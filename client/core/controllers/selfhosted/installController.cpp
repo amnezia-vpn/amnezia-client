@@ -137,7 +137,7 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
             return ErrorCode::InternalError;
         }
         adminConfig->updateContainerConfig(container, newConfig);
-        m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
         return ErrorCode::NoError;
     }
 
@@ -167,7 +167,7 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     if (errorCode == ErrorCode::NoError) {
         clearCachedProfile(serverId, container);
         adminConfig->updateContainerConfig(container, newConfig);
-        m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
@@ -187,7 +187,7 @@ void InstallController::clearCachedProfile(const QString &serverId, DockerContai
     adminConfig->clearCachedClientProfile(container);
     const ContainerConfig containerConfigModel = adminConfig->containerConfig(container);
 
-    m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+    m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
 
     emit clientRevocationRequested(serverId, containerConfigModel, container);
 }
@@ -223,7 +223,7 @@ ErrorCode InstallController::validateAndPrepareConfig(const QString &serverId)
             return errorCode;
         }
         adminConfig->updateContainerConfig(container, containerConfig);
-        m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return ErrorCode::NoError;
@@ -263,7 +263,7 @@ void InstallController::addEmptyServer(const ServerCredentials &credentials)
     serverConfig.defaultContainer = DockerContainer::None;
 
     m_serversRepository->addServer(QString(), serverConfig.toJson(),
-                                    SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+                                    serverConfigUtils::ConfigType::SelfHostedAdmin);
 }
 
 ErrorCode InstallController::prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig, SshSession &sshSession)
@@ -768,7 +768,7 @@ ErrorCode InstallController::removeAllContainers(const QString &serverId)
     if (errorCode == ErrorCode::NoError) {
         adminConfig->containers.clear();
         adminConfig->defaultContainer = DockerContainer::None;
-        m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
@@ -805,7 +805,7 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
 
         adminConfig->containers = containers;
         adminConfig->defaultContainer = defaultContainer;
-        m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
@@ -910,7 +910,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(const QString &ser
 
     if (hasNewContainers) {
         adminConfig->containers = containers;
-        m_serversRepository->editServer(serverId, adminConfig->toJson(), SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return ErrorCode::NoError;
@@ -968,7 +968,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     serverConfig.displayName = serverConfig.description.isEmpty() ? serverConfig.hostName : serverConfig.description;
 
     const QString newServerId = m_serversRepository->addServer(QString(), serverConfig.toJson(),
-                                                               SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+                                                               serverConfigUtils::ConfigType::SelfHostedAdmin);
     QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
     for (auto iterator = preparedContainers.begin(); iterator != preparedContainers.end(); iterator++) {
         adminAppendRequested(newServerId, iterator.key(), iterator.value(), clientName);
@@ -1020,7 +1020,7 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
             }
             adminConfig->updateContainerConfig(iterator.key(), containerConfig);
             m_serversRepository->editServer(serverId, adminConfig->toJson(),
-                                            SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+                                            serverConfigUtils::ConfigType::SelfHostedAdmin);
         }
     }
 

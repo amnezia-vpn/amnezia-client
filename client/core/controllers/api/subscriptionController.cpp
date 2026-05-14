@@ -16,7 +16,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
@@ -195,7 +195,7 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     apiConfig[apiDefs::key::serviceProtocol] = serviceProtocol;
     apiConfig[apiDefs::key::userCountryCode] = userCountryCode;
     
-    if (serverConfigJson.value(configKey::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
+    if (serverConfigJson.value(configKey::configVersion).toInt() == serverConfigUtils::ConfigSource::AmneziaGateway) {
         QJsonObject responseObj = QJsonDocument::fromJson(apiResponseBody).object();
         if (responseObj.contains(apiDefs::key::supportedProtocols)) {
             apiConfig.insert(apiDefs::key::supportedProtocols, responseObj.value(apiDefs::key::supportedProtocols).toArray());
@@ -245,12 +245,13 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     
     updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
     
-    if (serverConfigJson.value(configKey::configVersion).toInt() != apiDefs::ConfigSource::AmneziaGateway) {
+    if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
 
     ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(serverConfigJson);
-    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
     return ErrorCode::NoError;
 }
 
@@ -301,12 +302,13 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     }
 
     QJsonObject configObject = QJsonDocument::fromJson(configBytes).object();
-    if (configObject.value(configKey::configVersion).toInt() != apiDefs::ConfigSource::AmneziaGateway) {
+    if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
 
     ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
-    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
     return ErrorCode::NoError;
 }
 
@@ -375,7 +377,7 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
 
     quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
     
-    if (configObject.value(configKey::configVersion).toInt() != apiDefs::ConfigSource::AmneziaGateway) {
+    if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
 
@@ -387,7 +389,8 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     apiV2->apiConfig.subscriptionExpiredByServer = false;
     apiV2->crc = crc;
 
-    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
 
     return ErrorCode::NoError;
 }
@@ -426,7 +429,8 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
             ApiV2ServerConfig expiredApiV2 = *apiV2;
             expiredApiV2.apiConfig.subscriptionExpiredByServer = true;
-            m_serversRepository->editServer(serverId, expiredApiV2.toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+            m_serversRepository->editServer(serverId, expiredApiV2.toJson(),
+                                           serverConfigUtils::configTypeFromJson(expiredApiV2.toJson()));
         }
         return errorCode;
     }
@@ -439,7 +443,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
     
-    if (serverConfigJson.value(configKey::configVersion).toInt() != apiDefs::ConfigSource::AmneziaGateway) {
+    if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
 
@@ -459,7 +463,8 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
         newApiV2->nameOverriddenByUser = true;
     }
 
-    m_serversRepository->editServer(serverId, newApiV2Config.toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+    m_serversRepository->editServer(serverId, newApiV2Config.toJson(),
+                                   serverConfigUtils::configTypeFromJson(newApiV2Config.toJson()));
     return ErrorCode::NoError;
 }
 
@@ -495,7 +500,8 @@ ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)
     }
 
     apiV2->containers.clear();
-    m_serversRepository->editServer(serverId, apiV2->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+    m_serversRepository->editServer(serverId, apiV2->toJson(),
+                                    serverConfigUtils::configTypeFromJson(apiV2->toJson()));
     return ErrorCode::NoError;
 }
 
@@ -532,7 +538,8 @@ ErrorCode SubscriptionController::deactivateExternalDevice(const QString &server
 
     if (uuid == m_appSettingsRepository->getInstallationUuid(true)) {
         apiV2->containers.clear();
-        m_serversRepository->editServer(serverId, apiV2->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+        m_serversRepository->editServer(serverId, apiV2->toJson(),
+                                        serverConfigUtils::configTypeFromJson(apiV2->toJson()));
     }
 
     return ErrorCode::NoError;
@@ -618,7 +625,8 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(const QString &serverId, Q
             return ErrorCode::ApiConfigEmptyError;
         }
         apiV2->apiConfig.vpnKey = vpnKey;
-        m_serversRepository->editServer(serverId, apiV2->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+        m_serversRepository->editServer(serverId, apiV2->toJson(),
+                                         serverConfigUtils::configTypeFromJson(apiV2->toJson()));
     }
 
     return ErrorCode::NoError;
@@ -667,7 +675,8 @@ void SubscriptionController::removeApiConfig(const QString &serverId)
     apiV2->defaultContainer = DockerContainer::None;
     apiV2->apiConfig.publicKey = ApiConfig::PublicKeyInfo{};
 
-    m_serversRepository->editServer(serverId, apiV2->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+    m_serversRepository->editServer(serverId, apiV2->toJson(),
+                                    serverConfigUtils::configTypeFromJson(apiV2->toJson()));
 }
 
 bool SubscriptionController::isApiKeyExpired(const QString &serverId) const
@@ -695,7 +704,8 @@ void SubscriptionController::setCurrentProtocol(const QString &serverId, const Q
     auto apiV2 = m_serversRepository->apiV2Config(serverId);
     if (apiV2.has_value()) {
         apiV2->apiConfig.serviceProtocol = protocolName;
-        m_serversRepository->editServer(serverId, apiV2->toJson(), SecureServersRepository::ServerConfigKind::ApiV2);
+        m_serversRepository->editServer(serverId, apiV2->toJson(),
+                                        serverConfigUtils::configTypeFromJson(apiV2->toJson()));
     }
 }
 

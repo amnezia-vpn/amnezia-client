@@ -9,6 +9,7 @@
 #include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
+#include "core/utils/serverConfigUtils.h"
 
 using namespace amnezia;
 
@@ -66,7 +67,7 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Server count should remain 1");
 
         const QString validServerId = m_coreController->m_serversController->getServerId(0);
-        const SecureServersRepository::ServerConfigKind editKind =
+        const serverConfigUtils::ConfigType editKind =
             m_coreController->m_serversRepository->serverKind(validServerId);
 
         m_coreController->m_serversRepository->editServer(m_coreController->m_serversController->getServerId(-1),
@@ -97,7 +98,7 @@ private slots:
 
         m_coreController->m_serversRepository->editServer(m_coreController->m_serversController->getServerId(0),
                                                             SelfHostedAdminServerConfig {}.toJson(),
-                                                            SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+                                                            serverConfigUtils::ConfigType::SelfHostedAdmin);
         QVERIFY2(serverEditedSpy.count() == 0, "serverEdited should NOT be emitted for empty repository");
 
         m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(0));

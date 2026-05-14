@@ -2,7 +2,7 @@
 
 #include "amneziaApplication.h"
 #include "core/configurators/wireguardConfigurator.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"

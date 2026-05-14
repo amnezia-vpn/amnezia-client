@@ -9,7 +9,7 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/utilities.h"
 #include "core/utils/networkUtilities.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "version.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -68,7 +68,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
 
     const auto kind = m_serversRepository->serverKind(serverId);
     switch (kind) {
-    case SecureServersRepository::ServerConfigKind::SelfHostedAdmin: {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
         const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
@@ -78,7 +78,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         description = cfg->description;
         break;
     }
-    case SecureServersRepository::ServerConfigKind::SelfHostedUser: {
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
         const auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
@@ -88,7 +88,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         description = cfg->description;
         break;
     }
-    case SecureServersRepository::ServerConfigKind::Native: {
+    case serverConfigUtils::ConfigType::Native: {
         const auto cfg = m_serversRepository->nativeConfig(serverId);
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
@@ -98,7 +98,9 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         description = cfg->description;
         break;
     }
-    case SecureServersRepository::ServerConfigKind::ApiV2: {
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
         const auto cfg = m_serversRepository->apiV2Config(serverId);
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
@@ -106,13 +108,15 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         dns = { cfg->dns1, cfg->dns2 };
         hostName = cfg->hostName;
         description = cfg->description;
-        configVersion = apiDefs::ConfigSource::AmneziaGateway;
+        configVersion = serverConfigUtils::ConfigSource::AmneziaGateway;
         isApiConfig = true;
         break;
     }
-    case SecureServersRepository::ServerConfigKind::LegacyApiV1:
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
         return ErrorCode::InternalError;
-    case SecureServersRepository::ServerConfigKind::Invalid:
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
         return ErrorCode::InternalError;
     }
 

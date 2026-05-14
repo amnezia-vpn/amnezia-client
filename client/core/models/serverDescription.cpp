@@ -2,7 +2,7 @@
 
 #include <QMap>
 
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -111,7 +111,7 @@ ServerDescription buildServerDescription(const NativeServerConfig &server, bool 
 ServerDescription buildServerDescription(const LegacyApiServerConfig &server, bool /*isAmneziaDnsEnabled*/)
 {
     ServerDescription row = buildBaseDescription(server);
-    row.configVersion = apiDefs::ConfigSource::Telegram;
+    row.configVersion = serverConfigUtils::ConfigSource::Telegram;
     row.isApiV1 = true;
     row.isServerFromGatewayApi = false;
     row.hasWriteAccess = false;
@@ -128,7 +128,7 @@ ServerDescription buildServerDescription(const LegacyApiServerConfig &server, bo
 ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool /*isAmneziaDnsEnabled*/)
 {
     ServerDescription row = buildBaseDescription(server);
-    row.configVersion = apiDefs::ConfigSource::AmneziaGateway;
+    row.configVersion = serverConfigUtils::ConfigSource::AmneziaGateway;
     row.isApiV2 = true;
     row.isServerFromGatewayApi = true;
     row.isPremium = server.isPremium() || server.isExternalPremium();

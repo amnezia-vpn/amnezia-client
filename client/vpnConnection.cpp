@@ -30,6 +30,7 @@
 #endif
 
 #include "core/utils/networkUtilities.h"
+#include "core/utils/serverConfigUtils.h"
 #include "vpnConnection.h"
 
 using namespace ProtocolUtils;
@@ -77,37 +78,41 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
     const QString defaultServerId = m_serversRepository->defaultServerId();
     DockerContainer container = DockerContainer::None;
     switch (m_serversRepository->serverKind(defaultServerId)) {
-    case SecureServersRepository::ServerConfigKind::SelfHostedAdmin: {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
         const auto cfg = m_serversRepository->selfHostedAdminConfig(defaultServerId);
         if (cfg.has_value()) {
             container = cfg->defaultContainer;
         }
         break;
     }
-    case SecureServersRepository::ServerConfigKind::SelfHostedUser: {
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
         const auto cfg = m_serversRepository->selfHostedUserConfig(defaultServerId);
         if (cfg.has_value()) {
             container = cfg->defaultContainer;
         }
         break;
     }
-    case SecureServersRepository::ServerConfigKind::Native: {
+    case serverConfigUtils::ConfigType::Native: {
         const auto cfg = m_serversRepository->nativeConfig(defaultServerId);
         if (cfg.has_value()) {
             container = cfg->defaultContainer;
         }
         break;
     }
-    case SecureServersRepository::ServerConfigKind::ApiV2: {
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
         const auto cfg = m_serversRepository->apiV2Config(defaultServerId);
         if (cfg.has_value()) {
             container = cfg->defaultContainer;
         }
         break;
     }
-    case SecureServersRepository::ServerConfigKind::LegacyApiV1:
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
         break;
-    case SecureServersRepository::ServerConfigKind::Invalid:
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
         break;
     }
 

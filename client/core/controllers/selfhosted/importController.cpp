@@ -16,7 +16,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
@@ -207,13 +207,13 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     case ConfigTypes::Amnezia: {
         result.config = QJsonDocument::fromJson(config.toUtf8()).object();
 
-        if (apiUtils::isServerFromApi(result.config)) {
+        if (serverConfigUtils::isServerFromApi(result.config)) {
             auto apiConfig = result.config.value(apiDefs::key::apiConfig).toObject();
             apiConfig[apiDefs::key::vpnKey] = data;
             result.config[apiDefs::key::apiConfig] = apiConfig;
         }
 
-        if (m_serversRepository->kindFromJson(result.config) == SecureServersRepository::ServerConfigKind::LegacyApiV1) {
+        if (serverConfigUtils::isLegacyApiSubscription(serverConfigUtils::configTypeFromJson(result.config))) {
             result.errorCode = ErrorCode::LegacyApiV1NotSupportedError;
             result.config = {};
             return result;
@@ -386,7 +386,7 @@ void ImportController::importConfig(const QJsonObject &config)
     credentials.secretData = config.value(configKey::password).toString();
 
     if (credentials.isValid() || config.contains(configKey::containers)) {
-        m_serversRepository->addServer(QString(), config, m_serversRepository->kindFromJson(config));
+        m_serversRepository->addServer(QString(), config, serverConfigUtils::configTypeFromJson(config));
         emit importFinished();
     } else if (config.contains(configKey::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(config).toJson());
@@ -408,7 +408,7 @@ void ImportController::importConfig(const QJsonObject &config)
         } else {
             QJsonObject configWithCrc = config;
             configWithCrc.insert(configKey::crc, crc);
-            m_serversRepository->addServer(QString(), configWithCrc, m_serversRepository->kindFromJson(configWithCrc));
+            m_serversRepository->addServer(QString(), configWithCrc, serverConfigUtils::configTypeFromJson(configWithCrc));
             emit importFinished();
         }
     } else {

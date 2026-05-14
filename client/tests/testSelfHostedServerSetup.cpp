@@ -258,7 +258,7 @@ private slots:
         
         QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded);
         m_coreController->m_serversRepository->addServer(QString(), serverConfig.toJson(),
-                                                         SecureServersRepository::ServerConfigKind::SelfHostedAdmin);
+                                                         serverConfigUtils::ConfigType::SelfHostedAdmin);
         
         QVERIFY2(serverAddedSpy.count() == 1, "serverAdded signal should be emitted");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() > 0, "Server should be added");

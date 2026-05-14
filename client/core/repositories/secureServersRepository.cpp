@@ -5,8 +5,7 @@
 #include <QJsonValue>
 #include <QUuid>
 
-#include "core/utils/api/apiEnums.h"
-#include "core/utils/api/apiUtils.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 
@@ -31,25 +30,6 @@ QJsonObject embedStorageServerId(const QString &serverId, const QJsonObject &pay
     QJsonObject o = payloadSansId;
     o.insert(QString(configKey::storageServerId), serverId);
     return o;
-}
-
-bool hasThirdPartyConfig(const QJsonObject &json)
-{
-    const QJsonArray containersArray = json.value(configKey::containers).toArray();
-    for (const QJsonValue &val : containersArray) {
-        const QJsonObject containerObj = val.toObject();
-        for (auto it = containerObj.begin(); it != containerObj.end(); ++it) {
-            if (it.key() == configKey::container) {
-                continue;
-            }
-            const QJsonObject protocolObj = it.value().toObject();
-            if (protocolObj.contains(configKey::isThirdPartyConfig)
-                && protocolObj.value(configKey::isThirdPartyConfig).toBool()) {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 } // namespace
@@ -84,29 +64,6 @@ QString SecureServersRepository::normalizedOrGeneratedServerId(const QString &ca
         return trimmed;
     }
     return QUuid::createUuid().toString(QUuid::WithoutBraces);
-}
-
-SecureServersRepository::ServerConfigKind SecureServersRepository::kindFromJson(const QJsonObject &serverJson) const
-{
-    const apiDefs::ConfigType configType = apiUtils::getConfigType(serverJson);
-    switch (configType) {
-    case apiDefs::ConfigType::AmneziaPremiumV1:
-    case apiDefs::ConfigType::AmneziaFreeV2:
-        return ServerConfigKind::LegacyApiV1;
-    case apiDefs::ConfigType::AmneziaPremiumV2:
-    case apiDefs::ConfigType::AmneziaFreeV3:
-    case apiDefs::ConfigType::ExternalPremium:
-        return ServerConfigKind::ApiV2;
-    default:
-        break;
-    }
-
-    if (hasThirdPartyConfig(serverJson)) {
-        return ServerConfigKind::Native;
-    }
-
-    const SelfHostedAdminServerConfig adminProbe = SelfHostedAdminServerConfig::fromJson(serverJson);
-    return adminProbe.hasCredentials() ? ServerConfigKind::SelfHostedAdmin : ServerConfigKind::SelfHostedUser;
 }
 
 void SecureServersRepository::updateDefaultServerFromStorage()
@@ -155,9 +112,9 @@ void SecureServersRepository::loadFromStorage()
         const QString candidateId = readStorageServerId(json);
         const QString serverId = normalizedOrGeneratedServerId(candidateId);
         const QJsonObject strippedJson = withoutStorageServerId(json);
-        const ServerConfigKind kind = kindFromJson(strippedJson);
+        const serverConfigUtils::ConfigType kind = serverConfigUtils::configTypeFromJson(strippedJson);
 
-        if (m_serverJsonById.contains(serverId) || kind == ServerConfigKind::Invalid) {
+        if (m_serverJsonById.contains(serverId) || kind == serverConfigUtils::ConfigType::Invalid) {
             continue;
         }
         m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedJson));
@@ -196,14 +153,14 @@ void SecureServersRepository::clearServers()
     syncToStorage();
 }
 
-QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, ServerConfigKind kind)
+QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
     const QString id = normalizedOrGeneratedServerId(serverId);
-    if (m_serverJsonById.contains(id) || kind == ServerConfigKind::Invalid) {
+    if (m_serverJsonById.contains(id) || kind == serverConfigUtils::ConfigType::Invalid) {
         return id;
     }
     const QJsonObject strippedJson = withoutStorageServerId(serverJson);
-    if (kindFromJson(strippedJson) != kind) {
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
         return id;
     }
     m_serverJsonById.insert(id, embedStorageServerId(id, strippedJson));
@@ -219,9 +176,9 @@ QString SecureServersRepository::addServer(const QString &serverId, const QJsonO
     return id;
 }
 
-void SecureServersRepository::editServer(const QString &serverId, const QJsonObject &serverJson, ServerConfigKind kind)
+void SecureServersRepository::editServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
-    if (indexOfServerId(serverId) < 0 || kind == ServerConfigKind::Invalid) {
+    if (indexOfServerId(serverId) < 0 || kind == serverConfigUtils::ConfigType::Invalid) {
         return;
     }
     if (!m_serverJsonById.contains(serverId)) {
@@ -229,14 +186,14 @@ void SecureServersRepository::editServer(const QString &serverId, const QJsonObj
     }
 
     const QJsonObject oldJson = m_serverJsonById.value(serverId);
-    const ServerConfigKind oldKind = kindFromJson(withoutStorageServerId(oldJson));
+    const serverConfigUtils::ConfigType oldKind = serverConfigUtils::configTypeFromJson(withoutStorageServerId(oldJson));
 
     m_serverJsonById.remove(serverId);
 
     const QJsonObject strippedNew = withoutStorageServerId(serverJson);
-    if (kindFromJson(strippedNew) != kind) {
+    if (serverConfigUtils::configTypeFromJson(strippedNew) != kind) {
         const QJsonObject strippedOld = withoutStorageServerId(oldJson);
-        if (oldKind != ServerConfigKind::Invalid && kindFromJson(strippedOld) == oldKind) {
+        if (oldKind != serverConfigUtils::ConfigType::Invalid && serverConfigUtils::configTypeFromJson(strippedOld) == oldKind) {
             m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedOld));
         }
         return;
@@ -281,13 +238,13 @@ void SecureServersRepository::removeServer(const QString &serverId)
     emit serverRemoved(serverId, removedIndex);
 }
 
-SecureServersRepository::ServerConfigKind SecureServersRepository::serverKind(const QString &serverId) const
+serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString &serverId) const
 {
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
-        return ServerConfigKind::Invalid;
+        return serverConfigUtils::ConfigType::Invalid;
     }
-    return kindFromJson(withoutStorageServerId(it.value()));
+    return serverConfigUtils::configTypeFromJson(withoutStorageServerId(it.value()));
 }
 
 std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAdminConfig(const QString &serverId) const
@@ -297,7 +254,7 @@ std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAd
         return std::nullopt;
     }
     const QJsonObject strippedJson = withoutStorageServerId(it.value());
-    if (kindFromJson(strippedJson) != ServerConfigKind::SelfHostedAdmin) {
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::SelfHostedAdmin) {
         return std::nullopt;
     }
     return SelfHostedAdminServerConfig::fromJson(strippedJson);
@@ -310,7 +267,7 @@ std::optional<SelfHostedUserServerConfig> SecureServersRepository::selfHostedUse
         return std::nullopt;
     }
     const QJsonObject strippedJson = withoutStorageServerId(it.value());
-    if (kindFromJson(strippedJson) != ServerConfigKind::SelfHostedUser) {
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::SelfHostedUser) {
         return std::nullopt;
     }
     return SelfHostedUserServerConfig::fromJson(strippedJson);
@@ -323,7 +280,7 @@ std::optional<NativeServerConfig> SecureServersRepository::nativeConfig(const QS
         return std::nullopt;
     }
     const QJsonObject strippedJson = withoutStorageServerId(it.value());
-    if (kindFromJson(strippedJson) != ServerConfigKind::Native) {
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::Native) {
         return std::nullopt;
     }
     return NativeServerConfig::fromJson(strippedJson);
@@ -336,7 +293,7 @@ std::optional<ApiV2ServerConfig> SecureServersRepository::apiV2Config(const QStr
         return std::nullopt;
     }
     const QJsonObject strippedJson = withoutStorageServerId(it.value());
-    if (kindFromJson(strippedJson) != ServerConfigKind::ApiV2) {
+    if (!serverConfigUtils::isApiV2Subscription(serverConfigUtils::configTypeFromJson(strippedJson))) {
         return std::nullopt;
     }
     return ApiV2ServerConfig::fromJson(strippedJson);
@@ -349,7 +306,7 @@ std::optional<LegacyApiServerConfig> SecureServersRepository::legacyApiConfig(co
         return std::nullopt;
     }
     const QJsonObject strippedJson = withoutStorageServerId(it.value());
-    if (kindFromJson(strippedJson) != ServerConfigKind::LegacyApiV1) {
+    if (!serverConfigUtils::isLegacyApiSubscription(serverConfigUtils::configTypeFromJson(strippedJson))) {
         return std::nullopt;
     }
     return LegacyApiServerConfig::fromJson(strippedJson);

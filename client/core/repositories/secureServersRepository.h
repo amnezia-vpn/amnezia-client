@@ -14,6 +14,7 @@
 #include "core/models/api/apiV2ServerConfig.h"
 #include "core/models/api/legacyApiServerConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/utils/serverConfigUtils.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
@@ -23,23 +24,12 @@ class SecureServersRepository : public QObject
     Q_OBJECT
 
 public:
-    enum class ServerConfigKind
-    {
-        Invalid,
-        SelfHostedAdmin,
-        SelfHostedUser,
-        Native,
-        ApiV2,
-        LegacyApiV1
-    };
-
     explicit SecureServersRepository(SecureQSettings *settings, QObject *parent = nullptr);
 
-    QString addServer(const QString &serverId, const QJsonObject &serverJson, ServerConfigKind kind);
-    void editServer(const QString &serverId, const QJsonObject &serverJson, ServerConfigKind kind);
+    QString addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind);
+    void editServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind);
     void removeServer(const QString &serverId);
-    ServerConfigKind serverKind(const QString &serverId) const;
-    ServerConfigKind kindFromJson(const QJsonObject &serverJson) const;
+    serverConfigUtils::ConfigType serverKind(const QString &serverId) const;
 
     std::optional<SelfHostedAdminServerConfig> selfHostedAdminConfig(const QString &serverId) const;
     std::optional<SelfHostedUserServerConfig> selfHostedUserConfig(const QString &serverId) const;
