@@ -355,17 +355,53 @@ void AmneziaApplication::deliverVpnDeepLink(const QString &payload)
     m_coreController->openVpnKeyImportPreview(trimmed);
 }
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+namespace {
+bool forwardVpnPayloadToPrimaryInstance(const QString &payload)
+{
+    if (payload.trimmed().isEmpty()) {
+        return false;
+    }
+    QLocalSocket socket;
+    socket.connectToServer(QStringLiteral("AmneziaVPNInstance"));
+    if (!socket.waitForConnected(800)) {
+        return false;
+    }
+    const QByteArray msg = QByteArrayLiteral("VPN\n") + payload.toUtf8() + '\n';
+    socket.write(msg);
+    socket.waitForBytesWritten(3000);
+    socket.flush();
+    return true;
+}
+} // namespace
+#endif
+
 bool AmneziaApplication::event(QEvent *event)
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (event->type() == QEvent::FileOpen) {
         auto *foe = static_cast<QFileOpenEvent *>(event);
         const QUrl url = foe->url();
         if (url.scheme().compare(QLatin1String("vpn"), Qt::CaseInsensitive) == 0) {
             const QString payload = url.toString(QUrl::PrettyDecoded);
+#if !defined(MACOS_NE)
+            // Secondary instance: main() exits before init(), so m_coreController is null; browsers often
+            // pass the URL only via QFileOpenEvent (not argv). Forward to the running primary process.
+            if (!m_coreController) {
+                if (forwardVpnPayloadToPrimaryInstance(payload)) {
+                    qInfo().noquote() << "Forwarded vpn deep link to primary instance, bytes:" << payload.size();
+                    QTimer::singleShot(0, qApp, &QCoreApplication::quit);
+                    return true;
+                }
+                qWarning() << "vpn FileOpen: no CoreController and could not reach primary instance (socket)";
+                return true;
+            }
+#endif
             QTimer::singleShot(0, this, [this, payload]() { deliverVpnDeepLink(payload); });
             return true;
         }
     }
+#endif
     return AMNEZIA_BASE_CLASS::event(event);
 }
 #endif
