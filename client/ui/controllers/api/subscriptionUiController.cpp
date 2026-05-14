@@ -227,6 +227,38 @@ bool SubscriptionUiController::importPremiumFromAppStore(const QString &storePro
     return true;
 }
 
+bool SubscriptionUiController::importPremiumFromPlayMarket(const QString &storeProductId)
+{
+#if defined(Q_OS_ANDROID)
+    QString productId = storeProductId.trimmed();
+    if (productId.isEmpty()) {
+        productId = QStringLiteral("premium");
+    }
+
+    ServerConfig serverConfig;
+    int duplicateServerIndex = -1;
+    ErrorCode errorCode = m_subscriptionController->processPlayMarketPurchase(
+        m_apiServicesModel->getCountryCode(),
+        m_apiServicesModel->getSelectedServiceType(),
+        m_apiServicesModel->getSelectedServiceProtocol(),
+        productId,
+        serverConfig,
+        &duplicateServerIndex);
+
+    if (errorCode != ErrorCode::NoError) {
+        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+            emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
+            return true;
+        }
+        emit errorOccurred(errorCode);
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("%1 has been added to the app").arg(m_apiServicesModel->getSelectedServiceName()));
+#endif
+    return true;
+}
+
 bool SubscriptionUiController::restoreServiceFromAppStore()
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
@@ -276,6 +308,59 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
     if (result.duplicateCount > 0) {
         qInfo().noquote() << "[IAP] Skipped" << result.duplicateCount
                           << "duplicate restored transactions for original transaction IDs already processed";
+    }
+#endif
+    return true;
+}
+
+bool SubscriptionUiController::restoreServiceFromPlayMarket()
+{
+#if defined(Q_OS_ANDROID)
+    const QString premiumServiceType = QStringLiteral("amnezia-premium");
+
+    if (!fillAvailableServices()) {
+        qWarning().noquote() << "[Billing] Unable to fetch services list before restore";
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    if (m_apiServicesModel->rowCount() <= 0) {
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    bool premiumSelected = false;
+    for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+        m_apiServicesModel->setServiceIndex(i);
+        if (m_apiServicesModel->getSelectedServiceType() == premiumServiceType) {
+            premiumSelected = true;
+            break;
+        }
+    }
+
+    if (!premiumSelected) {
+        emit errorOccurred(ErrorCode::ApiServicesMissingError);
+        return false;
+    }
+
+    SubscriptionController::PlayMarketRestoreResult result = m_subscriptionController->processPlayMarketRestore(
+        m_apiServicesModel->getCountryCode(),
+        m_apiServicesModel->getSelectedServiceType(),
+        m_apiServicesModel->getSelectedServiceProtocol());
+
+    if (!result.hasInstalledConfig) {
+        if (result.duplicateConfigAlreadyPresent) {
+            emit installServerFromApiFinished(tr("This subscription has already been added"), result.duplicateServerIndex);
+            return true;
+        }
+        emit errorOccurred(result.errorCode);
+        return false;
+    }
+
+    emit installServerFromApiFinished(tr("Subscription restored successfully."));
+    if (result.duplicateCount > 0) {
+        qInfo().noquote() << "[Billing] Skipped" << result.duplicateCount
+                          << "duplicate restored purchases for tokens already processed";
     }
 #endif
     return true;

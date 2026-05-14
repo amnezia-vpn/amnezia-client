@@ -45,8 +45,10 @@ public slots:
 
     bool fillAvailableServices();
     bool importPremiumFromAppStore(const QString &storeProductId);
+    bool importPremiumFromPlayMarket(const QString &storeProductId);
     bool importFreeFromGateway();
     bool restoreServiceFromAppStore();
+    bool restoreServiceFromPlayMarket();
     bool importTrialFromGateway(const QString &email);
     bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);

@@ -47,9 +47,10 @@ public:
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
 
-    ErrorCode importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
+    ErrorCode importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
+                                        ServerConfig &serverConfig,
                                         int *duplicateServerIndex = nullptr);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
@@ -93,9 +94,23 @@ public:
         ErrorCode errorCode = ErrorCode::NoError;
     };
 
+    struct PlayMarketRestoreResult
+    {
+        bool hasInstalledConfig = false;
+        bool duplicateConfigAlreadyPresent = false;
+        int duplicateCount = 0;
+        int duplicateServerIndex = -1;
+        ErrorCode errorCode = ErrorCode::NoError;
+    };
+
     ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &productId,
                                      int *duplicateServerIndex = nullptr);
+
+    ErrorCode processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
+                                        const QString &serviceProtocol, const QString &productId,
+                                        ServerConfig &serverConfig,
+                                        int *duplicateServerIndex = nullptr);
 
     AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
                                                   const QString &serviceProtocol);
@@ -104,6 +119,9 @@ public:
                                           const QString &serviceProtocol, const ProtocolData &protocolData,
                                           const QString &captchaId, const QString &captchaSolution,
                                           CaptchaInfo *retryCaptchaOut = nullptr);
+
+    PlayMarketRestoreResult processPlayMarketRestore(const QString &userCountryCode, const QString &serviceType,
+                                                     const QString &serviceProtocol);
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);

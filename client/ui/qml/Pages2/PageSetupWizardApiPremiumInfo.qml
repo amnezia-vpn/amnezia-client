@@ -187,6 +187,13 @@ PageType {
                 PageController.showBusyIndicator(false)
                 return
             }
+            if (Qt.platform.os === "android") {
+                PageController.showBusyIndicator(true)
+                var androidStoreId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
+                SubscriptionUiController.importPremiumFromPlayMarket(androidStoreId)
+                PageController.showBusyIndicator(false)
+                return
+            }
             if (plan.checkoutUrl) {
                 Qt.openUrlExternally(plan.checkoutUrl)
                 PageController.closePage()
