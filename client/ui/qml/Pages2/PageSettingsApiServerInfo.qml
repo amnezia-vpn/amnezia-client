@@ -265,6 +265,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 24
 
                 visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
                 enabled: !switcher.isProtocolSwitchBlocked
