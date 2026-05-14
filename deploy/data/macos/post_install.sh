@@ -51,6 +51,15 @@ run_cmd sudo chmod -R a-w "$APP_PATH/"
 run_cmd sudo chown -R root "$APP_PATH/"
 run_cmd sudo chgrp -R wheel "$APP_PATH/"
 
+# Refresh Launch Services so CFBundleURLTypes (e.g. vpn://) is picked up without a manual lsregister.
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [ -d "$APP_PATH" ]; then
+  log "Launch Services: lsregister -f -R $APP_PATH"
+  run_cmd "$LSREGISTER" -f -R "$APP_PATH" || true
+else
+  log "WARN: $APP_PATH missing, skipping lsregister"
+fi
+
 log "Requesting ${APP_NAME} to quit gracefully"
 run_cmd osascript -e 'tell application "AmneziaVPN" to quit' || true
 
