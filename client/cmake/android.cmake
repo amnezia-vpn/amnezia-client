@@ -93,7 +93,13 @@ if(ANDROID_BUILD_PLAY)
     add_custom_target(android_play_apk
         COMMAND ./gradlew assemblePlay${_gradle_suffix} -DexplicitRun=1
         WORKING_DIRECTORY "${_android_build_dir}"
-        COMMENT "Building Android Play variant (assemblePlay${_gradle_suffix})"
+        COMMENT "Building Android Play APK (assemblePlay${_gradle_suffix})"
+        DEPENDS ${PROJECT}
+    )
+    add_custom_target(android_play_aab
+        COMMAND ./gradlew bundlePlay${_gradle_suffix} -DexplicitRun=1
+        WORKING_DIRECTORY "${_android_build_dir}"
+        COMMENT "Building Android Play AAB (bundlePlay${_gradle_suffix})"
         DEPENDS ${PROJECT}
     )
 endif()

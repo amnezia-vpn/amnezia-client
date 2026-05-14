@@ -33,6 +33,7 @@ while [[ $# -gt 0 ]]; do
         --abi)              abis+=("$2");            shift 2 ;;
         --sign)             : ${SIGN:=true};         shift   ;;
         --aab)              : ${BUILD_AAB=true};     shift   ;;
+        --play)             : ${BUILD_PLAY=true};    shift   ;;
         --help|-h|?)
             echo "Usage: $0 [options]"
             echo "  Options:"
@@ -45,6 +46,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --abi                     - specify Android ABIs for target to build for. all by default"
             echo "  --sign                    - whether to sign the resulting files. only appicable to Android"
             echo "  --aab                     - whether to build AAB. only applicable to Android"
+            echo "  --play                    - build Play flavor (Google Play Billing). use with --aab. only applicable to Android"
             exit 0
             ;;
         *) echo "Unknown arg \"$1\". Use $0 -h to get help"; exit 1 ;;
@@ -205,6 +207,7 @@ args=()
 [[ -n "$QT_ANDROID_SIGN_AAB" ]]       && args+=("-DQT_ANDROID_SIGN_AAB=$QT_ANDROID_SIGN_AAB")
 [[ -n "$QT_ANDROID_ABIS" ]]           && args+=("-DQT_ANDROID_ABIS=$QT_ANDROID_ABIS")
 [[ -n "$QT_ANDROID_BUILD_ALL_ABIS" ]] && args+=("-DQT_ANDROID_BUILD_ALL_ABIS=$QT_ANDROID_BUILD_ALL_ABIS")
+[[ -n "$BUILD_PLAY" ]]                && args+=("-DANDROID_BUILD_PLAY=ON")
 
 if [[ -n "$FORCE" ]]; then
     run_traced rm -rf "$BUILD_PATH"
@@ -213,7 +216,13 @@ fi
 run_traced cmake -S "$SOURCE_PATH" -B "$BUILD_PATH" "${args[@]}"
 run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS"
 
-[[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS" -t "aab"
+if [[ -n "$BUILD_AAB" ]]; then
+    if [[ -n "$BUILD_PLAY" ]]; then
+        run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS" -t "android_play_aab"
+    else
+        run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS" -t "aab"
+    fi
+fi
 
 if [ -z "$no_installers" ]; then
     for installer in $INSTALLERS; do

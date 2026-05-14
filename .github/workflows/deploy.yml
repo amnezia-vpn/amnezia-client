@@ -902,8 +902,8 @@ jobs:
            $OUT/AmneziaVPN_${VERSION}_${LABEL}_universal.apk
 
         if [[ "$BUILD_AAB" == "true" ]]; then
-          mv deploy/build/client/android-build/build/outputs/bundle/release/android-build-release.aab \
-             $OUT/AmneziaVPN_${VERSION}_${LABEL}.aab
+          mv deploy/build/client/android-build/build/outputs/bundle/ossRelease/android-build-oss-release.aab \
+             $OUT/AmneziaVPN_${VERSION}_${LABEL}_oss.aab
         fi
 
         for abi in arm64-v8a armeabi-v7a x86 x86_64; do
@@ -913,6 +913,24 @@ jobs:
         done
 
         ls -l $OUT
+
+    - name: 'Build Play AAB'
+      if: ${{ matrix.build_aab }}
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        LABEL: ${{ matrix.label }}
+      shell: bash
+      run: |
+        OUT=deploy/artifacts
+        VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
+
+        deploy/build.sh -t android --sign --aab --play --build ./deploy/build/play
+
+        mv deploy/build/play/client/android-build/build/outputs/bundle/playRelease/android-build-play-release.aab \
+           $OUT/AmneziaVPN_${VERSION}_${LABEL}_play.aab
 
     - name: 'Upload universal APK'
       uses: actions/upload-artifact@v7
