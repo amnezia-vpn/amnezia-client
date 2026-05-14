@@ -32,6 +32,17 @@
 
 bool AmneziaApplication::m_forceQuit = false;
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+namespace {
+bool g_secondaryInstanceForDeepLink = false;
+}
+
+void AmneziaApplication::markSecondaryInstanceForDeepLink()
+{
+    g_secondaryInstanceForDeepLink = true;
+}
+#endif
+
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
@@ -239,8 +250,13 @@ void AmneziaApplication::init()
     if (!m_parser.isSet(m_optImport)) {
         const QString vpnArg = vpnUrlFromArguments(QCoreApplication::arguments());
         if (!vpnArg.isEmpty()) {
+            m_pendingVpnDeepLink.clear();
             QTimer::singleShot(0, this, [this, vpnArg]() { deliverVpnDeepLink(vpnArg); });
         }
+    }
+    if (!m_pendingVpnDeepLink.isEmpty()) {
+        const QString pending = std::move(m_pendingVpnDeepLink);
+        QTimer::singleShot(0, this, [this, pending]() { deliverVpnDeepLink(pending); });
     }
 #endif
 }
@@ -355,8 +371,22 @@ void AmneziaApplication::deliverVpnDeepLink(const QString &payload)
     m_coreController->openVpnKeyImportPreview(trimmed);
 }
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-namespace {
+QString vpnPayloadFromFileOpenUrl(const QUrl &url)
+{
+    const QString decoded = url.toString(QUrl::PrettyDecoded);
+    const int idx = decoded.indexOf(QLatin1String("vpn://"), 0, Qt::CaseInsensitive);
+    if (idx >= 0) {
+        qDebug() << "vpn://" << decoded;
+        return decoded.mid(idx).trimmed();
+    }
+    if (url.scheme().compare(QLatin1String("vpn"), Qt::CaseInsensitive) == 0) {
+        qDebug() << "vpn://" << decoded;
+        return decoded.trimmed();
+    }
+    return {};
+}
+
+#if !defined(MACOS_NE)
 bool forwardVpnPayloadToPrimaryInstance(const QString &payload)
 {
     if (payload.trimmed().isEmpty()) {
@@ -373,35 +403,39 @@ bool forwardVpnPayloadToPrimaryInstance(const QString &payload)
     socket.flush();
     return true;
 }
-} // namespace
 #endif
 
 bool AmneziaApplication::event(QEvent *event)
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     if (event->type() == QEvent::FileOpen) {
         auto *foe = static_cast<QFileOpenEvent *>(event);
-        const QUrl url = foe->url();
-        if (url.scheme().compare(QLatin1String("vpn"), Qt::CaseInsensitive) == 0) {
-            const QString payload = url.toString(QUrl::PrettyDecoded);
+        const QUrl &url = foe->url();
+        qDebug() << "url:" << url;
+        const QString payload = vpnPayloadFromFileOpenUrl(url);
+        qDebug() << "payload" << payload;
+        if (!payload.isEmpty()) {
+            if (m_coreController) {
+                QTimer::singleShot(0, this, [this, payload]() { deliverVpnDeepLink(payload); });
+                return true;
+            }
 #if !defined(MACOS_NE)
-            // Secondary instance: main() exits before init(), so m_coreController is null; browsers often
-            // pass the URL only via QFileOpenEvent (not argv). Forward to the running primary process.
-            if (!m_coreController) {
+            // True secondary process (main skipped init): forward to the primary instance.
+            if (g_secondaryInstanceForDeepLink) {
                 if (forwardVpnPayloadToPrimaryInstance(payload)) {
                     qInfo().noquote() << "Forwarded vpn deep link to primary instance, bytes:" << payload.size();
                     QTimer::singleShot(0, qApp, &QCoreApplication::quit);
                     return true;
                 }
-                qWarning() << "vpn FileOpen: no CoreController and could not reach primary instance (socket)";
+                qWarning() << "vpn FileOpen: secondary instance could not reach primary (socket)";
                 return true;
             }
 #endif
-            QTimer::singleShot(0, this, [this, payload]() { deliverVpnDeepLink(payload); });
+            // Cold start: FileOpen can arrive while init() is still running (CoreController not ready yet).
+            // Do not forward to our own local server — queue and flush at end of init().
+            m_pendingVpnDeepLink = payload;
             return true;
         }
     }
-#endif
     return AMNEZIA_BASE_CLASS::event(event);
 }
 #endif

@@ -214,6 +214,20 @@ else()
     qt_finalize_target(${PROJECT})
 endif()
 
+if(IS_LSREGISTER_MACOS)
+    if(APPLE AND NOT IOS AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        add_custom_command(
+            TARGET ${PROJECT} POST_BUILD
+            COMMAND
+                /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+                -f
+                -R
+                $<TARGET_BUNDLE_DIR:${PROJECT}>
+            COMMENT "lsregister: register $<TARGET_BUNDLE_DIR:${PROJECT}> with Launch Services"
+        )
+    endif()
+endif()
+
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT AmneziaVPN

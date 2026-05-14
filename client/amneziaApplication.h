@@ -44,6 +44,7 @@ public:
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     void startLocalServer();
+    static void markSecondaryInstanceForDeepLink();
 #endif
 
     QQmlApplicationEngine *qmlEngine() const;
@@ -72,6 +73,7 @@ private:
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     void deliverVpnDeepLink(const QString &payload);
+    QString m_pendingVpnDeepLink;
 #endif
 
     QSharedPointer<VpnConnection> m_vpnConnection;

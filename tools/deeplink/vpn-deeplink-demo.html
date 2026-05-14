@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Amnezia — тест vpn:// из браузера</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 48rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+    code { background: #eee; padding: 0.1rem 0.35rem; border-radius: 4px; }
+    .warn { background: #fff3cd; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+    label { display: block; font-weight: 600; margin-top: 1rem; }
+    textarea {
+      width: 100%; min-height: 6rem; box-sizing: border-box; font-family: ui-monospace, monospace;
+      font-size: 0.85rem; padding: 0.5rem; border: 1px solid #ccc; border-radius: 6px; resize: vertical;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; align-items: center; }
+    a.button, button {
+      display: inline-block; padding: 0.55rem 1rem;
+      background: #1a73e8; color: #fff; text-decoration: none; border-radius: 6px; border: none; font-size: 0.95rem; cursor: pointer;
+    }
+    button.secondary { background: #333; }
+    button.muted { background: #666; }
+    #log {
+      margin-top: 1rem; padding: 0.75rem; background: #1e1e1e; color: #d4d4d4; border-radius: 6px;
+      font-family: ui-monospace, monospace; font-size: 0.75rem; max-height: 14rem; overflow-y: auto; white-space: pre-wrap; word-break: break-all;
+    }
+    #log .line { border-bottom: 1px solid #333; padding: 0.25rem 0; }
+    #log .time { color: #6a9955; margin-right: 0.5rem; }
+    .hint { color: #555; font-size: 0.9rem; margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <h1>Тест deep link <code>vpn://</code></h1>
+
+  <div class="warn">
+    Откройте эту страницу по <strong>HTTPS</strong> (см. <code>docs/deeplink/README.md</code>).
+    Клик по ссылке / кнопке должен быть <strong>жестом пользователя</strong> (как у <code>tg://</code> с https-страницы).
+  </div>
+
+  <label for="vpnInput">Строка ключа (целиком <code>vpn://…</code> или только хвост после <code>vpn://</code>)</label>
+  <textarea id="vpnInput" spellcheck="false" placeholder="vpn://AAAA_… или AAAA_…"></textarea>
+  <p class="hint">Если строка не начинается с <code>vpn://</code>, префикс будет добавлен автоматически.</p>
+
+  <div class="row">
+    <a class="button" id="vpnLink" href="#">Открыть (ссылка &lt;a&gt;)</a>
+    <button type="button" id="vpnBtn">Открыть (кнопка → location)</button>
+    <button type="button" class="secondary" id="copyBtn">Копировать URL</button>
+    <button type="button" class="muted" id="clearLogBtn">Очистить лог</button>
+  </div>
+
+  <p>Ожидание: Chrome спросит разрешение на схему <code>vpn</code> → AmneziaVPN → экран предпросмотра импорта.</p>
+
+  <label>Лог (на странице; дублируется в консоль DevTools)</label>
+  <div id="log" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      var input = document.getElementById("vpnInput");
+      var link = document.getElementById("vpnLink");
+      var logEl = document.getElementById("log");
+
+      function ts() {
+        return new Date().toISOString();
+      }
+
+      function log(msg) {
+        var line = document.createElement("div");
+        line.className = "line";
+        var t = document.createElement("span");
+        t.className = "time";
+        t.textContent = ts();
+        line.appendChild(t);
+        line.appendChild(document.createTextNode(msg));
+        logEl.insertBefore(line, logEl.firstChild);
+        try { console.log(ts(), msg); } catch (e) {}
+      }
+
+      function buildHref() {
+        var raw = (input.value || "").trim();
+        if (!raw) {
+          log("Пустое поле — вставьте ключ.");
+          return "";
+        }
+        var href = raw.indexOf("vpn://") === 0 ? raw : "vpn://" + raw;
+        log("Собран URL, длина символов: " + href.length);
+        return href;
+      }
+
+      function syncLinkHref() {
+        var href = buildHref();
+        if (href) {
+          link.setAttribute("href", href);
+          log("href ссылки обновлён (первые 80 символов): " + href.slice(0, 80) + (href.length > 80 ? "…" : ""));
+        } else {
+          link.setAttribute("href", "#");
+        }
+      }
+
+      input.addEventListener("input", function () {
+        syncLinkHref();
+      });
+
+      link.addEventListener("click", function (ev) {
+        var href = link.getAttribute("href");
+        log("Клик по ссылке, href.length=" + (href ? href.length : 0));
+        if (!href || href === "#") {
+          ev.preventDefault();
+          log("Отмена: нет валидного href.");
+        }
+      });
+
+      document.getElementById("vpnBtn").addEventListener("click", function () {
+        var href = buildHref();
+        if (!href) return;
+        log("Кнопка: переход window.location.href, длина=" + href.length);
+        window.location.href = href;
+      });
+
+      document.getElementById("copyBtn").addEventListener("click", function () {
+        var href = buildHref();
+        if (!href) return;
+        navigator.clipboard.writeText(href).then(function () {
+          log("Скопировано в буфер обмена.");
+        }).catch(function (err) {
+          log("Копирование не удалось: " + (err && err.message ? err.message : String(err)));
+        });
+      });
+
+      document.getElementById("clearLogBtn").addEventListener("click", function () {
+        logEl.textContent = "";
+        log("Лог очищен.");
+      });
+
+      window.addEventListener("pagehide", function () {
+        log("pagehide (страница уходит / навигация)");
+      });
+
+      log("Страница загружена. Вставьте ключ и нажмите ссылку или кнопку.");
+      syncLinkHref();
+    })();
+  </script>
+</body>
+</html>

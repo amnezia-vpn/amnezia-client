@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     const QString vpnFromArgv = findVpnDeepLinkInArguments(QCoreApplication::arguments());
     if (notifyRunningInstanceOrExit(app, vpnFromArgv)) {
+        AmneziaApplication::markSecondaryInstanceForDeepLink();
         return app.exec();
     }
     app.startLocalServer();
