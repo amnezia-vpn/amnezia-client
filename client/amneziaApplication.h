@@ -5,7 +5,6 @@
 #include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QThread>
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #include <QGuiApplication>
 #else
@@ -77,7 +76,6 @@ private:
 #endif
 
     QSharedPointer<VpnConnection> m_vpnConnection;
-    QThread m_vpnConnectionThread;
 
     QNetworkAccessManager *m_nam;
 protected:

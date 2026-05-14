@@ -75,20 +75,11 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 AmneziaApplication::~AmneziaApplication()
 {
 #ifdef AMNEZIA_DESKTOP
-    if (m_vpnConnection && m_vpnConnectionThread.isRunning()) {
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::BlockingQueuedConnection);
-        
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::BlockingQueuedConnection);
+    if (m_vpnConnection) {
+        m_vpnConnection->disconnectSlots();
+        m_vpnConnection->disconnectFromVpn();
     }
 #endif
-
-    m_vpnConnectionThread.requestInterruption();
-    m_vpnConnectionThread.quit();
-
-    if (!m_vpnConnectionThread.wait(3000)) {
-        m_vpnConnectionThread.terminate();
-        m_vpnConnectionThread.wait(500);
-    }
 
     if (m_engine) {
         delete m_engine;
@@ -185,9 +176,6 @@ void AmneziaApplication::init()
 #endif
 
     m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));
-    m_vpnConnection->moveToThread(&m_vpnConnectionThread);
-    m_vpnConnectionThread.start();
-
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
@@ -354,7 +342,7 @@ void AmneziaApplication::startLocalServer()
                 emit m_coreController->pageController()->raiseMainWindow();
             }
         });
-    });
+    }, Qt::QueuedConnection);
 }
 #endif
 
