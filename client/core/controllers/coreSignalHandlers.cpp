@@ -7,6 +7,7 @@
 #include "core/utils/routeModes.h"
 #include "core/controllers/coreController.h"
 #include "core/repositories/secureServersRepository.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnConnection.h"
 #include "ui/controllers/qml/pageController.h"
@@ -309,7 +310,19 @@ void CoreSignalHandlers::initPrepareConfigHandler()
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::prepareConfig, this, [this]() {
         m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Preparing);
 
-        m_coreController->m_subscriptionUiController->validateConfig();
+        const QString serverId = m_coreController->m_serversController->getDefaultServerId();
+        if (serverId.isEmpty()) {
+            m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
+            return;
+        }
+
+        const serverConfigUtils::ConfigType kind = m_coreController->m_serversRepository->serverKind(serverId);
+
+        if (serverConfigUtils::isApiV2Subscription(kind)) {
+            m_coreController->m_subscriptionUiController->validateConfig();
+        } else {
+            m_coreController->m_installUiController->validateConfig();
+        }
     });
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::configValidated, this, [this](bool isValid) {
@@ -318,7 +331,7 @@ void CoreSignalHandlers::initPrepareConfigHandler()
             return;
         }
 
-        m_coreController->m_installUiController->validateConfig();
+        m_coreController->m_connectionUiController->openConnection();
     });
 
     connect(m_coreController->m_installUiController, &InstallUiController::configValidated, this, [this](bool isValid) {
