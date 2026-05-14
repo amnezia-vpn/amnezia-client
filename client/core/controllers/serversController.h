@@ -50,6 +50,7 @@ public:
     int getServersCount() const;
     QString getServerId(int serverIndex) const;
     int indexOfServerId(const QString &serverId) const;
+    QString notificationDisplayName(const QString &serverId) const;
     std::optional<ApiV2ServerConfig> apiV2Config(const QString &serverId) const;
     std::optional<SelfHostedAdminServerConfig> selfHostedAdminConfig(const QString &serverId) const;
     ServerCredentials getServerCredentials(const QString &serverId) const;

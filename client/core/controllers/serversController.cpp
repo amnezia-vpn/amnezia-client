@@ -290,6 +290,68 @@ int ServersController::indexOfServerId(const QString &serverId) const
     return m_serversRepository->indexOfServerId(serverId);
 }
 
+QString ServersController::notificationDisplayName(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return {};
+    }
+
+    using Kind = serverConfigUtils::ConfigType;
+    switch (m_serversRepository->serverKind(serverId)) {
+    case Kind::SelfHostedAdmin: {
+        if (const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId)) {
+            if (!cfg->displayName.isEmpty()) {
+                return cfg->displayName;
+            }
+        }
+        break;
+    }
+    case Kind::SelfHostedUser: {
+        if (const auto cfg = m_serversRepository->selfHostedUserConfig(serverId)) {
+            if (!cfg->displayName.isEmpty()) {
+                return cfg->displayName;
+            }
+        }
+        break;
+    }
+    case Kind::Native: {
+        if (const auto cfg = m_serversRepository->nativeConfig(serverId)) {
+            if (!cfg->displayName.isEmpty()) {
+                return cfg->displayName;
+            }
+        }
+        break;
+    }
+    case Kind::AmneziaPremiumV2:
+    case Kind::AmneziaFreeV3:
+    case Kind::ExternalPremium: {
+        if (const auto cfg = m_serversRepository->apiV2Config(serverId)) {
+            if (!cfg->displayName.isEmpty()) {
+                return cfg->displayName;
+            }
+        }
+        break;
+    }
+    case Kind::AmneziaPremiumV1:
+    case Kind::AmneziaFreeV2: {
+        if (const auto cfg = m_serversRepository->legacyApiConfig(serverId)) {
+            if (!cfg->displayName.isEmpty()) {
+                return cfg->displayName;
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+
+    const int idx = indexOfServerId(serverId);
+    if (idx >= 0) {
+        return QString::number(idx + 1);
+    }
+    return serverId;
+}
+
 std::optional<ApiV2ServerConfig> ServersController::apiV2Config(const QString &serverId) const
 {
     return m_serversRepository->apiV2Config(serverId);

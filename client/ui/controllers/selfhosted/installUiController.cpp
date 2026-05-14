@@ -1,7 +1,5 @@
 #include "installUiController.h"
 
-#include <optional>
-
 #include <QDesktopServices>
 #include <QDir>
 #include <QEventLoop>
@@ -33,18 +31,6 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-
-namespace {
-
-QString displayNameFromAdmin(const std::optional<SelfHostedAdminServerConfig> &admin, const QString &serverId)
-{
-    if (!admin.has_value()) {
-        return serverId;
-    }
-    return admin->displayName.isEmpty() ? serverId : admin->displayName;
-}
-
-} // namespace
 
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,
@@ -278,8 +264,7 @@ void InstallUiController::updateContainer(const QString &serverId, int container
 
 void InstallUiController::rebootServer(const QString &serverId)
 {
-    const QString serverName =
-            displayNameFromAdmin(m_serversController->selfHostedAdminConfig(serverId), serverId);
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
     const auto errorCode = m_installController->rebootServer(serverId);
     if (errorCode == ErrorCode::NoError) {
@@ -294,8 +279,7 @@ void InstallUiController::removeServer(const QString &serverId)
     if (serverId.isEmpty()) {
         return;
     }
-    const QString serverName =
-            displayNameFromAdmin(m_serversController->selfHostedAdminConfig(serverId), serverId);
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
     m_serversController->removeServer(serverId);
     emit removeServerFinished(tr("Server '%1' was removed").arg(serverName));
@@ -303,8 +287,7 @@ void InstallUiController::removeServer(const QString &serverId)
 
 void InstallUiController::removeAllContainers(const QString &serverId)
 {
-    const QString serverName =
-            displayNameFromAdmin(m_serversController->selfHostedAdminConfig(serverId), serverId);
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
     ErrorCode errorCode = m_installController->removeAllContainers(serverId);
     if (errorCode == ErrorCode::NoError) {
@@ -316,8 +299,7 @@ void InstallUiController::removeAllContainers(const QString &serverId)
 
 void InstallUiController::removeContainer(const QString &serverId, int containerIndex)
 {
-    const QString serverName =
-            displayNameFromAdmin(m_serversController->selfHostedAdminConfig(serverId), serverId);
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     QString containerName = ContainerUtils::containerHumanNames().value(container);
