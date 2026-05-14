@@ -144,7 +144,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
-    m_newsController = new NewsController(m_appSettingsRepository, m_serversController);
+    m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
@@ -261,9 +261,12 @@ void CoreController::initSignalHandlers()
 {
     m_signalHandlers = new CoreSignalHandlers(this, this);
     m_signalHandlers->initAllHandlers();
-    
+
     // Trigger initial update after handlers are connected
     m_serversUiController->updateModel();
+    if (m_serversUiController->hasServersFromGatewayApi()) {
+        m_apiNewsUiController->fetchNews(false);
+    }
 }
 
 void CoreController::updateTranslator(const QLocale &locale)

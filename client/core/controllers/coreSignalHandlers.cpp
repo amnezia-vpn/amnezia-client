@@ -65,7 +65,6 @@ void CoreSignalHandlers::initAllHandlers()
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
     initSubscriptionRefreshHandler();
-    initContainerModelUpdateHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
     initTranslationsUpdatedHandler();
@@ -200,15 +199,6 @@ void CoreSignalHandlers::initSubscriptionRefreshHandler()
     });
 }
 
-void CoreSignalHandlers::initContainerModelUpdateHandler()
-{
-    connect(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded, this, [this]() {
-        if (m_coreController->m_serversUiController->hasServersFromGatewayApi()) {
-            m_coreController->m_apiNewsUiController->fetchNews(false);
-        }
-    });
-}
-
 void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
@@ -271,16 +261,20 @@ void CoreSignalHandlers::initServersModelUpdateHandler()
             m_coreController->m_serversUiController, &ServersUiController::updateModel);
     connect(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged,
             m_coreController->m_serversUiController, &ServersUiController::onDefaultServerChanged);
-    
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded,
-            m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited,
-            m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved,
-            m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    
-    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished,
-            m_coreController->m_serversUiController, &ServersUiController::updateModel);
+
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded, this,
+            [this](const QString &serverId) {
+                if (m_coreController->m_serversRepository->apiV2Config(serverId).has_value()) {
+                    m_coreController->m_apiNewsUiController->fetchNews(false);
+                }
+            });
+
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished, this, [this]() {
+        m_coreController->m_serversUiController->updateModel();
+        if (m_coreController->m_serversUiController->hasServersFromGatewayApi()) {
+            m_coreController->m_apiNewsUiController->fetchNews(false);
+        }
+    });
 }
 
 void CoreSignalHandlers::initClientManagementModelUpdateHandler()

@@ -1,7 +1,5 @@
 #include "serversController.h"
 #include "core/utils/serverConfigUtils.h"
-#include "core/utils/constants/apiKeys.h"
-#include "core/utils/constants/apiConstants.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -19,7 +17,6 @@ ServersController::ServersController(SecureServersRepository *serversRepository,
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
 {
     ensureDefaultServerValid();
-    recomputeGatewayStacks();
 }
 
 void ServersController::ensureDefaultServerValid()
@@ -313,70 +310,6 @@ ServerCredentials ServersController::getServerCredentials(const QString &serverI
         }
     }
     return ServerCredentials {};
-}
-
-ServersController::GatewayStacksData ServersController::gatewayStacks() const
-{
-    return m_gatewayStacks;
-}
-
-void ServersController::recomputeGatewayStacks()
-{
-    GatewayStacksData computed;
-    bool hasNewTags = false;
-
-    const QVector<QString> ids = m_serversRepository->orderedServerIds();
-    for (const QString &id : ids) {
-        const auto apiV2 = m_serversRepository->apiV2Config(id);
-        if (!apiV2.has_value()) {
-            continue;
-        }
-        const QString userCountryCode = apiV2->apiConfig.userCountryCode;
-        const QString serviceType = apiV2->serviceType();
-
-        if (!userCountryCode.isEmpty()) {
-            if (!m_gatewayStacks.userCountryCodes.contains(userCountryCode)) {
-                hasNewTags = true;
-            }
-            computed.userCountryCodes.insert(userCountryCode);
-        }
-
-        if (!serviceType.isEmpty()) {
-            if (!m_gatewayStacks.serviceTypes.contains(serviceType)) {
-                hasNewTags = true;
-            }
-            computed.serviceTypes.insert(serviceType);
-        }
-    }
-
-    m_gatewayStacks = std::move(computed);
-    if (hasNewTags) {
-        emit gatewayStacksExpanded();
-    }
-}
-
-bool ServersController::GatewayStacksData::operator==(const GatewayStacksData &other) const
-{
-    return userCountryCodes == other.userCountryCodes && serviceTypes == other.serviceTypes;
-}
-
-QJsonObject ServersController::GatewayStacksData::toJson() const
-{
-    QJsonObject json;
-
-    QJsonArray userCountryCodesArray;
-    for (const QString &code : userCountryCodes) {
-        userCountryCodesArray.append(code);
-    }
-    json[apiDefs::key::userCountryCode] = userCountryCodesArray;
-
-    QJsonArray serviceTypesArray;
-    for (const QString &type : serviceTypes) {
-        serviceTypesArray.append(type);
-    }
-    json[apiDefs::key::serviceType] = serviceTypesArray;
-
-    return json;
 }
 
 bool ServersController::isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType,

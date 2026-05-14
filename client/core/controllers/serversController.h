@@ -4,8 +4,6 @@
 #include <optional>
 
 #include <QObject>
-#include <QJsonObject>
-#include <QSet>
 #include <QVector>
 #include <QMap>
 
@@ -30,18 +28,7 @@ using namespace amnezia;
 class ServersController : public QObject
 {
     Q_OBJECT
-    
-public:
-    struct GatewayStacksData
-    {
-        QSet<QString> userCountryCodes;
-        QSet<QString> serviceTypes;
 
-        bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
-        bool operator==(const GatewayStacksData &other) const;
-        QJsonObject toJson() const;
-    };
-    
 public:
     explicit ServersController(SecureServersRepository* serversRepository, 
                               SecureAppSettingsRepository* appSettingsRepository = nullptr,
@@ -69,26 +56,17 @@ public:
     QMap<DockerContainer, ContainerConfig> getServerContainersMap(const QString &serverId) const;
     DockerContainer getDefaultContainer(const QString &serverId) const;
     ContainerConfig getContainerConfig(const QString &serverId, DockerContainer container) const;
-    
-    GatewayStacksData gatewayStacks() const;
 
     // Validation
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
     bool hasInstalledContainers(const QString &serverId) const;
     bool isLegacyApiV1Server(const QString &serverId) const;
 
-signals:
-    void gatewayStacksExpanded();
-
-public slots:
-    void recomputeGatewayStacks();
-
 private:
     void ensureDefaultServerValid();
 
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
-    GatewayStacksData m_gatewayStacks;
 };
 
 #endif // SERVERSCONTROLLER_H

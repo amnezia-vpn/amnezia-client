@@ -53,7 +53,6 @@ private slots:
         QVERIFY2(importFinishedSpy.count() == 1, "Import should succeed");
 
         QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
-        QSignalSpy gatewayStacksExpandedSpy(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded);
 
         amnezia::test::setServerDescription(m_coreController->m_serversRepository,
                                             m_coreController->m_serversController->getServerId(0),
