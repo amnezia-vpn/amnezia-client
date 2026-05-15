@@ -1345,3 +1345,113 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
     return ErrorCode::NoError;
 }
+
+ErrorCode InstallController::setDockerContainerEnabledState(const QString &serverId, DockerContainer container, bool enabled)
+{
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
+    const QString containerName = ContainerUtils::containerToString(container);
+    SshSession sshSession(this);
+    const QString script = enabled ? QStringLiteral("sudo docker start %1").arg(containerName)
+                                   : QStringLiteral("sudo docker stop %1").arg(containerName);
+    const ErrorCode runError = sshSession.runScript(credentials, script);
+    if (runError != ErrorCode::NoError) {
+        return runError;
+    }
+    ContainerConfig currentConfig = adminConfig->containerConfig(container);
+    if (auto *mtConfig = currentConfig.getMtProxyProtocolConfig()) {
+        mtConfig->isEnabled = enabled;
+        adminConfig->updateContainerConfig(container, currentConfig);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
+    }
+    return ErrorCode::NoError;
+}
+
+ErrorCode InstallController::queryDockerContainerStatus(const QString &serverId, DockerContainer container, int &statusOut)
+{
+    statusOut = 3;
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
+    const QString containerName = ContainerUtils::containerToString(container);
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data;
+        return ErrorCode::NoError;
+    };
+    SshSession sshSession(this);
+    const QString script = QStringLiteral(
+            "sudo docker inspect --format '{{.State.Status}}' %1 2>/dev/null || echo 'not_found'")
+            .arg(containerName);
+    const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    const QString status = stdOut.trimmed();
+    if (status == QLatin1String("running")) {
+        statusOut = 1;
+    } else if (status == QLatin1String("not_found") || status.isEmpty()) {
+        statusOut = 0;
+    } else if (status == QLatin1String("exited") || status == QLatin1String("created")
+               || status == QLatin1String("paused")) {
+        statusOut = 2;
+    } else {
+        statusOut = 3;
+    }
+    return ErrorCode::NoError;
+}
+
+ErrorCode InstallController::queryMtProxyDiagnostics(const QString &serverId, DockerContainer container, int listenPort,
+                                                     MtProxyContainerDiagnostics &out)
+{
+    out = {};
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
+    SshSession sshSession(this);
+    return MtProxyInstaller::queryDiagnostics(sshSession, credentials, container, listenPort, out);
+}
+
+QString InstallController::fetchDockerContainerSecret(const QString &serverId, DockerContainer container)
+{
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return {};
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return {};
+    }
+    const QString containerName = ContainerUtils::containerToString(container);
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data;
+        return ErrorCode::NoError;
+    };
+    SshSession sshSession(this);
+    const QString path = QStringLiteral("/data/secret");
+    const QString cmd = QStringLiteral("sudo docker exec %1 cat %2").arg(containerName, path);
+    const ErrorCode errorCode = sshSession.runScript(credentials, cmd, cbReadStdOut);
+    if (errorCode != ErrorCode::NoError) {
+        return {};
+    }
+    const QString secret = stdOut.trimmed();
+    static const QRegularExpression hex32(QStringLiteral("^[0-9a-fA-F]{32}$"));
+    return hex32.match(secret).hasMatch() ? secret : QString();
+}

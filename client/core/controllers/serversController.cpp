@@ -265,20 +265,6 @@ ContainerConfig ServersController::getContainerConfig(const QString &serverId, D
     return getServerContainersMap(serverId).value(container);
 }
 
-void ServersController::updateContainerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &config)
-{
-    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
-    if (kind != serverConfigUtils::ConfigType::SelfHostedAdmin) {
-        return;
-    }
-    auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
-    if (!cfg.has_value()) {
-        return;
-    }
-    cfg->updateContainerConfig(container, config);
-    m_serversRepository->editServer(serverId, cfg->toJson(), kind);
-}
-
 int ServersController::getDefaultServerIndex() const
 {
     return m_serversRepository->defaultServerIndex();

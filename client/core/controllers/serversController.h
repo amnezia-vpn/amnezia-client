@@ -57,7 +57,6 @@ public:
     QMap<DockerContainer, ContainerConfig> getServerContainersMap(const QString &serverId) const;
     DockerContainer getDefaultContainer(const QString &serverId) const;
     ContainerConfig getContainerConfig(const QString &serverId, DockerContainer container) const;
-    void updateContainerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &config);
 
     // Validation
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;

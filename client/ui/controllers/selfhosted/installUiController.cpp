@@ -12,7 +12,6 @@
 
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/selfhosted/installController.h"
-#include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
@@ -315,26 +314,17 @@ void InstallUiController::updateContainer(const QString &serverId, int container
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::setContainerEnabled(const QString &serverId, int containerIndex, bool enabled) {
+void InstallUiController::setContainerEnabled(const QString &serverId, int containerIndex, bool enabled)
+{
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    const ServerCredentials credentials = m_serversController->getServerCredentials(serverId);
-    const QString containerName = ContainerUtils::containerToString(container);
 
     emit serverIsBusy(true);
-    SshSession sshSession(this);
-    const QString script = enabled
-                           ? QString("sudo docker start %1").arg(containerName)
-                           : QString("sudo docker stop %1").arg(containerName);
-    const ErrorCode errorCode = sshSession.runScript(credentials, script);
+    const ErrorCode errorCode = m_installController->setDockerContainerEnabledState(serverId, container, enabled);
     emit serverIsBusy(false);
 
     if (errorCode == ErrorCode::NoError) {
-        ContainerConfig currentConfig = m_serversController->getContainerConfig(serverId, container);
-        if (auto *mtConfig = currentConfig.getMtProxyProtocolConfig()) {
-            mtConfig->isEnabled = enabled;
-            m_serversController->updateContainerConfig(serverId, container, currentConfig);
-            m_protocolModel->updateModel(currentConfig);
-        }
+        const ContainerConfig currentConfig = m_serversController->getContainerConfig(serverId, container);
+        m_protocolModel->updateModel(currentConfig);
         emit setContainerEnabledFinished(enabled);
         return;
     }
@@ -342,119 +332,36 @@ void InstallUiController::setContainerEnabled(const QString &serverId, int conta
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::refreshContainerStatus(const QString &serverId, int containerIndex) {
+void InstallUiController::refreshContainerStatus(const QString &serverId, int containerIndex)
+{
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    const ServerCredentials credentials = m_serversController->getServerCredentials(serverId);
-    const QString containerName = ContainerUtils::containerToString(container);
-
-    QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data;
-        return ErrorCode::NoError;
-    };
-
-    SshSession sshSession(this);
-    const QString script = QString(
-            "sudo docker inspect --format '{{.State.Status}}' %1 2>/dev/null || echo 'not_found'")
-            .arg(containerName);
-    const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
+    int status = 3;
+    const ErrorCode errorCode = m_installController->queryDockerContainerStatus(serverId, container, status);
     if (errorCode != ErrorCode::NoError) {
         emit containerStatusRefreshed(3);
         return;
     }
-
-    const QString status = stdOut.trimmed();
-    if (status == "running") {
-        emit containerStatusRefreshed(1);
-    } else if (status == "not_found" || status.isEmpty()) {
-        emit containerStatusRefreshed(0);
-    } else if (status == "exited" || status == "created" || status == "paused") {
-        emit containerStatusRefreshed(2);
-    } else {
-        emit containerStatusRefreshed(3);
-    }
+    emit containerStatusRefreshed(status);
 }
 
-void InstallUiController::refreshContainerDiagnostics(const QString &serverId, int containerIndex, int port) {
-    const ServerCredentials credentials = m_serversController->getServerCredentials(serverId);
+void InstallUiController::refreshContainerDiagnostics(const QString &serverId, int containerIndex, int port)
+{
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    const QString containerName = ContainerUtils::containerToString(container);
-
-    const QString script =
-            QString(
-                    "PORT_OK=$(sudo docker exec %1 sh -c 'ss -tlnp 2>/dev/null | grep -q :%2 && echo yes || echo no' 2>/dev/null || echo no); "
-                    "TG_OK=$(curl -s --max-time 5 -o /dev/null -w '%%{http_code}' https://core.telegram.org/getProxySecret 2>/dev/null | grep -q '200' && echo yes || echo no); "
-                    "CLIENTS=$(sudo docker exec amnezia-mtproxy sh -c 'curl -s --max-time 3 http://localhost:2398/stats 2>/dev/null | grep -o \"total_special_connections:[0-9]*\" | cut -d: -f2' 2>/dev/null); "
-                    "CONF_TIME=$(sudo docker exec amnezia-mtproxy sh -c 'stat -c \"%%y\" /data/proxy-multi.conf 2>/dev/null | cut -d. -f1' 2>/dev/null || echo unknown); "
-                    "echo \"PORT_OK=${PORT_OK}\"; "
-                    "echo \"TG_OK=${TG_OK}\"; "
-                    "echo \"CLIENTS=${CLIENTS:-0}\"; "
-                    "echo \"CONF_TIME=${CONF_TIME}\"; "
-                    "echo \"STATS=http://localhost:2398/stats\";")
-                    .arg(containerName)
-                    .arg(port);
-
-    QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data;
-        return ErrorCode::NoError;
-    };
-
-    SshSession sshSession(this);
-    const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
+    MtProxyContainerDiagnostics diag;
+    const ErrorCode errorCode = m_installController->queryMtProxyDiagnostics(serverId, container, port, diag);
     if (errorCode != ErrorCode::NoError) {
         emit containerDiagnosticsRefreshed(false, false, -1, QString(), QString());
         return;
     }
-
-    bool portReachable = false;
-    bool upstreamReachable = false;
-    int clientsConnected = -1;
-    QString lastConfigRefresh;
-    QString statsEndpoint;
-
-    for (const QString &line: stdOut.split('\n', Qt::SkipEmptyParts)) {
-        if (line.startsWith("PORT_OK=")) {
-            portReachable = line.mid(8).trimmed() == "yes";
-        } else if (line.startsWith("TG_OK=")) {
-            upstreamReachable = line.mid(6).trimmed() == "yes";
-        } else if (line.startsWith("CLIENTS=")) {
-            clientsConnected = line.mid(8).trimmed().toInt();
-        } else if (line.startsWith("CONF_TIME=")) {
-            lastConfigRefresh = line.mid(10).trimmed();
-        } else if (line.startsWith("STATS=")) {
-            statsEndpoint = line.mid(6).trimmed();
-        }
-    }
-
-    emit containerDiagnosticsRefreshed(portReachable, upstreamReachable, clientsConnected, lastConfigRefresh,
-                                       statsEndpoint);
+    emit containerDiagnosticsRefreshed(diag.portReachable, diag.upstreamReachable, diag.clientsConnected,
+                                       diag.lastConfigRefresh, diag.statsEndpoint);
 }
 
-void InstallUiController::fetchContainerSecret(const QString &serverId, int containerIndex) {
-    const ServerCredentials credentials = m_serversController->getServerCredentials(serverId);
+void InstallUiController::fetchContainerSecret(const QString &serverId, int containerIndex)
+{
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    const QString containerName = ContainerUtils::containerToString(container);
-
-    QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data;
-        return ErrorCode::NoError;
-    };
-
-    SshSession sshSession(this);
-    const QString path = QStringLiteral("/data/secret");
-    const QString cmd =
-            QStringLiteral("sudo docker exec %1 cat %2").arg(containerName, path);
-    const ErrorCode errorCode = sshSession.runScript(credentials, cmd, cbReadStdOut);
-    if (errorCode != ErrorCode::NoError) {
-        emit containerSecretFetched(QString());
-        return;
-    }
-
-    const QString secret = stdOut.trimmed();
-    static const QRegularExpression hex32(QStringLiteral("^[0-9a-fA-F]{32}$"));
-    emit containerSecretFetched(hex32.match(secret).hasMatch() ? secret : QString());
+    const QString secret = m_installController->fetchDockerContainerSecret(serverId, container);
+    emit containerSecretFetched(secret);
 }
 
 void InstallUiController::rebootServer(const QString &serverId)

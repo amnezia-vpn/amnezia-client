@@ -16,6 +16,7 @@
 #include "core/models/containerConfig.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
+#include "core/installers/mtProxyInstaller.h"
 
 class SshSession;
 class InstallerBase;
@@ -38,6 +39,16 @@ public:
     ErrorCode rebootServer(const QString &serverId);
     ErrorCode removeAllContainers(const QString &serverId);
     ErrorCode removeContainer(const QString &serverId, DockerContainer container);
+
+    ErrorCode setDockerContainerEnabledState(const QString &serverId, DockerContainer container, bool enabled);
+
+    /// statusOut: 0 = not deployed, 1 = running, 2 = stopped, 3 = error
+    ErrorCode queryDockerContainerStatus(const QString &serverId, DockerContainer container, int &statusOut);
+
+    ErrorCode queryMtProxyDiagnostics(const QString &serverId, DockerContainer container, int listenPort,
+                                      MtProxyContainerDiagnostics &out);
+
+    QString fetchDockerContainerSecret(const QString &serverId, DockerContainer container);
 
     ContainerConfig generateConfig(DockerContainer container, int port, TransportProto transportProto);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers, SshSession &sshSession);

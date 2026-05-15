@@ -67,6 +67,54 @@ ErrorCode MtProxyInstaller::extractConfigFromContainer(DockerContainer container
     return ErrorCode::NoError;
 }
 
+ErrorCode MtProxyInstaller::queryDiagnostics(SshSession &sshSession, const ServerCredentials &credentials,
+                                              DockerContainer container, int listenPort,
+                                              MtProxyContainerDiagnostics &out)
+{
+    out = {};
+    if (container != DockerContainer::MtProxy) {
+        return ErrorCode::InternalError;
+    }
+    const QString containerName = ContainerUtils::containerToString(container);
+    const QString script =
+            QStringLiteral(
+                    "PORT_OK=$(sudo docker exec %1 sh -c 'ss -tlnp 2>/dev/null | grep -q :%2 && echo yes || echo no' 2>/dev/null || echo no); "
+                    "TG_OK=$(curl -s --max-time 5 -o /dev/null -w '%%{http_code}' https://core.telegram.org/getProxySecret 2>/dev/null | grep -q '200' && echo yes || echo no); "
+                    "CLIENTS=$(sudo docker exec amnezia-mtproxy sh -c 'curl -s --max-time 3 http://localhost:2398/stats 2>/dev/null | grep -o \"total_special_connections:[0-9]*\" | cut -d: -f2' 2>/dev/null); "
+                    "CONF_TIME=$(sudo docker exec amnezia-mtproxy sh -c 'stat -c \"%%y\" /data/proxy-multi.conf 2>/dev/null | cut -d. -f1' 2>/dev/null || echo unknown); "
+                    "echo \"PORT_OK=${PORT_OK}\"; "
+                    "echo \"TG_OK=${TG_OK}\"; "
+                    "echo \"CLIENTS=${CLIENTS:-0}\"; "
+                    "echo \"CONF_TIME=${CONF_TIME}\"; "
+                    "echo \"STATS=http://localhost:2398/stats\";")
+                    .arg(containerName)
+                    .arg(listenPort);
+
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data;
+        return ErrorCode::NoError;
+    };
+    const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    for (const QString &line : stdOut.split('\n', Qt::SkipEmptyParts)) {
+        if (line.startsWith(QLatin1String("PORT_OK="))) {
+            out.portReachable = line.mid(8).trimmed() == QLatin1String("yes");
+        } else if (line.startsWith(QLatin1String("TG_OK="))) {
+            out.upstreamReachable = line.mid(6).trimmed() == QLatin1String("yes");
+        } else if (line.startsWith(QLatin1String("CLIENTS="))) {
+            out.clientsConnected = line.mid(8).trimmed().toInt();
+        } else if (line.startsWith(QLatin1String("CONF_TIME="))) {
+            out.lastConfigRefresh = line.mid(10).trimmed();
+        } else if (line.startsWith(QLatin1String("STATS="))) {
+            out.statsEndpoint = line.mid(6).trimmed();
+        }
+    }
+    return ErrorCode::NoError;
+}
+
 void MtProxyInstaller::uploadClientSettingsSnapshot(SshSession &sshSession, const ServerCredentials &credentials,
                                                     DockerContainer container, const ContainerConfig &config) {
     const MtProxyProtocolConfig *mt = config.getMtProxyProtocolConfig();
