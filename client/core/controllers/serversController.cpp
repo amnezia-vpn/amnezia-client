@@ -135,6 +135,31 @@ void ServersController::setDefaultContainer(const QString &serverId, DockerConta
     }
 }
 
+void ServersController::setCurrentConfigIndex(const int index)
+{
+    m_serversRepository->setCurrentConfigIndex(index);
+}
+
+int ServersController::getCurrentConfigIndex() const
+{
+    return m_serversRepository->getCurrentConfigIndex();
+}
+
+QString ServersController::getConfigString(const int index) const
+{
+    return m_serversRepository->getConfigString(index);
+}
+
+QString ServersController::getConfigName(const int index) const
+{
+    return m_serversRepository->getConfigName(index);
+}
+
+QJsonArray ServersController::getConfigNames() const
+{
+    return m_serversRepository->getConfigNames();
+}
+
 QVector<ServerDescription> ServersController::buildServerDescriptions(bool isAmneziaDnsEnabled) const
 {
     QVector<ServerDescription> out;

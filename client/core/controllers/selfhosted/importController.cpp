@@ -11,7 +11,12 @@
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
 #include <QUrl>
+#include <QUrlQuery>
+#include <QEventLoop>
+#include <QTimer>
 #include <algorithm>
+
+#include <iostream>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -375,6 +380,206 @@ int ImportController::qrChunksReceived() const
 int ImportController::qrChunksTotal() const
 {
     return m_totalQrCodeChunksCount;
+}
+
+ImportController::ImportResult ImportController::importLink(const QUrl &url)
+{
+    ImportResult result;
+
+    if (!url.isValid()) {
+        qWarning() << "Invalid URL:" << url;
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QNetworkAccessManager manager;
+
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    QNetworkReply *reply = manager.get(request);
+
+    QEventLoop loop;
+    QTimer timer;
+
+    timer.setSingleShot(true);
+
+    bool timedOut = false;
+
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QObject::connect(&timer, &QTimer::timeout, &loop, [&]() {
+        timedOut = true;
+        reply->abort();
+        loop.quit();
+    });
+
+    timer.start(10000);
+    loop.exec();
+
+    if (timedOut) {
+        qWarning() << "Request timed out";
+        reply->deleteLater();
+
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qWarning() << "Network error:" << reply->errorString();
+        reply->deleteLater();
+
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QByteArray data = reply->readAll();
+    reply->deleteLater();
+
+    if (data.isEmpty()) {
+        qWarning() << "Empty response";
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QByteArray decoded;
+    QString text;
+
+    if (isValidBase64(data)) {
+        decoded = QByteArray::fromBase64(data);
+        text = QString::fromUtf8(decoded).trimmed();
+    } else {
+        data.replace('\r', "");
+        text = QString::fromUtf8(data).trimmed();
+    }
+
+    if (text.isEmpty()) {
+        qWarning() << "Decoded text is empty";
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QStringList configs = text.split('\n', Qt::SkipEmptyParts);
+
+    QJsonArray configStrings;
+    QJsonArray configNames;
+
+    for (const QString &cfg : configs) {
+
+        bool supported = true;
+
+        if (!(cfg.startsWith("vless://") || cfg.startsWith("vmess://") || cfg.startsWith("trojan://")
+              || cfg.startsWith("ss://") || cfg.startsWith("ssd://"))) {
+            supported = false;
+            qWarning() << "Unknown protocol:" << cfg.left(20);
+            continue;
+        }
+
+        QUrl url(cfg);
+        QUrlQuery query(url);
+
+        QString name = QUrl::fromPercentEncoding(url.fragment().toUtf8());
+
+        name.isEmpty() ? name = "Unnamed" : name = "[" + name.replace(" /", "]");
+
+        if (!name.contains("v2ray") && supported) {
+            configStrings.append(cfg);
+            configNames.append(name);
+        } else {
+            qWarning() << "Config unsupported";
+        }
+    }
+
+    if (configStrings.isEmpty()) {
+        qWarning() << "No valid configs found";
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QString firstConfig = configStrings.first().toString();
+    result = extractConfigFromData(firstConfig);
+
+    QJsonObject serverConfig;
+
+    for (auto it = result.config.begin(); it != result.config.end(); ++it) {
+        serverConfig.insert(it.key(), it.value());
+    }
+
+    serverConfig.insert(configKey::description, m_appSettingsRepository->nextAvailableServerName());
+    serverConfig["xray_subscription_config"] = configStrings;
+    serverConfig["xray_subscription_config_name"] = configNames;
+    serverConfig["xray_subscription_config_current"] = 0;
+
+    result.config = serverConfig;
+
+    return result;
+}
+
+ImportController::ImportResult ImportController::editServerConfigWithData(QString data, int serverIndex, const QJsonObject& uiConfig)
+{
+    ImportResult result = extractConfigFromData(data);
+
+    if (result.errorCode != ErrorCode::NoError)
+        return result;
+
+    const ServerConfig currentServerConfig = m_serversRepository->server(serverIndex);
+
+    QJsonObject editedConfig = result.config;
+    const QJsonObject currentConfig = currentServerConfig.toJson();
+
+    for (auto it = uiConfig.begin(); it != uiConfig.end(); ++it) {
+        editedConfig.insert(it.key(), it.value());
+    }
+
+    if (currentConfig.contains(configKey::description)) {
+        editedConfig.insert(configKey::description, currentConfig.value(configKey::description));
+    }
+
+    if (currentConfig.contains("xray_subscription_config")) {
+        editedConfig.insert("xray_subscription_config", currentConfig.value("xray_subscription_config"));
+    }
+
+    if (currentConfig.contains("xray_subscription_config_name")) {
+        editedConfig.insert("xray_subscription_config_name", currentConfig.value("xray_subscription_config_name"));
+    }
+
+    if (currentConfig.contains("xray_subscription_config_current")) {
+        editedConfig.insert("xray_subscription_config_current", currentConfig.value("xray_subscription_config_current"));
+    }
+
+    const ServerConfig finalServerConfig = ServerConfig::fromJson(editedConfig);
+
+    m_serversRepository->editServer(serverIndex, finalServerConfig);
+
+    result.config = editedConfig;
+
+    return result;
+}
+
+bool ImportController::isValidBase64(const QByteArray &input)
+{
+    QByteArray data = input;
+    data = data.trimmed();
+
+    if (data.isEmpty())
+        return false;
+
+    static QRegularExpression base64Regex("^[A-Za-z0-9+/=_\\r\\n-]+$");
+
+    if (!base64Regex.match(QString::fromLatin1(data)).hasMatch())
+        return false;
+
+    data.replace("\r", "");
+    data.replace("\n", "");
+
+    if (data.size() % 4 != 0)
+        return false;
+
+    QByteArray decoded = QByteArray::fromBase64(data, QByteArray::Base64UrlEncoding);
+
+    if (decoded.isEmpty())
+        decoded = QByteArray::fromBase64(data);
+
+    return !decoded.isEmpty();
 }
 
 void ImportController::importConfig(const QJsonObject &config)

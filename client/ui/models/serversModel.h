@@ -30,6 +30,7 @@ public:
         IsServerFromGatewayApiRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
+        IsXRayConfigSelectionAvailableRole
     };
 
     ServersModel(QObject *parent = nullptr);
@@ -42,6 +43,8 @@ public slots:
     void updateModel(const QVector<amnezia::ServerDescription> &descriptions,
                      const QString &defaultServerId);
     void setDefaultServerId(const QString &serverId);
+
+    bool isDefaultServerContainXRayConfigs();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;

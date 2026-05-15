@@ -46,6 +46,12 @@ public:
     QString defaultServerId() const;
     void setDefaultServer(const QString &serverId);
 
+    void setCurrentConfigIndex(int index);
+    int getCurrentConfigIndex() const;
+    QString getConfigString(const int index) const;
+    QString getConfigName(const int index) const;
+    QJsonArray getConfigNames() const;
+
     void clearServers();
 
     QString nextAvailableServerName() const;

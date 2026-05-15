@@ -189,8 +189,19 @@ PageType {
 
                 text: qsTr("Continue")
 
+                function isValidUrl(text) {
+                    try {
+                        var u = new URL(text)
+                        return u.protocol === "http:" || u.protocol === "https:"
+                    } catch(e) {
+                        return false
+                    }
+                }
+
                 clickedFunc: function() {
-                    if (ImportController.extractConfigFromData(textKey.textField.text)) {
+                    if (isValidUrl(textKey.textField.text) && ImportController.importLink(textKey.textField.text)) {
+                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    }else if (ImportController.extractConfigFromData(textKey.textField.text)) {
                         PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                     }
                 }

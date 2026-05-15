@@ -113,6 +113,8 @@
         <file>Pages2/PageSettingsServerServices.qml</file>
         <file>Pages2/PageSettingsServersList.qml</file>
         <file>Pages2/PageSettingsSplitTunneling.qml</file>
+		<file>Pages2/PageSettingsXRayAvailableConfigs.qml</file>
+		<file>Pages2/PageSettingsXRayServerInfo.qml</file>
         <file>Pages2/PageSettingsNewsNotifications.qml</file>
         <file>Pages2/PageSettingsNewsDetail.qml</file>
         <file>Pages2/PageProtocolAwgClientSettings.qml</file>

@@ -78,6 +78,18 @@ QJsonObject NativeServerConfig::toJson() const
     if (!dns2.isEmpty()) {
         obj[configKey::dns2] = dns2;
     }
+
+    if (configString) {
+        obj[QLatin1String("xray_subscription_config")] = configString.value();
+    }
+
+    if (configName) {
+        obj[QLatin1String("xray_subscription_config_name")] = configName.value();
+    }
+
+    if (currentConfig) {
+        obj[QLatin1String("xray_subscription_config_current")] = currentConfig.value();
+    }
     
     return obj;
 }
@@ -109,7 +121,16 @@ NativeServerConfig NativeServerConfig::fromJson(const QJsonObject& json)
     if (config.displayName.isEmpty()) {
         config.displayName = config.description.isEmpty() ? config.hostName : config.description;
     }
-    
+
+    if (json.contains(QLatin1String("xray_subscription_config")))
+        config.configString = json.value(QLatin1String("xray_subscription_config")).toArray();
+
+    if (json.contains(QLatin1String("xray_subscription_config_name")))
+        config.configName = json.value(QLatin1String("xray_subscription_config_name")).toArray();
+
+    if (json.contains(QLatin1String("xray_subscription_config_current")))
+        config.currentConfig = json.value(QLatin1String("xray_subscription_config_current")).toInt();
+
     return config;
 }
 

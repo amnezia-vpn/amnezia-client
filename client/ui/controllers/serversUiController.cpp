@@ -304,6 +304,13 @@ bool ServersUiController::isServerFromApi(const QString &serverId) const
     return serverDescriptionById(serverId).isServerFromGatewayApi;
 }
 
+bool ServersUiController::isDefaultServerContainXRayConfigs() const
+{
+    int defaultIndex = getDefaultServerIndex();
+    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
+    return server.isXRayConfig();
+}
+
 bool ServersUiController::isServerCountrySelectionAvailable(const QString &serverId) const
 {
     return serverDescriptionById(serverId).isCountrySelectionAvailable;
@@ -528,6 +535,31 @@ int ServersUiController::getServerIndexById(const QString &serverId) const
 int ServersUiController::getServersCount() const
 {
     return m_orderedServerDescriptions.size();
+}
+
+void ServersUiController::setCurrentConfigIndex(const int index)
+{
+    m_serversController->setCurrentConfigIndex(index);
+}
+
+int ServersUiController::getCurrentConfigIndex() const
+{
+    return m_serversController->getCurrentConfigIndex();
+}
+
+QString ServersUiController::getConfigString(const int index) const
+{
+    return m_serversController->getConfigString(index);
+}
+
+QString ServersUiController::getConfigName(const int index) const
+{
+    return m_serversController->getConfigName(index);
+}
+
+QJsonArray ServersUiController::getConfigNames() const
+{
+    return m_serversController->getConfigNames();
 }
 
 void ServersUiController::updateContainersModel()

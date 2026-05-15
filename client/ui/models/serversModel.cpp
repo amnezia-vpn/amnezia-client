@@ -81,6 +81,11 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return row.isSubscriptionExpired;
     case IsSubscriptionExpiringSoonRole:
         return row.isSubscriptionExpiringSoon;
+    case IsXRayConfigSelectionAvailableRole: {
+        if (server.isXRayConfig()) {
+            return server.as<NativeServerConfig>()->configString.has_value();
+        }
+    }
     }
 
     return QVariant();
@@ -120,6 +125,11 @@ void ServersModel::setDefaultServerId(const QString &serverId)
     }
 }
 
+bool ServersModel::isDefaultServerContainXRayConfigs()
+{
+    return data(m_defaultServerIndex, IsXRayConfigSelectionAvailableRole).toBool();
+}
+
 QHash<int, QByteArray> ServersModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
@@ -141,6 +151,8 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[IsServerFromGatewayApiRole] = "isServerFromGatewayApi";
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
+
+    roles[IsXRayConfigSelectionAvailableRole] = "isXRayConfigSelectionAvailable";
 
     return roles;
 }

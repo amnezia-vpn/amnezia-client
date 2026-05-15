@@ -102,6 +102,8 @@ PageType {
                             }
 
                             PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                        }  else if (ServersModel.getProcessedServerData("isXRayConfigSelectionAvailable")) {
+                            PageController.goToPage(PageEnum.PageSettingsXRayServerInfo)
                         } else {
                             PageController.goToPage(PageEnum.PageSettingsServerInfo)
                         }

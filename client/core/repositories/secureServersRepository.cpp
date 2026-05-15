@@ -432,3 +432,70 @@ void SecureServersRepository::setDefaultServer(const QString &serverId)
     persistDefaultServerFields();
     emit defaultServerChanged(m_defaultServerId);
 }
+
+void SecureServersRepository::setCurrentConfigIndex(const int index)
+{
+    ServerConfig serverConfig = server(m_defaultServerIndex);
+    NativeServerConfig* xrayConfig = serverConfig.as<NativeServerConfig>();
+
+    xrayConfig->currentConfig = index;
+    editServer(m_defaultServerIndex, serverConfig);
+}
+
+int SecureServersRepository::getCurrentConfigIndex() const
+{
+    const ServerConfig serverConfig = server(m_defaultServerIndex);
+    if (!serverConfig.isXRayConfig())
+        return int();
+
+    const NativeServerConfig* xrayConfig = serverConfig.as<NativeServerConfig>();
+    if (!xrayConfig->currentConfig.has_value())
+        return int();
+
+    return xrayConfig->currentConfig.value();
+}
+
+QString SecureServersRepository::getConfigString(const int index) const
+{
+    const ServerConfig serverConfig = server(m_defaultServerIndex);
+    if (!serverConfig.isXRayConfig())
+        return QString();
+
+    const NativeServerConfig* xrayConfig = serverConfig.as<NativeServerConfig>();
+    if (!xrayConfig->configString.has_value())
+        return QString();
+
+    if (index < 0 || index >= xrayConfig->configString.value().size())
+        return QString();
+
+    return xrayConfig->configString.value().at(index).toString();
+}
+
+QString SecureServersRepository::getConfigName(const int index) const
+{
+    const ServerConfig serverConfig = server(m_defaultServerIndex);
+    if (!serverConfig.isXRayConfig())
+        return QString();
+
+    const NativeServerConfig* xrayConfig = serverConfig.as<NativeServerConfig>();
+    if (!xrayConfig->configName.has_value())
+        return QString();
+
+    if (index < 0 || index >= xrayConfig->configName.value().size())
+        return QString();
+
+    return xrayConfig->configName.value().at(index).toString();
+}
+
+QJsonArray SecureServersRepository::getConfigNames() const
+{
+    const ServerConfig serverConfig = server(m_defaultServerIndex);
+    if (!serverConfig.isXRayConfig())
+        return QJsonArray();
+
+    const NativeServerConfig* xrayConfig = serverConfig.as<NativeServerConfig>();
+    if (!xrayConfig->configName.has_value())
+        return QJsonArray();
+
+    return xrayConfig->configName.value();
+}
