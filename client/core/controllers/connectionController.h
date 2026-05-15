@@ -33,11 +33,11 @@ public:
                                  QObject* parent = nullptr);
     ~ConnectionController() = default;
 
-    ErrorCode prepareConnection(int serverIndex,
+    ErrorCode prepareConnection(const QString &serverId,
                                QJsonObject& vpnConfiguration,
                                DockerContainer& container);
 
-    ErrorCode openConnection(int serverIndex);
+    ErrorCode openConnection(const QString &serverId);
 
     void closeConnection();
 
@@ -55,7 +55,10 @@ public:
 
     QJsonObject createConnectionConfiguration(int serverIndex,
                                              const QPair<QString, QString> &dns,
-                                             const ServerConfig &serverConfig,
+                                             bool isApiConfig,
+                                             const QString &hostName,
+                                             const QString &description,
+                                             int configVersion,
                                              const ContainerConfig &containerConfig,
                                              DockerContainer container);
 
@@ -66,7 +69,7 @@ public:
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void serverRoutingRulesChanged(int serverIndex);
-    void openConnectionRequested(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void setConnectionStateRequested(Vpn::ConnectionState state);
     void killSwitchModeChangedRequested(bool enabled);

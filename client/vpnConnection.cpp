@@ -36,6 +36,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containers/containerUtils.h"
+#include "core/utils/serverConfigUtils.h"
 #include "vpnConnection.h"
 
 using namespace ProtocolUtils;
@@ -233,9 +234,58 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         return;
     }
 
+    DockerContainer container = DockerContainer::None;
+    if (m_container != DockerContainer::None) {
+        container = m_container;
+    }
     const int activeServerIndex = m_serverIndex >= 0 ? m_serverIndex : m_serversRepository->defaultServerIndex();
-    ServerConfig defaultServer = m_serversRepository->server(activeServerIndex);
-    DockerContainer container = defaultServer.defaultContainer();
+    const QString activeServerId = m_serversRepository->serverIdAt(activeServerIndex);
+    switch (m_serversRepository->serverKind(activeServerId)) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(activeServerId);
+        if (cfg.has_value()) {
+            if (container == DockerContainer::None) {
+                container = cfg->defaultContainer;
+            }
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(activeServerId);
+        if (cfg.has_value()) {
+            if (container == DockerContainer::None) {
+                container = cfg->defaultContainer;
+            }
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(activeServerId);
+        if (cfg.has_value()) {
+            if (container == DockerContainer::None) {
+                container = cfg->defaultContainer;
+            }
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
+        const auto cfg = m_serversRepository->apiV2Config(activeServerId);
+        if (cfg.has_value()) {
+            if (container == DockerContainer::None) {
+                container = cfg->defaultContainer;
+            }
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
+        break;
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
+        break;
+    }
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         switch (state) {
@@ -462,7 +512,7 @@ Vpn::ConnectionState VpnConnection::connectionState() const
     return m_connectionState;
 }
 
-void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration)
+void VpnConnection::connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
     if (!m_appSettingsRepository || !m_serversRepository) {
         qCritical() << "VpnConnection::connectToVpn: repositories not initialized";
@@ -470,10 +520,17 @@ void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, con
         return;
     }
 
-    qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2, route mode is")
-                        .arg(serverIndex)
+    qDebug() << QString("Trying to connect to VPN, server id is %1, container is %2, route mode is")
+                        .arg(serverId)
                         .arg(ContainerUtils::containerToString(container))
              << m_appSettingsRepository->routeMode();
+
+    const int serverIndex = m_serversRepository->indexOfServerId(serverId);
+    if (serverIndex < 0) {
+        qCritical() << "VpnConnection::connectToVpn: invalid server id" << serverId;
+        setConnectionState(Vpn::ConnectionState::Error);
+        return;
+    }
 
     m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
     m_serverIndex = serverIndex;

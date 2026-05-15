@@ -1,24 +1,21 @@
 #include "secureServersRepository.h"
 
-#include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonValue>
 #include <QRegularExpression>
+#include <QUuid>
 
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
-#include "core/utils/constants/apiConstants.h"
-#include "core/models/serverConfig.h"
-#include "core/models/containerConfig.h"
-#include "core/utils/protocolEnum.h"
-#include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
 
 using namespace amnezia;
 
-namespace
-{
+namespace {
+
 QStringList managedSitesKeys(RouteMode mode)
 {
     switch (mode) {
@@ -143,16 +140,33 @@ QVariantMap routingManagedVpnSites(const QJsonObject &serverConfig, RouteMode mo
     mergeSitesMap(sites, clientResolvedSites);
     return sites;
 }
+
+QString readStorageServerId(const QJsonObject &json)
+{
+    return json.value(QString(configKey::storageServerId)).toString().trimmed();
 }
 
-SecureServersRepository::SecureServersRepository(SecureQSettings* settings, QObject *parent)
+QJsonObject withoutStorageServerId(const QJsonObject &json)
+{
+    QJsonObject o = json;
+    o.remove(QString(configKey::storageServerId));
+    return o;
+}
+
+QJsonObject embedStorageServerId(const QString &serverId, const QJsonObject &payloadSansId)
+{
+    QJsonObject o = payloadSansId;
+    o.insert(QString(configKey::storageServerId), serverId);
+    return o;
+}
+
+} // namespace
+
+SecureServersRepository::SecureServersRepository(SecureQSettings *settings, QObject *parent)
     : QObject(parent), m_settings(settings)
 {
-    QJsonArray arr = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
-    for (const QJsonValue &val : arr) {
-        m_servers.append(ServerConfig::fromJson(val.toObject()));
-    }
-    m_defaultServerIndex = value("Servers/defaultServerIndex", 0).toInt();
+    loadFromStorage();
+    persistDefaultServerFields();
 }
 
 QVariant SecureServersRepository::value(const QString &key, const QVariant &defaultValue) const
@@ -165,165 +179,348 @@ void SecureServersRepository::setValue(const QString &key, const QVariant &value
     m_settings->setValue(key, value);
 }
 
+void SecureServersRepository::clearServerStateMaps()
+{
+    m_serverJsonById.clear();
+    m_orderedServerIds.clear();
+}
+
+QString SecureServersRepository::normalizedOrGeneratedServerId(const QString &candidateId) const
+{
+    const QString trimmed = candidateId.trimmed();
+    if (!trimmed.isEmpty() && !m_serverJsonById.contains(trimmed)) {
+        return trimmed;
+    }
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
+
+void SecureServersRepository::updateDefaultServerFromStorage()
+{
+    const QString storedDefaultId = value(QStringLiteral("Servers/defaultServerId"), QString()).toString();
+    if (!storedDefaultId.isEmpty() && m_serverJsonById.contains(storedDefaultId)) {
+        m_defaultServerId = storedDefaultId;
+        return;
+    }
+
+    const int storedDefaultIndex = value("Servers/defaultServerIndex", 0).toInt();
+    if (storedDefaultIndex >= 0 && storedDefaultIndex < m_orderedServerIds.size()) {
+        m_defaultServerId = m_orderedServerIds.at(storedDefaultIndex);
+        return;
+    }
+
+    if (!m_orderedServerIds.isEmpty()) {
+        m_defaultServerId = m_orderedServerIds.first();
+        return;
+    }
+
+    m_defaultServerId.clear();
+}
+
+void SecureServersRepository::persistDefaultServerFields()
+{
+    if (m_orderedServerIds.isEmpty()) {
+        m_defaultServerId.clear();
+    } else if (!m_orderedServerIds.contains(m_defaultServerId)) {
+        m_defaultServerId = m_orderedServerIds.first();
+    }
+
+    setValue("Servers/defaultServerId", m_defaultServerId);
+}
+
+void SecureServersRepository::loadFromStorage()
+{
+    clearServerStateMaps();
+
+    const QJsonArray serversArray =
+            QJsonDocument::fromJson(value(QStringLiteral("Servers/serversList"), QByteArray()).toByteArray())
+                    .array();
+
+    for (int i = 0; i < serversArray.size(); ++i) {
+        const QJsonObject json = serversArray.at(i).toObject();
+        const QString candidateId = readStorageServerId(json);
+        const QString serverId = normalizedOrGeneratedServerId(candidateId);
+        const QJsonObject strippedJson = withoutStorageServerId(json);
+        const serverConfigUtils::ConfigType kind = serverConfigUtils::configTypeFromJson(strippedJson);
+
+        if (m_serverJsonById.contains(serverId) || kind == serverConfigUtils::ConfigType::Invalid) {
+            continue;
+        }
+        m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedJson));
+        m_orderedServerIds.append(serverId);
+    }
+
+    updateDefaultServerFromStorage();
+}
+
 void SecureServersRepository::syncToStorage()
 {
-    QJsonArray arr;
-    for (const ServerConfig &cfg : m_servers) {
-        arr.append(cfg.toJson());
+    QJsonArray serversArray;
+
+    for (const QString &serverId : m_orderedServerIds) {
+        if (!m_serverJsonById.contains(serverId)) {
+            continue;
+        }
+        serversArray.append(m_serverJsonById.value(serverId));
     }
-    setValue("Servers/serversList", QJsonDocument(arr).toJson());
+
+    setValue("Servers/serversList", QJsonDocument(serversArray).toJson());
+    persistDefaultServerFields();
 }
 
 void SecureServersRepository::invalidateCache()
 {
-    m_servers.clear();
-    QJsonArray arr = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
-    for (const QJsonValue &val : arr) {
-        m_servers.append(ServerConfig::fromJson(val.toObject()));
-    }
-    m_defaultServerIndex = value("Servers/defaultServerIndex", 0).toInt();
+    loadFromStorage();
 }
 
-void SecureServersRepository::setServersArray(const QJsonArray &servers)
+void SecureServersRepository::clearServers()
 {
-    m_servers.clear();
-    for (const QJsonValue &val : servers) {
-        m_servers.append(ServerConfig::fromJson(val.toObject()));
-    }
+    clearServerStateMaps();
+
+    m_defaultServerId.clear();
+
     syncToStorage();
 }
 
-void SecureServersRepository::addServer(const ServerConfig &server)
+QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
-    m_servers.append(server);
+    const QString id = normalizedOrGeneratedServerId(serverId);
+    if (m_serverJsonById.contains(id) || kind == serverConfigUtils::ConfigType::Invalid) {
+        return id;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(serverJson);
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
+        return id;
+    }
+    m_serverJsonById.insert(id, embedStorageServerId(id, strippedJson));
+
+    m_orderedServerIds.append(id);
+
+    if (m_defaultServerId.isEmpty()) {
+        m_defaultServerId = id;
+    }
+
     syncToStorage();
-    emit serverAdded(server);
+    emit serverAdded(id);
+    return id;
 }
 
-void SecureServersRepository::editServer(int index, const ServerConfig &server)
+void SecureServersRepository::editServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
-    if (index < 0 || index >= m_servers.size()) {
+    if (indexOfServerId(serverId) < 0 || kind == serverConfigUtils::ConfigType::Invalid) {
         return;
     }
-    m_servers.replace(index, server);
-    syncToStorage();
-    emit serverEdited(index, server);
-}
-
-void SecureServersRepository::removeServer(int index)
-{
-    if (index < 0 || index >= m_servers.size()) {
+    if (!m_serverJsonById.contains(serverId)) {
         return;
     }
-    int defaultIndex = m_defaultServerIndex;
-    m_servers.removeAt(index);
 
-    if (defaultIndex == index) {
-        setDefaultServer(0);
-    } else if (defaultIndex > index) {
-        setDefaultServer(defaultIndex - 1);
+    const QJsonObject oldJson = m_serverJsonById.value(serverId);
+    const serverConfigUtils::ConfigType oldKind = serverConfigUtils::configTypeFromJson(withoutStorageServerId(oldJson));
+
+    m_serverJsonById.remove(serverId);
+
+    const QJsonObject strippedNew = withoutStorageServerId(serverJson);
+    if (serverConfigUtils::configTypeFromJson(strippedNew) != kind) {
+        const QJsonObject strippedOld = withoutStorageServerId(oldJson);
+        if (oldKind != serverConfigUtils::ConfigType::Invalid && serverConfigUtils::configTypeFromJson(strippedOld) == oldKind) {
+            m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedOld));
+        }
+        return;
+    }
+    m_serverJsonById.insert(serverId, embedStorageServerId(serverId, strippedNew));
+
+    syncToStorage();
+    emit serverEdited(serverId);
+}
+
+void SecureServersRepository::removeServer(const QString &serverId)
+{
+    const int removedIndex = indexOfServerId(serverId);
+    if (removedIndex < 0) {
+        return;
+    }
+    if (!m_serverJsonById.contains(serverId)) {
+        return;
     }
 
-    if (m_servers.isEmpty()) {
-        setDefaultServer(0);
+    const QString previousDefaultId = m_defaultServerId;
+    const int previousDefaultIndex = defaultServerIndex();
+
+    m_serverJsonById.remove(serverId);
+    m_orderedServerIds.removeAt(removedIndex);
+
+    if (m_orderedServerIds.isEmpty()) {
+        m_defaultServerId.clear();
+    } else if (m_defaultServerId == serverId) {
+        const int fallbackIndex = qMin(removedIndex, m_orderedServerIds.size() - 1);
+        m_defaultServerId = m_orderedServerIds.at(fallbackIndex);
+    } else if (!m_orderedServerIds.contains(m_defaultServerId)) {
+        m_defaultServerId = m_orderedServerIds.first();
+    }
+
+    const int newDefaultIndex = defaultServerIndex();
+    if (previousDefaultId != m_defaultServerId || previousDefaultIndex != newDefaultIndex) {
+        emit defaultServerChanged(m_defaultServerId);
     }
 
     syncToStorage();
-    emit serverRemoved(index);
+    emit serverRemoved(serverId, removedIndex);
 }
 
-ServerConfig SecureServersRepository::server(int index) const
+serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString &serverId) const
 {
-    if (index < 0 || index >= m_servers.size()) {
-        return SelfHostedServerConfig{};
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return serverConfigUtils::ConfigType::Invalid;
     }
-    return m_servers.at(index);
+    return serverConfigUtils::configTypeFromJson(withoutStorageServerId(it.value()));
 }
 
-QVector<ServerConfig> SecureServersRepository::servers() const
+std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAdminConfig(const QString &serverId) const
 {
-    return m_servers;
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(it.value());
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::SelfHostedAdmin) {
+        return std::nullopt;
+    }
+    return SelfHostedAdminServerConfig::fromJson(strippedJson);
+}
+
+std::optional<SelfHostedUserServerConfig> SecureServersRepository::selfHostedUserConfig(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(it.value());
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::SelfHostedUser) {
+        return std::nullopt;
+    }
+    return SelfHostedUserServerConfig::fromJson(strippedJson);
+}
+
+std::optional<NativeServerConfig> SecureServersRepository::nativeConfig(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(it.value());
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::Native) {
+        return std::nullopt;
+    }
+    return NativeServerConfig::fromJson(strippedJson);
+}
+
+std::optional<ApiV2ServerConfig> SecureServersRepository::apiV2Config(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(it.value());
+    if (!serverConfigUtils::isApiV2Subscription(serverConfigUtils::configTypeFromJson(strippedJson))) {
+        return std::nullopt;
+    }
+    return ApiV2ServerConfig::fromJson(strippedJson);
+}
+
+std::optional<LegacyApiServerConfig> SecureServersRepository::legacyApiConfig(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(it.value());
+    if (!serverConfigUtils::isLegacyApiSubscription(serverConfigUtils::configTypeFromJson(strippedJson))) {
+        return std::nullopt;
+    }
+    return LegacyApiServerConfig::fromJson(strippedJson);
 }
 
 int SecureServersRepository::serversCount() const
 {
-    return m_servers.size();
+    return m_orderedServerIds.size();
+}
+
+QString SecureServersRepository::serverIdAt(int index) const
+{
+    if (index < 0 || index >= m_orderedServerIds.size()) {
+        return QString();
+    }
+    return m_orderedServerIds.at(index);
+}
+
+QVector<QString> SecureServersRepository::orderedServerIds() const
+{
+    return m_orderedServerIds;
+}
+
+int SecureServersRepository::indexOfServerId(const QString &serverId) const
+{
+    return m_orderedServerIds.indexOf(serverId);
 }
 
 int SecureServersRepository::defaultServerIndex() const
 {
-    return m_defaultServerIndex;
+    if (m_orderedServerIds.isEmpty()) {
+        return 0;
+    }
+    const int idx = m_orderedServerIds.indexOf(m_defaultServerId);
+    return idx >= 0 ? idx : 0;
 }
 
-void SecureServersRepository::setDefaultServer(int index)
+QString SecureServersRepository::defaultServerId() const
 {
-    if (index < 0) {
+    return m_defaultServerId;
+}
+
+void SecureServersRepository::setDefaultServer(const QString &serverId)
+{
+    if (m_orderedServerIds.isEmpty()) {
         return;
     }
-    if (m_servers.size() > 0 && index >= m_servers.size()) {
+    if (!m_serverJsonById.contains(serverId)) {
         return;
     }
-    if (m_servers.isEmpty() && index != 0) {
+
+    if (indexOfServerId(serverId) < 0) {
         return;
     }
-    if (m_defaultServerIndex == index) {
+
+    if (m_defaultServerId == serverId) {
         return;
     }
-    m_defaultServerIndex = index;
-    setValue("Servers/defaultServerIndex", index);
-    emit defaultServerChanged(index);
-}
 
-void SecureServersRepository::setDefaultContainer(int serverIndex, DockerContainer container)
-{
-    ServerConfig config = server(serverIndex);
-    config.visit([container](auto& arg) {
-        arg.defaultContainer = container;
-    });
-    editServer(serverIndex, config);
-}
-
-ContainerConfig SecureServersRepository::containerConfig(int serverIndex, DockerContainer container) const
-{
-    ServerConfig config = server(serverIndex);
-    return config.containerConfig(container);
-}
-
-void SecureServersRepository::setContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config)
-{
-    ServerConfig serverConfig = server(serverIndex);
-    serverConfig.visit([container, &config](auto& arg) {
-        arg.containers[container] = config;
-    });
-    editServer(serverIndex, serverConfig);
-}
-
-void SecureServersRepository::clearLastConnectionConfig(int serverIndex, DockerContainer container)
-{
-    ServerConfig serverConfig = server(serverIndex);
-    ContainerConfig containerCfg = serverConfig.containerConfig(container);
-    
-    containerCfg.protocolConfig.clearClientConfig();
-    
-    setContainerConfig(serverIndex, container, containerCfg);
+    m_defaultServerId = serverId;
+    persistDefaultServerFields();
+    emit defaultServerChanged(m_defaultServerId);
 }
 
 QJsonObject SecureServersRepository::serverJson(int index) const
 {
-    if (index < 0 || index >= m_servers.size()) {
+    const QString serverId = serverIdAt(index);
+    if (serverId.isEmpty()) {
         return {};
     }
-    return m_servers.at(index).toJson();
+    return withoutStorageServerId(m_serverJsonById.value(serverId));
 }
 
 void SecureServersRepository::editServerJson(int index, const QJsonObject &serverJson)
 {
-    editServer(index, ServerConfig::fromJson(serverJson));
+    const QString serverId = serverIdAt(index);
+    if (serverId.isEmpty()) {
+        return;
+    }
+    const serverConfigUtils::ConfigType kind = serverConfigUtils::configTypeFromJson(serverJson);
+    editServer(serverId, serverJson, kind);
 }
 
 QVariantMap SecureServersRepository::managedVpnSites(int serverIndex, RouteMode mode) const
 {
-    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+    if (serverIndex < 0 || serverIndex >= serversCount()) {
         return {};
     }
     return sourceManagedVpnSites(serverJson(serverIndex), mode);
@@ -331,7 +528,7 @@ QVariantMap SecureServersRepository::managedVpnSites(int serverIndex, RouteMode 
 
 QVariantMap SecureServersRepository::managedVpnSitesForRouting(int serverIndex, RouteMode mode) const
 {
-    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+    if (serverIndex < 0 || serverIndex >= serversCount()) {
         return {};
     }
     return routingManagedVpnSites(serverJson(serverIndex), mode);
@@ -339,7 +536,7 @@ QVariantMap SecureServersRepository::managedVpnSitesForRouting(int serverIndex, 
 
 void SecureServersRepository::setManagedVpnSites(int serverIndex, RouteMode mode, const QVariantMap &sites)
 {
-    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+    if (serverIndex < 0 || serverIndex >= serversCount()) {
         return;
     }
 
@@ -402,7 +599,7 @@ void SecureServersRepository::removeAllManagedVpnSites(int serverIndex, RouteMod
 
 bool SecureServersRepository::isManagedSplitTunnelingForceEnabled(int serverIndex) const
 {
-    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+    if (serverIndex < 0 || serverIndex >= serversCount()) {
         return false;
     }
     return serverJson(serverIndex).value(configKey::managedSplitTunnelForceEnabled).toBool(false);
@@ -410,7 +607,7 @@ bool SecureServersRepository::isManagedSplitTunnelingForceEnabled(int serverInde
 
 void SecureServersRepository::setManagedSplitTunnelingForceEnabled(int serverIndex, bool enabled)
 {
-    if (serverIndex < 0 || serverIndex >= m_servers.size()) {
+    if (serverIndex < 0 || serverIndex >= serversCount()) {
         return;
     }
 
@@ -445,18 +642,23 @@ RouteMode SecureServersRepository::effectiveSiteRouteMode(int serverIndex, bool 
 
 ServerCredentials SecureServersRepository::serverCredentials(int index) const
 {
-    ServerConfig config = server(index);
-    
-    if (config.isSelfHosted()) {
-        const SelfHostedServerConfig* selfHosted = config.as<SelfHostedServerConfig>();
-        if (!selfHosted) return ServerCredentials();
-        auto creds = selfHosted->credentials();
-        if (creds.has_value()) {
-            return creds.value();
-        }
+    const QString serverId = serverIdAt(index);
+    if (serverId.isEmpty()) {
+        return {};
     }
-    
-    return ServerCredentials{};
+
+    const auto adminConfig = selfHostedAdminConfig(serverId);
+    if (adminConfig.has_value()) {
+        return adminConfig->credentials();
+    }
+
+    const auto userConfig = selfHostedUserConfig(serverId);
+    if (userConfig.has_value()) {
+        const auto credentials = userConfig->credentials();
+        return credentials.value_or(ServerCredentials{});
+    }
+
+    return {};
 }
 
 bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
@@ -469,36 +671,17 @@ bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
         return false;
     }
 
-    QVector<ServerConfig> serversList = servers();
-    for (const ServerConfig& serverConfig : serversList) {
-        if (serverConfig.isApiV1()) {
-            const ApiV1ServerConfig* apiV1 = serverConfig.as<ApiV1ServerConfig>();
-            if (!apiV1) continue;
-            QString storedKey = apiV1->vpnKey();
-            if (storedKey.isEmpty()) {
-                continue;
-            }
-            QString normalizedStored = storedKey.trimmed();
-            if (normalizedStored.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
-                normalizedStored = normalizedStored.mid(QStringLiteral("vpn://").size());
-            }
-            if (normalizedInput == normalizedStored) {
-                return true;
-            }
-        } else if (serverConfig.isApiV2()) {
-            const ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
-            if (!apiV2) continue;
-            QString storedKey = apiV2->vpnKey();
-            if (storedKey.isEmpty()) {
-                continue;
-            }
-            QString normalizedStored = storedKey.trimmed();
-            if (normalizedStored.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
-                normalizedStored = normalizedStored.mid(QStringLiteral("vpn://").size());
-            }
-            if (normalizedInput == normalizedStored) {
-                return true;
-            }
+    for (const QString &serverId : m_orderedServerIds) {
+        const auto apiV2 = apiV2Config(serverId);
+        if (!apiV2.has_value()) {
+            continue;
+        }
+        QString normalizedStored = apiV2->vpnKey().trimmed();
+        if (normalizedStored.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
+            normalizedStored = normalizedStored.mid(QStringLiteral("vpn://").size());
+        }
+        if (!normalizedStored.isEmpty() && normalizedInput == normalizedStored) {
+            return true;
         }
     }
     return false;
@@ -506,8 +689,9 @@ bool SecureServersRepository::hasServerWithVpnKey(const QString &vpnKey) const
 
 bool SecureServersRepository::hasServerWithCrc(quint16 crc) const
 {
-    for (const ServerConfig& serverConfig : m_servers) {
-        if (static_cast<quint16>(serverConfig.crc()) == crc) {
+    for (const QString &serverId : m_orderedServerIds) {
+        const QJsonObject json = serverJson(indexOfServerId(serverId));
+        if (static_cast<quint16>(json.value(configKey::crc).toInt()) == crc) {
             return true;
         }
     }

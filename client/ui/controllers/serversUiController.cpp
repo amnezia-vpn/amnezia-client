@@ -1,37 +1,37 @@
 #include "serversUiController.h"
 
-#include "core/utils/api/apiEnums.h"
-#include "core/utils/constants/apiKeys.h"
-#include "core/utils/constants/apiConstants.h"
-#include "core/utils/api/apiUtils.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/protocolEnum.h"
-#include "core/protocols/protocolUtils.h"
-#include "core/utils/constants/configKeys.h"
-#include "core/utils/constants/protocolConstants.h"
-#include <QJsonDocument>
-#include <QJsonArray>
-#include "core/models/serverConfig.h"
 #include "core/models/protocolConfig.h"
 #include "core/models/containerConfig.h"
-#include "core/models/protocols/awgProtocolConfig.h"
 
 using namespace amnezia;
 
-namespace
+namespace {
+int rowForServerId(const QVector<ServerDescription> &list, const QString &serverId)
 {
-    namespace configKey
-    {
-        constexpr char apiConfig[] = "api_config";
-        constexpr char serverCountryCode[] = "server_country_code";
-        constexpr char serverCountryName[] = "server_country_name";
-        constexpr char userCountryCode[] = "user_country_code";
-        constexpr char serviceType[] = "service_type";
+    if (serverId.isEmpty()) {
+        return -1;
     }
+    for (int i = 0; i < list.size(); ++i) {
+        if (list.at(i).serverId == serverId) {
+            return i;
+        }
+    }
+    return -1;
 }
 
+bool descriptionsHaveGatewayServers(const QVector<ServerDescription> &list)
+{
+    for (const auto &d : list) {
+        if (d.isServerFromGatewayApi) {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
 ServersUiController::ServersUiController(ServersController* serversController,
                                          SettingsController* settingsController,
                                          ServersModel* serversModel,
@@ -47,48 +47,70 @@ ServersUiController::ServersUiController(ServersController* serversController,
 {
 }
 
-void ServersUiController::removeServer(int index)
+void ServersUiController::removeServer(const QString &serverId)
 {
-    m_serversController->removeServer(index);
-    updateModel();
-}
-
-void ServersUiController::editServerName(int index, const QString &name)
-{
-    ServerConfig serverConfig = m_serversController->getServerConfig(index);
-    
-    if (serverConfig.isApiV1()) {
-        ApiV1ServerConfig* apiV1 = serverConfig.as<ApiV1ServerConfig>();
-        if (apiV1) {
-            apiV1->name = name;
-        }
-    } else if (serverConfig.isApiV2()) {
-        ApiV2ServerConfig* apiV2 = serverConfig.as<ApiV2ServerConfig>();
-        if (apiV2) {
-            apiV2->name = name;
-            apiV2->nameOverriddenByUser = true;
-        }
-    } else {
-        serverConfig.visit([&name](auto& arg) {
-            arg.description = name;
-        });
+    if (serverId.isEmpty()) {
+        return;
     }
-    
-    m_serversController->editServer(index, serverConfig);
+    m_serversController->removeServer(serverId);
     updateModel();
 }
 
-void ServersUiController::setDefaultServerIndex(int index)
+void ServersUiController::removeServerAtIndex(int index)
 {
-    m_serversController->setDefaultServerIndex(index);
-    updateModel();
-    emit defaultServerIndexChanged(index);
+    const QString serverId = getServerId(index);
+    if (!serverId.isEmpty()) {
+        removeServer(serverId);
+    }
 }
 
-void ServersUiController::setDefaultContainer(int serverIndex, int containerIndex)
+void ServersUiController::setDefaultServerAtIndex(int index)
 {
+    const QString serverId = getServerId(index);
+    if (!serverId.isEmpty()) {
+        setDefaultServer(serverId);
+    }
+}
+
+void ServersUiController::setDefaultContainerAtIndex(int index, int containerIndex)
+{
+    const QString serverId = getServerId(index);
+    if (!serverId.isEmpty()) {
+        setDefaultContainer(serverId, containerIndex);
+    }
+}
+
+void ServersUiController::editServerName(const QString &serverId, const QString &name)
+{
+    if (serverId.isEmpty()) {
+        return;
+    }
+
+    if (!m_serversController->renameServer(serverId, name)) {
+        emit errorOccurred(tr("Legacy API v1 configs are no longer supported. Remove this server to continue."));
+        emit finished(tr("Use the remove action to delete this legacy config."));
+        return;
+    }
+    updateModel();
+}
+
+void ServersUiController::setDefaultServer(const QString &serverId)
+{
+    if (serverId.isEmpty()) {
+        return;
+    }
+    m_serversController->setDefaultServer(serverId);
+    updateModel();
+    emit defaultServerIdChanged(serverId);
+}
+
+void ServersUiController::setDefaultContainer(const QString &serverId, int containerIndex)
+{
+    if (serverId.isEmpty()) {
+        return;
+    }
     auto container = static_cast<DockerContainer>(containerIndex);
-    m_serversController->setDefaultContainer(serverIndex, container);
+    m_serversController->setDefaultContainer(serverId, container);
     updateModel();
 }
 
@@ -98,129 +120,123 @@ void ServersUiController::toggleAmneziaDns(bool enabled)
     updateModel();
 }
 
-void ServersUiController::onDefaultServerChanged(int index)
+void ServersUiController::onDefaultServerChanged(const QString &/*defaultServerId*/)
 {
-    setProcessedServerIndex(index);
     updateModel();
+    setProcessedServerId(m_serversController->getDefaultServerId());
     updateDefaultServerContainersModel();
-    emit defaultServerIndexChanged(index);
+    emit defaultServerIdChanged(m_serversController->getDefaultServerId());
 }
 
 void ServersUiController::updateModel()
 {
-    int defaultIndex = m_serversController->getDefaultServerIndex();
-    bool wasEmpty = !hasServersFromGatewayApi();
-    int serversCount = m_serversController->getServersCount();
+    QVector<ServerDescription> descriptions =
+        m_serversController->buildServerDescriptions(m_settingsController->isAmneziaDnsEnabled());
 
-    if (m_processedServerIndex >= serversCount) {
-        setProcessedServerIndex(defaultIndex);
-    } else if (m_processedServerIndex >= 0) {
-        setProcessedServerIndex(m_processedServerIndex);
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    const bool hadServersFromGatewayBefore = descriptionsHaveGatewayServers(m_orderedServerDescriptions);
+    const bool hasServersFromGatewayNow = descriptionsHaveGatewayServers(descriptions);
+    const int listCount = descriptions.size();
+    const int defaultRowInDescriptions = rowForServerId(descriptions, defaultServerId);
+
+    m_orderedServerDescriptions = descriptions;
+
+    if (listCount == 0) {
+        setProcessedServerId(QString());
+    } else if (m_processedServerIndex >= listCount) {
+        setProcessedServerId(defaultServerId);
+    } else if (!m_processedServerId.isEmpty()) {
+        const int row = rowForServerId(m_orderedServerDescriptions, m_processedServerId);
+        if (row < 0) {
+            setProcessedServerId(defaultServerId);
+        } else {
+            setProcessedServerId(m_processedServerId);
+        }
+    } else if (defaultRowInDescriptions >= 0) {
+        setProcessedServerId(defaultServerId);
     }
-    
-    m_serversModel->updateModel(m_serversController->getServers(), defaultIndex, m_settingsController->isAmneziaDnsEnabled());
-    
-    
+
+    m_serversModel->updateModel(m_orderedServerDescriptions, defaultRowInDescriptions);
+
     updateContainersModel();
     updateDefaultServerContainersModel();
-    
-    bool isEmpty = !hasServersFromGatewayApi();
-    if (wasEmpty != isEmpty) {
+
+    if (hadServersFromGatewayBefore != hasServersFromGatewayNow) {
         emit hasServersFromGatewayApiChanged();
     }
-    
-    emit defaultServerIndexChanged(defaultIndex);
+
+    emit defaultServerIdChanged(defaultServerId);
+    emit defaultServerIndexChanged(defaultServerIndex());
 }
 
-int ServersUiController::getDefaultServerIndex() const
+QString ServersUiController::getDefaultServerId() const
 {
-    return m_serversController->getDefaultServerIndex();
+    return m_serversController->getDefaultServerId();
 }
 
 QString ServersUiController::getDefaultServerName() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    return m_serversController->getServerConfig(defaultIndex).displayName();
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.serverName;
+        }
+    }
+    return QString();
 }
 
 QString ServersUiController::getDefaultServerDefaultContainerName() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    return ContainerUtils::containerHumanNames().value(server.defaultContainer());
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return ContainerUtils::containerHumanNames().value(description.defaultContainer);
+        }
+    }
+    return QString();
 }
 
 QString ServersUiController::getDefaultServerDescriptionCollapsed() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    QString description = getDefaultServerDescription(server, defaultIndex);
-    
-    if (server.isApiConfig()) {
-        return description;
-    }
-    
-    DockerContainer container = server.defaultContainer();
-    QString containerName = ContainerUtils::containerHumanNames().value(container);
-    QString protocolVersion;
-    QString hostName = server.hostName();
-    
-    if (ContainerUtils::isAwgContainer(container)) {
-        ContainerConfig containerConfig = server.containerConfig(container);
-        if (auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig()) {
-            QString version = awgProtocolConfig->serverConfig.protocolVersion;
-            if (version == protocols::awg::awgV2) {
-                protocolVersion = QObject::tr(" (version 2)");
-            } else if (version == protocols::awg::awgV1_5) {
-                protocolVersion = QObject::tr(" (version 1.5)");
-            }
-            
-            if (container == DockerContainer::Awg && !awgProtocolConfig->serverConfig.isThirdPartyConfig) {
-                containerName = "AmneziaWG Legacy";
-            }
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.collapsedServerDescription;
         }
     }
-    
-    return description + containerName + protocolVersion + " | " + hostName;
+    return QString();
 }
 
 QString ServersUiController::getDefaultServerImagePathCollapsed() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    
-    if (server.isApiV2()) {
-        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        if (!apiV2) return QString();
-        const QString countryCode = apiV2->apiConfig.serverCountryCode;
-        if (countryCode.isEmpty()) {
-            return "";
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            if (!description.isApiV2 || description.apiServerCountryCode.isEmpty()) {
+                return "";
+            }
+            return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(description.apiServerCountryCode.toUpper());
         }
-        return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(countryCode.toUpper());
     }
     return "";
 }
 
 QString ServersUiController::getDefaultServerDescriptionExpanded() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    QString description = getDefaultServerDescription(server, defaultIndex);
-    
-    if (server.isApiConfig()) {
-        return description;
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.expandedServerDescription;
+        }
     }
-    
-    return description + server.hostName();
+    return QString();
 }
 
 bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    DockerContainer defaultContainer = server.defaultContainer();
-    
-    ContainerConfig containerConfig = server.containerConfig(defaultContainer);
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    const DockerContainer defaultContainer = m_serversController->getDefaultContainer(defaultServerId);
+    const ContainerConfig containerConfig = m_serversController->getContainerConfig(defaultServerId, defaultContainer);
     
     if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
         auto hasSplitTunnelingFromAllowedIps = [](const QStringList& allowedIps, const QString& nativeConfig) -> bool {
@@ -265,16 +281,13 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
 
 bool ServersUiController::isDefaultServerFromApi() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    const ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    const int configVersion = server.configVersion();
-    return configVersion == apiDefs::ConfigSource::Telegram
-            || configVersion == apiDefs::ConfigSource::AmneziaGateway;
-}
-
-int ServersUiController::getProcessedServerIndex() const
-{
-    return m_processedServerIndex;
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.isApiV2;
+        }
+    }
+    return false;
 }
 
 int ServersUiController::getProcessedContainerIndex() const
@@ -291,186 +304,196 @@ void ServersUiController::setProcessedContainerIndex(int index)
     }
 }
 
-void ServersUiController::setProcessedServerIndex(int index)
+QString ServersUiController::getProcessedServerId() const
 {
-    if (index >= m_serversController->getServersCount()) {
+    return m_processedServerId;
+}
+
+void ServersUiController::setProcessedServerId(const QString &serverId)
+{
+    const int index = serverId.isEmpty() ? -1 : serverIndexForId(serverId);
+    if (!serverId.isEmpty() && index < 0) {
         return;
     }
 
-    if (m_processedServerIndex != index) {
+    if (m_processedServerIndex != index || m_processedServerId != serverId) {
         m_processedServerIndex = index;
+        m_processedServerId = serverId;
         m_serversModel->setProcessedServerIndex(index);
 
         if (index >= 0) {
             updateContainersModel();
-
-            ServerConfig server = m_serversController->getServerConfig(index);
-            setProcessedContainerIndex(static_cast<int>(server.defaultContainer()));
-
-            if (server.isApiV2()) {
-                const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-                if (apiV2 && !apiV2->apiConfig.availableCountries.isEmpty()) {
-                    emit updateApiCountryModel();
+            for (const auto &description : m_orderedServerDescriptions) {
+                if (description.serverId == serverId) {
+                    setProcessedContainerIndex(static_cast<int>(description.defaultContainer));
+                    break;
                 }
-                emit updateApiServicesModel();
+            }
+
+            for (const auto &description : m_orderedServerDescriptions) {
+                if (description.serverId != serverId) {
+                    continue;
+                }
+                if (description.isApiV2) {
+                    if (description.isCountrySelectionAvailable && !description.apiAvailableCountries.isEmpty()) {
+                        emit updateApiCountryModel();
+                    }
+                    emit updateApiServicesModel();
+                }
+                break;
             }
         }
 
+        emit processedServerIdChanged(m_processedServerId);
         emit processedServerIndexChanged(m_processedServerIndex);
     }
 }
 
+int ServersUiController::getProcessedServerIndex() const
+{
+    return m_processedServerIndex;
+}
+
+void ServersUiController::setProcessedServerIndex(int index)
+{
+    if (index < 0) {
+        setProcessedServerId(QString());
+        return;
+    }
+    const QString id = getServerId(index);
+    if (!id.isEmpty()) {
+        setProcessedServerId(id);
+    }
+}
+
+int ServersUiController::defaultServerIndex() const
+{
+    return rowForServerId(m_orderedServerDescriptions, getDefaultServerId());
+}
+
 bool ServersUiController::processedServerIsPremium() const
 {
-    ServerConfig server = m_serversController->getServerConfig(m_processedServerIndex);
-    if (server.isApiV1()) {
-        const ApiV1ServerConfig* apiV1 = server.as<ApiV1ServerConfig>();
-        return apiV1 ? apiV1->isPremium() : false;
-    } else if (server.isApiV2()) {
-        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        return apiV2 ? (apiV2->isPremium() || apiV2->isExternalPremium()) : false;
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == m_processedServerId) {
+            return description.isPremium;
+        }
     }
     return false;
 }
 
 const ServerCredentials ServersUiController::getProcessedServerCredentials() const
 {
-    return m_serversController->getServerCredentials(m_processedServerIndex);
+    return m_serversController->getServerCredentials(m_processedServerId);
 }
 
 bool ServersUiController::isDefaultServerCurrentlyProcessed() const
 {
-    return m_serversController->getDefaultServerIndex() == m_processedServerIndex;
+    return m_serversController->getDefaultServerId() == m_processedServerId;
 }
 
 bool ServersUiController::isProcessedServerHasWriteAccess() const
 {
-    ServerCredentials credentials = m_serversController->getServerCredentials(m_processedServerIndex);
+    ServerCredentials credentials = m_serversController->getServerCredentials(m_processedServerId);
     return (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty());
 }
 
-
-QString ServersUiController::getDefaultServerDescription(const ServerConfig& server, int index) const
+QString ServersUiController::getDefaultServerDescription(const QString &serverId) const
 {
-    QString description;
-    
-    if (server.isApiV2()) {
-        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        if (!apiV2) return QString();
-        if (!apiV2->apiConfig.serverCountryCode.isEmpty()) {
-            return apiV2->apiConfig.serverCountryName;
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == serverId) {
+            return description.baseDescription;
         }
-        return apiV2->description;
-    } else if (server.isApiV1()) {
-        const ApiV1ServerConfig* apiV1 = server.as<ApiV1ServerConfig>();
-        return apiV1 ? apiV1->description : QString();
-    } else {
-        ServerCredentials credentials = m_serversController->getServerCredentials(index);
-        if (!credentials.userName.isEmpty() && !credentials.secretData.isEmpty()) {
-            bool isAmneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
-            if (isAmneziaDnsEnabled && isAmneziaDnsContainerInstalled(index)) {
-                description += "Amnezia DNS | ";
-            }
-        } else {
-            if (server.dns1() == protocols::dns::amneziaDnsIp) {
-                description += "Amnezia DNS | ";
-            }
-        }
-        return description;
     }
-}
-
-bool ServersUiController::isAmneziaDnsContainerInstalled(int serverIndex) const
-{
-    const ServerConfig server = m_serversController->getServerConfig(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = server.containers();
-    
-    return containers.contains(DockerContainer::Dns);
+    return QString();
 }
 
 bool ServersUiController::hasServersFromGatewayApi() const
 {
-    QVector<ServerConfig> servers = m_serversController->getServers();
-    for (const ServerConfig &server : servers) {
-        if (server.isApiV2()) {
-            return true;
-        }
-    }
-    return false;
+    return listHasServersFromGatewayApi();
 }
 
 bool ServersUiController::isAdVisible() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    if (defaultIndex < 0) {
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    if (defaultServerId.isEmpty()) {
         return false;
     }
-    ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    if (server.isApiV2()) {
-        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        if (!apiV2) return false;
-        return apiV2->apiConfig.serviceInfo.isAdVisible;
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.isAdVisible;
+        }
     }
     return false;
 }
 
 QString ServersUiController::adHeader() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    if (defaultIndex < 0) {
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    if (defaultServerId.isEmpty()) {
         return QString();
     }
-    ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    if (server.isApiV2()) {
-        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        if (!apiV2) return QString();
-        return apiV2->apiConfig.serviceInfo.adHeader;
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.adHeader;
+        }
     }
     return QString();
 }
 
 QString ServersUiController::adDescription() const
 {
-    int defaultIndex = getDefaultServerIndex();
-    if (defaultIndex < 0) {
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    if (defaultServerId.isEmpty()) {
         return QString();
     }
-    ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    if (server.isApiV2()) {
-        const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-        if (!apiV2) return QString();
-        return apiV2->apiConfig.serviceInfo.adDescription;
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.adDescription;
+        }
     }
     return QString();
 }
 
+QString ServersUiController::getServerId(int index) const
+{
+    if (index < 0 || index >= m_orderedServerDescriptions.size()) {
+        return QString();
+    }
+    return m_orderedServerDescriptions.at(index).serverId;
+}
+
+int ServersUiController::getServerIndexById(const QString &serverId) const
+{
+    return rowForServerId(m_orderedServerDescriptions, serverId);
+}
+
 void ServersUiController::updateContainersModel()
 {
-    if (m_processedServerIndex < 0 || m_processedServerIndex >= m_serversController->getServersCount()) {
+    if (m_processedServerId.isEmpty()) {
         return;
     }
-    ServerConfig server = m_serversController->getServerConfig(m_processedServerIndex);
-    QMap<DockerContainer, ContainerConfig> containers = server.containers();
+    const QMap<DockerContainer, ContainerConfig> containers =
+            m_serversController->getServerContainersMap(m_processedServerId);
     m_containersModel->updateModel(containers);
 }
 
 void ServersUiController::updateDefaultServerContainersModel()
 {
-    int defaultIndex = m_serversController->getDefaultServerIndex();
-    if (defaultIndex < 0 || defaultIndex >= m_serversController->getServersCount()) {
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    if (defaultServerId.isEmpty()) {
         return;
     }
-    ServerConfig server = m_serversController->getServerConfig(defaultIndex);
-    QMap<DockerContainer, ContainerConfig> containers = server.containers();
+    const QMap<DockerContainer, ContainerConfig> containers =
+            m_serversController->getServerContainersMap(defaultServerId);
     m_defaultServerContainersModel->updateModel(containers);
 }
 
 QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) const
 {
     QStringList servicesName;
-    ServerConfig server = m_serversController->getServerConfig(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = server.containers();
-    
+    const QString serverId = getServerId(serverIndex);
+    const QMap<DockerContainer, ContainerConfig> containers = m_serversController->getServerContainersMap(serverId);
+
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         DockerContainer container = it.key();
         if (ContainerUtils::containerService(container) == ServiceType::Other) {
@@ -487,5 +510,15 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
     }
     servicesName.sort();
     return servicesName;
+}
+
+int ServersUiController::serverIndexForId(const QString &serverId) const
+{
+    return rowForServerId(m_orderedServerDescriptions, serverId);
+}
+
+bool ServersUiController::listHasServersFromGatewayApi() const
+{
+    return descriptionsHaveGatewayServers(m_orderedServerDescriptions);
 }
 

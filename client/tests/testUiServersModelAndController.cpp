@@ -8,7 +8,7 @@
 #include <QModelIndex>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
 #include "core/controllers/selfhosted/importController.h"
 #include "ui/models/serversModel.h"
 #include "ui/models/containersModel.h"
@@ -22,6 +22,18 @@ using namespace amnezia;
 #include "secureQSettings.h"
 
 using namespace amnezia;
+
+namespace {
+int defaultServerRow(const QVector<ServerDescription> &descriptions, const QString &defaultServerId)
+{
+    for (int i = 0; i < descriptions.size(); ++i) {
+        if (descriptions.at(i).serverId == defaultServerId) {
+            return i;
+        }
+    }
+    return -1;
+}
+} // namespace
 
 class TestUiServersModelAndController : public QObject
 {
@@ -119,7 +131,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -166,11 +178,9 @@ private slots:
         }
         
         if (m_coreController->m_serversUiController) {
-            m_coreController->m_serversUiController->setProcessedServerIndex(serverIndex);
-            
-            ServerConfig serverConfig = m_coreController->m_serversRepository->server(serverIndex);
-            QString actualServerName = serverConfig.description();
-            QString containerName = ContainerUtils::containerHumanNames().value(DockerContainer::Awg);
+            m_coreController->m_serversUiController->setProcessedServerId(
+                    m_coreController->m_serversUiController->getServerId(0));
+
             QString hostName = "test.example.com";
             
             QString collapsedDescription = m_coreController->m_serversUiController->getDefaultServerDescriptionCollapsed();
@@ -261,27 +271,29 @@ private slots:
         m_coreController->m_importCoreController->importConfig(configNoDns);
         QVERIFY2(importFinishedSpy.count() == 1, "importFinished should be emitted");
         m_coreController->m_appSettingsRepository->setUseAmneziaDns(false);
-        m_coreController->m_serversModel->updateModel(
-            m_coreController->m_serversRepository->servers(),
-            m_coreController->m_serversRepository->defaultServerIndex(),
+        QVector<ServerDescription> descriptionsNoDns = m_coreController->m_serversController->buildServerDescriptions(
             m_coreController->m_appSettingsRepository->useAmneziaDns());
+        const QString defIdNoDns = m_coreController->m_serversRepository->defaultServerId();
+        m_coreController->m_serversModel->updateModel(descriptionsNoDns, defaultServerRow(descriptionsNoDns, defIdNoDns));
 
         QString descNoDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();
         QVERIFY2(descNoDns == "test.example.com",
                  QString("Without Amnezia DNS expected 'test.example.com', got '%1'").arg(descNoDns).toUtf8().constData());
 
-        m_coreController->m_serversRepository->setServersArray(QJsonArray());
-        m_coreController->m_serversRepository->setDefaultServer(0);
+        m_coreController->m_serversRepository->clearServers();
+        if (m_coreController->m_serversRepository->serversCount() > 0) {
+            m_coreController->m_serversRepository->setDefaultServer(m_coreController->m_serversRepository->serverIdAt(0));
+        }
 
         QJsonObject configWithDns = createServerDescriptionTestConfig(true);
         m_coreController->m_importCoreController->importConfig(configWithDns);
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Server should be imported");
         m_coreController->m_appSettingsRepository->setUseAmneziaDns(true);
-        m_coreController->m_serversModel->updateModel(
-            m_coreController->m_serversRepository->servers(),
-            m_coreController->m_serversRepository->defaultServerIndex(),
+        QVector<ServerDescription> descriptionsWithDns = m_coreController->m_serversController->buildServerDescriptions(
             m_coreController->m_appSettingsRepository->useAmneziaDns());
+        const QString defIdWithDns = m_coreController->m_serversRepository->defaultServerId();
+        m_coreController->m_serversModel->updateModel(descriptionsWithDns, defaultServerRow(descriptionsWithDns, defIdWithDns));
 
         QString descWithDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();

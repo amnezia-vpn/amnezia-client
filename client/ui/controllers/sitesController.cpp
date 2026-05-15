@@ -311,7 +311,9 @@ void SitesController::publishManagedSplitTunnelingRules(int serverIndex)
     job.serverIndex = serverIndex;
     job.credentials = credentials;
     job.rules = managedRoutingRulesPayload(serverIndex);
-    job.container = m_serversRepository->server(serverIndex).defaultContainer();
+    const QString serverId = m_serversRepository->serverIdAt(serverIndex);
+    const auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    job.container = adminConfig.has_value() ? adminConfig->defaultContainer : DockerContainer::None;
 
     for (int i = m_pendingManagedSplitTunnelingPublishJobs.size() - 1; i >= 0; --i) {
         if (m_pendingManagedSplitTunnelingPublishJobs.at(i).serverIndex == serverIndex) {

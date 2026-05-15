@@ -5,7 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 
@@ -56,7 +56,7 @@ private:
         int activeDeviceCount;
         int maxDeviceCount;
 
-        apiDefs::ConfigType configType;
+        serverConfigUtils::ConfigType configType;
 
         QStringList supportedProtocols;
 

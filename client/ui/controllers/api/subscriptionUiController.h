@@ -13,6 +13,7 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
+
 class SubscriptionUiController : public QObject
 {
     Q_OBJECT
@@ -34,10 +35,10 @@ public:
     Q_PROPERTY(QString vpnKey READ getVpnKey NOTIFY vpnKeyExportReady)
 
 public slots:
-    bool exportNativeConfig(int serverIndex, const QString &serverCountryCode, const QString &fileName);
-    bool revokeNativeConfig(int serverIndex, const QString &serverCountryCode);
-    bool exportVpnKey(int serverIndex, const QString &fileName);
-    void prepareVpnKeyExport(int serverIndex);
+    bool exportNativeConfig(const QString &serverId, const QString &serverCountryCode, const QString &fileName);
+    bool revokeNativeConfig(const QString &serverId, const QString &serverCountryCode);
+    bool exportVpnKey(const QString &serverId, const QString &fileName);
+    void prepareVpnKeyExport(const QString &serverId);
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
@@ -45,21 +46,21 @@ public slots:
     bool importFreeFromGateway();
     bool restoreServiceFromAppStore();
     bool importTrialFromGateway(const QString &email);
-    bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
+    bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
-    bool updateServiceFromTelegram(const int serverIndex);
-    bool deactivateDevice(int serverIndex);
-    bool deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
+    bool deactivateDevice(const QString &serverId);
+    bool deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode);
 
     void validateConfig();
 
-    void setCurrentProtocol(int serverIndex, const QString &protocolName);
-    bool isVlessProtocol(int serverIndex);
+    void setCurrentProtocol(const QString &serverId, const QString &protocolName);
+    bool isVlessProtocol(const QString &serverId);
 
-    void removeApiConfig(int serverIndex);
+    void removeApiConfig(const QString &serverId);
 
-    bool getAccountInfo(int serverIndex, bool reload);
-    void getRenewalLink(int serverIndex);
+    bool getAccountInfo(const QString &serverId, bool reload);
+    void getRenewalLink(const QString &serverId);
+
     void updateApiCountryModel();
     void updateApiDevicesModel();
 
@@ -79,6 +80,8 @@ signals:
     void apiConfigRemoved(const QString &message);
 
     void vpnKeyExportReady();
+
+    void unsupportedConnectDrawerRequested();
 
 private:
     QList<QString> getQrCodes();

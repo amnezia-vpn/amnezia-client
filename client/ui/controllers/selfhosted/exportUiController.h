@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "core/controllers/selfhosted/exportController.h"
+#include "core/utils/errorCodes.h"
 
 class ExportUiController : public QObject
 {
@@ -17,12 +18,13 @@ public:
     Q_PROPERTY(QString nativeConfigString READ getNativeConfigString NOTIFY exportConfigChanged)
 
 public slots:
-    void generateFullAccessConfig(int serverIndex);
-    void generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName);
-    void generateOpenVpnConfig(int serverIndex, const QString &clientName);
-    void generateWireGuardConfig(int serverIndex, const QString &clientName);
-    void generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName);
-    void generateXrayConfig(int serverIndex, const QString &clientName);
+    void generateFullAccessConfig(const QString &serverId);
+
+    void generateConnectionConfig(const QString &serverId, int containerIndex, const QString &clientName);
+    void generateOpenVpnConfig(const QString &serverId, const QString &clientName);
+    void generateWireGuardConfig(const QString &serverId, const QString &clientName);
+    void generateAwgConfig(const QString &serverId, int containerIndex, const QString &clientName);
+    void generateXrayConfig(const QString &serverId, const QString &clientName);
 
     QString getConfig();
     QString getNativeConfigString();
@@ -30,9 +32,11 @@ public slots:
 
     void exportConfig(const QString &fileName);
 
-    void updateClientManagementModel(int serverIndex, int containerIndex);
-    void revokeConfig(int row, int serverIndex, int containerIndex);
-    void renameClient(int row, const QString &clientName, int serverIndex, int containerIndex);
+    void updateClientManagementModel(const QString &serverId, int containerIndex);
+
+    void revokeConfig(int row, const QString &serverId, int containerIndex);
+
+    void renameClient(int row, const QString &clientName, const QString &serverId, int containerIndex);
 
 signals:
     void generateConfig(int type);

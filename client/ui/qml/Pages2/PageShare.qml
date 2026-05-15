@@ -42,40 +42,40 @@ PageType {
             var configExtension
             var configFileName
 
-            var serverIndex = ServersUiController.processedIndex
             var containerIndex = ServersUiController.processedContainerIndex
+            var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
-                ExportController.generateConnectionConfig(serverIndex, containerIndex, clientNameTextField.textField.text);
+                ExportController.generateConnectionConfig(serverId, containerIndex, clientNameTextField.textField.text);
                 configCaption = qsTr("Save AmneziaVPN config")
                 configExtension = ".vpn"
                 configFileName = "amnezia_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateOpenVpnConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save OpenVPN config")
                 configExtension = ".ovpn"
                 configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateWireGuardConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save WireGuard config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
-                ExportController.generateAwgConfig(serverIndex, containerIndex, clientNameTextField.textField.text)
+                ExportController.generateAwgConfig(serverId, containerIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save AmneziaWG config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.Xray: {
-                ExportController.generateXrayConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateXrayConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save XRay config")
                 configExtension = ".json"
                 configFileName = "amnezia_for_xray"
@@ -249,7 +249,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                            ExportController.updateClientManagementModel(ServersUiController.getServerId(ServersUiController.processedServerIndex),
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -333,7 +333,7 @@ PageType {
 
                     Component.onCompleted: {
                         if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultIndex)
+                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultServerIndex)
                         } else {
                             serverSelectorListView.selectedIndex = 0
                         }
@@ -344,7 +344,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersUiController.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.setProcessedServerIndex(proxyServersModel.mapToSource(selectedIndex))
                     }
                 }
             }
@@ -417,7 +417,7 @@ PageType {
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                            ExportController.updateClientManagementModel(ServersUiController.getServerId(ServersUiController.processedServerIndex),
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -792,9 +792,9 @@ PageType {
                                                         clientsListView.freezeFilter = true
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
-                                                                                      clientNameEditor.textField.text,
-                                                                                      ServersUiController.processedIndex,
-                                                                                      ServersUiController.processedContainerIndex)
+                                                                                          clientNameEditor.textField.text,
+                                                                                          ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                                                                                          ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
@@ -829,8 +829,8 @@ PageType {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
-                                                                          ServersUiController.processedIndex,
-                                                                          ServersUiController.processedContainerIndex)
+                                                                              ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                                                                              ServersUiController.processedContainerIndex)
                                         }
                                         var noButtonFunction = function() {
                                         }

@@ -1,5 +1,6 @@
 #include "apiUtils.h"
 
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include <QDateTime>
 #include <QJsonDocument>
@@ -75,63 +76,6 @@ bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, in
     return endDate <= nowUtc.addDays(withinDays);
 }
 
-bool apiUtils::isServerFromApi(const QJsonObject &serverConfigObject)
-{
-    auto configVersion = serverConfigObject.value(configKey::configVersion).toInt();
-    switch (configVersion) {
-    case apiDefs::ConfigSource::Telegram: return true;
-    case apiDefs::ConfigSource::AmneziaGateway: return true;
-    default: return false;
-    }
-}
-
-apiDefs::ConfigType apiUtils::getConfigType(const QJsonObject &serverConfigObject)
-{
-    auto configVersion = serverConfigObject.value(configKey::configVersion).toInt();
-
-    switch (configVersion) {
-    case apiDefs::ConfigSource::Telegram: {
-        constexpr QLatin1String freeV2Endpoint(FREE_V2_ENDPOINT);
-        constexpr QLatin1String premiumV1Endpoint(PREM_V1_ENDPOINT);
-
-        auto apiEndpoint = serverConfigObject.value(apiDefs::key::apiEndpoint).toString();
-
-        if (apiEndpoint.contains(premiumV1Endpoint)) {
-            return apiDefs::ConfigType::AmneziaPremiumV1;
-        } else if (apiEndpoint.contains(freeV2Endpoint)) {
-            return apiDefs::ConfigType::AmneziaFreeV2;
-        }
-    };
-    case apiDefs::ConfigSource::AmneziaGateway: {
-        constexpr QLatin1String servicePremium("amnezia-premium");
-        constexpr QLatin1String serviceFree("amnezia-free");
-        constexpr QLatin1String serviceExternalPremium("external-premium");
-        constexpr QLatin1String serviceExternalTrial("external-trial");
-
-        auto apiConfigObject = serverConfigObject.value(apiDefs::key::apiConfig).toObject();
-        auto serviceType = apiConfigObject.value(apiDefs::key::serviceType).toString();
-
-        if (serviceType == servicePremium) {
-            return apiDefs::ConfigType::AmneziaPremiumV2;
-        } else if (serviceType == serviceFree) {
-            return apiDefs::ConfigType::AmneziaFreeV3;
-        } else if (serviceType == serviceExternalPremium) {
-            return apiDefs::ConfigType::ExternalPremium;
-        } else if (serviceType == serviceExternalTrial) {
-            return apiDefs::ConfigType::ExternalTrial;
-        }
-    }
-    default: {
-        return apiDefs::ConfigType::SelfHosted;
-    }
-    };
-}
-
-apiDefs::ConfigSource apiUtils::getConfigSource(const QJsonObject &serverConfigObject)
-{
-    return static_cast<apiDefs::ConfigSource>(serverConfigObject.value(configKey::configVersion).toInt());
-}
-
 amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                      const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                      const QByteArray &responseBody)
@@ -197,14 +141,14 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 
 bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
 {
-    static const QSet<apiDefs::ConfigType> premiumTypes = { apiDefs::ConfigType::AmneziaPremiumV1, apiDefs::ConfigType::AmneziaPremiumV2,
-                                                            apiDefs::ConfigType::ExternalPremium, apiDefs::ConfigType::ExternalTrial };
-    return premiumTypes.contains(getConfigType(serverConfigObject));
+    static const QSet<serverConfigUtils::ConfigType> premiumTypes = { serverConfigUtils::ConfigType::AmneziaPremiumV1, serverConfigUtils::ConfigType::AmneziaPremiumV2,
+                                                            serverConfigUtils::ConfigType::ExternalPremium };
+    return premiumTypes.contains(serverConfigUtils::configTypeFromJson(serverConfigObject));
 }
 
 QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 {
-    if (apiUtils::getConfigType(serverConfigObject) != apiDefs::ConfigType::AmneziaPremiumV1) {
+    if (serverConfigUtils::configTypeFromJson(serverConfigObject) != serverConfigUtils::ConfigType::AmneziaPremiumV1) {
         return {};
     }
 
@@ -242,9 +186,8 @@ QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
 
 QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
 {
-    auto configType = apiUtils::getConfigType(serverConfigObject);
-    if (configType != apiDefs::ConfigType::AmneziaPremiumV2 && configType != apiDefs::ConfigType::ExternalPremium
-        && configType != apiDefs::ConfigType::ExternalTrial) {
+    auto configType = serverConfigUtils::configTypeFromJson(serverConfigObject);
+    if (configType != serverConfigUtils::ConfigType::AmneziaPremiumV2 && configType != serverConfigUtils::ConfigType::ExternalPremium) {
         return {};
     }
 

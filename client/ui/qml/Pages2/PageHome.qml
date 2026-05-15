@@ -344,14 +344,14 @@ PageType {
                         Keys.onReturnPressed: this.clicked()
 
                         onClicked: {
-                            ServersUiController.processedIndex = ServersUiController.defaultIndex
+                            ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
 
                             if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                                 if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
                                     PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
                                 } else {
                                     PageController.showBusyIndicator(true)
-                                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
+                                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
                                     PageController.showBusyIndicator(false)
                                     if (!result) {
                                         return

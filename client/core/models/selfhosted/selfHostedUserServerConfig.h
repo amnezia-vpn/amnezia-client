@@ -1,48 +1,38 @@
-#ifndef APIV1SERVERCONFIG_H
-#define APIV1SERVERCONFIG_H
+#ifndef SELFHOSTEDUSERSERVERCONFIG_H
+#define SELFHOSTEDUSERSERVERCONFIG_H
 
 #include <QJsonObject>
 #include <QMap>
+#include <optional>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/containerConfig.h"
-#include "core/utils/api/apiEnums.h"
-#include "core/utils/constants/apiKeys.h"
-#include "core/utils/constants/apiConstants.h"
+#include "core/utils/commonStructs.h"
 
 namespace amnezia
 {
 
 using namespace ContainerEnumNS;
 
-struct ApiV1ServerConfig {
+struct SelfHostedUserServerConfig {
     QString description;
+    QString displayName;
     QString hostName;
     QMap<DockerContainer, ContainerConfig> containers;
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
-    QJsonObject serverRoutingRules;
-
-    QString name;
-    QString protocol;
-    QString apiEndpoint;
-    QString apiKey;
-    int crc;
-    int configVersion;
-    
-    bool isPremium() const;
-    bool isFree() const;
-    QString vpnKey() const;
+    bool hasCredentials() const;
+    bool isReadOnly() const;
+    std::optional<ServerCredentials> credentials() const;
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;
     QJsonObject toJson() const;
-    static ApiV1ServerConfig fromJson(const QJsonObject& json);
+    static SelfHostedUserServerConfig fromJson(const QJsonObject &json);
 };
 
 } // namespace amnezia
 
-#endif // APIV1SERVERCONFIG_H
-
+#endif // SELFHOSTEDUSERSERVERCONFIG_H
