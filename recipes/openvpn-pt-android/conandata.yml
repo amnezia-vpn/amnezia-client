@@ -1,0 +1,3 @@
+patches:
+  "1.0.0":
+    - patch_file: "patches/0001-fix-cloak-go-build.patch"

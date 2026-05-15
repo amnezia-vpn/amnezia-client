@@ -1,13 +1,15 @@
 #include <QTest>
-#include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/models/serverDescription.h"
+#include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
+#include "core/utils/serverConfigUtils.h"
 
 using namespace amnezia;
 
@@ -38,7 +40,7 @@ private slots:
         m_settings->clearSettings();
         m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -54,27 +56,32 @@ private slots:
         QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
-        m_coreController->m_serversController->removeServer(-1);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(-1));
         QVERIFY2(serverRemovedSpy.count() == 0, "serverRemoved should NOT be emitted for invalid index");
 
-        m_coreController->m_serversController->removeServer(10);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(10));
         QVERIFY2(serverRemovedSpy.count() == 0, "serverRemoved should NOT be emitted for invalid index");
 
-        m_coreController->m_serversController->removeServer(100);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(100));
         QVERIFY2(serverRemovedSpy.count() == 0, "serverRemoved should NOT be emitted for invalid index");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Server count should remain 1");
 
-        ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        m_coreController->m_serversController->editServer(-1, serverConfig);
+        const QString validServerId = m_coreController->m_serversController->getServerId(0);
+        const serverConfigUtils::ConfigType editKind =
+            m_coreController->m_serversRepository->serverKind(validServerId);
+
+        m_coreController->m_serversRepository->editServer(m_coreController->m_serversController->getServerId(-1),
+                                                          QJsonObject(), editKind);
         QVERIFY2(serverEditedSpy.count() == 0, "serverEdited should NOT be emitted for invalid index");
 
-        m_coreController->m_serversController->editServer(10, serverConfig);
+        m_coreController->m_serversRepository->editServer(m_coreController->m_serversController->getServerId(10),
+                                                        QJsonObject(), editKind);
         QVERIFY2(serverEditedSpy.count() == 0, "serverEdited should NOT be emitted for invalid index");
 
-        m_coreController->m_serversController->setDefaultServerIndex(-1);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(-1));
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted for invalid index");
 
-        m_coreController->m_serversController->setDefaultServerIndex(10);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(10));
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted for invalid index");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default server index should remain 0");
     }
@@ -86,14 +93,15 @@ private slots:
 
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "Should start with 0 servers");
 
-        ServerConfig emptyConfig = SelfHostedServerConfig{};
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
         QVERIFY2(serverRemovedSpy.count() == 0, "serverRemoved should NOT be emitted for empty repository");
 
-        m_coreController->m_serversController->editServer(0, emptyConfig);
+        m_coreController->m_serversRepository->editServer(m_coreController->m_serversController->getServerId(0),
+                                                            SelfHostedAdminServerConfig {}.toJson(),
+                                                            serverConfigUtils::ConfigType::SelfHostedAdmin);
         QVERIFY2(serverEditedSpy.count() == 0, "serverEdited should NOT be emitted for empty repository");
 
-        m_coreController->m_serversController->setDefaultServerIndex(0);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(0));
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted for empty repository");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default server index should be 0 for empty repository");
 

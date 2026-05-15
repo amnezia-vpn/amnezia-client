@@ -159,15 +159,15 @@ ErrorCode XrayProtocol::startTun2Socks()
     m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
 
     connect(
-            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this,
+            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
             [this]() {
-                auto readAllStandardOutput = m_tun2socksProcess->readAllStandardOutput();
-                if (!readAllStandardOutput.waitForFinished()) {
+                auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
+                if (!readAllStandardError.waitForFinished()) {
                     qWarning() << "Failed to read output from tun2socks";
                     return;
                 }
 
-                const QString line = readAllStandardOutput.returnValue();
+                const QString line = readAllStandardError.returnValue();
 
                 if (!line.contains("[TCP]") && !line.contains("[UDP]"))
                     qDebug() << "[tun2socks]:" << line;

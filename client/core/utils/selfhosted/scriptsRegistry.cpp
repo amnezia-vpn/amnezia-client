@@ -76,7 +76,6 @@ QString amnezia::scriptName(ProtocolScriptType type)
 QString amnezia::scriptName(ClientScriptType type)
 {
     switch (type) {
-    case ClientScriptType::linux_installer: return QLatin1String("linux_installer.sh");
     case ClientScriptType::mac_installer: return QLatin1String("mac_installer.sh");
     default: return QString();
     }

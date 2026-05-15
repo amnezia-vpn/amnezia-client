@@ -8,7 +8,6 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
-#include "core/models/serverConfig.h"
 #include "logger.h"
 #include "secureQSettings.h"
 
@@ -145,7 +144,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
-    m_newsController = new NewsController(m_appSettingsRepository, m_serversController);
+    m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
@@ -165,7 +164,7 @@ void CoreController::initControllers()
         setQmlContextProperty("FocusController", m_focusController);
     }
 
-    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController, 
+    m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController,
                                                      m_awgConfigModel, m_wireGuardConfigModel, m_openVpnConfigModel, m_xrayConfigModel, m_torConfigModel,
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
@@ -262,9 +261,12 @@ void CoreController::initSignalHandlers()
 {
     m_signalHandlers = new CoreSignalHandlers(this, this);
     m_signalHandlers->initAllHandlers();
-    
+
     // Trigger initial update after handlers are connected
     m_serversUiController->updateModel();
+    if (m_serversUiController->hasServersFromGatewayApi()) {
+        m_apiNewsUiController->fetchNews(false);
+    }
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -322,11 +324,16 @@ PageController* CoreController::pageController() const
 
 void CoreController::openConnectionByIndex(int serverIndex)
 {
+    const QString serverId =
+        m_serversUiController ? m_serversUiController->getServerId(serverIndex) : QString();
+    if (serverId.isEmpty()) {
+        return;
+    }
     if (m_serversModel) {
         m_serversModel->setProcessedServerIndex(serverIndex);
     }
     if (m_serversController) {
-        m_serversController->setDefaultServerIndex(serverIndex);
+        m_serversController->setDefaultServer(serverId);
     }
     m_connectionUiController->toggleConnection();
 }

@@ -37,23 +37,23 @@ public:
                               SecureAppSettingsRepository* appSettingsRepository,
                               QObject *parent = nullptr);
 
-    ExportResult generateFullAccessConfig(int serverIndex);
-    ExportResult generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName);
-    ExportResult generateOpenVpnConfig(int serverIndex, const QString &clientName);
-    ExportResult generateWireGuardConfig(int serverIndex, const QString &clientName);
-    ExportResult generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName);
-    ExportResult generateXrayConfig(int serverIndex, const QString &clientName);
+    ExportResult generateFullAccessConfig(const QString &serverId);
+    ExportResult generateConnectionConfig(const QString &serverId, int containerIndex, const QString &clientName);
+    ExportResult generateOpenVpnConfig(const QString &serverId, const QString &clientName);
+    ExportResult generateWireGuardConfig(const QString &serverId, const QString &clientName);
+    ExportResult generateAwgConfig(const QString &serverId, int containerIndex, const QString &clientName);
+    ExportResult generateXrayConfig(const QString &serverId, const QString &clientName);
 
 signals:
-    void appendClientRequested(int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container);
-    void updateClientsRequested(int serverIndex, DockerContainer container);
-    void revokeClientRequested(int serverIndex, int row, DockerContainer container);
-    void renameClientRequested(int serverIndex, int row, const QString &clientName, DockerContainer container);
+    void appendClientRequested(const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container);
+    void updateClientsRequested(const QString &serverId, DockerContainer container);
+    void revokeClientRequested(const QString &serverId, int row, DockerContainer container);
+    void renameClientRequested(const QString &serverId, int row, const QString &clientName, DockerContainer container);
 
 public slots:
-    void updateClientManagementModel(int serverIndex, int containerIndex);
-    void revokeConfig(int row, int serverIndex, int containerIndex);
-    void renameClient(int row, const QString &clientName, int serverIndex, int containerIndex);
+    void updateClientManagementModel(const QString &serverId, int containerIndex);
+    void revokeConfig(int row, const QString &serverId, int containerIndex);
+    void renameClient(int row, const QString &clientName, const QString &serverId, int containerIndex);
 
 private:
     struct NativeConfigResult
@@ -62,7 +62,7 @@ private:
         QJsonObject jsonNativeConfig;
     };
 
-    NativeConfigResult generateNativeConfig(int serverIndex, DockerContainer container,
+    NativeConfigResult generateNativeConfig(const QString &serverId, DockerContainer container,
                                             const ContainerConfig &containerConfig,
                                             const QString &clientName);
 
