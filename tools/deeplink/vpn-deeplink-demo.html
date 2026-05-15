@@ -43,8 +43,6 @@
 
   <div class="row">
     <a class="button" id="vpnLink" href="#">Открыть (ссылка &lt;a&gt;)</a>
-    <button type="button" id="vpnBtn">Открыть (кнопка → location)</button>
-    <button type="button" class="secondary" id="copyBtn">Копировать URL</button>
     <button type="button" class="muted" id="clearLogBtn">Очистить лог</button>
   </div>
 
@@ -107,23 +105,6 @@
           ev.preventDefault();
           log("Отмена: нет валидного href.");
         }
-      });
-
-      document.getElementById("vpnBtn").addEventListener("click", function () {
-        var href = buildHref();
-        if (!href) return;
-        log("Кнопка: переход window.location.href, длина=" + href.length);
-        window.location.href = href;
-      });
-
-      document.getElementById("copyBtn").addEventListener("click", function () {
-        var href = buildHref();
-        if (!href) return;
-        navigator.clipboard.writeText(href).then(function () {
-          log("Скопировано в буфер обмена.");
-        }).catch(function (err) {
-          log("Копирование не удалось: " + (err && err.message ? err.message : String(err)));
-        });
       });
 
       document.getElementById("clearLogBtn").addEventListener("click", function () {
