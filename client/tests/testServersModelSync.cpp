@@ -5,7 +5,8 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
+#include "tests/testServerRepositoryHelpers.h"
 #include "ui/models/serversModel.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
@@ -38,7 +39,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -58,16 +59,14 @@ private slots:
         QString modelDesc1 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
         QVERIFY2(modelDesc1 == "AWG Server", "Model should have correct server name");
 
-        ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        serverConfig.visit([](auto& arg) {
-            arg.description = "Edited AWG Server";
-        });
-        m_coreController->m_serversController->editServer(0, serverConfig);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(0),
+                                            QStringLiteral("Edited AWG Server"));
 
         QString modelDesc2 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
         QVERIFY2(modelDesc2 == "Edited AWG Server", "Model should be updated after edit");
 
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
         QVERIFY2(m_coreController->m_serversModel->rowCount() == 0, "Model should have 0 rows after removal");
     }
 
@@ -98,7 +97,7 @@ private slots:
         QVERIFY2(!isDefault1, "Server 1 should not be default");
         QVERIFY2(isDefault2, "Server 2 should be default");
 
-        m_coreController->m_serversController->setDefaultServerIndex(0);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(0));
 
         isDefault0 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::IsDefaultRole).toBool();
         isDefault2 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(2, 0), ServersModel::IsDefaultRole).toBool();

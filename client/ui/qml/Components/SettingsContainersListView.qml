@@ -34,14 +34,14 @@ ListViewType {
                     if (isVpnContainer) {
                         // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
                         if (isThirdPartyConfig) {
-                            InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                            InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
                     }
 
                     if (isIpsec) {
-                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                        InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
@@ -49,7 +49,7 @@ ListViewType {
                         MtProxyConfigModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageServiceMtProxySettings)
                     } else {
-                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                        InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
 

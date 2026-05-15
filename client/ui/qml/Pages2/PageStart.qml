@@ -156,7 +156,7 @@ PageType {
         function onNoInstalledContainers() {
             PageController.setTriggeredByConnectButton(true)
 
-            ServersUiController.processedIndex = ServersUiController.defaultIndex
+            ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
@@ -226,14 +226,24 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
+        function onApiServerRemoved(message) {
+            if (!ServersModel.getServersCount()) {
+                PageController.goToPageHome()
+            } else {
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
+            }
+            PageController.showNotificationMessage(message)
+        }
+
         function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
                 if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
-                    ServersUiController.setDefaultServerIndex(preferredDefaultIndex)
+                    ServersUiController.setDefaultServerAtIndex(preferredDefaultIndex)
                 } else {
-                    ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
+                    ServersUiController.setDefaultServerAtIndex(ServersModel.getServersCount() - 1);
                 }
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
             }
 
             PageController.goToPageHome()
@@ -276,7 +286,7 @@ PageType {
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
@@ -350,7 +360,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
                 tabBar.currentIndex = 0
             }
         }

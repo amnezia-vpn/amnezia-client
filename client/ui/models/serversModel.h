@@ -5,7 +5,7 @@
 #include <QVector>
 
 #include "core/utils/selfhosted/sshSession.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
 
 class ServersModel : public QAbstractListModel
 {
@@ -75,14 +75,13 @@ public slots:
 
     bool isServerFromApi(const int serverIndex);
 
-    void updateModel(const QVector<ServerConfig> &servers, int defaultServerIndex, bool isAmneziaDnsEnabled = false);
-    
+    void updateModel(const QVector<amnezia::ServerDescription> &descriptions, int defaultServerIndex);
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 signals:
     void processedServerIndexChanged(const int index);
-    // emitted when the processed server index or processed server data is changed
     void processedServerChanged();
 
     void defaultServerIndexChanged(const int index);
@@ -97,16 +96,12 @@ signals:
 private:
     ServerCredentials serverCredentials(int index) const;
 
-    QString getServerDescription(const ServerConfig &server, const int index) const;
-
     bool serverHasInstalledContainers(const int serverIndex) const;
 
-    QVector<ServerConfig> m_servers;
+    QVector<amnezia::ServerDescription> m_descriptions;
 
-    int m_defaultServerIndex;
-    int m_processedServerIndex;
-
-    bool m_isAmneziaDnsEnabled = false;
+    int m_defaultServerIndex = -1;
+    int m_processedServerIndex = -1;
 };
 
 #endif // SERVERSMODEL_H

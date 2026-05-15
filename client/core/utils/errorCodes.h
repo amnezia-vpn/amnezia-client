@@ -71,10 +71,11 @@ namespace amnezia
 
         // import and install errors
         ImportInvalidConfigError = 900,
-        ImportBackupFileUseRestoreInstead = 903,
-        RestoreBackupInvalidError = 904,
         ImportOpenConfigError = 901,
         NoInstalledContainersError = 902,
+        ImportBackupFileUseRestoreInstead = 903,
+        RestoreBackupInvalidError = 904,
+        LegacyApiV1NotSupportedError = 905,
 
         // Android errors
         AndroidError = 1000,

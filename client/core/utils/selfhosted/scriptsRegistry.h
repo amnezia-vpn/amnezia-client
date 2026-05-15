@@ -43,7 +43,6 @@ enum ProtocolScriptType {
 
 enum ClientScriptType {
     // Client-side scripts
-    linux_installer,
     mac_installer
 };
 

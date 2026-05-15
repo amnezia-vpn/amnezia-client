@@ -139,7 +139,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                        InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {

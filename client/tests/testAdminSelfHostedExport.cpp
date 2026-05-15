@@ -8,7 +8,7 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/utils/constants/configKeys.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
@@ -117,8 +117,8 @@ private slots:
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged signal should NOT be emitted (default is already 0)");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() > 0, "Server should be added");
 
-        int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
-        auto exportResult = m_coreController->m_exportController->generateFullAccessConfig(serverIndex);
+        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
+        auto exportResult = m_coreController->m_exportController->generateFullAccessConfig(serverId);
         
         QVERIFY2(exportResult.errorCode == ErrorCode::NoError, "Export should succeed");
         QVERIFY2(!exportResult.config.isEmpty(), "Exported config should not be empty");

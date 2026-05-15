@@ -163,9 +163,9 @@ PageType {
                         ServersUiController.processedContainerIndex = listView.dockerContainer
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                         InstallController.install(listView.dockerContainer,
-                                                  listView.containerDefaultPort,
-                                                  listView.containerDefaultTransportProto,
-                                                  ServersUiController.processedIndex)
+                                                      listView.containerDefaultPort,
+                                                      listView.containerDefaultTransportProto,
+                                                      ServersUiController.getServerId(ServersUiController.processedServerIndex))
                     } else {
                         PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }

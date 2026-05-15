@@ -100,7 +100,7 @@ PageType {
     function mtProxyScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
-            InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
+            InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
         })
     }
 
@@ -172,7 +172,7 @@ PageType {
             return
         }
         isCheckingStatus = true
-        InstallController.refreshContainerStatus(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
     }
 
     // Block back navigation and Escape (via PageStart.isControlsDisabled) while SSH/update or diagnostics refresh runs.
@@ -200,7 +200,7 @@ PageType {
             }
             if (NetworkReachabilityController.hasInternetAccess) {
                 isCheckingStatus = true
-                InstallController.refreshContainerStatus(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
             }
         }
     }
@@ -276,7 +276,7 @@ PageType {
             root.savedPublicHost = MtProxyConfigModel.getPublicHost()
             if (status === 1) {
                 MtProxyConfigModel.setEnabled(true)
-                InstallController.fetchContainerSecret(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                InstallController.fetchContainerSecret(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
             } else if (status === 2) {
                 MtProxyConfigModel.setEnabled(false)
             }
@@ -730,7 +730,7 @@ PageType {
                         var noButtonText = qsTr("Cancel")
                         var yesButtonFunction = function () {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                            InstallController.removeContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
                         }
                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, function () {
                         })
@@ -815,9 +815,9 @@ PageType {
                             isUpdating = true
                             if (checked) {
                                 root.pendingUpdateAfterEnable = true
-                                InstallController.setContainerEnabled(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, true)
+                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, true)
                             } else {
-                                InstallController.setContainerEnabled(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, false)
+                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, false)
                             }
                         }
                     }
@@ -1628,7 +1628,7 @@ PageType {
                             enabled: !diagLoading
                             onClicked: {
                                 diagLoading = true
-                                InstallController.refreshContainerDiagnostics(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, parseInt(port))
+                                InstallController.refreshContainerDiagnostics(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, parseInt(port))
                             }
                         }
                     }
