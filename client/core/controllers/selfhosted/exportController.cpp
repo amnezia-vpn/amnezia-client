@@ -5,14 +5,13 @@
 
 #include "core/configurators/configuratorBase.h"
 #include "core/utils/selfhosted/sshSession.h"
-#include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
-#include "core/models/serverConfig.h"
+#include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
@@ -27,18 +26,20 @@ ExportController::ExportController(SecureServersRepository* serversRepository,
 {
 }
 
-ExportController::ExportResult ExportController::generateFullAccessConfig(int serverIndex)
+ExportController::ExportResult ExportController::generateFullAccessConfig(const QString &serverId)
 {
     ExportResult result;
 
-    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    serverConfig.visit([](auto& arg) {
-        for (auto it = arg.containers.begin(); it != arg.containers.end(); ++it) {
-            it.value().protocolConfig.clearClientConfig();
-        }
-    });
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    for (auto it = adminConfig->containers.begin(); it != adminConfig->containers.end(); ++it) {
+        it.value().protocolConfig.clearClientConfig();
+    }
 
-    QJsonObject serverJson = serverConfig.toJson();
+    QJsonObject serverJson = adminConfig->toJson();
     QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
@@ -47,13 +48,22 @@ ExportController::ExportResult ExportController::generateFullAccessConfig(int se
     return result;
 }
 
-ExportController::ExportResult ExportController::generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName)
+ExportController::ExportResult ExportController::generateConnectionConfig(const QString &serverId, int containerIndex, const QString &clientName)
 {
     ExportResult result;
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    const ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    ContainerConfig containerConfig = adminConfig->containerConfig(container);
 
     if (ContainerUtils::containerService(container) != ServiceType::Other) {
         SshSession sshSession;
@@ -74,35 +84,25 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
         
         QString clientId = newProtocolConfig.clientId();
         if (!clientId.isEmpty()) {
-            emit appendClientRequested(serverIndex, clientId, clientName, container);
+            emit appendClientRequested(serverId, clientId, clientName, container);
         }
     }
 
-    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    serverConfig.visit([container, containerConfig](auto& arg) {
-        arg.containers.clear();
-        arg.containers[container] = containerConfig;
-        arg.defaultContainer = container;
-    });
+    const QPair<QString, QString> dns = adminConfig->getDnsPair(m_appSettingsRepository->useAmneziaDns(),
+                                                               m_appSettingsRepository->primaryDns(),
+                                                               m_appSettingsRepository->secondaryDns());
 
-    if (serverConfig.isSelfHosted()) {
-        SelfHostedServerConfig* selfHosted = serverConfig.as<SelfHostedServerConfig>();
-        if (selfHosted) {
-            selfHosted->userName.reset();
-            selfHosted->password.reset();
-            selfHosted->port.reset();
-        }
-    }
+    adminConfig->containers.clear();
+    adminConfig->containers[container] = containerConfig;
+    adminConfig->defaultContainer = container;
+    adminConfig->userName.clear();
+    adminConfig->password.clear();
+    adminConfig->port = 0;
 
-    auto dns = serverConfig.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
-                                       m_appSettingsRepository->primaryDns(),
-                                       m_appSettingsRepository->secondaryDns());
-    serverConfig.visit([&dns](auto& arg) {
-        arg.dns1 = dns.first;
-        arg.dns2 = dns.second;
-    });
+    adminConfig->dns1 = dns.first;
+    adminConfig->dns2 = dns.second;
 
-    QJsonObject serverJson = serverConfig.toJson();
+    QJsonObject serverJson = adminConfig->toJson();
     QByteArray compressedConfig = QJsonDocument(serverJson).toJson();
     compressedConfig = qCompress(compressedConfig, 8);
     result.config = generateVpnUrl(compressedConfig);
@@ -111,7 +111,7 @@ ExportController::ExportResult ExportController::generateConnectionConfig(int se
     return result;
 }
 
-ExportController::NativeConfigResult ExportController::generateNativeConfig(int serverIndex, DockerContainer container,
+ExportController::NativeConfigResult ExportController::generateNativeConfig(const QString &serverId, DockerContainer container,
                                                                              const ContainerConfig &containerConfig,
                                                                              const QString &clientName)
 {
@@ -123,11 +123,19 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
 
     Proto protocol = ContainerUtils::defaultProtocol(container);
 
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-    ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-    auto dns = serverConfig.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
-                                       m_appSettingsRepository->primaryDns(),
-                                       m_appSettingsRepository->secondaryDns());
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    const ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    const QPair<QString, QString> dns = adminConfig->getDnsPair(m_appSettingsRepository->useAmneziaDns(),
+                                                                m_appSettingsRepository->primaryDns(),
+                                                                m_appSettingsRepository->secondaryDns());
 
     ContainerConfig modifiedContainerConfig = containerConfig;
     modifiedContainerConfig.container = container;
@@ -157,20 +165,25 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(int 
     if (protocol == Proto::OpenVpn || protocol == Proto::WireGuard || protocol == Proto::Awg || protocol == Proto::Xray) {
         QString clientId = newProtocolConfig.clientId();
         if (!clientId.isEmpty()) {
-            emit appendClientRequested(serverIndex, clientId, clientName, container);
+            emit appendClientRequested(serverId, clientId, clientName, container);
         }
     }
     return result;
 }
 
-ExportController::ExportResult ExportController::generateOpenVpnConfig(int serverIndex, const QString &clientName)
+ExportController::ExportResult ExportController::generateOpenVpnConfig(const QString &serverId, const QString &clientName)
 {
     ExportResult result;
 
     DockerContainer container = DockerContainer::OpenVpn;
-    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    ContainerConfig containerConfig = adminConfig->containerConfig(container);
 
-    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName);
+    auto nativeResult = generateNativeConfig(serverId, container, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -185,13 +198,18 @@ ExportController::ExportResult ExportController::generateOpenVpnConfig(int serve
     return result;
 }
 
-ExportController::ExportResult ExportController::generateWireGuardConfig(int serverIndex, const QString &clientName)
+ExportController::ExportResult ExportController::generateWireGuardConfig(const QString &serverId, const QString &clientName)
 {
     ExportResult result;
 
-    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::WireGuard);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    ContainerConfig containerConfig = adminConfig->containerConfig(DockerContainer::WireGuard);
 
-    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::WireGuard, containerConfig, clientName);
+    auto nativeResult = generateNativeConfig(serverId, DockerContainer::WireGuard, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -206,7 +224,7 @@ ExportController::ExportResult ExportController::generateWireGuardConfig(int ser
     return result;
 }
 
-ExportController::ExportResult ExportController::generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName)
+ExportController::ExportResult ExportController::generateAwgConfig(const QString &serverId, int containerIndex, const QString &clientName)
 {
     ExportResult result;
 
@@ -215,9 +233,14 @@ ExportController::ExportResult ExportController::generateAwgConfig(int serverInd
         result.errorCode = ErrorCode::InternalError;
         return result;
     }
-    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    ContainerConfig containerConfig = adminConfig->containerConfig(container);
 
-    auto nativeResult = generateNativeConfig(serverIndex, container, containerConfig, clientName);
+    auto nativeResult = generateNativeConfig(serverId, container, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -233,13 +256,18 @@ ExportController::ExportResult ExportController::generateAwgConfig(int serverInd
 }
 
 
-ExportController::ExportResult ExportController::generateXrayConfig(int serverIndex, const QString &clientName)
+ExportController::ExportResult ExportController::generateXrayConfig(const QString &serverId, const QString &clientName)
 {
     ExportResult result;
 
-    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, DockerContainer::Xray);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        result.errorCode = ErrorCode::InternalError;
+        return result;
+    }
+    ContainerConfig containerConfig = adminConfig->containerConfig(DockerContainer::Xray);
 
-    auto nativeResult = generateNativeConfig(serverIndex, DockerContainer::Xray, containerConfig, clientName);
+    auto nativeResult = generateNativeConfig(serverId, DockerContainer::Xray, containerConfig, clientName);
     if (nativeResult.errorCode != ErrorCode::NoError) {
         result.errorCode = nativeResult.errorCode;
         return result;
@@ -302,22 +330,22 @@ ExportController::ExportResult ExportController::generateXrayConfig(int serverIn
     return result;
 }
 
-void ExportController::updateClientManagementModel(int serverIndex, int containerIndex)
+void ExportController::updateClientManagementModel(const QString &serverId, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    emit updateClientsRequested(serverIndex, container);
+    emit updateClientsRequested(serverId, container);
 }
 
-void ExportController::revokeConfig(int row, int serverIndex, int containerIndex)
+void ExportController::revokeConfig(int row, const QString &serverId, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    emit revokeClientRequested(serverIndex, row, container);
+    emit revokeClientRequested(serverId, row, container);
 }
 
-void ExportController::renameClient(int row, const QString &clientName, int serverIndex, int containerIndex)
+void ExportController::renameClient(int row, const QString &clientName, const QString &serverId, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    emit renameClientRequested(serverIndex, row, clientName, container);
+    emit renameClientRequested(serverId, row, clientName, container);
 }
 
 QString ExportController::generateVpnUrl(const QByteArray &compressedConfig)

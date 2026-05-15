@@ -1,5 +1,7 @@
 #include "ipSplitTunnelingUiController.h"
 
+#include <QDebug>
+
 #include "systemController.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -55,7 +57,10 @@ void IpSplitTunnelingUiController::importSites(const QString &fileName, bool rep
 void IpSplitTunnelingUiController::exportSites(const QString &fileName)
 {
     QByteArray jsonData = m_ipSplitTunnelingController->exportSitesToJson();
-    SystemController::saveFile(fileName, QString::fromUtf8(jsonData));
+    if (!SystemController::saveFile(fileName, jsonData)) {
+        qInfo() << "IpSplitTunnelingUiController::exportSites: save or share was cancelled or failed";
+        return;
+    }
     emit finished(tr("Export completed"));
 }
 

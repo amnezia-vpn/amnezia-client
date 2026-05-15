@@ -3,6 +3,16 @@
 
 #include "installerBase.h"
 
+#include <QString>
+
+struct MtProxyContainerDiagnostics {
+    bool portReachable = false;
+    bool upstreamReachable = false;
+    int clientsConnected = -1;
+    QString lastConfigRefresh;
+    QString statsEndpoint;
+};
+
 class MtProxyInstaller : public InstallerBase {
 Q_OBJECT
 public:
@@ -15,6 +25,11 @@ public:
     static void uploadClientSettingsSnapshot(SshSession &sshSession, const amnezia::ServerCredentials &credentials,
                                              amnezia::DockerContainer container,
                                              const amnezia::ContainerConfig &config);
+
+    /// Shared diagnostics shell for MtProxy and Telemt service containers (legacy script paths).
+    static amnezia::ErrorCode queryDiagnostics(SshSession &sshSession, const amnezia::ServerCredentials &credentials,
+                                               amnezia::DockerContainer container, int listenPort,
+                                               MtProxyContainerDiagnostics &out);
 };
 
 #endif // MTPROXYINSTALLER_H

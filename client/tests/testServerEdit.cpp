@@ -5,7 +5,8 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
+#include "tests/testServerRepositoryHelpers.h"
 #include "ui/models/serversModel.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
@@ -39,7 +40,7 @@ private slots:
         m_settings->clearSettings();
         m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -52,20 +53,17 @@ private slots:
         QVERIFY2(importFinishedSpy.count() == 1, "Import should succeed");
 
         QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
-        QSignalSpy gatewayStacksExpandedSpy(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded);
 
-        ServerConfig serverConfig = m_coreController->m_serversController->getServerConfig(0);
-        serverConfig.visit([](auto& arg) {
-            arg.description = "Edited AWG Server";
-        });
-
-        m_coreController->m_serversController->editServer(0, serverConfig);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(0),
+                                            QStringLiteral("Edited AWG Server"));
 
         QVERIFY2(serverEditedSpy.count() == 1, "serverEdited signal should be emitted");
-        QVERIFY2(serverEditedSpy.at(0).at(0).toInt() == 0, "serverEdited should emit index 0");
+        QVERIFY2(serverEditedSpy.at(0).at(0).toString() == m_coreController->m_serversRepository->serverIdAt(0),
+                 "serverEdited should emit edited server id");
 
-        ServerConfig editedServer = m_coreController->m_serversRepository->server(0);
-        QString editedDesc = editedServer.description();
+        const QString editedDesc = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                                     m_coreController->m_serversRepository->serverIdAt(0));
         QVERIFY2(editedDesc == "Edited AWG Server", "Server description should be updated");
 
         if (m_coreController->m_serversModel) {
@@ -87,20 +85,16 @@ private slots:
 
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
-        ServerConfig defaultServerConfig = m_coreController->m_serversController->getServerConfig(1);
-        defaultServerConfig.visit([](auto& arg) {
-            arg.description = "Edited Default Server";
-        });
-        m_coreController->m_serversController->editServer(1, defaultServerConfig);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(1),
+                                            QStringLiteral("Edited Default Server"));
 
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted when editing default server");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default server index should remain 1");
 
-        ServerConfig nonDefaultServerConfig = m_coreController->m_serversController->getServerConfig(0);
-        nonDefaultServerConfig.visit([](auto& arg) {
-            arg.description = "Edited Non-Default Server";
-        });
-        m_coreController->m_serversController->editServer(0, nonDefaultServerConfig);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(0),
+                                            QStringLiteral("Edited Non-Default Server"));
 
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted when editing non-default server");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default server index should remain 1");
