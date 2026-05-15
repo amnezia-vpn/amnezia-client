@@ -33,7 +33,6 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
-#include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
@@ -129,15 +128,27 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     return startupContainerWorker(credentials, container, config, sshSession);
 }
 
-ErrorCode InstallController::updateContainer(int serverIndex, DockerContainer container, const ContainerConfig &oldConfig,
+ErrorCode InstallController::updateContainer(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
                                              ContainerConfig &newConfig)
 {
     if (!isUpdateDockerContainerRequired(container, oldConfig, newConfig)) {
-        m_serversRepository->setContainerConfig(serverIndex, container, newConfig);
+        auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!adminConfig.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        adminConfig->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
         return ErrorCode::NoError;
     }
 
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession(this);
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
@@ -154,42 +165,51 @@ ErrorCode InstallController::updateContainer(int serverIndex, DockerContainer co
     }
 
     if (errorCode == ErrorCode::NoError) {
-        clearCachedProfile(serverIndex, container);
-        m_serversRepository->setContainerConfig(serverIndex, container, newConfig);
+        clearCachedProfile(serverId, container);
+        adminConfig->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
 }
 
-void InstallController::clearCachedProfile(int serverIndex, DockerContainer container)
+void InstallController::clearCachedProfile(const QString &serverId, DockerContainer container)
 {
     if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return;
     }
 
-    ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
-
-    m_serversRepository->clearLastConnectionConfig(serverIndex, container);
-
-    emit clientRevocationRequested(serverIndex, containerConfigModel, container);
-}
-
-ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
-{
-    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-
-    if (serverConfigModel.isApiConfig()) {
-        return ErrorCode::NoError;
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return;
     }
 
-    DockerContainer container = serverConfigModel.defaultContainer();
+    adminConfig->clearCachedClientProfile(container);
+    const ContainerConfig containerConfigModel = adminConfig->containerConfig(container);
+
+    m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
+
+    emit clientRevocationRequested(serverId, containerConfigModel, container);
+}
+
+ErrorCode InstallController::validateAndPrepareConfig(const QString &serverId)
+{
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+
+    DockerContainer container = adminConfig->defaultContainer;
 
     if (container == DockerContainer::None) {
         return ErrorCode::NoInstalledContainersError;
     }
 
-    ContainerConfig containerConfig = m_serversRepository->containerConfig(serverIndex, container);
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    ContainerConfig containerConfig = adminConfig->containerConfig(container);
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession;
 
     auto isProtocolConfigExists = [](const ContainerConfig &cfg) {
@@ -198,20 +218,21 @@ ErrorCode InstallController::validateAndPrepareConfig(int serverIndex)
 
     if (!isProtocolConfigExists(containerConfig)) {
         QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
-        ErrorCode errorCode = processContainerForAdmin(container, containerConfig, credentials, sshSession, serverIndex, clientName);
+        ErrorCode errorCode = processContainerForAdmin(container, containerConfig, credentials, sshSession, serverId, clientName);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
-        m_serversRepository->setContainerConfig(serverIndex, container, containerConfig);
+        adminConfig->updateContainerConfig(container, containerConfig);
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return ErrorCode::NoError;
 }
 
-void InstallController::validateConfig(int serverIndex)
+void InstallController::validateConfig(const QString &serverId)
 {
-    QFuture<ErrorCode> future = QtConcurrent::run([this, serverIndex]() {
-        return validateAndPrepareConfig(serverIndex);
+    QFuture<ErrorCode> future = QtConcurrent::run([this, serverId]() {
+        return validateAndPrepareConfig(serverId);
     });
 
     auto *watcher = new QFutureWatcher<ErrorCode>(this);
@@ -228,6 +249,21 @@ void InstallController::validateConfig(int serverIndex)
         emit configValidated(false);
     });
     watcher->setFuture(future);
+}
+
+void InstallController::addEmptyServer(const ServerCredentials &credentials)
+{
+    SelfHostedAdminServerConfig serverConfig;
+    serverConfig.hostName = credentials.hostName;
+    serverConfig.userName = credentials.userName;
+    serverConfig.password = credentials.secretData;
+    serverConfig.port = credentials.port;
+    serverConfig.description = m_appSettingsRepository->nextAvailableServerName();
+    serverConfig.displayName = serverConfig.description.isEmpty() ? serverConfig.hostName : serverConfig.description;
+    serverConfig.defaultContainer = DockerContainer::None;
+
+    m_serversRepository->addServer(QString(), serverConfig.toJson(),
+                                    serverConfigUtils::ConfigType::SelfHostedAdmin);
 }
 
 ErrorCode InstallController::prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig, SshSession &sshSession)
@@ -257,7 +293,7 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     return ErrorCode::NoError;
 }
 
-void InstallController::adminAppendRequested(int serverIndex, DockerContainer container,
+void InstallController::adminAppendRequested(const QString &serverId, DockerContainer container,
                                              const ContainerConfig &containerConfig, const QString &clientName)
 {
     if (ContainerUtils::containerService(container) == ServiceType::Other
@@ -266,13 +302,13 @@ void InstallController::adminAppendRequested(int serverIndex, DockerContainer co
     }
     QString clientId = containerConfig.protocolConfig.clientId();
     if (!clientId.isEmpty()) {
-        emit clientAppendRequested(serverIndex, clientId, clientName, container);
+        emit clientAppendRequested(serverId, clientId, clientName, container);
     }
 }
 
 ErrorCode InstallController::processContainerForAdmin(DockerContainer container, ContainerConfig &containerConfig,
                                                       const ServerCredentials &credentials, SshSession &sshSession,
-                                                      int serverIndex, const QString &clientName)
+                                                      const QString &serverId, const QString &clientName)
 {
     if (ContainerUtils::isSupportedByCurrentPlatform(container)) {
         ErrorCode errorCode = prepareContainerConfig(container, credentials, containerConfig, sshSession);
@@ -280,7 +316,7 @@ ErrorCode InstallController::processContainerForAdmin(DockerContainer container,
             return errorCode;
         }
     }
-    adminAppendRequested(serverIndex, container, containerConfig, clientName);
+    adminAppendRequested(serverId, container, containerConfig, clientName);
     return ErrorCode::NoError;
 }
 
@@ -688,9 +724,16 @@ ErrorCode InstallController::setupServerFirewall(const ServerCredentials &creden
                                             amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())));
 }
 
-ErrorCode InstallController::rebootServer(int serverIndex)
+ErrorCode InstallController::rebootServer(const QString &serverId)
 {
-    auto credentials = m_serversRepository->serverCredentials(serverIndex);
+    const auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession(this);
 
     QString script = QString("sudo reboot");
@@ -709,27 +752,38 @@ ErrorCode InstallController::rebootServer(int serverIndex)
     return sshSession.runScript(credentials, script, cbReadStdOut, cbReadStdErr);
 }
 
-ErrorCode InstallController::removeAllContainers(int serverIndex)
+ErrorCode InstallController::removeAllContainers(const QString &serverId)
 {
-    auto credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession(this);
     ErrorCode errorCode = sshSession.runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
 
     if (errorCode == ErrorCode::NoError) {
-        ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-        serverConfigModel.visit([](auto& arg) {
-            arg.containers.clear();
-            arg.defaultContainer = DockerContainer::None;
-        });
-        m_serversRepository->editServer(serverIndex, serverConfigModel);
+        adminConfig->containers.clear();
+        adminConfig->defaultContainer = DockerContainer::None;
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
 }
 
-ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer container)
+ErrorCode InstallController::removeContainer(const QString &serverId, DockerContainer container)
 {
-    auto credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession(this);
     ErrorCode errorCode = sshSession.runScript(
             credentials,
@@ -737,11 +791,10 @@ ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer co
                                             amnezia::genBaseVars(credentials, container, QString(), QString())));
 
     if (errorCode == ErrorCode::NoError) {
-        ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containers = serverConfigModel.containers();
+        QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
         containers.remove(container);
-        
-        DockerContainer defaultContainer = serverConfigModel.defaultContainer();
+
+        DockerContainer defaultContainer = adminConfig->defaultContainer;
         if (defaultContainer == container) {
             if (containers.isEmpty()) {
                 defaultContainer = DockerContainer::None;
@@ -749,12 +802,10 @@ ErrorCode InstallController::removeContainer(int serverIndex, DockerContainer co
                 defaultContainer = containers.begin().key();
             }
         }
-        
-        serverConfigModel.visit([&containers, defaultContainer](auto& arg) {
-            arg.containers = containers;
-            arg.defaultContainer = defaultContainer;
-        });
-        m_serversRepository->editServer(serverIndex, serverConfigModel);
+
+        adminConfig->containers = containers;
+        adminConfig->defaultContainer = defaultContainer;
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
@@ -815,9 +866,16 @@ bool InstallController::isUpdateDockerContainerRequired(DockerContainer containe
     return true;
 }
 
-ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
+ErrorCode InstallController::scanServerForInstalledContainers(const QString &serverId)
 {
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession(this);
 
     QMap<DockerContainer, ContainerConfig> installedContainers;
@@ -826,8 +884,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
         return errorCode;
     }
 
-    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containers = serverConfigModel.containers();
+    QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
     bool hasNewContainers = false;
 
     QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
@@ -835,29 +892,25 @@ ErrorCode InstallController::scanServerForInstalledContainers(int serverIndex)
         if (!containers.contains(iterator.key())) {
             ContainerConfig containerConfig = iterator.value();
             errorCode = processContainerForAdmin(iterator.key(), containerConfig, credentials, sshSession,
-                                                 serverIndex, clientName);
+                                                 serverId, clientName);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
             containers.insert(iterator.key(), containerConfig);
             hasNewContainers = true;
 
-            DockerContainer defaultContainer = serverConfigModel.defaultContainer();
+            DockerContainer defaultContainer = adminConfig->defaultContainer;
             if (defaultContainer == DockerContainer::None
                 && ContainerUtils::containerService(iterator.key()) != ServiceType::Other
                 && ContainerUtils::isSupportedByCurrentPlatform(iterator.key())) {
-                serverConfigModel.visit([iterator](auto& arg) {
-                    arg.defaultContainer = iterator.key();
-                });
+                adminConfig->defaultContainer = iterator.key();
             }
         }
     }
 
     if (hasNewContainers) {
-        serverConfigModel.visit([&containers](auto& arg) {
-            arg.containers = containers;
-        });
-        m_serversRepository->editServer(serverIndex, serverConfigModel);
+        adminConfig->containers = containers;
+        m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return ErrorCode::NoError;
@@ -899,7 +952,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
         preparedContainers.insert(container, containerConfig);
     }
 
-    SelfHostedServerConfig serverConfig;
+    SelfHostedAdminServerConfig serverConfig;
     serverConfig.hostName = credentials.hostName;
     serverConfig.userName = credentials.userName;
     serverConfig.password = credentials.secretData;
@@ -912,21 +965,29 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
 
     serverConfig.defaultContainer = container;
 
-    m_serversRepository->addServer(ServerConfig(serverConfig));
+    serverConfig.displayName = serverConfig.description.isEmpty() ? serverConfig.hostName : serverConfig.description;
 
-    int serverIndex = m_serversRepository->serversCount() - 1;
+    const QString newServerId = m_serversRepository->addServer(QString(), serverConfig.toJson(),
+                                                               serverConfigUtils::ConfigType::SelfHostedAdmin);
     QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
     for (auto iterator = preparedContainers.begin(); iterator != preparedContainers.end(); iterator++) {
-        adminAppendRequested(serverIndex, iterator.key(), iterator.value(), clientName);
+        adminAppendRequested(newServerId, iterator.key(), iterator.value(), clientName);
     }
 
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::installContainer(int serverIndex, DockerContainer container, int port,
+ErrorCode InstallController::installContainer(const QString &serverId, DockerContainer container, int port,
                                               TransportProto transportProto, bool &wasContainerInstalled)
 {
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
     SshSession sshSession(this);
     
     QMap<DockerContainer, ContainerConfig> installedContainers;
@@ -949,15 +1010,17 @@ ErrorCode InstallController::installContainer(int serverIndex, DockerContainer c
 
     QString clientName = QString("Admin [%1]").arg(QSysInfo::prettyProductName());
     for (auto iterator = installedContainers.begin(); iterator != installedContainers.end(); iterator++) {
-        ContainerConfig existingConfigModel = m_serversRepository->containerConfig(serverIndex, iterator.key());
+        ContainerConfig existingConfigModel = adminConfig->containerConfig(iterator.key());
         if (existingConfigModel.container == DockerContainer::None) {
             ContainerConfig containerConfig = iterator.value();
             errorCode = processContainerForAdmin(iterator.key(), containerConfig, credentials, sshSession,
-                                                 serverIndex, clientName);
+                                                 serverId, clientName);
             if (errorCode != ErrorCode::NoError) {
                 return errorCode;
             }
-            m_serversRepository->setContainerConfig(serverIndex, iterator.key(), containerConfig);
+            adminConfig->updateContainerConfig(iterator.key(), containerConfig);
+            m_serversRepository->editServer(serverId, adminConfig->toJson(),
+                                            serverConfigUtils::ConfigType::SelfHostedAdmin);
         }
     }
 
@@ -993,7 +1056,15 @@ bool InstallController::isServerAlreadyExists(const ServerCredentials &credentia
 {
     int serversCount = m_serversRepository->serversCount();
     for (int i = 0; i < serversCount; i++) {
-        const ServerCredentials existingCredentials = m_serversRepository->serverCredentials(i);
+        const QString existingServerId = m_serversRepository->serverIdAt(i);
+        const auto adminConfig = m_serversRepository->selfHostedAdminConfig(existingServerId);
+        if (!adminConfig.has_value()) {
+            continue;
+        }
+        const ServerCredentials existingCredentials = adminConfig->credentials();
+        if (!existingCredentials.isValid()) {
+            continue;
+        }
         if (credentials.hostName == existingCredentials.hostName && credentials.port == existingCredentials.port) {
             existingServerIndex = i;
             return true;

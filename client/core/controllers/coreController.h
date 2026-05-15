@@ -84,7 +84,6 @@ class TestDefaultServerChange;
 class TestServerEdgeCases;
 class TestSignalOrder;
 class TestServersModelSync;
-class TestGatewayStacks;
 class TestComplexOperations;
 class TestSettingsSignals;
 class TestUiServersModelAndController;
@@ -101,7 +100,6 @@ class CoreController : public QObject
     friend class TestServerEdgeCases;
     friend class TestSignalOrder;
     friend class TestServersModelSync;
-    friend class TestGatewayStacks;
     friend class TestComplexOperations;
     friend class TestSettingsSignals;
     friend class TestUiServersModelAndController;

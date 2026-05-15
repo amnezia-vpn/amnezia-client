@@ -119,13 +119,13 @@ PageType {
 
                     Component.onCompleted: {
                         serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
-                                    proxyServersModel.mapFromSource(ServersUiController.defaultIndex) : 0
+                                    proxyServersModel.mapFromSource(ServersUiController.defaultServerIndex) : 0
                         serverSelectorListView.triggerCurrentItem()
                     }
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersUiController.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.setProcessedServerIndex(proxyServersModel.mapToSource(selectedIndex))
                     }
                 }
             }
@@ -155,7 +155,7 @@ PageType {
                         ExportController.exportErrorOccurred(qsTr("Access error!"))
                         return
                     } else {
-                        ExportController.generateFullAccessConfig(ServersUiController.processedIndex)
+                        ExportController.generateFullAccessConfig(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                     }
 
                     PageController.showBusyIndicator(false)

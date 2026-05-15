@@ -1,51 +1,93 @@
 #include "newsController.h"
 
 #include "core/controllers/gatewayController.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/repositories/secureServersRepository.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
-#include "core/utils/constants/configKeys.h"
 #include <QtConcurrent/QtConcurrent>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSet>
 #include <QSharedPointer>
 
 using namespace amnezia;
 
-NewsController::NewsController(SecureAppSettingsRepository* appSettingsRepository,
-                               ServersController* serversController)
-    : m_appSettingsRepository(appSettingsRepository), m_serversController(serversController)
+NewsController::NewsController(SecureAppSettingsRepository *appSettingsRepository,
+                               SecureServersRepository *serversRepository)
+    : m_appSettingsRepository(appSettingsRepository),
+      m_serversRepository(serversRepository)
 {
+}
+
+QJsonObject NewsController::getServicesList() const
+{
+    if (!m_serversRepository) {
+        return {};
+    }
+    QSet<QString> userCountryCodes;
+    QSet<QString> serviceTypes;
+    const QVector<QString> ids = m_serversRepository->orderedServerIds();
+    for (const QString &id : ids) {
+        const auto apiV2 = m_serversRepository->apiV2Config(id);
+        if (!apiV2.has_value()) {
+            continue;
+        }
+        if (!apiV2->apiConfig.userCountryCode.isEmpty()) {
+            userCountryCodes.insert(apiV2->apiConfig.userCountryCode);
+        }
+        const QString serviceType = apiV2->serviceType();
+        if (!serviceType.isEmpty()) {
+            serviceTypes.insert(serviceType);
+        }
+    }
+    if (userCountryCodes.isEmpty() && serviceTypes.isEmpty()) {
+        return {};
+    }
+    QJsonObject json;
+
+    QJsonArray userCountryCodesArray;
+    for (const QString &code : userCountryCodes) {
+        userCountryCodesArray.append(code);
+    }
+    json[apiDefs::key::userCountryCode] = userCountryCodesArray;
+
+    QJsonArray serviceTypesArray;
+    for (const QString &type : serviceTypes) {
+        serviceTypesArray.append(type);
+    }
+    json[apiDefs::key::serviceType] = serviceTypesArray;
+
+    return json;
 }
 
 QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
 {
-    if (!m_serversController) {
-        qWarning() << "ServersController is null, skip fetchNews";
+    if (!m_serversRepository) {
+        qWarning() << "SecureServersRepository is null, skip fetchNews";
         return QtFuture::makeReadyFuture(qMakePair(ErrorCode::InternalError, QJsonArray()));
     }
-    
-    const auto stacks = m_serversController->gatewayStacks();
-    if (stacks.isEmpty()) {
+
+    const QJsonObject services = getServicesList();
+    if (services.isEmpty()) {
         qDebug() << "No Gateway stacks, skip fetchNews";
         return QtFuture::makeReadyFuture(qMakePair(ErrorCode::NoError, QJsonArray()));
     }
 
     auto gatewayController = QSharedPointer<GatewayController>::create(
-        m_appSettingsRepository->getGatewayEndpoint(),
-        m_appSettingsRepository->isDevGatewayEnv(),
-        apiDefs::requestTimeoutMsecs,
-        m_appSettingsRepository->isStrictKillSwitchEnabled());
-    
+            m_appSettingsRepository->getGatewayEndpoint(),
+            m_appSettingsRepository->isDevGatewayEnv(),
+            apiDefs::requestTimeoutMsecs,
+            m_appSettingsRepository->isStrictKillSwitchEnabled());
+
     QJsonObject payload;
     payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());
 
-    const QJsonObject stacksJson = stacks.toJson();
-    if (stacksJson.contains(apiDefs::key::userCountryCode)) {
-        payload.insert(apiDefs::key::userCountryCode, stacksJson.value(apiDefs::key::userCountryCode));
+    if (services.contains(apiDefs::key::userCountryCode)) {
+        payload.insert(apiDefs::key::userCountryCode, services.value(apiDefs::key::userCountryCode));
     }
-    if (stacksJson.contains(apiDefs::key::serviceType)) {
-        payload.insert(apiDefs::key::serviceType, stacksJson.value(apiDefs::key::serviceType));
+    if (services.contains(apiDefs::key::serviceType)) {
+        payload.insert(apiDefs::key::serviceType, services.value(apiDefs::key::serviceType));
     }
 
     auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
@@ -69,4 +111,3 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
         return qMakePair(ErrorCode::NoError, newsArray);
     });
 }
-

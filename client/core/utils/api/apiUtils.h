@@ -4,7 +4,7 @@
 #include <QNetworkReply>
 #include <QObject>
 
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/errorCodes.h"
@@ -13,16 +13,11 @@
 
 namespace apiUtils
 {
-    bool isServerFromApi(const QJsonObject &serverConfigObject);
-
     bool isSubscriptionExpired(const QString &subscriptionEndDate);
 
     bool isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays = 30);
 
     bool isPremiumServer(const QJsonObject &serverConfigObject);
-
-    apiDefs::ConfigType getConfigType(const QJsonObject &serverConfigObject);
-    apiDefs::ConfigSource getConfigSource(const QJsonObject &serverConfigObject);
 
     amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                const QNetworkReply::NetworkError &replyError, const int httpStatusCode,

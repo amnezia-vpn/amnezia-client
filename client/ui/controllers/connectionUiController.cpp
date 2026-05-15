@@ -25,9 +25,12 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
 
 void ConnectionUiController::openConnection()
 {
-    int serverIndex = m_serversController->getDefaultServerIndex();
+    const QString serverId = m_serversController->getDefaultServerId();
+    if (serverId.isEmpty()) {
+        return;
+    }
 
-    ErrorCode errorCode = m_connectionController->openConnection(serverIndex);
+    ErrorCode errorCode = m_connectionController->openConnection(serverId);
 
     if (errorCode != ErrorCode::NoError) {
         emit connectionErrorOccurred(errorCode);
@@ -98,16 +101,6 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
     }
     }
     emit connectionStateChanged();
-}
-
-void ConnectionUiController::onCurrentContainerUpdated()
-{
-    if (m_isConnected || m_isConnectionInProgress) {
-        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnection..."));
-        openConnection();
-    } else {
-        emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));
-    }
 }
 
 void ConnectionUiController::onTranslationsUpdated()

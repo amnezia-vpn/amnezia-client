@@ -32,6 +32,7 @@
 
 #include "linuxfirewall.h"
 #include "logger.h"
+#include "xray_defs.h"
 #include <QProcess>
 
 #define BRAND_CODE "amn"
@@ -282,6 +283,10 @@ void LinuxFirewall::install()
                                                             QStringLiteral("-o tun2+ -j ACCEPT"),
                                                         });
 
+    installAnchor(Both, QStringLiteral("130.allowMarkedXray"), {
+                                                             QStringLiteral("-m mark --mark %1 -j ACCEPT").arg(amnezia::xray::xrayTrafficMark),
+                                                         });
+
     installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
 
     installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
@@ -358,6 +363,7 @@ void LinuxFirewall::uninstall()
     uninstallAnchor(IPv6, QStringLiteral("250.blockIPv6"));
     uninstallAnchor(Both, QStringLiteral("200.allowVPN"));
     uninstallAnchor(IPv4, QStringLiteral("120.blockNets"));
+    uninstallAnchor(Both, QStringLiteral("130.allowMarkedXray"));
     uninstallAnchor(IPv4, QStringLiteral("110.allowNets"));
     uninstallAnchor(Both, QStringLiteral("100.blockAll"));
 
