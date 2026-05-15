@@ -679,6 +679,27 @@ void SubscriptionController::removeApiConfig(const QString &serverId)
                                     serverConfigUtils::configTypeFromJson(apiV2->toJson()));
 }
 
+bool SubscriptionController::removeServer(const QString &serverId)
+{
+    if (serverId.isEmpty()) {
+        return false;
+    }
+
+    if (!m_serversRepository->apiV2Config(serverId).has_value()) {
+        qWarning().noquote() << "SubscriptionController::removeServer: not an Api V2 server, id" << serverId;
+        return false;
+    }
+
+    const ErrorCode revokeError = deactivateDevice(serverId);
+    if (revokeError != ErrorCode::NoError && revokeError != ErrorCode::ApiNotFoundError) {
+        qWarning().noquote() << "SubscriptionController::removeServer: deactivateDevice failed (error"
+                             << static_cast<int>(revokeError) << "); removing locally anyway.";
+    }
+
+    m_serversRepository->removeServer(serverId);
+    return true;
+}
+
 bool SubscriptionController::isApiKeyExpired(const QString &serverId) const
 {
     auto apiV2 = m_serversRepository->apiV2Config(serverId);

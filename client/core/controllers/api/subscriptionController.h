@@ -74,6 +74,8 @@ public:
 
     void removeApiConfig(const QString &serverId);
 
+    bool removeServer(const QString &serverId);
+
     void setCurrentProtocol(const QString &serverId, const QString &protocolName);
     bool isVlessProtocol(const QString &serverId) const;
 

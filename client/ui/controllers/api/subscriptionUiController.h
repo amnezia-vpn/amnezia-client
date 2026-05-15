@@ -58,6 +58,8 @@ public slots:
 
     void removeApiConfig(const QString &serverId);
 
+    void removeServer(const QString &serverId);
+
     bool getAccountInfo(const QString &serverId, bool reload);
     void getRenewalLink(const QString &serverId);
 
@@ -78,6 +80,7 @@ signals:
     void subscriptionRefreshNeeded();
 
     void apiConfigRemoved(const QString &message);
+    void apiServerRemoved(const QString &message);
 
     void vpnKeyExportReady();
 

@@ -506,7 +506,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                            SubscriptionUiController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                             PageController.showBusyIndicator(false)
                         }
                     }

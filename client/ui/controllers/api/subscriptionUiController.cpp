@@ -406,6 +406,15 @@ void SubscriptionUiController::removeApiConfig(const QString &serverId)
     emit apiConfigRemoved(tr("Api config removed"));
 }
 
+void SubscriptionUiController::removeServer(const QString &serverId)
+{
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
+    if (!m_subscriptionController->removeServer(serverId)) {
+        return;
+    }
+    emit apiServerRemoved(tr("Server '%1' was removed").arg(serverName));
+}
+
 
 QList<QString> SubscriptionUiController::getQrCodes()
 {

@@ -224,6 +224,16 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
+        function onApiServerRemoved(message) {
+            if (!ServersModel.getServersCount()) {
+                PageController.goToPageHome()
+            } else {
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
+            }
+            PageController.showNotificationMessage(message)
+        }
+
         function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             if (!ConnectionController.isConnected) {
                 if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
