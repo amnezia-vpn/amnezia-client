@@ -318,7 +318,7 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 
         const serverConfigUtils::ConfigType kind = m_coreController->m_serversRepository->serverKind(serverId);
 
-        if (serverConfigUtils::isApiV2Subscription(kind)) {
+        if (serverConfigUtils::isApiV2Subscription(kind) || serverConfigUtils::isLegacyApiSubscription(kind)) {
             m_coreController->m_subscriptionUiController->validateConfig();
         } else {
             m_coreController->m_installUiController->validateConfig();
