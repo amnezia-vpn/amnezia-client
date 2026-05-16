@@ -194,7 +194,11 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
         SOCKADDR_INET destination {};
         destination.si_family = AF_INET6;
         const Q_IPV6ADDR ipv6 = dst.toIPv6Address();
-        memcpy(&destination.Ipv6.sin6_addr, &ipv6, sizeof(ipv6));
+        static_assert(sizeof(destination.Ipv6.sin6_addr.s6_addr) == sizeof(ipv6),
+                      "IPv6 address buffers must have matching sizes");
+        for (size_t i = 0; i < sizeof(ipv6); ++i) {
+            destination.Ipv6.sin6_addr.s6_addr[i] = ipv6[i];
+        }
 
         MIB_IPFORWARD_ROW2 routeInfo {};
         auto result = GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &routeInfo, nullptr);

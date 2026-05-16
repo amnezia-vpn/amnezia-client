@@ -174,7 +174,11 @@ bool IPUtilsMacos::addIP6AddressToDevice(const InterfaceConfig& config) {
   }
   const IPAddress interfaceAddress(parsedAddr.first, parsedAddr.second >= 0 ? parsedAddr.second : 128);
   const Q_IPV6ADDR rawPrefixMask = interfaceAddress.netmask().toIPv6Address();
-  memcpy(&ifr6.ifra_prefixmask.sin6_addr, &rawPrefixMask, sizeof(rawPrefixMask));
+  static_assert(sizeof(ifr6.ifra_prefixmask.sin6_addr.s6_addr) == sizeof(rawPrefixMask),
+                "IPv6 prefix mask buffers must have matching sizes");
+  for (size_t i = 0; i < sizeof(rawPrefixMask); ++i) {
+    ifr6.ifra_prefixmask.sin6_addr.s6_addr[i] = rawPrefixMask[i];
+  }
   QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
   char* deviceAddr = _deviceAddr.data();
   inet_pton(AF_INET6, deviceAddr, &ifr6.ifra_addr.sin6_addr);
