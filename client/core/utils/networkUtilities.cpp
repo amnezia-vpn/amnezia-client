@@ -1,6 +1,7 @@
 #include "networkUtilities.h"
 #include <QtNetwork/qnetworkinterface.h>
 #include <cstddef>
+#include <cstring>
 
 #ifdef Q_OS_WIN
     #include <windows.h>
@@ -159,19 +160,29 @@ bool NetworkUtilities::checkIPv4Format(const QString &ip)
 
 bool NetworkUtilities::checkIpSubnetFormat(const QString &ip)
 {
-    if (!ip.contains("/"))
-        return checkIPv4Format(ip);
+    QString normalized = ip.trimmed();
+    if (normalized.startsWith("[") && normalized.endsWith("]")) {
+        normalized = normalized.mid(1, normalized.size() - 2);
+    }
 
-    QStringList parts = ip.split("/");
-    if (parts.size() != 2)
-        return false;
+    if (!normalized.contains("/")) {
+        const QHostAddress address(normalized);
+        return address.protocol() == QAbstractSocket::IPv4Protocol ||
+               address.protocol() == QAbstractSocket::IPv6Protocol;
+    }
 
-    bool ok;
-    int subnet = parts.at(1).toInt(&ok);
-    if (subnet >= 0 && subnet <= 32 && ok)
-        return checkIPv4Format(parts.at(0));
-    else
+    const auto subnet = QHostAddress::parseSubnet(normalized);
+    if (subnet.first.isNull()) {
         return false;
+    }
+
+    if (subnet.first.protocol() == QAbstractSocket::IPv4Protocol) {
+        return subnet.second >= 0 && subnet.second <= 32;
+    }
+    if (subnet.first.protocol() == QAbstractSocket::IPv6Protocol) {
+        return subnet.second >= 0 && subnet.second <= 128;
+    }
+    return false;
 }
 
 // static
@@ -179,6 +190,25 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
 #ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
+    if (dst.protocol() == QAbstractSocket::IPv6Protocol) {
+        SOCKADDR_INET destination {};
+        destination.si_family = AF_INET6;
+        const Q_IPV6ADDR ipv6 = dst.toIPv6Address();
+        memcpy(&destination.Ipv6.sin6_addr, &ipv6, sizeof(ipv6));
+
+        MIB_IPFORWARD_ROW2 routeInfo {};
+        auto result = GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &routeInfo, nullptr);
+        if (result != NO_ERROR) {
+            return -1;
+        }
+        auto adapter = QNetworkInterface::interfaceFromIndex(routeInfo.InterfaceIndex);
+        qDebug() << "Internet Adapter:" << adapter.name();
+        return routeInfo.InterfaceIndex;
+    }
+    if (dst.protocol() != QAbstractSocket::IPv4Protocol) {
+        return -1;
+    }
+
     quint32 ipBigEndian;
     quint32 ip = dst.toIPv4Address();
     qToBigEndian(ip, &ipBigEndian);

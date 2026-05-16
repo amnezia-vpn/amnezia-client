@@ -11,17 +11,27 @@
 #include <netinet/in_var.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <cstring>
 
+#include <QAbstractSocket>
 #include <QHostAddress>
 #include <QScopeGuard>
 
 #include "daemon/wireguardutils.h"
+#include "ipaddress.h"
 #include "leakdetector.h"
 #include "logger.h"
 #include "macosdaemon.h"
 
 namespace {
 Logger logger("IPUtilsMacos");
+
+QPair<QHostAddress, int> parseInterfaceAddress(const QString &value, int defaultPrefixLength) {
+  if (value.contains("/")) {
+    return QHostAddress::parseSubnet(value);
+  }
+  return { QHostAddress(value), defaultPrefixLength };
+}
 }
 
 IPUtilsMacos::IPUtilsMacos(QObject* parent) : IPUtils(parent) {
@@ -35,7 +45,14 @@ IPUtilsMacos::~IPUtilsMacos() {
 }
 
 bool IPUtilsMacos::addInterfaceIPs(const InterfaceConfig& config) {
-  return addIP4AddressToDevice(config) && addIP6AddressToDevice(config);
+  bool ret = true;
+  if (!config.m_deviceIpv4Address.isEmpty()) {
+    ret = addIP4AddressToDevice(config) && ret;
+  }
+  if (!config.m_deviceIpv6Address.isEmpty()) {
+    ret = addIP6AddressToDevice(config) && ret;
+  }
+  return ret;
 }
 
 bool IPUtilsMacos::setMTUAndUp(const InterfaceConfig& config) {
@@ -93,17 +110,23 @@ bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
 
   // Get the device address to add to interface
   QPair<QHostAddress, int> parsedAddr =
-      QHostAddress::parseSubnet(config.m_deviceIpv4Address);
+      parseInterfaceAddress(config.m_deviceIpv4Address, 32);
+  if (parsedAddr.first.protocol() != QAbstractSocket::IPv4Protocol) {
+    logger.error() << "Invalid IPv4 device address:" << config.m_deviceIpv4Address;
+    return false;
+  }
   QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
   char* deviceAddr = _deviceAddr.data();
   ifrAddr->sin_family = AF_INET;
   ifrAddr->sin_len = sizeof(struct sockaddr_in);
   inet_pton(AF_INET, deviceAddr, &ifrAddr->sin_addr);
 
-  // Set the netmask to /32
+  const IPAddress interfaceAddress(parsedAddr.first, parsedAddr.second >= 0 ? parsedAddr.second : 32);
+  QByteArray _deviceMask = interfaceAddress.netmask().toString().toLocal8Bit();
+  char* deviceMask = _deviceMask.data();
   ifrMask->sin_family = AF_INET;
   ifrMask->sin_len = sizeof(struct sockaddr_in);
-  memset(&ifrMask->sin_addr, 0xff, sizeof(ifrMask->sin_addr));
+  inet_pton(AF_INET, deviceMask, &ifrMask->sin_addr);
 
   // Set the broadcast address.
   ifrBcast->sin_family = AF_INET;
@@ -142,11 +165,16 @@ bool IPUtilsMacos::addIP6AddressToDevice(const InterfaceConfig& config) {
   ifr6.ifra_lifetime.ia6t_vltime = ifr6.ifra_lifetime.ia6t_pltime = 0xffffffff;
   ifr6.ifra_prefixmask.sin6_family = AF_INET6;
   ifr6.ifra_prefixmask.sin6_len = sizeof(ifr6.ifra_prefixmask);
-  memset(&ifr6.ifra_prefixmask.sin6_addr, 0xff, sizeof(struct in6_addr));
-
   // Get the device address to add to interface
   QPair<QHostAddress, int> parsedAddr =
-      QHostAddress::parseSubnet(config.m_deviceIpv6Address);
+      parseInterfaceAddress(config.m_deviceIpv6Address, 128);
+  if (parsedAddr.first.protocol() != QAbstractSocket::IPv6Protocol) {
+    logger.error() << "Invalid IPv6 device address:" << config.m_deviceIpv6Address;
+    return false;
+  }
+  const IPAddress interfaceAddress(parsedAddr.first, parsedAddr.second >= 0 ? parsedAddr.second : 128);
+  const Q_IPV6ADDR rawPrefixMask = interfaceAddress.netmask().toIPv6Address();
+  memcpy(&ifr6.ifra_prefixmask.sin6_addr, &rawPrefixMask, sizeof(rawPrefixMask));
   QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
   char* deviceAddr = _deviceAddr.data();
   inet_pton(AF_INET6, deviceAddr, &ifr6.ifra_addr.sin6_addr);

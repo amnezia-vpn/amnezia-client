@@ -63,7 +63,7 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
 
-  NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
+  NotifyRouteChange2(AF_UNSPEC, routeChangeCallback, this, FALSE, &m_routeHandle);
 }
 
 WindowsRouteMonitor::~WindowsRouteMonitor() {
