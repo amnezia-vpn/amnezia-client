@@ -25,10 +25,6 @@ struct NativeServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
-
-    std::optional<QJsonArray> configString;
-    std::optional<QJsonArray> configName;
-    std::optional<int> currentConfig;
     
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;

@@ -83,7 +83,7 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
         return row.isSubscriptionExpiringSoon;
     case IsXRayConfigSelectionAvailableRole: {
         if (server.isXRayConfig()) {
-            return server.as<NativeServerConfig>()->configString.has_value();
+            return !server.as<XRaySubscriptionConfig>()->configString.isEmpty();
         }
     }
     }

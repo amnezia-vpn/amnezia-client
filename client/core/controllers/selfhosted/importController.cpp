@@ -16,8 +16,6 @@
 #include <QTimer>
 #include <algorithm>
 
-#include <iostream>
-
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -505,9 +503,9 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
     }
 
     serverConfig.insert(configKey::description, m_appSettingsRepository->nextAvailableServerName());
-    serverConfig["xray_subscription_config"] = configStrings;
-    serverConfig["xray_subscription_config_name"] = configNames;
-    serverConfig["xray_subscription_config_current"] = 0;
+    serverConfig[configKey::xraySubscriptionConfig] = configStrings;
+    serverConfig[configKey::xraySubscriptionConfigName] = configNames;
+    serverConfig[configKey::xraySubscriptionConfigCurrent] = 0;
 
     result.config = serverConfig;
 
@@ -521,10 +519,8 @@ ImportController::ImportResult ImportController::editServerConfigWithData(QStrin
     if (result.errorCode != ErrorCode::NoError)
         return result;
 
-    const ServerConfig currentServerConfig = m_serversRepository->server(serverIndex);
-
+    const QJsonObject currentConfig = m_serversRepository->server(serverIndex).toJson();
     QJsonObject editedConfig = result.config;
-    const QJsonObject currentConfig = currentServerConfig.toJson();
 
     for (auto it = uiConfig.begin(); it != uiConfig.end(); ++it) {
         editedConfig.insert(it.key(), it.value());
@@ -534,16 +530,16 @@ ImportController::ImportResult ImportController::editServerConfigWithData(QStrin
         editedConfig.insert(configKey::description, currentConfig.value(configKey::description));
     }
 
-    if (currentConfig.contains("xray_subscription_config")) {
-        editedConfig.insert("xray_subscription_config", currentConfig.value("xray_subscription_config"));
+    if (currentConfig.contains(configKey::xraySubscriptionConfig)) {
+        editedConfig.insert(configKey::xraySubscriptionConfig, currentConfig.value(configKey::xraySubscriptionConfig));
     }
 
-    if (currentConfig.contains("xray_subscription_config_name")) {
-        editedConfig.insert("xray_subscription_config_name", currentConfig.value("xray_subscription_config_name"));
+    if (currentConfig.contains(configKey::xraySubscriptionConfigName)) {
+        editedConfig.insert(configKey::xraySubscriptionConfigName, currentConfig.value(configKey::xraySubscriptionConfigName));
     }
 
-    if (currentConfig.contains("xray_subscription_config_current")) {
-        editedConfig.insert("xray_subscription_config_current", currentConfig.value("xray_subscription_config_current"));
+    if (currentConfig.contains(configKey::xraySubscriptionConfigCurrent)) {
+        editedConfig.insert(configKey::xraySubscriptionConfigCurrent, currentConfig.value(configKey::xraySubscriptionConfigCurrent));
     }
 
     const ServerConfig finalServerConfig = ServerConfig::fromJson(editedConfig);
