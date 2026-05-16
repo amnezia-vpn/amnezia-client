@@ -1,5 +1,7 @@
 #include "awgInstaller.h"
 
+#include <QAbstractSocket>
+#include <QHostAddress>
 #include <QRandomGenerator>
 #include <QSet>
 #include <QStringList>
@@ -18,6 +20,27 @@
 
 using namespace amnezia;
 using namespace ProtocolUtils;
+
+namespace
+{
+void parseInterfaceAddresses(const QString &addressValue, AwgServerConfig &serverConfig)
+{
+    const QStringList addresses = addressValue.split(",", Qt::SkipEmptyParts);
+    for (const QString &addressWithPrefix : addresses) {
+        const QString trimmed = addressWithPrefix.trimmed();
+        const QString address = trimmed.section("/", 0, 0).trimmed();
+        const QString prefix = trimmed.section("/", 1, 1).trimmed();
+        const QHostAddress hostAddress(address);
+        if (hostAddress.protocol() == QAbstractSocket::IPv4Protocol) {
+            serverConfig.subnetAddress = address;
+            serverConfig.subnetCidr = prefix;
+        } else if (hostAddress.protocol() == QAbstractSocket::IPv6Protocol) {
+            serverConfig.subnetIpv6Address = address;
+            serverConfig.subnetIpv6Cidr = prefix;
+        }
+    }
+}
+}
 
 AwgInstaller::AwgInstaller(QObject *parent)
     : InstallerBase(parent)
@@ -113,12 +136,7 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
     }
 
     if (auto* awgConfig = config.getAwgProtocolConfig()) {
-        QString addressValue = serverConfigMap.value("Address");
-        QStringList addressParts = addressValue.split("/");
-        awgConfig->serverConfig.subnetAddress = addressParts.value(0);
-        if (addressParts.size() > 1) {
-            awgConfig->serverConfig.subnetCidr = addressParts.value(1);
-        }
+        parseInterfaceAddresses(serverConfigMap.value("Address"), awgConfig->serverConfig);
         awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(configKey::junkPacketCount);
         awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(configKey::junkPacketMinSize);
         awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(configKey::junkPacketMaxSize);
@@ -154,4 +172,3 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
 
     return ErrorCode::NoError;
 }
-

@@ -8,6 +8,11 @@ echo "Container startup"
 # kill daemons in case of restart
 wg-quick down /opt/amnezia/awg/wg0.conf
 
+sysctl -w net.ipv6.conf.all.disable_ipv6=0 >/dev/null 2>&1 || true
+sysctl -w net.ipv6.conf.default.disable_ipv6=0 >/dev/null 2>&1 || true
+sysctl -w net.ipv6.conf.all.forwarding=1 >/dev/null 2>&1 || true
+sysctl -w net.ipv6.conf.default.forwarding=1 >/dev/null 2>&1 || true
+
 # start daemons if configured
 if [ -f /opt/amnezia/awg/wg0.conf ]; then (wg-quick up /opt/amnezia/awg/wg0.conf); fi
 
@@ -24,5 +29,18 @@ iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
 
 iptables -t nat -A POSTROUTING -s $AWG_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -o eth0 -j MASQUERADE
 iptables -t nat -A POSTROUTING -s $AWG_SUBNET_IP/$WIREGUARD_SUBNET_CIDR -o eth1 -j MASQUERADE
+
+if command -v ip6tables >/dev/null 2>&1; then
+    ip6tables -A INPUT -i wg0 -j ACCEPT || true
+    ip6tables -A FORWARD -i wg0 -j ACCEPT || true
+    ip6tables -A OUTPUT -o wg0 -j ACCEPT || true
+
+    ip6tables -A FORWARD -i wg0 -o eth0 -s $AWG_SUBNET_IPV6/$WIREGUARD_SUBNET_IPV6_CIDR -j ACCEPT || true
+    ip6tables -A FORWARD -i wg0 -o eth1 -s $AWG_SUBNET_IPV6/$WIREGUARD_SUBNET_IPV6_CIDR -j ACCEPT || true
+    ip6tables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT || true
+
+    ip6tables -t nat -A POSTROUTING -s $AWG_SUBNET_IPV6/$WIREGUARD_SUBNET_IPV6_CIDR -o eth0 -j MASQUERADE || true
+    ip6tables -t nat -A POSTROUTING -s $AWG_SUBNET_IPV6/$WIREGUARD_SUBNET_IPV6_CIDR -o eth1 -j MASQUERADE || true
+fi
 
 tail -f /dev/null
