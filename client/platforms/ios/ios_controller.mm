@@ -580,24 +580,49 @@ bool IosController::setupWireGuard()
 
     wgConfig.insert(configKey::hostName, config[configKey::hostName]);
     wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
+    QStringList clientAddresses;
+    for (const QString &address : config.value(configKey::clientIp).toString().split(",", Qt::SkipEmptyParts)) {
+        clientAddresses << address.trimmed();
+    }
+    for (const QString &address : config.value(configKey::clientIpv6).toString().split(",", Qt::SkipEmptyParts)) {
+        const QString trimmedAddress = address.trimmed();
+        if (!clientAddresses.contains(trimmedAddress)) {
+            clientAddresses << trimmedAddress;
+        }
+    }
+    const bool hasClientIpv6 = !config.value(configKey::clientIpv6).toString().isEmpty()
+        || config.value(configKey::clientIp).toString().contains(":");
+    wgConfig.insert(configKey::clientIp, clientAddresses.join(", "));
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
     wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
     wgConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
 
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    QJsonArray splitTunnelSites;
+    const QJsonArray rawSplitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
+    for(int index = 0; index < rawSplitTunnelSites.count(); index++) {
+        const QString site = rawSplitTunnelSites[index].toString().remove(" ");
+        if (hasClientIpv6 || !site.contains(":")) {
+            splitTunnelSites.append(site);
+        }
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
 
     if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
+        QJsonArray filteredAllowedIps;
+        for (const QJsonValue &value : config[configKey::allowedIps].toArray()) {
+            const QString route = value.toString();
+            if (hasClientIpv6 || !route.contains(":")) {
+                filteredAllowedIps.append(route);
+            }
+        }
+        wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
     } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        QJsonArray allowed_ips { "0.0.0.0/0" };
+        if (hasClientIpv6) {
+            allowed_ips.append("::/0");
+        }
         wgConfig.insert(configKey::allowedIps, allowed_ips);
     }
 
@@ -670,24 +695,49 @@ bool IosController::setupAwg()
 
     wgConfig.insert(configKey::hostName, config[configKey::hostName]);
     wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
+    QStringList clientAddresses;
+    for (const QString &address : config.value(configKey::clientIp).toString().split(",", Qt::SkipEmptyParts)) {
+        clientAddresses << address.trimmed();
+    }
+    for (const QString &address : config.value(configKey::clientIpv6).toString().split(",", Qt::SkipEmptyParts)) {
+        const QString trimmedAddress = address.trimmed();
+        if (!clientAddresses.contains(trimmedAddress)) {
+            clientAddresses << trimmedAddress;
+        }
+    }
+    const bool hasClientIpv6 = !config.value(configKey::clientIpv6).toString().isEmpty()
+        || config.value(configKey::clientIp).toString().contains(":");
+    wgConfig.insert(configKey::clientIp, clientAddresses.join(", "));
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
     wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
     wgConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
 
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    QJsonArray splitTunnelSites;
+    const QJsonArray rawSplitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
+    for(int index = 0; index < rawSplitTunnelSites.count(); index++) {
+        const QString site = rawSplitTunnelSites[index].toString().remove(" ");
+        if (hasClientIpv6 || !site.contains(":")) {
+            splitTunnelSites.append(site);
+        }
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
 
     if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
+        QJsonArray filteredAllowedIps;
+        for (const QJsonValue &value : config[configKey::allowedIps].toArray()) {
+            const QString route = value.toString();
+            if (hasClientIpv6 || !route.contains(":")) {
+                filteredAllowedIps.append(route);
+            }
+        }
+        wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
     } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
+        QJsonArray allowed_ips { "0.0.0.0/0" };
+        if (hasClientIpv6) {
+            allowed_ips.append("::/0");
+        }
         wgConfig.insert(configKey::allowedIps, allowed_ips);
     }
 

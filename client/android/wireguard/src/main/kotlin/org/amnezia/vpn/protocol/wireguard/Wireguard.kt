@@ -76,9 +76,17 @@ open class Wireguard : Protocol() {
     }
 
     protected fun WireguardConfig.Builder.configWireguard(config: JSONObject, configData: JSONObject) {
-        configData.getString("client_ip").split(",").map { address ->
-            InetNetwork.parse(address.trim())
-        }.forEach(::addAddress)
+        val addresses = sequenceOf(
+            configData.optStringOrNull("client_ip"),
+            configData.optStringOrNull("client_ipv6")
+        ).filterNotNull()
+            .flatMap { it.split(",").asSequence() }
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .map { InetNetwork.parse(it) }
+            .toList()
+        addresses.forEach(::addAddress)
+        val hasIpv6Address = addresses.any { it.isIpv6 }
 
         config.optStringOrNull("dns1")?.let { dns ->
             addDnsServer(parseInetAddress(dns.trim()))
@@ -95,7 +103,7 @@ open class Wireguard : Protocol() {
         val routes = hashSetOf<InetNetwork>()
         configData.getJSONArray("allowed_ips").asSequence<String>().map { route ->
             InetNetwork.parse(route.trim())
-        }.forEach(routes::add)
+        }.filter { it.isIpv4 || hasIpv6Address }.forEach(routes::add)
         // if the allowed IPs list contains at least one non-default route, disable global split tunneling
         if (routes.any { it !in defRoutes }) disableSplitTunneling()
         addRoutes(routes)
