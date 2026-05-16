@@ -141,6 +141,7 @@ namespace amnezia
             constexpr char PresharedKey[] = "PresharedKey";
             constexpr char PreSharedKey[] = "PreSharedKey";
             constexpr char AllowedIPs[] = "AllowedIPs";
+            constexpr char DNS[] = "DNS";
             constexpr char Endpoint[] = "Endpoint";
             constexpr char PersistentKeepalive[] = "PersistentKeepalive";
             constexpr char MTU[] = "MTU";
@@ -148,6 +149,9 @@ namespace amnezia
             constexpr char defaultSubnetAddress[] = "10.8.1.0";
             constexpr char defaultSubnetMask[] = "255.255.255.0";
             constexpr char defaultSubnetCidr[] = "24";
+            constexpr char defaultSubnetIpv6Address[] = "fd58:baa6:dead:1::1";
+            constexpr char defaultSubnetIpv6Cidr[] = "64";
+            constexpr char defaultClientIpv6Cidr[] = "128";
 
             constexpr char defaultPort[] = "51820";
             constexpr char defaultPersistentKeepAlive[] = "25";
@@ -172,6 +176,8 @@ namespace amnezia
         namespace awg
         {
             constexpr char defaultPort[] = "55424";
+            constexpr char defaultSubnetIpv6Address[] = "fd58:baa6:dead:2::1";
+            constexpr char defaultSubnetIpv6Cidr[] = "64";
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";
 #else

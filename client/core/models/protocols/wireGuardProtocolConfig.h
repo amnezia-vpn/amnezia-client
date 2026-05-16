@@ -16,6 +16,8 @@ struct WireGuardServerConfig {
     QString subnetAddress;
     QString subnetMask;
     QString subnetCidr;
+    QString subnetIpv6Address;
+    QString subnetIpv6Cidr;
     bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
@@ -27,8 +29,9 @@ struct WireGuardServerConfig {
 struct WireGuardClientConfig {
     QString nativeConfig;
     QString hostName;
-    int port;
+    int port = 0;
     QString clientIp;
+    QString clientIpv6;
     QString clientPrivateKey;
     QString clientPublicKey;
     QString serverPublicKey;
@@ -60,4 +63,3 @@ struct WireGuardProtocolConfig {
 } // namespace amnezia
 
 #endif // WIREGUARDPROTOCOLCONFIG_H
-
