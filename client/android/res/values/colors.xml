@@ -1,0 +1,7 @@
+<resources>
+    <!-- Приглушенный зеленый (ON) -->
+    <color name="amnezia_widget_green">#5A9E60</color>
+    <!-- Приглушенный красный (OFF) -->
+    <color name="amnezia_widget_red">#B75D5D</color>
+    <color name="amnezia_widget_bg">#2D2D2D</color>
+</resources>
