@@ -835,7 +835,15 @@ PageType {
                                         var noButtonFunction = function() {
                                         }
 
-                                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                                        var isActiveConfigForCurrentClient = ServersModel.isDefaultServerCurrentlyProcessed()
+                                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()
+
+                                        if ((ConnectionController.isConnectionInProgress || ConnectionController.isConnected)
+                                                && isActiveConfigForCurrentClient) {
+                                            PageController.showNotificationMessage("Unable to revoke current config during active connection")
+                                        } else {
+                                            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                                        }
                                     }
                                 }
                             }

@@ -265,6 +265,7 @@ PageType {
                 Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.bottomMargin: 24
 
                 visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
                 enabled: !switcher.isProtocolSwitchBlocked
@@ -506,7 +507,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                            SubscriptionUiController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                             PageController.showBusyIndicator(false)
                         }
                     }

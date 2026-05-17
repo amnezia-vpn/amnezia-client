@@ -1,5 +1,6 @@
 #include "serversUiController.h"
 
+#include "core/utils/api/apiUtils.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -215,7 +216,11 @@ QString ServersUiController::getDefaultServerImagePathCollapsed() const
             if (!description.isApiV2 || description.apiServerCountryCode.isEmpty()) {
                 return "";
             }
-            return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(description.apiServerCountryCode.toUpper());
+            const QString imageCode = apiUtils::countryCodeBaseForFlag(description.apiServerCountryCode.toUpper());
+            if (imageCode.isEmpty()) {
+                return QString();
+            }
+            return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(imageCode);
         }
     }
     return "";

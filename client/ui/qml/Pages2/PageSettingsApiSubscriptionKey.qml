@@ -119,8 +119,11 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.exportVpnKey(ServersUiController.getServerId(ServersUiController.processedServerIndex), fileName)
+                        let ok = SubscriptionUiController.exportVpnKey(ServersUiController.getServerId(ServersUiController.processedServerIndex), fileName)
                         PageController.showBusyIndicator(false)
+                        if (ok) {
+                            PageController.showNotificationMessage(qsTr("Config file saved"))
+                        }
                     }
                 }
             }

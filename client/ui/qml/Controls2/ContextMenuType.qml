@@ -6,6 +6,9 @@ Menu {
 
     popupType: Popup.Native
 
+    onAboutToShow: blocker.enabled = true
+    onClosed: blocker.enabled = false
+
     MenuItem {
         text: qsTr("C&ut")
         enabled: textObj.selectedText
@@ -27,5 +30,12 @@ Menu {
         text: qsTr("&SelectAll")
         enabled: textObj.length > 0
         onTriggered: textObj.selectAll()
+    }
+
+    MouseArea {
+        id: blocker
+        z: 2
+        enabled: false
+        preventStealing: true
     }
 }

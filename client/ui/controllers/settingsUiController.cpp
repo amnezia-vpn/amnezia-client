@@ -107,7 +107,9 @@ void SettingsUiController::exportLogsFile(const QString &fileName)
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->exportLogsFile(fileName);
 #else
-    SystemController::saveFile(fileName, Logger::getLogFile());
+    if (!SystemController::saveFile(fileName, Logger::getLogFile())) {
+        qInfo() << "SettingsUiController::exportLogsFile: save or share was cancelled or failed";
+    }
 #endif
 }
 
@@ -116,7 +118,9 @@ void SettingsUiController::exportServiceLogsFile(const QString &fileName)
 #ifdef Q_OS_ANDROID
     AndroidController::instance()->exportLogsFile(fileName);
 #else
-    SystemController::saveFile(fileName, Logger::getServiceLogFile());
+    if (!SystemController::saveFile(fileName, Logger::getServiceLogFile())) {
+        qInfo() << "SettingsUiController::exportServiceLogsFile: save or share was cancelled or failed";
+    }
 #endif
 }
 
@@ -132,7 +136,9 @@ void SettingsUiController::clearLogs()
 void SettingsUiController::backupAppConfig(const QString &fileName)
 {
     QByteArray data = m_settingsController->backupAppConfig();
-    SystemController::saveFile(fileName, data);
+    if (!SystemController::saveFile(fileName, data)) {
+        qInfo() << "SettingsUiController::backupAppConfig: save or share was cancelled or failed";
+    }
 }
 
 void SettingsUiController::restoreAppConfig(const QString &fileName)

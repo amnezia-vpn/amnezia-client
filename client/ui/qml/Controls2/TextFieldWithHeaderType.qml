@@ -135,6 +135,7 @@ Item {
                         }
 
                         ContextMenu.menu: ContextMenuType {
+                            id: contextMenu
                             textObj: textField
                         }
 
@@ -159,7 +160,7 @@ Item {
 
     MouseArea {
         anchors.fill: root
-        cursorShape: Qt.IBeamCursor
+        cursorShape: contextMenu.opened ? Qt.ArrowCursor : Qt.IBeamCursor
 
         hoverEnabled: true
 

@@ -98,8 +98,7 @@ bool SubscriptionUiController::exportVpnKey(const QString &serverId, const QStri
         return false;
     }
 
-    SystemController::saveFile(fileName, m_vpnKey);
-    return true;
+    return SystemController::saveFile(fileName, m_vpnKey);
 }
 
 
@@ -117,8 +116,9 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverId, const
         return false;
     }
 
-    SystemController::saveFile(fileName, nativeConfig);
-    return true;
+    const bool saved = SystemController::saveFile(fileName, nativeConfig);
+    getAccountInfo(serverId, true);
+    return saved;
 }
 
 
@@ -404,6 +404,15 @@ void SubscriptionUiController::removeApiConfig(const QString &serverId)
 {
     m_subscriptionController->removeApiConfig(serverId);
     emit apiConfigRemoved(tr("Api config removed"));
+}
+
+void SubscriptionUiController::removeServer(const QString &serverId)
+{
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
+    if (!m_subscriptionController->removeServer(serverId)) {
+        return;
+    }
+    emit apiServerRemoved(tr("Server '%1' was removed").arg(serverName));
 }
 
 

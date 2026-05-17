@@ -1,5 +1,7 @@
 #include "exportUiController.h"
 
+#include <QDebug>
+
 #include "../systemController.h"
 
 ExportUiController::ExportUiController(ExportController* exportController, QObject *parent)
@@ -68,7 +70,9 @@ QList<QString> ExportUiController::getQrCodes()
 
 void ExportUiController::exportConfig(const QString &fileName)
 {
-    SystemController::saveFile(fileName, m_config);
+    if (!SystemController::saveFile(fileName, m_config)) {
+        qInfo() << "ExportUiController::exportConfig: save or share was cancelled or failed";
+    }
 }
 
 void ExportUiController::updateClientManagementModel(const QString &serverId, int containerIndex)
