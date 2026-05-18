@@ -179,12 +179,9 @@ QString SettingsController::getAppVersion() const
 
 void SettingsController::clearSettings()
 {
-    int serverCount = m_serversRepository->serversCount();
-    
     m_appSettingsRepository->clearSettings();
-    
-    m_serversRepository->setServersArray(QJsonArray());
-    m_serversRepository->setDefaultServer(0);
+
+    m_serversRepository->clearServers();
 
     emit siteSplitTunnelingRouteModeChanged(RouteMode::VpnOnlyForwardSites);
     emit siteSplitTunnelingToggled(false);

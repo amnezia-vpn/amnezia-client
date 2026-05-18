@@ -30,6 +30,7 @@
 #endif
 
 #include "core/utils/networkUtilities.h"
+#include "core/utils/serverConfigUtils.h"
 #include "vpnConnection.h"
 
 using namespace ProtocolUtils;
@@ -74,8 +75,46 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
         return;
     }
 
-    ServerConfig defaultServer = m_serversRepository->server(m_serversRepository->defaultServerIndex());
-    DockerContainer container = defaultServer.defaultContainer();
+    const QString defaultServerId = m_serversRepository->defaultServerId();
+    DockerContainer container = DockerContainer::None;
+    switch (m_serversRepository->serverKind(defaultServerId)) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(defaultServerId);
+        if (cfg.has_value()) {
+            container = cfg->defaultContainer;
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(defaultServerId);
+        if (cfg.has_value()) {
+            container = cfg->defaultContainer;
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(defaultServerId);
+        if (cfg.has_value()) {
+            container = cfg->defaultContainer;
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
+        const auto cfg = m_serversRepository->apiV2Config(defaultServerId);
+        if (cfg.has_value()) {
+            container = cfg->defaultContainer;
+        }
+        break;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
+        break;
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
+        break;
+    }
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         switch (state) {
@@ -247,7 +286,7 @@ Vpn::ConnectionState VpnConnection::connectionState() const
     return m_connectionState;
 }
 
-void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration)
+void VpnConnection::connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
     if (!m_appSettingsRepository || !m_serversRepository) {
         qCritical() << "VpnConnection::connectToVpn: repositories not initialized";
@@ -255,8 +294,8 @@ void VpnConnection::connectToVpn(int serverIndex, DockerContainer container, con
         return;
     }
 
-    qDebug() << QString("Trying to connect to VPN, server index is %1, container is %2, route mode is")
-                        .arg(serverIndex)
+    qDebug() << QString("Trying to connect to VPN, server id is %1, container is %2, route mode is")
+                        .arg(serverId)
                         .arg(ContainerUtils::containerToString(container))
              << m_appSettingsRepository->routeMode();
 

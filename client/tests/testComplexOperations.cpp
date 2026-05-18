@@ -5,7 +5,8 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
+#include "tests/testServerRepositoryHelpers.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
@@ -37,7 +38,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -65,35 +66,33 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 3, "Should have 3 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Default should be index 2");
 
-        ServerConfig server0 = m_coreController->m_serversController->getServerConfig(0);
-        server0.visit([](auto& arg) {
-            arg.description = "Edited First Server";
-        });
-        m_coreController->m_serversController->editServer(0, server0);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(0),
+                                            QStringLiteral("Edited First Server"));
 
         QVERIFY2(serverEditedSpy.count() == 1, "serverEdited should be emitted");
-        QString editedDesc0 = m_coreController->m_serversRepository->server(0).description();
+        QString editedDesc0 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                               m_coreController->m_serversRepository->serverIdAt(0));
         QVERIFY2(editedDesc0 == "Edited First Server", "First server should be edited");
 
-        m_coreController->m_serversController->removeServer(1);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(1));
 
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved should be emitted");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "Should have 2 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default should be index 1 (was 2, removed 1)");
 
-        m_coreController->m_serversController->setDefaultServerIndex(0);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(0));
 
         QVERIFY2(defaultServerChangedSpy.count() == 4, "defaultServerChanged should be emitted again");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default should be index 0");
 
-        ServerConfig server0After = m_coreController->m_serversController->getServerConfig(0);
-        server0After.visit([](auto& arg) {
-            arg.description = "Final Edited Server";
-        });
-        m_coreController->m_serversController->editServer(0, server0After);
+        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
+                                            m_coreController->m_serversController->getServerId(0),
+                                            QStringLiteral("Final Edited Server"));
 
         QVERIFY2(serverEditedSpy.count() == 2, "serverEdited should be emitted again");
-        QString finalDesc0 = m_coreController->m_serversRepository->server(0).description();
+        QString finalDesc0 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                              m_coreController->m_serversRepository->serverIdAt(0));
         QVERIFY2(finalDesc0 == "Final Edited Server", "First server should be edited again");
 
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "Final servers count should be 2");

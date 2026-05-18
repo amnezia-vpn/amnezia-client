@@ -37,21 +37,21 @@ signals:
     void clientAdded(const QJsonObject &client);
     void clientRenamed(int row, const QString &newName);
     void clientRevoked(int row);
-    void adminConfigRevoked(int serverIndex, DockerContainer container);
+    void adminConfigRevoked(const QString &serverId, DockerContainer container);
 
 public slots:
-    ErrorCode updateClients(int serverIndex, const DockerContainer container);
-    ErrorCode appendClient(int serverIndex, const QString &clientId, const QString &clientName, const DockerContainer container);
-    ErrorCode renameClient(int serverIndex, const int row, const QString &userName, const DockerContainer container, bool addTimeStamp = false);
-    ErrorCode revokeClient(int serverIndex, const int index, const DockerContainer container);
-    ErrorCode revokeClient(int serverIndex, const ContainerConfig &containerConfig, const DockerContainer container);
+    ErrorCode updateClients(const QString &serverId, const DockerContainer container);
+    ErrorCode appendClient(const QString &serverId, const QString &clientId, const QString &clientName, const DockerContainer container);
+    ErrorCode renameClient(const QString &serverId, const int row, const QString &userName, const DockerContainer container, bool addTimeStamp = false);
+    ErrorCode revokeClient(const QString &serverId, const int index, const DockerContainer container);
+    ErrorCode revokeClient(const QString &serverId, const ContainerConfig &containerConfig, const DockerContainer container);
 
 private:
     bool isClientExists(const QString &clientId, const QJsonArray &clientsTable);
     int clientIndexById(const QString &clientId, const QJsonArray &clientsTable);
     void migration(const QByteArray &clientsTableString, QJsonArray &clientsTable);
 
-    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials, const int serverIndex,
+    ErrorCode revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
                             SshSession* sshSession, QJsonArray &clientsTable);
     ErrorCode revokeWireGuard(const int row, const DockerContainer container, const ServerCredentials &credentials,
                               SshSession* sshSession, QJsonArray &clientsTable);
@@ -73,4 +73,3 @@ private:
 };
 
 #endif // USERSCONTROLLER_H
-

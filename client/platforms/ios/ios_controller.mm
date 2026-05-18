@@ -977,7 +977,9 @@ bool IosController::shareText(const QStringList& filesToSend) {
     }
 #if !MACOS_NE
     UIViewController *qtController = getViewController();
-    if (!qtController) return;
+    if (!qtController) {
+        return false;
+    }
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
 #endif

@@ -188,8 +188,9 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
                         }
-                        PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                        InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+
+                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                        InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) saveButton.forceActiveFocus()
