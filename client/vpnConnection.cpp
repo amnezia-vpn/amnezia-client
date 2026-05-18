@@ -208,9 +208,9 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
-    appendKillSwitchConfig(config);
 #endif
 
+    appendKillSwitchConfig(config);
     appendSplitTunnelingConfig(config);
 
     m_vpnConfiguration = config;
@@ -278,6 +278,7 @@ void VpnConnection::wireDaemonReconnectSignals()
 
 void VpnConnection::appendKillSwitchConfig(QJsonObject &config)
 {
+#ifdef AMNEZIA_DESKTOP
     if (!m_appSettingsRepository) {
         qCritical() << "VpnConnection::appendKillSwitchConfig: repositories not initialized";
         return;
@@ -285,6 +286,9 @@ void VpnConnection::appendKillSwitchConfig(QJsonObject &config)
 
     config.insert(configKey::killSwitchOption, QVariant(m_appSettingsRepository->isKillSwitchEnabled()).toString());
     config.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
+#else
+    Q_UNUSED(config)
+#endif
 }
 
 void VpnConnection::appendSplitTunnelingConfig(QJsonObject &config)
@@ -537,9 +541,7 @@ void VpnConnection::startTunnelSwitch(DockerContainer container,
                                       const QString &resolvedRemote)
 {
     QJsonObject config = vpnConfiguration;
-#ifdef AMNEZIA_DESKTOP
     appendKillSwitchConfig(config);
-#endif
     appendSplitTunnelingConfig(config);
 
     const QString stagingIfname = allocateIfname();
