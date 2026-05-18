@@ -210,11 +210,9 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     serverConfigJson[apiDefs::key::apiConfig] = apiConfig;
 }
 
-ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
-                                                 bool isTestPurchase)
+ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
 {
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
-                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }

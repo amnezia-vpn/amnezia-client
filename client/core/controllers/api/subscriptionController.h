@@ -118,8 +118,7 @@ public:
                                           ServerConfig &serverConfig, CaptchaInfo *retryCaptchaOut = nullptr);
 
 private:
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
-                             bool isTestPurchase = false);
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(int serverIndex) const;
     
     ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
