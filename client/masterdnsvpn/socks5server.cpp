@@ -44,12 +44,21 @@ constexpr quint8 kRepAtypUnsupported = 0x08;
 // wedged client doesn't park a socket forever.
 constexpr int kStepTimeoutMs = 5'000;
 
+// SOCKS5 handshake never reads more than a single domain-name label (255 B);
+// cap defensively so a corrupt caller can't ask us to allocate or block on
+// gigabytes of data from an attacker-controlled socket (CWE-120 / CWE-20).
+constexpr qsizetype kReadExactMax = 256;
+
 // Block-on-read helper. Returns the requested number of bytes or empty on
-// timeout / disconnect. Built on QTcpSocket's blocking API; safe inside the
-// per-client handler because each client runs its handshake on the calling
-// thread (Engine spins us up on its own QThread, so the GUI loop is fine).
+// timeout / disconnect / invalid size. Built on QTcpSocket's blocking API;
+// safe inside the per-client handler because each client runs its handshake
+// on the calling thread (Engine spins us up on its own QThread, so the GUI
+// loop is fine).
 QByteArray readExact(QTcpSocket *socket, qsizetype n)
 {
+    if (n <= 0 || n > kReadExactMax) {
+        return {};
+    }
     QByteArray out;
     out.reserve(n);
     while (out.size() < n) {
