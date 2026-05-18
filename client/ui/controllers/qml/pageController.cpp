@@ -19,8 +19,7 @@
     #include "ui/utils/macosUtil.h"
 #endif
 
-PageController::PageController(ServersController* serversController,
-                               SettingsController* settingsController,
+PageController::PageController(ServersController* serversController, SettingsController* settingsController,
                                QObject *parent)
     : QObject(parent), m_serversController(serversController), m_settingsController(settingsController)
 {
@@ -57,14 +56,7 @@ PageController::PageController(ServersController* serversController,
 
 bool PageController::isStartPageVisible()
 {
-    if (m_serversController->getServersCount()) {
-        if (m_serversController->getDefaultServerIndex() < 0) {
-            m_serversController->setDefaultServerIndex(0);
-        }
-        return false;
-    } else {
-        return true;
-    }
+    return m_serversController->getServersCount() == 0;
 }
 
 QString PageController::getPagePath(PageLoader::PageEnum page)

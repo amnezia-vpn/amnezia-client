@@ -188,7 +188,7 @@ Button {
 
                         anchors.fill: parent
                         radius: 12
-                        color: root.pressed ? rightImage.pressedColor : root.hovered ? rightImage.hoveredColor : rightImage.defaultColor
+                        color: root.pressed ? rightImage.pressedColor : root.hovered && root.enabled ? rightImage.hoveredColor : rightImage.defaultColor
 
                         Behavior on color {
                             PropertyAnimation { duration: 200 }

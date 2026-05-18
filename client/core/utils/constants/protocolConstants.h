@@ -3,6 +3,7 @@
 
 namespace amnezia
 {
+
     namespace protocols
     {
 
@@ -57,6 +58,40 @@ namespace amnezia
             constexpr char defaultPort[] = "443";
             constexpr char defaultLocalProxyPort[] = "10808";
             constexpr char defaultLocalAddr[] = "10.33.0.2";
+            constexpr char defaultLocalListenAddr[] = "127.0.0.1";
+
+            constexpr char defaultSecurity[] = "reality";
+            constexpr char defaultFlow[] = "xtls-rprx-vision";
+            constexpr char defaultTransport[] = "raw";
+            constexpr char defaultFingerprint[] = "chrome";
+            constexpr char defaultSni[] = "cdn.example.com";
+            constexpr char defaultAlpn[] = "HTTP/2";
+
+            constexpr char defaultXhttpMode[] = "Auto";
+            constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
+            constexpr char defaultXhttpUplinkMethod[] = "POST";
+            constexpr char defaultXhttpSessionPlacement[] = "Path";
+            constexpr char defaultXhttpSessionKey[] = "Path";
+            constexpr char defaultXhttpSeqPlacement[] = "Path";
+            constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
+
+            constexpr char defaultXhttpHost[] = "www.googletagmanager.com";
+            constexpr char defaultXhttpUplinkChunkSize[] = "0";
+            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1";
+            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "100";
+            constexpr char defaultXhttpScMinPostsIntervalMsMin[] = "100";
+            constexpr char defaultXhttpScMinPostsIntervalMsMax[] = "800";
+            constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";
+            constexpr char defaultXhttpScStreamUpServerSecsMax[] = "100";
+
+            constexpr char defaultXPaddingPlacement[] = "Cookie";
+            constexpr char defaultXPaddingMethod[] = "Repeat-x";
+
+            constexpr char defaultMkcpTti[] = "50";
+            constexpr char defaultMkcpUplinkCapacity[] = "5";
+            constexpr char defaultMkcpDownlinkCapacity[] = "20";
+            constexpr char defaultMkcpReadBufferSize[] = "2";
+            constexpr char defaultMkcpWriteBufferSize[] = "2";
 
             constexpr char outbounds[] = "outbounds";
             constexpr char inbounds[] = "inbounds";
@@ -174,9 +209,71 @@ namespace amnezia
             constexpr char proxyConfigPath[] = "/usr/local/3proxy/conf/3proxy.cfg";
         }
 
+        namespace mtProxy
+        {
+            constexpr char secretKey[]            = "mtproxy_secret";
+            constexpr char tagKey[]               = "mtproxy_tag";
+            constexpr char tgLinkKey[]            = "mtproxy_tg_link";
+            constexpr char tmeLinkKey[]           = "mtproxy_tme_link";
+            constexpr char isEnabledKey[]         = "mtproxy_is_enabled";
+            constexpr char publicHostKey[]        = "mtproxy_public_host";
+            constexpr char transportModeKey[]     = "mtproxy_transport_mode";
+            constexpr char tlsDomainKey[]         = "mtproxy_tls_domain";
+            constexpr char additionalSecretsKey[] = "mtproxy_additional_secrets";
+            constexpr char workersKey[]           = "mtproxy_workers";
+            constexpr char workersModeKey[]       = "mtproxy_workers_mode";
+            constexpr char natEnabledKey[]        = "mtproxy_nat_enabled";
+            constexpr char natInternalIpKey[]     = "mtproxy_nat_internal_ip";
+            constexpr char natExternalIpKey[]     = "mtproxy_nat_external_ip";
+
+            constexpr char transportModeStandard[] = "standard";
+            constexpr char transportModeFakeTLS[]  = "faketls";
+
+            constexpr char workersModeAuto[]       = "auto";
+            constexpr char workersModeManual[]     = "manual";
+
+            constexpr char defaultPort[]           = "443";
+            constexpr char defaultWorkers[]        = "2";
+            constexpr int  maxWorkers              = 32;
+            constexpr int  botTagHexLength         = 32;
+            constexpr char defaultTlsDomain[]      = "googletagmanager.com";
+        }
+
+        namespace telemt
+        {
+            constexpr char secretKey[]            = "telemt_secret";
+            constexpr char tagKey[]               = "telemt_tag";
+            constexpr char tgLinkKey[]            = "telemt_tg_link";
+            constexpr char tmeLinkKey[]           = "telemt_tme_link";
+            constexpr char isEnabledKey[]         = "telemt_is_enabled";
+            constexpr char publicHostKey[]        = "telemt_public_host";
+            constexpr char transportModeKey[]     = "telemt_transport_mode";
+            constexpr char tlsDomainKey[]         = "telemt_tls_domain";
+            constexpr char maskEnabledKey[]       = "telemt_mask_enabled";
+            constexpr char tlsEmulationKey[]      = "telemt_tls_emulation";
+            constexpr char useMiddleProxyKey[]    = "telemt_use_middle_proxy";
+            constexpr char userNameKey[]          = "telemt_user_name";
+            // Stored for UI only (Telemt server ignores these; same controls as MTProxy page)
+            constexpr char additionalSecretsKey[] = "telemt_additional_secrets";
+            constexpr char workersKey[]           = "telemt_workers";
+            constexpr char workersModeKey[]       = "telemt_workers_mode";
+            constexpr char natEnabledKey[]        = "telemt_nat_enabled";
+            constexpr char natInternalIpKey[]     = "telemt_nat_internal_ip";
+            constexpr char natExternalIpKey[]     = "telemt_nat_external_ip";
+
+            constexpr char transportModeStandard[] = "standard";
+            constexpr char transportModeFakeTLS[]  = "faketls";
+
+            constexpr char defaultPort[]           = "443";
+            constexpr char defaultTlsDomain[]      = "googletagmanager.com";
+            constexpr char defaultUserName[]       = "amnezia";
+            constexpr char defaultWorkers[]        = "2";
+            constexpr char workersModeAuto[]       = "auto";
+            constexpr char workersModeManual[]     = "manual";
+            constexpr int  maxWorkers              = 32;
+        }
+
     } // namespace protocols
 }
 
 #endif // PROTOCOLCONSTANTS_H
-
-

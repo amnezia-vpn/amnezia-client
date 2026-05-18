@@ -30,7 +30,9 @@ namespace amnezia
             TorWebSite,
             Dns,
             Sftp,
-            Socks5Proxy
+            Socks5Proxy,
+            MtProxy,
+            Telemt,
         };
         Q_ENUM_NS(Proto)
 

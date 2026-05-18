@@ -38,8 +38,6 @@ public slots:
     ErrorCode getLastConnectionError();
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
-    void onCurrentContainerUpdated();
-
     void onTranslationsUpdated();
 
 signals:

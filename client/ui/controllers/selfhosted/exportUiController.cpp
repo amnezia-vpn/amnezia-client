@@ -1,6 +1,9 @@
 #include "exportUiController.h"
 
+#include <QDebug>
+
 #include "../systemController.h"
+#include "core/utils/qrCodeUtils.h"
 
 ExportUiController::ExportUiController(ExportController* exportController, QObject *parent)
     : QObject(parent),
@@ -8,47 +11,55 @@ ExportUiController::ExportUiController(ExportController* exportController, QObje
 {
 }
 
-void ExportUiController::generateFullAccessConfig(int serverIndex)
+void ExportUiController::generateFullAccessConfig(const QString &serverId)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateFullAccessConfig(serverIndex);
+    auto result = m_exportController->generateFullAccessConfig(serverId);
     applyExportResult(result);
 }
 
-void ExportUiController::generateConnectionConfig(int serverIndex, int containerIndex, const QString &clientName)
+void ExportUiController::generateConnectionConfig(const QString &serverId, int containerIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateConnectionConfig(serverIndex, containerIndex, clientName);
+    auto result = m_exportController->generateConnectionConfig(serverId, containerIndex, clientName);
     applyExportResult(result);
 }
 
-void ExportUiController::generateOpenVpnConfig(int serverIndex, const QString &clientName)
+void ExportUiController::generateOpenVpnConfig(const QString &serverId, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateOpenVpnConfig(serverIndex, clientName);
+    auto result = m_exportController->generateOpenVpnConfig(serverId, clientName);
     applyExportResult(result);
 }
 
-void ExportUiController::generateWireGuardConfig(int serverIndex, const QString &clientName)
+void ExportUiController::generateWireGuardConfig(const QString &serverId, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateWireGuardConfig(serverIndex, clientName);
+    auto result = m_exportController->generateWireGuardConfig(serverId, clientName);
     applyExportResult(result);
 }
 
-void ExportUiController::generateAwgConfig(int serverIndex, int containerIndex, const QString &clientName)
+void ExportUiController::generateAwgConfig(const QString &serverId, int containerIndex, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateAwgConfig(serverIndex, containerIndex, clientName);
+    auto result = m_exportController->generateAwgConfig(serverId, containerIndex, clientName);
     applyExportResult(result);
 }
 
 
-void ExportUiController::generateXrayConfig(int serverIndex, const QString &clientName)
+void ExportUiController::generateXrayConfig(const QString &serverId, const QString &clientName)
 {
     clearPreviousConfig();
-    auto result = m_exportController->generateXrayConfig(serverIndex, clientName);
+    auto result = m_exportController->generateXrayConfig(serverId, clientName);
     applyExportResult(result);
+}
+
+void ExportUiController::generateQrFromString(const QString &text)
+{
+    clearPreviousConfig();
+    m_config = text;
+    m_qrCodes = qrCodeUtils::generateQrCodeImageSeries(text.toUtf8());
+    emit exportConfigChanged();
 }
 
 QString ExportUiController::getConfig()
@@ -68,23 +79,25 @@ QList<QString> ExportUiController::getQrCodes()
 
 void ExportUiController::exportConfig(const QString &fileName)
 {
-    SystemController::saveFile(fileName, m_config);
+    if (!SystemController::saveFile(fileName, m_config)) {
+        qInfo() << "ExportUiController::exportConfig: save or share was cancelled or failed";
+    }
 }
 
-void ExportUiController::updateClientManagementModel(int serverIndex, int containerIndex)
+void ExportUiController::updateClientManagementModel(const QString &serverId, int containerIndex)
 {
-    m_exportController->updateClientManagementModel(serverIndex, containerIndex);
+    m_exportController->updateClientManagementModel(serverId, containerIndex);
 }
 
-void ExportUiController::revokeConfig(int row, int serverIndex, int containerIndex)
+void ExportUiController::revokeConfig(int row, const QString &serverId, int containerIndex)
 {
-    m_exportController->revokeConfig(row, serverIndex, containerIndex);
+    m_exportController->revokeConfig(row, serverId, containerIndex);
     emit revokeConfigFinished();
 }
 
-void ExportUiController::renameClient(int row, const QString &clientName, int serverIndex, int containerIndex)
+void ExportUiController::renameClient(int row, const QString &clientName, const QString &serverId, int containerIndex)
 {
-    m_exportController->renameClient(row, clientName, serverIndex, containerIndex);
+    m_exportController->renameClient(row, clientName, serverId, containerIndex);
 }
 
 int ExportUiController::getQrCodesCount()
@@ -113,4 +126,14 @@ void ExportUiController::applyExportResult(const ExportController::ExportResult 
     m_qrCodes = result.qrCodes;
 
     emit exportConfigChanged();
+}
+
+void ExportUiController::setConfigFromString(const QString &config, const QString &fileName)
+{
+    clearPreviousConfig();
+    m_config = config;
+    emit exportConfigChanged();
+    if (!fileName.isEmpty()) {
+        SystemController::saveFile(fileName, m_config);
+    }
 }

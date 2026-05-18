@@ -16,6 +16,7 @@ using namespace ContainerEnumNS;
 
 struct NativeServerConfig {
     QString description;
+    QString displayName;
     QString hostName;
     QMap<DockerContainer, ContainerConfig> containers;
     DockerContainer defaultContainer;

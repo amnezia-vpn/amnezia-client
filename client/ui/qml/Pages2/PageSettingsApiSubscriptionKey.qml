@@ -48,7 +48,7 @@ PageType {
 
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
-        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
+        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getServerId(ServersUiController.processedServerIndex))
         PageController.showBusyIndicator(false)
     }
 
@@ -119,8 +119,11 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.exportVpnKey(ServersUiController.getProcessedServerIndex(), fileName)
+                        let ok = SubscriptionUiController.exportVpnKey(ServersUiController.getServerId(ServersUiController.processedServerIndex), fileName)
                         PageController.showBusyIndicator(false)
+                        if (ok) {
+                            PageController.showNotificationMessage(qsTr("Config file saved"))
+                        }
                     }
                 }
             }
@@ -141,7 +144,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                     PageController.showBusyIndicator(false)
                     vpnKeyDrawer.openTriggered()
                 }
