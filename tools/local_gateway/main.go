@@ -53,17 +53,43 @@ type authData struct {
 	APIKey string `json:"api_key"`
 }
 
+// gatewayStringList accepts a JSON string or a non-empty string array (dev gateway contract).
+type gatewayStringList []string
+
+func (g *gatewayStringList) UnmarshalJSON(data []byte) error {
+	var single string
+	if err := json.Unmarshal(data, &single); err == nil {
+		*g = gatewayStringList{single}
+		return nil
+	}
+	var arr []string
+	if err := json.Unmarshal(data, &arr); err != nil {
+		return err
+	}
+	*g = arr
+	return nil
+}
+
+func (g gatewayStringList) firstNonEmpty() string {
+	for _, s := range g {
+		if t := strings.TrimSpace(s); t != "" {
+			return t
+		}
+	}
+	return ""
+}
+
 type scanQRRequest struct {
-	QRUUID           string         `json:"qr_uuid"`
-	Config           string         `json:"config"`
-	ServiceInfo      map[string]any `json:"service_info"`
-	SupportedProto   []string       `json:"supported_protocols"`
-	AuthData         authData       `json:"auth_data"`
-	InstallationUUID string         `json:"installation_uuid"`
-	AppVersion       string         `json:"app_version"`
-	OSVersion        string         `json:"os_version"`
-	ServiceType      string         `json:"service_type"`
-	UserCountryCode  string         `json:"user_country_code"`
+	QRUUID           string            `json:"qr_uuid"`
+	Config           string            `json:"config"`
+	ServiceInfo      map[string]any    `json:"service_info"`
+	SupportedProto   []string          `json:"supported_protocols"`
+	AuthData         authData          `json:"auth_data"`
+	InstallationUUID string            `json:"installation_uuid"`
+	AppVersion       string            `json:"app_version"`
+	OSVersion        string            `json:"os_version"`
+	ServiceType      gatewayStringList `json:"service_type"`
+	UserCountryCode  gatewayStringList `json:"user_country_code"`
 }
 
 type pairingResult struct {
@@ -161,8 +187,8 @@ func validateGenerateQRRequest(req generateQRRequest) bool {
 }
 
 func validateScanQRRequest(req scanQRRequest) bool {
-	st := strings.TrimSpace(req.ServiceType)
-	cc := strings.TrimSpace(req.UserCountryCode)
+	st := req.ServiceType.firstNonEmpty()
+	cc := req.UserCountryCode.firstNonEmpty()
 	return req.QRUUID != "" &&
 		req.Config != "" &&
 		req.ServiceInfo != nil &&
@@ -802,6 +828,8 @@ func main() {
 	http.HandleFunc("/v1/revoke_native_config", logReq(handleRevokeNoop))
 	http.HandleFunc("/api/v1/generate_qr", logReq(handleGenerateQR))
 	http.HandleFunc("/api/v1/scan_qr", logReq(handleScanQR))
+	http.HandleFunc("/v1/generate_qr", logReq(handleGenerateQR))
+	http.HandleFunc("/v1/scan_qr", logReq(handleScanQR))
 
 	logStartupURLs(listenAddr, portStr)
 

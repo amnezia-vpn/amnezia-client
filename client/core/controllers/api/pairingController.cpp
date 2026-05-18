@@ -108,6 +108,16 @@ ErrorCode interpretScanQrJson(const QJsonObject &obj)
 }
 } // namespace
 
+QJsonArray PairingController::gatewayStringMetadataArray(const QString &value)
+{
+    QJsonArray arr;
+    const QString trimmed = value.trimmed();
+    if (!trimmed.isEmpty()) {
+        arr.append(trimmed);
+    }
+    return arr;
+}
+
 ErrorCode PairingController::parseGenerateQrResponseBody(const QByteArray &responseBody, QrPairingConfigPayload &outPayload)
 {
     outPayload = QrPairingConfigPayload {};
@@ -193,7 +203,7 @@ QJsonObject PairingController::buildScanQrPayload(const QString &qrUuid, const Q
     o[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
     o[apiDefs::key::appVersion] = QString(APP_VERSION);
     o[apiDefs::key::osVersion] = QSysInfo::productType();
-    o[apiDefs::key::serviceType] = serviceType;
-    o[apiDefs::key::userCountryCode] = userCountryCode;
+    o[apiDefs::key::serviceType] = gatewayStringMetadataArray(serviceType);
+    o[apiDefs::key::userCountryCode] = gatewayStringMetadataArray(userCountryCode);
     return o;
 }

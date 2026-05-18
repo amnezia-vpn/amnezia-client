@@ -98,7 +98,7 @@ namespace amnezia
         ApiNoPurchasedSubscriptionsError = 1115,
         ApiTrialAlreadyUsedError = 1116,
 
-        // QR pairing (gateway /api/v1/generate_qr, /api/v1/scan_qr)
+        // QR pairing (gateway /v1/generate_qr, /v1/scan_qr)
         ApiPairingForbiddenError = 1117,
         ApiPairingConflictError = 1118,
         ApiPairingRateLimitedError = 1119,

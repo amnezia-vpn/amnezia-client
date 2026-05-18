@@ -10,7 +10,7 @@
 class SecureAppSettingsRepository;
 
 /**
- * Core API for QR pairing against Amnezia gateway (POST /api/v1/generate_qr, /api/v1/scan_qr).
+ * Core API for QR pairing against Amnezia gateway (POST /v1/generate_qr, /v1/scan_qr).
  * Phase 1: transport via GatewayController, error mapping incl. gateway `http_status` wrapper and OpenAPI-style bodies.
  */
 class PairingController
@@ -37,6 +37,8 @@ public:
 
     static amnezia::ErrorCode validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey,
                                                         const QString &serviceType, const QString &userCountryCode);
+
+    static QJsonArray gatewayStringMetadataArray(const QString &value);
 
 private:
     SecureAppSettingsRepository *m_appSettingsRepository;

@@ -25,14 +25,15 @@
 #include "core/models/serverConfig.h"
 #include "core/models/api/apiV2ServerConfig.h"
 #include "core/utils/constants/apiConstants.h"
+#include "core/utils/constants/apiKeys.h"
 #include "core/utils/qrCodeUtils.h"
 
 using namespace amnezia;
 
 namespace
 {
-constexpr auto kGenerateQrPath = "%1api/v1/generate_qr";
-constexpr auto kScanQrPath = "%1api/v1/scan_qr";
+constexpr auto kGenerateQrPath = "%1v1/generate_qr";
+constexpr auto kScanQrPath = "%1v1/scan_qr";
 constexpr auto kGatewayProbePath = "%1v1/news";
 constexpr int kPairingRetryMaxAttempts = 3;
 constexpr int kGatewayProbeTimeoutMsecs = 3000;
@@ -506,12 +507,27 @@ bool PairingUiController::canOpenTvQrPairingPage()
         return false;
     }
 
+    if (!m_serversController || m_serversController->gatewayStacks().isEmpty()) {
+        return true;
+    }
+
+    QJsonObject payload;
+    payload.insert(QStringLiteral("locale"), m_appSettingsRepository->getAppLanguage().name().split(QLatin1Char('_')).first());
+
+    const QJsonObject stacksJson = m_serversController->gatewayStacks().toJson();
+    if (stacksJson.contains(apiDefs::key::userCountryCode)) {
+        payload.insert(apiDefs::key::userCountryCode, stacksJson.value(apiDefs::key::userCountryCode));
+    }
+    if (stacksJson.contains(apiDefs::key::serviceType)) {
+        payload.insert(apiDefs::key::serviceType, stacksJson.value(apiDefs::key::serviceType));
+    }
+
     const bool isTestPurchase = false;
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                         m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), kGatewayProbeTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled());
     QByteArray responseBody;
-    const ErrorCode err = gatewayController.post(QString::fromLatin1(kGatewayProbePath), QJsonObject {}, responseBody);
+    const ErrorCode err = gatewayController.post(QString::fromLatin1(kGatewayProbePath), payload, responseBody);
     if (err != ErrorCode::NoError) {
         emit errorOccurred(err);
         return false;
@@ -589,7 +605,7 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
     const QJsonObject payload = m_pairingController->buildGenerateQrPayload(m_tvSessionUuid);
     QNetworkReply *replyRaw = nullptr;
     const QFuture<QPair<ErrorCode, QByteArray>> future =
-            gatewayController->postAsync(QString::fromLatin1(kGenerateQrPath), payload, &replyRaw);
+            gatewayController->postAsync(QString::fromLatin1(kGenerateQrPath), payload, &replyRaw, gatewayController);
     m_tvNetworkReply = replyRaw;
 
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>(this);
@@ -804,7 +820,7 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
                                                                         serviceType, userCountryCode);
     QNetworkReply *replyRaw = nullptr;
     const QFuture<QPair<ErrorCode, QByteArray>> future =
-            gatewayController->postAsync(QString::fromLatin1(kScanQrPath), payload, &replyRaw);
+            gatewayController->postAsync(QString::fromLatin1(kScanQrPath), payload, &replyRaw, gatewayController);
     m_phoneNetworkReply = replyRaw;
 
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>(this);

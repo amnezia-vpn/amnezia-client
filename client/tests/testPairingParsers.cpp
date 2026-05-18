@@ -133,6 +133,19 @@ private slots:
                  ErrorCode::ApiPairingMissingMetadataError);
     }
 
+    void gatewayStringMetadataArray_singleScalar()
+    {
+        const QJsonArray arr = PairingController::gatewayStringMetadataArray(QStringLiteral("amnezia-premium"));
+        QCOMPARE(arr.size(), 1);
+        QCOMPARE(arr.at(0).toString(), QStringLiteral("amnezia-premium"));
+    }
+
+    void gatewayStringMetadataArray_emptyForBlank()
+    {
+        QCOMPARE(PairingController::gatewayStringMetadataArray(QString()).size(), 0);
+        QCOMPARE(PairingController::gatewayStringMetadataArray(QStringLiteral("   ")).size(), 0);
+    }
+
     void pairingUi_applyScanned_extractsUuid_emitsSignal()
     {
         PairingUiController ctl(nullptr, nullptr, nullptr, nullptr);

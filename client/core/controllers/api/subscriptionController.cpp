@@ -1146,7 +1146,7 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(int se
                                                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                                        apiDefs::requestTimeoutMsecs,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
-    auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
+    auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload, nullptr, gatewayController);
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
     QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,
                      [promise, watcher, gatewayController]() {

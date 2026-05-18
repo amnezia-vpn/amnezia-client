@@ -48,7 +48,7 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
         payload.insert(apiDefs::key::serviceType, stacksJson.value(apiDefs::key::serviceType));
     }
 
-    auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
+    auto future = gatewayController->postAsync(QString("%1v1/news"), payload, nullptr, gatewayController);
     return future.then([gatewayController](QPair<ErrorCode, QByteArray> result) -> QPair<ErrorCode, QJsonArray> {
         auto [errorCode, responseBody] = result;
         if (errorCode != ErrorCode::NoError) {
