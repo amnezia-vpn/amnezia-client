@@ -79,6 +79,10 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
         const bool isWgBased = (proto == ProtocolUtils::protoToString(Proto::Awg) ||
                                 proto == ProtocolUtils::protoToString(Proto::WireGuard));
         if (!isWgBased) {
+            if (!protocol) {
+                qWarning() << "VpnTrafficGuard::setupRoutes: protocol is null";
+                return;
+            }
             QString dns1 = vpnConfiguration.value(configKey::dns1).toString();
             QString dns2 = vpnConfiguration.value(configKey::dns2).toString();
 #ifdef Q_OS_MACOS
@@ -88,12 +92,6 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
 #else
             iface->routeAddList(protocol->vpnGateway(), QStringList() << dns1 << dns2);
 #endif
-            // TODO: add error code handling for all routeAddList (or rework the code below)
-            if (!protocol) {
-                qWarning() << "VpnTrafficGuard::setupRoutes: protocol is null";
-                return;
-            }
-            iface->routeAddList(protocol->vpnGateway(), QStringList() << dns1 << dns2);
 
             if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
                 iface->routeDeleteList(protocol->vpnGateway(), QStringList() << "0.0.0.0");
