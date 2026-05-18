@@ -70,13 +70,9 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 0
 
-                Header2TextType {
+                BaseHeaderType {
                     Layout.fillWidth: true
-                    text: qsTr("XRay VLESS settings")
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 36
-                    lineHeight: 38 + LanguageUiController.getLineHeightAppend()
-                    font.letterSpacing: -1.08
+                    headerText: qsTr("XRay VLESS settings")
                 }
 
                 ImageButtonType {

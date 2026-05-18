@@ -37,16 +37,13 @@ PageType {
             width: listView.width
             spacing: 0
 
-            Header2TextType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 0
                 Layout.bottomMargin: 24
-                text: qsTr("Flow")
-                font.pixelSize: 36
-                lineHeight: 38 + LanguageUiController.getLineHeightAppend()
-                font.letterSpacing: -1.08
+                headerText: qsTr("Flow")
             }
 
             VerticalRadioButton {

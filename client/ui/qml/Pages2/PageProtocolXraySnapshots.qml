@@ -64,14 +64,13 @@ PageType {
             width: listView.width
             spacing: 0
 
-            Header2TextType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 0
                 Layout.bottomMargin: 24
-                text: qsTr("XRay Configurations")
-                wrapMode: Text.WordWrap
+                headerText: qsTr("XRay Configurations")
             }
 
             // ── Create from current settings ──────────────────────────
@@ -222,14 +221,13 @@ PageType {
                 }
             }
 
-            Header2TextType {
+            BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 8
                 Layout.bottomMargin: 16
-                text: root.selectedConfigName
-                wrapMode: Text.WordWrap
+                headerText: root.selectedConfigName
             }
 
             // Apply
