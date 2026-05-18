@@ -114,22 +114,6 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     }
 #endif
 
-#ifdef AMNEZIA_QR_PAIRING_ALLOW
-    {
-        const QUrl gatewayUrl(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl);
-        const QString host = gatewayUrl.host().toLower();
-        const bool loopback =
-                (host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1"));
-        // tools/local_gateway on a LAN IP (e.g. phone → Mac -auto-public): mock expects plaintext JSON.
-        const bool usePlaintext = loopback || NetworkUtilities::hostIsPrivateLanAddress(host);
-        if (usePlaintext) {
-            encRequestData.isPlaintextLocalGateway = true;
-            encRequestData.requestBody = QJsonDocument(apiPayload).toJson();
-            return encRequestData;
-        }
-    }
-#endif
-
     QSimpleCrypto::QBlockCipher blockCipher;
     encRequestData.key = blockCipher.generatePrivateSalt(32);
     encRequestData.iv = blockCipher.generatePrivateSalt(32);

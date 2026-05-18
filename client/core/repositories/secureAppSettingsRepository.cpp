@@ -17,12 +17,7 @@
 using namespace amnezia;
 
 namespace {
-#ifdef AMNEZIA_QR_PAIRING_ALLOW
-    // Prefer 127.0.0.1 with local mock (tools/local_gateway listens on 0.0.0.0:8080); avoids LAN/IPv6 ambiguity in dev.
-    constexpr char gatewayEndpoint[] = "http://127.0.0.1:8080/";
-#else
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
-#endif
 }
 
 SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings, QObject *parent)
@@ -261,14 +256,6 @@ QString SecureAppSettingsRepository::getGatewayEndpoint(bool isTestPurchase) con
             || base.contains(QStringLiteral("[::1]"), Qt::CaseInsensitive)) {
             return m_gatewayEndpoint;
         }
-#ifdef AMNEZIA_QR_PAIRING_ALLOW
-        {
-            const QUrl gatewayUrl(base);
-            if (NetworkUtilities::hostIsPrivateLanAddress(gatewayUrl.host())) {
-                return m_gatewayEndpoint;
-            }
-        }
-#endif
         return QString(DEV_AGW_ENDPOINT);
     }
     return m_gatewayEndpoint;
