@@ -14,6 +14,7 @@
 #include "masterdnsvpn/dnsmsg.h"
 #include "masterdnsvpn/mtuprober.h"
 #include "masterdnsvpn/pingpacer.h"
+#include "masterdnsvpn/resolverpool.h"
 #include "masterdnsvpn/socks5server.h"
 #include "masterdnsvpn/wireframing.h"
 
