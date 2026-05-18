@@ -260,11 +260,7 @@ void SecureAppSettingsRepository::setGatewayEndpoint(const QString &endpoint)
 void SecureAppSettingsRepository::resetGatewayEndpoint()
 {
     m_gatewayEndpoint = gatewayEndpoint;
-#ifdef AMNEZIA_LOCAL_GATEWAY
-    setValue(QStringLiteral("Conf/devGatewayEnv"), true);
-#else
     setValue("Conf/gatewayEndpoint", gatewayEndpoint);
-#endif
 }
 
 void SecureAppSettingsRepository::setDevGatewayEndpoint()

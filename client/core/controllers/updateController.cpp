@@ -37,7 +37,9 @@ UpdateController::UpdateController(SecureAppSettingsRepository* appSettingsRepos
 {
 }
 
-UpdateController::~UpdateController() = default;
+UpdateController::~UpdateController()
+{
+}
 
 QString UpdateController::getRawChangelogText() const
 {

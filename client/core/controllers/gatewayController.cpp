@@ -273,7 +273,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             promise->finish();
         };
 
-        if (sslErrors->isEmpty()&& shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
+        if (sslErrors->isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
             auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
             auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
 
@@ -446,7 +446,6 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             apiErrorMessage = jsonObj.value(QStringLiteral("message")).toString().trimmed();
         }
     } else {
-        // Plaintext JSON error (e.g. HTTP 402 CAPTCHA) is not encrypted — do not treat as proxy failure.
         const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
         if (jsonDoc.isObject()) {
             const QJsonObject jsonObj = jsonDoc.object();
@@ -458,7 +457,7 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
                 return false;
             }
         }
-        // Reverse proxy or unknown route returns plaintext (e.g. "404 page not found") — not a proxy/CDN issue.
+
         if (httpStatusCode == httpStatusCodeNotFound || replyError == QNetworkReply::ContentNotFoundError) {
             return false;
         }
