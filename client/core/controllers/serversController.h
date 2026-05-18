@@ -1,11 +1,11 @@
 #ifndef SERVERSCONTROLLER_H
 #define SERVERSCONTROLLER_H
 
+#include <optional>
+
 #include <QObject>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QSet>
 #include <QVector>
+#include <QMap>
 
 #include <QPair>
 
@@ -17,34 +17,18 @@
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-#include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/serverDescription.h"
 
 class SshSession;
 class InstallController;
 
 using namespace amnezia;
 
-/**
- * @brief Core business logic controller for server operations
- * 
- * This controller contains pure business logic for managing servers.
- */
 class ServersController : public QObject
 {
     Q_OBJECT
-    
-public:
-    struct GatewayStacksData
-    {
-        QSet<QString> userCountryCodes;
-        QSet<QString> serviceTypes;
 
-        bool isEmpty() const { return userCountryCodes.isEmpty() && serviceTypes.isEmpty(); }
-        bool operator==(const GatewayStacksData &other) const;
-        QJsonObject toJson() const;
-    };
-    
 public:
     explicit ServersController(SecureServersRepository* serversRepository, 
                               SecureAppSettingsRepository* appSettingsRepository = nullptr,
@@ -52,44 +36,38 @@ public:
     ~ServersController() = default;
 
     // Server management
-    void addServer(const ServerConfig &server);
-    void editServer(int index, const ServerConfig &server);
-    void removeServer(int index);
-    void setDefaultServerIndex(int index);
+    bool renameServer(const QString &serverId, const QString &name);
+    void removeServer(const QString &serverId);
+    void setDefaultServer(const QString &serverId);
 
     // Container management
-    void setDefaultContainer(int serverIndex, DockerContainer container);
-    void updateContainerConfig(int serverIndex, DockerContainer container, const ContainerConfig &config);
-
-    // Cache management
-    void clearCachedProfile(int serverIndex, DockerContainer container);
+    void setDefaultContainer(const QString &serverId, DockerContainer container);
 
     // Getters
-    QJsonArray getServersArray() const;
-    QVector<ServerConfig> getServers() const;
+    QVector<ServerDescription> buildServerDescriptions(bool isAmneziaDnsEnabled) const;
     int getDefaultServerIndex() const;
+    QString getDefaultServerId() const;
     int getServersCount() const;
-    ServerConfig getServerConfig(int serverIndex) const;
-    ServerCredentials getServerCredentials(int serverIndex) const;
-    ContainerConfig getContainerConfig(int serverIndex, DockerContainer container) const;
-    QPair<QString, QString> getDnsPair(int serverIndex, bool isAmneziaDnsEnabled) const;
-    
-    GatewayStacksData gatewayStacks() const;
+    QString getServerId(int serverIndex) const;
+    int indexOfServerId(const QString &serverId) const;
+    QString notificationDisplayName(const QString &serverId) const;
+    std::optional<ApiV2ServerConfig> apiV2Config(const QString &serverId) const;
+    std::optional<SelfHostedAdminServerConfig> selfHostedAdminConfig(const QString &serverId) const;
+    ServerCredentials getServerCredentials(const QString &serverId) const;
+    QMap<DockerContainer, ContainerConfig> getServerContainersMap(const QString &serverId) const;
+    DockerContainer getDefaultContainer(const QString &serverId) const;
+    ContainerConfig getContainerConfig(const QString &serverId, DockerContainer container) const;
 
     // Validation
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
-    bool hasInstalledContainers(int serverIndex) const;
-
-signals:
-    void gatewayStacksExpanded();
-
-public slots:
-    void recomputeGatewayStacks();
+    bool hasInstalledContainers(const QString &serverId) const;
+    bool isLegacyApiV1Server(const QString &serverId) const;
 
 private:
+    void ensureDefaultServerValid();
+
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
-    GatewayStacksData m_gatewayStacks;
 };
 
 #endif // SERVERSCONTROLLER_H

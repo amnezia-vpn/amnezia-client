@@ -239,7 +239,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
     connect(reply, &QNetworkReply::sslErrors, [sslErrors](const QList<QSslError> &errors) { *sslErrors = errors; });
 
-    connect(reply, &QNetworkReply::finished, reply, [promise, sslErrors, encRequestData, endpoint, apiPayload, reply, this]() mutable {
+    connect(reply, &QNetworkReply::finished, this, [promise, sslErrors, encRequestData, endpoint, apiPayload, reply, this]() mutable {
         QByteArray encryptedResponseBody = reply->readAll();
         QString replyErrorString = reply->errorString();
         auto replyError = reply->error();

@@ -2,14 +2,13 @@
 
 #include "amneziaApplication.h"
 #include "core/configurators/wireguardConfigurator.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
 #include "version.h"
-#include "core/models/serverConfig.h"
 #include <QClipboard>
 #include <QDebug>
 #include <QSet>
@@ -67,7 +66,17 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
                                            ApiDevicesModel* apiDevicesModel,
                                            SettingsController* settingsController,
                                            QObject *parent)
-    : QObject(parent), m_serversController(serversController), m_apiServicesModel(apiServicesModel), m_servicesCatalogController(servicesCatalogController), m_subscriptionController(subscriptionController), m_apiSubscriptionPlansModel(apiSubscriptionPlansModel), m_apiBenefitsModel(apiBenefitsModel), m_apiAccountInfoModel(apiAccountInfoModel), m_apiCountryModel(apiCountryModel), m_apiDevicesModel(apiDevicesModel), m_settingsController(settingsController)
+    : QObject(parent),
+      m_serversController(serversController),
+      m_apiServicesModel(apiServicesModel),
+      m_servicesCatalogController(servicesCatalogController),
+      m_subscriptionController(subscriptionController),
+      m_apiSubscriptionPlansModel(apiSubscriptionPlansModel),
+      m_apiBenefitsModel(apiBenefitsModel),
+      m_apiAccountInfoModel(apiAccountInfoModel),
+      m_apiCountryModel(apiCountryModel),
+      m_apiDevicesModel(apiDevicesModel),
+      m_settingsController(settingsController)
 {
     connect(m_apiServicesModel, &ApiServicesModel::serviceSelectionChanged, this, [this]() {
         ApiServicesModel::ApiServicesData selectedServiceData = m_apiServicesModel->selectedServiceData();
@@ -81,24 +90,24 @@ bool SubscriptionUiController::isCaptchaAwaitingUser() const
     return m_captchaState.isPending;
 }
 
-bool SubscriptionUiController::exportVpnKey(int serverIndex, const QString &fileName)
+bool SubscriptionUiController::exportVpnKey(const QString &serverId, const QString &fileName)
 {
     if (fileName.isEmpty()) {
         emit errorOccurred(ErrorCode::PermissionsError);
         return false;
     }
 
-    prepareVpnKeyExport(serverIndex);
+    prepareVpnKeyExport(serverId);
     if (m_vpnKey.isEmpty()) {
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return false;
     }
 
-    SystemController::saveFile(fileName, m_vpnKey);
-    return true;
+    return SystemController::saveFile(fileName, m_vpnKey);
 }
 
-bool SubscriptionUiController::exportNativeConfig(int serverIndex, const QString &serverCountryCode, const QString &fileName)
+
+bool SubscriptionUiController::exportNativeConfig(const QString &serverId, const QString &serverCountryCode, const QString &fileName)
 {
     if (fileName.isEmpty()) {
         emit errorOccurred(ErrorCode::PermissionsError);
@@ -106,19 +115,21 @@ bool SubscriptionUiController::exportNativeConfig(int serverIndex, const QString
     }
 
     QString nativeConfig;
-    ErrorCode errorCode = m_subscriptionController->exportNativeConfig(serverIndex, serverCountryCode, nativeConfig);
+    ErrorCode errorCode = m_subscriptionController->exportNativeConfig(serverId, serverCountryCode, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
     }
 
-    SystemController::saveFile(fileName, nativeConfig);
-    return true;
+    const bool saved = SystemController::saveFile(fileName, nativeConfig);
+    getAccountInfo(serverId, true);
+    return saved;
 }
 
-bool SubscriptionUiController::revokeNativeConfig(int serverIndex, const QString &serverCountryCode)
+
+bool SubscriptionUiController::revokeNativeConfig(const QString &serverId, const QString &serverCountryCode)
 {
-    ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(serverIndex, serverCountryCode);
+    ErrorCode errorCode = m_subscriptionController->revokeNativeConfig(serverId, serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -126,10 +137,11 @@ bool SubscriptionUiController::revokeNativeConfig(int serverIndex, const QString
     return true;
 }
 
-void SubscriptionUiController::prepareVpnKeyExport(int serverIndex)
+
+void SubscriptionUiController::prepareVpnKeyExport(const QString &serverId)
 {
     QString vpnKey;
-    ErrorCode errorCode = m_subscriptionController->prepareVpnKeyExport(serverIndex, vpnKey);
+    ErrorCode errorCode = m_subscriptionController->prepareVpnKeyExport(serverId, vpnKey);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return;
@@ -144,6 +156,7 @@ void SubscriptionUiController::prepareVpnKeyExport(int serverIndex)
 
     emit vpnKeyExportReady();
 }
+
 
 void SubscriptionUiController::copyVpnKeyToClipboard()
 {
@@ -175,14 +188,12 @@ bool SubscriptionUiController::importPremiumFromAppStore(const QString &storePro
         productId = QStringLiteral("amnezia_premium_6_month");
     }
 
-    ServerConfig serverConfig;
     int duplicateServerIndex = -1;
     ErrorCode errorCode = m_subscriptionController->processAppStorePurchase(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol(),
         productId,
-        serverConfig,
         &duplicateServerIndex);
 
     if (errorCode != ErrorCode::NoError) {
@@ -267,10 +278,9 @@ bool SubscriptionUiController::importFreeFromGateway()
     SubscriptionController::ProtocolData protocolData = m_subscriptionController->generateProtocolData(serviceProtocol);
     SubscriptionController::CaptchaInfo captchaInfo;
 
-    ServerConfig serverConfig;
     ErrorCode errorCode = m_subscriptionController->importServiceFromGateway(userCountryCode, serviceType,
                                                                              serviceProtocol, protocolData,
-                                                                             serverConfig, captchaInfo);
+                                                                             captchaInfo);
 
     if (errorCode == ErrorCode::NoError) {
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
@@ -306,7 +316,6 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
     protocolData.wireGuardClientPubKey = m_captchaState.wireguardClientPubKey;
     protocolData.xrayUuid = m_captchaState.xrayUuid;
 
-    ServerConfig serverConfig;
     SubscriptionController::CaptchaInfo retryCaptcha;
     ErrorCode errorCode = m_subscriptionController->resolveImportServiceCaptcha(
             m_captchaState.userCountryCode,
@@ -315,13 +324,11 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
             protocolData,
             captchaId,
             solution,
-            serverConfig,
             &retryCaptcha);
 
     if (errorCode == ErrorCode::NoError) {
         m_captchaState.isPending = false;
         emit captchaFlowDismissRequested();
-        m_serversController->addServer(serverConfig);
         emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
         return;
     }
@@ -350,14 +357,12 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
     protocolData.xrayUuid = m_captchaState.xrayUuid;
 
     SubscriptionController::CaptchaInfo captchaInfo;
-    ServerConfig serverConfig;
 
     ErrorCode errorCode = m_subscriptionController->importServiceFromGateway(
             m_captchaState.userCountryCode,
             m_captchaState.serviceType,
             m_captchaState.serviceProtocol,
             protocolData,
-            serverConfig,
             captchaInfo);
 
     if (errorCode == ErrorCode::ApiCaptchaRequiredError && captchaInfo.isRequired) {
@@ -372,12 +377,10 @@ void SubscriptionUiController::onRefreshCaptchaRequested()
 bool SubscriptionUiController::importTrialFromGateway(const QString &email)
 {
     emit trialEmailError(QString());
-    ServerConfig serverConfig;
     ErrorCode errorCode = m_subscriptionController->importTrialFromGateway(m_apiServicesModel->getCountryCode(),
                                                                             m_apiServicesModel->getSelectedServiceType(),
                                                                             m_apiServicesModel->getSelectedServiceProtocol(),
-                                                                            email,
-                                                                            serverConfig);
+                                                                            email);
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiTrialAlreadyUsedError) {
             emit trialEmailError(
@@ -392,21 +395,17 @@ bool SubscriptionUiController::importTrialFromGateway(const QString &email)
     return true;
 }
 
-bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
+bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                                     bool reloadServiceConfig)
 {
     bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
     bool wasSubscriptionExpired = false;
-    ServerConfig oldServerConfig = m_serversController->getServerConfig(serverIndex);
-    if (oldServerConfig.isApiV2()) {
-        const ApiV2ServerConfig *oldApiV2 = oldServerConfig.as<ApiV2ServerConfig>();
-        if (oldApiV2) {
-            wasSubscriptionExpired = oldApiV2->apiConfig.subscriptionExpiredByServer
-                    || oldApiV2->apiConfig.isSubscriptionExpired();
-        }
+    if (const auto oldApiV2 = m_serversController->apiV2Config(serverId)) {
+        wasSubscriptionExpired = oldApiV2->apiConfig.subscriptionExpiredByServer
+                || oldApiV2->apiConfig.isSubscriptionExpired();
     }
 
-    ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverIndex, newCountryCode, isConnectEvent);
+    ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverId, newCountryCode, isConnectEvent);
 
     if (errorCode == ErrorCode::NoError) {
         if (wasSubscriptionExpired) {
@@ -430,27 +429,10 @@ bool SubscriptionUiController::updateServiceFromGateway(const int serverIndex, c
     }
 }
 
-bool SubscriptionUiController::updateServiceFromTelegram(const int serverIndex)
+
+bool SubscriptionUiController::deactivateDevice(const QString &serverId)
 {
-#ifdef Q_OS_IOS
-    IosController::Instance()->requestInetAccess();
-    QThread::msleep(10);
-#endif
-
-    ErrorCode errorCode = m_subscriptionController->updateServiceFromTelegram(serverIndex);
-
-    if (errorCode == ErrorCode::NoError) {
-        emit updateServerFromApiFinished();
-        return true;
-    } else {
-        emit errorOccurred(errorCode);
-        return false;
-    }
-}
-
-bool SubscriptionUiController::deactivateDevice(int serverIndex)
-{
-    ErrorCode errorCode = m_subscriptionController->deactivateDevice(serverIndex);
+    ErrorCode errorCode = m_subscriptionController->deactivateDevice(serverId);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -459,9 +441,10 @@ bool SubscriptionUiController::deactivateDevice(int serverIndex)
     return true;
 }
 
-bool SubscriptionUiController::deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode)
+
+bool SubscriptionUiController::deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode)
 {
-    ErrorCode errorCode = m_subscriptionController->deactivateExternalDevice(serverIndex, uuid, serverCountryCode);
+    ErrorCode errorCode = m_subscriptionController->deactivateExternalDevice(serverId, uuid, serverCountryCode);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
@@ -469,13 +452,20 @@ bool SubscriptionUiController::deactivateExternalDevice(int serverIndex, const Q
 
     return true;
 }
+
 
 void SubscriptionUiController::validateConfig()
 {
-    int serverIndex = m_serversController->getDefaultServerIndex();
-    bool hasInstalledContainers = m_serversController->hasInstalledContainers(serverIndex);
+    const QString serverId = m_serversController->getDefaultServerId();
+    if (!serverId.isEmpty() && m_serversController->isLegacyApiV1Server(serverId)) {
+        emit unsupportedConnectDrawerRequested();
+        emit configValidated(false);
+        return;
+    }
 
-    ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverIndex, hasInstalledContainers);
+    bool hasInstalledContainers = m_serversController->hasInstalledContainers(serverId);
+
+    ErrorCode errorCode = m_subscriptionController->validateAndUpdateConfig(serverId, hasInstalledContainers);
 
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError) {
@@ -489,21 +479,33 @@ void SubscriptionUiController::validateConfig()
     emit configValidated(true);
 }
 
-void SubscriptionUiController::setCurrentProtocol(int serverIndex, const QString &protocolName)
+void SubscriptionUiController::setCurrentProtocol(const QString &serverId, const QString &protocolName)
 {
-    m_subscriptionController->setCurrentProtocol(serverIndex, protocolName);
+    m_subscriptionController->setCurrentProtocol(serverId, protocolName);
 }
 
-bool SubscriptionUiController::isVlessProtocol(int serverIndex)
+
+bool SubscriptionUiController::isVlessProtocol(const QString &serverId)
 {
-    return m_subscriptionController->isVlessProtocol(serverIndex);
+    return m_subscriptionController->isVlessProtocol(serverId);
 }
 
-void SubscriptionUiController::removeApiConfig(int serverIndex)
+
+void SubscriptionUiController::removeApiConfig(const QString &serverId)
 {
-    m_subscriptionController->removeApiConfig(serverIndex);
+    m_subscriptionController->removeApiConfig(serverId);
     emit apiConfigRemoved(tr("Api config removed"));
 }
+
+void SubscriptionUiController::removeServer(const QString &serverId)
+{
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
+    if (!m_subscriptionController->removeServer(serverId)) {
+        return;
+    }
+    emit apiServerRemoved(tr("Server '%1' was removed").arg(serverName));
+}
+
 
 QList<QString> SubscriptionUiController::getQrCodes()
 {
@@ -520,7 +522,7 @@ QString SubscriptionUiController::getVpnKey()
     return m_vpnKey;
 }
 
-bool SubscriptionUiController::getAccountInfo(int serverIndex, bool reload)
+bool SubscriptionUiController::getAccountInfo(const QString &serverId, bool reload)
 {
     if (reload) {
         QEventLoop wait;
@@ -528,15 +530,18 @@ bool SubscriptionUiController::getAccountInfo(int serverIndex, bool reload)
         wait.exec(QEventLoop::ExcludeUserInputEvents);
     }
     QJsonObject accountInfo;
-    ErrorCode errorCode = m_subscriptionController->getAccountInfo(serverIndex, accountInfo);
+    ErrorCode errorCode = m_subscriptionController->getAccountInfo(serverId, accountInfo);
     if (errorCode != ErrorCode::NoError) {
         emit errorOccurred(errorCode);
         return false;
     }
 
-    ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-    QJsonObject serverConfigJson = serverConfig.toJson();
-    m_apiAccountInfoModel->updateModel(accountInfo, serverConfigJson);
+    const auto apiV2 = m_serversController->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return false;
+    }
+    m_apiAccountInfoModel->updateModel(accountInfo, apiV2->toJson());
 
     if (reload) {
         updateApiCountryModel();
@@ -557,9 +562,9 @@ void SubscriptionUiController::updateApiDevicesModel()
     m_apiDevicesModel->updateModel(m_apiAccountInfoModel->getIssuedConfigsInfo(), m_settingsController->getInstallationUuid(false));
 }
 
-void SubscriptionUiController::getRenewalLink(int serverIndex)
+void SubscriptionUiController::getRenewalLink(const QString &serverId)
 {
-    if (serverIndex < 0) {
+    if (serverId.isEmpty()) {
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
@@ -577,6 +582,6 @@ void SubscriptionUiController::getRenewalLink(int serverIndex)
         }
         emit renewalLinkReceived(url);
     });
-    watcher->setFuture(m_subscriptionController->getRenewalLink(serverIndex));
+    watcher->setFuture(m_subscriptionController->getRenewalLink(serverId));
 }
 

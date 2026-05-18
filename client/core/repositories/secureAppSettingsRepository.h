@@ -92,6 +92,9 @@ public:
 
     QString nextAvailableServerName() const;
 
+    QByteArray xraySavedConfigs() const;
+    void setXraySavedConfigs(const QByteArray &data);
+
 signals:
     void appLanguageChanged(QLocale locale);
     void allowedDnsServersChanged(const QStringList &servers);
