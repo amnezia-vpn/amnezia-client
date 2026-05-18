@@ -1,10 +1,223 @@
-<receiver android:name=".AmneziaWidgetProvider" android:exported="true">
-    <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-        <action android:name="org.amnezia.vpn.ACTION_TOGGLE_VPN" />
-        <action android:name="org.amnezia.vpn.ACTION_UPDATE_WIDGET_STATE" />
-    </intent-filter>
-    <meta-data
-        android:name="android.appwidget.provider"
-        android:resource="@xml/widget_info" />
-</receiver>
+<?xml version="1.0"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:versionName="-- %%INSERT_VERSION_NAME%% --"
+    android:versionCode="-- %%INSERT_VERSION_CODE%% --"
+    android:installLocation="auto">
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
+
+    <application
+        android:name=".AmneziaApplication"
+        android:label="-- %%INSERT_APP_NAME%% --"
+        android:icon="@mipmap/icon"
+        android:roundIcon="@mipmap/icon_round"
+        android:banner="@mipmap/ic_banner"
+        android:theme="@style/NoActionBar"
+        android:fullBackupContent="@xml/backup_content"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:hasFragileUserData="false"
+        tools:targetApi="s">
+
+        <activity
+            android:name=".AmneziaActivity"
+            android:configChanges="uiMode|screenSize|smallestScreenSize|screenLayout|orientation|density
+                |fontScale|layoutDirection|locale|keyboard|keyboardHidden|navigation|mcc|mnc"
+            android:launchMode="singleInstance"
+            android:windowSoftInputMode="adjustResize|stateUnchanged"
+            android:enableOnBackInvokedCallback="false"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="org.amnezia.vpn.IMPORT_CONFIG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="-- %%INSERT_APP_LIB_NAME%% --" />
+
+        </activity>
+
+        <activity
+            android:name=".CameraActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false" />
+
+        <activity
+            android:name=".VpnRequestActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
+        <activity android:name=".AuthActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
+        <activity android:name=".TvFilePicker"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="false"
+            android:theme="@style/Translucent" />
+
+        <activity
+            android:name=".ImportConfigActivity"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:exported="true"
+            android:theme="@style/Translucent">
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="application/octet-stream" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="vpn" android:host="*" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="file" />
+                <data android:scheme="content" />
+                <data android:mimeType="*/*" />
+                <data android:host="*" />
+
+                <data android:pathPattern=".*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.vpn" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.vpn" />
+
+                <data android:pathPattern=".*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.cfg" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.cfg" />
+
+                <data android:pathPattern=".*\\.conf" />
+                <data android:pathPattern=".*\\..*\\.conf" />
+                <data android:pathPattern=".*\\..*\\..*\\.conf" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\.conf" />
+                <data android:pathPattern=".*\\..*\\..*\\..*\\..*\\.conf" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".AwgService"
+            android:process=":amneziaAwgService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
+            android:exported="false"
+            android:tools:ignore="ForegroundServicePermission">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".OpenVpnService"
+            android:process=":amneziaOpenVpnService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
+            android:exported="false"
+            android:tools:ignore="ForegroundServicePermission">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".XrayService"
+            android:process=":amneziaXrayService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
+            android:exported="false"
+            android:tools:ignore="ForegroundServicePermission">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".AmneziaTileService"
+            android:process=":amneziaTileService"
+            android:icon="@drawable/ic_amnezia_round"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="org.amnezia.vpn.qtprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/qtprovider_paths" />
+        </provider>
+
+        <receiver android:name=".AmneziaWidgetProvider" android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.amnezia.vpn.ACTION_TOGGLE_VPN" />
+                <action android:name="org.amnezia.vpn.ACTION_UPDATE_WIDGET_STATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
+    </application>
+</manifest>
