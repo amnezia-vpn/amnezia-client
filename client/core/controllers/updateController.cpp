@@ -21,14 +21,14 @@ namespace
     Logger logger("UpdateController");
 
 #if defined(Q_OS_WINDOWS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_x64.exe");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-win64.exe");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
 #elif defined(Q_OS_MACOS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos.pkg");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-Darwin.pkg");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.tar");
-    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.tar";
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-Linux.run");
+    const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
 #endif
 }
 
@@ -346,36 +346,10 @@ int UpdateController::runMacInstaller(const QString &installerPath)
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
 int UpdateController::runLinuxInstaller(const QString &installerPath)
 {
-    // Create temporary directory for extraction
-    QTemporaryDir extractDir;
-    extractDir.setAutoRemove(false);
-    if (!extractDir.isValid()) {
-        logger.error() << "Failed to create temporary directory";
-        return -1;
-    }
-    logger.info() << "Temporary directory created:" << extractDir.path();
+    QFile::setPermissions(installerPath, QFile::permissions(installerPath) | QFile::ExeUser);
 
-    // Create script file in the temporary directory
-    QString scriptPath = extractDir.path() + "/installer.sh";
-    QFile scriptFile(scriptPath);
-    if (!scriptFile.open(QIODevice::WriteOnly)) {
-        logger.error() << "Failed to create script file";
-        return -1;
-    }
-
-    // Get script content from registry
-    QString scriptContent = amnezia::scriptData(amnezia::ClientScriptType::linux_installer);
-    scriptFile.write(scriptContent.toUtf8());
-    scriptFile.close();
-    logger.info() << "Script file created:" << scriptPath;
-
-    // Make script executable
-    QFile::setPermissions(scriptPath, QFile::permissions(scriptPath) | QFile::ExeUser);
-
-    // Start detached process
     qint64 pid;
-    bool success =
-            QProcess::startDetached("/bin/bash", QStringList() << scriptPath << extractDir.path() << installerPath, extractDir.path(), &pid);
+    bool success = QProcess::startDetached(installerPath, QStringList(), QString(), &pid);
 
     if (success) {
         logger.info() << "Installation process started with PID:" << pid;
@@ -387,5 +361,3 @@ int UpdateController::runLinuxInstaller(const QString &installerPath)
     return 0;
 }
 #endif
-
-

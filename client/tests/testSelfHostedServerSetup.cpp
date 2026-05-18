@@ -7,8 +7,8 @@
 #include <QDebug>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
-#include "core/models/selfhosted/selfHostedServerConfig.h"
+#include "core/models/serverDescription.h"
+#include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "core/models/protocols/dnsProtocolConfig.h"
@@ -60,21 +60,24 @@ private:
         qDebug() << "SSH connection successful. Output:" << sshOutput;
     }
 
-    void verifyAdminAccess(int serverIndex) {
-        ServerConfig server = m_coreController->m_serversRepository->server(serverIndex);
-        const SelfHostedServerConfig* selfHosted = server.as<SelfHostedServerConfig>();
-        QVERIFY2(selfHosted != nullptr, "Server config should be SelfHostedServerConfig");
+    void verifyAdminAccess(int serverIndex)
+    {
+        const QString serverId = m_coreController->m_serversRepository->serverIdAt(serverIndex);
+        const auto adminCfg = m_coreController->m_serversRepository->selfHostedAdminConfig(serverId);
+        QVERIFY2(adminCfg.has_value(), "Server config should be SelfHostedAdminServerConfig");
+
+        const SelfHostedAdminServerConfig &selfHosted = *adminCfg;
         
-        QVERIFY2(selfHosted->hasCredentials(), 
+        QVERIFY2(selfHosted.hasCredentials(), 
                  "Server should have credentials (admin access)");
         
-        QVERIFY2(selfHosted->userName.has_value() && !selfHosted->userName.value().isEmpty(),
+        QVERIFY2(!selfHosted.userName.isEmpty(),
                  "Server should have userName for admin access");
         
-        QVERIFY2(selfHosted->password.has_value() && !selfHosted->password.value().isEmpty(),
+        QVERIFY2(!selfHosted.password.isEmpty(),
                  "Server should have password for admin access");
         
-        QVERIFY2(!selfHosted->isReadOnly(), 
+        QVERIFY2(!selfHosted.isReadOnly(), 
                  "Server should not be read-only (should have admin access)");
         
         if (m_coreController->m_serversModel) {
@@ -143,7 +146,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -177,10 +180,10 @@ private slots:
         int serverIndex = m_coreController->m_serversRepository->serversCount() - 1;
         qDebug() << "Server with Awg container added at index:" << serverIndex;
         
-        ServerConfig serverAfterAwg = m_coreController->m_serversRepository->server(serverIndex);
-        QVERIFY2(serverAfterAwg.isSelfHosted(), "Server should be self-hosted");
-        const SelfHostedServerConfig* selfHostedAfterAwg = serverAfterAwg.as<SelfHostedServerConfig>();
-        QVERIFY2(selfHostedAfterAwg != nullptr, "Server config should be SelfHostedServerConfig");
+        const auto adminAfterAwg = m_coreController->m_serversRepository->selfHostedAdminConfig(
+            m_coreController->m_serversRepository->serverIdAt(serverIndex));
+        QVERIFY2(adminAfterAwg.has_value(), "Server should be self-hosted (admin)");
+        const SelfHostedAdminServerConfig *selfHostedAfterAwg = &(*adminAfterAwg);
         QVERIFY2(selfHostedAfterAwg->defaultContainer == DockerContainer::Awg, "Default container should be Awg");
         QVERIFY2(selfHostedAfterAwg->containers.contains(DockerContainer::Awg), "Server should have Awg container");
         
@@ -198,8 +201,9 @@ private slots:
         TransportProto dnsTransportProto = TransportProto::Udp;
         bool wasDnsInstalled = false;
         
+        const QString serverIdForOps = m_coreController->m_serversRepository->serverIdAt(serverIndex);
         ErrorCode installContainerError = m_coreController->m_installController->installContainer(
-            serverIndex, DockerContainer::Dns, dnsPort, dnsTransportProto, wasDnsInstalled);
+            serverIdForOps, DockerContainer::Dns, dnsPort, dnsTransportProto, wasDnsInstalled);
         
         QVERIFY2(installContainerError == ErrorCode::NoError,
                  QString("installContainer for Dns should succeed. Error: %1")
@@ -207,9 +211,10 @@ private slots:
                      .toUtf8().constData());
         qDebug() << "Dns container installed:" << wasDnsInstalled;
         
-        ServerConfig serverAfterDns = m_coreController->m_serversRepository->server(serverIndex);
-        const SelfHostedServerConfig* selfHostedAfterDns = serverAfterDns.as<SelfHostedServerConfig>();
-        QVERIFY2(selfHostedAfterDns != nullptr, "Server config should be SelfHostedServerConfig");
+        const auto adminAfterDns = m_coreController->m_serversRepository->selfHostedAdminConfig(
+            m_coreController->m_serversRepository->serverIdAt(serverIndex));
+        QVERIFY2(adminAfterDns.has_value(), "Server config should be SelfHostedAdminServerConfig");
+        const SelfHostedAdminServerConfig *selfHostedAfterDns = &(*adminAfterDns);
         QVERIFY2(selfHostedAfterDns->containers.contains(DockerContainer::Awg), "Server should still have Awg container");
         QVERIFY2(selfHostedAfterDns->containers.contains(DockerContainer::Dns), "Server should have Dns container");
         QVERIFY2(selfHostedAfterDns->containers.size() == 2, 
@@ -242,16 +247,18 @@ private slots:
         
         verifySshConnection(credentials);
         
-        SelfHostedServerConfig serverConfig;
+        SelfHostedAdminServerConfig serverConfig;
         serverConfig.hostName = credentials.hostName;
         serverConfig.userName = credentials.userName;
         serverConfig.password = credentials.secretData;
         serverConfig.port = credentials.port;
         serverConfig.description = m_coreController->m_appSettingsRepository->nextAvailableServerName();
+        serverConfig.displayName = serverConfig.description.isEmpty() ? serverConfig.hostName : serverConfig.description;
         serverConfig.defaultContainer = DockerContainer::None;
         
         QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded);
-        m_coreController->m_serversController->addServer(ServerConfig(serverConfig));
+        m_coreController->m_serversRepository->addServer(QString(), serverConfig.toJson(),
+                                                         serverConfigUtils::ConfigType::SelfHostedAdmin);
         
         QVERIFY2(serverAddedSpy.count() == 1, "serverAdded signal should be emitted");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() > 0, "Server should be added");
@@ -259,23 +266,25 @@ private slots:
         int serverIndex = m_coreController->m_serversRepository->serversCount() - 1;
         qDebug() << "Empty server added at index:" << serverIndex;
         
-        ServerConfig addedServer = m_coreController->m_serversRepository->server(serverIndex);
-        QVERIFY2(addedServer.isSelfHosted(), "Added server should be self-hosted");
-        const SelfHostedServerConfig* selfHosted = addedServer.as<SelfHostedServerConfig>();
-        QVERIFY2(selfHosted != nullptr, "Server config should be SelfHostedServerConfig");
+        const auto addedAdmin = m_coreController->m_serversRepository->selfHostedAdminConfig(
+            m_coreController->m_serversRepository->serverIdAt(serverIndex));
+        QVERIFY2(addedAdmin.has_value(), "Added server should be self-hosted admin");
+        const SelfHostedAdminServerConfig *selfHosted = &(*addedAdmin);
         QVERIFY2(selfHosted->containers.isEmpty(), "Server should have no containers initially");
         QVERIFY2(selfHosted->defaultContainer == DockerContainer::None, "Default container should be None");
         
-        ErrorCode scanError = m_coreController->m_installController->scanServerForInstalledContainers(serverIndex);
+        const QString scanServerId = m_coreController->m_serversRepository->serverIdAt(serverIndex);
+        ErrorCode scanError = m_coreController->m_installController->scanServerForInstalledContainers(scanServerId);
         QVERIFY2(scanError == ErrorCode::NoError, 
                  QString("Server scan should succeed. Error: %1")
                      .arg(static_cast<int>(scanError))
                      .toUtf8().constData());
         qDebug() << "Server scan completed successfully";
         
-        ServerConfig scannedServer = m_coreController->m_serversRepository->server(serverIndex);
-        const SelfHostedServerConfig* scannedSelfHosted = scannedServer.as<SelfHostedServerConfig>();
-        QVERIFY2(scannedSelfHosted != nullptr, "Scanned server config should be SelfHostedServerConfig");
+        const auto scannedAdmin = m_coreController->m_serversRepository->selfHostedAdminConfig(
+            m_coreController->m_serversRepository->serverIdAt(serverIndex));
+        QVERIFY2(scannedAdmin.has_value(), "Scanned server config should be SelfHostedAdminServerConfig");
+        const SelfHostedAdminServerConfig *scannedSelfHosted = &(*scannedAdmin);
         
         QMap<DockerContainer, ContainerConfig> containers = scannedSelfHosted->containers;
         int containersCount = containers.size();
@@ -336,24 +345,27 @@ private slots:
         int serverIndex = m_coreController->m_serversRepository->serversCount() - 1;
         qDebug() << "Server with Awg container added at index:" << serverIndex;
         
-        ServerConfig serverBeforeRemoval = m_coreController->m_serversRepository->server(serverIndex);
-        const SelfHostedServerConfig* selfHostedBeforeRemoval = serverBeforeRemoval.as<SelfHostedServerConfig>();
-        QVERIFY2(selfHostedBeforeRemoval != nullptr, "Server config should be SelfHostedServerConfig");
+        const auto adminBeforeRemoval = m_coreController->m_serversRepository->selfHostedAdminConfig(
+            m_coreController->m_serversRepository->serverIdAt(serverIndex));
+        QVERIFY2(adminBeforeRemoval.has_value(), "Server config should be SelfHostedAdminServerConfig");
+        const SelfHostedAdminServerConfig *selfHostedBeforeRemoval = &(*adminBeforeRemoval);
         QVERIFY2(!selfHostedBeforeRemoval->containers.isEmpty(), "Server should have containers before removal");
         QVERIFY2(selfHostedBeforeRemoval->defaultContainer != DockerContainer::None, "Server should have default container before removal");
         
         qDebug() << "Containers before removal:" << selfHostedBeforeRemoval->containers.size();
         
-        ErrorCode removeError = m_coreController->m_installController->removeAllContainers(serverIndex);
+        const QString removeServerId = m_coreController->m_serversRepository->serverIdAt(serverIndex);
+        ErrorCode removeError = m_coreController->m_installController->removeAllContainers(removeServerId);
         QVERIFY2(removeError == ErrorCode::NoError,
                  QString("removeAllContainers should succeed. Error: %1")
                      .arg(static_cast<int>(removeError))
                      .toUtf8().constData());
         qDebug() << "All containers removed successfully";
         
-        ServerConfig serverAfterRemoval = m_coreController->m_serversRepository->server(serverIndex);
-        const SelfHostedServerConfig* selfHostedAfterRemoval = serverAfterRemoval.as<SelfHostedServerConfig>();
-        QVERIFY2(selfHostedAfterRemoval != nullptr, "Server config should be SelfHostedServerConfig");
+        const auto adminAfterRemoval = m_coreController->m_serversRepository->selfHostedAdminConfig(
+            m_coreController->m_serversRepository->serverIdAt(serverIndex));
+        QVERIFY2(adminAfterRemoval.has_value(), "Server config should be SelfHostedAdminServerConfig");
+        const SelfHostedAdminServerConfig *selfHostedAfterRemoval = &(*adminAfterRemoval);
         
         QVERIFY2(selfHostedAfterRemoval->containers.isEmpty(), 
                  "Server should have no containers after removal");

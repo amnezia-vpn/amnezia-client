@@ -72,7 +72,10 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::TorWebSite, QObject::tr("Website in Tor network") },
              { DockerContainer::Dns, QObject::tr("AmneziaDNS") },
              { DockerContainer::Sftp, QObject::tr("SFTP file sharing service") },
-             { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") } };
+             { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
+             { DockerContainer::MtProxy, QObject::tr("MTProxy (Telegram)") },
+             { DockerContainer::Telemt, QObject::tr("Telemt (Telegram)") },
+    };
 }
 
 QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
@@ -102,7 +105,12 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
              { DockerContainer::Sftp,
                QObject::tr("Create a file vault on your server to securely store and transfer files.") },
              { DockerContainer::Socks5Proxy,
-               QObject::tr("") } };
+               QObject::tr("") },
+             { DockerContainer::MtProxy,
+               QObject::tr("Telegram MTProto proxy server") },
+             { DockerContainer::Telemt,
+               QObject::tr("Telegram MTProto proxy (Telemt, Rust)") },
+    };
 }
 
 QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
@@ -172,7 +180,15 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
                       "You will be able to access it using\n FileZilla or other SFTP clients, "
                       "as well as mount the disk on your device to access\n it directly from your device.\n\n"
                       "For more detailed information, you can\n find it in the support section under \"Create SFTP file storage.\" ") },
-        { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") }
+        { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
+        { DockerContainer::MtProxy,
+          QObject::tr("Telegram MTProto proxy server. "
+                      "Allows Telegram clients to connect through your server "
+                      "using the MTProto protocol. Supports FakeTLS mode for "
+                      "bypassing DPI-based blocking.") },
+        { DockerContainer::Telemt,
+          QObject::tr("Telegram MTProto proxy powered by Telemt (Rust). "
+                      "Supports secure and TLS fronting modes with optional traffic masking.") },
     };
 }
 
@@ -197,6 +213,8 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::Dns: return Proto::Dns;
     case DockerContainer::Sftp: return Proto::Sftp;
     case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
+    case DockerContainer::MtProxy: return Proto::MtProxy;
+    case DockerContainer::Telemt: return Proto::Telemt;
     default: return Proto::Unknown;
     }
 }
@@ -224,6 +242,8 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
+    case DockerContainer::MtProxy: return true;
+    case DockerContainer::Telemt: return true;
     default:
         return false;
     }
@@ -237,7 +257,8 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
-        return false;
+    case DockerContainer::MtProxy: return true;
+    case DockerContainer::Telemt: return true;
     default:
         return false;
     }
@@ -256,6 +277,8 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::Awg: return true;
     case DockerContainer::Xray: return true;
     case DockerContainer::SSXray: return true;
+    case DockerContainer::MtProxy: return true;
+    case DockerContainer::Telemt: return true;
     default: return false;
     }
 
@@ -318,6 +341,8 @@ bool ContainerUtils::isShareable(DockerContainer container)
     case DockerContainer::Dns: return false;
     case DockerContainer::Sftp: return false;
     case DockerContainer::Socks5Proxy: return false;
+    case DockerContainer::MtProxy: return false;
+    case DockerContainer::Telemt: return false;
     default: return true;
     }
 }
@@ -346,8 +371,10 @@ int ContainerUtils::installPageOrder(DockerContainer container)
     case DockerContainer::Xray: return 3;
     case DockerContainer::Ipsec: return 7;
     case DockerContainer::SSXray: return 8;
+    case DockerContainer::MtProxy:
+    case DockerContainer::Telemt:
+        return 20;
     default: return 0;
     }
 }
-
 

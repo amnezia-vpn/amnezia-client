@@ -25,7 +25,9 @@ public:
         IsXrayRole,
         IsSftpRole,
         IsIpsecRole,
-        IsSocks5ProxyRole
+        IsSocks5ProxyRole,
+        IsMtProxyRole,
+        IsTelemtRole,
     };
 
     explicit ProtocolsModel(QObject *parent = nullptr);

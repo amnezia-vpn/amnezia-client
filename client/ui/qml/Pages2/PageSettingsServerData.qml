@@ -111,7 +111,7 @@ PageType {
         readonly property var tColor: AmneziaStyle.color.paleGray
         readonly property var clickedHandler: function() {
             PageController.showBusyIndicator(true)
-            InstallController.scanServerForInstalledContainers(ServersUiController.processedIndex)
+            InstallController.scanServerForInstalledContainers(ServersUiController.getServerId(ServersUiController.processedServerIndex))
             PageController.showBusyIndicator(false)
         }
     }
@@ -134,7 +134,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.rebootServer(ServersUiController.processedIndex)
+                    InstallController.rebootServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -164,7 +164,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.removeServer(ServersUiController.processedIndex)
+                    InstallController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -194,7 +194,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
                 } else {
                     PageController.goToPage(PageEnum.PageDeinstalling)
-                    InstallController.removeAllContainers(ServersUiController.processedIndex)
+                    InstallController.removeAllContainers(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                 }
             }
             var noButtonFunction = function() {
@@ -223,7 +223,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    SubscriptionUiController.removeApiConfig(ServersUiController.processedIndex)
+                    SubscriptionUiController.removeApiConfig(ServersUiController.getServerId(ServersUiController.processedServerIndex))
                     PageController.showBusyIndicator(false)
                 }
             }

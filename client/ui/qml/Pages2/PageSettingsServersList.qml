@@ -86,11 +86,11 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                        ServersUiController.processedIndex = index
+                        ServersUiController.setProcessedServerIndex(index)
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             PageController.showBusyIndicator(true)
-                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
+                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
                             PageController.showBusyIndicator(false)
                             if (!result) {
                                 return

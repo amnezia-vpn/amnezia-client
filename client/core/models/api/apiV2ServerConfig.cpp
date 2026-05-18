@@ -80,6 +80,9 @@ QJsonObject ApiV2ServerConfig::toJson() const
     if (!description.isEmpty()) {
         obj[configKey::description] = description;
     }
+    if (!displayName.isEmpty()) {
+        obj[configKey::displayName] = displayName;
+    }
     
     obj[configKey::configVersion] = configVersion;
     
@@ -131,6 +134,7 @@ ApiV2ServerConfig ApiV2ServerConfig::fromJson(const QJsonObject& json)
     config.name = json.value(configKey::name).toString();
     config.nameOverriddenByUser = json.value(configKey::nameOverriddenByUser).toBool(false);
     config.description = json.value(configKey::description).toString();
+    config.displayName = json.value(configKey::displayName).toString();
     config.configVersion = json.value(configKey::configVersion).toInt(2);
     config.hostName = json.value(configKey::hostName).toString();
     
@@ -161,6 +165,10 @@ ApiV2ServerConfig ApiV2ServerConfig::fromJson(const QJsonObject& json)
     QJsonObject authDataObj = json.value(QLatin1String("auth_data")).toObject();
     if (!authDataObj.isEmpty()) {
         config.authData = AuthData::fromJson(authDataObj);
+    }
+    
+    if (config.displayName.isEmpty()) {
+        config.displayName = config.name.isEmpty() ? config.description : config.name;
     }
     
     return config;

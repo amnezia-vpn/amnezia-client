@@ -37,7 +37,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        property var isServerFromApi: ServersModel.isServerFromApi(ServersUiController.defaultIndex)
+        property var isServerFromApi: ServersModel.isServerFromApi(ServersUiController.defaultServerIndex)
 
         enabled: !isServerFromApi
 
