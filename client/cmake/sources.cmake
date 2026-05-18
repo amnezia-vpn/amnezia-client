@@ -66,6 +66,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
     ${CLIENT_ROOT_DIR}/core/utils/constants.h
     ${CLIENT_ROOT_DIR}/core/vpnTrafficGuard.h
+    ${CLIENT_ROOT_DIR}/core/tunnel.h
 )
 
 # Mozilla headres
@@ -147,6 +148,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/utilities.cpp
     ${CLIENT_ROOT_DIR}/core/utils/managementServer.cpp
     ${CLIENT_ROOT_DIR}/core/vpnTrafficGuard.cpp
+    ${CLIENT_ROOT_DIR}/core/tunnel.cpp
 )
 
 # Mozilla sources

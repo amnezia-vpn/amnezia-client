@@ -106,6 +106,13 @@ QString VpnProtocol::vpnLocalAddress() const
     return m_vpnLocalAddress;
 }
 
+bool VpnProtocol::isWireGuardBased(amnezia::DockerContainer container)
+{
+    return container == amnezia::DockerContainer::Awg
+        || container == amnezia::DockerContainer::Awg2
+        || container == amnezia::DockerContainer::WireGuard;
+}
+
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {
@@ -137,6 +144,7 @@ QString VpnProtocol::textConnectionState(Vpn::ConnectionState connectionState)
     case Vpn::ConnectionState::Preparing: return tr("Preparing");
     case Vpn::ConnectionState::Connecting: return tr("Connecting...");
     case Vpn::ConnectionState::Connected: return tr("Connected");
+    case Vpn::ConnectionState::Switching: return tr("Switching...");
     case Vpn::ConnectionState::Disconnecting: return tr("Disconnecting...");
     case Vpn::ConnectionState::Reconnecting: return tr("Reconnecting...");
     case Vpn::ConnectionState::Error: return tr("Error");
