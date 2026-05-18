@@ -36,7 +36,10 @@
 #include <QPointer>
 #include <QString>
 #include <QTimer>
+
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 class QTcpSocket;
 
@@ -238,7 +241,7 @@ private:
     // accumulates per-resolver outcomes — once `m_probesPending == 0` we
     // aggregate min(upload)/min(download) across the successful ones and
     // push to ResolverPool::setSyncedMtu.
-    QVector<std::unique_ptr<MtuProber>> m_probers;
+    std::vector<std::unique_ptr<MtuProber>> m_probers;
     struct ProbeOutcome {
         bool finished = false;
         bool ok = false;
@@ -250,7 +253,7 @@ private:
 
     // Stream-id allocator + map of active streams.
     quint16 m_nextStreamId = 1;
-    QHash<quint16, std::unique_ptr<ArqStream>> m_streams;
+    std::unordered_map<quint16, std::unique_ptr<ArqStream>> m_streams;
     QHash<quint16, QPointer<QTcpSocket>> m_streamSockets;
 
     // Outstanding DNS query map: dns-tx-id -> resolver index. Used by the

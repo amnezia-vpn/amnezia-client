@@ -28,6 +28,9 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+
+#include <memory>
+#include <vector>
 #include <cstdint>
 #include <memory>
 
@@ -210,10 +213,10 @@ signals:
 private:
     Q_DISABLE_COPY_MOVE(ResolverPool)
 
-    void onIncoming(int index, const QByteArray &bytes, quint16 transactionId);
+    void onIncoming(int index, quint16 transactionId, const QByteArray &bytes);
     void recordSendResult(int index, bool ok);
 
-    QVector<std::unique_ptr<ResolverConnection>> m_connections;
+    std::vector<std::unique_ptr<ResolverConnection>> m_connections;
     Config m_cfg;
     int m_roundRobinCursor = 0;
     int m_syncedUploadMtu = 0;

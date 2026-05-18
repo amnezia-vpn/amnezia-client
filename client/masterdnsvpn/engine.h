@@ -41,8 +41,9 @@
 
 #include <QJsonObject>
 #include <QObject>
-#include <QScopedPointer>
 #include <QString>
+
+#include <memory>
 
 namespace amnezia::masterdnsvpn {
 
@@ -96,7 +97,7 @@ signals:
 
 private:
     Q_DISABLE_COPY_MOVE(Engine)
-    QScopedPointer<EnginePrivate> d;
+    std::unique_ptr<EnginePrivate> d;
 };
 
 } // namespace amnezia::masterdnsvpn

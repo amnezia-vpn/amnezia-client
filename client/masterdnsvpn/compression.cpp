@@ -256,7 +256,7 @@ std::optional<QByteArray> decompressZlibRaw(const QByteArray &input)
     }
 
     QByteArray out;
-    out.reserve(std::max(input.size() * 4, 1024));
+    out.reserve(std::max<qsizetype>(input.size() * 4, 1024));
     QByteArray buf(64 * 1024, Qt::Uninitialized);
 
     zs.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(input.constData()));

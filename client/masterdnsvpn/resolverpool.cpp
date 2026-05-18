@@ -478,8 +478,8 @@ ResolverPick ResolverPool::pickPrimary()
                   [](ResolverConnection *a, ResolverConnection *b) {
                       return lossScore(*a) < lossScore(*b);
                   });
-        const int top = std::max<int>(2, (sorted.size() + 9) / 10);
-        const int len = std::min(top, sorted.size());
+        const int top = std::max<int>(2, static_cast<int>((sorted.size() + 9) / 10));
+        const int len = std::min<int>(top, static_cast<int>(sorted.size()));
         if (len == 0) {
             return {};
         }
@@ -525,9 +525,8 @@ bool ResolverPool::send(int index, const QByteArray &queryBytes)
     return ok;
 }
 
-void ResolverPool::onIncoming(int index, const QByteArray &bytes, quint16 transactionId)
+void ResolverPool::onIncoming(int index, quint16 transactionId, const QByteArray &bytes)
 {
-    Q_UNUSED(index);
     emit responseReceived(index, transactionId, bytes);
 }
 

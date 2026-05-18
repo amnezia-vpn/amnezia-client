@@ -750,7 +750,7 @@ void Session::onInnerPacket(const Packet &packet, int resolverIndex)
         const quint16 sid = *packet.streamId;
         auto it = m_streams.find(sid);
         if (it != m_streams.end()) {
-            (*it)->onPacketReceived(packet);
+            it->second->onPacketReceived(packet);
         }
     }
 }
@@ -907,7 +907,7 @@ void Session::onSocks5Accepted(QTcpSocket *socket, const Socks5Destination &dest
             streamId, m_arqCfg,
             [this, streamId](const ArqOutbound &out) { onArqOutbound(streamId, out); },
             [this, streamId](const ArqDelivery &d) { onArqDelivery(streamId, d); });
-    m_streams.insert(streamId, std::move(stream));
+    m_streams.emplace(streamId, std::move(stream));
     m_streamSockets.insert(streamId, socket);
 
     // Bridge socket -> ARQ.
@@ -918,13 +918,13 @@ void Session::onSocks5Accepted(QTcpSocket *socket, const Socks5Destination &dest
         }
         auto it = m_streams.find(streamId);
         if (it != m_streams.end()) {
-            (*it)->writeApp(bytes);
+            it->second->writeApp(bytes);
         }
     });
     connect(socket, &QTcpSocket::disconnected, this, [this, streamId]() {
         auto it = m_streams.find(streamId);
         if (it != m_streams.end()) {
-            (*it)->halfCloseWrite();
+            it->second->halfCloseWrite();
         }
     });
 
@@ -994,9 +994,9 @@ void Session::onTick()
 {
     const qint64 now = QDateTime::currentMSecsSinceEpoch();
     for (auto it = m_streams.begin(); it != m_streams.end();) {
-        (*it)->tickMs(now);
-        if ((*it)->isTerminal()) {
-            const quint16 sid = it.key();
+        it->second->tickMs(now);
+        if (it->second->isTerminal()) {
+            const quint16 sid = it->first;
             auto sock = m_streamSockets.take(sid);
             if (sock) {
                 sock->disconnectFromHost();
