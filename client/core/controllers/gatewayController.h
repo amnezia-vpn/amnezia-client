@@ -22,11 +22,9 @@ class GatewayController : public QObject
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr,
-                               const QString &reuseAgwRequestBase = QString());
+                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
-    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody,
-                            QString *outEffectiveRequestBase = nullptr);
+    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
@@ -63,8 +61,6 @@ private:
     void bypassProxyAsync(
             const QString &endpoint, const QString &proxyUrl, EncryptedRequestData encRequestData,
             std::function<void(const QByteArray &, bool, const QList<QSslError> &, QNetworkReply::NetworkError, const QString &, int)> onComplete);
-
-    void writeEffectiveRequestBase(QString *outEffectiveRequestBase) const;
 
     int m_requestTimeoutMsecs;
     QString m_gatewayEndpoint;

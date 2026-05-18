@@ -117,12 +117,9 @@ public:
                                           const QString &captchaId, const QString &captchaSolution,
                                           ServerConfig &serverConfig, CaptchaInfo *retryCaptchaOut = nullptr);
 
-    void clearGatewayCaptchaSticky();
-
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
-                             bool isTestPurchase = false, QString *outEffectiveRequestBase = nullptr,
-                             const QString &reuseRequestBase = QString());
+                             bool isTestPurchase = false);
     bool isApiKeyExpired(int serverIndex) const;
     
     ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
@@ -133,8 +130,6 @@ private:
 
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
-
-    QString m_gatewayCaptchaStickyBase;
 };
 
 #endif // SUBSCRIPTIONCONTROLLER_H

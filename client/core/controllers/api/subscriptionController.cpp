@@ -211,18 +211,12 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
 }
 
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
-                                                 bool isTestPurchase, QString *outEffectiveRequestBase,
-                                                 const QString &reuseRequestBase)
+                                                 bool isTestPurchase)
 {
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                         m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
-                                        m_appSettingsRepository->isStrictKillSwitchEnabled(), nullptr, reuseRequestBase);
-    return gatewayController.post(endpoint, apiPayload, responseBody, outEffectiveRequestBase);
-}
-
-void SubscriptionController::clearGatewayCaptchaSticky()
-{
-    m_gatewayCaptchaStickyBase.clear();
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
+    return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
@@ -244,12 +238,9 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
 
     QByteArray responseBody;
-    QString effectiveRequestBase;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, false, &effectiveRequestBase,
-                                         m_gatewayCaptchaStickyBase);
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
     if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
-        m_gatewayCaptchaStickyBase = effectiveRequestBase;
         QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
         if (jsonDoc.isObject()) {
             QJsonObject jsonObj = jsonDoc.object();
@@ -260,8 +251,6 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
         }
         return errorCode;
     }
-
-    m_gatewayCaptchaStickyBase.clear();
 
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
@@ -1153,11 +1142,8 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
     apiPayload["captcha_solution"] = normalizedSolution.isEmpty() ? captchaSolution.trimmed() : normalizedSolution;
 
     QByteArray responseBody;
-    QString effectiveRequestBase;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, false, &effectiveRequestBase,
-                                         m_gatewayCaptchaStickyBase);
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
-        m_gatewayCaptchaStickyBase = effectiveRequestBase;
         if (retryCaptchaOut
             && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError)) {
             const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
@@ -1173,8 +1159,6 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
         }
         return errorCode;
     }
-
-    m_gatewayCaptchaStickyBase.clear();
 
     QJsonObject serverConfigJson;
     errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);

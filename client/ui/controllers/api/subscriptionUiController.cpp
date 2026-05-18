@@ -255,10 +255,6 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
 
 bool SubscriptionUiController::importFreeFromGateway()
 {
-    if (!isCaptchaAwaitingUser()) {
-        m_subscriptionController->clearGatewayCaptchaSticky();
-    }
-
     QString userCountryCode = m_apiServicesModel->getCountryCode();
     QString serviceType = m_apiServicesModel->getSelectedServiceType();
     QString serviceProtocol = m_apiServicesModel->getSelectedServiceProtocol();

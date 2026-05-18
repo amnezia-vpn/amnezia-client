@@ -56,23 +56,13 @@ namespace
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                                     const bool isStrictKillSwitchEnabled, QObject *parent, const QString &reuseAgwRequestBase)
+                                     const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
       m_gatewayEndpoint(gatewayEndpoint),
       m_isDevEnvironment(isDevEnvironment),
       m_requestTimeoutMsecs(requestTimeoutMsecs),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled)
 {
-    if (!reuseAgwRequestBase.isEmpty()) {
-        m_proxyUrl = reuseAgwRequestBase;
-    }
-}
-
-void GatewayController::writeEffectiveRequestBase(QString *outEffectiveRequestBase) const
-{
-    if (outEffectiveRequestBase) {
-        *outEffectiveRequestBase = m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl;
-    }
 }
 
 GatewayController::EncryptedRequestData GatewayController::prepareRequest(const QString &endpoint, const QJsonObject &apiPayload)
@@ -182,12 +172,10 @@ GatewayController::DecryptionResult GatewayController::tryDecryptResponseBody(co
     return result;
 }
 
-ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody,
-                                    QString *outEffectiveRequestBase)
+ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
 {
     EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload);
     if (encRequestData.errorCode != ErrorCode::NoError) {
-        writeEffectiveRequestBase(outEffectiveRequestBase);
         return encRequestData.errorCode;
     }
 
@@ -252,17 +240,14 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     const auto errorCode =
             apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, responseBody);
     if (errorCode) {
-        writeEffectiveRequestBase(outEffectiveRequestBase);
         return errorCode;
     }
 
     if (!decryptionResult.isDecryptionSuccessful) {
         qCritical() << "error when decrypting the request body";
-        writeEffectiveRequestBase(outEffectiveRequestBase);
         return ErrorCode::ApiConfigDecryptionError;
     }
 
-    writeEffectiveRequestBase(outEffectiveRequestBase);
     return ErrorCode::NoError;
 }
 
