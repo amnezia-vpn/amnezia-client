@@ -46,6 +46,11 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnsframing.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/arq.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/resolverpool.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/compression.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnscache.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnsmsg.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/mtuprober.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/pingpacer.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${QSIMPLECRYPTO_DIR}/include/QAead.h
     ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
@@ -77,6 +82,10 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnsframing.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/arq.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/resolverpool.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/compression.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnscache.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/dnsmsg.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../client/masterdnsvpn/mtuprober.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
     ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
@@ -329,6 +338,12 @@ target_link_libraries(${PROJECT} PRIVATE amnezia::xray-bindings)
 
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${PROJECT} PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+
+# masterdnsvpn engine compression layer needs the same codecs the client does.
+find_package(ZLIB REQUIRED)
+find_package(zstd REQUIRED)
+find_package(lz4 REQUIRED)
+target_link_libraries(${PROJECT} PRIVATE ZLIB::ZLIB zstd::libzstd_static lz4::lz4)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
