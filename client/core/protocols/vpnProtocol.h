@@ -27,6 +27,7 @@ namespace Vpn
         Preparing,
         Connecting,
         Connected,
+        Switching,
         Disconnecting,
         Reconnecting,
         Error
@@ -60,6 +61,7 @@ public:
     virtual bool isDisconnected() const;
     virtual ErrorCode start() = 0;
     virtual void stop() = 0;
+    virtual void setPrimary(const QJsonObject& config) { Q_UNUSED(config) }
 
     Vpn::ConnectionState connectionState() const;
     ErrorCode lastError() const;
@@ -71,6 +73,7 @@ public:
     QString vpnLocalAddress() const;
 
     static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
+    static bool isWireGuardBased(amnezia::DockerContainer container);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
@@ -78,6 +81,8 @@ signals:
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
     void tunnelAddressesUpdated(const QString& gateway, const QString& localAddress);
+    void primaryReady();
+    void primaryFailed();
 
 public slots:
     virtual void onTimeout(); // todo: remove?
