@@ -42,6 +42,8 @@ QHash<int, QByteArray> ProtocolsModel::roleNames() const
     roles[IsSftpRole] = "isSftp";
     roles[IsIpsecRole] = "isIpsec";
     roles[IsSocks5ProxyRole] = "isSocks5Proxy";
+    roles[IsMtProxyRole] = "isMtProxy";
+    roles[IsTelemtRole] = "isTelemt";
 
     return roles;
 }
@@ -71,6 +73,8 @@ QVariant ProtocolsModel::data(const QModelIndex &index, int role) const
     case IsSftpRole: return proto == Proto::Sftp;
     case IsIpsecRole: return proto == Proto::Ikev2;
     case IsSocks5ProxyRole: return proto == Proto::Socks5Proxy;
+    case IsMtProxyRole: return proto == Proto::MtProxy;
+    case IsTelemtRole: return proto == Proto::Telemt;
     case RawConfigRole:
         return getRawConfig();
     case IsClientProtocolExistsRole:
@@ -124,6 +128,8 @@ PageLoader::PageEnum ProtocolsModel::serverProtocolPage(Proto protocol) const
     case Proto::Dns: return PageLoader::PageEnum::PageServiceDnsSettings;
     case Proto::Sftp: return PageLoader::PageEnum::PageServiceSftpSettings;
     case Proto::Socks5Proxy: return PageLoader::PageEnum::PageServiceSocksProxySettings;
+    case Proto::MtProxy: return PageLoader::PageEnum::PageServiceMtProxySettings;
+    case Proto::Telemt: return PageLoader::PageEnum::PageServiceTelemtSettings;
     default: return PageLoader::PageEnum::PageProtocolOpenVpnSettings;
     }
 }

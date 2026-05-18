@@ -1,53 +1,40 @@
-#include "selfHostedServerConfig.h"
+#include "selfHostedUserServerConfig.h"
 
 #include <QJsonArray>
-#include <QJsonDocument>
-#include <stdexcept>
 
-#include "core/utils/containerEnum.h"
-#include "core/utils/containers/containerUtils.h"
-#include "core/utils/protocolEnum.h"
-#include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
 
 namespace amnezia
 {
 
 using namespace ContainerEnumNS;
 
-bool SelfHostedServerConfig::hasCredentials() const
+bool SelfHostedUserServerConfig::hasCredentials() const
 {
-    return userName.has_value() && password.has_value() && port.has_value();
+    return false;
 }
 
-bool SelfHostedServerConfig::isReadOnly() const
+bool SelfHostedUserServerConfig::isReadOnly() const
 {
-    return !hasCredentials();
+    return true;
 }
 
-std::optional<ServerCredentials> SelfHostedServerConfig::credentials() const
+std::optional<ServerCredentials> SelfHostedUserServerConfig::credentials() const
 {
-    if (!hasCredentials()) {
-        return std::nullopt;
-    }
-    
-    ServerCredentials creds;
-    creds.hostName = hostName;
-    creds.userName = userName.value();
-    creds.secretData = password.value();
-    creds.port = port.value();
-    
-    return creds;
+    return std::nullopt;
 }
 
-bool SelfHostedServerConfig::hasContainers() const
+bool SelfHostedUserServerConfig::hasContainers() const
 {
     return !containers.isEmpty();
 }
 
-ContainerConfig SelfHostedServerConfig::containerConfig(DockerContainer container) const
+ContainerConfig SelfHostedUserServerConfig::containerConfig(DockerContainer container) const
 {
     if (!containers.contains(container)) {
         return ContainerConfig{};
@@ -55,17 +42,20 @@ ContainerConfig SelfHostedServerConfig::containerConfig(DockerContainer containe
     return containers.value(container);
 }
 
-QJsonObject SelfHostedServerConfig::toJson() const
+QJsonObject SelfHostedUserServerConfig::toJson() const
 {
     QJsonObject obj;
-    
+
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;
+    }
+    if (!displayName.isEmpty()) {
+        obj[configKey::displayName] = displayName;
     }
     if (!hostName.isEmpty()) {
         obj[configKey::hostName] = hostName;
     }
-    
+
     QJsonArray containersArray;
     for (auto it = containers.begin(); it != containers.end(); ++it) {
         QJsonObject containerObj = it.value().toJson();
@@ -74,67 +64,51 @@ QJsonObject SelfHostedServerConfig::toJson() const
     if (!containersArray.isEmpty()) {
         obj[configKey::containers] = containersArray;
     }
-    
+
     if (defaultContainer != DockerContainer::None) {
         obj[configKey::defaultContainer] = ContainerUtils::containerToString(defaultContainer);
     }
-    
+
     if (!dns1.isEmpty()) {
         obj[configKey::dns1] = dns1;
     }
     if (!dns2.isEmpty()) {
         obj[configKey::dns2] = dns2;
     }
-    
-    if (userName.has_value()) {
-        obj[configKey::userName] = userName.value();
-    }
-    if (password.has_value()) {
-        obj[configKey::password] = password.value();
-    }
-    if (port.has_value()) {
-        obj[configKey::port] = port.value();
-    }
-    
+
     return obj;
 }
 
-SelfHostedServerConfig SelfHostedServerConfig::fromJson(const QJsonObject& json)
+SelfHostedUserServerConfig SelfHostedUserServerConfig::fromJson(const QJsonObject &json)
 {
-    SelfHostedServerConfig config;
-    
+    SelfHostedUserServerConfig config;
+
     config.description = json.value(configKey::description).toString();
+    config.displayName = json.value(configKey::displayName).toString();
     config.hostName = json.value(configKey::hostName).toString();
-    
+
     QJsonArray containersArray = json.value(configKey::containers).toArray();
-    for (const QJsonValue& val : containersArray) {
+    for (const QJsonValue &val : containersArray) {
         QJsonObject containerObj = val.toObject();
-        ContainerConfig containerConfig = ContainerConfig::fromJson(containerObj);
-        
+        ContainerConfig cc = ContainerConfig::fromJson(containerObj);
+
         QString containerStr = containerObj.value(configKey::container).toString();
         DockerContainer container = ContainerUtils::containerFromString(containerStr);
-        
-        config.containers.insert(container, containerConfig);
+
+        config.containers.insert(container, cc);
     }
-    
+
     QString defaultContainerStr = json.value(configKey::defaultContainer).toString();
     config.defaultContainer = ContainerUtils::containerFromString(defaultContainerStr);
-    
+
     config.dns1 = json.value(configKey::dns1).toString();
     config.dns2 = json.value(configKey::dns2).toString();
-    
-    if (json.contains(configKey::userName)) {
-        config.userName = json.value(configKey::userName).toString();
+
+    if (config.displayName.isEmpty()) {
+        config.displayName = config.description.isEmpty() ? config.hostName : config.description;
     }
-    if (json.contains(configKey::password)) {
-        config.password = json.value(configKey::password).toString();
-    }
-    if (json.contains(configKey::port)) {
-        config.port = json.value(configKey::port).toInt();
-    }
-    
+
     return config;
 }
 
 } // namespace amnezia
-

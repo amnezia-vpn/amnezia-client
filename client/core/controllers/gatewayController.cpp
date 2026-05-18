@@ -26,8 +26,6 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
-#include "embedded_agw_public_keys.h"
-
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
 #endif
@@ -311,8 +309,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
     connect(reply, &QNetworkReply::sslErrors, [sslErrors](const QList<QSslError> &errors) { *sslErrors = errors; });
 
-    connect(reply, &QNetworkReply::finished, reply,
-            [promise, sslErrors, encRequestData, endpoint, apiPayload, reply, life]() mutable {
+    connect(reply, &QNetworkReply::finished, reply, [promise, sslErrors, encRequestData, endpoint, apiPayload, reply, life]() mutable {
         if (!life) {
             promise->addResult(qMakePair(ErrorCode::ApiConfigDecryptionError, QByteArray()));
             promise->finish();

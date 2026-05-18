@@ -50,6 +50,8 @@ namespace PageLoader
         PageServiceTorWebsiteSettings,
         PageServiceDnsSettings,
         PageServiceSocksProxySettings,
+        PageServiceMtProxySettings,
+        PageServiceTelemtSettings,
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,
@@ -84,7 +86,15 @@ namespace PageLoader
         PageSettingsApiQrPairingSend,
         PageSetupWizardApiQrPairingReceive,
 
-        PageDevMenu
+        PageDevMenu,
+
+        PageProtocolXraySnapshots,
+        PageProtocolXrayTransportSettings,
+        PageProtocolXrayXmuxSettings,
+        PageProtocolXrayXPaddingSettings,
+        PageProtocolXrayFlowSettings,
+        PageProtocolXraySecuritySettings,
+        PageProtocolXrayXPaddingBytesSettings,
     };
     Q_ENUM_NS(PageEnum)
 
@@ -98,8 +108,7 @@ class PageController : public QObject
 {
     Q_OBJECT
 public:
-    explicit PageController(ServersController* serversController,
-                            SettingsController* settingsController,
+    explicit PageController(ServersController* serversController, SettingsController* settingsController,
                             QObject *parent = nullptr);
 
     Q_PROPERTY(int safeAreaTopMargin READ getSafeAreaTopMargin NOTIFY safeAreaTopMarginChanged)
@@ -167,6 +176,8 @@ signals:
 
     void showPassphraseRequestDrawer();
     void passphraseRequestDrawerClosed(QString passphrase);
+
+    void unsupportedConnectDrawerRequested();
 
     void escapePressed();
     void closeTopDrawer();

@@ -5,9 +5,12 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QIODevice>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QMetaObject>
 #include <QPointer>
 #include <QRegularExpression>
+#include <QSet>
 #include <QTimer>
 #include <QUuid>
 #include <string>
@@ -22,7 +25,6 @@
 #endif
 
 #include "core/controllers/gatewayController.h"
-#include "core/models/serverConfig.h"
 #include "core/models/api/apiV2ServerConfig.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/constants/apiKeys.h"
@@ -37,6 +39,48 @@ constexpr auto kScanQrPath = "%1v1/scan_qr";
 constexpr auto kGatewayProbePath = "%1v1/news";
 constexpr int kPairingRetryMaxAttempts = 3;
 constexpr int kGatewayProbeTimeoutMsecs = 3000;
+
+QJsonObject apiGatewayServicesFromServers(const ServersController *serversController)
+{
+    if (!serversController || serversController->getServersCount() == 0) {
+        return {};
+    }
+
+    QSet<QString> userCountryCodes;
+    QSet<QString> serviceTypes;
+    for (int i = 0; i < serversController->getServersCount(); ++i) {
+        const QString serverId = serversController->getServerId(i);
+        const auto apiV2 = serversController->apiV2Config(serverId);
+        if (!apiV2.has_value()) {
+            continue;
+        }
+        if (!apiV2->apiConfig.userCountryCode.isEmpty()) {
+            userCountryCodes.insert(apiV2->apiConfig.userCountryCode);
+        }
+        const QString serviceType = apiV2->serviceType();
+        if (!serviceType.isEmpty()) {
+            serviceTypes.insert(serviceType);
+        }
+    }
+
+    if (userCountryCodes.isEmpty() && serviceTypes.isEmpty()) {
+        return {};
+    }
+
+    QJsonObject json;
+    QJsonArray userCountryCodesArray;
+    for (const QString &code : userCountryCodes) {
+        userCountryCodesArray.append(code);
+    }
+    json.insert(apiDefs::key::userCountryCode, userCountryCodesArray);
+
+    QJsonArray serviceTypesArray;
+    for (const QString &type : serviceTypes) {
+        serviceTypesArray.append(type);
+    }
+    json.insert(apiDefs::key::serviceType, serviceTypesArray);
+    return json;
+}
 
 bool isPairingRetriableError(ErrorCode code)
 {
@@ -507,19 +551,19 @@ bool PairingUiController::canOpenTvQrPairingPage()
         return false;
     }
 
-    if (!m_serversController || m_serversController->gatewayStacks().isEmpty()) {
+    const QJsonObject gatewayServices = apiGatewayServicesFromServers(m_serversController);
+    if (gatewayServices.isEmpty()) {
         return true;
     }
 
     QJsonObject payload;
     payload.insert(QStringLiteral("locale"), m_appSettingsRepository->getAppLanguage().name().split(QLatin1Char('_')).first());
 
-    const QJsonObject stacksJson = m_serversController->gatewayStacks().toJson();
-    if (stacksJson.contains(apiDefs::key::userCountryCode)) {
-        payload.insert(apiDefs::key::userCountryCode, stacksJson.value(apiDefs::key::userCountryCode));
+    if (gatewayServices.contains(apiDefs::key::userCountryCode)) {
+        payload.insert(apiDefs::key::userCountryCode, gatewayServices.value(apiDefs::key::userCountryCode));
     }
-    if (stacksJson.contains(apiDefs::key::serviceType)) {
-        payload.insert(apiDefs::key::serviceType, stacksJson.value(apiDefs::key::serviceType));
+    if (gatewayServices.contains(apiDefs::key::serviceType)) {
+        payload.insert(apiDefs::key::serviceType, gatewayServices.value(apiDefs::key::serviceType));
     }
 
     const bool isTestPurchase = false;
@@ -632,10 +676,8 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                          }
 
                          if (logicalErr == ErrorCode::NoError) {
-                             ServerConfig importedConfig;
                              const ErrorCode impErr = m_subscriptionController->importServerFromQrPairingResponse(
-                                     out.config, out.serviceInfo, out.supportedProtocols, importedConfig);
-                             Q_UNUSED(importedConfig);
+                                     out.config, out.serviceInfo, out.supportedProtocols);
                              setTvBusy(false);
                              if (impErr != ErrorCode::NoError) {
                                  setTvPairingUiPhase(2);
@@ -742,39 +784,35 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
         return;
     }
 
-    const ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-    if (!serverConfig.isApiV2()) {
+    const QString serverId = m_serversController->getServerId(serverIndex);
+    const auto apiV2Opt = m_serversController->apiV2Config(serverId);
+    if (!apiV2Opt.has_value()) {
         qWarning() << "[PairingUi] submitPhonePairing server is not API v2";
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
 
-    const ApiV2ServerConfig *apiV2 = serverConfig.as<ApiV2ServerConfig>();
-    if (!apiV2) {
-        qWarning() << "[PairingUi] submitPhonePairing cast to ApiV2ServerConfig failed";
-        emit errorOccurred(ErrorCode::InternalError);
-        return;
-    }
+    const ApiV2ServerConfig &apiV2 = *apiV2Opt;
 
     QString vpnKey;
-    const ErrorCode keyErr = m_subscriptionController->prepareVpnKeyExport(serverIndex, vpnKey);
+    const ErrorCode keyErr = m_subscriptionController->prepareVpnKeyExport(serverId, vpnKey);
     if (keyErr != ErrorCode::NoError) {
         qWarning() << "[PairingUi] prepareVpnKeyExport failed" << static_cast<int>(keyErr);
         emit errorOccurred(keyErr);
         return;
     }
 
-    const QJsonObject serviceInfo = apiV2->apiConfig.serviceInfo.toJson();
-    const QJsonArray supportedProtocols = apiV2->apiConfig.supportedProtocols;
-    const QString apiKey = apiV2->authData.apiKey;
+    const QJsonObject serviceInfo = apiV2.apiConfig.serviceInfo.toJson();
+    const QJsonArray supportedProtocols = apiV2.apiConfig.supportedProtocols;
+    const QString apiKey = apiV2.authData.apiKey;
     if (apiKey.isEmpty()) {
         qWarning() << "[PairingUi] submitPhonePairing aborted: empty API key on server card";
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return;
     }
 
-    const QString serviceType = apiV2->apiConfig.serviceType.trimmed();
-    const QString userCountryCode = apiV2->apiConfig.userCountryCode.trimmed();
+    const QString serviceType = apiV2.apiConfig.serviceType.trimmed();
+    const QString userCountryCode = apiV2.apiConfig.userCountryCode.trimmed();
 
     const ErrorCode fieldErr =
             PairingController::validatePairingScanFields(trimmedUuid, vpnKey, apiKey, serviceType, userCountryCode);
@@ -795,7 +833,7 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     emit phoneStatusMessageChanged();
     setPhoneBusy(true);
 
-    dispatchPhoneScanQrAttempt(trimmedUuid, apiV2->apiConfig.isTestPurchase, vpnKey, serviceInfo, supportedProtocols, apiKey,
+    dispatchPhoneScanQrAttempt(trimmedUuid, apiV2.apiConfig.isTestPurchase, vpnKey, serviceInfo, supportedProtocols, apiKey,
                                serviceType, userCountryCode, phoneGeneration, 0);
 }
 

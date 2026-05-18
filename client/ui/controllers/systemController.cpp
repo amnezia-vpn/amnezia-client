@@ -1,5 +1,6 @@
 #include "systemController.h"
 
+#include <QDebug>
 #include <QDesktopServices>
 #include <QDir>
 #include <QEventLoop>
@@ -24,11 +25,20 @@ SystemController::SystemController(QObject *parent)
 {
 }
 
-void SystemController::saveFile(const QString &fileName, const QString &data)
+bool SystemController::saveFile(const QString &fileName, const QString &data)
 {
 #if defined Q_OS_ANDROID
     AndroidController::instance()->saveFile(fileName, data);
-    return;
+    return true;
+#endif
+    return saveFile(fileName, data.toUtf8());
+}
+
+bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
+{
+#if defined Q_OS_ANDROID
+    AndroidController::instance()->saveFile(fileName, QString::fromUtf8(data));
+    return true;
 #endif
 
 #ifdef Q_OS_IOS
@@ -39,17 +49,20 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
 #endif
 
     if (!file.open(QIODevice::WriteOnly)) {
-        return;
+        qWarning() << "SystemController::saveFile: cannot open" << fileName;
+        return false;
     }
-    file.write(data.toUtf8());
+    if (file.write(data) != data.size()) {
+        qWarning() << "SystemController::saveFile: write failed" << fileName;
+        file.close();
+        return false;
+    }
     file.close();
 
 #ifdef Q_OS_IOS
     QStringList filesToSend;
     filesToSend.append(fileUrl.toString());
-    // todo check if save successful
-    IosController::Instance()->shareText(filesToSend);
-    return;
+    return IosController::Instance()->shareText(filesToSend);
 #else
     QFileInfo fi(fileName);
 
@@ -62,6 +75,7 @@ void SystemController::saveFile(const QString &fileName, const QString &data)
 #ifndef MACOS_NE
     QDesktopServices::openUrl(url);
 #endif
+    return true;
 #endif
 }
 

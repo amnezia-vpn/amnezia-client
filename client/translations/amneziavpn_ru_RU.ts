@@ -1313,6 +1313,21 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolXraySettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="61"/>
+        <source>XRay VLESS settings</source>
+        <translation>Настройки XRay VLESS</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="80"/>
+        <source>More about settings</source>
+        <translation>Подробнее о настройках</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="188"/>
+        <source>Reset settings</source>
+        <translation>Сбросить настройки</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="57"/>
         <source>XRay settings</source>
         <translation>Настройки XRay</translation>

@@ -56,7 +56,7 @@ namespace libssh {
             QEventLoop wait;
             connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
             watcher.setFuture(future);
-            wait.exec();
+            wait.exec(QEventLoop::ExcludeUserInputEvents);
 
             int connectionResult = watcher.result();
 
@@ -189,7 +189,7 @@ namespace libssh {
 
         QEventLoop wait;
         QObject::connect(this, &Client::writeToChannelFinished, &wait, &QEventLoop::quit);
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
 
         return watcher.result();
     }
@@ -284,7 +284,7 @@ namespace libssh {
 
         QEventLoop wait;
         QObject::connect(this, &Client::scpFileCopyFinished, &wait, &QEventLoop::quit);
-        wait.exec();
+        wait.exec(QEventLoop::ExcludeUserInputEvents);
 
         closeScpSession();
         return watcher.result();

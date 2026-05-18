@@ -14,7 +14,6 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
-#include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 
 using namespace amnezia;
@@ -292,11 +291,18 @@ ErrorCode UsersController::getXrayClients(const DockerContainer container, const
     return error;
 }
 
-ErrorCode UsersController::updateClients(int serverIndex, const DockerContainer container)
+ErrorCode UsersController::updateClients(const QString &serverId, const DockerContainer container)
 {
     ErrorCode error = ErrorCode::NoError;
     SshSession sshSession;
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
 
     QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable");
     if (container == DockerContainer::OpenVpn) {
@@ -381,20 +387,27 @@ ErrorCode UsersController::updateClients(int serverIndex, const DockerContainer 
 }
 
 
-ErrorCode UsersController::appendClient(int serverIndex, const QString &clientId, const QString &clientName, const DockerContainer container)
+ErrorCode UsersController::appendClient(const QString &serverId, const QString &clientId, const QString &clientName, const DockerContainer container)
 {
     ErrorCode error = ErrorCode::NoError;
     SshSession sshSession;
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
 
-    error = updateClients(serverIndex, container);
+    error = updateClients(serverId, container);
     if (error != ErrorCode::NoError) {
         return error;
     }
 
     int existingIndex = clientIndexById(clientId, m_clientsTable);
     if (existingIndex >= 0) {
-        return renameClient(serverIndex, existingIndex, clientName, container, true);
+        return renameClient(serverId, existingIndex, clientName, container, true);
     }
 
     QJsonObject client;
@@ -426,7 +439,7 @@ ErrorCode UsersController::appendClient(int serverIndex, const QString &clientId
     return error;
 }
 
-ErrorCode UsersController::renameClient(int serverIndex, const int row, const QString &clientName,
+ErrorCode UsersController::renameClient(const QString &serverId, const int row, const QString &clientName,
                                                    const DockerContainer container, bool addTimeStamp)
 {
     if (row < 0 || row >= m_clientsTable.size()) {
@@ -434,7 +447,14 @@ ErrorCode UsersController::renameClient(int serverIndex, const int row, const QS
     }
 
     SshSession sshSession;
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
 
     auto client = m_clientsTable.at(row).toObject();
     auto userData = client[configKey::userData].toObject();
@@ -470,7 +490,7 @@ ErrorCode UsersController::renameClient(int serverIndex, const int row, const QS
 }
 
 ErrorCode UsersController::revokeOpenVpn(const int row, const DockerContainer container, const ServerCredentials &credentials,
-                                                    const int serverIndex, SshSession* sshSession, QJsonArray &clientsTable)
+                                                    SshSession* sshSession, QJsonArray &clientsTable)
 {
     if (row < 0 || row >= clientsTable.size()) {
         return ErrorCode::InternalError;
@@ -689,14 +709,21 @@ ErrorCode UsersController::revokeXray(const int row,
     return error;
 }
 
-ErrorCode UsersController::revokeClient(int serverIndex, const int index, const DockerContainer container)
+ErrorCode UsersController::revokeClient(const QString &serverId, const int index, const DockerContainer container)
 {
     if (index < 0 || index >= m_clientsTable.size()) {
         return ErrorCode::InternalError;
     }
 
     SshSession sshSession;
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
 
     QString clientId = m_clientsTable.at(index).toObject().value(configKey::clientId).toString();
     ErrorCode errorCode = ErrorCode::NoError;
@@ -704,7 +731,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
     switch(container)
     {
         case DockerContainer::OpenVpn: {
-            errorCode = revokeOpenVpn(index, container, credentials, serverIndex, &sshSession, m_clientsTable);
+            errorCode = revokeOpenVpn(index, container, credentials, &sshSession, m_clientsTable);
             break;
         }
         case DockerContainer::WireGuard:
@@ -724,12 +751,15 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
     }
 
     if (errorCode == ErrorCode::NoError) {
-        ServerConfig serverConfig = m_serversRepository->server(serverIndex);
-        ContainerConfig containerCfg = m_serversRepository->containerConfig(serverIndex, container);
+        auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!adminConfig.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        ContainerConfig containerCfg = adminConfig->containerConfig(container);
         QString containerClientId = containerCfg.protocolConfig.clientId();
 
         if (!clientId.isEmpty() && !containerClientId.isEmpty() && containerClientId.contains(clientId)) {
-            emit adminConfigRevoked(serverIndex, container);
+            emit adminConfigRevoked(serverId, container);
         }
 
         emit clientRevoked(index);
@@ -739,13 +769,20 @@ ErrorCode UsersController::revokeClient(int serverIndex, const int index, const 
     return errorCode;
 }
 
-ErrorCode UsersController::revokeClient(int serverIndex, const ContainerConfig &containerConfig, const DockerContainer container)
+ErrorCode UsersController::revokeClient(const QString &serverId, const ContainerConfig &containerConfig, const DockerContainer container)
 {
     SshSession sshSession;
-    ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
+    auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!adminConfig.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    ServerCredentials credentials = adminConfig->credentials();
+    if (!credentials.isValid()) {
+        return ErrorCode::InternalError;
+    }
 
     ErrorCode errorCode = ErrorCode::NoError;
-    errorCode = updateClients(serverIndex, container);
+    errorCode = updateClients(serverId, container);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -778,7 +815,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const ContainerConfig &
     switch (container)
     {
     case DockerContainer::OpenVpn: {
-        errorCode = revokeOpenVpn(row, container, credentials, serverIndex, &sshSession, m_clientsTable);
+        errorCode = revokeOpenVpn(row, container, credentials, &sshSession, m_clientsTable);
         break;
     }
     case DockerContainer::WireGuard:
@@ -797,7 +834,7 @@ ErrorCode UsersController::revokeClient(int serverIndex, const ContainerConfig &
     }
 
     if (errorCode == ErrorCode::NoError) {
-        emit adminConfigRevoked(serverIndex, container);
+        emit adminConfigRevoked(serverId, container);
         emit clientRevoked(row);
         emit clientsUpdated(m_clientsTable);
     }
