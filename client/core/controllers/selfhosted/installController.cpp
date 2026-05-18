@@ -1514,6 +1514,7 @@ ErrorCode InstallController::queryDockerContainerStatus(const QString &serverId,
 ErrorCode InstallController::queryMtProxyDiagnostics(const QString &serverId, DockerContainer container, int listenPort,
                                                      MtProxyContainerDiagnostics &out)
 {
+    out = {};
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
         return ErrorCode::InternalError;

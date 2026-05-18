@@ -386,6 +386,7 @@ void InstallUiController::fetchContainerSecret(const QString &serverId, int cont
 }
 
 void InstallUiController::rebootServer(const QString &serverId)
+{
     const QString serverName = m_serversController->notificationDisplayName(serverId);
 
     const auto errorCode = m_installController->rebootServer(serverId);

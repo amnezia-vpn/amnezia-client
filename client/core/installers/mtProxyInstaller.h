@@ -26,7 +26,6 @@ public:
                                              amnezia::DockerContainer container,
                                              const amnezia::ContainerConfig &config);
 
-    /// Shared diagnostics shell for MtProxy and Telemt service containers (legacy script paths).
     static amnezia::ErrorCode queryDiagnostics(SshSession &sshSession, const amnezia::ServerCredentials &credentials,
                                                amnezia::DockerContainer container, int listenPort,
                                                MtProxyContainerDiagnostics &out);
