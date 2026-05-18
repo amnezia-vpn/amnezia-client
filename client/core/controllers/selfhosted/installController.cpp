@@ -774,7 +774,7 @@ ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, 
         return ErrorCode::ServerUserDirectoryNotAccessible;
     if (stdOut.contains("sudoers") || stdOut.contains("is not allowed to run sudo on"))
         return ErrorCode::ServerUserNotAllowedInSudoers;
-    if (stdOut.contains("password is required"))
+    if (stdOut.contains("password is required") || stdOut.contains("authentication is required"))
         return ErrorCode::ServerUserPasswordRequired;
 
     return error;
