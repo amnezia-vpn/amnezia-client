@@ -74,19 +74,22 @@ ListViewType {
                         : AmneziaStyle.color.mutedGray
 
                     checked: index === root.selectedIndex
-                    checkable: !ConnectionController.isConnected
+                    checkable: !ConnectionController.isConnectionInProgress
 
                     ButtonGroup.group: serversRadioButtonGroup
 
                     onClicked: {
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
+                        if (ConnectionController.isConnectionInProgress) {
+                            PageController.showNotificationMessage(qsTr("Unable to change server while connection is in progress"))
                             return
                         }
 
                         root.selectedIndex = index
-
                         ServersUiController.setDefaultServerAtIndex(index)
+
+                        if (ConnectionController.isConnected) {
+                            ConnectionController.openConnection()
+                        }
                     }
 
                     Keys.onEnterPressed: serverRadioButton.clicked()

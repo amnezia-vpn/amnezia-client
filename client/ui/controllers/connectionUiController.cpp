@@ -19,6 +19,7 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
       m_serversController(serversController)
 {
     connect(m_connectionController, &ConnectionController::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
+    connect(m_connectionController, &ConnectionController::serverSwitchFailed, this, &ConnectionUiController::serverSwitchFailed);
 
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
 
@@ -63,6 +64,12 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
         m_isConnectionInProgress = false;
         m_isConnected = true;
         m_connectionStateText = tr("Connected");
+        break;
+    }
+    case Vpn::ConnectionState::Switching: {
+        m_isConnectionInProgress = true;
+        m_isConnected = true;
+        m_connectionStateText = tr("Switching...");
         break;
     }
     case Vpn::ConnectionState::Connecting: {

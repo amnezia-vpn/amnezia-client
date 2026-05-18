@@ -70,7 +70,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 #ifdef AMNEZIA_DESKTOP
     switch (state) {
         case Vpn::ConnectionState::Connected: {
-            m_trafficGuard->setupRoutes(m_vpnConfiguration, m_vpnProtocol, remoteAddress());
+            m_trafficGuard->setupRoutes(m_vpnConfiguration, vpnProtocol(), m_remoteAddress);
         } break;
         default:
             break;
@@ -88,26 +88,22 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 #endif
 }
 
-const QString &VpnConnection::remoteAddress() const
-{
-    return m_remoteAddress;
-}
-
 void VpnConnection::setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository)
 {
     m_serversRepository = serversRepository;
     m_appSettingsRepository = appSettingsRepository;
+    m_trafficGuard.reset(new VpnTrafficGuard(appSettingsRepository, this));
 }
 
 QSharedPointer<VpnProtocol> VpnConnection::vpnProtocol() const
 {
-    return m_vpnProtocol;
+    return m_active ? m_active->protocol() : m_vpnProtocol;
 }
 
 void VpnConnection::disconnectSlots()
 {
-    if (m_vpnProtocol) {
-        m_vpnProtocol->disconnect();
+    if (auto proto = vpnProtocol()) {
+        proto->disconnect();
     }
 }
 
@@ -117,16 +113,45 @@ ErrorCode VpnConnection::lastError() const
     return ErrorCode::AndroidError;
 #endif
 
-    if (m_vpnProtocol.isNull()) {
-        return ErrorCode::InternalError;
-    }
-
-    return m_vpnProtocol.data()->lastError();
+    auto proto = vpnProtocol();
+    return proto.isNull() ? ErrorCode::InternalError : proto->lastError();
 }
 
 Vpn::ConnectionState VpnConnection::connectionState() const
 {
     return m_connectionState;
+}
+
+QString VpnConnection::allocateIfname()
+{
+    for (int i = 0; ; ++i) {
+        const QString name = QStringLiteral("amn") + QString::number(i);
+        if (!m_ifnamesInUse.contains(name)) {
+            m_ifnamesInUse.insert(name);
+            return name;
+        }
+    }
+}
+
+void VpnConnection::releaseIfname(const QString& ifname)
+{
+    m_ifnamesInUse.remove(ifname);
+}
+
+void VpnConnection::wireTunnelSignals(Tunnel* tunnel, bool isActive)
+{
+    connect(tunnel, &Tunnel::prepared, this, &VpnConnection::onTunnelPrepared);
+    connect(tunnel, &Tunnel::activated, this, &VpnConnection::onTunnelActivated);
+    connect(tunnel, &Tunnel::failed, this, &VpnConnection::onTunnelFailed);
+
+    if (isActive) {
+        connect(tunnel, &Tunnel::bytesChanged, this, &VpnConnection::onBytesChanged);
+        // Staging tunnel deliberately skips this wire: applying KS while the old
+        // primary is still serving would clobber its allow-rules. onTunnelActivated
+        // invokes applyFirewall manually after the make-before-break swap.
+        connect(tunnel, &Tunnel::addressesUpdated,
+                m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
+    }
 }
 
 void VpnConnection::connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration)
@@ -142,9 +167,24 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
                         .arg(ContainerUtils::containerToString(container))
              << m_appSettingsRepository->routeMode();
 
-    m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
+    const QString resolvedRemote =
+        NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
+
 #ifdef AMNEZIA_DESKTOP
-    if (!m_trafficGuard->allowEndpoint(m_remoteAddress)) {
+    // Seamless WG -> WG switch path: already connected via Tunnel, new container is also WG.
+    if (m_active
+        && m_connectionState == Vpn::ConnectionState::Connected
+        && VpnProtocol::isWireGuardBased(container)) {
+        if (!m_trafficGuard->allowEndpoint(resolvedRemote)) {
+            setConnectionState(Vpn::ConnectionState::Error);
+            emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
+            return;
+        }
+        startTunnelSwitch(container, vpnConfiguration, resolvedRemote);
+        return;
+    }
+
+    if (!m_trafficGuard->allowEndpoint(resolvedRemote)) {
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
         return;
@@ -152,21 +192,41 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 #endif
     setConnectionState(Vpn::ConnectionState::Connecting);
 
-    m_vpnConfiguration = vpnConfiguration;
+    QJsonObject config = vpnConfiguration;
 
 #ifdef AMNEZIA_DESKTOP
+    if (m_active) {
+        const QString oldIfname = m_active->ifname();
+        m_active->deactivate();
+        delete m_active;
+        m_active = nullptr;
+        releaseIfname(oldIfname);
+    }
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_trafficGuard->teardown();
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
-    appendKillSwitchConfig();
+    appendKillSwitchConfig(config);
 #endif
 
-    appendSplitTunnelingConfig();
+    appendSplitTunnelingConfig(config);
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    m_vpnConfiguration = config;
+    m_remoteAddress = resolvedRemote;
+
+#ifdef AMNEZIA_DESKTOP
+    if (VpnProtocol::isWireGuardBased(container)) {
+        const QString ifname = allocateIfname();
+        m_active = new Tunnel(ifname, container, config, resolvedRemote, this);
+        wireTunnelSignals(m_active, /*isActive=*/true);
+        wireDaemonReconnectSignals();
+        m_trafficGuard->setConfig(config);
+        m_active->prepare();
+        return;
+    }
+
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
     if (!m_vpnProtocol) {
         setConnectionState(Vpn::ConnectionState::Error);
@@ -201,26 +261,33 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
     connect(m_vpnProtocol.data(), &VpnProtocol::tunnelAddressesUpdated, m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
 
+    wireDaemonReconnectSignals();
+}
+
+void VpnConnection::wireDaemonReconnectSignals()
+{
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
+        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn,
+                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn,
+                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
     });
 #endif
 }
 
-void VpnConnection::appendKillSwitchConfig()
+void VpnConnection::appendKillSwitchConfig(QJsonObject &config)
 {
     if (!m_appSettingsRepository) {
         qCritical() << "VpnConnection::appendKillSwitchConfig: repositories not initialized";
         return;
     }
 
-    m_vpnConfiguration.insert(configKey::killSwitchOption, QVariant(m_appSettingsRepository->isKillSwitchEnabled()).toString());
-    m_vpnConfiguration.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
+    config.insert(configKey::killSwitchOption, QVariant(m_appSettingsRepository->isKillSwitchEnabled()).toString());
+    config.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
 }
 
-void VpnConnection::appendSplitTunnelingConfig()
+void VpnConnection::appendSplitTunnelingConfig(QJsonObject &config)
 {
     if (!m_appSettingsRepository) {
         qCritical() << "VpnConnection::appendSplitTunnelingConfig: repositories not initialized";
@@ -230,14 +297,14 @@ void VpnConnection::appendSplitTunnelingConfig()
     bool allowSiteBasedSplitTunneling = true;
 
     // this block is for old native configs and for old self-hosted configs
-    auto protocolName = m_vpnConfiguration.value(configKey::vpnProto).toString();
+    auto protocolName = config.value(configKey::vpnProto).toString();
     if (protocolName == ProtocolUtils::protoToString(Proto::Awg) || protocolName == ProtocolUtils::protoToString(Proto::WireGuard)) {
         allowSiteBasedSplitTunneling = false;
-        auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
+        auto configData = config.value(protocolName + "_config_data").toObject();
         if (configData.value(configKey::allowedIps).isString()) {
             QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(configKey::allowedIps).toString().split(", "));
             configData.insert(configKey::allowedIps, allowedIpsJsonArray);
-            m_vpnConfiguration.insert(protocolName + "_config_data", configData);
+            config.insert(protocolName + "_config_data", configData);
         } else if (configData.value(configKey::allowedIps).isUndefined()) {
             auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
@@ -249,7 +316,7 @@ void VpnConnection::appendSplitTunnelingConfig()
                     }
                     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
                     configData.insert(configKey::allowedIps, allowedIpsJsonArray);
-                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
+                    config.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }
@@ -265,7 +332,7 @@ void VpnConnection::appendSplitTunnelingConfig()
                         break;
                     }
                     configData.insert(configKey::persistentKeepAlive, persistentKeepaliveString.at(1));
-                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
+                    config.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }
@@ -301,14 +368,14 @@ void VpnConnection::appendSplitTunnelingConfig()
                 routeMode = amnezia::RouteMode::VpnAllSites;
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
-                sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns1).toString());
-                sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns2).toString());
+                sitesJsonArray.append(config.value(configKey::dns1).toString());
+                sitesJsonArray.append(config.value(configKey::dns2).toString());
             }
         }
     }
 
-    m_vpnConfiguration.insert(configKey::splitTunnelType, routeMode);
-    m_vpnConfiguration.insert(configKey::splitTunnelSites, sitesJsonArray);
+    config.insert(configKey::splitTunnelType, routeMode);
+    config.insert(configKey::splitTunnelSites, sitesJsonArray);
 
     amnezia::AppsRouteMode appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
@@ -325,8 +392,8 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
     }
 
-    m_vpnConfiguration.insert(configKey::appSplitTunnelType, appsRouteMode);
-    m_vpnConfiguration.insert(configKey::splitTunnelApps, appsJsonArray);
+    config.insert(configKey::appSplitTunnelType, appsRouteMode);
+    config.insert(configKey::splitTunnelApps, appsJsonArray);
 
     qDebug() << QString("Site split tunneling is %1, route mode is %2")
                         .arg(m_appSettingsRepository->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")
@@ -368,9 +435,6 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 }
 
 void VpnConnection::reconnectToVpn() {
-    if (m_vpnProtocol.isNull())
-        return;
-
     if (m_connectionState != Vpn::ConnectionState::Connected) {
         qWarning() << QString("Reconnect triggered on %1 during inappropriate state: %2; ignoring slot")
                               .arg(QMetaEnum::fromType<Vpn::ConnectionState>().valueToKey(m_connectionState));
@@ -380,6 +444,16 @@ void VpnConnection::reconnectToVpn() {
     qDebug() << "Reconnect triggered. Reconnecting to the server";
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
+
+#ifdef AMNEZIA_DESKTOP
+    if (m_active) {
+        m_active->restart();
+        return;
+    }
+#endif
+
+    if (m_vpnProtocol.isNull())
+        return;
 
     m_vpnProtocol->stop();
     if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
@@ -394,6 +468,28 @@ void VpnConnection::disconnectFromVpn()
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
     disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
+#endif
+
+#ifdef AMNEZIA_DESKTOP
+    if (m_staging) {
+        m_trafficGuard->revokeEndpoint(m_staging->remoteAddress());
+        m_staging->deactivate();
+        releaseIfname(m_staging->ifname());
+        delete m_staging;
+        m_staging = nullptr;
+    }
+
+    if (m_active) {
+        setConnectionState(Vpn::ConnectionState::Disconnecting);
+        m_trafficGuard->teardown();
+        m_trafficGuard->revokeEndpoint(m_remoteAddress);
+        m_active->deactivate();
+        releaseIfname(m_active->ifname());
+        delete m_active;
+        m_active = nullptr;
+        setConnectionState(Vpn::ConnectionState::Disconnected);
+        return;
+    }
 #endif
 
     if (m_vpnProtocol.isNull()) {
@@ -434,4 +530,97 @@ void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
 
     m_connectionState = state;
     emit connectionStateChanged(state);
+}
+
+void VpnConnection::startTunnelSwitch(DockerContainer container,
+                                      const QJsonObject &vpnConfiguration,
+                                      const QString &resolvedRemote)
+{
+    QJsonObject config = vpnConfiguration;
+#ifdef AMNEZIA_DESKTOP
+    appendKillSwitchConfig(config);
+#endif
+    appendSplitTunnelingConfig(config);
+
+    const QString stagingIfname = allocateIfname();
+    m_staging = new Tunnel(stagingIfname, container, config, resolvedRemote, this);
+    wireTunnelSignals(m_staging, /*isActive=*/false);
+
+    setConnectionState(Vpn::ConnectionState::Switching);
+    m_staging->prepare();
+}
+
+void VpnConnection::onTunnelPrepared()
+{
+    Tunnel* tunnel = qobject_cast<Tunnel*>(sender());
+    if (!tunnel) return;
+    tunnel->commit();
+}
+
+void VpnConnection::onTunnelActivated()
+{
+    Tunnel* tunnel = qobject_cast<Tunnel*>(sender());
+    if (!tunnel) return;
+
+    if (tunnel == m_staging) {
+        // Make-before-break gate passed: new tunnel is primary, old still allowed by KS.
+        if (m_active) {
+            const QString oldRemote = m_active->remoteAddress();
+            const QString oldIfname = m_active->ifname();
+            m_active->deactivate();
+            delete m_active;
+            releaseIfname(oldIfname);
+            m_trafficGuard->revokeEndpoint(oldRemote);
+        }
+
+        m_active = m_staging;
+        m_staging = nullptr;
+        connect(m_active, &Tunnel::bytesChanged, this, &VpnConnection::onBytesChanged);
+        connect(m_active, &Tunnel::addressesUpdated,
+                m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
+        m_vpnConfiguration = m_active->config();
+        m_remoteAddress = m_active->remoteAddress();
+        m_trafficGuard->setConfig(m_vpnConfiguration);
+
+        if (auto proto = m_active->protocol()) {
+            m_trafficGuard->applyFirewall(proto->vpnGateway(),
+                                          proto->vpnLocalAddress());
+        }
+        setConnectionState(Vpn::ConnectionState::Connected);
+        return;
+    }
+
+    if (tunnel == m_active) {
+        setConnectionState(Vpn::ConnectionState::Connected);
+    }
+}
+
+void VpnConnection::onTunnelFailed(amnezia::ErrorCode error)
+{
+    Tunnel* tunnel = qobject_cast<Tunnel*>(sender());
+    if (!tunnel) return;
+
+    if (tunnel == m_staging) {
+        m_trafficGuard->revokeEndpoint(m_staging->remoteAddress());
+        m_staging->deactivate();
+        releaseIfname(m_staging->ifname());
+        m_staging->deleteLater();
+        m_staging = nullptr;
+        setConnectionState(Vpn::ConnectionState::Connected);
+        emit serverSwitchFailed();
+        return;
+    }
+
+    if (tunnel == m_active) {
+        m_trafficGuard->teardown();
+        m_trafficGuard->revokeEndpoint(m_remoteAddress);
+        m_active->deactivate();
+        releaseIfname(m_active->ifname());
+        m_active->deleteLater();
+        m_active = nullptr;
+        setConnectionState(Vpn::ConnectionState::Error);
+        if (error != ErrorCode::NoError) {
+            emit vpnProtocolError(error);
+        }
+    }
 }
