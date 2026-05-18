@@ -19,9 +19,7 @@ import "../Components"
 PageType {
     id: root
 
-    /** True after "Add Device via QR" until permission result or navigation. */
     property bool pendingOpenQrPageAfterCamera: false
-    /** True after denial: user may enable camera in system settings; resume opens QR page when granted. */
     property bool waitingSettingsReturnForQrPage: false
 
     function proceedOpenQrPairingPage() {

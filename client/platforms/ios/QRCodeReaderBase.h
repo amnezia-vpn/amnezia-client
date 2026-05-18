@@ -17,7 +17,6 @@ public slots:
     void stopReading();
     void setCameraSize(QRect value);
     void setTorchEnabled(bool on);
-    /// Called from AVFoundation delegate on the main queue; emits codeReaded.
     void notifyCodeRead(const QString &code);
 
 signals:

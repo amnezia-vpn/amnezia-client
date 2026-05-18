@@ -31,7 +31,6 @@ public:
     static QString ipAddressFromIpWithSubnet(const QString ip);
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
 
-    /// True for RFC1918 / IPv4 link-local / IPv6 ULA or IPv6 link-local (dev-only LAN gateway with tools/local_gateway).
     static bool hostIsPrivateLanAddress(const QString &host);
 };
 

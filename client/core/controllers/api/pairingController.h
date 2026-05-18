@@ -9,10 +9,6 @@
 
 class SecureAppSettingsRepository;
 
-/**
- * Core API for QR pairing against Amnezia gateway (POST /v1/generate_qr, /v1/scan_qr).
- * Phase 1: transport via GatewayController, error mapping incl. gateway `http_status` wrapper and OpenAPI-style bodies.
- */
 class PairingController
 {
 public:

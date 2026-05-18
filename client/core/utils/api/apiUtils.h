@@ -29,7 +29,6 @@ namespace apiUtils
                                                const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                const QByteArray &responseBody);
 
-    /** Maps gateway JSON `http_status` field (when present) to ErrorCode. Returns NoError if field is missing. */
     amnezia::ErrorCode errorCodeFromGatewayJsonHttpStatus(const QJsonObject &jsonObj);
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);

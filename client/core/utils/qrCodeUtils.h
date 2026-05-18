@@ -10,7 +10,6 @@ namespace qrCodeUtils
     constexpr const qint16 qrMagicCode = 1984;
 
     QList<QString> generateQrCodeImageSeries(const QByteArray &data);
-    /** QR payload is raw UTF-8 text (e.g. hyphenated session UUID) so phone cameras return a parsable string. */
     QList<QString> generateQrCodeImageSeriesPlainText(const QByteArray &utf8Text);
     qrcodegen::QrCode generateQrCode(const QByteArray &data);
     QString svgToBase64(const QString &image);

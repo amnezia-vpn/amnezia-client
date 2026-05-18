@@ -4,10 +4,6 @@
 #include <functional>
 #include <string>
 
-/**
- * iOS-only: UIWindow + UIKit capture for API “send pairing” QR scan.
- * UTF-8 scan payload is valid only for the duration of the callback.
- */
 using AmneziaPairingQrScannedUtf8Handler = std::function<void(const char *)>;
 using AmneziaPairingQrOverlayBackHandler = std::function<void()>;
 

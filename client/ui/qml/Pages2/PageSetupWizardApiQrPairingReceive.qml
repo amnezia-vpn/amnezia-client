@@ -13,14 +13,12 @@ PageType {
     id: root
 
     property int qrImageIndex: 0
-    /** Same window as gateway long-poll: new QR / session on each tick. */
     readonly property int qrRefreshIntervalMs: Math.max(5000, PairingUiController.tvPairingWaitWindowSeconds * 1000)
 
     function scrollPairingToBottom() {
         receiveScroll.contentY = Math.max(0, receiveScroll.contentHeight - receiveScroll.height)
     }
 
-    /** StackView often creates the page already visible — onVisibleChanged may not fire for the initial true. */
     function beginReceiveFlow() {
         PairingUiController.startTvQrSession()
         qrRotationTimer.restart()
