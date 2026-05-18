@@ -9,6 +9,8 @@
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 #include "core/models/protocols/dnsProtocolConfig.h"
+#include "core/models/protocols/mtProxyProtocolConfig.h"
+#include "core/models/protocols/telemtProtocolConfig.h"
 
 namespace amnezia
 {
@@ -40,6 +42,10 @@ Proto ProtocolConfig::type() const
             return Proto::TorWebSite;
         } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
             return Proto::Dns;
+        } else if constexpr (std::is_same_v<T, MtProxyProtocolConfig>) {
+            return Proto::MtProxy;
+        } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
+            return Proto::Telemt;
         }
         return Proto::Unknown;
     }, data);
@@ -69,6 +75,10 @@ QString ProtocolConfig::port() const
             return QString();
         } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
             return QString();
+        } else if constexpr (std::is_same_v<T, MtProxyProtocolConfig>) {
+            return arg.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : arg.port;
+        } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
+            return arg.port.isEmpty() ? QString(protocols::telemt::defaultPort) : arg.port;
         }
         return QString();
     }, data);
@@ -96,6 +106,10 @@ QString ProtocolConfig::transportProto() const
             return QString();
         } else if constexpr (std::is_same_v<T, DnsProtocolConfig>) {
             return QString();
+        } else if constexpr (std::is_same_v<T, MtProxyProtocolConfig>) {
+            return QStringLiteral("tcp");
+        } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
+            return QStringLiteral("tcp");
         }
         return QString();
     }, data);
@@ -330,6 +344,10 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
         return ProtocolConfig{TorProtocolConfig::fromJson(json)};
     case Proto::Dns:
         return ProtocolConfig{DnsProtocolConfig::fromJson(json)};
+    case Proto::MtProxy:
+        return ProtocolConfig{MtProxyProtocolConfig::fromJson(json)};
+    case Proto::Telemt:
+        return ProtocolConfig{TelemtProtocolConfig::fromJson(json)};
     default:
         return ProtocolConfig{AwgProtocolConfig{}};
     }

@@ -173,7 +173,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    InstallController.mountSftpDrive(ServersUiController.processedIndex, port, password, username)
+                    InstallController.mountSftpDrive(ServersUiController.getServerId(ServersUiController.processedServerIndex), port, password, username)
                     PageController.showBusyIndicator(false)
                 }
             }

@@ -8,7 +8,6 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/importController.h"
 #include "core/controllers/coreSignalHandlers.h"
-#include "core/models/serverConfig.h"
 #include "logger.h"
 #include "secureQSettings.h"
 
@@ -90,6 +89,9 @@ void CoreController::initModels()
     m_masterDnsVpnConfigModel = new MasterDnsVpnConfigModel(this);
     setQmlContextProperty("MasterDnsVpnConfigModel", m_masterDnsVpnConfigModel);
 
+    m_xrayConfigSnapshotsModel = new XrayConfigSnapshotsModel(m_appSettingsRepository, m_xrayConfigModel, this);
+    setQmlContextProperty("XrayConfigSnapshotsModel", m_xrayConfigSnapshotsModel);
+
     m_torConfigModel = new TorConfigModel(this);
     setQmlContextProperty("TorConfigModel", m_torConfigModel);
 
@@ -103,6 +105,12 @@ void CoreController::initModels()
 
     m_socks5ConfigModel = new Socks5ProxyConfigModel(this);
     setQmlContextProperty("Socks5ProxyConfigModel", m_socks5ConfigModel);
+
+    m_mtProxyConfigModel = new MtProxyConfigModel(this);
+    setQmlContextProperty("MtProxyConfigModel", m_mtProxyConfigModel);
+
+    m_telemtConfigModel = new TelemtConfigModel(this);
+    setQmlContextProperty("TelemtConfigModel", m_telemtConfigModel);
 
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
@@ -148,7 +156,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
-    m_newsController = new NewsController(m_appSettingsRepository, m_serversController);
+    m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
@@ -174,7 +182,7 @@ void CoreController::initControllers()
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif
-                                                     m_sftpConfigModel, m_socks5ConfigModel, this);
+                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);
@@ -206,6 +214,10 @@ void CoreController::initControllers()
 
     m_systemController = new SystemController(this);
     setQmlContextProperty("SystemController", m_systemController);
+
+    m_networkReachabilityController = new NetworkReachabilityController(this);
+    m_engine->rootContext()->setContextProperty("NetworkReachabilityController", m_networkReachabilityController);
+    m_engine->rootContext()->setContextProperty("NetworkReachability", m_networkReachabilityController);
 
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
@@ -266,9 +278,12 @@ void CoreController::initSignalHandlers()
 {
     m_signalHandlers = new CoreSignalHandlers(this, this);
     m_signalHandlers->initAllHandlers();
-    
+
     // Trigger initial update after handlers are connected
     m_serversUiController->updateModel();
+    if (m_serversUiController->hasServersFromGatewayApi()) {
+        m_apiNewsUiController->fetchNews(false);
+    }
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -326,11 +341,16 @@ PageController* CoreController::pageController() const
 
 void CoreController::openConnectionByIndex(int serverIndex)
 {
+    const QString serverId =
+        m_serversUiController ? m_serversUiController->getServerId(serverIndex) : QString();
+    if (serverId.isEmpty()) {
+        return;
+    }
     if (m_serversModel) {
         m_serversModel->setProcessedServerIndex(serverIndex);
     }
     if (m_serversController) {
-        m_serversController->setDefaultServerIndex(serverIndex);
+        m_serversController->setDefaultServer(serverId);
     }
     m_connectionUiController->toggleConnection();
 }

@@ -17,7 +17,7 @@ import "../Config"
 ListViewType {
     id: root
 
-    property int selectedIndex: ServersUiController.defaultIndex
+    property int selectedIndex: ServersUiController.defaultServerIndex
 
     anchors.top: serversMenuHeader.bottom
     anchors.right: parent.right
@@ -29,8 +29,8 @@ ListViewType {
 
     Connections {
         target: ServersUiController
-        function onDefaultServerIndexChanged(serverIndex) {
-            root.selectedIndex = serverIndex
+        function onDefaultServerIndexChanged() {
+            root.selectedIndex = ServersUiController.defaultServerIndex
         }
     }
 
@@ -86,7 +86,7 @@ ListViewType {
 
                         root.selectedIndex = index
 
-                        ServersUiController.setDefaultServerIndex(index)
+                        ServersUiController.setDefaultServerAtIndex(index)
                     }
 
                     Keys.onEnterPressed: serverRadioButton.clicked()
@@ -106,14 +106,14 @@ ListViewType {
                     z: 1
 
                     onClicked: function() {
-                        ServersUiController.processedIndex = index
+                        ServersUiController.processedServerIndex = index
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
                                 PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
                             } else {
                                 PageController.showBusyIndicator(true)
-                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
+                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
                                 PageController.showBusyIndicator(false)
                                 if (!result) {
                                     return

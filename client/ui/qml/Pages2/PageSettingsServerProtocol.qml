@@ -76,7 +76,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        InstallController.openClientSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
+                        InstallController.openClientSettings(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -104,7 +104,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    InstallController.openServerSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
+                    InstallController.openServerSettings(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 
@@ -147,7 +147,7 @@ PageType {
                         }
 
                         PageController.showBusyIndicator(true)
-                        InstallController.clearCachedProfile(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                        InstallController.clearCachedProfile(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
                         PageController.showBusyIndicator(false)
                     }
 
@@ -191,7 +191,7 @@ PageType {
                         } else
                         {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                            InstallController.removeContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
                         }
                     }
                     var noButtonFunction = function() {

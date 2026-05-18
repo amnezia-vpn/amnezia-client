@@ -82,8 +82,8 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        var serverIndex = ServersUiController.getProcessedServerIndex()
-                        Qt.callLater(deactivateExternalDevice, serverIndex, supportTag, countryCode)
+                        var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
+                        Qt.callLater(deactivateExternalDevice, serverId, supportTag, countryCode)
                     }
                     var noButtonFunction = function() {
                     }
@@ -96,10 +96,10 @@ PageType {
         }
     }
 
-    function deactivateExternalDevice(serverIndex, supportTag, countryCode) {
+    function deactivateExternalDevice(serverId, supportTag, countryCode) {
         PageController.showBusyIndicator(true)
-        if (SubscriptionUiController.deactivateExternalDevice(serverIndex, supportTag, countryCode)) {
-            SubscriptionUiController.getAccountInfo(serverIndex, true)
+        if (SubscriptionUiController.deactivateExternalDevice(serverId, supportTag, countryCode)) {
+            SubscriptionUiController.getAccountInfo(serverId, true)
         }
         PageController.showBusyIndicator(false)
     }

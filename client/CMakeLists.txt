@@ -52,7 +52,7 @@ set(LIBS ${LIBS}
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
     ZLIB::ZLIB
-    zstd::libzstd
+    zstd::libzstd_static
     lz4::lz4
 )
 

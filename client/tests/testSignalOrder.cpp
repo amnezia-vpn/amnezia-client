@@ -5,7 +5,7 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
@@ -38,7 +38,7 @@ private slots:
         m_settings->clearSettings();
         m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -73,11 +73,12 @@ private slots:
         QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved);
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
-        m_coreController->m_serversController->removeServer(1);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(1));
 
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
         QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted when removing default server");
-        QVERIFY2(defaultServerChangedSpy.at(0).at(0).toInt() == 0, "defaultServerChanged should emit new default index 0");
+        QVERIFY2(defaultServerChangedSpy.at(0).at(0).toString() == m_coreController->m_serversRepository->defaultServerId(),
+                 "defaultServerChanged should emit new default server id");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default server index should be 0");
     }
 };
