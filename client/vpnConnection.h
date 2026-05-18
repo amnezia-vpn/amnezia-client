@@ -79,7 +79,6 @@ private:
 
     QJsonObject m_vpnConfiguration;
     QString m_remoteAddress;
-    QJsonObject m_routeMode;
 
     Tunnel* m_active = nullptr;
     Tunnel* m_staging = nullptr;
