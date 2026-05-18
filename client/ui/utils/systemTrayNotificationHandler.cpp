@@ -110,6 +110,7 @@ void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
         m_trayActionDisconnect->setEnabled(true);
         break;
     case Vpn::ConnectionState::Connected:
+    case Vpn::ConnectionState::Switching:
         setTrayIcon(QString(resourcesPath).arg(ConnectedTrayIconName));
         m_trayActionConnect->setEnabled(false);
         m_trayActionDisconnect->setEnabled(true);
