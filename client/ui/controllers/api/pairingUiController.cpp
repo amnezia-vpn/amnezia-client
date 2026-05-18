@@ -238,15 +238,6 @@ void PairingUiController::clearPendingPhonePairingUuid()
     emit pendingPhonePairingUuidChanged();
 }
 
-void PairingUiController::setTvPairingUiPhase(int phase)
-{
-    if (m_tvPairingUiPhase == phase) {
-        return;
-    }
-    m_tvPairingUiPhase = phase;
-    emit tvPairingUiPhaseChanged();
-}
-
 void PairingUiController::openPairingQrScanner()
 {
 #if defined(Q_OS_ANDROID)
@@ -626,7 +617,6 @@ void PairingUiController::startTvQrSession()
     emit tvSessionUuidChanged();
 
     setTvBusy(true);
-    setTvPairingUiPhase(1);
 
     dispatchTvGenerateQrAttempt(generation, 0);
 }
@@ -680,7 +670,6 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                                      out.config, out.serviceInfo, out.supportedProtocols);
                              setTvBusy(false);
                              if (impErr != ErrorCode::NoError) {
-                                 setTvPairingUiPhase(2);
                                  m_tvStatusMessage = tvFailureMessage(impErr);
                                  emit tvStatusMessageChanged();
                                  emit errorOccurred(impErr);
@@ -691,7 +680,6 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                              m_tvStatusMessage = tr("Configuration received");
                              emit tvStatusMessageChanged();
                              emit tvPairingConfigReceived();
-                             setTvPairingUiPhase(0);
                              return;
                          }
 
@@ -707,7 +695,6 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                          }
 
                          setTvBusy(false);
-                         setTvPairingUiPhase(logicalErr == ErrorCode::ApiConfigTimeoutError ? 3 : 2);
                          m_tvStatusMessage = tvFailureMessage(logicalErr);
                          emit tvStatusMessageChanged();
                          emit errorOccurred(logicalErr);
@@ -731,7 +718,6 @@ void PairingUiController::cancelTvQrSession()
     m_tvStatusMessage.clear();
     emit tvStatusMessageChanged();
     resetTvQrDisplay();
-    setTvPairingUiPhase(0);
 }
 
 void PairingUiController::cancelAllPairingActivity()

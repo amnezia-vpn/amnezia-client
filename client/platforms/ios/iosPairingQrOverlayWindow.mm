@@ -905,18 +905,6 @@ void amneziaIosPairingQrOverlayDismiss()
     });
 }
 
-bool amneziaIosPairingQrOverlayIsPresented()
-{
-    if ([NSThread isMainThread]) {
-        return gPairingQrOverlayWindow != nil && !gPairingQrOverlayWindow.hidden;
-    }
-    __block bool out = false;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        out = (gPairingQrOverlayWindow != nil && !gPairingQrOverlayWindow.hidden);
-    });
-    return out;
-}
-
 void amneziaIosPairingQrOverlaySetTorchEnabled(bool on)
 {
     NSLog(@"[PairingQrOverlay] C++ setTorch=%d", (int)on);

@@ -10,7 +10,6 @@ using AmneziaPairingQrOverlayBackHandler = std::function<void()>;
 void amneziaIosPairingQrOverlayPresent(AmneziaPairingQrScannedUtf8Handler onScanned, AmneziaPairingQrOverlayBackHandler onBack,
                                        const std::string &titleUtf8, const std::string &subtitleUtf8);
 void amneziaIosPairingQrOverlayDismiss();
-bool amneziaIosPairingQrOverlayIsPresented();
 void amneziaIosPairingQrOverlaySetTorchEnabled(bool on);
 void amneziaIosPairingQrOverlayRestartCapture();
 

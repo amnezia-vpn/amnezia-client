@@ -32,7 +32,6 @@ class PairingUiController : public QObject
                        pendingPhonePairingUuidChanged)
     Q_PROPERTY(QString lastSuccessfulPhonePairingDisplayName READ lastSuccessfulPhonePairingDisplayName NOTIFY
                        lastSuccessfulPhonePairingDisplayNameChanged)
-    Q_PROPERTY(int tvPairingUiPhase READ tvPairingUiPhase NOTIFY tvPairingUiPhaseChanged)
     Q_PROPERTY(bool embeddedPairingQrCameraActive READ embeddedPairingQrCameraActive WRITE setEmbeddedPairingQrCameraActive NOTIFY
                        embeddedPairingQrCameraActiveChanged)
     Q_PROPERTY(bool iosNativePairingQrOverlayBuild READ iosNativePairingQrOverlayBuild CONSTANT)
@@ -58,7 +57,6 @@ public:
     QString pendingPhonePairingUuid() const { return m_pendingPhonePairingUuid; }
     void setPendingPhonePairingUuid(const QString &uuid);
     QString lastSuccessfulPhonePairingDisplayName() const { return m_lastSuccessfulPhonePairingDisplayName; }
-    int tvPairingUiPhase() const { return m_tvPairingUiPhase; }
     bool embeddedPairingQrCameraActive() const { return m_embeddedPairingQrCameraActive; }
     bool iosNativePairingQrOverlayBuild() const;
     bool androidNativePairingQrOverlayBuild() const;
@@ -67,7 +65,6 @@ public:
     Q_INVOKABLE void refreshIosEmbeddedPairingQrChrome();
 
     qint64 androidPairingReaderCooldownUntilEpochMs() const { return m_androidPairingReaderCooldownUntilEpochMs; }
-    Q_INVOKABLE void suppressAndroidNativePairingReaderStarts(int ms);
 
     Q_INVOKABLE void presentIosPairingQrNativeOverlayScanner(const QString &title = QString(),
                                                            const QString &subtitle = QString());
@@ -97,8 +94,6 @@ public slots:
 
     bool applyScannedTextAsPairingUuid(const QString &raw);
 
-    Q_INVOKABLE void clearPendingPhonePairingUuid();
-
 signals:
     void errorOccurred(amnezia::ErrorCode errorCode);
     void tvQrCodesChanged();
@@ -114,7 +109,6 @@ signals:
     void phonePairingSucceeded();
 
     void pairingUuidFromScan(const QString &uuid);
-    void tvPairingUiPhaseChanged();
     void pairingCameraAccessFinished(bool granted);
     void embeddedPairingQrCameraActiveChanged();
     void androidPairingReaderCooldownUntilEpochMsChanged();
@@ -126,12 +120,13 @@ private:
     void setTvBusy(bool busy);
     void setPhoneBusy(bool busy);
     void resetTvQrDisplay();
+    void clearPendingPhonePairingUuid();
+    void suppressAndroidNativePairingReaderStarts(int ms);
     QString tvFailureMessage(amnezia::ErrorCode code) const;
     void dispatchTvGenerateQrAttempt(quint64 generation, int retryAttempt);
     void dispatchPhoneScanQrAttempt(const QString &qrUuid, bool isTestPurchase, const QString &vpnKey, const QJsonObject &serviceInfo,
                                     const QJsonArray &supportedProtocols, const QString &apiKey, const QString &serviceType,
                                     const QString &userCountryCode, quint64 generation, int retryAttempt);
-    void setTvPairingUiPhase(int phase);
 
     PairingController *m_pairingController {};
     ServersController *m_serversController {};
@@ -145,7 +140,6 @@ private:
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_tvWatcher;
     QPointer<QNetworkReply> m_tvNetworkReply;
     quint64 m_tvSessionGeneration { 0 };
-    int m_tvPairingUiPhase { 0 };
 
     bool m_phonePairingBusy = false;
     QString m_phoneStatusMessage;
