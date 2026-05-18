@@ -41,17 +41,6 @@ namespace
 
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
 
-#ifdef AMNEZIA_LOCAL_GATEWAY
-    bool gatewayUrlIsPlaintextMockTarget(const QString &gatewayEndpoint, const QString &proxyUrl)
-    {
-        const auto hostOf = [](const QString &urlString) -> QString {
-            return QUrl(urlString).host().toLower();
-        };
-        const QString host = proxyUrl.isEmpty() ? hostOf(gatewayEndpoint) : hostOf(proxyUrl);
-        return host == QLatin1String("localhost") || host == QLatin1String("127.0.0.1") || host == QLatin1String("::1")
-               || host == QLatin1String("[::1]");
-    }
-#endif
     constexpr int proxyStorageRequestTimeoutMsecs = 3000;
 }
 
@@ -79,16 +68,6 @@ GatewayController::EncryptedRequestData GatewayController::prepareRequest(const 
     encRequestData.request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     encRequestData.request.setRawHeader(QString("X-Client-Request-ID").toUtf8(), QUuid::createUuid().toString(QUuid::WithoutBraces).toUtf8());
     encRequestData.request.setUrl(endpoint.arg(m_proxyUrl.isEmpty() ? m_gatewayEndpoint : m_proxyUrl));
-
-#ifdef AMNEZIA_LOCAL_GATEWAY
-    if (gatewayUrlIsPlaintextMockTarget(m_gatewayEndpoint, m_proxyUrl)) {
-        encRequestData.requestBody = QJsonDocument(apiPayload).toJson();
-        encRequestData.key.clear();
-        encRequestData.iv.clear();
-        encRequestData.salt.clear();
-        return encRequestData;
-    }
-#endif
 
     // bypass killSwitch exceptions for API-gateway
 #ifdef AMNEZIA_DESKTOP
@@ -195,19 +174,10 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
 
     reply->deleteLater();
 
-#ifdef AMNEZIA_LOCAL_GATEWAY
-    const bool plaintextMock = encRequestData.key.isEmpty();
-    DecryptionResult decryptionResult;
-    decryptionResult.decryptedBody = encryptedResponseBody;
-    decryptionResult.isDecryptionSuccessful = true;
-#else
-    const bool plaintextMock = false;
     auto decryptionResult =
             tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
-#endif
 
-    if (!plaintextMock && sslErrors.isEmpty()
-        && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
+    if (sslErrors.isEmpty() && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
         auto requestFunction = [&encRequestData, &encryptedResponseBody](const QString &url) {
             encRequestData.request.setUrl(url);
             return amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
@@ -277,18 +247,8 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
 
         reply->deleteLater();
 
-#ifdef AMNEZIA_LOCAL_GATEWAY
-        const bool plaintextMock = encRequestData.key.isEmpty();
-        DecryptionResult decryptionResult;
-        decryptionResult.decryptedBody = encryptedResponseBody;
-        decryptionResult.isDecryptionSuccessful = true;
-#else
-        // TODO
-        /// Temp var plaintextMock
-        const bool plaintextMock = false;
         auto decryptionResult =
                 tryDecryptResponseBody(encryptedResponseBody, replyError, encRequestData.key, encRequestData.iv, encRequestData.salt);
-#endif
 
         auto processResponse = [promise, encRequestData](const GatewayController::DecryptionResult &decryptionResult,
                                                          const QList<QSslError> &sslErrors, QNetworkReply::NetworkError replyError,
@@ -313,8 +273,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             promise->finish();
         };
 
-        if (!plaintextMock && sslErrors->isEmpty()
-            && shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
+        if (sslErrors->isEmpty()&& shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful, httpStatusCode)) {
             auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
             auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
 

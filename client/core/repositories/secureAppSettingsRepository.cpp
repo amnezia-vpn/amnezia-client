@@ -16,11 +16,7 @@
 using namespace amnezia;
 
 namespace {
-#ifdef AMNEZIA_LOCAL_GATEWAY
-    constexpr char gatewayEndpoint[] = "http://localhost:8080/";
-#else
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
-#endif
 }
 
 SecureAppSettingsRepository::SecureAppSettingsRepository(SecureQSettings* settings, QObject *parent)
