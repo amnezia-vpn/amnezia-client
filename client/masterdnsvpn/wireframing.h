@@ -21,6 +21,7 @@
 #define MASTERDNSVPN_WIREFRAMING_H
 
 #include <QByteArray>
+#include <QMetaType>
 #include <QtGlobal>
 #include <array>
 #include <cstdint>
