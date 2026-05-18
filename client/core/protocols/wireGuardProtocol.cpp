@@ -12,7 +12,8 @@
 WireguardProtocol::WireguardProtocol(const QJsonObject &configuration, QObject *parent)
     : VpnProtocol(configuration, parent)
 {
-    m_impl.reset(new LocalSocketController());
+    const QString ifname = configuration.value("ifname").toString();
+    m_impl.reset(new LocalSocketController(ifname));
     connect(m_impl.get(), &ControllerImpl::connected, this,
             [this](const QString &pubkey, const QDateTime &connectionTimestamp) {
                 setConnectionState(Vpn::ConnectionState::Connected);

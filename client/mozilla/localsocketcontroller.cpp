@@ -39,7 +39,8 @@ namespace {
 Logger logger("LocalSocketController");
 }
 
-LocalSocketController::LocalSocketController() {
+LocalSocketController::LocalSocketController(const QString& ifname)
+    : m_ifname(ifname) {
   MZ_COUNT_CTOR(LocalSocketController);
 
   m_socket = new QLocalSocket(this);
@@ -121,7 +122,7 @@ void LocalSocketController::daemonConnected() {
   checkStatus();
 }
 
-void LocalSocketController::activate(const QJsonObject &rawConfig) {
+QJsonObject LocalSocketController::buildActivateJson(const QJsonObject& rawConfig) {
   QString protocolName = rawConfig.value("protocol").toString();
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
@@ -134,7 +135,6 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
 
   QJsonObject json;
-  json.insert("type", "activate");
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));
@@ -292,6 +292,19 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
     json.insert(amnezia::configKey::specialJunk5, wgConfig.value(amnezia::configKey::specialJunk5));
   }
 
+  json.insert("ifname", m_ifname);
+  return json;
+}
+
+void LocalSocketController::activate(const QJsonObject& rawConfig) {
+  QJsonObject json = buildActivateJson(rawConfig);
+  json.insert("type", "activate");
+  write(json);
+}
+
+void LocalSocketController::setPrimary(const QJsonObject& rawConfig) {
+  QJsonObject json = buildActivateJson(rawConfig);
+  json.insert("type", "setPrimary");
   write(json);
 }
 
@@ -306,6 +319,7 @@ void LocalSocketController::deactivate() {
 
   QJsonObject json;
   json.insert("type", "deactivate");
+  json.insert("ifname", m_ifname);
   write(json);
   emit disconnected();
 }
@@ -471,12 +485,20 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     return;
   }
 
+  auto belongsToThisTunnel = [this, &obj]() {
+    const QJsonValue val = obj.value("ifname");
+    return !val.isString() || val.toString() == m_ifname;
+  };
+
   if (type == "disconnected") {
+    if (!belongsToThisTunnel()) return;
     disconnectInternal();
     return;
   }
 
   if (type == "connected") {
+    if (!belongsToThisTunnel()) return;
+
     QJsonValue pubkey = obj.value("pubkey");
     if (!pubkey.isString()) {
       logger.error() << "Unexpected pubkey value";
@@ -491,6 +513,18 @@ void LocalSocketController::parseCommand(const QByteArray& command) {
     emit statusUpdated("", m_deviceIpv4, 0, 0);
 
     emit connected(pubkey.toString());
+    return;
+  }
+
+  if (type == "primaryReady") {
+    if (!belongsToThisTunnel()) return;
+    emit primaryReady();
+    return;
+  }
+
+  if (type == "primaryFailed") {
+    if (!belongsToThisTunnel()) return;
+    emit primaryFailed();
     return;
   }
 
