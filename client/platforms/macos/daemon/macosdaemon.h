@@ -11,8 +11,6 @@
 #include "wireguardutilsmacos.h"
 
 class MacOSDaemon final : public Daemon {
-  friend class IPUtilsMacos;
-
  public:
   MacOSDaemon();
   ~MacOSDaemon();
@@ -22,7 +20,6 @@ class MacOSDaemon final : public Daemon {
   bool deactivate(bool emitSignals = true) override;
 
  protected:
-  WireguardUtils* wgutils() const override { return m_wgutils; }
   DnsUtils* dnsutils() override { return m_dnsutils; }
   bool supportIPUtils() const override { return true; }
   IPUtils* iputils() override { return m_iputils; }
@@ -31,13 +28,7 @@ class MacOSDaemon final : public Daemon {
     return new WireguardUtilsMacos(this);
   }
 
-  void replaceActiveWgUtils(WireguardUtils* newUtils) override {
-    delete m_wgutils;
-    m_wgutils = static_cast<WireguardUtilsMacos*>(newUtils);
-  }
-
  private:
-  WireguardUtilsMacos* m_wgutils = nullptr;
   DnsUtilsMacos* m_dnsutils = nullptr;
   IPUtilsMacos* m_iputils = nullptr;
 };

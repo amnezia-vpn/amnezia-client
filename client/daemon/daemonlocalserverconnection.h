@@ -6,6 +6,7 @@
 #define DAEMONLOCALSERVERCONNECTION_H
 
 #include <QObject>
+#include <QString>
 
 #include "daemonerrors.h"
 
@@ -23,7 +24,8 @@ class DaemonLocalServerConnection final : public QObject {
 
   void parseCommand(const QByteArray& json);
 
-  void connected(const QString& pubkey);
+  void onTunnelConnected(const QString& ifname, const QString& pubkey);
+  void onTunnelHandshakeFailed(const QString& ifname);
   void disconnected();
   void backendFailure(DaemonError err);
 

@@ -29,7 +29,6 @@ LinuxDaemon::LinuxDaemon() : Daemon(nullptr) {
 
     logger.debug() << "Daemon created";
 
-    m_wgutils = new WireguardUtilsLinux(this);
     m_dnsutils = new DnsUtilsLinux(this);
     m_iputils = new IPUtilsLinux(this);
 

@@ -62,7 +62,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
     return false;
   }
 
-  const QString ifname = config.m_ifname.isEmpty() ? QString(WG_INTERFACE) : config.m_ifname;
+  const QString ifname = config.m_ifname;
 
   QDir wgRuntimeDir(WG_RUNTIME_DIR);
   if (!wgRuntimeDir.exists()) {
@@ -146,30 +146,6 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   int err = uapiErrno(uapiCommand(message));
   if (err != 0) {
     logger.error() << "Interface configuration failed:" << strerror(err);
-  } else {
-    if (config.m_killSwitchEnabled) {
-      FirewallParams params { };
-      params.dnsServers.append(config.m_primaryDnsServer);
-      if (!config.m_secondaryDnsServer.isEmpty()) {
-          params.dnsServers.append(config.m_secondaryDnsServer);
-      }
-
-      if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-          params.blockAll = true;
-          if (config.m_excludedAddresses.size()) {
-              params.allowNets = true;
-              foreach (auto net, config.m_excludedAddresses) {
-                  params.allowAddrs.append(net.toUtf8());
-              }
-          }
-      } else {
-          params.blockNets = true;
-          foreach (auto net, config.m_allowedIPAddressRanges) {
-              params.blockAddrs.append(net.toString());
-          }
-      }
-      applyFirewallRules(params);
-    }
   }
   return (err == 0);
 }
@@ -454,29 +430,4 @@ QString WireguardUtilsMacos::waitForTunnelName(const QString& filename) {
   }
 
   return QString();
-}
-
-void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
-{
-  // double-check + ensure our firewall is installed and enabled. This is necessary as
-  // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
-  if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
-
-  MacOSFirewall::ensureRootAnchorPriority();
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), params.blockAll);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), params.allowNets);
-  MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), params.allowNets,
-                                QStringLiteral("allownets"), params.allowAddrs);
-
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), params.blockNets);
-  MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), params.blockNets,
-                                QStringLiteral("blocknets"), params.blockAddrs);
-
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
-  MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), params.dnsServers);
 }

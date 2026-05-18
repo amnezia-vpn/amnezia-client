@@ -13,6 +13,8 @@
 
 class QJsonObject;
 
+constexpr int ACTIVATION_TIMEOUT_MSEC = 30000;
+
 class InterfaceConfig {
   Q_GADGET
 

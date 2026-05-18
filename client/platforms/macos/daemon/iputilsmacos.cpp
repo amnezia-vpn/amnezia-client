@@ -39,8 +39,12 @@ bool IPUtilsMacos::addInterfaceIPs(const InterfaceConfig& config) {
 }
 
 bool IPUtilsMacos::setMTUAndUp(const InterfaceConfig& config) {
-  Q_UNUSED(config);
-  QString ifname = MacOSDaemon::instance()->m_wgutils->interfaceName();
+  WireguardUtils* wg = MacOSDaemon::instance()->wgutilsFor(config.m_ifname);
+  if (!wg) {
+    logger.error() << "No wireguard interface for" << config.m_ifname;
+    return false;
+  }
+  QString ifname = wg->interfaceName();
   struct ifreq ifr;
 
   // Create socket file descriptor to perform the ioctl operations on
@@ -80,8 +84,12 @@ bool IPUtilsMacos::setMTUAndUp(const InterfaceConfig& config) {
 }
 
 bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
-  Q_UNUSED(config);
-  QString ifname = MacOSDaemon::instance()->m_wgutils->interfaceName();
+  WireguardUtils* wg = MacOSDaemon::instance()->wgutilsFor(config.m_ifname);
+  if (!wg) {
+    logger.error() << "No wireguard interface for" << config.m_ifname;
+    return false;
+  }
+  QString ifname = wg->interfaceName();
   struct ifaliasreq ifr;
   struct sockaddr_in* ifrAddr = (struct sockaddr_in*)&ifr.ifra_addr;
   struct sockaddr_in* ifrMask = (struct sockaddr_in*)&ifr.ifra_mask;
@@ -130,8 +138,12 @@ bool IPUtilsMacos::addIP4AddressToDevice(const InterfaceConfig& config) {
 }
 
 bool IPUtilsMacos::addIP6AddressToDevice(const InterfaceConfig& config) {
-  Q_UNUSED(config);
-  QString ifname = MacOSDaemon::instance()->m_wgutils->interfaceName();
+  WireguardUtils* wg = MacOSDaemon::instance()->wgutilsFor(config.m_ifname);
+  if (!wg) {
+    logger.error() << "No wireguard interface for" << config.m_ifname;
+    return false;
+  }
+  QString ifname = wg->interfaceName();
   struct in6_aliasreq ifr6;
 
   // Name the interface and set family
