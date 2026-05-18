@@ -193,8 +193,8 @@ QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
     QStringList result;
     for (const QString& server : servers)
     {
-        result << QStringLiteral("-o amn0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o amn0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
+        result << QStringLiteral("-o amn+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
+        result << QStringLiteral("-o amn+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
         result << QStringLiteral("-o tun2+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
@@ -278,7 +278,7 @@ void LinuxFirewall::install()
                                                          });
 
     installAnchor(Both, QStringLiteral("200.allowVPN"), {
-                                                            QStringLiteral("-o amn0+ -j ACCEPT"),
+                                                            QStringLiteral("-o amn+ -j ACCEPT"),
                                                             QStringLiteral("-o tun0+ -j ACCEPT"),
                                                             QStringLiteral("-o tun2+ -j ACCEPT"),
                                                         });

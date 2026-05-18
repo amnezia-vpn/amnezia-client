@@ -11,7 +11,6 @@
 
 #include "daemon/wireguardutils.h"
 #include "linuxroutemonitor.h"
-#include "linuxfirewall.h"
 
 
 class WireguardUtilsLinux final : public WireguardUtils {
@@ -40,7 +39,6 @@ public:
 
     bool excludeLocalNetworks(const QList<IPAddress>& lanAddressRanges) override;
 
-    void applyFirewallRules(FirewallParams& params);
 signals:
     void backendFailure();
 

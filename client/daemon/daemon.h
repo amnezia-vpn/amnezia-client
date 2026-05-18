@@ -22,7 +22,6 @@ class Daemon : public QObject {
   enum Op {
     Up,
     Down,
-    Switch,
   };
 
   explicit Daemon(QObject* parent);
@@ -32,9 +31,14 @@ class Daemon : public QObject {
 
   static bool parseConfig(const QJsonObject& obj, InterfaceConfig& config);
 
-  virtual bool activate(const InterfaceConfig& config);
+  bool activate(const QString& ifname, const InterfaceConfig& config);
+  bool setPrimary(const QString& ifname, const InterfaceConfig& config);
+  bool deactivateTunnel(const QString& ifname);
   virtual bool deactivate(bool emitSignals = true);
   virtual QJsonObject getStatus();
+
+  const QString& primaryIfname() const { return m_primaryIfname; }
+  WireguardUtils* wgutilsFor(const QString& ifname) const { return m_tunnels.value(ifname); }
 
   // Callback before any Activating measure is done
   virtual void prepareActivation(const InterfaceConfig& config, int inetAdapterIndex = 0) {
@@ -46,12 +50,8 @@ class Daemon : public QObject {
   void cleanLogs();
 
  signals:
-  void connected(const QString& pubkey);
-  /**
-   * Can be fired if a call to activate() was unsucessfull
-   * and connected systems should rollback
-   */
-  void activationFailure();
+  void tunnelConnected(const QString& ifname, const QString& pubkey);
+  void tunnelHandshakeFailed(const QString& ifname);
   void disconnected();
   void backendFailure(DaemonError reason = DaemonError::ERROR_FATAL);
 
@@ -59,6 +59,10 @@ class Daemon : public QObject {
   bool maybeUpdateResolvers(const InterfaceConfig& config);
   bool addExclusionRoute(const IPAddress& address);
   bool delExclusionRoute(const IPAddress& address);
+  void demotePrimary(const QString& ifname);
+  void checkActivations();
+  WireguardUtils* primaryWgutils() const { return m_tunnels.value(m_primaryIfname); }
+  QTimer m_activationTimer;
 
  protected:
   virtual bool run(Op op, const InterfaceConfig& config) {
@@ -66,13 +70,11 @@ class Daemon : public QObject {
     Q_UNUSED(config);
     return true;
   }
-  virtual bool supportServerSwitching(const InterfaceConfig& config) const;
-  virtual bool switchServer(const InterfaceConfig& config);
-  virtual WireguardUtils* wgutils() const = 0;
   virtual WireguardUtils* createWgUtils() = 0;
-  virtual void replaceActiveWgUtils(WireguardUtils* newUtils) = 0;
 
-  WireguardUtils* m_stagingWgutils = nullptr;
+  QMap<QString, WireguardUtils*> m_tunnels;
+  QString m_primaryIfname;
+
   virtual bool supportIPUtils() const { return false; }
   virtual IPUtils* iputils() { return nullptr; }
   virtual DnsUtils* dnsutils() { return nullptr; }
@@ -80,18 +82,16 @@ class Daemon : public QObject {
   static bool parseStringList(const QJsonObject& obj, const QString& name,
                               QStringList& list);
 
-  void checkHandshake();
-
   class ConnectionState {
    public:
     ConnectionState(){};
     ConnectionState(const InterfaceConfig& config) { m_config = config; }
     QDateTime m_date;
+    QDateTime m_deadline;
     InterfaceConfig m_config;
   };
-  QMap<InterfaceConfig::HopType, ConnectionState> m_connections;
+  QMap<QString, ConnectionState> m_connections;
   QHash<IPAddress, int> m_excludedAddrSet;
-  QTimer m_handshakeTimer;
 };
 
 #endif  // DAEMON_H

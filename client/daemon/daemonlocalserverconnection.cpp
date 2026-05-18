@@ -31,8 +31,10 @@ DaemonLocalServerConnection::DaemonLocalServerConnection(QObject* parent,
           &DaemonLocalServerConnection::readData);
 
   Daemon* daemon = Daemon::instance();
-  connect(daemon, &Daemon::connected, this,
-          &DaemonLocalServerConnection::connected);
+  connect(daemon, &Daemon::tunnelConnected,
+          this, &DaemonLocalServerConnection::onTunnelConnected);
+  connect(daemon, &Daemon::tunnelHandshakeFailed,
+          this, &DaemonLocalServerConnection::onTunnelHandshakeFailed);
   connect(daemon, &Daemon::disconnected, this,
           &DaemonLocalServerConnection::disconnected);
   connect(daemon, &Daemon::backendFailure, this,
@@ -107,19 +109,44 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
     InterfaceConfig config;
     if (!Daemon::parseConfig(obj, config)) {
       logger.error() << "Invalid configuration";
-      emit disconnected();
+      disconnected();
       return;
     }
-
-    if (!Daemon::instance()->activate(config)) {
+    if (!Daemon::instance()->activate(config.m_ifname, config)) {
       logger.error() << "Failed to activate the interface";
-      emit disconnected();
+      disconnected();
     }
     return;
   }
 
   if (type == "deactivate") {
-    Daemon::instance()->deactivate(true);
+    const QString ifname = obj.value("ifname").toString();
+    if (!ifname.isEmpty()) {
+      Daemon::instance()->deactivateTunnel(ifname);
+    } else {
+      Daemon::instance()->deactivate(true);
+    }
+    return;
+  }
+
+  if (type == "setPrimary") {
+    InterfaceConfig config;
+    if (!Daemon::parseConfig(obj, config)) {
+      logger.error() << "setPrimary: invalid configuration";
+      return;
+    }
+    if (!Daemon::instance()->setPrimary(config.m_ifname, config)) {
+      logger.error() << "setPrimary failed";
+      QJsonObject reply;
+      reply.insert("type", "primaryFailed");
+      reply.insert("ifname", config.m_ifname);
+      write(reply);
+      return;
+    }
+    QJsonObject reply;
+    reply.insert("type", "primaryReady");
+    reply.insert("ifname", config.m_ifname);
+    write(reply);
     return;
   }
 
@@ -146,10 +173,19 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
   logger.warning() << "Invalid command:" << type;
 }
 
-void DaemonLocalServerConnection::connected(const QString& pubkey) {
+void DaemonLocalServerConnection::onTunnelConnected(const QString& ifname,
+                                                    const QString& pubkey) {
   QJsonObject obj;
   obj.insert("type", "connected");
-  obj.insert("pubkey", QJsonValue(pubkey));
+  obj.insert("ifname", ifname);
+  obj.insert("pubkey", pubkey);
+  write(obj);
+}
+
+void DaemonLocalServerConnection::onTunnelHandshakeFailed(const QString& ifname) {
+  QJsonObject obj;
+  obj.insert("type", "disconnected");
+  obj.insert("ifname", ifname);
   write(obj);
 }
 

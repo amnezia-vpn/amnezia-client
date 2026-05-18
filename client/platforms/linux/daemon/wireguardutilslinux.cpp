@@ -14,7 +14,6 @@
 #include <QTimer>
 #include <QThread>
 
-#include "linuxfirewall.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -63,7 +62,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         return false;
     }
 
-    const QString ifname = config.m_ifname.isEmpty() ? QString(WG_INTERFACE) : config.m_ifname;
+    const QString ifname = config.m_ifname;
 
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     if (!wgRuntimeDir.exists()) {
@@ -147,29 +146,6 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
-    } else {
-        if (config.m_killSwitchEnabled) {
-            FirewallParams params { };
-            params.dnsServers.append(config.m_primaryDnsServer);
-            if (!config.m_secondaryDnsServer.isEmpty()) {
-                params.dnsServers.append(config.m_secondaryDnsServer);
-            }
-            if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-                params.blockAll = true;
-                if (config.m_excludedAddresses.size()) {
-                    params.allowNets = true;
-                    foreach (auto net, config.m_excludedAddresses) {
-                        params.allowAddrs.append(net.toUtf8());
-                    }
-                }
-            } else {
-                params.blockNets = true;
-                foreach (auto net, config.m_allowedIPAddressRanges) {
-                    params.blockAddrs.append(net.toString());
-                }
-            }
-            applyFirewallRules(params);
-        }
     }
 
     return (err == 0);
@@ -453,28 +429,4 @@ QString WireguardUtilsLinux::waitForTunnelName(const QString& filename) {
     }
 
     return QString();
-}
-
-void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
-{
-    // double-check + ensure our firewall is installed and enabled
-    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
-
-    // Note: rule precedence is handled inside IpTablesFirewall
-    LinuxFirewall::ensureRootAnchorPriority();
-
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), params.allowNets);
-    LinuxFirewall::updateAllowNets(params.allowAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
-    LinuxFirewall::updateBlockNets(params.blockAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
-    LinuxFirewall::updateDNSServers(params.dnsServers);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 }
