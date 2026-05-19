@@ -49,7 +49,7 @@ private:
                                             const QByteArray &key, const QByteArray &iv, const QByteArray &salt);
 
     QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
-    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful, int httpStatusCode);
+    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful);
     void bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
                      std::function<QNetworkReply *(const QString &url)> requestFunction,
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);

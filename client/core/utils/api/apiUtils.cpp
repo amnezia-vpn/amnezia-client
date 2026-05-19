@@ -35,15 +35,6 @@ namespace
         return value.isString() ? value.toString().trimmed() : QString();
     }
 
-    QString apiErrorTokenFromJson(const QJsonObject &jsonObj)
-    {
-        const QString message = apiErrorMessageFromJson(jsonObj);
-        if (!message.isEmpty()) {
-            return message;
-        }
-        return jsonObj.value(QStringLiteral("error")).toString().trimmed();
-    }
-
     QString escapeUnicode(const QString &input)
     {
         QString output;
@@ -155,16 +146,16 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiConfigDownloadError;
         }
         if (status == httpStatusCodePaymentRequired) {
-            const QString errorToken = apiErrorTokenFromJson(jsonObj);
-            if (errorToken.contains(QLatin1String("refresh_captcha"), Qt::CaseInsensitive)) {
+            const QString message = apiErrorMessageFromJson(jsonObj);
+            if (message.contains(QLatin1String("refresh_captcha"), Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiCaptchaRefreshError;
             }
-            if (errorToken.contains(QLatin1String("invalid_captcha"), Qt::CaseInsensitive)) {
+            if (message.contains(QLatin1String("invalid_captcha"), Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiCaptchaInvalidError;
             }
             if (jsonObj.contains(QStringLiteral("captcha_id")) || jsonObj.contains(QStringLiteral("captcha_image"))
-                || errorToken.compare(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive) == 0
-                || errorToken.contains(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive)) {
+                || message.compare(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive) == 0
+                || message.contains(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiCaptchaRequiredError;
             }
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
