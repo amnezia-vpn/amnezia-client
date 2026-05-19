@@ -203,7 +203,7 @@ QJsonObject PairingController::buildScanQrPayload(const QString &qrUuid, const Q
     o[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
     o[apiDefs::key::appVersion] = QString(APP_VERSION);
     o[apiDefs::key::osVersion] = QSysInfo::productType();
-    o[apiDefs::key::serviceType] = gatewayStringMetadataArray(serviceType);
-    o[apiDefs::key::userCountryCode] = gatewayStringMetadataArray(userCountryCode);
+    o[apiDefs::key::serviceType] = serviceType.trimmed();
+    o[apiDefs::key::userCountryCode] = userCountryCode.trimmed();
     return o;
 }
