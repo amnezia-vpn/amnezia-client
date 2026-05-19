@@ -32,8 +32,6 @@ class PairingUiController : public QObject
                        pendingPhonePairingUuidChanged)
     Q_PROPERTY(QString lastSuccessfulPhonePairingDisplayName READ lastSuccessfulPhonePairingDisplayName NOTIFY
                        lastSuccessfulPhonePairingDisplayNameChanged)
-    Q_PROPERTY(bool embeddedPairingQrCameraActive READ embeddedPairingQrCameraActive WRITE setEmbeddedPairingQrCameraActive NOTIFY
-                       embeddedPairingQrCameraActiveChanged)
     Q_PROPERTY(bool iosNativePairingQrOverlayBuild READ iosNativePairingQrOverlayBuild CONSTANT)
     Q_PROPERTY(bool androidNativePairingQrOverlayBuild READ androidNativePairingQrOverlayBuild CONSTANT)
     Q_PROPERTY(qint64 androidPairingReaderCooldownUntilEpochMs READ androidPairingReaderCooldownUntilEpochMs NOTIFY
@@ -57,12 +55,8 @@ public:
     QString pendingPhonePairingUuid() const { return m_pendingPhonePairingUuid; }
     void setPendingPhonePairingUuid(const QString &uuid);
     QString lastSuccessfulPhonePairingDisplayName() const { return m_lastSuccessfulPhonePairingDisplayName; }
-    bool embeddedPairingQrCameraActive() const { return m_embeddedPairingQrCameraActive; }
     bool iosNativePairingQrOverlayBuild() const;
     bool androidNativePairingQrOverlayBuild() const;
-    Q_INVOKABLE void setEmbeddedPairingQrCameraActive(bool active);
-    Q_INVOKABLE void syncIosEmbeddedPairingQrNativeBottomExtra(int extraPt);
-    Q_INVOKABLE void refreshIosEmbeddedPairingQrChrome();
 
     qint64 androidPairingReaderCooldownUntilEpochMs() const { return m_androidPairingReaderCooldownUntilEpochMs; }
 
@@ -110,7 +104,6 @@ signals:
 
     void pairingUuidFromScan(const QString &uuid);
     void pairingCameraAccessFinished(bool granted);
-    void embeddedPairingQrCameraActiveChanged();
     void androidPairingReaderCooldownUntilEpochMsChanged();
     void pairingSendQrScanRejectedInvalidPayload();
     void pairingIosNativeQrOverlayBackRequested();
@@ -149,7 +142,6 @@ private:
     QPointer<QNetworkReply> m_phoneNetworkReply;
     quint64 m_phoneSessionGeneration { 0 };
 
-    bool m_embeddedPairingQrCameraActive = false;
     qint64 m_androidPairingReaderCooldownUntilEpochMs = 0;
 };
 

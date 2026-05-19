@@ -1,9 +1,7 @@
 import QtQuick
-import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import QRCodeReader 1.0
 import PageEnum 1.0
 import Style 1.0
 
@@ -16,70 +14,11 @@ import "../Components"
 PageType {
     id: root
 
-    property bool pairingQrChromeDebug: false
-
-    readonly property bool useIosStyleNativeQrReader: GC.isMobile() && Qt.platform.os !== "android"
-
     readonly property bool useIosNativePairingQrOverlay: PairingUiController.iosNativePairingQrOverlayBuild
 
-    readonly property bool useAndroidNativePairingQrScanner: GC.isMobile() && Qt.platform.os === "android"
     readonly property bool useAndroidNativePairingQrOverlay: PairingUiController.androidNativePairingQrOverlayBuild
                                                              && GC.isMobile()
                                                              && Qt.platform.os === "android"
-
-    readonly property bool extendScanDimToScreenEdges: GC.isMobile() && pairingWizardStep === 0
-                                                     && PairingUiController.embeddedPairingQrCameraActive
-                                                     && !root.useAndroidNativePairingQrOverlay
-    clip: !extendScanDimToScreenEdges
-
-    /** QQuickWindow as var — typing as Item breaks bindings on Qt 6. */
-    readonly property var appWindow: Window.window
-    readonly property real scanDimBleedTop: {
-        if (!extendScanDimToScreenEdges || !appWindow || !appWindow.contentItem)
-            return 0
-        let bleed = Math.max(0, root.mapToItem(appWindow.contentItem, 0, 0).y)
-        if (bleed < 2 && root.useIosStyleNativeQrReader)
-            bleed = Math.max(bleed, PageController.safeAreaTopMargin)
-        return bleed
-    }
-    readonly property real scanDimBleedBottom: {
-        if (!extendScanDimToScreenEdges || !appWindow || !appWindow.contentItem)
-            return 0
-        const o = root.mapToItem(appWindow.contentItem, 0, root.height)
-        let bleed = Math.max(0, appWindow.height - o.y)
-        const slack = Math.max(0, appWindow.height - root.height - scanDimBleedTop)
-        if (bleed < slack - 1)
-            bleed = Math.max(bleed, slack)
-        if (bleed < 2 && root.useIosStyleNativeQrReader)
-            bleed = Math.max(bleed, PageController.safeAreaBottomMargin + 72)
-        return bleed
-    }
-
-    readonly property real scanDimBleedBottomForDimLayer: (root.useIosStyleNativeQrReader
-                                                          && PairingUiController.embeddedPairingQrCameraActive) ? 0 : scanDimBleedBottom
-
-    function pushIosNativeBottomBleedSync() {
-        if (!root.useIosStyleNativeQrReader || !PairingUiController.embeddedPairingQrCameraActive) {
-            return
-        }
-        PairingUiController.syncIosEmbeddedPairingQrNativeBottomExtra(Math.max(0, Math.round(root.scanDimBleedBottom)))
-    }
-
-    onScanDimBleedBottomChanged: {
-        if (PairingUiController.embeddedPairingQrCameraActive && root.useIosStyleNativeQrReader) {
-            Qt.callLater(root.pushIosNativeBottomBleedSync)
-        }
-    }
-
-    Connections {
-        target: PairingUiController
-
-        function onEmbeddedPairingQrCameraActiveChanged() {
-            if (PairingUiController.embeddedPairingQrCameraActive) {
-                Qt.callLater(root.pushIosNativeBottomBleedSync)
-            }
-        }
-    }
 
     property int pairingWizardStep: 0
     property bool keepPhonePairingInBackgroundOnClose: false
@@ -88,31 +27,17 @@ PageType {
     property bool addDeviceConfirmNavigationScheduled: false
     property bool awaitingCameraPermissionForScan: false
     property bool waitingSettingsReturnForScan: false
-    property bool torchOn: false
+
     /** Suppress double startActivity when StackView fires both Component.onCompleted and onVisibleChanged. */
     property int _androidPairingReaderLastStartMs: 0
 
-    Timer {
-        id: pairingCameraKickTimer
-        interval: 220
-        repeat: false
-        onTriggered: root.restartPairingIosCamera()
-    }
-
     function stopMobileScanner() {
-        torchOn = false
         if (root.useIosNativePairingQrOverlay) {
             PairingUiController.setPairingQrTorchEnabled(false)
             PairingUiController.dismissIosPairingQrNativeOverlayScanner()
-            return
-        }
-        if (Qt.platform.os === "android") {
+        } else if (Qt.platform.os === "android") {
             PairingUiController.setPairingQrTorchEnabled(false)
-        } else if (root.useIosStyleNativeQrReader) {
-            pairingQrReader.setTorchEnabled(false)
         }
-        pairingQrReader.stopReading()
-        PairingUiController.embeddedPairingQrCameraActive = false
     }
 
     function startMobileScanner() {
@@ -122,7 +47,6 @@ PageType {
         if (!root.visible) {
             return
         }
-        /** Confirm step (or transition to it): never reopen native / embedded scanner from stray taps or visibility. */
         if (root.pairingWizardStep !== 0) {
             return
         }
@@ -138,10 +62,9 @@ PageType {
             PairingUiController.presentIosPairingQrNativeOverlayScanner(
                         qsTr("Add device via QR"),
                         qsTr("Scan the session QR shown on the device you want to add. You will confirm before the subscription is sent."))
-            /** Do not run pairingCameraKickTimer here: restartCapture during first startRunning races the session (torch needs 2–3 taps). */
             return
         }
-        if (root.useAndroidNativePairingQrScanner) {
+        if (Qt.platform.os === "android") {
             const coolUntil = PairingUiController.androidPairingReaderCooldownUntilEpochMs
             if (Date.now() < coolUntil) {
                 return
@@ -152,23 +75,7 @@ PageType {
             }
             _androidPairingReaderLastStartMs = now
             PairingUiController.openPairingQrScanner()
-            return
         }
-        PairingUiController.embeddedPairingQrCameraActive = true
-        if (root.useIosStyleNativeQrReader) {
-            // Session must start here, not only after pairingCameraKickTimer (220ms), otherwise
-            // torch/scan run before startReading and native layer never attaches.
-            restartPairingIosCamera()
-            pairingCameraKickTimer.restart()
-            /** After resume embedded can stay true so setEmbedded skips; QUIMetalView may be opaque again. */
-            Qt.callLater(function () {
-                PairingUiController.refreshIosEmbeddedPairingQrChrome()
-            })
-        }
-    }
-
-    function startPairingScanAfterPermission() {
-        startMobileScanner()
     }
 
     function showScanCameraDeniedDrawer() {
@@ -195,20 +102,6 @@ PageType {
         }
     }
 
-    function restartPairingIosCamera() {
-        if (root.useIosNativePairingQrOverlay) {
-            PairingUiController.restartIosPairingQrNativeOverlayCapture()
-            return
-        }
-        if (!root.useIosStyleNativeQrReader || pairingWizardStep !== 0) {
-            return
-        }
-        // Never gate on root.visible here: under StackView the active page often has
-        // visible === false while it is on screen, so startReading never ran (no session, no torch).
-        pairingQrReader.stopReading()
-        pairingQrReader.startReading()
-    }
-
     Component.onDestruction: {
         if (!keepPhonePairingInBackgroundOnClose && !PairingUiController.phonePairingBusy) {
             PairingUiController.cancelAllPairingActivity()
@@ -217,18 +110,16 @@ PageType {
 
     onVisibleChanged: {
         if (visible) {
-            /** Only reset confirm flag on scan step; clearing it on confirm breaks guards if visible flickers. */
             if (pairingWizardStep === 0) {
                 addDeviceConfirmNavigationScheduled = false
                 Qt.callLater(startMobileScanner)
             }
-        } else {
-            pairingCameraKickTimer.stop()
+        } else if (!PairingUiController.phonePairingBusy) {
             stopMobileScanner()
             _androidPairingReaderLastStartMs = 0
             pairingWizardStep = 0
             waitingSettingsReturnForScan = false
-            if (!keepPhonePairingInBackgroundOnClose && !PairingUiController.phonePairingBusy) {
+            if (!keepPhonePairingInBackgroundOnClose) {
                 PairingUiController.cancelAllPairingActivity()
             }
         }
@@ -238,16 +129,12 @@ PageType {
         if (pairingWizardStep !== 0) {
             stopMobileScanner()
         } else if (root.visible) {
-            /**
-             * Android native: use Qt.callLater like iOS — a multi-second Timer delay left the QML scan chrome
-             * visible with an empty (black) viewport until CameraActivity opened.
-             */
             Qt.callLater(startMobileScanner)
         }
     }
 
     Component.onCompleted: {
-        if (GC.isMobile() && root.visible && pairingWizardStep === 0) {
+        if (visible && pairingWizardStep === 0) {
             Qt.callLater(startMobileScanner)
         }
     }
@@ -260,37 +147,15 @@ PageType {
                 return
             }
             root.tryResumeScanAfterCameraSettings()
-            if (!root.useIosStyleNativeQrReader || root.pairingWizardStep !== 0
-                || !PairingUiController.isPairingCameraAccessGranted()) {
-                return
-            }
-            if (root.useIosNativePairingQrOverlay) {
-                Qt.callLater(function () {
-                    if (!root.visible || root.pairingWizardStep !== 0 || !GC.isMobile()) {
-                        return
-                    }
-                    PairingUiController.restartIosPairingQrNativeOverlayCapture()
-                })
+            if (!root.useIosNativePairingQrOverlay || root.pairingWizardStep !== 0
+                    || !PairingUiController.isPairingCameraAccessGranted()) {
                 return
             }
             Qt.callLater(function () {
                 if (!root.visible || root.pairingWizardStep !== 0 || !GC.isMobile()) {
                     return
                 }
-                PairingUiController.embeddedPairingQrCameraActive = true
-                PairingUiController.refreshIosEmbeddedPairingQrChrome()
-                Qt.callLater(function () {
-                    if (!root.visible || root.pairingWizardStep !== 0) {
-                        return
-                    }
-                    root.restartPairingIosCamera()
-                    Qt.callLater(function () {
-                        if (!root.visible || root.pairingWizardStep !== 0) {
-                            return
-                        }
-                        PairingUiController.refreshIosEmbeddedPairingQrChrome()
-                    })
-                })
+                PairingUiController.restartIosPairingQrNativeOverlayCapture()
             })
         }
     }
@@ -308,15 +173,15 @@ PageType {
     Item {
         anchors.fill: parent
 
-        /** Brief Qt backdrop + back while CameraActivity is starting (native holds title/instructions like iOS overlay). */
         Rectangle {
             anchors.fill: parent
             visible: pairingWizardStep === 0 && root.useAndroidNativePairingQrOverlay
             color: AmneziaStyle.color.midnightBlack
             z: 1
         }
+
         BackButtonType {
-            visible: pairingWizardStep === 0 && root.useAndroidNativePairingQrOverlay
+            visible: pairingWizardStep === 0 && (root.useAndroidNativePairingQrOverlay || !GC.isMobile())
             anchors.top: parent.top
             anchors.topMargin: PageController.safeAreaTopMargin
             anchors.left: parent.left
@@ -327,312 +192,25 @@ PageType {
             }
         }
 
-        Item {
-            id: scanStep
-            anchors.fill: parent
-            visible: pairingWizardStep === 0 && !root.useAndroidNativePairingQrOverlay
-            /** Extra guard: invisible alone can race one frame on some stacks; deny input off scan step. */
-            enabled: pairingWizardStep === 0 && !root.useAndroidNativePairingQrOverlay
-
-            readonly property real sqSz: Math.floor(Math.min(width, height) * 0.72)
-            readonly property real sqX: (width - sqSz) / 2
-            readonly property real sqY: (height - sqSz) / 2 - height * 0.06
-            readonly property real dimAlpha: 0.55
-            readonly property color dimTopDebug: "#aa3333"
-            readonly property color dimBottomDebug: "#33aaff"
-            readonly property color dimLeftDebug: "#3333ff"
-            readonly property color dimRightDebug: "#ffaa33"
-            readonly property int bracketThick: 5
-            readonly property int bracketLen: Math.max(28, Math.floor(sqSz * 0.13))
-            readonly property real bracketRadius: bracketThick * 0.5
-
-            Rectangle {
-                anchors.fill: parent
-                color: AmneziaStyle.color.midnightBlack
-                visible: !GC.isMobile()
-            }
+        Column {
+            anchors.centerIn: parent
+            width: parent.width - 48
+            spacing: 12
+            visible: pairingWizardStep === 0 && !GC.isMobile()
 
             Label {
-                anchors.centerIn: parent
-                width: parent.width - 48
+                width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
-                visible: !GC.isMobile()
                 color: AmneziaStyle.color.mutedGray
                 font.pixelSize: 15
                 text: qsTr("QR pairing is available in the mobile app.")
-            }
-
-            Item {
-                id: dimLayer
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: -root.scanDimBleedTop
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: -root.scanDimBleedBottomForDimLayer
-                visible: GC.isMobile()
-                z: 0
-
-                readonly property real holeTop: root.scanDimBleedTop + scanStep.sqY
-                readonly property real holeBottom: holeTop + scanStep.sqSz
-
-                Rectangle {
-                    x: 0
-                    y: 0
-                    width: parent.width
-                    height: Math.max(0, dimLayer.holeTop)
-                    color: root.pairingQrChromeDebug ? scanStep.dimTopDebug : Qt.rgba(0, 0, 0, scanStep.dimAlpha)
-                }
-                Rectangle {
-                    x: 0
-                    y: dimLayer.holeBottom
-                    width: parent.width
-                    height: Math.max(0, dimLayer.height - dimLayer.holeBottom)
-                    color: root.pairingQrChromeDebug ? scanStep.dimBottomDebug : Qt.rgba(0, 0, 0, scanStep.dimAlpha)
-                }
-                Rectangle {
-                    x: 0
-                    y: dimLayer.holeTop
-                    width: Math.max(0, scanStep.sqX)
-                    height: scanStep.sqSz
-                    color: root.pairingQrChromeDebug ? scanStep.dimLeftDebug : Qt.rgba(0, 0, 0, scanStep.dimAlpha)
-                }
-                Rectangle {
-                    x: scanStep.sqX + scanStep.sqSz
-                    y: dimLayer.holeTop
-                    width: Math.max(0, parent.width - (scanStep.sqX + scanStep.sqSz))
-                    height: scanStep.sqSz
-                    color: root.pairingQrChromeDebug ? scanStep.dimRightDebug : Qt.rgba(0, 0, 0, scanStep.dimAlpha)
-                }
-            }
-
-            /** Same onyx as tab bar: bridges dim/camera to TabBar sibling so the seam is not only TabBar.background overlap. */
-            Rectangle {
-                id: pairingIosStackBottomChromeBridge
-                objectName: "pairingIosStackBottomChromeBridge"
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: 22
-                visible: GC.isMobile() && root.useIosStyleNativeQrReader && PairingUiController.embeddedPairingQrCameraActive
-                color: root.pairingQrChromeDebug ? "#8844ff" : AmneziaStyle.color.onyxBlack
-                z: 1
-            }
-
-            Item {
-                x: scanStep.sqX
-                y: scanStep.sqY
-                width: scanStep.sqSz
-                height: scanStep.sqSz
-                visible: GC.isMobile()
-
-                Rectangle {
-                    x: 0
-                    y: 0
-                    width: scanStep.bracketLen
-                    height: scanStep.bracketThick
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-                Rectangle {
-                    x: 0
-                    y: 0
-                    width: scanStep.bracketThick
-                    height: scanStep.bracketLen
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-
-                Rectangle {
-                    x: scanStep.sqSz - scanStep.bracketLen
-                    y: 0
-                    width: scanStep.bracketLen
-                    height: scanStep.bracketThick
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-                Rectangle {
-                    x: scanStep.sqSz - scanStep.bracketThick
-                    y: 0
-                    width: scanStep.bracketThick
-                    height: scanStep.bracketLen
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-
-                Rectangle {
-                    x: 0
-                    y: scanStep.sqSz - scanStep.bracketThick
-                    width: scanStep.bracketLen
-                    height: scanStep.bracketThick
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-                Rectangle {
-                    x: 0
-                    y: scanStep.sqSz - scanStep.bracketLen
-                    width: scanStep.bracketThick
-                    height: scanStep.bracketLen
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-
-                Rectangle {
-                    x: scanStep.sqSz - scanStep.bracketLen
-                    y: scanStep.sqSz - scanStep.bracketThick
-                    width: scanStep.bracketLen
-                    height: scanStep.bracketThick
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-                Rectangle {
-                    x: scanStep.sqSz - scanStep.bracketThick
-                    y: scanStep.sqSz - scanStep.bracketLen
-                    width: scanStep.bracketThick
-                    height: scanStep.bracketLen
-                    radius: scanStep.bracketRadius
-                    color: AmneziaStyle.color.paleGray
-                }
-            }
-
-            Column {
-                id: headerBlock
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 8 + PageController.safeAreaTopMargin
-                spacing: 10
-                z: 2
-                /** Native iOS overlay draws its own header. */
-                visible: !GC.isMobile() || !root.useIosNativePairingQrOverlay
-
-                BackButtonType {
-                    width: parent.width
-                    backButtonFunction: function() {
-                        PageController.closePage()
-                    }
-                }
-
-                Label {
-                    width: parent.width - 32
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Add device via QR")
-                    font.pixelSize: 28
-                    font.bold: true
-                    color: AmneziaStyle.color.paleGray
-                    wrapMode: Text.Wrap
-                }
-
-                ParagraphTextType {
-                    width: parent.width - 32
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Scan the session QR shown on the device you want to add. You will confirm before the subscription is sent.")
-                    wrapMode: Text.Wrap
-                }
-            }
-
-            Item {
-                z: 2
-                width: 56
-                height: 56
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottomMargin: 28 + PageController.safeAreaBottomMargin
-                visible: GC.isMobile() && !root.useIosNativePairingQrOverlay
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: 28
-                    color: Qt.rgba(1, 1, 1, root.torchOn ? 0.42 : 0.22)
-                    border.width: root.torchOn ? 2 : 0
-                    border.color: AmneziaStyle.color.goldenApricot
-                }
-                Text {
-                    anchors.centerIn: parent
-                    text: "🔦"
-                    font.pixelSize: 26
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        root.torchOn = !root.torchOn
-                        if (Qt.platform.os === "android") {
-                            PairingUiController.setPairingQrTorchEnabled(root.torchOn)
-                        } else if (root.useIosNativePairingQrOverlay) {
-                            PairingUiController.setPairingQrTorchEnabled(root.torchOn)
-                        } else if (root.useIosStyleNativeQrReader) {
-                            pairingQrReader.setTorchEnabled(root.torchOn)
-                        }
-                    }
-                }
-            }
-
-            ParagraphTextType {
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottomMargin: 100 + PageController.safeAreaBottomMargin
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-                visible: PairingUiController.phoneStatusMessage.length > 0
-                text: PairingUiController.phoneStatusMessage
-                wrapMode: Text.Wrap
-                z: 2
-            }
-
-            Item {
-                width: 0
-                height: 0
-                visible: false
-
-                QRCodeReader {
-                    id: pairingQrReader
-
-                    // Same idea as PageSetupWizardQrReader: ensure startReading runs even if
-                    // StackView/onVisible timing skips startMobileScanner once.
-                    Component.onCompleted: {
-                        if (root.useIosNativePairingQrOverlay) {
-                            return
-                        }
-                        if (!root.useIosStyleNativeQrReader || root.pairingWizardStep !== 0) {
-                            return
-                        }
-                        Qt.callLater(function () {
-                            if (root.pairingWizardStep !== 0 || !PairingUiController.isPairingCameraAccessGranted()) {
-                                return
-                            }
-                            PairingUiController.embeddedPairingQrCameraActive = true
-                            pairingQrReader.stopReading()
-                            pairingQrReader.startReading()
-                        })
-                    }
-
-                    onCodeReaded: function(code) {
-                        if (addDeviceConfirmNavigationScheduled) {
-                            return
-                        }
-                        if (PairingUiController.applyScannedTextAsPairingUuid(code)) {
-                            addDeviceConfirmNavigationScheduled = true
-                            stopMobileScanner()
-                        } else {
-                            const now = new Date().getTime()
-                            if (now - lastInvalidPairingQrToastClockMs >= 2200) {
-                                lastInvalidPairingQrToastClockMs = now
-                                PageController.showNotificationMessage(
-                                            qsTr("This QR code is not a pairing session. Show the code from the other device’s “receive config” screen."))
-                            }
-                        }
-                    }
-                }
             }
         }
 
         ColumnLayout {
             id: confirmStep
             anchors.fill: parent
-            anchors.leftMargin: 0
-            anchors.rightMargin: 0
             visible: pairingWizardStep === 1
             z: 10
             spacing: 16
@@ -732,7 +310,6 @@ PageType {
             addDeviceConfirmNavigationScheduled = true
             stopMobileScanner()
             PairingUiController.pendingPhonePairingUuid = uuid
-            /** Immediate step switch so scan chrome is not hit-testable for another frame (avoids reopening CameraActivity). */
             pairingWizardStep = 1
         }
 
@@ -753,7 +330,6 @@ PageType {
             PageController.closePage()
         }
 
-        /** Native CameraActivity back: leave pairing flow (same as iOS overlay back). Do NOT reopen scanner. */
         function onPairingAndroidNativeQrScannerUserDismissed() {
             if (!root.useAndroidNativePairingQrOverlay) {
                 return

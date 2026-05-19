@@ -4,51 +4,15 @@
 #include "platforms/ios/iosPairingCameraAccess.h"
 
 #include <QByteArray>
-#include <QDebug>
-#include <QThread>
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
 
-static NSString *amneziaQrThreadTag(void)
-{
-    if ([NSThread isMainThread]) {
-        return @"main";
-    }
-    return [NSString stringWithFormat:@"bg:%p", (void *)[NSThread currentThread]];
-}
-
-static void amneziaQrLogDeviceAuth(void)
-{
-    AVAuthorizationStatus st = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
-    NSString *stName = @"unknown";
-    switch (st) {
-        case AVAuthorizationStatusNotDetermined:
-            stName = @"notDetermined";
-            break;
-        case AVAuthorizationStatusRestricted:
-            stName = @"restricted";
-            break;
-        case AVAuthorizationStatusDenied:
-            stName = @"denied";
-            break;
-        case AVAuthorizationStatusAuthorized:
-            stName = @"authorized";
-            break;
-        default:
-            break;
-    }
-    NSLog(@"[QRCodeReader] camera auth status=%@ (%ld)", stName, (long)st);
-}
-
 static UIWindow *amneziaKeyWindowForQrCamera(void)
 {
     UIApplication *app = [UIApplication sharedApplication];
-    NSMutableArray<NSString *> *trace = [NSMutableArray array];
 
     if (@available(iOS 13.0, *)) {
-        NSInteger sceneCount = app.connectedScenes.count;
-        [trace addObject:[NSString stringWithFormat:@"connectedScenes=%ld", (long)sceneCount]];
         for (UIScene *scene in app.connectedScenes) {
             if (scene.activationState != UISceneActivationStateForegroundActive) {
                 continue;
@@ -57,17 +21,13 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
                 continue;
             }
             UIWindowScene *windowScene = (UIWindowScene *)scene;
-            NSInteger winN = windowScene.windows.count;
-            [trace addObject:[NSString stringWithFormat:@"foreground UIWindowScene windows=%ld", (long)winN]];
             for (UIWindow *window in windowScene.windows) {
                 if (window.isKeyWindow) {
-                    NSLog(@"[QRCodeReader] keyWindow pick: scene keyWindow=%@ bounds=%@", window, NSStringFromCGRect(window.bounds));
                     return window;
                 }
             }
             for (UIWindow *window in windowScene.windows) {
                 if (!window.isHidden) {
-                    NSLog(@"[QRCodeReader] keyWindow pick: scene nonHidden=%@ bounds=%@", window, NSStringFromCGRect(window.bounds));
                     return window;
                 }
             }
@@ -75,25 +35,14 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     }
 
     if (app.keyWindow) {
-        [trace addObject:@"app.keyWindow"];
-        NSLog(@"[QRCodeReader] keyWindow pick: application.keyWindow=%@ bounds=%@",
-              app.keyWindow, NSStringFromCGRect(app.keyWindow.bounds));
         return app.keyWindow;
     }
     for (UIWindow *window in app.windows) {
         if (window.isKeyWindow) {
-            NSLog(@"[QRCodeReader] keyWindow pick: windows scan key=%@ bounds=%@", window, NSStringFromCGRect(window.bounds));
             return window;
         }
     }
-    UIWindow *first = app.windows.firstObject;
-    if (first) {
-        NSLog(@"[QRCodeReader] keyWindow pick: firstObject=%@ bounds=%@ trace=[%@]",
-              first, NSStringFromCGRect(first.bounds), [trace componentsJoinedByString:@", "]);
-        return first;
-    }
-    NSLog(@"[QRCodeReader] keyWindow pick: NONE trace=[%@]", [trace componentsJoinedByString:@", "]);
-    return nil;
+    return app.windows.firstObject;
 }
 
 @interface QRCodeReaderImpl : UIViewController
@@ -135,7 +84,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
         if ([input isKindOfClass:[AVCaptureDeviceInput class]]) {
             AVCaptureDevice *d = ((AVCaptureDeviceInput *)input).device;
             if (d) {
-                NSLog(@"[QRCodeReader] resolvedCaptureDevice from session input device=%p", d);
                 return d;
             }
         }
@@ -155,13 +103,11 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
         return;
     }
     if (![device hasTorch]) {
-        NSLog(@"[QRCodeReader] torch: device %p has no torch", device);
         return;
     }
 
     AVCaptureSession *session = self.captureSession;
     if (on && session && ![session isRunning]) {
-        NSLog(@"[QRCodeReader] torch: session not running yet; retry in 0.25s (session=%p)", session);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             if (on) {
                 [self applyTorchOnMainThread:YES];
@@ -183,8 +129,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
             if ([device isTorchModeSupported:AVCaptureTorchModeOn]) {
                 device.torchMode = AVCaptureTorchModeOn;
             }
-        } else {
-            NSLog(@"[QRCodeReader] torch ON ok level=maxAvailable");
         }
     } else {
         device.torchMode = AVCaptureTorchModeOff;
@@ -193,7 +137,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 }
 
 - (void)applyTorch:(BOOL)on {
-    NSLog(@"[QRCodeReader] applyTorch requested on=%d thread=%@", (int)on, amneziaQrThreadTag());
     if ([NSThread isMainThread]) {
         [self applyTorchOnMainThread:on];
     } else {
@@ -204,9 +147,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 }
 
 - (BOOL)startReadingOnMainThread {
-    NSLog(@"[QRCodeReader] startReadingOnMainThread begin thread=%@", amneziaQrThreadTag());
-    amneziaQrLogDeviceAuth();
-
     [self stopReadingOnMainThread];
 
     NSError *error = nil;
@@ -216,7 +156,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
         NSLog(@"[QRCodeReader] defaultDeviceWithMediaType:Video is nil");
         return NO;
     }
-    NSLog(@"[QRCodeReader] capture device=%p localizedName=%@", captureDevice, captureDevice.localizedName);
 
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:captureDevice error:&error];
 
@@ -226,7 +165,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     }
 
     self.activeCaptureDevice = captureDevice;
-    NSLog(@"[QRCodeReader] activeCaptureDevice set to %p", self.activeCaptureDevice);
 
     AVCaptureSession *session = [[AVCaptureSession alloc] init];
     [session addInput:deviceInput];
@@ -260,26 +198,16 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     self.videoPreviewPlayer.zPosition = -1000.f;
     [keyWindow.layer insertSublayer:self.videoPreviewPlayer atIndex:0];
     amneziaIosPairingRelayoutChromeIfNeeded();
-    NSLog(@"[QRCodeReader] previewLayer inserted window=%@ layer.sublayers.count=%lu bounds=%@",
-          keyWindow, (unsigned long)keyWindow.layer.sublayers.count, NSStringFromCGRect(bounds));
 
     AVCaptureSession *runningSession = self.captureSession;
     dispatch_async(_sessionQueue, ^{
-        NSLog(@"[QRCodeReader] session startRunning on session queue session=%p", runningSession);
         [runningSession startRunning];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSLog(@"[QRCodeReader] after startRunning isRunning=%d", (int)runningSession.isRunning);
-        });
     });
-
-    NSLog(@"[QRCodeReader] startReading OK activeDevice=%p window bounds=%@",
-          self.activeCaptureDevice, NSStringFromCGRect(bounds));
 
     return YES;
 }
 
 - (BOOL)startReading {
-    NSLog(@"[QRCodeReader] startReading entry thread=%@ qt=%p", amneziaQrThreadTag(), (void *)QThread::currentThread());
     if ([NSThread isMainThread]) {
         return [self startReadingOnMainThread];
     }
@@ -287,12 +215,10 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     dispatch_sync(dispatch_get_main_queue(), ^{
         ok = [self startReadingOnMainThread];
     });
-    NSLog(@"[QRCodeReader] startReading exit ok=%d (dispatched to main)", (int)ok);
     return ok;
 }
 
 - (void)stopReadingOnMainThread {
-    NSLog(@"[QRCodeReader] stopReadingOnMainThread thread=%@", amneziaQrThreadTag());
     [self applyTorchOnMainThread:NO];
     self.activeCaptureDevice = nil;
 
@@ -311,7 +237,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
         dispatch_sync(_sessionQueue, ^{
             @try {
                 if ([session isRunning]) {
-                    NSLog(@"[QRCodeReader] session stopRunning (sync) session=%p", session);
                     [session stopRunning];
                 }
             } @catch (NSException *ex) {
@@ -321,14 +246,12 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     }
 
     if (self.videoPreviewPlayer) {
-        NSLog(@"[QRCodeReader] remove preview from superlayer");
         [self.videoPreviewPlayer removeFromSuperlayer];
         self.videoPreviewPlayer = nil;
     }
 }
 
 - (void)stopReading {
-    NSLog(@"[QRCodeReader] stopReading entry thread=%@ qt=%p", amneziaQrThreadTag(), (void *)QThread::currentThread());
     if ([NSThread isMainThread]) {
         [self stopReadingOnMainThread];
     } else {
@@ -336,7 +259,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
             [self stopReadingOnMainThread];
         });
     }
-    NSLog(@"[QRCodeReader] stopReading exit");
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output
@@ -351,7 +273,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
             if (value.length == 0) {
                 return;
             }
-            NSLog(@"[QRCodeReader] metadata QR len=%lu", static_cast<unsigned long>(value.length));
             QRCodeReader *cpp = _qrCodeReader;
             const QByteArray utf8([value UTF8String]);
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -374,21 +295,13 @@ QRect QRCodeReader::cameraSize() {
 
 void QRCodeReader::setCameraSize(QRect value) {
     m_cameraSize = value;
-    qInfo() << "[QRCodeReader] setCameraSize" << value;
 }
 
 void QRCodeReader::startReading() {
-    qInfo() << "[QRCodeReader] C++ startReading thread" << QThread::currentThread();
-    const BOOL ok = [m_qrCodeReader startReading];
-    if (!ok) {
-        qWarning() << "[QRCodeReader] C++ startReading failed (see NSLogs)";
-    } else {
-        qInfo() << "[QRCodeReader] C++ startReading ok";
-    }
+    [m_qrCodeReader startReading];
 }
 
 void QRCodeReader::stopReading() {
-    qInfo() << "[QRCodeReader] C++ stopReading thread" << QThread::currentThread();
     [m_qrCodeReader stopReading];
 }
 
@@ -397,7 +310,6 @@ void QRCodeReader::notifyCodeRead(const QString &code) {
 }
 
 void QRCodeReader::setTorchEnabled(bool on) {
-    qInfo() << "[QRCodeReader] C++ setTorchEnabled" << on << "thread" << QThread::currentThread();
     [(QRCodeReaderImpl *)m_qrCodeReader applyTorch:on ? YES : NO];
 }
 #else

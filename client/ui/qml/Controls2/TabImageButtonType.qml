@@ -53,10 +53,7 @@ TabButton {
     background: Rectangle {
         id: background
         anchors.fill: parent
-        /** iOS embedded QR camera: clear window + preview under Qt; transparent tab cells show the camera. */
-        color: (PairingUiController.embeddedPairingQrCameraActive && Qt.platform.os !== "android")
-               ? AmneziaStyle.color.onyxBlack
-               : AmneziaStyle.color.transparent
+        color: AmneziaStyle.color.transparent
         radius: 10
 
         border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent

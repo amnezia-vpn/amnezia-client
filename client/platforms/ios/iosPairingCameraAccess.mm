@@ -130,11 +130,9 @@ static void amneziaLayoutPairingSafeAreaDimStrips(void)
     CGFloat bottomY = hb.size.height - insets.bottom;
     CGFloat bottomH = insets.bottom;
     UIView *qt = s_pairingDimQtRoot;
-    CGFloat qMaxYForLog = hb.size.height;
     if (qt && qt.superview) {
         CGRect qInHost = [host convertRect:qt.bounds fromView:qt];
         const CGFloat qMaxY = CGRectGetMaxY(qInHost);
-        qMaxYForLog = qMaxY;
         if (qMaxY < hb.size.height - 0.5f) {
             bottomY = qMaxY;
             bottomH = hb.size.height - qMaxY;
@@ -168,28 +166,6 @@ static void amneziaLayoutPairingSafeAreaDimStrips(void)
     s_pairingSafeBottomDim.frame = CGRectMake(0, bottomY, hb.size.width, bottomH);
 
     amneziaSyncPairingWindowBottomMaskLayer(w, host, bottomY, bottomH, hb.size.width);
-
-    CGRect winStrip = [w convertRect:s_pairingSafeBottomDim.frame fromView:host];
-    CALayer *previewLy = amneziaFindVideoPreviewLayerInWindow(w);
-    CGRect previewWin = CGRectZero;
-    if (previewLy) {
-        previewWin = [w.layer convertRect:previewLy.bounds fromLayer:previewLy];
-    }
-    CGRect maskWin = s_pairingWindowBottomMaskLayer ? s_pairingWindowBottomMaskLayer.frame : CGRectZero;
-    CGRect qtWin = CGRectZero;
-    if (qt) {
-        qtWin = [w convertRect:qt.bounds fromView:qt];
-    }
-
-    NSLog(@"[PairingCamera] safeAreaDim bottom strip y=%.1f h=%.1f qtMaxY=%.1f hostH=%.1f safeBottom=%.1f extraPt=%d winMask=%d",
-          bottomY, bottomH, qMaxYForLog, hb.size.height, insets.bottom, s_pairingNativeBottomExtraPt,
-          (int)(s_pairingWindowBottomMaskLayer.superlayer != nil));
-    NSLog(@"[PairingCamera] geom winStrip={{%.1f,%.1f},{%.1f,%.1f}} qtWin={{%.1f,%.1f},{%.1f,%.1f}} previewWin={{%.1f,%.1f},{%.1f,%.1f}} "
-          @"maskWin={{%.1f,%.1f},{%.1f,%.1f}} dyStripTopMinusPreviewTop=%.1f dyStripTopMinusQtMaxY=%.1f",
-          winStrip.origin.x, winStrip.origin.y, winStrip.size.width, winStrip.size.height, qtWin.origin.x, qtWin.origin.y,
-          qtWin.size.width, qtWin.size.height, previewWin.origin.x, previewWin.origin.y, previewWin.size.width,
-          previewWin.size.height, maskWin.origin.x, maskWin.origin.y, maskWin.size.width, maskWin.size.height,
-          CGRectGetMinY(winStrip) - CGRectGetMinY(previewWin), CGRectGetMinY(winStrip) - CGRectGetMaxY(qtWin));
 }
 
 static void amneziaInstallPairingSafeAreaDimStrips(UIWindow *window, UIView *qtRootView)
@@ -226,10 +202,6 @@ static void amneziaInstallPairingSafeAreaDimStrips(UIWindow *window, UIView *qtR
 
     [host insertSubview:s_pairingSafeTopDim belowSubview:qtRootView];
     [host insertSubview:s_pairingSafeBottomDim belowSubview:qtRootView];
-
-    NSLog(@"[PairingCamera] safeAreaDim host=%@ top=%.1f bottomInset=%.1f qtFrame=%@ hostBounds=%@ window=%@",
-          NSStringFromClass(host.class), insets.top, insets.bottom, NSStringFromCGRect(qtRootView.frame), NSStringFromCGRect(hb),
-          NSStringFromCGRect(window.bounds));
 
     s_pairingSafeDimOrientationToken = [[NSNotificationCenter defaultCenter]
         addObserverForName:UIDeviceOrientationDidChangeNotification
@@ -277,7 +249,6 @@ static void amneziaForceMetalViewsTransparent(UIView *view, NSUInteger depth, NS
         if (view.layer) {
             view.layer.backgroundColor = [UIColor clearColor].CGColor;
         }
-        NSLog(@"[PairingCamera] forceMetalTransparent depth=%lu class=%@", (unsigned long)depth, cn);
     }
     if (depth < maxDepth) {
         for (UIView *child in view.subviews) {
@@ -358,7 +329,6 @@ void amneziaIosApplyEmbeddedCameraUnderlayToQtView(bool enable)
     void (^work)(void) = ^{
         UIViewController *vc = amneziaKeyWindowViewController();
         if (!vc || !vc.view) {
-            NSLog(@"[PairingCamera] amneziaIosApplyEmbeddedCameraUnderlayToQtView: no root VC (enable=%d)", (int)enable);
             return;
         }
         UIView *root = vc.view;
@@ -378,9 +348,6 @@ void amneziaIosApplyEmbeddedCameraUnderlayToQtView(bool enable)
             amneziaInstallPairingSafeAreaDimStrips(win, root);
             amneziaLayoutPairingSafeAreaDimStrips();
         }
-        NSLog(@"[PairingCamera] Qt view underlay transparency %@ subviews=%lu",
-              enable ? @"ON" : @"OFF", (unsigned long)root.subviews.count);
-        /** QUIMetalView is often updated after QSG resize; repeat walk next runloop so camera shows below status bar. */
         if (enable) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 UIViewController *vc2 = amneziaKeyWindowViewController();
@@ -388,7 +355,6 @@ void amneziaIosApplyEmbeddedCameraUnderlayToQtView(bool enable)
                     return;
                 }
                 amneziaApplyPairingUnderlayWalk(vc2.view, YES);
-                NSLog(@"[PairingCamera] underlay repeat pass (post-runloop)");
             });
         }
     };

@@ -108,7 +108,6 @@ class AmneziaActivity : QtActivity(), LifecycleOwner {
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
 
-    private var pairingQrEmbeddedCamera: PairingQrEmbeddedCamera? = null
     private var lastPairingQrReaderStartUptimeMs: Long = 0L
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
@@ -999,26 +998,6 @@ class AmneziaActivity : QtActivity(), LifecycleOwner {
     }
 
     @Suppress("unused")
-    fun startPairingQrEmbeddedCamera() {
-        Log.v(TAG, "startPairingQrEmbeddedCamera")
-        if (pairingQrEmbeddedCamera == null) {
-            pairingQrEmbeddedCamera = PairingQrEmbeddedCamera(this)
-        }
-        pairingQrEmbeddedCamera?.start()
-    }
-
-    @Suppress("unused")
-    fun stopPairingQrEmbeddedCamera() {
-        Log.v(TAG, "stopPairingQrEmbeddedCamera")
-        pairingQrEmbeddedCamera?.stop()
-    }
-
-    @Suppress("unused")
-    fun setPairingQrEmbeddedTorch(enabled: Boolean) {
-        pairingQrEmbeddedCamera?.setTorch(enabled)
-    }
-
-    @Suppress("unused")
     fun startQrCodeReader() {
         Log.v(TAG, "Start camera")
         Intent(this, CameraActivity::class.java).also {
@@ -1030,11 +1009,9 @@ class AmneziaActivity : QtActivity(), LifecycleOwner {
     fun startPairingQrCodeReader() {
         val now = SystemClock.uptimeMillis()
         if (now - lastPairingQrReaderStartUptimeMs < 1200L) {
-            Log.w(TAG, "startPairingQrCodeReader: suppressed duplicate (${now - lastPairingQrReaderStartUptimeMs}ms)")
             return
         }
         lastPairingQrReaderStartUptimeMs = now
-        Log.v(TAG, "Start pairing QR camera")
         Intent(this, CameraActivity::class.java).also {
             it.putExtra(CameraActivity.EXTRA_PAIRING_QR_CAMERA, true)
             startActivity(it)

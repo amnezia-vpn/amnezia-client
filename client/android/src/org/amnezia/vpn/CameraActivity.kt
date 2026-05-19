@@ -170,7 +170,6 @@ class CameraActivity : ComponentActivity() {
         if (!::viewBinding.isInitialized) {
             return
         }
-        Log.v(TAG, "onNewIntent: rebind pairing camera")
         cleanupCameraResources()
         qrHandledOrClosing.set(false)
         pairingQrDeliveredToQt = false

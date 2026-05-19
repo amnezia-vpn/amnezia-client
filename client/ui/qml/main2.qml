@@ -16,8 +16,7 @@ Window  {
     id: root
     objectName: "mainWindow"
 
-    readonly property bool pairingQrCameraUnderlay: PairingUiController.embeddedPairingQrCameraActive && GC.isMobile()
-    color: pairingQrCameraUnderlay ? "#00000000" : AmneziaStyle.color.midnightBlack
+    color: AmneziaStyle.color.midnightBlack
 
     Connections {
         target: Qt.application

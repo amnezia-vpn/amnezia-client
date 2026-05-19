@@ -82,7 +82,6 @@ namespace PageLoader
         PageSetupWizardApiPremiumInfo,
         PageSetupWizardApiTrialEmail,
 
-        PageSettingsApiQrPairingDev,
         PageSettingsApiQrPairingSend,
         PageSetupWizardApiQrPairingReceive,
 

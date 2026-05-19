@@ -19,15 +19,6 @@ PageType {
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
 
-    property bool pairingQrChromeDebug: false
-
-    readonly property int tabBarChromeOverlapUp: (PairingUiController.embeddedPairingQrCameraActive && GC.isMobile()
-                                                  && Qt.platform.os !== "android")
-                                                 ? (root.pairingQrChromeDebug ? 24 : 18) : 0
-
-    readonly property int tabStackPairingUnderlapDown: (PairingUiController.embeddedPairingQrCameraActive && GC.isMobile()
-                                                       && Qt.platform.os !== "android") ? 8 : 0
-
     Connections {
         objectName: "pageControllerConnection"
 
@@ -279,7 +270,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: tabBar.top
-        anchors.bottomMargin: -root.tabStackPairingUnderlapDown
+        anchors.bottomMargin: 0
 
         enabled: !root.isControlsDisabled
 
@@ -351,16 +342,16 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            height: parent.height + root.tabBarChromeOverlapUp
+            height: parent.height
 
             Rectangle {
                 anchors.fill: parent
-                color: root.pairingQrChromeDebug ? "#00ff66" : AmneziaStyle.color.onyxBlack
+                color: AmneziaStyle.color.onyxBlack
             }
             Shape {
                 id: tabBarChromeShape
                 objectName: "backgroundShape"
-                visible: root.tabBarChromeOverlapUp === 0
+                visible: true
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom

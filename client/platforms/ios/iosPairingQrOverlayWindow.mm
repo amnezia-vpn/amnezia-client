@@ -17,56 +17,6 @@ static bool gTorchRequested = false;
 /** Last time overlay became key; used to ignore restartCapture during warm-up (see QML kick timer removal). */
 static CFAbsoluteTime gPairingQrOverlayKeySince = -1.0;
 
-static void amneziaPairingQrLogScenes(NSString *tag)
-{
-    NSUInteger n = 0;
-    for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
-        NSString *cls = NSStringFromClass(scene.class);
-        NSString *state = @"?";
-        switch (scene.activationState) {
-            case UISceneActivationStateUnattached:
-                state = @"unattached";
-                break;
-            case UISceneActivationStateForegroundActive:
-                state = @"foregroundActive";
-                break;
-            case UISceneActivationStateForegroundInactive:
-                state = @"foregroundInactive";
-                break;
-            case UISceneActivationStateBackground:
-                state = @"background";
-                break;
-            default:
-                break;
-        }
-        CGRect bounds = CGRectZero;
-        if ([scene isKindOfClass:[UIWindowScene class]]) {
-            bounds = ((UIWindowScene *)scene).coordinateSpace.bounds;
-        }
-        NSLog(@"[PairingQrOverlay] %@ scene[%lu] class=%@ state=%@ bounds=%@", tag, (unsigned long)n, cls, state,
-              NSStringFromCGRect(bounds));
-        n++;
-    }
-    if (n == 0) {
-        NSLog(@"[PairingQrOverlay] %@ connectedScenes count=0", tag);
-    }
-}
-
-static void amneziaPairingQrLogWindows(NSString *tag)
-{
-    NSUInteger i = 0;
-    for (UIWindow *cw in UIApplication.sharedApplication.windows) {
-        NSLog(@"[PairingQrOverlay] %@ UIWindow[%lu] ptr=%p level=%.1f hidden=%d key=%d bounds=%@ rootVC=%@", tag,
-              (unsigned long)i, (void *)cw, cw.windowLevel, (int)cw.hidden, (int)cw.isKeyWindow,
-              NSStringFromCGRect(cw.bounds),
-              cw.rootViewController ? NSStringFromClass(cw.rootViewController.class) : @"(nil)");
-        i++;
-    }
-    if (i == 0) {
-        NSLog(@"[PairingQrOverlay] %@ UIApplication.windows count=0", tag);
-    }
-}
-
 static UIWindowScene *amneziaForegroundWindowScene(void)
 {
     for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
@@ -113,11 +63,9 @@ static CGFloat amneziaPairingQrBottomTabStripReserve(UIWindowScene *scene)
         if ([cw.rootViewController isKindOfClass:qios]) {
             const CGFloat inset = cw.safeAreaInsets.bottom;
             const CGFloat reserve = inset + 49.f;
-            NSLog(@"[PairingQrOverlay] bottomReserve: QUIWindow safeBottom=%.1f -> reserve=%.1f", inset, reserve);
             return MIN(MAX(reserve, 72.f), 140.f);
         }
     }
-    NSLog(@"[PairingQrOverlay] bottomReserve: QUIWindow not found, default 83");
     return 83.f;
 }
 
@@ -548,7 +496,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 
 - (void)backTapped
 {
-    NSLog(@"[PairingQrOverlay] native back tapped");
     if (gOnBack) {
         gOnBack();
     }
@@ -557,7 +504,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 - (void)torchTapped
 {
     gTorchRequested = !gTorchRequested;
-    NSLog(@"[PairingQrOverlay] native torch toggle -> %d", (int)gTorchRequested);
     [self applyTorchFromGlobalFlag];
     if (gTorchRequested) {
         self.torchButton.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.42];
@@ -597,8 +543,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 {
     AVCaptureDevice *device = self.videoDevice;
     if (!device || ![device hasTorch]) {
-        NSLog(@"[PairingQrOverlay] applyTorch skipped on=%d device=%p hasTorch=%d", (int)on, (void *)device,
-              device ? (int)[device hasTorch] : -1);
         if (on && gTorchRequested) {
             __unsafe_unretained AmneziaPairingQrOverlayViewController *unsafeSelf = self;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.12 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -676,9 +620,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 
 - (BOOL)startCapturePipelineOnMainThread
 {
-    NSLog(@"[PairingQrOverlay] startCapturePipelineOnMainThread entry camera.bounds=%@ thread=%@",
-          self.cameraContainer ? NSStringFromCGRect(self.cameraContainer.bounds) : @"(nil)",
-          [NSThread isMainThread] ? @"main" : @"bg");
 
     [self stopCapturePipelineOnMainThread];
 
@@ -693,8 +634,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
         NSLog(@"[PairingQrOverlay] no default video device");
         return NO;
     }
-    NSLog(@"[PairingQrOverlay] capture device=%p modelID=%@ localizedName=%@", (void *)device, device.modelID,
-          device.localizedName);
     AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
     if (!input) {
         NSLog(@"[PairingQrOverlay] deviceInput failed: %@", error.localizedDescription);
@@ -706,7 +645,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     if ([session canSetSessionPreset:AVCaptureSessionPresetHigh]) {
         session.sessionPreset = AVCaptureSessionPresetHigh;
     }
-    NSLog(@"[PairingQrOverlay] session preset=%@", session.sessionPreset);
 
     [session addInput:input];
 
@@ -732,7 +670,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     self.previewLayer = preview;
     [self.cameraContainer.layer insertSublayer:preview atIndex:0];
     preview.frame = self.cameraContainer.bounds;
-    NSLog(@"[PairingQrOverlay] previewLayer on host frame=%@", NSStringFromCGRect(preview.frame));
 
     [self.view layoutIfNeeded];
     [self layoutScanOverlayGeometry];
@@ -740,22 +677,18 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     AVCaptureSession *runningSession = session;
     __unsafe_unretained AmneziaPairingQrOverlayViewController *weakSelf = self;
     dispatch_async(q, ^{
-        NSLog(@"[PairingQrOverlay] session queue: startRunning begin session=%p", (void *)runningSession);
         @try {
             [runningSession startRunning];
         } @catch (NSException *ex) {
             NSLog(@"[PairingQrOverlay] startRunning exception: %@", ex);
         }
         const BOOL running = [runningSession isRunning];
-        NSLog(@"[PairingQrOverlay] session queue: startRunning end isRunning=%d", (int)running);
         dispatch_async(dispatch_get_main_queue(), ^{
             AmneziaPairingQrOverlayViewController *strongSelf = weakSelf;
             if (!strongSelf) {
                 return;
             }
             AVCaptureVideoPreviewLayer *pl = strongSelf.previewLayer;
-            NSLog(@"[PairingQrOverlay] post-start main: sessionRunning=%d previewFrame=%@ hostBounds=%@", (int)runningSession.isRunning,
-                  pl ? NSStringFromCGRect(pl.frame) : @"(no preview)", NSStringFromCGRect(strongSelf.cameraContainer.bounds));
             [strongSelf applyTorchFromGlobalFlag];
         });
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -764,9 +697,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
                 return;
             }
             AVCaptureVideoPreviewLayer *pl = strongSelf.previewLayer;
-            NSLog(@"[PairingQrOverlay] probe+350ms: sessionRunning=%d previewFrame=%@", (int)runningSession.isRunning,
-                  pl ? NSStringFromCGRect(pl.frame) : @"(nil)");
-            amneziaPairingQrLogWindows(@"probe+350ms");
         });
     });
 
@@ -791,10 +721,8 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
         }
         dispatch_async(dispatch_get_main_queue(), ^{
             if (gOnScanned) {
-                NSLog(@"[PairingQrOverlay] metadata QR len=%lu", (unsigned long)copy.size());
                 gOnScanned(copy.c_str());
             } else {
-                NSLog(@"[PairingQrOverlay] metadata QR but gOnScanned is nil");
             }
         });
         break;
@@ -805,7 +733,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 
 static void amneziaPairingQrOverlayTeardownOnMain(void)
 {
-    NSLog(@"[PairingQrOverlay] teardownOnMain overlayPtr=%p", (void *)gPairingQrOverlayWindow);
     UIWindow *w = gPairingQrOverlayWindow;
     gPairingQrOverlayWindow = nil;
     gOnScanned = nullptr;
@@ -824,12 +751,9 @@ static void amneziaPairingQrOverlayTeardownOnMain(void)
 
     UIWindow *restore = amneziaPickQtAppWindowToRestore();
     if (restore) {
-        NSLog(@"[PairingQrOverlay] teardown: restore keyWindow to %@", restore);
         [restore makeKeyWindow];
     } else {
-        NSLog(@"[PairingQrOverlay] teardown: no window to restore as key");
     }
-    amneziaPairingQrLogWindows(@"afterTeardown");
 }
 
 void amneziaIosPairingQrOverlayPresent(AmneziaPairingQrScannedUtf8Handler onScanned, AmneziaPairingQrOverlayBackHandler onBack,
@@ -837,26 +761,20 @@ void amneziaIosPairingQrOverlayPresent(AmneziaPairingQrScannedUtf8Handler onScan
 {
     const bool hasScan = static_cast<bool>(onScanned);
     const bool hasBack = static_cast<bool>(onBack);
-    NSLog(@"[PairingQrOverlay] C++ present requested hasScan=%d hasBack=%d callerThread=%p", (int)hasScan, (int)hasBack,
-          (void *)NSThread.currentThread);
     AmneziaPairingQrScannedUtf8Handler scanH = std::move(onScanned);
     AmneziaPairingQrOverlayBackHandler backH = std::move(onBack);
     const std::string titleCopy = titleUtf8;
     const std::string subCopy = subtitleUtf8;
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"[PairingQrOverlay] present block on main");
-        amneziaPairingQrLogScenes(@"beforeTeardown");
-        amneziaPairingQrLogWindows(@"beforeTeardown");
+
         amneziaPairingQrOverlayTeardownOnMain();
         gOnScanned = std::move(scanH);
         gOnBack = std::move(backH);
-        NSLog(@"[PairingQrOverlay] callbacks stored scan=%d back=%d", (int)(bool)gOnScanned, (int)(bool)gOnBack);
 
         UIWindowScene *scene = amneziaForegroundWindowScene();
         if (!scene) {
             NSLog(@"[PairingQrOverlay] present: no UIWindowScene");
-            amneziaPairingQrLogScenes(@"sceneNil");
             gOnScanned = nullptr;
             gOnBack = nullptr;
             return;
@@ -878,28 +796,22 @@ void amneziaIosPairingQrOverlayPresent(AmneziaPairingQrScannedUtf8Handler onScan
         w.backgroundColor = [UIColor blackColor];
         w.rootViewController = vc;
         gPairingQrOverlayWindow = w;
-        NSLog(@"[PairingQrOverlay] created UIWindow ptr=%p frame=%@ (sceneH=%.0f bottomReserve=%.0f) level=%.1f", (void *)w,
-              NSStringFromCGRect(w.frame), sceneBounds.size.height, bottomReserve, w.windowLevel);
 
         [w makeKeyAndVisible];
         [w layoutIfNeeded];
         [vc.view setNeedsLayout];
         [vc.view layoutIfNeeded];
-        NSLog(@"[PairingQrOverlay] after layout vc.view.bounds=%@ window.key=%d", NSStringFromCGRect(vc.view.bounds),
-              (int)w.isKeyWindow);
 
         gPairingQrOverlayKeySince = CFAbsoluteTimeGetCurrent();
 
         if (![vc startCapturePipelineOnMainThread]) {
             NSLog(@"[PairingQrOverlay] startCapture failed");
         }
-        amneziaPairingQrLogWindows(@"afterPresent");
     });
 }
 
 void amneziaIosPairingQrOverlayDismiss()
 {
-    NSLog(@"[PairingQrOverlay] C++ dismiss requested");
     dispatch_async(dispatch_get_main_queue(), ^{
         amneziaPairingQrOverlayTeardownOnMain();
     });
@@ -907,12 +819,10 @@ void amneziaIosPairingQrOverlayDismiss()
 
 void amneziaIosPairingQrOverlaySetTorchEnabled(bool on)
 {
-    NSLog(@"[PairingQrOverlay] C++ setTorch=%d", (int)on);
     gTorchRequested = on;
     dispatch_async(dispatch_get_main_queue(), ^{
         UIWindow *win = gPairingQrOverlayWindow;
         if (!win) {
-            NSLog(@"[PairingQrOverlay] setTorch: no overlay window");
             return;
         }
         UIViewController *root = win.rootViewController;
@@ -935,25 +845,20 @@ void amneziaIosPairingQrOverlaySetTorchEnabled(bool on)
 
 void amneziaIosPairingQrOverlayRestartCapture()
 {
-    NSLog(@"[PairingQrOverlay] C++ restartCapture requested");
     dispatch_async(dispatch_get_main_queue(), ^{
         const CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
         if (gPairingQrOverlayKeySince > 0 && (now - gPairingQrOverlayKeySince) < 1.0) {
-            NSLog(@"[PairingQrOverlay] restartCapture: skipped warm-up (%.3fs since overlay key)", now - gPairingQrOverlayKeySince);
             return;
         }
         UIWindow *w = gPairingQrOverlayWindow;
         if (!w) {
-            NSLog(@"[PairingQrOverlay] restartCapture: no overlay window");
             return;
         }
         UIViewController *root = w.rootViewController;
         if (![root isKindOfClass:[AmneziaPairingQrOverlayViewController class]]) {
-            NSLog(@"[PairingQrOverlay] restartCapture: rootVC class=%@", root ? NSStringFromClass(root.class) : @"(nil)");
             return;
         }
         AmneziaPairingQrOverlayViewController *vc = (AmneziaPairingQrOverlayViewController *)root;
-        NSLog(@"[PairingQrOverlay] restartCapture: stop+start");
         [vc stopCapturePipelineOnMainThread];
         if (![vc startCapturePipelineOnMainThread]) {
             NSLog(@"[PairingQrOverlay] restart startCapture failed");

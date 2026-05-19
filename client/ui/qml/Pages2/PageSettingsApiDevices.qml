@@ -109,11 +109,11 @@ PageType {
         }
 
         function onPhonePairingSucceeded() {
-            const serverIndex = ServersUiController.getProcessedServerIndex()
-            if (serverIndex < 0) {
+            var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
+            if (serverId.length === 0) {
                 return
             }
-            SubscriptionUiController.getAccountInfo(serverIndex, true)
+            SubscriptionUiController.getAccountInfo(serverId, true)
             SubscriptionUiController.updateApiDevicesModel()
             if (!root.visible) {
                 return

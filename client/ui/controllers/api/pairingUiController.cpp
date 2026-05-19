@@ -3,7 +3,6 @@
 #include <QCoreApplication>
 #include <QDataStream>
 #include <QDateTime>
-#include <QDebug>
 #include <QIODevice>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -241,7 +240,6 @@ void PairingUiController::clearPendingPhonePairingUuid()
 void PairingUiController::openPairingQrScanner()
 {
 #if defined(Q_OS_ANDROID)
-    qInfo() << "[PairingUi] openPairingQrScanner (Android native activity)";
     AndroidController::instance()->startPairingQrReaderActivity();
 #endif
 }
@@ -251,9 +249,7 @@ bool PairingUiController::isPairingCameraAccessGranted() const
 #if defined(Q_OS_ANDROID)
     return AndroidController::instance()->isCameraPermissionGranted();
 #elif defined(Q_OS_IOS)
-    const bool ok = amneziaIosPairingCameraAccessGranted();
-    qInfo() << "[PairingUi] iOS isPairingCameraAccessGranted =" << ok;
-    return ok;
+    return amneziaIosPairingCameraAccessGranted();
 #else
     return true;
 #endif
@@ -265,7 +261,6 @@ void PairingUiController::requestPairingCameraAccess()
     AndroidController::instance()->requestCameraPermissionForQrPairing();
 #elif defined(Q_OS_IOS)
     amneziaIosRequestPairingCameraAccess([this](bool granted) {
-        qInfo() << "[PairingUi] iOS requestPairingCameraAccess callback granted =" << granted;
         QMetaObject::invokeMethod(
                 this, [this, granted]() { emit pairingCameraAccessFinished(granted); }, Qt::QueuedConnection);
     });
@@ -283,52 +278,10 @@ void PairingUiController::openPairingCameraAppSettings()
 #endif
 }
 
-void PairingUiController::setEmbeddedPairingQrCameraActive(bool active)
-{
-    if (m_embeddedPairingQrCameraActive == active) {
-        return;
-    }
-    m_embeddedPairingQrCameraActive = active;
-#if defined(Q_OS_IOS)
-    qInfo() << "[PairingUi] iOS embeddedPairingQrCameraActive ->" << active;
-    amneziaIosApplyEmbeddedCameraUnderlayToQtView(active);
-#endif
-#if defined(Q_OS_ANDROID)
-    if (active) {
-        AndroidController::instance()->startPairingQrEmbeddedCamera();
-    } else {
-        AndroidController::instance()->stopPairingQrEmbeddedCamera();
-    }
-#endif
-    emit embeddedPairingQrCameraActiveChanged();
-}
-
-void PairingUiController::syncIosEmbeddedPairingQrNativeBottomExtra(int extraPt)
-{
-#if defined(Q_OS_IOS)
-    amneziaIosSetPairingEmbeddedCameraNativeBottomExtraPt(extraPt);
-#else
-    Q_UNUSED(extraPt);
-#endif
-}
-
-void PairingUiController::refreshIosEmbeddedPairingQrChrome()
-{
-#if defined(Q_OS_IOS)
-    if (!m_embeddedPairingQrCameraActive) {
-        return;
-    }
-    qInfo() << "[PairingUi] refreshIosEmbeddedPairingQrChrome (reapply UIView underlay)";
-    amneziaIosApplyEmbeddedCameraUnderlayToQtView(true);
-#else
-    // no-op on non-iOS
-#endif
-}
-
 void PairingUiController::setPairingQrTorchEnabled(bool enabled)
 {
 #if defined(Q_OS_ANDROID)
-    AndroidController::instance()->setPairingQrEmbeddedTorch(enabled);
+    Q_UNUSED(enabled);
 #elif defined(Q_OS_IOS)
     amneziaIosPairingQrOverlaySetTorchEnabled(enabled);
 #else
@@ -339,7 +292,6 @@ void PairingUiController::setPairingQrTorchEnabled(bool enabled)
 void PairingUiController::presentIosPairingQrNativeOverlayScanner(const QString &title, const QString &subtitle)
 {
 #if defined(Q_OS_IOS)
-    qInfo() << "[PairingUi] presentIosPairingQrNativeOverlayScanner: scheduling native UIWindow overlay";
     const std::string titleUtf8 = title.isEmpty() ? std::string() : title.toStdString();
     const std::string subtitleUtf8 = subtitle.isEmpty() ? std::string() : subtitle.toStdString();
     amneziaIosPairingQrOverlayPresent(
@@ -364,14 +316,12 @@ void PairingUiController::presentIosPairingQrNativeOverlayScanner(const QString 
 #else
     Q_UNUSED(title);
     Q_UNUSED(subtitle);
-    qInfo() << "[PairingUi] presentIosPairingQrNativeOverlayScanner: no-op (not iOS build)";
 #endif
 }
 
 void PairingUiController::dismissIosPairingQrNativeOverlayScanner()
 {
 #if defined(Q_OS_IOS)
-    qInfo() << "[PairingUi] dismissIosPairingQrNativeOverlayScanner";
     amneziaIosPairingQrOverlayDismiss();
 #endif
 }
@@ -379,25 +329,17 @@ void PairingUiController::dismissIosPairingQrNativeOverlayScanner()
 void PairingUiController::restartIosPairingQrNativeOverlayCapture()
 {
 #if defined(Q_OS_IOS)
-    qInfo() << "[PairingUi] restartIosPairingQrNativeOverlayCapture";
     amneziaIosPairingQrOverlayRestartCapture();
 #endif
 }
 
 bool PairingUiController::applyScannedTextAsPairingUuid(const QString &raw)
 {
-    const QString t = raw.trimmed();
-    qInfo() << "[PairingUi] scan raw len=" << t.size();
     const QString uuid = extractPairingSessionUuidFromScanText(raw);
     if (uuid.isEmpty()) {
-        if (t.startsWith(QStringLiteral("vpn://"), Qt::CaseInsensitive)) {
-            qInfo() << "[PairingUi] scan rejected: looks like vpn:// bundle, not session UUID";
-        } else {
-            qInfo() << "[PairingUi] scan rejected: no session UUID recognized in payload";
-        }
         return false;
     }
-    qInfo() << "[PairingUi] scan accepted uuid=" << uuid.left(13) << "...";
+
     emit pairingUuidFromScan(uuid);
     return true;
 }
@@ -406,7 +348,6 @@ bool PairingUiController::applyScannedTextAsPairingUuid(const QString &raw)
 bool PairingUiController::tryConsumeAndroidQrScan(const QString &code)
 {
     if (!g_pairingUiForAndroidQr) {
-        qWarning() << "[PairingUi] tryConsumeAndroidQrScan: no controller (g_pairingUiForAndroidQr null)";
         return false;
     }
     const QString codeCopy = code;
@@ -423,7 +364,6 @@ bool PairingUiController::tryConsumeAndroidQrScan(const QString &code)
         }
         ctlPtr->applyScannedTextAsPairingUuid(codeCopy);
     });
-    qInfo() << "[PairingUi] tryConsumeAndroidQrScan: scheduled apply on Qt thread, rawLen=" << codeCopy.size();
     return true;
 }
 
@@ -743,8 +683,6 @@ void PairingUiController::cancelAllPairingActivity()
     }
 
     cancelTvQrSession();
-
-    setEmbeddedPairingQrCameraActive(false);
 }
 
 void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIndex)
@@ -757,15 +695,12 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     }
 
     const QString trimmedUuid = qrUuid.trimmed();
-    qInfo() << "[PairingUi] submitPhonePairing serverIndex=" << serverIndex << "uuidLen=" << trimmedUuid.size();
     if (trimmedUuid.isEmpty()) {
-        qWarning() << "[PairingUi] submitPhonePairing aborted: empty UUID (paste or scan first)";
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return;
     }
 
     if (serverIndex < 0 || serverIndex >= m_serversController->getServersCount()) {
-        qWarning() << "[PairingUi] submitPhonePairing invalid serverIndex";
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
@@ -773,7 +708,6 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     const QString serverId = m_serversController->getServerId(serverIndex);
     const auto apiV2Opt = m_serversController->apiV2Config(serverId);
     if (!apiV2Opt.has_value()) {
-        qWarning() << "[PairingUi] submitPhonePairing server is not API v2";
         emit errorOccurred(ErrorCode::InternalError);
         return;
     }
@@ -783,7 +717,6 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     QString vpnKey;
     const ErrorCode keyErr = m_subscriptionController->prepareVpnKeyExport(serverId, vpnKey);
     if (keyErr != ErrorCode::NoError) {
-        qWarning() << "[PairingUi] prepareVpnKeyExport failed" << static_cast<int>(keyErr);
         emit errorOccurred(keyErr);
         return;
     }
@@ -792,7 +725,6 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
     const QJsonArray supportedProtocols = apiV2.apiConfig.supportedProtocols;
     const QString apiKey = apiV2.authData.apiKey;
     if (apiKey.isEmpty()) {
-        qWarning() << "[PairingUi] submitPhonePairing aborted: empty API key on server card";
         emit errorOccurred(ErrorCode::ApiConfigEmptyError);
         return;
     }

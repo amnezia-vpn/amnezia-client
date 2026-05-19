@@ -90,21 +90,6 @@ PageType {
         footer: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                text: qsTr("QR pairing (full dev UI)")
-                descriptionText: qsTr("Receive + send on one device for local gateway / QA")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApiQrPairingDev)
-                }
-            }
-
             SwitcherType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16

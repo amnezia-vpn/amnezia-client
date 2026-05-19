@@ -12,7 +12,6 @@ import "../Components"
 PageType {
     id: root
 
-    property int qrImageIndex: 0
     readonly property int qrRefreshIntervalMs: Math.max(5000, PairingUiController.tvPairingWaitWindowSeconds * 1000)
 
     function scrollPairingToBottom() {
@@ -134,15 +133,7 @@ PageType {
                         anchors.margins: 20
                         fillMode: Image.PreserveAspectFit
                         sourceSize: Qt.size(2048, 2048)
-                        source: PairingUiController.tvQrCodesCount > 0 ? PairingUiController.tvQrCodes[root.qrImageIndex] : ""
-
-                        MouseArea {
-                            anchors.fill: parent
-                            enabled: PairingUiController.tvQrCodesCount > 1
-                            onClicked: {
-                                root.qrImageIndex = (root.qrImageIndex + 1) % PairingUiController.tvQrCodesCount
-                            }
-                        }
+                        source: PairingUiController.tvQrCodesCount > 0 ? PairingUiController.tvQrCodes[0] : ""
                     }
                 }
             }
@@ -170,7 +161,6 @@ PageType {
         target: PairingUiController
 
         function onTvQrCodesChanged() {
-            root.qrImageIndex = 0
             if (PairingUiController.tvQrCodesCount > 0) {
                 scrollToBottomRetryTimer.retries = 0
                 scrollToBottomRetryTimer.start()
@@ -183,10 +173,6 @@ PageType {
                     })
                 })
             }
-        }
-
-        function onTvSessionUuidChanged() {
-            root.qrImageIndex = 0
         }
 
         function onTvPairingConfigReceived() {
