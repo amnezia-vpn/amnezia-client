@@ -104,10 +104,6 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         return amnezia::ErrorCode::ApiUpdateRequestError;
     }
 
-    qDebug() << QString::fromUtf8(responseBody);
-    qDebug() << replyError;
-    qDebug() << httpStatusCode;
-
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (jsonDoc.isObject()) {
         QJsonObject jsonObj = jsonDoc.object();
