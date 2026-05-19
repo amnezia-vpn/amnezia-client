@@ -145,6 +145,8 @@ signals:
     void loggingDisableByWatcher();
 
     void appLanguageChanged();
+
+    void appLanguageChanged(const LanguageSettings::AvailableLanguageEnum language);
     void resetLanguageToSystem();
 
     void onNotificationStateChanged();
