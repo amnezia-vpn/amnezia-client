@@ -38,11 +38,13 @@ class LocalSocketController final : public ControllerImpl {
 
   bool multihopSupported() override { return true; }
 
+ public:
+  static QJsonObject buildActivateJson(const QJsonObject& rawConfig,
+                                       const QString& ifname);
+
  private:
   void initializeInternal();
   void disconnectInternal();
-
-  QJsonObject buildActivateJson(const QJsonObject& rawConfig);
 
   void daemonConnected();
   void errorOccurred(QLocalSocket::LocalSocketError socketError);

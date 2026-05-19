@@ -17,7 +17,6 @@
 
 #include "leakdetector.h"
 #include "logger.h"
-#include "killswitch.h"
 
 namespace {
 Logger logger("LinuxDaemon");
@@ -51,8 +50,3 @@ LinuxDaemon* LinuxDaemon::instance() {
     return s_daemon;
 }
 
-bool LinuxDaemon::deactivate(bool emitSignals) {
-    bool result = Daemon::deactivate(emitSignals);
-    KillSwitch::instance()->disableKillSwitch();
-    return result;
-}

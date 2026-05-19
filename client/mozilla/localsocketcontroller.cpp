@@ -122,7 +122,8 @@ void LocalSocketController::daemonConnected() {
   checkStatus();
 }
 
-QJsonObject LocalSocketController::buildActivateJson(const QJsonObject& rawConfig) {
+QJsonObject LocalSocketController::buildActivateJson(const QJsonObject& rawConfig,
+                                                     const QString& ifname) {
   QString protocolName = rawConfig.value("protocol").toString();
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
@@ -138,7 +139,6 @@ QJsonObject LocalSocketController::buildActivateJson(const QJsonObject& rawConfi
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
   json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));
-  m_deviceIpv4 = wgConfig.value(amnezia::configKey::clientIp).toString();
 
   // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
   // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
@@ -230,7 +230,6 @@ QJsonObject LocalSocketController::buildActivateJson(const QJsonObject& rawConfi
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
   QJsonArray jsExcludedAddresses;
-  jsExcludedAddresses.append(wgConfig.value(amnezia::configKey::hostName));
   if (splitTunnelType == 2) {
     for (auto v : splitTunnelSites) {
           QString ipRange = v.toString();
@@ -292,18 +291,22 @@ QJsonObject LocalSocketController::buildActivateJson(const QJsonObject& rawConfi
     json.insert(amnezia::configKey::specialJunk5, wgConfig.value(amnezia::configKey::specialJunk5));
   }
 
-  json.insert("ifname", m_ifname);
+  json.insert("ifname", ifname);
   return json;
 }
 
 void LocalSocketController::activate(const QJsonObject& rawConfig) {
-  QJsonObject json = buildActivateJson(rawConfig);
+  const QString protocolName = rawConfig.value("protocol").toString();
+  const QJsonObject wgConfig = rawConfig.value(protocolName + "_config_data").toObject();
+  m_deviceIpv4 = wgConfig.value(amnezia::configKey::clientIp).toString();
+
+  QJsonObject json = buildActivateJson(rawConfig, m_ifname);
   json.insert("type", "activate");
   write(json);
 }
 
 void LocalSocketController::setPrimary(const QJsonObject& rawConfig) {
-  QJsonObject json = buildActivateJson(rawConfig);
+  QJsonObject json = buildActivateJson(rawConfig, m_ifname);
   json.insert("type", "setPrimary");
   write(json);
 }

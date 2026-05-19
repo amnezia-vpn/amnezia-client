@@ -18,6 +18,8 @@
 #include "killswitch.h"
 #include "xray.h"
 
+#include "../client/daemon/daemon.h"
+
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
 #endif
@@ -89,6 +91,36 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 
     return Router::routeDeleteList(gw, ips);
+}
+
+bool IpcServer::addExclusionRoute(const QString &addr)
+{
+    return Daemon::instance() && Daemon::instance()->addExclusionRoute(addr);
+}
+
+bool IpcServer::delExclusionRoute(const QString &addr)
+{
+    return Daemon::instance() && Daemon::instance()->delExclusionRoute(addr);
+}
+
+bool IpcServer::addAllowedIp(const QString &ifname, const QString &prefix)
+{
+    return Daemon::instance() && Daemon::instance()->addAllowedIp(ifname, prefix);
+}
+
+bool IpcServer::delAllowedIp(const QString &ifname, const QString &prefix)
+{
+    return Daemon::instance() && Daemon::instance()->delAllowedIp(ifname, prefix);
+}
+
+bool IpcServer::setTunnelResolvers(const QString &ifname, const QStringList &resolvers)
+{
+    return Daemon::instance() && Daemon::instance()->setTunnelResolvers(ifname, resolvers);
+}
+
+bool IpcServer::restoreTunnelResolvers()
+{
+    return Daemon::instance() && Daemon::instance()->restoreTunnelResolvers();
 }
 
 bool IpcServer::flushDns()

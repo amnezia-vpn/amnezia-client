@@ -5,6 +5,8 @@
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "protocols/vpnProtocol.h"
 
+class Tunnel;
+
 class VpnTrafficGuard : public QObject
 {
     Q_OBJECT
@@ -17,10 +19,21 @@ public:
                                  const QSharedPointer<VpnProtocol> &protocol,
                                  const QString &remoteAddress);
 
-    void teardown();
+    void flushAll();
     bool allowEndpoint(const QString &remoteAddress);
     void revokeEndpoint(const QString &remoteAddress);
     void applyFirewall(const QString &vpnGateway, const QString &vpnLocalAddress);
+
+    void reserve(Tunnel* tunnel);
+    void release(Tunnel* tunnel);
+    void applyPolicy(Tunnel* tunnel);
+    void revokePolicy(Tunnel* tunnel);
+
+    void bringUp(Tunnel* tunnel);
+    void commit(Tunnel* tunnel);
+    void tearDown(Tunnel* tunnel);
+    void swap(Tunnel* from, Tunnel* to);
+
 private:
     void addSplitTunnelRoutes(const QString &gateway, amnezia::RouteMode mode);
     SecureAppSettingsRepository* m_appSettingsRepository;

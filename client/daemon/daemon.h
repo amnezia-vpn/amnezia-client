@@ -37,6 +37,13 @@ class Daemon : public QObject {
   virtual bool deactivate(bool emitSignals = true);
   virtual QJsonObject getStatus();
 
+  bool addExclusionRoute(const QString &addr);
+  bool delExclusionRoute(const QString &addr);
+  bool addAllowedIp(const QString &ifname, const QString &prefix);
+  bool delAllowedIp(const QString &ifname, const QString &prefix);
+  bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers);
+  bool restoreTunnelResolvers();
+
   const QString& primaryIfname() const { return m_primaryIfname; }
   WireguardUtils* wgutilsFor(const QString& ifname) const { return m_tunnels.value(ifname); }
 
@@ -56,10 +63,6 @@ class Daemon : public QObject {
   void backendFailure(DaemonError reason = DaemonError::ERROR_FATAL);
 
  private:
-  bool maybeUpdateResolvers(const InterfaceConfig& config);
-  bool addExclusionRoute(const IPAddress& address);
-  bool delExclusionRoute(const IPAddress& address);
-  void demotePrimary(const QString& ifname);
   void checkActivations();
   WireguardUtils* primaryWgutils() const { return m_tunnels.value(m_primaryIfname); }
   QTimer m_activationTimer;
