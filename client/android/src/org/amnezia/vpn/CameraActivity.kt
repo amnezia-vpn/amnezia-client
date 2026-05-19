@@ -66,30 +66,16 @@ class CameraActivity : ComponentActivity() {
     private var boundImageAnalysis: ImageAnalysis? = null
     private var torchOn: Boolean = false
 
-    /** CameraX analyzer thread only; ML Kit Task callbacks use [ContextCompat.getMainExecutor] so they are not rejected after [ExecutorService.shutdown]. */
     private var imageAnalysisExecutor: ExecutorService? = null
 
-    /** After a successful decode, ignore further frames (ML Kit otherwise hits "detector is already closed"). */
     private val qrHandledOrClosing = AtomicBoolean(false)
 
-    /**
-     * Pairing mode: QR was accepted by Qt ([decodeQrCode] true) and we are finishing normally.
-     * Do not apply JNI reopen cooldown on destroy — user may cancel confirm and return to scan immediately.
-     */
     private var pairingQrDeliveredToQt = false
 
-    /**
-     * Pairing mode: user closed camera via back / toolbar (not a successful scan).
-     * Skip JNI reopen cooldown — otherwise Qt stays on the black overlay shell until cooldown ends and a second back pops the page.
-     */
     private var pairingQrUserDismissedCamera = false
 
     private var barcodeScanner: BarcodeScanner? = null
 
-    /**
-     * [PreviewView.getOutputTransform] is main-thread-only; the image analyzer runs on a background
-     * executor. Refresh this cache whenever layout / preview geometry may change.
-     */
     private val cachedPreviewOutputTransform = AtomicReference<OutputTransform?>(null)
 
     private var previewTransformLayoutListener: View.OnLayoutChangeListener? = null

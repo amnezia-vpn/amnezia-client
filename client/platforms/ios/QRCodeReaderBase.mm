@@ -1,8 +1,6 @@
 #if !MACOS_NE
 #include "QRCodeReaderBase.h"
 
-#include "platforms/ios/iosPairingCameraAccess.h"
-
 #include <QByteArray>
 
 #import <UIKit/UIKit.h>
@@ -197,7 +195,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     [self.videoPreviewPlayer setFrame:bounds];
     self.videoPreviewPlayer.zPosition = -1000.f;
     [keyWindow.layer insertSublayer:self.videoPreviewPlayer atIndex:0];
-    amneziaIosPairingRelayoutChromeIfNeeded();
 
     AVCaptureSession *runningSession = self.captureSession;
     dispatch_async(_sessionQueue, ^{

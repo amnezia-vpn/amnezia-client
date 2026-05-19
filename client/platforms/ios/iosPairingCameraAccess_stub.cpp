@@ -11,9 +11,3 @@ void amneziaIosRequestPairingCameraAccess(const std::function<void(bool)> &onDon
 }
 
 void amneziaIosOpenApplicationSettings() {}
-
-void amneziaIosApplyEmbeddedCameraUnderlayToQtView(bool) {}
-
-void amneziaIosSetPairingEmbeddedCameraNativeBottomExtraPt(int) {}
-
-void amneziaIosPairingRelayoutChromeIfNeeded(void) {}

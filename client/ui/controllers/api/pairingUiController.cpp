@@ -1,7 +1,6 @@
 #include "pairingUiController.h"
 
 #include <QCoreApplication>
-#include <QDataStream>
 #include <QDateTime>
 #include <QIODevice>
 #include <QJsonArray>
@@ -99,49 +98,6 @@ int pairingRetryDelayMs(int zeroBasedAttempt)
     return baseMs * (1 << zeroBasedAttempt);
 }
 
-bool tryDecodeLegacyChunkedPairingQrPayload(const QString &t, QString *outUuid)
-{
-    static const QRegularExpression binUrlSafe(QStringLiteral("^[A-Za-z0-9_-]+$"));
-    if (!binUrlSafe.match(t).hasMatch() || t.size() < 16) {
-        return false;
-    }
-    QByteArray padded = t.toUtf8();
-    switch (padded.size() % 4) {
-    case 2:
-        padded += "==";
-        break;
-    case 3:
-        padded += "=";
-        break;
-    default:
-        break;
-    }
-    const QByteArray raw = QByteArray::fromBase64(padded, QByteArray::Base64UrlEncoding);
-    if (raw.isEmpty()) {
-        return false;
-    }
-    QDataStream ds(raw);
-    ds.setByteOrder(QDataStream::BigEndian);
-    qint16 magic = 0;
-    quint8 nChunks = 0;
-    quint8 chunkIndex = 0;
-    QByteArray pl;
-    ds >> magic >> nChunks >> chunkIndex >> pl;
-    if (ds.status() != QDataStream::Ok) {
-        return false;
-    }
-    if (magic != qrCodeUtils::qrMagicCode || nChunks < 1 || nChunks > 200 || chunkIndex >= nChunks) {
-        return false;
-    }
-    const QString candidate = QString::fromUtf8(pl).trimmed();
-    const QUuid u = QUuid::fromString(candidate);
-    if (u.isNull()) {
-        return false;
-    }
-    *outUuid = u.toString(QUuid::WithoutBraces);
-    return true;
-}
-
 QString extractPairingSessionUuidFromScanText(const QString &raw)
 {
     const QString t = raw.trimmed();
@@ -153,10 +109,6 @@ QString extractPairingSessionUuidFromScanText(const QString &raw)
     const QRegularExpressionMatch m = reV4.match(t);
     if (m.hasMatch()) {
         return m.captured(0);
-    }
-    QString fromLegacy;
-    if (tryDecodeLegacyChunkedPairingQrPayload(t, &fromLegacy)) {
-        return fromLegacy;
     }
     const QUuid parsed = QUuid::fromString(t);
     if (!parsed.isNull()) {

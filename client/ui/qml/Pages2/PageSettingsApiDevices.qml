@@ -109,15 +109,10 @@ PageType {
         }
 
         function onPhonePairingSucceeded() {
-            var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
-            if (serverId.length === 0) {
-                return
-            }
-            SubscriptionUiController.getAccountInfo(serverId, true)
-            SubscriptionUiController.updateApiDevicesModel()
             if (!root.visible) {
                 return
             }
+            SubscriptionUiController.updateApiDevicesModel()
             const label = PairingUiController.lastSuccessfulPhonePairingDisplayName
             if (label.length > 0) {
                 PageController.showNotificationMessage(
