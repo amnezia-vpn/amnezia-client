@@ -108,6 +108,8 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         ExportController.exportConfig(fileName)
+                        if (SettingsController.isFileEncryptionEnabled())
+                            SystemController.encryptFile(filename, SettingsController.getPassword(), SettingsController.getHint())
                         PageController.showBusyIndicator(false)
                     }
                 }

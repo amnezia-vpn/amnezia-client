@@ -135,8 +135,6 @@ signals:
 
     void loggingDisableByWatcher();
 
-    void fileEncryptionStateChanged();
-
     void appLanguageChanged(const LanguageSettings::AvailableLanguageEnum language);
     void resetLanguageToSystem();
 
