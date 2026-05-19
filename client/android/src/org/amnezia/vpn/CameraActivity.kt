@@ -227,7 +227,6 @@ class CameraActivity : ComponentActivity() {
         cachedPreviewOutputTransform.set(null)
     }
 
-    /** Must run on the main thread (uses [PreviewView.getOutputTransform]). */
     private fun refreshCachedPreviewOutputTransform() {
         if (!::viewBinding.isInitialized) {
             return
@@ -242,9 +241,6 @@ class CameraActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * Schedules [refreshCachedPreviewOutputTransform] on the main thread (safe from any thread).
-     */
     private fun scheduleCachedPreviewOutputTransformRefresh() {
         if (!::viewBinding.isInitialized) {
             return
@@ -252,9 +248,6 @@ class CameraActivity : ComponentActivity() {
         viewBinding.viewFinder.post { refreshCachedPreviewOutputTransform() }
     }
 
-    /**
-     * iOS `layoutScanOverlayGeometry`: hole + torch vertical position; keeps ML Kit ROI aligned with overlay.
-     */
     private fun onPairingLayoutGeometryChanged() {
         if (!::viewBinding.isInitialized || !intent.getBooleanExtra(EXTRA_PAIRING_QR_CAMERA, false)) {
             return
@@ -305,7 +298,6 @@ class CameraActivity : ComponentActivity() {
         }
     }
 
-    /** Matches iOS pairing overlay torch on/off chrome (background + golden border). */
     private fun applyPairingTorchButtonChrome() {
         if (!::viewBinding.isInitialized || !intent.getBooleanExtra(EXTRA_PAIRING_QR_CAMERA, false)) {
             return
@@ -325,11 +317,6 @@ class CameraActivity : ComponentActivity() {
         btn.background = bg
     }
 
-    /**
-     * Maps the pairing scan square from [PreviewView] pixel space into the same coordinate system
-     * as ML Kit barcodes for this [imageProxy] (rotation-aware). Falls back to FILL_CENTER math
-     * if the transform is not ready — never returns view-space rects as image-space.
-     */
     private fun pairingHoleRectInImageSpace(
         viewFinder: PreviewView,
         imageProxy: ImageProxy,
@@ -492,7 +479,7 @@ class CameraActivity : ComponentActivity() {
             barcodeScanner?.close()
         } catch (_: Exception) {
         }
-        // No ZoomSuggestionOptions: ML Kit "scanner-auto-zoom" is off-spec for pairing and skews crop vs our ROI.
+
         barcodeScanner = BarcodeScanning.getClient(
             Builder()
                 .setBarcodeFormats(Barcode.FORMAT_QR_CODE)

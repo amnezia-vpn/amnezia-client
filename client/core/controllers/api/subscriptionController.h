@@ -54,7 +54,6 @@ public:
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
 
-    /** Decode premium API (vpn://) bundle from QR pairing TV response, merge gateway fields, add server. */
     ErrorCode importServerFromQrPairingResponse(const QString &vpnConfigKey, const QJsonObject &serviceInfo,
                                                 const QJsonArray &supportedProtocols, int *duplicateServerIndex = nullptr);
 

@@ -7,11 +7,6 @@ import kotlin.math.atan2
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * Stroked L-brackets for the pairing scan frame — port of iOS `amneziaScanBracketStrokePath`
- * (`iosPairingQrOverlayWindow.mm`).
- * corner: 0=TL, 1=TR, 2=BL, 3=BR.
- */
 object PairingQrScanBracketPaths {
 
     private fun Path.addCornerMinorArc(

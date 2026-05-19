@@ -35,7 +35,6 @@ namespace
     void execNetworkWaitLoop(QEventLoop &wait)
     {
 #ifdef Q_OS_IOS
-        // QEventLoop::ExcludeUserInputEvents is not supported on iOS (Qt warns; can break nested UI).
         wait.exec();
 #else
         wait.exec(QEventLoop::ExcludeUserInputEvents);
@@ -58,7 +57,6 @@ namespace
 
     constexpr int proxyStorageRequestTimeoutMsecs = 3000;
 
-    /** Gateway paths use "%1v1/..." — %1 must end with '/' or the host and path merge (404). */
     QString normalizedGatewayBase(const QString &endpoint)
     {
         QString e = endpoint.trimmed();
@@ -362,8 +360,7 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
             promise->finish();
         };
 
-        if (sslErrors->isEmpty()
-            && ctl->shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
+        if (sslErrors->isEmpty() && ctl->shouldBypassProxy(replyError, decryptionResult.decryptedBody, decryptionResult.isDecryptionSuccessful)) {
             auto serviceType = apiPayload.value(apiDefs::key::serviceType).toString("");
             auto userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString("");
 
@@ -532,7 +529,6 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
 bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody,
                                           bool isDecryptionSuccessful)
 {
-    // Dev AGW is reached directly; S3 proxy rotation returns 500 and masks the real error (see pairing long-poll).
     if (m_isDevEnvironment) {
         return false;
     }

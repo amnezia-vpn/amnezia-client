@@ -116,14 +116,12 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 
     NSError *err = nil;
     if (![device lockForConfiguration:&err]) {
-        NSLog(@"[QRCodeReader] torch lock failed: %@", err.localizedDescription);
         return;
     }
 
     if (on) {
         err = nil;
         if (![device setTorchModeOnWithLevel:AVCaptureMaxAvailableTorchLevel error:&err]) {
-            NSLog(@"[QRCodeReader] setTorchModeOnWithLevel failed: %@ — trying torchMode", err.localizedDescription);
             if ([device isTorchModeSupported:AVCaptureTorchModeOn]) {
                 device.torchMode = AVCaptureTorchModeOn;
             }
@@ -151,14 +149,12 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 
     AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (!captureDevice) {
-        NSLog(@"[QRCodeReader] defaultDeviceWithMediaType:Video is nil");
         return NO;
     }
 
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:captureDevice error:&error];
 
     if (!deviceInput) {
-        NSLog(@"[QRCodeReader] deviceInput failed: %@", error.localizedDescription);
         return NO;
     }
 
@@ -186,7 +182,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 
     UIWindow *keyWindow = amneziaKeyWindowForQrCamera();
     if (!keyWindow) {
-        NSLog(@"[QRCodeReader] startReading: no keyWindow (UIKit must run on main)");
         [self stopReadingOnMainThread];
         return NO;
     }
@@ -237,7 +232,7 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
                     [session stopRunning];
                 }
             } @catch (NSException *ex) {
-                NSLog(@"[QRCodeReader] session stopRunning exception: %@", ex);
+                NSLog(@"Session stopRunning exception: %@", ex);
             }
         });
     }

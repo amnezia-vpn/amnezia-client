@@ -7,14 +7,12 @@
 
 #include <string>
 
-/** Qt on iOS may use a high window level; stay clearly above the main QQuick window. */
 static const CGFloat kAmneziaPairingQrOverlayWindowLevel = (CGFloat)UIWindowLevelAlert + 1000.f;
 
 static AmneziaPairingQrScannedUtf8Handler gOnScanned;
 static AmneziaPairingQrOverlayBackHandler gOnBack;
 static UIWindow *gPairingQrOverlayWindow = nil;
 static bool gTorchRequested = false;
-/** Last time overlay became key; used to ignore restartCapture during warm-up (see QML kick timer removal). */
 static CFAbsoluteTime gPairingQrOverlayKeySince = -1.0;
 
 static UIWindowScene *amneziaForegroundWindowScene(void)
@@ -49,7 +47,6 @@ static UIWindow *amneziaPickQtAppWindowToRestore(void)
     return best;
 }
 
-/** Height left uncovered at the bottom so the Qt tab bar on QUIWindow stays visible. */
 static CGFloat amneziaPairingQrBottomTabStripReserve(UIWindowScene *scene)
 {
     Class qios = NSClassFromString(@"QIOSViewController");
@@ -78,13 +75,11 @@ static void amneziaApplyReadableOverCameraShadow(UIView *v)
     v.layer.masksToBounds = NO;
 }
 
-/** AmneziaStyle.color.paleGray — same as BackButtonType / BaseHeaderType on QML pages. */
 static UIColor *amneziaPaleGray(void)
 {
     return [UIColor colorWithRed:(CGFloat)0xD7 / 255.0 green:(CGFloat)0xD8 / 255.0 blue:(CGFloat)0xDB / 255.0 alpha:1.0];
 }
 
-/** Quarter circle from S to E on (C, r). Normalizes end angle vs start so Δ∈(−π,π]; clockwise from minor sign (same as working TR/TL). */
 static void amneziaAddCornerMinorArc(UIBezierPath *p, CGPoint C, CGFloat r, CGPoint S, CGPoint E)
 {
     const CGFloat as = atan2f((float)(S.y - C.y), (float)(S.x - C.x));
@@ -100,10 +95,6 @@ static void amneziaAddCornerMinorArc(UIBezierPath *p, CGPoint C, CGFloat r, CGPo
     [p addArcWithCenter:C radius:r startAngle:as endAngle:ae clockwise:cw];
 }
 
-/**
- * Stroked L per corner: own geometry + shared minor-arc helper.
- * corner: 0=TL, 1=TR, 2=BL, 3=BR.
- */
 static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloat y0, CGFloat s, CGFloat R, CGFloat L, CGFloat t)
 {
     const CGFloat r = MAX(1.5, R - t * 0.5);
@@ -114,7 +105,7 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     const CGFloat xxb = x0 + s - t * 0.5f;
 
     switch (corner) {
-        case 0: { /* top-left */
+        case 0: {
             const CGPoint cTL = CGPointMake(x0 + R, y0 + R);
             const CGPoint sTL = CGPointMake(x0 + R, yy);
             const CGPoint eTL = CGPointMake(xx, y0 + R);
@@ -124,7 +115,7 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
             const CGFloat yEndTL = MIN(y0 + R + L, y0 + s - R - t * 0.5f);
             [p addLineToPoint:CGPointMake(xx, MAX(yEndTL, y0 + R + 2.f))];
         } break;
-        case 1: { /* top-right — keep explicit angles (reference for helper tuning). */
+        case 1: {
             const CGPoint cTR = CGPointMake(x0 + s - R, y0 + R);
             const CGPoint sTR = CGPointMake(x0 + s - R, yy);
             const CGPoint eTR = CGPointMake(xxb, y0 + R);
@@ -134,7 +125,7 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
             const CGFloat yEndTR = MIN(y0 + R + L, y0 + s - R - t * 0.5f);
             [p addLineToPoint:CGPointMake(xxb, MAX(yEndTR, y0 + R + 2.f))];
         } break;
-        case 2: { /* bottom-left — mirror TL: approach (R+L,yyb)→(R,yyb) like (R+L,yy)→(R,yy); leg Y = reflect top leg in y_mid=y0+s/2. */
+        case 2: {
             const CGPoint cBL = CGPointMake(x0 + R, y0 + s - R);
             const CGPoint sBL = CGPointMake(x0 + R, yyb);
             const CGPoint eBL = CGPointMake(xx, y0 + s - R);
@@ -145,7 +136,7 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
             const CGFloat yLegBL = y0 + s + y0 - yEndTopRef;
             [p addLineToPoint:CGPointMake(xx, yLegBL)];
         } break;
-        case 3: { /* bottom-right — mirror TR: (s-R-L,yyb)→(s-R,yyb); leg Y same reflection as BL. */
+        case 3: {
             const CGPoint cBR = CGPointMake(x0 + s - R, y0 + s - R);
             const CGPoint sBR = CGPointMake(x0 + s - R, yyb);
             const CGPoint eBR = CGPointMake(xxb, y0 + s - R);
@@ -182,11 +173,9 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 @property (nonatomic, copy) NSString *chromeSubtitleText;
 @property (nonatomic, strong) UIView *scanDimView;
 @property (nonatomic, strong) CAShapeLayer *scanDimMaskLayer;
-/** Milky highlight inside the scan hole (below dim), same rounded rect as mask. */
 @property (nonatomic, strong) UIView *scanHoleFillView;
 @property (nonatomic, strong) CAShapeLayer *scanHoleHighlightLayer;
 @property (nonatomic, strong) UIView *bracketContainer;
-/** Four CAShapeLayers: TL, TR, BL, BR — stroked L-brackets following scan hole corner radius. */
 @property (nonatomic, strong) NSMutableArray<CAShapeLayer *> *bracketCornerLayers;
 @end
 
@@ -372,7 +361,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     [header setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
 }
 
-/** Maps the on-screen scan hole to `AVCaptureMetadataOutput.rectOfInterest` (normalized), via preview layer. */
 - (void)applyMetadataRectOfInterestForScanHole:(CGRect)holeInScanDimBounds
 {
     if (!self.previewLayer || !self.metadataOutput || !self.scanDimView || !self.cameraContainer) {
@@ -431,7 +419,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     }
     sqY = MAX(sqY, headerBottom + 8.0);
 
-    /** Keep a band below the scan hole for the torch (avoids coupling hole layout to previous torch frame). */
     const CGFloat kBottomBandForTorch = 80.0;
     const CGFloat maxHoleBottom = vb.size.height - kBottomBandForTorch;
     if (sqY + sqSz > maxHoleBottom) {
@@ -443,7 +430,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     sqY = MAX(headerBottom + 4.0, MIN(sqY, vb.size.height - sqSz - 8.0));
 
     const CGRect hole = CGRectMake(sqX, sqY, sqSz, sqSz);
-    /** Corner radius of the scan “window” (dim cut-out + inner highlight); matches reference UI. */
     CGFloat holeR = MIN(28.0, MAX(10.0, sqSz * 0.056));
     {
         const CGFloat half = 0.5 * MIN(hole.size.width, hole.size.height);
@@ -474,7 +460,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
         layer.path = amneziaScanBracketStrokePath((int)i, x0, y0, s, holeR, L, t).CGPath;
     }
 
-    /** Torch vertically centered between scan hole bottom and overlay bottom (top of Qt tab strip below window). */
     if (self.torchCenterYConstraint && self.torchButton) {
         const CGFloat holeBottom = CGRectGetMaxY(hole);
         const CGFloat bandBottom = vb.size.height;
