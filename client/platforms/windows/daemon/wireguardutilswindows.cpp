@@ -185,12 +185,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
     out << "allowed_ip=" << ip.toString() << "\n";
   }
 
-  // Exclude the server address, except for multihop exit servers.
-  if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
-
   QString reply = m_tunnel.uapiCommand(message);
   logger.debug() << "DATA:" << reply;
   return true;
@@ -199,12 +193,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-
-  // Clear exclustion routes for this peer.
-  if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
 
   // Disable the windows firewall for this peer.
   m_firewall->disablePeerTraffic(config.m_serverPublicKey);

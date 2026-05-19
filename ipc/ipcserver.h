@@ -17,11 +17,18 @@ class IpcServer : public IpcInterfaceSource
 {
 public:
     explicit IpcServer(QObject *parent = nullptr);
+
     virtual int createPrivilegedProcess() override;
 
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
+    virtual bool addExclusionRoute(const QString &addr) override;
+    virtual bool delExclusionRoute(const QString &addr) override;
+    virtual bool addAllowedIp(const QString &ifname, const QString &prefix) override;
+    virtual bool delAllowedIp(const QString &ifname, const QString &prefix) override;
+    virtual bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers) override;
+    virtual bool restoreTunnelResolvers() override;
     virtual bool flushDns() override;
     virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;

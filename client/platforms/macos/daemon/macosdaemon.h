@@ -17,8 +17,6 @@ class MacOSDaemon final : public Daemon {
 
   static MacOSDaemon* instance();
 
-  bool deactivate(bool emitSignals = true) override;
-
  protected:
   DnsUtils* dnsutils() override { return m_dnsutils; }
   bool supportIPUtils() const override { return true; }

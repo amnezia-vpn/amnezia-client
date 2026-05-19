@@ -13,6 +13,8 @@
 #endif
 
 #include "core/utils/networkUtilities.h"
+#include "core/tunnel.h"
+#include "mozilla/localsocketcontroller.h"
 
 VpnTrafficGuard::VpnTrafficGuard(SecureAppSettingsRepository* appSettings, QObject *parent)
     : QObject(parent), m_appSettingsRepository(appSettings)
@@ -230,29 +232,30 @@ void VpnTrafficGuard::applyFirewall(const QString &gateway, const QString &local
 #endif
 }
 
-void VpnTrafficGuard::teardown()
+void VpnTrafficGuard::flushAll()
 {
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->restoreTunnelResolvers();
         QRemoteObjectPendingReply<bool> reply = iface->disableKillSwitch();
         m_allowedEndpoints.clear();
         //TODO: why it takes so long?
         if (!reply.waitForFinished(5000) || !reply.returnValue()) {
-            qWarning() << "VpnTrafficGuard::teardown: Failed to disable killswitch";
+            qWarning() << "VpnTrafficGuard::flushAll: Failed to disable killswitch";
         } else {
-            qDebug() << "VpnTrafficGuard::teardown: Successfully disabled killswitch";
+            qDebug() << "VpnTrafficGuard::flushAll: Successfully disabled killswitch";
         }
         auto flushDns = iface->flushDns();
         if (flushDns.waitForFinished() && flushDns.returnValue())
-            qDebug() << "VpnTrafficGuard::teardown: Successfully flushed DNS";
+            qDebug() << "VpnTrafficGuard::flushAll: Successfully flushed DNS";
         else
-            qWarning() << "VpnTrafficGuard::teardown: Failed to flush DNS";
+            qWarning() << "VpnTrafficGuard::flushAll: Failed to flush DNS";
 
         auto clearSavedRoutes = iface->clearSavedRoutes();
         if (clearSavedRoutes.waitForFinished() && clearSavedRoutes.returnValue())
-            qDebug() << "VpnTrafficGuard::teardown: Successfully cleared saved routes";
+            qDebug() << "VpnTrafficGuard::flushAll: Successfully cleared saved routes";
         else
-            qWarning() << "VpnTrafficGuard::teardown: Failed to clear saved routes";
+            qWarning() << "VpnTrafficGuard::flushAll: Failed to clear saved routes";
         if (m_ipv6RoutingStopped) {
             auto StartRoutingIpv6 = iface->StartRoutingIpv6();
             if (!StartRoutingIpv6.waitForFinished() || !StartRoutingIpv6.returnValue()) {
@@ -263,4 +266,145 @@ void VpnTrafficGuard::teardown()
         }
     });
 #endif
+}
+
+namespace {
+QStringList allowedIpPrefixesFor(const QJsonObject& activateJson)
+{
+    QStringList prefixes;
+    const QJsonArray ranges = activateJson.value("allowedIPAddressRanges").toArray();
+    for (const QJsonValue& v : ranges) {
+        const QJsonObject r = v.toObject();
+        const QString addr = r.value("address").toString();
+        if (addr.isEmpty()) continue;
+        prefixes.append(QStringLiteral("%1/%2").arg(addr).arg(r.value("range").toInt()));
+    }
+    return prefixes;
+}
+
+QStringList excludedAddressesFor(const QJsonObject& activateJson)
+{
+    QStringList addrs;
+    const QJsonArray excluded = activateJson.value("excludedAddresses").toArray();
+    for (const QJsonValue& v : excluded) {
+        const QString s = v.toString();
+        if (!s.isEmpty()) addrs.append(s);
+    }
+    return addrs;
+}
+
+QStringList resolversFor(const QJsonObject& activateJson)
+{
+    QStringList dns;
+    const QString primary = activateJson.value("primaryDnsServer").toString();
+    if (!primary.isEmpty()) dns.append(primary);
+    const QString secondary = activateJson.value("secondaryDnsServer").toString();
+    if (!secondary.isEmpty()) dns.append(secondary);
+    return dns;
+}
+}
+
+void VpnTrafficGuard::reserve(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+#ifdef AMNEZIA_DESKTOP
+    allowEndpoint(tunnel->remoteAddress());
+#else
+    Q_UNUSED(tunnel)
+#endif
+}
+
+void VpnTrafficGuard::release(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+#ifdef AMNEZIA_DESKTOP
+    revokeEndpoint(tunnel->remoteAddress());
+#else
+    Q_UNUSED(tunnel)
+#endif
+}
+
+void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+#ifdef AMNEZIA_DESKTOP
+    const QJsonObject activate = LocalSocketController::buildActivateJson(tunnel->config(), tunnel->ifname());
+    const QStringList prefixes = allowedIpPrefixesFor(activate);
+    const QStringList excluded = excludedAddressesFor(activate);
+    const QStringList dns = resolversFor(activate);
+    const QString ifname = tunnel->ifname();
+    const QString peer = tunnel->remoteAddress();
+
+    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        if (!peer.isEmpty()) iface->addExclusionRoute(peer);
+        for (const QString& addr : excluded) {
+            iface->addExclusionRoute(addr);
+        }
+        for (const QString& prefix : prefixes) {
+            iface->addAllowedIp(ifname, prefix);
+        }
+        iface->setTunnelResolvers(ifname, dns);
+        iface->flushDns();
+    });
+#else
+    Q_UNUSED(tunnel)
+#endif
+}
+
+void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+#ifdef AMNEZIA_DESKTOP
+    const QJsonObject activate = LocalSocketController::buildActivateJson(tunnel->config(), tunnel->ifname());
+    const QStringList prefixes = allowedIpPrefixesFor(activate);
+    const QStringList excluded = excludedAddressesFor(activate);
+    const QString ifname = tunnel->ifname();
+    const QString peer = tunnel->remoteAddress();
+
+    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        for (const QString& prefix : prefixes) {
+            iface->delAllowedIp(ifname, prefix);
+        }
+        for (const QString& addr : excluded) {
+            iface->delExclusionRoute(addr);
+        }
+        if (!peer.isEmpty()) iface->delExclusionRoute(peer);
+    });
+#else
+    Q_UNUSED(tunnel)
+#endif
+}
+
+void VpnTrafficGuard::bringUp(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+    reserve(tunnel);
+    tunnel->prepare();
+}
+
+void VpnTrafficGuard::commit(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+    applyPolicy(tunnel);
+    tunnel->commit();
+}
+
+void VpnTrafficGuard::tearDown(Tunnel* tunnel)
+{
+    if (!tunnel) return;
+    revokePolicy(tunnel);
+    release(tunnel);
+    tunnel->deactivate();
+}
+
+void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
+{
+    if (!to) return;
+    applyPolicy(to);
+    to->commit();
+    if (from) {
+        revokePolicy(from);
+        release(from);
+        from->deactivate();
+    }
 }

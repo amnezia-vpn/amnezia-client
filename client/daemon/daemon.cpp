@@ -101,13 +101,6 @@ bool Daemon::activate(const QString& ifname, const InterfaceConfig& config) {
     }
   }
 
-  if (!config.m_serverIpv4AddrIn.isEmpty()) {
-    addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-  }
-  if (!config.m_serverIpv6AddrIn.isEmpty()) {
-    addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
-
   // Add the peer to this interface.
   if (!wg->updatePeer(config)) {
     logger.error() << "Peer creation failed.";
@@ -138,56 +131,14 @@ bool Daemon::setPrimary(const QString& ifname, const InterfaceConfig& config) {
     m_primaryIfname = priorPrimary;
   });
 
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
-
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-    if (!wg->updateRoutePrefix(ip)) {
-      logger.warning() << "setPrimary: route setup failed for" << ip.toString();
-    }
-  }
-
-  if (!maybeUpdateResolvers(config)) {
-    logger.warning() << "setPrimary: DNS resolver update failed";
-  }
-
   if (!run(Up, config)) {
     return false;
   }
 
   m_connections[ifname].m_config = config;
 
-  // Demote the prior primary AFTER the new primary is fully installed.
-  // Delete-after-install order preserves coverage during the make-before-break overlap.
-  if (!priorPrimary.isEmpty() && priorPrimary != ifname) {
-    demotePrimary(priorPrimary);
-  }
-
   failure_guard.dismiss();
   return true;
-}
-
-void Daemon::demotePrimary(const QString& ifname) {
-  WireguardUtils* wg = wgutilsFor(ifname);
-  if (!wg) {
-    return;
-  }
-  const ConnectionState cs = m_connections.value(ifname);
-  const InterfaceConfig& config = cs.m_config;
-
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-    wg->deleteRoutePrefix(ip);
-  }
-  for (const QString& addr : config.m_excludedAddresses) {
-    if (addr.isEmpty()) {
-      continue;
-    }
-    IPAddress ip(addr);
-    if (m_excludedAddrSet.contains(ip)) {
-      delExclusionRoute(ip);
-    }
-  }
 }
 
 bool Daemon::deactivateTunnel(const QString& ifname) {
@@ -195,33 +146,17 @@ bool Daemon::deactivateTunnel(const QString& ifname) {
   const ConnectionState cs = m_connections.value(ifname);
   const InterfaceConfig& config = cs.m_config;
   const bool wasPrimary = (ifname == m_primaryIfname);
+  const bool isLastTunnel = wg && m_tunnels.size() == 1;
 
   if (wg) {
     logger.debug() << "deactivateTunnel" << wg->interfaceName();
-    if (wasPrimary) {
-      for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
-        wg->deleteRoutePrefix(ip);
+    if (isLastTunnel) {
+      for (const IPAddress& prefix : m_excludedAddrSet.keys()) {
+        wg->deleteExclusionRoute(prefix);
       }
+      m_excludedAddrSet.clear();
     }
     wg->deletePeer(config);
-
-    auto removeExclusion = [&](const QString& addr) {
-      if (addr.isEmpty()) {
-        return;
-      }
-      IPAddress ip(addr);
-      if (m_excludedAddrSet.contains(ip)) {
-        delExclusionRoute(ip);
-      }
-    };
-    removeExclusion(config.m_serverIpv4AddrIn);
-    removeExclusion(config.m_serverIpv6AddrIn);
-    if (wasPrimary) {
-      for (const QString& i : config.m_excludedAddresses) {
-        removeExclusion(i);
-      }
-    }
-
     wg->deleteInterface();
     m_tunnels.remove(ifname);
     delete wg;
@@ -231,30 +166,6 @@ bool Daemon::deactivateTunnel(const QString& ifname) {
   if (wasPrimary) {
     m_primaryIfname.clear();
   }
-  return true;
-}
-
-bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
-  if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
-      (config.m_hopType == InterfaceConfig::SingleHop)) {
-    QList<QHostAddress> resolvers;
-    resolvers.append(QHostAddress(config.m_primaryDnsServer));
-    if (!config.m_secondaryDnsServer.isEmpty()) {
-        resolvers.append(QHostAddress(config.m_secondaryDnsServer));
-    }
-
-    // If the DNS is not the Gateway, it's a user defined DNS
-    // thus, not add any other :)
-    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
-      resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
-    }
-
-    const QString ifname = wgutilsFor(config.m_ifname)->interfaceName();
-    if (!dnsutils()->updateResolvers(ifname, resolvers)) {
-      return false;
-    }
-  }
-
   return true;
 }
 
@@ -279,20 +190,25 @@ bool Daemon::parseStringList(const QJsonObject& obj, const QString& name,
   return true;
 }
 
-bool Daemon::addExclusionRoute(const IPAddress& prefix) {
+bool Daemon::addExclusionRoute(const QString &addr) {
+  IPAddress prefix(addr);
   if (m_excludedAddrSet.contains(prefix)) {
     m_excludedAddrSet[prefix]++;
     return true;
   }
-  if (!primaryWgutils()->addExclusionRoute(prefix)) {
+  WireguardUtils* wg = primaryWgutils();
+  if (!wg || !wg->addExclusionRoute(prefix)) {
     return false;
   }
   m_excludedAddrSet[prefix] = 1;
   return true;
 }
 
-bool Daemon::delExclusionRoute(const IPAddress& prefix) {
-  Q_ASSERT(m_excludedAddrSet.contains(prefix));
+bool Daemon::delExclusionRoute(const QString &addr) {
+  IPAddress prefix(addr);
+  if (!m_excludedAddrSet.contains(prefix)) {
+    return false;
+  }
   if (m_excludedAddrSet[prefix] > 1) {
     m_excludedAddrSet[prefix]--;
     return true;
@@ -300,6 +216,32 @@ bool Daemon::delExclusionRoute(const IPAddress& prefix) {
   m_excludedAddrSet.remove(prefix);
   WireguardUtils* wg = primaryWgutils();
   return wg && wg->deleteExclusionRoute(prefix);
+}
+
+bool Daemon::addAllowedIp(const QString &ifname, const QString &prefix) {
+  WireguardUtils* wg = wgutilsFor(ifname);
+  return wg && wg->updateRoutePrefix(IPAddress(prefix));
+}
+
+bool Daemon::delAllowedIp(const QString &ifname, const QString &prefix) {
+  WireguardUtils* wg = wgutilsFor(ifname);
+  return wg && wg->deleteRoutePrefix(IPAddress(prefix));
+}
+
+bool Daemon::setTunnelResolvers(const QString &ifname, const QStringList &resolvers) {
+  WireguardUtils* wg = wgutilsFor(ifname);
+  if (!wg || !dnsutils()) {
+    return false;
+  }
+  QList<QHostAddress> hostAddrs;
+  for (const QString& r : resolvers) {
+    hostAddrs.append(QHostAddress(r));
+  }
+  return dnsutils()->updateResolvers(wg->interfaceName(), hostAddrs);
+}
+
+bool Daemon::restoreTunnelResolvers() {
+  return dnsutils() && dnsutils()->restoreResolvers();
 }
 
 // static
@@ -529,16 +471,20 @@ bool Daemon::deactivate(bool emitSignals) {
     emit disconnected();
   }
 
-  if (!dnsutils()->restoreResolvers()) {
-    logger.warning() << "Failed to restore DNS resolvers.";
-  }
-
   const QStringList ifnames = m_tunnels.keys();
   for (const QString& ifname : ifnames) {
     if (ifname != primary) {
       deactivateTunnel(ifname);
     }
   }
+
+  if (auto* wg = primaryWgutils()) {
+    for (const IPAddress& prefix : m_excludedAddrSet.keys()) {
+      wg->deleteExclusionRoute(prefix);
+    }
+  }
+  m_excludedAddrSet.clear();
+
   if (m_tunnels.contains(primary)) {
     deactivateTunnel(primary);
   }

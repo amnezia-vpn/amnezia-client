@@ -208,15 +208,6 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
         out << "allowed_ip=" << ip.toString() << "\n";
     }
 
-    // Exclude the server address, except for multihop exit servers.
-    if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-        (m_rtmonitor != nullptr)) {
-        if (!config.m_serverIpv4AddrIn.isEmpty())
-            m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        if (!config.m_serverIpv6AddrIn.isEmpty())
-            m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-    }
-
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Peer configuration failed:" << strerror(err);
@@ -227,15 +218,6 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
 bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     QByteArray publicKey =
         QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-
-    // Clear exclustion routes for this peer.
-    if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-        (m_rtmonitor != nullptr)) {
-        if (!config.m_serverIpv4AddrIn.isEmpty())
-            m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        if (!config.m_serverIpv6AddrIn.isEmpty())
-            m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-    }
 
     QString message;
     QTextStream out(&message);

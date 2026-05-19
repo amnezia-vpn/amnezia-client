@@ -51,7 +51,6 @@ MacosRouteMonitor::MacosRouteMonitor(const QString& ifname, QObject* parent)
 
 MacosRouteMonitor::~MacosRouteMonitor() {
   MZ_COUNT_DTOR(MacosRouteMonitor);
-  flushExclusionRoutes();
   if (m_rtsock >= 0) {
     close(m_rtsock);
   }

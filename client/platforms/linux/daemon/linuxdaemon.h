@@ -18,8 +18,6 @@ class LinuxDaemon final : public Daemon {
 
   static LinuxDaemon* instance();
 
-  bool deactivate(bool emitSignals = true) override;
-
  protected:
   DnsUtils* dnsutils() override { return m_dnsutils; }
   bool supportIPUtils() const override { return true; }

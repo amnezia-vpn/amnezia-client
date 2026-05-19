@@ -146,9 +146,6 @@ void VpnConnection::wireTunnelSignals(Tunnel* tunnel, bool isActive)
 
     if (isActive) {
         connect(tunnel, &Tunnel::bytesChanged, this, &VpnConnection::onBytesChanged);
-        // Staging tunnel deliberately skips this wire: applying KS while the old
-        // primary is still serving would clobber its allow-rules. onTunnelActivated
-        // invokes applyFirewall manually after the make-before-break swap.
         connect(tunnel, &Tunnel::addressesUpdated,
                 m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
     }
@@ -197,14 +194,14 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 #ifdef AMNEZIA_DESKTOP
     if (m_active) {
         const QString oldIfname = m_active->ifname();
-        m_active->deactivate();
+        m_trafficGuard->tearDown(m_active);
         delete m_active;
         m_active = nullptr;
         releaseIfname(oldIfname);
     }
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        m_trafficGuard->teardown();
+        m_trafficGuard->flushAll();
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
@@ -223,7 +220,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         wireTunnelSignals(m_active, /*isActive=*/true);
         wireDaemonReconnectSignals();
         m_trafficGuard->setConfig(config);
-        m_active->prepare();
+        m_trafficGuard->bringUp(m_active);
         return;
     }
 
@@ -476,8 +473,7 @@ void VpnConnection::disconnectFromVpn()
 
 #ifdef AMNEZIA_DESKTOP
     if (m_staging) {
-        m_trafficGuard->revokeEndpoint(m_staging->remoteAddress());
-        m_staging->deactivate();
+        m_trafficGuard->tearDown(m_staging);
         releaseIfname(m_staging->ifname());
         delete m_staging;
         m_staging = nullptr;
@@ -485,9 +481,8 @@ void VpnConnection::disconnectFromVpn()
 
     if (m_active) {
         setConnectionState(Vpn::ConnectionState::Disconnecting);
-        m_trafficGuard->teardown();
-        m_trafficGuard->revokeEndpoint(m_remoteAddress);
-        m_active->deactivate();
+        m_trafficGuard->tearDown(m_active);
+        m_trafficGuard->flushAll();
         releaseIfname(m_active->ifname());
         delete m_active;
         m_active = nullptr;
@@ -515,7 +510,7 @@ void VpnConnection::disconnectFromVpn()
                           });
 #endif
 #ifdef AMNEZIA_DESKTOP
-    m_trafficGuard->teardown();
+    m_trafficGuard->flushAll();
 #endif
     m_vpnProtocol->stop();
 
@@ -549,31 +544,19 @@ void VpnConnection::startTunnelSwitch(DockerContainer container,
     wireTunnelSignals(m_staging, /*isActive=*/false);
 
     setConnectionState(Vpn::ConnectionState::Switching);
-    m_staging->prepare();
+    m_trafficGuard->bringUp(m_staging);
 }
 
 void VpnConnection::onTunnelPrepared()
 {
     Tunnel* tunnel = qobject_cast<Tunnel*>(sender());
     if (!tunnel) return;
-    tunnel->commit();
-}
 
-void VpnConnection::onTunnelActivated()
-{
-    Tunnel* tunnel = qobject_cast<Tunnel*>(sender());
-    if (!tunnel) return;
-
-    if (tunnel == m_staging) {
-        // Make-before-break gate passed: new tunnel is primary, old still allowed by KS.
-        if (m_active) {
-            const QString oldRemote = m_active->remoteAddress();
-            const QString oldIfname = m_active->ifname();
-            m_active->deactivate();
-            delete m_active;
-            releaseIfname(oldIfname);
-            m_trafficGuard->revokeEndpoint(oldRemote);
-        }
+    if (tunnel == m_staging && m_active) {
+        const QString oldIfname = m_active->ifname();
+        m_trafficGuard->swap(m_active, m_staging);
+        delete m_active;
+        releaseIfname(oldIfname);
 
         m_active = m_staging;
         m_staging = nullptr;
@@ -583,17 +566,23 @@ void VpnConnection::onTunnelActivated()
         m_vpnConfiguration = m_active->config();
         m_remoteAddress = m_active->remoteAddress();
         m_trafficGuard->setConfig(m_vpnConfiguration);
+        return;
+    }
 
+    m_trafficGuard->commit(tunnel);
+}
+
+void VpnConnection::onTunnelActivated()
+{
+    Tunnel* tunnel = qobject_cast<Tunnel*>(sender());
+    if (!tunnel) return;
+
+    if (tunnel == m_active) {
+        setConnectionState(Vpn::ConnectionState::Connected);
         if (auto proto = m_active->protocol()) {
             m_trafficGuard->applyFirewall(proto->vpnGateway(),
                                           proto->vpnLocalAddress());
         }
-        setConnectionState(Vpn::ConnectionState::Connected);
-        return;
-    }
-
-    if (tunnel == m_active) {
-        setConnectionState(Vpn::ConnectionState::Connected);
     }
 }
 
@@ -603,7 +592,7 @@ void VpnConnection::onTunnelFailed(amnezia::ErrorCode error)
     if (!tunnel) return;
 
     if (tunnel == m_staging) {
-        m_trafficGuard->revokeEndpoint(m_staging->remoteAddress());
+        m_trafficGuard->release(m_staging);
         m_staging->deactivate();
         releaseIfname(m_staging->ifname());
         m_staging->deleteLater();
@@ -614,9 +603,8 @@ void VpnConnection::onTunnelFailed(amnezia::ErrorCode error)
     }
 
     if (tunnel == m_active) {
-        m_trafficGuard->teardown();
-        m_trafficGuard->revokeEndpoint(m_remoteAddress);
-        m_active->deactivate();
+        m_trafficGuard->tearDown(m_active);
+        m_trafficGuard->flushAll();
         releaseIfname(m_active->ifname());
         m_active->deleteLater();
         m_active = nullptr;
