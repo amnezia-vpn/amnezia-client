@@ -1,5 +1,9 @@
 #include "subscriptionUiController.h"
 
+#ifdef Q_OS_IOS
+#include "platforms/ios/ios_controller.h"
+#endif
+
 #include "amneziaApplication.h"
 #include "core/configurators/wireguardConfigurator.h"
 #include "core/utils/serverConfigUtils.h"

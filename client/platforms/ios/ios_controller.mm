@@ -682,17 +682,11 @@ bool IosController::setupAwg()
     bool isMultiPeer = config.contains("peers") && config["peers"].isArray()
                        && !config["peers"].toArray().isEmpty();
 
+    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
     if (isMultiPeer) {
-        // Use only the first client IP (peer 1's IP)
-        QString fullClientIp = config[configKey::clientIp].toString();
-        QStringList ipList = fullClientIp.split(",");
-        QString firstClientIp = ipList.isEmpty() ? fullClientIp : ipList.first().trimmed();
-        wgConfig.insert(configKey::clientIp, firstClientIp);
-        // Route all traffic through peer 1
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
+        wgConfig.insert("peers", config["peers"]);
+        wgConfig.insert(configKey::allowedIps, QJsonArray{}); // required by WGConfig decoder, unused in multi-peer path
     } else {
-        wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
         if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
             wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
         } else {

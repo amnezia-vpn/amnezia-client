@@ -5,8 +5,12 @@
 #include "iputilslinux.h"
 
 #include <arpa/inet.h>
+#include <linux/if_addr.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <sys/socket.h>
 #include <unistd.h>
 
 #include <QHostAddress>
@@ -71,37 +75,102 @@ bool IPUtilsLinux::setMTUAndUp(const InterfaceConfig& config) {
   return true;
 }
 
-bool IPUtilsLinux::addIP4AddressToDevice(const InterfaceConfig& config) {
-  struct ifreq ifr;
-  struct sockaddr_in* ifrAddr = (struct sockaddr_in*)&ifr.ifr_addr;
+static bool addIPv4AddressNetlink(int ifindex, const QHostAddress& addr,
+                                   int prefixlen) {
+  int nlsock = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+  if (nlsock < 0) return false;
+  auto guard = qScopeGuard([&] { close(nlsock); });
 
-  // Name the interface and set family
-  strncpy(ifr.ifr_name, WG_INTERFACE, IFNAMSIZ);
-  ifr.ifr_addr.sa_family = AF_INET;
+  char buf[512];
+  memset(buf, 0, sizeof(buf));
 
-  // Get the device address to add to interface
-  QPair<QHostAddress, int> parsedAddr =
-      QHostAddress::parseSubnet(config.m_deviceIpv4Address);
-  QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
-  char* deviceAddr = _deviceAddr.data();
-  inet_pton(AF_INET, deviceAddr, &ifrAddr->sin_addr);
+  struct nlmsghdr* nlmsg = reinterpret_cast<struct nlmsghdr*>(buf);
+  nlmsg->nlmsg_len = NLMSG_LENGTH(sizeof(struct ifaddrmsg));
+  nlmsg->nlmsg_type = RTM_NEWADDR;
+  nlmsg->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
+  nlmsg->nlmsg_seq = 1;
+  nlmsg->nlmsg_pid = 0;
 
-  // Create IPv4 socket to perform the ioctl operations on
-  int sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-  if (sockfd < 0) {
-    logger.error() << "Failed to create ioctl socket.";
+  struct ifaddrmsg* ifa = static_cast<struct ifaddrmsg*>(NLMSG_DATA(nlmsg));
+  ifa->ifa_family = AF_INET;
+  ifa->ifa_prefixlen = prefixlen;
+  ifa->ifa_flags = IFA_F_PERMANENT;
+  ifa->ifa_scope = RT_SCOPE_UNIVERSE;
+  ifa->ifa_index = ifindex;
+
+  struct in_addr ip4;
+  QByteArray addrBytes = addr.toString().toLocal8Bit();
+  inet_pton(AF_INET, addrBytes.constData(), &ip4);
+
+  auto appendAttr = [](struct nlmsghdr* nlmsg, size_t maxlen, int type,
+                        const void* data, size_t len) {
+    size_t newlen = NLMSG_ALIGN(nlmsg->nlmsg_len) + RTA_SPACE(len);
+    if (newlen > maxlen) return;
+    char* p = reinterpret_cast<char*>(nlmsg) + NLMSG_ALIGN(nlmsg->nlmsg_len);
+    struct rtattr* rta = reinterpret_cast<struct rtattr*>(p);
+    rta->rta_type = type;
+    rta->rta_len = RTA_LENGTH(len);
+    memcpy(RTA_DATA(rta), data, len);
+    nlmsg->nlmsg_len = newlen;
+  };
+
+  appendAttr(nlmsg, sizeof(buf), IFA_LOCAL, &ip4, sizeof(ip4));
+  appendAttr(nlmsg, sizeof(buf), IFA_ADDRESS, &ip4, sizeof(ip4));
+
+  struct sockaddr_nl nladdr;
+  memset(&nladdr, 0, sizeof(nladdr));
+  nladdr.nl_family = AF_NETLINK;
+
+  if (sendto(nlsock, buf, nlmsg->nlmsg_len, 0,
+             reinterpret_cast<struct sockaddr*>(&nladdr),
+             sizeof(nladdr)) < 0) {
     return false;
   }
-  auto guard = qScopeGuard([&] { close(sockfd); });
 
-  // Set ifr to interface
-  int ret = ioctl(sockfd, SIOCSIFADDR, &ifr);
-  if (ret) {
-    logger.error() << "Failed to set IPv4: " << deviceAddr
-                   << "error:" << strerror(errno);
-    return false;
+  char ackbuf[1024];
+  ssize_t acklen = recv(nlsock, ackbuf, sizeof(ackbuf), 0);
+  if (acklen >= static_cast<ssize_t>(sizeof(struct nlmsghdr))) {
+    struct nlmsghdr* ackmsg = reinterpret_cast<struct nlmsghdr*>(ackbuf);
+    if (ackmsg->nlmsg_type == NLMSG_ERROR) {
+      struct nlmsgerr* err = static_cast<struct nlmsgerr*>(NLMSG_DATA(ackmsg));
+      if (err->error != 0) {
+        errno = -err->error;
+        return false;
+      }
+    }
   }
   return true;
+}
+
+bool IPUtilsLinux::addIP4AddressToDevice(const InterfaceConfig& config) {
+  if (config.m_deviceIpv4Address.isEmpty()) return true;
+
+  int ifindex = if_nametoindex(WG_INTERFACE);
+  if (ifindex == 0) {
+    logger.error() << "Failed to get ifindex for" << WG_INTERFACE;
+    return false;
+  }
+
+  bool ok = false;
+  const QStringList addresses =
+      config.m_deviceIpv4Address.split(',', Qt::SkipEmptyParts);
+  for (const QString& entry : addresses) {
+    QPair<QHostAddress, int> parsed =
+        QHostAddress::parseSubnet(entry.trimmed());
+    if (parsed.first.isNull()) {
+      logger.warning() << "Failed to parse IPv4 address:" << entry.trimmed();
+      continue;
+    }
+    if (!addIPv4AddressNetlink(ifindex, parsed.first, parsed.second)) {
+      logger.error() << "Failed to add IPv4" << parsed.first.toString() << "/"
+                     << parsed.second << ":" << strerror(errno);
+    } else {
+      logger.debug() << "Added IPv4" << parsed.first.toString() << "/"
+                     << parsed.second << "to" << WG_INTERFACE;
+      ok = true;
+    }
+  }
+  return ok;
 }
 
 bool IPUtilsLinux::addIP6AddressToDevice(const InterfaceConfig& config) {
