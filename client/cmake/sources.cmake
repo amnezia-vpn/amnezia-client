@@ -35,6 +35,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/installers/torInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.h
     ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.h
+    ${CLIENT_ROOT_DIR}/core/installers/mtProxyInstaller.h
+    ${CLIENT_ROOT_DIR}/core/installers/telemtInstaller.h
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.h
@@ -110,6 +112,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/installers/torInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/sftpInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/installers/socks5Installer.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/mtProxyInstaller.cpp
+    ${CLIENT_ROOT_DIR}/core/installers/telemtInstaller.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/appSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/ipSplitTunnelingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/allowedDnsController.cpp
@@ -201,12 +205,14 @@ file(GLOB UI_MODELS_H CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/*.h
     ${CLIENT_ROOT_DIR}/ui/models/protocols/*.h
     ${CLIENT_ROOT_DIR}/ui/models/services/*.h
+    ${CLIENT_ROOT_DIR}/ui/models/utils/*.h
     ${CLIENT_ROOT_DIR}/ui/models/api/*.h
 )
 file(GLOB UI_MODELS_CPP CONFIGURE_DEPENDS
     ${CLIENT_ROOT_DIR}/ui/models/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/protocols/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/services/*.cpp
+    ${CLIENT_ROOT_DIR}/ui/models/utils/*.cpp
     ${CLIENT_ROOT_DIR}/ui/models/api/*.cpp
 )
 

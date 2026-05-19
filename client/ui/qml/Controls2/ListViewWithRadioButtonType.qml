@@ -31,6 +31,9 @@ ListViewType {
 
     function triggerCurrentItem() {
         var item = root.itemAtIndex(selectedIndex)
+        if (!item) {
+            return
+        }
         item.selectable.clicked()
     }
 

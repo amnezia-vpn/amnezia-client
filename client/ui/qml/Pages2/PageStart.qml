@@ -132,9 +132,11 @@ PageType {
             onInstallationErrorOccurred(message)
         }
 
-        function onUpdateContainerFinished(message) {
+        function onUpdateContainerFinished(message, closePage) {
             PageController.showNotificationMessage(message)
-            PageController.closePage()
+            if (closePage) {
+                PageController.closePage()
+            }
         }
 
         function onCachedProfileCleared(message) {

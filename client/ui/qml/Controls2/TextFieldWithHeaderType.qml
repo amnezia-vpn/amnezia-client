@@ -10,6 +10,7 @@ Item {
     id: root
 
     property string headerText
+    property string subtitleText // optional line under header (e.g. default value hint)
     property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
     property string headerTextColor: AmneziaStyle.color.mutedGray
 
@@ -82,6 +83,15 @@ Item {
                         visible: text !== ""
 
                         Layout.fillWidth: true
+                    }
+
+                    SmallTextType {
+                        text: root.subtitleText
+                        visible: root.subtitleText !== ""
+                        color: AmneziaStyle.color.charcoalGray
+                        font.pixelSize: 13
+                        Layout.fillWidth: true
+                        Layout.topMargin: visible ? 2 : 0
                     }
 
                     TextField {

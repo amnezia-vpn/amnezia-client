@@ -29,6 +29,7 @@
 #include "ui/controllers/languageUiController.h"
 #include "ui/controllers/updateUiController.h"
 #include "ui/controllers/api/servicesCatalogUiController.h"
+#include "ui/controllers/networkReachabilityController.h"
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/selfhosted/usersController.h"
@@ -65,11 +66,15 @@
 #include "ui/models/protocols/openvpnConfigModel.h"
 #include "ui/models/protocols/wireguardConfigModel.h"
 #include "ui/models/protocols/xrayConfigModel.h"
+#include "ui/models/protocols/xrayConfigSnapshotsModel.h"
 #include "ui/models/protocolsModel.h"
 #include "ui/models/services/torConfigModel.h"
 #include "ui/models/serversModel.h"
 #include "ui/models/services/sftpConfigModel.h"
 #include "ui/models/services/socks5ProxyConfigModel.h"
+#include "ui/models/services/mtProxyConfigModel.h"
+#include "ui/models/services/telemtConfigModel.h"
+
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
 
@@ -158,6 +163,7 @@ private:
     SitesController* m_sitesController;
     IpSplitTunnelingUiController* m_ipSplitTunnelingUiController;
     SystemController* m_systemController;
+    NetworkReachabilityController* m_networkReachabilityController;
     AppSplitTunnelingUiController* m_appSplitTunnelingUiController;
     AllowedDnsUiController* m_allowedDnsUiController;
     LanguageUiController* m_languageUiController;
@@ -203,6 +209,7 @@ private:
 
     OpenVpnConfigModel* m_openVpnConfigModel;
     XrayConfigModel* m_xrayConfigModel;
+    XrayConfigSnapshotsModel* m_xrayConfigSnapshotsModel;
     TorConfigModel* m_torConfigModel;
     WireGuardConfigModel* m_wireGuardConfigModel;
     AwgConfigModel* m_awgConfigModel;
@@ -211,6 +218,8 @@ private:
 #endif
     SftpConfigModel* m_sftpConfigModel;
     Socks5ProxyConfigModel* m_socks5ConfigModel;
+    MtProxyConfigModel* m_mtProxyConfigModel;
+    TelemtConfigModel* m_telemtConfigModel;
 
     CoreSignalHandlers* m_signalHandlers;
 };

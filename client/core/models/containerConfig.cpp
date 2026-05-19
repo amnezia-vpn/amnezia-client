@@ -113,6 +113,26 @@ const Socks5ProxyProtocolConfig* ContainerConfig::getSocks5ProxyProtocolConfig()
     return protocolConfig.as<Socks5ProxyProtocolConfig>();
 }
 
+MtProxyProtocolConfig* ContainerConfig::getMtProxyProtocolConfig()
+{
+    return protocolConfig.as<MtProxyProtocolConfig>();
+}
+
+const MtProxyProtocolConfig* ContainerConfig::getMtProxyProtocolConfig() const
+{
+    return protocolConfig.as<MtProxyProtocolConfig>();
+}
+
+TelemtProtocolConfig* ContainerConfig::getTelemtProtocolConfig()
+{
+    return protocolConfig.as<TelemtProtocolConfig>();
+}
+
+const TelemtProtocolConfig* ContainerConfig::getTelemtProtocolConfig() const
+{
+    return protocolConfig.as<TelemtProtocolConfig>();
+}
+
 Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 {
     return protocolConfig.as<Ikev2ProtocolConfig>();
