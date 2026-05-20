@@ -2,7 +2,6 @@
 
 #include <QIODevice>
 #include <QList>
-#include <QString>
 
 QList<QString> qrCodeUtils::generateQrCodeImageSeriesPlainText(const QByteArray &utf8Text)
 {

@@ -16,8 +16,6 @@ Window  {
     id: root
     objectName: "mainWindow"
 
-    color: AmneziaStyle.color.midnightBlack
-
     Connections {
         target: Qt.application
         function onStateChanged() {
@@ -62,6 +60,8 @@ Window  {
     minimumHeight: GC.isDesktop() ? 640 : 0
     maximumWidth: 600
     maximumHeight: 800
+
+    color: AmneziaStyle.color.midnightBlack
 
     onClosing: function(close) {
         close.accepted = false

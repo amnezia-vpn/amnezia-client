@@ -92,7 +92,7 @@ PageType {
 
             SwitcherType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 

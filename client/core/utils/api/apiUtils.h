@@ -1,7 +1,6 @@
 #ifndef APIUTILS_H
 #define APIUTILS_H
 
-#include <QJsonObject>
 #include <QNetworkReply>
 #include <QObject>
 

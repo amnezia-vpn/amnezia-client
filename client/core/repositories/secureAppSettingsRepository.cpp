@@ -4,7 +4,6 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QUuid>
-#include <QUrl>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"

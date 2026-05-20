@@ -139,11 +139,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     AVCaptureSession *session = self.captureSession;
     self.captureSession = nil;
 
-    /**
-     * Must run stopRunning on the same serial queue as startRunning, synchronously before tearing down.
-     * Async stop + immediate start (e.g. foreground resume calling restartPairingIosCamera) left stopRunning
-     * racing startRunning's internal beginConfiguration/commitConfiguration → NSGenericException crash.
-     */
     if (session) {
         if (!_sessionQueue) {
             _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
@@ -175,14 +170,12 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     }
 }
 
-- (void)captureOutput:(AVCaptureOutput *)output
-    didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects
-               fromConnection:(AVCaptureConnection *)connection {
+- (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
 
     if (metadataObjects != nil && metadataObjects.count > 0) {
         AVMetadataMachineReadableCodeObject *metadataObject = [metadataObjects objectAtIndex:0];
 
-        if ([[metadataObject type] isEqualToString:AVMetadataObjectTypeQRCode]) {
+        if ([[metadataObject type] isEqualToString: AVMetadataObjectTypeQRCode]) {
             NSString *value = [metadataObject stringValue];
             if (value.length == 0) {
                 return;
@@ -200,7 +193,7 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 
 QRCodeReader::QRCodeReader() {
     m_qrCodeReader = [[QRCodeReaderImpl alloc] init];
-    [m_qrCodeReader setQrCodeReader:this];
+    [m_qrCodeReader setQrCodeReader: this];
 }
 
 QRect QRCodeReader::cameraSize() {
