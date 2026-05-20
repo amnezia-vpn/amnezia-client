@@ -550,7 +550,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     }
     NSError *err = nil;
     if (![device lockForConfiguration:&err]) {
-        NSLog(@"[PairingQrOverlay] torch lock failed: %@", err.localizedDescription);
         return;
     }
     if (on) {
@@ -597,7 +596,7 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
                     [session stopRunning];
                 }
             } @catch (NSException *ex) {
-                NSLog(@"[PairingQrOverlay] stopRunning exception: %@", ex);
+                NSLog(@"Stop running exception: %@", ex);
             }
         });
     }
@@ -609,19 +608,16 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
     [self stopCapturePipelineOnMainThread];
 
     if (!self.cameraContainer) {
-        NSLog(@"[PairingQrOverlay] no cameraContainer");
         return NO;
     }
 
     NSError *error = nil;
     AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (!device) {
-        NSLog(@"[PairingQrOverlay] no default video device");
         return NO;
     }
     AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice:device error:&error];
     if (!input) {
-        NSLog(@"[PairingQrOverlay] deviceInput failed: %@", error.localizedDescription);
         return NO;
     }
     self.videoDevice = device;
@@ -635,7 +631,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
 
     AVCaptureMetadataOutput *meta = [[AVCaptureMetadataOutput alloc] init];
     if (![session canAddOutput:meta]) {
-        NSLog(@"[PairingQrOverlay] cannot add metadata output");
         return NO;
     }
     [session addOutput:meta];
@@ -665,7 +660,7 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
         @try {
             [runningSession startRunning];
         } @catch (NSException *ex) {
-            NSLog(@"[PairingQrOverlay] startRunning exception: %@", ex);
+            NSLog(@"Start running exception: %@", ex);
         }
         const BOOL running = [runningSession isRunning];
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -759,7 +754,6 @@ void amneziaIosPairingQrOverlayPresent(AmneziaPairingQrScannedUtf8Handler onScan
 
         UIWindowScene *scene = amneziaForegroundWindowScene();
         if (!scene) {
-            NSLog(@"[PairingQrOverlay] present: no UIWindowScene");
             gOnScanned = nullptr;
             gOnBack = nullptr;
             return;
@@ -790,7 +784,7 @@ void amneziaIosPairingQrOverlayPresent(AmneziaPairingQrScannedUtf8Handler onScan
         gPairingQrOverlayKeySince = CFAbsoluteTimeGetCurrent();
 
         if (![vc startCapturePipelineOnMainThread]) {
-            NSLog(@"[PairingQrOverlay] startCapture failed");
+            NSLog(@"Start capture failed");
         }
     });
 }
@@ -846,7 +840,7 @@ void amneziaIosPairingQrOverlayRestartCapture()
         AmneziaPairingQrOverlayViewController *vc = (AmneziaPairingQrOverlayViewController *)root;
         [vc stopCapturePipelineOnMainThread];
         if (![vc startCapturePipelineOnMainThread]) {
-            NSLog(@"[PairingQrOverlay] restart startCapture failed");
+            NSLog(@"Restart startCapture failed");
         }
     });
 }

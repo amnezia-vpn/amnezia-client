@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
-import QtQuick.Window
 
 import PageEnum 1.0
 import Style 1.0
@@ -270,7 +269,6 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: tabBar.top
-        anchors.bottomMargin: 0
 
         enabled: !root.isControlsDisabled
 
@@ -317,8 +315,6 @@ PageType {
         id: tabBar
         objectName: "tabBar"
 
-        clip: false
-
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
@@ -335,41 +331,24 @@ PageType {
 
         enabled: !root.isControlsDisabled && !root.isTabBarDisabled
 
-        background: Item {
-            id: tabBarBackgroundRoot
-            objectName: "tabBarBackgroundRoot"
+        background: Shape {
+            objectName: "backgroundShape"
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+            width: parent.width
             height: parent.height
 
-            Rectangle {
-                anchors.fill: parent
-                color: AmneziaStyle.color.onyxBlack
-            }
-            Shape {
-                id: tabBarChromeShape
-                objectName: "backgroundShape"
-                visible: true
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: tabBar.height
+            ShapePath {
+                startX: 0
+                startY: 0
 
-                ShapePath {
-                    startX: 0
-                    startY: 0
+                PathLine { x: width; y: 0 }
+                PathLine { x: width; y: tabBar.height - 1 }
+                PathLine { x: 0; y: tabBar.height - 1 }
+                PathLine { x: 0; y: 0 }
 
-                    PathLine { x: tabBarChromeShape.width; y: 0 }
-                    PathLine { x: tabBarChromeShape.width; y: tabBarChromeShape.height - 1 }
-                    PathLine { x: 0; y: tabBarChromeShape.height - 1 }
-                    PathLine { x: 0; y: 0 }
-
-                    strokeWidth: 1
-                    strokeColor: AmneziaStyle.color.slateGray
-                    fillColor: "transparent"
-                }
+                strokeWidth: 1
+                strokeColor: AmneziaStyle.color.slateGray
+                fillColor: AmneziaStyle.color.onyxBlack
             }
         }
 
