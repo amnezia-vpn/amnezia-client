@@ -30,8 +30,6 @@ public:
     static QString netMaskFromIpWithSubnet(const QString ip);
     static QString ipAddressFromIpWithSubnet(const QString ip);
     static QStringList summarizeRoutes(const QStringList &ips, const QString cidr);
-
-    static bool hostIsPrivateLanAddress(const QString &host);
 };
 
 #endif // NETWORKUTILITIES_H

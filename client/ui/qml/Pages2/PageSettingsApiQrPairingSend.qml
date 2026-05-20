@@ -14,11 +14,9 @@ import "../Components"
 PageType {
     id: root
 
-    readonly property bool useIosNativePairingQrOverlay: PairingUiController.iosNativePairingQrOverlayBuild
+    readonly property bool useIosNativePairingQrOverlay: GC.isMobile() && Qt.platform.os === "ios"
 
-    readonly property bool useAndroidNativePairingQrOverlay: PairingUiController.androidNativePairingQrOverlayBuild
-                                                             && GC.isMobile()
-                                                             && Qt.platform.os === "android"
+    readonly property bool useAndroidNativePairingQrOverlay: GC.isMobile() && Qt.platform.os === "android"
 
     property int pairingWizardStep: 0
     property bool keepPhonePairingInBackgroundOnClose: false
@@ -35,8 +33,6 @@ PageType {
         if (root.useIosNativePairingQrOverlay) {
             PairingUiController.setPairingQrTorchEnabled(false)
             PairingUiController.dismissIosPairingQrNativeOverlayScanner()
-        } else if (Qt.platform.os === "android") {
-            PairingUiController.setPairingQrTorchEnabled(false)
         }
     }
 

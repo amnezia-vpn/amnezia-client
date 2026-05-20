@@ -21,19 +21,13 @@ class PairingUiController : public QObject
 
     Q_PROPERTY(QVariantList tvQrCodes READ tvQrCodes NOTIFY tvQrCodesChanged)
     Q_PROPERTY(int tvQrCodesCount READ tvQrCodesCount NOTIFY tvQrCodesChanged)
-    Q_PROPERTY(QString tvSessionUuid READ tvSessionUuid NOTIFY tvSessionUuidChanged)
-    Q_PROPERTY(bool tvPairingBusy READ tvPairingBusy NOTIFY tvPairingBusyChanged)
-    Q_PROPERTY(QString tvStatusMessage READ tvStatusMessage NOTIFY tvStatusMessageChanged)
     Q_PROPERTY(int tvPairingWaitWindowSeconds READ tvPairingWaitWindowSeconds NOTIFY tvQrCodesChanged)
 
     Q_PROPERTY(bool phonePairingBusy READ phonePairingBusy NOTIFY phonePairingBusyChanged)
-    Q_PROPERTY(QString phoneStatusMessage READ phoneStatusMessage NOTIFY phoneStatusMessageChanged)
     Q_PROPERTY(QString pendingPhonePairingUuid READ pendingPhonePairingUuid WRITE setPendingPhonePairingUuid NOTIFY
                        pendingPhonePairingUuidChanged)
     Q_PROPERTY(QString lastSuccessfulPhonePairingDisplayName READ lastSuccessfulPhonePairingDisplayName NOTIFY
                        lastSuccessfulPhonePairingDisplayNameChanged)
-    Q_PROPERTY(bool iosNativePairingQrOverlayBuild READ iosNativePairingQrOverlayBuild CONSTANT)
-    Q_PROPERTY(bool androidNativePairingQrOverlayBuild READ androidNativePairingQrOverlayBuild CONSTANT)
     Q_PROPERTY(qint64 androidPairingReaderCooldownUntilEpochMs READ androidPairingReaderCooldownUntilEpochMs NOTIFY
                        androidPairingReaderCooldownUntilEpochMsChanged)
 
@@ -45,18 +39,12 @@ public:
 
     QVariantList tvQrCodes() const;
     int tvQrCodesCount() const;
-    QString tvSessionUuid() const;
-    bool tvPairingBusy() const;
-    QString tvStatusMessage() const;
     int tvPairingWaitWindowSeconds() const;
 
     bool phonePairingBusy() const;
-    QString phoneStatusMessage() const;
     QString pendingPhonePairingUuid() const { return m_pendingPhonePairingUuid; }
     void setPendingPhonePairingUuid(const QString &uuid);
     QString lastSuccessfulPhonePairingDisplayName() const { return m_lastSuccessfulPhonePairingDisplayName; }
-    bool iosNativePairingQrOverlayBuild() const;
-    bool androidNativePairingQrOverlayBuild() const;
 
     qint64 androidPairingReaderCooldownUntilEpochMs() const { return m_androidPairingReaderCooldownUntilEpochMs; }
 
@@ -91,11 +79,7 @@ public slots:
 signals:
     void errorOccurred(amnezia::ErrorCode errorCode);
     void tvQrCodesChanged();
-    void tvSessionUuidChanged();
-    void tvPairingBusyChanged();
-    void tvStatusMessageChanged();
     void phonePairingBusyChanged();
-    void phoneStatusMessageChanged();
     void pendingPhonePairingUuidChanged();
     void lastSuccessfulPhonePairingDisplayNameChanged();
 
@@ -115,7 +99,6 @@ private:
     void resetTvQrDisplay();
     void clearPendingPhonePairingUuid();
     void suppressAndroidNativePairingReaderStarts(int ms);
-    QString tvFailureMessage(amnezia::ErrorCode code) const;
     void dispatchTvGenerateQrAttempt(quint64 generation, int retryAttempt);
     void dispatchPhoneScanQrAttempt(const QString &qrUuid, bool isTestPurchase, const QString &vpnKey, const QJsonObject &serviceInfo,
                                     const QJsonArray &supportedProtocols, const QString &apiKey, const QString &serviceType,
@@ -129,13 +112,11 @@ private:
     QList<QString> m_tvQrCodes;
     QString m_tvSessionUuid;
     bool m_tvPairingBusy = false;
-    QString m_tvStatusMessage;
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_tvWatcher;
     QPointer<QNetworkReply> m_tvNetworkReply;
     quint64 m_tvSessionGeneration { 0 };
 
     bool m_phonePairingBusy = false;
-    QString m_phoneStatusMessage;
     QString m_pendingPhonePairingUuid;
     QString m_lastSuccessfulPhonePairingDisplayName;
     QPointer<QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>>> m_phoneWatcher;

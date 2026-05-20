@@ -124,24 +124,6 @@ PairingUiController *g_pairingUiForAndroidQr = nullptr;
 }
 #endif
 
-bool PairingUiController::iosNativePairingQrOverlayBuild() const
-{
-#if defined(Q_OS_IOS)
-    return true;
-#else
-    return false;
-#endif
-}
-
-bool PairingUiController::androidNativePairingQrOverlayBuild() const
-{
-#if defined(Q_OS_ANDROID)
-    return true;
-#else
-    return false;
-#endif
-}
-
 PairingUiController::PairingUiController(PairingController *pairingController, ServersController *serversController,
                                          SubscriptionController *subscriptionController,
                                          SecureAppSettingsRepository *appSettingsRepository, QObject *parent)
@@ -375,21 +357,6 @@ int PairingUiController::tvQrCodesCount() const
     return m_tvQrCodes.size();
 }
 
-QString PairingUiController::tvSessionUuid() const
-{
-    return m_tvSessionUuid;
-}
-
-bool PairingUiController::tvPairingBusy() const
-{
-    return m_tvPairingBusy;
-}
-
-QString PairingUiController::tvStatusMessage() const
-{
-    return m_tvStatusMessage;
-}
-
 int PairingUiController::tvPairingWaitWindowSeconds() const
 {
     if (!m_pairingController) {
@@ -404,18 +371,9 @@ bool PairingUiController::phonePairingBusy() const
     return m_phonePairingBusy;
 }
 
-QString PairingUiController::phoneStatusMessage() const
-{
-    return m_phoneStatusMessage;
-}
-
 void PairingUiController::setTvBusy(bool busy)
 {
-    if (m_tvPairingBusy == busy) {
-        return;
-    }
     m_tvPairingBusy = busy;
-    emit tvPairingBusyChanged();
 }
 
 void PairingUiController::setPhoneBusy(bool busy)
@@ -467,21 +425,6 @@ void PairingUiController::resetTvQrDisplay()
     m_tvQrCodes.clear();
     m_tvSessionUuid.clear();
     emit tvQrCodesChanged();
-    emit tvSessionUuidChanged();
-}
-
-QString PairingUiController::tvFailureMessage(ErrorCode code) const
-{
-    switch (code) {
-    case ErrorCode::ApiConfigTimeoutError:
-        return tr("QR session expired. A new QR code will appear automatically when the screen refreshes.");
-    case ErrorCode::ApiConfigAlreadyAdded:
-        return tr("This configuration is already on the device.");
-    case ErrorCode::ApiNotFoundError:
-        return tr("This gateway does not expose QR pairing (HTTP 404). Check the gateway URL or use the local mock (tools/local_gateway).");
-    default:
-        return tr("Pairing failed");
-    }
 }
 
 void PairingUiController::startTvQrSession()
@@ -506,7 +449,6 @@ void PairingUiController::startTvQrSession()
     const QByteArray qrPayload = m_tvSessionUuid.toUtf8();
     m_tvQrCodes = qrCodeUtils::generateQrCodeImageSeriesPlainText(qrPayload);
     emit tvQrCodesChanged();
-    emit tvSessionUuidChanged();
 
     setTvBusy(true);
 
@@ -562,15 +504,11 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                                      out.config, out.serviceInfo, out.supportedProtocols);
                              setTvBusy(false);
                              if (impErr != ErrorCode::NoError) {
-                                 m_tvStatusMessage = tvFailureMessage(impErr);
-                                 emit tvStatusMessageChanged();
                                  emit errorOccurred(impErr);
                                  resetTvQrDisplay();
                                  return;
                              }
                              resetTvQrDisplay();
-                             m_tvStatusMessage = tr("Configuration received");
-                             emit tvStatusMessageChanged();
                              emit tvPairingConfigReceived();
                              return;
                          }
@@ -587,8 +525,6 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                          }
 
                          setTvBusy(false);
-                         m_tvStatusMessage = tvFailureMessage(logicalErr);
-                         emit tvStatusMessageChanged();
                          emit errorOccurred(logicalErr);
                      });
     watcher->setFuture(future);
@@ -607,8 +543,6 @@ void PairingUiController::cancelTvQrSession()
         m_tvWatcher.clear();
     }
     setTvBusy(false);
-    m_tvStatusMessage.clear();
-    emit tvStatusMessageChanged();
     resetTvQrDisplay();
 }
 
@@ -625,8 +559,6 @@ void PairingUiController::cancelAllPairingActivity()
         m_phoneWatcher.clear();
     }
     setPhoneBusy(false);
-    m_phoneStatusMessage.clear();
-    emit phoneStatusMessageChanged();
 
     clearPendingPhonePairingUuid();
     if (!m_lastSuccessfulPhonePairingDisplayName.isEmpty()) {
@@ -699,8 +631,6 @@ void PairingUiController::submitPhonePairing(const QString &qrUuid, int serverIn
         emit lastSuccessfulPhonePairingDisplayNameChanged();
     }
 
-    m_phoneStatusMessage = tr("Sending…");
-    emit phoneStatusMessageChanged();
     setPhoneBusy(true);
 
     dispatchPhoneScanQrAttempt(trimmedUuid, apiV2.apiConfig.isTestPurchase, vpnKey, serviceInfo, supportedProtocols, apiKey,
@@ -757,8 +687,6 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
 
                          if (logicalErr == ErrorCode::NoError) {
                              setPhoneBusy(false);
-                             m_phoneStatusMessage = tr("Sent successfully");
-                             emit phoneStatusMessageChanged();
                              if (m_lastSuccessfulPhonePairingDisplayName != scanDisplayName) {
                                  m_lastSuccessfulPhonePairingDisplayName = scanDisplayName;
                                  emit lastSuccessfulPhonePairingDisplayNameChanged();
@@ -782,8 +710,6 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
                          }
 
                          setPhoneBusy(false);
-                         m_phoneStatusMessage = tr("Send failed");
-                         emit phoneStatusMessageChanged();
                          emit errorOccurred(logicalErr);
                      });
     watcher->setFuture(future);

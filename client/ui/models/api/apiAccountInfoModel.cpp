@@ -116,13 +116,6 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     case MaxDeviceCountRole: {
         return m_accountInfoData.maxDeviceCount;
     }
-    case AvailableDeviceSlotsRole: {
-        if (m_accountInfoData.maxDeviceCount <= 0) {
-            return 1 << 20;
-        }
-        const int spare = m_accountInfoData.maxDeviceCount - m_accountInfoData.activeDeviceCount;
-        return qMax(0, spare);
-    }
     case ConfigurationFilesCountRole: {
         return m_accountInfoData.configurationFilesCount;
     }
@@ -236,7 +229,6 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsInAppPurchaseRole] = "isInAppPurchase";
     roles[ActiveDeviceCountRole] = "activeDeviceCount";
     roles[MaxDeviceCountRole] = "maxDeviceCount";
-    roles[AvailableDeviceSlotsRole] = "availableDeviceSlots";
     roles[ConfigurationFilesCountRole] = "configurationFilesCount";
 
     return roles;

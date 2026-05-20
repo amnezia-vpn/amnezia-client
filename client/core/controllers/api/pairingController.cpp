@@ -108,16 +108,6 @@ ErrorCode interpretScanQrJson(const QJsonObject &obj)
 }
 } // namespace
 
-QJsonArray PairingController::gatewayStringMetadataArray(const QString &value)
-{
-    QJsonArray arr;
-    const QString trimmed = value.trimmed();
-    if (!trimmed.isEmpty()) {
-        arr.append(trimmed);
-    }
-    return arr;
-}
-
 ErrorCode PairingController::parseGenerateQrResponseBody(const QByteArray &responseBody, QrPairingConfigPayload &outPayload)
 {
     outPayload = QrPairingConfigPayload {};

@@ -28,7 +28,6 @@ public:
         IsInAppPurchaseRole,
         ActiveDeviceCountRole,
         MaxDeviceCountRole,
-        AvailableDeviceSlotsRole,
         ConfigurationFilesCountRole
     };
 

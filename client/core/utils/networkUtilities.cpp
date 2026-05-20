@@ -42,7 +42,6 @@
     #include <net/if.h>
 #endif
 
-#include <QAbstractSocket>
 #include <QHostAddress>
 #include <QHostInfo>
 
@@ -491,26 +490,4 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
     return { gateway, QNetworkInterface::interfaceFromIndex(index) };
 #endif
-}
-
-bool NetworkUtilities::hostIsPrivateLanAddress(const QString &host)
-{
-    if (host.isEmpty()) {
-        return false;
-    }
-    QHostAddress addr(host);
-    if (addr.isNull() || addr.isLoopback()) {
-        return false;
-    }
-    if (addr.protocol() == QAbstractSocket::IPv4Protocol) {
-        return addr.isInSubnet(QHostAddress(QStringLiteral("10.0.0.0")), 8)
-                || addr.isInSubnet(QHostAddress(QStringLiteral("172.16.0.0")), 12)
-                || addr.isInSubnet(QHostAddress(QStringLiteral("192.168.0.0")), 16)
-                || addr.isInSubnet(QHostAddress(QStringLiteral("169.254.0.0")), 16);
-    }
-    if (addr.protocol() == QAbstractSocket::IPv6Protocol) {
-        return addr.isInSubnet(QHostAddress(QStringLiteral("fe80::")), 10)
-                || addr.isInSubnet(QHostAddress(QStringLiteral("fc00::")), 7);
-    }
-    return false;
 }

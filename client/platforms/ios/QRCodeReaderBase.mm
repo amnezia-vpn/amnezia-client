@@ -50,7 +50,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 @property (nonatomic, assign) QRCodeReader *qrCodeReader;
 @property (nonatomic, retain) AVCaptureSession *captureSession;
 @property (nonatomic, retain) AVCaptureVideoPreviewLayer *videoPreviewPlayer;
-@property (nonatomic, retain) AVCaptureDevice *activeCaptureDevice;
 @property (nonatomic) dispatch_queue_t sessionQueue;
 @end
 
@@ -70,78 +69,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     _qrCodeReader = value;
 }
 
-- (AVCaptureDevice *)resolvedCaptureDevice {
-    if (self.activeCaptureDevice) {
-        return self.activeCaptureDevice;
-    }
-    AVCaptureSession *session = self.captureSession;
-    if (!session) {
-        return nil;
-    }
-    for (AVCaptureInput *input in session.inputs) {
-        if ([input isKindOfClass:[AVCaptureDeviceInput class]]) {
-            AVCaptureDevice *d = ((AVCaptureDeviceInput *)input).device;
-            if (d) {
-                return d;
-            }
-        }
-    }
-    return nil;
-}
-
-- (void)applyTorchOnMainThread:(BOOL)on {
-    AVCaptureDevice *device = [self resolvedCaptureDevice];
-    if (!device) {
-        if (on) {
-            NSLog(@"[QRCodeReader] torch ON failed: no device (active=%p session=%p inputs=%lu)",
-                  self.activeCaptureDevice,
-                  self.captureSession,
-                  (unsigned long)(self.captureSession ? self.captureSession.inputs.count : 0));
-        }
-        return;
-    }
-    if (![device hasTorch]) {
-        return;
-    }
-
-    AVCaptureSession *session = self.captureSession;
-    if (on && session && ![session isRunning]) {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.25 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            if (on) {
-                [self applyTorchOnMainThread:YES];
-            }
-        });
-        return;
-    }
-
-    NSError *err = nil;
-    if (![device lockForConfiguration:&err]) {
-        return;
-    }
-
-    if (on) {
-        err = nil;
-        if (![device setTorchModeOnWithLevel:AVCaptureMaxAvailableTorchLevel error:&err]) {
-            if ([device isTorchModeSupported:AVCaptureTorchModeOn]) {
-                device.torchMode = AVCaptureTorchModeOn;
-            }
-        }
-    } else {
-        device.torchMode = AVCaptureTorchModeOff;
-    }
-    [device unlockForConfiguration];
-}
-
-- (void)applyTorch:(BOOL)on {
-    if ([NSThread isMainThread]) {
-        [self applyTorchOnMainThread:on];
-    } else {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self applyTorchOnMainThread:on];
-        });
-    }
-}
-
 - (BOOL)startReadingOnMainThread {
     [self stopReadingOnMainThread];
 
@@ -157,8 +84,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
     if (!deviceInput) {
         return NO;
     }
-
-    self.activeCaptureDevice = captureDevice;
 
     AVCaptureSession *session = [[AVCaptureSession alloc] init];
     [session addInput:deviceInput];
@@ -211,9 +136,6 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
 }
 
 - (void)stopReadingOnMainThread {
-    [self applyTorchOnMainThread:NO];
-    self.activeCaptureDevice = nil;
-
     AVCaptureSession *session = self.captureSession;
     self.captureSession = nil;
 
@@ -300,10 +222,6 @@ void QRCodeReader::stopReading() {
 void QRCodeReader::notifyCodeRead(const QString &code) {
     emit codeReaded(code);
 }
-
-void QRCodeReader::setTorchEnabled(bool on) {
-    [(QRCodeReaderImpl *)m_qrCodeReader applyTorch:on ? YES : NO];
-}
 #else
 #include "QRCodeReaderBase.h"
 
@@ -319,6 +237,5 @@ QRect QRCodeReader::cameraSize() {
 void QRCodeReader::startReading() {}
 void QRCodeReader::stopReading() {}
 void QRCodeReader::setCameraSize(QRect) {}
-void QRCodeReader::setTorchEnabled(bool) {}
 void QRCodeReader::notifyCodeRead(const QString &) {}
 #endif

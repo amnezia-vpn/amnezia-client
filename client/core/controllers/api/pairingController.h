@@ -34,8 +34,6 @@ public:
     static amnezia::ErrorCode validatePairingScanFields(const QString &qrUuid, const QString &vpnConfig, const QString &apiKey,
                                                         const QString &serviceType, const QString &userCountryCode);
 
-    static QJsonArray gatewayStringMetadataArray(const QString &value);
-
 private:
     SecureAppSettingsRepository *m_appSettingsRepository;
 };

@@ -16,7 +16,6 @@ public slots:
     void startReading();
     void stopReading();
     void setCameraSize(QRect value);
-    void setTorchEnabled(bool on);
     void notifyCodeRead(const QString &code);
 
 signals:
