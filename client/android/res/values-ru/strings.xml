@@ -24,6 +24,9 @@
     <string name="notificationSettingsDialogMessage">Для показа уведомлений необходимо включить уведомления в системных настройках</string>
     <string name="openNotificationSettings">Открыть настройки уведомлений</string>
 
+    <string name="cameraPermissionDialogTitle">Доступ к камере</string>
+    <string name="cameraPermissionDialogMessage">Чтобы отсканировать QR-код для добавления устройства, Amnezia VPN нужен доступ к камере.</string>
+    <string name="cameraPermissionContinue">Продолжить</string>
     <string name="camera_torch">Фонарик</string>
     <string name="pairing_qr_camera_title">Добавить устройство по QR</string>
     <string name="pairing_qr_camera_subtitle">Отсканируйте QR сессии на устройстве, которое хотите добавить. Перед отправкой подписки будет подтверждение.</string>
