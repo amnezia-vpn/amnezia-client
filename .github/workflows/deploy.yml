@@ -260,13 +260,17 @@ jobs:
 # ------------------------------------------------------
 
   Bake-Prebuilts-iOS:
-    runs-on: macos-latest
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
         xcode-version: [26.0, 26.4]
+        include:
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -350,7 +354,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '26.4'
+        xcode-version: '26.0'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -400,14 +404,17 @@ jobs:
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS:
-    runs-on: macos-latest
-
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
+        include:
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
