@@ -86,6 +86,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     const int httpStatusCodeNotImplemented = 501;
     const int httpStatusCodePaymentRequired = 402;
     const int httpStatusCodeTooManyRequests = 429;
+    const int httpStatusCodeRequestTimeout = 408;
     const int httpStatusCodeUnprocessableEntity = 422;
 
     if (!sslErrors.empty()) {
@@ -135,6 +136,9 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         }
         if (status == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
+        }
+        if (status == httpStatusCodeRequestTimeout) {
+            return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
         if (status == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
