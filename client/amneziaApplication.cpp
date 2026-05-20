@@ -15,6 +15,9 @@
 #include <QEvent>
 #include <QDir>
 #include <QSettings>
+#include <QFileOpenEvent>
+#include <QUrl>
+#include <QCoreApplication>
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
 
@@ -28,6 +31,17 @@
          
 
 bool AmneziaApplication::m_forceQuit = false;
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+namespace {
+bool g_secondaryInstanceForDeepLink = false;
+}
+
+void AmneziaApplication::markSecondaryInstanceForDeepLink()
+{
+    g_secondaryInstanceForDeepLink = true;
+}
+#endif
 
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
@@ -61,25 +75,54 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 AmneziaApplication::~AmneziaApplication()
 {
 #ifdef AMNEZIA_DESKTOP
-    if (m_vpnConnection && m_vpnConnectionThread.isRunning()) {
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::BlockingQueuedConnection);
-        
-        QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectFromVpn", Qt::BlockingQueuedConnection);
+    if (m_vpnConnection) {
+        m_vpnConnection->disconnectSlots();
+        m_vpnConnection->disconnectFromVpn();
     }
 #endif
-
-    m_vpnConnectionThread.requestInterruption();
-    m_vpnConnectionThread.quit();
-
-    if (!m_vpnConnectionThread.wait(3000)) {
-        m_vpnConnectionThread.terminate();
-        m_vpnConnectionThread.wait(500);
-    }
 
     if (m_engine) {
         delete m_engine;
     }
 }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+namespace {
+QString vpnUrlFromArguments(const QStringList &args)
+{
+    for (const QString &arg : args) {
+        const QString t = arg.trimmed();
+        if (t.startsWith(QLatin1String("vpn://"), Qt::CaseInsensitive)) {
+            return t;
+        }
+    }
+    return {};
+}
+} // namespace
+#endif
+
+#if defined(Q_OS_WIN) && !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+namespace {
+void registerWindowsVpnUrlSchemeIfNeeded()
+{
+    QSettings flag(ORGANIZATION_NAME, APPLICATION_NAME);
+    if (flag.value(QStringLiteral("protocolHandler/vpnRegistered")).toBool()) {
+        return;
+    }
+
+    const QString exe = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+
+    QSettings vpnKey(QStringLiteral("HKEY_CURRENT_USER\\Software\\Classes\\vpn"), QSettings::NativeFormat);
+    vpnKey.setValue(QStringLiteral("."), QStringLiteral("URL:AmneziaVPN"));
+    vpnKey.setValue(QStringLiteral("URL Protocol"), QString());
+
+    QSettings cmdKey(QStringLiteral("HKEY_CURRENT_USER\\Software\\Classes\\vpn\\shell\\open\\command"), QSettings::NativeFormat);
+    cmdKey.setValue(QStringLiteral("."), QStringLiteral("\"%1\" \"%2\"").arg(exe, QStringLiteral("%1")));
+
+    flag.setValue(QStringLiteral("protocolHandler/vpnRegistered"), true);
+}
+} // namespace
+#endif
 
 #ifdef Q_OS_ANDROID
 namespace {
@@ -133,9 +176,6 @@ void AmneziaApplication::init()
 #endif
 
     m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));
-    m_vpnConnection->moveToThread(&m_vpnConnectionThread);
-    m_vpnConnectionThread.start();
-
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
@@ -190,6 +230,23 @@ void AmneziaApplication::init()
             });
         }
     }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#    ifdef Q_OS_WIN
+    registerWindowsVpnUrlSchemeIfNeeded();
+#    endif
+    if (!m_parser.isSet(m_optImport)) {
+        const QString vpnArg = vpnUrlFromArguments(QCoreApplication::arguments());
+        if (!vpnArg.isEmpty()) {
+            m_pendingVpnDeepLink.clear();
+            QTimer::singleShot(0, this, [this, vpnArg]() { deliverVpnDeepLink(vpnArg); });
+        }
+    }
+    if (!m_pendingVpnDeepLink.isEmpty()) {
+        const QString pending = std::move(m_pendingVpnDeepLink);
+        QTimer::singleShot(0, this, [this, pending]() { deliverVpnDeepLink(pending); });
+    }
+#endif
 }
 
 void AmneziaApplication::registerTypes()
@@ -250,20 +307,124 @@ bool AmneziaApplication::parseCommands()
 }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-void AmneziaApplication::startLocalServer() {
-    const QString serverName("AmneziaVPNInstance");
+void AmneziaApplication::startLocalServer()
+{
+    const QString serverName(QStringLiteral("AmneziaVPNInstance"));
     QLocalServer::removeServer(serverName);
 
     QLocalServer *server = new QLocalServer(this);
-    server->listen(serverName);
+    if (!server->listen(serverName)) {
+        qWarning() << "QLocalServer::listen failed:" << server->errorString();
+    }
 
-    QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
-        if (server) {
-            QLocalSocket *clientConnection = server->nextPendingConnection();
-            clientConnection->deleteLater();
+    QObject::connect(server, &QLocalServer::newConnection, this, [this, server]() {
+        QLocalSocket *sock = server->nextPendingConnection();
+        if (!sock) {
+            return;
         }
-        emit m_coreController->pageController()->raiseMainWindow(); //TODO
-    });
+
+        QString vpnPayload;
+        if (sock->waitForReadyRead(3000)) {
+            const QByteArray buf = sock->readAll();
+            static const QByteArray prefix = QByteArrayLiteral("VPN\n");
+            if (buf.startsWith(prefix)) {
+                vpnPayload = QString::fromUtf8(buf.mid(prefix.size())).trimmed();
+            }
+        }
+        sock->deleteLater();
+
+        if (!vpnPayload.isEmpty()) {
+            QTimer::singleShot(0, this, [this, vpnPayload]() { deliverVpnDeepLink(vpnPayload); });
+        }
+
+        QTimer::singleShot(0, this, [this]() {
+            if (m_coreController && m_coreController->pageController()) {
+                emit m_coreController->pageController()->raiseMainWindow();
+            }
+        });
+    }, Qt::QueuedConnection);
+}
+#endif
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+void AmneziaApplication::deliverVpnDeepLink(const QString &payload)
+{
+    if (!m_coreController) {
+        return;
+    }
+    const QString trimmed = payload.trimmed();
+    if (trimmed.isEmpty()) {
+        return;
+    }
+    m_coreController->openVpnKeyImportPreview(trimmed);
+}
+
+QString vpnPayloadFromFileOpenUrl(const QUrl &url)
+{
+    const QString decoded = url.toString(QUrl::PrettyDecoded);
+    const int idx = decoded.indexOf(QLatin1String("vpn://"), 0, Qt::CaseInsensitive);
+    if (idx >= 0) {
+        qDebug() << "vpn://" << decoded;
+        return decoded.mid(idx).trimmed();
+    }
+    if (url.scheme().compare(QLatin1String("vpn"), Qt::CaseInsensitive) == 0) {
+        qDebug() << "vpn://" << decoded;
+        return decoded.trimmed();
+    }
+    return {};
+}
+
+#if !defined(MACOS_NE)
+bool forwardVpnPayloadToPrimaryInstance(const QString &payload)
+{
+    if (payload.trimmed().isEmpty()) {
+        return false;
+    }
+    QLocalSocket socket;
+    socket.connectToServer(QStringLiteral("AmneziaVPNInstance"));
+    if (!socket.waitForConnected(800)) {
+        return false;
+    }
+    const QByteArray msg = QByteArrayLiteral("VPN\n") + payload.toUtf8() + '\n';
+    socket.write(msg);
+    socket.waitForBytesWritten(3000);
+    socket.flush();
+    return true;
+}
+#endif
+
+bool AmneziaApplication::event(QEvent *event)
+{
+    if (event->type() == QEvent::FileOpen) {
+        auto *foe = static_cast<QFileOpenEvent *>(event);
+        const QUrl &url = foe->url();
+        qDebug() << "url:" << url;
+        const QString payload = vpnPayloadFromFileOpenUrl(url);
+        qDebug() << "payload" << payload;
+        if (!payload.isEmpty()) {
+            if (m_coreController) {
+                QTimer::singleShot(0, this, [this, payload]() { deliverVpnDeepLink(payload); });
+                return true;
+            }
+#if !defined(MACOS_NE)
+            // True secondary process (main skipped init): forward to the primary instance.
+            if (g_secondaryInstanceForDeepLink) {
+                if (forwardVpnPayloadToPrimaryInstance(payload)) {
+                    qInfo().noquote() << "Forwarded vpn deep link to primary instance, bytes:" << payload.size();
+                    QTimer::singleShot(0, qApp, &QCoreApplication::quit);
+                    return true;
+                }
+                qWarning() << "vpn FileOpen: secondary instance could not reach primary (socket)";
+                return true;
+            }
+#endif
+            // Cold start: FileOpen can arrive while init() is still running (CoreController not ready yet).
+            // Do not forward to our own local server — queue and flush at end of init().
+            m_pendingVpnDeepLink = payload;
+            return true;
+        }
+    }
+    return AMNEZIA_BASE_CLASS::event(event);
 }
 #endif
 

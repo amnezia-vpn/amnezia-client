@@ -119,6 +119,8 @@ public:
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
+    /** Navigate home, parse key, open preview (same path as mobile deep link / share). */
+    void openVpnKeyImportPreview(const QString &data);
     void updateTranslator(const QLocale &locale);
 
 signals:

@@ -1,3 +1,5 @@
+#include <QByteArray>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QTimer>
 
@@ -6,7 +8,7 @@
 #include "core/utils/migrations.h"
 #include "version.h"
 
-#include <QTimer>
+#include <QLocalSocket>
 
 #ifdef Q_OS_WIN
     #include "Windows.h"
@@ -17,17 +19,40 @@
 #endif
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-bool isAnotherInstanceRunning()
+namespace {
+QString findVpnDeepLinkInArguments(const QStringList &args)
+{
+    for (const QString &arg : args) {
+        const QString t = arg.trimmed();
+        if (t.startsWith(QLatin1String("vpn://"), Qt::CaseInsensitive)) {
+            return t;
+        }
+    }
+    return {};
+}
+
+bool notifyRunningInstanceOrExit(AmneziaApplication &app, const QString &vpnPayload)
 {
     QLocalSocket socket;
-    socket.connectToServer("AmneziaVPNInstance");
-    if (socket.waitForConnected(500)) {
-        qWarning() << "AmneziaVPN is already running";
-        return true;
+    socket.connectToServer(QStringLiteral("AmneziaVPNInstance"));
+    if (!socket.waitForConnected(500)) {
+        return false;
     }
-    return false;
+    qWarning() << "AmneziaVPN is already running";
+    if (!vpnPayload.isEmpty()) {
+        const QByteArray msg = QByteArrayLiteral("VPN\n") + vpnPayload.toUtf8() + '\n';
+        socket.write(msg);
+        socket.waitForBytesWritten(3000);
+    }
+    socket.flush();
+    QTimer::singleShot(1000, &app, [&app]() { app.quit(); });
+    return true;
 }
+} // namespace
 #endif
+
+// Desktop (non-NE): single-instance IPC forwards vpn:// to the running process. MACOS_NE has no IPC here;
+// deep links use argv / QFileOpenEvent after registration in the app bundle Info.plist.
 
 int main(int argc, char *argv[])
 {
@@ -48,8 +73,9 @@ int main(int argc, char *argv[])
     OsSignalHandler::setup();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (isAnotherInstanceRunning()) {
-        QTimer::singleShot(1000, &app, [&]() { app.quit(); });
+    const QString vpnFromArgv = findVpnDeepLinkInArguments(QCoreApplication::arguments());
+    if (notifyRunningInstanceOrExit(app, vpnFromArgv)) {
+        AmneziaApplication::markSecondaryInstanceForDeepLink();
         return app.exec();
     }
     app.startLocalServer();

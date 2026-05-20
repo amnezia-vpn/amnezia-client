@@ -1,12 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#include <dispatch/dispatch.h>
 
-#include <QByteArray>
-#include <QFile>
-#include <QString>
-
-#include "ios_controller.h"
+#import "AmneziaOpenUrlImport.h"
 
 using SceneOpenURLContexts = void (*)(id, SEL, UIScene *, NSSet<UIOpenURLContext *> *);
 
@@ -14,29 +9,7 @@ static SceneOpenURLContexts g_originalSceneOpenURLContexts = nullptr;
 
 static void amnezia_handleURL(NSURL *url)
 {
-    if (!url || !url.isFileURL) {
-        return;
-    }
-
-    QString filePath(url.path.UTF8String);
-    if (filePath.isEmpty()) {
-        return;
-    }
-
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        if (filePath.contains("backup")) {
-            IosController::Instance()->importBackupFromOutside(filePath);
-            return;
-        }
-
-        QFile file(filePath);
-        if (!file.open(QIODevice::ReadOnly)) {
-            return;
-        }
-
-        const QByteArray data = file.readAll();
-        IosController::Instance()->importConfigFromOutside(QString::fromUtf8(data));
-    });
+    AmneziaHandleOpenUrl(url);
 }
 
 static void amnezia_scene_openURLContexts(id self, SEL _cmd, UIScene *scene, NSSet<UIOpenURLContext *> *contexts)

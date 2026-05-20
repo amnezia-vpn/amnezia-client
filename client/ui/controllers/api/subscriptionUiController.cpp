@@ -8,6 +8,10 @@
 #include "core/utils/api/apiUtils.h"
 #include "core/utils/qrCodeUtils.h"
 #include "ui/controllers/systemController.h"
+#ifdef Q_OS_IOS
+#include "platforms/ios/ios_controller.h"
+#include <QThread>
+#endif
 #include "version.h"
 #include <QClipboard>
 #include <QDebug>

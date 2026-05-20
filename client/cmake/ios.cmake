@@ -34,6 +34,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/AmneziaOpenUrlImport.h
 )
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
 
@@ -47,6 +48,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/AmneziaSceneDelegateHooks.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/AmneziaOpenUrlImport.mm
 )
 
 

@@ -10,6 +10,8 @@
 	<string>${QT_INTERNAL_DOLLAR_VAR}{PRODUCT_NAME}</string>
 	<key>CFBundleExecutable</key>
 	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+	<key>CFBundleIconFile</key>
+	<string>${MACOSX_BUNDLE_ICON_FILE}</string>
 	<key>CFBundleIdentifier</key>
 	<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -46,6 +48,19 @@
 	</dict>
 	<key>CFBundleIcons</key>
         <dict/>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}.vpn-deeplink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>vpn</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
