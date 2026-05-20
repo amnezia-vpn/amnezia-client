@@ -423,6 +423,21 @@ if (WIN32)
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
     )
+
+    # If present, prefer the driver next to the client tree (e.g. IOCTL 12 / include-only build)
+    # over the Conan-prebuilt Mullvad package so IFW/MSI and service output stay in sync.
+    set(_AMNEZIA_CUSTOM_SPLIT_TUNNEL "${CMAKE_SOURCE_DIR}/client/platforms/windows/drivers/mullvad-split-tunnel.sys")
+    if(EXISTS "${_AMNEZIA_CUSTOM_SPLIT_TUNNEL}")
+        add_custom_command(TARGET ${PROJECT} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${_AMNEZIA_CUSTOM_SPLIT_TUNNEL}"
+                "$<TARGET_FILE_DIR:${PROJECT}>/mullvad-split-tunnel.sys"
+            COMMENT "Override split-tunnel driver with client/platforms/windows/drivers build"
+        )
+        install(FILES "${_AMNEZIA_CUSTOM_SPLIT_TUNNEL}"
+            DESTINATION ${CMAKE_INSTALL_BINDIR}
+            COMPONENT AmneziaVPN)
+    endif()
 endif()
 
 # install target
