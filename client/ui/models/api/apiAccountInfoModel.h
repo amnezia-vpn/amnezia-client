@@ -26,8 +26,6 @@ public:
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
         IsInAppPurchaseRole,
-        ActiveDeviceCountRole,
-        MaxDeviceCountRole,
         ConfigurationFilesCountRole
     };
 

@@ -662,21 +662,12 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
         } @catch (NSException *ex) {
             NSLog(@"Start running exception: %@", ex);
         }
-        const BOOL running = [runningSession isRunning];
         dispatch_async(dispatch_get_main_queue(), ^{
             AmneziaPairingQrOverlayViewController *strongSelf = weakSelf;
             if (!strongSelf) {
                 return;
             }
-            AVCaptureVideoPreviewLayer *pl = strongSelf.previewLayer;
             [strongSelf applyTorchFromGlobalFlag];
-        });
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            AmneziaPairingQrOverlayViewController *strongSelf = weakSelf;
-            if (!strongSelf) {
-                return;
-            }
-            AVCaptureVideoPreviewLayer *pl = strongSelf.previewLayer;
         });
     });
 
@@ -702,7 +693,6 @@ static UIBezierPath *amneziaScanBracketStrokePath(int corner, CGFloat x0, CGFloa
         dispatch_async(dispatch_get_main_queue(), ^{
             if (gOnScanned) {
                 gOnScanned(copy.c_str());
-            } else {
             }
         });
         break;

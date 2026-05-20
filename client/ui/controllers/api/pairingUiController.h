@@ -62,7 +62,6 @@ public:
 public slots:
     bool canOpenTvQrPairingPage();
     void startTvQrSession();
-    /** New UUID + QR image; aborts in-flight generate_qr without clearing the code first. */
     void rotateTvQrSession();
     void cancelTvQrSession();
     void cancelAllPairingActivity();

@@ -110,12 +110,6 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     case IsInAppPurchaseRole: {
         return m_accountInfoData.isInAppPurchase;
     }
-    case ActiveDeviceCountRole: {
-        return m_accountInfoData.activeDeviceCount;
-    }
-    case MaxDeviceCountRole: {
-        return m_accountInfoData.maxDeviceCount;
-    }
     case ConfigurationFilesCountRole: {
         return m_accountInfoData.configurationFilesCount;
     }
@@ -227,8 +221,6 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
     roles[IsInAppPurchaseRole] = "isInAppPurchase";
-    roles[ActiveDeviceCountRole] = "activeDeviceCount";
-    roles[MaxDeviceCountRole] = "maxDeviceCount";
     roles[ConfigurationFilesCountRole] = "configurationFilesCount";
 
     return roles;
