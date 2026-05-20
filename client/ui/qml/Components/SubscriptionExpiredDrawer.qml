@@ -76,7 +76,7 @@ DrawerType2 {
             textColor: AmneziaStyle.color.midnightBlack
 
             clickedFunc: function() {
-                SubscriptionUiController.getRenewalLink(ServersUiController.defaultIndex)
+                SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.defaultServerIndex))
             }
         }
 
@@ -96,7 +96,7 @@ DrawerType2 {
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
-                let result = SubscriptionUiController.getAccountInfo(ServersUiController.defaultIndex, false)
+                let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.defaultServerIndex), false)
                 PageController.showBusyIndicator(false)
                 if (result) {
                     root.closeTriggered()

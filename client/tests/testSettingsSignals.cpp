@@ -6,7 +6,6 @@
 #include <QTest>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
 #include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/allowedDnsModel.h"

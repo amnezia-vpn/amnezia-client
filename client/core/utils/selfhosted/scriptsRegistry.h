@@ -43,7 +43,6 @@ enum ProtocolScriptType {
 
 enum ClientScriptType {
     // Client-side scripts
-    linux_installer,
     mac_installer
 };
 
@@ -68,6 +67,8 @@ ScriptVars genWireGuardVars(const ContainerConfig &containerConfig);
 ScriptVars genAwgVars(const ContainerConfig &containerConfig);
 ScriptVars genSftpVars(const ContainerConfig &containerConfig);
 ScriptVars genSocks5ProxyVars(const ContainerConfig &containerConfig);
+ScriptVars genMtProxyVars(const ContainerConfig &containerConfig);
+ScriptVars genTelemtVars(const ContainerConfig &containerConfig);
 
 ScriptVars genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig);
 }

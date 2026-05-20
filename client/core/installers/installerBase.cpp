@@ -14,6 +14,8 @@
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
+#include "core/models/protocols/mtProxyProtocolConfig.h"
+#include "core/models/protocols/telemtProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 #include "core/models/protocols/torProtocolConfig.h"
 
@@ -89,6 +91,18 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             Socks5ProxyProtocolConfig socks5Config;
             socks5Config.port = portStr;
             config.protocolConfig = socks5Config;
+            break;
+        }
+        case Proto::MtProxy: {
+            MtProxyProtocolConfig mtConfig;
+            mtConfig.port = portStr;
+            config.protocolConfig = mtConfig;
+            break;
+        }
+        case Proto::Telemt: {
+            TelemtProtocolConfig telemtConfig;
+            telemtConfig.port = portStr;
+            config.protocolConfig = telemtConfig;
             break;
         }
         case Proto::Ikev2: {

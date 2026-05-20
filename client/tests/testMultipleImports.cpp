@@ -6,7 +6,8 @@
 #include <QTest>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
+#include "tests/testServerRepositoryHelpers.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
@@ -46,7 +47,7 @@ private slots:
         m_settings->clearSettings();
         m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -76,8 +77,8 @@ private slots:
         }
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "First server should be default");
         
-        ServerConfig server1 = m_coreController->m_serversRepository->server(0);
-        QString desc1 = server1.description();
+        QString desc1 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(0));
         QVERIFY2(desc1 == "AWG Server", "First server description should match");
         
         if (m_coreController->m_serversModel) {
@@ -98,8 +99,8 @@ private slots:
         }
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
-        ServerConfig server2 = m_coreController->m_serversRepository->server(1);
-        QString desc2 = server2.description();
+        QString desc2 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(1));
         QVERIFY2(desc2 == "Xray Server", "Second server description should match");
         
         if (m_coreController->m_serversModel) {
@@ -120,8 +121,8 @@ private slots:
         }
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Third server should be default");
         
-        ServerConfig server3 = m_coreController->m_serversRepository->server(2);
-        QString desc3 = server3.description();
+        QString desc3 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(2));
         QVERIFY2(desc3 == "WireGuard Server", "Third server description should match");
         
         if (m_coreController->m_serversModel) {
@@ -153,25 +154,25 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "After two imports servers count should be 2");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
-        ServerConfig server0 = m_coreController->m_serversRepository->server(0);
-        ServerConfig server1 = m_coreController->m_serversRepository->server(1);
-        QString desc0 = server0.description();
-        QString desc1 = server1.description();
+        QString desc0 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(0));
+        QString desc1 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(1));
         QVERIFY2(desc0 == "AWG Server", "First server description should match");
         QVERIFY2(desc1 == "Xray Server", "Second server description should match");
 
         defaultServerChangedSpy.clear();
         serverRemovedSpy.clear();
 
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
         
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
-        QVERIFY2(serverRemovedSpy.at(0).at(0).toInt() == 0, "serverRemoved should emit index 0");
+        QVERIFY2(serverRemovedSpy.at(0).at(1).toInt() == 0, "serverRemoved should emit removed index 0");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "After removing first server, servers count should be 1");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "After removing first server, default index should be 0");
         
-        ServerConfig remainingServer = m_coreController->m_serversRepository->server(0);
-        QString remainingDesc = remainingServer.description();
+        QString remainingDesc = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                                 m_coreController->m_serversRepository->serverIdAt(0));
         QVERIFY2(remainingDesc == "Xray Server", "Remaining server should be Xray Server");
         
         if (m_coreController->m_serversModel) {
@@ -183,10 +184,10 @@ private slots:
         defaultServerChangedSpy.clear();
         serverRemovedSpy.clear();
 
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
         
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
-        QVERIFY2(serverRemovedSpy.at(0).at(0).toInt() == 0, "serverRemoved should emit index 0");
+        QVERIFY2(serverRemovedSpy.at(0).at(1).toInt() == 0, "serverRemoved should emit removed index 0");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 0, "After removing last server, servers count should be 0");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "After removing last server, default index should be 0");
         

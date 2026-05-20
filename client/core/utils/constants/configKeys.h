@@ -18,6 +18,7 @@ namespace amnezia
 
         constexpr QLatin1String serverIndex("serverIndex");
         constexpr QLatin1String description("description");
+        constexpr QLatin1String displayName("displayName");
         constexpr QLatin1String name("name");
         constexpr QLatin1String cert("cert");
         constexpr QLatin1String accessToken("api_key");
@@ -92,6 +93,8 @@ namespace amnezia
         constexpr QLatin1String xray("xray");
         constexpr QLatin1String ssxray("ssxray");
         constexpr QLatin1String socks5proxy("socks5proxy");
+        constexpr QLatin1String mtproxy("mtproxy");
+        constexpr QLatin1String telemt("telemt");
 
         constexpr QLatin1String splitTunnelSites("splitTunnelSites");
         constexpr QLatin1String splitTunnelType("splitTunnelType");
@@ -121,6 +124,78 @@ namespace amnezia
         constexpr QLatin1String latestHandshake("latestHandshake");
         constexpr QLatin1String dataReceived("dataReceived");
         constexpr QLatin1String dataSent("dataSent");
+
+        constexpr QLatin1String storageServerId("storageServerId");
+
+        // ── Xray-specific keys ────────────────────────────────────────
+
+        // Security
+        constexpr QLatin1String xraySecurity("xray_security");       // none | tls | reality
+        constexpr QLatin1String xrayFlow("xray_flow");               // "" | xtls-rprx-vision | xtls-rprx-vision-udp443
+        constexpr QLatin1String xrayFingerprint("xray_fingerprint"); // Mozilla/5.0 | chrome | firefox | ...
+        constexpr QLatin1String xraySni("xray_sni");                 // Server Name (SNI)
+        constexpr QLatin1String xrayAlpn("xray_alpn");               // HTTP/2 | HTTP/1.1 | HTTP/2,HTTP/1.1
+
+        // Transport — common
+        constexpr QLatin1String xrayTransport("xray_transport"); // raw | xhttp | mkcp
+
+        // Transport — XHTTP
+        constexpr QLatin1String xhttpMode("xhttp_mode"); // Auto | Packet-up | Stream-up | Stream-one
+        constexpr QLatin1String xhttpHost("xhttp_host");
+        constexpr QLatin1String xhttpPath("xhttp_path");
+        constexpr QLatin1String xhttpHeadersTemplate("xhttp_headers_template"); // HTTP | None
+        constexpr QLatin1String xhttpUplinkMethod("xhttp_uplink_method");       // POST | PUT | PATCH
+        constexpr QLatin1String xhttpDisableGrpc("xhttp_disable_grpc");         // bool
+        constexpr QLatin1String xhttpDisableSse("xhttp_disable_sse");           // bool
+
+        // Transport — XHTTP Session & Sequence
+        constexpr QLatin1String xhttpSessionPlacement("xhttp_session_placement"); // Path | Header | Cookie | None
+        constexpr QLatin1String xhttpSessionKey("xhttp_session_key");
+        constexpr QLatin1String xhttpSeqPlacement("xhttp_seq_placement");
+        constexpr QLatin1String xhttpSeqKey("xhttp_seq_key");
+        constexpr QLatin1String xhttpUplinkDataPlacement("xhttp_uplink_data_placement"); // Body | Query
+        constexpr QLatin1String xhttpUplinkDataKey("xhttp_uplink_data_key");
+
+        // Transport — XHTTP Traffic Shaping
+        constexpr QLatin1String xhttpUplinkChunkSize("xhttp_uplink_chunk_size");
+        constexpr QLatin1String xhttpScMaxBufferedPosts("xhttp_sc_max_buffered_posts");
+        constexpr QLatin1String xhttpScMaxEachPostBytesMin("xhttp_sc_max_each_post_bytes_min");
+        constexpr QLatin1String xhttpScMaxEachPostBytesMax("xhttp_sc_max_each_post_bytes_max");
+        constexpr QLatin1String xhttpScMinPostsIntervalMsMin("xhttp_sc_min_posts_interval_ms_min");
+        constexpr QLatin1String xhttpScMinPostsIntervalMsMax("xhttp_sc_min_posts_interval_ms_max");
+        constexpr QLatin1String xhttpScStreamUpServerSecsMin("xhttp_sc_stream_up_server_secs_min");
+        constexpr QLatin1String xhttpScStreamUpServerSecsMax("xhttp_sc_stream_up_server_secs_max");
+
+        // Transport — mKCP
+        constexpr QLatin1String mkcpTti("mkcp_tti");
+        constexpr QLatin1String mkcpUplinkCapacity("mkcp_uplink_capacity");
+        constexpr QLatin1String mkcpDownlinkCapacity("mkcp_downlink_capacity");
+        constexpr QLatin1String mkcpReadBufferSize("mkcp_read_buffer_size");
+        constexpr QLatin1String mkcpWriteBufferSize("mkcp_write_buffer_size");
+        constexpr QLatin1String mkcpCongestion("mkcp_congestion"); // bool
+
+        // xPadding
+        constexpr QLatin1String xPaddingBytesMin("xpadding_bytes_min");
+        constexpr QLatin1String xPaddingBytesMax("xpadding_bytes_max");
+        constexpr QLatin1String xPaddingObfsMode("xpadding_obfs_mode"); // bool
+        constexpr QLatin1String xPaddingKey("xpadding_key");
+        constexpr QLatin1String xPaddingHeader("xpadding_header");
+        constexpr QLatin1String xPaddingPlacement("xpadding_placement"); // Cookie | Header | Query | Body
+        constexpr QLatin1String xPaddingMethod("xpadding_method");       // Repeat-x | Random | Zero
+
+        // xmux
+        constexpr QLatin1String xmuxEnabled("xmux_enabled"); // bool
+        constexpr QLatin1String xmuxMaxConcurrencyMin("xmux_max_concurrency_min");
+        constexpr QLatin1String xmuxMaxConcurrencyMax("xmux_max_concurrency_max");
+        constexpr QLatin1String xmuxMaxConnectionsMin("xmux_max_connections_min");
+        constexpr QLatin1String xmuxMaxConnectionsMax("xmux_max_connections_max");
+        constexpr QLatin1String xmuxCMaxReuseTimesMin("xmux_c_max_reuse_times_min");
+        constexpr QLatin1String xmuxCMaxReuseTimesMax("xmux_c_max_reuse_times_max");
+        constexpr QLatin1String xmuxHMaxRequestTimesMin("xmux_h_max_request_times_min");
+        constexpr QLatin1String xmuxHMaxRequestTimesMax("xmux_h_max_request_times_max");
+        constexpr QLatin1String xmuxHMaxReusableSecsMin("xmux_h_max_reusable_secs_min");
+        constexpr QLatin1String xmuxHMaxReusableSecsMax("xmux_h_max_reusable_secs_max");
+        constexpr QLatin1String xmuxHKeepAlivePeriod("xmux_h_keep_alive_period");
     }
 }
 

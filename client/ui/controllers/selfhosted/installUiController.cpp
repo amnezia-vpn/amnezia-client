@@ -5,13 +5,14 @@
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QStandardPaths>
+#include <QFutureWatcher>
+#include <QtConcurrent>
 
 #include "core/utils/api/apiUtils.h"
 #include "core/controllers/selfhosted/installController.h"
-#include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/networkUtilities.h"
-#include "logger.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -27,32 +28,11 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/services/torConfigModel.h"
 #include "core/utils/utilities.h"
-#include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/awgProtocolConfig.h"
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-
-namespace
-{
-    Logger logger("InstallUiController");
-
-    namespace configKey
-    {
-        constexpr char serviceInfo[] = "service_info";
-        constexpr char serviceType[] = "service_type";
-        constexpr char serviceProtocol[] = "service_protocol";
-        constexpr char userCountryCode[] = "user_country_code";
-
-        constexpr char serverCountryCode[] = "server_country_code";
-        constexpr char serverCountryName[] = "server_country_name";
-        constexpr char availableCountries[] = "available_countries";
-
-        constexpr char apiConfig[] = "api_config";
-        constexpr char authData[] = "auth_data";
-    }
-}
 
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,
@@ -69,6 +49,8 @@ InstallUiController::InstallUiController(InstallController *installController,
 #endif
                                          SftpConfigModel *sftpConfigModel,
                                          Socks5ProxyConfigModel *socks5ConfigModel,
+                                         MtProxyConfigModel* mtConfigModel,
+                                         TelemtConfigModel *telemtConfigModel,
                                          QObject *parent)
     : QObject(parent),
       m_installController(installController),
@@ -85,7 +67,9 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_ikev2ConfigModel(ikev2ConfigModel),
 #endif
       m_sftpConfigModel(sftpConfigModel),
-      m_socks5ConfigModel(socks5ConfigModel)
+      m_socks5ConfigModel(socks5ConfigModel),
+      m_mtProxyConfigModel(mtConfigModel),
+      m_telemtConfigModel(telemtConfigModel)
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
     connect(m_installController, &InstallController::validationErrorOccurred, this, [this](ErrorCode errorCode) {
@@ -101,19 +85,18 @@ InstallUiController::~InstallUiController()
 {
 }
 
-void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, int serverIndex)
+void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, const QString &serverId)
 {
-    const bool isNewServer = serverIndex < 0;
+    const bool isNewServer = serverId.isEmpty();
     
     ServerCredentials serverCredentials;
     if (isNewServer) {
         serverCredentials = m_processedServerCredentials;
     } else {
-        serverCredentials = m_serversController->getServerCredentials(serverIndex);
+        serverCredentials = m_serversController->getServerCredentials(serverId);
         m_processedServerCredentials = ServerCredentials();
     }
 
-    QMap<DockerContainer, QJsonObject> preparedContainers;
     QString finishMessage;
     ErrorCode errorCode;
 
@@ -131,9 +114,13 @@ void InstallUiController::install(DockerContainer container, int port, Transport
             return;
         }
 
-        int serverIndex = m_serversController->getServersCount() - 1;
-        ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containers = serverConfig.containers();
+        const QString newServerId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
+        const auto admin = m_serversController->selfHostedAdminConfig(newServerId);
+        if (!admin.has_value()) {
+            emit installationErrorOccurred(ErrorCode::InternalError);
+            return;
+        }
+        QMap<DockerContainer, ContainerConfig> containers = admin->containers;
         int containersCount = containers.size();
 
         if (wasContainerInstalled) {
@@ -148,20 +135,28 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
         emit installServerFinished(finishMessage);
     } else {
-        ServerConfig serverConfig = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containers = serverConfig.containers();
+        const auto adminBefore = m_serversController->selfHostedAdminConfig(serverId);
+        if (!adminBefore.has_value()) {
+            emit installationErrorOccurred(ErrorCode::InternalError);
+            return;
+        }
+        QMap<DockerContainer, ContainerConfig> containers = adminBefore->containers;
         int containersCount = containers.size();
 
         bool wasContainerInstalled = false;
-        errorCode = m_installController->installContainer(serverIndex, container, port, transportProto,
+        errorCode = m_installController->installContainer(serverId, container, port, transportProto,
                                                           wasContainerInstalled);
         if (errorCode) {
             emit installationErrorOccurred(errorCode);
             return;
         }
 
-        ServerConfig newServerConfig = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> newContainers = newServerConfig.containers();
+        const auto adminAfter = m_serversController->selfHostedAdminConfig(serverId);
+        if (!adminAfter.has_value()) {
+            emit installationErrorOccurred(ErrorCode::InternalError);
+            return;
+        }
+        QMap<DockerContainer, ContainerConfig> newContainers = adminAfter->containers;
         int newContainersCount = newContainers.size();
 
         bool hasNewContainers = (newContainersCount - containersCount) > (wasContainerInstalled ? 1 : 0);
@@ -181,17 +176,25 @@ void InstallUiController::install(DockerContainer container, int port, Transport
     }
 }
 
-void InstallUiController::scanServerForInstalledContainers(int serverIndex)
+void InstallUiController::scanServerForInstalledContainers(const QString &serverId)
 {
-    ServerConfig serverBefore = m_serversController->getServerConfig(serverIndex);
-    QMap<DockerContainer, ContainerConfig> containersBefore = serverBefore.containers();
+    const auto serverBefore = m_serversController->selfHostedAdminConfig(serverId);
+    if (!serverBefore.has_value()) {
+        emit installationErrorOccurred(ErrorCode::InternalError);
+        return;
+    }
+    QMap<DockerContainer, ContainerConfig> containersBefore = serverBefore->containers;
     int containersCountBefore = containersBefore.size();
 
-    ErrorCode errorCode = m_installController->scanServerForInstalledContainers(serverIndex);
+    ErrorCode errorCode = m_installController->scanServerForInstalledContainers(serverId);
 
     if (errorCode == ErrorCode::NoError) {
-        ServerConfig serverAfter = m_serversController->getServerConfig(serverIndex);
-        QMap<DockerContainer, ContainerConfig> containersAfter = serverAfter.containers();
+        const auto serverAfter = m_serversController->selfHostedAdminConfig(serverId);
+        if (!serverAfter.has_value()) {
+            emit installationErrorOccurred(ErrorCode::InternalError);
+            return;
+        }
+        QMap<DockerContainer, ContainerConfig> containersAfter = serverAfter->containers;
         int containersCountAfter = containersAfter.size();
 
         bool isInstalledContainerAdded = containersCountAfter > containersCountBefore;
@@ -202,7 +205,7 @@ void InstallUiController::scanServerForInstalledContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::updateContainer(int serverIndex, int containerIndex, int protocolIndex)
+void InstallUiController::updateContainer(const QString &serverId, int containerIndex, int protocolIndex, bool closePage)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     
@@ -241,6 +244,14 @@ void InstallUiController::updateContainer(int serverIndex, int containerIndex, i
         containerConfig.protocolConfig = m_socks5ConfigModel->getProtocolConfig();
         break;
     }
+    case Proto::MtProxy: {
+        containerConfig.protocolConfig = m_mtProxyConfigModel->getProtocolConfig();
+        break;
+    }
+    case Proto::Telemt: {
+        containerConfig.protocolConfig = m_telemtConfigModel->getProtocolConfig();
+        break;
+    }
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: {
         containerConfig.protocolConfig = m_ikev2ConfigModel->getProtocolConfig();
@@ -250,32 +261,135 @@ void InstallUiController::updateContainer(int serverIndex, int containerIndex, i
     default:
         return;
     }
-    ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverIndex, container);
+    ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverId, container);
 
-    ErrorCode errorCode = m_installController->updateContainer(serverIndex, container, oldContainerConfig, containerConfig);
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
+        emit serverIsBusy(true);
+        auto *watcher = new QFutureWatcher<ErrorCode>(this);
+        QObject::connect(watcher, &QFutureWatcher<ErrorCode>::finished, this,
+                         [this, watcher, serverId, container, closePage]() {
+                             const ErrorCode errorCode = watcher->result();
+                             watcher->deleteLater();
+                             emit serverIsBusy(false);
+
+                             if (errorCode == ErrorCode::NoError) {
+                                 const ContainerConfig updatedConfig =
+                                         m_serversController->getContainerConfig(serverId, container);
+                                 m_protocolModel->updateModel(updatedConfig);
+
+                                 const auto defaultContainer =
+                                         m_serversController->getDefaultContainer(serverId);
+                                 if ((serverId == m_serversController->getDefaultServerId())
+                                     && (container == defaultContainer)) {
+                                     emit currentContainerUpdated();
+                                 } else {
+                                     emit updateContainerFinished(tr("Settings updated successfully"), closePage);
+                                 }
+                             } else {
+                                 emit installationErrorOccurred(errorCode);
+                             }
+                         });
+
+        ContainerConfig newConfigCopy = containerConfig;
+        ContainerConfig oldConfigCopy = oldContainerConfig;
+        InstallController *installController = m_installController;
+        QFuture<ErrorCode> future =
+                QtConcurrent::run([installController, serverId, container, oldConfigCopy,
+                                          newConfigCopy]() mutable -> ErrorCode {
+                    return installController->updateContainer(serverId, container, oldConfigCopy, newConfigCopy);
+                });
+        watcher->setFuture(future);
+        return;
+    }
+
+    ErrorCode errorCode = m_installController->updateContainer(serverId, container, oldContainerConfig, containerConfig);
 
     if (errorCode == ErrorCode::NoError) {
-        ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
+        ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);
         m_protocolModel->updateModel(updatedConfig);
 
-        auto defaultContainer = m_serversController->getServerConfig(serverIndex).defaultContainer();
-        if ((serverIndex == m_serversController->getDefaultServerIndex()) && (container == defaultContainer)) {
+        const auto defaultContainer = m_serversController->getDefaultContainer(serverId);
+        if ((serverId == m_serversController->getDefaultServerId()) && (container == defaultContainer)) {
             emit currentContainerUpdated();
         } else {
-            emit updateContainerFinished(tr("Settings updated successfully"));
+            emit updateContainerFinished(tr("Settings updated successfully"), closePage);
         }
-
         return;
     }
 
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::rebootServer(int serverIndex)
+void InstallUiController::setContainerEnabled(const QString &serverId, int containerIndex, bool enabled)
 {
-    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
+    const DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+        return;
+    }
 
-    const auto errorCode = m_installController->rebootServer(serverIndex);
+    emit serverIsBusy(true);
+    const ErrorCode errorCode = m_installController->setDockerContainerEnabledState(serverId, container, enabled);
+    emit serverIsBusy(false);
+
+    if (errorCode == ErrorCode::NoError) {
+        const ContainerConfig currentConfig = m_serversController->getContainerConfig(serverId, container);
+        m_protocolModel->updateModel(currentConfig);
+        emit setContainerEnabledFinished(enabled);
+        return;
+    }
+
+    emit installationErrorOccurred(errorCode);
+}
+
+void InstallUiController::refreshContainerStatus(const QString &serverId, int containerIndex)
+{
+    const DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+        return;
+    }
+
+    int status = 3;
+    const ErrorCode errorCode = m_installController->queryDockerContainerStatus(serverId, container, status);
+    if (errorCode != ErrorCode::NoError) {
+        emit containerStatusRefreshed(3);
+        return;
+    }
+    emit containerStatusRefreshed(status);
+}
+
+void InstallUiController::refreshContainerDiagnostics(const QString &serverId, int containerIndex, int port)
+{
+    const DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+        return;
+    }
+
+    MtProxyContainerDiagnostics diag;
+    const ErrorCode errorCode = m_installController->queryMtProxyDiagnostics(serverId, container, port, diag);
+    if (errorCode != ErrorCode::NoError) {
+        emit containerDiagnosticsRefreshed(false, false, -1, QString(), QString());
+        return;
+    }
+    emit containerDiagnosticsRefreshed(diag.portReachable, diag.upstreamReachable, diag.clientsConnected,
+                                       diag.lastConfigRefresh, diag.statsEndpoint);
+}
+
+void InstallUiController::fetchContainerSecret(const QString &serverId, int containerIndex)
+{
+    const DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+        return;
+    }
+
+    const QString secret = m_installController->fetchDockerContainerSecret(serverId, container);
+    emit containerSecretFetched(secret);
+}
+
+void InstallUiController::rebootServer(const QString &serverId)
+{
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
+
+    const auto errorCode = m_installController->rebootServer(serverId);
     if (errorCode == ErrorCode::NoError) {
         emit rebootServerFinished(tr("Server '%1' was rebooted").arg(serverName));
     } else {
@@ -283,19 +397,22 @@ void InstallUiController::rebootServer(int serverIndex)
     }
 }
 
-void InstallUiController::removeServer(int serverIndex)
+void InstallUiController::removeServer(const QString &serverId)
 {
-    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
+    if (serverId.isEmpty()) {
+        return;
+    }
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
-    m_serversController->removeServer(serverIndex);
+    m_serversController->removeServer(serverId);
     emit removeServerFinished(tr("Server '%1' was removed").arg(serverName));
 }
 
-void InstallUiController::removeAllContainers(int serverIndex)
+void InstallUiController::removeAllContainers(const QString &serverId)
 {
-    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
-    ErrorCode errorCode = m_installController->removeAllContainers(serverIndex);
+    ErrorCode errorCode = m_installController->removeAllContainers(serverId);
     if (errorCode == ErrorCode::NoError) {
         emit removeAllContainersFinished(tr("All containers from server '%1' have been removed").arg(serverName));
         return;
@@ -303,14 +420,14 @@ void InstallUiController::removeAllContainers(int serverIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::removeContainer(int serverIndex, int containerIndex)
+void InstallUiController::removeContainer(const QString &serverId, int containerIndex)
 {
-    QString serverName = m_serversController->getServerConfig(serverIndex).displayName();
+    const QString serverName = m_serversController->notificationDisplayName(serverId);
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     QString containerName = ContainerUtils::containerHumanNames().value(container);
 
-    ErrorCode errorCode = m_installController->removeContainer(serverIndex, container);
+    ErrorCode errorCode = m_installController->removeContainer(serverId, container);
     if (errorCode == ErrorCode::NoError) {
 
         emit removeContainerFinished(tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
@@ -319,17 +436,17 @@ void InstallUiController::removeContainer(int serverIndex, int containerIndex)
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::clearCachedProfile(int serverIndex, int containerIndex)
+void InstallUiController::clearCachedProfile(const QString &serverId, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     if (ContainerUtils::containerService(container) == ServiceType::Other) {
         return;
     }
 
-    m_installController->clearCachedProfile(serverIndex, container);
+    m_installController->clearCachedProfile(serverId, container);
 
     emit cachedProfileCleared(tr("%1 cached profile cleared").arg(ContainerUtils::containerHumanNames().value(container)));
-    ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverIndex, container);
+    ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);
     m_protocolModel->updateModel(updatedConfig);
 }
 
@@ -354,9 +471,9 @@ void InstallUiController::setProcessedServerCredentials(const QString &hostName,
     m_processedServerCredentials.secretData = secretData;
 }
 
-void InstallUiController::mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username)
+void InstallUiController::mountSftpDrive(const QString &serverId, const QString &port, const QString &password, const QString &username)
 {
-    ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverIndex);
+    ServerCredentials serverCredentials = m_serversController->getServerCredentials(serverId);
     ErrorCode errorCode = m_installController->mountSftpDrive(serverCredentials, port, password, username);
     if (errorCode != ErrorCode::NoError) {
         emit installationErrorOccurred(errorCode);
@@ -399,40 +516,35 @@ void InstallUiController::setEncryptedPassphrase(QString passphrase)
 
 void InstallUiController::addEmptyServer()
 {
-    SelfHostedServerConfig serverConfig;
-    serverConfig.hostName = m_processedServerCredentials.hostName;
-    serverConfig.userName = m_processedServerCredentials.userName;
-    serverConfig.password = m_processedServerCredentials.secretData;
-    serverConfig.port = m_processedServerCredentials.port;
-    serverConfig.description = m_settingsController->nextAvailableServerName();
-    serverConfig.defaultContainer = DockerContainer::None;
-
-    m_serversController->addServer(ServerConfig(serverConfig));
+    m_installController->addEmptyServer(m_processedServerCredentials);
     emit installServerFinished(tr("Server added successfully"));
 }
 
 void InstallUiController::validateConfig()
 {
-    int serverIndex = m_serversController->getDefaultServerIndex();
-    m_installController->validateConfig(serverIndex);
+    const QString serverId = m_serversController->getDefaultServerId();
+    if (serverId.isEmpty()) {
+        return;
+    }
+    m_installController->validateConfig(serverId);
 }
 
-void InstallUiController::updateProtocols(int serverIndex, int containerIndex)
+void InstallUiController::updateProtocols(const QString &serverId, int containerIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
+    ContainerConfig containerConfig = m_serversController->getContainerConfig(serverId, container);
     containerConfig.container = container;
     m_protocolModel->updateModel(containerConfig);
 }
 
-void InstallUiController::openServerSettings(int serverIndex, int containerIndex, int protocolIndex)
+void InstallUiController::openServerSettings(const QString &serverId, int containerIndex, int protocolIndex)
 {
-    updateProtocolConfigModel(serverIndex, containerIndex, protocolIndex);
+    updateProtocolConfigModel(serverId, containerIndex, protocolIndex);
 }
 
-void InstallUiController::openClientSettings(int serverIndex, int containerIndex, int protocolIndex)
+void InstallUiController::openClientSettings(const QString &serverId, int containerIndex, int protocolIndex)
 {
-    updateProtocolConfigModel(serverIndex, containerIndex, protocolIndex);
+    updateProtocolConfigModel(serverId, containerIndex, protocolIndex);
 }
 
 int InstallUiController::defaultPort(int protocolIndex)
@@ -465,10 +577,10 @@ bool InstallUiController::defaultTransportProtoChangeable(int protocolIndex)
     return ProtocolUtils::defaultTransportProtoChangeable(proto);
 }
 
-void InstallUiController::updateProtocolConfigModel(int serverIndex, int containerIndex, int protocolIndex)
+void InstallUiController::updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    ContainerConfig containerConfig = m_serversController->getContainerConfig(serverIndex, container);
+    ContainerConfig containerConfig = m_serversController->getContainerConfig(serverId, container);
     containerConfig.container = container;
     Proto protocolType = static_cast<Proto>(protocolIndex);
 
@@ -480,14 +592,16 @@ void InstallUiController::updateProtocolConfigModel(int serverIndex, int contain
     case Proto::Awg: updateIfPresent(m_awgConfigModel, containerConfig.getAwgProtocolConfig()); break;
     case Proto::WireGuard: updateIfPresent(m_wireGuardConfigModel, containerConfig.getWireGuardProtocolConfig()); break;
     case Proto::OpenVpn: updateIfPresent(m_openVpnConfigModel, containerConfig.getOpenVpnProtocolConfig()); break;
-    case Proto::Xray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
+    case Proto::Xray:
+    case Proto::SSXray: updateIfPresent(m_xrayConfigModel, containerConfig.getXrayProtocolConfig()); break;
     case Proto::TorWebSite: updateIfPresent(m_torConfigModel, containerConfig.getTorProtocolConfig()); break;
     case Proto::Sftp: updateIfPresent(m_sftpConfigModel, containerConfig.getSftpProtocolConfig()); break;
     case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;
+    case Proto::MtProxy: updateIfPresent(m_mtProxyConfigModel, containerConfig.getMtProxyProtocolConfig()); break;
+    case Proto::Telemt: updateIfPresent(m_telemtConfigModel, containerConfig.getTelemtProtocolConfig()); break;
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: updateIfPresent(m_ikev2ConfigModel, containerConfig.getIkev2ProtocolConfig()); break;
 #endif
     default: break;
     }
 }
-
