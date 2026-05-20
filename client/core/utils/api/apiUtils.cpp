@@ -106,23 +106,10 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     qDebug() << replyError;
     qDebug() << httpStatusCode;
 
-    if (httpStatusCode == httpStatusCodeNotFound) {
-        const QJsonDocument probe = QJsonDocument::fromJson(responseBody);
-        if (!probe.isObject()) {
-            return amnezia::ErrorCode::ApiNotFoundError;
-        }
-    }
-
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (jsonDoc.isObject()) {
         QJsonObject jsonObj = jsonDoc.object();
-        int status = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
-        if (status < 0) {
-            status = httpStatusCode;
-        }
-        if (status == 0 && httpStatusCode >= 400) {
-            status = httpStatusCode;
-        }
+        const int status = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
 
         if (status == httpStatusCodeTooManyRequests) {
             return amnezia::ErrorCode::ApiRateLimitError;
