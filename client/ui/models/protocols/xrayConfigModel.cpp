@@ -267,6 +267,9 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
     m_container = container;
 
     m_protocolConfig = protocolConfig;
+    if (m_protocolConfig.needsClientHydration) {
+        m_protocolConfig.hydrateServerConfigFromClientNative();
+    }
 
     applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
 

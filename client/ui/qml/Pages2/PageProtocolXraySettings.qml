@@ -64,6 +64,18 @@ PageType {
 
             spacing: 0
 
+            Text {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                visible: !listView.enabled
+                wrapMode: Text.WordWrap
+                color: AmneziaStyle.color.paleGray
+                font.pixelSize: 14
+                text: qsTr("You have read-only access to this server. XRay settings cannot be edited.")
+            }
+
             RowLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -174,7 +186,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 // Show Save immediately while user edits port, even before focus loss.
-                visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || textFieldWithHeaderType.textField.text !== port)
+                visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
                 enabled: visible && textFieldWithHeaderType.errorText === ""
                 text: qsTr("Save")
                 onClicked: function() {
@@ -187,6 +199,10 @@ PageType {
                         if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
+                        }
+
+                        if (textFieldWithHeaderType.textField.text !== port) {
+                            port = textFieldWithHeaderType.textField.text
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
@@ -209,6 +225,8 @@ PageType {
                 clickedFunction: function() {
                     var yesButtonFunction = function() {
                         XrayConfigModel.resetToDefaults()
+                        PageController.showNotificationMessage(
+                            qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
                     }
                     showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
                         qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {

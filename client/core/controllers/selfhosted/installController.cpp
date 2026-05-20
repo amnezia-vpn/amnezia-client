@@ -20,6 +20,7 @@
 #include "core/installers/sftpInstaller.h"
 #include "core/installers/socks5Installer.h"
 #include "core/installers/mtProxyInstaller.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/installers/telemtInstaller.h"
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
@@ -181,6 +182,16 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
     qDebug() << "InstallController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
+    bool xrayServerSettingsChanged = false;
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
+        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
+        if (oldXrayConfig && newXrayConfig) {
+            xrayServerSettingsChanged =
+                    !oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig);
+        }
+    }
+
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
@@ -188,6 +199,18 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
             errorCode = startupContainerWorker(credentials, container, newConfig, sshSession);
+        }
+    }
+
+    if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged) {
+        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+        XrayConfigurator xrayConfigurator(&sshSession);
+        qDebug() << "InstallController::updateContainer applying Xray server inbound sync, reinstall="
+                 << reinstallRequired;
+        errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
+        if (errorCode != ErrorCode::NoError) {
+            qDebug() << "InstallController::updateContainer Xray inbound sync failed, error="
+                     << static_cast<int>(errorCode);
         }
     }
 
@@ -638,12 +661,13 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
     }
 
     if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-        const auto* oldXrayConfig = oldConfig.getXrayProtocolConfig();
-        const auto* newXrayConfig = newConfig.getXrayProtocolConfig();
-        
+        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
+        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
+
         if (oldXrayConfig && newXrayConfig) {
-            if (oldXrayConfig->serverConfig.port != newXrayConfig->serverConfig.port)
+            if (!oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig)) {
                 return true;
+            }
         }
     }
 

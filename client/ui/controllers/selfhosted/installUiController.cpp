@@ -263,11 +263,15 @@ void InstallUiController::updateContainer(const QString &serverId, int container
     }
     ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverId, container);
 
-    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
+    const bool asyncUpdate = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+            || container == DockerContainer::Xray || container == DockerContainer::SSXray;
+
+    if (asyncUpdate) {
         emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);
+        const Proto protocolTypeCopy = protocolType;
         QObject::connect(watcher, &QFutureWatcher<ErrorCode>::finished, this,
-                         [this, watcher, serverId, container, closePage]() {
+                         [this, watcher, serverId, container, closePage, protocolTypeCopy]() {
                              const ErrorCode errorCode = watcher->result();
                              watcher->deleteLater();
                              emit serverIsBusy(false);
@@ -276,6 +280,7 @@ void InstallUiController::updateContainer(const QString &serverId, int container
                                  const ContainerConfig updatedConfig =
                                          m_serversController->getContainerConfig(serverId, container);
                                  m_protocolModel->updateModel(updatedConfig);
+                                 updateProtocolConfigModel(serverId, static_cast<int>(container), static_cast<int>(protocolTypeCopy));
 
                                  const auto defaultContainer =
                                          m_serversController->getDefaultContainer(serverId);
@@ -295,7 +300,7 @@ void InstallUiController::updateContainer(const QString &serverId, int container
         InstallController *installController = m_installController;
         QFuture<ErrorCode> future =
                 QtConcurrent::run([installController, serverId, container, oldConfigCopy,
-                                          newConfigCopy]() mutable -> ErrorCode {
+                                   newConfigCopy]() mutable -> ErrorCode {
                     return installController->updateContainer(serverId, container, oldConfigCopy, newConfigCopy);
                 });
         watcher->setFuture(future);
@@ -307,6 +312,7 @@ void InstallUiController::updateContainer(const QString &serverId, int container
     if (errorCode == ErrorCode::NoError) {
         ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);
         m_protocolModel->updateModel(updatedConfig);
+        updateProtocolConfigModel(serverId, static_cast<int>(container), static_cast<int>(protocolType));
 
         const auto defaultContainer = m_serversController->getDefaultContainer(serverId);
         if ((serverId == m_serversController->getDefaultServerId()) && (container == defaultContainer)) {
@@ -426,6 +432,34 @@ void InstallUiController::removeContainer(const QString &serverId, int container
 
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     QString containerName = ContainerUtils::containerHumanNames().value(container);
+
+    const bool asyncRemove = container == DockerContainer::Xray || container == DockerContainer::SSXray;
+
+    if (asyncRemove) {
+        emit serverIsBusy(true);
+        auto *watcher = new QFutureWatcher<ErrorCode>(this);
+        QObject::connect(watcher, &QFutureWatcher<ErrorCode>::finished, this,
+                         [this, watcher, serverId, container, containerName, serverName]() {
+                             const ErrorCode errorCode = watcher->result();
+                             watcher->deleteLater();
+                             emit serverIsBusy(false);
+
+                             if (errorCode == ErrorCode::NoError) {
+                                 emit removeContainerFinished(
+                                         tr("%1 has been removed from the server '%2'").arg(containerName, serverName));
+                             } else {
+                                 emit installationErrorOccurred(errorCode);
+                             }
+                         });
+
+        InstallController *installController = m_installController;
+        QFuture<ErrorCode> future = QtConcurrent::run(
+                [installController, serverId, container]() -> ErrorCode {
+                    return installController->removeContainer(serverId, container);
+                });
+        watcher->setFuture(future);
+        return;
+    }
 
     ErrorCode errorCode = m_installController->removeContainer(serverId, container);
     if (errorCode == ErrorCode::NoError) {

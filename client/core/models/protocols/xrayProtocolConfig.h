@@ -139,6 +139,12 @@ struct XrayProtocolConfig {
     bool hasClientConfig() const;
     void setClientConfig(const XrayClientConfig &config);
     void clearClientConfig();
+
+    /// Set in fromJson when persisted server fields are missing (typical shared profile).
+    bool needsClientHydration = false;
+
+    /// Fills serverConfig from client nativeConfig (outbound streamSettings). For read-only UI.
+    bool hydrateServerConfigFromClientNative();
 };
 
 } // namespace amnezia

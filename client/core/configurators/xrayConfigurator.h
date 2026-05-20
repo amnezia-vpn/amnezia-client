@@ -23,10 +23,31 @@ public:
     amnezia::ProtocolConfig processConfigWithLocalSettings(const amnezia::ConnectionSettings &settings,
                                                            amnezia::ProtocolConfig protocolConfig) override;
 
+    /// Uploads server.json inbound (port, streamSettings, client flows). Optionally appends a new VLESS client.
+    /// When appendNewClient is false, rebuilds admin client config in containerConfig from the first server client.
+    amnezia::ErrorCode applyServerSettingsToRemote(const amnezia::ServerCredentials &credentials,
+                                                   amnezia::DockerContainer container,
+                                                   amnezia::ContainerConfig &containerConfig,
+                                                   const amnezia::DnsSettings &dnsSettings,
+                                                   bool appendNewClient,
+                                                   QString *outClientId = nullptr);
+
 private:
     QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
                                 const amnezia::DnsSettings &dnsSettings,
                                 amnezia::ErrorCode &errorCode);
+
+    amnezia::ErrorCode uploadServerConfigJson(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
+                                              const amnezia::DnsSettings &dnsSettings, const QJsonObject &serverConfig) const;
+
+    amnezia::XrayProtocolConfig buildClientProtocolConfig(const amnezia::ServerCredentials &credentials,
+                                                          amnezia::DockerContainer container,
+                                                          const amnezia::XrayServerConfig &srv,
+                                                          const QString &clientId,
+                                                          amnezia::ErrorCode &errorCode) const;
+
+    QJsonObject mergeStreamSettingsForServerInbound(const amnezia::XrayServerConfig &srv,
+                                                    const QJsonObject &existingStreamSettings) const;
 
     // Builds the native xray "streamSettings" JSON object from XrayServerConfig
     QJsonObject buildStreamSettings(const amnezia::XrayServerConfig &srv,
