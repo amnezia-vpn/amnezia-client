@@ -106,7 +106,7 @@ void UpdateController::fetchGatewayUrl()
     // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
     QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
         gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
-            .then(this, [this](QPair<ErrorCode, QByteArray> result) {
+            .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
                 auto [err, gatewayResponse] = result;
                 if (err != ErrorCode::NoError) {
                     logger.error() << errorString(err);
