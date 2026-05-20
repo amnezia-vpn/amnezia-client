@@ -2,7 +2,6 @@
 
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/configKeys.h"
-#include <QLatin1Char>
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -228,19 +227,4 @@ QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
     vpnKeyText = QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
 
     return vpnKeyText;
-}
-
-QString apiUtils::countryCodeBaseForFlag(const QString &fullCountryCode)
-{
-    const QString trimmed = fullCountryCode.trimmed();
-    if (trimmed.isEmpty()) {
-        return QString();
-    }
-    const int dashIdx = trimmed.indexOf(QLatin1Char('-'));
-    const QString base = dashIdx < 0 ? trimmed : trimmed.left(dashIdx);
-    const QString normalized = base.trimmed();
-    if (normalized.isEmpty()) {
-        return QString();
-    }
-    return normalized.toUpper();
 }

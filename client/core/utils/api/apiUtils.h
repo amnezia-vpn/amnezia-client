@@ -25,9 +25,6 @@ namespace apiUtils
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
     QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
-
-    // ISO2-style segment for flagKit assets (e.g. US-WEST -> US). Do not use in API request bodies.
-    QString countryCodeBaseForFlag(const QString &fullCountryCode);
 }
 
 #endif // APIUTILS_H
