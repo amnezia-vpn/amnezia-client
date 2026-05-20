@@ -78,6 +78,11 @@ ErrorCode applyGatewayOrOpenApiScanError(const QJsonObject &obj)
     }
 
     const QString msg = obj.value(QStringLiteral("message")).toString();
+    if (msg.contains(QStringLiteral("QR session"), Qt::CaseInsensitive)
+        && (msg.contains(QStringLiteral("not found"), Qt::CaseInsensitive)
+            || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive))) {
+        return ErrorCode::ApiPairingSessionExpiredError;
+    }
     if (msg.contains(QStringLiteral("not found"), Qt::CaseInsensitive) || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive)) {
         return ErrorCode::ApiNotFoundError;
     }

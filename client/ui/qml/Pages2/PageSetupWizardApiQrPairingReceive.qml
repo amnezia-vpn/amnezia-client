@@ -48,8 +48,7 @@ PageType {
         repeat: true
         running: root.visible
         onTriggered: {
-            PairingUiController.cancelTvQrSession()
-            PairingUiController.startTvQrSession()
+            PairingUiController.rotateTvQrSession()
         }
     }
 
@@ -183,6 +182,11 @@ PageType {
             Qt.callLater(function() {
                 PageController.closePage()
             })
+        }
+
+        function onTvPairingConfigAlreadyAdded() {
+            scrollToBottomRetryTimer.stop()
+            qrRotationTimer.restart()
         }
     }
 }

@@ -90,6 +90,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiPairingServiceUnavailableError): errorMessage = QObject::tr("Service temporarily unavailable. Please try again later"); break;
     case (ErrorCode::ApiPairingPayloadTooLargeError): errorMessage = QObject::tr("QR pairing data is too large to send"); break;
     case (ErrorCode::ApiPairingMissingMetadataError): errorMessage = QObject::tr("This subscription is missing data required to transfer via QR (service type or country). Refresh the subscription or pick another server."); break;
+    case (ErrorCode::ApiPairingSessionExpiredError): errorMessage = QObject::tr("The QR code session has ended. Show a new QR code on the other device and scan again."); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

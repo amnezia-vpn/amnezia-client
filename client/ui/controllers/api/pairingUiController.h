@@ -62,6 +62,8 @@ public:
 public slots:
     bool canOpenTvQrPairingPage();
     void startTvQrSession();
+    /** New UUID + QR image; aborts in-flight generate_qr without clearing the code first. */
+    void rotateTvQrSession();
     void cancelTvQrSession();
     void cancelAllPairingActivity();
 
@@ -84,6 +86,7 @@ signals:
     void lastSuccessfulPhonePairingDisplayNameChanged();
 
     void tvPairingConfigReceived();
+    void tvPairingConfigAlreadyAdded();
     void phonePairingSucceeded();
 
     void pairingUuidFromScan(const QString &uuid);

@@ -435,11 +435,23 @@ void PairingUiController::startTvQrSession()
     if (m_tvPairingBusy) {
         return;
     }
+    rotateTvQrSession();
+}
+
+void PairingUiController::rotateTvQrSession()
+{
+    if (!m_pairingController || !m_appSettingsRepository) {
+        return;
+    }
 
     if (m_tvWatcher) {
         m_tvWatcher->disconnect();
         m_tvWatcher->deleteLater();
         m_tvWatcher.clear();
+    }
+    if (m_tvNetworkReply) {
+        m_tvNetworkReply->abort();
+        m_tvNetworkReply.clear();
     }
 
     ++m_tvSessionGeneration;
@@ -505,6 +517,11 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                              setTvBusy(false);
                              if (impErr != ErrorCode::NoError) {
                                  emit errorOccurred(impErr);
+                                 if (impErr == ErrorCode::ApiConfigAlreadyAdded) {
+                                     emit tvPairingConfigAlreadyAdded();
+                                     QTimer::singleShot(0, this, [this]() { rotateTvQrSession(); });
+                                     return;
+                                 }
                                  resetTvQrDisplay();
                                  return;
                              }
@@ -526,7 +543,7 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
 
                          if (logicalErr == ErrorCode::ApiConfigTimeoutError) {
                              setTvBusy(false);
-                             QTimer::singleShot(0, this, [this]() { startTvQrSession(); });
+                             QTimer::singleShot(0, this, [this]() { rotateTvQrSession(); });
                              return;
                          }
 

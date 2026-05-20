@@ -108,6 +108,15 @@ private slots:
         QCOMPARE(PairingController::parseScanQrResponseBody(body), ErrorCode::ApiNotFoundError);
     }
 
+    void scanQr_qrSessionExpiredMessage()
+    {
+        QJsonObject o;
+        o[QStringLiteral("message")] = QStringLiteral("QR session not found or expired");
+        const QByteArray body = QJsonDocument(o).toJson();
+
+        QCOMPARE(PairingController::parseScanQrResponseBody(body), ErrorCode::ApiPairingSessionExpiredError);
+    }
+
     void validateScanFields_oversizedVpnKey()
     {
         QString vpnKey;

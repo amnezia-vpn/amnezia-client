@@ -153,6 +153,21 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         if (httpStatusFromBody == httpStatusCodePaymentRequired) {
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
+
+        const QString msg = apiErrorMessageFromJson(jsonObj);
+        if (msg.contains(QStringLiteral("QR session"), Qt::CaseInsensitive)
+            && (msg.contains(QStringLiteral("not found"), Qt::CaseInsensitive)
+                || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive))) {
+            return amnezia::ErrorCode::ApiPairingSessionExpiredError;
+        }
+        if (msg.contains(QStringLiteral("not found"), Qt::CaseInsensitive)
+            || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive)) {
+            return amnezia::ErrorCode::ApiNotFoundError;
+        }
+        if (httpStatusCode == httpStatusCodeNotFound) {
+            return amnezia::ErrorCode::ApiNotFoundError;
+        }
+
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }
 

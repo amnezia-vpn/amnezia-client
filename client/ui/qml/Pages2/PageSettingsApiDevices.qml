@@ -109,16 +109,16 @@ PageType {
         }
 
         function onPhonePairingSucceeded() {
-            if (!root.visible) {
-                return
-            }
             SubscriptionUiController.updateApiDevicesModel()
             const label = PairingUiController.lastSuccessfulPhonePairingDisplayName
             if (label.length > 0) {
                 PageController.showNotificationMessage(
-                            qsTr("%1 has been added to your subscription").arg(label))
+                            qsTr("Configuration was sent (%1). Finish setup on the device that displayed the QR code — "
+                                 + "if it already has this config, that device will show a message.").arg(label))
             } else {
-                PageController.showNotificationMessage(qsTr("New device has been added to your subscription"))
+                PageController.showNotificationMessage(
+                            qsTr("Configuration was sent to the device that displayed the QR code. "
+                                 + "If it already has this config, that device will show a message."))
             }
         }
 
