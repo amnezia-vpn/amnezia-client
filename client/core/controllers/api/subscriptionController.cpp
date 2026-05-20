@@ -1008,7 +1008,8 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
         if (retryCaptchaOut
-            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError)) {
+            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
+                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
             const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
             if (jsonDoc.isObject()) {
                 const QJsonObject jsonObj = jsonDoc.object();

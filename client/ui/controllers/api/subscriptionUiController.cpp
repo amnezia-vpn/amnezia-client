@@ -333,7 +333,8 @@ void SubscriptionUiController::onCaptchaSolved(const QString &captchaId, const Q
         return;
     }
 
-    if ((errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError)
+    if ((errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
+         || errorCode == ErrorCode::ApiCaptchaRequiredError)
         && retryCaptcha.isRequired) {
         emit captchaRequired(retryCaptcha.captchaId, retryCaptcha.captchaImageBase64,
                              retryCaptcha.hint.isEmpty() ? tr("Enter the digits from the image to continue") : retryCaptcha.hint);
