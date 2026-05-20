@@ -40,7 +40,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       shell: bash
@@ -100,7 +100,7 @@ jobs:
         python-version: 3.14
       
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Install system packages'
       run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
@@ -151,7 +151,7 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
@@ -233,7 +233,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       shell: cmd
@@ -287,7 +287,7 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos
@@ -386,7 +386,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install deps'
-      run: pip install "conan==2.26.2" jsonschema jinja2
+      run: pip install "conan==2.28.0" jsonschema jinja2
 
     - name: 'Build project'
       env:
@@ -431,7 +431,7 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1
@@ -517,7 +517,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       env:
@@ -563,7 +563,7 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DMACOS_NE=TRUE
@@ -652,7 +652,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       run: |
@@ -688,7 +688,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Setup Android SDK'
       uses: android-actions/setup-android@v4
@@ -825,7 +825,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Decode keystore secret to file'
       env:
