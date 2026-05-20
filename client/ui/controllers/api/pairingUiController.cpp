@@ -524,6 +524,12 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
                              return;
                          }
 
+                         if (logicalErr == ErrorCode::ApiConfigTimeoutError) {
+                             setTvBusy(false);
+                             QTimer::singleShot(0, this, [this]() { startTvQrSession(); });
+                             return;
+                         }
+
                          setTvBusy(false);
                          emit errorOccurred(logicalErr);
                      });
