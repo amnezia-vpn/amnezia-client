@@ -18,7 +18,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          base: ${{ github.event.before }}
           filters: |
             recipes:
               - 'recipes/**'
@@ -40,7 +39,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       shell: bash
@@ -50,9 +49,11 @@ jobs:
         done
 
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -98,7 +99,7 @@ jobs:
         python-version: 3.14
       
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Install system packages'
       run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
@@ -118,7 +119,7 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-Linux.run
+        path: deploy/build/AmneziaVPN_*_linux_x64.run
         archive: false
         retention-days: 7
 
@@ -149,15 +150,17 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -229,7 +232,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       shell: cmd
@@ -242,27 +245,31 @@ jobs:
     - name: 'Upload WIX installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-win64.msi
+        path: deploy/build/AmneziaVPN_*_windows_x64.msi
         archive: false
         retention-days: 7
       
     - name: 'Upload IFW installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-win64.exe
+        path: deploy/build/AmneziaVPN_*_windows_x64.exe
         archive: false
         retention-days: 7
 
 # ------------------------------------------------------
 
   Bake-Prebuilts-iOS:
-    runs-on: macos-latest
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
-        xcode-version: [26.0]
+        xcode-version: [26.0, 26.4]
+        include:
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -279,15 +286,17 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -365,7 +374,7 @@ jobs:
       if: steps.ios-signing.outputs.ready == 'true'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '26.1'
+        xcode-version: '26.0'
 
     - name: 'Install desktop Qt'
       if: steps.ios-signing.outputs.ready == 'true'
@@ -401,7 +410,7 @@ jobs:
 
     - name: 'Install deps'
       if: steps.ios-signing.outputs.ready == 'true'
-      run: pip install "conan==2.26.2" jsonschema jinja2
+      run: pip install "conan==2.28.0" jsonschema jinja2
 
     - name: 'Build project'
       if: steps.ios-signing.outputs.ready == 'true'
@@ -420,14 +429,17 @@ jobs:
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS:
-    runs-on: macos-latest
-
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
-        xcode-version: [16.2, 16.4]
+        xcode-version: [16.2, 16.4, 26.4]
+        include:
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -444,15 +456,17 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -549,7 +563,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       env:
@@ -565,7 +579,7 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-Darwin.pkg
+        path: deploy/build/AmneziaVPN_*_macos_x64.pkg
         archive: false
         retention-days: 7
 
@@ -595,15 +609,17 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DMACOS_NE=TRUE
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -722,7 +738,7 @@ jobs:
 
     - name: 'Install conan'
       if: steps.macos-ne-signing.outputs.ready == 'true'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       if: steps.macos-ne-signing.outputs.ready == 'true'
@@ -760,7 +776,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Setup Android SDK'
       uses: android-actions/setup-android@v4
@@ -785,9 +801,11 @@ jobs:
         done
 
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -895,7 +913,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Decode keystore secret to file'
       env:

@@ -21,13 +21,13 @@ namespace
     Logger logger("UpdateController");
 
 #if defined(Q_OS_WINDOWS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-win64.exe");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_x64.exe");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
 #elif defined(Q_OS_MACOS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-Darwin.pkg");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos_x64.pkg");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-Linux.run");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.run");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
 #endif
 }
@@ -184,7 +184,7 @@ void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QSt
         logger.error() << QString("Network error occurred while fetching %1: %2 %3")
                           .arg(operation, reply->errorString(), QString::number(error));
     });
-    
+
     QObject::connect(reply, &QNetworkReply::sslErrors, [operation](const QList<QSslError> &errors) {
         QStringList errorStrings;
         for (const QSslError &err : errors) {
@@ -196,16 +196,8 @@ void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QSt
 
 void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& operation)
 {
-    if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
-        || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-        logger.error() << errorString(ErrorCode::ApiConfigTimeoutError);
-    } else {
-        QString err = reply->errorString();
-        logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
-        logger.error() << "Error message:" << err;
-        logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        logger.error() << errorString(ErrorCode::ApiConfigDownloadError);
-    }
+    logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
+    logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 }
 
 QString UpdateController::composeDownloadUrl() const
