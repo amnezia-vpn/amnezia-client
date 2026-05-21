@@ -164,25 +164,36 @@ bool KillSwitch::disableAllTraffic() {
     return true;
 }
 
+QStringList KillSwitch::combinedAllowNets() const {
+    QStringList result = m_allowedRanges;
+    for (const QString &site : m_splitTunnelAllows) {
+        if (!site.isEmpty() && !result.contains(site)) {
+            result.append(site);
+        }
+    }
+    return result;
+}
+
 bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 
     m_allowedRanges = ranges;
+    const QStringList combined = combinedAllowNets();
 
 #ifdef Q_OS_LINUX
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), true);
-    LinuxFirewall::updateAllowNets(m_allowedRanges);
+    LinuxFirewall::updateAllowNets(combined);
 #endif
 
 #ifdef Q_OS_MACOS
     MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), true);
-    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), true, QStringLiteral("allownets"), m_allowedRanges);
+    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), true, QStringLiteral("allownets"), combined);
 #endif
 
 #ifdef Q_OS_WIN
     if (isStrictKillSwitchEnabled()) {
         WindowsFirewall::create(this)->enableInterface(-1);
     }
-    WindowsFirewall::create(this)->allowTrafficRange(m_allowedRanges);
+    WindowsFirewall::create(this)->allowTrafficRange(combined);
 #endif
 
     return true;
@@ -304,6 +315,13 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
         allownets.append(configStr.value("vpnServer").toString());
         for (auto v : splitTunnelSites) {
             allownets.append(v.toString());
+        }
+    }
+
+    m_splitTunnelAllows = allownets;
+    for (const QString &endpoint : m_allowedRanges) {
+        if (!endpoint.isEmpty() && !allownets.contains(endpoint)) {
+            allownets.append(endpoint);
         }
     }
 #endif
