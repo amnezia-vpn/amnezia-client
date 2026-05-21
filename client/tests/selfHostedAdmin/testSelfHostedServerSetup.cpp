@@ -40,10 +40,10 @@ private:
     ServerCredentials getCredentialsFromEnv() {
         QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
         
-        QString hostName = getValueFromIni("secrets/TEST_SERVER_HOST");
-        QString userName = getValueFromIni("secrets/TEST_SERVER_USER");
-        QString password = getValueFromIni("secrets/TEST_SERVER_PASSWORD");
-        QString portStr = getValueFromIni("secrets/TEST_SERVER_PORT");
+        QString hostName = getValueFromIni("secrets/selfHostedServerHostName");
+        QString userName = getValueFromIni("secrets/selfHostedServerUserName");
+        QString password = getValueFromIni("secrets/selfHostedServerPassword");
+        QString portStr = getValueFromIni("secrets/selfHostedServerSshPort");
         int port = portStr.toInt();
         
         ServerCredentials credentials;
@@ -160,7 +160,7 @@ private slots:
         ServerCredentials credentials = getCredentialsFromEnv();
         
         if (credentials.hostName.isEmpty() || credentials.userName.isEmpty() || credentials.secretData.isEmpty()) {
-            QSKIP("Test requires TEST_SERVER_HOST, TEST_SERVER_USER, TEST_SERVER_PASSWORD environment variables");
+            QSKIP("Test requires selfHostedServerHostName, selfHostedServerUserName, selfHostedServerPassword in test_vars.ini");
         }
         
         QVERIFY2(credentials.isValid(), "Server credentials should be valid");
@@ -245,7 +245,7 @@ private slots:
         ServerCredentials credentials = getCredentialsFromEnv();
         
         if (credentials.hostName.isEmpty() || credentials.userName.isEmpty() || credentials.secretData.isEmpty()) {
-            QSKIP("Test requires TEST_SERVER_HOST, TEST_SERVER_USER, TEST_SERVER_PASSWORD environment variables");
+            QSKIP("Test requires selfHostedServerHostName, selfHostedServerUserName, selfHostedServerPassword in test_vars.ini");
         }
         
         QVERIFY2(credentials.isValid(), "Server credentials should be valid");
@@ -326,7 +326,7 @@ private slots:
         ServerCredentials credentials = getCredentialsFromEnv();
         
         if (credentials.hostName.isEmpty() || credentials.userName.isEmpty() || credentials.secretData.isEmpty()) {
-            QSKIP("Test requires TEST_SERVER_HOST, TEST_SERVER_USER, TEST_SERVER_PASSWORD environment variables");
+            QSKIP("Test requires selfHostedServerHostName, selfHostedServerUserName, selfHostedServerPassword in test_vars.ini");
         }
         
         QVERIFY2(credentials.isValid(), "Server credentials should be valid");

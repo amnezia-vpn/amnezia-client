@@ -52,7 +52,7 @@ private slots:
     }
 
     void testInvalidIndexOperations() {
-        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
+        QString awgKey = getValueFromIni("configs/thirdPartyAwgVpnKey");
 
         auto importResult = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult.config);

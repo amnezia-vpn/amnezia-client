@@ -15,7 +15,7 @@
 
 using namespace amnezia;
 
-class TestSerialization : public QObject
+class TestXraySerialization : public QObject
 {
     Q_OBJECT
 
@@ -83,26 +83,10 @@ private slots:
         auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
 
         m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
-
-        QString vpnKey = getValueFromIni("configs/TEST_SELF_HOSTED_CONFIG");
-        QJsonObject importedConfig = m_coreController->m_importCoreController->extractConfigFromData(vpnKey).config;
-
-        m_coreController->m_importCoreController->importConfig(importedConfig);
-
-        qDebug() << "SELF-HOSTED ADMIN SERVER IMPORTED\n";
     }
 
     void cleanupTestCase()
     {
-        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
-
-        for (int containerIndex = 1; containerIndex < 7; ++containerIndex)
-            m_coreController->m_installUiController->clearCachedProfile(serverId, containerIndex);
-
-        m_coreController->m_serversController->removeServer(serverId);
-
-        qDebug() << "SERVER REMOVED\n";
-
         m_settings->clearSettings();
         delete m_coreController;
         delete m_settings;
@@ -118,15 +102,12 @@ private slots:
 
     void testVless()
     {
-        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
-
-        QString clientName = "Test Client (vless (de)serialization)";
-
-        ExportController::ExportResult exportResult = m_coreController->m_exportController->generateXrayConfig(serverId, clientName);
-
         ImportController::ImportResult importResult;
 
-        QString config = exportResult.config;
+        QString configData = getValueFromIni("configs/thirdPartyVlessImportData");
+        m_coreController->m_importCoreController->extractConfigFromData(configData);
+
+        QString config = configData;
         QString prefix;
         QString errormsg;
         ConfigTypes configType = ConfigTypes::Invalid;
@@ -150,7 +131,7 @@ private slots:
 
         ImportController::ImportResult importResult;
         
-        QString configData = getValueFromIni("configs/TEST_CONFIG_VMESS_NEW");
+        QString configData = getValueFromIni("configs/thirdPartyVmessNewImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -177,7 +158,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/TEST_CONFIG_VMESS");
+        QString configData = getValueFromIni("configs/thirdPartyVmessImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -204,7 +185,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/TEST_CONFIG_TROJAN");
+        QString configData = getValueFromIni("configs/thirdPartyTrojanImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -231,7 +212,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/TEST_CONFIG_SS");
+        QString configData = getValueFromIni("configs/thirdPartyShadowsocksImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -258,7 +239,7 @@ private slots:
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/TEST_CONFIG_SSD");
+        QString configData = getValueFromIni("configs/thirdPartyShadowsocksSubscriptionImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -286,5 +267,5 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestSerialization)
-#include "testSerialization.moc"
+QTEST_MAIN(TestXraySerialization)
+#include "testXraySerialization.moc"

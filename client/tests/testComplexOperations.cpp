@@ -49,9 +49,9 @@ private slots:
     }
 
     void testComplexOperationSequence() {
-        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
-        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
-        QString wgKey = getValueFromIni("configs/TEST_CONFIG_WG");
+        QString awgKey = getValueFromIni("configs/thirdPartyAwgVpnKey");
+        QString xrayKey = getValueFromIni("configs/thirdPartyXrayVpnKey");
+        QString wgKey = getValueFromIni("configs/thirdPartyWireGuardVpnKey");
 
         QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
         QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded);

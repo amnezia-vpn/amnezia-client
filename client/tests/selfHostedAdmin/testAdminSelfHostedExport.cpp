@@ -103,7 +103,7 @@ private slots:
     }
 
     void testAdminSelfHostedExport() {
-        QString vpnKey = getValueFromIni("configs/TEST_CONFIG_ANY");
+        QString vpnKey = getValueFromIni("configs/selfHostedAdminExportRoundTripVpnKey");
         
         QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);

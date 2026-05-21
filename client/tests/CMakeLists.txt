@@ -35,15 +35,6 @@ target_include_directories(test_common PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-add_executable(test_import_export
-    testAdminSelfHostedExport.cpp
-)
-
-target_link_libraries(test_import_export PRIVATE
-    Qt6::Test
-    test_common
-)
-
 add_executable(test_multiple_imports
     testMultipleImports.cpp
 )
@@ -125,29 +116,11 @@ target_link_libraries(test_ui_servers_model_and_controller PRIVATE
     test_common
 )
 
-add_executable(test_self_hosted_server_setup
-    testSelfHostedServerSetup.cpp
+add_executable(test_xray_serialization
+    testXraySerialization.cpp
 )
 
-target_link_libraries(test_self_hosted_server_setup PRIVATE
-    Qt6::Test
-    test_common
-)
-
-add_executable(test_exports
-    testMultipleExports.cpp
-)
-
-target_link_libraries(test_exports PRIVATE
-    Qt6::Test
-    test_common
-)
-
-add_executable(test_serialization
-    testSerialization.cpp
-)
-
-target_link_libraries(test_serialization PRIVATE
+target_link_libraries(test_xray_serialization PRIVATE
     Qt6::Test
     test_common
 )
@@ -188,32 +161,22 @@ target_link_libraries(test_ui_allowed_dns_model_and_controller PRIVATE
     test_common
 )
 
-add_executable(test_ui_api_services_model_and_controller
-    api/testUiApiServicesModelAndController.cpp
-)
-
-target_link_libraries(test_ui_api_services_model_and_controller PRIVATE
-    Qt6::Test
-    test_common
-)
-
-add_executable(test_ui_news_model_and_controller
-    api/testUiNewsModelAndController.cpp
-)
-
-target_link_libraries(test_ui_news_model_and_controller PRIVATE
-    Qt6::Test
-    test_common
-)
-
-add_custom_command(TARGET test_import_export POST_BUILD
+add_custom_command(TARGET test_xray_serialization POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_SOURCE_DIR}/test_vars.ini
-        "$<TARGET_FILE_DIR:test_import_export>"
+        "$<TARGET_FILE_DIR:test_xray_serialization>"
 )
 
+add_custom_command(TARGET test_multiple_imports POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/test_vars.ini
+        "$<TARGET_FILE_DIR:test_multiple_imports>"
+)
+
+add_subdirectory(selfHostedAdmin)
+add_subdirectory(api)
+
 enable_testing()
-add_test(NAME ImportExportTest COMMAND test_import_export)
 add_test(NAME MultipleImportsTest COMMAND test_multiple_imports)
 add_test(NAME ServerEditTest COMMAND test_server_edit)
 add_test(NAME DefaultServerChangeTest COMMAND test_default_server_change)
@@ -223,12 +186,8 @@ add_test(NAME ServersModelSyncTest COMMAND test_servers_model_sync)
 add_test(NAME ComplexOperationsTest COMMAND test_complex_operations)
 add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
-add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
-add_test(NAME MultipleExportsTest COMMAND test_exports)
-add_test(NAME SerializationTest COMMAND test_serialization)
+add_test(NAME XraySerializationTest COMMAND test_xray_serialization)
 add_test(NAME UiLanguageModelAndControllerTest COMMAND test_ui_language_model_and_controller)
 add_test(NAME UiIpModelAndControllerTest COMMAND test_ui_ip_model_and_controller)
 add_test(NAME UiAppSTModelAndControllerTest COMMAND test_ui_app_st_model_and_controller)
 add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
-add_test(NAME UiApiServicesModelAndControllerTest COMMAND test_ui_api_services_model_and_controller)
-add_test(NAME UiNewsModelAndControllerTest COMMAND test_ui_news_model_and_controller)

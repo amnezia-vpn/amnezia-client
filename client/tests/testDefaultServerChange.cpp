@@ -51,9 +51,9 @@ private slots:
     }
 
     void testSetDefaultServerIndex() {
-        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
-        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
-        QString wgKey = getValueFromIni("configs/TEST_CONFIG_WG");
+        QString awgKey = getValueFromIni("configs/thirdPartyAwgVpnKey");
+        QString xrayKey = getValueFromIni("configs/thirdPartyXrayVpnKey");
+        QString wgKey = getValueFromIni("configs/thirdPartyWireGuardVpnKey");
 
         auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult1.config);
@@ -86,9 +86,9 @@ private slots:
     }
 
     void testDefaultServerChangeOnRemoveEdgeCases() {
-        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
-        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
-        QString wgKey = getValueFromIni("configs/TEST_CONFIG_WG");
+        QString awgKey = getValueFromIni("configs/thirdPartyAwgVpnKey");
+        QString xrayKey = getValueFromIni("configs/thirdPartyXrayVpnKey");
+        QString wgKey = getValueFromIni("configs/thirdPartyWireGuardVpnKey");
 
         auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult1.config);

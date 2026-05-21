@@ -38,7 +38,7 @@ private slots:
 
         m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
 
-        QString vpnKey = getValueFromIni("configs/TEST_SELF_HOSTED_CONFIG");
+        QString vpnKey = getValueFromIni("configs/selfHostedAdminFullAccessVpnKey");
         QJsonObject importedConfig = m_coreController->m_importCoreController->extractConfigFromData(vpnKey).config;
 
         m_coreController->m_importCoreController->importConfig(importedConfig);

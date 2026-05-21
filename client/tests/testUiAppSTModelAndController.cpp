@@ -67,7 +67,7 @@ private slots:
         QVERIFY2(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
         QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isSplitTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
 
-        QString app = getValueFromIni("paths/TEST_APP_PATH");
+        QString app = getValueFromIni("paths/appSplitTunnelingTargetAppPath");
 
         m_coreController->m_appSplitTunnelingUiController->addApp(app);
         m_coreController->m_appSplitTunnelingUiController->updateModel();

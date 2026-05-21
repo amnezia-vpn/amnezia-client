@@ -50,7 +50,7 @@ private slots:
     }
 
     void testServersModelSyncOnOperations() {
-        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
+        QString awgKey = getValueFromIni("configs/thirdPartyAwgVpnKey");
 
         if (!m_coreController->m_serversModel) {
             QSKIP("ServersModel not available");
@@ -77,9 +77,9 @@ private slots:
     }
 
     void testServersModelDefaultIndexSync() {
-        QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
-        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
-        QString wgKey = getValueFromIni("configs/TEST_CONFIG_WG");
+        QString awgKey = getValueFromIni("configs/thirdPartyAwgVpnKey");
+        QString xrayKey = getValueFromIni("configs/thirdPartyXrayVpnKey");
+        QString wgKey = getValueFromIni("configs/thirdPartyWireGuardVpnKey");
 
         if (!m_coreController->m_serversModel) {
             QSKIP("ServersModel not available");

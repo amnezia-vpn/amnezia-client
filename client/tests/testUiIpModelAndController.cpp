@@ -99,13 +99,13 @@ private slots:
         QVERIFY2(finishedSpy.count() == 3, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_ipSplitTunnelingModel->rowCount() == 1, "IpSplitTunnelingModel should have 1 row");
 
-        m_coreController->m_ipSplitTunnelingUiController->importSites(getValueFromIni("paths/TEST_SITES_LIST_PATH"), true);
+        m_coreController->m_ipSplitTunnelingUiController->importSites(getValueFromIni("paths/ipSplitTunnelingSitesListFile"), true);
         m_coreController->m_ipSplitTunnelingUiController->updateModel();
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 4, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_ipSplitTunnelingModel->rowCount() > 1, "IpSplitTunnelingModel should have more than 1 row");
 
-        m_coreController->m_ipSplitTunnelingUiController->exportSites(getValueFromIni("paths/TEST_EXPORT_PATH") + "test_ips_export.json");
+        m_coreController->m_ipSplitTunnelingUiController->exportSites(getValueFromIni("paths/testExportOutputDirectory") + "test_ips_export.json");
         QVERIFY2(finishedSpy.count() == 5, "finished signal should be emitted");
 
         m_coreController->m_ipSplitTunnelingUiController->removeSites();
