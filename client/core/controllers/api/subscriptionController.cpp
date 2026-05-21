@@ -460,6 +460,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     
     if (apiV2->nameOverriddenByUser) {
         newApiV2->name = apiV2->name;
+        newApiV2->displayName = apiV2->displayName;
         newApiV2->nameOverriddenByUser = true;
     }
 
