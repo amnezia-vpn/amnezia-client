@@ -23,7 +23,9 @@ public:
 
 private:
     KillSwitch(QObject* parent) {};
+    QStringList combinedAllowNets() const;
     QStringList m_allowedRanges;
+    QStringList m_splitTunnelAllows;
     QSharedPointer<SecureQSettings> m_appSettigns;
 
 };
