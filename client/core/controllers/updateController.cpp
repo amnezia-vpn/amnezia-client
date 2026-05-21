@@ -23,7 +23,7 @@ namespace
 #if defined(Q_OS_WINDOWS)
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_x64.exe");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
-#elif defined(Q_OS_MACOS)
+#elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos_x64.pkg");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
@@ -202,7 +202,7 @@ void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& o
 
 QString UpdateController::composeDownloadUrl() const
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
     return m_baseUrl + "/" + fileName;
 #else
@@ -212,7 +212,7 @@ QString UpdateController::composeDownloadUrl() const
 
 void UpdateController::runInstaller()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_downloadUrl.isEmpty()) {
         logger.error() << "Download URL is empty";
         return;
@@ -244,7 +244,7 @@ void UpdateController::runInstaller()
 
     #if defined(Q_OS_WINDOWS)
             runWindowsInstaller(kInstallerLocalPath);
-    #elif defined(Q_OS_MACOS)
+    #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
             runMacInstaller(kInstallerLocalPath);
     #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
             runLinuxInstaller(kInstallerLocalPath);
@@ -284,7 +284,7 @@ int UpdateController::runWindowsInstaller(const QString &installerPath)
 }
 #endif
 
-#if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
 int UpdateController::runMacInstaller(const QString &installerPath)
 {
     // Create temporary directory for extraction
