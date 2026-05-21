@@ -4,10 +4,11 @@
 #include <QSignalSpy>
 #include <QUuid>
 #include <QProcessEnvironment>
+#include <QHostInfo>
 #include <QTest>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
 #include "secureQSettings.h"
 #include "vpnConnection.h"
 
@@ -47,12 +48,12 @@ private slots:
 
     void cleanupTestCase()
     {
-        int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
-        
-        for (int containerIndex = 1; containerIndex < 7; ++containerIndex)
-            m_coreController->m_installUiController->clearCachedProfile(serverIndex, containerIndex);
+        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
 
-        m_coreController->m_serversController->removeServer(serverIndex);
+        for (int containerIndex = 1; containerIndex < 7; ++containerIndex)
+            m_coreController->m_installUiController->clearCachedProfile(serverId, containerIndex);
+
+        m_coreController->m_serversController->removeServer(serverId);
 
         qDebug() << "SERVER REMOVED\n";
 
@@ -65,13 +66,13 @@ private slots:
     {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
     void testMultipleExports()
     {
-        int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
+        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
 
         QString clientName = "MultipleExports Test Client";
 
@@ -93,7 +94,7 @@ private slots:
                 continue;
             }
 
-            auto exportResult = m_coreController->m_exportController->generateConnectionConfig(serverIndex, containerIndex, clientName);
+            auto exportResult = m_coreController->m_exportController->generateConnectionConfig(serverId, containerIndex, clientName);
 
             QVERIFY2(exportResult.errorCode == ErrorCode::NoError,
                      QStringLiteral("\n%1: Export should succeed").arg(containerName).toUtf8().constData());
@@ -104,14 +105,14 @@ private slots:
 
     void testMultipleExportsNative()
     {
-        int serverIndex = m_coreController->m_serversRepository->defaultServerIndex();
+        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
 
         QString clientName = "MultipleExports Test Client";
 
-        auto exportResultAwg = m_coreController->m_exportController->generateAwgConfig(serverIndex, DockerContainer::Awg2, clientName);
-        auto exportResultWg = m_coreController->m_exportController->generateWireGuardConfig(serverIndex, clientName);
-        auto exportResultOvpn = m_coreController->m_exportController->generateOpenVpnConfig(serverIndex, clientName);
-        auto exportResultXray = m_coreController->m_exportController->generateXrayConfig(serverIndex, clientName);
+        auto exportResultAwg = m_coreController->m_exportController->generateAwgConfig(serverId, 2, clientName);
+        auto exportResultWg = m_coreController->m_exportController->generateWireGuardConfig(serverId, clientName);
+        auto exportResultOvpn = m_coreController->m_exportController->generateOpenVpnConfig(serverId, clientName);
+        auto exportResultXray = m_coreController->m_exportController->generateXrayConfig(serverId, clientName);
 
         QVERIFY2(exportResultAwg.errorCode == ErrorCode::NoError, "\nAwg (native): Export should succeed");
         QVERIFY2(exportResultWg.errorCode == ErrorCode::NoError, "\nWg (native): Export should succeed");

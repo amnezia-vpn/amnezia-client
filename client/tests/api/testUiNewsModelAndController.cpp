@@ -7,7 +7,7 @@
 #include <QUuid>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
 #include "secureQSettings.h"
 #include "vpnConnection.h"
 
@@ -45,7 +45,7 @@ private slots:
     {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 

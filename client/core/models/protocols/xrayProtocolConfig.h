@@ -100,16 +100,18 @@ struct XrayServerConfig {
     bool isThirdPartyConfig = false;
 
     // New: Security
-    QString security = protocols::xray::defaultSecurity;
-    QString flow = protocols::xray::defaultFlow;
-    QString fingerprint = protocols::xray::defaultFingerprint;
-    QString sni = protocols::xray::defaultSni;
-    QString alpn = protocols::xray::defaultAlpn;
+    QString security;
+    QString flow;
+    QString fingerprint;
+    QString sni;
+    QString alpn;
 
     // New: Transport
-    QString transport = protocols::xray::defaultTransport;
+    QString transport;
     XrayXhttpConfig xhttp;
     XrayMkcpConfig mkcp;
+    bool hasXhttp = false;
+    bool hasMkcp = false;
 
     QJsonObject toJson() const;
 

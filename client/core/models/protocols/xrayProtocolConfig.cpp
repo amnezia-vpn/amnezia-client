@@ -208,8 +208,12 @@ QJsonObject XrayServerConfig::toJson() const
     if (!transport.isEmpty()) {
         obj[configKey::xrayTransport] = transport;
     }
-    obj["xhttp"] = xhttp.toJson();
-    obj["mkcp"] = mkcp.toJson();
+    if (hasXhttp) {
+        obj["xhttp"] = xhttp.toJson();
+    }
+    if (hasMkcp) {
+        obj["mkcp"] = mkcp.toJson();
+    }
 
     return obj;
 }
@@ -226,19 +230,25 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
     c.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
 
     // New: Security
-    c.security = json.value(configKey::xraySecurity).toString(protocols::xray::defaultSecurity);
-    c.flow = json.value(configKey::xrayFlow).toString(protocols::xray::defaultFlow);
-    c.fingerprint = json.value(configKey::xrayFingerprint).toString(protocols::xray::defaultFingerprint);
+    c.security = json.value(configKey::xraySecurity).toString();
+    c.flow = json.value(configKey::xrayFlow).toString();
+    c.fingerprint = json.value(configKey::xrayFingerprint).toString();
     if (c.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
         c.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
     }
-    c.sni = json.value(configKey::xraySni).toString(protocols::xray::defaultSni);
-    c.alpn = json.value(configKey::xrayAlpn).toString(protocols::xray::defaultAlpn);
+    c.sni = json.value(configKey::xraySni).toString();
+    c.alpn = json.value(configKey::xrayAlpn).toString();
 
     // New: Transport
-    c.transport = json.value(configKey::xrayTransport).toString(protocols::xray::defaultTransport);
-    c.xhttp = XrayXhttpConfig::fromJson(json.value("xhttp").toObject());
-    c.mkcp = XrayMkcpConfig::fromJson(json.value("mkcp").toObject());
+    c.transport = json.value(configKey::xrayTransport).toString();
+    if (json.contains(QStringLiteral("xhttp"))) {
+        c.hasXhttp = true;
+        c.xhttp = XrayXhttpConfig::fromJson(json.value(QStringLiteral("xhttp")).toObject());
+    }
+    if (json.contains(QStringLiteral("mkcp"))) {
+        c.hasMkcp = true;
+        c.mkcp = XrayMkcpConfig::fromJson(json.value(QStringLiteral("mkcp")).toObject());
+    }
 
     return c;
 }

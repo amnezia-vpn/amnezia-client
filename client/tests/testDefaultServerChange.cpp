@@ -52,8 +52,8 @@ private slots:
 
     void testSetDefaultServerIndex() {
         QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
-        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_WG");
-        QString wgKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
+        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
+        QString wgKey = getValueFromIni("configs/TEST_CONFIG_WG");
 
         auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult1.config);
@@ -87,8 +87,8 @@ private slots:
 
     void testDefaultServerChangeOnRemoveEdgeCases() {
         QString awgKey = getValueFromIni("configs/TEST_CONFIG_AWG");
-        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_WG");
-        QString wgKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
+        QString xrayKey = getValueFromIni("configs/TEST_CONFIG_XRAY");
+        QString wgKey = getValueFromIni("configs/TEST_CONFIG_WG");
 
         auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult1.config);

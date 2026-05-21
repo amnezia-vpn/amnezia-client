@@ -49,9 +49,6 @@ QJsonObject SelfHostedUserServerConfig::toJson() const
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;
     }
-    if (!displayName.isEmpty()) {
-        obj[configKey::displayName] = displayName;
-    }
     if (!hostName.isEmpty()) {
         obj[configKey::hostName] = hostName;
     }
@@ -84,7 +81,6 @@ SelfHostedUserServerConfig SelfHostedUserServerConfig::fromJson(const QJsonObjec
     SelfHostedUserServerConfig config;
 
     config.description = json.value(configKey::description).toString();
-    config.displayName = json.value(configKey::displayName).toString();
     config.hostName = json.value(configKey::hostName).toString();
 
     QJsonArray containersArray = json.value(configKey::containers).toArray();

@@ -212,8 +212,8 @@ void CoreController::initControllers()
     setQmlContextProperty("SystemController", m_systemController);
 
     m_networkReachabilityController = new NetworkReachabilityController(this);
-    m_engine->rootContext()->setContextProperty("NetworkReachabilityController", m_networkReachabilityController);
-    m_engine->rootContext()->setContextProperty("NetworkReachability", m_networkReachabilityController);
+    setQmlContextProperty("NetworkReachabilityController", m_networkReachabilityController);
+    setQmlContextProperty("NetworkReachability", m_networkReachabilityController);
 
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
