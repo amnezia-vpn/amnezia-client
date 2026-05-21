@@ -1,18 +1,39 @@
 #include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QSignalSpy>
 #include <QUuid>
-#include <QProcessEnvironment>
-#include <QHostInfo>
 #include <QTest>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverDescription.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/commonStructs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
 #include "secureQSettings.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
+
+namespace {
+
+enum class NativeExportKind {
+    Awg = 1,
+    WireGuard,
+    OpenVpn,
+    Xray,
+};
+
+QList<DockerContainer> vpnContainersForExport()
+{
+    return {
+        DockerContainer::Awg2,
+        DockerContainer::WireGuard,
+        DockerContainer::OpenVpn,
+        DockerContainer::Xray
+    };
+}
+
+} // namespace
 
 class TestMultipleExports : public QObject
 {
@@ -21,11 +42,97 @@ class TestMultipleExports : public QObject
 private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
+    QString m_serverId;
 
-    QString getValueFromIni(const QString &key)
+    ServerCredentials getCredentialsFromIni()
     {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
+        ServerCredentials credentials;
+        credentials.hostName = getValueFromIni("secrets/selfHostedServerHostName");
+        credentials.userName = getValueFromIni("secrets/selfHostedServerUserName");
+        credentials.secretData = getValueFromIni("secrets/selfHostedServerPassword");
+        credentials.port = getValueFromIni("secrets/selfHostedServerSshPort").toInt();
+        return credentials;
+    }
+
+    int portForContainer(DockerContainer container) const
+    {
+        const Proto proto = ContainerUtils::defaultProtocol(container);
+        if (container == DockerContainer::Awg2) {
+            return ProtocolUtils::getPortForInstall(proto);
+        }
+        return ProtocolUtils::defaultPort(proto);
+    }
+
+    TransportProto transportForContainer(DockerContainer container) const
+    {
+        return ProtocolUtils::defaultTransportProto(ContainerUtils::defaultProtocol(container));
+    }
+
+    void installVpnContainer(DockerContainer container)
+    {
+        const QString containerName = ContainerUtils::containerToString(container);
+        bool wasInstalled = false;
+        const ErrorCode error = m_coreController->m_installController->installContainer(
+            m_serverId, container, portForContainer(container), transportForContainer(container), wasInstalled);
+
+        QVERIFY2(error == ErrorCode::NoError,
+                 QString("%1: installContainer should succeed. Error: %2")
+                     .arg(containerName)
+                     .arg(static_cast<int>(error))
+                     .toUtf8()
+                     .constData());
+        qDebug() << containerName << "installed:" << wasInstalled;
+    }
+
+    void setupServerWithVpnContainers()
+    {
+        const ServerCredentials credentials = getCredentialsFromIni();
+
+        if (credentials.hostName.isEmpty() || credentials.userName.isEmpty() || credentials.secretData.isEmpty()) {
+            QSKIP("Test requires selfHostedServerHostName, selfHostedServerUserName, selfHostedServerPassword in test_vars.ini");
+        }
+
+        QVERIFY2(credentials.isValid(), "Server credentials should be valid");
+        qDebug() << "Using server:" << credentials.hostName << "user:" << credentials.userName
+                 << "port:" << credentials.port;
+
+        QString sshOutput;
+        const ErrorCode sshError =
+            m_coreController->m_installController->checkSshConnection(credentials, sshOutput);
+        QVERIFY2(sshError == ErrorCode::NoError,
+                 QString("SSH connection should succeed. Error: %1, Output: %2")
+                     .arg(static_cast<int>(sshError))
+                     .arg(sshOutput)
+                     .toUtf8()
+                     .constData());
+
+        m_coreController->m_installController->addEmptyServer(credentials);
+        QVERIFY2(m_coreController->m_serversRepository->serversCount() > 0, "Server should be added");
+
+        m_serverId = m_coreController->m_serversRepository->defaultServerId();
+        QVERIFY2(!m_serverId.isEmpty(), "Server id should not be empty");
+
+        const ErrorCode removeError = m_coreController->m_installController->removeAllContainers(m_serverId);
+        QVERIFY2(removeError == ErrorCode::NoError,
+                 QString("removeAllContainers should succeed. Error: %1")
+                     .arg(static_cast<int>(removeError))
+                     .toUtf8()
+                     .constData());
+        qDebug() << "Remote Amnezia services cleared";
+
+        for (DockerContainer container : vpnContainersForExport()) {
+            installVpnContainer(container);
+        }
+
+        qDebug() << "All VPN containers installed for export tests";
+    }
+
+    void skipIfContainerNotInstalled(const QString &containerName, int containerIndex)
+    {
+        if (!m_coreController->m_containersModel->data(containerIndex, ContainersModel::Roles::IsInstalledRole).toBool()) {
+            const QString reason = QString("%1: Not installed").arg(containerName);
+            QSKIP(reason.toUtf8().constData());
+        }
     }
 
 private slots:
@@ -38,93 +145,103 @@ private slots:
 
         m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
 
-        QString vpnKey = getValueFromIni("configs/selfHostedAdminFullAccessVpnKey");
-        QJsonObject importedConfig = m_coreController->m_importCoreController->extractConfigFromData(vpnKey).config;
-
-        m_coreController->m_importCoreController->importConfig(importedConfig);
-
-        qDebug() << "SELF-HOSTED ADMIN SERVER IMPORTED\n";
+        setupServerWithVpnContainers();
     }
 
     void cleanupTestCase()
     {
-        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
+        if (!m_serverId.isEmpty()) {
+            m_coreController->m_installController->removeAllContainers(m_serverId);
 
-        for (int containerIndex = 1; containerIndex < 7; ++containerIndex)
-            m_coreController->m_installUiController->clearCachedProfile(serverId, containerIndex);
+            for (int containerIndex = 1; containerIndex < 7; ++containerIndex) {
+                m_coreController->m_installUiController->clearCachedProfile(m_serverId, containerIndex);
+            }
 
-        m_coreController->m_serversController->removeServer(serverId);
+            m_coreController->m_serversController->removeServer(m_serverId);
 
-        qDebug() << "SERVER REMOVED\n";
+            qDebug() << "SERVER REMOVED\n";
+        }
 
         m_settings->clearSettings();
         delete m_coreController;
         delete m_settings;
     }
 
-    void init()
+    void testMultipleExports_data()
     {
-        m_settings->clearSettings();
-        if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
-        }
+        QTest::addColumn<QString>("containerName");
+        QTest::addColumn<int>("containerIndex");
+
+        QTest::newRow("awg2") << "Awg2" << static_cast<int>(DockerContainer::Awg2);
+        QTest::newRow("wireguard") << "WireGuard" << static_cast<int>(DockerContainer::WireGuard);
+        QTest::newRow("openvpn") << "OpenVPN" << static_cast<int>(DockerContainer::OpenVpn);
+        QTest::newRow("xray") << "XRay" << static_cast<int>(DockerContainer::Xray);
     }
 
     void testMultipleExports()
     {
-        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
+        QFETCH(QString, containerName);
+        QFETCH(int, containerIndex);
 
-        QString clientName = "MultipleExports Test Client";
+        skipIfContainerNotInstalled(containerName, containerIndex);
 
-        for (int containerIndex = 1; containerIndex < 7; ++containerIndex) {
+        const QString clientName = "MultipleExports Test Client";
+        const auto exportResult =
+            m_coreController->m_exportController->generateConnectionConfig(m_serverId, containerIndex, clientName);
 
-            QString containerName;
+        QVERIFY2(exportResult.errorCode == ErrorCode::NoError,
+                 QString("\n%1: Export should succeed").arg(containerName).toUtf8().constData());
+        QVERIFY2(!exportResult.config.isEmpty(),
+                 QString("%1: Exported config should not be empty").arg(containerName).toUtf8().constData());
+    }
 
-            switch (containerIndex) {
-            case 1: containerName = "AwgLegacy"; break;
-            case 2: containerName = "Awg2"; break;
-            case 3: containerName = "WireGuard"; break;
-            case 4: containerName = "OpenVPN"; break;
-            case 5: continue; break; // skipping IPsec
-            case 6: containerName = "XRay"; break;
-            }
+    void testMultipleExportsNative_data()
+    {
+        QTest::addColumn<QString>("containerName");
+        QTest::addColumn<int>("containerIndex");
+        QTest::addColumn<int>("nativeExportKind");
 
-            if (!m_coreController->m_containersModel->data(containerIndex, ContainersModel::Roles::IsInstalledRole).toBool()) {
-                qDebug() << QStringLiteral("%1: Not installed").arg(containerName).toUtf8().constData();
-                continue;
-            }
-
-            auto exportResult = m_coreController->m_exportController->generateConnectionConfig(serverId, containerIndex, clientName);
-
-            QVERIFY2(exportResult.errorCode == ErrorCode::NoError,
-                     QStringLiteral("\n%1: Export should succeed").arg(containerName).toUtf8().constData());
-            QVERIFY2(!exportResult.config.isEmpty(),
-                     QStringLiteral("%1: Exported config should not be empty\n").arg(containerName).toUtf8().constData());
-        }
+        QTest::newRow("awg") << "Awg2" << static_cast<int>(DockerContainer::Awg2)
+                             << static_cast<int>(NativeExportKind::Awg);
+        QTest::newRow("wireguard") << "WireGuard" << static_cast<int>(DockerContainer::WireGuard)
+                                   << static_cast<int>(NativeExportKind::WireGuard);
+        QTest::newRow("openvpn") << "OpenVPN" << static_cast<int>(DockerContainer::OpenVpn)
+                                 << static_cast<int>(NativeExportKind::OpenVpn);
+        QTest::newRow("xray") << "XRay" << static_cast<int>(DockerContainer::Xray)
+                              << static_cast<int>(NativeExportKind::Xray);
     }
 
     void testMultipleExportsNative()
     {
-        const QString serverId = m_coreController->m_serversRepository->defaultServerId();
+        QFETCH(QString, containerName);
+        QFETCH(int, containerIndex);
+        QFETCH(int, nativeExportKind);
 
-        QString clientName = "MultipleExports Test Client";
+        skipIfContainerNotInstalled(containerName, containerIndex);
 
-        auto exportResultAwg = m_coreController->m_exportController->generateAwgConfig(serverId, 2, clientName);
-        auto exportResultWg = m_coreController->m_exportController->generateWireGuardConfig(serverId, clientName);
-        auto exportResultOvpn = m_coreController->m_exportController->generateOpenVpnConfig(serverId, clientName);
-        auto exportResultXray = m_coreController->m_exportController->generateXrayConfig(serverId, clientName);
+        const QString clientName = "MultipleExports Test Client";
+        ExportController::ExportResult exportResult;
 
-        QVERIFY2(exportResultAwg.errorCode == ErrorCode::NoError, "\nAwg (native): Export should succeed");
-        QVERIFY2(exportResultWg.errorCode == ErrorCode::NoError, "\nWg (native): Export should succeed");
-        QVERIFY2(exportResultOvpn.errorCode == ErrorCode::NoError, "\nOvpn (native): Export should succeed");
-        QVERIFY2(exportResultXray.errorCode == ErrorCode::NoError, "\nXray (native): Export should succeed");
+        switch (static_cast<NativeExportKind>(nativeExportKind)) {
+        case NativeExportKind::Awg:
+            exportResult = m_coreController->m_exportController->generateAwgConfig(m_serverId, containerIndex, clientName);
+            break;
+        case NativeExportKind::WireGuard:
+            exportResult = m_coreController->m_exportController->generateWireGuardConfig(m_serverId, clientName);
+            break;
+        case NativeExportKind::OpenVpn:
+            exportResult = m_coreController->m_exportController->generateOpenVpnConfig(m_serverId, clientName);
+            break;
+        case NativeExportKind::Xray:
+            exportResult = m_coreController->m_exportController->generateXrayConfig(m_serverId, clientName);
+            break;
+        }
 
-        QVERIFY2(!exportResultAwg.config.isEmpty(), "Awg (native): Exported config should not be empty\n");
-        QVERIFY2(!exportResultWg.config.isEmpty(), "Wg (native): Exported config should not be empty\n");
-        QVERIFY2(!exportResultOvpn.config.isEmpty(), "Ovpn (native): Exported config should not be empty\n");
-        QVERIFY2(!exportResultXray.config.isEmpty(), "Xray (native): Exported config should not be empty\n");
+        QVERIFY2(exportResult.errorCode == ErrorCode::NoError,
+                 QString("\n%1 (native): Export should succeed").arg(containerName).toUtf8().constData());
+        QVERIFY2(!exportResult.config.isEmpty(),
+                 QString("%1 (native): Exported config should not be empty").arg(containerName).toUtf8().constData());
     }
-
 };
 
 QTEST_MAIN(TestMultipleExports)

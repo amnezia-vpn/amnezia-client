@@ -34,3 +34,6 @@ add_custom_command(TARGET test_admin_self_hosted_export POST_BUILD
 add_test(NAME AdminSelfHostedExportTest COMMAND test_admin_self_hosted_export)
 add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
 add_test(NAME MultipleExportsTest COMMAND test_multiple_exports)
+
+# Full container install over SSH (Awg2, WireGuard, OpenVPN, Xray) can take well over 30 minutes.
+set_tests_properties(MultipleExportsTest PROPERTIES TIMEOUT 7200)

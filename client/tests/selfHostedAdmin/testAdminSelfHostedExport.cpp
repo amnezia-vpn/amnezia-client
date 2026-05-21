@@ -9,8 +9,11 @@
 
 #include "core/controllers/coreController.h"
 #include "core/utils/constants/configKeys.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
+
+using namespace amnezia::test;
 
 class TestAdminSelfHostedExport : public QObject
 {
@@ -19,12 +22,6 @@ class TestAdminSelfHostedExport : public QObject
 private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
     QJsonObject decodeVpnKey(const QString &vpnKey) {
         QString key = vpnKey;

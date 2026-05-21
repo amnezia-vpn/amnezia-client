@@ -17,6 +17,7 @@ qt6_add_resources(TEST_QRC
 add_library(test_common OBJECT
     ${SOURCES}
     ${HEADERS}
+    utils/testUtils.cpp
     ${TEST_QRC}
 )
 
@@ -30,6 +31,7 @@ target_link_libraries(test_common PUBLIC
 )
 
 target_include_directories(test_common PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${CMAKE_CURRENT_BINARY_DIR}/..
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -89,11 +91,11 @@ target_link_libraries(test_servers_model_sync PRIVATE
     test_common
 )
 
-add_executable(test_complex_operations
-    testComplexOperations.cpp
+add_executable(test_server_rename
+    testServerRename.cpp
 )
 
-target_link_libraries(test_complex_operations PRIVATE
+target_link_libraries(test_server_rename PRIVATE
     Qt6::Test
     test_common
 )
@@ -183,7 +185,7 @@ add_test(NAME DefaultServerChangeTest COMMAND test_default_server_change)
 add_test(NAME ServerEdgeCasesTest COMMAND test_server_edge_cases)
 add_test(NAME SignalOrderTest COMMAND test_signal_order)
 add_test(NAME ServersModelSyncTest COMMAND test_servers_model_sync)
-add_test(NAME ComplexOperationsTest COMMAND test_complex_operations)
+add_test(NAME ServerRenameTest COMMAND test_server_rename)
 add_test(NAME SettingsSignalsTest COMMAND test_settings_signals)
 add_test(NAME UiServersModelAndControllerTest COMMAND test_ui_servers_model_and_controller)
 add_test(NAME XraySerializationTest COMMAND test_xray_serialization)

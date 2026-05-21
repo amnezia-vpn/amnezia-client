@@ -7,11 +7,13 @@
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverDescription.h"
-#include "tests/testServerRepositoryHelpers.h"
+#include "ui/models/serversModel.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
 
 class TestMultipleImports : public QObject
 {
@@ -20,12 +22,6 @@ class TestMultipleImports : public QObject
 private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
 private slots:
     void initTestCase() {
@@ -77,9 +73,9 @@ private slots:
         }
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "First server should be default");
         
-        QString desc1 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(0));
-        QVERIFY2(desc1 == "AWG Server", "First server description should match");
+        const auto description1 = serverDescriptionAt(m_coreController->m_serversRepository, 0);
+        QVERIFY2(description1.has_value(), "Server config should exist");
+        QVERIFY2(*description1 == "AWG Server", "First server description should match");
         
         if (m_coreController->m_serversModel) {
             QString modelDesc1 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
@@ -99,9 +95,9 @@ private slots:
         }
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
-        QString desc2 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(1));
-        QVERIFY2(desc2 == "Xray Server", "Second server description should match");
+        const auto description2 = serverDescriptionAt(m_coreController->m_serversRepository, 1);
+        QVERIFY2(description2.has_value(), "Server config should exist");
+        QVERIFY2(*description2 == "Xray Server", "Second server description should match");
         
         if (m_coreController->m_serversModel) {
             QString modelDesc2 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(1, 0), ServersModel::NameRole).toString();
@@ -121,9 +117,9 @@ private slots:
         }
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Third server should be default");
         
-        QString desc3 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(2));
-        QVERIFY2(desc3 == "WireGuard Server", "Third server description should match");
+        const auto description3 = serverDescriptionAt(m_coreController->m_serversRepository, 2);
+        QVERIFY2(description3.has_value(), "Server config should exist");
+        QVERIFY2(*description3 == "WireGuard Server", "Third server description should match");
         
         if (m_coreController->m_serversModel) {
             QString modelDesc3 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(2, 0), ServersModel::NameRole).toString();
@@ -154,12 +150,11 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "After two imports servers count should be 2");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Second server should be default");
         
-        QString desc0 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(0));
-        QString desc1 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(1));
-        QVERIFY2(desc0 == "AWG Server", "First server description should match");
-        QVERIFY2(desc1 == "Xray Server", "Second server description should match");
+        const auto description0 = serverDescriptionAt(m_coreController->m_serversRepository, 0);
+        const auto description1 = serverDescriptionAt(m_coreController->m_serversRepository, 1);
+        QVERIFY2(description0.has_value() && description1.has_value(), "Server configs should exist");
+        QVERIFY2(*description0 == "AWG Server", "First server description should match");
+        QVERIFY2(*description1 == "Xray Server", "Second server description should match");
 
         defaultServerChangedSpy.clear();
         serverRemovedSpy.clear();
@@ -171,9 +166,9 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "After removing first server, servers count should be 1");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "After removing first server, default index should be 0");
         
-        QString remainingDesc = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                                 m_coreController->m_serversRepository->serverIdAt(0));
-        QVERIFY2(remainingDesc == "Xray Server", "Remaining server should be Xray Server");
+        const auto remainingDescription = serverDescriptionAt(m_coreController->m_serversRepository, 0);
+        QVERIFY2(remainingDescription.has_value(), "Server config should exist");
+        QVERIFY2(*remainingDescription == "Xray Server", "Remaining server should be Xray Server");
         
         if (m_coreController->m_serversModel) {
             QVERIFY2(m_coreController->m_serversModel->rowCount() == 1, "After removing first server, model row count should be 1");

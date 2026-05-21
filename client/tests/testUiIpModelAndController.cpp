@@ -1,8 +1,10 @@
 #include <QDebug>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcessEnvironment>
 #include <QSignalSpy>
+#include <QTemporaryDir>
 #include <QUuid>
 #include <QTest>
 
@@ -20,12 +22,6 @@ class TestUiIpModelAndController : public QObject
 private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
     QString normalizeHostname(const QString &hostname) const
     {
@@ -99,13 +95,27 @@ private slots:
         QVERIFY2(finishedSpy.count() == 3, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_ipSplitTunnelingModel->rowCount() == 1, "IpSplitTunnelingModel should have 1 row");
 
-        m_coreController->m_ipSplitTunnelingUiController->importSites(getValueFromIni("paths/ipSplitTunnelingSitesListFile"), true);
+        QTemporaryDir tempDir;
+        QVERIFY2(tempDir.isValid(), "Temporary directory should be created");
+
+        const QString sitesFile = tempDir.filePath(QStringLiteral("sites.json"));
+        {
+            QFile file(sitesFile);
+            QVERIFY2(file.open(QIODevice::WriteOnly), "Sites import file should be writable");
+            file.write(R"([
+                {"hostname": "example.com", "ip": "93.184.216.34"},
+                {"hostname": "test.org", "ip": "1.2.3.4"}
+            ])");
+        }
+
+        m_coreController->m_ipSplitTunnelingUiController->importSites(sitesFile, true);
         m_coreController->m_ipSplitTunnelingUiController->updateModel();
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 4, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_ipSplitTunnelingModel->rowCount() > 1, "IpSplitTunnelingModel should have more than 1 row");
 
-        m_coreController->m_ipSplitTunnelingUiController->exportSites(getValueFromIni("paths/testExportOutputDirectory") + "test_ips_export.json");
+        const QString exportFile = tempDir.filePath(QStringLiteral("test_ips_export.json"));
+        m_coreController->m_ipSplitTunnelingUiController->exportSites(exportFile);
         QVERIFY2(finishedSpy.count() == 5, "finished signal should be emitted");
 
         m_coreController->m_ipSplitTunnelingUiController->removeSites();

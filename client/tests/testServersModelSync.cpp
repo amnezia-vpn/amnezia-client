@@ -6,12 +6,13 @@
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverDescription.h"
-#include "tests/testServerRepositoryHelpers.h"
 #include "ui/models/serversModel.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
 
 class TestServersModelSync : public QObject
 {
@@ -20,12 +21,6 @@ class TestServersModelSync : public QObject
 private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
 private slots:
     void initTestCase() {
@@ -65,9 +60,8 @@ private slots:
         QString modelDesc1 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
         QVERIFY2(modelDesc1 == "AWG Server", "Model should have correct server name");
 
-        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
-                                            m_coreController->m_serversController->getServerId(0),
-                                            QStringLiteral("Edited AWG Server"));
+        QVERIFY(m_coreController->m_serversController->renameServer(
+            m_coreController->m_serversController->getServerId(0), QStringLiteral("Edited AWG Server")));
 
         QString modelDesc2 = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
         QVERIFY2(modelDesc2 == "Edited AWG Server", "Model should be updated after edit");

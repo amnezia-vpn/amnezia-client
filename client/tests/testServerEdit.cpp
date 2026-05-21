@@ -6,12 +6,13 @@
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverDescription.h"
-#include "tests/testServerRepositoryHelpers.h"
 #include "ui/models/serversModel.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
 
 class TestServerEdit : public QObject
 {
@@ -20,12 +21,6 @@ class TestServerEdit : public QObject
 private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
 private slots:
     void initTestCase() {
@@ -60,17 +55,17 @@ private slots:
 
         QSignalSpy serverEditedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited);
 
-        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
-                                            m_coreController->m_serversController->getServerId(0),
-                                            QStringLiteral("Edited AWG Server"));
+        QVERIFY(m_coreController->m_serversController->renameServer(
+            m_coreController->m_serversController->getServerId(0), QStringLiteral("Edited AWG Server")));
 
         QVERIFY2(serverEditedSpy.count() == 1, "serverEdited signal should be emitted");
         QVERIFY2(serverEditedSpy.at(0).at(0).toString() == m_coreController->m_serversRepository->serverIdAt(0),
                  "serverEdited should emit edited server id");
 
-        const QString editedDesc = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                                     m_coreController->m_serversRepository->serverIdAt(0));
-        QVERIFY2(editedDesc == "Edited AWG Server", "Server description should be updated");
+        const auto editedDescription = serverDescription(m_coreController->m_serversRepository,
+                                                         m_coreController->m_serversRepository->serverIdAt(0));
+        QVERIFY2(editedDescription.has_value(), "Server config should exist");
+        QVERIFY2(*editedDescription == "Edited AWG Server", "Server description should be updated");
 
         if (m_coreController->m_serversModel) {
             QString modelDesc = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
@@ -91,16 +86,14 @@ private slots:
 
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
-        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
-                                            m_coreController->m_serversController->getServerId(1),
-                                            QStringLiteral("Edited Default Server"));
+        QVERIFY(m_coreController->m_serversController->renameServer(
+            m_coreController->m_serversController->getServerId(1), QStringLiteral("Edited Default Server")));
 
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted when editing default server");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default server index should remain 1");
 
-        amnezia::test::setServerDescription(m_coreController->m_serversRepository,
-                                            m_coreController->m_serversController->getServerId(0),
-                                            QStringLiteral("Edited Non-Default Server"));
+        QVERIFY(m_coreController->m_serversController->renameServer(
+            m_coreController->m_serversController->getServerId(0), QStringLiteral("Edited Non-Default Server")));
 
         QVERIFY2(defaultServerChangedSpy.count() == 0, "defaultServerChanged should NOT be emitted when editing non-default server");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default server index should remain 1");

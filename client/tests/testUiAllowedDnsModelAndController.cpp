@@ -1,8 +1,10 @@
 #include <QDebug>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcessEnvironment>
 #include <QSignalSpy>
+#include <QTemporaryDir>
 #include <QUuid>
 #include <QTest>
 
@@ -20,12 +22,6 @@ class TestUiAllowedDnsModelAndController : public QObject
 private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
 private slots:
     void initTestCase()
@@ -73,13 +69,24 @@ private slots:
         QString msg = QString("dns ip should be %1, got %2").arg(ip, dnsIp.toString());
         QVERIFY2(dnsIp == ip, msg.toLocal8Bit().constData());
 
-        m_coreController->m_allowedDnsUiController->importDns(getValueFromIni("paths/allowedDnsServersListFile"), true);
+        QTemporaryDir tempDir;
+        QVERIFY2(tempDir.isValid(), "Temporary directory should be created");
+
+        const QString dnsFile = tempDir.filePath(QStringLiteral("dns.json"));
+        {
+            QFile file(dnsFile);
+            QVERIFY2(file.open(QIODevice::WriteOnly), "DNS import file should be writable");
+            file.write(R"(["8.8.8.8", "1.1.1.1"])");
+        }
+
+        m_coreController->m_allowedDnsUiController->importDns(dnsFile, true);
         m_coreController->m_allowedDnsUiController->updateModel();
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 2, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_allowedDnsModel->rowCount() > 1, "AllowedDnsModel should have more than 1 row");
 
-        m_coreController->m_allowedDnsUiController->exportDns(getValueFromIni("paths/testExportOutputDirectory") + "test_dns_export.json");
+        const QString exportFile = tempDir.filePath(QStringLiteral("test_dns_export.json"));
+        m_coreController->m_allowedDnsUiController->exportDns(exportFile);
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 3, "finished signal should be emitted");
 
@@ -87,6 +94,11 @@ private slots:
         m_coreController->m_allowedDnsUiController->updateModel();
         QVERIFY2(errorOccurredSpy.count() == 0, "errorOccurred signal should not be emitted");
         QVERIFY2(finishedSpy.count() == 4, "finished signal should be emitted");
+        QVERIFY2(m_coreController->m_allowedDnsModel->rowCount() == 1, "AllowedDnsModel should have 1 row after removing first DNS");
+
+        m_coreController->m_allowedDnsUiController->removeDns(0);
+        m_coreController->m_allowedDnsUiController->updateModel();
+        QVERIFY2(finishedSpy.count() == 5, "finished signal should be emitted");
         QVERIFY2(m_coreController->m_allowedDnsModel->rowCount() == 0, "AllowedDnsModel should have 0 rows");
     }
 };

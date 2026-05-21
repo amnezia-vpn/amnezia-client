@@ -11,9 +11,11 @@
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
 #include "secureQSettings.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
 
 class TestXraySerialization : public QObject
 {
@@ -22,12 +24,6 @@ class TestXraySerialization : public QObject
 private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
     QJsonObject extractXrayConfig(const QString &data, ConfigTypes configType, const QString &description = "") const
     {
@@ -102,9 +98,12 @@ private slots:
 
     void testVless()
     {
-        ImportController::ImportResult importResult;
+        const QString configData = getValueFromIni("configs/thirdPartyVlessImportData");
+        if (!isIniValueConfigured(configData)) {
+            QSKIP("configs/thirdPartyVlessImportData is not configured in test_vars.ini");
+        }
 
-        QString configData = getValueFromIni("configs/thirdPartyVlessImportData");
+        ImportController::ImportResult importResult;
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -127,11 +126,15 @@ private slots:
 
     void testVmessNew()
     {
+        const QString configData = getValueFromIni("configs/thirdPartyVmessNewImportData");
+        if (!isIniValueConfigured(configData)) {
+            QSKIP("configs/thirdPartyVmessNewImportData is not configured in test_vars.ini");
+        }
+
         QString clientName = "Test Client (vmess_new deserialization)";
 
         ImportController::ImportResult importResult;
         
-        QString configData = getValueFromIni("configs/thirdPartyVmessNewImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -154,11 +157,15 @@ private slots:
 
     void testVmess()
     {
+        const QString configData = getValueFromIni("configs/thirdPartyVmessImportData");
+        if (!isIniValueConfigured(configData)) {
+            QSKIP("configs/thirdPartyVmessImportData is not configured in test_vars.ini");
+        }
+
         QString clientName = "Test Client (vmess deserialization)";
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/thirdPartyVmessImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -181,11 +188,15 @@ private slots:
 
     void testTrojan()
     {
+        const QString configData = getValueFromIni("configs/thirdPartyTrojanImportData");
+        if (!isIniValueConfigured(configData)) {
+            QSKIP("configs/thirdPartyTrojanImportData is not configured in test_vars.ini");
+        }
+
         QString clientName = "Test Client (trojan deserialization)";
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/thirdPartyTrojanImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -208,11 +219,15 @@ private slots:
 
     void testSS()
     {
+        const QString configData = getValueFromIni("configs/thirdPartyShadowsocksImportData");
+        if (!isIniValueConfigured(configData)) {
+            QSKIP("configs/thirdPartyShadowsocksImportData is not configured in test_vars.ini");
+        }
+
         QString clientName = "Test Client (ss deserialization)";
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/thirdPartyShadowsocksImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;
@@ -235,11 +250,15 @@ private slots:
 
     void testSSd()
     {
+        const QString configData = getValueFromIni("configs/thirdPartyShadowsocksSubscriptionImportData");
+        if (!isIniValueConfigured(configData)) {
+            QSKIP("configs/thirdPartyShadowsocksSubscriptionImportData is not configured in test_vars.ini");
+        }
+
         QString clientName = "Test Client (ssd deserialization)";
 
         ImportController::ImportResult importResult;
 
-        QString configData = getValueFromIni("configs/thirdPartyShadowsocksSubscriptionImportData");
         m_coreController->m_importCoreController->extractConfigFromData(configData);
 
         QString config = configData;

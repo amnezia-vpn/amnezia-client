@@ -1,8 +1,11 @@
+#include <QCoreApplication>
 #include <QDebug>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcessEnvironment>
 #include <QSignalSpy>
+#include <QTemporaryDir>
 #include <QUuid>
 #include <QTest>
 
@@ -20,12 +23,6 @@ class TestUiAppSTModelAndController : public QObject
 private:
     CoreController *m_coreController;
     SecureQSettings *m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
 private slots:
     void initTestCase()
@@ -67,7 +64,7 @@ private slots:
         QVERIFY2(isSplitTunnelingChangedSpy.count() == 2, "isSplitTunnelingChangedSpy signal should be emitted 2nd time");
         QVERIFY2(m_coreController->m_appSplitTunnelingUiController->isSplitTunnelingEnabled() == false, "AppSplitTunneling should be disabled");
 
-        QString app = getValueFromIni("paths/appSplitTunnelingTargetAppPath");
+        const QString app = QCoreApplication::applicationFilePath();
 
         m_coreController->m_appSplitTunnelingUiController->addApp(app);
         m_coreController->m_appSplitTunnelingUiController->updateModel();

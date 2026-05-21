@@ -6,12 +6,13 @@
 
 #include "core/controllers/coreController.h"
 #include "core/models/serverDescription.h"
-#include "tests/testServerRepositoryHelpers.h"
 #include "ui/models/serversModel.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
 
 class TestDefaultServerChange : public QObject
 {
@@ -20,12 +21,6 @@ class TestDefaultServerChange : public QObject
 private:
     CoreController* m_coreController;
     SecureQSettings* m_settings;
-
-    QString getValueFromIni(const QString &key)
-    {
-        QSettings settings("test_vars.ini", QSettings::IniFormat);
-        return settings.value(key).toString();
-    }
 
 private slots:
     void initTestCase() {
@@ -108,12 +103,11 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "Should have 2 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default should be index 1 (was 2, removed 0)");
 
-        QString desc1 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(0));
-        QString desc2 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                          m_coreController->m_serversRepository->serverIdAt(1));
-        QVERIFY2(desc1 == "Xray Server", "First remaining server should be Xray");
-        QVERIFY2(desc2 == "WireGuard Server", "Second remaining server should be WireGuard");
+        const auto description1 = serverDescriptionAt(m_coreController->m_serversRepository, 0);
+        const auto description2 = serverDescriptionAt(m_coreController->m_serversRepository, 1);
+        QVERIFY2(description1.has_value() && description2.has_value(), "Server configs should exist");
+        QVERIFY2(*description1 == "Xray Server", "First remaining server should be Xray");
+        QVERIFY2(*description2 == "WireGuard Server", "Second remaining server should be WireGuard");
 
         defaultServerChangedSpy.clear();
         serverRemovedSpy.clear();
@@ -123,9 +117,9 @@ private slots:
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Should have 1 server");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default should be index 0 (was 1, removed 0)");
 
-        QString lastDesc = amnezia::test::serverDescription(m_coreController->m_serversRepository,
-                                                            m_coreController->m_serversRepository->serverIdAt(0));
-        QVERIFY2(lastDesc == "WireGuard Server", "Last server should be WireGuard");
+        const auto lastDescription = serverDescriptionAt(m_coreController->m_serversRepository, 0);
+        QVERIFY2(lastDescription.has_value(), "Server config should exist");
+        QVERIFY2(*lastDescription == "WireGuard Server", "Last server should be WireGuard");
     }
 };
 
