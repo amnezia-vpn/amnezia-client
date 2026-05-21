@@ -22,6 +22,7 @@ jobs:
             recipes:
               - 'recipes/**'
               - 'conanfile.py'
+              - '.github/workflows/deploy.yml'
 
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
