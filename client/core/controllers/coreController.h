@@ -82,49 +82,11 @@
 #endif
 
 class CoreSignalHandlers;
-class TestMultipleImports;
-class TestAdminSelfHostedExport;
-class TestServerEdit;
-class TestDefaultServerChange;
-class TestServerEdgeCases;
-class TestSignalOrder;
-class TestServersModelSync;
-class TestServerRename;
-class TestSettingsSignals;
-class TestUiServersModelAndController;
-class TestSelfHostedServerSetup;
-class TestMultipleExports;
-class TestXraySerialization;
-class TestUiLanguageModelAndController;
-class TestUiIpModelAndController;
-class TestUiAppSTModelAndController;
-class TestUiAllowedDnsModelAndController;
-class TestUiNewsModelAndController;
-class TestUiApiServicesModelAndController;
 
 class CoreController : public QObject
 {
     Q_OBJECT
     friend class CoreSignalHandlers;
-    friend class TestMultipleImports;
-    friend class TestAdminSelfHostedExport;
-    friend class TestServerEdit;
-    friend class TestDefaultServerChange;
-    friend class TestServerEdgeCases;
-    friend class TestSignalOrder;
-    friend class TestServersModelSync;
-    friend class TestServerRename;
-    friend class TestSettingsSignals;
-    friend class TestUiServersModelAndController;
-    friend class TestSelfHostedServerSetup;
-    friend class TestMultipleExports;
-    friend class TestXraySerialization;
-    friend class TestUiLanguageModelAndController;
-    friend class TestUiIpModelAndController;
-    friend class TestUiAppSTModelAndController;
-    friend class TestUiAllowedDnsModelAndController;
-    friend class TestUiNewsModelAndController;
-    friend class TestUiApiServicesModelAndController;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
@@ -140,6 +102,18 @@ public:
 signals:
     void translationsUpdated();
     void websiteUrlChanged(const QString &newUrl);
+
+protected:
+    SecureServersRepository* serversRepositoryProtected() const { return m_serversRepository; }
+    SecureAppSettingsRepository* appSettingsRepositoryProtected() const { return m_appSettingsRepository; }
+    ServersModel* serversModelProtected() const { return m_serversModel; }
+    ContainersModel* containersModelProtected() const { return m_containersModel; }
+
+    InstallUiController* installUiControllerProtected() const { return m_installUiController; }
+    ImportController* importCoreControllerProtected() const { return m_importCoreController; }
+    ExportController* exportControllerProtected() const { return m_exportController; }
+    InstallController* installControllerProtected() const { return m_installController; }
+    ServersController* serversControllerProtected() const { return m_serversController; }
 
 private:
     void initRepositories();
