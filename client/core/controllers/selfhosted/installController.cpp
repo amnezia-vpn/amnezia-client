@@ -668,7 +668,13 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
 
         if (oldXrayConfig && newXrayConfig) {
-            if (!oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig)) {
+            const QString oldPort = oldXrayConfig->serverConfig.port.isEmpty()
+                    ? QString(protocols::xray::defaultPort)
+                    : oldXrayConfig->serverConfig.port;
+            const QString newPort = newXrayConfig->serverConfig.port.isEmpty()
+                    ? QString(protocols::xray::defaultPort)
+                    : newXrayConfig->serverConfig.port;
+            if (oldPort != newPort) {
                 return true;
             }
         }

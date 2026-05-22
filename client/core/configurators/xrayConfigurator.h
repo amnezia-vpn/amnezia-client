@@ -44,7 +44,14 @@ private:
                                                           amnezia::DockerContainer container,
                                                           const amnezia::XrayServerConfig &srv,
                                                           const QString &clientId,
-                                                          amnezia::ErrorCode &errorCode) const;
+                                                          amnezia::ErrorCode &errorCode,
+                                                          const QString &prefetchedRealityPublicKey = {},
+                                                          const QString &prefetchedRealityShortId = {}) const;
+
+    amnezia::ErrorCode readRealityKeyFiles(amnezia::DockerContainer container,
+                                           const amnezia::ServerCredentials &credentials,
+                                           QString &outPublicKey,
+                                           QString &outShortId) const;
 
     QJsonObject mergeStreamSettingsForServerInbound(const amnezia::XrayServerConfig &srv,
                                                     const QJsonObject &existingStreamSettings) const;

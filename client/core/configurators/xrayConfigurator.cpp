@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QThread>
 #include <QUuid>
 #include "logger.h"
 
@@ -161,6 +162,36 @@ ErrorCode XrayConfigurator::uploadServerConfigJson(const ServerCredentials &cred
     return errorCode;
 }
 
+ErrorCode XrayConfigurator::readRealityKeyFiles(const DockerContainer container, const ServerCredentials &credentials,
+                                                QString &outPublicKey, QString &outShortId) const
+{
+    outPublicKey.clear();
+    outShortId.clear();
+
+    auto readKeyFile = [&](const QString &path, QString &out) -> ErrorCode {
+        for (int attempt = 0; attempt < 3; ++attempt) {
+            ErrorCode fileError = ErrorCode::NoError;
+            out = QString::fromUtf8(m_sshSession->getTextFileFromContainer(container, credentials, path, fileError));
+            out.replace(QLatin1Char('\n'), QString());
+            out.replace(QLatin1Char('\r'), QString());
+            if (fileError == ErrorCode::NoError && !out.isEmpty()) {
+                return ErrorCode::NoError;
+            }
+            if (attempt < 2) {
+                QThread::msleep(500);
+            }
+        }
+        logger.error() << "Xray readRealityKeyFiles: failed path=" << path;
+        return ErrorCode::XrayRealityKeysReadFailed;
+    };
+
+    ErrorCode errorCode = readKeyFile(QString::fromLatin1(amnezia::protocols::xray::PublicKeyPath), outPublicKey);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    return readKeyFile(QString::fromLatin1(amnezia::protocols::xray::shortidPath), outShortId);
+}
+
 QJsonObject XrayConfigurator::mergeStreamSettingsForServerInbound(const XrayServerConfig &srv,
                                                                   const QJsonObject &existingStreamSettings) const
 {
@@ -218,6 +249,17 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
         flowValue = QStringLiteral("xtls-rprx-vision");
     }
 
+    QString realityPublicKey;
+    QString realityShortId;
+    if (srv.security == QLatin1String("reality")) {
+        errorCode = readRealityKeyFiles(container, credentials, realityPublicKey, realityShortId);
+        if (errorCode != ErrorCode::NoError) {
+            logger.error() << "Xray applyServerSettings: readRealityKeyFiles failed, error="
+                           << static_cast<int>(errorCode);
+            return errorCode;
+        }
+    }
+
     QString currentConfig = m_sshSession->getTextFileFromContainer(
             container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -230,25 +272,25 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
     if (doc.isNull() || !doc.isObject()) {
         logger.error() << "Failed to parse server config JSON";
-        return ErrorCode::InternalError;
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     QJsonObject serverConfig = doc.object();
     if (!serverConfig.contains(amnezia::protocols::xray::inbounds)) {
         logger.error() << "Server config missing 'inbounds' field";
-        return ErrorCode::InternalError;
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     QJsonArray inbounds = serverConfig[amnezia::protocols::xray::inbounds].toArray();
     if (inbounds.isEmpty()) {
         logger.error() << "Server config has empty 'inbounds' array";
-        return ErrorCode::InternalError;
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     QJsonObject inbound = inbounds[0].toObject();
     if (!inbound.contains(amnezia::protocols::xray::settings)) {
         logger.error() << "Inbound missing 'settings' field";
-        return ErrorCode::InternalError;
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     const QJsonObject existingStream = inbound[amnezia::protocols::xray::streamSettings].toObject();
@@ -277,9 +319,13 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     } else {
         if (clients.isEmpty()) {
             logger.error() << "Server config has no VLESS clients";
-            return ErrorCode::InternalError;
+            return ErrorCode::XrayServerNoVlessClients;
         }
         clientId = clients[0].toObject()[amnezia::protocols::xray::id].toString();
+        if (clientId.isEmpty()) {
+            logger.error() << "Server config VLESS client has empty id";
+            return ErrorCode::XrayServerNoVlessClients;
+        }
         QJsonArray updatedClients;
         for (const QJsonValue &v : clients) {
             QJsonObject c = v.toObject();
@@ -309,7 +355,8 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
         *outClientId = clientId;
     }
 
-    XrayProtocolConfig updated = buildClientProtocolConfig(credentials, container, srv, clientId, errorCode);
+    XrayProtocolConfig updated =
+            buildClientProtocolConfig(credentials, container, srv, clientId, errorCode, realityPublicKey, realityShortId);
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Xray applyServerSettings: buildClientProtocolConfig failed, error="
                        << static_cast<int>(errorCode);
@@ -339,33 +386,20 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
 XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCredentials &credentials,
                                                                DockerContainer container,
                                                                const XrayServerConfig &srv, const QString &clientId,
-                                                               ErrorCode &errorCode) const
+                                                               ErrorCode &errorCode,
+                                                               const QString &prefetchedRealityPublicKey,
+                                                               const QString &prefetchedRealityShortId) const
 {
-    QString xrayPublicKey;
-    QString xrayShortId;
+    QString xrayPublicKey = prefetchedRealityPublicKey;
+    QString xrayShortId = prefetchedRealityShortId;
 
     if (srv.security == QLatin1String("reality")) {
-        xrayPublicKey = m_sshSession->getTextFileFromContainer(container, credentials,
-                                                               amnezia::protocols::xray::PublicKeyPath, errorCode);
-        if (errorCode != ErrorCode::NoError || xrayPublicKey.isEmpty()) {
-            logger.error() << "Failed to get public key";
-            if (errorCode == ErrorCode::NoError) {
-                errorCode = ErrorCode::InternalError;
+        if (xrayPublicKey.isEmpty() || xrayShortId.isEmpty()) {
+            errorCode = readRealityKeyFiles(container, credentials, xrayPublicKey, xrayShortId);
+            if (errorCode != ErrorCode::NoError) {
+                return {};
             }
-            return {};
         }
-        xrayPublicKey.replace("\n", "");
-
-        xrayShortId = m_sshSession->getTextFileFromContainer(container, credentials,
-                                                             amnezia::protocols::xray::shortidPath, errorCode);
-        if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
-            logger.error() << "Failed to get short ID";
-            if (errorCode == ErrorCode::NoError) {
-                errorCode = ErrorCode::InternalError;
-            }
-            return {};
-        }
-        xrayShortId.replace("\n", "");
     }
 
     QJsonObject userObj;

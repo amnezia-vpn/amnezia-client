@@ -185,8 +185,10 @@ PageType {
                 Layout.bottomMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                // Show Save immediately while user edits port, even before focus loss.
-                visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+                // Show Save while port is being edited (before editingFinished) or other fields changed.
+                visible: listView.enabled
+                         && (XrayConfigModel.hasUnsavedChanges
+                             || textFieldWithHeaderType.textField.text !== port)
                 enabled: visible && textFieldWithHeaderType.errorText === ""
                 text: qsTr("Save")
                 onClicked: function() {
