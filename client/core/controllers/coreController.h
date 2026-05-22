@@ -129,6 +129,7 @@ protected:
     IpSplitTunnelingUiController* ipSplitTunnelingUiControllerProtected() const { return m_ipSplitTunnelingUiController; }
     AppSplitTunnelingController* appSplitTunnelingControllerProtected() const { return m_appSplitTunnelingController; }
     AppSplitTunnelingUiController* appSplitTunnelingUiControllerProtected() const { return m_appSplitTunnelingUiController; }
+    ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
 
