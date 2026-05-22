@@ -95,6 +95,7 @@ void CoreSignalHandlers::initErrorMessagesHandler()
     });
 
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::serverSwitchFailed, this, [this]() {
+        m_coreController->m_subscriptionUiController->revertLastCountryChange();
         emit m_coreController->m_pageController->showNotificationMessage(
             tr("Failed to switch server. Existing connection maintained."));
     });
