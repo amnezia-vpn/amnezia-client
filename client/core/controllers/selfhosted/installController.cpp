@@ -202,7 +202,10 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         }
     }
 
-    if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged) {
+    const bool skipXrayInboundSync =
+            newConfig.getXrayProtocolConfig() && newConfig.getXrayProtocolConfig()->serverConfig.isThirdPartyConfig;
+
+    if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged && !skipXrayInboundSync) {
         DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
         XrayConfigurator xrayConfigurator(&sshSession);
         qDebug() << "InstallController::updateContainer applying Xray server inbound sync, reinstall="

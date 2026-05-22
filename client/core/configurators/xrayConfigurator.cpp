@@ -201,6 +201,14 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     }
 
     const XrayServerConfig &srv = xrayCfg->serverConfig;
+    if (srv.isThirdPartyConfig) {
+        logger.info() << "Xray applyServerSettings: skipped (third-party/native profile)";
+        if (outClientId && xrayCfg->hasClientConfig()) {
+            *outClientId = xrayCfg->clientConfig->id;
+        }
+        return ErrorCode::NoError;
+    }
+
     logger.info() << "Xray applyServerSettings: start"
                     << "container=" << static_cast<int>(container) << "host=" << credentials.hostName
                     << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port
@@ -369,7 +377,8 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
 
     QJsonObject vnextEntry;
     vnextEntry[amnezia::protocols::xray::address] = credentials.hostName;
-    vnextEntry[amnezia::protocols::xray::port] = srv.port.isEmpty() ? amnezia::protocols::xray::defaultPort : srv.port.toInt();
+    vnextEntry[amnezia::protocols::xray::port] =
+            srv.port.isEmpty() ? QString(amnezia::protocols::xray::defaultPort).toInt() : srv.port.toInt();
     vnextEntry[amnezia::protocols::xray::users] = QJsonArray { userObj };
 
     QJsonObject outboundSettings;
@@ -586,6 +595,13 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
                                               const DnsSettings &dnsSettings,
                                               ErrorCode &errorCode)
 {
+    if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
+        if (xrayCfg->serverConfig.isThirdPartyConfig && xrayCfg->hasClientConfig()) {
+            logger.info() << "Xray createConfig: returning existing third-party client config without server SSH";
+            return *xrayCfg;
+        }
+    }
+
     const XrayServerConfig *serverConfig = nullptr;
     if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
         serverConfig = &xrayCfg->serverConfig;

@@ -75,6 +75,7 @@ struct XrayXhttpConfig {
     XrayXmuxConfig     xmux;
 
     QJsonObject toJson() const;
+    /// Reads only keys present in JSON (no Amnezia UI defaults). Use XrayConfigModel::applyDefaultsToServerConfig for UI.
     static XrayXhttpConfig fromJson(const QJsonObject &json);
 };
 
@@ -99,15 +100,14 @@ struct XrayServerConfig {
     QString site;
     bool isThirdPartyConfig = false;
 
-    // New: Security
-    QString security = protocols::xray::defaultSecurity;
-    QString flow = protocols::xray::defaultFlow;
-    QString fingerprint = protocols::xray::defaultFingerprint;
-    QString sni = protocols::xray::defaultSni;
-    QString alpn = protocols::xray::defaultAlpn;
+    // Extended VLESS fields: empty in persisted JSON means "not set" (UI defaults applied in XrayConfigModel).
+    QString security;
+    QString flow;
+    QString fingerprint;
+    QString sni;
+    QString alpn;
 
-    // New: Transport
-    QString transport = protocols::xray::defaultTransport;
+    QString transport;
     XrayXhttpConfig xhttp;
     XrayMkcpConfig mkcp;
 

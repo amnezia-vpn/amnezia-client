@@ -108,35 +108,114 @@ QJsonObject XrayXhttpConfig::toJson() const
     return obj;
 }
 
+namespace
+{
+    XrayXhttpConfig clearedXhttpConfig()
+    {
+        XrayXhttpConfig c;
+        c.mode = QString();
+        c.host = QString();
+        c.path = QString();
+        c.headersTemplate = QString();
+        c.uplinkMethod = QString();
+        c.disableGrpc = false;
+        c.disableSse = false;
+        c.sessionPlacement = QString();
+        c.sessionKey = QString();
+        c.seqPlacement = QString();
+        c.seqKey = QString();
+        c.uplinkDataPlacement = QString();
+        c.uplinkDataKey = QString();
+        c.uplinkChunkSize = QString();
+        c.scMaxBufferedPosts = QString();
+        c.scMaxEachPostBytesMin = QString();
+        c.scMaxEachPostBytesMax = QString();
+        c.scMinPostsIntervalMsMin = QString();
+        c.scMinPostsIntervalMsMax = QString();
+        c.scStreamUpServerSecsMin = QString();
+        c.scStreamUpServerSecsMax = QString();
+        return c;
+    }
+} // namespace
+
 XrayXhttpConfig XrayXhttpConfig::fromJson(const QJsonObject &json)
 {
-    XrayXhttpConfig c;
-    c.mode            = json.value(configKey::xhttpMode).toString(protocols::xray::defaultXhttpMode);
-    c.host            = json.value(configKey::xhttpHost).toString(protocols::xray::defaultSite);
-    c.path            = json.value(configKey::xhttpPath).toString();
-    c.headersTemplate = json.value(configKey::xhttpHeadersTemplate).toString(protocols::xray::defaultXhttpHeadersTemplate);
-    c.uplinkMethod    = json.value(configKey::xhttpUplinkMethod).toString(protocols::xray::defaultXhttpUplinkMethod);
-    c.disableGrpc     = json.value(configKey::xhttpDisableGrpc).toBool(true);
-    c.disableSse      = json.value(configKey::xhttpDisableSse).toBool(true);
+    if (json.isEmpty()) {
+        return clearedXhttpConfig();
+    }
 
-    c.sessionPlacement    = json.value(configKey::xhttpSessionPlacement).toString(protocols::xray::defaultXhttpSessionPlacement);
-    c.sessionKey          = json.value(configKey::xhttpSessionKey).toString();
-    c.seqPlacement        = json.value(configKey::xhttpSeqPlacement).toString(protocols::xray::defaultXhttpSessionPlacement);
-    c.seqKey              = json.value(configKey::xhttpSeqKey).toString();
-    c.uplinkDataPlacement = json.value(configKey::xhttpUplinkDataPlacement).toString(protocols::xray::defaultXhttpUplinkDataPlacement);
-    c.uplinkDataKey       = json.value(configKey::xhttpUplinkDataKey).toString();
+    XrayXhttpConfig c = clearedXhttpConfig();
 
-    c.uplinkChunkSize         = json.value(configKey::xhttpUplinkChunkSize).toString("0");
-    c.scMaxBufferedPosts      = json.value(configKey::xhttpScMaxBufferedPosts).toString();
-    c.scMaxEachPostBytesMin   = json.value(configKey::xhttpScMaxEachPostBytesMin).toString("1");
-    c.scMaxEachPostBytesMax   = json.value(configKey::xhttpScMaxEachPostBytesMax).toString("100");
-    c.scMinPostsIntervalMsMin = json.value(configKey::xhttpScMinPostsIntervalMsMin).toString("100");
-    c.scMinPostsIntervalMsMax = json.value(configKey::xhttpScMinPostsIntervalMsMax).toString("800");
-    c.scStreamUpServerSecsMin = json.value(configKey::xhttpScStreamUpServerSecsMin).toString("1");
-    c.scStreamUpServerSecsMax = json.value(configKey::xhttpScStreamUpServerSecsMax).toString("100");
+    if (json.contains(configKey::xhttpMode)) {
+        c.mode = json.value(configKey::xhttpMode).toString();
+    }
+    if (json.contains(configKey::xhttpHost)) {
+        c.host = json.value(configKey::xhttpHost).toString();
+    }
+    if (json.contains(configKey::xhttpPath)) {
+        c.path = json.value(configKey::xhttpPath).toString();
+    }
+    if (json.contains(configKey::xhttpHeadersTemplate)) {
+        c.headersTemplate = json.value(configKey::xhttpHeadersTemplate).toString();
+    }
+    if (json.contains(configKey::xhttpUplinkMethod)) {
+        c.uplinkMethod = json.value(configKey::xhttpUplinkMethod).toString();
+    }
+    if (json.contains(configKey::xhttpDisableGrpc)) {
+        c.disableGrpc = json.value(configKey::xhttpDisableGrpc).toBool();
+    }
+    if (json.contains(configKey::xhttpDisableSse)) {
+        c.disableSse = json.value(configKey::xhttpDisableSse).toBool();
+    }
+    if (json.contains(configKey::xhttpSessionPlacement)) {
+        c.sessionPlacement = json.value(configKey::xhttpSessionPlacement).toString();
+    }
+    if (json.contains(configKey::xhttpSessionKey)) {
+        c.sessionKey = json.value(configKey::xhttpSessionKey).toString();
+    }
+    if (json.contains(configKey::xhttpSeqPlacement)) {
+        c.seqPlacement = json.value(configKey::xhttpSeqPlacement).toString();
+    }
+    if (json.contains(configKey::xhttpSeqKey)) {
+        c.seqKey = json.value(configKey::xhttpSeqKey).toString();
+    }
+    if (json.contains(configKey::xhttpUplinkDataPlacement)) {
+        c.uplinkDataPlacement = json.value(configKey::xhttpUplinkDataPlacement).toString();
+    }
+    if (json.contains(configKey::xhttpUplinkDataKey)) {
+        c.uplinkDataKey = json.value(configKey::xhttpUplinkDataKey).toString();
+    }
+    if (json.contains(configKey::xhttpUplinkChunkSize)) {
+        c.uplinkChunkSize = json.value(configKey::xhttpUplinkChunkSize).toString();
+    }
+    if (json.contains(configKey::xhttpScMaxBufferedPosts)) {
+        c.scMaxBufferedPosts = json.value(configKey::xhttpScMaxBufferedPosts).toString();
+    }
+    if (json.contains(configKey::xhttpScMaxEachPostBytesMin)) {
+        c.scMaxEachPostBytesMin = json.value(configKey::xhttpScMaxEachPostBytesMin).toString();
+    }
+    if (json.contains(configKey::xhttpScMaxEachPostBytesMax)) {
+        c.scMaxEachPostBytesMax = json.value(configKey::xhttpScMaxEachPostBytesMax).toString();
+    }
+    if (json.contains(configKey::xhttpScMinPostsIntervalMsMin)) {
+        c.scMinPostsIntervalMsMin = json.value(configKey::xhttpScMinPostsIntervalMsMin).toString();
+    }
+    if (json.contains(configKey::xhttpScMinPostsIntervalMsMax)) {
+        c.scMinPostsIntervalMsMax = json.value(configKey::xhttpScMinPostsIntervalMsMax).toString();
+    }
+    if (json.contains(configKey::xhttpScStreamUpServerSecsMin)) {
+        c.scStreamUpServerSecsMin = json.value(configKey::xhttpScStreamUpServerSecsMin).toString();
+    }
+    if (json.contains(configKey::xhttpScStreamUpServerSecsMax)) {
+        c.scStreamUpServerSecsMax = json.value(configKey::xhttpScStreamUpServerSecsMax).toString();
+    }
 
-    c.xPadding = XrayXPaddingConfig::fromJson(json.value("xPadding").toObject());
-    c.xmux     = XrayXmuxConfig::fromJson(json.value("xmux").toObject());
+    if (json.contains(QLatin1String("xPadding"))) {
+        c.xPadding = XrayXPaddingConfig::fromJson(json.value(QLatin1String("xPadding")).toObject());
+    }
+    if (json.contains(QLatin1String("xmux"))) {
+        c.xmux = XrayXmuxConfig::fromJson(json.value(QLatin1String("xmux")).toObject());
+    }
 
     return c;
 }
@@ -156,12 +235,27 @@ QJsonObject XrayMkcpConfig::toJson() const
 XrayMkcpConfig XrayMkcpConfig::fromJson(const QJsonObject &json)
 {
     XrayMkcpConfig c;
-    c.tti              = json.value(configKey::mkcpTti).toString();
-    c.uplinkCapacity   = json.value(configKey::mkcpUplinkCapacity).toString();
-    c.downlinkCapacity = json.value(configKey::mkcpDownlinkCapacity).toString();
-    c.readBufferSize   = json.value(configKey::mkcpReadBufferSize).toString();
-    c.writeBufferSize  = json.value(configKey::mkcpWriteBufferSize).toString();
-    c.congestion       = json.value(configKey::mkcpCongestion).toBool(true);
+    if (json.isEmpty()) {
+        return c;
+    }
+    if (json.contains(configKey::mkcpTti)) {
+        c.tti = json.value(configKey::mkcpTti).toString();
+    }
+    if (json.contains(configKey::mkcpUplinkCapacity)) {
+        c.uplinkCapacity = json.value(configKey::mkcpUplinkCapacity).toString();
+    }
+    if (json.contains(configKey::mkcpDownlinkCapacity)) {
+        c.downlinkCapacity = json.value(configKey::mkcpDownlinkCapacity).toString();
+    }
+    if (json.contains(configKey::mkcpReadBufferSize)) {
+        c.readBufferSize = json.value(configKey::mkcpReadBufferSize).toString();
+    }
+    if (json.contains(configKey::mkcpWriteBufferSize)) {
+        c.writeBufferSize = json.value(configKey::mkcpWriteBufferSize).toString();
+    }
+    if (json.contains(configKey::mkcpCongestion)) {
+        c.congestion = json.value(configKey::mkcpCongestion).toBool();
+    }
     return c;
 }
 
@@ -208,8 +302,14 @@ QJsonObject XrayServerConfig::toJson() const
     if (!transport.isEmpty()) {
         obj[configKey::xrayTransport] = transport;
     }
-    obj["xhttp"] = xhttp.toJson();
-    obj["mkcp"] = mkcp.toJson();
+    const QJsonObject xhttpObj = xhttp.toJson();
+    if (!xhttpObj.isEmpty()) {
+        obj[QStringLiteral("xhttp")] = xhttpObj;
+    }
+    const QJsonObject mkcpObj = mkcp.toJson();
+    if (!mkcpObj.isEmpty()) {
+        obj[QStringLiteral("mkcp")] = mkcpObj;
+    }
 
     return obj;
 }
@@ -225,20 +325,39 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
     c.site = json.value(configKey::site).toString();
     c.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
 
-    // New: Security
-    c.security = json.value(configKey::xraySecurity).toString(protocols::xray::defaultSecurity);
-    c.flow = json.value(configKey::xrayFlow).toString(protocols::xray::defaultFlow);
-    c.fingerprint = json.value(configKey::xrayFingerprint).toString(protocols::xray::defaultFingerprint);
-    if (c.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
-        c.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
+    if (json.contains(configKey::xraySecurity)) {
+        c.security = json.value(configKey::xraySecurity).toString();
     }
-    c.sni = json.value(configKey::xraySni).toString(protocols::xray::defaultSni);
-    c.alpn = json.value(configKey::xrayAlpn).toString(protocols::xray::defaultAlpn);
-
-    // New: Transport
-    c.transport = json.value(configKey::xrayTransport).toString(protocols::xray::defaultTransport);
-    c.xhttp = XrayXhttpConfig::fromJson(json.value("xhttp").toObject());
-    c.mkcp = XrayMkcpConfig::fromJson(json.value("mkcp").toObject());
+    if (json.contains(configKey::xrayFlow)) {
+        c.flow = json.value(configKey::xrayFlow).toString();
+    }
+    if (json.contains(configKey::xrayFingerprint)) {
+        c.fingerprint = json.value(configKey::xrayFingerprint).toString();
+        if (c.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
+            c.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
+        }
+    }
+    if (json.contains(configKey::xraySni)) {
+        c.sni = json.value(configKey::xraySni).toString();
+    }
+    if (json.contains(configKey::xrayAlpn)) {
+        c.alpn = json.value(configKey::xrayAlpn).toString();
+    }
+    if (json.contains(configKey::xrayTransport)) {
+        c.transport = json.value(configKey::xrayTransport).toString();
+    }
+    if (json.contains(QLatin1String("xhttp"))) {
+        const QJsonObject xhttpJson = json.value(QLatin1String("xhttp")).toObject();
+        if (!xhttpJson.isEmpty()) {
+            c.xhttp = XrayXhttpConfig::fromJson(xhttpJson);
+        }
+    }
+    if (json.contains(QLatin1String("mkcp"))) {
+        const QJsonObject mkcpJson = json.value(QLatin1String("mkcp")).toObject();
+        if (!mkcpJson.isEmpty()) {
+            c.mkcp = XrayMkcpConfig::fromJson(mkcpJson);
+        }
+    }
 
     return c;
 }
@@ -354,7 +473,9 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
         }
     }
 
-    c.needsClientHydration = !json.contains(configKey::xrayTransport) && c.hasClientConfig();
+    c.needsClientHydration =
+            c.hasClientConfig()
+            && (!json.contains(configKey::xrayTransport) || c.serverConfig.isThirdPartyConfig);
     if (c.needsClientHydration) {
         c.hydrateServerConfigFromClientNative();
     }
@@ -409,7 +530,9 @@ bool XrayProtocolConfig::hydrateServerConfigFromClientNative()
         srv.transport = QStringLiteral("raw");
     }
 
-    srv.security = streamSettings.value(protocols::xray::security).toString(protocols::xray::defaultSecurity);
+    if (streamSettings.contains(protocols::xray::security)) {
+        srv.security = streamSettings.value(protocols::xray::security).toString();
+    }
 
     if (srv.security == QLatin1String("reality")) {
         const QJsonObject rs = streamSettings.value(protocols::xray::realitySettings).toObject();
