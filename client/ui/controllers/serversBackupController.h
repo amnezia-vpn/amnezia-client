@@ -10,10 +10,13 @@
 
 class QTemporaryFile;
 class ServersModel;
+class SecureQSettings;
 
-#include "core/controllers/serverController.h"
+#include <QPointer>
+
 #include "core/defs.h"
 #include "containers/containers_defs.h"
+#include "core/utils/selfhosted/sshSession.h"
 
 using namespace amnezia;
 
@@ -31,7 +34,7 @@ class ServersBackupController : public QObject
     Q_OBJECT
 
 public:
-    explicit ServersBackupController(std::shared_ptr<Settings> settings, ServersModel *serversModel, QObject *parent = nullptr);
+    explicit ServersBackupController(SecureQSettings *settings, ServersModel *serversModel, QObject *parent = nullptr);
     ~ServersBackupController();
 
     /**
@@ -360,10 +363,17 @@ private:
      */
     void trySetDefaultContainer();
 
+    ErrorCode runHostScript(const ServerCredentials &credentials, const QString &script,
+                            const std::function<ErrorCode(const QString &, libssh::Client &)> &cbStdOut = nullptr,
+                            const std::function<ErrorCode(const QString &, libssh::Client &)> &cbStdErr = nullptr);
+    ErrorCode downloadFileFromHost(const ServerCredentials &credentials, const QString &remotePath, const QString &localPath);
+    ErrorCode uploadFileToHostPublic(const ServerCredentials &credentials, const QString &localPath, const QString &remotePath,
+                                     libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
+
 private:
-    std::shared_ptr<Settings> m_settings;
+    QPointer<SecureQSettings> m_settings;
     ServersModel *m_serversModel;
-    ServerController *m_serverController;
+    SshSession m_sshSession;
     BackupStatus m_status;
     QString m_backupDir;
     QString m_currentOutput;

@@ -1,4 +1,6 @@
 #include "serversBackupController.h"
+#include "secureQSettings.h"
+#include "core/utils/utilities.h"
 #include <QDebug>
 #include <QDir>
 #include <QRegularExpression>
@@ -24,11 +26,10 @@
 #include "ui/models/servers_model.h"
 #include "ui/models/containers_model.h"
 
-ServersBackupController::ServersBackupController(std::shared_ptr<Settings> settings, ServersModel *serversModel, QObject *parent)
+ServersBackupController::ServersBackupController(SecureQSettings *settings, ServersModel *serversModel, QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_serversModel(serversModel)
-    , m_serverController(new ServerController(settings, this))
     , m_status(Idle)
     , m_backupDir("/var/backups/amnezia")
     , m_restoreReplaceMode(false)
@@ -87,7 +88,7 @@ void ServersBackupController::createBackup(const ServerCredentials &credentials)
     };
 
     // Run script on server
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
         // Parse created backup name from output: format "IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz"
@@ -165,7 +166,7 @@ void ServersBackupController::createContainerBackup(const ServerCredentials &cre
         return handleStdErr(data, m_currentError);
     };
 
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
         // Parse created backup name from output: format "IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz"
@@ -221,7 +222,7 @@ void ServersBackupController::createContainersBackup(const ServerCredentials &cr
         return handleStdErr(data, m_currentError);
     };
 
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
         // Parse created backup name from output: format "IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz"
@@ -268,7 +269,7 @@ void ServersBackupController::fetchBackupList(const ServerCredentials &credentia
         return handleStdErr(data, m_currentError);
     };
 
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
         QList<BackupInfo> backups = parseBackupList(m_currentOutput);
@@ -310,7 +311,7 @@ void ServersBackupController::restoreBackup(const ServerCredentials &credentials
         return handleStdErr(data, m_currentError);
     };
 
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     // Check output for errors, even if script exited with code 0
     bool hasError = m_currentOutput.contains("[ERROR]") || 
@@ -362,7 +363,7 @@ void ServersBackupController::checkBackupStatus(const ServerCredentials &credent
         return handleStdErr(data, m_currentError);
     };
 
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
         QJsonObject status = parseBackupStatus(m_currentOutput);
@@ -438,7 +439,7 @@ void ServersBackupController::downloadBackup(const ServerCredentials &credential
 
     setProgress(25, tr("Starting file transfer..."));
 
-    ErrorCode error = m_serverController->downloadFileFromHost(credentials, remotePath, actualLocalPath);
+    ErrorCode error = downloadFileFromHost(credentials, remotePath, actualLocalPath);
 
     if (error == ErrorCode::NoError) {
        // qDebug() << "Backup downloaded to:" << actualLocalPath;
@@ -582,7 +583,7 @@ void ServersBackupController::uploadBackup(const ServerCredentials &credentials,
 
     setProgress(25, tr("Starting file transfer..."));
 
-    ErrorCode error = m_serverController->uploadFileToHostPublic(credentials, actualLocalPath, remotePath,
+    ErrorCode error = uploadFileToHostPublic(credentials, actualLocalPath, remotePath,
                                                                   libssh::ScpOverwriteMode::ScpOverwriteExisting);
 
     qDebug() << "Upload result, error code:" << static_cast<int>(error);
@@ -763,7 +764,7 @@ void ServersBackupController::deleteBackup(const ServerCredentials &credentials,
         return handleStdErr(data, m_currentError);
     };
 
-    ErrorCode error = m_serverController->runHostScript(credentials, script, cbStdOut, cbStdErr);
+    ErrorCode error = runHostScript(credentials, script, cbStdOut, cbStdErr);
 
     if (error == ErrorCode::NoError) {
         setStatus(Success);
@@ -1481,4 +1482,37 @@ void ServersBackupController::trySetDefaultContainer()
         m_containerRetryCount = 0;
         emit defaultServerAndContainerSet();
     }
+}
+
+ErrorCode ServersBackupController::runHostScript(const ServerCredentials &credentials, const QString &script,
+                                                  const std::function<ErrorCode(const QString &, libssh::Client &)> &cbStdOut,
+                                                  const std::function<ErrorCode(const QString &, libssh::Client &)> &cbStdErr)
+{
+    const QString fileName = "/tmp/amnezia_" + Utils::getRandomString(16) + ".sh";
+    ErrorCode e = m_sshSession.uploadFileToHost(credentials, script.toUtf8(), fileName);
+    if (e != ErrorCode::NoError)
+        return e;
+
+    e = m_sshSession.runScript(credentials, QString("sudo bash %1").arg(fileName), cbStdOut, cbStdErr);
+    m_sshSession.runScript(credentials, QString("sudo rm -f %1").arg(fileName));
+    return e;
+}
+
+ErrorCode ServersBackupController::downloadFileFromHost(const ServerCredentials &credentials, const QString &remotePath, const QString &localPath)
+{
+    libssh::Client sshClient;
+    ErrorCode e = sshClient.connectToHost(credentials);
+    if (e != ErrorCode::NoError)
+        return e;
+    return sshClient.scpFileDownload(remotePath, localPath);
+}
+
+ErrorCode ServersBackupController::uploadFileToHostPublic(const ServerCredentials &credentials, const QString &localPath, const QString &remotePath,
+                                                          libssh::ScpOverwriteMode overwriteMode)
+{
+    libssh::Client sshClient;
+    ErrorCode e = sshClient.connectToHost(credentials);
+    if (e != ErrorCode::NoError)
+        return e;
+    return sshClient.scpFileCopy(overwriteMode, localPath, remotePath, "backup_file");
 }
