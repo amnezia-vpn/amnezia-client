@@ -71,6 +71,7 @@ CMakeLists.txt.user*
 
 # Linux files
 *.7z
+AmneziaVPN_Ubuntu_x64.*
 deploy/AppDir
 deploy/Tools
 deploy/AmneziaVPN*Installer*
@@ -114,6 +115,7 @@ proguard/
 
 # Android Studio captures folder
 captures/
+device_backups/
 
 # IntelliJ
 *.iml
