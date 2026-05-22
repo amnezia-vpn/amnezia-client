@@ -17,7 +17,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftInterop.h"
 #endif
 
 QFile Logger::m_file;
@@ -146,7 +146,7 @@ QString Logger::getLogFile()
     QString qtLog = file.readAll();
 
 #ifdef Q_OS_IOS
-    return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
+    return QString().fromStdString(SWIFT_INTEROP_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
 #else
     return qtLog;
 #endif
@@ -163,7 +163,7 @@ QString Logger::getServiceLogFile()
     QString qtLog = file.readAll();
 
 #ifdef Q_OS_IOS
-    return QString().fromStdString(AmneziaVPN::swiftUpdateLogData(qtLog.toStdString()));
+    return QString().fromStdString(SWIFT_INTEROP_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
 #else
     return qtLog;
 #endif
@@ -194,7 +194,7 @@ void Logger::clearLogs(bool isServiceLogger)
     file.close();
 
 #ifdef Q_OS_IOS
-    AmneziaVPN::swiftDeleteLog();
+    SWIFT_INTEROP_NAMESPACE::swiftDeleteLog();
 #endif
 
     if (isLogActive) {

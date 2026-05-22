@@ -1,0 +1,25 @@
+#ifndef SWIFTINTEROP_H
+#define SWIFTINTEROP_H
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+#include "core/utils/swiftInteropConfig.h"
+
+#ifndef SWIFT_INTEROP_OBJC_HEADER
+#ifdef AMNEZIA_SWIFT_OBJC_HEADER
+#define SWIFT_INTEROP_OBJC_HEADER AMNEZIA_SWIFT_OBJC_HEADER
+#else
+#define SWIFT_INTEROP_OBJC_HEADER "AmneziaVPN-Swift.h"
+#endif
+#endif
+#ifndef SWIFT_INTEROP_NAMESPACE
+#ifdef AMNEZIA_SWIFT_NAMESPACE
+#define SWIFT_INTEROP_NAMESPACE AMNEZIA_SWIFT_NAMESPACE
+#else
+#define SWIFT_INTEROP_NAMESPACE AmneziaVPN
+#endif
+#endif
+
+#include SWIFT_INTEROP_OBJC_HEADER
+#endif
+
+#endif
