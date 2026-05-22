@@ -8,6 +8,7 @@ from conan.tools.files import chdir
 
 import os
 import shutil
+import shlex
 
 class OpenVPNAdapter(ConanFile):
     name = "openvpnadapter"
@@ -57,16 +58,32 @@ class OpenVPNAdapter(ConanFile):
                 f" -sdk {self._sdk}"
                 f' "CONFIGURATION_BUILD_DIR={self.build_folder}"'
                 f' "BUILT_PRODUCTS_DIR={self.build_folder}"'
+                " MACH_O_TYPE=staticlib"
                 " BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
                 " CODE_SIGNING_ALLOWED=NO"
             )
 
     def package(self):
+        package_framework = os.path.join(self.package_folder, "OpenVPNAdapter.framework")
         shutil.copytree(os.path.join(self.build_folder, "OpenVPNAdapter.framework"),
-                        os.path.join(self.package_folder, "OpenVPNAdapter.framework"))
+                        package_framework)
+
+        framework_binary = os.path.join(package_framework, "OpenVPNAdapter")
+        dependency_binaries = [
+            os.path.join(self.build_folder, "OpenVPNClient.framework", "OpenVPNClient"),
+            os.path.join(self.build_folder, "LZ4.framework", "LZ4"),
+            os.path.join(self.build_folder, "mbedTLS.framework", "mbedTLS"),
+        ]
+        merged_binary = framework_binary + ".merged"
+        self.run("xcrun libtool -static -o {} {}".format(
+            shlex.quote(merged_binary),
+            " ".join(shlex.quote(path) for path in [framework_binary] + dependency_binaries)
+        ))
+        shutil.move(merged_binary, framework_binary)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpnadapter")
         self.cpp_info.type = PackageType.STATIC
         self.cpp_info.package_framework = True
         self.cpp_info.location = os.path.join(self.package_folder, "OpenVPNAdapter.framework")
+        self.cpp_info.frameworks = ["SystemConfiguration"]
