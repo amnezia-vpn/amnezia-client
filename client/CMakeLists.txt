@@ -193,8 +193,6 @@ elseif(APPLE)
     include(cmake/macos.cmake)
 endif()
 
-include(CTest)
-
 list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
