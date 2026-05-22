@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(PROJECT AmneziaVPN)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/clientBrandingDefaults.cmake)
+
+set(PROJECT ${CLIENT_TARGET_NAME})
 project(${PROJECT})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -66,21 +68,26 @@ qt6_add_resources(QRC ${QRC}
     ${CMAKE_CURRENT_LIST_DIR}/images/images.qrc
     ${CMAKE_CURRENT_LIST_DIR}/images/flagKit.qrc
     ${CMAKE_CURRENT_LIST_DIR}/client_scripts/clientScripts.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/ui/qml/qml.qrc
+    ${CLIENT_QML_QRC_FILE}
     ${CMAKE_CURRENT_LIST_DIR}/server_scripts/serverScripts.qrc
+    ${CLIENT_EXTRA_QRC}
 )
 
 # -- i18n begin
-set(AMNEZIAVPN_TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru_RU.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_fa_IR.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ar_EG.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_my_MM.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ur_PK.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_hi_IN.ts
-)
+if(CLIENT_TS_FILES)
+    set(AMNEZIAVPN_TS_FILES ${CLIENT_TS_FILES})
+else()
+    set(AMNEZIAVPN_TS_FILES
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ru_RU.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_zh_CN.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_fa_IR.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ar_EG.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_my_MM.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_uk_UA.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ur_PK.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_hi_IN.ts
+    )
+endif()
 
 qt6_add_translations(${PROJECT}
     TS_FILES ${AMNEZIAVPN_TS_FILES}
@@ -122,6 +129,17 @@ include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/core/utils)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/core/utils/appUiConfig.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/core/utils/appUiConfig.h
+    @ONLY
+)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/core/utils/swiftInteropConfig.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/core/utils/swiftInteropConfig.h
+    @ONLY
+)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")

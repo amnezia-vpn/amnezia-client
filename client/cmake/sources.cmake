@@ -65,6 +65,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
+    ${CLIENT_ROOT_DIR}/core/utils/swiftInterop.h
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
     ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
     ${CLIENT_ROOT_DIR}/core/utils/constants.h

@@ -5,6 +5,7 @@
 #include "amneziaApplication.h"
 #include "core/utils/osSignalHandler.h"
 #include "core/utils/migrations.h"
+#include "core/utils/appUiConfig.h"
 #include "version.h"
 
 #ifdef Q_OS_WIN
@@ -19,9 +20,9 @@
 bool isAnotherInstanceRunning()
 {
     QLocalSocket socket;
-    socket.connectToServer("AmneziaVPNInstance");
+    socket.connectToServer(APP_INSTANCE_NAME);
     if (socket.waitForConnected(500)) {
-        qWarning() << "AmneziaVPN is already running";
+        qWarning() << APPLICATION_NAME << "is already running";
         return true;
     }
     return false;
