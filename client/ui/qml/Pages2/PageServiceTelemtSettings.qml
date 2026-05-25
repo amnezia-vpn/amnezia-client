@@ -42,7 +42,7 @@ PageType {
 
     onSavedTransportModeChanged: {
         if (savedTransportMode === "faketls") {
-            root.syncedSecretTabIndex = 2
+            root.syncedSecretTabIndex = 1
         } else if (savedTransportMode !== "") {
             root.syncedSecretTabIndex = 0
         }
@@ -123,7 +123,6 @@ PageType {
         root.telemtScheduleContainerStatusRefresh()
     }
 
-    // Defer SSH/updateContainer so QML control handlers return before nested event loops run.
     function telemtScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
@@ -432,23 +431,17 @@ PageType {
                     if (mode === "faketls") {
                         var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : TelemtConfigModel.defaultTlsDomain()
                         return "ee" + secret + domainToHex(domain)
-                    } else if (mode === "padded") {
-                        return "dd" + secret
                     }
-                    // Telemt default (secure MTProto, not FakeTLS): Telegram proxy links require dd + hex secret
                     return "dd" + secret
                 }
 
                 property int secretTabIndex: root.syncedSecretTabIndex
 
                 function activeSecret() {
-                    if (root.syncedSecretTabIndex === 0) {
-                        return secretForMode("standard")
-                    }
                     if (root.syncedSecretTabIndex === 1) {
-                        return secretForMode("padded")
+                        return secretForMode("faketls")
                     }
-                    return secretForMode("faketls")
+                    return secretForMode("standard")
                 }
 
                 function effectiveSecret() {
@@ -791,15 +784,6 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
-                function domainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
                 function telemtLinkSecret() {
                     if (secret === "") {
                         return ""
@@ -1049,6 +1033,7 @@ PageType {
                                 clickedFunction: function () {
                                     transportMode = (index === 0) ? "standard" : "faketls"
                                     TelemtConfigModel.setTransportMode(transportMode)
+                                    root.syncedSecretTabIndex = transportMode === "faketls" ? 1 : 0
                                     transportModeDropDown.closeTriggered()
                                 }
                             }

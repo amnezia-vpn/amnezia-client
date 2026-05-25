@@ -45,7 +45,7 @@ PageType {
 
     onSavedTransportModeChanged: {
         if (savedTransportMode === "faketls") {
-            root.syncedSecretTabIndex = 2
+            root.syncedSecretTabIndex = 1
         } else if (savedTransportMode !== "") {
             root.syncedSecretTabIndex = 0
         }
@@ -126,7 +126,6 @@ PageType {
         root.mtProxyScheduleContainerStatusRefresh()
     }
 
-    // Hex values that exist in last loaded / last successfully saved config — show link panel only for these.
     property var mtProxyPersistedAdditionalHex: []
 
     function mtProxyRefreshPersistedAdditionalSecrets() {
@@ -148,11 +147,8 @@ PageType {
         return false
     }
 
-    // Rejects garbage like "123123123123"; only dotted IPv4 shape (≤3 digits per octet, ≤4 octets).
     readonly property var natIpv4InputFormat: /^(\d{1,3}\.){0,3}\d{0,3}$/
 
-    // Defer SSH/updateContainer so QML control handlers return before nested event loops run;
-    // avoids "Object destroyed while one of its QML signal handlers is in progress".
     function mtProxyScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
@@ -160,7 +156,6 @@ PageType {
         })
     }
 
-    // Optional IPv4: show invalid while typing only when the string looks complete (four octets), so partial entry is not nagged.
     function natIpv4FieldShowInvalidError(text) {
         var t = text ? String(text).replace(/^\s+|\s+$/g, '') : ""
         if (t === "")
@@ -226,7 +221,6 @@ PageType {
         Qt.callLater(root.mtProxyOnPageShown)
     }
 
-    // Block back navigation and Escape (via PageStart.isControlsDisabled) while SSH/update or diagnostics refresh runs.
     onNavigationBlockedWhileBusyChanged: {
         if (root.visible) {
             PageController.disableControls(navigationBlockedWhileBusy)
@@ -495,22 +489,17 @@ PageType {
                     if (mode === "faketls") {
                         var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : MtProxyConfigModel.defaultTlsDomain()
                         return "ee" + secret + domainToHex(domain)
-                    } else if (mode === "padded") {
-                        return "dd" + secret
                     }
-                    return secret
+                    return "dd" + secret
                 }
 
                 property int secretTabIndex: root.syncedSecretTabIndex
 
                 function activeSecret() {
-                    if (root.syncedSecretTabIndex === 0) {
-                        return secretForMode("standard")
-                    }
                     if (root.syncedSecretTabIndex === 1) {
-                        return secretForMode("padded")
+                        return secretForMode("faketls")
                     }
-                    return secretForMode("faketls")
+                    return secretForMode("standard")
                 }
 
                 function effectiveSecret() {
@@ -867,31 +856,15 @@ PageType {
                     if (mode === "faketls") {
                         var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : MtProxyConfigModel.defaultTlsDomain()
                         return "ee" + baseHex + mtProxyDomainToHex(domain)
-                    } else if (mode === "padded") {
-                        return "dd" + baseHex
                     }
-                    return baseHex
-                }
-
-                function mtProxyLinkSecret() {
-                    if (secret === "") {
-                        return ""
-                    }
-                    if (transportMode === "faketls") {
-                        var domain = tlsDomain !== "" ? tlsDomain : MtProxyConfigModel.defaultTlsDomain()
-                        return "ee" + secret + mtProxyDomainToHex(domain)
-                    }
-                    return "dd" + secret
+                    return "dd" + baseHex
                 }
 
                 function mtProxyActiveSecretForBaseHex(baseHex) {
-                    if (root.syncedSecretTabIndex === 0) {
-                        return mtProxySecretForBaseHex(baseHex, "standard")
-                    }
                     if (root.syncedSecretTabIndex === 1) {
-                        return mtProxySecretForBaseHex(baseHex, "padded")
+                        return mtProxySecretForBaseHex(baseHex, "faketls")
                     }
-                    return mtProxySecretForBaseHex(baseHex, "faketls")
+                    return mtProxySecretForBaseHex(baseHex, "standard")
                 }
 
                 function mtProxyEffectiveHostForLinks() {
@@ -954,7 +927,7 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: secret !== "" ? mtProxyLinkSecret() : qsTr("Not generated")
+                            text: secret !== "" ? mtProxyActiveSecretForBaseHex(secret) : qsTr("Not generated")
                             color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
                             wrapMode: Text.WrapAnywhere
                             font.pixelSize: 14
@@ -1210,6 +1183,7 @@ PageType {
                                 clickedFunction: function () {
                                     transportMode = (index === 0) ? "standard" : "faketls"
                                     MtProxyConfigModel.setTransportMode(transportMode)
+                                    root.syncedSecretTabIndex = transportMode === "faketls" ? 1 : 0
                                     transportModeDropDown.closeTriggered()
                                 }
                             }
