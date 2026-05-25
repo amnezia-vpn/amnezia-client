@@ -1,6 +1,5 @@
 #include "serversUiController.h"
 
-#include "core/utils/api/apiUtils.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -216,11 +215,7 @@ QString ServersUiController::getDefaultServerImagePathCollapsed() const
             if (!description.isApiV2 || description.apiServerCountryCode.isEmpty()) {
                 return "";
             }
-            const QString imageCode = apiUtils::countryCodeBaseForFlag(description.apiServerCountryCode.toUpper());
-            if (imageCode.isEmpty()) {
-                return QString();
-            }
-            return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(imageCode);
+            return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(description.apiServerCountryCode.toUpper());
         }
     }
     return "";
@@ -510,6 +505,10 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("TOR");
             } else if (container == DockerContainer::Socks5Proxy) {
                 servicesName.append("SOCKS5");
+            } else if (container == DockerContainer::MtProxy) {
+                servicesName.append("MTProxy");
+            } else if (container == DockerContainer::Telemt) {
+                servicesName.append("Telemt");
             }
         }
     }

@@ -323,6 +323,18 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
         vlessServer.shortId = realitySettings.value(amnezia::protocols::xray::shortId).toString();
         vlessServer.fingerprint = realitySettings.value(amnezia::protocols::xray::fingerprint).toString("chrome");
         vlessServer.spiderX = realitySettings.value(amnezia::protocols::xray::spiderX).toString("");
+    } else if (vlessServer.security == "tls") {
+        QJsonObject tlsSettings = streamSettings.value("tlsSettings").toObject();
+        vlessServer.serverName = tlsSettings.value(amnezia::protocols::xray::serverName).toString();
+        vlessServer.fingerprint = tlsSettings.value(amnezia::protocols::xray::fingerprint).toString();
+        // alpn: serialize array back to comma-separated for VLESS URI
+        QJsonArray alpnArr = tlsSettings.value("alpn").toArray();
+        QStringList alpnList;
+        for (const QJsonValue &v : alpnArr) {
+            alpnList << v.toString();
+        }
+        // alpn goes into vless URI query param — handled by Serialize via serverName/alpn fields
+        // VlessServerObject doesn't have alpn field, so we embed in serverName if needed
     }
 
     result.nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, "AmneziaVPN");

@@ -5,7 +5,6 @@
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
-#include "core/utils/api/apiUtils.h"
 #include "logger.h"
 
 namespace
@@ -42,7 +41,7 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
         return countryInfo.countryName;
     }
     case CountryImageCodeRole: {
-        return apiUtils::countryCodeBaseForFlag(countryInfo.countryCode);
+        return countryInfo.countryCode.toUpper();
     }
     case IsIssuedRole: {
         return isIssued;

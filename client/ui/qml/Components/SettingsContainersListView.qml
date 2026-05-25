@@ -45,6 +45,12 @@ ListViewType {
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
+                    } else if (isMtProxy) {
+                        MtProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceMtProxySettings)
+                    } else if (isTelemt) {
+                        TelemtConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceTelemtSettings)
                     } else {
                         InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
