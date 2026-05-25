@@ -20,12 +20,6 @@ import "../Components"
 PageType {
     id: root
 
-    Rectangle {
-        anchors.fill: parent
-        z: -1
-        color: AmneziaStyle.color.onyxBlack
-    }
-
     property int containerStatus: 1
     property bool isUpdating: false
     property bool isCheckingStatus: false
@@ -68,7 +62,18 @@ PageType {
 
     readonly property bool mtProxyNetworkBlocked: !NetworkReachabilityController.hasInternetAccess
 
-    readonly property bool navigationBlockedWhileBusy: isUpdating || diagLoading
+    property bool remoteOperationBusy: false
+    readonly property bool operationInProgress: isCheckingStatus || isUpdating || diagLoading
+    readonly property bool pageBusy: operationInProgress || remoteOperationBusy
+    readonly property bool navigationBlockedWhileBusy: pageBusy
+
+    function syncPageBusyIndicator() {
+        if (root.visible) {
+            PageController.showBusyIndicator(pageBusy)
+        }
+    }
+
+    onPageBusyChanged: syncPageBusyIndicator()
 
     // Hex values that exist in last loaded / last successfully saved config — show link panel only for these.
     property var mtProxyPersistedAdditionalHex: []
@@ -185,9 +190,11 @@ PageType {
     onVisibleChanged: {
         if (!visible) {
             PageController.disableControls(false)
+            PageController.showBusyIndicator(false)
             diagLoading = false
         } else {
             PageController.disableControls(navigationBlockedWhileBusy)
+            syncPageBusyIndicator()
         }
     }
 
@@ -207,6 +214,10 @@ PageType {
 
     Connections {
         target: InstallController
+
+        function onServerIsBusy(busy) {
+            remoteOperationBusy = busy
+        }
 
         function onUpdateContainerFinished(message, closePage) {
             if (!root.visible) {
@@ -254,6 +265,7 @@ PageType {
             }
             if (enabled && pendingUpdateAfterEnable) {
                 pendingUpdateAfterEnable = false
+                isUpdating = true
                 root.mtProxyScheduleUpdate(false)
                 return
             }
@@ -338,6 +350,18 @@ PageType {
             clickedFunction: function () {
                 Qt.openUrlExternally("https://core.telegram.org/proxy")
             }
+        }
+
+        CaptionTextType {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.topMargin: 8
+            visible: root.mtProxyNetworkBlocked
+            text: qsTr("No internet connection. Connect to the internet to change MTProxy settings.")
+            color: AmneziaStyle.color.mutedGray
+            wrapMode: Text.WordWrap
+            font.pixelSize: 14
         }
 
         TabBar {
@@ -804,7 +828,7 @@ PageType {
                     Layout.bottomMargin: 16
                     text: qsTr("Enable MTProxy")
                     checked: isEnabled
-                    enabled: !isCheckingStatus && containerStatus !== 0 && containerStatus !== 3 && !isUpdating
+                    enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy
                         && !root.mtProxyNetworkBlocked
                     onToggled: function () {
                         if (checked !== isEnabled) {
@@ -1849,37 +1873,6 @@ PageType {
                     }
                 }
             }
-        }
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        visible: isCheckingStatus || isUpdating || root.mtProxyNetworkBlocked
-        color: AmneziaStyle.color.midnightBlack
-        opacity: 0.6
-        z: 1
-        MouseArea {
-            anchors.fill: parent
-        }
-        BusyIndicator {
-            anchors.centerIn: parent
-            visible: isCheckingStatus || isUpdating
-            running: isCheckingStatus || isUpdating
-            width: 48
-            height: 48
-        }
-        CaptionTextType {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 24
-            anchors.rightMargin: 24
-            visible: root.mtProxyNetworkBlocked && !isCheckingStatus && !isUpdating
-            horizontalAlignment: Text.AlignHCenter
-            text: qsTr("No internet connection. Connect to the internet to change MTProxy settings.")
-            color: AmneziaStyle.color.paleGray
-            wrapMode: Text.WordWrap
-            font.pixelSize: 14
         }
     }
 }
