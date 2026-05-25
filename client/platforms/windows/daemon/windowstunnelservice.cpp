@@ -15,9 +15,8 @@
 #include "platforms/windows/windowsutils.h"
 #include "windowsdaemon.h"
 
-#define TUNNEL_NAMED_PIPE \
-  "\\\\."                 \
-  "\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\AmneziaVPN"
+#define TUNNEL_NAMED_PIPE_PREFIX \
+  "\\\\.\\pipe\\ProtectedPrefix\\Administrators\\AmneziaWG\\"
 
 constexpr uint32_t WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC = 2000;
 
@@ -28,6 +27,10 @@ Logger logger("WindowsTunnelService");
 static bool stopAndDeleteTunnelService(SC_HANDLE service);
 static bool waitForServiceStatus(SC_HANDLE service, DWORD expectedStatus);
 
+std::wstring WindowsTunnelService::serviceNameForIfname(const QString& ifname) {
+  return (QStringLiteral("AmneziaWGTunnel$") + ifname).toStdWString();
+}
+
 WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
   MZ_COUNT_CTOR(WindowsTunnelService);
   logger.debug() << "WindowsTunnelService created.";
@@ -37,7 +40,7 @@ WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
     WindowsUtils::windowsLog("Failed to open SCManager");
   }
 
-  // Is the service already running? Terminate it.
+  // Is the legacy single-tunnel service still around? Terminate it.
   SC_HANDLE service =
       OpenService((SC_HANDLE)m_scm, TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
   if (service != nullptr) {
@@ -108,8 +111,11 @@ void WindowsTunnelService::timeout() {
   emit backendFailure();
 }
 
-bool WindowsTunnelService::start(const QString& configData) {
-  logger.debug() << "Starting the tunnel service";
+bool WindowsTunnelService::start(const QString& configData, const QString& ifname) {
+  logger.debug() << "Starting the tunnel service for" << ifname;
+
+  m_ifname = ifname;
+  const std::wstring serviceName = serviceNameForIfname(ifname);
 
   m_logworker = new WindowsTunnelLogger(WindowsCommons::tunnelLogFile());
   m_logworker->moveToThread(&m_logthread);
@@ -128,10 +134,9 @@ bool WindowsTunnelService::start(const QString& configData) {
     m_logworker = nullptr;
   });
 
-  // Let's see if we have to delete a previous instance.
-  service = OpenService(scm, TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
+  service = OpenService(scm, serviceName.c_str(), SERVICE_ALL_ACCESS);
   if (service) {
-    logger.debug() << "An existing service has been detected. Let's close it.";
+    logger.debug() << "A stale service was detected. Cleaning it up.";
     if (!stopAndDeleteTunnelService(service)) {
       return false;
     }
@@ -143,12 +148,12 @@ bool WindowsTunnelService::start(const QString& configData) {
   {
     QTextStream out(&serviceCmdline);
     out << "\"" << qApp->applicationFilePath() << "\" tunneldaemon \""
-        << configData << "\"";
+        << configData << "\" \"" << ifname << "\"";
   }
 
   logger.debug() << "Service:" << qApp->applicationFilePath();
 
-  service = CreateService(scm, TUNNEL_SERVICE_NAME, L"Amnezia VPN (tunnel)",
+  service = CreateService(scm, serviceName.c_str(), L"Amnezia VPN (tunnel)",
                           SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
                           SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
                           (const wchar_t*)serviceCmdline.utf16(), nullptr, 0,
@@ -236,8 +241,9 @@ static bool stopAndDeleteTunnelService(SC_HANDLE service) {
 }
 
 QString WindowsTunnelService::uapiCommand(const QString& command) {
-  // Create a pipe to the tunnel service.
-  LPTSTR tunnelName = (LPTSTR)TEXT(TUNNEL_NAMED_PIPE);
+  const std::wstring pipeName = std::wstring(TEXT(TUNNEL_NAMED_PIPE_PREFIX))
+                              + m_ifname.toStdWString();
+  LPCWSTR tunnelName = pipeName.c_str();
   HANDLE pipe = CreateFile(tunnelName, GENERIC_READ | GENERIC_WRITE, 0, nullptr,
                            OPEN_EXISTING, 0, nullptr);
   if (pipe == INVALID_HANDLE_VALUE) {

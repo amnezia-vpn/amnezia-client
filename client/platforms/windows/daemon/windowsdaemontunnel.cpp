@@ -37,11 +37,14 @@ int WindowsDaemonTunnel::run(QStringList& tokens) {
   QCoreApplication::setApplicationName("Amnezia VPN Tunnel");
   QCoreApplication::setApplicationVersion(Constants::versionString());
 
-  if (tokens.length() != 2) {
-    logger.error() << "Expected 1 parameter only: the config file.";
+  if (tokens.length() < 2 || tokens.length() > 3) {
+    logger.error() << "Expected: <config> [<ifname>]";
     return 1;
   }
   QString maybeConfig = tokens.at(1);
+  QString name = tokens.length() == 3 && !tokens.at(2).isEmpty()
+                     ? tokens.at(2)
+                     : WireguardUtilsWindows::s_defaultInterfaceName();
 
   if (!maybeConfig.startsWith("[Interface]")) {
     logger.error() << "parameter Does not seem to be a config";
@@ -64,7 +67,6 @@ int WindowsDaemonTunnel::run(QStringList& tokens) {
     WindowsUtils::windowsLog("Failed to get WireGuardTunnelService function");
     return 1;
   }
-  auto name = WireguardUtilsWindows::s_interfaceName();
   if (!tunnelProc(maybeConfig.utf16(), name.utf16())) {
     logger.error() << "Failed to activate the tunnel service";
     return 1;
