@@ -408,7 +408,6 @@ jobs:
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
-      max-parallel: 1
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
         include:
