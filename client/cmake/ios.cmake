@@ -124,7 +124,7 @@ target_sources(${PROJECT} PRIVATE
 
 target_sources(${PROJECT} PRIVATE
     ${CLIENT_IOS_LAUNCHSCREEN_PATH}
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    ${CLIENT_IOS_MEDIA_ASSETS_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 
