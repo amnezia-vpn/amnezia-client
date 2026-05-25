@@ -47,10 +47,10 @@ ListViewType {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                     } else if (isMtProxy) {
                         MtProxyConfigModel.updateModel(config)
-                        PageController.goToPage(PageEnum.PageServiceMtProxySettings)
+                        PageController.goToPage(PageEnum.PageServiceMtProxySettings, false)
                     } else if (isTelemt) {
                         TelemtConfigModel.updateModel(config)
-                        PageController.goToPage(PageEnum.PageServiceTelemtSettings)
+                        PageController.goToPage(PageEnum.PageServiceTelemtSettings, false)
                     } else {
                         InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)

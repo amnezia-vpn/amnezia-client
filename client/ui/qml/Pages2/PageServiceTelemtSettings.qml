@@ -64,13 +64,57 @@ PageType {
     readonly property bool pageBusy: operationInProgress || remoteOperationBusy
     readonly property bool navigationBlockedWhileBusy: pageBusy
 
+    property bool pageOpenHandled: false
+
     function syncPageBusyIndicator() {
-        if (root.visible) {
-            PageController.showBusyIndicator(pageBusy)
+        if (!root.pageOpenHandled) {
+            return
         }
+        PageController.showBusyIndicator(pageBusy)
     }
 
     onPageBusyChanged: syncPageBusyIndicator()
+
+    property bool containerStatusRefreshCallPending: false
+
+    function telemtRequestContainerStatusRefresh() {
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+            syncPageBusyIndicator()
+            return
+        }
+        isCheckingStatus = true
+        syncPageBusyIndicator()
+        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+    }
+
+    function telemtScheduleContainerStatusRefresh() {
+        if (containerStatusRefreshCallPending) {
+            return
+        }
+        containerStatusRefreshCallPending = true
+        Qt.callLater(function () {
+            containerStatusRefreshCallPending = false
+            root.telemtRequestContainerStatusRefresh()
+        })
+    }
+
+    function telemtOnPageShown() {
+        if (root.pageOpenHandled) {
+            return
+        }
+        root.pageOpenHandled = true
+
+        PageController.disableControls(navigationBlockedWhileBusy)
+
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+        } else {
+            isCheckingStatus = true
+        }
+        syncPageBusyIndicator()
+        root.telemtScheduleContainerStatusRefresh()
+    }
 
     // Defer SSH/updateContainer so QML control handlers return before nested event loops run.
     function telemtScheduleUpdate(closePage) {
@@ -111,12 +155,7 @@ PageType {
         root.savedTlsDomain = TelemtConfigModel.getTlsDomain()
         root.savedPublicHost = TelemtConfigModel.getPublicHost()
 
-        if (!NetworkReachabilityController.hasInternetAccess) {
-            isCheckingStatus = false
-            return
-        }
-        isCheckingStatus = true
-        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+        Qt.callLater(root.telemtOnPageShown)
     }
 
     onNavigationBlockedWhileBusyChanged: {
@@ -127,12 +166,13 @@ PageType {
 
     onVisibleChanged: {
         if (!visible) {
+            root.pageOpenHandled = false
+            containerStatusRefreshCallPending = false
             PageController.disableControls(false)
             PageController.showBusyIndicator(false)
             diagLoading = false
         } else {
-            PageController.disableControls(navigationBlockedWhileBusy)
-            syncPageBusyIndicator()
+            root.telemtOnPageShown()
         }
     }
 
@@ -144,8 +184,7 @@ PageType {
                 return
             }
             if (NetworkReachabilityController.hasInternetAccess) {
-                isCheckingStatus = true
-                InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                root.telemtScheduleContainerStatusRefresh()
             }
         }
     }
@@ -250,6 +289,11 @@ PageType {
             TelemtConfigModel.validateAndSetSecret(secret)
         }
     }
+
+    Item {
+        id: contentLayer
+        anchors.fill: parent
+        enabled: !root.pageBusy
 
     BackButtonType {
         id: backButton
@@ -1468,5 +1512,7 @@ PageType {
                 }
             }
         }
+    }
+
     }
 }

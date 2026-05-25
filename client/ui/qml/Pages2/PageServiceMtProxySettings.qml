@@ -67,13 +67,57 @@ PageType {
     readonly property bool pageBusy: operationInProgress || remoteOperationBusy
     readonly property bool navigationBlockedWhileBusy: pageBusy
 
+    property bool pageOpenHandled: false
+
     function syncPageBusyIndicator() {
-        if (root.visible) {
-            PageController.showBusyIndicator(pageBusy)
+        if (!root.pageOpenHandled) {
+            return
         }
+        PageController.showBusyIndicator(pageBusy)
     }
 
     onPageBusyChanged: syncPageBusyIndicator()
+
+    property bool containerStatusRefreshCallPending: false
+
+    function mtProxyRequestContainerStatusRefresh() {
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+            syncPageBusyIndicator()
+            return
+        }
+        isCheckingStatus = true
+        syncPageBusyIndicator()
+        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+    }
+
+    function mtProxyScheduleContainerStatusRefresh() {
+        if (containerStatusRefreshCallPending) {
+            return
+        }
+        containerStatusRefreshCallPending = true
+        Qt.callLater(function () {
+            containerStatusRefreshCallPending = false
+            root.mtProxyRequestContainerStatusRefresh()
+        })
+    }
+
+    function mtProxyOnPageShown() {
+        if (root.pageOpenHandled) {
+            return
+        }
+        root.pageOpenHandled = true
+
+        PageController.disableControls(navigationBlockedWhileBusy)
+
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+        } else {
+            isCheckingStatus = true
+        }
+        syncPageBusyIndicator()
+        root.mtProxyScheduleContainerStatusRefresh()
+    }
 
     // Hex values that exist in last loaded / last successfully saved config — show link panel only for these.
     property var mtProxyPersistedAdditionalHex: []
@@ -172,12 +216,7 @@ PageType {
             root.mtProxyRefreshPersistedAdditionalSecrets()
         })
 
-        if (!NetworkReachabilityController.hasInternetAccess) {
-            isCheckingStatus = false
-            return
-        }
-        isCheckingStatus = true
-        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+        Qt.callLater(root.mtProxyOnPageShown)
     }
 
     // Block back navigation and Escape (via PageStart.isControlsDisabled) while SSH/update or diagnostics refresh runs.
@@ -189,12 +228,13 @@ PageType {
 
     onVisibleChanged: {
         if (!visible) {
+            root.pageOpenHandled = false
+            containerStatusRefreshCallPending = false
             PageController.disableControls(false)
             PageController.showBusyIndicator(false)
             diagLoading = false
         } else {
-            PageController.disableControls(navigationBlockedWhileBusy)
-            syncPageBusyIndicator()
+            root.mtProxyOnPageShown()
         }
     }
 
@@ -206,8 +246,7 @@ PageType {
                 return
             }
             if (NetworkReachabilityController.hasInternetAccess) {
-                isCheckingStatus = true
-                InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                root.mtProxyScheduleContainerStatusRefresh()
             }
         }
     }
@@ -313,6 +352,11 @@ PageType {
             MtProxyConfigModel.validateAndSetSecret(secret)
         }
     }
+
+    Item {
+        id: contentLayer
+        anchors.fill: parent
+        enabled: !root.pageBusy
 
     BackButtonType {
         id: backButton
@@ -1895,5 +1939,7 @@ PageType {
                 }
             }
         }
+    }
+
     }
 }
