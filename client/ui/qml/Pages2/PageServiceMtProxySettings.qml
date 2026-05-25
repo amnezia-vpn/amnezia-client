@@ -23,6 +23,7 @@ PageType {
     property int containerStatus: 1
     property bool isUpdating: false
     property bool isCheckingStatus: false
+    property bool isFetchingSecret: false
     property bool previousEnabled: true
     property int previousContainerStatus: 1
 
@@ -63,17 +64,23 @@ PageType {
     readonly property bool mtProxyNetworkBlocked: !NetworkReachabilityController.hasInternetAccess
 
     property bool remoteOperationBusy: false
-    readonly property bool operationInProgress: isCheckingStatus || isUpdating || diagLoading
+    readonly property bool operationInProgress: isCheckingStatus || isFetchingSecret || isUpdating || diagLoading
     readonly property bool pageBusy: operationInProgress || remoteOperationBusy
     readonly property bool navigationBlockedWhileBusy: pageBusy
 
     property bool pageOpenHandled: false
+    property bool busyIndicatorShown: false
 
     function syncPageBusyIndicator() {
         if (!root.pageOpenHandled) {
             return
         }
-        PageController.showBusyIndicator(pageBusy)
+        var wantBusy = root.pageBusy
+        if (wantBusy === root.busyIndicatorShown) {
+            return
+        }
+        root.busyIndicatorShown = wantBusy
+        PageController.showBusyIndicator(wantBusy)
     }
 
     onPageBusyChanged: syncPageBusyIndicator()
@@ -230,6 +237,9 @@ PageType {
         if (!visible) {
             root.pageOpenHandled = false
             containerStatusRefreshCallPending = false
+            isCheckingStatus = false
+            isFetchingSecret = false
+            busyIndicatorShown = false
             PageController.disableControls(false)
             PageController.showBusyIndicator(false)
             diagLoading = false
@@ -262,6 +272,7 @@ PageType {
             if (!root.visible) {
                 isUpdating = false
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
             isUpdating = false
@@ -277,9 +288,11 @@ PageType {
             if (!root.visible) {
                 isUpdating = false
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
             isUpdating = false
+            isFetchingSecret = false
             containerStatus = previousContainerStatus
             MtProxyConfigModel.setEnabled(previousEnabled)
             MtProxyConfigModel.setPort(previousPort)
@@ -317,9 +330,9 @@ PageType {
         function onContainerStatusRefreshed(status) {
             if (!root.visible) {
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
-            isCheckingStatus = false
             containerStatus = status
 
             root.savedTransportMode = MtProxyConfigModel.getTransportMode()
@@ -327,10 +340,17 @@ PageType {
             root.savedPublicHost = MtProxyConfigModel.getPublicHost()
             if (status === 1) {
                 MtProxyConfigModel.setEnabled(true)
+                isFetchingSecret = true
+                isCheckingStatus = false
                 InstallController.fetchContainerSecret(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
-            } else if (status === 2) {
-                MtProxyConfigModel.setEnabled(false)
+            } else {
+                isFetchingSecret = false
+                isCheckingStatus = false
+                if (status === 2) {
+                    MtProxyConfigModel.setEnabled(false)
+                }
             }
+            syncPageBusyIndicator()
         }
 
         function onContainerDiagnosticsRefreshed(portReachable, upstreamReachable, clientsConnected, lastConfigRefresh, statsEndpoint) {
@@ -347,8 +367,11 @@ PageType {
 
         function onContainerSecretFetched(secret) {
             if (!root.visible) {
+                isFetchingSecret = false
                 return
             }
+            isFetchingSecret = false
+            syncPageBusyIndicator()
             MtProxyConfigModel.validateAndSetSecret(secret)
         }
     }
