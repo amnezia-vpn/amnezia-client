@@ -7,6 +7,9 @@
 #include <QPair>
 #include <QPromise>
 #include <QSharedPointer>
+#include <QString>
+#include <QStringList>
+#include <memory>
 
 #include "core/defs.h"
 
@@ -14,13 +17,16 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
+class Settings;
+
 class GatewayController : public QObject
 {
     Q_OBJECT
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
+                               const bool isStrictKillSwitchEnabled, const std::shared_ptr<Settings> &settings,
+                               QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
@@ -53,7 +59,7 @@ private:
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
 
     void getProxyUrlsAsync(const QStringList proxyStorageUrls, const int currentProxyStorageIndex,
-                           std::function<void(const QStringList &)> onComplete);
+                           const QString &proxyUrlsCacheKey, std::function<void(const QStringList &)> onComplete);
     void getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex, std::function<void(const QString &)> onComplete);
     void bypassProxyAsync(
             const QString &endpoint, const QString &proxyUrl, EncryptedRequestData encRequestData,
@@ -63,6 +69,7 @@ private:
     QString m_gatewayEndpoint;
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
+    std::shared_ptr<Settings> m_settings;
 
     inline static QString m_proxyUrl;
 };

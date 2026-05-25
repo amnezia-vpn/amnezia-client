@@ -15,6 +15,7 @@ namespace
     const char cloudFlareNs2[] = "1.0.0.1";
 
     constexpr char gatewayEndpoint[] = "http://gw.amnezia.org:80/";
+    constexpr char proxyUrlsKey[] = "Conf/proxyUrls/";
 }
 
 Settings::Settings(QObject *parent) : QObject(parent), m_settings(ORGANIZATION_NAME, APPLICATION_NAME, this)
@@ -524,6 +525,24 @@ bool Settings::isDevGatewayEnv(bool isTestPurchase)
 void Settings::toggleDevGatewayEnv(bool enabled)
 {
     m_settings.setValue("Conf/devGatewayEnv", enabled);
+}
+
+QByteArray Settings::readGatewayProxyUrls(const QString &cacheKey) const
+{
+    if (cacheKey.isEmpty()) {
+        return {};
+    }
+
+    return m_settings.value(QString(proxyUrlsKey) + cacheKey).toByteArray();
+}
+
+void Settings::writeGatewayProxyUrls(const QString &cacheKey, const QByteArray &proxyUrlsEncrypted)
+{
+    if (cacheKey.isEmpty()) {
+        return;
+    }
+
+    m_settings.setValue(QString(proxyUrlsKey) + cacheKey, proxyUrlsEncrypted);
 }
 
 bool Settings::isHomeAdLabelVisible()

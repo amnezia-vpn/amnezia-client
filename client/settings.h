@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QString>
+#include <QByteArray>
 
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -234,6 +235,8 @@ public:
     QString getGatewayEndpoint(bool isTestPurchase = false);
     bool isDevGatewayEnv(bool isTestPurchase = false);
     void toggleDevGatewayEnv(bool enabled);
+    QByteArray readGatewayProxyUrls(const QString &cacheKey) const;
+    void writeGatewayProxyUrls(const QString &cacheKey, const QByteArray &proxyUrlsEncrypted);
 
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
