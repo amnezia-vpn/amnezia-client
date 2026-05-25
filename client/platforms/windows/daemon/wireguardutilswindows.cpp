@@ -12,6 +12,7 @@
 
 #include <QFileInfo>
 
+#include "killswitch.h"
 #include "leakdetector.h"
 #include "logger.h"
 #include "windowsfirewall.h"
@@ -110,15 +111,14 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     configString.truncate(peerStart);
   }
 
-  if (!m_tunnel.start(configString)) {
+  m_ifname = config.m_ifname.isEmpty() ? s_defaultInterfaceName() : config.m_ifname;
+  if (!m_tunnel.start(configString, m_ifname)) {
     logger.error() << "Failed to activate the tunnel service";
     return false;
   }
 
-  // Determine the interface LUID
   NET_LUID luid;
-  const QString ifname = config.m_ifname.isEmpty() ? interfaceName() : config.m_ifname;
-  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)ifname.utf16(), &luid);
+  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)m_ifname.utf16(), &luid);
   if (result != 0) {
     logger.error() << "Failed to lookup LUID:" << result;
     return false;
@@ -127,11 +127,11 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
 
   if (config.m_killSwitchEnabled) {
-    // Enable the windows firewall
     NET_IFINDEX ifindex;
     ConvertInterfaceLuidToIndex(&luid, &ifindex);
     m_firewall->allowAllTraffic();
     m_firewall->enableInterface(ifindex);
+    KillSwitch::instance()->addAllowedRange({});
   }
 
   logger.debug() << "Registration completed";

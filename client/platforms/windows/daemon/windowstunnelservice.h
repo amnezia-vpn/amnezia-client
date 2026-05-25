@@ -9,6 +9,7 @@
 #include <QObject>
 #include <QThread>
 #include <QTimer>
+#include <string>
 
 #include "windowstunnellogger.h"
 
@@ -20,10 +21,12 @@ class WindowsTunnelService final : public QObject {
   WindowsTunnelService(QObject* parent = nullptr);
   ~WindowsTunnelService();
 
-  bool start(const QString& configData);
+  bool start(const QString& configData, const QString& ifname);
   void stop();
   bool isRunning();
   QString uapiCommand(const QString& command);
+
+  static std::wstring serviceNameForIfname(const QString& ifname);
 
  signals:
   void backendFailure();
@@ -36,6 +39,7 @@ class WindowsTunnelService final : public QObject {
   QTimer m_timer;
   QThread m_logthread;
   WindowsTunnelLogger* m_logworker = nullptr;
+  QString m_ifname;
 
   // These are really SC_HANDLEs in disguise.
   void* m_scm = nullptr;

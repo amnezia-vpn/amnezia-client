@@ -27,10 +27,8 @@ class WireguardUtilsWindows final : public WireguardUtils {
   ~WireguardUtilsWindows();
 
   bool interfaceExists() override { return m_tunnel.isRunning(); }
-  QString interfaceName() override {
-    return WireguardUtilsWindows::s_interfaceName();
-  }
-  static const QString s_interfaceName() { return "AmneziaVPN"; }
+  QString interfaceName() override { return m_ifname; }
+  static const QString s_defaultInterfaceName() { return "AmneziaVPN"; }
   bool addInterface(const InterfaceConfig& config) override;
   bool deleteInterface() override;
 
@@ -54,6 +52,7 @@ class WireguardUtilsWindows final : public WireguardUtils {
   void buildMibForwardRow(const IPAddress& prefix, void* row);
 
   quint64 m_luid = 0;
+  QString m_ifname;
   WindowsTunnelService m_tunnel;
   QPointer<WindowsRouteMonitor> m_routeMonitor;
   QPointer<WindowsFirewall> m_firewall;
