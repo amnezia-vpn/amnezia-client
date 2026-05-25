@@ -17,6 +17,11 @@ public:
 
     static bool encryptFile(const QString &filePath, const QString &password, const QString &hint);
 
+    Q_INVOKABLE bool QEncryptFile(const QString &filePath, const QString &password, const QString &hint)
+    {
+        return encryptFile(filePath, password, hint);
+    }
+
 public slots:
     QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",
                         const bool isSaveMode = false, const QString &defaultSuffix = "");
