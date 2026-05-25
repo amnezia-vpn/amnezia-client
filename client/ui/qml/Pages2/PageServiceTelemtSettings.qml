@@ -715,6 +715,26 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
+                function domainToHex(domain) {
+                    var hex = ""
+                    for (var i = 0; i < domain.length; i++) {
+                        var code = domain.charCodeAt(i).toString(16)
+                        hex += (code.length < 2 ? "0" : "") + code
+                    }
+                    return hex
+                }
+
+                function telemtLinkSecret() {
+                    if (secret === "") {
+                        return ""
+                    }
+                    if (transportMode === "faketls") {
+                        var domain = tlsDomain !== "" ? tlsDomain : TelemtConfigModel.defaultTlsDomain()
+                        return "ee" + secret + domainToHex(domain)
+                    }
+                    return "dd" + secret
+                }
+
                 SwitcherType {
                     id: enableTelemtSwitch
                     Layout.fillWidth: true
@@ -762,13 +782,14 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: secret !== "" ? secret : qsTr("Not generated")
+                            text: secret !== "" ? telemtLinkSecret() : qsTr("Not generated")
                             color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
-                            elide: Text.ElideMiddle
+                            wrapMode: Text.WrapAnywhere
                             font.pixelSize: 14
                         }
 
                         ImageButtonType {
+                            Layout.alignment: Qt.AlignTop
                             implicitWidth: 36
                             implicitHeight: 36
                             hoverEnabled: true

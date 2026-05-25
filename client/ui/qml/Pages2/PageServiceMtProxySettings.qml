@@ -797,6 +797,17 @@ PageType {
                     return baseHex
                 }
 
+                function mtProxyLinkSecret() {
+                    if (secret === "") {
+                        return ""
+                    }
+                    if (transportMode === "faketls") {
+                        var domain = tlsDomain !== "" ? tlsDomain : MtProxyConfigModel.defaultTlsDomain()
+                        return "ee" + secret + mtProxyDomainToHex(domain)
+                    }
+                    return "dd" + secret
+                }
+
                 function mtProxyActiveSecretForBaseHex(baseHex) {
                     if (root.syncedSecretTabIndex === 0) {
                         return mtProxySecretForBaseHex(baseHex, "standard")
@@ -867,13 +878,14 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: secret !== "" ? secret : qsTr("Not generated")
+                            text: secret !== "" ? mtProxyLinkSecret() : qsTr("Not generated")
                             color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
-                            elide: Text.ElideMiddle
+                            wrapMode: Text.WrapAnywhere
                             font.pixelSize: 14
                         }
 
                         ImageButtonType {
+                            Layout.alignment: Qt.AlignTop
                             implicitWidth: 36
                             implicitHeight: 36
                             hoverEnabled: true
