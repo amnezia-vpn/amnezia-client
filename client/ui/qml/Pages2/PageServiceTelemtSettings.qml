@@ -256,9 +256,16 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+
         onFocusChanged: {
-            if (this.activeFocus) connectionListView.positionViewAtBeginning()
+            if (this.activeFocus) {
+                if (mainTabBar.currentIndex === 0) {
+                    connectionListView.positionViewAtBeginning()
+                } else {
+                    settingsListView.positionViewAtBeginning()
+                }
+            }
         }
     }
 
@@ -267,20 +274,20 @@ PageType {
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 8
         spacing: 0
 
         BaseHeaderType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            Layout.topMargin: 8
+            Layout.bottomMargin: 24
+
             headerText: qsTr("Telemt settings")
         }
 
         LabelWithButtonType {
             Layout.fillWidth: true
-            Layout.leftMargin: 0
+            Layout.leftMargin: 16
             Layout.rightMargin: 16
             text: qsTr("Read more about this settings")
             textColor: AmneziaStyle.color.goldenApricot
@@ -300,36 +307,38 @@ PageType {
             wrapMode: Text.WordWrap
             font.pixelSize: 14
         }
+    }
 
-        TabBar {
-            id: mainTabBar
-            Layout.fillWidth: true
-            Layout.topMargin: 4
+    TabBar {
+        id: mainTabBar
+        anchors.top: pageHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        width: parent.width
 
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    anchors.bottom: parent.bottom
-                    color: AmneziaStyle.color.slateGray
-                }
+        background: Rectangle {
+            color: AmneziaStyle.color.transparent
+            Rectangle {
+                width: parent.width
+                height: 1
+                anchors.bottom: parent.bottom
+                color: AmneziaStyle.color.slateGray
             }
+        }
 
-            TabButtonType {
-                text: qsTr("Connection")
-                isSelected: mainTabBar.currentIndex === 0
-            }
-            TabButtonType {
-                text: qsTr("Settings")
-                isSelected: mainTabBar.currentIndex === 1
-            }
+        TabButtonType {
+            text: qsTr("Connection")
+            isSelected: mainTabBar.currentIndex === 0
+        }
+        TabButtonType {
+            text: qsTr("Settings")
+            isSelected: mainTabBar.currentIndex === 1
         }
     }
 
     StackLayout {
         id: tabContent
-        anchors.top: pageHeader.bottom
+        anchors.top: mainTabBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
