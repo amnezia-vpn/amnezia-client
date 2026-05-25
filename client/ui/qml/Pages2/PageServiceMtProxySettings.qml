@@ -85,6 +85,33 @@ PageType {
 
     onPageBusyChanged: syncPageBusyIndicator()
 
+    function mtProxyDomainToHex(domain) {
+        var hex = ""
+        for (var i = 0; i < domain.length; i++) {
+            var code = domain.charCodeAt(i).toString(16)
+            hex += (code.length < 2 ? "0" : "") + code
+        }
+        return hex
+    }
+
+    function mtProxyClientSecret(baseHex32, mode, tlsDomain) {
+        if (baseHex32 === "") {
+            return ""
+        }
+        if (mode === "faketls") {
+            return "ee" + baseHex32 + mtProxyDomainToHex(tlsDomain)
+        }
+        return "dd" + baseHex32
+    }
+
+    function mtProxyClientSecretForTabIndex(baseHex32, tabIndex, tlsDomain, defaultTlsDomain) {
+        var domain = tlsDomain !== "" ? tlsDomain : defaultTlsDomain
+        if (tabIndex === 1) {
+            return mtProxyClientSecret(baseHex32, "faketls", domain)
+        }
+        return mtProxyClientSecret(baseHex32, "standard", domain)
+    }
+
     property bool containerStatusRefreshCallPending: false
 
     function mtProxyRequestContainerStatusRefresh() {
@@ -476,30 +503,11 @@ PageType {
                 width: connectionListView.width
                 spacing: 0
 
-                function domainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
-                function secretForMode(mode) {
-                    if (mode === "faketls") {
-                        var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : MtProxyConfigModel.defaultTlsDomain()
-                        return "ee" + secret + domainToHex(domain)
-                    }
-                    return "dd" + secret
-                }
-
                 property int secretTabIndex: root.syncedSecretTabIndex
 
                 function activeSecret() {
-                    if (root.syncedSecretTabIndex === 1) {
-                        return secretForMode("faketls")
-                    }
-                    return secretForMode("standard")
+                    return root.mtProxyClientSecretForTabIndex(secret, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, MtProxyConfigModel.defaultTlsDomain())
                 }
 
                 function effectiveSecret() {
@@ -843,28 +851,9 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
-                function mtProxyDomainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
-                function mtProxySecretForBaseHex(baseHex, mode) {
-                    if (mode === "faketls") {
-                        var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : MtProxyConfigModel.defaultTlsDomain()
-                        return "ee" + baseHex + mtProxyDomainToHex(domain)
-                    }
-                    return "dd" + baseHex
-                }
-
                 function mtProxyActiveSecretForBaseHex(baseHex) {
-                    if (root.syncedSecretTabIndex === 1) {
-                        return mtProxySecretForBaseHex(baseHex, "faketls")
-                    }
-                    return mtProxySecretForBaseHex(baseHex, "standard")
+                    return root.mtProxyClientSecretForTabIndex(baseHex, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, MtProxyConfigModel.defaultTlsDomain())
                 }
 
                 function mtProxyEffectiveHostForLinks() {
@@ -1372,6 +1361,9 @@ PageType {
                                         imageColor: AmneziaStyle.color.vibrantRed
                                         onClicked: {
                                             MtProxyConfigModel.removeAdditionalSecret(index)
+                                            if (containerStatus === 1) {
+                                                root.mtProxyScheduleUpdate(false)
+                                            }
                                         }
                                     }
                                 }

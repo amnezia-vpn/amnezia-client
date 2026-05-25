@@ -35,6 +35,7 @@ PageType {
     property bool   previousNatEnabled: false
     property string previousNatInternalIp: ""
     property string previousNatExternalIp: ""
+    property string previousSecret: ""
 
     property string savedTransportMode: ""
     property string savedTlsDomain: ""
@@ -81,6 +82,33 @@ PageType {
     }
 
     onPageBusyChanged: syncPageBusyIndicator()
+
+    function telemtDomainToHex(domain) {
+        var hex = ""
+        for (var i = 0; i < domain.length; i++) {
+            var code = domain.charCodeAt(i).toString(16)
+            hex += (code.length < 2 ? "0" : "") + code
+        }
+        return hex
+    }
+
+    function telemtClientSecret(baseHex32, mode, tlsDomain) {
+        if (baseHex32 === "") {
+            return ""
+        }
+        if (mode === "faketls") {
+            return "ee" + baseHex32 + telemtDomainToHex(tlsDomain)
+        }
+        return "dd" + baseHex32
+    }
+
+    function telemtClientSecretForTabIndex(baseHex32, tabIndex, tlsDomain, defaultTlsDomain) {
+        var domain = tlsDomain !== "" ? tlsDomain : defaultTlsDomain
+        if (tabIndex === 1) {
+            return telemtClientSecret(baseHex32, "faketls", domain)
+        }
+        return telemtClientSecret(baseHex32, "standard", domain)
+    }
 
     property bool containerStatusRefreshCallPending: false
 
@@ -244,6 +272,9 @@ PageType {
             TelemtConfigModel.setNatEnabled(previousNatEnabled)
             TelemtConfigModel.setNatInternalIp(previousNatInternalIp)
             TelemtConfigModel.setNatExternalIp(previousNatExternalIp)
+            if (previousSecret !== "") {
+                TelemtConfigModel.setSecret(previousSecret)
+            }
         }
 
         function onSetContainerEnabledFinished(enabled) {
@@ -418,30 +449,11 @@ PageType {
                 width: connectionListView.width
                 spacing: 0
 
-                function domainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
-                function secretForMode(mode) {
-                    if (mode === "faketls") {
-                        var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : TelemtConfigModel.defaultTlsDomain()
-                        return "ee" + secret + domainToHex(domain)
-                    }
-                    return "dd" + secret
-                }
-
                 property int secretTabIndex: root.syncedSecretTabIndex
 
                 function activeSecret() {
-                    if (root.syncedSecretTabIndex === 1) {
-                        return secretForMode("faketls")
-                    }
-                    return secretForMode("standard")
+                    return root.telemtClientSecretForTabIndex(secret, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, TelemtConfigModel.defaultTlsDomain())
                 }
 
                 function effectiveSecret() {
@@ -784,15 +796,9 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
-                function telemtLinkSecret() {
-                    if (secret === "") {
-                        return ""
-                    }
-                    if (transportMode === "faketls") {
-                        var domain = tlsDomain !== "" ? tlsDomain : TelemtConfigModel.defaultTlsDomain()
-                        return "ee" + secret + domainToHex(domain)
-                    }
-                    return "dd" + secret
+                function telemtActiveSecretForBaseHex(baseHex) {
+                    return root.telemtClientSecretForTabIndex(baseHex, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, TelemtConfigModel.defaultTlsDomain())
                 }
 
                 SwitcherType {
@@ -810,6 +816,7 @@ PageType {
                         if (checked !== isEnabled) {
                             previousEnabled = isEnabled
                             previousContainerStatus = containerStatus
+                            root.previousSecret = secret
                             isEnabled = checked
                             isUpdating = true
                             if (checked) {
@@ -842,7 +849,7 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: secret !== "" ? telemtLinkSecret() : qsTr("Not generated")
+                            text: secret !== "" ? telemtActiveSecretForBaseHex(secret) : qsTr("Not generated")
                             color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
                             wrapMode: Text.WrapAnywhere
                             font.pixelSize: 14
@@ -857,12 +864,14 @@ PageType {
                             imageColor: AmneziaStyle.color.paleGray
                             visible: ServersModel.isProcessedServerHasWriteAccess()
                             onClicked: {
+                                var secretSnapshot = secret
                                 showQuestionDrawer(
                                     qsTr("Generate new secret?"),
                                     qsTr("All existing connection links will stop working. Users will need new links."),
                                     qsTr("Generate"),
                                     qsTr("Cancel"),
                                         function () {
+                                        root.previousSecret = secretSnapshot
                                         if (containerStatus === 1) {
                                             isUpdating = true
                                             TelemtConfigModel.generateSecret()
@@ -1514,6 +1523,7 @@ PageType {
                         previousNatEnabled = natEnabled
                         previousNatInternalIp = natInternalIp
                         previousNatExternalIp = natExternalIp
+                        root.previousSecret = secret
                         isUpdating = true
                         root.telemtScheduleUpdate(false)
                     }
