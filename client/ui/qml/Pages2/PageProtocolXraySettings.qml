@@ -185,7 +185,6 @@ PageType {
                 Layout.bottomMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                // Show Save while port is being edited (before editingFinished) or other fields changed.
                 visible: listView.enabled
                          && (XrayConfigModel.hasUnsavedChanges
                              || textFieldWithHeaderType.textField.text !== port)

@@ -100,7 +100,6 @@ struct XrayServerConfig {
     QString site;
     bool isThirdPartyConfig = false;
 
-    // Extended VLESS fields: empty in persisted JSON means "not set" (UI defaults applied in XrayConfigModel).
     QString security;
     QString flow;
     QString fingerprint;
@@ -140,10 +139,8 @@ struct XrayProtocolConfig {
     void setClientConfig(const XrayClientConfig &config);
     void clearClientConfig();
 
-    /// Set in fromJson when persisted server fields are missing (typical shared profile).
     bool needsClientHydration = false;
 
-    /// Fills serverConfig from client nativeConfig (outbound streamSettings). For read-only UI.
     bool hydrateServerConfigFromClientNative();
 };
 

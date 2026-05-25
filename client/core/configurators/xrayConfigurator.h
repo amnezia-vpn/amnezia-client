@@ -23,8 +23,6 @@ public:
     amnezia::ProtocolConfig processConfigWithLocalSettings(const amnezia::ConnectionSettings &settings,
                                                            amnezia::ProtocolConfig protocolConfig) override;
 
-    /// Uploads server.json inbound (port, streamSettings, client flows). Optionally appends a new VLESS client.
-    /// When appendNewClient is false, rebuilds admin client config in containerConfig from the first server client.
     amnezia::ErrorCode applyServerSettingsToRemote(const amnezia::ServerCredentials &credentials,
                                                    amnezia::DockerContainer container,
                                                    amnezia::ContainerConfig &containerConfig,
@@ -56,7 +54,6 @@ private:
     QJsonObject mergeStreamSettingsForServerInbound(const amnezia::XrayServerConfig &srv,
                                                     const QJsonObject &existingStreamSettings) const;
 
-    // Builds the native xray "streamSettings" JSON object from XrayServerConfig
     QJsonObject buildStreamSettings(const amnezia::XrayServerConfig &srv,
                                     const QString &clientId) const;
 };
