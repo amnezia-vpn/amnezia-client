@@ -146,8 +146,6 @@ void VpnConnection::wireTunnelSignals(Tunnel* tunnel, bool isActive)
 
     if (isActive) {
         connect(tunnel, &Tunnel::bytesChanged, this, &VpnConnection::onBytesChanged);
-        connect(tunnel, &Tunnel::addressesUpdated,
-                m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
     }
 }
 
@@ -216,6 +214,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 #ifdef AMNEZIA_DESKTOP
     if (VpnProtocol::isWireGuardBased(container)) {
         const QString ifname = allocateIfname();
+        config.insert("ifname", ifname);
         m_active = new Tunnel(ifname, container, config, resolvedRemote, this);
         wireTunnelSignals(m_active, /*isActive=*/true);
         wireDaemonReconnectSignals();
@@ -561,8 +560,6 @@ void VpnConnection::onTunnelPrepared()
         m_active = m_staging;
         m_staging = nullptr;
         connect(m_active, &Tunnel::bytesChanged, this, &VpnConnection::onBytesChanged);
-        connect(m_active, &Tunnel::addressesUpdated,
-                m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
         m_vpnConfiguration = m_active->config();
         m_remoteAddress = m_active->remoteAddress();
         m_trafficGuard->setConfig(m_vpnConfiguration);

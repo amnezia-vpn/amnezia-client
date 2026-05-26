@@ -181,18 +181,28 @@ void VpnTrafficGuard::applyFirewall(const QString &gateway, const QString &local
     QJsonObject updatedConfig = m_config;
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef Q_OS_WIN
-        QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
-        for (int i = 0; i < netInterfaces.size(); i++) {
-            for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
-            {
-                if (localAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
-                    updatedConfig.insert("vpnAdapterIndex", netInterfaces.at(i).index());
-                    updatedConfig.insert("vpnGateway", gateway);
-                    updatedConfig.insert("vpnServer", NetworkUtilities::getIPAddress(updatedConfig.value(configKey::hostName).toString()));
-                    if (QVariant(updatedConfig.value(configKey::killSwitchOption).toString()).toBool()) {
-                        iface->enableKillSwitch(updatedConfig, netInterfaces.at(i).index());
+        const QString ifname = updatedConfig.value("ifname").toString();
+        if (!ifname.isEmpty()) {
+            updatedConfig.insert("vpnGateway", gateway);
+            updatedConfig.insert("vpnServer", NetworkUtilities::getIPAddress(updatedConfig.value(configKey::hostName).toString()));
+            if (QVariant(updatedConfig.value(configKey::killSwitchOption).toString()).toBool()) {
+                iface->enableKillSwitch(updatedConfig, 0);
+            }
+            iface->enablePeerTraffic(updatedConfig);
+        } else {
+            QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
+            for (int i = 0; i < netInterfaces.size(); i++) {
+                for (int j=0; j < netInterfaces.at(i).addressEntries().size(); j++)
+                {
+                    if (localAddress == netInterfaces.at(i).addressEntries().at(j).ip().toString()) {
+                        updatedConfig.insert("vpnAdapterIndex", netInterfaces.at(i).index());
+                        updatedConfig.insert("vpnGateway", gateway);
+                        updatedConfig.insert("vpnServer", NetworkUtilities::getIPAddress(updatedConfig.value(configKey::hostName).toString()));
+                        if (QVariant(updatedConfig.value(configKey::killSwitchOption).toString()).toBool()) {
+                            iface->enableKillSwitch(updatedConfig, netInterfaces.at(i).index());
+                        }
+                        iface->enablePeerTraffic(updatedConfig);
                     }
-                    iface->enablePeerTraffic(updatedConfig);
                 }
             }
         }
