@@ -6,9 +6,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
-#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/utilities.h"
-#include "core/utils/networkUtilities.h"
 #include "core/utils/serverConfigUtils.h"
 #include "version.h"
 #include "core/utils/containerEnum.h"
@@ -67,13 +65,15 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
     bool isApiConfig = false;
 
     const auto kind = m_serversRepository->serverKind(serverId);
+    const QString primaryDns = m_appSettingsRepository->primaryDns();
+    const QString secondaryDns = m_appSettingsRepository->secondaryDns();
     switch (kind) {
     case serverConfigUtils::ConfigType::SelfHostedAdmin: {
         const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
         containerConfigModel = cfg->containerConfig(container);
-        dns = { cfg->dns1, cfg->dns2 };
+        dns = cfg->getDnsPair(m_appSettingsRepository->useAmneziaDns(), primaryDns, secondaryDns);
         hostName = cfg->hostName;
         description = cfg->description;
         break;
@@ -83,7 +83,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
         containerConfigModel = cfg->containerConfig(container);
-        dns = { cfg->dns1, cfg->dns2 };
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
         hostName = cfg->hostName;
         description = cfg->description;
         break;
@@ -93,7 +93,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
         containerConfigModel = cfg->containerConfig(container);
-        dns = { cfg->dns1, cfg->dns2 };
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
         hostName = cfg->hostName;
         description = cfg->description;
         break;
@@ -105,7 +105,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
         containerConfigModel = cfg->containerConfig(container);
-        dns = { cfg->dns1, cfg->dns2 };
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
         hostName = cfg->hostName;
         description = cfg->description;
         configVersion = serverConfigUtils::ConfigSource::AmneziaGateway;
@@ -122,16 +122,6 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
 
     if (!isContainerSupported(container)) {
         return ErrorCode::NotSupportedOnThisPlatform;
-    }
-    if (dns.first.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.first)) {
-        if (m_appSettingsRepository->useAmneziaDns()) {
-            dns.first = protocols::dns::amneziaDnsIp;
-        } else {
-            dns.first = m_appSettingsRepository->primaryDns();
-        }
-    }
-    if (dns.second.isEmpty() || !NetworkUtilities::checkIPv4Format(dns.second)) {
-        dns.second = m_appSettingsRepository->secondaryDns();
     }
 
     vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,
