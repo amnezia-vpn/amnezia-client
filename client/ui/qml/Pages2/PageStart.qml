@@ -237,15 +237,6 @@ PageType {
         }
 
         function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
-            if (!ConnectionController.isConnected) {
-                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
-                    ServersUiController.setDefaultServerAtIndex(preferredDefaultIndex)
-                } else {
-                    ServersUiController.setDefaultServerAtIndex(ServersModel.getServersCount() - 1);
-                }
-                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
-            }
-
             PageController.goToPageHome()
             PageController.showNotificationMessage(message)
         }

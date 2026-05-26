@@ -9,6 +9,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/utils/errorCodes.h"
@@ -52,6 +53,7 @@ public:
                                Socks5ProxyConfigModel* socks5ConfigModel,
                                MtProxyConfigModel* mtConfigModel,
                                TelemtConfigModel* telemtConfigModel,
+                               ConnectionController* connectionController,
                                QObject *parent = nullptr);
     ~InstallUiController();
 
@@ -155,6 +157,7 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;
 

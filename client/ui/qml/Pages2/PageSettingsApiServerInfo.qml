@@ -131,7 +131,7 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-                headerText: root.processedServer.name
+                headerText: root.processedServer != null ? root.processedServer.name : ""
 
                 actionButtonFunction: function() {
                     serverNameEditDrawer.openTriggered()
@@ -526,6 +526,6 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.35
 
-        serverNameText: root.processedServer.name
+        serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }
 }

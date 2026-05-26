@@ -80,8 +80,11 @@ PageType {
 
             actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-            headerText: root.processedServer.name
+            headerText: root.processedServer != null ? root.processedServer.name : ""
             descriptionText: {
+                if (root.processedServer == null) {
+                    return ""
+                }
                 if (root.processedServer.isServerFromTelegramApi) {
                     return root.processedServer.serverDescription
                 } else if (root.processedServer.hasWriteAccess) {
@@ -104,7 +107,7 @@ PageType {
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            serverNameText: root.processedServer.name
+            serverNameText: root.processedServer != null ? root.processedServer.name : ""
         }
 
         TabBar {

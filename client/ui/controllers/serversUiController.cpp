@@ -123,8 +123,6 @@ void ServersUiController::toggleAmneziaDns(bool enabled)
 void ServersUiController::onDefaultServerChanged(const QString &/*defaultServerId*/)
 {
     updateModel();
-    setProcessedServerId(m_serversController->getDefaultServerId());
-    updateDefaultServerContainersModel();
     emit defaultServerIdChanged(m_serversController->getDefaultServerId());
 }
 
@@ -136,24 +134,23 @@ void ServersUiController::updateModel()
     const QString defaultServerId = m_serversController->getDefaultServerId();
     const bool hadServersFromGatewayBefore = descriptionsHaveGatewayServers(m_orderedServerDescriptions);
     const bool hasServersFromGatewayNow = descriptionsHaveGatewayServers(descriptions);
-    const int listCount = descriptions.size();
     const int defaultRowInDescriptions = rowForServerId(descriptions, defaultServerId);
 
     m_orderedServerDescriptions = descriptions;
 
-    if (listCount == 0) {
-        setProcessedServerId(QString());
-    } else if (m_processedServerIndex >= listCount) {
-        setProcessedServerId(defaultServerId);
+    if (m_orderedServerDescriptions.isEmpty()) {
+        if (!m_processedServerId.isEmpty() || m_processedServerIndex != -1) {
+            setProcessedServerId(QString());
+        }
     } else if (!m_processedServerId.isEmpty()) {
         const int row = rowForServerId(m_orderedServerDescriptions, m_processedServerId);
         if (row < 0) {
-            setProcessedServerId(defaultServerId);
-        } else {
-            setProcessedServerId(m_processedServerId);
+            setProcessedServerId(QString());
+        } else if (m_processedServerIndex != row) {
+            m_processedServerIndex = row;
+            m_serversModel->setProcessedServerIndex(row);
+            emit processedServerIndexChanged(m_processedServerIndex);
         }
-    } else if (defaultRowInDescriptions >= 0) {
-        setProcessedServerId(defaultServerId);
     }
 
     m_serversModel->updateModel(m_orderedServerDescriptions, defaultRowInDescriptions);
@@ -312,9 +309,6 @@ QString ServersUiController::getProcessedServerId() const
 void ServersUiController::setProcessedServerId(const QString &serverId)
 {
     const int index = serverId.isEmpty() ? -1 : serverIndexForId(serverId);
-    if (!serverId.isEmpty() && index < 0) {
-        return;
-    }
 
     if (m_processedServerIndex != index || m_processedServerId != serverId) {
         m_processedServerIndex = index;
@@ -323,12 +317,6 @@ void ServersUiController::setProcessedServerId(const QString &serverId)
 
         if (index >= 0) {
             updateContainersModel();
-            for (const auto &description : m_orderedServerDescriptions) {
-                if (description.serverId == serverId) {
-                    setProcessedContainerIndex(static_cast<int>(description.defaultContainer));
-                    break;
-                }
-            }
 
             for (const auto &description : m_orderedServerDescriptions) {
                 if (description.serverId != serverId) {

@@ -106,7 +106,7 @@ ListViewType {
                     z: 1
 
                     onClicked: function() {
-                        ServersUiController.processedServerIndex = index
+                        ServersUiController.setProcessedServerIndex(index)
 
                         if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
                             if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
