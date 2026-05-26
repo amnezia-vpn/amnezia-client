@@ -282,13 +282,13 @@ bool IpcServer::resetKillSwitchAllowedRange(QStringList ranges)
     return KillSwitch::instance()->resetAllowedRange(ranges);
 }
 
-bool IpcServer::addKillSwitchAllowedRange(QStringList ranges)
+bool IpcServer::addKillSwitchAllowedRange(const QString &ifname, QStringList ranges)
 {
 #ifdef MZ_DEBUG
-    qDebug() << "IpcServer::addKillSwitchAllowedRange";
+    qDebug() << "IpcServer::addKillSwitchAllowedRange" << ifname;
 #endif
 
-    return KillSwitch::instance()->addAllowedRange(ranges);
+    return KillSwitch::instance()->addAllowedRange(ifname, ranges);
 }
 
 bool IpcServer::disableAllTraffic()
@@ -316,6 +316,15 @@ bool IpcServer::disableKillSwitch()
 #endif
 
     return KillSwitch::instance()->disableKillSwitch();
+}
+
+bool IpcServer::disableKillSwitchForTunnel(const QString &ifname, const QStringList &remainingRanges)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::disableKillSwitchForTunnel" << ifname;
+#endif
+
+    return KillSwitch::instance()->disableKillSwitchForTunnel(ifname, remainingRanges);
 }
 
 bool IpcServer::enablePeerTraffic(const QJsonObject &configStr)

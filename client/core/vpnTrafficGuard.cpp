@@ -31,34 +31,24 @@ void VpnTrafficGuard::setConfig(const QJsonObject &config)
     m_config = config;
 }
 
-bool VpnTrafficGuard::allowEndpoint(const QString &remoteAddress)
+bool VpnTrafficGuard::allowEndpoint(const QString &remoteAddress, const QString &ifname)
 {
 #ifdef AMNEZIA_DESKTOP
     if (remoteAddress.isEmpty()) {
         return false;
     }
-    if (!m_allowedEndpoints.contains(remoteAddress)) {
-        m_allowedEndpoints.append(remoteAddress);
+    if (m_allowedEndpoints.contains(remoteAddress)) {
+        return true;
     }
+    m_allowedEndpoints.append(remoteAddress);
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList(remoteAddress));
+        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(ifname, QStringList(remoteAddress));
         return reply.waitForFinished(1000) && reply.returnValue();
     });
 #else
     Q_UNUSED(remoteAddress)
+    Q_UNUSED(ifname)
     return true;
-#endif
-}
-
-void VpnTrafficGuard::revokeEndpoint(const QString &remoteAddress)
-{
-#ifdef AMNEZIA_DESKTOP
-    m_allowedEndpoints.removeAll(remoteAddress);
-    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->resetKillSwitchAllowedRange(m_allowedEndpoints);
-    });
-#else
-    Q_UNUSED(remoteAddress)
 #endif
 }
 
@@ -175,9 +165,29 @@ void VpnTrafficGuard::addSplitTunnelRoutes(const QString &gw, amnezia::RouteMode
 #endif
 }
 
-void VpnTrafficGuard::applyFirewall(const QString &gateway, const QString &localAddress)
+void VpnTrafficGuard::finishFirewallHandover(Tunnel* tunnel)
+{
+#if defined(AMNEZIA_DESKTOP) && defined(Q_OS_WIN)
+    if (!tunnel) return;
+    const QString handoverIfname = tunnel->handoverIfname();
+    if (handoverIfname.isEmpty() || handoverIfname == tunnel->ifname()) {
+        tunnel->clearHandoverIfname();
+        return;
+    }
+    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->disableKillSwitchForTunnel(handoverIfname, QStringList());
+    });
+    tunnel->clearHandoverIfname();
+#else
+    Q_UNUSED(tunnel)
+#endif
+}
+
+void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, const QString &localAddress)
 {
 #ifdef AMNEZIA_DESKTOP
+    finishFirewallHandover(tunnel);
+
     QJsonObject updatedConfig = m_config;
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef Q_OS_WIN
@@ -213,10 +223,10 @@ void VpnTrafficGuard::applyFirewall(const QString &gateway, const QString &local
                                 NetworkUtilities::getIPAddress(updatedConfig.value(amnezia::configKey::hostName).toString()));
             QRemoteObjectPendingReply<bool> reply = iface->enableKillSwitch(updatedConfig, 0);
             //TODO: why it takes so long?
-            if (!reply.waitForFinished(5000) || !reply.returnValue()) {
-                qWarning() << "VpnTrafficGuard::applyFirewall: Failed to enable killswitch";
+            if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to enable killswitch";
             } else {
-                qDebug() << "VpnTrafficGuard::applyFirewall: Successfully enabled killswitch";
+                qDebug() << "VpnTrafficGuard::applyKillSwitch: Successfully enabled killswitch";
             }
         }
 #endif
@@ -250,7 +260,7 @@ void VpnTrafficGuard::flushAll()
         QRemoteObjectPendingReply<bool> reply = iface->disableKillSwitch();
         m_allowedEndpoints.clear();
         //TODO: why it takes so long?
-        if (!reply.waitForFinished(5000) || !reply.returnValue()) {
+        if (!reply.waitForFinished(1000) || !reply.returnValue()) {
             qWarning() << "VpnTrafficGuard::flushAll: Failed to disable killswitch";
         } else {
             qDebug() << "VpnTrafficGuard::flushAll: Successfully disabled killswitch";
@@ -318,7 +328,7 @@ void VpnTrafficGuard::reserve(Tunnel* tunnel)
 {
     if (!tunnel) return;
 #ifdef AMNEZIA_DESKTOP
-    allowEndpoint(tunnel->remoteAddress());
+    allowEndpoint(tunnel->remoteAddress(), tunnel->ifname());
 #else
     Q_UNUSED(tunnel)
 #endif
@@ -327,8 +337,12 @@ void VpnTrafficGuard::reserve(Tunnel* tunnel)
 void VpnTrafficGuard::release(Tunnel* tunnel)
 {
     if (!tunnel) return;
+    disconnect(tunnel, nullptr, this, nullptr);
 #ifdef AMNEZIA_DESKTOP
-    revokeEndpoint(tunnel->remoteAddress());
+    m_allowedEndpoints.removeAll(tunnel->remoteAddress());
+    IpcClient::withInterface([this, &tunnel](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->disableKillSwitchForTunnel(tunnel->ifname(), m_allowedEndpoints);
+    });
 #else
     Q_UNUSED(tunnel)
 #endif
@@ -396,6 +410,17 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
 {
     if (!tunnel) return;
     applyPolicy(tunnel);
+    connect(tunnel, &Tunnel::activated, this, [this, tunnel] {
+        if (auto p = tunnel->protocol()) {
+            applyKillSwitch(tunnel, p->vpnGateway(), p->vpnLocalAddress());
+        }
+    });
+#ifdef Q_OS_WIN
+    connect(tunnel, &Tunnel::addressesUpdated, this,
+            [this, tunnel](const QString& gw, const QString& la) {
+        applyKillSwitch(tunnel, gw, la);
+    });
+#endif
     tunnel->commit();
 }
 
@@ -410,11 +435,18 @@ void VpnTrafficGuard::tearDown(Tunnel* tunnel)
 void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
 {
     if (!to) return;
-    applyPolicy(to);
-    to->commit();
     if (from) {
+        to->setHandoverIfname(from->ifname());
+    }
+    commit(to);
+    if (from) {
+        m_allowedEndpoints.removeAll(from->remoteAddress());
+#ifndef Q_OS_WIN
+        IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
+            iface->resetKillSwitchAllowedRange(m_allowedEndpoints);
+        });
+#endif
         revokePolicy(from);
-        release(from);
         from->deactivate();
     }
 }

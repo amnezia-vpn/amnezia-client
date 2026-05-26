@@ -41,6 +41,10 @@ public:
     State state() const { return m_state; }
     QSharedPointer<VpnProtocol> protocol() const { return m_protocol; }
 
+    const QString& handoverIfname() const { return m_handoverIfname; }
+    void setHandoverIfname(const QString& ifname) { m_handoverIfname = ifname; }
+    void clearHandoverIfname() { m_handoverIfname.clear(); }
+
     virtual void prepare();
     virtual void commit();
     virtual void deactivate();
@@ -61,6 +65,7 @@ protected:
 
     QString m_ifname;
     QString m_remoteAddress;
+    QString m_handoverIfname;
     amnezia::DockerContainer m_container;
     QJsonObject m_config;
     QSharedPointer<VpnProtocol> m_protocol;

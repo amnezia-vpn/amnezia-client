@@ -159,6 +159,16 @@ bool KillSwitch::disableKillSwitch() {
     return true;
 }
 
+bool KillSwitch::disableKillSwitchForTunnel(const QString& ifname, const QStringList& remainingRanges) {
+#ifdef Q_OS_WIN
+    Q_UNUSED(remainingRanges)
+    return WindowsFirewall::create(this)->disableKillSwitchForTunnel(ifname);
+#else
+    Q_UNUSED(ifname)
+    return resetAllowedRange(remainingRanges);
+#endif
+}
+
 bool KillSwitch::disableAllTraffic() {
 #ifdef Q_OS_WIN
     WindowsFirewall::create(this)->enableInterface(-1);
@@ -221,7 +231,15 @@ bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
     return true;
 }
 
-bool KillSwitch::addAllowedRange(const QStringList &ranges) {
+bool KillSwitch::addAllowedRange(const QString &ifname, const QStringList &ranges) {
+#ifdef Q_OS_WIN
+    if (!ifname.isEmpty()) {
+        return WindowsFirewall::create(this)->allowTrafficRange(ranges, ifname);
+    }
+#else
+    Q_UNUSED(ifname)
+#endif
+
     for (const QString &range : ranges) {
         if (!range.isEmpty() && !m_allowedRanges.contains(range)) {
             m_allowedRanges.append(range);
@@ -242,7 +260,11 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         config.m_secondaryDnsServer = configStr.value(amnezia::configKey::dns2).toString();
     }
 
-    config.m_serverPublicKey = "openvpn";
+    config.m_ifname = configStr.value("ifname").toString();
+    const QString protocolName = configStr.value(amnezia::configKey::vpnProto).toString();
+    const QString pubkey = configStr.value(protocolName + "_config_data").toObject()
+                                    .value(amnezia::configKey::serverPubKey).toString();
+    config.m_serverPublicKey = pubkey.isEmpty() ? QStringLiteral("openvpn") : pubkey;
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
     config.m_serverIpv4AddrIn = configStr.value("vpnServer").toString();
     int vpnAdapterIndex = resolveVpnAdapterIndex(configStr);
@@ -306,10 +328,11 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
 #ifdef Q_OS_WIN
     Q_UNUSED(vpnAdapterIndex)
     const int resolvedIndex = resolveVpnAdapterIndex(configStr);
+    const QString ifname = configStr.value("ifname").toString();
     if (configStr.value("splitTunnelType").toInt() != 0) {
         WindowsFirewall::create(this)->allowAllTraffic();
     }
-    return WindowsFirewall::create(this)->enableInterface(resolvedIndex);
+    return WindowsFirewall::create(this)->enableInterface(resolvedIndex, ifname);
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)

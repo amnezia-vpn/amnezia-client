@@ -14,11 +14,12 @@ public:
     bool init();
     bool refresh(bool enabled);
     bool disableKillSwitch();
+    bool disableKillSwitchForTunnel(const QString& ifname, const QStringList& remainingRanges);
     bool disableAllTraffic();
     bool enablePeerTraffic(const QJsonObject &configStr);
     bool enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex);
     bool resetAllowedRange(const QStringList &ranges);
-    bool addAllowedRange(const QStringList &ranges);
+    bool addAllowedRange(const QString &ifname, const QStringList &ranges);
     bool isStrictKillSwitchEnabled();
 
 private:
