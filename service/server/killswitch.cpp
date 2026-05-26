@@ -14,6 +14,28 @@
 #ifdef Q_OS_WIN
     #include "../client/platforms/windows/daemon/windowsfirewall.h"
     #include "../client/platforms/windows/daemon/windowsdaemon.h"
+
+namespace {
+int resolveVpnAdapterIndex(const QJsonObject& configStr) {
+    int index = configStr.value("vpnAdapterIndex").toInt();
+    if (index != 0) {
+        return index;
+    }
+    const QString ifname = configStr.value("ifname").toString();
+    if (ifname.isEmpty()) {
+        return 0;
+    }
+    NET_LUID luid;
+    if (ConvertInterfaceAliasToLuid((wchar_t*)ifname.utf16(), &luid) != 0) {
+        return 0;
+    }
+    NET_IFINDEX ifindex = 0;
+    if (ConvertInterfaceLuidToIndex(&luid, &ifindex) != 0) {
+        return 0;
+    }
+    return static_cast<int>(ifindex);
+}
+}
 #endif
 
 #ifdef Q_OS_LINUX
@@ -223,7 +245,7 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
     config.m_serverPublicKey = "openvpn";
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
     config.m_serverIpv4AddrIn = configStr.value("vpnServer").toString();
-    int vpnAdapterIndex = configStr.value("vpnAdapterIndex").toInt();
+    int vpnAdapterIndex = resolveVpnAdapterIndex(configStr);
     int inetAdapterIndex = configStr.value("inetAdapterIndex").toInt();
 
     int splitTunnelType = configStr.value("splitTunnelType").toInt();
@@ -282,10 +304,12 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 
 bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex) {
 #ifdef Q_OS_WIN
+    Q_UNUSED(vpnAdapterIndex)
+    const int resolvedIndex = resolveVpnAdapterIndex(configStr);
     if (configStr.value("splitTunnelType").toInt() != 0) {
         WindowsFirewall::create(this)->allowAllTraffic();
     }
-    return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
+    return WindowsFirewall::create(this)->enableInterface(resolvedIndex);
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)

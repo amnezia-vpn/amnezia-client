@@ -12,7 +12,6 @@
 
 #include <QFileInfo>
 
-#include "killswitch.h"
 #include "leakdetector.h"
 #include "logger.h"
 #include "windowsfirewall.h"
@@ -103,12 +102,17 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     return false;
   }
 
-  // We don't want to pass a peer just yet, that will happen later with
-  // a UAPI command in WireguardUtilsWindows::updatePeer(), so truncate
-  // the config file to remove the [Peer] section.
   qsizetype peerStart = configString.indexOf("[Peer]", 0, Qt::CaseSensitive);
   if (peerStart >= 0) {
     configString.truncate(peerStart);
+  }
+
+  qsizetype dnsStart = configString.indexOf("DNS = ");
+  if (dnsStart >= 0) {
+    qsizetype dnsEnd = configString.indexOf('\n', dnsStart);
+    if (dnsEnd >= 0) {
+      configString.remove(dnsStart, dnsEnd - dnsStart + 1);
+    }
   }
 
   m_ifname = config.m_ifname.isEmpty() ? s_defaultInterfaceName() : config.m_ifname;
@@ -126,14 +130,6 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   m_luid = luid.Value;
   m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
 
-  if (config.m_killSwitchEnabled) {
-    NET_IFINDEX ifindex;
-    ConvertInterfaceLuidToIndex(&luid, &ifindex);
-    m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
-    KillSwitch::instance()->addAllowedRange({});
-  }
-
   logger.debug() << "Registration completed";
   return true;
 }
@@ -143,7 +139,6 @@ bool WireguardUtilsWindows::deleteInterface() {
     m_routeMonitor->deleteLater();
   }
 
-  m_firewall->disableKillSwitch();
   m_tunnel.stop();
   return true;
 }
@@ -154,10 +149,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   QByteArray pskKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
 
-  if (config.m_killSwitchEnabled) {
-    // Enable the windows firewall for this peer.
-    m_firewall->enablePeerTraffic(config);
-  }
   logger.debug() << "Configuring peer" << publicKey.toHex()
                  << "via" << config.m_serverIpv4AddrIn;
 
@@ -193,9 +184,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-
-  // Disable the windows firewall for this peer.
-  m_firewall->disablePeerTraffic(config.m_serverPublicKey);
 
   QString message;
   QTextStream out(&message);
