@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, chdir
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import Environment
+from conan.tools.env import VirtualBuildEnv
 
 import os
 
@@ -28,11 +27,11 @@ class Tun2Socks(ConanFile):
             "x86_64": "amd64",
             "armv8": "arm64"
         }.get(str(self.settings.arch))
-    
+
     @property
     def _is_windows(self):
         return str(self.settings.get_safe("os")).startswith("Windows")
-    
+
     @property
     def _ext(self):
         return ".exe" if self._is_windows else ""
@@ -47,12 +46,8 @@ class Tun2Socks(ConanFile):
             )
 
     def build_requirements(self):
+        # Upstream Makefile: CGO_ENABLED=0 — pure Go; no MSYS2 / MinGW / make on Windows.
         self.tool_requires("go/1.26.0")
-        if self._is_windows:
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-            self.tool_requires("mingw-builds/15.1.0")
 
     def requirements(self):
         if self._is_windows:
@@ -64,25 +59,33 @@ class Tun2Socks(ConanFile):
         )
 
     def generate(self):
-        tc = AutotoolsToolchain(self)
-        env = tc.environment()
-        env.define("LDFLAGS", "")
-        env.define("CGO_LDFLAGS", tc.ldflags)
-        env.define("CGO_CFLAGS", tc.cflags)
-        env.define("GOOS", self._goos)
-        env.define("GOARCH", self._goarch)
-        tc.generate(env)
+        VirtualBuildEnv(self).generate()
 
     def build(self):
+        # Makefile default: BUILD_DIR=build, CGO_ENABLED=0, target tun2socks -> build/tun2socks(.exe)
+        out_dir = os.path.join(self.source_folder, "build")
+        os.makedirs(out_dir, exist_ok=True)
+        out_name = f"tun2socks{self._ext}"
+        out_path = os.path.join(out_dir, out_name)
+        goos = self._goos
+        goarch = self._goarch
         with chdir(self, self.source_folder):
-            at = Autotools(self)
-            at.make("tun2socks")
+            if self._is_windows:
+                self.run(
+                    f'set "GOOS={goos}"&& set "GOARCH={goarch}"&& set "CGO_ENABLED=0"&& set "GO111MODULE=on"&& '
+                    f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .',
+                    env="conanbuild",
+                )
+            else:
+                self.run(
+                    f'GOOS={goos} GOARCH={goarch} CGO_ENABLED=0 GO111MODULE=on '
+                    f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .',
+                    env="conanbuild",
+                )
 
     def package(self):
-        copy(self, "tun2socks", src=self.build_folder, dst=self.package_folder)
-        if self._is_windows:
-            with chdir(self, self.package_folder):
-                os.rename(src="tun2socks", dst="tun2socks.exe")
+        out_dir = os.path.join(self.source_folder, "build")
+        copy(self, f"tun2socks{self._ext}", src=out_dir, dst=self.package_folder)
 
     def package_info(self):
         self.cpp_info.exe = True

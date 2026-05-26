@@ -45,6 +45,8 @@ class LibSSHRecipe(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if self.settings.os == "Windows" and str(self.settings.arch) == "armv8":
+            self.options["openssl/*"].no_asm = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")

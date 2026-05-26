@@ -11,6 +11,12 @@ class AmneziaVPN(ConanFile):
         "macos_ne": False
     }
 
+    def configure(self):
+        # OpenSSL 3.x ASM on Windows/ARM64 needs clang-cl (VS "C++ Clang tools").
+        # Without it, nmake fails on *.asm; pure C build is fine for the client.
+        if str(self.settings.os) == "Windows" and str(self.settings.arch) == "armv8":
+            self.options["openssl/*"].no_asm = True
+
     def requirements(self):
         os = str(self.settings.os)
 
@@ -43,5 +49,8 @@ class AmneziaVPN(ConanFile):
 
         # expicitly use libssh@amnezia to prevent it from being downloaded from conan-center
         self.requires("libssh/0.11.3@amnezia")
-        self.requires("openssl/3.6.1")
+        if str(self.settings.os) == "Windows" and str(self.settings.arch) == "armv8":
+            self.requires("openssl/3.6.1", options={"no_asm": True})
+        else:
+            self.requires("openssl/3.6.1")
         self.requires("zlib/1.3.2")

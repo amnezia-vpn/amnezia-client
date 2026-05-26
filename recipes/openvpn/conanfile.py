@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, replace_in_file, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake, CMakeDeps
@@ -17,7 +17,6 @@ class Openvpn(ConanFile):
         return str(self.settings.os).startswith("Windows")
 
     def export_sources(self):
-        export_conandata_patches(self)
         copy(self, "*applink.c", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def layout(self):
@@ -37,7 +36,8 @@ class Openvpn(ConanFile):
             self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
-        self.requires("openssl/3.6.1", visible=False)
+        openssl_opts = {"no_asm": True} if self._is_windows and str(self.settings.arch) == "armv8" else {}
+        self.requires("openssl/3.6.1", visible=False, options=openssl_opts)
         self.requires("lz4/1.10.0", visible=False)
         self.requires("lzo/2.10", visible=False)
         if self.settings.os == "Linux":
@@ -52,10 +52,15 @@ class Openvpn(ConanFile):
         )
 
     def _patch_sources(self):
-        replace_in_file(self, 
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "/Qspectre",
-            ""
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "/Qspectre", "")
+        # Empty CMAKE_GENERATOR_PLATFORM (Ninja + MSVC) breaks
+        # `if (${CMAKE_GENERATOR_PLATFORM} STREQUAL ...)` → invalid `if (STREQUAL ...)`.
+        replace_in_file(
+            self,
+            cmakelists,
+            'if (${CMAKE_GENERATOR_PLATFORM} STREQUAL "x64" OR ${CMAKE_GENERATOR_PLATFORM} STREQUAL "x86")',
+            'if (CMAKE_GENERATOR_PLATFORM STREQUAL "x64" OR CMAKE_GENERATOR_PLATFORM STREQUAL "x86" OR CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")',
         )
 
     def generate(self):
@@ -73,6 +78,8 @@ class Openvpn(ConanFile):
             tc.extra_cxxflags = [ f"-I{tap_include_path}", f"-I{applink_include_path}" ]
             tc.cache_variables["BUILD_TESTING"] = False
             tc.cache_variables["ENABLE_PKCS11"] = False
+            # Upstream defaults USE_WERROR=ON → /WX on MSVC; breaks on newer toolchains (warnings from deps / OpenVPN).
+            tc.cache_variables["USE_WERROR"] = False
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -85,7 +92,6 @@ class Openvpn(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self._is_windows:
             cmake = CMake(self)
             cmake.configure()
