@@ -68,25 +68,19 @@ PageType {
                 }
             }
 
-            DividerType {}
-
-            LabelWithButtonType {
-                id: localProxyButton
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Local proxy")
-                descriptionText: qsTr("Running: 127.0.0.1:1080")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    // Placeholder - no action
-                }
-            }
-
-            DividerType {}
+            // TODO: Local proxy
+            // DividerType {}
+            // LabelWithButtonType {
+            //     id: localProxyButton
+            //     Layout.fillWidth: true
+            //     Layout.leftMargin: 16
+            //     Layout.rightMargin: 16
+            //     text: qsTr("Local proxy")
+            //     descriptionText: qsTr("Running: 127.0.0.1:1080")
+            //     rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            //     clickedFunction: function() {}
+            // }
+            // DividerType {}
         }
     }
 }

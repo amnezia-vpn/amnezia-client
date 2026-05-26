@@ -170,6 +170,16 @@ bool ConnectionUiController::isConnected() const
     return m_isConnected;
 }
 
+void ConnectionUiController::onCurrentContainerUpdated()
+{
+    if (m_isConnected || m_isConnectionInProgress) {
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully, reconnecting..."));
+        openConnection();
+    } else {
+        emit reconnectWithUpdatedContainer(tr("Settings updated successfully"));
+    }
+}
+
 void ConnectionUiController::checkAndStartAwgStateTimer()
 {
     const QString serverId = m_serversController->getDefaultServerId();
@@ -184,9 +194,18 @@ void ConnectionUiController::checkAndStartAwgStateTimer()
     const Proto proto = ContainerUtils::defaultProtocol(container);
     if (proto == Proto::Awg) {
         const auto v2Config = m_serversController->apiV2Config(serverId);
-        if (v2Config.has_value() && v2Config->isPremium()) {
+        if (v2Config.has_value() && (v2Config->isPremium() || v2Config->isExternalPremium())) {
+            const bool isAutoMode = v2Config->serviceProtocol().isEmpty();
+            if (isAutoMode) {
+                if (!m_awgStateTimer.isActive()) {
+                    m_awgStateTimer.start(kAwgSwitchTimeoutMs);
+                }
+                return;
+            }
+        }
+        else if (m_serversController->isLegacyApiV1Server(serverId)) {
             if (!m_awgStateTimer.isActive()) {
-                m_awgStateTimer.start(10000);
+                m_awgStateTimer.start(kAwgSwitchTimeoutMs);
             }
             return;
         }
@@ -226,7 +245,8 @@ void ConnectionUiController::onAwgStateTimeout()
         m_apiSwitched = false;
         m_waitingForApiUpdate = true;
 
-        emit requestSetCurrentProtocol(QStringLiteral("vless"));
+        emit requestSetProcessedServer(serverId);
+        emit requestSetCurrentProtocol(serverId, QStringLiteral("vless"));
         emit requestUpdateServiceFromGateway(serverId, QString(), QString(), true);
     });
 }
@@ -245,6 +265,7 @@ void ConnectionUiController::onUpdateServiceFromGatewayCompleted(bool success, c
         if (containersMap.contains(DockerContainer::Xray)) {
             qDebug().noquote() << "AWG connect timeout (10s), switching default container to Xray and reconnecting";
             m_serversController->setDefaultContainer(serverId, DockerContainer::Xray);
+            emit requestSetCurrentProtocol(serverId, QStringLiteral("vless"));
             m_pendingApiServerId.clear();
 
             if (!m_isConnected && !m_isConnectionInProgress) {

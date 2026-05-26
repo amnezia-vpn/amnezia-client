@@ -44,6 +44,7 @@ public slots:
 public slots:
     void checkAndStartAwgStateTimer();
     void onUpdateServiceFromGatewayCompleted(bool success, const QString &serverId);
+    void onCurrentContainerUpdated();
 
 private slots:
     void onAwgStateTimeout();
@@ -57,12 +58,16 @@ signals:
     void preparingConfig();
     void prepareConfig();
 
-    void requestSetCurrentProtocol(const QString &protocol);
+    // serverId + protocol — both carried so the receiver doesn't need to re-read default server
+    void requestSetCurrentProtocol(const QString &serverId, const QString &protocol);
     void requestUpdateServiceFromGateway(const QString &serverId, const QString &newCountryCode,
                                          const QString &newCountryName, bool reloadServiceConfig);
+    void requestSetProcessedServer(const QString &serverId);
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
+
+    static constexpr int kAwgSwitchTimeoutMs = 10000;
 
     QTimer m_awgStateTimer;
     ConnectionController* m_connectionController;

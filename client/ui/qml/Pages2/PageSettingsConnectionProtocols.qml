@@ -12,56 +12,18 @@ import "../Config"
 PageType {
     id: root
 
+    // Protocol to re-assert after updateServiceFromGateway completes (empty = auto)
+    property string pendingProtocol: ""
+    property bool waitingForGatewayUpdate: false
+
     Timer {
         id: updateProtocolTimer
         interval: 100
         repeat: false
-        property string savedProtocol: ""
         onTriggered: {
-            if (!root || !root.visible) {
-                PageController.showBusyIndicator(false)
-                return
-            }
-            
-            SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), "", "", true)
-            
-            // After update, restore the protocol we set (because updateServiceFromGateway may overwrite it)
-            if (savedProtocol !== "") {
-                Qt.callLater(function() {
-                    try {
-                        if (!root || !root.visible) {
-                            PageController.showBusyIndicator(false)
-                            return
-                        }
-                        var protocolToSet = savedProtocol === "auto" ? "" : savedProtocol
-                        SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), protocolToSet)
-                        PageController.showBusyIndicator(false)
-                        Qt.callLater(function() {
-                            try {
-                                if (root && root.visible && typeof root.getCurrentProtocol === "function") {
-                                    root.currentProtocol = root.getCurrentProtocol()
-                                }
-                            } catch (e) {
-                                console.log("Error updating protocol display:", e)
-                            }
-                        })
-                    } catch (e) {
-                        console.log("Error in updateProtocolTimer:", e)
-                        PageController.showBusyIndicator(false)
-                    }
-                })
-            } else {
-                PageController.showBusyIndicator(false)
-                Qt.callLater(function() {
-                    try {
-                        if (root && root.visible && typeof root.getCurrentProtocol === "function") {
-                            root.currentProtocol = root.getCurrentProtocol()
-                        }
-                    } catch (e) {
-                        console.log("Error updating protocol display:", e)
-                    }
-                })
-            }
+            var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
+            root.waitingForGatewayUpdate = true
+            SubscriptionUiController.updateServiceFromGateway(serverId, "", "", true)
         }
     }
 
@@ -106,18 +68,20 @@ PageType {
     Connections {
         target: SubscriptionUiController
         function onUpdateServerFromApiFinished() {
-            if (!root || !root.visible) {
+            if (!root.waitingForGatewayUpdate) {
                 return
             }
-            Qt.callLater(function() {
-                try {
-                    if (root && root.visible && typeof root.getCurrentProtocol === "function") {
-                        root.currentProtocol = root.getCurrentProtocol()
-                    }
-                } catch (e) {
-                    console.log("Error in ApiConfigsController.onUpdateServerFromApiFinished:", e)
-                }
-            })
+            root.waitingForGatewayUpdate = false
+
+            // Re-assert the protocol the user chose (gateway reload may have reset it)
+            if (root.pendingProtocol !== "") {
+                var protocolToSet = root.pendingProtocol === "auto" ? "" : root.pendingProtocol
+                SubscriptionUiController.setCurrentProtocol(
+                    ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                    protocolToSet)
+            }
+
+            root.currentProtocol = root.getCurrentProtocol()
         }
     }
 
@@ -203,9 +167,8 @@ PageType {
                         return
                     }
 
-                    PageController.showBusyIndicator(true)
                     SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), "")
-                    updateProtocolTimer.savedProtocol = "auto"
+                    root.pendingProtocol = "auto"
                     updateProtocolTimer.start()
                 }
 
@@ -234,11 +197,10 @@ PageType {
                         return
                     }
 
-                    PageController.showBusyIndicator(true)
-                    SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), "awg")
-                    updateProtocolTimer.savedProtocol = "awg"
-                    updateProtocolTimer.start()
                     root.currentProtocol = "awg"
+                    root.pendingProtocol = "awg"
+                    SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), "awg")
+                    updateProtocolTimer.start()
                 }
 
                 Keys.onEnterPressed: this.clicked()
@@ -266,11 +228,10 @@ PageType {
                         return
                     }
 
-                    PageController.showBusyIndicator(true)
-                    SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), "vless")
-                    updateProtocolTimer.savedProtocol = "vless"
-                    updateProtocolTimer.start()
                     root.currentProtocol = "vless"
+                    root.pendingProtocol = "vless"
+                    SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), "vless")
+                    updateProtocolTimer.start()
                 }
 
                 Keys.onEnterPressed: this.clicked()

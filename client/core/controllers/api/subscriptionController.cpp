@@ -418,7 +418,9 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     }
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     QString serviceProtocol = apiV2->serviceProtocol();
-    ProtocolData protocolData = generateProtocolData(serviceProtocol);
+    // Auto mode (empty) defaults to AWG — gateway requires public_key for all requests
+    const QString effectiveProtocol = serviceProtocol.isEmpty() ? configKey::awg : serviceProtocol;
+    ProtocolData protocolData = generateProtocolData(effectiveProtocol);
     
     QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
@@ -432,7 +434,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
                                             authDataJson };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+    appendProtocolDataToApiPayload(effectiveProtocol, protocolData, apiPayload);
 
     if (isConnectEvent) {
         apiPayload[apiDefs::key::isConnectEvent] = true;
@@ -451,11 +453,11 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     }
 
     QJsonObject serverConfigJson;
-    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    errorCode = extractServerConfigJsonFromResponse(responseBody, effectiveProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    
+
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
     
     if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {

@@ -226,17 +226,18 @@ void CoreController::initControllers()
     setQmlContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
     connect(m_connectionUiController, &ConnectionUiController::requestSetCurrentProtocol,
-            this, [this](const QString &protocol) {
-                const QString serverId = m_serversController->getDefaultServerId();
-                if (!serverId.isEmpty()) {
-                    m_subscriptionUiController->setCurrentProtocol(serverId, protocol);
-                }
-            }, Qt::QueuedConnection);
+            m_subscriptionUiController, &SubscriptionUiController::setCurrentProtocol, Qt::QueuedConnection);
     connect(m_connectionUiController, &ConnectionUiController::requestUpdateServiceFromGateway,
             m_subscriptionUiController, &SubscriptionUiController::updateServiceFromGateway, Qt::QueuedConnection);
     connect(m_subscriptionUiController, &SubscriptionUiController::updateServiceFromGatewayCompleted,
             m_connectionUiController, &ConnectionUiController::onUpdateServiceFromGatewayCompleted,
             Qt::QueuedConnection);
+    connect(m_connectionUiController, &ConnectionUiController::requestSetProcessedServer,
+            this, [this](const QString &serverId) {
+                m_serversUiController->setProcessedServerIndex(m_serversController->indexOfServerId(serverId));
+            }, Qt::QueuedConnection);
+    connect(m_installUiController, &InstallUiController::currentContainerUpdated,
+            m_connectionUiController, &ConnectionUiController::onCurrentContainerUpdated);
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
     setQmlContextProperty("ApiNewsController", m_apiNewsUiController);
