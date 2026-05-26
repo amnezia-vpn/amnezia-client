@@ -159,7 +159,7 @@ PageType {
                 enabled: !ConnectionController.isConnected || !ServersModel.isDefaultServerCurrentlyProcessed()
 
                 text: qsTr("Choose automatically")
-                descriptionText: qsTr("AmneziaWG is used by default. If the connection is unstable, the app will switch to VLESS. It won't switch back automatically")
+                descriptionText: qsTr("AmneziaWG is used by default. If the connection is unstable, the app will switch to VLESS. On the next launch, AmneziaWG will be tried again")
 
                 onClicked: function() {
                     if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {

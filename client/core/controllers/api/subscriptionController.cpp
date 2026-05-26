@@ -743,6 +743,9 @@ void SubscriptionController::setCurrentProtocol(const QString &serverId, const Q
     auto apiV2 = m_serversRepository->apiV2Config(serverId);
     if (apiV2.has_value()) {
         apiV2->apiConfig.serviceProtocol = protocolName;
+        if (protocolName.isEmpty()) {
+            apiV2->defaultContainer = DockerContainer::Awg;
+        }
         m_serversRepository->editServer(serverId, apiV2->toJson(),
                                         serverConfigUtils::configTypeFromJson(apiV2->toJson()));
     }
