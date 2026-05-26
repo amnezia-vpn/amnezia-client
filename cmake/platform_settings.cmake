@@ -7,7 +7,7 @@ if(APPLE)
         set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "" FORCE)
         set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE STRING "" FORCE)
     elseif(MACOS_NE)
-        set(CONAN_INSTALL_ARGS "--build=missing;-o=&:macos_ne=True" CACHE STRING "" FORCE)
+        set(_CONAN_INSTALL_ARGS "-o=&:macos_ne=True")
         set(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" CACHE STRING "" FORCE)
         set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
     else()
@@ -17,15 +17,18 @@ if(APPLE)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Android")
-    set(CONAN_INSTALL_ARGS
-    "--build=missing"
-    "-c=tools.android:cmake_legacy_toolchain=false"
-    "-c=tools.build:sharedlinkflags=['-Wl,-z,max-page-size=16384']"
-    "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']"
-    CACHE STRING "" FORCE)
+    set(_CONAN_INSTALL_ARGS
+        "-c=tools.android:cmake_legacy_toolchain=false"
+        "-c=tools.build:sharedlinkflags=['-Wl,-z,max-page-size=16384']"
+        "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']"
+        "-o=openssl/*:shared=True")
     set(CMAKE_ANDROID_STL_TYPE "c++_shared" CACHE STRING "")
 endif()
 
 if (WIN32 OR APPLE)
     set(CMAKE_INSTALL_BINDIR ".")
 endif()
+
+list(PREPEND _CONAN_INSTALL_ARGS "--build=missing")
+list(JOIN _CONAN_INSTALL_ARGS ";" _CONAN_INSTALL_ARGS_JOINED)
+set(CONAN_INSTALL_ARGS ${_CONAN_INSTALL_ARGS_JOINED} CACHE STRING "" FORCE)
