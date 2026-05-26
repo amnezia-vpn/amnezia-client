@@ -1,5 +1,6 @@
 #include "allowedDnsUiController.h"
 
+#include <QDebug>
 #include <QFile>
 #include <QStandardPaths>
 #include <QJsonDocument>
@@ -98,7 +99,10 @@ void AllowedDnsUiController::exportDns(const QString &fileName)
     QJsonDocument jsonDocument(jsonArray);
     QByteArray jsonData = jsonDocument.toJson();
 
-    SystemController::saveFile(fileName, jsonData);
+    if (!SystemController::saveFile(fileName, jsonData)) {
+        qInfo() << "AllowedDnsUiController::exportDns: save or share was cancelled or failed";
+        return;
+    }
 
     emit finished(tr("Export completed"));
 }

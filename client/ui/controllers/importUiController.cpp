@@ -201,3 +201,12 @@ bool ImportUiController::decodeQrCode(const QString &code)
     return mInstance->parseQrCodeChunk(code);
 }
 #endif
+
+QString ImportUiController::readTextFile(const QString &fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return {};
+    }
+    return QString::fromUtf8(file.readAll());
+}

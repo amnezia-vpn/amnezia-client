@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv, Environment
+from conan.tools.env import Environment
 
 import os
 import stat
@@ -34,7 +34,6 @@ class AmneziaLibxray(ConanFile):
         )
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
         env = Environment()
         ndk_path_str = self.conf.get("tools.android:ndk_path")
         if ndk_path_str:

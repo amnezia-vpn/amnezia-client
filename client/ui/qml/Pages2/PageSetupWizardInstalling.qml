@@ -28,7 +28,7 @@ PageType {
         function onInstallContainerFinished(finishedMessage, isServiceInstall) {
             var containerIndex = ServersUiController.processedContainerIndex
             if (!ConnectionController.isConnected && !ContainersModel.isServiceContainer(containerIndex)) {
-                ServersUiController.setDefaultContainer(ServersUiController.processedIndex, containerIndex)
+                ServersUiController.setDefaultContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
             }
             
             PageController.closePage() // close installing page
@@ -47,8 +47,8 @@ PageType {
 
         function onInstallServerFinished(finishedMessage) {
             if (!ConnectionController.isConnected) {
-                ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+                ServersUiController.setDefaultServerAtIndex(ServersModel.getServersCount() - 1);
+                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
             }
 
             PageController.goToPageHome()
@@ -57,7 +57,7 @@ PageType {
 
         function onServerAlreadyExists(serverIndex) {
             PageController.goToStartPage()
-            ServersUiController.processedIndex = serverIndex
+            ServersUiController.setProcessedServerIndex(serverIndex)
             PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
 
             PageController.showErrorMessage(qsTr("The server has already been added to the application"))

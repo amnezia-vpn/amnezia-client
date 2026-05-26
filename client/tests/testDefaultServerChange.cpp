@@ -5,7 +5,8 @@
 #include <QSignalSpy>
 
 #include "core/controllers/coreController.h"
-#include "core/models/serverConfig.h"
+#include "core/models/serverDescription.h"
+#include "tests/testServerRepositoryHelpers.h"
 #include "ui/models/serversModel.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
@@ -39,7 +40,7 @@ private slots:
         m_settings->clearSettings();
         m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerConfig>(), -1, false);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
         }
     }
 
@@ -60,9 +61,10 @@ private slots:
 
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
 
-        m_coreController->m_serversController->setDefaultServerIndex(0);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(0));
         QVERIFY2(defaultServerChangedSpy.count() == 1, "defaultServerChanged signal should be emitted");
-        QVERIFY2(defaultServerChangedSpy.at(0).at(0).toInt() == 0, "defaultServerChanged should emit index 0");
+        QVERIFY2(defaultServerChangedSpy.at(0).at(0).toString() == m_coreController->m_serversController->getServerId(0),
+                 "defaultServerChanged should emit new default server id");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default server index should be 0");
 
         if (m_coreController->m_serversModel) {
@@ -70,9 +72,10 @@ private slots:
             QVERIFY2(modelDefaultIndex == 0, "Model should reflect default server");
         }
 
-        m_coreController->m_serversController->setDefaultServerIndex(2);
+        m_coreController->m_serversController->setDefaultServer(m_coreController->m_serversController->getServerId(2));
         QVERIFY2(defaultServerChangedSpy.count() == 2, "defaultServerChanged signal should be emitted again");
-        QVERIFY2(defaultServerChangedSpy.at(1).at(0).toInt() == 2, "defaultServerChanged should emit index 2");
+        QVERIFY2(defaultServerChangedSpy.at(1).at(0).toString() == m_coreController->m_serversController->getServerId(2),
+                 "defaultServerChanged should emit new default server id");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 2, "Default server index should be 2");
     }
 
@@ -94,28 +97,28 @@ private slots:
         QSignalSpy defaultServerChangedSpy(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged);
         QSignalSpy serverRemovedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved);
 
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 2, "Should have 2 servers");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 1, "Default should be index 1 (was 2, removed 0)");
 
-        ServerConfig remainingServer1 = m_coreController->m_serversRepository->server(0);
-        ServerConfig remainingServer2 = m_coreController->m_serversRepository->server(1);
-        QString desc1 = remainingServer1.description();
-        QString desc2 = remainingServer2.description();
+        QString desc1 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(0));
+        QString desc2 = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                          m_coreController->m_serversRepository->serverIdAt(1));
         QVERIFY2(desc1 == "Xray Server", "First remaining server should be Xray");
         QVERIFY2(desc2 == "WireGuard Server", "Second remaining server should be WireGuard");
 
         defaultServerChangedSpy.clear();
         serverRemovedSpy.clear();
 
-        m_coreController->m_serversController->removeServer(0);
+        m_coreController->m_serversController->removeServer(m_coreController->m_serversController->getServerId(0));
         QVERIFY2(serverRemovedSpy.count() == 1, "serverRemoved signal should be emitted");
         QVERIFY2(m_coreController->m_serversRepository->serversCount() == 1, "Should have 1 server");
         QVERIFY2(m_coreController->m_serversRepository->defaultServerIndex() == 0, "Default should be index 0 (was 1, removed 0)");
 
-        ServerConfig lastServer = m_coreController->m_serversRepository->server(0);
-        QString lastDesc = lastServer.description();
+        QString lastDesc = amnezia::test::serverDescription(m_coreController->m_serversRepository,
+                                                            m_coreController->m_serversRepository->serverIdAt(0));
         QVERIFY2(lastDesc == "WireGuard Server", "Last server should be WireGuard");
     }
 };
