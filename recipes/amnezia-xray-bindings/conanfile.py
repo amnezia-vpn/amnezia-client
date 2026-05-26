@@ -5,9 +5,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import XCRun, is_apple_os
 from conan.tools.apple.apple import _to_apple_arch
-from conan.tools.files.copy_pattern import _filter_files
 
 import os
+import shlex
 from pathlib import Path
 
 
@@ -34,7 +34,7 @@ class AmneziaXrayBindings(ConanFile):
     @property
     def _archs(self):
         return str(self.settings.arch).split("|")
-    
+
     @property
     def _is_multiarch(self):
         return len(self._archs) > 1
@@ -69,7 +69,7 @@ class AmneziaXrayBindings(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
             )
-        
+
         if self._is_multiarch and not is_apple_os(self):
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support multiarch builds"
@@ -99,28 +99,38 @@ class AmneziaXrayBindings(ConanFile):
     def build(self):
         with chdir(self, self.source_folder):
             for arch in self._archs:
-                cflags = self._cflags
-                ldflags = self._ldflags
+                cflags = list(self._cflags)
+                ldflags = list(self._ldflags)
                 if is_apple_os(self):
                     cflags.append(f"-arch {_to_apple_arch(arch)}")
                     ldflags.append(f"-arch {_to_apple_arch(arch)}")
 
                 autotools = Autotools(self)
                 autotools.make(args=[
-                    f"BUILD_DIR={os.path.join("build", arch)}"
+                    f"BUILD_DIR={os.path.join('build', arch)}",
                     f"ARCH={self._arch_map.get(arch)}",
-                    f"CGO_CFLAGS={cflags}",
-                    f"CGO_LDFLAGS={ldflags}"
+                    f"CGO_CFLAGS={shlex.quote(' '.join(cflags))}",
+                    f"CGO_LDFLAGS={shlex.quote(' '.join(ldflags))}"
                 ])
 
             if is_apple_os(self) and self._is_multiarch:
-                dir = os.path.join(self.source_folder, "merged")
-                archives = _filter_files(self.source_folder, "*.a", None, False, dir)
-                output = os.path.join(dir, Path(archives[0]).name)
+                merged_dir = os.path.join(self.source_folder, "merged")
+                archives = sorted(
+                    str(path) for path in Path(self.source_folder).glob("build/*/*.a")
+                )
+                if not archives:
+                    raise ConanInvalidConfiguration(
+                        f"{self.name} v{self.version} did not produce archives for {self.settings.arch}"
+                    )
+                output = os.path.join(merged_dir, Path(archives[0]).name)
 
-                mkdir(dir)
+                mkdir(self, merged_dir)
                 lipo = XCRun(self).find('lipo')
-                self.run(f"{lipo} -create -output {output} {archives}")
+                self.run("{} -create -output {} {}".format(
+                    shlex.quote(lipo),
+                    shlex.quote(output),
+                    " ".join(shlex.quote(archive) for archive in archives)
+                ))
 
     def _rename_header(self):
         if not self._is_windows:
@@ -138,11 +148,12 @@ class AmneziaXrayBindings(ConanFile):
                 os.rename(src, dst)
 
     def package(self):
-        dir_pattern = os.path.join("build", "merged") if self._is_multiarch else  os.path.join("build", "*")
-        copy(self, os.path.join(dir_pattern, "*.h"), src=self.build_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
-        copy(self, os.path.join(dir_pattern, "*.a"), src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, os.path.join(dir_pattern, "*.lib"), src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, os.path.join(dir_pattern, "*.dll"), src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        header_src = os.path.join(self.source_folder, "build", self._archs[0])
+        lib_src = os.path.join(self.source_folder, "merged") if self._is_multiarch else header_src
+        copy(self, "*.h", src=header_src, dst=os.path.join(self.package_folder, "include"), keep_path=False)
+        copy(self, "*.a", src=lib_src, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.lib", src=lib_src, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", src=lib_src, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         self._rename_header()
 
     def package_info(self):

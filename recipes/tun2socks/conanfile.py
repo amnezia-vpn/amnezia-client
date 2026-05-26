@@ -2,10 +2,12 @@ from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, chdir
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
 
 import os
+import shlex
 
 
 class Tun2Socks(ConanFile):
@@ -79,6 +81,8 @@ class Tun2Socks(ConanFile):
         output_path = os.path.join(self.build_folder, self._binary_name)
         if not os.path.exists(output_path):
             output_path = os.path.join(self.source_folder, self._binary_name)
+        if not os.path.exists(output_path):
+            output_path = os.path.join(self.source_folder, "build", self._binary_name)
 
         arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
         os.rename(output_path, arch_output_path)
@@ -87,7 +91,12 @@ class Tun2Socks(ConanFile):
     def _build_universal_macos(self):
         outputs = [self._build_go_arch(goarch) for goarch in self._goarchs]
         universal_output = os.path.join(self.build_folder, self._binary_name)
-        self.run(f"lipo -create {' '.join(outputs)} -output {universal_output}")
+        lipo = XCRun(self).find("lipo")
+        self.run("{} -create {} -output {}".format(
+            shlex.quote(lipo),
+            " ".join(shlex.quote(output) for output in outputs),
+            shlex.quote(universal_output)
+        ))
 
     @property
     def _is_windows(self):

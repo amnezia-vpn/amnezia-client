@@ -2,10 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy
+from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.env import VirtualBuildEnv
 
 import os
+import shlex
 
 
 class AwgGo(ConanFile):
@@ -82,7 +84,12 @@ class AwgGo(ConanFile):
     def _build_universal_macos(self):
         outputs = [self._build_go_arch(goarch) for goarch in self._goarchs]
         universal_output = os.path.join(self.build_folder, self._binary_name)
-        self.run(f"lipo -create {' '.join(outputs)} -output {universal_output}")
+        lipo = XCRun(self).find("lipo")
+        self.run("{} -create {} -output {}".format(
+            shlex.quote(lipo),
+            " ".join(shlex.quote(output) for output in outputs),
+            shlex.quote(universal_output)
+        ))
 
     def layout(self):
         basic_layout(self, build_folder=".")
