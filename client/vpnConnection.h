@@ -108,7 +108,8 @@ private:
 
    void startTunnelSwitch(DockerContainer container,
                           const QJsonObject &vpnConfiguration,
-                          const QString &resolvedRemote);
+                          const QString &resolvedRemote,
+                          const QString &stagingIfname);
 
 private slots:
    void onTunnelPrepared();

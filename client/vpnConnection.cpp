@@ -166,20 +166,37 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
 
 #ifdef AMNEZIA_DESKTOP
-    // Seamless WG -> WG switch path: already connected via Tunnel, new container is also WG.
-    if (m_active
-        && m_connectionState == Vpn::ConnectionState::Connected
-        && VpnProtocol::isWireGuardBased(container)) {
-        if (!m_trafficGuard->allowEndpoint(resolvedRemote)) {
+    const bool isWg = VpnProtocol::isWireGuardBased(container);
+    const QString preAllocatedIfname = isWg ? allocateIfname() : QString();
+
+    bool seamlessSwitch = m_active
+                       && m_connectionState == Vpn::ConnectionState::Connected
+                       && isWg;
+#ifdef Q_OS_WIN
+    if (seamlessSwitch) {
+        auto clientIpFor = [](const QJsonObject& cfg) {
+            const QString proto = cfg.value("protocol").toString();
+            return cfg.value(proto + "_config_data").toObject().value(configKey::clientIp).toString();
+        };
+        if (clientIpFor(vpnConfiguration) == clientIpFor(m_active->config())) {
+            seamlessSwitch = false;
+        }
+    }
+#endif
+
+    if (seamlessSwitch) {
+        if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
+            releaseIfname(preAllocatedIfname);
             setConnectionState(Vpn::ConnectionState::Error);
             emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
             return;
         }
-        startTunnelSwitch(container, vpnConfiguration, resolvedRemote);
+        startTunnelSwitch(container, vpnConfiguration, resolvedRemote, preAllocatedIfname);
         return;
     }
 
-    if (!m_trafficGuard->allowEndpoint(resolvedRemote)) {
+    if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
+        if (isWg) releaseIfname(preAllocatedIfname);
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
         return;
@@ -212,10 +229,9 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_remoteAddress = resolvedRemote;
 
 #ifdef AMNEZIA_DESKTOP
-    if (VpnProtocol::isWireGuardBased(container)) {
-        const QString ifname = allocateIfname();
-        config.insert("ifname", ifname);
-        m_active = new Tunnel(ifname, container, config, resolvedRemote, this);
+    if (isWg) {
+        config.insert("ifname", preAllocatedIfname);
+        m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
         wireTunnelSignals(m_active, /*isActive=*/true);
         wireDaemonReconnectSignals();
         m_trafficGuard->setConfig(config);
@@ -255,7 +271,10 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
-    connect(m_vpnProtocol.data(), &VpnProtocol::tunnelAddressesUpdated, m_trafficGuard.data(), &VpnTrafficGuard::applyFirewall);
+    connect(m_vpnProtocol.data(), &VpnProtocol::tunnelAddressesUpdated, this,
+            [this](const QString& gateway, const QString& localAddress) {
+        m_trafficGuard->applyKillSwitch(nullptr, gateway, localAddress);
+    });
 
     wireDaemonReconnectSignals();
 }
@@ -532,13 +551,14 @@ void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
 
 void VpnConnection::startTunnelSwitch(DockerContainer container,
                                       const QJsonObject &vpnConfiguration,
-                                      const QString &resolvedRemote)
+                                      const QString &resolvedRemote,
+                                      const QString &stagingIfname)
 {
     QJsonObject config = vpnConfiguration;
+    config.insert("ifname", stagingIfname);
     appendKillSwitchConfig(config);
     appendSplitTunnelingConfig(config);
 
-    const QString stagingIfname = allocateIfname();
     m_staging = new Tunnel(stagingIfname, container, config, resolvedRemote, this);
     wireTunnelSignals(m_staging, /*isActive=*/false);
 
@@ -576,10 +596,6 @@ void VpnConnection::onTunnelActivated()
 
     if (tunnel == m_active) {
         setConnectionState(Vpn::ConnectionState::Connected);
-        if (auto proto = m_active->protocol()) {
-            m_trafficGuard->applyFirewall(proto->vpnGateway(),
-                                          proto->vpnLocalAddress());
-        }
     }
 }
 

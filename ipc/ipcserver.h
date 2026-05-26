@@ -41,11 +41,12 @@ public:
     virtual bool StartRoutingIpv6() override;
     virtual bool StopRoutingIpv6() override;
     virtual bool disableAllTraffic() override;
-    virtual bool addKillSwitchAllowedRange(QStringList ranges) override;
+    virtual bool addKillSwitchAllowedRange(const QString &ifname, QStringList ranges) override;
     virtual bool resetKillSwitchAllowedRange(QStringList ranges) override;
     virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
     virtual bool disableKillSwitch() override;
+    virtual bool disableKillSwitchForTunnel(const QString &ifname, const QStringList &remainingRanges) override;
     virtual bool refreshKillSwitch( bool enabled ) override;
     virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
     virtual bool restoreResolvers() override;
