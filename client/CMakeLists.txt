@@ -269,6 +269,25 @@ if(OVPN_SCRIPTS)
         "$<TARGET_FILE_DIR:${PROJECT}>"
     )
 
+    if(APPLE AND NOT IOS AND NOT MACOS_NE)
+        set(SIGN_OVPN_SCRIPT [=[
+if [ "$CODE_SIGNING_ALLOWED" != "NO" ]; then
+    identity="$EXPANDED_CODE_SIGN_IDENTITY"
+    if [ -z "$identity" ]; then
+        identity="$CODE_SIGN_IDENTITY"
+    fi
+    if [ -z "$identity" ]; then
+        identity="-"
+    fi
+    /usr/bin/codesign --force --sign "$identity" "$1"
+fi
+]=])
+        add_custom_command(TARGET ${PROJECT} POST_BUILD
+            COMMAND /bin/sh -c "${SIGN_OVPN_SCRIPT}" _ "$<TARGET_FILE_DIR:${PROJECT}>/update-resolv-conf.sh"
+            VERBATIM
+        )
+    endif()
+
     install(FILES ${OVPN_SCRIPTS}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
