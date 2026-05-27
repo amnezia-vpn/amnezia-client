@@ -35,6 +35,8 @@ namespace amnezia
         ServerCgroupMountpoint = 212,
         DockerPullRateLimit = 213,
         ServerLinuxKernelTooOld = 214,
+        ServerContainerizationNotSupported = 215,
+        DockerServiceNotActive = 216,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -116,5 +118,3 @@ namespace amnezia
 Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // ERRORCODES_H
-
-
