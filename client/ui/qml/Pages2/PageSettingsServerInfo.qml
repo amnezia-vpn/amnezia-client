@@ -32,9 +32,17 @@ PageType {
     }
 
     Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -46,8 +54,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -85,9 +93,9 @@ PageType {
                 if (root.processedServer == null) {
                     return ""
                 }
-                if (root.processedServer.isServerFromTelegramApi) {
+                if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
                     return root.processedServer.serverDescription
-                } else if (root.processedServer.hasWriteAccess) {
+                } else if (ServersUiController.isProcessedServerHasWriteAccess()) {
                     return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
                 } else {
                     return root.processedServer.hostName
@@ -115,8 +123,8 @@ PageType {
 
             Layout.fillWidth: true
 
-            currentIndex: (ServersModel.getProcessedServerData("isServerFromTelegramApi")
-                           && !ServersModel.getProcessedServerData("hasInstalledContainers")) ?
+            currentIndex: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+                           && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
                               root.pageSettingsServerData : root.pageSettingsServerProtocols
 
             background: Rectangle {

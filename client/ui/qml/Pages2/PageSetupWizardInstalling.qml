@@ -51,7 +51,7 @@ PageType {
 
         function onServerAlreadyExists(serverIndex) {
             PageController.goToStartPage()
-            ServersUiController.setProcessedServerIndex(serverIndex)
+            ServersUiController.setProcessedServerId(ServersUiController.getServerId(serverIndex))
             PageController.goToPage(PageEnum.PageSettingsServerInfo, false)
 
             PageController.showErrorMessage(qsTr("The server has already been added to the application"))

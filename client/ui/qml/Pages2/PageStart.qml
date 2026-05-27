@@ -144,7 +144,7 @@ PageType {
         }
 
         function onRemoveServerFinished(finishedMessage) {
-            if (!ServersModel.getServersCount()) {
+            if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
@@ -156,7 +156,7 @@ PageType {
         function onNoInstalledContainers() {
             PageController.setTriggeredByConnectButton(true)
 
-            ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
+            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
             PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
@@ -227,7 +227,7 @@ PageType {
         }
 
         function onApiServerRemoved(message) {
-            if (!ServersModel.getServersCount()) {
+            if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
@@ -277,7 +277,7 @@ PageType {
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
@@ -351,7 +351,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                 tabBar.currentIndex = 0
             }
         }
@@ -365,15 +365,15 @@ PageType {
 
                 function onModelReset() {
                     if (!SettingsController.isOnTv()) {
-                        var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
+                        var hasServerWithWriteAccess = ServersUiController.hasServerWithWriteAccess()
                         shareTabButton.visible = hasServerWithWriteAccess
                         shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
                     }
                 }
             }
 
-            visible: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess()
-            width: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess() ? undefined : 0
+            visible: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess()
+            width: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess() ? undefined : 0
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"

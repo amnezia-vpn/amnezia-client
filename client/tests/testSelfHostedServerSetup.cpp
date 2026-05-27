@@ -146,7 +146,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), QString());
         }
     }
 
