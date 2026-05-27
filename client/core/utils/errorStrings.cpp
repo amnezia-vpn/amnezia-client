@@ -30,6 +30,8 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
     case(ErrorCode::DockerPullRateLimit): errorMessage = QObject::tr("Docker error: The pull rate limit has been reached"); break;
     case(ErrorCode::ServerLinuxKernelTooOld): errorMessage = QObject::tr("Server error: Linux kernel is too old"); break;
+    case(ErrorCode::ServerContainerizationNotSupported): errorMessage = QObject::tr("Server error: The default containerization app offered for installation on the server is not supported.\n Try installing Docker Engine on the server manually."); break;
+    case(ErrorCode::DockerServiceNotActive): errorMessage = QObject::tr("Docker error: The Docker service is not active.\n Check the status of the docker service on the server or try again in a minute."); break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
