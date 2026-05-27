@@ -216,9 +216,9 @@ void InstallController::clearCachedProfile(const QString &serverId, DockerContai
         return;
     }
 
-    adminConfig->clearCachedClientProfile(container);
     const ContainerConfig containerConfigModel = adminConfig->containerConfig(container);
 
+    adminConfig->clearCachedClientProfile(container);
     m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
 
     emit clientRevocationRequested(serverId, containerConfigModel, container);
