@@ -838,7 +838,7 @@ PageType {
                                         }
 
                                         var isActiveConfigForCurrentClient = ServersUiController.isDefaultServerCurrentlyProcessed()
-                                                && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ContainersModel.getProcessedContainerIndex()
+                                                && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex
 
                                         if ((ConnectionController.isConnectionInProgress || ConnectionController.isConnected)
                                                 && isActiveConfigForCurrentClient) {
