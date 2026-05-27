@@ -169,22 +169,10 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     const bool isWg = VpnProtocol::isWireGuardBased(container);
     const QString preAllocatedIfname = isWg ? allocateIfname() : QString();
 
-    bool seamlessSwitch = m_active
-                       && m_connectionState == Vpn::ConnectionState::Connected
-                       && isWg;
-#ifdef Q_OS_WIN
-    if (seamlessSwitch) {
-        auto clientIpFor = [](const QJsonObject& cfg) {
-            const QString proto = cfg.value("protocol").toString();
-            return cfg.value(proto + "_config_data").toObject().value(configKey::clientIp).toString();
-        };
-        if (clientIpFor(vpnConfiguration) == clientIpFor(m_active->config())) {
-            seamlessSwitch = false;
-        }
-    }
-#endif
-
-    if (seamlessSwitch) {
+    // Seamless WG -> WG switch path: already connected via Tunnel, new container is also WG.
+    if (m_active
+        && m_connectionState == Vpn::ConnectionState::Connected
+        && isWg) {
         if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
             releaseIfname(preAllocatedIfname);
             setConnectionState(Vpn::ConnectionState::Error);

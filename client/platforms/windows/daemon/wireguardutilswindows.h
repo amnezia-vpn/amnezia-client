@@ -32,6 +32,9 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool addInterface(const InterfaceConfig& config) override;
   bool deleteInterface() override;
 
+  bool applyDeviceAddresses(const QString& ipv4Address, const QString& ipv6Address) override;
+  bool removeDeviceAddresses(const QString& ipv4Address, const QString& ipv6Address) override;
+
   bool updatePeer(const InterfaceConfig& config) override;
   bool deletePeer(const InterfaceConfig& config) override;
   QList<PeerStatus> getPeerStatus() override;

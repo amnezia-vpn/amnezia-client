@@ -93,14 +93,14 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
     return Router::routeDeleteList(gw, ips);
 }
 
-bool IpcServer::addExclusionRoute(const QString &addr)
+bool IpcServer::addExclusionRoute(const QString &ifname, const QString &addr)
 {
-    return Daemon::instance() && Daemon::instance()->addExclusionRoute(addr);
+    return Daemon::instance() && Daemon::instance()->addExclusionRoute(ifname, addr);
 }
 
-bool IpcServer::delExclusionRoute(const QString &addr)
+bool IpcServer::delExclusionRoute(const QString &ifname, const QString &addr)
 {
-    return Daemon::instance() && Daemon::instance()->delExclusionRoute(addr);
+    return Daemon::instance() && Daemon::instance()->delExclusionRoute(ifname, addr);
 }
 
 bool IpcServer::addAllowedIp(const QString &ifname, const QString &prefix)

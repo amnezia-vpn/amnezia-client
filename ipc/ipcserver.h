@@ -23,8 +23,8 @@ public:
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
-    virtual bool addExclusionRoute(const QString &addr) override;
-    virtual bool delExclusionRoute(const QString &addr) override;
+    virtual bool addExclusionRoute(const QString &ifname, const QString &addr) override;
+    virtual bool delExclusionRoute(const QString &ifname, const QString &addr) override;
     virtual bool addAllowedIp(const QString &ifname, const QString &prefix) override;
     virtual bool delAllowedIp(const QString &ifname, const QString &prefix) override;
     virtual bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers) override;

@@ -58,9 +58,12 @@ static int prefixcmp(const void* a, const void* b, size_t bits) {
   return 0;
 }
 
+QSet<quint64> WindowsRouteMonitor::s_vpnLuids;
+
 WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
     : QObject(parent), m_luid(luid) {
   MZ_COUNT_CTOR(WindowsRouteMonitor);
+  s_vpnLuids.insert(luid);
   logger.debug() << "WindowsRouteMonitor created.";
 
   NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
@@ -69,8 +72,8 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
 WindowsRouteMonitor::~WindowsRouteMonitor() {
   MZ_COUNT_DTOR(WindowsRouteMonitor);
   CancelMibChangeNotify2(m_routeHandle);
+  s_vpnLuids.remove(m_luid);
 
-  flushRouteTable(m_exclusionRoutes);
   flushRouteTable(m_clonedRoutes);
   logger.debug() << "WindowsRouteMonitor destroyed.";
 }
@@ -95,7 +98,8 @@ void WindowsRouteMonitor::updateInterfaceMetrics(int family) {
   // Rebuild the list of interfaces that are valid for routing.
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPINTERFACE_ROW* row = &table->Table[i];
-    if (row->InterfaceLuid.Value == m_luid) {
+    // Skip any VPN wintun (own or sibling) so exclusion routes never pick one.
+    if (s_vpnLuids.contains(row->InterfaceLuid.Value)) {
       continue;
     }
     if (!row->Connected) {
@@ -126,8 +130,8 @@ void WindowsRouteMonitor::updateExclusionRoute(MIB_IPFORWARD_ROW2* data,
   nexthop.si_family = data->DestinationPrefix.Prefix.si_family;
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
-    // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
+    // Skip any VPN wintun (own or sibling).
+    if (s_vpnLuids.contains(row->InterfaceLuid.Value)) {
       continue;
     }
     if (row->DestinationPrefix.PrefixLength < bestMatch) {
@@ -239,14 +243,16 @@ QHostAddress WindowsRouteMonitor::prefixToAddress(
   }
 }
 
-bool WindowsRouteMonitor::isRouteExcluded(const IP_ADDRESS_PREFIX* dest) const {
-  auto i = m_exclusionRoutes.constBegin();
-  while (i != m_exclusionRoutes.constEnd()) {
-    const MIB_IPFORWARD_ROW2* row = i.value();
+bool WindowsRouteMonitor::isRouteExcluded(void* ptable,
+                                          const IP_ADDRESS_PREFIX* dest) const {
+  PMIB_IPFORWARD_TABLE2 table = reinterpret_cast<PMIB_IPFORWARD_TABLE2>(ptable);
+  for (ULONG i = 0; i < table->NumEntries; i++) {
+    const MIB_IPFORWARD_ROW2* row = &table->Table[i];
+    if (row->Protocol != MIB_IPPROTO_NETMGMT) continue;
+    if (row->Metric != EXCLUSION_ROUTE_METRIC) continue;
     if (routeContainsDest(&row->DestinationPrefix, dest)) {
       return true;
     }
-    i++;
   }
   return false;
 }
@@ -272,8 +278,8 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
 
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
-    // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
+    // Skip any VPN wintun (own or sibling).
+    if (s_vpnLuids.contains(row->InterfaceLuid.Value)) {
       continue;
     }
     // Ignore the default route
@@ -286,7 +292,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
       continue;
     }
     // Ignore routes which should be excluded.
-    if (isRouteExcluded(&row->DestinationPrefix)) {
+    if (isRouteExcluded(table, &row->DestinationPrefix)) {
       continue;
     }
     QHostAddress destination = prefixToAddress(&row->DestinationPrefix);
@@ -375,11 +381,6 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
     return true;
   }
 
-  if (m_exclusionRoutes.contains(prefix)) {
-    logger.warning() << "Exclusion route already exists";
-    return false;
-  }
-
   // Allocate and initialize the MIB routing table row.
   MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
   InitializeIpForwardEntry(data);
@@ -427,8 +428,8 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
   updateCapturedRoutes(family, table);
   updateExclusionRoute(data, table);
   FreeMibTable(table);
-
-  m_exclusionRoutes[prefix] = data;
+  delete data;
+  m_ownedExclusionRoutes.insert(prefix);
   return true;
 }
 
@@ -436,23 +437,39 @@ bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   logger.debug() << "Deleting exclusion route for"
                  << prefix.address().toString();
 
-  MIB_IPFORWARD_ROW2* data = m_exclusionRoutes.take(prefix);
-  if (data == nullptr) {
-    return true;
+  m_ownedExclusionRoutes.remove(prefix);
+
+  PMIB_IPFORWARD_TABLE2 table;
+  DWORD result = GetIpForwardTable2(AF_UNSPEC, &table);
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to fetch routing table:" << result;
+    return false;
   }
 
-  DWORD result = DeleteIpForwardEntry2(data);
-  if ((result != ERROR_NOT_FOUND) && (result != NO_ERROR)) {
-    logger.error() << "Failed to delete route to"
-                   << prefix.toString()
-                   << "result:" << result;
+  const bool isV4 = prefix.address().protocol() == QAbstractSocket::IPv4Protocol;
+  const ADDRESS_FAMILY addrFamily =
+      isV4 ? static_cast<ADDRESS_FAMILY>(AF_INET)
+           : static_cast<ADDRESS_FAMILY>(AF_INET6);
+  bool deleted = false;
+  for (ULONG i = 0; i < table->NumEntries; i++) {
+    MIB_IPFORWARD_ROW2* row = &table->Table[i];
+    if (row->Protocol != MIB_IPPROTO_NETMGMT) continue;
+    if (row->Metric != EXCLUSION_ROUTE_METRIC) continue;
+    if (row->DestinationPrefix.Prefix.si_family != addrFamily) continue;
+    if (row->DestinationPrefix.PrefixLength != prefix.prefixLength()) continue;
+    if (prefixToAddress(&row->DestinationPrefix) != prefix.address()) continue;
+    DWORD r = DeleteIpForwardEntry2(row);
+    if (r == NO_ERROR || r == ERROR_NOT_FOUND) {
+      deleted = true;
+    } else {
+      logger.error() << "Failed to delete route to" << prefix.toString()
+                     << "result:" << r;
+    }
+    break;
   }
-
-  // Captured routes might have changed.
-  updateCapturedRoutes(data->DestinationPrefix.Prefix.si_family);
-
-  delete data;
-  return true;
+  FreeMibTable(table);
+  updateCapturedRoutes(addrFamily);
+  return deleted;
 }
 
 void WindowsRouteMonitor::flushRouteTable(
@@ -492,8 +509,24 @@ void WindowsRouteMonitor::routeChanged() {
 
   updateInterfaceMetrics(AF_UNSPEC);
   updateCapturedRoutes(AF_UNSPEC, table);
-  for (MIB_IPFORWARD_ROW2* data : m_exclusionRoutes) {
-    updateExclusionRoute(data, table);
+
+  for (const IPAddress& prefix : m_ownedExclusionRoutes) {
+    const bool isV4 =
+        prefix.address().protocol() == QAbstractSocket::IPv4Protocol;
+    const ADDRESS_FAMILY addrFamily =
+        isV4 ? static_cast<ADDRESS_FAMILY>(AF_INET)
+             : static_cast<ADDRESS_FAMILY>(AF_INET6);
+    for (ULONG i = 0; i < table->NumEntries; i++) {
+      MIB_IPFORWARD_ROW2* row = &table->Table[i];
+      if (row->Protocol != MIB_IPPROTO_NETMGMT) continue;
+      if (row->Metric != EXCLUSION_ROUTE_METRIC) continue;
+      if (row->DestinationPrefix.Prefix.si_family != addrFamily) continue;
+      if (row->DestinationPrefix.PrefixLength != prefix.prefixLength()) continue;
+      if (prefixToAddress(&row->DestinationPrefix) != prefix.address()) continue;
+      MIB_IPFORWARD_ROW2 copy = *row;
+      updateExclusionRoute(&copy, table);
+      break;
+    }
   }
 
   FreeMibTable(table);

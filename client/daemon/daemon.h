@@ -37,8 +37,8 @@ class Daemon : public QObject {
   virtual bool deactivate(bool emitSignals = true);
   virtual QJsonObject getStatus();
 
-  bool addExclusionRoute(const QString &addr);
-  bool delExclusionRoute(const QString &addr);
+  bool addExclusionRoute(const QString &ifname, const QString &addr);
+  bool delExclusionRoute(const QString &ifname, const QString &addr);
   bool addAllowedIp(const QString &ifname, const QString &prefix);
   bool delAllowedIp(const QString &ifname, const QString &prefix);
   bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers);
