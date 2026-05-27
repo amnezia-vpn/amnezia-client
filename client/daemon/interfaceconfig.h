@@ -60,6 +60,7 @@ class InterfaceConfig {
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
   QString m_ifname;
+  bool m_deferAddressSetup = false;
 
   QJsonObject toJson() const;
   QString toWgConf(

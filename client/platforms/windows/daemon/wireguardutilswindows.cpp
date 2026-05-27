@@ -107,12 +107,21 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     configString.truncate(peerStart);
   }
 
-  qsizetype dnsStart = configString.indexOf("DNS = ");
-  if (dnsStart >= 0) {
-    qsizetype dnsEnd = configString.indexOf('\n', dnsStart);
-    if (dnsEnd >= 0) {
-      configString.remove(dnsStart, dnsEnd - dnsStart + 1);
-    }
+  auto stripLine = [&](const QString& key) {
+    qsizetype start = configString.startsWith(key + " = ")
+                          ? 0
+                          : configString.indexOf("\n" + key + " = ");
+    if (start < 0) return;
+    if (start != 0) start += 1;
+    qsizetype end = configString.indexOf('\n', start);
+    if (end < 0) return;
+    configString.remove(start, end - start + 1);
+  };
+
+  stripLine("DNS");
+  if (config.m_deferAddressSetup) {
+    // Wintun rejects duplicate IPv4; daemon will assign at swap time.
+    stripLine("Address");
   }
 
   m_ifname = config.m_ifname.isEmpty() ? s_defaultInterfaceName() : config.m_ifname;
@@ -141,6 +150,60 @@ bool WireguardUtilsWindows::deleteInterface() {
 
   m_tunnel.stop();
   return true;
+}
+
+bool WireguardUtilsWindows::applyDeviceAddresses(const QString& ipv4Address,
+                                                  const QString& ipv6Address) {
+  auto applyOne = [&](const QString& addr, int family, uint8_t prefix) -> bool {
+    if (addr.isEmpty()) return true;
+    const QByteArray ip = addr.section('/', 0, 0).toUtf8();
+    MIB_UNICASTIPADDRESS_ROW row;
+    InitializeUnicastIpAddressEntry(&row);
+    row.InterfaceLuid.Value = m_luid;
+    row.Address.si_family = static_cast<ADDRESS_FAMILY>(family);
+    row.OnLinkPrefixLength = prefix;
+    row.DadState = IpDadStatePreferred;
+    void* dst = (family == AF_INET)
+                  ? static_cast<void*>(&row.Address.Ipv4.sin_addr)
+                  : static_cast<void*>(&row.Address.Ipv6.sin6_addr);
+    if (InetPtonA(family, ip.constData(), dst) != 1) {
+      logger.error() << "applyDeviceAddresses: cannot parse" << addr;
+      return false;
+    }
+    DWORD r = CreateUnicastIpAddressEntry(&row);
+    logger.debug() << "Apply" << addr << "to" << m_ifname << "result:" << r;
+    return r == NO_ERROR || r == ERROR_OBJECT_ALREADY_EXISTS;
+  };
+
+  if (!applyOne(ipv4Address, AF_INET, 32)) return false;
+  if (!applyOne(ipv6Address, AF_INET6, 128)) return false;
+  return true;
+}
+
+bool WireguardUtilsWindows::removeDeviceAddresses(const QString& ipv4Address,
+                                                   const QString& ipv6Address) {
+  auto removeOne = [&](const QString& addr, int family) -> bool {
+    if (addr.isEmpty()) return true;
+    const QByteArray ip = addr.section('/', 0, 0).toUtf8();
+    MIB_UNICASTIPADDRESS_ROW row;
+    InitializeUnicastIpAddressEntry(&row);
+    row.InterfaceLuid.Value = m_luid;
+    row.Address.si_family = static_cast<ADDRESS_FAMILY>(family);
+    void* dst = (family == AF_INET)
+                  ? static_cast<void*>(&row.Address.Ipv4.sin_addr)
+                  : static_cast<void*>(&row.Address.Ipv6.sin6_addr);
+    if (InetPtonA(family, ip.constData(), dst) != 1) {
+      logger.error() << "removeDeviceAddresses: cannot parse" << addr;
+      return false;
+    }
+    DWORD r = DeleteUnicastIpAddressEntry(&row);
+    logger.debug() << "Remove" << addr << "from" << m_ifname << "result:" << r;
+    return r == NO_ERROR || r == ERROR_NOT_FOUND;
+  };
+
+  bool ok = removeOne(ipv4Address, AF_INET);
+  ok &= removeOne(ipv6Address, AF_INET6);
+  return ok;
 }
 
 bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {

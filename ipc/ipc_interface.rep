@@ -12,8 +12,8 @@ class IpcInterface
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
     SLOT( bool clearSavedRoutes() );
     SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
-    SLOT( bool addExclusionRoute(const QString &addr) );
-    SLOT( bool delExclusionRoute(const QString &addr) );
+    SLOT( bool addExclusionRoute(const QString &ifname, const QString &addr) );
+    SLOT( bool delExclusionRoute(const QString &ifname, const QString &addr) );
     SLOT( bool addAllowedIp(const QString &ifname, const QString &prefix) );
     SLOT( bool delAllowedIp(const QString &ifname, const QString &prefix) );
     SLOT( bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers) );

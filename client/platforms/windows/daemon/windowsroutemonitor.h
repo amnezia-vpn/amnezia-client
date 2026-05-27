@@ -14,6 +14,7 @@
 #include <QHash>
 #include <QMap>
 #include <QObject>
+#include <QSet>
 
 #include "ipaddress.h"
 
@@ -28,7 +29,6 @@ class WindowsRouteMonitor final : public QObject {
 
   bool addExclusionRoute(const IPAddress& prefix);
   bool deleteExclusionRoute(const IPAddress& prefix);
-  void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 
   quint64 getLuid() const { return m_luid; }
 
@@ -36,7 +36,7 @@ class WindowsRouteMonitor final : public QObject {
   void routeChanged();
 
  private:
-  bool isRouteExcluded(const IP_ADDRESS_PREFIX* dest) const;
+  bool isRouteExcluded(void* table, const IP_ADDRESS_PREFIX* dest) const;
   static bool routeContainsDest(const IP_ADDRESS_PREFIX* route,
                                 const IP_ADDRESS_PREFIX* dest);
   static QHostAddress prefixToAddress(const IP_ADDRESS_PREFIX* dest);
@@ -47,7 +47,7 @@ class WindowsRouteMonitor final : public QObject {
   void updateCapturedRoutes(int family);
   void updateCapturedRoutes(int family, void* table);
 
-  QHash<IPAddress, MIB_IPFORWARD_ROW2*> m_exclusionRoutes;
+  QSet<IPAddress> m_ownedExclusionRoutes;
   QMap<quint64, ULONG> m_interfaceMetricsIpv4;
   QMap<quint64, ULONG> m_interfaceMetricsIpv6;
 
@@ -57,6 +57,8 @@ class WindowsRouteMonitor final : public QObject {
 
   const quint64 m_luid = 0;
   HANDLE m_routeHandle = INVALID_HANDLE_VALUE;
+
+  static QSet<quint64> s_vpnLuids;
 };
 
 #endif /* WINDOWSROUTEMONITOR_H */

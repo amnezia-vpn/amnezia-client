@@ -360,9 +360,9 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
     const QString peer = tunnel->remoteAddress();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        if (!peer.isEmpty()) iface->addExclusionRoute(peer);
+        if (!peer.isEmpty()) iface->addExclusionRoute(ifname, peer);
         for (const QString& addr : excluded) {
-            iface->addExclusionRoute(addr);
+            iface->addExclusionRoute(ifname, addr);
         }
         for (const QString& prefix : prefixes) {
             iface->addAllowedIp(ifname, prefix);
@@ -390,9 +390,9 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
             iface->delAllowedIp(ifname, prefix);
         }
         for (const QString& addr : excluded) {
-            iface->delExclusionRoute(addr);
+            iface->delExclusionRoute(ifname, addr);
         }
-        if (!peer.isEmpty()) iface->delExclusionRoute(peer);
+        if (!peer.isEmpty()) iface->delExclusionRoute(ifname, peer);
     });
 #else
     Q_UNUSED(tunnel)
