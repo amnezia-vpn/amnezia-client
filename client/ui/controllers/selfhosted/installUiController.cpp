@@ -288,15 +288,7 @@ void InstallUiController::updateContainer(const QString &serverId, int container
                                  const ContainerConfig updatedConfig =
                                          m_serversController->getContainerConfig(serverId, container);
                                  m_protocolModel->updateModel(updatedConfig);
-
-                                 const auto defaultContainer =
-                                         m_serversController->getDefaultContainer(serverId);
-                                 if ((serverId == m_serversController->getDefaultServerId())
-                                     && (container == defaultContainer)) {
-                                     emit currentContainerUpdated();
-                                 } else {
-                                     emit updateContainerFinished(tr("Settings updated successfully"), closePage);
-                                 }
+                                 emit updateContainerFinished(tr("Settings updated successfully"), closePage);
                              } else {
                                  emit installationErrorOccurred(errorCode);
                              }
@@ -319,13 +311,7 @@ void InstallUiController::updateContainer(const QString &serverId, int container
     if (errorCode == ErrorCode::NoError) {
         ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);
         m_protocolModel->updateModel(updatedConfig);
-
-        const auto defaultContainer = m_serversController->getDefaultContainer(serverId);
-        if ((serverId == m_serversController->getDefaultServerId()) && (container == defaultContainer)) {
-            emit currentContainerUpdated();
-        } else {
-            emit updateContainerFinished(tr("Settings updated successfully"), closePage);
-        }
+        emit updateContainerFinished(tr("Settings updated successfully"), closePage);
         return;
     }
 
