@@ -82,33 +82,11 @@
 #endif
 
 class CoreSignalHandlers;
-class TestMultipleImports;
-class TestAdminSelfHostedExport;
-class TestServerEdit;
-class TestDefaultServerChange;
-class TestServerEdgeCases;
-class TestSignalOrder;
-class TestServersModelSync;
-class TestComplexOperations;
-class TestSettingsSignals;
-class TestUiServersModelAndController;
-class TestSelfHostedServerSetup;
 
 class CoreController : public QObject
 {
     Q_OBJECT
     friend class CoreSignalHandlers;
-    friend class TestMultipleImports;
-    friend class TestAdminSelfHostedExport;
-    friend class TestServerEdit;
-    friend class TestDefaultServerChange;
-    friend class TestServerEdgeCases;
-    friend class TestSignalOrder;
-    friend class TestServersModelSync;
-    friend class TestComplexOperations;
-    friend class TestSettingsSignals;
-    friend class TestUiServersModelAndController;
-    friend class TestSelfHostedServerSetup;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
@@ -124,6 +102,36 @@ public:
 signals:
     void translationsUpdated();
     void websiteUrlChanged(const QString &newUrl);
+
+protected:
+    SecureServersRepository* serversRepositoryProtected() const { return m_serversRepository; }
+    SecureAppSettingsRepository* appSettingsRepositoryProtected() const { return m_appSettingsRepository; }
+    ServersModel* serversModelProtected() const { return m_serversModel; }
+    ContainersModel* containersModelProtected() const { return m_containersModel; }
+    ApiServicesModel* apiServicesModelProtected() const { return m_apiServicesModel; }
+    NewsModel* newsModelProtected() const { return m_newsModel; }
+    AllowedDnsModel* allowedDnsModelProtected() const { return m_allowedDnsModel; }
+    AppSplitTunnelingModel* appSplitTunnelingModelProtected() const { return m_appSplitTunnelingModel; }
+    IpSplitTunnelingModel* ipSplitTunnelingModelProtected() const { return m_ipSplitTunnelingModel; }
+    LanguageModel* languageModelProtected() const { return m_languageModel; }
+
+    InstallUiController* installUiControllerProtected() const { return m_installUiController; }
+    ImportController* importCoreControllerProtected() const { return m_importCoreController; }
+    ExportController* exportControllerProtected() const { return m_exportController; }
+    InstallController* installControllerProtected() const { return m_installController; }
+    ServersController* serversControllerProtected() const { return m_serversController; }
+    SettingsUiController* settingsUiControllerProtected() const { return m_settingsUiController; }
+    SettingsController* settingsControllerProtected() const { return m_settingsController; }
+    AllowedDnsUiController* allowedDnsUiControllerProtected() const { return m_allowedDnsUiController; }
+    AllowedDnsController* allowedDnsControllerProtected() const { return m_allowedDnsController; }
+    LanguageUiController* languageUiControllerProtected() const { return m_languageUiController; }
+    IpSplitTunnelingController* ipSplitTunnelingControllerProtected() const { return m_ipSplitTunnelingController; }
+    IpSplitTunnelingUiController* ipSplitTunnelingUiControllerProtected() const { return m_ipSplitTunnelingUiController; }
+    AppSplitTunnelingController* appSplitTunnelingControllerProtected() const { return m_appSplitTunnelingController; }
+    AppSplitTunnelingUiController* appSplitTunnelingUiControllerProtected() const { return m_appSplitTunnelingUiController; }
+    ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
+    ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
+    ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
 
 private:
     void initRepositories();

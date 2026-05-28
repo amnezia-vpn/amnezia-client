@@ -193,10 +193,6 @@ elseif(APPLE)
     include(cmake/macos.cmake)
 endif()
 
-if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
-    add_subdirectory(tests)
-endif()
-
 list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})

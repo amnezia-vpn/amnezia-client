@@ -34,25 +34,25 @@ ListViewType {
                     if (isVpnContainer) {
                         // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
                         if (isThirdPartyConfig) {
-                            InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
+                            InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
                     }
 
                     if (isIpsec) {
-                        InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
+                        InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
                     } else if (isMtProxy) {
                         MtProxyConfigModel.updateModel(config)
-                        PageController.goToPage(PageEnum.PageServiceMtProxySettings)
+                        PageController.goToPage(PageEnum.PageServiceMtProxySettings, false)
                     } else if (isTelemt) {
                         TelemtConfigModel.updateModel(config)
-                        PageController.goToPage(PageEnum.PageServiceTelemtSettings)
+                        PageController.goToPage(PageEnum.PageServiceTelemtSettings, false)
                     } else {
-                        InstallController.updateProtocols(ServersUiController.getServerId(ServersUiController.processedServerIndex), containerIndex)
+                        InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
 

@@ -217,6 +217,11 @@ void SettingsController::toggleAutoStart(bool enable)
 
 bool SettingsController::isStartMinimizedEnabled() const
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (!isAutoStartEnabled()) {
+        return false;
+    }
+#endif
     return m_appSettingsRepository->isStartMinimized();
 }
 

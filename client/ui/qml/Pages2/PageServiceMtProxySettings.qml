@@ -20,15 +20,10 @@ import "../Components"
 PageType {
     id: root
 
-    Rectangle {
-        anchors.fill: parent
-        z: -1
-        color: AmneziaStyle.color.onyxBlack
-    }
-
     property int containerStatus: 1
     property bool isUpdating: false
     property bool isCheckingStatus: false
+    property bool isFetchingSecret: false
     property bool previousEnabled: true
     property int previousContainerStatus: 1
 
@@ -50,7 +45,7 @@ PageType {
 
     onSavedTransportModeChanged: {
         if (savedTransportMode === "faketls") {
-            root.syncedSecretTabIndex = 2
+            root.syncedSecretTabIndex = 1
         } else if (savedTransportMode !== "") {
             root.syncedSecretTabIndex = 0
         }
@@ -68,9 +63,96 @@ PageType {
 
     readonly property bool mtProxyNetworkBlocked: !NetworkReachabilityController.hasInternetAccess
 
-    readonly property bool navigationBlockedWhileBusy: isUpdating || diagLoading
+    property bool remoteOperationBusy: false
+    readonly property bool operationInProgress: isCheckingStatus || isFetchingSecret || isUpdating || diagLoading
+    readonly property bool pageBusy: operationInProgress || remoteOperationBusy
+    readonly property bool navigationBlockedWhileBusy: pageBusy
 
-    // Hex values that exist in last loaded / last successfully saved config — show link panel only for these.
+    property bool pageOpenHandled: false
+    property bool busyIndicatorShown: false
+
+    function syncPageBusyIndicator() {
+        if (!root.pageOpenHandled) {
+            return
+        }
+        var wantBusy = root.pageBusy
+        if (wantBusy === root.busyIndicatorShown) {
+            return
+        }
+        root.busyIndicatorShown = wantBusy
+        PageController.showBusyIndicator(wantBusy)
+    }
+
+    onPageBusyChanged: syncPageBusyIndicator()
+
+    function mtProxyDomainToHex(domain) {
+        var hex = ""
+        for (var i = 0; i < domain.length; i++) {
+            var code = domain.charCodeAt(i).toString(16)
+            hex += (code.length < 2 ? "0" : "") + code
+        }
+        return hex
+    }
+
+    function mtProxyClientSecret(baseHex32, mode, tlsDomain) {
+        if (baseHex32 === "") {
+            return ""
+        }
+        if (mode === "faketls") {
+            return "ee" + baseHex32 + mtProxyDomainToHex(tlsDomain)
+        }
+        return "dd" + baseHex32
+    }
+
+    function mtProxyClientSecretForTabIndex(baseHex32, tabIndex, tlsDomain, defaultTlsDomain) {
+        var domain = tlsDomain !== "" ? tlsDomain : defaultTlsDomain
+        if (tabIndex === 1) {
+            return mtProxyClientSecret(baseHex32, "faketls", domain)
+        }
+        return mtProxyClientSecret(baseHex32, "standard", domain)
+    }
+
+    property bool containerStatusRefreshCallPending: false
+
+    function mtProxyRequestContainerStatusRefresh() {
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+            syncPageBusyIndicator()
+            return
+        }
+        isCheckingStatus = true
+        syncPageBusyIndicator()
+        InstallController.refreshContainerStatus(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
+    }
+
+    function mtProxyScheduleContainerStatusRefresh() {
+        if (containerStatusRefreshCallPending) {
+            return
+        }
+        containerStatusRefreshCallPending = true
+        Qt.callLater(function () {
+            containerStatusRefreshCallPending = false
+            root.mtProxyRequestContainerStatusRefresh()
+        })
+    }
+
+    function mtProxyOnPageShown() {
+        if (root.pageOpenHandled) {
+            return
+        }
+        root.pageOpenHandled = true
+
+        PageController.disableControls(navigationBlockedWhileBusy)
+
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+        } else {
+            isCheckingStatus = true
+        }
+        syncPageBusyIndicator()
+        root.mtProxyScheduleContainerStatusRefresh()
+    }
+
     property var mtProxyPersistedAdditionalHex: []
 
     function mtProxyRefreshPersistedAdditionalSecrets() {
@@ -92,19 +174,15 @@ PageType {
         return false
     }
 
-    // Rejects garbage like "123123123123"; only dotted IPv4 shape (≤3 digits per octet, ≤4 octets).
     readonly property var natIpv4InputFormat: /^(\d{1,3}\.){0,3}\d{0,3}$/
 
-    // Defer SSH/updateContainer so QML control handlers return before nested event loops run;
-    // avoids "Object destroyed while one of its QML signal handlers is in progress".
     function mtProxyScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
-            InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
+            InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
         })
     }
 
-    // Optional IPv4: show invalid while typing only when the string looks complete (four octets), so partial entry is not nagged.
     function natIpv4FieldShowInvalidError(text) {
         var t = text ? String(text).replace(/^\s+|\s+$/g, '') : ""
         if (t === "")
@@ -167,15 +245,9 @@ PageType {
             root.mtProxyRefreshPersistedAdditionalSecrets()
         })
 
-        if (!NetworkReachabilityController.hasInternetAccess) {
-            isCheckingStatus = false
-            return
-        }
-        isCheckingStatus = true
-        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+        Qt.callLater(root.mtProxyOnPageShown)
     }
 
-    // Block back navigation and Escape (via PageStart.isControlsDisabled) while SSH/update or diagnostics refresh runs.
     onNavigationBlockedWhileBusyChanged: {
         if (root.visible) {
             PageController.disableControls(navigationBlockedWhileBusy)
@@ -184,10 +256,16 @@ PageType {
 
     onVisibleChanged: {
         if (!visible) {
+            root.pageOpenHandled = false
+            containerStatusRefreshCallPending = false
+            isCheckingStatus = false
+            isFetchingSecret = false
+            busyIndicatorShown = false
             PageController.disableControls(false)
+            PageController.showBusyIndicator(false)
             diagLoading = false
         } else {
-            PageController.disableControls(navigationBlockedWhileBusy)
+            root.mtProxyOnPageShown()
         }
     }
 
@@ -199,8 +277,7 @@ PageType {
                 return
             }
             if (NetworkReachabilityController.hasInternetAccess) {
-                isCheckingStatus = true
-                InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                root.mtProxyScheduleContainerStatusRefresh()
             }
         }
     }
@@ -208,10 +285,15 @@ PageType {
     Connections {
         target: InstallController
 
+        function onServerIsBusy(busy) {
+            remoteOperationBusy = busy
+        }
+
         function onUpdateContainerFinished(message, closePage) {
             if (!root.visible) {
                 isUpdating = false
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
             isUpdating = false
@@ -227,9 +309,11 @@ PageType {
             if (!root.visible) {
                 isUpdating = false
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
             isUpdating = false
+            isFetchingSecret = false
             containerStatus = previousContainerStatus
             MtProxyConfigModel.setEnabled(previousEnabled)
             MtProxyConfigModel.setPort(previousPort)
@@ -254,6 +338,7 @@ PageType {
             }
             if (enabled && pendingUpdateAfterEnable) {
                 pendingUpdateAfterEnable = false
+                isUpdating = true
                 root.mtProxyScheduleUpdate(false)
                 return
             }
@@ -266,9 +351,9 @@ PageType {
         function onContainerStatusRefreshed(status) {
             if (!root.visible) {
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
-            isCheckingStatus = false
             containerStatus = status
 
             root.savedTransportMode = MtProxyConfigModel.getTransportMode()
@@ -276,10 +361,17 @@ PageType {
             root.savedPublicHost = MtProxyConfigModel.getPublicHost()
             if (status === 1) {
                 MtProxyConfigModel.setEnabled(true)
-                InstallController.fetchContainerSecret(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
-            } else if (status === 2) {
-                MtProxyConfigModel.setEnabled(false)
+                isFetchingSecret = true
+                isCheckingStatus = false
+                InstallController.fetchContainerSecret(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
+            } else {
+                isFetchingSecret = false
+                isCheckingStatus = false
+                if (status === 2) {
+                    MtProxyConfigModel.setEnabled(false)
+                }
             }
+            syncPageBusyIndicator()
         }
 
         function onContainerDiagnosticsRefreshed(portReachable, upstreamReachable, clientsConnected, lastConfigRefresh, statsEndpoint) {
@@ -296,20 +388,35 @@ PageType {
 
         function onContainerSecretFetched(secret) {
             if (!root.visible) {
+                isFetchingSecret = false
                 return
             }
+            isFetchingSecret = false
+            syncPageBusyIndicator()
             MtProxyConfigModel.validateAndSetSecret(secret)
         }
     }
+
+    Item {
+        id: contentLayer
+        anchors.fill: parent
+        enabled: !root.pageBusy
 
     BackButtonType {
         id: backButton
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+
         onFocusChanged: {
-            if (this.activeFocus) connectionListView.positionViewAtBeginning()
+            if (this.activeFocus) {
+                if (mainTabBar.currentIndex === 0) {
+                    connectionListView.positionViewAtBeginning()
+                } else {
+                    settingsListView.positionViewAtBeginning()
+                }
+            }
         }
     }
 
@@ -318,57 +425,62 @@ PageType {
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 8
         spacing: 0
 
         BaseHeaderType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            Layout.topMargin: 8
+            Layout.bottomMargin: 24
+
             headerText: qsTr("MTProxy settings")
+            descriptionLinkText: qsTr("Read more about this settings")
+            descriptionLinkUrl: "https://core.telegram.org/proxy"
         }
 
-        LabelWithButtonType {
+        CaptionTextType {
             Layout.fillWidth: true
-            Layout.leftMargin: 0
+            Layout.leftMargin: 16
             Layout.rightMargin: 16
-            text: qsTr("Read more about this settings")
-            textColor: AmneziaStyle.color.goldenApricot
-            clickedFunction: function () {
-                Qt.openUrlExternally("https://core.telegram.org/proxy")
+            Layout.topMargin: 8
+            visible: root.mtProxyNetworkBlocked
+            text: qsTr("No internet connection. Connect to the internet to change MTProxy settings.")
+            color: AmneziaStyle.color.mutedGray
+            wrapMode: Text.WordWrap
+            font.pixelSize: 14
+        }
+    }
+
+    TabBar {
+        id: mainTabBar
+        anchors.top: pageHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        width: parent.width
+
+        background: Rectangle {
+            color: AmneziaStyle.color.transparent
+            Rectangle {
+                width: parent.width
+                height: 1
+                anchors.bottom: parent.bottom
+                color: AmneziaStyle.color.slateGray
             }
         }
 
-        TabBar {
-            id: mainTabBar
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    anchors.bottom: parent.bottom
-                    color: AmneziaStyle.color.slateGray
-                }
-            }
-
-            TabButtonType {
-                text: qsTr("Connection")
-                isSelected: mainTabBar.currentIndex === 0
-            }
-            TabButtonType {
-                text: qsTr("Settings")
-                isSelected: mainTabBar.currentIndex === 1
-            }
+        TabButtonType {
+            text: qsTr("Connection")
+            isSelected: mainTabBar.currentIndex === 0
+        }
+        TabButtonType {
+            text: qsTr("Settings")
+            isSelected: mainTabBar.currentIndex === 1
         }
     }
 
     StackLayout {
         id: tabContent
-        anchors.top: pageHeader.bottom
+        anchors.top: mainTabBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -382,35 +494,11 @@ PageType {
                 width: connectionListView.width
                 spacing: 0
 
-                function domainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
-                function secretForMode(mode) {
-                    if (mode === "faketls") {
-                        var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : MtProxyConfigModel.defaultTlsDomain()
-                        return "ee" + secret + domainToHex(domain)
-                    } else if (mode === "padded") {
-                        return "dd" + secret
-                    }
-                    return secret
-                }
-
                 property int secretTabIndex: root.syncedSecretTabIndex
 
                 function activeSecret() {
-                    if (root.syncedSecretTabIndex === 0) {
-                        return secretForMode("standard")
-                    }
-                    if (root.syncedSecretTabIndex === 1) {
-                        return secretForMode("padded")
-                    }
-                    return secretForMode("faketls")
+                    return root.mtProxyClientSecretForTabIndex(secret, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, MtProxyConfigModel.defaultTlsDomain())
                 }
 
                 function effectiveSecret() {
@@ -418,7 +506,7 @@ PageType {
                 }
 
                 function effectiveHost() {
-                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersModel.getProcessedServerData("hostName")
+                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersUiController.serverHostName(ServersUiController.processedServerId)
                 }
 
                 function tmeLink() {
@@ -720,7 +808,7 @@ PageType {
                     Layout.bottomMargin: 24
                     Layout.leftMargin: 0
                     Layout.rightMargin: 16
-                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                    visible: ServersUiController.isProcessedServerHasWriteAccess()
                     text: qsTr("Delete MTProxy")
                     textColor: AmneziaStyle.color.vibrantRed
                     clickedFunction: function () {
@@ -730,7 +818,7 @@ PageType {
                         var noButtonText = qsTr("Cancel")
                         var yesButtonFunction = function () {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                            InstallController.removeContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
                         }
                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, function () {
                         })
@@ -754,37 +842,13 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
-                function mtProxyDomainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
-                function mtProxySecretForBaseHex(baseHex, mode) {
-                    if (mode === "faketls") {
-                        var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : MtProxyConfigModel.defaultTlsDomain()
-                        return "ee" + baseHex + mtProxyDomainToHex(domain)
-                    } else if (mode === "padded") {
-                        return "dd" + baseHex
-                    }
-                    return baseHex
-                }
-
                 function mtProxyActiveSecretForBaseHex(baseHex) {
-                    if (root.syncedSecretTabIndex === 0) {
-                        return mtProxySecretForBaseHex(baseHex, "standard")
-                    }
-                    if (root.syncedSecretTabIndex === 1) {
-                        return mtProxySecretForBaseHex(baseHex, "padded")
-                    }
-                    return mtProxySecretForBaseHex(baseHex, "faketls")
+                    return root.mtProxyClientSecretForTabIndex(baseHex, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, MtProxyConfigModel.defaultTlsDomain())
                 }
 
                 function mtProxyEffectiveHostForLinks() {
-                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersModel.getProcessedServerData("hostName")
+                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersUiController.serverHostName(ServersUiController.processedServerId)
                 }
 
                 function mtProxyTmeLinkForAdditional(baseHex) {
@@ -804,7 +868,7 @@ PageType {
                     Layout.bottomMargin: 16
                     text: qsTr("Enable MTProxy")
                     checked: isEnabled
-                    enabled: !isCheckingStatus && containerStatus !== 0 && containerStatus !== 3 && !isUpdating
+                    enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy
                         && !root.mtProxyNetworkBlocked
                     onToggled: function () {
                         if (checked !== isEnabled) {
@@ -815,9 +879,9 @@ PageType {
                             isUpdating = true
                             if (checked) {
                                 root.pendingUpdateAfterEnable = true
-                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, true)
+                                InstallController.setContainerEnabled(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, true)
                             } else {
-                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, false)
+                                InstallController.setContainerEnabled(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, false)
                             }
                         }
                     }
@@ -843,19 +907,20 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: secret !== "" ? secret : qsTr("Not generated")
+                            text: secret !== "" ? mtProxyActiveSecretForBaseHex(secret) : qsTr("Not generated")
                             color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
-                            elide: Text.ElideMiddle
+                            wrapMode: Text.WrapAnywhere
                             font.pixelSize: 14
                         }
 
                         ImageButtonType {
+                            Layout.alignment: Qt.AlignTop
                             implicitWidth: 36
                             implicitHeight: 36
                             hoverEnabled: true
                             image: "qrc:/images/controls/refresh-cw.svg"
                             imageColor: AmneziaStyle.color.paleGray
-                            visible: ServersModel.isProcessedServerHasWriteAccess()
+                            visible: ServersUiController.isProcessedServerHasWriteAccess()
                             onClicked: {
                                 var secretSnapshot = secret
                                 showQuestionDrawer(
@@ -889,7 +954,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 4
                     headerText: qsTr("Public host / IP")
-                    textField.placeholderText: ServersModel.getProcessedServerData("hostName")
+                    textField.placeholderText: ServersUiController.serverHostName(ServersUiController.processedServerId)
                     textField.text: publicHost
                     textField.maximumLength: 253
                     textField.validator: PublicHostInputValidator {
@@ -936,7 +1001,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 12
                     visible: publicHostTextField.textField.text !== "" &&
-                        publicHostTextField.textField.text !== ServersModel.getProcessedServerData("hostName")
+                        publicHostTextField.textField.text !== ServersUiController.serverHostName(ServersUiController.processedServerId)
                     text: qsTr("⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.")
                     color: AmneziaStyle.color.goldenApricot
                     font.pixelSize: 12
@@ -1098,6 +1163,7 @@ PageType {
                                 clickedFunction: function () {
                                     transportMode = (index === 0) ? "standard" : "faketls"
                                     MtProxyConfigModel.setTransportMode(transportMode)
+                                    root.syncedSecretTabIndex = transportMode === "faketls" ? 1 : 0
                                     transportModeDropDown.closeTriggered()
                                 }
                             }
@@ -1281,11 +1347,14 @@ PageType {
                                         implicitWidth: 32
                                         implicitHeight: 32
                                         hoverEnabled: true
-                                        visible: ServersModel.isProcessedServerHasWriteAccess()
+                                        visible: ServersUiController.isProcessedServerHasWriteAccess()
                                         image: "qrc:/images/controls/trash.svg"
                                         imageColor: AmneziaStyle.color.vibrantRed
                                         onClicked: {
                                             MtProxyConfigModel.removeAdditionalSecret(index)
+                                            if (containerStatus === 1) {
+                                                root.mtProxyScheduleUpdate(false)
+                                            }
                                         }
                                     }
                                 }
@@ -1628,7 +1697,7 @@ PageType {
                             enabled: !diagLoading
                             onClicked: {
                                 diagLoading = true
-                                InstallController.refreshContainerDiagnostics(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, parseInt(port))
+                                InstallController.refreshContainerDiagnostics(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, parseInt(port))
                             }
                         }
                     }
@@ -1754,7 +1823,7 @@ PageType {
                     Layout.bottomMargin: 32
                     Layout.rightMargin: 16
                     Layout.leftMargin: 16
-                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                    visible: ServersUiController.isProcessedServerHasWriteAccess()
                     enabled: !root.mtProxyNetworkBlocked
                     text: qsTr("Save")
                     clickedFunc: function () {
@@ -1852,34 +1921,5 @@ PageType {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        visible: isCheckingStatus || isUpdating || root.mtProxyNetworkBlocked
-        color: AmneziaStyle.color.midnightBlack
-        opacity: 0.6
-        z: 1
-        MouseArea {
-            anchors.fill: parent
-        }
-        BusyIndicator {
-            anchors.centerIn: parent
-            visible: isCheckingStatus || isUpdating
-            running: isCheckingStatus || isUpdating
-            width: 48
-            height: 48
-        }
-        CaptionTextType {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 24
-            anchors.rightMargin: 24
-            visible: root.mtProxyNetworkBlocked && !isCheckingStatus && !isUpdating
-            horizontalAlignment: Text.AlignHCenter
-            text: qsTr("No internet connection. Connect to the internet to change MTProxy settings.")
-            color: AmneziaStyle.color.paleGray
-            wrapMode: Text.WordWrap
-            font.pixelSize: 14
-        }
     }
 }

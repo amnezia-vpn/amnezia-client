@@ -65,6 +65,7 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
                                            ApiCountryModel* apiCountryModel,
                                            ApiDevicesModel* apiDevicesModel,
                                            SettingsController* settingsController,
+                                           ConnectionController* connectionController,
                                            QObject *parent)
     : QObject(parent),
       m_serversController(serversController),
@@ -76,12 +77,28 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
       m_apiAccountInfoModel(apiAccountInfoModel),
       m_apiCountryModel(apiCountryModel),
       m_apiDevicesModel(apiDevicesModel),
-      m_settingsController(settingsController)
+      m_settingsController(settingsController),
+      m_connectionController(connectionController)
 {
     connect(m_apiServicesModel, &ApiServicesModel::serviceSelectionChanged, this, [this]() {
         ApiServicesModel::ApiServicesData selectedServiceData = m_apiServicesModel->selectedServiceData();
         m_apiSubscriptionPlansModel->updateModel(selectedServiceData.subscriptionPlansJson);
         m_apiBenefitsModel->updateModel(selectedServiceData.benefits);
+    });
+
+    connect(this, &SubscriptionUiController::installServerFromApiFinished, this,
+            [this](const QString &, int preferredDefaultServerIndex) {
+        if (m_connectionController->isConnected()) {
+            return;
+        }
+
+        const int selectedServerIndex = preferredDefaultServerIndex >= 0
+                ? preferredDefaultServerIndex
+                : (m_serversController->getServersCount() - 1);
+        const QString serverId = m_serversController->getServerId(selectedServerIndex);
+        if (!serverId.isEmpty()) {
+            m_serversController->setDefaultServer(serverId);
+        }
     });
 }
 
