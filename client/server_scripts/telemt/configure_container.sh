@@ -4,8 +4,10 @@
 echo "[*] Amnezia Telemt: configure script start"
 mkdir -p /data/tlsfront
 
-# Secret: substituted $TELEMT_SECRET -> saved file -> openssl (same rules as MTProxy configure)
-if [ -n "$TELEMT_SECRET" ]; then
+# Secret: regenerate (fresh install) -> env var -> saved file -> openssl
+if [ "$TELEMT_REGENERATE_SECRET" = "1" ]; then
+    SECRET=$(openssl rand -hex 16)
+elif [ -n "$TELEMT_SECRET" ]; then
     SECRET="$TELEMT_SECRET"
 elif [ -f /data/secret ]; then
     SECRET=$(cat /data/secret)

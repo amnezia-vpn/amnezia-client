@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonValue>
+#include <QSet>
 #include <QUuid>
 
 #include "core/utils/serverConfigUtils.h"
@@ -30,6 +31,45 @@ QJsonObject embedStorageServerId(const QString &serverId, const QJsonObject &pay
     QJsonObject o = payloadSansId;
     o.insert(QString(configKey::storageServerId), serverId);
     return o;
+}
+
+QString storedServerDisplayName(const SecureServersRepository *repository, const QString &serverId)
+{
+    using Kind = serverConfigUtils::ConfigType;
+    switch (repository->serverKind(serverId)) {
+    case Kind::SelfHostedAdmin:
+        if (const auto cfg = repository->selfHostedAdminConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::SelfHostedUser:
+        if (const auto cfg = repository->selfHostedUserConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::Native:
+        if (const auto cfg = repository->nativeConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::AmneziaPremiumV2:
+    case Kind::AmneziaFreeV3:
+    case Kind::ExternalPremium:
+        if (const auto cfg = repository->apiV2Config(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::AmneziaPremiumV1:
+    case Kind::AmneziaFreeV2:
+        if (const auto cfg = repository->legacyApiConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::Invalid:
+    default:
+        break;
+    }
+    return {};
 }
 
 } // namespace
@@ -151,6 +191,28 @@ void SecureServersRepository::clearServers()
     m_defaultServerId.clear();
 
     syncToStorage();
+}
+
+QString SecureServersRepository::nextAvailableServerName() const
+{
+    QSet<QString> usedNames;
+    usedNames.reserve(m_orderedServerIds.size());
+
+    for (const QString &serverId : m_orderedServerIds) {
+        const QString displayName = storedServerDisplayName(this, serverId);
+        if (!displayName.isEmpty()) {
+            usedNames.insert(displayName);
+        }
+    }
+
+    int i = 0;
+    QString candidate;
+    do {
+        i++;
+        candidate = QStringLiteral("Server %1").arg(i);
+    } while (usedNames.contains(candidate));
+
+    return candidate;
 }
 
 QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)

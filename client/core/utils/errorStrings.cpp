@@ -30,6 +30,15 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
     case(ErrorCode::DockerPullRateLimit): errorMessage = QObject::tr("Docker error: The pull rate limit has been reached"); break;
     case(ErrorCode::ServerLinuxKernelTooOld): errorMessage = QObject::tr("Server error: Linux kernel is too old"); break;
+    case(ErrorCode::XrayServerConfigInvalid):
+        errorMessage = QObject::tr("Server error: invalid or unreadable XRay server configuration");
+        break;
+    case(ErrorCode::XrayServerNoVlessClients):
+        errorMessage = QObject::tr("Server error: XRay server has no VLESS clients");
+        break;
+    case(ErrorCode::XrayRealityKeysReadFailed):
+        errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
+        break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
@@ -84,6 +93,10 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
+    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
+    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
+    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
+    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

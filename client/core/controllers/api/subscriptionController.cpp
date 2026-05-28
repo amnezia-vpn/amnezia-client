@@ -5,6 +5,7 @@
 #include <QEventLoop>
 #include <QFutureWatcher>
 #include <QJsonDocument>
+#include <QJsonObject>
 #include <QPromise>
 #include <QSet>
 #include <QSysInfo>
@@ -216,7 +217,8 @@ ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const 
 }
 
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
-                                                            const QString &serviceProtocol, const ProtocolData &protocolData)
+                                                            const QString &serviceProtocol, const ProtocolData &protocolData,
+                                                            CaptchaInfo &captchaInfo)
 {
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -233,6 +235,19 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+
+    if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+        if (jsonDoc.isObject()) {
+            QJsonObject jsonObj = jsonDoc.object();
+            captchaInfo.captchaId = jsonObj.value("captcha_id").toString();
+            captchaInfo.captchaImageBase64 = jsonObj.value("captcha_image").toString();
+            captchaInfo.hint = jsonObj.value("hint").toString();
+            captchaInfo.isRequired = true;
+        }
+        return errorCode;
+    }
+
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -242,9 +257,9 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    
+
     updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
-    
+
     if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
@@ -956,3 +971,74 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
     return promise->future();
 }
 
+ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &userCountryCode,
+                                                              const QString &serviceType,
+                                                              const QString &serviceProtocol,
+                                                              const ProtocolData &protocolData,
+                                                              const QString &captchaId,
+                                                              const QString &captchaSolution,
+                                                              CaptchaInfo *retryCaptchaOut)
+{
+    GatewayRequestData gatewayRequestData{QSysInfo::productType(),
+                                          QString(APP_VERSION),
+                                          m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                          m_appSettingsRepository->getInstallationUuid(true),
+                                          userCountryCode,
+                                          "",
+                                          serviceType,
+                                          serviceProtocol,
+                                          QJsonObject()};
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+
+    apiPayload["captcha_id"] = captchaId;
+    QString normalizedSolution;
+    normalizedSolution.reserve(captchaSolution.size());
+    for (const QChar &ch : captchaSolution) {
+        const ushort u = ch.unicode();
+        if (u >= '0' && u <= '9') {
+            normalizedSolution += ch;
+        } else if (u >= 0xFF10 && u <= 0xFF19) {
+            normalizedSolution += QChar(static_cast<char16_t>(u - 0xFF10 + '0'));
+        }
+    }
+    apiPayload["captcha_solution"] = normalizedSolution.isEmpty() ? captchaSolution.trimmed() : normalizedSolution;
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        if (retryCaptchaOut
+            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
+                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
+            const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+            if (jsonDoc.isObject()) {
+                const QJsonObject jsonObj = jsonDoc.object();
+                if (jsonObj.contains(QStringLiteral("captcha_id")) && jsonObj.contains(QStringLiteral("captcha_image"))) {
+                    retryCaptchaOut->captchaId = jsonObj.value(QStringLiteral("captcha_id")).toString();
+                    retryCaptchaOut->captchaImageBase64 = jsonObj.value(QStringLiteral("captcha_image")).toString();
+                    retryCaptchaOut->hint = jsonObj.value(QStringLiteral("hint")).toString();
+                    retryCaptchaOut->isRequired = true;
+                }
+            }
+        }
+        return errorCode;
+    }
+
+    QJsonObject serverConfigJson;
+    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
+
+    if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
+        return ErrorCode::InternalError;
+    }
+
+    ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(serverConfigJson);
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
+    return ErrorCode::NoError;
+}

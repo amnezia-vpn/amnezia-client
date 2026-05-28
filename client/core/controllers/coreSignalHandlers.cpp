@@ -125,9 +125,9 @@ void CoreSignalHandlers::initInstallControllerHandler()
 {
     connect(m_coreController->m_installController, &InstallController::serverIsBusy, m_coreController->m_installUiController, &InstallUiController::serverIsBusy);
     connect(m_coreController->m_installUiController, &InstallUiController::cancelInstallation, m_coreController->m_installController, &InstallController::cancelInstallation);
-    connect(m_coreController->m_serversUiController, &ServersUiController::processedServerIndexChanged,
-        m_coreController->m_installUiController, [this](int serverIndex) {
-        if (serverIndex >= 0) {
+    connect(m_coreController->m_serversUiController, &ServersUiController::processedServerIdChanged,
+        m_coreController->m_installUiController, [this](const QString &serverId) {
+        if (!serverId.isEmpty()) {
             m_coreController->m_installUiController->clearProcessedServerCredentials();
         }
     });

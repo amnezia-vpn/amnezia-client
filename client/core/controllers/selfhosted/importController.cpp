@@ -486,7 +486,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data) const
     QJsonObject config;
     config[configKey::containers] = arr;
     config[configKey::defaultContainer] = configKey::amneziaOpenvpn;
-    config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+    config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(data);
@@ -645,7 +645,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     QJsonObject config;
     config[configKey::containers] = arr;
     config[configKey::defaultContainer] = containerName;
-    config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+    config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
             "DNS = "
@@ -699,7 +699,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
             ? configKey::amneziaSsxray
             : configKey::amneziaXray;
     if (description.isEmpty()) {
-        config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+        config[configKey::description] = m_serversRepository->nextAvailableServerName();
     } else {
         config[configKey::description] = description;
     }

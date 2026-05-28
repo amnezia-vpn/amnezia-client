@@ -426,26 +426,6 @@ void SecureAppSettingsRepository::clearSettings()
     emit settingsCleared();
 }
 
-QString SecureAppSettingsRepository::nextAvailableServerName() const
-{
-    int i = 0;
-    bool nameExist = false;
-
-    do {
-        i++;
-        nameExist = false;
-        QJsonArray servers = QJsonDocument::fromJson(value("Servers/serversList").toByteArray()).array();
-        for (const QJsonValue &server : servers) {
-            if (server.toObject().value(configKey::description).toString() == QString("Server") + " " + QString::number(i)) {
-                nameExist = true;
-                break;
-            }
-        }
-    } while (nameExist);
-
-    return QString("Server") + " " + QString::number(i);
-}
-
 void SecureAppSettingsRepository::setInstallationUuid(const QString &uuid)
 {
     m_settings->setValue("Conf/installationUuid", uuid);

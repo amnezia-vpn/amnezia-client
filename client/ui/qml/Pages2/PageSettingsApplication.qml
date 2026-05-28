@@ -154,10 +154,10 @@ PageType {
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized (works with autostart option turned on)")
 
-                enabled: switcherAutoStart.checked
+                enabled: SettingsController.isAutoStartEnabled()
                 opacity: enabled ? 1.0 : 0.5
 
-                checked: SettingsController.startMinimized
+                checked: SettingsController.isAutoStartEnabled() && SettingsController.startMinimized
                 onToggled: function() {
                     if (checked !== SettingsController.startMinimized) {
                         SettingsController.toggleStartMinimized(checked)
