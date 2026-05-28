@@ -380,17 +380,8 @@ PageType {
             Layout.bottomMargin: 24
 
             headerText: qsTr("Telemt settings")
-        }
-
-        LabelWithButtonType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            text: qsTr("Read more about this settings")
-            textColor: AmneziaStyle.color.goldenApricot
-            clickedFunction: function () {
-                Qt.openUrlExternally("https://github.com/telemt/telemt")
-            }
+            descriptionLinkText: qsTr("Read more about this settings")
+            descriptionLinkUrl: "https://github.com/telemt/telemt"
         }
 
         CaptionTextType {

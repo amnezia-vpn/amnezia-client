@@ -434,17 +434,8 @@ PageType {
             Layout.bottomMargin: 24
 
             headerText: qsTr("MTProxy settings")
-        }
-
-        LabelWithButtonType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            text: qsTr("Read more about this settings")
-            textColor: AmneziaStyle.color.goldenApricot
-            clickedFunction: function () {
-                Qt.openUrlExternally("https://core.telegram.org/proxy")
-            }
+            descriptionLinkText: qsTr("Read more about this settings")
+            descriptionLinkUrl: "https://core.telegram.org/proxy"
         }
 
         CaptionTextType {
