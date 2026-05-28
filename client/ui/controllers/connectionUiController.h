@@ -45,7 +45,6 @@ signals:
     void serverRoutingRulesChanged(int serverIndex);
 
     void connectionErrorOccurred(ErrorCode errorCode);
-    void reconnectWithUpdatedContainer(const QString &message);
 
     void connectButtonClicked();
     void preparingConfig();

@@ -217,6 +217,11 @@ void SettingsController::toggleAutoStart(bool enable)
 
 bool SettingsController::isStartMinimizedEnabled() const
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (!isAutoStartEnabled()) {
+        return false;
+    }
+#endif
     return m_appSettingsRepository->isStartMinimized();
 }
 
@@ -358,6 +363,6 @@ void SettingsController::disablePremV1MigrationReminder()
 
 QString SettingsController::nextAvailableServerName() const
 {
-    return m_appSettingsRepository->nextAvailableServerName();
+    return m_serversRepository->nextAvailableServerName();
 }
 

@@ -23,6 +23,7 @@
 #include "core/installers/sftpInstaller.h"
 #include "core/installers/socks5Installer.h"
 #include "core/installers/mtProxyInstaller.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/installers/telemtInstaller.h"
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
@@ -613,9 +614,14 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
+    amnezia::ScriptVars removeContainerVars =
+            amnezia::genBaseVars(credentials, container, QString(), QString());
+    if (!isUpdate) {
+        removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
+    }
     sshSession.runScript(credentials,
-                                  sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                                                  amnezia::genBaseVars(credentials, container, QString(), QString())));
+                         sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
+                                                removeContainerVars));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
     qDebug().noquote() << "buildContainerWorker start";
@@ -675,6 +681,16 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
     qDebug() << "InstallController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
 
+    bool xrayServerSettingsChanged = false;
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
+        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
+        if (oldXrayConfig && newXrayConfig) {
+            xrayServerSettingsChanged =
+                    !oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig);
+        }
+    }
+
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
@@ -682,6 +698,21 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
             errorCode = startupContainerWorker(credentials, container, newConfig, sshSession);
+        }
+    }
+
+    const bool skipXrayInboundSync =
+            newConfig.getXrayProtocolConfig() && newConfig.getXrayProtocolConfig()->serverConfig.isThirdPartyConfig;
+
+    if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged && !skipXrayInboundSync) {
+        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+        XrayConfigurator xrayConfigurator(&sshSession);
+        qDebug() << "InstallController::updateContainer applying Xray server inbound sync, reinstall="
+                 << reinstallRequired;
+        errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
+        if (errorCode != ErrorCode::NoError) {
+            qDebug() << "InstallController::updateContainer Xray inbound sync failed, error="
+                     << static_cast<int>(errorCode);
         }
     }
 
@@ -710,9 +741,9 @@ void InstallController::clearCachedProfile(const QString &serverId, DockerContai
         return;
     }
 
-    adminConfig->clearCachedClientProfile(container);
     const ContainerConfig containerConfigModel = adminConfig->containerConfig(container);
 
+    adminConfig->clearCachedClientProfile(container);
     m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
 
     emit clientRevocationRequested(serverId, containerConfigModel, container);
@@ -821,7 +852,7 @@ void InstallController::addEmptyServer(const ServerCredentials &credentials)
     serverConfig.userName = credentials.userName;
     serverConfig.password = credentials.secretData;
     serverConfig.port = credentials.port;
-    serverConfig.description = m_appSettingsRepository->nextAvailableServerName();
+    serverConfig.description = m_serversRepository->nextAvailableServerName();
     serverConfig.displayName = serverConfig.description.isEmpty() ? serverConfig.hostName : serverConfig.description;
     serverConfig.defaultContainer = DockerContainer::None;
 
@@ -1132,12 +1163,19 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
     }
 
     if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-        const auto* oldXrayConfig = oldConfig.getXrayProtocolConfig();
-        const auto* newXrayConfig = newConfig.getXrayProtocolConfig();
-        
+        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
+        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
+
         if (oldXrayConfig && newXrayConfig) {
-            if (oldXrayConfig->serverConfig.port != newXrayConfig->serverConfig.port)
+            const QString oldPort = oldXrayConfig->serverConfig.port.isEmpty()
+                    ? QString(protocols::xray::defaultPort)
+                    : oldXrayConfig->serverConfig.port;
+            const QString newPort = newXrayConfig->serverConfig.port.isEmpty()
+                    ? QString(protocols::xray::defaultPort)
+                    : newXrayConfig->serverConfig.port;
+            if (oldPort != newPort) {
                 return true;
+            }
         }
     }
 
@@ -1436,10 +1474,12 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
         return ErrorCode::InternalError;
     }
     SshSession sshSession(this);
+    amnezia::ScriptVars removeContainerVars =
+            amnezia::genBaseVars(credentials, container, QString(), QString());
+    removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
     ErrorCode errorCode = sshSession.runScript(
             credentials,
-            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                            amnezia::genBaseVars(credentials, container, QString(), QString())));
+            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container), removeContainerVars));
 
     if (errorCode == ErrorCode::NoError) {
         QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
@@ -1629,7 +1669,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     serverConfig.userName = credentials.userName;
     serverConfig.password = credentials.secretData;
     serverConfig.port = credentials.port;
-    serverConfig.description = m_appSettingsRepository->nextAvailableServerName();
+    serverConfig.description = m_serversRepository->nextAvailableServerName();
 
     for (auto iterator = preparedContainers.begin(); iterator != preparedContainers.end(); iterator++) {
         serverConfig.containers.insert(iterator.key(), iterator.value());
@@ -1702,28 +1742,26 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::checkSshConnection(const ServerCredentials &credentials, QString &output,
+ErrorCode InstallController::checkSshConnection(ServerCredentials &credentials, QString &output,
                                                 std::function<QString()> passphraseCallback)
 {
     SshSession sshSession(this);
     ErrorCode errorCode = ErrorCode::NoError;
 
-    ServerCredentials processedCredentials = credentials;
-
-    if (processedCredentials.secretData.contains("BEGIN") && processedCredentials.secretData.contains("PRIVATE KEY")) {
+    if (credentials.secretData.contains("BEGIN") && credentials.secretData.contains("PRIVATE KEY")) {
         if (!passphraseCallback) {
             return ErrorCode::SshPrivateKeyError;
         }
 
         QString decryptedPrivateKey;
-        errorCode = sshSession.getDecryptedPrivateKey(processedCredentials, decryptedPrivateKey, passphraseCallback);
+        errorCode = sshSession.getDecryptedPrivateKey(credentials, decryptedPrivateKey, passphraseCallback);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
-        processedCredentials.secretData = decryptedPrivateKey;
+        credentials.secretData = decryptedPrivateKey;
     }
 
-    output = sshSession.checkSshConnection(processedCredentials, errorCode);
+    output = sshSession.checkSshConnection(credentials, errorCode);
     return errorCode;
 }
 

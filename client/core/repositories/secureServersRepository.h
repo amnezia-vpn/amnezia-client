@@ -66,6 +66,8 @@ public:
     bool hasServerWithCrc(quint16 crc) const;
     void clearServers();
 
+    QString nextAvailableServerName() const;
+
     void invalidateCache();
 
 signals:

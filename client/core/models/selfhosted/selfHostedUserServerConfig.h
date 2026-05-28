@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <QMap>
+#include <QPair>
 #include <optional>
 
 #include "core/utils/containerEnum.h"
@@ -29,6 +30,9 @@ struct SelfHostedUserServerConfig {
     std::optional<ServerCredentials> credentials() const;
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;
+
+    QPair<QString, QString> getDnsPair(const QString &primaryDns, const QString &secondaryDns) const;
+
     QJsonObject toJson() const;
     static SelfHostedUserServerConfig fromJson(const QJsonObject &json);
 };

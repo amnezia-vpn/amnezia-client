@@ -165,7 +165,7 @@ PageType {
                         InstallController.install(listView.dockerContainer,
                                                       listView.containerDefaultPort,
                                                       listView.containerDefaultTransportProto,
-                                                      ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                                                      ServersUiController.processedServerId)
                     } else {
                         PageController.goToPage(PageEnum.PageSetupWizardProtocols)
                     }

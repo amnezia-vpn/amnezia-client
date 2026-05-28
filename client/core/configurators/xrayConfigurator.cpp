@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QThread>
 #include <QUuid>
 #include "logger.h"
 
@@ -137,115 +138,324 @@ amnezia::ProtocolConfig XrayConfigurator::processConfigWithLocalSettings(const a
     return protocolConfig;
 }
 
-QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
-                                               const ContainerConfig &containerConfig,
-                                               const DnsSettings &dnsSettings,
-                                               ErrorCode &errorCode)
+ErrorCode XrayConfigurator::uploadServerConfigJson(const ServerCredentials &credentials, DockerContainer container,
+                                                    const DnsSettings &dnsSettings, const QJsonObject &serverConfig) const
 {
-    // Generate new UUID for client
-    QString clientId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const QString updatedConfig = QJsonDocument(serverConfig).toJson();
+    ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(
+            container, credentials, updatedConfig, amnezia::protocols::xray::serverConfigPath,
+            libssh::ScpOverwriteMode::ScpOverwriteExisting);
+    if (errorCode != ErrorCode::NoError) {
+        logger.error() << "Failed to upload updated config";
+        return errorCode;
+    }
 
-    // Get flow value from settings (default xtls-rprx-vision)
-    QString flowValue = "xtls-rprx-vision";
-    if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
-        if (!xrayCfg->serverConfig.flow.isEmpty()) {
-            flowValue = xrayCfg->serverConfig.flow;
+    const QString restartScript = QStringLiteral("sudo docker restart $CONTAINER_NAME");
+    errorCode = m_sshSession->runScript(
+            credentials,
+            m_sshSession->replaceVars(restartScript,
+                                      amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns,
+                                                           dnsSettings.secondaryDns)));
+    if (errorCode != ErrorCode::NoError) {
+        logger.error() << "Failed to restart container";
+    }
+    return errorCode;
+}
+
+ErrorCode XrayConfigurator::readRealityKeyFiles(const DockerContainer container, const ServerCredentials &credentials,
+                                                QString &outPublicKey, QString &outShortId) const
+{
+    outPublicKey.clear();
+    outShortId.clear();
+
+    auto readKeyFile = [&](const QString &path, QString &out) -> ErrorCode {
+        for (int attempt = 0; attempt < 3; ++attempt) {
+            ErrorCode fileError = ErrorCode::NoError;
+            out = QString::fromUtf8(m_sshSession->getTextFileFromContainer(container, credentials, path, fileError));
+            out.replace(QLatin1Char('\n'), QString());
+            out.replace(QLatin1Char('\r'), QString());
+            if (fileError == ErrorCode::NoError && !out.isEmpty()) {
+                return ErrorCode::NoError;
+            }
+            if (attempt < 2) {
+                QThread::msleep(500);
+            }
+        }
+        logger.error() << "Xray readRealityKeyFiles: failed path=" << path;
+        return ErrorCode::XrayRealityKeysReadFailed;
+    };
+
+    ErrorCode errorCode = readKeyFile(QString::fromLatin1(amnezia::protocols::xray::PublicKeyPath), outPublicKey);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    return readKeyFile(QString::fromLatin1(amnezia::protocols::xray::shortidPath), outShortId);
+}
+
+QJsonObject XrayConfigurator::mergeStreamSettingsForServerInbound(const XrayServerConfig &srv,
+                                                                  const QJsonObject &existingStreamSettings) const
+{
+    QJsonObject streamSettings = buildStreamSettings(srv, QString());
+
+    if (srv.security != QLatin1String("reality")) {
+        return streamSettings;
+    }
+
+    const QJsonObject newRs = streamSettings[amnezia::protocols::xray::realitySettings].toObject();
+    QJsonObject oldRs = existingStreamSettings[amnezia::protocols::xray::realitySettings].toObject();
+    QJsonObject merged = oldRs.isEmpty() ? newRs : oldRs;
+
+    const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultSite) : srv.site;
+    const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
+
+    if (newRs.contains(amnezia::protocols::xray::fingerprint)) {
+        merged[amnezia::protocols::xray::fingerprint] = newRs[amnezia::protocols::xray::fingerprint];
+    }
+    merged[amnezia::protocols::xray::serverNames] = QJsonArray { sniEff };
+    if (!merged.contains(QStringLiteral("dest"))) {
+        merged[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
+    }
+
+    streamSettings[amnezia::protocols::xray::realitySettings] = merged;
+    return streamSettings;
+}
+
+ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials &credentials, DockerContainer container,
+                                                        ContainerConfig &containerConfig, const DnsSettings &dnsSettings,
+                                                        bool appendNewClient, QString *outClientId)
+{
+    ErrorCode errorCode = ErrorCode::NoError;
+    const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>();
+    if (!xrayCfg) {
+        logger.error() << "Xray applyServerSettings: missing XrayProtocolConfig";
+        return ErrorCode::InternalError;
+    }
+
+    const XrayServerConfig &srv = xrayCfg->serverConfig;
+    if (srv.isThirdPartyConfig) {
+        logger.info() << "Xray applyServerSettings: skipped (third-party/native profile)";
+        if (outClientId && xrayCfg->hasClientConfig()) {
+            *outClientId = xrayCfg->clientConfig->id;
+        }
+        return ErrorCode::NoError;
+    }
+
+    logger.info() << "Xray applyServerSettings: start"
+                    << "container=" << static_cast<int>(container) << "host=" << credentials.hostName
+                    << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port
+                    << "appendClient=" << appendNewClient;
+    QString flowValue = srv.flow;
+    if (flowValue.isEmpty() && srv.security == QLatin1String("reality")) {
+        flowValue = QStringLiteral("xtls-rprx-vision");
+    }
+
+    QString realityPublicKey;
+    QString realityShortId;
+    if (srv.security == QLatin1String("reality")) {
+        errorCode = readRealityKeyFiles(container, credentials, realityPublicKey, realityShortId);
+        if (errorCode != ErrorCode::NoError) {
+            logger.error() << "Xray applyServerSettings: readRealityKeyFiles failed, error="
+                           << static_cast<int>(errorCode);
+            return errorCode;
         }
     }
 
-    // Get current server config
     QString currentConfig = m_sshSession->getTextFileFromContainer(
-        container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
-
+            container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Failed to get server config file";
-        return "";
+        logger.error() << "Xray applyServerSettings: getTextFileFromContainer failed, error="
+                       << static_cast<int>(errorCode) << "path=" << amnezia::protocols::xray::serverConfigPath;
+        return errorCode;
     }
+    logger.info() << "Xray applyServerSettings: read server config, bytes=" << currentConfig.size();
 
-    // Parse current config as JSON
     QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
     if (doc.isNull() || !doc.isObject()) {
         logger.error() << "Failed to parse server config JSON";
-        errorCode = ErrorCode::InternalError;
-        return "";
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     QJsonObject serverConfig = doc.object();
-
-    // Validate server config structure
     if (!serverConfig.contains(amnezia::protocols::xray::inbounds)) {
         logger.error() << "Server config missing 'inbounds' field";
-        errorCode = ErrorCode::InternalError;
-        return "";
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     QJsonArray inbounds = serverConfig[amnezia::protocols::xray::inbounds].toArray();
     if (inbounds.isEmpty()) {
         logger.error() << "Server config has empty 'inbounds' array";
-        errorCode = ErrorCode::InternalError;
-        return "";
+        return ErrorCode::XrayServerConfigInvalid;
     }
 
     QJsonObject inbound = inbounds[0].toObject();
     if (!inbound.contains(amnezia::protocols::xray::settings)) {
         logger.error() << "Inbound missing 'settings' field";
-        errorCode = ErrorCode::InternalError;
-        return "";
+        return ErrorCode::XrayServerConfigInvalid;
+    }
+
+    const QJsonObject existingStream = inbound[amnezia::protocols::xray::streamSettings].toObject();
+    inbound[amnezia::protocols::xray::streamSettings] = mergeStreamSettingsForServerInbound(srv, existingStream);
+
+    if (!srv.port.isEmpty()) {
+        inbound[amnezia::protocols::xray::port] = srv.port.toInt();
     }
 
     QJsonObject settings = inbound[amnezia::protocols::xray::settings].toObject();
     if (!settings.contains(amnezia::protocols::xray::clients)) {
-        logger.error() << "Settings missing 'clients' field";
-        errorCode = ErrorCode::InternalError;
-        return "";
+        settings[amnezia::protocols::xray::clients] = QJsonArray {};
     }
 
     QJsonArray clients = settings[amnezia::protocols::xray::clients].toArray();
+    QString clientId;
 
-    // Create configuration for new client
-    QJsonObject clientConfig {
-        {amnezia::protocols::xray::id, clientId},
-    };
-    clientConfig[amnezia::protocols::xray::id] = clientId;
-    if (!flowValue.isEmpty()) {
-        clientConfig[amnezia::protocols::xray::flow] = flowValue;
+    if (appendNewClient) {
+        clientId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        QJsonObject clientEntry;
+        clientEntry[amnezia::protocols::xray::id] = clientId;
+        if (!flowValue.isEmpty()) {
+            clientEntry[amnezia::protocols::xray::flow] = flowValue;
+        }
+        clients.append(clientEntry);
+    } else {
+        if (clients.isEmpty()) {
+            logger.error() << "Server config has no VLESS clients";
+            return ErrorCode::XrayServerNoVlessClients;
+        }
+        clientId = clients[0].toObject()[amnezia::protocols::xray::id].toString();
+        if (clientId.isEmpty()) {
+            logger.error() << "Server config VLESS client has empty id";
+            return ErrorCode::XrayServerNoVlessClients;
+        }
+        QJsonArray updatedClients;
+        for (const QJsonValue &v : clients) {
+            QJsonObject c = v.toObject();
+            if (flowValue.isEmpty()) {
+                c.remove(amnezia::protocols::xray::flow);
+            } else {
+                c[amnezia::protocols::xray::flow] = flowValue;
+            }
+            updatedClients.append(c);
+        }
+        clients = updatedClients;
     }
 
-    clients.append(clientConfig);
-
-    // Update config
     settings[amnezia::protocols::xray::clients] = clients;
     inbound[amnezia::protocols::xray::settings] = settings;
     inbounds[0] = inbound;
     serverConfig[amnezia::protocols::xray::inbounds] = inbounds;
 
-    // Save updated config to server
-    QString updatedConfig = QJsonDocument(serverConfig).toJson();
-    errorCode = m_sshSession->uploadTextFileToContainer(
-        container,
-        credentials,
-        updatedConfig,
-        amnezia::protocols::xray::serverConfigPath,
-        libssh::ScpOverwriteMode::ScpOverwriteExisting
-    );
+    errorCode = uploadServerConfigJson(credentials, container, dnsSettings, serverConfig);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Failed to upload updated config";
-        return "";
+        logger.error() << "Xray applyServerSettings: upload/restart failed, error=" << static_cast<int>(errorCode);
+        return errorCode;
+    }
+    logger.info() << "Xray applyServerSettings: server config uploaded and container restarted";
+
+    if (outClientId) {
+        *outClientId = clientId;
     }
 
-    // Restart container
-    QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
-    errorCode = m_sshSession->runScript(
-        credentials,
-        m_sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns))
-    );
-
+    XrayProtocolConfig updated =
+            buildClientProtocolConfig(credentials, container, srv, clientId, errorCode, realityPublicKey, realityShortId);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Failed to restart container";
-        return "";
+        logger.error() << "Xray applyServerSettings: buildClientProtocolConfig failed, error="
+                       << static_cast<int>(errorCode);
+        return errorCode;
     }
+    containerConfig.protocolConfig = updated;
+    logger.info() << "Xray applyServerSettings: done, clientId=" << clientId;
+    return ErrorCode::NoError;
+}
 
+QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
+                                               const ContainerConfig &containerConfig,
+                                               const DnsSettings &dnsSettings,
+                                               ErrorCode &errorCode)
+{
+    ContainerConfig mutableConfig = containerConfig;
+    QString clientId;
+    const ErrorCode applyError =
+            applyServerSettingsToRemote(credentials, container, mutableConfig, dnsSettings, true, &clientId);
+    errorCode = applyError;
+    if (applyError != ErrorCode::NoError || clientId.isEmpty()) {
+        return QString();
+    }
     return clientId;
+}
+
+XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCredentials &credentials,
+                                                               DockerContainer container,
+                                                               const XrayServerConfig &srv, const QString &clientId,
+                                                               ErrorCode &errorCode,
+                                                               const QString &prefetchedRealityPublicKey,
+                                                               const QString &prefetchedRealityShortId) const
+{
+    QString xrayPublicKey = prefetchedRealityPublicKey;
+    QString xrayShortId = prefetchedRealityShortId;
+
+    if (srv.security == QLatin1String("reality")) {
+        if (xrayPublicKey.isEmpty() || xrayShortId.isEmpty()) {
+            errorCode = readRealityKeyFiles(container, credentials, xrayPublicKey, xrayShortId);
+            if (errorCode != ErrorCode::NoError) {
+                return {};
+            }
+        }
+    }
+
+    QJsonObject userObj;
+    userObj[amnezia::protocols::xray::id] = clientId;
+    userObj[amnezia::protocols::xray::encryption] = QStringLiteral("none");
+    if (!srv.flow.isEmpty()) {
+        userObj[amnezia::protocols::xray::flow] = srv.flow;
+    }
+
+    QJsonObject vnextEntry;
+    vnextEntry[amnezia::protocols::xray::address] = credentials.hostName;
+    vnextEntry[amnezia::protocols::xray::port] =
+            srv.port.isEmpty() ? QString(amnezia::protocols::xray::defaultPort).toInt() : srv.port.toInt();
+    vnextEntry[amnezia::protocols::xray::users] = QJsonArray { userObj };
+
+    QJsonObject outboundSettings;
+    outboundSettings[amnezia::protocols::xray::vnext] = QJsonArray { vnextEntry };
+
+    QJsonObject outbound;
+    outbound[QStringLiteral("protocol")] = QStringLiteral("vless");
+    outbound[amnezia::protocols::xray::settings] = outboundSettings;
+
+    QJsonObject streamObj = buildStreamSettings(srv, clientId);
+    if (srv.security == QLatin1String("reality")) {
+        QJsonObject rs = streamObj[amnezia::protocols::xray::realitySettings].toObject();
+        rs[amnezia::protocols::xray::publicKey] = xrayPublicKey;
+        rs[amnezia::protocols::xray::shortId] = xrayShortId;
+        rs[amnezia::protocols::xray::spiderX] = QString();
+        streamObj[amnezia::protocols::xray::realitySettings] = rs;
+    }
+
+    outbound[amnezia::protocols::xray::streamSettings] = streamObj;
+
+    QJsonObject inboundObj;
+    inboundObj[QStringLiteral("listen")] = amnezia::protocols::xray::defaultLocalListenAddr;
+    inboundObj[amnezia::protocols::xray::port] = amnezia::protocols::xray::defaultLocalProxyPort;
+    inboundObj[QStringLiteral("protocol")] = QStringLiteral("socks");
+    inboundObj[amnezia::protocols::xray::settings] = QJsonObject { { QStringLiteral("udp"), true } };
+
+    QJsonObject clientJson;
+    clientJson[QStringLiteral("log")] = QJsonObject { { QStringLiteral("loglevel"), QStringLiteral("error") } };
+    clientJson[amnezia::protocols::xray::inbounds] = QJsonArray { inboundObj };
+    clientJson[amnezia::protocols::xray::outbounds] = QJsonArray { outbound };
+
+    const QString config = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
+
+    XrayProtocolConfig protocolConfig;
+    protocolConfig.serverConfig = srv;
+
+    XrayClientConfig clientConfig;
+    clientConfig.nativeConfig = config;
+    clientConfig.localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort);
+    clientConfig.id = clientId;
+    protocolConfig.setClientConfig(clientConfig);
+
+    return protocolConfig;
 }
 
 QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, const QString &clientId) const
@@ -419,6 +629,13 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
                                               const DnsSettings &dnsSettings,
                                               ErrorCode &errorCode)
 {
+    if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
+        if (xrayCfg->serverConfig.isThirdPartyConfig && xrayCfg->hasClientConfig()) {
+            logger.info() << "Xray createConfig: returning existing third-party client config without server SSH";
+            return *xrayCfg;
+        }
+    }
+
     const XrayServerConfig *serverConfig = nullptr;
     if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
         serverConfig = &xrayCfg->serverConfig;
@@ -441,93 +658,5 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
         return XrayProtocolConfig{};
     }
 
-    // Fetch server keys (Reality only)
-    QString xrayPublicKey;
-    QString xrayShortId;
-
-    if (srv.security == "reality") {
-        xrayPublicKey = m_sshSession->getTextFileFromContainer(container, credentials,
-                                                               amnezia::protocols::xray::PublicKeyPath, errorCode);
-        if (errorCode != ErrorCode::NoError || xrayPublicKey.isEmpty()) {
-            logger.error() << "Failed to get public key";
-            if (errorCode == ErrorCode::NoError) {
-                errorCode = ErrorCode::InternalError;
-            }
-            return XrayProtocolConfig{};
-        }
-        xrayPublicKey.replace("\n", "");
-
-        xrayShortId = m_sshSession->getTextFileFromContainer(container, credentials,
-                                                             amnezia::protocols::xray::shortidPath, errorCode);
-        if (errorCode != ErrorCode::NoError || xrayShortId.isEmpty()) {
-            logger.error() << "Failed to get short ID";
-            if (errorCode == ErrorCode::NoError) {
-                errorCode = ErrorCode::InternalError;
-            }
-            return XrayProtocolConfig{};
-        }
-        xrayShortId.replace("\n", "");
-    }
-
-    // Build outbound
-    QJsonObject userObj;
-    userObj[amnezia::protocols::xray::id] = xrayClientId;
-    userObj[amnezia::protocols::xray::encryption] = "none";
-    if (!srv.flow.isEmpty()) {
-        userObj[amnezia::protocols::xray::flow] = srv.flow;
-    }
-
-    QJsonObject vnextEntry;
-    vnextEntry[amnezia::protocols::xray::address] = credentials.hostName;
-    vnextEntry[amnezia::protocols::xray::port] = srv.port.toInt();
-    vnextEntry[amnezia::protocols::xray::users] = QJsonArray { userObj };
-
-    QJsonObject outboundSettings;
-    outboundSettings[amnezia::protocols::xray::vnext] = QJsonArray { vnextEntry };
-
-    QJsonObject outbound;
-    outbound["protocol"] = "vless";
-    outbound[amnezia::protocols::xray::settings] = outboundSettings;
-
-    // Build streamSettings
-    QJsonObject streamObj = buildStreamSettings(srv, xrayClientId);
-
-    // Inject Reality keys
-    if (srv.security == "reality") {
-        QJsonObject rs = streamObj[amnezia::protocols::xray::realitySettings].toObject();
-        rs[amnezia::protocols::xray::publicKey] = xrayPublicKey;
-        rs[amnezia::protocols::xray::shortId] = xrayShortId;
-        rs[amnezia::protocols::xray::spiderX] = "";
-        streamObj[amnezia::protocols::xray::realitySettings] = rs;
-    }
-
-    outbound[amnezia::protocols::xray::streamSettings] = streamObj;
-
-    // Build full client config
-    QJsonObject inboundObj;
-    inboundObj["listen"] = amnezia::protocols::xray::defaultLocalListenAddr;
-    inboundObj[amnezia::protocols::xray::port] = amnezia::protocols::xray::defaultLocalProxyPort;
-    inboundObj["protocol"] = "socks";
-    inboundObj[amnezia::protocols::xray::settings] = QJsonObject { { "udp", true } };
-
-    QJsonObject clientJson;
-    clientJson["log"] = QJsonObject { { "loglevel", "error" } };
-    clientJson[amnezia::protocols::xray::inbounds] = QJsonArray { inboundObj };
-    clientJson[amnezia::protocols::xray::outbounds] = QJsonArray { outbound };
-
-    QString config = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
-
-    // Return
-    XrayProtocolConfig protocolConfig;
-    protocolConfig.serverConfig = srv;
-
-    XrayClientConfig clientConfig;
-    clientConfig.nativeConfig = config;
-    qDebug() << "config:" << config;
-    clientConfig.localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort);
-    clientConfig.id = xrayClientId;
-
-    protocolConfig.setClientConfig(clientConfig);
-
-    return protocolConfig;
+    return buildClientProtocolConfig(credentials, container, srv, xrayClientId, errorCode);
 }

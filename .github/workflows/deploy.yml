@@ -23,6 +23,9 @@ jobs:
               - 'recipes/**'
               - 'conanfile.py'
               - '.github/workflows/deploy.yml'
+              - 'cmake/conan_provider.cmake'
+              - 'cmake/platform_settings.cmake'
+              - 'cmake/recipes_bootstrap.cmake'
 
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
