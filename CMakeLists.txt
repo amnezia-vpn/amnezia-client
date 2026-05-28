@@ -18,9 +18,9 @@ project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         HOMEPAGE_URL "https://amnezia.org/"
 )
 
+# trigger conan to kick off `conan install` globally
+find_package(OpenSSL REQUIRED)
 if (PREBUILTS_ONLY)
-    # trigger conan to kick off `conan install`
-    find_package(OpenSSL REQUIRED)
     return()
 endif()
 

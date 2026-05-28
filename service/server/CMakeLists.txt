@@ -440,10 +440,12 @@ install(RUNTIME_DEPENDENCY_SET service_deps
         [[api-ms-win-.*]]
         [[ext-ms-.*]]
         [[kernel32\.dll]]
+        [[hvsifiletrust\.dll]]
         [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
-        [[\.framework]]
+        [[.*\.framework]]
+        [[^[Qq]t.*]]
     POST_EXCLUDE_REGEXES
-        [[.*/system32/.*\.dll]]
+        [[^.*[\\/]system32[\\/].*\.dll$]]
         [[^/lib.*]]
         [[^/usr/lib.*]]
     DIRECTORIES ${CONAN_RUNTIME_LIB_DIRS}
