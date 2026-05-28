@@ -1240,28 +1240,26 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
     return ErrorCode::NoError;
 }
 
-ErrorCode InstallController::checkSshConnection(const ServerCredentials &credentials, QString &output,
+ErrorCode InstallController::checkSshConnection(ServerCredentials &credentials, QString &output,
                                                 std::function<QString()> passphraseCallback)
 {
     SshSession sshSession(this);
     ErrorCode errorCode = ErrorCode::NoError;
 
-    ServerCredentials processedCredentials = credentials;
-
-    if (processedCredentials.secretData.contains("BEGIN") && processedCredentials.secretData.contains("PRIVATE KEY")) {
+    if (credentials.secretData.contains("BEGIN") && credentials.secretData.contains("PRIVATE KEY")) {
         if (!passphraseCallback) {
             return ErrorCode::SshPrivateKeyError;
         }
 
         QString decryptedPrivateKey;
-        errorCode = sshSession.getDecryptedPrivateKey(processedCredentials, decryptedPrivateKey, passphraseCallback);
+        errorCode = sshSession.getDecryptedPrivateKey(credentials, decryptedPrivateKey, passphraseCallback);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
         }
-        processedCredentials.secretData = decryptedPrivateKey;
+        credentials.secretData = decryptedPrivateKey;
     }
 
-    output = sshSession.checkSshConnection(processedCredentials, errorCode);
+    output = sshSession.checkSshConnection(credentials, errorCode);
     return errorCode;
 }
 
