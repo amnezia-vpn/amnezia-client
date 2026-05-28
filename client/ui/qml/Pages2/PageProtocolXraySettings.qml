@@ -111,15 +111,21 @@ PageType {
                 headerText: qsTr("Port")
 
                 Binding {
-                    target: textField
+                    target: textFieldWithHeaderType.textField
                     property: "text"
                     value: port
-                    when: !textField.activeFocus
+                    when: !textFieldWithHeaderType.textField.activeFocus
+                    restoreMode: Binding.RestoreNone
                 }
 
                 textField.maximumLength: 5
                 textField.validator: IntValidator {
                     bottom: 1; top: 65535
+                }
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus && textField.text === "" && port !== "") {
+                        textField.text = port
+                    }
                 }
                 textField.onTextChanged: {
                     root.portDirty = (textField.text !== port)
