@@ -23,18 +23,6 @@ using namespace amnezia;
 
 using namespace amnezia;
 
-namespace {
-int defaultServerRow(const QVector<ServerDescription> &descriptions, const QString &defaultServerId)
-{
-    for (int i = 0; i < descriptions.size(); ++i) {
-        if (descriptions.at(i).serverId == defaultServerId) {
-            return i;
-        }
-    }
-    return -1;
-}
-} // namespace
-
 class TestUiServersModelAndController : public QObject
 {
     Q_OBJECT
@@ -131,7 +119,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), QString());
         }
     }
 
@@ -274,7 +262,7 @@ private slots:
         QVector<ServerDescription> descriptionsNoDns = m_coreController->m_serversController->buildServerDescriptions(
             m_coreController->m_appSettingsRepository->useAmneziaDns());
         const QString defIdNoDns = m_coreController->m_serversRepository->defaultServerId();
-        m_coreController->m_serversModel->updateModel(descriptionsNoDns, defaultServerRow(descriptionsNoDns, defIdNoDns));
+        m_coreController->m_serversModel->updateModel(descriptionsNoDns, defIdNoDns);
 
         QString descNoDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();
@@ -293,7 +281,7 @@ private slots:
         QVector<ServerDescription> descriptionsWithDns = m_coreController->m_serversController->buildServerDescriptions(
             m_coreController->m_appSettingsRepository->useAmneziaDns());
         const QString defIdWithDns = m_coreController->m_serversRepository->defaultServerId();
-        m_coreController->m_serversModel->updateModel(descriptionsWithDns, defaultServerRow(descriptionsWithDns, defIdWithDns));
+        m_coreController->m_serversModel->updateModel(descriptionsWithDns, defIdWithDns);
 
         QString descWithDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();

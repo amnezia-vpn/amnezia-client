@@ -19,7 +19,6 @@ class ServersUiController : public QObject
     Q_OBJECT
     
     Q_PROPERTY(QString defaultServerId READ getDefaultServerId NOTIFY defaultServerIdChanged)
-    Q_PROPERTY(int defaultServerIndex READ defaultServerIndex NOTIFY defaultServerIndexChanged)
 
     Q_PROPERTY(QString defaultServerName READ getDefaultServerName NOTIFY defaultServerIdChanged)
     Q_PROPERTY(QString defaultServerDefaultContainerName READ getDefaultServerDefaultContainerName NOTIFY defaultServerIdChanged)
@@ -30,9 +29,8 @@ class ServersUiController : public QObject
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIdChanged)
     
     Q_PROPERTY(QString processedServerId READ getProcessedServerId WRITE setProcessedServerId NOTIFY processedServerIdChanged)
-    Q_PROPERTY(int processedServerIndex READ getProcessedServerIndex WRITE setProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(int processedContainerIndex READ getProcessedContainerIndex WRITE setProcessedContainerIndex NOTIFY processedContainerIndexChanged)
-    Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerIndexChanged)
+    Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerIdChanged)
     
     Q_PROPERTY(bool hasServersFromGatewayApi READ hasServersFromGatewayApi NOTIFY hasServersFromGatewayApiChanged)
     
@@ -72,20 +70,27 @@ public slots:
     QString getDefaultServerDescriptionExpanded() const;
     bool isDefaultServerDefaultContainerHasSplitTunneling() const;
     bool isDefaultServerFromApi() const;
+    bool hasServerWithWriteAccess() const;
+
+    QString serverName(const QString &serverId) const;
+    QString serverHostName(const QString &serverId) const;
+    int serverDefaultContainer(const QString &serverId) const;
+    bool isServerFromApi(const QString &serverId) const;
+    bool isServerCountrySelectionAvailable(const QString &serverId) const;
+    bool isServerHasWriteAccess(const QString &serverId) const;
+    bool serverHasInstalledContainers(const QString &serverId) const;
+    QString serverAdEndpoint(const QString &serverId) const;
+    bool isServerRenewalAvailable(const QString &serverId) const;
+    bool isServerSubscriptionExpired(const QString &serverId) const;
+    bool isServerSubscriptionExpiringSoon(const QString &serverId) const;
     
     QString getProcessedServerId() const;
     void setProcessedServerId(const QString &serverId);
-
-    int getProcessedServerIndex() const;
-    void setProcessedServerIndex(int index);
-
-    int defaultServerIndex() const;
 
     int getProcessedContainerIndex() const;
     void setProcessedContainerIndex(int index);
     bool processedServerIsPremium() const;
     
-    const ServerCredentials getProcessedServerCredentials() const;
     bool isDefaultServerCurrentlyProcessed() const;
     bool isProcessedServerHasWriteAccess() const;
     
@@ -97,15 +102,14 @@ public slots:
     
     QString getServerId(int index) const;
     int getServerIndexById(const QString &serverId) const;
+    int getServersCount() const;
     QStringList getAllInstalledServicesName(int serverIndex) const;
 
 signals:
     void errorOccurred(const QString &errorMessage);
     void finished(const QString &message);
     void defaultServerIdChanged(const QString &serverId);
-    void defaultServerIndexChanged(int index);
     void processedServerIdChanged(const QString &serverId);
-    void processedServerIndexChanged(int index);
     void processedContainerIndexChanged(int index);
     void hasServersFromGatewayApiChanged();
     void updateApiCountryModel();
@@ -115,7 +119,8 @@ public:
     void updateModel();
     
 private:
-    QString getDefaultServerDescription(const QString &serverId) const;
+    const ServerDescription &serverDescriptionById(const QString &serverId) const;
+    const ServerDescription &processedServerDescription() const;
     int serverIndexForId(const QString &serverId) const;
     bool listHasServersFromGatewayApi() const;
 
@@ -130,7 +135,6 @@ private:
 
     QVector<amnezia::ServerDescription> m_orderedServerDescriptions;
     
-    int m_processedServerIndex = -1;
     QString m_processedServerId;
     int m_processedContainerIndex = -1;
 };

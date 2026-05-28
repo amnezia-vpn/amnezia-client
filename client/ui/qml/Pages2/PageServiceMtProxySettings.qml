@@ -122,7 +122,7 @@ PageType {
         }
         isCheckingStatus = true
         syncPageBusyIndicator()
-        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+        InstallController.refreshContainerStatus(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
     }
 
     function mtProxyScheduleContainerStatusRefresh() {
@@ -179,7 +179,7 @@ PageType {
     function mtProxyScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
-            InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
+            InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
         })
     }
 
@@ -363,7 +363,7 @@ PageType {
                 MtProxyConfigModel.setEnabled(true)
                 isFetchingSecret = true
                 isCheckingStatus = false
-                InstallController.fetchContainerSecret(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                InstallController.fetchContainerSecret(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
             } else {
                 isFetchingSecret = false
                 isCheckingStatus = false
@@ -515,7 +515,7 @@ PageType {
                 }
 
                 function effectiveHost() {
-                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersModel.getProcessedServerData("hostName")
+                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersUiController.serverHostName(ServersUiController.processedServerId)
                 }
 
                 function tmeLink() {
@@ -817,7 +817,7 @@ PageType {
                     Layout.bottomMargin: 24
                     Layout.leftMargin: 0
                     Layout.rightMargin: 16
-                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                    visible: ServersUiController.isProcessedServerHasWriteAccess()
                     text: qsTr("Delete MTProxy")
                     textColor: AmneziaStyle.color.vibrantRed
                     clickedFunction: function () {
@@ -827,7 +827,7 @@ PageType {
                         var noButtonText = qsTr("Cancel")
                         var yesButtonFunction = function () {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                            InstallController.removeContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
                         }
                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, function () {
                         })
@@ -857,7 +857,7 @@ PageType {
                 }
 
                 function mtProxyEffectiveHostForLinks() {
-                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersModel.getProcessedServerData("hostName")
+                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersUiController.serverHostName(ServersUiController.processedServerId)
                 }
 
                 function mtProxyTmeLinkForAdditional(baseHex) {
@@ -888,9 +888,9 @@ PageType {
                             isUpdating = true
                             if (checked) {
                                 root.pendingUpdateAfterEnable = true
-                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, true)
+                                InstallController.setContainerEnabled(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, true)
                             } else {
-                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, false)
+                                InstallController.setContainerEnabled(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, false)
                             }
                         }
                     }
@@ -929,7 +929,7 @@ PageType {
                             hoverEnabled: true
                             image: "qrc:/images/controls/refresh-cw.svg"
                             imageColor: AmneziaStyle.color.paleGray
-                            visible: ServersModel.isProcessedServerHasWriteAccess()
+                            visible: ServersUiController.isProcessedServerHasWriteAccess()
                             onClicked: {
                                 var secretSnapshot = secret
                                 showQuestionDrawer(
@@ -963,7 +963,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 4
                     headerText: qsTr("Public host / IP")
-                    textField.placeholderText: ServersModel.getProcessedServerData("hostName")
+                    textField.placeholderText: ServersUiController.serverHostName(ServersUiController.processedServerId)
                     textField.text: publicHost
                     textField.maximumLength: 253
                     textField.validator: PublicHostInputValidator {
@@ -1010,7 +1010,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 12
                     visible: publicHostTextField.textField.text !== "" &&
-                        publicHostTextField.textField.text !== ServersModel.getProcessedServerData("hostName")
+                        publicHostTextField.textField.text !== ServersUiController.serverHostName(ServersUiController.processedServerId)
                     text: qsTr("⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.")
                     color: AmneziaStyle.color.goldenApricot
                     font.pixelSize: 12
@@ -1356,7 +1356,7 @@ PageType {
                                         implicitWidth: 32
                                         implicitHeight: 32
                                         hoverEnabled: true
-                                        visible: ServersModel.isProcessedServerHasWriteAccess()
+                                        visible: ServersUiController.isProcessedServerHasWriteAccess()
                                         image: "qrc:/images/controls/trash.svg"
                                         imageColor: AmneziaStyle.color.vibrantRed
                                         onClicked: {
@@ -1706,7 +1706,7 @@ PageType {
                             enabled: !diagLoading
                             onClicked: {
                                 diagLoading = true
-                                InstallController.refreshContainerDiagnostics(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, parseInt(port))
+                                InstallController.refreshContainerDiagnostics(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, parseInt(port))
                             }
                         }
                     }
@@ -1832,7 +1832,7 @@ PageType {
                     Layout.bottomMargin: 32
                     Layout.rightMargin: 16
                     Layout.leftMargin: 16
-                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                    visible: ServersUiController.isProcessedServerHasWriteAccess()
                     enabled: !root.mtProxyNetworkBlocked
                     text: qsTr("Save")
                     clickedFunc: function () {

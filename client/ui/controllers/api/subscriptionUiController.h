@@ -5,6 +5,7 @@
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -28,6 +29,7 @@ public:
                          ApiCountryModel* apiCountryModel,
                          ApiDevicesModel* apiDevicesModel,
                          SettingsController* settingsController,
+                         ConnectionController* connectionController,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -104,6 +106,7 @@ private:
     ApiCountryModel* m_apiCountryModel;
     ApiDevicesModel* m_apiDevicesModel;
     SettingsController* m_settingsController;
+    ConnectionController* m_connectionController;
 };
 
 #endif // SUBSCRIPTIONUICONTROLLER_H
