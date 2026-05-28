@@ -4,8 +4,10 @@
 curl -s https://core.telegram.org/getProxySecret -o /data/proxy-secret
 curl -s https://core.telegram.org/getProxyConfig -o /data/proxy-multi.conf
 
-# Determine secret: env var -> saved file -> generate new
-if [ -n "$MTPROXY_SECRET" ]; then
+# Determine secret: regenerate (fresh install) -> env var -> saved file -> generate new
+if [ "$MTPROXY_REGENERATE_SECRET" = "1" ]; then
+    SECRET=$(openssl rand -hex 16)
+elif [ -n "$MTPROXY_SECRET" ]; then
     SECRET="$MTPROXY_SECRET"
 elif [ -f /data/secret ]; then
     SECRET=$(cat /data/secret)

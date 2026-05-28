@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.files import get, copy, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake, CMakeDeps
@@ -17,6 +17,7 @@ class Openvpn(ConanFile):
         return str(self.settings.os).startswith("Windows")
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "*applink.c", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def layout(self):
@@ -84,6 +85,7 @@ class Openvpn(ConanFile):
             deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         if self._is_windows:
             cmake = CMake(self)
             cmake.configure()

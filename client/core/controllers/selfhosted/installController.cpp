@@ -120,9 +120,14 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
+    amnezia::ScriptVars removeContainerVars =
+            amnezia::genBaseVars(credentials, container, QString(), QString());
+    if (!isUpdate) {
+        removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
+    }
     sshSession.runScript(credentials,
-                                  sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                                                  amnezia::genBaseVars(credentials, container, QString(), QString())));
+                         sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
+                                                removeContainerVars));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
     qDebug().noquote() << "buildContainerWorker start";
@@ -242,9 +247,9 @@ void InstallController::clearCachedProfile(const QString &serverId, DockerContai
         return;
     }
 
-    adminConfig->clearCachedClientProfile(container);
     const ContainerConfig containerConfigModel = adminConfig->containerConfig(container);
 
+    adminConfig->clearCachedClientProfile(container);
     m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
 
     emit clientRevocationRequested(serverId, containerConfigModel, container);
@@ -975,10 +980,12 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
         return ErrorCode::InternalError;
     }
     SshSession sshSession(this);
+    amnezia::ScriptVars removeContainerVars =
+            amnezia::genBaseVars(credentials, container, QString(), QString());
+    removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
     ErrorCode errorCode = sshSession.runScript(
             credentials,
-            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                            amnezia::genBaseVars(credentials, container, QString(), QString())));
+            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container), removeContainerVars));
 
     if (errorCode == ErrorCode::NoError) {
         QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;

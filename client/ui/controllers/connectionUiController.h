@@ -44,7 +44,6 @@ signals:
     void connectionStateChanged();
 
     void connectionErrorOccurred(ErrorCode errorCode);
-    void reconnectWithUpdatedContainer(const QString &message);
 
     void connectButtonClicked();
     void preparingConfig();

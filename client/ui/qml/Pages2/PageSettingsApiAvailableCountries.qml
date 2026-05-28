@@ -24,8 +24,8 @@ PageType {
     property bool isInAppPurchase: false
 
     function updateSubscriptionState() {
-        root.subscriptionExpired = ServersModel.getProcessedServerData("isSubscriptionExpired")
-        root.subscriptionExpiringSoon = ServersModel.getProcessedServerData("isSubscriptionExpiringSoon")
+        root.subscriptionExpired = ServersUiController.isServerSubscriptionExpired(ServersUiController.processedServerId)
+        root.subscriptionExpiringSoon = ServersUiController.isServerSubscriptionExpiringSoon(ServersUiController.processedServerId)
         root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
@@ -35,11 +35,19 @@ PageType {
     }
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
 
-        function onProcessedServerChanged() {
+        function onProcessedServerIdChanged() {
             root.processedServer = proxyServersModel.get(0)
             root.updateSubscriptionState()
+        }
+    }
+
+    Connections {
+        target: ServersModel
+
+        function onModelReset() {
+            root.processedServer = proxyServersModel.get(0)
         }
     }
 
@@ -58,8 +66,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -108,7 +116,7 @@ PageType {
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
-                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
+                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
                     PageController.showBusyIndicator(false)
                     if (!result) {
                         return
@@ -148,7 +156,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
 
@@ -200,7 +208,7 @@ PageType {
                             PageController.showBusyIndicator(true)
                             var prevIndex = ApiCountryModel.currentIndex
                             ApiCountryModel.currentIndex = index
-                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), countryCode, countryName)) {
+                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, countryCode, countryName)) {
                                 ApiCountryModel.currentIndex = prevIndex
                             }
                             PageController.showBusyIndicator(false)

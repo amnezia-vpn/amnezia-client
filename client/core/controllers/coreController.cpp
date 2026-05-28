@@ -178,7 +178,8 @@ void CoreController::initControllers()
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif
-                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel, this);
+                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel,
+                                                     m_connectionController, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);
@@ -220,7 +221,8 @@ void CoreController::initControllers()
 
     m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController,
                                                               m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_apiAccountInfoModel,
-                                                              m_apiCountryModel, m_apiDevicesModel, m_settingsController, this);
+                                                              m_apiCountryModel, m_apiDevicesModel, m_settingsController,
+                                                              m_connectionController, this);
     setQmlContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
@@ -341,9 +343,6 @@ void CoreController::openConnectionByIndex(int serverIndex)
         m_serversUiController ? m_serversUiController->getServerId(serverIndex) : QString();
     if (serverId.isEmpty()) {
         return;
-    }
-    if (m_serversModel) {
-        m_serversModel->setProcessedServerIndex(serverIndex);
     }
     if (m_serversController) {
         m_serversController->setDefaultServer(serverId);

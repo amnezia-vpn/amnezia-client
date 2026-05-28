@@ -295,6 +295,8 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
 
         vars.append({{"$MTPROXY_PORT", c.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : c.port}});
         vars.append({{"$MTPROXY_SECRET", c.secret}});
+        vars.append({{"$MTPROXY_REGENERATE_SECRET",
+                      c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0")}});
         vars.append({{"$MTPROXY_TAG", c.tag}});
         vars.append({{"$MTPROXY_TRANSPORT_MODE",
                       c.transportMode.isEmpty() ? QString(protocols::mtProxy::transportModeStandard)
@@ -350,6 +352,8 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
         vars.append({ { "$TELEMT_TOML_TLS", faketls ? QLatin1String("true") : QLatin1String("false") } });
         vars.append({ { "$TELEMT_PORT", c.port.isEmpty() ? QString(protocols::telemt::defaultPort) : c.port } });
         vars.append({ { "$TELEMT_SECRET", c.secret } });
+        vars.append({ { "$TELEMT_REGENERATE_SECRET",
+                         c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0") } });
         vars.append({ { "$TELEMT_TAG", c.tag } });
         QString tlsDomain = c.tlsDomain;
         if (tlsDomain.isEmpty()) {

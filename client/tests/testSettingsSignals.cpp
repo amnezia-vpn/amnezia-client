@@ -133,6 +133,8 @@ private slots:
     void testStartMinimizedSignals() {
         QSignalSpy startMinimizedChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::startMinimizedChanged);
 
+        m_coreController->m_settingsUiController->toggleAutoStart(true);
+
         bool initialStartMinimized = m_coreController->m_settingsController->isStartMinimizedEnabled();
 
         m_coreController->m_settingsUiController->toggleStartMinimized(!initialStartMinimized);
@@ -140,6 +142,21 @@ private slots:
         QVERIFY2(m_coreController->m_settingsController->isStartMinimizedEnabled() == !initialStartMinimized, "Start minimized state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isStartMinimizedEnabled() == !initialStartMinimized, "Start minimized state should be available in SettingsUiController");
         QVERIFY2(m_coreController->m_appSettingsRepository->isStartMinimized() == !initialStartMinimized, "Start minimized state should be available in SecureAppSettingsRepository");
+
+        m_coreController->m_settingsUiController->toggleAutoStart(false);
+    }
+
+    void testAutoStartDisablesStartMinimizedUi() {
+        QSignalSpy startMinimizedChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::startMinimizedChanged);
+
+        m_coreController->m_settingsUiController->toggleAutoStart(true);
+        m_coreController->m_settingsUiController->toggleStartMinimized(true);
+        QVERIFY2(m_coreController->m_settingsUiController->isStartMinimizedEnabled(), "Start minimized should be enabled with autostart");
+
+        m_coreController->m_settingsUiController->toggleAutoStart(false);
+        QVERIFY2(startMinimizedChangedSpy.count() >= 1, "startMinimizedChanged signal should be emitted when autostart is disabled");
+        QVERIFY2(!m_coreController->m_settingsUiController->isStartMinimizedEnabled(), "Start minimized should be disabled when autostart is disabled");
+        QVERIFY2(!m_coreController->m_appSettingsRepository->isStartMinimized(), "Start minimized setting should be cleared when autostart is disabled");
     }
 
     void testAutoConnectSignals() {

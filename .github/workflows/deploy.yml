@@ -22,6 +22,7 @@ jobs:
             recipes:
               - 'recipes/**'
               - 'conanfile.py'
+              - '.github/workflows/deploy.yml'
 
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
@@ -539,13 +540,17 @@ jobs:
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS-NE:
-    runs-on: macos-latest
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
-        xcode-version: [16.2, 16.4]
+        xcode-version: [16.2, 16.4, 26.4]
+        include:
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4

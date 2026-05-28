@@ -8,6 +8,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
+#include "core/utils/networkUtilities.h"
 
 namespace amnezia
 {
@@ -40,6 +41,21 @@ ContainerConfig SelfHostedUserServerConfig::containerConfig(DockerContainer cont
         return ContainerConfig{};
     }
     return containers.value(container);
+}
+
+QPair<QString, QString> SelfHostedUserServerConfig::getDnsPair(const QString &primaryDns,
+                                                               const QString &secondaryDns) const
+{
+    QString d1 = dns1;
+    QString d2 = dns2;
+
+    if (d1.isEmpty() || !NetworkUtilities::checkIPv4Format(d1)) {
+        d1 = primaryDns;
+    }
+    if (d2.isEmpty() || !NetworkUtilities::checkIPv4Format(d2)) {
+        d2 = secondaryDns;
+    }
+    return { d1, d2 };
 }
 
 QJsonObject SelfHostedUserServerConfig::toJson() const
