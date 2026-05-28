@@ -44,6 +44,7 @@ bool ServersController::renameServer(const QString &serverId, const QString &nam
         auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
         if (!cfg.has_value()) return false;
         cfg->description = name;
+        cfg->displayName = name;
         m_serversRepository->editServer(serverId, cfg->toJson(), kind);
         return true;
     }
@@ -51,6 +52,7 @@ bool ServersController::renameServer(const QString &serverId, const QString &nam
         auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
         if (!cfg.has_value()) return false;
         cfg->description = name;
+        cfg->displayName = name;
         m_serversRepository->editServer(serverId, cfg->toJson(), kind);
         return true;
     }
@@ -58,6 +60,7 @@ bool ServersController::renameServer(const QString &serverId, const QString &nam
         auto cfg = m_serversRepository->nativeConfig(serverId);
         if (!cfg.has_value()) return false;
         cfg->description = name;
+        cfg->displayName = name;
         m_serversRepository->editServer(serverId, cfg->toJson(), kind);
         return true;
     }
@@ -67,6 +70,7 @@ bool ServersController::renameServer(const QString &serverId, const QString &nam
         auto cfg = m_serversRepository->apiV2Config(serverId);
         if (!cfg.has_value()) return false;
         cfg->name = name;
+        cfg->displayName = name;
         cfg->nameOverriddenByUser = true;
         m_serversRepository->editServer(serverId, cfg->toJson(), kind);
         return true;

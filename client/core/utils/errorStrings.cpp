@@ -30,6 +30,15 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
     case(ErrorCode::DockerPullRateLimit): errorMessage = QObject::tr("Docker error: The pull rate limit has been reached"); break;
     case(ErrorCode::ServerLinuxKernelTooOld): errorMessage = QObject::tr("Server error: Linux kernel is too old"); break;
+    case(ErrorCode::XrayServerConfigInvalid):
+        errorMessage = QObject::tr("Server error: invalid or unreadable XRay server configuration");
+        break;
+    case(ErrorCode::XrayServerNoVlessClients):
+        errorMessage = QObject::tr("Server error: XRay server has no VLESS clients");
+        break;
+    case(ErrorCode::XrayRealityKeysReadFailed):
+        errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
+        break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;

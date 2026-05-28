@@ -43,7 +43,7 @@ PageType {
             var configFileName
 
             var containerIndex = ServersUiController.processedContainerIndex
-            var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
+            var serverId = ServersUiController.processedServerId
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
@@ -249,7 +249,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                            ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -332,8 +332,10 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultServerIndex)
+                        if (ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId)
+                            && ServersUiController.serverHasInstalledContainers(ServersUiController.defaultServerId)) {
+                            serverSelectorListView.selectedIndex =
+                                proxyServersModel.mapFromSource(ServersUiController.getServerIndexById(ServersUiController.defaultServerId))
                         } else {
                             serverSelectorListView.selectedIndex = 0
                         }
@@ -344,7 +346,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersUiController.setProcessedServerIndex(proxyServersModel.mapToSource(selectedIndex))
+                        ServersUiController.setProcessedServerId(ServersUiController.getServerId(proxyServersModel.mapToSource(selectedIndex)))
                     }
                 }
             }
@@ -394,7 +396,7 @@ PageType {
                         target: serverSelector
 
                         function onServerSelectorIndexChanged() {
-                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
+                            var defaultContainer = proxyContainersModel.mapFromSource(ServersUiController.serverDefaultContainer(ServersUiController.processedServerId))
                             containerSelectorListView.selectedIndex = defaultContainer
                             containerSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
                             containerSelectorListView.triggerCurrentItem()
@@ -417,7 +419,7 @@ PageType {
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                            ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -793,7 +795,7 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                           clientNameEditor.textField.text,
-                                                                                          ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                                                                                          ServersUiController.processedServerId,
                                                                                           ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
@@ -829,14 +831,14 @@ PageType {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
-                                                                              ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                                                                              ServersUiController.processedServerId,
                                                                               ServersUiController.processedContainerIndex)
                                         }
                                         var noButtonFunction = function() {
                                         }
 
-                                        var isActiveConfigForCurrentClient = ServersModel.isDefaultServerCurrentlyProcessed()
-                                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()
+                                        var isActiveConfigForCurrentClient = ServersUiController.isDefaultServerCurrentlyProcessed()
+                                                && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex
 
                                         if ((ConnectionController.isConnectionInProgress || ConnectionController.isConnected)
                                                 && isActiveConfigForCurrentClient) {

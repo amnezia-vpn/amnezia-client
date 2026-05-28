@@ -15,7 +15,7 @@ required_conan_version = ">=2.26"
 
 class HevSocks5Tunnel(ConanFile):
     name = "hev-socks5-tunnel"
-    version = "2.14.4"
+    version = "2.15.0"
     settings = "os", "arch", "compiler"
     options = {
         "shared": [True, False],

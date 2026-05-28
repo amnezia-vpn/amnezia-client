@@ -18,15 +18,10 @@ import "../Components"
 PageType {
     id: root
 
-    Rectangle {
-        anchors.fill: parent
-        z: -1
-        color: AmneziaStyle.color.onyxBlack
-    }
-
     property int containerStatus: 1
     property bool isUpdating: false
     property bool isCheckingStatus: false
+    property bool isFetchingSecret: false
     property bool previousEnabled: true
     property int previousContainerStatus: 1
 
@@ -40,6 +35,7 @@ PageType {
     property bool   previousNatEnabled: false
     property string previousNatInternalIp: ""
     property string previousNatExternalIp: ""
+    property string previousSecret: ""
 
     property string savedTransportMode: ""
     property string savedTlsDomain: ""
@@ -47,7 +43,7 @@ PageType {
 
     onSavedTransportModeChanged: {
         if (savedTransportMode === "faketls") {
-            root.syncedSecretTabIndex = 2
+            root.syncedSecretTabIndex = 1
         } else if (savedTransportMode !== "") {
             root.syncedSecretTabIndex = 0
         }
@@ -64,13 +60,101 @@ PageType {
     property string diagStatsEndpoint: ""
 
     readonly property bool telemtNetworkBlocked: !NetworkReachabilityController.hasInternetAccess
-    readonly property bool navigationBlockedWhileBusy: isUpdating || diagLoading
 
-    // Defer SSH/updateContainer so QML control handlers return before nested event loops run.
+    property bool remoteOperationBusy: false
+    readonly property bool operationInProgress: isCheckingStatus || isFetchingSecret || isUpdating || diagLoading
+    readonly property bool pageBusy: operationInProgress || remoteOperationBusy
+    readonly property bool navigationBlockedWhileBusy: pageBusy
+
+    property bool pageOpenHandled: false
+    property bool busyIndicatorShown: false
+
+    function syncPageBusyIndicator() {
+        if (!root.pageOpenHandled) {
+            return
+        }
+        var wantBusy = root.pageBusy
+        if (wantBusy === root.busyIndicatorShown) {
+            return
+        }
+        root.busyIndicatorShown = wantBusy
+        PageController.showBusyIndicator(wantBusy)
+    }
+
+    onPageBusyChanged: syncPageBusyIndicator()
+
+    function telemtDomainToHex(domain) {
+        var hex = ""
+        for (var i = 0; i < domain.length; i++) {
+            var code = domain.charCodeAt(i).toString(16)
+            hex += (code.length < 2 ? "0" : "") + code
+        }
+        return hex
+    }
+
+    function telemtClientSecret(baseHex32, mode, tlsDomain) {
+        if (baseHex32 === "") {
+            return ""
+        }
+        if (mode === "faketls") {
+            return "ee" + baseHex32 + telemtDomainToHex(tlsDomain)
+        }
+        return "dd" + baseHex32
+    }
+
+    function telemtClientSecretForTabIndex(baseHex32, tabIndex, tlsDomain, defaultTlsDomain) {
+        var domain = tlsDomain !== "" ? tlsDomain : defaultTlsDomain
+        if (tabIndex === 1) {
+            return telemtClientSecret(baseHex32, "faketls", domain)
+        }
+        return telemtClientSecret(baseHex32, "standard", domain)
+    }
+
+    property bool containerStatusRefreshCallPending: false
+
+    function telemtRequestContainerStatusRefresh() {
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+            syncPageBusyIndicator()
+            return
+        }
+        isCheckingStatus = true
+        syncPageBusyIndicator()
+        InstallController.refreshContainerStatus(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
+    }
+
+    function telemtScheduleContainerStatusRefresh() {
+        if (containerStatusRefreshCallPending) {
+            return
+        }
+        containerStatusRefreshCallPending = true
+        Qt.callLater(function () {
+            containerStatusRefreshCallPending = false
+            root.telemtRequestContainerStatusRefresh()
+        })
+    }
+
+    function telemtOnPageShown() {
+        if (root.pageOpenHandled) {
+            return
+        }
+        root.pageOpenHandled = true
+
+        PageController.disableControls(navigationBlockedWhileBusy)
+
+        if (!NetworkReachabilityController.hasInternetAccess) {
+            isCheckingStatus = false
+        } else {
+            isCheckingStatus = true
+        }
+        syncPageBusyIndicator()
+        root.telemtScheduleContainerStatusRefresh()
+    }
+
     function telemtScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
-            InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.Telemt, cp)
+            InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Telemt, cp)
         })
     }
 
@@ -105,12 +189,7 @@ PageType {
         root.savedTlsDomain = TelemtConfigModel.getTlsDomain()
         root.savedPublicHost = TelemtConfigModel.getPublicHost()
 
-        if (!NetworkReachabilityController.hasInternetAccess) {
-            isCheckingStatus = false
-            return
-        }
-        isCheckingStatus = true
-        InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+        Qt.callLater(root.telemtOnPageShown)
     }
 
     onNavigationBlockedWhileBusyChanged: {
@@ -121,10 +200,16 @@ PageType {
 
     onVisibleChanged: {
         if (!visible) {
+            root.pageOpenHandled = false
+            containerStatusRefreshCallPending = false
+            isCheckingStatus = false
+            isFetchingSecret = false
+            busyIndicatorShown = false
             PageController.disableControls(false)
+            PageController.showBusyIndicator(false)
             diagLoading = false
         } else {
-            PageController.disableControls(navigationBlockedWhileBusy)
+            root.telemtOnPageShown()
         }
     }
 
@@ -136,8 +221,7 @@ PageType {
                 return
             }
             if (NetworkReachabilityController.hasInternetAccess) {
-                isCheckingStatus = true
-                InstallController.refreshContainerStatus(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                root.telemtScheduleContainerStatusRefresh()
             }
         }
     }
@@ -145,10 +229,15 @@ PageType {
     Connections {
         target: InstallController
 
+        function onServerIsBusy(busy) {
+            remoteOperationBusy = busy
+        }
+
         function onUpdateContainerFinished(message, closePage) {
             if (!root.visible) {
                 isUpdating = false
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
             isUpdating = false
@@ -166,9 +255,11 @@ PageType {
             if (!root.visible) {
                 isUpdating = false
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
             isUpdating = false
+            isFetchingSecret = false
             containerStatus = previousContainerStatus
             TelemtConfigModel.setEnabled(previousEnabled)
             TelemtConfigModel.setPort(previousPort)
@@ -181,6 +272,9 @@ PageType {
             TelemtConfigModel.setNatEnabled(previousNatEnabled)
             TelemtConfigModel.setNatInternalIp(previousNatInternalIp)
             TelemtConfigModel.setNatExternalIp(previousNatExternalIp)
+            if (previousSecret !== "") {
+                TelemtConfigModel.setSecret(previousSecret)
+            }
         }
 
         function onSetContainerEnabledFinished(enabled) {
@@ -190,6 +284,7 @@ PageType {
             }
             if (enabled && pendingUpdateAfterEnable) {
                 pendingUpdateAfterEnable = false
+                isUpdating = true
                 root.telemtScheduleUpdate(false)
                 return
             }
@@ -202,9 +297,9 @@ PageType {
         function onContainerStatusRefreshed(status) {
             if (!root.visible) {
                 isCheckingStatus = false
+                isFetchingSecret = false
                 return
             }
-            isCheckingStatus = false
             containerStatus = status
 
             root.savedTransportMode = TelemtConfigModel.getTransportMode()
@@ -212,10 +307,17 @@ PageType {
             root.savedPublicHost = TelemtConfigModel.getPublicHost()
             if (status === 1) {
                 TelemtConfigModel.setEnabled(true)
-                InstallController.fetchContainerSecret(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
-            } else if (status === 2) {
-                TelemtConfigModel.setEnabled(false)
+                isFetchingSecret = true
+                isCheckingStatus = false
+                InstallController.fetchContainerSecret(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
+            } else {
+                isFetchingSecret = false
+                isCheckingStatus = false
+                if (status === 2) {
+                    TelemtConfigModel.setEnabled(false)
+                }
             }
+            syncPageBusyIndicator()
         }
 
         function onContainerDiagnosticsRefreshed(portReachable, upstreamReachable, clientsConnected, lastConfigRefresh, statsEndpoint) {
@@ -232,20 +334,35 @@ PageType {
 
         function onContainerSecretFetched(secret) {
             if (!root.visible) {
+                isFetchingSecret = false
                 return
             }
+            isFetchingSecret = false
+            syncPageBusyIndicator()
             TelemtConfigModel.validateAndSetSecret(secret)
         }
     }
+
+    Item {
+        id: contentLayer
+        anchors.fill: parent
+        enabled: !root.pageBusy
 
     BackButtonType {
         id: backButton
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+
         onFocusChanged: {
-            if (this.activeFocus) connectionListView.positionViewAtBeginning()
+            if (this.activeFocus) {
+                if (mainTabBar.currentIndex === 0) {
+                    connectionListView.positionViewAtBeginning()
+                } else {
+                    settingsListView.positionViewAtBeginning()
+                }
+            }
         }
     }
 
@@ -254,57 +371,62 @@ PageType {
         anchors.top: backButton.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 8
         spacing: 0
 
         BaseHeaderType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            Layout.topMargin: 8
+            Layout.bottomMargin: 24
+
             headerText: qsTr("Telemt settings")
+            descriptionLinkText: qsTr("Read more about this settings")
+            descriptionLinkUrl: "https://github.com/telemt/telemt"
         }
 
-        LabelWithButtonType {
+        CaptionTextType {
             Layout.fillWidth: true
-            Layout.leftMargin: 0
+            Layout.leftMargin: 16
             Layout.rightMargin: 16
-            text: qsTr("Read more about this settings")
-            textColor: AmneziaStyle.color.goldenApricot
-            clickedFunction: function () {
-                Qt.openUrlExternally("https://github.com/telemt/telemt")
+            Layout.topMargin: 8
+            visible: root.telemtNetworkBlocked
+            text: qsTr("No internet connection. Connect to the internet to change Telemt settings.")
+            color: AmneziaStyle.color.mutedGray
+            wrapMode: Text.WordWrap
+            font.pixelSize: 14
+        }
+    }
+
+    TabBar {
+        id: mainTabBar
+        anchors.top: pageHeader.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        width: parent.width
+
+        background: Rectangle {
+            color: AmneziaStyle.color.transparent
+            Rectangle {
+                width: parent.width
+                height: 1
+                anchors.bottom: parent.bottom
+                color: AmneziaStyle.color.slateGray
             }
         }
 
-        TabBar {
-            id: mainTabBar
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    anchors.bottom: parent.bottom
-                    color: AmneziaStyle.color.slateGray
-                }
-            }
-
-            TabButtonType {
-                text: qsTr("Connection")
-                isSelected: mainTabBar.currentIndex === 0
-            }
-            TabButtonType {
-                text: qsTr("Settings")
-                isSelected: mainTabBar.currentIndex === 1
-            }
+        TabButtonType {
+            text: qsTr("Connection")
+            isSelected: mainTabBar.currentIndex === 0
+        }
+        TabButtonType {
+            text: qsTr("Settings")
+            isSelected: mainTabBar.currentIndex === 1
         }
     }
 
     StackLayout {
         id: tabContent
-        anchors.top: pageHeader.bottom
+        anchors.top: mainTabBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -318,36 +440,11 @@ PageType {
                 width: connectionListView.width
                 spacing: 0
 
-                function domainToHex(domain) {
-                    var hex = ""
-                    for (var i = 0; i < domain.length; i++) {
-                        var code = domain.charCodeAt(i).toString(16)
-                        hex += (code.length < 2 ? "0" : "") + code
-                    }
-                    return hex
-                }
-
-                function secretForMode(mode) {
-                    if (mode === "faketls") {
-                        var domain = root.savedTlsDomain !== "" ? root.savedTlsDomain : TelemtConfigModel.defaultTlsDomain()
-                        return "ee" + secret + domainToHex(domain)
-                    } else if (mode === "padded") {
-                        return "dd" + secret
-                    }
-                    // Telemt default (secure MTProto, not FakeTLS): Telegram proxy links require dd + hex secret
-                    return "dd" + secret
-                }
-
                 property int secretTabIndex: root.syncedSecretTabIndex
 
                 function activeSecret() {
-                    if (root.syncedSecretTabIndex === 0) {
-                        return secretForMode("standard")
-                    }
-                    if (root.syncedSecretTabIndex === 1) {
-                        return secretForMode("padded")
-                    }
-                    return secretForMode("faketls")
+                    return root.telemtClientSecretForTabIndex(secret, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, TelemtConfigModel.defaultTlsDomain())
                 }
 
                 function effectiveSecret() {
@@ -355,7 +452,7 @@ PageType {
                 }
 
                 function effectiveHost() {
-                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersModel.getProcessedServerData("hostName")
+                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersUiController.serverHostName(ServersUiController.processedServerId)
                 }
 
                 function tmeLink() {
@@ -657,7 +754,7 @@ PageType {
                     Layout.bottomMargin: 24
                     Layout.leftMargin: 0
                     Layout.rightMargin: 16
-                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                    visible: ServersUiController.isProcessedServerHasWriteAccess()
                     text: qsTr("Delete Telemt")
                     textColor: AmneziaStyle.color.vibrantRed
                     clickedFunction: function () {
@@ -667,7 +764,7 @@ PageType {
                         var noButtonText = qsTr("Cancel")
                         var yesButtonFunction = function () {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex)
+                            InstallController.removeContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
                         }
                         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, function () {
                         })
@@ -690,6 +787,11 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
+                function telemtActiveSecretForBaseHex(baseHex) {
+                    return root.telemtClientSecretForTabIndex(baseHex, root.syncedSecretTabIndex,
+                        root.savedTlsDomain, TelemtConfigModel.defaultTlsDomain())
+                }
+
                 SwitcherType {
                     id: enableTelemtSwitch
                     Layout.fillWidth: true
@@ -699,18 +801,20 @@ PageType {
                     Layout.bottomMargin: 16
                     text: qsTr("Enable Telemt")
                     checked: isEnabled
-                    enabled: !isCheckingStatus && containerStatus !== 0 && containerStatus !== 3 && !isUpdating
+                    enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy
+                        && !root.telemtNetworkBlocked
                     onToggled: function () {
                         if (checked !== isEnabled) {
                             previousEnabled = isEnabled
                             previousContainerStatus = containerStatus
+                            root.previousSecret = secret
                             isEnabled = checked
                             isUpdating = true
                             if (checked) {
                                 root.pendingUpdateAfterEnable = true
-                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, true)
+                                InstallController.setContainerEnabled(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, true)
                             } else {
-                                InstallController.setContainerEnabled(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, false)
+                                InstallController.setContainerEnabled(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, false)
                             }
                         }
                     }
@@ -736,26 +840,29 @@ PageType {
 
                         CaptionTextType {
                             Layout.fillWidth: true
-                            text: secret !== "" ? secret : qsTr("Not generated")
+                            text: secret !== "" ? telemtActiveSecretForBaseHex(secret) : qsTr("Not generated")
                             color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
-                            elide: Text.ElideMiddle
+                            wrapMode: Text.WrapAnywhere
                             font.pixelSize: 14
                         }
 
                         ImageButtonType {
+                            Layout.alignment: Qt.AlignTop
                             implicitWidth: 36
                             implicitHeight: 36
                             hoverEnabled: true
                             image: "qrc:/images/controls/refresh-cw.svg"
                             imageColor: AmneziaStyle.color.paleGray
-                            visible: ServersModel.isProcessedServerHasWriteAccess()
+                            visible: ServersUiController.isProcessedServerHasWriteAccess()
                             onClicked: {
+                                var secretSnapshot = secret
                                 showQuestionDrawer(
                                     qsTr("Generate new secret?"),
                                     qsTr("All existing connection links will stop working. Users will need new links."),
                                     qsTr("Generate"),
                                     qsTr("Cancel"),
                                         function () {
+                                        root.previousSecret = secretSnapshot
                                         if (containerStatus === 1) {
                                             isUpdating = true
                                             TelemtConfigModel.generateSecret()
@@ -780,7 +887,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 4
                     headerText: qsTr("Public host / IP")
-                    textField.placeholderText: ServersModel.getProcessedServerData("hostName")
+                    textField.placeholderText: ServersUiController.serverHostName(ServersUiController.processedServerId)
                     textField.text: publicHost
                     textField.onEditingFinished: {
                         textField.text = textField.text.replace(/^\s+|\s+$/g, '')
@@ -809,7 +916,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 12
                     visible: publicHostTextField.textField.text !== "" &&
-                        publicHostTextField.textField.text !== ServersModel.getProcessedServerData("hostName")
+                        publicHostTextField.textField.text !== ServersUiController.serverHostName(ServersUiController.processedServerId)
                     text: qsTr("⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.")
                     color: AmneziaStyle.color.goldenApricot
                     font.pixelSize: 12
@@ -926,6 +1033,7 @@ PageType {
                                 clickedFunction: function () {
                                     transportMode = (index === 0) ? "standard" : "faketls"
                                     TelemtConfigModel.setTransportMode(transportMode)
+                                    root.syncedSecretTabIndex = transportMode === "faketls" ? 1 : 0
                                     transportModeDropDown.closeTriggered()
                                 }
                             }
@@ -1240,7 +1348,7 @@ PageType {
                             enabled: !diagLoading
                             onClicked: {
                                 diagLoading = true
-                                InstallController.refreshContainerDiagnostics(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, parseInt(port))
+                                InstallController.refreshContainerDiagnostics(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, parseInt(port))
                             }
                         }
                     }
@@ -1366,7 +1474,7 @@ PageType {
                     Layout.bottomMargin: 32
                     Layout.rightMargin: 16
                     Layout.leftMargin: 16
-                    visible: ServersModel.isProcessedServerHasWriteAccess()
+                    visible: ServersUiController.isProcessedServerHasWriteAccess()
                     text: qsTr("Save")
                     clickedFunc: function () {
                         var portValue = portTextField.textField.text === ""
@@ -1406,6 +1514,7 @@ PageType {
                         previousNatEnabled = natEnabled
                         previousNatInternalIp = natInternalIp
                         previousNatExternalIp = natExternalIp
+                        root.previousSecret = secret
                         isUpdating = true
                         root.telemtScheduleUpdate(false)
                     }
@@ -1414,34 +1523,5 @@ PageType {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        visible: isCheckingStatus || isUpdating || root.telemtNetworkBlocked
-        color: AmneziaStyle.color.midnightBlack
-        opacity: 0.6
-        z: 1
-        MouseArea {
-            anchors.fill: parent
-        }
-        BusyIndicator {
-            anchors.centerIn: parent
-            visible: isCheckingStatus || isUpdating
-            running: isCheckingStatus || isUpdating
-            width: 48
-            height: 48
-        }
-        CaptionTextType {
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 24
-            anchors.rightMargin: 24
-            visible: root.telemtNetworkBlocked && !isCheckingStatus && !isUpdating
-            horizontalAlignment: Text.AlignHCenter
-            text: qsTr("No internet connection. Connect to the internet to change Telemt settings.")
-            color: AmneziaStyle.color.paleGray
-            wrapMode: Text.WordWrap
-            font.pixelSize: 14
-        }
     }
 }

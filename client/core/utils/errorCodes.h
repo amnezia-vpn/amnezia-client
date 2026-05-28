@@ -35,6 +35,9 @@ namespace amnezia
         ServerCgroupMountpoint = 212,
         DockerPullRateLimit = 213,
         ServerLinuxKernelTooOld = 214,
+        XrayServerConfigInvalid = 215,
+        XrayServerNoVlessClients = 216,
+        XrayRealityKeysReadFailed = 217,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,

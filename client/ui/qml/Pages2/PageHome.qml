@@ -344,14 +344,14 @@ PageType {
                         Keys.onReturnPressed: this.clicked()
 
                         onClicked: {
-                            ServersUiController.setProcessedServerIndex(ServersUiController.defaultServerIndex)
+                            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
 
-                            if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
-                                if (ServersModel.getProcessedServerData("isCountrySelectionAvailable")) {
+                            if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
+                                if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
                                     PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
                                 } else {
                                     PageController.showBusyIndicator(true)
-                                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
+                                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
                                     PageController.showBusyIndicator(false)
                                     if (!result) {
                                         return
@@ -420,13 +420,13 @@ PageType {
 
                                 target: ServersUiController
 
-                                function onDefaultServerIndexChanged() {
+                                function onDefaultServerIdChanged() {
                                     updateContainersModelFilters()
                                 }
                             }
 
                             function updateContainersModelFilters() {
-                                if (ServersModel.isDefaultServerHasWriteAccess()) {
+                                if (ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId)) {
                                     proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
                                 } else {
                                     proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()

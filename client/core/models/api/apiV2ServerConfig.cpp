@@ -13,6 +13,7 @@
 #include "core/utils/api/apiUtils.h"
 #include "core/models/api/apiConfig.h"
 #include "core/models/api/authData.h"
+#include "core/utils/networkUtilities.h"
 
 namespace amnezia
 {
@@ -65,6 +66,20 @@ ContainerConfig ApiV2ServerConfig::containerConfig(DockerContainer container) co
         return ContainerConfig{};
     }
     return containers.value(container);
+}
+
+QPair<QString, QString> ApiV2ServerConfig::getDnsPair(const QString &primaryDns, const QString &secondaryDns) const
+{
+    QString d1 = dns1;
+    QString d2 = dns2;
+
+    if (d1.isEmpty() || !NetworkUtilities::checkIPv4Format(d1)) {
+        d1 = primaryDns;
+    }
+    if (d2.isEmpty() || !NetworkUtilities::checkIPv4Format(d2)) {
+        d2 = secondaryDns;
+    }
+    return { d1, d2 };
 }
 
 QJsonObject ApiV2ServerConfig::toJson() const
