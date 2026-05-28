@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool portDirty: false
+
     function formatTransport(value) {
         if (value === "raw") return "RAW (TCP)"
         if (value === "xhttp") return "XHTTP"
@@ -112,8 +114,14 @@ PageType {
                 textField.validator: IntValidator {
                     bottom: 1; top: 65535
                 }
+                textField.onTextChanged: {
+                    root.portDirty = (textField.text !== port)
+                }
                 textField.onEditingFinished: {
-                    if (textField.text !== port) port = textField.text
+                    if (textField.text !== port) {
+                        port = textField.text
+                    }
+                    root.portDirty = false
                 }
                 checkEmptyText: true
             }
@@ -172,8 +180,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 visible: listView.enabled
-                         && (XrayConfigModel.hasUnsavedChanges
-                             || textFieldWithHeaderType.textField.text !== port)
+                         && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
                 enabled: visible && textFieldWithHeaderType.errorText === ""
                 text: qsTr("Save")
                 onClicked: function() {
