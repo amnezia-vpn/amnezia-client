@@ -13,7 +13,6 @@
 #include "version.h"
 #include "core/controllers/gatewayController.h"
 #include "core/utils/constants/apiKeys.h"
-#include "core/utils/errorStrings.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 
 namespace
@@ -109,7 +108,7 @@ void UpdateController::fetchGatewayUrl()
             .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
                 auto [err, gatewayResponse] = result;
                 if (err != ErrorCode::NoError) {
-                    logger.error() << errorString(err);
+                    logger.error() << "Gateway request failed, error code:" << static_cast<int>(err);
                     finishUpdateCheck();
                     return;
                 }
@@ -250,17 +249,9 @@ void UpdateController::runInstaller()
             runLinuxInstaller(kInstallerLocalPath);
     #endif
         } else {
-            if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
-                || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-                logger.error() << errorString(ErrorCode::ApiConfigTimeoutError);
-            } else {
-                QString err = reply->errorString();
-                logger.error() << QString::fromUtf8(reply->readAll());
-                logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
-                logger.error() << "Error message:" << err;
-                logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-                logger.error() << errorString(ErrorCode::ApiConfigDownloadError);
-            }
+            logger.error() << "Installer download failed, network error:" << static_cast<int>(reply->error())
+                           << reply->errorString();
+            logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         }
         reply->deleteLater();
     });

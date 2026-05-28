@@ -35,8 +35,11 @@ namespace amnezia
         ServerCgroupMountpoint = 212,
         DockerPullRateLimit = 213,
         ServerLinuxKernelTooOld = 214,
-        ServerContainerizationNotSupported = 215,
-        DockerServiceNotActive = 216,
+        XrayServerConfigInvalid = 215,
+        XrayServerNoVlessClients = 216,
+        XrayRealityKeysReadFailed = 217,
+        ServerContainerRuntimeNotSupported = 218,
+        ContainerRuntimeServiceNotRunning = 219,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -100,6 +103,10 @@ namespace amnezia
         ApiSubscriptionNotActiveError = 1114,
         ApiNoPurchasedSubscriptionsError = 1115,
         ApiTrialAlreadyUsedError = 1116,
+        ApiCaptchaRequiredError = 1117,
+        ApiCaptchaInvalidError = 1118,
+        ApiCaptchaRefreshError = 1119,
+        ApiRateLimitError = 1120,
 
         // QFile errors
         OpenError = 1200,

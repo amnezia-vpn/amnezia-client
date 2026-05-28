@@ -82,7 +82,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
+                        var serverId = ServersUiController.processedServerId
                         Qt.callLater(deactivateExternalDevice, serverId, supportTag, countryCode)
                     }
                     var noButtonFunction = function() {

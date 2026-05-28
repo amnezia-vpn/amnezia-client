@@ -5,6 +5,7 @@
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -28,6 +29,7 @@ public:
                          ApiCountryModel* apiCountryModel,
                          ApiDevicesModel* apiDevicesModel,
                          SettingsController* settingsController,
+                         ConnectionController* connectionController,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -56,6 +58,10 @@ public slots:
     void setCurrentProtocol(const QString &serverId, const QString &protocolName);
     bool isVlessProtocol(const QString &serverId);
 
+    bool isCaptchaAwaitingUser() const;
+    void onCaptchaSolved(const QString &captchaId, const QString &solution);
+    void onRefreshCaptchaRequested();
+
     void removeApiConfig(const QString &serverId);
 
     void removeServer(const QString &serverId);
@@ -83,8 +89,22 @@ signals:
     void apiServerRemoved(const QString &message);
 
     void vpnKeyExportReady();
+    void captchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
+    void captchaFlowDismissRequested();
 
     void unsupportedConnectDrawerRequested();
+
+private:
+    struct CaptchaState {
+        QString userCountryCode;
+        QString serviceType;
+        QString serviceProtocol;
+        QString openvpnPrivKey;
+        QString wireguardClientPrivKey;
+        QString wireguardClientPubKey;
+        QString xrayUuid;
+        bool isPending = false;
+    } m_captchaState;
 
 private:
     QList<QString> getQrCodes();
@@ -104,6 +124,7 @@ private:
     ApiCountryModel* m_apiCountryModel;
     ApiDevicesModel* m_apiDevicesModel;
     SettingsController* m_settingsController;
+    ConnectionController* m_connectionController;
 };
 
 #endif // SUBSCRIPTIONUICONTROLLER_H

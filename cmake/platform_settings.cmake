@@ -20,13 +20,18 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Android")
     set(_CONAN_INSTALL_ARGS
         "-c=tools.android:cmake_legacy_toolchain=false"
         "-c=tools.build:sharedlinkflags=['-Wl,-z,max-page-size=16384']"
-        "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']"
-        "-o=openssl/*:shared=True")
+        "-c=tools.build:exelinkflags=['-Wl,-z,max-page-size=16384']")
     set(CMAKE_ANDROID_STL_TYPE "c++_shared" CACHE STRING "")
 endif()
 
 if (WIN32 OR APPLE)
     set(CMAKE_INSTALL_BINDIR ".")
+endif()
+
+# Apple NE-based apps do not support any dylibs or variations
+# So Qt would use the openssl bundled with system, not application
+if (NOT(CMAKE_SYSTEM_NAME STREQUAL "iOS" OR (APPLE AND MACOS_NE)))
+    list(APPEND _CONAN_INSTALL_ARGS "-o=openssl/*:shared=True")
 endif()
 
 list(PREPEND _CONAN_INSTALL_ARGS "--build=missing")

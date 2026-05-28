@@ -77,9 +77,17 @@ PageType {
     }
 
     Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -91,8 +99,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -131,7 +139,7 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-                headerText: root.processedServer.name
+                headerText: root.processedServer != null ? root.processedServer.name : ""
 
                 actionButtonFunction: function() {
                     serverNameEditDrawer.openTriggered()
@@ -186,7 +194,7 @@ PageType {
                 textColor: AmneziaStyle.color.midnightBlack
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
         }
@@ -246,7 +254,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
 
@@ -258,8 +266,8 @@ PageType {
             SwitcherType {
                 id: switcher
 
-                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex))
-                readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
+                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.processedServerId)
+                readonly property bool isProtocolSwitchBlocked: ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
@@ -277,8 +285,8 @@ PageType {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                     } else {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.setCurrentProtocol(ServersUiController.getServerId(ServersUiController.processedServerIndex), switcher.isVlessProtocol ? "awg" : "vless")
-                        SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), "", "", true)
+                        SubscriptionUiController.setCurrentProtocol(ServersUiController.processedServerId, switcher.isVlessProtocol ? "awg" : "vless")
+                        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, "", "", true)
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -326,7 +334,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
-                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
 
                     PageController.showBusyIndicator(false)
                 }
@@ -432,7 +440,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.getServerId(ServersUiController.processedServerIndex), "", "", true)
+                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, "", "", true)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -470,8 +478,8 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (SubscriptionUiController.deactivateDevice(ServersUiController.getServerId(ServersUiController.processedServerIndex))) {
-                                SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), true)
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.processedServerId)) {
+                                SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, true)
                             }
                             PageController.showBusyIndicator(false)
                         }
@@ -507,7 +515,7 @@ PageType {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            SubscriptionUiController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                            SubscriptionUiController.removeServer(ServersUiController.processedServerId)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -526,6 +534,6 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.35
 
-        serverNameText: root.processedServer.name
+        serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }
 }

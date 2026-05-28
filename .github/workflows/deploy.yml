@@ -23,6 +23,9 @@ jobs:
               - 'recipes/**'
               - 'conanfile.py'
               - '.github/workflows/deploy.yml'
+              - 'cmake/conan_provider.cmake'
+              - 'cmake/platform_settings.cmake'
+              - 'cmake/recipes_bootstrap.cmake'
 
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
@@ -917,3 +920,4 @@ jobs:
         run: | 
           echo "Pull request:" >> $GITHUB_STEP_SUMMARY
           echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+

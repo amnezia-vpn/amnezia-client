@@ -121,7 +121,7 @@ PageType {
                     var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0].textField.text
 
                     InstallController.setProcessedServerCredentials(_hostname, _username, _secretData)
-                    ServersUiController.setProcessedServerIndex(-1)
+                    ServersUiController.setProcessedServerId("")
 
                     PageController.showBusyIndicator(true)
                     var isConnectionOpened = InstallController.checkSshConnection()

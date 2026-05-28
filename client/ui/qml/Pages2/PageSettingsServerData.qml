@@ -59,7 +59,7 @@ PageType {
     Connections {
         target: ServersUiController
 
-        function onProcessedServerIndexChanged() {
+        function onProcessedServerIdChanged() {
             root.isServerWithWriteAccess = ServersUiController.isProcessedServerHasWriteAccess()
         }
     }
@@ -111,7 +111,7 @@ PageType {
         readonly property var tColor: AmneziaStyle.color.paleGray
         readonly property var clickedHandler: function() {
             PageController.showBusyIndicator(true)
-            InstallController.scanServerForInstalledContainers(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+            InstallController.scanServerForInstalledContainers(ServersUiController.processedServerId)
             PageController.showBusyIndicator(false)
         }
     }
@@ -134,7 +134,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot reboot server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.rebootServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    InstallController.rebootServer(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -164,7 +164,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    InstallController.removeServer(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    InstallController.removeServer(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
                 }
             }
@@ -194,7 +194,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot clear server from Amnezia software during active connection"))
                 } else {
                     PageController.goToPage(PageEnum.PageDeinstalling)
-                    InstallController.removeAllContainers(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    InstallController.removeAllContainers(ServersUiController.processedServerId)
                 }
             }
             var noButtonFunction = function() {
@@ -208,7 +208,7 @@ PageType {
     QtObject {
         id: reset
 
-        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+        property bool isVisible: ServersUiController.isServerFromApi(ServersUiController.processedServerId)
         readonly property string title: qsTr("Reset API config")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -223,7 +223,7 @@ PageType {
                     PageController.showNotificationMessage(qsTr("Cannot reset API config during active connection"))
                 } else {
                     PageController.showBusyIndicator(true)
-                    SubscriptionUiController.removeApiConfig(ServersUiController.getServerId(ServersUiController.processedServerIndex))
+                    SubscriptionUiController.removeApiConfig(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
                 }
             }

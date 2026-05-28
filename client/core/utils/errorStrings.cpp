@@ -30,8 +30,17 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
     case(ErrorCode::DockerPullRateLimit): errorMessage = QObject::tr("Docker error: The pull rate limit has been reached"); break;
     case(ErrorCode::ServerLinuxKernelTooOld): errorMessage = QObject::tr("Server error: Linux kernel is too old"); break;
-    case(ErrorCode::ServerContainerizationNotSupported): errorMessage = QObject::tr("Server error: The default containerization app offered for installation on the server is not supported.\n Try installing Docker Engine on the server manually."); break;
-    case(ErrorCode::DockerServiceNotActive): errorMessage = QObject::tr("Docker error: The Docker service is not active.\n Check the status of the docker service on the server or try again in a minute."); break;
+    case(ErrorCode::XrayServerConfigInvalid):
+        errorMessage = QObject::tr("Server error: invalid or unreadable XRay server configuration");
+        break;
+    case(ErrorCode::XrayServerNoVlessClients):
+        errorMessage = QObject::tr("Server error: XRay server has no VLESS clients");
+        break;
+    case(ErrorCode::XrayRealityKeysReadFailed):
+        errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
+        break;
+    case(ErrorCode::ServerContainerRuntimeNotSupported): errorMessage = QObject::tr("Server error: The default container runtime available for installation on this server is not supported.\n Install Docker Engine on the server manually and try again."); break;
+    case(ErrorCode::ContainerRuntimeServiceNotRunning): errorMessage = QObject::tr("Container runtime error: The container runtime service is not running.\n Check the container runtime service on the server, or wait about a minute and try again."); break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
@@ -86,6 +95,10 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
+    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
+    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
+    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
+    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
