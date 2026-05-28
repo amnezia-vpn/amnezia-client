@@ -85,6 +85,8 @@ PageType {
                 BaseHeaderType {
                     Layout.fillWidth: true
                     headerText: qsTr("XRay VLESS settings")
+                    descriptionLinkText: qsTr("More about settings")
+                    descriptionLinkUrl: "https://docs.amnezia.org"
                 }
 
                 ImageButtonType {
@@ -94,22 +96,6 @@ PageType {
                     image: "qrc:/images/controls/more-vertical.svg"
                     imageColor: AmneziaStyle.color.paleGray
                     onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
-                }
-            }
-
-            LabelTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 4
-                text: qsTr("More about settings")
-                color: AmneziaStyle.color.goldenApricot
-                font.pixelSize: 16
-                lineHeight: 24 + LanguageUiController.getLineHeightAppend()
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: Qt.openUrlExternally("https://docs.amnezia.org")
                 }
             }
 
