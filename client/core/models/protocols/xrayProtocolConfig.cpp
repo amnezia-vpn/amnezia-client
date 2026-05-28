@@ -13,6 +13,136 @@ using namespace ProtocolUtils;
 
 namespace amnezia
 {
+namespace
+{
+    bool hydrateServerConfigFromClientRoot(XrayServerConfig &srv, bool &needsClientHydration, const QJsonObject &root)
+    {
+        const QJsonArray outbounds = root.value(protocols::xray::outbounds).toArray();
+        if (outbounds.isEmpty()) {
+            return false;
+        }
+
+        const QJsonObject outbound = outbounds[0].toObject();
+        const QJsonObject streamSettings = outbound.value(protocols::xray::streamSettings).toObject();
+        if (streamSettings.isEmpty()) {
+            return false;
+        }
+
+        const QJsonObject settings = outbound.value(protocols::xray::settings).toObject();
+        const QJsonArray vnext = settings.value(protocols::xray::vnext).toArray();
+        if (!vnext.isEmpty()) {
+            const QJsonObject vnextEntry = vnext[0].toObject();
+            if (vnextEntry.contains(protocols::xray::port)) {
+                srv.port = QString::number(vnextEntry.value(protocols::xray::port).toInt());
+            }
+            const QJsonArray users = vnextEntry.value(protocols::xray::users).toArray();
+            if (!users.isEmpty()) {
+                srv.flow = users[0].toObject().value(protocols::xray::flow).toString();
+            }
+        }
+
+        const QString networkVal = streamSettings.value(protocols::xray::network).toString(QStringLiteral("tcp"));
+        if (networkVal == QLatin1String("xhttp")) {
+            srv.transport = QStringLiteral("xhttp");
+        } else if (networkVal == QLatin1String("kcp")) {
+            srv.transport = QStringLiteral("mkcp");
+        } else {
+            srv.transport = QStringLiteral("raw");
+        }
+
+        if (streamSettings.contains(protocols::xray::security)) {
+            srv.security = streamSettings.value(protocols::xray::security).toString();
+        }
+
+        if (srv.security == QLatin1String("reality")) {
+            const QJsonObject rs = streamSettings.value(protocols::xray::realitySettings).toObject();
+            srv.sni = rs.value(protocols::xray::serverName).toString();
+            srv.site = srv.sni.isEmpty() ? srv.site : srv.sni;
+            const QString fp = rs.value(protocols::xray::fingerprint).toString();
+            if (!fp.isEmpty()) {
+                srv.fingerprint = fp.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)
+                        ? QString::fromLatin1(protocols::xray::defaultFingerprint)
+                        : fp;
+            }
+        }
+
+        if (srv.security == QLatin1String("tls")) {
+            const QJsonObject tls = streamSettings.value(QStringLiteral("tlsSettings")).toObject();
+            srv.sni = tls.value(protocols::xray::serverName).toString();
+            const QString fp = tls.value(protocols::xray::fingerprint).toString();
+            if (!fp.isEmpty()) {
+                srv.fingerprint = fp;
+            }
+            QStringList alpnList;
+            for (const QJsonValue &v : tls.value(QStringLiteral("alpn")).toArray()) {
+                alpnList << v.toString();
+            }
+            if (!alpnList.isEmpty()) {
+                srv.alpn = alpnList.join(QLatin1Char(','));
+            }
+        }
+
+        if (srv.transport == QLatin1String("xhttp")) {
+            const QJsonObject xhttpObj = streamSettings.value(QStringLiteral("xhttpSettings")).toObject();
+            QJsonObject xhttpJson;
+            const QString mode = xhttpObj.value(QStringLiteral("mode")).toString();
+            if (!mode.isEmpty()) {
+                if (mode == QLatin1String("auto")) {
+                    xhttpJson[configKey::xhttpMode] = QStringLiteral("Auto");
+                } else if (mode == QLatin1String("packet-up")) {
+                    xhttpJson[configKey::xhttpMode] = QStringLiteral("Packet-up");
+                } else if (mode == QLatin1String("stream-up")) {
+                    xhttpJson[configKey::xhttpMode] = QStringLiteral("Stream-up");
+                } else if (mode == QLatin1String("stream-one")) {
+                    xhttpJson[configKey::xhttpMode] = QStringLiteral("Stream-one");
+                } else {
+                    xhttpJson[configKey::xhttpMode] = mode;
+                }
+            }
+            if (xhttpObj.contains(QStringLiteral("host"))) {
+                xhttpJson[configKey::xhttpHost] = xhttpObj.value(QStringLiteral("host")).toString();
+            }
+            if (xhttpObj.contains(QStringLiteral("path"))) {
+                xhttpJson[configKey::xhttpPath] = xhttpObj.value(QStringLiteral("path")).toString();
+            }
+            if (xhttpObj.contains(QStringLiteral("uplinkHTTPMethod"))) {
+                xhttpJson[configKey::xhttpUplinkMethod] =
+                        xhttpObj.value(QStringLiteral("uplinkHTTPMethod")).toString();
+            }
+            xhttpJson[configKey::xhttpDisableGrpc] = xhttpObj.value(QStringLiteral("noGRPCHeader")).toBool(true);
+            xhttpJson[configKey::xhttpDisableSse] = xhttpObj.value(QStringLiteral("noSSEHeader")).toBool(true);
+            srv.xhttp = XrayXhttpConfig::fromJson(xhttpJson);
+        }
+
+        if (srv.transport == QLatin1String("mkcp")) {
+            const QJsonObject kcpObj = streamSettings.value(QStringLiteral("kcpSettings")).toObject();
+            XrayMkcpConfig mk;
+            if (kcpObj.contains(QStringLiteral("tti"))) {
+                mk.tti = QString::number(kcpObj.value(QStringLiteral("tti")).toInt());
+            }
+            if (kcpObj.contains(QStringLiteral("uplinkCapacity"))) {
+                mk.uplinkCapacity = QString::number(kcpObj.value(QStringLiteral("uplinkCapacity")).toInt());
+            }
+            if (kcpObj.contains(QStringLiteral("downlinkCapacity"))) {
+                mk.downlinkCapacity = QString::number(kcpObj.value(QStringLiteral("downlinkCapacity")).toInt());
+            }
+            if (kcpObj.contains(QStringLiteral("readBufferSize"))) {
+                mk.readBufferSize = QString::number(kcpObj.value(QStringLiteral("readBufferSize")).toInt());
+            }
+            if (kcpObj.contains(QStringLiteral("writeBufferSize"))) {
+                mk.writeBufferSize = QString::number(kcpObj.value(QStringLiteral("writeBufferSize")).toInt());
+            }
+            if (kcpObj.contains(QStringLiteral("congestion"))) {
+                mk.congestion = kcpObj.value(QStringLiteral("congestion")).toBool(true);
+            }
+            srv.mkcp = mk;
+        }
+
+        needsClientHydration = false;
+        return true;
+    }
+} // namespace
+
 QJsonObject XrayXPaddingConfig::toJson() const
 {
     QJsonObject obj;
@@ -470,14 +600,14 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
             } else {
                 c.clientConfig = XrayClientConfig::fromJson(parsed);
             }
-        }
-    }
 
-    c.needsClientHydration =
-            c.hasClientConfig()
-            && (!json.contains(configKey::xrayTransport) || c.serverConfig.isThirdPartyConfig);
-    if (c.needsClientHydration) {
-        c.hydrateServerConfigFromClientNative();
+            c.needsClientHydration =
+                    c.hasClientConfig()
+                    && (!json.contains(configKey::xrayTransport) || c.serverConfig.isThirdPartyConfig);
+            if (c.needsClientHydration) {
+                hydrateServerConfigFromClientRoot(c.serverConfig, c.needsClientHydration, parsed);
+            }
+        }
     }
 
     return c;
@@ -493,132 +623,7 @@ bool XrayProtocolConfig::hydrateServerConfigFromClientNative()
     if (doc.isNull() || !doc.isObject()) {
         return false;
     }
-
-    const QJsonObject root = doc.object();
-    const QJsonArray outbounds = root.value(protocols::xray::outbounds).toArray();
-    if (outbounds.isEmpty()) {
-        return false;
-    }
-
-    const QJsonObject outbound = outbounds[0].toObject();
-    const QJsonObject streamSettings = outbound.value(protocols::xray::streamSettings).toObject();
-    if (streamSettings.isEmpty()) {
-        return false;
-    }
-
-    XrayServerConfig &srv = serverConfig;
-
-    const QJsonObject settings = outbound.value(protocols::xray::settings).toObject();
-    const QJsonArray vnext = settings.value(protocols::xray::vnext).toArray();
-    if (!vnext.isEmpty()) {
-        const QJsonObject vnextEntry = vnext[0].toObject();
-        if (vnextEntry.contains(protocols::xray::port)) {
-            srv.port = QString::number(vnextEntry.value(protocols::xray::port).toInt());
-        }
-        const QJsonArray users = vnextEntry.value(protocols::xray::users).toArray();
-        if (!users.isEmpty()) {
-            srv.flow = users[0].toObject().value(protocols::xray::flow).toString();
-        }
-    }
-
-    const QString networkVal = streamSettings.value(protocols::xray::network).toString(QStringLiteral("tcp"));
-    if (networkVal == QLatin1String("xhttp")) {
-        srv.transport = QStringLiteral("xhttp");
-    } else if (networkVal == QLatin1String("kcp")) {
-        srv.transport = QStringLiteral("mkcp");
-    } else {
-        srv.transport = QStringLiteral("raw");
-    }
-
-    if (streamSettings.contains(protocols::xray::security)) {
-        srv.security = streamSettings.value(protocols::xray::security).toString();
-    }
-
-    if (srv.security == QLatin1String("reality")) {
-        const QJsonObject rs = streamSettings.value(protocols::xray::realitySettings).toObject();
-        srv.sni = rs.value(protocols::xray::serverName).toString();
-        srv.site = srv.sni.isEmpty() ? srv.site : srv.sni;
-        const QString fp = rs.value(protocols::xray::fingerprint).toString();
-        if (!fp.isEmpty()) {
-            srv.fingerprint = fp.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)
-                    ? QString::fromLatin1(protocols::xray::defaultFingerprint)
-                    : fp;
-        }
-    }
-
-    if (srv.security == QLatin1String("tls")) {
-        const QJsonObject tls = streamSettings.value(QStringLiteral("tlsSettings")).toObject();
-        srv.sni = tls.value(protocols::xray::serverName).toString();
-        const QString fp = tls.value(protocols::xray::fingerprint).toString();
-        if (!fp.isEmpty()) {
-            srv.fingerprint = fp;
-        }
-        QStringList alpnList;
-        for (const QJsonValue &v : tls.value(QStringLiteral("alpn")).toArray()) {
-            alpnList << v.toString();
-        }
-        if (!alpnList.isEmpty()) {
-            srv.alpn = alpnList.join(QLatin1Char(','));
-        }
-    }
-
-    if (srv.transport == QLatin1String("xhttp")) {
-        const QJsonObject xhttpObj = streamSettings.value(QStringLiteral("xhttpSettings")).toObject();
-        QJsonObject xhttpJson;
-        const QString mode = xhttpObj.value(QStringLiteral("mode")).toString();
-        if (!mode.isEmpty()) {
-            if (mode == QLatin1String("auto")) {
-                xhttpJson[configKey::xhttpMode] = QStringLiteral("Auto");
-            } else if (mode == QLatin1String("packet-up")) {
-                xhttpJson[configKey::xhttpMode] = QStringLiteral("Packet-up");
-            } else if (mode == QLatin1String("stream-up")) {
-                xhttpJson[configKey::xhttpMode] = QStringLiteral("Stream-up");
-            } else if (mode == QLatin1String("stream-one")) {
-                xhttpJson[configKey::xhttpMode] = QStringLiteral("Stream-one");
-            } else {
-                xhttpJson[configKey::xhttpMode] = mode;
-            }
-        }
-        if (xhttpObj.contains(QStringLiteral("host"))) {
-            xhttpJson[configKey::xhttpHost] = xhttpObj.value(QStringLiteral("host")).toString();
-        }
-        if (xhttpObj.contains(QStringLiteral("path"))) {
-            xhttpJson[configKey::xhttpPath] = xhttpObj.value(QStringLiteral("path")).toString();
-        }
-        if (xhttpObj.contains(QStringLiteral("uplinkHTTPMethod"))) {
-            xhttpJson[configKey::xhttpUplinkMethod] = xhttpObj.value(QStringLiteral("uplinkHTTPMethod")).toString();
-        }
-        xhttpJson[configKey::xhttpDisableGrpc] = xhttpObj.value(QStringLiteral("noGRPCHeader")).toBool(true);
-        xhttpJson[configKey::xhttpDisableSse] = xhttpObj.value(QStringLiteral("noSSEHeader")).toBool(true);
-        srv.xhttp = XrayXhttpConfig::fromJson(xhttpJson);
-    }
-
-    if (srv.transport == QLatin1String("mkcp")) {
-        const QJsonObject kcpObj = streamSettings.value(QStringLiteral("kcpSettings")).toObject();
-        XrayMkcpConfig mk;
-        if (kcpObj.contains(QStringLiteral("tti"))) {
-            mk.tti = QString::number(kcpObj.value(QStringLiteral("tti")).toInt());
-        }
-        if (kcpObj.contains(QStringLiteral("uplinkCapacity"))) {
-            mk.uplinkCapacity = QString::number(kcpObj.value(QStringLiteral("uplinkCapacity")).toInt());
-        }
-        if (kcpObj.contains(QStringLiteral("downlinkCapacity"))) {
-            mk.downlinkCapacity = QString::number(kcpObj.value(QStringLiteral("downlinkCapacity")).toInt());
-        }
-        if (kcpObj.contains(QStringLiteral("readBufferSize"))) {
-            mk.readBufferSize = QString::number(kcpObj.value(QStringLiteral("readBufferSize")).toInt());
-        }
-        if (kcpObj.contains(QStringLiteral("writeBufferSize"))) {
-            mk.writeBufferSize = QString::number(kcpObj.value(QStringLiteral("writeBufferSize")).toInt());
-        }
-        if (kcpObj.contains(QStringLiteral("congestion"))) {
-            mk.congestion = kcpObj.value(QStringLiteral("congestion")).toBool(true);
-        }
-        srv.mkcp = mk;
-    }
-
-    needsClientHydration = false;
-    return true;
+    return hydrateServerConfigFromClientRoot(serverConfig, needsClientHydration, doc.object());
 }
 
 bool XrayProtocolConfig::hasClientConfig() const
