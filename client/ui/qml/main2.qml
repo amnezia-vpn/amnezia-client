@@ -214,7 +214,10 @@ Window  {
             id: captchaDialog
 
             onCaptchaSolved: function(captchaId, solution) {
-                SubscriptionUiController.onCaptchaSolved(captchaId, solution)
+                PageController.showBusyIndicator(true)
+                Qt.callLater(function() {
+                    SubscriptionUiController.onCaptchaSolved(captchaId, solution)
+                })
             }
 
             onRefreshCaptchaRequested: function() {
@@ -338,6 +341,9 @@ Window  {
         }
 
         function onCaptchaRequired(captchaId, captchaImageBase64, hint) {
+            if (captchaDialog.opened) {
+                PageController.showBusyIndicator(false)
+            }
             captchaDialog.captchaId = captchaId
             captchaDialog.captchaImageBase64 = captchaImageBase64
             captchaDialog.hint = hint
@@ -345,7 +351,14 @@ Window  {
         }
 
         function onCaptchaFlowDismissRequested() {
+            PageController.showBusyIndicator(false)
             captchaDialog.close()
+        }
+
+        function onErrorOccurred(error) {
+            if (captchaDialog.opened) {
+                PageController.showBusyIndicator(false)
+            }
         }
     }
 
