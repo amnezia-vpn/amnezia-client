@@ -810,11 +810,11 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("Containerization app is not supported"))
-        return ErrorCode::ServerContainerizationNotSupported;
+        return ErrorCode::ServerContainerRuntimeNotSupported;
     if (stdOut.contains("command not found"))
         return ErrorCode::ServerDockerFailedError;
     if (stdOut.contains("Service status not active"))
-        return ErrorCode::DockerServiceNotActive;
+        return ErrorCode::ContainerRuntimeServiceNotRunning;
 
     return error;
 }
