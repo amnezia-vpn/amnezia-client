@@ -66,7 +66,7 @@ private:
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
 
-    QString m_proxyUrl;
+    inline static QString m_proxyUrl;
 };
 
 #endif // GATEWAYCONTROLLER_H

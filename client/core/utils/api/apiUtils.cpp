@@ -105,33 +105,33 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (jsonDoc.isObject()) {
         QJsonObject jsonObj = jsonDoc.object();
-        const int status = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+        const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
 
-        if (status == httpStatusCodeTooManyRequests) {
+        if (httpStatusFromBody == httpStatusCodeTooManyRequests) {
             return amnezia::ErrorCode::ApiRateLimitError;
         }
-        if (status == httpStatusCodeConflict) {
+        if (httpStatusFromBody == httpStatusCodeConflict) {
             if (apiErrorMessageFromJson(jsonObj).contains(trialAlreadyUsedMessage, Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiTrialAlreadyUsedError;
             }
             return amnezia::ErrorCode::ApiConfigLimitError;
         }
-        if (status == httpStatusCodeNotFound) {
+        if (httpStatusFromBody == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
         }
-        if (status == httpStatusCodeRequestTimeout) {
+        if (httpStatusFromBody == httpStatusCodeRequestTimeout) {
             return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
-        if (status == httpStatusCodeNotImplemented) {
+        if (httpStatusFromBody == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
         }
-        if (status == httpStatusCodeUnprocessableEntity) {
+        if (httpStatusFromBody == httpStatusCodeUnprocessableEntity) {
             if (apiErrorMessageFromJson(jsonObj) == unprocessableSubscriptionMessage) {
                 return amnezia::ErrorCode::ApiSubscriptionExpiredError;
             }
             return amnezia::ErrorCode::ApiConfigDownloadError;
         }
-        if (status == httpStatusCodePaymentRequired) {
+        if (httpStatusFromBody == httpStatusCodePaymentRequired) {
             const QString message = apiErrorMessageFromJson(jsonObj);
             if (message.contains(QLatin1String("refresh_captcha"), Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiCaptchaRefreshError;
@@ -147,11 +147,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
 
-        if (replyError == QNetworkReply::NoError && status > 0 && status < 400) {
-            return amnezia::ErrorCode::NoError;
-        }
-
-        if (status >= 400) {
+        if (httpStatusFromBody >= 300) {
             return amnezia::ErrorCode::ApiConfigDownloadError;
         }
     }
