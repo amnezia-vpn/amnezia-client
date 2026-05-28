@@ -17,6 +17,10 @@ import "../Components"
 PageType {
     id: root
 
+    enableTimer: false
+
+    property bool portDirty: false
+
     function formatTransport(value) {
         if (value === "raw") return "RAW (TCP)"
         if (value === "xhttp") return "XHTTP"
@@ -39,8 +43,8 @@ PageType {
         anchors.right: parent.right
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
-        onFocusChanged: {
-            if (this.activeFocus) {
+        onActiveFocusChanged: {
+            if (backButton.enabled && backButton.activeFocus) {
                 listView.positionViewAtBeginning()
             }
         }
@@ -59,8 +63,6 @@ PageType {
 
         delegate: ColumnLayout {
             width: listView.width
-
-            property alias focusItemId: textFieldWithHeaderType.textField
 
             spacing: 0
 
@@ -107,13 +109,26 @@ PageType {
                 Layout.rightMargin: 16
                 enabled: listView.enabled
                 headerText: qsTr("Port")
-                textField.text: port
+
+                Binding {
+                    target: textField
+                    property: "text"
+                    value: port
+                    when: !textField.activeFocus
+                }
+
                 textField.maximumLength: 5
                 textField.validator: IntValidator {
                     bottom: 1; top: 65535
                 }
+                textField.onTextChanged: {
+                    root.portDirty = (textField.text !== port)
+                }
                 textField.onEditingFinished: {
-                    if (textField.text !== port) port = textField.text
+                    if (textField.text !== port) {
+                        port = textField.text
+                    }
+                    root.portDirty = false
                 }
                 checkEmptyText: true
             }
@@ -172,9 +187,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 visible: listView.enabled
-                         && (XrayConfigModel.hasUnsavedChanges
-                             || textFieldWithHeaderType.textField.text !== port)
-                enabled: visible && textFieldWithHeaderType.errorText === ""
+                         && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
+                enabled: visible && textFieldWithHeaderType.textField.text !== ""
                 text: qsTr("Save")
                 onClicked: function() {
                     forceActiveFocus()
