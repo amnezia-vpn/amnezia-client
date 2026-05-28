@@ -90,8 +90,6 @@ public:
     bool restoreAppConfig(const QByteArray &cfg);
     void clearSettings();
 
-    QString nextAvailableServerName() const;
-
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);
 

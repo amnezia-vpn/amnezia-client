@@ -363,6 +363,6 @@ void SettingsController::disablePremV1MigrationReminder()
 
 QString SettingsController::nextAvailableServerName() const
 {
-    return m_appSettingsRepository->nextAvailableServerName();
+    return m_serversRepository->nextAvailableServerName();
 }
 
