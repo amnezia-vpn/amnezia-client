@@ -5,4 +5,4 @@ elif which zypper > /dev/null 2>&1 || command -v zypper > /dev/null 2>&1; then L
 elif which pacman > /dev/null 2>&1 || command -v pacman > /dev/null 2>&1; then LOCK_CMD="fuser"; LOCK_FILE="/var/lib/pacman/db.lck";\
 else echo "Packet manager not found"; echo "Internal error"; exit 1;\
 fi;\
-if sudo which $LOCK_CMD > /dev/null 2>&1 || command -v $LOCK_CMD > /dev/null 2>&1; then sudo $LOCK_CMD $LOCK_FILE 2>/dev/null; else echo "$LOCK_CMD not installed"; fi
+if sudo -n which $LOCK_CMD > /dev/null 2>&1 || command -v $LOCK_CMD > /dev/null 2>&1; then sudo $LOCK_CMD $LOCK_FILE 2>/dev/null; else echo "$LOCK_CMD not installed"; fi
