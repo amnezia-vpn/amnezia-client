@@ -285,34 +285,34 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
     )
+endif()
 
-    if(WIN32)
-        set(HEADERS ${HEADERS}
-            ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.h
-        )
-        set(SOURCES ${SOURCES}
-            ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
-        )
-    endif()
+if(WIN32)
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.h
+    )
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
+    )
+endif()
 
-    if(LINUX)
-        set(HEADERS ${HEADERS}
-            ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.h
-        )
-        set(SOURCES ${SOURCES}
-            ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.cpp
-        )
-    endif()
+if(LINUX)
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.h
+    )
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.cpp
+    )
+endif()
 
-    if(APPLE AND MACOS_NE)
-        set(HEADERS ${HEADERS}
-                ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
-                ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
-        )
+if(APPLE AND MACOS_NE)
+    set(HEADERS ${HEADERS}
+        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
+    )
 
-        set(SOURCES ${SOURCES}
-                ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
-                ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
-        )
-    endif()
+    set(SOURCES ${SOURCES}
+        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
+    )
 endif()
