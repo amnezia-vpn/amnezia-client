@@ -200,11 +200,6 @@ PageType {
             PageController.showNotificationMessage(qsTr("Backup downloaded successfully!\n\nSaved to:\n%1").arg(localPath))
         }
 
-        function onBackupRestored() {
-            PageController.showBusyIndicator(false)
-            PageController.showNotificationMessage(qsTr("Backup restored successfully! Containers are restarting..."))
-        }
-
         function onProgressChanged(percent, message) {
             console.log("Backup progress:", percent, "%", message)
         }

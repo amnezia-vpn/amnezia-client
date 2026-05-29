@@ -20,16 +20,21 @@
 #ifdef Q_OS_IOS
 #include "platforms/ios/ios_controller.h"
 #endif
-#include "containers/containers_defs.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "systemController.h"
-#include "ui/models/servers_model.h"
-#include "ui/models/containers_model.h"
+#include "ui/models/serversModel.h"
+#include "ui/models/containersModel.h"
+#include "ui/controllers/serversUiController.h"
+#include "core/controllers/serversController.h"
 
-ServersBackupController::ServersBackupController(SecureQSettings *settings, ServersModel *serversModel, QObject *parent)
+ServersBackupController::ServersBackupController(SecureQSettings *settings, ServersModel *serversModel,
+                                                 ServersUiController *serversUiController, ServersController *serversController,
+                                                 QObject *parent)
     : QObject(parent)
     , m_settings(settings)
     , m_serversModel(serversModel)
+    , m_serversUiController(serversUiController)
+    , m_serversController(serversController)
     , m_status(Idle)
     , m_backupDir("/var/backups/amnezia")
     , m_restoreReplaceMode(false)
@@ -123,7 +128,7 @@ void ServersBackupController::createBackup(const ServerCredentials &credentials)
 
 void ServersBackupController::createBackupByName(const ServerCredentials &credentials, const QString &containerName)
 {
-    DockerContainer container = ContainerProps::containerFromString(containerName);
+    DockerContainer container = ContainerUtils::containerFromString(containerName);
     if (container == DockerContainer::None) {
         emit errorOccurred(tr("Unknown container: %1").arg(containerName), ErrorCode::InternalError);
         return;
@@ -139,7 +144,7 @@ void ServersBackupController::createContainerBackup(const ServerCredentials &cre
     }
 
     setStatus(InProgress);
-    QString containerName = ContainerProps::containerToString(container);
+    QString containerName = ContainerUtils::containerToString(container);
     setProgress(0, tr("Starting backup for container: %1...").arg(containerName));
 
     m_currentOutput.clear();
@@ -578,13 +583,44 @@ void ServersBackupController::uploadBackup(const ServerCredentials &credentials,
     setStatus(InProgress);
     setProgress(0, tr("Uploading backup..."));
 
-    // Construct remote file path with filename
-    QString remotePath = QString("%1/%2").arg(m_backupDir, filename);
+    // Sanitize filename: replace spaces with underscores so SCP path has no unquoted spaces
+    // (libssh passes the path verbatim to the remote shell; spaces would split the scp -t argument)
+    QString safeFilename = filename;
+    safeFilename.replace(' ', '_');
+
+    // Construct remote file path with sanitized filename
+    QString remotePath = QString("%1/%2").arg(m_backupDir, safeFilename);
 
     setProgress(25, tr("Starting file transfer..."));
 
-    ErrorCode error = uploadFileToHostPublic(credentials, actualLocalPath, remotePath,
-                                                                  libssh::ScpOverwriteMode::ScpOverwriteExisting);
+    // SCP to /var/backups/amnezia/ requires root ownership. The SSH user may not be root,
+    // so we upload the file to /tmp/ first (world-writable), then move it to the final
+    // location via sudo — the same pattern used by all other server-side operations.
+    QFile localFile(actualLocalPath);
+    if (!localFile.open(QIODevice::ReadOnly)) {
+        emit errorOccurred(tr("Failed to read backup file for upload"), ErrorCode::ReadError);
+        return;
+    }
+    const QByteArray fileData = localFile.readAll();
+    localFile.close();
+
+    const QString tmpRemotePath = QString("/tmp/amnezia_restore_%1.tgz").arg(
+                Utils::getRandomString(8));
+
+    ErrorCode error = m_sshSession.uploadFileToHost(credentials, fileData, tmpRemotePath);
+    qDebug() << "Upload to /tmp result, error code:" << static_cast<int>(error);
+
+    if (error == ErrorCode::NoError) {
+        // Move from /tmp to final destination with sudo
+        const QString moveScript = QString("mkdir -p \"%1\" && mv \"%2\" \"%3\"")
+                .arg(m_backupDir, tmpRemotePath, remotePath);
+        error = runHostScript(credentials, moveScript);
+        qDebug() << "Move to backup dir result, error code:" << static_cast<int>(error);
+        if (error != ErrorCode::NoError) {
+            // Clean up tmp file on failure
+            runHostScript(credentials, QString("rm -f \"%1\"").arg(tmpRemotePath));
+        }
+    }
 
     qDebug() << "Upload result, error code:" << static_cast<int>(error);
     
@@ -836,7 +872,7 @@ echo "[INFO] Backup created: $BACKUP_FILENAME"
 
 QString ServersBackupController::getContainerBackupScript(DockerContainer container, const QString &ipAddress) const
 {
-    QString containerName = ContainerProps::containerToString(container);
+    QString containerName = ContainerUtils::containerToString(container);
     
     // Backup specific container directly via docker cp
     // Filename format: IP_ADDRESS - DD-MM-YYYY_HH-MM-SS.tgz
@@ -895,7 +931,7 @@ QString ServersBackupController::getContainersBackupScript(const QList<DockerCon
 {
     QString containersList;
     for (const DockerContainer &container : containers) {
-        QString containerName = ContainerProps::containerToString(container);
+        QString containerName = ContainerUtils::containerToString(container);
         containersList += QString("\"%1\" ").arg(containerName);
     }
     
@@ -1212,14 +1248,14 @@ void ServersBackupController::createBackupWithDownload(bool downloadToDevice, bo
         return;
     }
     
-    int serverIndex = m_serversModel->getProcessedServerIndex();
+    int serverIndex = m_serversUiController ? m_serversUiController->getProcessedServerIndex() : -1;
     if (serverIndex < 0) {
         emit errorOccurred(tr("No server selected"), ErrorCode::InternalError);
         return;
     }
-    
-    ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
-    
+
+    ServerCredentials credentials = m_serversUiController->getProcessedServerCredentials();
+
     // Set flags for automatic download and delete
     m_autoDownloadAfterCreate = downloadToDevice;
     m_autoDeleteAfterDownload = deleteFromServer;
@@ -1349,7 +1385,10 @@ void ServersBackupController::startRestore(bool isFromSetupWizard,
              << "replaceMode=" << replaceMode
              << "backupFilePath=" << backupFilePath;
     
-    // Enable auto restore flag after upload
+    // Always auto-restore after upload. Previously the QML onBackupUploaded handler
+    // in PageSettingsServerData.qml triggered restoreBackup for the regular flow, but
+    // that handler was removed (it caused double restores). Now C++ handles restore
+    // automatically in both wizard and regular flows.
     m_autoRestoreAfterUpload = true;
     
     // If this is setup wizard with wizard credentials, use them directly
@@ -1374,24 +1413,26 @@ void ServersBackupController::startRestore(bool isFromSetupWizard,
             return;
         }
         
-        int serverIndex = m_serversModel->getProcessedServerIndex();
+        int serverIndex = m_serversUiController ? m_serversUiController->getProcessedServerIndex() : -1;
         qDebug() << "  ProcessedServerIndex:" << serverIndex;
         qDebug() << "  ServersCount:" << m_serversModel->getServersCount();
-        
+
         if (serverIndex < 0) {
             qWarning() << "No processed server selected, trying default server";
             serverIndex = m_serversModel->getDefaultServerIndex();
             qDebug() << "  DefaultServerIndex:" << serverIndex;
-            
+
             if (serverIndex < 0) {
                 qWarning() << "No default server either";
                 emit errorOccurred(tr("No server selected"), ErrorCode::InternalError);
                 return;
             }
         }
-        
+
         qDebug() << "  Using server index:" << serverIndex;
-        ServerCredentials credentials = m_serversModel->getServerCredentials(serverIndex);
+        ServerCredentials credentials = m_serversController
+            ? m_serversController->getServerCredentials(m_serversController->getServerId(serverIndex))
+            : ServerCredentials{};
         
         // Save credentials for subsequent restore
         m_pendingRestoreCredentials = credentials;
@@ -1416,7 +1457,9 @@ bool ServersBackupController::setDefaultServerAfterRestore(bool isFromSetupWizar
     if (isFromSetupWizard) {
         int serverIdx = m_serversModel->getServersCount() - 1;
         qDebug() << "Setting default server after restore:" << serverIdx;
-        m_serversModel->setDefaultServerIndex(serverIdx);
+        if (m_serversUiController) {
+            m_serversUiController->setDefaultServerAtIndex(serverIdx);
+        }
         m_serversModel->setProcessedServerIndex(serverIdx);
         
         // Reset retry counter
@@ -1441,31 +1484,33 @@ void ServersBackupController::trySetDefaultContainer()
     
     int serverIdx = m_serversModel->getServersCount() - 1;
     qDebug() << "Timer: Setting default container (attempt" << m_containerRetryCount + 1 << "/" << m_maxContainerRetries << ")";
-    
-    // Get server configuration
-    QJsonObject serverConfig = m_serversModel->getServerConfig(serverIdx);
-    QJsonArray containers = serverConfig.value(config_key::containers).toArray();
-    
+
+    // Get installed containers via ServersController
+    QMap<DockerContainer, ContainerConfig> containers;
+    if (m_serversController) {
+        QString serverId = m_serversController->getServerId(serverIdx);
+        containers = m_serversController->getServerContainersMap(serverId);
+    }
+
     qDebug() << "  Total containers:" << containers.size();
-    
-    if (containers.size() > 0) {
-        // Find first installed container
-        for (int i = 0; i < containers.size(); i++) {
-            QJsonObject containerObj = containers.at(i).toObject();
-            
-            // Check if container has any data (meaning it's installed)
-            DockerContainer container = ContainerProps::containerFromString(containerObj.value(config_key::container).toString());
-            if (container != DockerContainer::None && !containerObj.isEmpty()) {
-                qDebug() << "  Setting default container at index:" << i << "for server:" << serverIdx;
-                m_serversModel->setDefaultContainer(serverIdx, i);
-                
+
+    if (!containers.isEmpty()) {
+        // Find first installed non-None container
+        for (auto it = containers.begin(); it != containers.end(); ++it) {
+            DockerContainer container = it.key();
+            if (container != DockerContainer::None) {
+                qDebug() << "  Setting default container" << static_cast<int>(container) << "for server:" << serverIdx;
+                if (m_serversUiController) {
+                    m_serversUiController->setDefaultContainerAtIndex(serverIdx, static_cast<int>(container));
+                }
+
                 // Successfully set - send signal
                 qDebug() << "  Default server and container set successfully";
                 emit defaultServerAndContainerSet();
                 return;
             }
         }
-        
+
         // Containers exist, but none match - proceed anyway
         qDebug() << "  No suitable containers found, but model has data, proceeding";
         emit defaultServerAndContainerSet();
@@ -1514,5 +1559,6 @@ ErrorCode ServersBackupController::uploadFileToHostPublic(const ServerCredential
     ErrorCode e = sshClient.connectToHost(credentials);
     if (e != ErrorCode::NoError)
         return e;
+
     return sshClient.scpFileCopy(overwriteMode, localPath, remotePath, "backup_file");
 }

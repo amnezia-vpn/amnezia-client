@@ -55,7 +55,6 @@ PageType {
             root.currentContainerIndex = 0
             
             // Now add empty server with these credentials
-            InstallController.setShouldCreateServer(true)
             InstallController.setProcessedServerCredentials(hostname, username, secretData)
             
             // Set waiting flag
@@ -77,10 +76,7 @@ PageType {
             if (root.waitingForServerToAdd && root.isRestoreFromBackup && root.backupFilePath.length > 0) {
                 console.log("Server added successfully, now installing containers from backup...")
                 root.waitingForServerToAdd = false
-                
-                // Server already created, set flag to false
-                InstallController.setShouldCreateServer(false)
-                
+
                 // Start installing containers
                 root.isInstallingContainers = true
                 installNextContainer()
@@ -133,28 +129,28 @@ PageType {
         
         // Get default settings for container
         var defaultProtocol = ContainerProps.defaultProtocol(dockerContainer)
-        var defaultPort = ProtocolProps.getPortForInstall(defaultProtocol)
-        var defaultTransport = ProtocolProps.defaultTransportProto(defaultProtocol)
-        
+        var defaultPort = InstallController.getPortForInstall(defaultProtocol)
+        var defaultTransport = InstallController.defaultTransportProto(defaultProtocol)
+
+        // Set server index
+        var serverIdx = ServersModel.getServersCount() - 1
+        ServersModel.processedIndex = serverIdx
+        var serverId = ServersUiController.getServerId(serverIdx)
+
         // Show loading indicator with message
         PageController.showBusyIndicator(true)
         PageController.showNotificationMessage(qsTr("Installing %1 (%2/%3)...")
             .arg(containerName)
             .arg(root.currentContainerIndex + 1)
             .arg(root.containersToInstall.length))
-        
+
         // Ensure credentials are set
-        console.log("Setting credentials for container installation...")
         InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
-        
-        // Set server index
-        var serverIdx = ServersModel.getServersCount() - 1
-        ServersModel.processedIndex = serverIdx
-        
+
         // Install container
-        console.log("Calling InstallController.install for docker container:", dockerContainer)
+        console.log("Installing container:", containerName, "serverId:", serverId)
         ContainersModel.setProcessedContainerIndex(dockerContainer)
-        InstallController.install(dockerContainer, defaultPort, defaultTransport)
+        InstallController.install(dockerContainer, defaultPort, defaultTransport, serverId)
     }
     
     // Timer for navigating to restore mode selection page after file selection
