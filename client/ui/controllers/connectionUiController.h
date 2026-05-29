@@ -63,6 +63,7 @@ signals:
     void requestUpdateServiceFromGateway(const QString &serverId, const QString &newCountryCode,
                                          const QString &newCountryName, bool reloadServiceConfig);
     void requestSetProcessedServer(const QString &serverId);
+    void reconnectWithUpdatedContainer(const QString &message);
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();

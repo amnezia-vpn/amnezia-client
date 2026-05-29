@@ -156,13 +156,13 @@ PageType {
 
                 ButtonGroup.group: protocolButtonGroup
                 checked: root.currentProtocol === "auto"
-                enabled: !ConnectionController.isConnected || !ServersModel.isDefaultServerCurrentlyProcessed()
+                enabled: !ConnectionController.isConnected || !ServersUiController.isDefaultServerCurrentlyProcessed()
 
                 text: qsTr("Choose automatically")
                 descriptionText: qsTr("AmneziaWG is used by default. If the connection is unstable, the app will switch to VLESS. On the next launch, AmneziaWG will be tried again")
 
                 onClicked: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                         return
                     }
@@ -187,12 +187,12 @@ PageType {
 
                 ButtonGroup.group: protocolButtonGroup
                 checked: root.currentProtocol === "awg"
-                enabled: !ConnectionController.isConnected || !ServersModel.isDefaultServerCurrentlyProcessed()
+                enabled: !ConnectionController.isConnected || !ServersUiController.isDefaultServerCurrentlyProcessed()
 
                 text: qsTr("AmneziaWG")
 
                 onClicked: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                         return
                     }
@@ -218,12 +218,12 @@ PageType {
 
                 ButtonGroup.group: protocolButtonGroup
                 checked: root.currentProtocol === "vless"
-                enabled: !ConnectionController.isConnected || !ServersModel.isDefaultServerCurrentlyProcessed()
+                enabled: !ConnectionController.isConnected || !ServersUiController.isDefaultServerCurrentlyProcessed()
 
                 text: qsTr("XRay VLESS Reality")
 
                 onClicked: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                    if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                         PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
                         return
                     }
