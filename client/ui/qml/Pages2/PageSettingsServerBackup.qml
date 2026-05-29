@@ -160,10 +160,10 @@ PageType {
         
         // If IP not found in filename, use current server
         if (!serverIp || serverIp.length === 0) {
-            serverIp = ServersModel.getProcessedServerData("hostName") || ""
+            serverIp = ServersUiController.serverHostName(ServersUiController.processedServerId) || ""
         }
-        
-        var serverName = ServersModel.getProcessedServerData("name") || qsTr("Server")
+
+        var serverName = ServersUiController.serverName(ServersUiController.processedServerId) || qsTr("Server")
         
         // Open restore mode selection page
         var parentItem = root.parent

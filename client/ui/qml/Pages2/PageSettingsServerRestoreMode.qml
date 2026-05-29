@@ -170,15 +170,11 @@ PageType {
         // Navigate to successful restore page
         // Get actual server name from model
         var actualServerName = serverName
-        if (root.isFromSetupWizard && ServersModel.getServersCount() > 0) {
-            var serverIdx = ServersModel.getServersCount() - 1
-            var oldProcessedIndex = ServersModel.processedIndex
-            ServersModel.processedIndex = serverIdx
-            actualServerName = ServersModel.getProcessedServerData("name") || qsTr("Server")
-            ServersModel.processedIndex = oldProcessedIndex
+        if (root.isFromSetupWizard && ServersUiController.getServersCount() > 0) {
+            var lastServerId = ServersUiController.getServerId(ServersUiController.getServersCount() - 1)
+            actualServerName = ServersUiController.serverName(lastServerId) || qsTr("Server")
         } else if (!serverName || serverName.length === 0) {
-            // If name not provided, get from processedIndex
-            actualServerName = ServersModel.getProcessedServerData("name") || qsTr("Server")
+            actualServerName = ServersUiController.serverName(ServersUiController.processedServerId) || qsTr("Server")
         }
         
         var parentItem = root.parent
