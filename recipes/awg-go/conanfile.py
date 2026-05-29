@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, chdir, rmdir
 from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 
@@ -49,32 +49,6 @@ class AwgGo(ConanFile):
     def _is_universal_macos(self):
         return str(self.settings.os) == "Macos" and len(self._archs) > 1
 
-    def _go_arch_make_args(self, goarch):
-        return [
-            f"GOOS={self._goos}",
-            f"GOARCH={goarch}",
-        ]
-
-    def _build_go_arch(self, goarch):
-        autotools = Autotools(self)
-        autotools.make("clean")
-        autotools.make(args=self._go_arch_make_args(goarch))
-
-        output_path = os.path.join(self.build_folder, self._binary_name)
-        arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
-        os.rename(output_path, arch_output_path)
-        return arch_output_path
-
-    def _build_universal_macos(self):
-        outputs = [self._build_go_arch(goarch) for goarch in self._goarchs]
-        universal_output = os.path.join(self.build_folder, self._binary_name)
-        lipo = XCRun(self).find("lipo")
-        self.run("{} -create {} -output {}".format(
-            shlex.quote(lipo),
-            " ".join(shlex.quote(output) for output in outputs),
-            shlex.quote(universal_output)
-        ))
-
     def layout(self):
         basic_layout(self, build_folder=".")
 
@@ -108,7 +82,41 @@ class AwgGo(ConanFile):
 
     def build(self):
         if self._is_universal_macos:
-            self._build_universal_macos()
+            outputs = []
+            for goarch in self._goarchs:
+                arch_build_folder = os.path.join(self.build_folder, f"build-{goarch}")
+                rmdir(self, arch_build_folder)
+                copy(self, "*", src=self.source_folder, dst=arch_build_folder, excludes=(
+                    "amneziawg-go",
+                    "amneziawg-go-*",
+                    "build-*",
+                    "conan",
+                    "conan/*",
+                    "gocache",
+                    "gocache/*",
+                    "gopath",
+                    "gopath/*",
+                ))
+
+                at = Autotools(self)
+                with chdir(self, arch_build_folder):
+                    at.make(args=[
+                        f"GOOS={self._goos}",
+                        f"GOARCH={goarch}",
+                    ])
+
+                output_path = os.path.join(arch_build_folder, self._binary_name)
+                arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
+                os.rename(output_path, arch_output_path)
+                outputs.append(arch_output_path)
+
+            universal_output = os.path.join(self.build_folder, self._binary_name)
+            lipo = XCRun(self).find("lipo")
+            self.run("{} -create {} -output {}".format(
+                shlex.quote(lipo),
+                " ".join(shlex.quote(output) for output in outputs),
+                shlex.quote(universal_output)
+            ))
             return
 
         at = Autotools(self)
