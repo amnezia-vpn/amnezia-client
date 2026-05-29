@@ -5,10 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Git
 from conan.internal.model.pkg_type import PackageType
 from conan.tools.files import chdir
+from conan.tools.apple import XCRun
 
 import os
 import shutil
-import shlex
 
 class OpenVPNAdapter(ConanFile):
     name = "openvpnadapter"
@@ -50,7 +50,10 @@ class OpenVPNAdapter(ConanFile):
 
     def build(self):
         with chdir(self, self.source_folder):
-            self.run("xcrun xcodebuild"
+            xcrun = XCRun(self)
+
+            xcodebuild = xcrun.find("xcodebuild")
+            self.run(f"{xcodebuild}"
                 " -project OpenVPNAdapter.xcodeproj"
                 " -scheme OpenVPNAdapter"
                 " -configuration Release"
@@ -63,23 +66,18 @@ class OpenVPNAdapter(ConanFile):
                 " CODE_SIGNING_ALLOWED=NO"
             )
 
-    def package(self):
-        package_framework = os.path.join(self.package_folder, "OpenVPNAdapter.framework")
-        shutil.copytree(os.path.join(self.build_folder, "OpenVPNAdapter.framework"),
-                        package_framework)
+            openvpnadapter = os.path.join(self.build_folder, "OpenVPNAdapter.framework", "OpenVPNAdapter")
+            self.run(f"{xcrun.libtool} -static -o"
+                     f" {openvpnadapter}"
+                     f" {openvpnadapter}"
+                     f' {os.path.join(self.build_folder, "OpenVPNClient.framework", "OpenVPNClient")}'
+                     f' {os.path.join(self.build_folder, "LZ4.framework", "LZ4")}'
+                     f' {os.path.join(self.build_folder, "mbedTLS.framework", "mbedTLS")}'
+            )
 
-        framework_binary = os.path.join(package_framework, "OpenVPNAdapter")
-        dependency_binaries = [
-            os.path.join(self.build_folder, "OpenVPNClient.framework", "OpenVPNClient"),
-            os.path.join(self.build_folder, "LZ4.framework", "LZ4"),
-            os.path.join(self.build_folder, "mbedTLS.framework", "mbedTLS"),
-        ]
-        merged_binary = framework_binary + ".merged"
-        self.run("xcrun libtool -static -o {} {}".format(
-            shlex.quote(merged_binary),
-            " ".join(shlex.quote(path) for path in [framework_binary] + dependency_binaries)
-        ))
-        shutil.move(merged_binary, framework_binary)
+    def package(self):
+        shutil.copytree(os.path.join(self.build_folder, "OpenVPNAdapter.framework"),
+                        os.path.join(self.package_folder, "OpenVPNAdapter.framework"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpnadapter")
