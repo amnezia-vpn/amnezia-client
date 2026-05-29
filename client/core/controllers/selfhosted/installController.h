@@ -64,7 +64,8 @@ public:
     
     bool isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
     
-    ErrorCode checkSshConnection(const ServerCredentials &credentials, QString &output, std::function<QString()> passphraseCallback = nullptr);
+    ErrorCode checkSshConnection(ServerCredentials &credentials, QString &output,
+                                 std::function<QString()> passphraseCallback = nullptr);
     
     bool isServerAlreadyExists(const ServerCredentials &credentials, int &existingServerIndex);
     

@@ -76,7 +76,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: SettingsController.isLocalProxySupported && ServersModel.processedServerIsPremium
+                visible: SettingsController.isLocalProxySupported && ServersUiController.processedServerIsPremium
                 Layout.preferredHeight: visible ? implicitHeight : 0
 
                 text: qsTr("Local proxy")

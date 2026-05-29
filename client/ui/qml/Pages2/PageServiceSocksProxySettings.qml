@@ -71,7 +71,7 @@ PageType {
                 Layout.bottomMargin: 16
 
                 text: qsTr("Host")
-                descriptionText: ServersModel.getProcessedServerData("hostName")
+                descriptionText: ServersUiController.serverHostName(ServersUiController.processedServerId)
 
                 descriptionOnTop: true
 
@@ -285,7 +285,7 @@ PageType {
                             }
 
                             PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                            InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.Socks5Proxy)
+                            InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Socks5Proxy)
                             tempPort = portTextField.textField.text
                             tempUsername = usernameTextField.textField.text
                             tempPassword = passwordTextField.textField.text

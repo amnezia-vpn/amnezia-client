@@ -201,10 +201,6 @@ elseif(APPLE)
     include(cmake/macos.cmake)
 endif()
 
-if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
-    add_subdirectory(tests)
-endif()
-
 list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
@@ -224,11 +220,32 @@ endif()
 
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
+    RUNTIME_DEPENDENCY_SET client_deps
     COMPONENT AmneziaVPN
 )
-install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+
+if(APPLE)
+    set(RUNTIME_DEPS_DIR ${CMAKE_INSTALL_BINDIR}/AmneziaVPN.app/Contents/Frameworks)
+else()
+    set(RUNTIME_DEPS_DIR ${CMAKE_INSTALL_BINDIR})
+endif()
+
+install(RUNTIME_DEPENDENCY_SET client_deps
+    PRE_EXCLUDE_REGEXES
+        [[api-ms-win-.*]]
+        [[ext-ms-.*]]
+        [[kernel32\.dll]]
+        [[hvsifiletrust\.dll]]
+        [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
+        [[.*\.framework]]
+        [[^[Qq]t.*]]
+    POST_EXCLUDE_REGEXES
+        [[^.*[\\/]system32[\\/].*\.dll$]]
+        [[^/lib.*]]
+        [[^/usr/lib.*]]
+    DIRECTORIES ${CONAN_RUNTIME_LIB_DIRS}
     COMPONENT AmneziaVPN
+    DESTINATION "${RUNTIME_DEPS_DIR}"
 )
 
 set(deploy_tool_options "")

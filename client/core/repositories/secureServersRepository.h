@@ -50,6 +50,8 @@ public:
 
     void clearServers();
 
+    QString nextAvailableServerName() const;
+
     void invalidateCache();
 
 signals:

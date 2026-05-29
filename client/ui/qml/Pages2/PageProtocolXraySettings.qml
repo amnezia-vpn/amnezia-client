@@ -64,6 +64,18 @@ PageType {
 
             spacing: 0
 
+            Text {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                visible: !listView.enabled
+                wrapMode: Text.WordWrap
+                color: AmneziaStyle.color.paleGray
+                font.pixelSize: 14
+                text: qsTr("You have read-only access to this server. XRay settings cannot be edited.")
+            }
+
             RowLayout {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -73,6 +85,8 @@ PageType {
                 BaseHeaderType {
                     Layout.fillWidth: true
                     headerText: qsTr("XRay VLESS settings")
+                    descriptionLinkText: qsTr("More about settings")
+                    descriptionLinkUrl: "https://docs.amnezia.org"
                 }
 
                 ImageButtonType {
@@ -82,22 +96,6 @@ PageType {
                     image: "qrc:/images/controls/more-vertical.svg"
                     imageColor: AmneziaStyle.color.paleGray
                     onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
-                }
-            }
-
-            LabelTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 4
-                text: qsTr("More about settings")
-                color: AmneziaStyle.color.goldenApricot
-                font.pixelSize: 16
-                lineHeight: 24 + LanguageUiController.getLineHeightAppend()
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: Qt.openUrlExternally("https://docs.amnezia.org")
                 }
             }
 
@@ -173,8 +171,9 @@ PageType {
                 Layout.bottomMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                // Show Save immediately while user edits port, even before focus loss.
-                visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || textFieldWithHeaderType.textField.text !== port)
+                visible: listView.enabled
+                         && (XrayConfigModel.hasUnsavedChanges
+                             || textFieldWithHeaderType.textField.text !== port)
                 enabled: visible && textFieldWithHeaderType.errorText === ""
                 text: qsTr("Save")
                 onClicked: function() {
@@ -184,13 +183,17 @@ PageType {
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
                     var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
                         }
 
+                        if (textFieldWithHeaderType.textField.text !== port) {
+                            port = textFieldWithHeaderType.textField.text
+                        }
+
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(ServersUiController.getServerId(ServersUiController.processedServerIndex), ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                        InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) saveButton.forceActiveFocus()
@@ -209,6 +212,8 @@ PageType {
                 clickedFunction: function() {
                     var yesButtonFunction = function() {
                         XrayConfigModel.resetToDefaults()
+                        PageController.showNotificationMessage(
+                            qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
                     }
                     showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
                         qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {

@@ -77,15 +77,15 @@ PageType {
 
     function handleLocalProxyToggle(checked) {
         if (checked) {
-            if (!ServersModel.processedServerIsPremium) {
+            if (!ServersUiController.processedServerIsPremium) {
                 PageController.showNotificationMessage(qsTr("Local proxy is available only for Amnezia Premium"))
                 return
             }
             const wasVpnActive = ConnectionController.isConnected || ConnectionController.isConnectionInProgress
 
-            let serverId = ServersModel.processedServerId
+            let serverId = ServersUiController.processedServerId
             if (!serverId) {
-                serverId = ServersModel.getServerId(ServersModel.getDefaultServerIndex())
+                serverId = ServersUiController.defaultServerId
             }
             if (!serverId) {
                 PageController.showNotificationMessage(qsTr("Unable to determine the current server"))
@@ -181,7 +181,7 @@ PageType {
                 Layout.rightMargin: 16
                 headerText: qsTr("Local Proxy")
                 descriptionText: qsTr("Use a proxy to route selected apps (for example, the CensorTracker extension) through Amnezia Premium.")
-                showSwitcher: ServersModel.processedServerIsPremium
+                showSwitcher: ServersUiController.processedServerIsPremium
                 switcher {
                     checked: SettingsController.isLocalProxyHttpEnabled
                 }
@@ -414,9 +414,9 @@ PageType {
     }
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
 
-        function onProcessedServerChanged() {
+        function onProcessedServerIdChanged() {
             var portField = root.getPortField()
             if (portField !== null && !portField.textField.activeFocus) {
                 portField.syncPortValue()
