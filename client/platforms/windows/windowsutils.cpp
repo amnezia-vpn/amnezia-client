@@ -12,43 +12,42 @@
 
 #include "logger.h"
 
-namespace
+namespace {
+Logger logger("WindowsUtils");
+
+constexpr const wchar_t kThemeWatcherClassName[] = L"AmneziaVpnThemeWatcher";
+
+struct ThemeObserverState
 {
-    Logger logger("WindowsUtils");
+    std::function<void()> callback;
+    HWND hwnd = nullptr;
+};
 
-    constexpr const wchar_t kThemeWatcherClassName[] = L"AmneziaVpnThemeWatcher";
+ThemeObserverState g_themeObserver;
 
-    struct ThemeObserverState
-    {
-        std::function<void()> callback;
-        HWND hwnd = nullptr;
-    };
-
-    ThemeObserverState g_themeObserver;
-
-    bool registryUsesDarkTheme(const QSettings &settings, const QString &lightThemeKey)
-    {
-        if (settings.contains(lightThemeKey)) {
-            return settings.value(lightThemeKey).toInt() != 1;
-        }
-        return false;
+bool registryUsesDarkTheme(const QSettings &settings, const QString &lightThemeKey)
+{
+    if (settings.contains(lightThemeKey)) {
+        return settings.value(lightThemeKey).toInt() != 1;
     }
+    return false;
+}
 
-    LRESULT CALLBACK themeWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-    {
-        Q_UNUSED(wParam);
+LRESULT CALLBACK themeWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    Q_UNUSED(wParam);
 
-        if (msg == WM_SETTINGCHANGE && lParam != 0) {
-            const wchar_t *section = reinterpret_cast<const wchar_t *>(lParam);
-            if (wcscmp(section, L"ImmersiveColorSet") == 0 || wcscmp(section, L"WindowsThemeElement") == 0) {
-                if (g_themeObserver.callback) {
-                    g_themeObserver.callback();
-                }
+    if (msg == WM_SETTINGCHANGE && lParam != 0) {
+        const wchar_t *section = reinterpret_cast<const wchar_t *>(lParam);
+        if (wcscmp(section, L"ImmersiveColorSet") == 0 || wcscmp(section, L"WindowsThemeElement") == 0) {
+            if (g_themeObserver.callback) {
+                g_themeObserver.callback();
             }
         }
-
-        return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
+
+    return DefWindowProcW(hwnd, msg, wParam, lParam);
+}
 } // namespace
 
 constexpr const int WINDOWS_11_BUILD =
@@ -56,9 +55,11 @@ constexpr const int WINDOWS_11_BUILD =
 
 QString WindowsUtils::getErrorMessage(quint32 code) {
   LPSTR messageBuffer = nullptr;
-  size_t size =
-          FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                         nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, nullptr);
+  size_t size = FormatMessageA(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+      nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPSTR)&messageBuffer, 0, nullptr);
 
   std::string message(messageBuffer, size);
   QString result(message.c_str());
