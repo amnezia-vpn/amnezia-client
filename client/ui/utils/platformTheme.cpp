@@ -7,6 +7,8 @@
 #  include "platforms/macos/macosutils.h"
 #elif defined(Q_OS_WIN)
 #  include "platforms/windows/windowsutils.h"
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+#  include "platforms/linux/linuxutils.h"
 #endif
 
 bool platformIsDarkTheme()
@@ -15,6 +17,8 @@ bool platformIsDarkTheme()
     return MacOSUtils::isDarkTheme();
 #elif defined(Q_OS_WIN)
     return WindowsUtils::isDarkTheme();
+#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    return LinuxUtils::isDarkTheme();
 #else
     if (QStyleHints *styleHints = QGuiApplication::styleHints()) {
         return styleHints->colorScheme() == Qt::ColorScheme::Dark;

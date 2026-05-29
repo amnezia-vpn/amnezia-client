@@ -294,6 +294,15 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
             ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
         )
     endif()
+
+    if(LINUX AND NOT ANDROID)
+        set(HEADERS ${HEADERS}
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.h
+        )
+        set(SOURCES ${SOURCES}
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.cpp
+        )
+    endif()
 endif()
 
 if(APPLE AND MACOS_NE)

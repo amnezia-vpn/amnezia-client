@@ -27,12 +27,20 @@
 #  include "platforms/windows/windowsutils.h"
 #endif
 
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+#  include "platforms/linux/linuxutils.h"
+#endif
+
 #include "version.h"
 
 namespace {
 
 constexpr int kTrayIconSize = 128;
 constexpr char kTrayTemplateIconPath[] = ":/images/tray/icon.svg";
+
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+constexpr int kLinuxTrayIconSizes[] = {16, 22, 24, 32, 48, 64, 128};
+#endif
 
 class TrayThemeChangeFilter final : public QObject {
 public:
@@ -58,10 +66,10 @@ private:
     std::function<void()> m_onThemeChanged;
 };
 
-QPixmap renderTrayTemplate(const QString &resourcePath, qreal opacity)
+QPixmap renderTrayTemplate(const QString &resourcePath, qreal opacity, int size)
 {
     QSvgRenderer renderer(resourcePath);
-    QPixmap pixmap(kTrayIconSize, kTrayIconSize);
+    QPixmap pixmap(size, size);
     pixmap.fill(Qt::transparent);
 
     if (!renderer.isValid()) {
@@ -71,13 +79,13 @@ QPixmap renderTrayTemplate(const QString &resourcePath, qreal opacity)
 
     QPainter painter(&pixmap);
     painter.setOpacity(opacity);
-    renderer.render(&painter, QRectF(0, 0, kTrayIconSize, kTrayIconSize));
+    renderer.render(&painter, QRectF(0, 0, size, size));
     return pixmap;
 }
 
-QPixmap colorizeTrayTemplate(const QPixmap &mask, const QColor &foreground)
+QPixmap colorizeTrayTemplate(const QPixmap &mask, const QColor &foreground, int size)
 {
-    QPixmap result(kTrayIconSize, kTrayIconSize);
+    QPixmap result(size, size);
     result.fill(Qt::transparent);
 
     QPainter painter(&result);
@@ -87,10 +95,10 @@ QPixmap colorizeTrayTemplate(const QPixmap &mask, const QColor &foreground)
     return result;
 }
 
-void drawStatusIndicator(QPainter &painter, const QColor &color)
+void drawStatusIndicator(QPainter &painter, const QColor &color, int size)
 {
-    const qreal dotSize = kTrayIconSize * 0.35;
-    const qreal dotOrigin = (kTrayIconSize - dotSize) * 0.8;
+    const qreal dotSize = size * 0.35;
+    const qreal dotOrigin = (size - dotSize) * 0.8;
 
     painter.setPen(Qt::NoPen);
     painter.setBrush(color);
@@ -99,7 +107,7 @@ void drawStatusIndicator(QPainter &painter, const QColor &color)
 
 QByteArray renderTrayTemplatePng(qreal opacity)
 {
-    const QPixmap pixmap = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
+    const QPixmap pixmap = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity, kTrayIconSize);
 
     QByteArray bytes;
     QBuffer buffer(&bytes);
@@ -108,19 +116,32 @@ QByteArray renderTrayTemplatePng(qreal opacity)
     return bytes;
 }
 
-QIcon buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor)
+QPixmap buildTrayPixmap(int size, qreal opacity, bool darkTheme, const QColor &indicatorColor)
 {
-    const QPixmap mask = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
+    const QPixmap mask = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity, size);
     const QColor foreground = darkTheme ? Qt::white : Qt::black;
-    QPixmap pixmap = colorizeTrayTemplate(mask, foreground);
+    QPixmap pixmap = colorizeTrayTemplate(mask, foreground, size);
 
     if (indicatorColor.isValid()) {
         QPainter painter(&pixmap);
-        drawStatusIndicator(painter, indicatorColor);
+        drawStatusIndicator(painter, indicatorColor, size);
     }
 
+    return pixmap;
+}
+
+QIcon buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor)
+{
     QIcon icon;
-    icon.addPixmap(pixmap);
+
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    for (int size : kLinuxTrayIconSizes) {
+        icon.addPixmap(buildTrayPixmap(size, opacity, darkTheme, indicatorColor));
+    }
+#else
+    icon.addPixmap(buildTrayPixmap(kTrayIconSize, opacity, darkTheme, indicatorColor));
+#endif
+
     return icon;
 }
 
@@ -166,18 +187,26 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
         });
     }
 
+#if !defined(Q_OS_LINUX) || defined(Q_OS_ANDROID)
     qApp->installEventFilter(new TrayThemeChangeFilter([this]() {
         refreshTheme();
     }, this));
+#endif
 
 #if defined(Q_OS_WIN)
     WindowsUtils::installThemeChangeObserver([this]() {
         refreshTheme();
     });
 #endif
+
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    LinuxUtils::installThemeChangeObserver([this]() {
+        refreshTheme();
+    });
+#endif
 #endif
 
-    refreshTheme();
+    m_isDarkTheme = platformIsDarkTheme();
     setTrayState(Vpn::ConnectionState::Disconnected);
 
 #if !defined(Q_OS_MAC) || defined(MACOS_NE)
@@ -216,7 +245,12 @@ void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUr
 
 void SystemTrayNotificationHandler::refreshTheme()
 {
-    m_isDarkTheme = platformIsDarkTheme();
+    const bool isDarkTheme = platformIsDarkTheme();
+    if (isDarkTheme == m_isDarkTheme) {
+        return;
+    }
+
+    m_isDarkTheme = isDarkTheme;
 
 #if !defined(Q_OS_MAC) || defined(MACOS_NE)
     updateTrayIcon();
@@ -321,6 +355,9 @@ void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
         m_macStatusIcon->rebuildNativeMenu();
     }
 #endif
+}
+template<typename> constexpr auto SystemTrayNotificationHandler::qt_create_metaobjectdata()
+{
 }
 
 void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
