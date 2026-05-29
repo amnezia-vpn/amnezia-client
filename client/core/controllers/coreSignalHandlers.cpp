@@ -33,7 +33,6 @@
 #include "core/controllers/connectionController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
-#include "ui/models/api/apiCountryModel.h"
 #include "ui/models/containersModel.h"
 #include "core/utils/containerEnum.h"
 
@@ -176,17 +175,14 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
         if (processedServerId.isEmpty()) {
             return;
         }
-        
-        QJsonArray availableCountries;
-        QString serverCountryCode;
 
         const auto apiV2 = m_coreController->m_serversRepository->apiV2Config(processedServerId);
-        if (apiV2.has_value()) {
-            availableCountries = apiV2->apiConfig.availableCountries;
-            serverCountryCode = apiV2->apiConfig.serverCountryCode;
+        if (!apiV2.has_value()) {
+            return;
         }
-        
-        m_coreController->m_apiCountryModel->updateModel(availableCountries, serverCountryCode);
+
+        m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
+                                                           apiV2->apiConfig.serverCountryCode);
     });
 }
 

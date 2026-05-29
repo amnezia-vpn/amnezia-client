@@ -83,7 +83,7 @@ PageType {
 
         model: ApiCountryModel
 
-        currentIndex: 0
+        currentIndex: ApiCountryModel.currentIndex
 
         ButtonGroup {
             id: containersRadioButtonGroup

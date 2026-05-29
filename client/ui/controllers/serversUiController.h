@@ -113,7 +113,6 @@ signals:
     void processedContainerIndexChanged(int index);
     void hasServersFromGatewayApiChanged();
     void updateApiCountryModel();
-    void updateApiServicesModel();
 
 public:
     void updateModel();
