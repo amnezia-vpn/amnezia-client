@@ -38,6 +38,8 @@
 @interface MacOSStatusIconDelegate : NSObject
 @property(assign) NSStatusItem* statusItem;
 @property(assign) NSView* statusIndicator;
+@property(retain) NSMenu* nativeMenu;
+@property(retain) NSMutableArray* menuActionTargets;
 
 - (void)setIcon:(NSData*)imageData;
 - (void)setIndicator;
@@ -202,6 +204,17 @@ void MacOSStatusIcon::setIcon(const QString& iconPath) {
   Q_ASSERT(imageResource.isValid());
 
   [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData()];
+}
+
+void MacOSStatusIcon::setIconFromData(const QByteArray& imageData) {
+  logger.debug() << "Set icon from rendered data";
+
+  if (imageData.isEmpty()) {
+    return;
+  }
+
+  NSData* data = [NSData dataWithBytes:imageData.constData() length:imageData.size()];
+  [m_statusBarIcon setIcon:data];
 }
 
 void MacOSStatusIcon::setIndicatorColor(const QColor& indicatorColor) {
