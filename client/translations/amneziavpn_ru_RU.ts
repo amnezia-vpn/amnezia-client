@@ -4446,7 +4446,17 @@ Create one from the current settings.</source>
         <translation>Добавить их в приложение, если они не отображаются</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="126"/>
+        <source>Backup</source>
+        <translation>Резервное копирование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="127"/>
+        <source>Local copy of VPN protocols, services, all server settings and users</source>
+        <translation>Локальная копия VPN-протоколов, сервисов, всех настроек сервера и пользователей</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="124"/>
         <source>Reboot server</source>
         <translation>Перезагрузить сервер</translation>
     </message>
@@ -5176,6 +5186,34 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="200"/>
         <source>Skip setup</source>
         <translation>Пропустить настройку</translation>
+    </message>
+    <message>
+        <source>No containers found in backup file</source>
+        <translation>В файле резервной копии не найдено контейнеров</translation>
+    </message>
+    <message>
+        <source>Installing %1 (%2/%3)...</source>
+        <translation>Устанавливается %1 (%2/%3)...</translation>
+    </message>
+    <message>
+        <source>backup.tgz</source>
+        <translation>backup.tgz</translation>
+    </message>
+    <message>
+        <source>RestoredServer</source>
+        <translation>Восстановленный сервер</translation>
+    </message>
+    <message>
+        <source>Restore from backup</source>
+        <translation>Восстановить из резервной копии</translation>
+    </message>
+    <message>
+        <source>Restoration of VPN protocols, services, all server settings and users</source>
+        <translation>Восстановление VPN-протоколов, сервисов, всех настроек сервера и пользователей</translation>
+    </message>
+    <message>
+        <source>Select Backup to Restore</source>
+        <translation>Выберите файл резервной копии</translation>
     </message>
 </context>
 <context>
@@ -6836,6 +6874,334 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/models/protocols/xrayConfigSnapshotsModel.cpp" line="153"/>
         <source>Invalid JSON format</source>
         <translation>Неверный формат JSON</translation>
+    </message>
+</context>
+<context>
+    <name>ServersBackupController</name>
+    <message>
+        <source>Another operation is in progress</source>
+        <translation>Другая операция уже выполняется</translation>
+    </message>
+    <message>
+        <source>Starting backup creation...</source>
+        <translation>Создание резервной копии...</translation>
+    </message>
+    <message>
+        <source>Backup created successfully</source>
+        <translation>Резервная копия успешно создана</translation>
+    </message>
+    <message>
+        <source>Failed to parse backup filename from output: %1</source>
+        <translation>Не удалось получить имя файла резервной копии: %1</translation>
+    </message>
+    <message>
+        <source>Failed to create backup: %1</source>
+        <translation>Не удалось создать резервную копию: %1</translation>
+    </message>
+    <message>
+        <source>Starting backup for container: %1...</source>
+        <translation>Создание резервной копии контейнера: %1...</translation>
+    </message>
+    <message>
+        <source>Container backup created successfully</source>
+        <translation>Резервная копия контейнера успешно создана</translation>
+    </message>
+    <message>
+        <source>Failed to create container backup: %1</source>
+        <translation>Не удалось создать резервную копию контейнера: %1</translation>
+    </message>
+    <message>
+        <source>Starting backup for %1 containers...</source>
+        <translation>Создание резервной копии для %1 контейнеров...</translation>
+    </message>
+    <message>
+        <source>Backing up containers...</source>
+        <translation>Сохранение контейнеров...</translation>
+    </message>
+    <message>
+        <source>Containers backup created successfully</source>
+        <translation>Резервная копия контейнеров успешно создана</translation>
+    </message>
+    <message>
+        <source>Failed to create containers backup: %1</source>
+        <translation>Не удалось создать резервную копию контейнеров: %1</translation>
+    </message>
+    <message>
+        <source>Fetching backup list...</source>
+        <translation>Получение списка резервных копий...</translation>
+    </message>
+    <message>
+        <source>Backup list received</source>
+        <translation>Список резервных копий получен</translation>
+    </message>
+    <message>
+        <source>Failed to fetch backup list: %1</source>
+        <translation>Не удалось получить список резервных копий: %1</translation>
+    </message>
+    <message>
+        <source>Starting restore from %1 (%2)...</source>
+        <translation>Восстановление из %1 (%2)...</translation>
+    </message>
+    <message>
+        <source>add mode</source>
+        <translation>режим добавления</translation>
+    </message>
+    <message>
+        <source>replace mode</source>
+        <translation>режим замены</translation>
+    </message>
+    <message>
+        <source>Starting restore...</source>
+        <translation>Запуск восстановления...</translation>
+    </message>
+    <message>
+        <source>Restoring containers...</source>
+        <translation>Восстановление контейнеров...</translation>
+    </message>
+    <message>
+        <source>Finalizing restore...</source>
+        <translation>Завершение восстановления...</translation>
+    </message>
+    <message>
+        <source>Backup restored successfully</source>
+        <translation>Резервная копия успешно восстановлена</translation>
+    </message>
+    <message>
+        <source>Backup restore did not complete successfully. Output: %1</source>
+        <translation>Восстановление из резервной копии не завершилось успешно. Вывод: %1</translation>
+    </message>
+    <message>
+        <source>Failed to restore backup: %1</source>
+        <translation>Не удалось восстановить резервную копию: %1</translation>
+    </message>
+    <message>
+        <source>Checking backup status...</source>
+        <translation>Проверка статуса резервной копии...</translation>
+    </message>
+    <message>
+        <source>Status received</source>
+        <translation>Статус получен</translation>
+    </message>
+    <message>
+        <source>Failed to check backup status: %1</source>
+        <translation>Не удалось проверить статус резервной копии: %1</translation>
+    </message>
+    <message>
+        <source>Downloading backup...</source>
+        <translation>Скачивание резервной копии...</translation>
+    </message>
+    <message>
+        <source>Starting file transfer...</source>
+        <translation>Начало передачи файла...</translation>
+    </message>
+    <message>
+        <source>Backup downloaded successfully</source>
+        <translation>Резервная копия успешно скачана</translation>
+    </message>
+    <message>
+        <source>Failed to download backup: error code %1</source>
+        <translation>Не удалось скачать резервную копию: код ошибки %1</translation>
+    </message>
+    <message>
+        <source>Uploading backup...</source>
+        <translation>Загрузка резервной копии на сервер...</translation>
+    </message>
+    <message>
+        <source>Backup uploaded successfully</source>
+        <translation>Резервная копия успешно загружена на сервер</translation>
+    </message>
+    <message>
+        <source>Failed to upload backup: error code %1</source>
+        <translation>Не удалось загрузить резервную копию: код ошибки %1</translation>
+    </message>
+    <message>
+        <source>Backup filename is empty</source>
+        <translation>Имя файла резервной копии не указано</translation>
+    </message>
+    <message>
+        <source>Failed to read backup file for upload</source>
+        <translation>Не удалось прочитать файл резервной копии для загрузки</translation>
+    </message>
+    <message>
+        <source>Failed to read backup file from Android storage</source>
+        <translation>Не удалось прочитать файл резервной копии из хранилища Android</translation>
+    </message>
+    <message>
+        <source>Failed to create temporary file</source>
+        <translation>Не удалось создать временный файл</translation>
+    </message>
+    <message>
+        <source>Local file does not exist: %1</source>
+        <translation>Локальный файл не найден: %1</translation>
+    </message>
+    <message>
+        <source>Path is not a file: %1</source>
+        <translation>Указанный путь не является файлом: %1</translation>
+    </message>
+    <message>
+        <source>Failed to create local directory: %1</source>
+        <translation>Не удалось создать локальную папку: %1</translation>
+    </message>
+    <message>
+        <source>Deleting backup...</source>
+        <translation>Удаление резервной копии...</translation>
+    </message>
+    <message>
+        <source>Backup deleted</source>
+        <translation>Резервная копия удалена</translation>
+    </message>
+    <message>
+        <source>Failed to delete backup: %1</source>
+        <translation>Не удалось удалить резервную копию: %1</translation>
+    </message>
+    <message>
+        <source>Finalizing...</source>
+        <translation>Завершение...</translation>
+    </message>
+    <message>
+        <source>No containers found in backup file</source>
+        <translation>В файле резервной копии не найдено контейнеров</translation>
+    </message>
+    <message>
+        <source>Unknown container: %1</source>
+        <translation>Неизвестный контейнер: %1</translation>
+    </message>
+    <message>
+        <source>Internal error: ServersModel is not available</source>
+        <translation>Внутренняя ошибка: ServersModel недоступен</translation>
+    </message>
+    <message>
+        <source>ServersModel is not available</source>
+        <translation>ServersModel недоступен</translation>
+    </message>
+    <message>
+        <source>No server selected</source>
+        <translation>Сервер не выбран</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerBackup</name>
+    <message>
+        <source>Backup</source>
+        <translation>Резервное копирование</translation>
+    </message>
+    <message>
+        <source>Local copy of VPN protocols, services, all server settings and users.</source>
+        <translation>Локальная копия VPN-протоколов, сервисов, всех настроек сервера и пользователей.</translation>
+    </message>
+    <message>
+        <source>More about backups</source>
+        <translation>Подробнее о резервных копиях</translation>
+    </message>
+    <message>
+        <source>Create backup</source>
+        <translation>Создать резервную копию</translation>
+    </message>
+    <message>
+        <source>Restore from backup</source>
+        <translation>Восстановить из резервной копии</translation>
+    </message>
+    <message>
+        <source>Create backup and download to device?</source>
+        <translation>Создать резервную копию и скачать на устройство?</translation>
+    </message>
+    <message>
+        <source>Backup will be created on server and automatically downloaded to your device</source>
+        <translation>Резервная копия будет создана на сервере и автоматически скачана на ваше устройство</translation>
+    </message>
+    <message>
+        <source>Create server configuration backup?</source>
+        <translation>Создать резервную копию конфигурации сервера?</translation>
+    </message>
+    <message>
+        <source>This will create a backup of your server containers configuration on the server</source>
+        <translation>На сервере будет создана резервная копия конфигурации контейнеров</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>Создать</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Select Backup to Restore</source>
+        <translation>Выберите файл резервной копии</translation>
+    </message>
+    <message>
+        <source>Backup files (*.tar.gz *.backup *.tgz *.gz)</source>
+        <translation>Файлы резервных копий (*.tar.gz *.backup *.tgz *.gz)</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Сервер</translation>
+    </message>
+    <message>
+        <source>Backup created successfully: %1</source>
+        <translation>Резервная копия успешно создана: %1</translation>
+    </message>
+    <message>
+        <source>Backup downloaded successfully!\n\nSaved to:\n%1</source>
+        <translation>Резервная копия успешно скачана!\n\nСохранена в:\n%1</translation>
+    </message>
+    <message>
+        <source>Backup error: %1</source>
+        <translation>Ошибка резервного копирования: %1</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerRestoreMode</name>
+    <message>
+        <source>%1 on %2</source>
+        <translation>%1 на %2</translation>
+    </message>
+    <message>
+        <source>Restore from backup</source>
+        <translation>Восстановление из резервной копии</translation>
+    </message>
+    <message>
+        <source>Add data from backup</source>
+        <translation>Добавить данные из резервной копии</translation>
+    </message>
+    <message>
+        <source>If the same protocols are already installed on the server, they will be updated. Created users and access will be saved</source>
+        <translation>Если на сервере уже установлены такие же протоколы, они будут обновлены. Созданные пользователи и доступы сохранятся</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Заменить</translation>
+    </message>
+    <message>
+        <source>All installed protocols, users and their access will not be saved</source>
+        <translation>Все установленные протоколы, пользователи и их доступы не будут сохранены</translation>
+    </message>
+    <message>
+        <source>Backup restore error: %1</source>
+        <translation>Ошибка восстановления из резервной копии: %1</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Сервер</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerBackupRestored</name>
+    <message>
+        <source>%1 on &quot;%2&quot;</source>
+        <translation>%1 на &quot;%2&quot;</translation>
+    </message>
+    <message>
+        <source>Backup restored</source>
+        <translation>Резервная копия восстановлена</translation>
+    </message>
+    <message>
+        <source>To home</source>
+        <translation>На главную</translation>
+    </message>
+    <message>
+        <source>To server settings</source>
+        <translation>К настройкам сервера</translation>
     </message>
 </context>
 <context>
