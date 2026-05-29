@@ -68,6 +68,7 @@
         <file>tray/active.png</file>
         <file>tray/default.png</file>
         <file>tray/error.png</file>
+        <file>tray/icon.svg</file>
         <file>controls/monitor.svg</file>
     </qresource>
 </RCC>

@@ -34,7 +34,8 @@ private:
     void setTrayState(Vpn::ConnectionState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
-    void setTrayIcon(const QString &iconPath);
+    void updateTrayIcon();
+    qreal trayIconOpacityForState(Vpn::ConnectionState state) const;
 
 private:
     QMenu m_menu;
@@ -45,13 +46,15 @@ private:
     QAction* m_trayActionDisconnect = nullptr;
     QAction* m_trayActionVisitWebSite = nullptr;
     QAction* m_trayActionQuit = nullptr;
-    QAction* m_statusLabel = nullptr;    
+    QAction* m_statusLabel = nullptr;
     QAction* m_separator = nullptr;
 
-    const QString ConnectedTrayIconName = "active.png";
-    const QString DisconnectedTrayIconName = "default.png";
-    const QString ErrorTrayIconName = "error.png";
-    QString  websiteUrl = "https://amnezia.org";
+    Vpn::ConnectionState m_trayState = Vpn::ConnectionState::Unknown;
+
+    static constexpr qreal kDisconnectedTrayOpacity = 0.5;
+    static constexpr qreal kConnectedTrayOpacity = 1.0;
+
+    QString websiteUrl = "https://amnezia.org";
 };
 
 #endif  // SYSTEMTRAYNOTIFICATIONHANDLER_H
