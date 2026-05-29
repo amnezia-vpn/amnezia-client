@@ -78,19 +78,20 @@ void WindowsUtils::windowsLog(const QString& msg) {
 
 // Static
 QString WindowsUtils::windowsVersion() {
-  QSettings regCurrentVersion("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
-                              QSettings::NativeFormat);
+  QSettings regCurrentVersion(
+      "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+      QSettings::NativeFormat);
 
   int buildNr = regCurrentVersion.value("CurrentBuild").toInt();
   if (buildNr >= WINDOWS_11_BUILD) {
-      return "11";
+    return "11";
   }
   return QSysInfo::productVersion();
 }
 
 // static
 void WindowsUtils::forceCrash() {
-    RaiseException(0x0000DEAD, EXCEPTION_NONCONTINUABLE, 0, NULL);
+  RaiseException(0x0000DEAD, EXCEPTION_NONCONTINUABLE, 0, NULL);
 }
 
 // static
