@@ -38,8 +38,6 @@
 @interface MacOSStatusIconDelegate : NSObject
 @property(assign) NSStatusItem* statusItem;
 @property(assign) NSView* statusIndicator;
-@property(retain) NSMenu* nativeMenu;
-@property(retain) NSMutableArray* menuActionTargets;
 
 - (void)setIcon:(NSData*)imageData;
 - (void)setIndicator;
@@ -49,13 +47,20 @@
 @end
 
 @implementation MacOSStatusIconDelegate
+/**
+ * Initializes and sets the status item and indicator objects.
+ *
+ * @return An instance of MacOSStatusIconDelegate.
+ */
 - (id)init {
   self = [super init];
   self.menuActionTargets = [[NSMutableArray alloc] init];
 
+  // Create status item
   self.statusItem =
       [[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength] retain];
   self.statusItem.visible = true;
+  // Add the indicator as a subview
   [self setIndicator];
 
   return self;
@@ -67,6 +72,11 @@
   [super dealloc];
 }
 
+/**
+ * Sets the image for the status icon.
+ *
+ * @param iconPath The data for the icon image.
+ */
 - (void)setIcon:(NSData*)imageData {
   NSImage* image = [[NSImage alloc] initWithData:imageData];
   [image setTemplate:true];
@@ -75,6 +85,9 @@
   [image release];
 }
 
+/**
+ * Adds status indicator as a subview to the status item button.
+ */
 - (void)setIndicator {
   float viewHeight = NSHeight([self.statusItem.button bounds]);
   float dotSize = viewHeight * 0.35;
@@ -89,12 +102,31 @@
   [dot release];
 }
 
+/**
+ * Sets the color if the indicator.
+ *
+ * @param color The indicator background color.
+ */
 - (void)setIndicatorColor:(NSColor*)color {
   if (self.statusIndicator) {
     self.statusIndicator.layer.backgroundColor = color.CGColor;
   }
 }
 
+/**
+ * Sets the status bar menu to the status item.
+ *
+ * @param statusBarMenu The menu object that is passed from QT.
+ */
+- (void)setMenu:(NSMenu*)statusBarMenu {
+  [self.statusItem setMenu:statusBarMenu];
+}
+
+/**
+ * Sets the tooltip string for the status item.
+ *
+ * @param tooltip The tooltip string.
+ */
 - (void)setToolTip:(NSString*)tooltip {
   [self.statusItem.button setToolTip:tooltip];
 }
@@ -172,17 +204,6 @@ void MacOSStatusIcon::setIcon(const QString& iconPath) {
   [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData()];
 }
 
-void MacOSStatusIcon::setIconFromData(const QByteArray& imageData) {
-  logger.debug() << "Set icon from rendered data";
-
-  if (imageData.isEmpty()) {
-    return;
-  }
-
-  NSData* data = [NSData dataWithBytes:imageData.constData() length:imageData.size()];
-  [m_statusBarIcon setIcon:data];
-}
-
 void MacOSStatusIcon::setIndicatorColor(const QColor& indicatorColor) {
   logger.debug() << "Set indicator color";
 
@@ -221,11 +242,14 @@ void MacOSStatusIcon::showMessage(const QString& title, const QString& message) 
 
   UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
 
+  // This is a no-op is authorization has been granted.
   [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert |
                                            UNAuthorizationOptionBadge)
                         completionHandler:^(__unused BOOL granted, NSError* _Nullable error) {
                           if (error) {
+                            // Note: This error may happen if the application is not signed.
                             NSLog(@"Error asking for permission to send notifications %@", error);
+                            return;
                           }
                         }];
 
