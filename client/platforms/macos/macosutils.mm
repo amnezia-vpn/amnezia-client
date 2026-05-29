@@ -150,8 +150,6 @@ void MacOSUtils::installInterfaceThemeObserver(std::function<void()> callback) {
     return;
   }
 
-  // Copy into block storage: capturing the parameter by reference would dangle
-  // once this function returns.
   const std::function<void()> themeCallback = std::move(callback);
 
   NSDistributedNotificationCenter *center = [NSDistributedNotificationCenter defaultCenter];

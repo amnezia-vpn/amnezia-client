@@ -51,69 +51,64 @@ namespace
     }
 } // namespace
 
-constexpr const int WINDOWS_11_BUILD = 22000; // Build Number of the first release win 11 iso
+constexpr const int WINDOWS_11_BUILD =
+    22000;  // Build Number of the first release win 11 iso
 
-QString WindowsUtils::getErrorMessage(quint32 code)
-{
-    LPSTR messageBuffer = nullptr;
-    size_t size =
-            FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                           nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, nullptr);
+QString WindowsUtils::getErrorMessage(quint32 code) {
+  LPSTR messageBuffer = nullptr;
+  size_t size =
+          FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                         nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, nullptr);
 
-    std::string message(messageBuffer, size);
-    QString result(message.c_str());
-    LocalFree(messageBuffer);
-    return result;
+  std::string message(messageBuffer, size);
+  QString result(message.c_str());
+  LocalFree(messageBuffer);
+  return result;
 }
 
-QString WindowsUtils::getErrorMessage()
-{
-    return getErrorMessage(GetLastError());
+QString WindowsUtils::getErrorMessage() {
+  return getErrorMessage(GetLastError());
 }
 
 // A simple function to log windows error messages.
-void WindowsUtils::windowsLog(const QString &msg)
-{
-    QString errmsg = getErrorMessage();
-    logger.error() << msg << "-" << errmsg;
+void WindowsUtils::windowsLog(const QString& msg) {
+  QString errmsg = getErrorMessage();
+  logger.error() << msg << "-" << errmsg;
 }
 
 // Static
-QString WindowsUtils::windowsVersion()
-{
-    QSettings regCurrentVersion("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
-                                QSettings::NativeFormat);
+QString WindowsUtils::windowsVersion() {
+  QSettings regCurrentVersion("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+                              QSettings::NativeFormat);
 
-    int buildNr = regCurrentVersion.value("CurrentBuild").toInt();
-    if (buildNr >= WINDOWS_11_BUILD) {
-        return "11";
-    }
-    return QSysInfo::productVersion();
+  int buildNr = regCurrentVersion.value("CurrentBuild").toInt();
+  if (buildNr >= WINDOWS_11_BUILD) {
+      return "11";
+  }
+  return QSysInfo::productVersion();
 }
 
 // static
-void WindowsUtils::forceCrash()
-{
+void WindowsUtils::forceCrash() {
     RaiseException(0x0000DEAD, EXCEPTION_NONCONTINUABLE, 0, NULL);
 }
 
 // static
-bool WindowsUtils::isDarkTheme()
-{
-    QSettings settings(
-            QStringLiteral("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
-            QSettings::NativeFormat);
+bool WindowsUtils::isDarkTheme() {
+  QSettings settings(
+          QStringLiteral("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
+          QSettings::NativeFormat);
 
-    if (settings.contains(QStringLiteral("SystemUsesLightTheme"))) {
-        return registryUsesDarkTheme(settings, QStringLiteral("SystemUsesLightTheme"));
-    }
+  if (settings.contains(QStringLiteral("SystemUsesLightTheme"))) {
+      return registryUsesDarkTheme(settings, QStringLiteral("SystemUsesLightTheme"));
+  }
 
-    if (settings.contains(QStringLiteral("AppsUseLightTheme"))) {
-        return registryUsesDarkTheme(settings, QStringLiteral("AppsUseLightTheme"));
-    }
+  if (settings.contains(QStringLiteral("AppsUseLightTheme"))) {
+      return registryUsesDarkTheme(settings, QStringLiteral("AppsUseLightTheme"));
+  }
 
-    logger.warning() << "SystemUsesLightTheme registry key is unavailable; assuming dark theme";
-    return true;
+  logger.warning() << "SystemUsesLightTheme registry key is unavailable; assuming dark theme";
+  return true;
 }
 
 void WindowsUtils::installThemeChangeObserver(std::function<void()> callback)

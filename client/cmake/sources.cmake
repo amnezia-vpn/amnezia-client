@@ -295,7 +295,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         )
     endif()
 
-    if(LINUX AND NOT ANDROID)
+    if(LINUX)
         set(HEADERS ${HEADERS}
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.h
         )
@@ -303,17 +303,16 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.cpp
         )
     endif()
-endif()
 
-if(APPLE AND MACOS_NE)
-    # Include only the tray notification handler in NE builds
-    set(HEADERS ${HEADERS}
-        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
-        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
-    )
+    if(APPLE AND MACOS_NE)
+        set(HEADERS ${HEADERS}
+                ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
+                ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
+        )
 
-    set(SOURCES ${SOURCES}
-        ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
-        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
-    )
+        set(SOURCES ${SOURCES}
+                ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
+                ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
+        )
+    endif()
 endif()
