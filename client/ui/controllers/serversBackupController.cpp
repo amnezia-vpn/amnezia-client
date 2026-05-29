@@ -62,6 +62,8 @@ void ServersBackupController::createBackup(const ServerCredentials &credentials)
         return;
     }
 
+    m_sshSession.resetConnection();
+
     setStatus(InProgress);
     setProgress(0, tr("Starting backup creation..."));
 
@@ -481,6 +483,8 @@ void ServersBackupController::uploadBackup(const ServerCredentials &credentials,
         emit errorOccurred("Another operation is in progress", ErrorCode::AmneziaServiceConnectionFailed);
         return;
     }
+
+    m_sshSession.resetConnection();
 
     // Save restore mode for later use
     m_restoreReplaceMode = replaceMode;
