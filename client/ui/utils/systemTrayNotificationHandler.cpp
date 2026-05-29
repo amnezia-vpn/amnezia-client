@@ -23,6 +23,10 @@
 #  include "platforms/macos/macosstatusicon.h"
 #endif
 
+#if defined(Q_OS_WIN)
+#  include "platforms/windows/windowsutils.h"
+#endif
+
 #include "version.h"
 
 namespace {
@@ -71,6 +75,28 @@ QPixmap renderTrayTemplate(const QString &resourcePath, qreal opacity)
     return pixmap;
 }
 
+QPixmap colorizeTrayTemplate(const QPixmap &mask, const QColor &foreground)
+{
+    QPixmap result(kTrayIconSize, kTrayIconSize);
+    result.fill(Qt::transparent);
+
+    QPainter painter(&result);
+    painter.fillRect(result.rect(), foreground);
+    painter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    painter.drawPixmap(0, 0, mask);
+    return result;
+}
+
+void drawStatusIndicator(QPainter &painter, const QColor &color)
+{
+    const qreal dotSize = kTrayIconSize * 0.35;
+    const qreal dotOrigin = (kTrayIconSize - dotSize) * 0.8;
+
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(color);
+    painter.drawEllipse(QRectF(dotOrigin, dotOrigin, dotSize, dotSize));
+}
+
 QByteArray renderTrayTemplatePng(qreal opacity)
 {
     const QPixmap pixmap = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
@@ -82,13 +108,19 @@ QByteArray renderTrayTemplatePng(qreal opacity)
     return bytes;
 }
 
-QIcon buildTrayIcon(qreal opacity)
+QIcon buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor)
 {
-    const QPixmap pixmap = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
+    const QPixmap mask = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
+    const QColor foreground = darkTheme ? Qt::white : Qt::black;
+    QPixmap pixmap = colorizeTrayTemplate(mask, foreground);
+
+    if (indicatorColor.isValid()) {
+        QPainter painter(&pixmap);
+        drawStatusIndicator(painter, indicatorColor);
+    }
 
     QIcon icon;
     icon.addPixmap(pixmap);
-    icon.setIsMask(true);
     return icon;
 }
 
@@ -106,7 +138,6 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_macStatusIcon->setToolTip(APPLICATION_NAME);
     // Template NSStatusItem icons follow the menu bar appearance automatically.
 #else
-    m_systemTrayIcon.show();
     connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this, &SystemTrayNotificationHandler::onTrayActivated);
     m_systemTrayIcon.setContextMenu(&m_menu);
 #endif
@@ -138,10 +169,20 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     qApp->installEventFilter(new TrayThemeChangeFilter([this]() {
         refreshTheme();
     }, this));
+
+#if defined(Q_OS_WIN)
+    WindowsUtils::installThemeChangeObserver([this]() {
+        refreshTheme();
+    });
+#endif
 #endif
 
     refreshTheme();
     setTrayState(Vpn::ConnectionState::Disconnected);
+
+#if !defined(Q_OS_MAC) || defined(MACOS_NE)
+    m_systemTrayIcon.show();
+#endif
 }
 
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
@@ -220,7 +261,7 @@ void SystemTrayNotificationHandler::updateTrayIcon()
     m_macStatusIcon->setIconFromData(renderTrayTemplatePng(opacity));
     m_macStatusIcon->setIndicatorColor(trayIndicatorColorForState(m_trayState));
 #else
-    m_systemTrayIcon.setIcon(buildTrayIcon(opacity));
+    m_systemTrayIcon.setIcon(buildTrayIcon(opacity, m_isDarkTheme, trayIndicatorColorForState(m_trayState)));
 #endif
 }
 
@@ -292,7 +333,10 @@ void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
   Q_ASSERT(m_macStatusIcon);
   m_macStatusIcon->showMessage(title, message);
 #else
-  m_systemTrayIcon.showMessage(title, message, buildTrayIcon(kConnectedTrayOpacity), timerMsec);
+  m_systemTrayIcon.showMessage(
+      title, message,
+      buildTrayIcon(kConnectedTrayOpacity, m_isDarkTheme, trayIndicatorColorForState(Vpn::ConnectionState::Connected)),
+      timerMsec);
 #endif
 }
 

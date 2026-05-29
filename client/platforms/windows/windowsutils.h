@@ -7,6 +7,8 @@
 
 #include <QString>
 
+#include <functional>
+
 class WindowsUtils final {
  public:
   static QString getErrorMessage();
@@ -20,6 +22,7 @@ class WindowsUtils final {
   static void forceCrash();
 
   static bool isDarkTheme();
+  static void installThemeChangeObserver(std::function<void()> callback);
 };
 
 #endif  // WINDOWSUTILS_H

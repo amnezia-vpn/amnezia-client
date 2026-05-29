@@ -267,6 +267,7 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.h
@@ -278,20 +279,32 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
     )
+
+    if(WIN32)
+        set(HEADERS ${HEADERS}
+            ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.h
+        )
+        set(SOURCES ${SOURCES}
+            ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
+        )
+    endif()
 endif()
 
 if(APPLE AND MACOS_NE)
     # Include only the tray notification handler in NE builds
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
     )
 endif()
