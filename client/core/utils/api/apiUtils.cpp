@@ -167,44 +167,6 @@ bool apiUtils::isPremiumServer(const QJsonObject &serverConfigObject)
     return premiumTypes.contains(serverConfigUtils::configTypeFromJson(serverConfigObject));
 }
 
-QString apiUtils::getPremiumV1VpnKey(const QJsonObject &serverConfigObject)
-{
-    if (serverConfigUtils::configTypeFromJson(serverConfigObject) != serverConfigUtils::ConfigType::AmneziaPremiumV1) {
-        return {};
-    }
-
-    QList<QPair<QString, QVariant>> orderedFields;
-    orderedFields.append(qMakePair(configKey::name, serverConfigObject[configKey::name].toString()));
-    orderedFields.append(qMakePair(configKey::description, serverConfigObject[configKey::description].toString()));
-    orderedFields.append(qMakePair(configKey::configVersion, serverConfigObject[configKey::configVersion].toDouble()));
-    orderedFields.append(qMakePair(apiDefs::key::protocol, serverConfigObject[apiDefs::key::protocol].toString()));
-    orderedFields.append(qMakePair(apiDefs::key::apiEndpoint, serverConfigObject[apiDefs::key::apiEndpoint].toString()));
-    orderedFields.append(qMakePair(apiDefs::key::apiKey, serverConfigObject[apiDefs::key::apiKey].toString()));
-
-    QString vpnKeyStr = "{";
-    for (int i = 0; i < orderedFields.size(); ++i) {
-        const auto &pair = orderedFields[i];
-        if (pair.second.typeId() == QMetaType::Type::QString) {
-            vpnKeyStr += "\"" + pair.first + "\": \"" + pair.second.toString() + "\"";
-        } else if (pair.second.typeId() == QMetaType::Type::Double || pair.second.typeId() == QMetaType::Type::Int) {
-            vpnKeyStr += "\"" + pair.first + "\": " + QString::number(pair.second.toDouble(), 'f', 1);
-        }
-
-        if (i < orderedFields.size() - 1) {
-            vpnKeyStr += ", ";
-        }
-    }
-    vpnKeyStr += "}";
-
-    QByteArray vpnKeyCompressed = escapeUnicode(vpnKeyStr).toUtf8();
-    vpnKeyCompressed = qCompress(vpnKeyCompressed, 6);
-    vpnKeyCompressed = vpnKeyCompressed.mid(4);
-
-    QByteArray signedData = AMNEZIA_CONFIG_SIGNATURE + vpnKeyCompressed;
-
-    return QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
-}
-
 QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
 {
     auto configType = serverConfigUtils::configTypeFromJson(serverConfigObject);
