@@ -256,35 +256,31 @@ install(SCRIPT ${QT_DEPLOY_SCRIPT}
 )
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)
-    list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
+    set(MACOS_OVPN_SCRIPT "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
+    list(APPEND OVPN_SCRIPTS ${MACOS_OVPN_SCRIPT})
+    set_source_files_properties(${MACOS_OVPN_SCRIPT} PROPERTIES
+        MACOSX_PACKAGE_LOCATION MacOS
+    )
+    target_sources(${PROJECT} PRIVATE ${MACOS_OVPN_SCRIPT})
+    if(BUILD_VPN_KEYCHAIN)
+        set(MACOS_CODE_SIGN_FLAGS "--keychain ${BUILD_VPN_KEYCHAIN} --deep")
+    else()
+        set(MACOS_CODE_SIGN_FLAGS "--deep")
+    endif()
+    set_target_properties(${PROJECT} PROPERTIES
+        XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "${MACOS_CODE_SIGN_FLAGS}"
+    )
 endif()
 if (LINUX AND NOT ANDROID)
     list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/linux/update-resolv-conf.sh")
 endif()
 
 if(OVPN_SCRIPTS)
-    add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${OVPN_SCRIPTS}
-        "$<TARGET_FILE_DIR:${PROJECT}>"
-    )
-
-    if(APPLE AND NOT IOS AND NOT MACOS_NE)
-        set(SIGN_OVPN_SCRIPT [=[
-if [ "$CODE_SIGNING_ALLOWED" != "NO" ]; then
-    identity="$EXPANDED_CODE_SIGN_IDENTITY"
-    if [ -z "$identity" ]; then
-        identity="$CODE_SIGN_IDENTITY"
-    fi
-    if [ -z "$identity" ]; then
-        identity="-"
-    fi
-    /usr/bin/codesign --force --sign "$identity" "$1"
-fi
-]=])
+    if(NOT APPLE)
         add_custom_command(TARGET ${PROJECT} POST_BUILD
-            COMMAND /bin/sh -c "${SIGN_OVPN_SCRIPT}" _ "$<TARGET_FILE_DIR:${PROJECT}>/update-resolv-conf.sh"
-            VERBATIM
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${OVPN_SCRIPTS}
+            "$<TARGET_FILE_DIR:${PROJECT}>"
         )
     endif()
 

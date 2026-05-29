@@ -4,7 +4,6 @@ from conan.tools.files import get, copy, chdir
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import VirtualBuildEnv
 
 import os
 import shlex
@@ -50,32 +49,24 @@ class Tun2Socks(ConanFile):
     def _is_universal_macos(self):
         return str(self.settings.os) == "Macos" and len(self._archs) > 1
 
-    @property
-    def _is_unsupported_multi_arch(self):
-        return len(self._archs) > 1 and not self._is_universal_macos
-
-    def _go_cache_vars(self):
-        return {
-            "GOPATH": os.path.join(self.build_folder, "gopath"),
-            "GOMODCACHE": os.path.join(self.build_folder, "gopath", "pkg", "mod"),
-            "GOCACHE": os.path.join(self.build_folder, "gocache"),
-            "GOTELEMETRY": "off",
-        }
-
-    def _define_go_cache_env(self, env):
-        for name, value in self._go_cache_vars().items():
-            env.define(name, value)
-
     def _go_arch_make_args(self, goarch):
-        return [f"{name}={value}" for name, value in self._go_cache_vars().items()] + [
+        return [
             "LDFLAGS=",
             f"GOOS={self._goos}",
             f"GOARCH={goarch}",
         ]
 
     def _build_go_arch(self, goarch):
+        autotools = Autotools(self)
+        for output_path in (
+            os.path.join(self.build_folder, self._binary_name),
+            os.path.join(self.source_folder, self._binary_name),
+            os.path.join(self.source_folder, "build", self._binary_name),
+        ):
+            if os.path.exists(output_path):
+                os.remove(output_path)
+
         with chdir(self, self.source_folder):
-            autotools = Autotools(self)
             autotools.make(self._binary_name, args=self._go_arch_make_args(goarch))
 
         output_path = os.path.join(self.build_folder, self._binary_name)
@@ -110,7 +101,7 @@ class Tun2Socks(ConanFile):
         basic_layout(self)
 
     def validate(self):
-        if not self._goos or not all(self._goarchs) or self._is_unsupported_multi_arch:
+        if not self._goos or not all(self._goarchs) or (len(self._archs) > 1 and not self._is_universal_macos):
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
             )
@@ -133,10 +124,12 @@ class Tun2Socks(ConanFile):
         )
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
         tc = AutotoolsToolchain(self)
         env = tc.environment()
-        self._define_go_cache_env(env)
+        env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
+        env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
+        env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
+        env.define("GOTELEMETRY", "off")
         env.define("LDFLAGS", "")
         env.define("CGO_LDFLAGS", tc.ldflags)
         env.define("CGO_CFLAGS", tc.cflags)
