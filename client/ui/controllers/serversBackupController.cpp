@@ -1252,13 +1252,15 @@ void ServersBackupController::createBackupWithDownload(bool downloadToDevice, bo
         return;
     }
     
-    int serverIndex = m_serversUiController ? m_serversUiController->getProcessedServerIndex() : -1;
+    int serverIndex = m_serversUiController
+        ? m_serversController->indexOfServerId(m_serversUiController->getProcessedServerId())
+        : -1;
     if (serverIndex < 0) {
         emit errorOccurred(tr("No server selected"), ErrorCode::InternalError);
         return;
     }
 
-    ServerCredentials credentials = m_serversUiController->getProcessedServerCredentials();
+    ServerCredentials credentials = m_serversController->getServerCredentials(m_serversUiController->getProcessedServerId());
 
     // Set flags for automatic download and delete
     m_autoDownloadAfterCreate = downloadToDevice;
@@ -1417,13 +1419,15 @@ void ServersBackupController::startRestore(bool isFromSetupWizard,
             return;
         }
         
-        int serverIndex = m_serversUiController ? m_serversUiController->getProcessedServerIndex() : -1;
+        int serverIndex = m_serversUiController
+            ? m_serversController->indexOfServerId(m_serversUiController->getProcessedServerId())
+            : -1;
         qDebug() << "  ProcessedServerIndex:" << serverIndex;
-        qDebug() << "  ServersCount:" << m_serversModel->getServersCount();
+        qDebug() << "  ServersCount:" << m_serversController->getServersCount();
 
         if (serverIndex < 0) {
             qWarning() << "No processed server selected, trying default server";
-            serverIndex = m_serversModel->getDefaultServerIndex();
+            serverIndex = m_serversController->getDefaultServerIndex();
             qDebug() << "  DefaultServerIndex:" << serverIndex;
 
             if (serverIndex < 0) {
@@ -1452,19 +1456,19 @@ bool ServersBackupController::setDefaultServerAfterRestore(bool isFromSetupWizar
         return false;
     }
     
-    if (m_serversModel->getServersCount() == 0) {
+    if (m_serversController->getServersCount() == 0) {
         qWarning() << "No servers in model";
         return false;
     }
     
     // For setup wizard, set last added server as default
     if (isFromSetupWizard) {
-        int serverIdx = m_serversModel->getServersCount() - 1;
+        int serverIdx = m_serversController->getServersCount() - 1;
         qDebug() << "Setting default server after restore:" << serverIdx;
         if (m_serversUiController) {
             m_serversUiController->setDefaultServerAtIndex(serverIdx);
         }
-        m_serversModel->setProcessedServerIndex(serverIdx);
+        m_serversUiController->setProcessedServerId(m_serversController->getServerId(serverIdx));
         
         // Reset retry counter
         m_containerRetryCount = 0;
@@ -1486,7 +1490,7 @@ void ServersBackupController::trySetDefaultContainer()
         return;
     }
     
-    int serverIdx = m_serversModel->getServersCount() - 1;
+    int serverIdx = m_serversController->getServersCount() - 1;
     qDebug() << "Timer: Setting default container (attempt" << m_containerRetryCount + 1 << "/" << m_maxContainerRetries << ")";
 
     // Get installed containers via ServersController
