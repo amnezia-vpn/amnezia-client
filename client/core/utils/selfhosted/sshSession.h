@@ -47,6 +47,9 @@ public:
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
                                libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
 
+    /** Force-close the current SSH connection so the next operation starts fresh. */
+    void resetConnection();
+
 private:
     libssh::Client m_sshClient;
 };

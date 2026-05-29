@@ -193,45 +193,25 @@ PageType {
                 // Server already added, as we waited for onInstallServerFinished
                 Qt.callLater(function() {
                     var pagePath = "qrc:/ui/qml/Pages2/PageSettingsServerRestoreMode.qml"
-                    
-                    // Find main application window
-                    var item = root
-                    while (item.parent) {
-                        item = item.parent
+
+                    // Traverse upward from root to find the containing StackView.
+                    // StackView has both `push` function and `depth` property.
+                    // This avoids a recursive downward search that causes stack overflow
+                    // on iOS when the component tree is large (many VPN managers).
+                    var stackView = root.parent
+                    while (stackView) {
+                        if (typeof stackView.push === "function" && stackView.hasOwnProperty("depth")) {
+                            break
+                        }
+                        stackView = stackView.parent
                     }
-                    
-                    // Find StackView recursively
-                    function findStackView(obj) {
-                        if (!obj) return null
-                        
-                        // Check if object is StackView
-                        if (obj.toString().indexOf("StackView") !== -1 || typeof obj.push === "function") {
-                            return obj
-                        }
-                        
-                        // Check children
-                        if (obj.children) {
-                            for (var i = 0; i < obj.children.length; i++) {
-                                var result = findStackView(obj.children[i])
-                                if (result) return result
-                            }
-                        }
-                        
-                        // Check contentItem
-                        if (obj.contentItem) {
-                            return findStackView(obj.contentItem)
-                        }
-                        
-                        return null
-                    }
-                    
-                    var stackView = findStackView(item)
+
                     if (stackView) {
                         console.log("Found StackView, pushing restore mode page")
                         stackView.push(pagePath, {
                             "backupFilePath": root.backupFilePath,
                             "backupFileName": fileName,
-                            "serverName": "", // Will be obtained from ServersModel
+                            "serverName": "",
                             "serverIp": serverIp,
                             "isFromSetupWizard": true,
                             "wizardHostname": root.restoreHostname,
