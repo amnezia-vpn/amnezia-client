@@ -2043,6 +2043,16 @@ Thank you for staying with us!</source>
         <translation>Невозможно изменить протокол во время активного соединения</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="289"/>
+        <source>Connection</source>
+        <translation>Соединение</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="290"/>
+        <source>Protocol selection and local proxy setup</source>
+        <translation>Выбор протокола и настройка локального прокси</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="319"/>
         <source>Subscription Key</source>
         <translation>Ключ для подключения</translation>
@@ -5397,6 +5407,54 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/qml/main2.qml" line="268"/>
         <source>Save</source>
         <translation>Сохранить</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsConnectionProtocols</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="142"/>
+        <source>VPN Protocol</source>
+        <translation>VPN-протокол</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="161"/>
+        <source>Choose automatically</source>
+        <translation>Выбирать автоматически</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="162"/>
+        <source>AmneziaWG is used by default. If the connection is unstable, the app will switch to VLESS. On the next launch, AmneziaWG will be tried again</source>
+        <translation>По умолчанию используется AmneziaWG. Если соединение нестабильно, приложение переключится на VLESS. При следующем запуске снова будет использован AmneziaWG</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="196"/>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="227"/>
+        <source>Cannot change protocol during active connection</source>
+        <translation>Невозможно изменить протокол во время активного соединения</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="192"/>
+        <source>AmneziaWG</source>
+        <translation>AmneziaWG</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionProtocols.qml" line="223"/>
+        <source>XRay VLESS Reality</source>
+        <translation>XRay VLESS Reality</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsConnectionType</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionType.qml" line="46"/>
+        <source>Connection</source>
+        <translation>Соединение</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsConnectionType.qml" line="63"/>
+        <source>VPN protocol</source>
+        <translation>VPN-протокол</translation>
     </message>
 </context>
 </TS>

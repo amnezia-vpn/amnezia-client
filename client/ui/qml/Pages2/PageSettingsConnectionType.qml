@@ -57,8 +57,6 @@ PageType {
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
                 text: qsTr("VPN protocol")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
