@@ -10,6 +10,7 @@ Item {
     id: root
 
     property string headerText
+    property string subtitleText // optional line under header (e.g. default value hint)
     property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
     property string headerTextColor: AmneziaStyle.color.mutedGray
 
@@ -85,6 +86,15 @@ Item {
                         Layout.fillWidth: true
                     }
 
+                    SmallTextType {
+                        text: root.subtitleText
+                        visible: root.subtitleText !== ""
+                        color: AmneziaStyle.color.charcoalGray
+                        font.pixelSize: 13
+                        Layout.fillWidth: true
+                        Layout.topMargin: visible ? 2 : 0
+                    }
+
                     TextField {
                         id: textField
 
@@ -138,6 +148,7 @@ Item {
                         }
 
                         ContextMenu.menu: ContextMenuType {
+                            id: contextMenu
                             textObj: textField
                         }
 
@@ -162,7 +173,7 @@ Item {
 
     MouseArea {
         anchors.fill: root
-        cursorShape: Qt.IBeamCursor
+        cursorShape: contextMenu.opened ? Qt.ArrowCursor : Qt.IBeamCursor
 
         hoverEnabled: true
 
@@ -185,18 +196,17 @@ Item {
 
     BasicButtonType {
         visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
-        parent: backgroud
 
         focusPolicy: Qt.NoFocus
         text: root.buttonText
         leftImageSource: root.buttonImageSource
 
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        anchors.top: content.top
+        anchors.bottom: content.bottom
+        anchors.right: content.right
 
-        height: parent.height
-        width: Math.max(height, implicitWidth)
+        height: content.implicitHeight
+        width: content.implicitHeight
         squareLeftSide: true
 
         clickedFunc: function() {

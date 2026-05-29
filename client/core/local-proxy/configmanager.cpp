@@ -1,13 +1,15 @@
 #include "configmanager.h"
 
-#include "containers/containers_defs.h"
-#include "core/api/apiDefs.h"
-#include "core/api/apiUtils.h"
 #include "core/controllers/gatewayController.h"
-#include "core/defs.h"
+#include "core/repositories/secureAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
+#include "core/utils/api/apiUtils.h"
+#include "core/utils/constants/apiConstants.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/containers/containerUtils.h"
 #include "portavailabilityhelper.h"
 #include "proxylogger.h"
-#include "settings.h"
 #include "version.h"
 
 #include <QDir>
@@ -20,23 +22,16 @@
 #include <QStandardPaths>
 #include <QUuid>
 
-ConfigManager::ConfigManager(const std::shared_ptr<Settings> &settings)
-    : m_settings(settings)
+using namespace amnezia;
+
+ConfigManager::ConfigManager(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository)
+    : m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
 {
-    ProxyLogger::getInstance().debug("ConfigManager initialized (Settings-backed)");
+    ProxyLogger::getInstance().debug("ConfigManager initialized (repository-backed)");
 }
 
 namespace {
 namespace gateway_key {
-constexpr char apiConfig[] = "api_config";
-constexpr char authData[] = "auth_data";
-constexpr char userCountryCode[] = "user_country_code";
-constexpr char serviceType[] = "service_type";
-constexpr char serviceProtocol[] = "service_protocol";
-constexpr char uuid[] = "installation_uuid";
-constexpr char osVersion[] = "os_version";
-constexpr char appVersion[] = "app_version";
-constexpr char publicKey[] = "public_key";
 constexpr char vless[] = "vless";
 } // namespace gateway_key
 
@@ -44,13 +39,13 @@ constexpr quint16 kDefaultProxyPort = 10808;
 constexpr int kProxyPortMin = 1024;
 constexpr int kProxyPortMax = 65535;
 
-int resolveProxyPort(const std::shared_ptr<Settings> &settings)
+int resolveProxyPort(SecureAppSettingsRepository *appSettings)
 {
-    if (!settings) {
+    if (!appSettings) {
         return kDefaultProxyPort;
     }
 
-    const quint16 port = settings->localProxyPort();
+    const quint16 port = appSettings->localProxyPort();
     if (port < kProxyPortMin || port > kProxyPortMax) {
         return kDefaultProxyPort;
     }
@@ -87,24 +82,24 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &err
 {
     errorDescription.clear();
 
-    if (!m_settings) {
-        const QString message = QStringLiteral("Settings backend is not available");
+    if (!m_serversRepository || !m_appSettingsRepository) {
+        const QString message = QStringLiteral("Local proxy repositories are not available");
         ProxyLogger::getInstance().error(message);
         errorDescription = message;
         return std::nullopt;
     }
 
-    const QString ownerUuid = m_settings->localProxyOwnerUuid();
-    if (ownerUuid.isEmpty()) {
-        const QString message = QStringLiteral("Local proxy owner UUID is not configured");
+    const QString ownerId = m_appSettingsRepository->localProxyOwnerId();
+    if (ownerId.isEmpty()) {
+        const QString message = QStringLiteral("Local proxy owner server id is not configured");
         ProxyLogger::getInstance().warning(message);
         errorDescription = message;
         return std::nullopt;
     }
 
-    const auto ownerServer = findServerByUuid(ownerUuid);
+    const auto ownerServer = m_serversRepository->serverJsonById(ownerId);
     if (!ownerServer) {
-        const QString message = QStringLiteral("Owner server with UUID %1 not found in Settings").arg(ownerUuid);
+        const QString message = QStringLiteral("Owner server with id %1 not found").arg(ownerId);
         ProxyLogger::getInstance().error(message);
         errorDescription = message;
         return std::nullopt;
@@ -112,7 +107,7 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &err
 
     if (!apiUtils::isPremiumServer(*ownerServer)) {
         const QString message = QStringLiteral("Server %1 is not premium, local proxy is unavailable")
-                                        .arg(ownerServer->value(amnezia::config_key::name).toString());
+                                        .arg(ownerServer->value(configKey::name).toString());
         ProxyLogger::getInstance().warning(message);
         errorDescription = message;
         return std::nullopt;
@@ -121,7 +116,7 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &err
     const auto serializedConfig = extractSerializedXrayConfig(*ownerServer);
     if (!serializedConfig || serializedConfig->isEmpty()) {
         const QString message = QStringLiteral("Server %1 lacks Xray last_config payload")
-                                        .arg(ownerServer->value(amnezia::config_key::name).toString());
+                                        .arg(ownerServer->value(configKey::name).toString());
         ProxyLogger::getInstance().error(message);
         errorDescription = message;
         return std::nullopt;
@@ -137,10 +132,10 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfig(QString &err
     }
 
     ConfigData data;
-    data.ownerUuid = ownerUuid;
-    data.serverName = ownerServer->value(amnezia::config_key::name).toString();
+    data.ownerId = ownerId;
+    data.serverName = ownerServer->value(configKey::name).toString();
     data.parsedConfig = doc.object();
-    const int proxyPort = resolveProxyPort(m_settings);
+    const int proxyPort = resolveProxyPort(m_appSettingsRepository);
     if (applyProxyPortToConfig(data.parsedConfig, proxyPort)) {
         data.serializedConfig = serializeConfig(data.parsedConfig);
     } else {
@@ -155,24 +150,24 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfigWithFetch(QSt
 {
     errorDescription.clear();
 
-    if (!m_settings) {
-        const QString message = QStringLiteral("Settings backend is not available");
+    if (!m_serversRepository || !m_appSettingsRepository) {
+        const QString message = QStringLiteral("Local proxy repositories are not available");
         ProxyLogger::getInstance().error(message);
         errorDescription = message;
         return std::nullopt;
     }
 
-    const QString ownerUuid = m_settings->localProxyOwnerUuid();
-    if (ownerUuid.isEmpty()) {
-        const QString message = QStringLiteral("Local proxy owner UUID is not configured");
+    const QString ownerId = m_appSettingsRepository->localProxyOwnerId();
+    if (ownerId.isEmpty()) {
+        const QString message = QStringLiteral("Local proxy owner server id is not configured");
         ProxyLogger::getInstance().warning(message);
         errorDescription = message;
         return std::nullopt;
     }
 
-    const auto ownerServer = findServerByUuid(ownerUuid);
+    const auto ownerServer = m_serversRepository->serverJsonById(ownerId);
     if (!ownerServer) {
-        const QString message = QStringLiteral("Owner server with UUID %1 not found in Settings").arg(ownerUuid);
+        const QString message = QStringLiteral("Owner server with id %1 not found").arg(ownerId);
         ProxyLogger::getInstance().error(message);
         errorDescription = message;
         return std::nullopt;
@@ -180,7 +175,7 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfigWithFetch(QSt
 
     if (!apiUtils::isPremiumServer(*ownerServer)) {
         const QString message = QStringLiteral("Server %1 is not premium, local proxy is unavailable")
-                                        .arg(ownerServer->value(amnezia::config_key::name).toString());
+                                        .arg(ownerServer->value(configKey::name).toString());
         ProxyLogger::getInstance().warning(message);
         errorDescription = message;
         return std::nullopt;
@@ -205,12 +200,12 @@ std::optional<ConfigManager::ConfigData> ConfigManager::buildConfigWithFetch(QSt
     }
 
     ConfigData data;
-    data.ownerUuid = ownerUuid;
-    data.serverName = ownerServer->value(amnezia::config_key::name).toString();
+    data.ownerId = ownerId;
+    data.serverName = ownerServer->value(configKey::name).toString();
     data.parsedConfig = doc.object();
 
-    int selectedPort = resolveProxyPort(m_settings);
-    const bool isUserDefinedPort = m_settings->isLocalProxyPortUserDefined();
+    int selectedPort = resolveProxyPort(m_appSettingsRepository);
+    const bool isUserDefinedPort = m_appSettingsRepository->isLocalProxyPortUserDefined();
 
     if (!PortAvailabilityHelper::isPortAvailable(selectedPort)) {
         const bool canAutoSelect = !isUserDefinedPort && selectedPort == kDefaultProxyPort;
@@ -305,37 +300,20 @@ QString ConfigManager::tempConfigPath() const
     return QDir(tempDirectory()).filePath(QStringLiteral("xray_active.json"));
 }
 
-std::optional<QJsonObject> ConfigManager::findServerByUuid(const QString &uuid) const
-{
-    if (!m_settings) {
-        return std::nullopt;
-    }
-
-    const QJsonArray servers = m_settings->serversArray();
-    for (const QJsonValue &value : servers) {
-        const QJsonObject server = value.toObject();
-        if (server.value(amnezia::config_key::server_uuid).toString() == uuid) {
-            return server;
-        }
-    }
-
-    return std::nullopt;
-}
-
 std::optional<QString> ConfigManager::extractSerializedXrayConfig(const QJsonObject &server) const
 {
-    const QJsonArray containers = server.value(amnezia::config_key::containers).toArray();
-    const QString targetContainer = ContainerProps::containerToString(amnezia::DockerContainer::Xray);
-    const QString protoKey = ProtocolProps::protoToString(amnezia::Proto::Xray);
+    const QJsonArray containers = server.value(configKey::containers).toArray();
+    const QString targetContainer = ContainerUtils::containerToString(DockerContainer::Xray);
+    const QString protoKey = QString(configKey::xray);
 
     for (const QJsonValue &value : containers) {
         const QJsonObject container = value.toObject();
-        if (container.value(amnezia::config_key::container).toString() != targetContainer) {
+        if (container.value(configKey::container).toString() != targetContainer) {
             continue;
         }
 
         const QJsonObject proto = container.value(protoKey).toObject();
-        const QString serialized = proto.value(amnezia::config_key::last_config).toString();
+        const QString serialized = proto.value(configKey::lastConfig).toString();
         if (!serialized.isEmpty()) {
             return serialized;
         }
@@ -348,14 +326,14 @@ std::optional<QString> ConfigManager::fetchSerializedXrayConfigFromGateway(const
 {
     errorDescription.clear();
 
-    if (!m_settings) {
-        const QString message = QStringLiteral("Settings backend is not available");
+    if (!m_appSettingsRepository) {
+        const QString message = QStringLiteral("App settings repository is not available");
         ProxyLogger::getInstance().error(message);
         errorDescription = message;
         return std::nullopt;
     }
 
-    const QJsonObject apiConfig = server.value(gateway_key::apiConfig).toObject();
+    const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
     if (apiConfig.isEmpty()) {
         const QString message = QStringLiteral("Server API config is missing");
         ProxyLogger::getInstance().warning(message);
@@ -363,8 +341,8 @@ std::optional<QString> ConfigManager::fetchSerializedXrayConfigFromGateway(const
         return std::nullopt;
     }
 
-    const QString userCountryCode = apiConfig.value(gateway_key::userCountryCode).toString();
-    const QString serviceType = apiConfig.value(gateway_key::serviceType).toString();
+    const QString userCountryCode = apiConfig.value(apiDefs::key::userCountryCode).toString();
+    const QString serviceType = apiConfig.value(apiDefs::key::serviceType).toString();
     if (userCountryCode.isEmpty() || serviceType.isEmpty()) {
         const QString message = QStringLiteral("Server API config lacks service identifiers");
         ProxyLogger::getInstance().warning(message);
@@ -373,27 +351,27 @@ std::optional<QString> ConfigManager::fetchSerializedXrayConfigFromGateway(const
     }
 
     QJsonObject apiPayload;
-    apiPayload[gateway_key::osVersion] = QSysInfo::productType();
-    apiPayload[gateway_key::appVersion] = QString(APP_VERSION);
+    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
+    apiPayload[apiDefs::key::appVersion] = QString(APP_VERSION);
 
-    const QString appLanguage = m_settings->getAppLanguage().name().split("_").first();
+    const QString appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
     if (!appLanguage.isEmpty()) {
         apiPayload[apiDefs::key::appLanguage] = appLanguage;
     }
 
-    apiPayload[gateway_key::uuid] = m_settings->getInstallationUuid(true);
-    apiPayload[gateway_key::userCountryCode] = userCountryCode;
-    apiPayload[gateway_key::serviceType] = serviceType;
-    apiPayload[gateway_key::serviceProtocol] = gateway_key::vless;
-    apiPayload[gateway_key::publicKey] = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    apiPayload[apiDefs::key::uuid] = m_appSettingsRepository->getInstallationUuid(true);
+    apiPayload[apiDefs::key::userCountryCode] = userCountryCode;
+    apiPayload[apiDefs::key::serviceType] = serviceType;
+    apiPayload[apiDefs::key::serviceProtocol] = QString(gateway_key::vless);
+    apiPayload[apiDefs::key::publicKey] = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
-    const QJsonObject authData = server.value(gateway_key::authData).toObject();
+    const QJsonObject authData = server.value(apiDefs::key::authData).toObject();
     if (!authData.isEmpty()) {
-        apiPayload[gateway_key::authData] = authData;
+        apiPayload[apiDefs::key::authData] = authData;
     }
 
-    GatewayController gatewayController(m_settings->getGatewayEndpoint(), m_settings->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_settings->isStrictKillSwitchEnabled());
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
+                                        apiDefs::requestTimeoutMsecs, m_appSettingsRepository->isStrictKillSwitchEnabled());
 
     QByteArray responseBody;
     const amnezia::ErrorCode errorCode = gatewayController.post(QString("%1v1/config"), apiPayload, responseBody);
@@ -413,7 +391,7 @@ std::optional<QString> ConfigManager::fetchSerializedXrayConfigFromGateway(const
         return std::nullopt;
     }
 
-    QString data = responseDoc.object().value(amnezia::config_key::config).toString();
+    QString data = responseDoc.object().value(configKey::config).toString();
     if (data.isEmpty()) {
         const QString message = QStringLiteral("Gateway response lacks config payload");
         ProxyLogger::getInstance().error(message);

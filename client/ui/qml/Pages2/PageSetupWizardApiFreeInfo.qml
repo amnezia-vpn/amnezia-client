@@ -29,7 +29,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (activeFocus) {
@@ -46,7 +46,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        contentHeight: scrollColumn.implicitHeight + 24
+        contentHeight: scrollColumn.childrenRect.height + 24
 
         ColumnLayout {
             id: scrollColumn
@@ -106,7 +106,7 @@ PageType {
                 visible: (Qt.platform.os === "ios" || IsMacOsNeBuild)
 
                 termsUrl: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                privacyUrl: LanguageModel.getCurrentSiteUrl("policy")
+                privacyUrl: LanguageUiController.getCurrentSiteUrl("policy")
             }
         }
     }
@@ -120,13 +120,13 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
         text: qsTr("Continue")
 
         clickedFunc: function() {
             PageController.showBusyIndicator(true)
-            var result = ApiConfigsController.importService()
+            var result = SubscriptionUiController.importFreeFromGateway()
             PageController.showBusyIndicator(false)
 
             if (!result) {

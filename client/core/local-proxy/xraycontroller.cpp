@@ -1,7 +1,7 @@
 #include "xraycontroller.h"
 
 #include "proxylogger.h"
-#include "core/ipcclient.h"
+#include "core/utils/ipcClient.h"
 
 namespace {
 const QString kIpcUnavailableError = QStringLiteral("Failed to communicate with IPC service");

@@ -24,7 +24,7 @@ Rectangle {
     border.color: AmneziaStyle.color.onyxBlack
     radius: 13
 
-    visible: ServersModel.isAdVisible
+    visible: ServersUiController.isAdVisible
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
@@ -73,7 +73,7 @@ Rectangle {
 
             CaptionTextType {
                 Layout.fillWidth: true
-                text: ServersModel.adHeader
+                text: ServersUiController.adHeader
                 color: AmneziaStyle.color.paleGray
                 font.pixelSize: 14
                 font.weight: 700
@@ -83,7 +83,7 @@ Rectangle {
 
             CaptionTextType {
                 Layout.fillWidth: true
-                text: ServersModel.adDescription
+                text: ServersUiController.adDescription
                 color: AmneziaStyle.color.mutedGray
                 wrapMode: Text.WordWrap
                 lineHeight: 18

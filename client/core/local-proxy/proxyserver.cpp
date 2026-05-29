@@ -1,14 +1,17 @@
 #include "proxyserver.h"
-#include "settings.h"
+
+#include "core/repositories/secureAppSettingsRepository.h"
+#include "core/repositories/secureServersRepository.h"
 
 #include <QDebug>
 
-ProxyServer::ProxyServer(const std::shared_ptr<Settings> &settings, QObject *parent)
+ProxyServer::ProxyServer(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
+                         QObject *parent)
     : QObject(parent)
-    , m_settings(settings)
-    , m_service(new ProxyService(settings, this))
+    , m_appSettingsRepository(appSettingsRepository)
+    , m_service(new ProxyService(serversRepository, appSettingsRepository, this))
 {
-    m_lastRestartToken = m_settings ? m_settings->localProxyRestartToken() : 0;
+    m_lastRestartToken = m_appSettingsRepository ? m_appSettingsRepository->localProxyRestartToken() : 0;
 }
 
 ProxyServer::~ProxyServer()
@@ -73,8 +76,8 @@ bool ProxyServer::syncSettings()
         return false;
     }
 
-    const quint16 newProxyPort = m_settings ? m_settings->localProxyPort() : 0;
-    const int restartToken = m_settings ? m_settings->localProxyRestartToken() : 0;
+    const quint16 newProxyPort = m_appSettingsRepository ? m_appSettingsRepository->localProxyPort() : 0;
+    const int restartToken = m_appSettingsRepository ? m_appSettingsRepository->localProxyRestartToken() : 0;
     const bool xrayRunning = m_service->isXrayRunning();
 
     if (!xrayRunning) {

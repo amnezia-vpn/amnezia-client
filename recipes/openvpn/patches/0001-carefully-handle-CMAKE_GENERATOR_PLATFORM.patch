@@ -1,0 +1,25 @@
+From 693bee38daaec5962ea3f0939c71e869f202c08a Mon Sep 17 00:00:00 2001
+From: Yaroslav Gurov <ygurov@proton.me>
+Date: Mon, 18 May 2026 16:58:00 +0200
+Subject: [PATCH] carefully handle CMAKE_GENERATOR_PLATFORM
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 198c98ff..7341db70 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -108,7 +108,7 @@ if (MSVC)
+         "$<$<CONFIG:Release>:/OPT:REF>"
+         "$<$<CONFIG:Release>:/OPT:ICF>"
+         )
+-    if (${CMAKE_GENERATOR_PLATFORM} STREQUAL "x64" OR ${CMAKE_GENERATOR_PLATFORM} STREQUAL "x86")
++    if ("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64" OR "${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x86")
+         add_link_options("$<$<CONFIG:Release>:/CETCOMPAT>")
+     endif()
+ else ()
+-- 
+2.46.0.windows.1
+

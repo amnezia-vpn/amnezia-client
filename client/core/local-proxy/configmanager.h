@@ -1,23 +1,23 @@
 #pragma once
 
-#include <memory>
 #include <optional>
 
 #include <QJsonObject>
 #include <QString>
 
-class Settings;
+class SecureServersRepository;
+class SecureAppSettingsRepository;
 
 class ConfigManager {
 public:
     struct ConfigData {
-        QString ownerUuid;
+        QString ownerId;
         QString serverName;
         QString serializedConfig;
         QJsonObject parsedConfig;
     };
 
-    explicit ConfigManager(const std::shared_ptr<Settings> &settings);
+    ConfigManager(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository);
 
     std::optional<ConfigData> buildConfig(QString &errorDescription) const;
     std::optional<ConfigData> buildConfigWithFetch(QString &errorDescription) const;
@@ -26,12 +26,12 @@ public:
     QString tempConfigPath() const;
 
 private:
-    std::optional<QJsonObject> findServerByUuid(const QString &uuid) const;
     std::optional<QString> extractSerializedXrayConfig(const QJsonObject &server) const;
     std::optional<QString> fetchSerializedXrayConfigFromGateway(const QJsonObject &server, QString &errorDescription) const;
     QString tempDirectory() const;
     bool applyProxyPortToConfig(QJsonObject &config, int port) const;
     QString serializeConfig(const QJsonObject &config) const;
 
-    std::shared_ptr<Settings> m_settings;
+    SecureServersRepository *m_serversRepository;
+    SecureAppSettingsRepository *m_appSettingsRepository;
 };

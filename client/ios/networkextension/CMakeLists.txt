@@ -110,21 +110,14 @@ set_property(TARGET networkextension APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
 )
 
-## Build wireguard-go-version.h
-execute_process(
-    COMMAND go list -m golang.zx2c4.com/wireguard
-    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
-    OUTPUT_VARIABLE WG_VERSION_FULL
-)
-string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wireguard-go-version.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
-target_sources(networkextension PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
-
 target_include_directories(networkextension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(networkextension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/ios/arm64/libwg-go.a)
+find_package(openvpnadapter REQUIRED)
+target_link_libraries(networkextension PRIVATE amnezia::openvpnadapter)
 
-target_link_libraries(networkextension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework)
+find_package(awg-apple REQUIRED)
+target_link_libraries(networkextension PRIVATE amnezia::awg-apple)
+
+find_package(hev-socks5-tunnel REQUIRED)
+target_link_libraries(networkextension PRIVATE heiher::hev-socks5-tunnel)

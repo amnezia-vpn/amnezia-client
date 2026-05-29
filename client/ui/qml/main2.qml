@@ -47,7 +47,7 @@ Window  {
         interval: 150
         repeat: false
         onTriggered: {
-            if (Qt.platform.os === "android" && SettingsController.isEdgeToEdgeEnabled()) {
+            if (Qt.platform.os === "android" && PageController.isEdgeToEdgeEnabled()) {
                 console.log("QML: Application resumed with edge-to-edge")
             }
         }
@@ -144,6 +144,10 @@ Window  {
             busyIndicator.visible = visible
             PageController.disableControls(visible)
         }
+
+        function onShowChangelogDrawer() {
+            changelogDrawer.openTriggered()
+        }
     }
 
     Connections {
@@ -210,7 +214,7 @@ Window  {
             id: privateKeyPassphraseDrawer
 
             anchors.fill: parent
-            expandedHeight: root.height * 0.35 + SettingsController.safeAreaBottomMargin + SettingsController.imeHeight
+            expandedHeight: root.height * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
             expandedStateContent: ColumnLayout {
                 anchors.top: parent.top
@@ -301,7 +305,15 @@ Window  {
     }
 
     Connections {
-        target: ApiConfigsController
+        target: PageController
+
+        function onUnsupportedConnectDrawerRequested() {
+            root.showUnsupportedConnectDrawer()
+        }
+    }
+
+    Connections {
+        target: SubscriptionUiController
 
         function onSubscriptionExpiredOnServer() {
             subscriptionExpiredDrawer.openTriggered()
@@ -309,7 +321,7 @@ Window  {
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onRenewalLinkReceived(url) {
             Qt.openUrlExternally(url)
@@ -326,6 +338,28 @@ Window  {
             anchors.centerIn: parent
             z: 1
         }
+    }
+
+    function showUnsupportedConnectDrawer() {
+        let headerText = qsTr("This subscription format is no longer supported")
+        let descriptionText = qsTr("This legacy Amnezia subscription type can no longer be used to connect in this application version.\nRemove the server from the app to continue.")
+        let yesButtonText = qsTr("Continue")
+        let noButtonText = qsTr("Cancel")
+
+        let yesButtonFunction = function() {
+            if (ConnectionController.isConnected) {
+                PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                return
+            }
+
+            PageController.showBusyIndicator(true)
+            InstallController.removeServer(ServersUiController.defaultServerId)
+            PageController.showBusyIndicator(false)
+        }
+        let noButtonFunction = function() {
+        }
+
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
     function showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
@@ -359,5 +393,15 @@ Window  {
 
         onAccepted: SystemController.fileDialogClosed(true)
         onRejected: SystemController.fileDialogClosed(false)
+    }
+
+    Item {
+        anchors.fill: parent
+
+        ChangelogDrawer {
+            id: changelogDrawer
+
+            anchors.fill: parent
+        }
     }
 }

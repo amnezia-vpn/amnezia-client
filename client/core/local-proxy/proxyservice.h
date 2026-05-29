@@ -7,15 +7,16 @@
 #include <QObject>
 #include <QScopedPointer>
 #include <QJsonObject>
-#include <memory>
 
-class Settings;
+class SecureServersRepository;
+class SecureAppSettingsRepository;
 
 class ProxyService : public QObject, public IProxyService {
     Q_OBJECT
 
 public:
-    explicit ProxyService(const std::shared_ptr<Settings> &settings, QObject* parent = nullptr);
+    ProxyService(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
+                 QObject *parent = nullptr);
     ~ProxyService() = default;
 
     QJsonObject getConfig() override;

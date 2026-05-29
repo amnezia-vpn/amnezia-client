@@ -13,9 +13,10 @@ void logConfigError(const QString &errorMessage)
 
 } // namespace
 
-ProxyService::ProxyService(const std::shared_ptr<Settings> &settings, QObject* parent)
+ProxyService::ProxyService(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
+                           QObject *parent)
     : QObject(parent)
-    , m_configManager(new ConfigManager(settings))
+    , m_configManager(new ConfigManager(serversRepository, appSettingsRepository))
     , m_xrayController(new XrayController())
 {
     ProxyLogger::getInstance().debug("ProxyService initialized");

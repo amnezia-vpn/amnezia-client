@@ -79,7 +79,7 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         anchors.bottomMargin: 24
 
         model: instructionsModel
@@ -114,7 +114,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(link))
+                    Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
                 }
             }
 

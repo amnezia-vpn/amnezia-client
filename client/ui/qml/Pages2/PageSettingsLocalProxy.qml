@@ -22,21 +22,21 @@ PageType {
     property int pendingStartAutoSelectedPort: -1
     property bool pendingStartVpnWasActive: false
     property bool pendingEnableAfterVpnDisconnect: false
-    property string pendingEnableServerUuid: ""
+    property string pendingEnableServerId: ""
     property int pendingEnableRequestedPort: -1
     property int pendingEnableAutoSelectedPort: -1
     property int pendingEnablePortToUse: -1
 
     function clearPendingEnableAfterVpnDisconnect() {
         root.pendingEnableAfterVpnDisconnect = false
-        root.pendingEnableServerUuid = ""
+        root.pendingEnableServerId = ""
         root.pendingEnableRequestedPort = -1
         root.pendingEnableAutoSelectedPort = -1
         root.pendingEnablePortToUse = -1
     }
 
-    function enableLocalProxyNow(serverUuid, requestedPort, autoSelectedPort, portToEnable, vpnWasActive) {
-        if (!SettingsController.enableLocalProxy(serverUuid, portToEnable)) {
+    function enableLocalProxyNow(serverId, requestedPort, autoSelectedPort, portToEnable, vpnWasActive) {
+        if (!SettingsController.enableLocalProxy(serverId, portToEnable)) {
             PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2).")
                 .arg(root.localProxyPortMin)
                 .arg(root.localProxyPortMax))
@@ -83,18 +83,18 @@ PageType {
             }
             const wasVpnActive = ConnectionController.isConnected || ConnectionController.isConnectionInProgress
 
-            let serverUuid = ServersModel.processedServerUuid
-            if (!serverUuid && ServersModel.defaultIndex !== undefined) {
-                serverUuid = ServersModel.getServerUuid(ServersModel.defaultIndex)
+            let serverId = ServersModel.processedServerId
+            if (!serverId) {
+                serverId = ServersModel.getServerId(ServersModel.getDefaultServerIndex())
             }
-            if (!serverUuid) {
+            if (!serverId) {
                 PageController.showNotificationMessage(qsTr("Unable to determine the current server"))
                 return
             }
 
             if (SettingsController.isLocalProxyHttpEnabled
-                    && SettingsController.localProxyOwnerUuid
-                    && SettingsController.localProxyOwnerUuid !== serverUuid) {
+                    && SettingsController.localProxyOwnerId
+                    && SettingsController.localProxyOwnerId !== serverId) {
                 PageController.showNotificationMessage(qsTr("Local proxy is already enabled for another server"))
                 return
             }
@@ -127,7 +127,7 @@ PageType {
             const portToEnable = autoSelectedPort > 0 ? autoSelectedPort : requestedPort
             if (wasVpnActive) {
                 root.pendingEnableAfterVpnDisconnect = true
-                root.pendingEnableServerUuid = serverUuid
+                root.pendingEnableServerId = serverId
                 root.pendingEnableRequestedPort = requestedPort
                 root.pendingEnableAutoSelectedPort = autoSelectedPort
                 root.pendingEnablePortToUse = portToEnable
@@ -135,7 +135,7 @@ PageType {
                 return
             }
 
-            root.enableLocalProxyNow(serverUuid, requestedPort, autoSelectedPort, portToEnable, false)
+            root.enableLocalProxyNow(serverId, requestedPort, autoSelectedPort, portToEnable, false)
         } else {
             startSuccessToastTimer.stop()
             root.clearPendingEnableAfterVpnDisconnect()
@@ -153,7 +153,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if (activeFocus) {
@@ -384,13 +384,13 @@ PageType {
                 return
             }
 
-            const serverUuid = root.pendingEnableServerUuid
+            const serverId = root.pendingEnableServerId
             const requestedPort = root.pendingEnableRequestedPort
             const autoSelectedPort = root.pendingEnableAutoSelectedPort
             const portToEnable = root.pendingEnablePortToUse
             root.clearPendingEnableAfterVpnDisconnect()
 
-            root.enableLocalProxyNow(serverUuid, requestedPort, autoSelectedPort, portToEnable, true)
+            root.enableLocalProxyNow(serverId, requestedPort, autoSelectedPort, portToEnable, true)
         }
     }
 
