@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, chdir, rmdir
+from conan.tools.files import get, copy, chdir
 from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 
@@ -74,53 +74,38 @@ class AwgGo(ConanFile):
         env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
         env.define("GOTELEMETRY", "off")
         env.define("GOOS", self._goos)
-        if not self._is_universal_macos:
-            env.define("GOARCH", self._goarch)
         env.define("CGO_LDFLAGS", tc.ldflags)
         env.define("CGO_CFLAGS", tc.cflags)
         tc.generate(env)
 
     def build(self):
-        if self._is_universal_macos:
-            outputs = []
+        outputs = []
+        with chdir(self, self.source_folder):
             for goarch in self._goarchs:
-                arch_build_folder = os.path.join(self.build_folder, f"build-{goarch}")
-                rmdir(self, arch_build_folder)
-                copy(self, "*", src=self.source_folder, dst=arch_build_folder, excludes=(
-                    "amneziawg-go",
-                    "amneziawg-go-*",
-                    "build-*",
-                    "conan",
-                    "conan/*",
-                    "gocache",
-                    "gocache/*",
-                    "gopath",
-                    "gopath/*",
-                ))
-
+                arch_destdir = os.path.join(self.build_folder, f"build-{goarch}")
                 at = Autotools(self)
-                with chdir(self, arch_build_folder):
-                    at.make(args=[
-                        f"GOOS={self._goos}",
-                        f"GOARCH={goarch}",
-                    ])
-
-                output_path = os.path.join(arch_build_folder, self._binary_name)
+                at.make("clean")
+                at.make("install", args=[
+                    f"DESTDIR={shlex.quote(arch_destdir)}",
+                    "BINDIR=",
+                    f"GOARCH={goarch}",
+                ])
+                output_path = os.path.join(arch_destdir, self._binary_name)
                 arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
                 os.rename(output_path, arch_output_path)
                 outputs.append(arch_output_path)
 
-            universal_output = os.path.join(self.build_folder, self._binary_name)
+        output = os.path.join(self.build_folder, self._binary_name)
+        if self._is_universal_macos:
             lipo = XCRun(self).find("lipo")
             self.run("{} -create {} -output {}".format(
                 shlex.quote(lipo),
                 " ".join(shlex.quote(output) for output in outputs),
-                shlex.quote(universal_output)
+                shlex.quote(output)
             ))
             return
 
-        at = Autotools(self)
-        at.make()
+        os.rename(outputs[0], output)
 
     def package(self):
         copy(self, self._binary_name, src=self.build_folder, dst=self.package_folder)

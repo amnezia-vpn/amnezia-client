@@ -239,12 +239,7 @@ install(SCRIPT ${QT_DEPLOY_SCRIPT}
 )
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)
-    set(MACOS_OVPN_SCRIPT "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
-    list(APPEND OVPN_SCRIPTS ${MACOS_OVPN_SCRIPT})
-    set_source_files_properties(${MACOS_OVPN_SCRIPT} PROPERTIES
-        MACOSX_PACKAGE_LOCATION MacOS
-    )
-    target_sources(${PROJECT} PRIVATE ${MACOS_OVPN_SCRIPT})
+    list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
         XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
@@ -255,13 +250,11 @@ if (LINUX AND NOT ANDROID)
 endif()
 
 if(OVPN_SCRIPTS)
-    if(NOT APPLE)
-        add_custom_command(TARGET ${PROJECT} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${OVPN_SCRIPTS}
-            "$<TARGET_FILE_DIR:${PROJECT}>"
-        )
-    endif()
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${OVPN_SCRIPTS}
+        "$<TARGET_FILE_DIR:${PROJECT}>"
+    )
 
     install(FILES ${OVPN_SCRIPTS}
         DESTINATION ${CMAKE_INSTALL_BINDIR}

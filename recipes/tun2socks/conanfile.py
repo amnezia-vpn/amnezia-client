@@ -15,6 +15,11 @@ class Tun2Socks(ConanFile):
     package_type = "application"
     settings = "os", "arch"
     _binary_name = "tun2socks"
+    _arch_map = {
+        "x86": "386",
+        "x86_64": "amd64",
+        "armv8": "arm64"
+    }
 
     @property
     def _goos(self):
@@ -25,21 +30,8 @@ class Tun2Socks(ConanFile):
         }.get(str(self.settings.os))
 
     @property
-    def _arch_map(self):
-        return {
-            "x86": "386",
-            "x86_64": "amd64",
-            "armv8": "arm64"
-        }
-
-    @property
     def _archs(self):
         return str(self.settings.arch).split("|")
-
-    @property
-    def _goarch(self):
-        goarchs = [self._arch_map.get(arch) for arch in self._archs]
-        return goarchs[0] if len(goarchs) == 1 else None
 
     @property
     def _goarchs(self):
@@ -48,46 +40,6 @@ class Tun2Socks(ConanFile):
     @property
     def _is_universal_macos(self):
         return str(self.settings.os) == "Macos" and len(self._archs) > 1
-
-    def _go_arch_make_args(self, goarch):
-        return [
-            "LDFLAGS=",
-            f"GOOS={self._goos}",
-            f"GOARCH={goarch}",
-        ]
-
-    def _build_go_arch(self, goarch):
-        autotools = Autotools(self)
-        for output_path in (
-            os.path.join(self.build_folder, self._binary_name),
-            os.path.join(self.source_folder, self._binary_name),
-            os.path.join(self.source_folder, "build", self._binary_name),
-        ):
-            if os.path.exists(output_path):
-                os.remove(output_path)
-
-        with chdir(self, self.source_folder):
-            autotools.make(self._binary_name, args=self._go_arch_make_args(goarch))
-
-        output_path = os.path.join(self.build_folder, self._binary_name)
-        if not os.path.exists(output_path):
-            output_path = os.path.join(self.source_folder, self._binary_name)
-        if not os.path.exists(output_path):
-            output_path = os.path.join(self.source_folder, "build", self._binary_name)
-
-        arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
-        os.rename(output_path, arch_output_path)
-        return arch_output_path
-
-    def _build_universal_macos(self):
-        outputs = [self._build_go_arch(goarch) for goarch in self._goarchs]
-        universal_output = os.path.join(self.build_folder, self._binary_name)
-        lipo = XCRun(self).find("lipo")
-        self.run("{} -create {} -output {}".format(
-            shlex.quote(lipo),
-            " ".join(shlex.quote(output) for output in outputs),
-            shlex.quote(universal_output)
-        ))
 
     @property
     def _is_windows(self):
@@ -134,18 +86,32 @@ class Tun2Socks(ConanFile):
         env.define("CGO_LDFLAGS", tc.ldflags)
         env.define("CGO_CFLAGS", tc.cflags)
         env.define("GOOS", self._goos)
-        if not self._is_universal_macos:
-            env.define("GOARCH", self._goarch)
         tc.generate(env)
 
     def build(self):
+        outputs = []
+        with chdir(self, self.source_folder):
+            for goarch in self._goarchs:
+                target = f"{self._goos}-{goarch}"
+                at = Autotools(self)
+                at.make(target)
+                output_ext = ".exe" if self._goos == "windows" else ""
+                output_path = os.path.join(self.source_folder, "build", f"{self._binary_name}-{target}{output_ext}")
+                arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
+                os.rename(output_path, arch_output_path)
+                outputs.append(arch_output_path)
+
+        output = os.path.join(self.build_folder, self._binary_name)
         if self._is_universal_macos:
-            self._build_universal_macos()
+            lipo = XCRun(self).find("lipo")
+            self.run("{} -create {} -output {}".format(
+                shlex.quote(lipo),
+                " ".join(shlex.quote(output) for output in outputs),
+                shlex.quote(output)
+            ))
             return
 
-        with chdir(self, self.source_folder):
-            at = Autotools(self)
-            at.make(self._binary_name)
+        os.rename(outputs[0], output)
 
     def package(self):
         copy(self, self._binary_name, src=self.build_folder, dst=self.package_folder)
