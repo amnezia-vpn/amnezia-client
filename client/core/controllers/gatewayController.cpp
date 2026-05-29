@@ -4,6 +4,8 @@
 #include <functional>
 #include <random>
 
+#include "embedded_agw_public_keys.h"
+
 #include <QCryptographicHash>
 #include <QJsonArray>
 #include <QJsonDocument>

@@ -7,8 +7,13 @@
 
 #include "notificationHandler.h"
 
+#include <QColor>
 #include <QMenu>
 #include <QSystemTrayIcon>
+
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+class MacOSStatusIcon;
+#endif
 
 class SystemTrayNotificationHandler : public NotificationHandler {
     Q_OBJECT
@@ -34,12 +39,19 @@ private:
     void setTrayState(Vpn::ConnectionState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
 
+    void refreshTheme();
     void updateTrayIcon();
     qreal trayIconOpacityForState(Vpn::ConnectionState state) const;
+    QColor trayIndicatorColorForState(Vpn::ConnectionState state) const;
 
 private:
     QMenu m_menu;
+
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    MacOSStatusIcon *m_macStatusIcon = nullptr;
+#else
     QSystemTrayIcon m_systemTrayIcon;
+#endif
 
     QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;
@@ -50,6 +62,7 @@ private:
     QAction* m_separator = nullptr;
 
     Vpn::ConnectionState m_trayState = Vpn::ConnectionState::Unknown;
+    bool m_isDarkTheme = false;
 
     static constexpr qreal kDisconnectedTrayOpacity = 0.5;
     static constexpr qreal kConnectedTrayOpacity = 1.0;

@@ -137,6 +137,32 @@ void MacOSUtils::showDockIcon() {
  * Original bug (and sample implementation):
  * https://bugreports.qt.io/browse/QTBUG-88600
  */
+bool MacOSUtils::isDarkTheme() {
+  if (@available(macOS 10.14, *)) {
+    NSAppearanceName appearanceName = [[NSApp effectiveAppearance] name];
+    return appearanceName && [appearanceName isEqualToString:NSAppearanceNameDarkAqua];
+  }
+  return false;
+}
+
+void MacOSUtils::installInterfaceThemeObserver(std::function<void()> callback) {
+  if (!callback) {
+    return;
+  }
+
+  // Copy into block storage: capturing the parameter by reference would dangle
+  // once this function returns.
+  const std::function<void()> themeCallback = std::move(callback);
+
+  NSDistributedNotificationCenter *center = [NSDistributedNotificationCenter defaultCenter];
+  [center addObserverForName:@"AppleInterfaceThemeChangedNotification"
+                      object:nil
+                       queue:[NSOperationQueue mainQueue]
+                  usingBlock:^(__unused NSNotification *notification) {
+                    themeCallback();
+                  }];
+}
+
 void MacOSUtils::patchNSStatusBarSetImageForBigSur() {
   Method original = class_getInstanceMethod([NSStatusBarButton class], @selector(setImage:));
   Method patched = class_getInstanceMethod([NSStatusBarButton class], @selector(setImagePatched:));

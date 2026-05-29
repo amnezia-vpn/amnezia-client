@@ -60,3 +60,17 @@ QString WindowsUtils::windowsVersion() {
 void WindowsUtils::forceCrash() {
   RaiseException(0x0000DEAD, EXCEPTION_NONCONTINUABLE, 0, NULL);
 }
+
+// static
+bool WindowsUtils::isDarkTheme() {
+  QSettings settings(
+      QStringLiteral("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
+      QSettings::NativeFormat);
+
+  if (settings.contains(QStringLiteral("AppsUseLightTheme"))) {
+    return settings.value(QStringLiteral("AppsUseLightTheme")).toInt() != 1;
+  }
+
+  logger.warning() << "AppsUseLightTheme registry key is unavailable; assuming dark theme";
+  return true;
+}

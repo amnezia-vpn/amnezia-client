@@ -5,14 +5,23 @@
 #include <QDebug>
 #include "systemTrayNotificationHandler.h"
 
+#include "platformTheme.h"
+
 #include <QApplication>
+#include <QBuffer>
+#include <QColor>
 #include <QDesktopServices>
 #include <QGuiApplication>
 #include <QIcon>
 #include <QPainter>
 #include <QStyleHints>
 #include <QSvgRenderer>
-#include <QWindow>
+#include <QEvent>
+#include <functional>
+
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+#  include "platforms/macos/macosstatusicon.h"
+#endif
 
 #include "version.h"
 
@@ -20,6 +29,30 @@ namespace {
 
 constexpr int kTrayIconSize = 128;
 constexpr char kTrayTemplateIconPath[] = ":/images/tray/icon.svg";
+
+class TrayThemeChangeFilter final : public QObject {
+public:
+    explicit TrayThemeChangeFilter(std::function<void()> onThemeChanged, QObject *parent = nullptr)
+        : QObject(parent)
+        , m_onThemeChanged(std::move(onThemeChanged))
+    {
+    }
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override
+    {
+        Q_UNUSED(watched);
+        if (event->type() == QEvent::ApplicationPaletteChange || event->type() == QEvent::ThemeChange) {
+            if (m_onThemeChanged) {
+                m_onThemeChanged();
+            }
+        }
+        return QObject::eventFilter(watched, event);
+    }
+
+private:
+    std::function<void()> m_onThemeChanged;
+};
 
 QPixmap renderTrayTemplate(const QString &resourcePath, qreal opacity)
 {
@@ -38,6 +71,17 @@ QPixmap renderTrayTemplate(const QString &resourcePath, qreal opacity)
     return pixmap;
 }
 
+QByteArray renderTrayTemplatePng(qreal opacity)
+{
+    const QPixmap pixmap = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
+
+    QByteArray bytes;
+    QBuffer buffer(&bytes);
+    buffer.open(QIODevice::WriteOnly);
+    pixmap.save(&buffer, "PNG");
+    return bytes;
+}
+
 QIcon buildTrayIcon(qreal opacity)
 {
     const QPixmap pixmap = renderTrayTemplate(QString::fromLatin1(kTrayTemplateIconPath), opacity);
@@ -51,12 +95,21 @@ QIcon buildTrayIcon(qreal opacity)
 } // namespace
 
 SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
-    NotificationHandler(parent),
-    m_systemTrayIcon(parent)
-
+    NotificationHandler(parent)
+#if !defined(Q_OS_MAC) || defined(MACOS_NE)
+    , m_systemTrayIcon(parent)
+#endif
 {
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    m_macStatusIcon = new MacOSStatusIcon(this);
+    m_macStatusIcon->setMenu(&m_menu);
+    m_macStatusIcon->setToolTip(APPLICATION_NAME);
+    // Template NSStatusItem icons follow the menu bar appearance automatically.
+#else
     m_systemTrayIcon.show();
     connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this, &SystemTrayNotificationHandler::onTrayActivated);
+    m_systemTrayIcon.setContextMenu(&m_menu);
+#endif
 
     m_trayActionShow =  m_menu.addAction(tr("Show") + " " + APPLICATION_NAME, this, [this](){
         emit raiseRequested();
@@ -75,14 +128,19 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
                                        this,
                                        [&](){ qApp->quit(); });
 
-    m_systemTrayIcon.setContextMenu(&m_menu);
-
+#if !defined(Q_OS_MAC) || defined(MACOS_NE)
     if (QStyleHints *styleHints = QGuiApplication::styleHints()) {
         connect(styleHints, &QStyleHints::colorSchemeChanged, this, [this]() {
-            updateTrayIcon();
+            refreshTheme();
         });
     }
 
+    qApp->installEventFilter(new TrayThemeChangeFilter([this]() {
+        refreshTheme();
+    }, this));
+#endif
+
+    refreshTheme();
     setTrayState(Vpn::ConnectionState::Disconnected);
 }
 
@@ -102,11 +160,26 @@ void SystemTrayNotificationHandler::onTranslationsUpdated()
     m_trayActionDisconnect->setText(tr("Disconnect"));
     m_trayActionVisitWebSite->setText(tr("Visit Website"));
     m_trayActionQuit->setText(tr("Quit")+ " " + APPLICATION_NAME);
+
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    if (m_macStatusIcon) {
+        m_macStatusIcon->rebuildNativeMenu();
+    }
+#endif
 }
 
 void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUrl) {
     qDebug() << "Updated website URL:" << newWebsiteUrl;
     websiteUrl = newWebsiteUrl;
+}
+
+void SystemTrayNotificationHandler::refreshTheme()
+{
+    m_isDarkTheme = platformIsDarkTheme();
+
+#if !defined(Q_OS_MAC) || defined(MACOS_NE)
+    updateTrayIcon();
+#endif
 }
 
 qreal SystemTrayNotificationHandler::trayIconOpacityForState(Vpn::ConnectionState state) const
@@ -126,10 +199,29 @@ qreal SystemTrayNotificationHandler::trayIconOpacityForState(Vpn::ConnectionStat
     }
 }
 
+QColor SystemTrayNotificationHandler::trayIndicatorColorForState(Vpn::ConnectionState state) const
+{
+    switch (state) {
+    case Vpn::ConnectionState::Connected:
+        return QColor(52, 199, 89);
+    case Vpn::ConnectionState::Error:
+        return QColor(235, 87, 87);
+    default:
+        return QColor();
+    }
+}
+
 void SystemTrayNotificationHandler::updateTrayIcon()
 {
     const qreal opacity = trayIconOpacityForState(m_trayState);
+
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    Q_ASSERT(m_macStatusIcon);
+    m_macStatusIcon->setIconFromData(renderTrayTemplatePng(opacity));
+    m_macStatusIcon->setIndicatorColor(trayIndicatorColorForState(m_trayState));
+#else
     m_systemTrayIcon.setIcon(buildTrayIcon(opacity));
+#endif
 }
 
 void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
@@ -182,8 +274,13 @@ void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
     }
 
     updateTrayIcon();
-}
 
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+    if (m_macStatusIcon) {
+        m_macStatusIcon->rebuildNativeMenu();
+    }
+#endif
+}
 
 void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            const QString& title,
@@ -191,7 +288,12 @@ void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            int timerMsec) {
   Q_UNUSED(type);
 
+#if defined(Q_OS_MAC) && !defined(MACOS_NE)
+  Q_ASSERT(m_macStatusIcon);
+  m_macStatusIcon->showMessage(title, message);
+#else
   m_systemTrayIcon.showMessage(title, message, buildTrayIcon(kConnectedTrayOpacity), timerMsec);
+#endif
 }
 
 void SystemTrayNotificationHandler::showHideWindow() {

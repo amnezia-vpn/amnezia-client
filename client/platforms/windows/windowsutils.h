@@ -18,6 +18,8 @@ class WindowsUtils final {
 
   // Force an application crash for testing
   static void forceCrash();
+
+  static bool isDarkTheme();
 };
 
 #endif  // WINDOWSUTILS_H

@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QString>
 
+#include <functional>
+
 class MacOSUtils final {
  public:
   static NSString* appId();
@@ -23,6 +25,9 @@ class MacOSUtils final {
   static void showDockIcon();
 
   static void patchNSStatusBarSetImageForBigSur();
+
+  static bool isDarkTheme();
+  static void installInterfaceThemeObserver(std::function<void()> callback);
 };
 
 #endif  // MACOSUTILS_H
