@@ -10,12 +10,15 @@
 
 class QTemporaryFile;
 class ServersModel;
+class ServersUiController;
+class ServersController;
 class SecureQSettings;
 
 #include <QPointer>
 
-#include "core/defs.h"
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/commonStructs.h"
+#include "core/utils/errorCodes.h"
 #include "core/utils/selfhosted/sshSession.h"
 
 using namespace amnezia;
@@ -34,7 +37,9 @@ class ServersBackupController : public QObject
     Q_OBJECT
 
 public:
-    explicit ServersBackupController(SecureQSettings *settings, ServersModel *serversModel, QObject *parent = nullptr);
+    explicit ServersBackupController(SecureQSettings *settings, ServersModel *serversModel,
+                                     ServersUiController *serversUiController, ServersController *serversController,
+                                     QObject *parent = nullptr);
     ~ServersBackupController();
 
     /**
@@ -373,6 +378,8 @@ private:
 private:
     QPointer<SecureQSettings> m_settings;
     ServersModel *m_serversModel;
+    ServersUiController *m_serversUiController;
+    ServersController *m_serversController;
     SshSession m_sshSession;
     BackupStatus m_status;
     QString m_backupDir;
