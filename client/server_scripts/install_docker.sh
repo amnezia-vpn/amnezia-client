@@ -8,27 +8,27 @@ echo "Dist: $dist, Packet manager: $pm, Install command: $silent_inst, What pkg 
 echo $LANG | grep -qE '^(en_US.UTF-8|C.UTF-8|C)$' || export LC_ALL=C;\
 if [ "$dist" = "debian" ]; then export DEBIAN_FRONTEND=noninteractive; fi;\
 if ! command -v sudo > /dev/null 2>&1; then $pm $check_pkgs; $pm $silent_inst sudo; fi;\
-if ! sudo sh -c 'command -v which > /dev/null 2>&1'; then sudo $pm $check_pkgs; sudo $pm $silent_inst which; fi;\
-if ! sudo sh -c 'command -v fuser > /dev/null 2>&1'; then sudo $pm $check_pkgs; sudo $pm $silent_inst psmisc; fi;\
-if ! sudo sh -c 'command -v lsof > /dev/null 2>&1'; then sudo $pm $check_pkgs; sudo $pm $silent_inst lsof; fi;\
-if ! sudo sh -c 'command -v docker > /dev/null 2>&1'; then \
-  sudo $pm $check_pkgs;\
-  if ! sudo $pm $what_pkg $docker_pkg 2>/dev/null | grep -qi podman; then \
-    sudo $pm $silent_inst $docker_pkg;\
-    sleep 5; sudo systemctl enable --now docker; sleep 5;\
+if ! sudo -n sh -c 'command -v which > /dev/null 2>&1'; then sudo -n $pm $check_pkgs; sudo -n $pm $silent_inst which; fi;\
+if ! sudo -n sh -c 'command -v fuser > /dev/null 2>&1'; then sudo -n $pm $check_pkgs; sudo -n $pm $silent_inst psmisc; fi;\
+if ! sudo -n sh -c 'command -v lsof > /dev/null 2>&1'; then sudo -n $pm $check_pkgs; sudo -n $pm $silent_inst lsof; fi;\
+if ! sudo -n sh -c 'command -v docker > /dev/null 2>&1'; then \
+  sudo -n $pm $check_pkgs;\
+  if ! sudo -n $pm $what_pkg $docker_pkg 2>/dev/null | grep -qi podman; then \
+    sudo -n $pm $silent_inst $docker_pkg;\
+    sleep 5; sudo -n systemctl enable --now docker; sleep 5;\
   else \
     echo "Container runtime is not supported";\
     exit 1;\
   fi;\
 fi;\
-if [ "$(sudo cat /sys/module/apparmor/parameters/enabled 2>/dev/null)" = "Y" ]; then \
-  if ! sudo sh -c 'command -v apparmor_parser > /dev/null 2>&1'; then \
-    sudo $pm $check_pkgs; sudo $pm $silent_inst apparmor;\
+if [ "$(sudo -n cat /sys/module/apparmor/parameters/enabled 2>/dev/null)" = "Y" ]; then \
+  if ! sudo -n sh -c 'command -v apparmor_parser > /dev/null 2>&1'; then \
+    sudo -n $pm $check_pkgs; sudo -n $pm $silent_inst apparmor;\
   fi;\
 fi;\
-if [ "$(sudo systemctl is-active docker)" != "active" ]; then \
-  sleep 5; sudo systemctl start docker; sleep 5;\
-  if [ "$(sudo systemctl is-active docker)" != "active" ]; then echo "Container runtime service not running"; fi;\
+if [ "$(sudo -n systemctl is-active docker)" != "active" ]; then \
+  sleep 5; sudo -n systemctl start docker; sleep 5;\
+  if [ "$(sudo -n systemctl is-active docker)" != "active" ]; then echo "Container runtime service not running"; fi;\
 fi;\
-sudo docker --version;\
+sudo -n docker --version || docker --version;\
 uname -sr
