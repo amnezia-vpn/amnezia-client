@@ -34,7 +34,13 @@ void LinuxTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
     const qreal opacity = TrayIconCommon::opacityForState(visual.connectionState);
     const QColor indicatorColor = TrayIconCommon::indicatorColorForState(visual.connectionState);
-    m_trayIcon.setIcon(buildTrayIcon(opacity, visual.darkTheme, indicatorColor));
+    const QIcon icon = buildTrayIcon(opacity, visual.darkTheme, indicatorColor);
+
+    // Some tray implementations cache the first icon; clear before applying an update.
+    if (m_trayIcon.isVisible()) {
+        m_trayIcon.setIcon(QIcon());
+    }
+    m_trayIcon.setIcon(icon);
 }
 
 void LinuxTrayIconBackend::showMessage(const QString &title, const QString &message, const TrayIconVisual &visual,

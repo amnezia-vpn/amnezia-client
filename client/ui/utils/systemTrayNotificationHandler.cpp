@@ -78,12 +78,17 @@ void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUr
 void SystemTrayNotificationHandler::refreshTheme()
 {
     const bool isDarkTheme = platformIsDarkTheme();
-    if (isDarkTheme == m_isDarkTheme) {
-        return;
-    }
-
+    const bool themeChanged = (isDarkTheme != m_isDarkTheme);
     m_isDarkTheme = isDarkTheme;
+
+#if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    // Palette can change without gtk/portal settings updating; always repaint on Linux.
     updateTrayIcon();
+#else
+    if (themeChanged) {
+        updateTrayIcon();
+    }
+#endif
 }
 
 TrayIconVisual SystemTrayNotificationHandler::currentTrayVisual() const

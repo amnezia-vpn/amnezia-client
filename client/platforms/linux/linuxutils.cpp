@@ -51,6 +51,11 @@ public:
                     SLOT(onPortalSettingChanged(QString, QString, QDBusVariant)));
     }
 
+    void setCallback(std::function<void()> callback)
+    {
+        m_callback = std::move(callback);
+    }
+
 private slots:
     void onPortalSettingChanged(const QString &namespaceName, const QString &key, const QDBusVariant &value)
     {
@@ -114,7 +119,10 @@ void LinuxUtils::installThemeChangeObserver(std::function<void()> callback)
 
     if (!g_themeObserver) {
         g_themeObserver = new LinuxThemeObserver(std::move(callback), qApp);
+        return;
     }
+
+    g_themeObserver->setCallback(std::move(callback));
 }
 
 #include "linuxutils.moc"

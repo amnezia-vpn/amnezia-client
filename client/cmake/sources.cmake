@@ -347,10 +347,12 @@ if(LINUX)
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.h
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxtrayiconbackend.h
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxtraytheme.h
+            ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.h
     )
     set(SOURCES ${SOURCES}
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.cpp
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxtrayiconbackend.cpp
             ${CLIENT_ROOT_DIR}/platforms/linux/linuxtraytheme.cpp
+            ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.cpp
     )
 endif()
