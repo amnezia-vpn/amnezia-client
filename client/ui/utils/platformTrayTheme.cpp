@@ -1,5 +1,7 @@
 #include "platformTrayTheme.h"
 
+#include <QtGlobal>
+
 #if defined(Q_OS_MAC) && !defined(MACOS_NE)
 #  include "platforms/macos/mactraytheme.h"
 #elif defined(Q_OS_WIN) || (defined(Q_OS_MAC) && defined(MACOS_NE))

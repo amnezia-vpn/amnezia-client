@@ -5,34 +5,29 @@
 #include <QPainter>
 #include <QSvgRenderer>
 
-namespace TrayIconCommon {
-
+namespace TrayIconCommon
+{
 qreal opacityForState(Vpn::ConnectionState state)
 {
     switch (state) {
     case Vpn::ConnectionState::Connected:
-    case Vpn::ConnectionState::Error:
-        return kConnectedOpacity;
+    case Vpn::ConnectionState::Error: return kConnectedOpacity;
     case Vpn::ConnectionState::Disconnected:
     case Vpn::ConnectionState::Preparing:
     case Vpn::ConnectionState::Connecting:
     case Vpn::ConnectionState::Disconnecting:
     case Vpn::ConnectionState::Reconnecting:
     case Vpn::ConnectionState::Unknown:
-    default:
-        return kDisconnectedOpacity;
+    default: return kDisconnectedOpacity;
     }
 }
 
 QColor indicatorColorForState(Vpn::ConnectionState state)
 {
     switch (state) {
-    case Vpn::ConnectionState::Connected:
-        return QColor(52, 199, 89);
-    case Vpn::ConnectionState::Error:
-        return QColor(235, 87, 87);
-    default:
-        return QColor();
+    case Vpn::ConnectionState::Connected: return QColor(52, 199, 89);
+    case Vpn::ConnectionState::Error: return QColor(235, 87, 87);
+    default: return QColor();
     }
 }
 

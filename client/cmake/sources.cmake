@@ -312,6 +312,7 @@ if(APPLE AND MACOS_NE)
         ${CLIENT_ROOT_DIR}/ui/utils/platformTrayTheme.h
         ${CLIENT_ROOT_DIR}/ui/utils/trayIconCommon.h
         ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.h
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.h
         ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.h
         ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.h
     )
@@ -322,6 +323,7 @@ if(APPLE AND MACOS_NE)
         ${CLIENT_ROOT_DIR}/ui/utils/platformTrayTheme.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/trayIconCommon.cpp
         ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.cpp
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.cpp
         ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.cpp
     )
@@ -331,12 +333,14 @@ if(WIN32)
     set(HEADERS ${HEADERS}
             ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.h
             ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.h
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.h
             ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.h
             ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.h
     )
     set(SOURCES ${SOURCES}
             ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
             ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.cpp
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.cpp
             ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.cpp
             ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.cpp
     )

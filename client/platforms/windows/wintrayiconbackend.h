@@ -21,8 +21,6 @@ public:
     void setActivatedHandler(std::function<void(QSystemTrayIcon::ActivationReason)> handler) override;
 
 private:
-    QIcon buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor) const;
-
     QSystemTrayIcon m_trayIcon;
 };
 

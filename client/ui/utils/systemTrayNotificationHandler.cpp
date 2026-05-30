@@ -82,7 +82,6 @@ void SystemTrayNotificationHandler::refreshTheme()
     m_isDarkTheme = isDarkTheme;
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    // Palette can change without gtk/portal settings updating; always repaint on Linux.
     updateTrayIcon();
 #else
     if (themeChanged) {
@@ -106,6 +105,9 @@ void SystemTrayNotificationHandler::updateTrayIcon()
     }
 
     m_trayIcon->applyVisual(currentTrayVisual());
+#if defined(Q_OS_WIN)
+    qDebug() << "Windows tray: setIcon darkTheme=" << m_isDarkTheme << "state=" << static_cast<int>(m_trayState);
+#endif
 }
 
 void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationReason reason)

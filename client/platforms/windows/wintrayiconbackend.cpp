@@ -1,6 +1,6 @@
 #include "wintrayiconbackend.h"
 
-#include "ui/utils/trayIconCommon.h"
+#include "platforms/windows/wintrayicon.h"
 
 #include <QObject>
 
@@ -20,23 +20,18 @@ void WinTrayIconBackend::setToolTip(const QString &tooltip)
 
 void WinTrayIconBackend::show()
 {
-    m_trayIcon.show();
+    WinTrayIcon::show(m_trayIcon);
 }
 
 void WinTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
-    const qreal opacity = TrayIconCommon::opacityForState(visual.connectionState);
-    const QColor indicatorColor = TrayIconCommon::indicatorColorForState(visual.connectionState);
-    m_trayIcon.setIcon(buildTrayIcon(opacity, visual.darkTheme, indicatorColor));
+    WinTrayIcon::applyTo(m_trayIcon, visual.connectionState, visual.darkTheme);
 }
 
 void WinTrayIconBackend::showMessage(const QString &title, const QString &message, const TrayIconVisual &visual,
                                      int timerMsec)
 {
-    m_trayIcon.showMessage(title, message,
-                           buildTrayIcon(TrayIconCommon::kConnectedOpacity, visual.darkTheme,
-                                         TrayIconCommon::indicatorColorForState(Vpn::ConnectionState::Connected)),
-                           timerMsec);
+    WinTrayIcon::showMessage(m_trayIcon, title, message, visual.darkTheme, timerMsec);
 }
 
 void WinTrayIconBackend::rebuildMenu()
@@ -51,11 +46,6 @@ void WinTrayIconBackend::setActivatedHandler(std::function<void(QSystemTrayIcon:
 
     QObject::connect(&m_trayIcon, &QSystemTrayIcon::activated, m_trayIcon.parent(),
                      [handler](QSystemTrayIcon::ActivationReason reason) { handler(reason); });
-}
-
-QIcon WinTrayIconBackend::buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor) const
-{
-    return TrayIconCommon::buildIcon(opacity, darkTheme, indicatorColor);
 }
 
 std::unique_ptr<TrayIconBackend> createTrayIconBackend(QObject *parent)

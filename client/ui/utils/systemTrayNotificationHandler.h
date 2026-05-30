@@ -9,7 +9,6 @@
 #include "trayIconBackend.h"
 
 #include <QMenu>
-#include <QSystemTrayIcon>
 
 #include <memory>
 
