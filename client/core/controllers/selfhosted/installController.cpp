@@ -811,7 +811,7 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
         return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("Container runtime is not supported"))
         return ErrorCode::ServerContainerRuntimeNotSupported;
-    if (stdOut.contains("command not found"))
+    if (stdOut.contains("sudo:") && stdOut.contains("not found"))
         return ErrorCode::ServerDockerFailedError;
     if (stdOut.contains("Container runtime service not running"))
         return ErrorCode::ContainerRuntimeServiceNotRunning;
