@@ -20,6 +20,7 @@ class MacOSStatusIcon final : public QObject {
   explicit MacOSStatusIcon(QObject* parent);
   ~MacOSStatusIcon();
 
+ public:
   void setIcon(const QString& iconUrl);
   void setIconFromData(const QByteArray& imageData);
   void setIndicatorColor(const QColor& indicatorColor);

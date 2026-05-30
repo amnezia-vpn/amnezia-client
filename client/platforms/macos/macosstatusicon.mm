@@ -176,7 +176,7 @@ namespace {
 Logger logger("MacOSStatusIcon");
 
 MacOSStatusIconDelegate* m_statusBarIcon = nullptr;
-}  // namespace
+}
 
 MacOSStatusIcon::MacOSStatusIcon(QObject* parent) : QObject(parent) {
   MZ_COUNT_CTOR(MacOSStatusIcon);
