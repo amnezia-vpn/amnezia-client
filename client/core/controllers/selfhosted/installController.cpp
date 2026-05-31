@@ -795,8 +795,8 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
     qDebug().noquote() << "InstallController::installDockerWorker" << stdOut;
 
     if (container == DockerContainer::Awg2) {
-        QRegularExpression regex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
-        QRegularExpressionMatch match = regex.match(stdOut);
+        QRegularExpression kernelVersionRegex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
+        QRegularExpressionMatch match = kernelVersionRegex.match(stdOut);
         if (match.hasMatch()) {
             int majorVersion = match.captured(1).toInt();
             int minorVersion = match.captured(2).toInt();
@@ -811,8 +811,15 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
         return ErrorCode::ServerPacketManagerError;
     if (stdOut.contains("Container runtime is not supported"))
         return ErrorCode::ServerContainerRuntimeNotSupported;
-    if (stdOut.contains("sudo:") && stdOut.contains("not found"))
+    
+    QRegularExpression notFoundRegex(
+        R"(^.*(?:sudo:|docker:).*not found.*$)",
+        QRegularExpression::MultilineOption);
+
+    if (notFoundRegex.match(stdOut).hasMatch()) {
         return ErrorCode::ServerDockerFailedError;
+    }
+    
     if (stdOut.contains("Container runtime service not running"))
         return ErrorCode::ContainerRuntimeServiceNotRunning;
 
