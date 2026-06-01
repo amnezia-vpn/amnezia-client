@@ -1111,10 +1111,34 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
             }
         }
 
+        GatewayRequestData checkRequestData { QSysInfo::productType(),
+                                              QString(APP_VERSION),
+                                              m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                              m_appSettingsRepository->getInstallationUuid(true),
+                                              userCountryCode,
+                                              "",
+                                              serviceType,
+                                              serviceProtocol,
+                                              QJsonObject() };
+        QJsonObject checkPayload = checkRequestData.toJsonObject();
+        checkPayload[apiDefs::key::transactionId] = purchaseToken;
+
+        QByteArray checkResponse;
+        ErrorCode checkError = executeRequest(QString("%1v1/subscriptions"), checkPayload, checkResponse, false);
+        if (checkError != ErrorCode::NoError) {
+            qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
+            result.errorCode = checkError;
+            continue;
+        }
+
+        QJsonObject checkObject = QJsonDocument::fromJson(checkResponse).object();
+        bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
+        qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
+
         ProtocolData protocolData = generateProtocolData(serviceProtocol);
         int currentDuplicateServerIndex = -1;
         ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                        purchaseToken, false,
+                                                        purchaseToken, isTestPurchase,
                                                         &currentDuplicateServerIndex);
 
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
