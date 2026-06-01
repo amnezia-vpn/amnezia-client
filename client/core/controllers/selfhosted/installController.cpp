@@ -72,6 +72,21 @@ namespace
         }
         return false;
     }
+
+    bool usesNamedDataVolume(DockerContainer container)
+    {
+        return container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
+    }
+
+    QString buildRemoveContainerScript(const amnezia::ScriptVars &vars, bool removeDataVolume)
+    {
+        QString script = SshSession::replaceVars(amnezia::scriptData(SharedScriptType::remove_container), vars);
+        if (removeDataVolume) {
+            script += QLatin1String("\nsudo docker volume rm -f $CONTAINER_NAME-data 2>/dev/null || true");
+            script = SshSession::replaceVars(script, vars);
+        }
+        return script;
+    }
 }
 
 InstallController::InstallController(SecureServersRepository *serversRepository,
@@ -120,14 +135,10 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
-    amnezia::ScriptVars removeContainerVars =
+    const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    if (!isUpdate) {
-        removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
-    }
-    sshSession.runScript(credentials,
-                         sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                                removeContainerVars));
+    const bool removeDataVolume = !isUpdate && usesNamedDataVolume(container);
+    sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
     qDebug().noquote() << "buildContainerWorker start";
@@ -980,12 +991,11 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
         return ErrorCode::InternalError;
     }
     SshSession sshSession(this);
-    amnezia::ScriptVars removeContainerVars =
+    const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
-    ErrorCode errorCode = sshSession.runScript(
-            credentials,
-            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container), removeContainerVars));
+    const bool removeDataVolume = usesNamedDataVolume(container);
+    ErrorCode errorCode =
+            sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
 
     if (errorCode == ErrorCode::NoError) {
         QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
