@@ -50,7 +50,6 @@ public:
     ErrorCode importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
-                                        ServerConfig &serverConfig,
                                         int *duplicateServerIndex = nullptr);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
@@ -109,7 +108,6 @@ public:
 
     ErrorCode processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const QString &productId,
-                                        ServerConfig &serverConfig,
                                         int *duplicateServerIndex = nullptr);
 
     AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,

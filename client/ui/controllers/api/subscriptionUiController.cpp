@@ -235,14 +235,12 @@ bool SubscriptionUiController::importPremiumFromPlayMarket(const QString &storeP
         productId = QStringLiteral("premium");
     }
 
-    ServerConfig serverConfig;
     int duplicateServerIndex = -1;
     ErrorCode errorCode = m_subscriptionController->processPlayMarketPurchase(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol(),
         productId,
-        serverConfig,
         &duplicateServerIndex);
 
     if (errorCode != ErrorCode::NoError) {

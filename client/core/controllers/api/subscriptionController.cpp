@@ -304,7 +304,6 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
 ErrorCode SubscriptionController::importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             const QString &transactionId, bool isTestPurchase,
-                                                            ServerConfig &serverConfig,
                                                             int *duplicateServerIndex)
 {
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
@@ -831,9 +830,8 @@ ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCou
     bool isTestPurchase = IosController::Instance()->isTestFlight();
 
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    ServerConfig serverConfig;
     return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                     originalTransactionId, isTestPurchase, serverConfig, duplicateServerIndex);
+                                     originalTransactionId, isTestPurchase, duplicateServerIndex);
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
@@ -845,7 +843,6 @@ ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCou
 
 ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
                                                              const QString &serviceProtocol, const QString &productId,
-                                                             ServerConfig &serverConfig,
                                                              int *duplicateServerIndex)
 {
 #if defined(Q_OS_ANDROID)
@@ -917,15 +914,40 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         return ErrorCode::ApiPurchaseError;
     }
 
+    // First call: determine if this is a test purchase
+    GatewayRequestData checkRequestData { QSysInfo::productType(),
+                                          QString(APP_VERSION),
+                                          m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                          m_appSettingsRepository->getInstallationUuid(true),
+                                          userCountryCode,
+                                          "",
+                                          serviceType,
+                                          serviceProtocol,
+                                          QJsonObject() };
+
+    QJsonObject checkPayload = checkRequestData.toJsonObject();
+    checkPayload[apiDefs::key::transactionId] = purchaseToken;
+
+    QByteArray checkResponse;
+    ErrorCode checkError = executeRequest(QString("%1v1/subscriptions"), checkPayload, checkResponse, false);
+    if (checkError != ErrorCode::NoError) {
+        qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
+        return checkError;
+    }
+
+    QJsonObject checkObject = QJsonDocument::fromJson(checkResponse).object();
+    bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
+    qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
+
+    // Second call: import service with correct isTestPurchase flag
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,   //here we should now all about type payment
-                                     purchaseToken, false, serverConfig, duplicateServerIndex);
+    return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                     purchaseToken, isTestPurchase, duplicateServerIndex);
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
     Q_UNUSED(serviceProtocol);
     Q_UNUSED(productId);
-    Q_UNUSED(serverConfig);
     return ErrorCode::ApiPurchaseError;
 #endif
 }
@@ -985,9 +1007,8 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
 
         ProtocolData protocolData = generateProtocolData(serviceProtocol);
         int currentDuplicateServerIndex = -1;
-        ServerConfig serverConfig;
         ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                        originalTransactionId, isTestPurchase, serverConfig,
+                                                        originalTransactionId, isTestPurchase,
                                                         &currentDuplicateServerIndex);
 
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
@@ -1091,10 +1112,9 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
         }
 
         ProtocolData protocolData = generateProtocolData(serviceProtocol);
-        ServerConfig serverConfig;
         int currentDuplicateServerIndex = -1;
         ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                        purchaseToken, false, serverConfig,
+                                                        purchaseToken, false,
                                                         &currentDuplicateServerIndex);
 
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
@@ -1126,18 +1146,14 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
 #endif
 }
 
-ErrorCode SubscriptionController::getAccountInfo(int serverIndex, QJsonObject &accountInfo)
+ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonObject &accountInfo)
 {
-    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-
-    if (!serverConfigModel.isApiV2()) {
+    auto apiV2Opt = m_serversRepository->apiV2Config(serverId);
+    if (!apiV2Opt.has_value()) {
         return ErrorCode::InternalError;
     }
 
-    const ApiV2ServerConfig* apiV2 = serverConfigModel.as<ApiV2ServerConfig>();
-    if (!apiV2) {
-        return ErrorCode::InternalError;
-    }
+    const ApiV2ServerConfig* apiV2 = &apiV2Opt.value();
     bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
