@@ -208,7 +208,7 @@ PageType {
                     return
                 }
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
             var noButtonFunction = function () {
                 if (typeof GC !== "undefined" && !GC.isMobile()) {
