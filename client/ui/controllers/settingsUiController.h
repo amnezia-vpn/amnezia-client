@@ -32,6 +32,7 @@ public:
     Q_PROPERTY(bool isDevGatewayEnv READ isDevGatewayEnv WRITE toggleDevGatewayEnv NOTIFY devGatewayEnvChanged)
 
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
+    Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
 
 public slots:
@@ -135,6 +136,7 @@ signals:
     void activityResumed();
 
     void isHomeAdLabelVisibleChanged(bool visible);
+    void autoStartChanged();
     void startMinimizedChanged();
 
 private:

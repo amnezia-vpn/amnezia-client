@@ -164,6 +164,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit amneziaDnsToggled(amneziaDnsEnabled);
 
         emit restoreBackupFinished();
+        emit autoStartChanged();
         emit startMinimizedChanged();
     } else {
         emit errorOccurred(errorCode);
@@ -178,6 +179,7 @@ QString SettingsUiController::getAppVersion()
 void SettingsUiController::clearSettings()
 {
     m_settingsController->clearSettings();
+    emit autoStartChanged();
     emit startMinimizedChanged();
     emit resetLanguageToSystem();
 
@@ -206,9 +208,8 @@ bool SettingsUiController::isAutoStartEnabled()
 void SettingsUiController::toggleAutoStart(bool enable)
 {
     m_settingsController->toggleAutoStart(enable);
-    if (!enable) {
-        emit startMinimizedChanged();
-    }
+    emit autoStartChanged();
+    emit startMinimizedChanged();
 }
 
 bool SettingsUiController::isStartMinimizedEnabled()
