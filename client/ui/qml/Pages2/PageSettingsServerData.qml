@@ -36,17 +36,6 @@ PageType {
         function onRebootServerFinished(finishedMessage) {
             PageController.showNotificationMessage(finishedMessage)
         }
-
-        function onRemoveAllContainersFinished(finishedMessage) {
-            PageController.closePage() // close deInstalling page
-            PageController.showNotificationMessage(finishedMessage)
-        }
-
-        function onRemoveContainerFinished(finishedMessage) {
-            PageController.closePage() // close deInstalling page
-            PageController.closePage() // close page with remove button
-            PageController.showNotificationMessage(finishedMessage)
-        }
     }
 
     Connections {

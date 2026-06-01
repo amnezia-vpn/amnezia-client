@@ -153,6 +153,21 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
+        function onRemoveAllContainersFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
+            PageController.showNotificationMessage(finishedMessage)
+        }
+
+        function onRemoveContainerFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
+            PageController.closePage()
+            PageController.showNotificationMessage(finishedMessage)
+        }
+
         function onNoInstalledContainers() {
             PageController.setTriggeredByConnectButton(true)
 
