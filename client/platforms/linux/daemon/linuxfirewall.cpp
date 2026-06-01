@@ -33,6 +33,7 @@
 #include "linuxfirewall.h"
 #include "logger.h"
 #include "xray_defs.h"
+#include <QFileInfo>
 #include <QProcess>
 
 #define BRAND_CODE "amn"
@@ -46,13 +47,14 @@ namespace
 const QString kAnchorName{BRAND_CODE "vpn"};
 const QString kPacketTag{"0x3211"};
 const QString kCGroupId{"0x567"};
+const QString kRouteTableId{"3211"};
 const QString enabledKeyTemplate = "enabled:%1:%2";
 const QString disabledKeyTemplate = "disabled:%1:%2";
 const QString kVpnGroupName = BRAND_CODE "vpn";
 QHash<QString, LinuxFirewall::FilterCallbackFunc> anchorCallbacks;
 }
 
-QString LinuxFirewall::kRtableName = QStringLiteral("%1rt").arg(kAnchorName);
+QString LinuxFirewall::kRtableName = kRouteTableId;
 QString LinuxFirewall::kOutputChain = QStringLiteral("OUTPUT");
 QString LinuxFirewall::kPostRoutingChain = QStringLiteral("POSTROUTING");
 QString LinuxFirewall::kPreRoutingChain = QStringLiteral("PREROUTING");
@@ -65,6 +67,11 @@ QString LinuxFirewall::kMangleTable = QStringLiteral("mangle");
 static QString getCommand(LinuxFirewall::IPVersion ip)
 {
     return ip == LinuxFirewall::IPv6 ? QStringLiteral("ip6tables") : QStringLiteral("iptables");
+}
+
+static bool hasNetClsCgroupSupport()
+{
+    return QFileInfo::exists(QStringLiteral("/sys/fs/cgroup/net_cls"));
 }
 
 int LinuxFirewall::createChain(LinuxFirewall::IPVersion ip, const QString& chain, const QString& tableName)
@@ -287,6 +294,8 @@ void LinuxFirewall::install()
                                                              QStringLiteral("-m mark --mark %1 -j ACCEPT").arg(amnezia::xray::xrayTrafficMark),
                                                          });
 
+    installAnchor(Both, QStringLiteral("400.allowPIA"), {});
+
     installAnchor(IPv4, QStringLiteral("120.blockNets"), {});
 
     installAnchor(IPv4, QStringLiteral("110.allowNets"), {});
@@ -508,9 +517,13 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
 
 void LinuxFirewall::setupTrafficSplitting()
 {
-    auto cGroupDir = "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/";
-    logger.info() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
-    execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));
+    if (hasNetClsCgroupSupport()) {
+        auto cGroupDir = "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/";
+        logger.info() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
+        execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));
+    } else {
+        logger.info() << "Skipping net_cls cgroup setup because this system uses cgroup v2";
+    }
     // Set a rule with priority 100 (lower priority than local but higher than main/default, 0 is highest priority)
     execute(QStringLiteral("if ! ip rule list | grep -q %1 ; then ip rule add from all fwmark %1 lookup %2 pri 100 ; fi").arg(kPacketTag, kRtableName));
 }

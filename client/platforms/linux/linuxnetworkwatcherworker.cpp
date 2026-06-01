@@ -202,9 +202,8 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
     logger.debug() << "NMStateChanged " << state;
 
-    if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
+    if (state == NM_STATE_CONNECTED_GLOBAL) {
         emit wakeup();
-    } else if (state == NM_STATE_CONNECTED_GLOBAL) {
         emit networkChanged();
     }
 }
