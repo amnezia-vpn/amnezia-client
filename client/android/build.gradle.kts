@@ -123,6 +123,29 @@ android {
                         output.outputFileName = "$outputBaseName-${buildType.name}.apk"
                     }
                 }
+
+            // Qt cmake expects APK at build/outputs/apk/{outputBaseName}-{buildType}-unsigned.apk
+            // (no flavor subdirectory). With product flavors Gradle puts the signed APK under
+            // build/outputs/apk/{flavor}/{buildType}/{outputBaseName}-{buildType}.apk.
+            // Copy to the path Qt cmake looks for so its zipalign/apksigner step can proceed.
+            val flavorName = productFlavors.firstOrNull()?.name ?: ""
+            if (flavorName.isNotEmpty()) {
+                val buildTypeName = buildType.name
+                // Qt cmake expects APK at build/outputs/apk/{outputBaseName}-{buildType}-unsigned.apk
+                // (no flavor subdirectory). With product flavors Gradle puts it under
+                // build/outputs/apk/{flavor}/{buildType}/. Copy to the flat path Qt cmake looks for.
+                packageApplicationProvider.configure {
+                    doLast {
+                        val srcDir = layout.buildDirectory.dir("outputs/apk/$flavorName/$buildTypeName").get().asFile
+                        val dstDir = layout.buildDirectory.dir("outputs/apk").get().asFile
+                        dstDir.mkdirs()
+                        srcDir.listFiles()?.filter { it.name.endsWith(".apk") }?.forEach { apk ->
+                            val dstName = apk.name.replace("${buildTypeName}.apk", "${buildTypeName}-unsigned.apk")
+                            apk.copyTo(File(dstDir, dstName), overwrite = true)
+                        }
+                    }
+                }
+            }
         }
     }
 
