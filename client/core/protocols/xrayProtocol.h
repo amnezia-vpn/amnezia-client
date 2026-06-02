@@ -20,8 +20,15 @@ public:
 
     ErrorCode start() override;
     void stop() override;
+    void setPrimary(const QJsonObject &config) override;
 
 private:
+    enum class Phase {
+        Inactive,
+        Active,
+        Stopping,
+    };
+
     ErrorCode setupRouting();
     ErrorCode startTun2Socks();
 
@@ -40,6 +47,7 @@ private:
     static constexpr int tun2socksRetryDelayMs = 400;
 
     QString m_tunName;
+    Phase m_phase = Phase::Inactive;
 };
 
 #endif // XRAYPROTOCOL_H
