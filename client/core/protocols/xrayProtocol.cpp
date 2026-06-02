@@ -67,6 +67,8 @@ ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
 
+    m_phase = Phase::Active;
+
     // Inject SOCKS5 auth into the inbound before starting xray.
     // Re-uses existing credentials if the config already has them (e.g. imported config).
     amnezia::serialization::inbounds::InboundCredentials creds;
@@ -119,6 +121,11 @@ void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
 
+    if (m_phase != Phase::Active) {
+        return;
+    }
+    m_phase = Phase::Stopping;
+
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
         auto restoreResolvers = iface->restoreResolvers();
         if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
@@ -153,7 +160,14 @@ void XrayProtocol::stop()
         m_tun2socksProcess.reset();
     }
 
+    m_phase = Phase::Inactive;
     setConnectionState(Vpn::ConnectionState::Disconnected);
+}
+
+void XrayProtocol::setPrimary(const QJsonObject &config)
+{
+    Q_UNUSED(config)
+    emit primaryReady();
 }
 
 ErrorCode XrayProtocol::startTun2Socks()
@@ -208,13 +222,17 @@ ErrorCode XrayProtocol::startTun2Socks()
                     }
                 }
 
-                if (resourceBusy && m_tun2socksRetryCount < maxTun2SocksRetries) {
+                if (m_phase == Phase::Active && resourceBusy
+                    && m_tun2socksRetryCount < maxTun2SocksRetries) {
                     m_tun2socksRetryCount++;
                     qWarning() << QString("Tun2socks: TUN resource busy, retrying (%1/%2) in %3ms...")
                                       .arg(m_tun2socksRetryCount)
                                       .arg(maxTun2SocksRetries)
                                       .arg(tun2socksRetryDelayMs);
                     QTimer::singleShot(tun2socksRetryDelayMs, this, [this]() {
+                        if (m_phase != Phase::Active) {
+                            return;
+                        }
                         if (ErrorCode err = startTun2Socks(); err != ErrorCode::NoError) {
                             stop();
                             setLastError(err);
