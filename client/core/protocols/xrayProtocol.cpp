@@ -183,7 +183,20 @@ ErrorCode XrayProtocol::startTun2Socks()
     m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(m_tunName), "-proxy", proxyUrl });
 
     connect(
-            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
+            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, this,
+            [this](QProcess::ProcessError error) {
+                if (error != QProcess::FailedToStart) {
+                    // Other errors are reported via the finished signal or are transient.
+                    return;
+                }
+                qCritical() << "Tun2socks failed to start";
+                stop();
+                setLastError(ErrorCode::Tun2SockExecutableMissing);
+            },
+            Qt::QueuedConnection);
+
+    connect(
+            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this,
             [this]() {
                 auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
                 if (!readAllStandardError.waitForFinished()) {
