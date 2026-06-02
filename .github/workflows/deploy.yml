@@ -932,31 +932,10 @@ jobs:
         mv deploy/build/play/client/android-build/build/outputs/bundle/playRelease/android-build-play-release.aab \
            $OUT/AmneziaVPN_${VERSION}_${LABEL}_play.aab
 
-    - name: 'Build Play APK'
-      env:
-        QT_INSTALL_DIR: ${{ runner.temp }}
-        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
-      shell: bash
-      run: |
-        VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
-
-        deploy/build.sh -t android --sign --apk --play --build ./deploy/build/play-apk
-
-        (cd deploy/build/play-apk/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_play.apk)
-
     - name: 'Upload universal APK'
       uses: actions/upload-artifact@v7
       with:
         path: deploy/artifacts/*_universal.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload Play APK'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/play-apk/client/android-build/*.apk
         archive: false
         retention-days: 7
 
