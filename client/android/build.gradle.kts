@@ -133,21 +133,19 @@ android {
     //   AAB: build/outputs/bundle/{buildType}/{base}-{buildType}.aab (no flavor subdir)
     // where {base} = outputBaseName (set by Qt Creator) or "android-build" (CI fallback).
     // Release APK gets -unsigned suffix (Qt cmake signs it); debug does not.
+    // Copy only oss flavor to the flat output dir that androiddeployqt/Qt Creator expect.
+    // Play flavor is built via android_play_apk/android_play_aab cmake targets and uses
+    // its native Gradle output paths directly.
     applicationVariants.all {
         val flavorName = productFlavors.firstOrNull()?.name ?: ""
         val buildTypeName = buildType.name
-        // Copy play flavor only when invoked explicitly (android_play_apk/aab cmake targets pass -DexplicitRun=1).
-        // This prevents play from overwriting oss in the flat output dir during normal Qt Creator builds.
-        val isExplicitRun = project.findProperty("explicitRun") == "1"
-        val shouldCopy = flavorName == "oss" || (flavorName == "play" && isExplicitRun)
-        if (shouldCopy) {
+        if (flavorName == "oss") {
             val base = outputBaseName.ifEmpty { "android-build" }
             val unsignedSuffix = if (buildTypeName == "release") "-unsigned" else ""
 
-            // APK: copy to outputs/apk/{base}-{buildType}[-unsigned].apk
             packageApplicationProvider.configure {
                 doLast {
-                    val srcDir = layout.buildDirectory.dir("outputs/apk/$flavorName/$buildTypeName").get().asFile
+                    val srcDir = layout.buildDirectory.dir("outputs/apk/oss/$buildTypeName").get().asFile
                     val dstDir = layout.buildDirectory.dir("outputs/apk").get().asFile
                     dstDir.mkdirs()
                     srcDir.listFiles()?.filter { it.name.endsWith(".apk") }?.forEach { apk ->
@@ -156,11 +154,9 @@ android {
                 }
             }
 
-            // AAB: copy to outputs/bundle/{buildType}/{base}-{buildType}.aab
             tasks.named("bundle${name.replaceFirstChar { it.uppercase() }}") {
                 doLast {
-                    val variantBundleDir = "${flavorName}${buildTypeName.replaceFirstChar { it.uppercase() }}"
-                    val srcDir = layout.buildDirectory.dir("outputs/bundle/$variantBundleDir").get().asFile
+                    val srcDir = layout.buildDirectory.dir("outputs/bundle/ossRelease").get().asFile
                     val dstDir = layout.buildDirectory.dir("outputs/bundle/$buildTypeName").get().asFile
                     dstDir.mkdirs()
                     srcDir.listFiles()?.filter { it.name.endsWith(".aab") }?.forEach { aab ->
