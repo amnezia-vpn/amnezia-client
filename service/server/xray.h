@@ -31,11 +31,6 @@ private:
 #else
     int m_defaultIfaceIdx;
 #endif
-
-#ifdef Q_OS_MAC
-    QString m_uplinkIfaceName;
-    QString m_uplinkGateway;
-#endif
 };
 
 #endif // XRAY_H

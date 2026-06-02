@@ -1,8 +1,5 @@
 #include "xray.h"
 #include "core/utils/networkUtilities.h"
-#ifdef Q_OS_MAC
-#include "router_mac.h"
-#endif
 
 #include <QDebug>
 #include <QNetworkInterface>
@@ -34,9 +31,7 @@
 bool Xray::startXray(const QString &cfg)
 {
     qDebug() << "Xray::startXray()";
-    const auto gatewayAndIface = NetworkUtilities::getGatewayAndIface();
-    const QString defaultGateway = gatewayAndIface.first;
-    const QNetworkInterface defaultIface = gatewayAndIface.second;
+    const QNetworkInterface defaultIface = NetworkUtilities::getGatewayAndIface().second;
 #ifdef Q_OS_LINUX
     m_defaultIfaceName = defaultIface.name().toUtf8();
 #else
@@ -45,17 +40,6 @@ bool Xray::startXray(const QString &cfg)
     if (defaultIface.index() > 0) {
         qDebug() << "[xray] using uplink interface:" << defaultIface.name() << "(" << defaultIface.index() << ")";
     }
-
-#ifdef Q_OS_MAC
-    m_uplinkIfaceName = defaultIface.name();
-    m_uplinkGateway = defaultGateway;
-    if (!m_uplinkIfaceName.isEmpty()) {
-        const bool installed = RouterMac::Instance().routeAddXray(m_uplinkIfaceName, m_uplinkGateway);
-        if (!installed) {
-            qWarning() << "[xray] failed to install xray routes on" << m_uplinkIfaceName;
-        }
-    }
-#endif
 
     if (auto err = amnezia_xray_setsockcallback(ctxSockCallback, this); err != nullptr) {
         qDebug() << "[xray] sockopt failed: " << err;
@@ -90,14 +74,6 @@ bool Xray::stopXray()
         amnezia_xray_free(err);
         success = false;
     }
-
-#ifdef Q_OS_MAC
-    if (!m_uplinkIfaceName.isEmpty()) {
-        RouterMac::Instance().routeDeleteXray(m_uplinkIfaceName, m_uplinkGateway);
-    }
-    m_uplinkIfaceName.clear();
-    m_uplinkGateway.clear();
-#endif
 
     return success;
 }

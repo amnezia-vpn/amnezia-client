@@ -1,9 +1,14 @@
 #ifndef IPCSERVER_H
 #define IPCSERVER_H
 
+#include <QByteArray>
+#include <QEventLoop>
 #include <QLocalServer>
 #include <QObject>
+#include <QPointer>
+#include <QProcess>
 #include <QRemoteObjectNode>
+#include <QSharedPointer>
 #include <QJsonObject>
 #include "../client/daemon/interfaceconfig.h"
 #include "../client/mozilla/pinghelper.h"
@@ -72,6 +77,17 @@ private:
 
     QMap<int, ProcessDescriptor> m_processes;
     PingHelper m_pingHelper;
+
+    QSharedPointer<QProcess> m_xrayProcess;
+    QByteArray m_xrayStdoutBuf;
+    QPointer<QEventLoop> m_xrayStartLoop;
+    bool m_xrayStartResult = false;
+#ifdef Q_OS_MAC
+    QString m_xrayUplinkIface;
+    QString m_xrayUplinkGateway;
+#endif
+
+    void onXrayWorkerLine(const QByteArray& line);
 };
 
 #endif // IPCSERVER_H
