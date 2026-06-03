@@ -22,12 +22,10 @@
 
 SettingsUiController::SettingsUiController(SettingsController* settingsController,
                                          ServersController* serversController,
-                                         LanguageUiController* languageUiController,
                                          QObject *parent)
     : QObject(parent),
       m_settingsController(settingsController),
-      m_serversController(serversController),
-      m_languageUiController(languageUiController)
+      m_serversController(serversController)
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsUiController::onNotificationStateChanged);
@@ -157,8 +155,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
 {
     ErrorCode errorCode = m_settingsController->restoreAppConfigFromData(data);
     if (errorCode == ErrorCode::NoError) {
-        emit appLanguageChanged(
-                static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageUiController->getCurrentLanguageIndex()));
+        emit appLanguageChanged();
 
         bool amneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
         emit amneziaDnsToggled(amneziaDnsEnabled);
