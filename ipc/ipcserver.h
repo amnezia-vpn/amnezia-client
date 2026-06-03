@@ -55,8 +55,8 @@ public:
     virtual bool refreshKillSwitch( bool enabled ) override;
     virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
     virtual bool restoreResolvers() override;
-    virtual bool xrayStart(const QString& cfg) override;
-    virtual bool xrayStop() override;
+    virtual bool xrayStart(const QString& ifname, const QString& cfg) override;
+    virtual bool xrayStop(const QString& ifname) override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 
@@ -78,16 +78,19 @@ private:
     QMap<int, ProcessDescriptor> m_processes;
     PingHelper m_pingHelper;
 
-    QSharedPointer<QProcess> m_xrayProcess;
-    QByteArray m_xrayStdoutBuf;
-    QPointer<QEventLoop> m_xrayStartLoop;
-    bool m_xrayStartResult = false;
+    struct XrayWorker {
+        QSharedPointer<QProcess> process;
+        QByteArray stdoutBuf;
+        QPointer<QEventLoop> startLoop;
+        bool startResult = false;
 #ifdef Q_OS_MAC
-    QString m_xrayUplinkIface;
-    QString m_xrayUplinkGateway;
+        QString uplinkIface;
+        QString uplinkGateway;
 #endif
+    };
+    QHash<QString, XrayWorker> m_xrayWorkers;
 
-    void onXrayWorkerLine(const QByteArray& line);
+    void onXrayWorkerLine(const QString& ifname, const QByteArray& line);
 };
 
 #endif // IPCSERVER_H

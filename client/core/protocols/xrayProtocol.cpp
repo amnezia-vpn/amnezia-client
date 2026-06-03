@@ -107,7 +107,7 @@ ErrorCode XrayProtocol::start()
 
     return IpcClient::withInterface(
             [&](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStart = iface->xrayStart(xrayConfigStr);
+                auto xrayStart = iface->xrayStart(m_tunName, xrayConfigStr);
                 if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
                     qCritical() << "Failed to start xray";
                     return ErrorCode::XrayExecutableCrashed;
@@ -135,7 +135,7 @@ void XrayProtocol::stop()
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
             qWarning() << "Failed to delete tun";
 
-        auto xrayStop = iface->xrayStop();
+        auto xrayStop = iface->xrayStop(m_tunName);
         if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
             qWarning() << "Failed to stop xray";
     });

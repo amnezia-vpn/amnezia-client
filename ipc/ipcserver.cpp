@@ -353,139 +353,158 @@ bool IpcServer::refreshKillSwitch(bool enabled)
     return KillSwitch::instance()->refresh(enabled);
 }
 
-void IpcServer::onXrayWorkerLine(const QByteArray& line)
+void IpcServer::onXrayWorkerLine(const QString& ifname, const QByteArray& line)
 {
     const QJsonObject ev = QJsonDocument::fromJson(line).object();
     const QString name = ev.value("ev").toString();
     if (name == "log") {
+        const QString prefix = QStringLiteral("[xray-worker:%1]").arg(ifname);
         const QString level = ev.value("level").toString();
         const QString msg   = ev.value("msg").toString();
         if (level == QLatin1String("warn")) {
-            qWarning().noquote() << "[xray-worker]" << msg;
+            qWarning().noquote() << prefix << msg;
         } else if (level == QLatin1String("error") || level == QLatin1String("fatal")) {
-            qCritical().noquote() << "[xray-worker]" << msg;
+            qCritical().noquote() << prefix << msg;
         } else if (level == QLatin1String("info")) {
-            qInfo().noquote() << "[xray-worker]" << msg;
+            qInfo().noquote() << prefix << msg;
         } else {
-            qDebug().noquote() << "[xray-worker]" << msg;
+            qDebug().noquote() << prefix << msg;
         }
     } else if (name == "ready" || name == "failed") {
-        if (m_xrayStartLoop) {
-            m_xrayStartResult = (name == "ready");
-            m_xrayStartLoop->quit();
+        auto it = m_xrayWorkers.find(ifname);
+        if (it != m_xrayWorkers.end() && it->startLoop) {
+            it->startResult = (name == "ready");
+            it->startLoop->quit();
         }
     }
 }
 
-bool IpcServer::xrayStart(const QString& cfg)
+bool IpcServer::xrayStart(const QString& ifname, const QString& cfg)
 {
 #ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayStart";
+    qDebug() << "IpcServer::xrayStart" << ifname;
 #endif
 
-    if (!m_xrayProcess || m_xrayProcess->state() == QProcess::NotRunning) {
-        m_xrayProcess = QSharedPointer<QProcess>::create();
-        m_xrayStdoutBuf.clear();
+    XrayWorker& w = m_xrayWorkers[ifname];
 
-        QObject::connect(m_xrayProcess.data(), &QProcess::readyReadStandardOutput, this, [this]() {
-            m_xrayStdoutBuf.append(m_xrayProcess->readAllStandardOutput());
+    if (!w.process || w.process->state() == QProcess::NotRunning) {
+        w.process = QSharedPointer<QProcess>::create();
+        w.stdoutBuf.clear();
+
+        QObject::connect(w.process.data(), &QProcess::readyReadStandardOutput, this, [this, ifname]() {
+            auto it = m_xrayWorkers.find(ifname);
+            if (it == m_xrayWorkers.end() || !it->process) return;
+            it->stdoutBuf.append(it->process->readAllStandardOutput());
             int nl;
-            while ((nl = m_xrayStdoutBuf.indexOf('\n')) >= 0) {
-                const QByteArray line = m_xrayStdoutBuf.left(nl);
-                m_xrayStdoutBuf.remove(0, nl + 1);
-                onXrayWorkerLine(line);
+            while ((nl = it->stdoutBuf.indexOf('\n')) >= 0) {
+                const QByteArray line = it->stdoutBuf.left(nl);
+                it->stdoutBuf.remove(0, nl + 1);
+                onXrayWorkerLine(ifname, line);
             }
         });
 
-        QObject::connect(m_xrayProcess.data(), &QProcess::errorOccurred, this,
-                         [this](QProcess::ProcessError err) {
-            qCritical().noquote().nospace() << "[xray-worker] process error: " << err;
-            if (m_xrayStartLoop) {
-                m_xrayStartResult = false;
-                m_xrayStartLoop->quit();
+        QObject::connect(w.process.data(), &QProcess::errorOccurred, this,
+                         [this, ifname](QProcess::ProcessError err) {
+            const QString prefix = QStringLiteral("[xray-worker:%1]").arg(ifname);
+            qCritical().noquote().nospace() << prefix << " process error: " << err;
+            auto it = m_xrayWorkers.find(ifname);
+            if (it != m_xrayWorkers.end() && it->startLoop) {
+                it->startResult = false;
+                it->startLoop->quit();
             }
         });
 
-        QObject::connect(m_xrayProcess.data(),
+        QObject::connect(w.process.data(),
                          QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                         this, [this](int code, QProcess::ExitStatus status) {
-            qDebug().noquote().nospace() << "[xray-worker] finished, code=" << code << " status=" << status;
-            if (m_xrayStartLoop) {
-                m_xrayStartResult = false;
-                m_xrayStartLoop->quit();
+                         this, [this, ifname](int code, QProcess::ExitStatus status) {
+            const QString prefix = QStringLiteral("[xray-worker:%1]").arg(ifname);
+            qDebug().noquote().nospace() << prefix << " finished, code=" << code << " status=" << status;
+            auto it = m_xrayWorkers.find(ifname);
+            if (it != m_xrayWorkers.end() && it->startLoop) {
+                it->startResult = false;
+                it->startLoop->quit();
             }
         });
 
-        m_xrayProcess->setProgram(QCoreApplication::applicationFilePath());
-        m_xrayProcess->setArguments({QStringLiteral("--xray-worker")});
-        m_xrayProcess->start();
+        w.process->setProgram(QCoreApplication::applicationFilePath());
+        w.process->setArguments({QStringLiteral("--xray-worker")});
+        w.process->start();
 
-        if (!m_xrayProcess->waitForStarted(5000)) {
-            qCritical().noquote() << "[xray-worker] failed to start";
-            m_xrayProcess.reset();
+        if (!w.process->waitForStarted(5000)) {
+            qCritical().noquote() << QStringLiteral("[xray-worker:%1] failed to start").arg(ifname);
+            m_xrayWorkers.remove(ifname);
             return false;
         }
     }
 
 #ifdef Q_OS_MAC
     const auto gatewayAndIface = NetworkUtilities::getGatewayAndIface();
-    m_xrayUplinkGateway = gatewayAndIface.first;
-    m_xrayUplinkIface = gatewayAndIface.second.name();
-    if (!m_xrayUplinkIface.isEmpty() && !m_xrayUplinkGateway.isEmpty()) {
-        if (!RouterMac::Instance().routeAddXray(m_xrayUplinkIface, m_xrayUplinkGateway)) {
-            qWarning() << "[xray] failed to install xray routes on" << m_xrayUplinkIface;
+    w.uplinkGateway = gatewayAndIface.first;
+    w.uplinkIface = gatewayAndIface.second.name();
+    if (!w.uplinkIface.isEmpty() && !w.uplinkGateway.isEmpty()) {
+        if (!RouterMac::Instance().routeAddXray(w.uplinkIface, w.uplinkGateway)) {
+            qWarning() << "[xray] failed to install xray routes on" << w.uplinkIface;
         }
     }
 #endif
 
     const QJsonObject startCmd{{QStringLiteral("op"), QStringLiteral("start")},
                                {QStringLiteral("config"), cfg}};
-    m_xrayProcess->write(QJsonDocument(startCmd).toJson(QJsonDocument::Compact) + '\n');
+    w.process->write(QJsonDocument(startCmd).toJson(QJsonDocument::Compact) + '\n');
 
     QEventLoop loop;
-    m_xrayStartLoop = &loop;
-    m_xrayStartResult = false;
+    w.startLoop = &loop;
+    w.startResult = false;
     loop.exec();
-    m_xrayStartLoop.clear();
 
-    if (!m_xrayStartResult) {
+    // Re-fetch: the worker entry may have been removed during the loop (e.g. process finished).
+    auto it = m_xrayWorkers.find(ifname);
+    if (it == m_xrayWorkers.end()) {
+        return false;
+    }
+    it->startLoop.clear();
+    const bool ok = it->startResult;
+
+    if (!ok) {
 #ifdef Q_OS_MAC
-        if (!m_xrayUplinkIface.isEmpty()) {
-            RouterMac::Instance().routeDeleteXray(m_xrayUplinkIface, m_xrayUplinkGateway);
-            m_xrayUplinkIface.clear();
-            m_xrayUplinkGateway.clear();
+        if (!it->uplinkIface.isEmpty()) {
+            RouterMac::Instance().routeDeleteXray(it->uplinkIface, it->uplinkGateway);
         }
 #endif
+        m_xrayWorkers.remove(ifname);
     }
 
-    return m_xrayStartResult;
+    return ok;
 }
 
-bool IpcServer::xrayStop()
+bool IpcServer::xrayStop(const QString& ifname)
 {
 #ifdef MZ_DEBUG
-    qDebug() << "IpcServer::xrayStop";
+    qDebug() << "IpcServer::xrayStop" << ifname;
 #endif
 
-    if (m_xrayProcess && m_xrayProcess->state() != QProcess::NotRunning) {
-        const QJsonObject stopCmd{{QStringLiteral("op"), QStringLiteral("stop")}};
-        m_xrayProcess->write(QJsonDocument(stopCmd).toJson(QJsonDocument::Compact) + '\n');
+    auto it = m_xrayWorkers.find(ifname);
+    if (it == m_xrayWorkers.end()) {
+        return true;
+    }
 
-        if (!m_xrayProcess->waitForFinished(3000)) {
-            qWarning().noquote() << "[xray-worker] did not exit after stop, killing";
-            m_xrayProcess->kill();
-            m_xrayProcess->waitForFinished(1000);
+    if (it->process && it->process->state() != QProcess::NotRunning) {
+        const QJsonObject stopCmd{{QStringLiteral("op"), QStringLiteral("stop")}};
+        it->process->write(QJsonDocument(stopCmd).toJson(QJsonDocument::Compact) + '\n');
+
+        if (!it->process->waitForFinished(3000)) {
+            qWarning().noquote() << QStringLiteral("[xray-worker:%1] did not exit after stop, killing").arg(ifname);
+            it->process->kill();
+            it->process->waitForFinished(1000);
         }
     }
-    m_xrayProcess.reset();
 
 #ifdef Q_OS_MAC
-    if (!m_xrayUplinkIface.isEmpty()) {
-        RouterMac::Instance().routeDeleteXray(m_xrayUplinkIface, m_xrayUplinkGateway);
-        m_xrayUplinkIface.clear();
-        m_xrayUplinkGateway.clear();
+    if (!it->uplinkIface.isEmpty()) {
+        RouterMac::Instance().routeDeleteXray(it->uplinkIface, it->uplinkGateway);
     }
 #endif
 
+    m_xrayWorkers.remove(ifname);
     return true;
 }
