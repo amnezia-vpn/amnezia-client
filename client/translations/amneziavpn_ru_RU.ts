@@ -121,113 +121,11 @@
     </message>
 </context>
 <context>
-    <name>ApiPremV1MigrationDrawer</name>
-    <message>
-        <source>Switch to the new Amnezia Premium subscription</source>
-        <translation type="vanished">Перейдите на новый тип подписки Amnezia Premium</translation>
-    </message>
-    <message>
-        <source>We&apos;ll preserve all remaining days of your current subscription and give you an extra month as a thank you. </source>
-        <translation type="vanished">Мы сохраним все оставшиеся дни текущей подписки и подарим дополнительный месяц в благодарность за переход. </translation>
-    </message>
-    <message>
-        <source>This new subscription type will be actively developed with more locations and features added regularly. Currently available:</source>
-        <translation type="vanished">Именно новый тип подписки будет активно развиваться и пополняться новыми локациями и функциями. Уже доступны:</translation>
-    </message>
-    <message>
-        <source>&lt;li&gt;20 locations (with more coming soon)&lt;/li&gt;</source>
-        <translation type="vanished">&lt;li&gt;20 локаций (их число будет расти)&lt;/li&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;li&gt;Easier switching between countries in the app&lt;/li&gt;</source>
-        <translation type="vanished">&lt;li&gt;Удобное переключение между странами в приложении&lt;/li&gt;</translation>
-    </message>
-    <message>
-        <source>&lt;li&gt;Personal dashboard to manage your subscription&lt;/li&gt;</source>
-        <translation type="vanished">&lt;li&gt;Личный кабинет для управления подпиской&lt;/li&gt;</translation>
-    </message>
-    <message>
-        <source>Old keys will be deactivated after switching.</source>
-        <translation type="vanished">После перехода старые ключи перестанут работать.</translation>
-    </message>
-    <message>
-        <source>Email</source>
-        <translation type="vanished">Email</translation>
-    </message>
-    <message>
-        <source>mail@example.com</source>
-        <translation type="vanished">mail@example.com</translation>
-    </message>
-    <message>
-        <source>No old format subscriptions for a given email</source>
-        <translation type="vanished">Для указанного адреса электронной почты нет подписок старого типа</translation>
-    </message>
-    <message>
-        <source>Enter the email you used for your current subscription</source>
-        <translation type="vanished">Укажите адрес почты, который использовали при заказе текущей подписки</translation>
-    </message>
-    <message>
-        <source>Continue</source>
-        <translation type="vanished">Продолжить</translation>
-    </message>
-    <message>
-        <source>Remind me later</source>
-        <translation type="vanished">Напомнить позже</translation>
-    </message>
-    <message>
-        <source>Don&apos;t remind me again</source>
-        <translation type="vanished">Больше не напоминать</translation>
-    </message>
-    <message>
-        <source>No more reminders? You can always switch to the new format in the server settings</source>
-        <translation type="vanished">Отключить напоминания? Вы всегда сможете перейти на новый тип подписки в настройках сервера</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="vanished">Отменить</translation>
-    </message>
-</context>
-<context>
-    <name>ApiPremV1SubListDrawer</name>
-    <message>
-        <source>Choose Subscription</source>
-        <translation type="vanished">Выбрать подписку</translation>
-    </message>
-    <message>
-        <source>Order ID: </source>
-        <translation type="vanished">ID заказа: </translation>
-    </message>
-    <message>
-        <source>Purchase Date: </source>
-        <translation type="vanished">Дата покупки: </translation>
-    </message>
-</context>
-<context>
     <name>ApiServicesModel</name>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="77"/>
         <source>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.&lt;/a&gt;</source>
         <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Недоступно в вашем регионе. Если у вас включен VPN, отключите его, вернитесь на предыдущий экран и попробуйте снова.&lt;/a&gt;</translation>
-    </message>
-    <message>
-        <source>%1 MBit/s</source>
-        <translation type="vanished">%1 Мбит/с</translation>
-    </message>
-    <message>
-        <source>%1 days</source>
-        <translation type="vanished">%1 дней</translation>
-    </message>
-    <message>
-        <source>Free</source>
-        <translation type="vanished">Бесплатно</translation>
-    </message>
-    <message>
-        <source>%1 $</source>
-        <translation type="vanished">%1 $</translation>
-    </message>
-    <message>
-        <source>%1 $/month</source>
-        <translation type="vanished">%1 $/месяц</translation>
     </message>
 </context>
 <context>
@@ -560,21 +458,6 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
-    <name>OtpCodeDrawer</name>
-    <message>
-        <source>OTP code was sent to your email</source>
-        <translation type="vanished">Одноразовый код был отправлен на ваш email</translation>
-    </message>
-    <message>
-        <source>OTP Code</source>
-        <translation type="vanished">Одноразовый код</translation>
-    </message>
-    <message>
-        <source>Continue</source>
-        <translation type="vanished">Продолжить</translation>
-    </message>
-</context>
-<context>
     <name>PageDeinstalling</name>
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="52"/>
@@ -602,20 +485,6 @@ Already installed containers were found on the server. All installed containers 
 </context>
 <context>
     <name>PageHome</name>
-    <message>
-        <source>You&apos;ve successfully switched to the new Amnezia Premium subscription!</source>
-        <translation type="vanished">Вы успешно перешли на новый тип подписки Amnezia Premium!</translation>
-    </message>
-    <message>
-        <source>Old keys will no longer work. Please use your new subscription key to connect. 
-Thank you for staying with us!</source>
-        <translation type="vanished">Старые ключи перестанут работать. Пожалуйста, используйте новый ключ для подключения.
-Спасибо, что остаетесь с нами!</translation>
-    </message>
-    <message>
-        <source>Continue</source>
-        <translation type="vanished">Продолжить</translation>
-    </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="83"/>
         <source>Logging enabled</source>
@@ -2941,10 +2810,6 @@ Thank you for staying with us!</source>
         <translation>Невозможно сбросить конфигурацию API во время активного соединения</translation>
     </message>
     <message>
-        <source>Switch to the new Amnezia Premium subscription</source>
-        <translation type="vanished">Перейти на новый тип подписки Amnezia Premium</translation>
-    </message>
-    <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="154"/>
         <source>Remove server from application</source>
         <translation>Удалить сервер из приложения</translation>
@@ -3221,45 +3086,6 @@ Thank you for staying with us!</source>
     </message>
 </context>
 <context>
-    <name>PageSetupWizardApiServiceInfo</name>
-    <message>
-        <source>Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.</source>
-        <translation type="vanished">Списание с Apple ID при подтверждении. Продление автоматическое, если автопродление не отключено минимум за 24 часа до окончания периода. Управление в настройках Apple ID.</translation>
-    </message>
-    <message>
-        <source>Subscribe Now</source>
-        <translation type="vanished">Подписаться сейчас</translation>
-    </message>
-    <message>
-        <source>By continuing, you agree to the &lt;a href=&quot;%1&quot; style=&quot;color: #FBB26A;&quot;&gt;Terms of Use&lt;/a&gt; and &lt;a href=&quot;%2&quot; style=&quot;color: #FBB26A;&quot;&gt;Privacy Policy&lt;/a&gt;</source>
-        <translation type="vanished">Продолжая, вы соглашаетесь с &lt;a href=&quot;%1&quot; style=&quot;color: #FBB26A;&quot;&gt;Условиями использования&lt;/a&gt; и &lt;a href=&quot;%2&quot; style=&quot;color: #FBB26A;&quot;&gt;Политикой конфиденциальности&lt;/a&gt;</translation>
-    </message>
-    <message>
-        <source>For the region</source>
-        <translation type="vanished">Для региона</translation>
-    </message>
-    <message>
-        <source>Price</source>
-        <translation type="vanished">Цена</translation>
-    </message>
-    <message>
-        <source>Work period</source>
-        <translation type="vanished">Период работы</translation>
-    </message>
-    <message>
-        <source>Speed</source>
-        <translation type="vanished">Скорость</translation>
-    </message>
-    <message>
-        <source>Features</source>
-        <translation type="vanished">Особенности</translation>
-    </message>
-    <message>
-        <source>Connect</source>
-        <translation type="vanished">Подключиться</translation>
-    </message>
-</context>
-<context>
     <name>PageSetupWizardApiServicesList</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
@@ -3412,10 +3238,6 @@ Thank you for staying with us!</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="280"/>
         <source>VPN by Amnezia</source>
         <translation>VPN от Amnezia</translation>
-    </message>
-    <message>
-        <source>Connect to classic paid and free VPN services from Amnezia</source>
-        <translation type="vanished">Подключайтесь к классическим платным и бесплатным VPN-сервисам от Amnezia</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="299"/>
