@@ -155,15 +155,17 @@ void CoreSignalHandlers::initExportControllerHandler()
 void CoreSignalHandlers::initImportControllerHandler()
 {
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
-        if (!m_coreController->m_connectionController->isConnected()) {
-            int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
-            const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
-            if (!serverId.isEmpty()) {
-                m_coreController->m_serversController->setDefaultServer(serverId);
-            }
-            if (m_coreController->m_serversUiController) {
-                m_coreController->m_serversUiController->setProcessedServerId(serverId);
-            }
+        if (m_coreController->m_connectionUiController->isConnected()) {
+            return;
+        }
+
+        const int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
+        const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
+        if (!serverId.isEmpty()) {
+            m_coreController->m_serversController->setDefaultServer(serverId);
+        }
+        if (m_coreController->m_serversUiController) {
+            m_coreController->m_serversUiController->setProcessedServerId(serverId);
         }
     });
 }
