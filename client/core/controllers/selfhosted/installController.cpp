@@ -1463,7 +1463,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProtoStr = containerAndPortMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            if (container == DockerContainer::None) {
+            if (container == DockerContainer::None || ContainerUtils::isUnsupportedContainer(container)) {
                 continue;
             }
 
@@ -1488,7 +1488,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProtoStr = torOrDnsRegMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            if (container == DockerContainer::None) {
+            if (container == DockerContainer::None || ContainerUtils::isUnsupportedContainer(container)) {
                 continue;
             }
 

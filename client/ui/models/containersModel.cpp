@@ -67,6 +67,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerUtils::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerUtils::isShareable(container);
+    case IsUnsupportedContainerRole: return ContainerUtils::isUnsupportedContainer(container);
     case IsVpnContainerRole: return ContainerUtils::containerService(container) == ServiceType::Vpn;
     case IsServiceContainerRole: return ContainerUtils::containerService(container) == ServiceType::Other;
     case IsIpsecRole: return container == DockerContainer::Ipsec;
@@ -142,7 +143,8 @@ bool ContainersModel::hasInstalledProtocols()
 
 bool ContainersModel::isInstallationAllowed(DockerContainer container)
 {
-    return container != DockerContainer::Awg;
+    return container != DockerContainer::Awg
+           && !ContainerUtils::isUnsupportedContainer(container);
 }
 
 void ContainersModel::openContainerSettings(int containerIndex)
@@ -176,6 +178,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
+    roles[IsUnsupportedContainerRole] = "isUnsupportedContainer";
     roles[IsInstallationAllowedRole] = "isInstallationAllowed";
     roles[InstallPageOrderRole] = "installPageOrder";
     

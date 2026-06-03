@@ -132,7 +132,6 @@ signals:
     void cachedProfileCleared(const QString &message);
     void apiConfigRemoved(const QString &message);
 
-    void noInstalledContainers();
     void configValidated(bool isValid);
 
 private:

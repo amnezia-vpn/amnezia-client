@@ -239,7 +239,7 @@ void CoreSignalHandlers::initAutoConnectHandler()
 {
     if (m_coreController->m_settingsUiController->isAutoConnectEnabled()
         && !m_coreController->m_serversController->getDefaultServerId().isEmpty()) {
-        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->openConnection(); });
+        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->toggleConnection(); });
     }
 }
 
@@ -343,6 +343,9 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
 {
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::unsupportedConnectDrawerRequested,
+            m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
+
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::unsupportedConnectDrawerRequested,
             m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
 }
 

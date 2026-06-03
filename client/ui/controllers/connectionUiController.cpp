@@ -33,7 +33,7 @@ void ConnectionUiController::openConnection()
     ErrorCode errorCode = m_connectionController->openConnection(serverId);
 
     if (errorCode != ErrorCode::NoError) {
-        emit connectionErrorOccurred(errorCode);
+        notifyConnectionBlocked(errorCode);
         return;
     }
 }
@@ -130,8 +130,34 @@ void ConnectionUiController::toggleConnection()
     } else if (isConnected()) {
         closeConnection();
     } else {
+        const QString serverId = m_serversController->getDefaultServerId();
+        if (serverId.isEmpty()) {
+            return;
+        }
+
+        const ErrorCode errorCode = m_connectionController->isConnectionSupported(serverId);
+        if (errorCode != ErrorCode::NoError) {
+            notifyConnectionBlocked(errorCode);
+            return;
+        }
+
         emit prepareConfig();
     }
+}
+
+void ConnectionUiController::notifyConnectionBlocked(ErrorCode errorCode)
+{
+    if (errorCode == ErrorCode::LegacyApiV1NotSupportedError) {
+        emit unsupportedConnectDrawerRequested();
+        return;
+    }
+
+    if (errorCode == ErrorCode::NoInstalledContainersError) {
+        emit noInstalledContainers();
+        return;
+    }
+
+    emit connectionErrorOccurred(errorCode);
 }
 
 bool ConnectionUiController::isConnectionInProgress() const

@@ -21,6 +21,8 @@ QString ContainerUtils::containerToString(DockerContainer c)
 {
     if (c == DockerContainer::None)
         return "none";
+    if (c == DockerContainer::Cloak)
+        return "amnezia-openvpn-cloak";
     if (c == DockerContainer::Awg)
         return "amnezia-awg";
     if (c == DockerContainer::Awg2)
@@ -62,6 +64,8 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
 {
     return { { DockerContainer::None, "Not installed" },
              { DockerContainer::OpenVpn, "OpenVPN" },
+             { DockerContainer::ShadowSocks, "OpenVPN over SS" },
+             { DockerContainer::Cloak, "OpenVPN over Cloak" },
              { DockerContainer::WireGuard, "WireGuard" },
              { DockerContainer::Awg, "AmneziaWG" },
              { DockerContainer::Awg2, "AmneziaWG" },
@@ -83,6 +87,10 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
     return {              { DockerContainer::OpenVpn,
                QObject::tr("OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its "
                            "own security protocol with SSL/TLS for key exchange.") },
+             { DockerContainer::ShadowSocks,
+               QObject::tr("This protocol is no longer supported.") },
+             { DockerContainer::Cloak,
+               QObject::tr("This protocol is no longer supported.") },
              { DockerContainer::WireGuard,
                QObject::tr("WireGuard - popular VPN protocol with high performance, high speed and low power "
                            "consumption.") },
@@ -194,6 +202,9 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
 
 ServiceType ContainerUtils::containerService(DockerContainer c)
 {
+    if (isUnsupportedContainer(c)) {
+        return ServiceType::Vpn;
+    }
     return ProtocolUtils::protocolService(defaultProtocol(c));
 }
 
@@ -202,6 +213,8 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     switch (c) {
     case DockerContainer::None: return Proto::Unknown;
     case DockerContainer::OpenVpn: return Proto::OpenVpn;
+    case DockerContainer::Cloak:
+    case DockerContainer::ShadowSocks: return Proto::Unknown;
     case DockerContainer::WireGuard: return Proto::WireGuard;
     case DockerContainer::Awg2: return Proto::Awg;
     case DockerContainer::Awg: return Proto::Awg;
@@ -252,6 +265,8 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     // macOS build using Network Extension – allow OpenVPN for parity with iOS.
     switch (c) {
     case DockerContainer::OpenVpn: return true;
+    case DockerContainer::Cloak: return false;
+    case DockerContainer::ShadowSocks: return false;
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Awg2: return true;
     case DockerContainer::Awg: return true;
@@ -336,6 +351,10 @@ int ContainerUtils::easySetupOrder(DockerContainer container)
 
 bool ContainerUtils::isShareable(DockerContainer container)
 {
+    if (isUnsupportedContainer(container)) {
+        return false;
+    }
+
     switch (container) {
     case DockerContainer::TorWebSite: return false;
     case DockerContainer::Dns: return false;
@@ -350,6 +369,11 @@ bool ContainerUtils::isShareable(DockerContainer container)
 bool ContainerUtils::isAwgContainer(DockerContainer container)
 {
     return container == DockerContainer::Awg || container == DockerContainer::Awg2;
+}
+
+bool ContainerUtils::isUnsupportedContainer(DockerContainer container)
+{
+    return container == DockerContainer::Cloak || container == DockerContainer::ShadowSocks;
 }
 
 QJsonObject ContainerUtils::getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig)

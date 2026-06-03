@@ -75,13 +75,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_connectionController(connectionController)
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
-    connect(m_installController, &InstallController::validationErrorOccurred, this, [this](ErrorCode errorCode) {
-        if (errorCode == ErrorCode::NoInstalledContainersError) {
-            emit noInstalledContainers();
-        } else {
-            emit installationErrorOccurred(errorCode);
-        }
-    });
+    connect(m_installController, &InstallController::validationErrorOccurred, this, &InstallUiController::installationErrorOccurred);
 }
 
 InstallUiController::~InstallUiController()

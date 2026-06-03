@@ -106,6 +106,19 @@ PageType {
     }
 
     Connections {
+        objectName: "connectionControllerConnections"
+
+        target: ConnectionController
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredByConnectButton(true)
+
+            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
         objectName: "installControllerConnections"
 
         target: InstallController
@@ -166,13 +179,6 @@ PageType {
             }
             PageController.closePage()
             PageController.showNotificationMessage(finishedMessage)
-        }
-
-        function onNoInstalledContainers() {
-            PageController.setTriggeredByConnectButton(true)
-
-            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
         }
     }
 

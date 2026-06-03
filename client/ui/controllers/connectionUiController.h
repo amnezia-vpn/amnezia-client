@@ -48,9 +48,12 @@ signals:
     void connectButtonClicked();
     void preparingConfig();
     void prepareConfig();
+    void unsupportedConnectDrawerRequested();
+    void noInstalledContainers();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();
+    void notifyConnectionBlocked(ErrorCode errorCode);
 
     ConnectionController* m_connectionController;
     ServersController* m_serversController;
