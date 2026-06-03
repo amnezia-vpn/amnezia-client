@@ -166,7 +166,7 @@ PageType {
             }
 
             DividerType {
-                visible: !GC.isMobile()
+                visible: !GC.isMobile() && ServersUiController.hasServersFromGatewayApi
             }
 
             SwitcherType {
