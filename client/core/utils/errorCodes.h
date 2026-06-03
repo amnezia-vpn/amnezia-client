@@ -66,6 +66,11 @@ namespace amnezia
         OpenVpnUnknownError = 701,
         OpenVpnTapAdapterError = 702,
         AddressPoolError = 703,
+        IKEv2ConfigError = 710,
+        IKEv2LoadError = 711,
+        IKEv2SaveError = 712,
+        IKEv2ConnectError = 713,
+        IKEv2TimeoutError = 714,
 
         // 3rd party utils errors
         OpenSslFailed = 800,
