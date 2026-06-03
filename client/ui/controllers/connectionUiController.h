@@ -35,6 +35,8 @@ public slots:
     void openConnection();
     void closeConnection();
 
+    bool isRevokeBlockedDuringActiveConnection(const QString &serverId, int containerIndex, const QString &clientId) const;
+
     ErrorCode getLastConnectionError();
     void onConnectionStateChanged(Vpn::ConnectionState state);
 
