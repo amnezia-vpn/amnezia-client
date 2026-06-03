@@ -590,8 +590,36 @@ bool IosController::setupWireGuard()
             clientAddresses << trimmedAddress;
         }
     }
-    const bool hasClientIpv6 = !config.value(configKey::clientIpv6).toString().isEmpty()
-        || config.value(configKey::clientIp).toString().contains(":");
+
+    // Determine the routes (AllowedIPs). A full-tunnel config must also capture IPv6 (::/0),
+    // even when the server has no IPv6, so native IPv6 cannot leak over the cellular/Wi-Fi
+    // interface. Custom split/partial route sets are honored verbatim.
+    QJsonArray allowedIps;
+    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
+        allowedIps = config[configKey::allowedIps].toArray();
+    } else {
+        allowedIps = QJsonArray { "0.0.0.0/0" };
+    }
+    const bool isFullTunnel = allowedIps.contains("0.0.0.0/0");
+    if (isFullTunnel && !allowedIps.contains("::/0")) {
+        allowedIps.append("::/0");
+    }
+
+    bool hasRealClientIpv6 = false;
+    for (const QString &address : clientAddresses) {
+        if (address.contains(":")) {
+            hasRealClientIpv6 = true;
+            break;
+        }
+    }
+    // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+    // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+    if (isFullTunnel && !hasRealClientIpv6) {
+        clientAddresses << QString("%1/%2").arg(protocols::wireguard::dummyClientIpv6Address,
+                                                protocols::wireguard::defaultClientIpv6Cidr);
+    }
+    const bool hasClientIpv6 = isFullTunnel || hasRealClientIpv6;
+
     wgConfig.insert(configKey::clientIp, clientAddresses.join(", "));
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
@@ -609,22 +637,14 @@ bool IosController::setupWireGuard()
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        QJsonArray filteredAllowedIps;
-        for (const QJsonValue &value : config[configKey::allowedIps].toArray()) {
-            const QString route = value.toString();
-            if (hasClientIpv6 || !route.contains(":")) {
-                filteredAllowedIps.append(route);
-            }
+    QJsonArray filteredAllowedIps;
+    for (const QJsonValue &value : allowedIps) {
+        const QString route = value.toString();
+        if (hasClientIpv6 || !route.contains(":")) {
+            filteredAllowedIps.append(route);
         }
-        wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0" };
-        if (hasClientIpv6) {
-            allowed_ips.append("::/0");
-        }
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
     }
+    wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
@@ -705,8 +725,36 @@ bool IosController::setupAwg()
             clientAddresses << trimmedAddress;
         }
     }
-    const bool hasClientIpv6 = !config.value(configKey::clientIpv6).toString().isEmpty()
-        || config.value(configKey::clientIp).toString().contains(":");
+
+    // Determine the routes (AllowedIPs). A full-tunnel config must also capture IPv6 (::/0),
+    // even when the server has no IPv6, so native IPv6 cannot leak over the cellular/Wi-Fi
+    // interface. Custom split/partial route sets are honored verbatim.
+    QJsonArray allowedIps;
+    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
+        allowedIps = config[configKey::allowedIps].toArray();
+    } else {
+        allowedIps = QJsonArray { "0.0.0.0/0" };
+    }
+    const bool isFullTunnel = allowedIps.contains("0.0.0.0/0");
+    if (isFullTunnel && !allowedIps.contains("::/0")) {
+        allowedIps.append("::/0");
+    }
+
+    bool hasRealClientIpv6 = false;
+    for (const QString &address : clientAddresses) {
+        if (address.contains(":")) {
+            hasRealClientIpv6 = true;
+            break;
+        }
+    }
+    // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+    // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+    if (isFullTunnel && !hasRealClientIpv6) {
+        clientAddresses << QString("%1/%2").arg(protocols::wireguard::dummyClientIpv6Address,
+                                                protocols::wireguard::defaultClientIpv6Cidr);
+    }
+    const bool hasClientIpv6 = isFullTunnel || hasRealClientIpv6;
+
     wgConfig.insert(configKey::clientIp, clientAddresses.join(", "));
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
@@ -724,22 +772,14 @@ bool IosController::setupAwg()
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        QJsonArray filteredAllowedIps;
-        for (const QJsonValue &value : config[configKey::allowedIps].toArray()) {
-            const QString route = value.toString();
-            if (hasClientIpv6 || !route.contains(":")) {
-                filteredAllowedIps.append(route);
-            }
+    QJsonArray filteredAllowedIps;
+    for (const QJsonValue &value : allowedIps) {
+        const QString route = value.toString();
+        if (hasClientIpv6 || !route.contains(":")) {
+            filteredAllowedIps.append(route);
         }
-        wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0" };
-        if (hasClientIpv6) {
-            allowed_ips.append("::/0");
-        }
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
     }
+    wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);

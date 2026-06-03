@@ -25,6 +25,11 @@ import org.json.JSONObject
 
 private const val TAG = "Wireguard"
 
+// Non-routable ULA placeholder (RFC 4193) used to capture IPv6 into the tunnel when the server
+// has no IPv6, so native IPv6 cannot leak over the cellular/Wi-Fi interface.
+private const val DUMMY_CLIENT_IPV6_ADDRESS = "fd58:baa6:dead::1"
+private const val DUMMY_CLIENT_IPV6_PREFIX = 128
+
 open class Wireguard : Protocol() {
 
     private var tunnelHandle: Int = -1
@@ -84,9 +89,7 @@ open class Wireguard : Protocol() {
             .map { it.trim() }
             .filter { it.isNotEmpty() }
             .map { InetNetwork.parse(it) }
-            .toList()
-        addresses.forEach(::addAddress)
-        val hasIpv6Address = addresses.any { it.isIpv6 }
+            .toMutableList()
 
         config.optStringOrNull("dns1")?.let { dns ->
             addDnsServer(parseInetAddress(dns.trim()))
@@ -96,14 +99,23 @@ open class Wireguard : Protocol() {
             addDnsServer(parseInetAddress(dns.trim()))
         }
 
-        val defRoutes = hashSetOf(
-            InetNetwork("0.0.0.0", 0),
-            InetNetwork("::", 0)
-        )
-        val routes = hashSetOf<InetNetwork>()
-        configData.getJSONArray("allowed_ips").asSequence<String>().map { route ->
-            InetNetwork.parse(route.trim())
-        }.filter { it.isIpv4 || hasIpv6Address }.forEach(routes::add)
+        val defaultIpv4Route = InetNetwork("0.0.0.0", 0)
+        val defaultIpv6Route = InetNetwork("::", 0)
+        val defRoutes = hashSetOf(defaultIpv4Route, defaultIpv6Route)
+        val routes = configData.getJSONArray("allowed_ips").asSequence<String>()
+            .map { InetNetwork.parse(it.trim()) }
+            .toHashSet()
+        // A full-tunnel config must also capture IPv6 (::/0), even when the server has no IPv6,
+        // so native IPv6 cannot leak over the cellular/Wi-Fi interface.
+        val isFullTunnel = defaultIpv4Route in routes
+        if (isFullTunnel) routes += defaultIpv6Route
+        // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+        // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+        if (isFullTunnel && addresses.none { it.isIpv6 }) {
+            addresses += InetNetwork(DUMMY_CLIENT_IPV6_ADDRESS, DUMMY_CLIENT_IPV6_PREFIX)
+        }
+        addresses.forEach(::addAddress)
+
         // if the allowed IPs list contains at least one non-default route, disable global split tunneling
         if (routes.any { it !in defRoutes }) disableSplitTunneling()
         addRoutes(routes)

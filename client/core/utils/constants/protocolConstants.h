@@ -152,6 +152,9 @@ namespace amnezia
             constexpr char defaultSubnetIpv6Address[] = "fd58:baa6:dead:1::1";
             constexpr char defaultSubnetIpv6Cidr[] = "64";
             constexpr char defaultClientIpv6Cidr[] = "128";
+            // Non-routable ULA placeholder (RFC 4193) used to capture IPv6 into the tunnel
+            // on mobile when the server has no IPv6, so native IPv6 cannot leak.
+            constexpr char dummyClientIpv6Address[] = "fd58:baa6:dead::1";
 
             constexpr char defaultPort[] = "51820";
             constexpr char defaultPersistentKeepAlive[] = "25";

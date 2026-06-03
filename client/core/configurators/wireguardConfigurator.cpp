@@ -62,10 +62,11 @@ QHostAddress nextIpv6Address(const QHostAddress &address)
     for (int i = 15; i >= 0; --i) {
         ++bytes[i];
         if (bytes[i] != 0) {
-            break;
+            return QHostAddress(bytes);
         }
     }
-    return QHostAddress(bytes);
+    // All-0xFF wrapped around to ::; the subnet is exhausted, so report no address.
+    return QHostAddress();
 }
 
 QList<QHostAddress> filterAddressesByFamily(const QList<QHostAddress> &addresses, QAbstractSocket::NetworkLayerProtocol family)
