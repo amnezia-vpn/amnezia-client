@@ -82,11 +82,33 @@
 #endif
 
 class CoreSignalHandlers;
+class TestMultipleImports;
+class TestAdminSelfHostedExport;
+class TestServerEdit;
+class TestDefaultServerChange;
+class TestServerEdgeCases;
+class TestSignalOrder;
+class TestServersModelSync;
+class TestComplexOperations;
+class TestSettingsSignals;
+class TestUiServersModelAndController;
+class TestSelfHostedServerSetup;
 
 class CoreController : public QObject
 {
     Q_OBJECT
     friend class CoreSignalHandlers;
+    friend class TestMultipleImports;
+    friend class TestAdminSelfHostedExport;
+    friend class TestServerEdit;
+    friend class TestDefaultServerChange;
+    friend class TestServerEdgeCases;
+    friend class TestSignalOrder;
+    friend class TestServersModelSync;
+    friend class TestComplexOperations;
+    friend class TestSettingsSignals;
+    friend class TestUiServersModelAndController;
+    friend class TestSelfHostedServerSetup;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,

@@ -102,6 +102,8 @@
         <file>Pages2/PageSettingsAppSplitTunneling.qml</file>
         <file>Pages2/PageSettingsBackup.qml</file>
         <file>Pages2/PageSettingsConnection.qml</file>
+        <file>Pages2/PageSettingsConnectionProtocols.qml</file>
+        <file>Pages2/PageSettingsConnectionType.qml</file>
         <file>Pages2/PageSettingsDns.qml</file>
         <file>Pages2/PageSettingsKillSwitch.qml</file>
         <file>Pages2/PageSettingsKillSwitchExceptions.qml</file>

@@ -161,7 +161,12 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
         return encRequestData.errorCode;
     }
 
-    QNetworkReply *reply = amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
+    QNetworkAccessManager *nam = amnApp ? amnApp->networkManager() : nullptr;
+    if (!nam) {
+        return ErrorCode::InternalError;
+    }
+
+    QNetworkReply *reply = nam->post(encRequestData.request, encRequestData.requestBody);
 
     QEventLoop wait;
     connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
@@ -236,7 +241,14 @@ QFuture<QPair<ErrorCode, QByteArray>> GatewayController::postAsync(const QString
         return promise->future();
     }
 
-    QNetworkReply *reply = amnApp->networkManager()->post(encRequestData.request, encRequestData.requestBody);
+    QNetworkAccessManager *nam = amnApp ? amnApp->networkManager() : nullptr;
+    if (!nam) {
+        promise->addResult(qMakePair(ErrorCode::InternalError, QByteArray()));
+        promise->finish();
+        return promise->future();
+    }
+
+    QNetworkReply *reply = nam->post(encRequestData.request, encRequestData.requestBody);
 
     auto sslErrors = QSharedPointer<QList<QSslError>>::create();
 
@@ -378,9 +390,14 @@ QStringList GatewayController::getProxyUrls(const QString &serviceType, const QS
         return {};
     }
 
+    QNetworkAccessManager *nam = amnApp ? amnApp->networkManager() : nullptr;
+    if (!nam) {
+        return {};
+    }
+
     for (const auto &proxyStorageUrl : proxyStorageUrls) {
         request.setUrl(proxyStorageUrl);
-        reply = amnApp->networkManager()->get(request);
+        reply = nam->get(request);
 
         connect(reply, &QNetworkReply::finished, &wait, &QEventLoop::quit);
         connect(reply, &QNetworkReply::sslErrors, [this, &sslErrors](const QList<QSslError> &errors) { sslErrors = errors; });

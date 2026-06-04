@@ -225,6 +225,22 @@ void CoreController::initControllers()
                                                               m_connectionController, this);
     setQmlContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
+    connect(m_connectionUiController, &ConnectionUiController::requestSetCurrentProtocol,
+            m_subscriptionUiController, &SubscriptionUiController::setCurrentProtocol, Qt::QueuedConnection);
+    connect(m_connectionUiController, &ConnectionUiController::requestUpdateServiceFromGateway,
+            m_subscriptionUiController, &SubscriptionUiController::updateServiceFromGateway, Qt::QueuedConnection);
+    connect(m_subscriptionUiController, &SubscriptionUiController::updateServiceFromGatewayCompleted,
+            m_connectionUiController, &ConnectionUiController::onUpdateServiceFromGatewayCompleted,
+            Qt::QueuedConnection);
+    connect(m_connectionUiController, &ConnectionUiController::requestSetProcessedServer,
+            this, [this](const QString &serverId) {
+                m_serversUiController->setProcessedServerId(serverId);
+            }, Qt::QueuedConnection);
+    connect(m_installUiController, &InstallUiController::updateContainerFinished,
+            m_connectionUiController, [this](const QString &, bool) {
+                m_connectionUiController->onCurrentContainerUpdated();
+            });
+
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
     setQmlContextProperty("ApiNewsController", m_apiNewsUiController);
 

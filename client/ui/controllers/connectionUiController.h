@@ -2,6 +2,7 @@
 #define CONNECTIONUICONTROLLER_H
 
 #include <QObject>
+#include <QTimer>
 
 #include "core/controllers/connectionController.h"
 #include "core/utils/errorCodes.h"
@@ -40,6 +41,14 @@ public slots:
 
     void onTranslationsUpdated();
 
+public slots:
+    void checkAndStartAwgStateTimer();
+    void onUpdateServiceFromGatewayCompleted(bool success, const QString &serverId);
+    void onCurrentContainerUpdated();
+
+private slots:
+    void onAwgStateTimeout();
+
 signals:
     void connectionStateChanged();
 
@@ -49,9 +58,19 @@ signals:
     void preparingConfig();
     void prepareConfig();
 
+    // serverId + protocol — both carried so the receiver doesn't need to re-read default server
+    void requestSetCurrentProtocol(const QString &serverId, const QString &protocol);
+    void requestUpdateServiceFromGateway(const QString &serverId, const QString &newCountryCode,
+                                         const QString &newCountryName, bool reloadServiceConfig);
+    void requestSetProcessedServer(const QString &serverId);
+    void reconnectWithUpdatedContainer(const QString &message);
+
 private:
     Vpn::ConnectionState getCurrentConnectionState();
 
+    static constexpr int kAwgSwitchTimeoutMs = 10000;
+
+    QTimer m_awgStateTimer;
     ConnectionController* m_connectionController;
     ServersController* m_serversController;
 
@@ -60,6 +79,10 @@ private:
     QString m_connectionStateText = tr("Connect");
 
     Vpn::ConnectionState m_state;
+
+    QString m_pendingApiServerId;
+    bool m_apiSwitched = false;
+    bool m_waitingForApiUpdate = false;
 };
 
 #endif
