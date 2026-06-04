@@ -73,11 +73,6 @@ namespace
         return false;
     }
 
-    bool usesNamedDataVolume(DockerContainer container)
-    {
-        return container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
-    }
-
     QString buildRemoveContainerScript(const amnezia::ScriptVars &vars, bool removeDataVolume)
     {
         QString script = SshSession::replaceVars(amnezia::scriptData(SharedScriptType::remove_container), vars);
@@ -137,7 +132,7 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
 
     const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    const bool removeDataVolume = !isUpdate && usesNamedDataVolume(container);
+    const bool removeDataVolume = !isUpdate && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
     sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
@@ -993,7 +988,7 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
     SshSession sshSession(this);
     const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    const bool removeDataVolume = usesNamedDataVolume(container);
+    const bool removeDataVolume = (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
     ErrorCode errorCode =
             sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
 
