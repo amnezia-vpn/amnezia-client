@@ -431,9 +431,7 @@ void InstallUiController::removeContainer(const QString &serverId, int container
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
     QString containerName = ContainerUtils::containerHumanNames().value(container);
 
-    const bool asyncRemove = container == DockerContainer::Xray || container == DockerContainer::SSXray;
-
-    if (asyncRemove) {
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
         emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);
         QObject::connect(watcher, &QFutureWatcher<ErrorCode>::finished, this,
