@@ -64,7 +64,9 @@ namespace libssh {
             int connectionResult = watcher.result();
 
             if (connectionResult != SSH_OK) {
-                return fromLibsshErrorCode();
+                ErrorCode errorCode = fromLibsshErrorCode();
+                disconnectFromHost();
+                return errorCode;
             }
 
             std::string authUsername = credentials.userName.toStdString();
@@ -98,12 +100,15 @@ namespace libssh {
                     if (errorCode == ErrorCode::NoError) {
                         errorCode = ErrorCode::SshPrivateKeyFormatError;
                     }
+                    disconnectFromHost();
                     return errorCode;
                 }
             } else {
                 authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.secretData.toStdString().c_str());
                 if (authResult != SSH_OK) {
-                    return fromLibsshErrorCode();
+                    ErrorCode errorCode = fromLibsshErrorCode();
+                    disconnectFromHost();
+                    return errorCode;
                 }
             }
 
