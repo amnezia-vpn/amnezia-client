@@ -31,6 +31,8 @@ private:
     bool storeClientIdentity();
 
     void handleStatusChange(int rawStatus);
+    void startTunnelNow();
+    void reportError(ErrorCode code);
 
     void startHandshakeTimeoutTimer();
     void stopHandshakeTimeoutTimer();
@@ -47,6 +49,7 @@ private:
 
     QTimer *m_handshakeTimeoutTimer { nullptr };
     bool m_handshakeTimedOut { false };
+    bool m_startWhenDisconnected { false };
 
     void *m_statusObserver { nullptr };
 

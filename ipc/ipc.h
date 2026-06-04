@@ -15,7 +15,8 @@ enum PermittedProcess {
     OpenVPN,
     Wireguard,
     Tun2Socks,
-    CertUtil
+    CertUtil,
+    Security
 };
 
 inline QString permittedProcessPath(PermittedProcess pid)
@@ -29,6 +30,8 @@ inline QString permittedProcessPath(PermittedProcess pid)
             return Utils::certUtilPath();
         case PermittedProcess::Tun2Socks:
             return Utils::tun2socksPath();
+        case PermittedProcess::Security:
+            return "/usr/bin/security";
         default:
             return "";
     }
