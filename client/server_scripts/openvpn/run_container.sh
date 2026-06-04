@@ -7,11 +7,6 @@ sudo docker run -d \
 -p $OPENVPN_PORT:$OPENVPN_PORT/$OPENVPN_TRANSPORT_PROTO \
 --name $CONTAINER_NAME $CONTAINER_NAME
 
-# Wait until the container is actually running before the network/exec steps.
-# DH generation was removed, so this phase now finishes in ~2s instead of up to
-# minutes; without this guard a slow Docker daemon (or a leftover container from a
-# previous deploy) could let later steps race ahead and fail with "No such
-# container". Single-line on purpose (script runs as one batched shell). ~15s cap.
 amn_i=0; while [ "$(sudo docker inspect -f '{{.State.Running}}' $CONTAINER_NAME 2>/dev/null)" != "true" ] && [ $amn_i -lt 30 ]; do sleep 0.5; amn_i=$((amn_i+1)); done
 
 sudo docker network connect amnezia-dns-net $CONTAINER_NAME
