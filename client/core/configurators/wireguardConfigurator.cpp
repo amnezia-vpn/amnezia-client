@@ -161,10 +161,13 @@ bool WireguardConfigurator::hasServerIpv6Egress(const ServerCredentials &credent
         return ErrorCode::NoError;
     };
 
+    constexpr char probeServer[] = "2001:4860:4860::8888"; // Google Public DNS (IPv6)
+    constexpr char probeName[] = "google.com";
+    constexpr int probeTimeoutSec = 3;
+
     const QString probeScript =
-        "(ping -6 -c 1 -W 2 2001:4860:4860::8888 >/dev/null 2>&1 || "
-        "ping6 -c 1 -W 2 2001:4860:4860::8888 >/dev/null 2>&1) && "
-        "echo AMNEZIA_IPV6_OK || true";
+        QString("timeout %1 nslookup %2 %3 >/dev/null 2>&1 && echo AMNEZIA_IPV6_OK || true")
+            .arg(QString::number(probeTimeoutSec), probeName, probeServer);
 
     const auto errorCode = m_sshSession->runContainerScript(credentials, container, probeScript, cbReadStdOut);
     if (errorCode != ErrorCode::NoError) {
