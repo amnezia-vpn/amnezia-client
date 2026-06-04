@@ -152,8 +152,8 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     return startupContainerWorker(credentials, container, config, sshSession);
 }
 
-ErrorCode InstallController::updateContainer(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
-                                             ContainerConfig &newConfig)
+ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
+                                                ContainerConfig &newConfig)
 {
     if (!isUpdateDockerContainerRequired(container, oldConfig, newConfig)) {
         auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
@@ -185,7 +185,7 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     SshSession sshSession(this);
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
-    qDebug() << "InstallController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
+    qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     bool xrayServerSettingsChanged = false;
     if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
@@ -213,11 +213,11 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged && !skipXrayInboundSync) {
         DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
         XrayConfigurator xrayConfigurator(&sshSession);
-        qDebug() << "InstallController::updateContainer applying Xray server inbound sync, reinstall="
+        qDebug() << "InstallController::updateServerConfig applying Xray server inbound sync, reinstall="
                  << reinstallRequired;
         errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
         if (errorCode != ErrorCode::NoError) {
-            qDebug() << "InstallController::updateContainer Xray inbound sync failed, error="
+            qDebug() << "InstallController::updateServerConfig Xray inbound sync failed, error="
                      << static_cast<int>(errorCode);
         }
     }
@@ -234,6 +234,41 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     }
 
     return errorCode;
+}
+
+ErrorCode InstallController::updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig)
+{
+    switch (m_serversRepository->serverKind(serverId)) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        auto config = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        auto config = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::SelfHostedUser);
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        auto config = m_serversRepository->nativeConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::Native);
+        return ErrorCode::NoError;
+    }
+    default:
+        return ErrorCode::InternalError;
+    }
 }
 
 void InstallController::clearCachedProfile(const QString &serverId, DockerContainer container)

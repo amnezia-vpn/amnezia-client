@@ -154,7 +154,7 @@ PageType {
     function telemtScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
-            InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Telemt, cp)
+            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Telemt, cp)
         })
     }
 

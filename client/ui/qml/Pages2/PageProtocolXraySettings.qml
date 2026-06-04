@@ -213,7 +213,7 @@ PageType {
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                        InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) saveButton.forceActiveFocus()
