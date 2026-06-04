@@ -59,6 +59,7 @@ ErrorCode SshSession::runScript(const ServerCredentials &credentials, QString sc
     qDebug() << "SshSession::Run script";
 
     QString totalLine;
+    QStringList statements;
     const QStringList &lines = script.split("\n", Qt::SkipEmptyParts);
     for (int i = 0; i < lines.count(); i++) {
         QString currentLine = lines.at(i);
@@ -69,24 +70,31 @@ ErrorCode SshSession::runScript(const ServerCredentials &credentials, QString sc
             totalLine = totalLine + "\n" + currentLine;
         }
 
-        QString lineToExec;
         if (currentLine.endsWith("\\")) {
             continue;
-        } else {
-            lineToExec = totalLine;
-            totalLine.clear();
         }
+
+        QString lineToExec = totalLine;
+        totalLine.clear();
 
         if (lineToExec.startsWith("#")) {
             continue;
         }
 
-        qDebug().noquote() << lineToExec;
+        statements << lineToExec;
+    }
 
-        error = m_sshClient.executeCommand(lineToExec, cbReadStdOut, cbReadStdErr);
-        if (error != ErrorCode::NoError) {
-            return error;
-        }
+    if (statements.isEmpty()) {
+        qDebug().noquote() << "SshSession::runScript finished (no statements)\n";
+        return ErrorCode::NoError;
+    }
+
+    const QString batchedScript = statements.join("\n");
+    qDebug().noquote() << batchedScript;
+
+    error = m_sshClient.executeCommand(batchedScript, cbReadStdOut, cbReadStdErr);
+    if (error != ErrorCode::NoError) {
+        return error;
     }
 
     qDebug().noquote() << "SshSession::runScript finished\n";
@@ -97,30 +105,25 @@ ErrorCode SshSession::runContainerScript(const ServerCredentials &credentials, D
                                          const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
                                          const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
-    QString fileName = "/opt/amnezia/" + Utils::getRandomString(16) + ".sh";
-
-    ErrorCode e = uploadTextFileToContainer(container, credentials, script, fileName);
-    if (e)
-        return e;
-
     const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
-    QString runner = QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, useSh ? "sh" : "bash");
-    e = runScript(credentials, replaceVars(runner, amnezia::genBaseVars(credentials, container, QString(), QString())), cbReadStdOut, cbReadStdErr);
+    const QString shell = useSh ? QStringLiteral("sh") : QStringLiteral("bash");
+    const QString b64 = QString::fromLatin1(script.toUtf8().toBase64());
 
-    QString remover = QString("sudo docker exec -i $CONTAINER_NAME rm %1 ").arg(fileName);
-    runScript(credentials, replaceVars(remover, amnezia::genBaseVars(credentials, container, QString(), QString())), cbReadStdOut, cbReadStdErr);
+    const QString command = QStringLiteral("printf '%s' '%1' | base64 -d | sudo docker exec -i $CONTAINER_NAME %2")
+                                .arg(b64, shell);
 
-    return e;
+    return runScript(credentials,
+                     replaceVars(command, amnezia::genBaseVars(credentials, container, QString(), QString())),
+                     cbReadStdOut, cbReadStdErr);
 }
 
 ErrorCode SshSession::uploadTextFileToContainer(DockerContainer container, const ServerCredentials &credentials, const QString &file,
                                                 const QString &path, libssh::ScpOverwriteMode overwriteMode)
 {
-    ErrorCode e = ErrorCode::NoError;
-    QString tmpFileName = QString("/tmp/%1.tmp").arg(Utils::getRandomString(16));
-    e = uploadFileToHost(credentials, file.toUtf8(), tmpFileName);
-    if (e)
-        return e;
+    if (overwriteMode != libssh::ScpOverwriteMode::ScpOverwriteExisting
+        && overwriteMode != libssh::ScpOverwriteMode::ScpAppendToExisting) {
+        return ErrorCode::NotImplementedError;
+    }
 
     QString stdOut;
     auto cbReadStd = [&](const QString &data, libssh::Client &) {
@@ -128,45 +131,26 @@ ErrorCode SshSession::uploadTextFileToContainer(DockerContainer container, const
         return ErrorCode::NoError;
     };
 
-    // mkdir
-    QString mkdir = QString("sudo docker exec -i $CONTAINER_NAME mkdir -p  \"$(dirname %1)\"").arg(path);
+    auto baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
 
-    e = runScript(credentials, replaceVars(mkdir, amnezia::genBaseVars(credentials, container, QString(), QString())));
+    const QString b64 = QString::fromLatin1(file.toUtf8().toBase64());
+    const QString dir = QFileInfo(path).path();
+    const QString redirect = (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting)
+                                 ? QStringLiteral(">>")
+                                 : QStringLiteral(">");
+
+    const QString command = QStringLiteral("printf '%s' '%1' | base64 -d | "
+                                           "sudo docker exec -i $CONTAINER_NAME sh -c 'mkdir -p \"%2\" && cat %3 \"%4\"'")
+                                    .arg(b64, dir, redirect, path);
+
+    ErrorCode e = runScript(credentials, replaceVars(command, baseVars), cbReadStd, cbReadStd);
     if (e)
         return e;
-
-    if (overwriteMode == libssh::ScpOverwriteMode::ScpOverwriteExisting) {
-        e = runScript(credentials,
-                      replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, path),
-                                  amnezia::genBaseVars(credentials, container, QString(), QString())),
-                      cbReadStd, cbReadStd);
-
-        if (e)
-            return e;
-    } else if (overwriteMode == libssh::ScpOverwriteMode::ScpAppendToExisting) {
-        e = runScript(credentials,
-                      replaceVars(QStringLiteral("sudo docker cp %1 $CONTAINER_NAME:/%2").arg(tmpFileName, tmpFileName),
-                                  amnezia::genBaseVars(credentials, container, QString(), QString())),
-                      cbReadStd, cbReadStd);
-
-        if (e)
-            return e;
-
-        e = runScript(credentials,
-                      replaceVars(QStringLiteral("sudo docker exec -i $CONTAINER_NAME sh -c \"cat %1 >> %2\"").arg(tmpFileName, path),
-                                  amnezia::genBaseVars(credentials, container, QString(), QString())),
-                      cbReadStd, cbReadStd);
-
-        if (e)
-            return e;
-    } else
-        return ErrorCode::NotImplementedError;
 
     if (stdOut.contains("Error") && stdOut.contains("No such container")) {
         return ErrorCode::ServerContainerMissingError;
     }
 
-    runScript(credentials, replaceVars(QString("sudo shred -u %1").arg(tmpFileName), amnezia::genBaseVars(credentials, container, QString(), QString())));
     return e;
 }
 
@@ -186,6 +170,38 @@ QByteArray SshSession::getTextFileFromContainer(DockerContainer container, const
 
     errorCode = runScript(credentials, script, cbReadStdOut);
     return QByteArray::fromHex(stdOut.toUtf8());
+}
+
+QList<QByteArray> SshSession::getTextFilesFromContainer(DockerContainer container, const ServerCredentials &credentials,
+                                                        const QStringList &paths, ErrorCode &errorCode)
+{
+    errorCode = ErrorCode::NoError;
+    QList<QByteArray> result;
+    if (paths.isEmpty()) {
+        return result;
+    }
+
+    const QString sep = QStringLiteral("ZZAMNSEPZZ");
+    QString inner;
+    for (const QString &path : paths) {
+        inner += QStringLiteral("xxd -p '%1'; echo '%2'; ").arg(path, sep);
+    }
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"%2\"")
+                         .arg(ContainerUtils::containerToString(container), inner);
+
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data;
+        return ErrorCode::NoError;
+    };
+    errorCode = runScript(credentials, script, cbReadStdOut);
+
+    const QStringList parts = stdOut.split(sep);
+    for (int i = 0; i < paths.size(); ++i) {
+        const QString hex = (i < parts.size()) ? parts.at(i) : QString();
+        result.append(QByteArray::fromHex(hex.toUtf8()));
+    }
+    return result;
 }
 
 ErrorCode SshSession::uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,

@@ -90,10 +90,9 @@ InstallController::~InstallController()
 }
 
 ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,
-                                            bool isUpdate)
+                                            SshSession &sshSession, bool isUpdate)
 {
     qDebug().noquote() << "InstallController::setupContainer" << ContainerUtils::containerToString(container);
-    SshSession sshSession(this);
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, sshSession);
@@ -199,7 +198,7 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
 
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
-        errorCode = setupContainer(credentials, container, newConfig, true);
+        errorCode = setupContainer(credentials, container, newConfig, sshSession, true);
     } else {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
@@ -1033,10 +1032,10 @@ ContainerConfig InstallController::generateConfig(DockerContainer container, int
 }
 
 ErrorCode InstallController::installContainer(const ServerCredentials &credentials, DockerContainer container, int port,
-                                              TransportProto transportProto, ContainerConfig &config)
+                                              TransportProto transportProto, ContainerConfig &config, SshSession &sshSession)
 {
     config = generateConfig(container, port, transportProto);
-    return setupContainer(credentials, container, config, false);
+    return setupContainer(credentials, container, config, sshSession, false);
 }
 
 
@@ -1142,7 +1141,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     wasContainerInstalled = false;
     if (!installedContainers.contains(container)) {
         ContainerConfig config;
-        errorCode = installContainer(credentials, container, port, transportProto, config);
+        errorCode = installContainer(credentials, container, port, transportProto, config, sshSession);
         if (errorCode) {
             return errorCode;
         }
@@ -1212,7 +1211,7 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
     wasContainerInstalled = false;
     if (!installedContainers.contains(container)) {
         ContainerConfig config;
-        errorCode = installContainer(credentials, container, port, transportProto, config);
+        errorCode = installContainer(credentials, container, port, transportProto, config, sshSession);
         if (errorCode) {
             return errorCode;
         }

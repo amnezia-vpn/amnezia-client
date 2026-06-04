@@ -63,16 +63,18 @@ OpenVpnConfigurator::ConnectionData OpenVpnConfigurator::prepareOpenVpnConfig(co
         return connData;
     }
 
-    connData.caCert =
-            m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::caCertPath, errorCode);
-    connData.clientCert = m_sshSession->getTextFileFromContainer(
-            container, credentials, QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId), errorCode);
-
+    const QStringList certPaths = {
+        QString::fromLatin1(amnezia::protocols::openvpn::caCertPath),
+        QString("%1/%2.crt").arg(amnezia::protocols::openvpn::clientCertPath).arg(connData.clientId),
+        QString::fromLatin1(amnezia::protocols::openvpn::taKeyPath)
+    };
+    const QList<QByteArray> certs = m_sshSession->getTextFilesFromContainer(container, credentials, certPaths, errorCode);
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
-
-    connData.taKey = m_sshSession->getTextFileFromContainer(container, credentials, amnezia::protocols::openvpn::taKeyPath, errorCode);
+    connData.caCert = certs.value(0);
+    connData.clientCert = certs.value(1);
+    connData.taKey = certs.value(2);
 
     if (connData.caCert.isEmpty() || connData.clientCert.isEmpty() || connData.taKey.isEmpty()) {
         errorCode = ErrorCode::SshScpFailureError;

@@ -48,6 +48,9 @@ namespace libssh {
             ssh_options_set(m_session, SSH_OPTIONS_USER, hostUsername.c_str());
             ssh_options_set(m_session, SSH_OPTIONS_LOG_VERBOSITY, &logVerbosity);
 
+            long connectTimeoutSec = 30;
+            ssh_options_set(m_session, SSH_OPTIONS_TIMEOUT, &connectTimeoutSec);
+
             QFutureWatcher<int> watcher;
             QFuture<int> future = QtConcurrent::run([this]() {
                 return ssh_connect(m_session);
@@ -103,6 +106,9 @@ namespace libssh {
                     return fromLibsshErrorCode();
                 }
             }
+
+            long sessionTimeoutSec = 86400;
+            ssh_options_set(m_session, SSH_OPTIONS_TIMEOUT, &sessionTimeoutSec);
         }
         return ErrorCode::NoError;
     }
