@@ -216,6 +216,8 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
+    qWarning() << "[ServicesCatalog] errorCode:" << static_cast<int>(errorCode)
+               << "response:" << QString::fromLocal8Bit(responseBody);
     if (errorCode == ErrorCode::NoError) {
         if (!responseBody.contains(apiDefs::key::services.data())) {
             errorCode = ErrorCode::ApiServicesMissingError;
@@ -237,7 +239,10 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
 ErrorCode ServicesCatalogController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
 {
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+    QString gatewayEndpoint = m_appSettingsRepository->getGatewayEndpoint();
+    qWarning() << "[ServicesCatalog] request URL:" << endpoint.arg(gatewayEndpoint)
+              << "isDevEnv:" << m_appSettingsRepository->isDevGatewayEnv();
+    GatewayController gatewayController(gatewayEndpoint, m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
