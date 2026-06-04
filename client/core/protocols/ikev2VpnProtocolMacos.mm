@@ -22,6 +22,9 @@
 
 namespace {
 
+// macOS rejects password-less PKCS#12 containers on import, so the client p12
+// (exported by the Amnezia server without a password) is re-wrapped with a known
+// password using legacy 3DES/SHA1 algorithms that Apple's importer accepts.
 const char *kRepackedP12Password = "amnezia";
 
 const char *kVpnSystemKeychainPath = "/Library/Keychains/System.keychain";
@@ -39,6 +42,9 @@ const char *vpnStatusName(int status)
     }
 }
 
+// Parses the password-less client p12, re-wraps the identity with a password and
+// also extracts the CA certificate (DER) bundled in the p12 chain, which is needed
+// to validate the self-signed server certificate.
 bool prepareIdentity(const QByteArray &source, const QString &friendlyName, QByteArray &repackedP12, QByteArray &caCertDer)
 {
     const unsigned char *cursor = reinterpret_cast<const unsigned char *>(source.constData());
@@ -107,6 +113,7 @@ bool prepareIdentity(const QByteArray &source, const QString &friendlyName, QByt
     return true;
 }
 
+// Removes any previously imported identity with this label from the login keychain.
 void removeIdentityFromLoginKeychain(const QString &label)
 {
     NSDictionary *query = @{
@@ -117,6 +124,10 @@ void removeIdentityFromLoginKeychain(const QString &label)
     SecItemDelete((__bridge CFDictionaryRef)query);
 }
 
+// Imports the client identity into the user's login keychain with an access list
+// that grants this app and the VPN agent (neagent) access. Setting the ACL at
+// creation time (legacy SecAccess) avoids the System keychain admin prompt and the
+// partition-list authorization that cannot be satisfied on the System keychain.
 bool importIdentityToLoginKeychain(const QByteArray &p12, const QString &label)
 {
     SecKeychainRef loginKeychain = NULL;
@@ -168,6 +179,9 @@ bool importIdentityToLoginKeychain(const QByteArray &p12, const QString &label)
     return true;
 }
 
+// Looks up the persistent reference of the client identity in the login keychain.
+// The search is restricted to the login keychain so a stale identity that an earlier
+// build left in the System keychain (same label) can never be picked instead.
 NSData *copyIdentityPersistentRef(const QString &label)
 {
     SecKeychainRef loginKeychain = NULL;
@@ -197,6 +211,7 @@ NSData *copyIdentityPersistentRef(const QString &label)
     return (NSData *)CFAutorelease(persistentRef);
 }
 
+// Runs /usr/bin/security as root through the privileged Amnezia service.
 void runPrivilegedSecurity(const QString &label, const QStringList &arguments)
 {
     auto process = IpcClient::CreatePrivilegedProcess();
@@ -239,6 +254,28 @@ void runPrivilegedSecurity(const QString &label, const QStringList &arguments)
     qInfo() << "[IKEv2-mac]" << label << "started" << started << "finished" << finished
             << "| out:" << out.trimmed() << "| err:" << err.trimmed();
 }
+
+// Disables the VPN configuration so it cannot be turned on from the OS System
+// Settings once the app has disconnected (mirrors the reference behaviour). It is
+// self-contained (captures no C++ object), so it is safe even when called right
+// before this protocol instance is destroyed.
+void disableVpnConfiguration()
+{
+    NEVPNManager *manager = [NEVPNManager sharedManager];
+    if (!manager.enabled) {
+        return;
+    }
+    manager.enabled = NO;
+    [manager saveToPreferencesWithCompletionHandler:^(NSError *error) {
+      if (error) {
+          qWarning() << "[IKEv2-mac] failed to disable VPN configuration:"
+                     << QString::fromNSString(error.localizedDescription);
+      } else {
+          qInfo() << "[IKEv2-mac] VPN configuration disabled";
+      }
+    }];
+}
+
 }  // namespace
 
 Ikev2ProtocolMacos::Ikev2ProtocolMacos(const QJsonObject &configuration, QObject *parent)
@@ -269,6 +306,9 @@ void Ikev2ProtocolMacos::readIkev2Configuration(const QJsonObject &configuration
 
 bool Ikev2ProtocolMacos::storeClientIdentity()
 {
+    // Already installed for this client: reuse it. Re-importing on every connect
+    // churns the key, re-triggers the neagent keychain prompt and disturbs the key
+    // an active (tearing-down) connection still references during a reconnect.
     if (copyIdentityPersistentRef(m_clientId) != nil) {
         qInfo() << "[IKEv2-mac] client identity already in login keychain, reusing it";
         return true;
@@ -283,11 +323,14 @@ bool Ikev2ProtocolMacos::storeClientIdentity()
         return false;
     }
 
+    // Install the client identity into the user's login keychain with an ACL granting
+    // neagent access. No admin rights are needed and no System keychain prompt appears.
     removeIdentityFromLoginKeychain(m_clientId);
     if (!importIdentityToLoginKeychain(repackedP12, m_clientId)) {
         return false;
     }
 
+    // Install and trust the CA so the self-signed server certificate validates.
     if (!caCertDer.isEmpty()) {
         QTemporaryFile caFile(QDir::tempPath() + "/amnezia-ikev2-ca-XXXXXX.cer");
         caFile.setAutoRemove(false);
@@ -339,6 +382,8 @@ ErrorCode Ikev2ProtocolMacos::start()
 
     m_handshakeTimedOut = false;
     m_lastVpnStatus = NEVPNStatusInvalid;
+    m_startRetries = 0;
+    m_tunnelStarted = false;
 
     setConnectionState(Vpn::ConnectionState::Connecting);
 
@@ -436,6 +481,9 @@ ErrorCode Ikev2ProtocolMacos::start()
                                         Qt::QueuedConnection);
                               }];
 
+              // If a previous connection is still active or tearing down, stop it first
+              // and start only once it reaches Disconnected. Otherwise our fresh start
+              // races with the old teardown and gets dropped immediately.
               NEVPNStatus current = manager.connection.status;
               if (current == NEVPNStatusDisconnected || current == NEVPNStatusInvalid) {
                   qInfo() << "[IKEv2-mac] preferences saved, connection is"
@@ -464,6 +512,9 @@ void Ikev2ProtocolMacos::stop()
     stopHandshakeTimeoutTimer();
     m_startWhenDisconnected = false;
 
+    // stop() runs synchronously because VpnConnection destroys this object right after
+    // it returns. Any async work (dispatch_async) would be dropped when the object dies,
+    // leaving the tunnel up and the UI stuck on "Disconnecting".
     NEVPNManager *manager = [NEVPNManager sharedManager];
     NEVPNStatus status = manager.connection.status;
     qInfo() << "[IKEv2-mac] stop(): current NEVPNStatus =" << (int)status;
@@ -475,22 +526,48 @@ void Ikev2ProtocolMacos::stop()
         qInfo() << "[IKEv2-mac] stop(): stopVPNTunnel issued";
     }
 
+    // Disable the configuration so it cannot be switched on from OS System Settings.
+    disableVpnConfiguration();
+
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
 void Ikev2ProtocolMacos::startTunnelNow()
 {
-    qInfo() << "[IKEv2-mac] startVPNTunnel";
+    qInfo() << "[IKEv2-mac] startVPNTunnel (attempt" << (m_startRetries + 1) << ")";
     NEVPNManager *manager = [NEVPNManager sharedManager];
     NSError *startError = nil;
     [manager.connection startVPNTunnelAndReturnError:&startError];
-    if (startError) {
-        qCritical() << "[IKEv2-mac] starting the tunnel failed:"
-                    << QString::fromNSString(startError.localizedDescription);
-        reportError(ErrorCode::IKEv2ConnectError);
-    } else {
+
+    if (!startError) {
+        m_startRetries = 0;
+        m_tunnelStarted = true;
         QMetaObject::invokeMethod(this, [this]() { startHandshakeTimeoutTimer(); }, Qt::QueuedConnection);
+        return;
     }
+
+    // A freshly created VPN configuration (the very first connection, right after the
+    // user authorises the new adapter) is often not ready yet and startVPNTunnel fails.
+    // Reload the preferences and retry a few times before giving up.
+    if (m_startRetries < MAX_START_RETRIES) {
+        m_startRetries++;
+        qWarning() << "[IKEv2-mac] startVPNTunnel failed, will retry (" << m_startRetries << "):"
+                   << QString::fromNSString(startError.localizedDescription);
+        QPointer<Ikev2ProtocolMacos> self = this;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.7 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+          if (!self) return;
+          [[NEVPNManager sharedManager] loadFromPreferencesWithCompletionHandler:^(NSError *reloadError) {
+            if (!self) return;
+            self->startTunnelNow();
+          }];
+        });
+        return;
+    }
+
+    qCritical() << "[IKEv2-mac] starting the tunnel failed:"
+                << QString::fromNSString(startError.localizedDescription);
+    disableVpnConfiguration();
+    reportError(ErrorCode::IKEv2ConnectError);
 }
 
 void Ikev2ProtocolMacos::handleStatusChange(int rawStatus)
@@ -503,6 +580,8 @@ void Ikev2ProtocolMacos::handleStatusChange(int rawStatus)
             << "| lastStatus:" << vpnStatusName(m_lastVpnStatus)
             << "| waitingToStart:" << m_startWhenDisconnected;
 
+    // While waiting for a previous connection to finish tearing down, swallow its
+    // teardown events and launch our tunnel only once it is fully Disconnected.
     if (m_startWhenDisconnected) {
         if (vpnStatus == NEVPNStatusDisconnecting) {
             return;
@@ -526,6 +605,7 @@ void Ikev2ProtocolMacos::handleStatusChange(int rawStatus)
     case NEVPNStatusConnected:
         stopHandshakeTimeoutTimer();
         m_lastVpnStatus = vpnStatus;
+        m_tunnelStarted = true;
         qInfo() << "[IKEv2-mac] tunnel established";
         setConnectionState(Vpn::ConnectionState::Connected);
         break;
@@ -536,38 +616,65 @@ void Ikev2ProtocolMacos::handleStatusChange(int rawStatus)
         break;
 
     case NEVPNStatusDisconnecting:
+        // Until the tunnel has actually started, transient teardown events are just the
+        // freshly created configuration settling — ignore them so the start retry survives.
+        if (!m_tunnelStarted) {
+            return;
+        }
         stopHandshakeTimeoutTimer();
         setConnectionState(Vpn::ConnectionState::Disconnecting);
         break;
 
     case NEVPNStatusDisconnected: {
+        // Config-not-ready noise during the start-retry phase: keep retrying, do not
+        // treat it as a failure and do not disable the configuration.
+        if (!m_tunnelStarted) {
+            m_lastVpnStatus = vpnStatus;
+            return;
+        }
+
         stopHandshakeTimeoutTimer();
         removeStatusObserver();
 
         if (m_handshakeTimedOut) {
-            qCritical() << "[IKEv2-mac] handshake timed out";
+            qCritical() << "[IKEv2-mac] connection failed: handshake timed out";
             setLastError(ErrorCode::IKEv2TimeoutError);
         } else if (m_lastVpnStatus == NEVPNStatusInvalid && currentState == Vpn::ConnectionState::Connecting) {
-            qCritical() << "[IKEv2-mac] server rejected the configuration";
+            qCritical() << "[IKEv2-mac] connection failed: server rejected the configuration";
             setLastError(ErrorCode::IKEv2ConfigError);
+        } else if (m_lastVpnStatus == NEVPNStatusReasserting
+                   && (currentState == Vpn::ConnectionState::Connecting
+                       || currentState == Vpn::ConnectionState::Connected)) {
+            qWarning() << "[IKEv2-mac] connection lost (network unavailable)";
+            setConnectionState(Vpn::ConnectionState::Disconnected);
         } else if (m_lastVpnStatus == NEVPNStatusConnected
                    && (currentState == Vpn::ConnectionState::Connecting
                        || currentState == Vpn::ConnectionState::Connected)) {
-            qWarning() << "[IKEv2-mac] tunnel disabled from system settings";
+            qWarning() << "[IKEv2-mac] tunnel turned off outside the app (system settings)";
             setConnectionState(Vpn::ConnectionState::Disconnected);
         } else {
             setConnectionState(Vpn::ConnectionState::Disconnected);
         }
         m_lastVpnStatus = vpnStatus;
+
+        // The session is over: disable the adapter so it cannot be re-enabled from OS settings.
+        disableVpnConfiguration();
         break;
     }
 
     case NEVPNStatusInvalid:
+        // The fresh configuration reports Invalid until it is fully realized. Ignore it
+        // while still starting; only treat it as fatal once the tunnel has started.
+        if (!m_tunnelStarted) {
+            m_lastVpnStatus = vpnStatus;
+            return;
+        }
         stopHandshakeTimeoutTimer();
         removeStatusObserver();
-        qCritical() << "[IKEv2-mac] VPN profile is invalid";
+        qCritical() << "[IKEv2-mac] VPN profile became invalid";
         m_lastVpnStatus = vpnStatus;
         setLastError(ErrorCode::IKEv2ConfigError);
+        disableVpnConfiguration();
         break;
 
     default:

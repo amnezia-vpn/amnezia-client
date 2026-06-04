@@ -50,12 +50,15 @@ private:
     QTimer *m_handshakeTimeoutTimer { nullptr };
     bool m_handshakeTimedOut { false };
     bool m_startWhenDisconnected { false };
+    bool m_tunnelStarted { false };
+    int m_startRetries { 0 };
 
     void *m_statusObserver { nullptr };
 
     int m_lastVpnStatus { 0 };
 
     static constexpr int HANDSHAKE_TIMEOUT_SEC = 20;
+    static constexpr int MAX_START_RETRIES = 5;
 };
 
 #endif // IKEV2_VPN_PROTOCOL_MACOS_H
