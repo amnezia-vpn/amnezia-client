@@ -107,7 +107,6 @@ bool prepareIdentity(const QByteArray &source, const QString &friendlyName, QByt
     return true;
 }
 
-// Removes any previously imported identity with this label from the login keychain.
 void removeIdentityFromLoginKeychain(const QString &label)
 {
     NSDictionary *query = @{
@@ -198,7 +197,6 @@ NSData *copyIdentityPersistentRef(const QString &label)
     return (NSData *)CFAutorelease(persistentRef);
 }
 
-// Runs /usr/bin/security as root through the privileged Amnezia service.
 void runPrivilegedSecurity(const QString &label, const QStringList &arguments)
 {
     auto process = IpcClient::CreatePrivilegedProcess();
