@@ -31,7 +31,7 @@ inline QString permittedProcessPath(PermittedProcess pid)
         case PermittedProcess::Tun2Socks:
             return Utils::tun2socksPath();
         case PermittedProcess::Security:
-            return "/usr/bin/security";
+            return Utils::securityPath();
         default:
             return "";
     }
