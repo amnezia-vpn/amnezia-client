@@ -165,19 +165,15 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     connData.clientIP = nextIp.toString();
 
     // Get keys
-    connData.serverPubKey =
-            m_sshSession->getTextFileFromContainer(container, credentials, m_serverPublicKeyPath, errorCode);
+    const QList<QByteArray> keys =
+            m_sshSession->getTextFilesFromContainer(container, credentials, {m_serverPublicKeyPath, m_serverPskKeyPath}, errorCode);
+    if (errorCode != ErrorCode::NoError) {
+        return connData;
+    }
+    connData.serverPubKey = keys.value(0);
     connData.serverPubKey.replace("\n", "");
-    if (errorCode != ErrorCode::NoError) {
-        return connData;
-    }
-
-    connData.pskKey = m_sshSession->getTextFileFromContainer(container, credentials, m_serverPskKeyPath, errorCode);
+    connData.pskKey = keys.value(1);
     connData.pskKey.replace("\n", "");
-
-    if (errorCode != ErrorCode::NoError) {
-        return connData;
-    }
 
     // Add client to config
     QString configPart = QString("[Peer]\n"

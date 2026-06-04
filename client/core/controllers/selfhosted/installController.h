@@ -33,7 +33,7 @@ public:
                               QObject *parent = nullptr);
     ~InstallController();
 
-    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false);
+    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession, bool isUpdate = false);
     ErrorCode updateContainer(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
 
     ErrorCode rebootServer(const QString &serverId);
@@ -55,7 +55,7 @@ public:
     
     ErrorCode scanServerForInstalledContainers(const QString &serverId);
     
-    ErrorCode installContainer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto, ContainerConfig &config);
+    ErrorCode installContainer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto, ContainerConfig &config, SshSession &sshSession);
 
     ErrorCode installServer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto,
                                          bool &wasContainerInstalled);
