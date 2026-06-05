@@ -382,6 +382,10 @@ PageType {
                             ValueFilter {
                                 roleName: "isShareable"
                                 value: true
+                            },
+                            ValueFilter {
+                                roleName: "isUnsupportedContainer"
+                                value: false
                             }
                         ]
                     }
@@ -396,9 +400,19 @@ PageType {
                         target: serverSelector
 
                         function onServerSelectorIndexChanged() {
-                            var defaultContainer = proxyContainersModel.mapFromSource(ServersUiController.serverDefaultContainer(ServersUiController.processedServerId))
+                            if (!proxyContainersModel.count) {
+                                root.shareButtonEnabled = false
+                                return
+                            }
+
+                            var defaultContainer = proxyContainersModel.mapFromSource(
+                                        ServersUiController.serverDefaultContainer(ServersUiController.processedServerId))
+                            if (defaultContainer < 0) {
+                                defaultContainer = 0
+                            }
+
                             containerSelectorListView.selectedIndex = defaultContainer
-                            containerSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
+                            containerSelectorListView.positionViewAtIndex(defaultContainer, ListView.Beginning)
                             containerSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -837,11 +851,10 @@ PageType {
                                         var noButtonFunction = function() {
                                         }
 
-                                        var isActiveConfigForCurrentClient = ServersUiController.isDefaultServerCurrentlyProcessed()
-                                                && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex
-
-                                        if ((ConnectionController.isConnectionInProgress || ConnectionController.isConnected)
-                                                && isActiveConfigForCurrentClient) {
+                                        if (ConnectionController.isRevokeBlockedDuringActiveConnection(
+                                                ServersUiController.processedServerId,
+                                                ServersUiController.processedContainerIndex,
+                                                clientId)) {
                                             PageController.showNotificationMessage("Unable to revoke current config during active connection")
                                         } else {
                                             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

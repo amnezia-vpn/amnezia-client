@@ -33,7 +33,6 @@
 #include "core/controllers/connectionController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
-#include "ui/models/api/apiCountryModel.h"
 #include "ui/models/containersModel.h"
 #include "core/utils/containerEnum.h"
 
@@ -156,15 +155,17 @@ void CoreSignalHandlers::initExportControllerHandler()
 void CoreSignalHandlers::initImportControllerHandler()
 {
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
-        if (!m_coreController->m_connectionController->isConnected()) {
-            int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
-            const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
-            if (!serverId.isEmpty()) {
-                m_coreController->m_serversController->setDefaultServer(serverId);
-            }
-            if (m_coreController->m_serversUiController) {
-                m_coreController->m_serversUiController->setProcessedServerId(serverId);
-            }
+        if (m_coreController->m_connectionUiController->isConnected()) {
+            return;
+        }
+
+        const int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
+        const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
+        if (!serverId.isEmpty()) {
+            m_coreController->m_serversController->setDefaultServer(serverId);
+        }
+        if (m_coreController->m_serversUiController) {
+            m_coreController->m_serversUiController->setProcessedServerId(serverId);
         }
     });
 }
@@ -176,17 +177,14 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
         if (processedServerId.isEmpty()) {
             return;
         }
-        
-        QJsonArray availableCountries;
-        QString serverCountryCode;
 
         const auto apiV2 = m_coreController->m_serversRepository->apiV2Config(processedServerId);
-        if (apiV2.has_value()) {
-            availableCountries = apiV2->apiConfig.availableCountries;
-            serverCountryCode = apiV2->apiConfig.serverCountryCode;
+        if (!apiV2.has_value()) {
+            return;
         }
-        
-        m_coreController->m_apiCountryModel->updateModel(availableCountries, serverCountryCode);
+
+        m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
+                                                           apiV2->apiConfig.serverCountryCode);
     });
 }
 
@@ -237,13 +235,16 @@ void CoreSignalHandlers::initLanguageHandler()
     connect(m_coreController->m_settingsUiController, &SettingsUiController::resetLanguageToSystem, m_coreController->m_languageUiController, [this]() {
         m_coreController->m_languageUiController->changeLanguage(m_coreController->m_languageUiController->getSystemLanguageEnum());
     });
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::appLanguageChanged, m_coreController->m_languageUiController, [this]() {
+        m_coreController->m_languageUiController->onAppLanguageChanged(m_coreController->m_settingsController->getAppLanguage());
+    });
 }
 
 void CoreSignalHandlers::initAutoConnectHandler()
 {
     if (m_coreController->m_settingsUiController->isAutoConnectEnabled()
         && !m_coreController->m_serversController->getDefaultServerId().isEmpty()) {
-        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->openConnection(); });
+        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->toggleConnection(); });
     }
 }
 
@@ -347,6 +348,9 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
 {
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::unsupportedConnectDrawerRequested,
+            m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
+
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::unsupportedConnectDrawerRequested,
             m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
 }
 

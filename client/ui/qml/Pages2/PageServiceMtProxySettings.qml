@@ -179,7 +179,7 @@ PageType {
     function mtProxyScheduleUpdate(closePage) {
         var cp = closePage === undefined ? false : closePage
         Qt.callLater(function () {
-            InstallController.updateContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
+            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.MtProxy, cp)
         })
     }
 

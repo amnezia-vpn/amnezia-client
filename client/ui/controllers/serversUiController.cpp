@@ -156,7 +156,17 @@ void ServersUiController::updateModel()
 
     m_serversModel->updateModel(m_orderedServerDescriptions, defaultServerId);
 
-    updateContainersModel();
+    if (!m_processedServerId.isEmpty()) {
+        if (isServerFromApi(m_processedServerId)) {
+            const auto &description = serverDescriptionById(m_processedServerId);
+            if (description.isApiV2 && description.isCountrySelectionAvailable
+                && !description.apiAvailableCountries.isEmpty()) {
+                emit updateApiCountryModel();
+            }
+        } else {
+            updateContainersModel();
+        }
+    }
     updateDefaultServerContainersModel();
 
     if (hadServersFromGatewayBefore != hasServersFromGatewayNow) {
@@ -350,19 +360,14 @@ void ServersUiController::setProcessedServerId(const QString &serverId)
         m_processedServerId = normalizedServerId;
 
         if (newIndex >= 0) {
-            updateContainersModel();
-
-            for (const auto &description : m_orderedServerDescriptions) {
-                if (description.serverId != normalizedServerId) {
-                    continue;
+            if (isServerFromApi(m_processedServerId)) {
+                const auto &description = serverDescriptionById(m_processedServerId);
+                if (description.isApiV2 && description.isCountrySelectionAvailable
+                    && !description.apiAvailableCountries.isEmpty()) {
+                    emit updateApiCountryModel();
                 }
-                if (description.isApiV2) {
-                    if (description.isCountrySelectionAvailable && !description.apiAvailableCountries.isEmpty()) {
-                        emit updateApiCountryModel();
-                    }
-                    emit updateApiServicesModel();
-                }
-                break;
+            } else {
+                updateContainersModel();
             }
         }
 

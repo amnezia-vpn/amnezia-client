@@ -75,13 +75,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_connectionController(connectionController)
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
-    connect(m_installController, &InstallController::validationErrorOccurred, this, [this](ErrorCode errorCode) {
-        if (errorCode == ErrorCode::NoInstalledContainersError) {
-            emit noInstalledContainers();
-        } else {
-            emit installationErrorOccurred(errorCode);
-        }
-    });
+    connect(m_installController, &InstallController::validationErrorOccurred, this, &InstallUiController::installationErrorOccurred);
 }
 
 InstallUiController::~InstallUiController()
@@ -217,15 +211,13 @@ void InstallUiController::scanServerForInstalledContainers(const QString &server
     emit installationErrorOccurred(errorCode);
 }
 
-void InstallUiController::updateContainer(const QString &serverId, int containerIndex, int protocolIndex, bool closePage)
+bool InstallUiController::buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig)
 {
     DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    
     Proto protocolType = static_cast<Proto>(protocolIndex);
-    
-    ContainerConfig containerConfig;
+
     containerConfig.container = container;
-    
+
     switch (protocolType) {
     case Proto::Awg: {
         containerConfig.protocolConfig = m_awgConfigModel->getProtocolConfig();
@@ -271,6 +263,41 @@ void InstallUiController::updateContainer(const QString &serverId, int container
     }
 #endif
     default:
+        return false;
+    }
+    return true;
+}
+
+void InstallUiController::updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage)
+{
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    Proto protocolType = static_cast<Proto>(protocolIndex);
+
+    ContainerConfig containerConfig;
+    if (!buildContainerConfigFromModel(containerIndex, protocolIndex, containerConfig)) {
+        return;
+    }
+
+    ErrorCode errorCode = m_installController->updateClientConfig(serverId, container, containerConfig);
+
+    if (errorCode == ErrorCode::NoError) {
+        ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);
+        m_protocolModel->updateModel(updatedConfig);
+        updateProtocolConfigModel(serverId, static_cast<int>(container), static_cast<int>(protocolType));
+        emit updateContainerFinished(tr("Settings updated successfully"), closePage);
+        return;
+    }
+
+    emit installationErrorOccurred(errorCode);
+}
+
+void InstallUiController::updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage)
+{
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    Proto protocolType = static_cast<Proto>(protocolIndex);
+
+    ContainerConfig containerConfig;
+    if (!buildContainerConfigFromModel(containerIndex, protocolIndex, containerConfig)) {
         return;
     }
     ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverId, container);
@@ -305,13 +332,13 @@ void InstallUiController::updateContainer(const QString &serverId, int container
         QFuture<ErrorCode> future =
                 QtConcurrent::run([installController, serverId, container, oldConfigCopy,
                                    newConfigCopy]() mutable -> ErrorCode {
-                    return installController->updateContainer(serverId, container, oldConfigCopy, newConfigCopy);
+                    return installController->updateServerConfig(serverId, container, oldConfigCopy, newConfigCopy);
                 });
         watcher->setFuture(future);
         return;
     }
 
-    ErrorCode errorCode = m_installController->updateContainer(serverId, container, oldContainerConfig, containerConfig);
+    ErrorCode errorCode = m_installController->updateServerConfig(serverId, container, oldContainerConfig, containerConfig);
 
     if (errorCode == ErrorCode::NoError) {
         ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);

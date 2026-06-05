@@ -30,6 +30,16 @@ PageType {
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
+    function selectConnectionCountry(countryIndex, countryCode, countryName) {
+        if (countryIndex === ApiCountryModel.currentIndex) {
+            return
+        }
+
+        PageController.showBusyIndicator(true)
+        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, countryCode, countryName)
+        PageController.showBusyIndicator(false)
+    }
+
     Component.onCompleted: {
         root.updateSubscriptionState()
     }
@@ -83,7 +93,7 @@ PageType {
 
         model: ApiCountryModel
 
-        currentIndex: 0
+        currentIndex: ApiCountryModel.currentIndex
 
         ButtonGroup {
             id: containersRadioButtonGroup
@@ -204,15 +214,7 @@ PageType {
                             return
                         }
 
-                        if (index !== ApiCountryModel.currentIndex) {
-                            PageController.showBusyIndicator(true)
-                            var prevIndex = ApiCountryModel.currentIndex
-                            ApiCountryModel.currentIndex = index
-                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, countryCode, countryName)) {
-                                ApiCountryModel.currentIndex = prevIndex
-                            }
-                            PageController.showBusyIndicator(false)
-                        }
+                        root.selectConnectionCountry(index, countryCode, countryName)
                     }
 
                     Keys.onEnterPressed: {

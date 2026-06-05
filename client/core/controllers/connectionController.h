@@ -37,6 +37,8 @@ public:
                                QJsonObject& vpnConfiguration,
                                DockerContainer& container);
 
+    ErrorCode isConnectionSupported(const QString &serverId) const;
+
     ErrorCode openConnection(const QString &serverId);
 
     void closeConnection();
@@ -80,6 +82,8 @@ signals:
 #endif
 
 private:
+    ErrorCode defaultContainerForServer(const QString &serverId, DockerContainer &container) const;
+
     void onVpnConnectionStateChanged(Vpn::ConnectionState state);
     void scheduleServerRoutingRulesSync(int intervalMs);
     void scheduleNextServerRoutingRulesSync(bool success);
