@@ -6,6 +6,7 @@
 #include <QColor>
 #include <QIcon>
 #include <QSystemTrayIcon>
+#include <QTimer>
 
 class WinTrayIconBackend final : public TrayIconBackend
 {
@@ -21,7 +22,12 @@ public:
     void setActivatedHandler(std::function<void(QSystemTrayIcon::ActivationReason)> handler) override;
 
 private:
+    void reapplyLastVisual();
+
     QSystemTrayIcon m_trayIcon;
+    TrayIconVisual m_lastVisual;
+    QTimer m_reapplyTimerShort;
+    QTimer m_reapplyTimerLong;
 };
 
 #endif // WINTRAYICONBACKEND_H

@@ -6,6 +6,15 @@
 
 WinTrayIconBackend::WinTrayIconBackend(QObject *parent) : m_trayIcon(parent)
 {
+    m_reapplyTimerShort.setSingleShot(true);
+    m_reapplyTimerLong.setSingleShot(true);
+    QObject::connect(&m_reapplyTimerShort, &QTimer::timeout, &m_trayIcon, [this]() { reapplyLastVisual(); });
+    QObject::connect(&m_reapplyTimerLong, &QTimer::timeout, &m_trayIcon, [this]() { reapplyLastVisual(); });
+}
+
+void WinTrayIconBackend::reapplyLastVisual()
+{
+    WinTrayIcon::applyTo(m_trayIcon, m_lastVisual.connectionState, m_lastVisual.darkTheme);
 }
 
 void WinTrayIconBackend::setMenu(QMenu *menu)
@@ -25,7 +34,11 @@ void WinTrayIconBackend::show()
 
 void WinTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
+    m_lastVisual = visual;
     WinTrayIcon::applyTo(m_trayIcon, visual.connectionState, visual.darkTheme);
+
+    m_reapplyTimerShort.start(250);
+    m_reapplyTimerLong.start(1200);
 }
 
 void WinTrayIconBackend::showMessage(const QString &title, const QString &message, const TrayIconVisual &visual,

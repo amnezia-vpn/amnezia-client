@@ -100,6 +100,7 @@ bool WindowsUtils::isDarkTheme() {
   QSettings settings(
           QStringLiteral("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"),
           QSettings::NativeFormat);
+    settings.sync();
 
   if (settings.contains(QStringLiteral("SystemUsesLightTheme"))) {
       return registryUsesDarkTheme(settings, QStringLiteral("SystemUsesLightTheme"));
