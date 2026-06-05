@@ -46,6 +46,8 @@ namespace apiDefs
         constexpr QLatin1String captchaId("captcha_id");
         constexpr QLatin1String captchaSolution("captcha_solution");
 
+        constexpr QLatin1String market("market");
+
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");
