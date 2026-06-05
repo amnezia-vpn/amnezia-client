@@ -248,3 +248,8 @@ void PageController::onShowErrorMessage(ErrorCode errorCode)
 
     emit showErrorMessage(fullMessage);
 }
+
+void PageController::onErrorMessageClosed()
+{
+    emit errorMessageClosed();
+}

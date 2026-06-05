@@ -25,6 +25,8 @@ public:
 
 public slots:
     void updateWebsiteUrl(const QString &newWebsiteUrl);
+    void setConnectionError();
+    void clearConnectionError();
 
 protected:
     void notify(Message type, const QString& title,
@@ -51,6 +53,7 @@ private:
 
     Vpn::ConnectionState m_trayState = Vpn::ConnectionState::Unknown;
     bool m_isDarkTheme = false;
+    bool m_errorLatched = false;
 
     QString websiteUrl = "https://amnezia.org";
 };

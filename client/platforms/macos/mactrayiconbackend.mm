@@ -23,7 +23,13 @@ void MacTrayIconBackend::show()
 
 void MacTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
-    m_statusIcon.setIconFromData(TrayIconCommon::buildTemplatePng(visual.connectionState));
+    if (TrayIconCommon::isColoredState(visual.connectionState)) {
+        // Error icon carries a red badge: render it in color, not as a template.
+        m_statusIcon.setIconFromData(TrayIconCommon::buildColorPng(visual.connectionState, visual.darkTheme),
+                                     /*asTemplate*/ false);
+    } else {
+        m_statusIcon.setIconFromData(TrayIconCommon::buildTemplatePng(visual.connectionState), /*asTemplate*/ true);
+    }
 }
 
 void MacTrayIconBackend::showMessage(const QString &title, const QString &message, const TrayIconVisual &visual, int timerMsec)

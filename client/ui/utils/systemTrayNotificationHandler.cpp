@@ -93,9 +93,25 @@ void SystemTrayNotificationHandler::refreshTheme()
 TrayIconVisual SystemTrayNotificationHandler::currentTrayVisual() const
 {
     TrayIconVisual visual;
-    visual.connectionState = m_trayState;
+    visual.connectionState = m_errorLatched ? Vpn::ConnectionState::Error : m_trayState;
     visual.darkTheme = m_isDarkTheme;
     return visual;
+}
+
+void SystemTrayNotificationHandler::setConnectionError()
+{
+    m_errorLatched = true;
+    updateTrayIcon();
+}
+
+void SystemTrayNotificationHandler::clearConnectionError()
+{
+    if (!m_errorLatched) {
+        return;
+    }
+
+    m_errorLatched = false;
+    updateTrayIcon();
 }
 
 void SystemTrayNotificationHandler::updateTrayIcon()
@@ -118,6 +134,20 @@ void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationR
 
 void SystemTrayNotificationHandler::setTrayState(Vpn::ConnectionState state)
 {
+    if (state == Vpn::ConnectionState::Error || state == Vpn::ConnectionState::Unknown) {
+        // Latch the error icon. Both Error and Unknown surface the error message
+        // in the UI. The connection is torn down to Disconnected right after, so
+        // treat the real state as Disconnected and let the latch keep the error
+        // icon visible until the error is acknowledged.
+        m_errorLatched = true;
+        state = Vpn::ConnectionState::Disconnected;
+    } else if (state != Vpn::ConnectionState::Disconnected) {
+        // A new (re)connecting/connected lifecycle clears a previous error.
+        // Plain Disconnected leaves the latch untouched so the auto-Disconnected
+        // that immediately follows an error does not drop the error icon.
+        m_errorLatched = false;
+    }
+
     m_trayState = state;
 
     switch (state) {

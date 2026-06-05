@@ -69,7 +69,8 @@
         <file>tray/off-light.svg</file>
         <file>tray/on-black.svg</file>
         <file>tray/on-white.svg</file>
-        <file>tray/error.svg</file>
+        <file>tray/error-black.svg</file>
+        <file>tray/error-white.svg</file>
         <file>controls/monitor.svg</file>
     </qresource>
 </RCC>

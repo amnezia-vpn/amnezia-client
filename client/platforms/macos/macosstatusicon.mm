@@ -39,7 +39,7 @@
 @property(retain) NSMenu* nativeMenu;
 @property(retain) NSMutableArray* menuActionTargets;
 
-- (void)setIcon:(NSData*)imageData;
+- (void)setIcon:(NSData*)imageData asTemplate:(BOOL)asTemplate;
 - (void)setToolTip:(NSString*)tooltip;
 - (void)rebuildMenuFromQMenu:(QMenu*)menu;
 @end
@@ -71,11 +71,14 @@
 /**
  * Sets the image for the status icon.
  *
- * @param iconPath The data for the icon image.
+ * @param imageData The data for the icon image.
+ * @param asTemplate When true the icon is a template image recolored by the
+ *        system for the current menu bar appearance. When false the icon is
+ *        rendered in its original colors (used for the colored error icon).
  */
-- (void)setIcon:(NSData*)imageData {
+- (void)setIcon:(NSData*)imageData asTemplate:(BOOL)asTemplate {
   NSImage* image = [[NSImage alloc] initWithData:imageData];
-  [image setTemplate:true];
+  [image setTemplate:asTemplate];
 
   [self.statusItem.button setImage:image];
   [image release];
@@ -169,10 +172,10 @@ void MacOSStatusIcon::setIcon(const QString& iconPath) {
   QResource imageResource = QResource(iconPath);
   Q_ASSERT(imageResource.isValid());
 
-  [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData()];
+  [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData() asTemplate:true];
 }
 
-void MacOSStatusIcon::setIconFromData(const QByteArray& imageData) {
+void MacOSStatusIcon::setIconFromData(const QByteArray& imageData, bool asTemplate) {
   logger.debug() << "Set icon from rendered data";
 
   if (imageData.isEmpty()) {
@@ -180,7 +183,7 @@ void MacOSStatusIcon::setIconFromData(const QByteArray& imageData) {
   }
 
   NSData* data = [NSData dataWithBytes:imageData.constData() length:imageData.size()];
-  [m_statusBarIcon setIcon:data];
+  [m_statusBarIcon setIcon:data asTemplate:asTemplate];
 }
 
 void MacOSStatusIcon::setMenu(QMenu* menu) {

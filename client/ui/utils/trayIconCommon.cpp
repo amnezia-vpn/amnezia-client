@@ -11,7 +11,7 @@ QString resourcePathForState(Vpn::ConnectionState state, bool darkTheme)
 {
     switch (state) {
     case Vpn::ConnectionState::Error:
-        return QString::fromLatin1(kIconError);
+        return QString::fromLatin1(darkTheme ? kIconErrorWhite : kIconErrorBlack);
     case Vpn::ConnectionState::Connected:
         return QString::fromLatin1(darkTheme ? kIconOnWhite : kIconOnBlack);
     case Vpn::ConnectionState::Disconnected:
@@ -23,6 +23,11 @@ QString resourcePathForState(Vpn::ConnectionState state, bool darkTheme)
     default:
         return QString::fromLatin1(darkTheme ? kIconOffLight : kIconOffBlack);
     }
+}
+
+bool isColoredState(Vpn::ConnectionState state)
+{
+    return state == Vpn::ConnectionState::Error;
 }
 
 QPixmap renderIcon(const QString &resourcePath, int size)
@@ -53,15 +58,23 @@ QIcon buildIcon(Vpn::ConnectionState state, bool darkTheme)
     return icon;
 }
 
-QByteArray buildTemplatePng(Vpn::ConnectionState state)
+QByteArray pixmapToPng(const QPixmap &pixmap)
 {
-    const QPixmap pixmap = renderIcon(resourcePathForState(state, /*darkTheme*/ true), kDefaultTrayIconSize);
-
     QByteArray bytes;
     QBuffer buffer(&bytes);
     buffer.open(QIODevice::WriteOnly);
     pixmap.save(&buffer, "PNG");
     return bytes;
+}
+
+QByteArray buildTemplatePng(Vpn::ConnectionState state)
+{
+    return pixmapToPng(renderIcon(resourcePathForState(state, /*darkTheme*/ true), kDefaultTrayIconSize));
+}
+
+QByteArray buildColorPng(Vpn::ConnectionState state, bool darkTheme)
+{
+    return pixmapToPng(renderIcon(resourcePathForState(state, darkTheme), kDefaultTrayIconSize));
 }
 
 } // namespace TrayIconCommon
