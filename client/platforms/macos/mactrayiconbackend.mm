@@ -23,9 +23,7 @@ void MacTrayIconBackend::show()
 
 void MacTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
-    const qreal opacity = TrayIconCommon::opacityForState(visual.connectionState);
-    m_statusIcon.setIconFromData(TrayIconCommon::buildTemplatePng(opacity));
-    m_statusIcon.setIndicatorColor(TrayIconCommon::indicatorColorForState(visual.connectionState));
+    m_statusIcon.setIconFromData(TrayIconCommon::buildTemplatePng(visual.connectionState));
 }
 
 void MacTrayIconBackend::showMessage(const QString &title, const QString &message, const TrayIconVisual &visual, int timerMsec)

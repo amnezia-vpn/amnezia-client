@@ -32,9 +32,7 @@ void LinuxTrayIconBackend::show()
 
 void LinuxTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
-    const qreal opacity = TrayIconCommon::opacityForState(visual.connectionState);
-    const QColor indicatorColor = TrayIconCommon::indicatorColorForState(visual.connectionState);
-    const QIcon icon = buildTrayIcon(opacity, visual.darkTheme, indicatorColor);
+    const QIcon icon = buildTrayIcon(visual.connectionState, visual.darkTheme);
 
     // Some tray implementations cache the first icon; clear before applying an update.
     if (m_trayIcon.isVisible()) {
@@ -47,8 +45,7 @@ void LinuxTrayIconBackend::showMessage(const QString &title, const QString &mess
                                        int timerMsec)
 {
     m_trayIcon.showMessage(title, message,
-                           buildTrayIcon(TrayIconCommon::kConnectedOpacity, visual.darkTheme,
-                                         TrayIconCommon::indicatorColorForState(Vpn::ConnectionState::Connected)),
+                           buildTrayIcon(Vpn::ConnectionState::Connected, visual.darkTheme),
                            timerMsec);
 }
 
@@ -66,11 +63,11 @@ void LinuxTrayIconBackend::setActivatedHandler(std::function<void(QSystemTrayIco
                      [handler](QSystemTrayIcon::ActivationReason reason) { handler(reason); });
 }
 
-QIcon LinuxTrayIconBackend::buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor) const
+QIcon LinuxTrayIconBackend::buildTrayIcon(Vpn::ConnectionState state, bool darkTheme) const
 {
     QIcon icon;
     for (int size : kLinuxTrayIconSizes) {
-        icon.addPixmap(TrayIconCommon::buildPixmap(size, opacity, darkTheme, indicatorColor));
+        icon.addPixmap(TrayIconCommon::buildPixmap(size, state, darkTheme));
     }
     return icon;
 }

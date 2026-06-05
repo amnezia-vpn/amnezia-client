@@ -12,7 +12,7 @@ class QString;
 
 namespace WinTrayIcon
 {
-QIcon buildIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor);
+QIcon buildIcon(Vpn::ConnectionState state, bool darkTheme);
 void applyTo(QSystemTrayIcon &trayIcon, Vpn::ConnectionState state, bool darkTheme);
 QIcon buildNotifyIcon(bool darkTheme);
 

@@ -21,7 +21,7 @@ public:
     void setActivatedHandler(std::function<void(QSystemTrayIcon::ActivationReason)> handler) override;
 
 private:
-    QIcon buildTrayIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor) const;
+    QIcon buildTrayIcon(Vpn::ConnectionState state, bool darkTheme) const;
 
     QSystemTrayIcon m_trayIcon;
 };

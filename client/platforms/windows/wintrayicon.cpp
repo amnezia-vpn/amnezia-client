@@ -6,22 +6,19 @@
 
 namespace WinTrayIcon
 {
-QIcon buildIcon(qreal opacity, bool darkTheme, const QColor &indicatorColor)
+QIcon buildIcon(Vpn::ConnectionState state, bool darkTheme)
 {
-    return TrayIconCommon::buildIcon(opacity, darkTheme, indicatorColor);
+    return TrayIconCommon::buildIcon(state, darkTheme);
 }
 
 void applyTo(QSystemTrayIcon &trayIcon, Vpn::ConnectionState state, bool darkTheme)
 {
-    const qreal opacity = TrayIconCommon::opacityForState(state);
-    const QColor indicatorColor = TrayIconCommon::indicatorColorForState(state);
-    trayIcon.setIcon(buildIcon(opacity, darkTheme, indicatorColor));
+    trayIcon.setIcon(buildIcon(state, darkTheme));
 }
 
 QIcon buildNotifyIcon(bool darkTheme)
 {
-    return buildIcon(TrayIconCommon::kConnectedOpacity, darkTheme,
-                     TrayIconCommon::indicatorColorForState(Vpn::ConnectionState::Connected));
+    return buildIcon(Vpn::ConnectionState::Connected, darkTheme);
 }
 
 void configure(QSystemTrayIcon &trayIcon, QMenu *menu, const QString &tooltip)

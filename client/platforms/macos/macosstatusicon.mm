@@ -29,21 +29,17 @@
 @end
 
 /**
- * Creates a NSStatusItem with that can hold an icon. Additionally a NSView is
- * set as a subview to the button item of the status item. The view serves as
- * an indicator that can be displayed in color eventhough the icon is set as a
- * template. In that way we give the system control over it’s effective
- * appearance.
+ * Creates a NSStatusItem that holds the tray icon. The icon is set as a
+ * template image, so the system controls its effective appearance for the
+ * current menu bar theme. The connection status is baked into the artwork, so
+ * no separate colored indicator is drawn.
  */
 @interface MacOSStatusIconDelegate : NSObject
 @property(assign) NSStatusItem* statusItem;
-@property(assign) NSView* statusIndicator;
 @property(retain) NSMenu* nativeMenu;
 @property(retain) NSMutableArray* menuActionTargets;
 
 - (void)setIcon:(NSData*)imageData;
-- (void)setIndicator;
-- (void)setIndicatorColor:(NSColor*)color;
 - (void)setToolTip:(NSString*)tooltip;
 - (void)rebuildMenuFromQMenu:(QMenu*)menu;
 @end
@@ -62,8 +58,6 @@
   self.statusItem =
       [[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength] retain];
   self.statusItem.visible = true;
-  // Add the indicator as a subview
-  [self setIndicator];
 
   return self;
 }
@@ -85,34 +79,6 @@
 
   [self.statusItem.button setImage:image];
   [image release];
-}
-
-/**
- * Adds status indicator as a subview to the status item button.
- */
-- (void)setIndicator {
-  float viewHeight = NSHeight([self.statusItem.button bounds]);
-  float dotSize = viewHeight * 0.35;
-  float dotOrigin = (viewHeight - dotSize) * 0.8;
-
-  NSView* dot = [[NSView alloc] initWithFrame:NSMakeRect(dotOrigin, dotOrigin, dotSize, dotSize)];
-  self.statusIndicator = dot;
-  self.statusIndicator.wantsLayer = true;
-  self.statusIndicator.layer.cornerRadius = dotSize * 0.5;
-
-  [self.statusItem.button addSubview:self.statusIndicator];
-  [dot release];
-}
-
-/**
- * Sets the color if the indicator.
- *
- * @param color The indicator background color.
- */
-- (void)setIndicatorColor:(NSColor*)color {
-  if (self.statusIndicator) {
-    self.statusIndicator.layer.backgroundColor = color.CGColor;
-  }
 }
 
 /**
@@ -215,21 +181,6 @@ void MacOSStatusIcon::setIconFromData(const QByteArray& imageData) {
 
   NSData* data = [NSData dataWithBytes:imageData.constData() length:imageData.size()];
   [m_statusBarIcon setIcon:data];
-}
-
-void MacOSStatusIcon::setIndicatorColor(const QColor& indicatorColor) {
-  logger.debug() << "Set indicator color";
-
-  if (!indicatorColor.isValid()) {
-    [m_statusBarIcon setIndicatorColor:[NSColor clearColor]];
-    return;
-  }
-
-  NSColor* color = [NSColor colorWithCalibratedRed:indicatorColor.red() / 255.0f
-                                             green:indicatorColor.green() / 255.0f
-                                              blue:indicatorColor.blue() / 255.0f
-                                             alpha:indicatorColor.alpha() / 255.0f];
-  [m_statusBarIcon setIndicatorColor:color];
 }
 
 void MacOSStatusIcon::setMenu(QMenu* menu) {

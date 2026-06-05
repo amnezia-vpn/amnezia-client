@@ -23,7 +23,6 @@ class MacOSStatusIcon final : public QObject {
  public:
   void setIcon(const QString& iconUrl);
   void setIconFromData(const QByteArray& imageData);
-  void setIndicatorColor(const QColor& indicatorColor);
   void setMenu(QMenu* menu);
   void rebuildNativeMenu();
   void setToolTip(const QString& tooltip);
