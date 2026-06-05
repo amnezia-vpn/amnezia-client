@@ -32,12 +32,15 @@ void LinuxTrayIconBackend::show()
 
 void LinuxTrayIconBackend::applyVisual(const TrayIconVisual &visual)
 {
-    const QIcon icon = buildTrayIcon(visual.connectionState, visual.darkTheme);
-
-    // Some tray implementations cache the first icon; clear before applying an update.
-    if (m_trayIcon.isVisible()) {
-        m_trayIcon.setIcon(QIcon());
+    if (m_hasLastVisual && visual.connectionState == m_lastState && visual.darkTheme == m_lastDarkTheme) {
+        return;
     }
+
+    m_lastState = visual.connectionState;
+    m_lastDarkTheme = visual.darkTheme;
+    m_hasLastVisual = true;
+
+    const QIcon icon = buildTrayIcon(visual.connectionState, visual.darkTheme);
     m_trayIcon.setIcon(icon);
 }
 

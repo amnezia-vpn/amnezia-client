@@ -5,6 +5,7 @@
 
 #include <QColor>
 #include <QIcon>
+#include <QString>
 #include <QSystemTrayIcon>
 
 class LinuxTrayIconBackend final : public TrayIconBackend
@@ -24,6 +25,9 @@ private:
     QIcon buildTrayIcon(Vpn::ConnectionState state, bool darkTheme) const;
 
     QSystemTrayIcon m_trayIcon;
+    Vpn::ConnectionState m_lastState = Vpn::ConnectionState::Unknown;
+    bool m_lastDarkTheme = false;
+    bool m_hasLastVisual = false;
 };
 
 #endif // LINUXTRAYICONBACKEND_H
