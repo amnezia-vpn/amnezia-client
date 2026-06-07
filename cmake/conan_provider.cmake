@@ -489,6 +489,13 @@ function(conan_install)
         set(ENV{PATH} "$ENV{PATH}:${PATH_TO_CMAKE_BIN}")
     endif()
 
+    if(DEFINED ENV{HOME})
+        set(_conan_lock_dir "$ENV{HOME}/.cache/amnezia")
+    else()
+        set(_conan_lock_dir "${CMAKE_BINARY_DIR}/.conan-lock")
+    endif()
+    file(MAKE_DIRECTORY "${_conan_lock_dir}")
+    file(LOCK "${_conan_lock_dir}/conan-install.lock" GUARD FUNCTION TIMEOUT 600)
     execute_process(COMMAND ${CONAN_COMMAND} install ${CMAKE_SOURCE_DIR} ${conan_args} ${ARGN} --format=json
                     RESULT_VARIABLE return_code
                     OUTPUT_VARIABLE conan_stdout

@@ -55,6 +55,7 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
+    int installApk(const QString &fileName);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
@@ -69,6 +70,7 @@ signals:
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
+    void apkInstallerStarted(QString fileName);
     void configImported(QString config);
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state, int serverIndex);
@@ -103,6 +105,7 @@ private:
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static void onApkInstallerStarted(JNIEnv *env, jobject thiz, jstring fileName);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
     static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);

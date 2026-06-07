@@ -20,6 +20,16 @@ get_abi_folder() {
     esac
 }
 
+get_android_toolchain_dir() {
+    local abi_folder
+    abi_folder=$(get_abi_folder "$1")
+    if [[ -f "$QT_ROOT_PATH/android/lib/cmake/Qt6/qt.toolchain.cmake" ]]; then
+        echo "android"
+    else
+        echo "$abi_folder"
+    fi
+}
+
 abis=()
 installers=()
 while [[ $# -gt 0 ]]; do
@@ -148,7 +158,7 @@ case "$TARGET" in
             QT_ANDROID_ABIS="${ABIS// /;}"
         fi
 
-        toolchain_dir=$(get_abi_folder "$toolchain_abi")
+        toolchain_dir=$(get_android_toolchain_dir "$toolchain_abi")
         : ${CMAKE_PREFIX_PATH:="$QT_ROOT_PATH/$toolchain_dir/lib/cmake/Qt6/qt.toolchain.cmake"}
         : ${CMAKE_TOOLCHAIN_FILE:="$QT_ROOT_PATH/$toolchain_dir/lib/cmake/Qt6/qt.toolchain.cmake"}
         ;;
@@ -201,12 +211,23 @@ args=()
 [[ -n "$QT_ANDROID_SIGN_AAB" ]]       && args+=("-DQT_ANDROID_SIGN_AAB=$QT_ANDROID_SIGN_AAB")
 [[ -n "$QT_ANDROID_ABIS" ]]           && args+=("-DQT_ANDROID_ABIS=$QT_ANDROID_ABIS")
 [[ -n "$QT_ANDROID_BUILD_ALL_ABIS" ]] && args+=("-DQT_ANDROID_BUILD_ALL_ABIS=$QT_ANDROID_BUILD_ALL_ABIS")
+[[ -n "$CONAN_NO_REMOTE" ]]           && args+=("-DCONAN_NO_REMOTE=$CONAN_NO_REMOTE")
+[[ -n "$CONAN_INSTALL_ARGS" ]]        && args+=("-DCONAN_INSTALL_ARGS=$CONAN_INSTALL_ARGS")
 
 if [[ -n "$FORCE" ]]; then
     run_traced rm -rf "$BUILD_PATH"
 fi
 
 run_traced cmake -S "$SOURCE_PATH" -B "$BUILD_PATH" "${args[@]}"
+if [[ "$TARGET" == "android" && "$QT_ANDROID_BUILD_ALL_ABIS" == "TRUE" ]]; then
+    for configure_target in \
+        qt_internal_android_armeabi-v7a_configure \
+        qt_internal_android_x86_configure \
+        qt_internal_android_x86_64_configure
+    do
+        run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" -t "$configure_target"
+    done
+fi
 run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE"
 
 [[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" -t "aab"

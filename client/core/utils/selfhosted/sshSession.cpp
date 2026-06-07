@@ -209,6 +209,17 @@ ErrorCode SshSession::uploadFileToHost(const ServerCredentials &credentials, con
     return ErrorCode::NoError;
 }
 
+ErrorCode SshSession::uploadLocalFileToHost(const ServerCredentials &credentials, const QString &localPath, const QString &remotePath,
+                                            libssh::ScpOverwriteMode overwriteMode)
+{
+    auto error = m_sshClient.connectToHost(credentials);
+    if (error != ErrorCode::NoError) {
+        return error;
+    }
+
+    return m_sshClient.scpFileCopy(overwriteMode, localPath, remotePath, "selfhosted_update_payload");
+}
+
 QString SshSession::checkSshConnection(const ServerCredentials &credentials, ErrorCode &errorCode)
 {
     QString stdOut;

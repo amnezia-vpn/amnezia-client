@@ -6,6 +6,7 @@ from conan.tools.scm import Git
 
 import os
 import platform
+import shutil
 
 class AwgAndroid(ConanFile):
     name = "awg-android"
@@ -27,6 +28,12 @@ class AwgAndroid(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} v{self.version} does not support {self.settings.os}")
 
     def source(self):
+        source_dir = os.environ.get("AWG_ANDROID_SOURCE_DIR")
+        if source_dir:
+            if not os.path.isdir(source_dir):
+                raise ConanInvalidConfiguration(f"AWG_ANDROID_SOURCE_DIR does not exist: {source_dir}")
+            shutil.copytree(source_dir, self.source_folder, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".git"))
+            return
         git = Git(self)
         git.clone(
             url="https://github.com/amnezia-vpn/amneziawg-android.git",
@@ -36,7 +43,11 @@ class AwgAndroid(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GRADLE_USER_HOME"] = os.path.join(self.build_folder, "gradle_user_home")
+        gradle_user_home = os.environ.get("AWG_ANDROID_GRADLE_USER_HOME")
+        if not gradle_user_home:
+            gradle_user_home = os.path.join(os.path.expanduser("~"), ".cache", "amnezia", "awg-android-gradle")
+        os.makedirs(gradle_user_home, exist_ok=True)
+        tc.variables["GRADLE_USER_HOME"] = gradle_user_home
         tc.variables["CMAKE_LIBRARY_OUTPUT_DIRECTORY"] = os.path.join(self.build_folder, "out")
         # not to warn in case of strtok() usage
         tc.extra_cflags = ["-Wno-deprecated-declarations"]

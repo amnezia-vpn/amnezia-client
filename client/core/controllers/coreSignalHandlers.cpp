@@ -434,9 +434,16 @@ void CoreSignalHandlers::initNotificationHandler()
 
 void CoreSignalHandlers::initUpdateFoundHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     connect(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished, m_coreController->m_updateUiController,
             &UpdateUiController::checkForUpdates);
+
+    connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, this, [this](Vpn::ConnectionState state) {
+        if (state != Vpn::ConnectionState::Connected) {
+            return;
+        }
+
+        QTimer::singleShot(5000, m_coreController->m_updateUiController, &UpdateUiController::checkForUpdates);
+    });
 
     connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {
         const QString version = m_coreController->m_updateUiController->getVersion();
@@ -445,6 +452,5 @@ void CoreSignalHandlers::initUpdateFoundHandler()
                 updateId, m_coreController->m_updateUiController->getHeaderText(), m_coreController->m_updateUiController->getChangelogText());
         emit m_coreController->m_pageController->showChangelogDrawer();
     });
-#endif
 }
 

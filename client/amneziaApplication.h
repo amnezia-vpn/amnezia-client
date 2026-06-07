@@ -38,6 +38,7 @@ public:
     void registerTypes();
     void loadFonts();
     bool parseCommands();
+    int commandExitCode() const;
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     void startLocalServer();
@@ -66,6 +67,8 @@ private:
     QCommandLineOption m_optCleanup;
     QCommandLineOption m_optConnect;
     QCommandLineOption m_optImport;
+    QCommandLineOption m_optPublishBundledUpdatesOnce;
+    int m_commandExitCode = 0;
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;

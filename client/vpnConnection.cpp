@@ -406,6 +406,7 @@ QStringList VpnConnection::serverRoutingRulesSyncHosts() const
         addHost(m_vpnProtocol->vpnGateway());
     }
     addHost(QString::fromLatin1(protocols::serverRoutingRules::syncHost));
+    addHost(QString::fromLatin1(protocols::selfHostedUpdates::syncHost));
     return hosts;
 }
 

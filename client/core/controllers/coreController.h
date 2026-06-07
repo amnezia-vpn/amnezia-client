@@ -36,6 +36,7 @@
 #include "core/controllers/appSplitTunnelingController.h"
 #include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/allowedDnsController.h"
+#include "core/controllers/selfhosted/selfHostedUpdateBootstrapper.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
@@ -191,6 +192,7 @@ private:
     SubscriptionController* m_subscriptionController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
+    SelfHostedUpdateBootstrapper* m_selfHostedUpdateBootstrapper;
     InstallController* m_installController;
     ExportController* m_exportController;
     ConnectionController* m_connectionController;

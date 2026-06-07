@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     alias(libs.plugins.android.application)
@@ -15,6 +16,25 @@ kotlin {
 val qtTargetSdkVersion: String by gradleProperties
 val qtTargetAbiList: String by gradleProperties
 val outputBaseName: String by gradleProperties
+
+fun androidManifestAttribute(name: String): String? {
+    val manifestFile = layout.projectDirectory.file("AndroidManifest.xml").asFile
+    if (!manifestFile.isFile) {
+        return null
+    }
+    val documentBuilderFactory = DocumentBuilderFactory.newInstance()
+    documentBuilderFactory.isNamespaceAware = true
+    val manifest = documentBuilderFactory.newDocumentBuilder().parse(manifestFile).documentElement
+    return manifest.getAttributeNS("http://schemas.android.com/apk/res/android", name)
+        .takeIf { it.isNotBlank() && !it.contains("%%INSERT_") }
+}
+
+val qtVersionCode = providers.gradleProperty("qtVersionCode").orNull?.toIntOrNull()
+    ?: androidManifestAttribute("versionCode")?.toIntOrNull()
+    ?: 1
+val qtVersionName = providers.gradleProperty("qtVersionName").orNull?.takeIf { it.isNotBlank() }
+    ?: androidManifestAttribute("versionName")
+    ?: "0.0.0.0"
 
 android {
     namespace = "org.amnezia.vpn"
@@ -36,6 +56,8 @@ android {
     defaultConfig {
         applicationId = "org.amnezia.vpn"
         targetSdk = qtTargetSdkVersion.toInt()
+        versionCode = qtVersionCode
+        versionName = qtVersionName
 
         // keeps language resources for only the locales specified below
         resourceConfigurations += listOf("en", "ru", "b+zh+Hans")

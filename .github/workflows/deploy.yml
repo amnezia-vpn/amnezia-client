@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - '**'
+  workflow_dispatch:
+    inputs:
+      FORCE_BUILD_ALL:
+        description: 'Force dependency prebuilts before platform builds'
+        required: true
+        default: false
+        type: boolean
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
@@ -26,11 +33,10 @@ jobs:
               - 'cmake/conan_provider.cmake'
               - 'cmake/platform_settings.cmake'
               - 'cmake/recipes_bootstrap.cmake'
-
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
     needs: Detect-Changes
-    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    if: ${{ needs.Detect-Changes.outputs.recipes_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.FORCE_BUILD_ALL == true) }}
 
     steps:
     - uses: actions/checkout@v4
@@ -66,7 +72,7 @@ jobs:
     runs-on: android-runner
 
     needs: Bake-Prebuilts-Linux
-    if: ${{ always() }}
+    if: ${{ always() && (needs.Bake-Prebuilts-Linux.result == 'success' || needs.Bake-Prebuilts-Linux.result == 'skipped') }}
 
     env:
       QT_VERSION: 6.10.1
@@ -123,8 +129,10 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_linux_x64_run
         path: deploy/build/AmneziaVPN_*_linux_x64.run
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
     - name: 'Upload translations artifact'
@@ -139,7 +147,7 @@ jobs:
   Bake-Prebuilts-Windows:
     runs-on: windows-latest
     needs: Detect-Changes
-    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    if: ${{ needs.Detect-Changes.outputs.recipes_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.FORCE_BUILD_ALL == true) }}
 
     steps:
     - uses: actions/checkout@v4
@@ -173,7 +181,7 @@ jobs:
     runs-on: windows-latest
 
     needs: Bake-Prebuilts-Windows
-    if: ${{ always() }}
+    if: ${{ always() && (needs.Bake-Prebuilts-Windows.result == 'success' || needs.Bake-Prebuilts-Windows.result == 'skipped') }}
 
     env:
       QT_VERSION: 6.10.1
@@ -249,22 +257,26 @@ jobs:
     - name: 'Upload WIX installer artifact'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_windows_x64_msi
         path: deploy/build/AmneziaVPN_*_windows_x64.msi
         archive: false
+        if-no-files-found: error
         retention-days: 7
       
     - name: 'Upload IFW installer artifact'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_windows_x64_exe
         path: deploy/build/AmneziaVPN_*_windows_x64.exe
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
 # ------------------------------------------------------
 
   Bake-Prebuilts-iOS:
     needs: Detect-Changes
-    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    if: ${{ needs.Detect-Changes.outputs.recipes_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.FORCE_BUILD_ALL == true) }}
 
     strategy:
       matrix:
@@ -309,7 +321,7 @@ jobs:
     runs-on: macos-latest
 
     needs: Bake-Prebuilts-iOS
-    if: ${{ always() }}
+    if: ${{ always() && (needs.Bake-Prebuilts-iOS.result == 'success' || needs.Bake-Prebuilts-iOS.result == 'skipped') }}
 
     env:
       QT_VERSION: 6.10.1
@@ -430,11 +442,40 @@ jobs:
           sed -e '/-DPROD_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DPROD_AGW_PUBLIC_KEY/d' | \
           sed -e '/-DDEV_AGW_PUBLIC_KEY/,/-D/ { /-D/!d; }' -e '/-DDEV_AGW_PUBLIC_KEY/d'
 
+    - name: 'Package iOS IPA'
+      if: steps.ios-signing.outputs.ready == 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        VERSION="$(grep 'CMAKE_PROJECT_VERSION:STATIC' deploy/build/CMakeCache.txt | cut -d= -f2)"
+        APP_PATH="$(find deploy/build -type d -name 'AmneziaVPN.app' -path '*/Release-iphoneos/*' -print -quit)"
+        if [[ -z "$APP_PATH" ]]; then
+          echo "::error::Built iOS app bundle was not found under deploy/build."
+          find deploy/build -maxdepth 5 -type d -name '*.app' -print
+          exit 1
+        fi
+
+        IPA_ROOT="$RUNNER_TEMP/amnezia-ios-ipa"
+        rm -rf "$IPA_ROOT"
+        mkdir -p "$IPA_ROOT/Payload"
+        cp -a "$APP_PATH" "$IPA_ROOT/Payload/AmneziaVPN.app"
+        (cd "$IPA_ROOT" && /usr/bin/zip -qry "$GITHUB_WORKSPACE/deploy/build/AmneziaVPN_${VERSION}_ios.ipa" Payload)
+
+    - name: 'Upload iOS IPA'
+      if: steps.ios-signing.outputs.ready == 'true'
+      uses: actions/upload-artifact@v7
+      with:
+        name: AmneziaVPN_ios_ipa
+        path: deploy/build/AmneziaVPN_*_ios.ipa
+        archive: false
+        if-no-files-found: error
+        retention-days: 7
+
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS:
     needs: Detect-Changes
-    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    if: ${{ needs.Detect-Changes.outputs.recipes_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.FORCE_BUILD_ALL == true) }}
 
     strategy:
       matrix:
@@ -479,7 +520,7 @@ jobs:
     runs-on: macos-latest
 
     needs: Bake-Prebuilts-MacOS
-    if: ${{ always() }}
+    if: ${{ always() && (needs.Bake-Prebuilts-MacOS.result == 'success' || needs.Bake-Prebuilts-MacOS.result == 'skipped') }}
 
     env:
       QT_VERSION: 6.10.1
@@ -583,15 +624,17 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_macos_x64_pkg
         path: deploy/build/AmneziaVPN_*_macos_x64.pkg
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS-NE:
     needs: Detect-Changes
-    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    if: ${{ needs.Detect-Changes.outputs.recipes_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.FORCE_BUILD_ALL == true) }}
 
     strategy:
       matrix:
@@ -760,6 +803,7 @@ jobs:
       with:
         name: AmneziaVPN_MacOS_unpacked
         path: deploy/build/client/AmneziaVPN.app
+        if-no-files-found: error
         retention-days: 7
 
 # ------------------------------------------------------
@@ -767,7 +811,7 @@ jobs:
   Bake-Prebuilts-Android:
     runs-on: android-runner
     needs: Detect-Changes
-    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    if: ${{ needs.Detect-Changes.outputs.recipes_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.FORCE_BUILD_ALL == true) }}
 
     env:
       ANDROID_PLATFORM: android-28
@@ -822,7 +866,7 @@ jobs:
     runs-on: android-runner
 
     needs: Bake-Prebuilts-Android
-    if: ${{ always() }}
+    if: ${{ always() && (needs.Bake-Prebuilts-Android.result == 'success' || needs.Bake-Prebuilts-Android.result == 'skipped') }}
 
     env:
       ANDROID_PLATFORM: android-28
@@ -953,43 +997,55 @@ jobs:
     - name: 'Upload universal APK'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_android_universal_apk
         path: deploy/build/client/android-build/*.apk
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
     - name: 'Upload AAB'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_android_aab
         path: deploy/build/client/android-build/build/outputs/bundle/release/*.aab
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
     - name: 'Upload arm64-v8a APK'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_android_arm64-v8a_apk
         path: deploy/build/arm64-v8a/client/android-build/*.apk
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
     - name: 'Upload armeabi-v7a APK'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_android_armeabi-v7a_apk
         path: deploy/build/armeabi-v7a/client/android-build/*.apk
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
     - name: 'Upload x86 APK'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_android_x86_apk
         path: deploy/build/x86/client/android-build/*.apk
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
     - name: 'Upload x86_64 APK'
       uses: actions/upload-artifact@v7
       with:
+        name: AmneziaVPN_android_x86_64_apk
         path: deploy/build/x86_64/client/android-build/*.apk
         archive: false
+        if-no-files-found: error
         retention-days: 7
 
   Extra:

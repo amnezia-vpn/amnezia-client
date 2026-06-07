@@ -1,0 +1,159 @@
+name: 'Upstream release freeze'
+
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      TARGET_BRANCH:
+        description: 'Fork branch to sync or freeze'
+        required: true
+        default: 'feat/server-managed-split-tunnel'
+        type: string
+      UPSTREAM_REPO:
+        description: 'Upstream repository to watch'
+        required: true
+        default: 'amnezia-vpn/amnezia-client'
+        type: string
+      FORCE_FREEZE_TAG:
+        description: 'Optional release tag to freeze immediately'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: upstream-release-freeze-${{ github.event.inputs.TARGET_BRANCH || 'feat/server-managed-split-tunnel' }}
+  cancel-in-progress: false
+
+jobs:
+  Sync-Or-Freeze:
+    runs-on: ubuntu-latest
+
+    env:
+      TARGET_BRANCH: ${{ github.event.inputs.TARGET_BRANCH || 'feat/server-managed-split-tunnel' }}
+      UPSTREAM_REPO: ${{ github.event.inputs.UPSTREAM_REPO || 'amnezia-vpn/amnezia-client' }}
+      FORCE_FREEZE_TAG: ${{ github.event.inputs.FORCE_FREEZE_TAG || '' }}
+      STATE_FILE: .github/upstream-release-freeze.json
+
+    steps:
+      - name: 'Checkout target branch'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_BRANCH }}
+          fetch-depth: 0
+          token: ${{ secrets.UPSTREAM_SYNC_TOKEN || github.token }}
+
+      - name: 'Configure git'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "amnezia-release-freeze[bot]"
+          git config user.email "amnezia-release-freeze[bot]@users.noreply.github.com"
+
+      - name: 'Fetch upstream dev and tags'
+        id: upstream
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+          git fetch --no-tags upstream '+refs/heads/dev:refs/remotes/upstream/dev'
+          git fetch --tags upstream '+refs/tags/*:refs/tags/*'
+
+          latest_tag="$(gh api "repos/${UPSTREAM_REPO}/releases/latest" --jq '.tag_name')"
+          if [[ -z "$latest_tag" ]]; then
+            echo "::error::No latest published upstream release was found."
+            exit 1
+          fi
+          if ! [[ "$latest_tag" =~ ^[0-9]+(\.[0-9]+){3}$ ]]; then
+            echo "::error::Latest published upstream release tag does not match x.y.z.w: $latest_tag"
+            exit 1
+          fi
+
+          echo "latest_tag=$latest_tag" >> "$GITHUB_OUTPUT"
+          echo "upstream_dev_sha=$(git rev-parse upstream/dev)" >> "$GITHUB_OUTPUT"
+          echo "Latest upstream release tag: $latest_tag"
+          echo "Upstream dev: $(git rev-parse upstream/dev)"
+
+      - name: 'Plan release freeze'
+        id: plan
+        shell: bash
+        run: |
+          set -euo pipefail
+          python deploy/selfhosted_updates/release_freeze.py plan \
+            --state-file "$STATE_FILE" \
+            --upstream-repo "$UPSTREAM_REPO" \
+            --target-branch "$TARGET_BRANCH" \
+            --latest-tag "${{ steps.upstream.outputs.latest_tag }}" \
+            --force-freeze-tag "$FORCE_FREEZE_TAG" > "$RUNNER_TEMP/release-freeze-plan.json"
+          cat "$RUNNER_TEMP/release-freeze-plan.json"
+          python - "$RUNNER_TEMP/release-freeze-plan.json" "$GITHUB_OUTPUT" <<'PY'
+          import json
+          import sys
+
+          plan_path, output_path = sys.argv[1:]
+          plan = json.loads(open(plan_path, encoding="utf-8").read())
+          with open(output_path, "a", encoding="utf-8") as out:
+              for key in ("action", "baselineTag", "latestTag", "releaseTag"):
+                  print(f"{key}={plan.get(key, '')}", file=out)
+          PY
+
+      - name: 'Report waiting for next published release'
+        if: steps.plan.outputs.action == 'wait'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Latest published upstream release is ${{ steps.upstream.outputs.latest_tag }}."
+          echo "No newer published release than baseline ${{ steps.plan.outputs.baselineTag }}; leaving $TARGET_BRANCH unchanged."
+          echo "Ordinary upstream/dev commits are intentionally not merged between releases."
+
+      - name: 'Freeze branch on upstream release tag'
+        if: steps.plan.outputs.action == 'freeze'
+        shell: bash
+        run: |
+          set -euo pipefail
+          release_tag="${{ steps.plan.outputs.releaseTag }}"
+          fork_patch="$RUNNER_TEMP/server-managed-fork.patch"
+          git diff --binary upstream/dev...HEAD > "$fork_patch"
+          git checkout -B "$TARGET_BRANCH" "refs/tags/${release_tag}"
+          if [[ -s "$fork_patch" ]]; then
+            git apply --index --3way "$fork_patch"
+            git commit -m "chore: apply server-managed fork changes to upstream release ${release_tag}"
+          else
+            echo "No fork patch to apply on top of upstream release ${release_tag}."
+          fi
+
+          python deploy/selfhosted_updates/release_freeze.py record \
+            --state-file "$STATE_FILE" \
+            --upstream-repo "$UPSTREAM_REPO" \
+            --target-branch "$TARGET_BRANCH" \
+            --latest-tag "${{ steps.upstream.outputs.latest_tag }}" \
+            --baseline-tag "${{ steps.plan.outputs.baselineTag }}" \
+            --action freeze \
+            --release-tag "$release_tag" \
+            --release-sha "$(git rev-parse "refs/tags/${release_tag}^{commit}")" \
+            --upstream-dev-sha "${{ steps.upstream.outputs.upstream_dev_sha }}"
+
+          git add "$STATE_FILE"
+          git commit -m "chore: freeze fork at upstream release ${release_tag}"
+          git push --force-with-lease origin HEAD:"$TARGET_BRANCH"
+
+      - name: 'Report local release build command'
+        if: steps.plan.outputs.action == 'freeze'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Fork frozen at upstream release ${{ steps.plan.outputs.releaseTag }}."
+          echo "Builds are intentionally local-only. Run on the release workstation:"
+          echo "pwsh -ExecutionPolicy Bypass -File deploy/selfhosted_updates/local_release.ps1 -Version ${{ steps.plan.outputs.releaseTag }}"
+
+      - name: 'Report already frozen state'
+        if: steps.plan.outputs.action == 'already-frozen'
+        shell: bash
+        run: |
+          echo "Fork is already frozen at upstream release ${{ steps.plan.outputs.releaseTag }}."

@@ -98,6 +98,7 @@ bool AndroidController::initialize()
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
+        {"onApkInstallerStarted", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onApkInstallerStarted)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
@@ -329,6 +330,12 @@ void AndroidController::sendTouch(float x, float y)
     callActivityMethod("sendTouch", "(FF)V", x, y);
 }
 
+int AndroidController::installApk(const QString &fileName)
+{
+    return callActivityMethod<jint>("installApk", "(Ljava/lang/String;)I",
+                                    QJniObject::fromString(fileName).object<jstring>());
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;
@@ -516,6 +523,14 @@ void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->fileOpened(AndroidUtils::convertJString(env, uri));
+}
+
+// static
+void AndroidController::onApkInstallerStarted(JNIEnv *env, jobject thiz, jstring fileName)
+{
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->apkInstallerStarted(AndroidUtils::convertJString(env, fileName));
 }
 
 // static

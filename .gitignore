@@ -75,6 +75,12 @@ AmneziaVPN_Ubuntu_x64.*
 deploy/AppDir
 deploy/Tools
 deploy/AmneziaVPN*Installer*
+dist/selfhosted-release-env.ps1
+dist/selfhosted-local-artifacts/
+dist/selfhosted-updates/
+dist/selfhosted-windows-client/
+dist/android-device-backups/
+aqtinstall.log
 
 # MACOS files
 .DS_Store
@@ -86,6 +92,9 @@ deploy/data/macos/pf/amn.400.allowPIA.conf
 
 # tmp files
 *.*~
+.tmp/
+__pycache__/
+*.py[cod]
 
 #########################  Android
 # Built application files

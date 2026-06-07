@@ -4,6 +4,7 @@
 #include <QtConcurrent>
 
 #include <fstream>
+#include <limits>
 
 #ifdef Q_OS_WINDOWS
 const uint32_t S_IRWXU = 0644;
@@ -180,6 +181,12 @@ namespace libssh {
                 if (errorCode != ErrorCode::NoError) {
                     return errorCode;
                 }
+                const int exitStatus = ssh_channel_get_exit_status(m_channel);
+                if (exitStatus != 0) {
+                    qWarning() << "SSH command failed with exit status" << exitStatus << data;
+                    closeChannel();
+                    return ErrorCode::ServerCheckFailed;
+                }
             } else {
                 return closeChannel();
             }
@@ -241,9 +248,12 @@ namespace libssh {
         connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &Client::scpFileCopyFinished);
         QFuture<ErrorCode> future = QtConcurrent::run([this, overwriteMode, &localPath, &remotePath, &fileDesc]() {
             const int accessType = O_WRONLY | O_CREAT | overwriteMode;
-            const int localFileSize = QFileInfo(localPath).size();
+            const qint64 localFileSize = QFileInfo(localPath).size();
+            if (localFileSize < 0 || static_cast<quint64>(localFileSize) > std::numeric_limits<size_t>::max()) {
+                return ErrorCode::ReadError;
+            }
 
-            int result = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), localFileSize, accessType);
+            int result = ssh_scp_push_file(m_scpSession, remotePath.toStdString().c_str(), static_cast<size_t>(localFileSize), accessType);
             if (result != SSH_OK) {
                 return fromLibsshErrorCode();
             }
@@ -251,9 +261,9 @@ namespace libssh {
             QFile fin(localPath);
 
             if (fin.open(QIODevice::ReadOnly)) {
-                constexpr size_t bufferSize = 16384;
-                int transferred = 0;
-                int currentChunkSize = bufferSize;
+                constexpr qint64 bufferSize = 16384;
+                qint64 transferred = 0;
+                qint64 currentChunkSize = bufferSize;
 
                 while (transferred < localFileSize) {
 

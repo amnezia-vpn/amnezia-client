@@ -18,6 +18,8 @@
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
 
+#include "core/controllers/selfhosted/selfHostedUpdateBootstrapper.h"
+#include "core/repositories/secureServersRepository.h"
 #include "core/protocols/qmlRegisterProtocols.h"
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
@@ -33,7 +35,9 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
-      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data")),
+      m_optPublishBundledUpdatesOnce({QStringLiteral("publish-bundled-updates-once")},
+                                      QStringLiteral("Publish bundled self-hosted update payload once and exit"))
 {
     setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
@@ -237,8 +241,20 @@ bool AmneziaApplication::parseCommands()
     m_parser.addOption(m_optCleanup);
     m_parser.addOption(m_optConnect);
     m_parser.addOption(m_optImport);
+    m_parser.addOption(m_optPublishBundledUpdatesOnce);
     
     m_parser.process(*this);
+
+    if (m_parser.isSet(m_optPublishBundledUpdatesOnce)) {
+        Logger::init(false);
+        SecureServersRepository serversRepository(m_settings);
+        SelfHostedUpdateBootstrapper bootstrapper(&serversRepository);
+        const bool ok = bootstrapper.publishNow();
+        qInfo().noquote() << QStringLiteral("Bundled self-hosted update publish %1").arg(ok ? QStringLiteral("finished") : QStringLiteral("failed"));
+        Logger::deInit();
+        m_commandExitCode = ok ? 0 : 2;
+        return false;
+    }
 
     if (m_parser.isSet(m_optCleanup)) {
         Logger::cleanUp();
@@ -247,6 +263,11 @@ bool AmneziaApplication::parseCommands()
         return false;
     }
     return true;
+}
+
+int AmneziaApplication::commandExitCode() const
+{
+    return m_commandExitCode;
 }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)

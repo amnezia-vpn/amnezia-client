@@ -81,6 +81,8 @@ public:
     QString getInstallationUuid(bool createIfNotExists) const;
     QStringList getReadNewsIds() const;
     void setReadNewsIds(const QStringList &ids);
+    QString selfHostedUpdateLastAutoInstallAttempt() const;
+    void setSelfHostedUpdateLastAutoInstallAttempt(const QString &attemptId);
 
     bool isHomeAdLabelVisible() const;
     void disableHomeAdLabel();

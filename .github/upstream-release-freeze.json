@@ -1,0 +1,11 @@
+{
+  "baselineTag": "4.8.15.4",
+  "frozen": false,
+  "frozenTag": "",
+  "lastSyncedUpstreamDev": "594635e5cfcfb74ece31cb7e8a6b0536b56d1bca",
+  "latestObservedTag": "4.8.15.4",
+  "schema": 1,
+  "targetBranch": "feat/server-managed-split-tunnel",
+  "updatedAt": "2026-06-06T00:00:00+00:00",
+  "upstreamRepo": "amnezia-vpn/amnezia-client"
+}

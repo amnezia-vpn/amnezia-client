@@ -37,12 +37,14 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.graphics.Insets
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.io.IOException
+import java.io.File
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
@@ -77,6 +79,10 @@ private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
+private const val KEY_PENDING_INSTALL_APK_PATH = "pending_install_apk_path"
+private const val APK_INSTALL_FAILED = 0
+private const val APK_INSTALL_STARTED = 1
+private const val APK_INSTALL_PERMISSION_SETTINGS_OPENED = 2
 
 class AmneziaActivity : QtActivity() {
 
@@ -98,6 +104,8 @@ class AmneziaActivity : QtActivity() {
     private val resumeHandler = Handler(Looper.getMainLooper())
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
+    private var pendingInstallApkPath: String? = null
+    private var installApkDeliveryScheduled = false
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -206,7 +214,9 @@ class AmneziaActivity : QtActivity() {
             }
         )
         pendingOpenFileUri = savedInstanceState?.getString(KEY_PENDING_OPEN_FILE_URI)
+        pendingInstallApkPath = savedInstanceState?.getString(KEY_PENDING_INSTALL_APK_PATH)
         openFileDeliveryScheduled = false
+        installApkDeliveryScheduled = false
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
@@ -215,6 +225,7 @@ class AmneziaActivity : QtActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
+        pendingInstallApkPath?.let { outState.putString(KEY_PENDING_INSTALL_APK_PATH, it) }
     }
 
     private fun loadLibs() {
@@ -367,6 +378,7 @@ class AmneziaActivity : QtActivity() {
         // Cancel all pending operations when activity pauses
         resumeHandler.removeCallbacksAndMessages(null)
         openFileDeliveryScheduled = false
+        installApkDeliveryScheduled = false
         Log.d(TAG, "Pause Amnezia activity")
     }
 
@@ -389,6 +401,17 @@ class AmneziaActivity : QtActivity() {
                         qtInitialized.await()
                         QtAndroidController.onFileOpened(uri)
                     }
+                }
+            }, OPEN_FILE_AFTER_RESUME_DELAY_MS)
+        }
+
+        if (pendingInstallApkPath != null && !installApkDeliveryScheduled && canRequestPackageInstall()) {
+            val apkPath = pendingInstallApkPath!!
+            installApkDeliveryScheduled = true
+            resumeHandler.postDelayed({
+                installApkDeliveryScheduled = false
+                if (!isFinishing && !isDestroyed) {
+                    startApkInstaller(apkPath, openSettingsIfBlocked = false)
                 }
             }, OPEN_FILE_AFTER_RESUME_DELAY_MS)
         }
@@ -862,6 +885,56 @@ class AmneziaActivity : QtActivity() {
             pfd?.close()
             pfd = null
         }
+    }
+
+    @Suppress("unused")
+    fun installApk(fileName: String): Int {
+        Log.i(TAG, "Install APK: $fileName")
+        pendingInstallApkPath = fileName
+        return startApkInstaller(fileName, openSettingsIfBlocked = true)
+    }
+
+    private fun canRequestPackageInstall(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.O || packageManager.canRequestPackageInstalls()
+
+    private fun startApkInstaller(fileName: String, openSettingsIfBlocked: Boolean): Int {
+        try {
+            val apkFile = File(fileName)
+            if (!apkFile.isFile) {
+                Log.e(TAG, "APK file does not exist: $fileName")
+                pendingInstallApkPath = null
+                return APK_INSTALL_FAILED
+            }
+            if (!canRequestPackageInstall()) {
+                if (!openSettingsIfBlocked) {
+                    return APK_INSTALL_FAILED
+                }
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:$packageName")
+                ).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                startActivity(intent)
+                return APK_INSTALL_PERMISSION_SETTINGS_OPENED
+            }
+            val uri = FileProvider.getUriForFile(this, "org.amnezia.vpn.qtprovider", apkFile)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            pendingInstallApkPath = null
+            startActivity(intent)
+            QtAndroidController.onApkInstallerStarted(fileName)
+            return APK_INSTALL_STARTED
+        } catch (e: ActivityNotFoundException) {
+            Log.e(TAG, "No activity found to install APK: $e")
+            Toast.makeText(this, "No application can install this update", Toast.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to start APK installer: $e")
+        }
+        return APK_INSTALL_FAILED
     }
 
     @Suppress("unused")

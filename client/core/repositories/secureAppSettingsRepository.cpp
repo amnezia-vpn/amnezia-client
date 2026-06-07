@@ -388,6 +388,16 @@ void SecureAppSettingsRepository::setReadNewsIds(const QStringList &ids)
     setValue("News/readIds", ids);
 }
 
+QString SecureAppSettingsRepository::selfHostedUpdateLastAutoInstallAttempt() const
+{
+    return value("Conf/selfHostedUpdateLastAutoInstallAttempt").toString();
+}
+
+void SecureAppSettingsRepository::setSelfHostedUpdateLastAutoInstallAttempt(const QString &attemptId)
+{
+    setValue("Conf/selfHostedUpdateLastAutoInstallAttempt", attemptId);
+}
+
 bool SecureAppSettingsRepository::isHomeAdLabelVisible() const
 {
     return value("Conf/homeAdLabelVisible", true).toBool();

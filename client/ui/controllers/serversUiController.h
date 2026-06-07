@@ -29,6 +29,7 @@ class ServersUiController : public QObject
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIdChanged)
     
     Q_PROPERTY(QString processedServerId READ getProcessedServerId WRITE setProcessedServerId NOTIFY processedServerIdChanged)
+    Q_PROPERTY(int processedServerIndex READ getProcessedServerIndex NOTIFY processedServerIndexChanged)
     Q_PROPERTY(int processedContainerIndex READ getProcessedContainerIndex WRITE setProcessedContainerIndex NOTIFY processedContainerIndexChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerIdChanged)
     
@@ -85,6 +86,7 @@ public slots:
     bool isServerSubscriptionExpiringSoon(const QString &serverId) const;
     
     QString getProcessedServerId() const;
+    int getProcessedServerIndex() const;
     void setProcessedServerId(const QString &serverId);
 
     int getProcessedContainerIndex() const;
@@ -110,6 +112,7 @@ signals:
     void finished(const QString &message);
     void defaultServerIdChanged(const QString &serverId);
     void processedServerIdChanged(const QString &serverId);
+    void processedServerIndexChanged(int index);
     void processedContainerIndexChanged(int index);
     void hasServersFromGatewayApiChanged();
     void updateApiCountryModel();

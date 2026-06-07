@@ -26,6 +26,16 @@ bool isAnotherInstanceRunning()
     }
     return false;
 }
+
+bool isPublishBundledUpdatesOnceCommand(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i) {
+        if (QString::fromLocal8Bit(argv[i]) == QStringLiteral("--publish-bundled-updates-once")) {
+            return true;
+        }
+    }
+    return false;
+}
 #endif
 
 int main(int argc, char *argv[])
@@ -52,11 +62,14 @@ int main(int argc, char *argv[])
     });
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (isAnotherInstanceRunning()) {
+    const bool publishBundledUpdatesOnce = isPublishBundledUpdatesOnceCommand(argc, argv);
+    if (!publishBundledUpdatesOnce && isAnotherInstanceRunning()) {
         QTimer::singleShot(1000, &app, [&]() { app.quit(); });
         return app.exec();
     }
-    app.startLocalServer();
+    if (!publishBundledUpdatesOnce) {
+        app.startLocalServer();
+    }
 #endif
 
 // Allow to raise app window if secondary instance launched
@@ -82,5 +95,5 @@ int main(int argc, char *argv[])
 
         return app.exec();
     }
-    return 0;
+    return app.commandExitCode();
 }

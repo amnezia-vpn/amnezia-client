@@ -185,6 +185,8 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _asm_target(self):
+        if self.options.get_safe("no_asm") or self.settings.os == "Android":
+            return None
         if self.settings.os in ("Android", "iOS", "watchOS", "tvOS"):
             return {
                 "x86": "x86_asm" if self.settings.os == "Android" else None,
@@ -360,6 +362,7 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Android":
             args.append(f" -D__ANDROID_API__={str(self.settings.os.api_level)}")  # see NOTES.ANDROID
+            args.append("no-asm")
         if self.settings.os == "Windows":
             if self.options.enable_capieng:
                 args.append("enable-capieng")
@@ -650,6 +653,9 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             self.cpp_info.components["ssl"].libs = ["libssl"]
             self.cpp_info.components["crypto"].libs = ["libcrypto"]
+        elif self.options.shared and self.settings.os == "Android":
+            self.cpp_info.components["ssl"].libs = ["ssl_3"]
+            self.cpp_info.components["crypto"].libs = ["crypto_3"]
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]

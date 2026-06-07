@@ -46,6 +46,8 @@ public:
 
     ErrorCode uploadFileToHost(const ServerCredentials &credentials, const QByteArray &data, const QString &remotePath,
                                libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
+    ErrorCode uploadLocalFileToHost(const ServerCredentials &credentials, const QString &localPath, const QString &remotePath,
+                                    libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
 
 private:
     libssh::Client m_sshClient;
