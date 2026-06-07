@@ -127,6 +127,8 @@ signals:
     void passphraseRequestStarted();
     void passphraseRequestFinished();
 
+    void installationStepChanged(const QString &message, double progress);
+    void removalStepChanged(const QString &message, double progress);
     void serverIsBusy(const bool isBusy);
     void cancelInstallation();
 

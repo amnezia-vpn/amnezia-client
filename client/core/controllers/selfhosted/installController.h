@@ -91,6 +91,8 @@ signals:
     void configValidated(bool isValid);
     void validationErrorOccurred(ErrorCode errorCode);
 
+    void installationStepChanged(const QString &message, double progress);
+    void removalStepChanged(const QString &message, double progress);
     void serverIsBusy(const bool isBusy);
     void cancelInstallationRequested();
     void clientRevocationRequested(const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container);

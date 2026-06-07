@@ -106,55 +106,68 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     SshSession sshSession(this);
     ErrorCode e = ErrorCode::NoError;
 
+    emit installationStepChanged(tr("Checking server access…"), 0.03);
     e = isUserInSudo(credentials, sshSession);
     if (e)
         return e;
 
+    emit installationStepChanged(tr("Checking server readiness…"), 0.07);
     e = isServerDpkgBusy(credentials, sshSession);
     if (e)
         return e;
 
+    emit installationStepChanged(tr("Installing Docker on the server…"), 0.12);
     e = installDockerWorker(credentials, container, sshSession);
     if (e)
         return e;
+    emit installationStepChanged(tr("Docker ready"), 0.30);
     qDebug().noquote() << "InstallController::setupContainer installDockerWorker finished";
 
     if (!isUpdate) {
+        emit installationStepChanged(tr("Checking port availability…"), 0.33);
         e = isServerPortBusy(credentials, container, config, sshSession);
         if (e)
             return e;
     }
 
+    emit installationStepChanged(tr("Preparing server environment…"), 0.38);
     e = prepareHostWorker(credentials, container, sshSession);
     if (e)
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
+    emit installationStepChanged(tr("Removing old container…"), 0.42);
     const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
     const bool removeDataVolume = !isUpdate && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
     sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
+    emit installationStepChanged(tr("Building the VPN container…"), 0.47);
     qDebug().noquote() << "buildContainerWorker start";
     e = buildContainerWorker(credentials, container, config, sshSession);
     if (e)
         return e;
+    emit installationStepChanged(tr("Container image built"), 0.63);
     qDebug().noquote() << "InstallController::setupContainer buildContainerWorker finished";
 
+    emit installationStepChanged(tr("Starting the container…"), 0.68);
     e = runContainerWorker(credentials, container, config, sshSession);
     if (e)
         return e;
     qDebug().noquote() << "InstallController::setupContainer runContainerWorker finished";
 
+    emit installationStepChanged(tr("Configuring the protocol…"), 0.72);
     e = configureContainerWorker(credentials, container, config, sshSession);
     if (e)
         return e;
     qDebug().noquote() << "InstallController::setupContainer configureContainerWorker finished";
 
+    emit installationStepChanged(tr("Setting up firewall rules…"), 0.77);
     setupServerFirewall(credentials, sshSession);
     qDebug().noquote() << "InstallController::setupContainer setupServerFirewall finished";
 
+    emit installationStepChanged(tr("Running startup scripts…"), 0.90);
     return startupContainerWorker(credentials, container, config, sshSession);
 }
 
@@ -412,6 +425,8 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     if (!ContainerUtils::isSupportedByCurrentPlatform(container)) {
         return ErrorCode::NoError;
     }
+
+    emit installationStepChanged(tr("Generating client configuration…"), 0.96);
 
     if (ContainerUtils::containerService(container) != ServiceType::Other) {
         Proto protocol = ContainerUtils::defaultProtocol(container);
@@ -999,9 +1014,11 @@ ErrorCode InstallController::removeAllContainers(const QString &serverId)
         return ErrorCode::InternalError;
     }
     SshSession sshSession(this);
+    emit removalStepChanged(tr("Removing all containers…"), 0.15);
     ErrorCode errorCode = sshSession.runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
 
     if (errorCode == ErrorCode::NoError) {
+        emit removalStepChanged(tr("Cleaning up configuration…"), 0.90);
         adminConfig->containers.clear();
         adminConfig->defaultContainer = DockerContainer::None;
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
@@ -1024,10 +1041,12 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
     const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
     const bool removeDataVolume = (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    emit removalStepChanged(tr("Removing container…"), 0.15);
     ErrorCode errorCode =
             sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
 
     if (errorCode == ErrorCode::NoError) {
+        emit removalStepChanged(tr("Cleaning up configuration…"), 0.90);
         QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
         containers.remove(container);
 
