@@ -122,6 +122,12 @@ void CoreSignalHandlers::initSettingsSplitTunnelingHandler()
 
 void CoreSignalHandlers::initInstallControllerHandler()
 {
+    connect(m_coreController->m_installController, &InstallController::installationStepChanged,
+            m_coreController->m_installUiController, &InstallUiController::installationStepChanged,
+            Qt::QueuedConnection);
+    connect(m_coreController->m_installController, &InstallController::removalStepChanged,
+            m_coreController->m_installUiController, &InstallUiController::removalStepChanged,
+            Qt::QueuedConnection);
     connect(m_coreController->m_installController, &InstallController::serverIsBusy, m_coreController->m_installUiController, &InstallUiController::serverIsBusy);
     connect(m_coreController->m_installUiController, &InstallUiController::cancelInstallation, m_coreController->m_installController, &InstallController::cancelInstallation);
     connect(m_coreController->m_serversUiController, &ServersUiController::processedServerIdChanged,
