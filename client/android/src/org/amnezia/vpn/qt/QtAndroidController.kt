@@ -22,6 +22,8 @@ object QtAndroidController {
     external fun onStatisticsUpdate(rxBytes: Long, txBytes: Long)
 
     external fun onFileOpened(uri: String)
+
+    /** Notifies C++ that Android opened the system APK installer for a downloaded update. */
     external fun onApkInstallerStarted(fileName: String)
 
     external fun onConfigImported(data: String)

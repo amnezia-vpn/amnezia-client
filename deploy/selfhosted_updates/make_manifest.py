@@ -68,6 +68,8 @@ def validate_base_url(value: str) -> str:
     parsed = urlparse(normalized)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc or not parsed.hostname:
         raise SystemExit("--base-url must be an http(s) endpoint URL with a host, for example http://172.29.172.252:17865")
+    if parsed.username or parsed.password or parsed.query or parsed.fragment:
+        raise SystemExit("--base-url must not contain userinfo, query, or fragment parts")
     if "/" in parsed.hostname:
         raise SystemExit("--base-url host must be a single host or IP address, not a CIDR route")
     try:
@@ -237,12 +239,20 @@ def main() -> int:
     files_dir.mkdir(parents=True, exist_ok=True)
 
     platforms: dict[str, dict[str, object]] = {}
+    reserved_file_names: dict[str, str] = {}
     def add_platform(platform: str, artifact: dict[str, object]) -> None:
         if platform in platforms:
             raise SystemExit(f"duplicate manifest platform: {platform}")
         platforms[platform] = artifact
 
+    def reserve_file_name(platform: str, file_name: str) -> None:
+        owner = reserved_file_names.get(file_name)
+        if owner and owner != platform:
+            raise SystemExit(f"duplicate artifact output filename {file_name!r} for platforms {owner} and {platform}")
+        reserved_file_names[file_name] = platform
+
     for platform, artifact_path in parse_artifact(args.artifact).items():
+        reserve_file_name(platform, artifact_path.name)
         target = files_dir / artifact_path.name
         shutil.copy2(artifact_path, target)
         add_platform(platform, {
@@ -259,6 +269,8 @@ def main() -> int:
         ipa_path = args.ios_ipa.expanduser().resolve()
         if not ipa_path.is_file():
             raise SystemExit(f"iOS IPA file does not exist: {ipa_path}")
+        reserve_file_name("ios", ipa_path.name)
+        reserve_file_name("ios", f"{ipa_path.stem}.plist")
         ipa_target = files_dir / ipa_path.name
         shutil.copy2(ipa_path, ipa_target)
         plist_target = files_dir / f"{ipa_path.stem}.plist"

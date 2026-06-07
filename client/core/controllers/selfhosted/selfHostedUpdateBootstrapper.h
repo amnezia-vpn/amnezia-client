@@ -2,6 +2,7 @@
 #define SELFHOSTEDUPDATEBOOTSTRAPPER_H
 
 #include <QObject>
+#include <QMap>
 #include <QString>
 #include <QStringList>
 
@@ -25,6 +26,7 @@ private:
         QString manifestPath;
         QString version;
         QStringList filePaths;
+        QMap<QString, QString> fileSha256ByName;
         QByteArray manifestSha256;
     };
 

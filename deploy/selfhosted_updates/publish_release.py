@@ -14,7 +14,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from urllib.error import HTTPError
+from urllib.error import ContentTooShortError, HTTPError, URLError
 from urllib.parse import parse_qs, urlparse
 from urllib.request import Request, urlopen
 from urllib.request import urlretrieve
@@ -117,19 +117,28 @@ def download_known_release_assets(repo: str, version: str, artifact_dir: Path, r
     download_filenames = {platform: artifact_filenames(platform, version) for platform in KNOWN_PATTERNS}
     download_filenames["ios"] = [IOS_IPA_PATTERN.format(version=version)]
     for platform, filenames in download_filenames.items():
-        if any((artifact_dir / filename).exists() for filename in filenames):
+        existing = next((artifact_dir / filename for filename in filenames if (artifact_dir / filename).exists()), None)
+        if existing and existing.stat().st_size > 0 and platform not in required_platforms:
             continue
-        last_error: HTTPError | None = None
+        if existing:
+            existing.unlink(missing_ok=True)
+        last_error: Exception | None = None
         for filename in filenames:
             target = artifact_dir / filename
+            tmp_target = target.with_name(target.name + ".tmp")
             url = f"https://github.com/{repo}/releases/download/{version}/{filename}"
             print(f"Downloading {url}", flush=True)
             try:
-                urlretrieve(url, target)
+                tmp_target.unlink(missing_ok=True)
+                urlretrieve(url, tmp_target)
+                if tmp_target.stat().st_size <= 0:
+                    raise RuntimeError(f"downloaded empty asset: {url}")
+                tmp_target.replace(target)
                 last_error = None
                 break
-            except HTTPError as error:
+            except (ContentTooShortError, HTTPError, URLError, RuntimeError) as error:
                 last_error = error
+                tmp_target.unlink(missing_ok=True)
                 target.unlink(missing_ok=True)
         if last_error:
             if platform in required_platforms:
@@ -414,6 +423,8 @@ def main() -> int:
     args.version = validate_release_version(args.version)
 
     private_key = args.private_key.expanduser().resolve()
+    if not private_key.is_file():
+        raise SystemExit(f"Private key file does not exist: {private_key}")
     if args.server and not args.public_key_base64:
         raise SystemExit("--public-key-base64 or SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 is required when publishing to a server")
     if args.public_key_base64:
@@ -424,6 +435,9 @@ def main() -> int:
         platform: Path(path).expanduser().resolve()
         for platform, path in parse_platform_values(args.artifact, "--artifact").items()
     }
+    missing_explicit = [f"{platform}={path}" for platform, path in explicit_artifacts.items() if not path.is_file()]
+    if missing_explicit:
+        raise SystemExit("Explicit update artifact does not exist: " + ", ".join(missing_explicit))
     externals = parse_platform_values(args.external, "--external")
     if args.download_github_release:
         download_known_release_assets(
@@ -465,6 +479,8 @@ def main() -> int:
             "Missing required update artifacts/settings: "
             + ", ".join(missing_platform_messages(missing, artifact_dir, args.version))
         )
+    if ios_ipa and not ios_ipa.is_file():
+        raise SystemExit(f"iOS IPA file does not exist: {ios_ipa}")
 
     out_dir = (args.out_dir or Path("dist") / "selfhosted-updates" / args.version).expanduser().resolve()
     if out_dir.exists():

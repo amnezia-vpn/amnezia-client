@@ -61,6 +61,7 @@ private:
     bool isNewVersionAvailable() const;
     bool isNewVersionAvailable(const QString &version) const;
     QList<QUrl> selfHostedManifestUrls() const;
+    QUrl normalizedSelfHostedManifestUrl(const QString &host) const;
     QList<QString> platformCandidates() const;
     bool processSelfHostedManifest(const QUrl &manifestUrl, const QByteArray &manifestData);
     bool verifySignedManifestEnvelope(const QByteArray &manifestData, QByteArray &payloadData) const;

@@ -17,6 +17,7 @@ val qtTargetSdkVersion: String by gradleProperties
 val qtTargetAbiList: String by gradleProperties
 val outputBaseName: String by gradleProperties
 
+/** Reads an Android namespaced attribute from the generated Qt manifest template. */
 fun androidManifestAttribute(name: String): String? {
     val manifestFile = layout.projectDirectory.file("AndroidManifest.xml").asFile
     if (!manifestFile.isFile) {
@@ -31,10 +32,10 @@ fun androidManifestAttribute(name: String): String? {
 
 val qtVersionCode = providers.gradleProperty("qtVersionCode").orNull?.toIntOrNull()
     ?: androidManifestAttribute("versionCode")?.toIntOrNull()
-    ?: 1
+    ?: throw GradleException("qtVersionCode must be provided by Qt/CMake for Android release builds")
 val qtVersionName = providers.gradleProperty("qtVersionName").orNull?.takeIf { it.isNotBlank() }
     ?: androidManifestAttribute("versionName")
-    ?: "0.0.0.0"
+    ?: throw GradleException("qtVersionName must be provided by Qt/CMake for Android release builds")
 
 android {
     namespace = "org.amnezia.vpn"

@@ -13,6 +13,9 @@
 #include <QUrl>
 #include <QVariant>
 
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+
 #include "core/repositories/secureServersRepository.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
@@ -26,6 +29,11 @@ namespace
     constexpr auto kManifestName = "manifest.json";
     constexpr auto kFilesDirName = "files";
     constexpr auto kInstallHostScript = ":/server_scripts/update_host/install_server_update_host.sh";
+    constexpr auto kUpdateHostImage = "docker.io/library/busybox:1.36.1";
+
+#ifndef SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64
+#define SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 ""
+#endif
 
     const QStringList kRequiredPlatforms = {
         QStringLiteral("windows-x64"),
@@ -46,8 +54,8 @@ namespace
         }
 
         QCryptographicHash hash(QCryptographicHash::Sha256);
-        while (!file.atEnd()) {
-            hash.addData(file.read(1024 * 1024));
+        if (!hash.addData(&file)) {
+            return {};
         }
         return hash.result().toHex();
     }
@@ -69,6 +77,68 @@ namespace
 
         payloadOut = payloadDoc.object();
         return true;
+    }
+
+    bool decodeStrictBase64(const QByteArray &encoded, QByteArray::Base64Options options, QByteArray &decoded)
+    {
+        const QByteArray::FromBase64Result result = QByteArray::fromBase64Encoding(
+                encoded, options | QByteArray::AbortOnBase64DecodingErrors);
+        if (!result) {
+            decoded.clear();
+            return false;
+        }
+
+        decoded = result.decoded;
+        return true;
+    }
+
+    bool verifyManifestSignature(const QJsonObject &manifest)
+    {
+        if (manifest.value(QStringLiteral("schema")).toString() != QStringLiteral("amnezia-selfhosted-update-v1")
+            || manifest.value(QStringLiteral("signatureAlgorithm")).toString() != QStringLiteral("Ed25519")) {
+            return false;
+        }
+
+        QByteArray payload;
+        QByteArray signature;
+        QByteArray publicKeyPem;
+        if (!decodeStrictBase64(manifest.value(QStringLiteral("payload")).toString().toUtf8(),
+                                QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals,
+                                payload)
+            || !decodeStrictBase64(manifest.value(QStringLiteral("signature")).toString().toUtf8(),
+                                   QByteArray::Base64Encoding,
+                                   signature)
+            || !decodeStrictBase64(QByteArray(SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64),
+                                   QByteArray::Base64Encoding,
+                                   publicKeyPem)
+            || payload.isEmpty() || signature.size() != 64 || publicKeyPem.isEmpty()) {
+            return false;
+        }
+
+        BIO *bio = BIO_new_mem_buf(publicKeyPem.constData(), publicKeyPem.size());
+        if (!bio) {
+            return false;
+        }
+        EVP_PKEY *publicKey = PEM_read_bio_PUBKEY(bio, nullptr, nullptr, nullptr);
+        BIO_free(bio);
+        if (!publicKey) {
+            return false;
+        }
+
+        bool ok = false;
+        EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+        if (ctx) {
+            ok = EVP_PKEY_base_id(publicKey) == EVP_PKEY_ED25519
+                    && EVP_DigestVerifyInit(ctx, nullptr, nullptr, nullptr, publicKey) == 1
+                    && EVP_DigestVerify(ctx,
+                                        reinterpret_cast<const unsigned char *>(signature.constData()),
+                                        static_cast<size_t>(signature.size()),
+                                        reinterpret_cast<const unsigned char *>(payload.constData()),
+                                        static_cast<size_t>(payload.size())) == 1;
+            EVP_MD_CTX_free(ctx);
+        }
+        EVP_PKEY_free(publicKey);
+        return ok;
     }
 
     QString artifactFileName(const QJsonObject &platform)
@@ -174,6 +244,11 @@ bool SelfHostedUpdateBootstrapper::loadPayload(const QString &payloadDir, Payloa
         return false;
     }
 
+    if (!verifyManifestSignature(manifestDoc.object())) {
+        logger.warning() << "Bundled update manifest signature verification failed";
+        return false;
+    }
+
     QJsonObject decodedPayload;
     if (!decodeManifestPayload(manifestDoc.object(), decodedPayload)) {
         logger.warning() << "Bundled update manifest has invalid signed payload";
@@ -229,6 +304,7 @@ bool SelfHostedUpdateBootstrapper::loadPayload(const QString &payloadDir, Payloa
             return false;
         }
         files.append(filePath);
+        payload.fileSha256ByName.insert(QFileInfo(filePath).fileName(), expectedSha256);
     }
 
     payload.rootDir = root.absolutePath();
@@ -257,16 +333,7 @@ bool SelfHostedUpdateBootstrapper::selectServerCredentials(amnezia::ServerCreden
         return credentials.isValid();
     };
 
-    if (selectByServerId(m_serversRepository->defaultServerId())) {
-        return true;
-    }
-
-    for (const QString &serverId : m_serversRepository->orderedServerIds()) {
-        if (selectByServerId(serverId)) {
-            return true;
-        }
-    }
-    return false;
+    return selectByServerId(m_serversRepository->defaultServerId());
 }
 
 bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::ServerCredentials credentials)
@@ -282,12 +349,24 @@ bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::Serv
 
     const QString serverDir = QString::fromLatin1(amnezia::protocols::selfHostedUpdates::hostDirectory);
     const QString remoteManifest = serverDir + QStringLiteral("/") + QString::fromLatin1(kManifestName);
-    const QString remoteTmp = QStringLiteral("/tmp/amnezia-client-updates-%1-%2")
-            .arg(payload.version, QString::number(QCoreApplication::applicationPid()));
+    QString remoteTmp;
+    auto readRemoteTmp = [&remoteTmp](const QString &data, libssh::Client &) {
+        remoteTmp += data.trimmed();
+        return amnezia::ErrorCode::NoError;
+    };
     amnezia::ErrorCode error = sshSession.runScript(credentials,
-                                                    QStringLiteral("rm -rf %1 && mkdir -p %1/files").arg(shellQuote(remoteTmp)));
+                                                    QStringLiteral("set -eu\n"
+                                                                   "remote_tmp=$(mktemp -d /tmp/amnezia-client-updates.XXXXXX)\n"
+                                                                   "chmod 700 \"$remote_tmp\"\n"
+                                                                   "mkdir -p \"$remote_tmp/files\"\n"
+                                                                   "printf '%s' \"$remote_tmp\"\n"),
+                                                    readRemoteTmp);
     if (error != amnezia::ErrorCode::NoError) {
         logger.warning() << "Failed to prepare remote update payload directory";
+        return false;
+    }
+    if (!remoteTmp.startsWith(QStringLiteral("/tmp/amnezia-client-updates."))) {
+        logger.warning() << "Remote update payload directory is invalid";
         return false;
     }
 
@@ -330,16 +409,19 @@ bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::Serv
                 .arg(shellQuote(remoteManifest), shellQuote(QString::fromLatin1(payload.manifestSha256)));
 
         for (const QString &filePath : payload.filePaths) {
-            verifyScript += QStringLiteral("test -s %1\n")
-                    .arg(shellQuote(serverDir + QStringLiteral("/files/") + QFileInfo(filePath).fileName()));
+            const QString fileName = QFileInfo(filePath).fileName();
+            verifyScript += QStringLiteral("test \"$(sha256sum %1 | awk '{print $1}')\" = %2\n")
+                    .arg(shellQuote(serverDir + QStringLiteral("/files/") + fileName),
+                         shellQuote(payload.fileSha256ByName.value(fileName)));
         }
 
         verifyScript += QStringLiteral(
                 "sudo docker ps --format '{{.Names}}' | grep -qx 'amnezia-client-updates'\n"
                 "test \"$(sudo docker exec amnezia-client-updates sh -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" = %1\n"
-                "test \"$(sudo docker run --rm --log-driver none --network host --entrypoint sh docker.io/library/busybox:latest -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" = %1\n"
-                "printf 'manifest_sha256=%s\\ncontainer_manifest_sha256=%s\\nhost_manifest_sha256=%s\\nport_map=%s\\n' %1 \"$(sudo docker exec amnezia-client-updates sh -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" \"$(sudo docker run --rm --log-driver none --network host --entrypoint sh docker.io/library/busybox:latest -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" \"$(sudo docker port amnezia-client-updates 17865 2>/dev/null || true)\"\n")
-                .arg(shellQuote(QString::fromLatin1(payload.manifestSha256)));
+                "test \"$(sudo docker run --rm --log-driver none --network host --entrypoint sh %2 -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" = %1\n"
+                "printf 'manifest_sha256=%s\\ncontainer_manifest_sha256=%s\\nhost_manifest_sha256=%s\\nport_map=%s\\n' %1 \"$(sudo docker exec amnezia-client-updates sh -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" \"$(sudo docker run --rm --log-driver none --network host --entrypoint sh %2 -c \"busybox wget -q -O - 'http://127.0.0.1:17865/manifest.json'\" | sha256sum | awk '{print $1}')\" \"$(sudo docker port amnezia-client-updates 17865 2>/dev/null || true)\"\n")
+                .arg(shellQuote(QString::fromLatin1(payload.manifestSha256)),
+                     shellQuote(QString::fromLatin1(kUpdateHostImage)));
 
         QString verifyOutput;
         const auto captureOutput = [&verifyOutput](const QString &data, libssh::Client &) {

@@ -98,6 +98,22 @@ function New-Base64UrlSecret([int] $ByteCount = 32) {
     return [Convert]::ToBase64String($bytes).TrimEnd("=").Replace("+", "-").Replace("/", "_")
 }
 
+function Protect-SecretPath([string] $Path) {
+    if ([string]::IsNullOrWhiteSpace($Path) -or -not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+    $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
+    $aclArgs = @(
+        $Path,
+        "/inheritance:r",
+        "/grant:r",
+        "*${sid}:F",
+        "*S-1-5-32-544:F",
+        "*S-1-5-18:F"
+    )
+    & icacls @aclArgs | Out-Null
+}
+
 function Test-WslCommand([string] $CommandName) {
     $bashScript = @(
         'export PATH="$HOME/.local/jdk-17/bin:$HOME/.local/bin:$PATH"',
@@ -317,7 +333,15 @@ function Ensure-QtKit([string] $QtHost, [string] $Target, [string] $KitName) {
     }
     $moduleArgs = ""
     if (($Target -eq "android" -or $KitName -eq "gcc_64") -and -not [string]::IsNullOrWhiteSpace($QtAndroidModules)) {
-        $moduleArgs = " -m $QtAndroidModules"
+        $modules = $QtAndroidModules -split "[,;\s]+" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+        foreach ($module in $modules) {
+            if ($module -notmatch "^[A-Za-z0-9_.+-]+$") {
+                throw "Invalid Qt module name: $module"
+            }
+        }
+        if ($modules.Count -gt 0) {
+            $moduleArgs = " -m " + (($modules | ForEach-Object { Quote-Sh $_ }) -join " ")
+        }
     }
     Invoke-Wsl "python3 -m aqt install-qt $(Quote-Sh $QtHost) $(Quote-Sh $Target) $(Quote-Sh $QtVersion) $(Quote-Sh $aqtArch) -O $(Quote-Sh $qtInstallWsl) --timeout 30$moduleArgs$mirrorArgs"
 }
@@ -512,23 +536,26 @@ function Ensure-AndroidReleaseKeystore {
 
     $storePass = New-Base64UrlSecret
     $keyPass = $storePass
+    Protect-SecretPath $KeyDir
     $keystoreDirWsl = Convert-ToWslPath (Split-Path -Parent $AndroidReleaseKeystorePath)
     $keystoreWsl = $keystoreDirWsl.TrimEnd("/") + "/" + [IO.Path]::GetFileName($AndroidReleaseKeystorePath)
     $distinguishedName = "CN=AmneziaVPN Self-Hosted Release, OU=Release, O=AmneziaVPN, L=Local, ST=Local, C=US"
     $generateCommand = "keytool -genkeypair -v" +
         " -keystore $(Quote-Sh $keystoreWsl)" +
-        " -storepass $(Quote-Sh $storePass)" +
-        " -keypass $(Quote-Sh $keyPass)" +
+        " -storepass:env AMNEZIA_ANDROID_STORE_PASS" +
+        " -keypass:env AMNEZIA_ANDROID_KEY_PASS" +
         " -alias $(Quote-Sh $AndroidReleaseKeystoreAlias)" +
         " -keyalg RSA -keysize 4096 -validity 10000" +
         " -dname $(Quote-Sh $distinguishedName)"
     $verifyCommand = "keytool -list" +
         " -keystore $(Quote-Sh $keystoreWsl)" +
-        " -storepass $(Quote-Sh $storePass)" +
+        " -storepass:env AMNEZIA_ANDROID_STORE_PASS" +
         " -alias $(Quote-Sh $AndroidReleaseKeystoreAlias) >/dev/null"
 
     $generateScript = @(
         'export PATH="$HOME/.local/jdk-17/bin:$HOME/.local/bin:$PATH"',
+        "export AMNEZIA_ANDROID_STORE_PASS=$(Quote-Sh $storePass)",
+        "export AMNEZIA_ANDROID_KEY_PASS=$(Quote-Sh $keyPass)",
         'command -v keytool >/dev/null',
         $generateCommand,
         $verifyCommand
@@ -545,6 +572,8 @@ function Ensure-AndroidReleaseKeystore {
         "`$env:QT_ANDROID_KEYSTORE_KEY_PASS = $(Quote-PsSingle $keyPass)"
     ) -join [Environment]::NewLine
     Set-Content -LiteralPath $AndroidReleaseKeystoreEnvFile -Value $envContent -Encoding UTF8
+    Protect-SecretPath $AndroidReleaseKeystorePath
+    Protect-SecretPath $AndroidReleaseKeystoreEnvFile
     Write-Host "Generated Android release keystore and secret env file under $KeyDir"
 }
 
@@ -557,16 +586,16 @@ function Write-EnvironmentFile {
         $publicKeyBase64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($PublicKeyPath))
     }
     $content = @(
-        "`$env:QT_INSTALL_DIR = '$QtInstallDir'",
-        "`$env:QT_ROOT_PATH = '$QtInstallDir\$QtVersion'",
-        "`$env:QT_ANDROID_SHADERTOOLS_LIB = '$(Resolve-AndroidShaderToolsLib)'",
-        "`$env:QIF_ROOT_PATH = '$QtInstallDir\Tools\QtInstallerFramework\4.7'",
-        "`$env:WSL_QIF_ROOT_PATH = '$(Resolve-WslQifRoot)'",
-        "`$env:ANDROID_HOME = '$AndroidHome'",
-        "`$env:WSL_ANDROID_HOME = '$resolvedWslAndroidHome'",
-        "`$env:SELFHOSTED_UPDATE_SYNC_HOST = '$UpdateSyncHost'",
-        "`$env:SELFHOSTED_UPDATE_PRIVATE_KEY_PATH = '$PrivateKeyPath'",
-        "`$env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = '$publicKeyBase64'"
+        "`$env:QT_INSTALL_DIR = $(Quote-PsSingle $QtInstallDir)",
+        "`$env:QT_ROOT_PATH = $(Quote-PsSingle (Join-Path $QtInstallDir $QtVersion))",
+        "`$env:QT_ANDROID_SHADERTOOLS_LIB = $(Quote-PsSingle (Resolve-AndroidShaderToolsLib))",
+        "`$env:QIF_ROOT_PATH = $(Quote-PsSingle (Join-Path $QtInstallDir 'Tools\QtInstallerFramework\4.7'))",
+        "`$env:WSL_QIF_ROOT_PATH = $(Quote-PsSingle (Resolve-WslQifRoot))",
+        "`$env:ANDROID_HOME = $(Quote-PsSingle $AndroidHome)",
+        "`$env:WSL_ANDROID_HOME = $(Quote-PsSingle $resolvedWslAndroidHome)",
+        "`$env:SELFHOSTED_UPDATE_SYNC_HOST = $(Quote-PsSingle $UpdateSyncHost)",
+        "`$env:SELFHOSTED_UPDATE_PRIVATE_KEY_PATH = $(Quote-PsSingle $PrivateKeyPath)",
+        "`$env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = $(Quote-PsSingle $publicKeyBase64)"
     )
     if (Test-Path -LiteralPath $AndroidReleaseKeystoreEnvFile -PathType Leaf) {
         $content += ". $(Quote-PsSingle $AndroidReleaseKeystoreEnvFile)"

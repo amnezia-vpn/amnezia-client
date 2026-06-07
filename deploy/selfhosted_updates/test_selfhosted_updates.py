@@ -277,6 +277,13 @@ class SourceContractTests(unittest.TestCase):
             make_manifest.validate_base_url("https://updates.example.invalid/1"),
             "https://updates.example.invalid/1",
         )
+        for invalid_base_url in (
+            "https://user:pass@updates.example.invalid",
+            "https://updates.example.invalid/update?token=secret",
+            "https://updates.example.invalid/update#manifest",
+        ):
+            with self.assertRaises(SystemExit):
+                make_manifest.validate_base_url(invalid_base_url)
         with self.assertRaises(SystemExit) as no_scheme:
             make_manifest.validate_base_url("10.8.1.0/1")
         self.assertIn("http(s) endpoint URL", str(no_scheme.exception))
@@ -354,6 +361,41 @@ class SourceContractTests(unittest.TestCase):
                     "--artifact",
                 )
             self.assertIn("duplicate platform: windows-x64", str(duplicate_publish_value.exception))
+
+    def test_manifest_tool_rejects_duplicate_output_filenames(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            first_dir = root / "first"
+            second_dir = root / "second"
+            first_dir.mkdir()
+            second_dir.mkdir()
+            first = first_dir / "AmneziaVPN.bin"
+            second = second_dir / "AmneziaVPN.bin"
+            first.write_bytes(b"first")
+            second.write_bytes(b"second")
+
+            old_argv = sys.argv
+            sys.argv = [
+                "make_manifest.py",
+                "--version",
+                "9.9.9.9",
+                "--base-url",
+                "https://updates.example.invalid",
+                "--private-key",
+                str(root / "missing.pem"),
+                "--artifact",
+                f"windows-x64={first}",
+                "--artifact",
+                f"linux-x64={second}",
+                "--out-dir",
+                str(root / "out"),
+            ]
+            try:
+                with self.assertRaises(SystemExit) as duplicate_output:
+                    make_manifest.main()
+            finally:
+                sys.argv = old_argv
+            self.assertIn("duplicate artifact output filename", str(duplicate_output.exception))
 
     def test_android_apk_install_handoff_controls_auto_install_marker(self) -> None:
         activity = (REPO_ROOT / "client/android/src/org/amnezia/vpn/AmneziaActivity.kt").read_text(encoding="utf-8")
@@ -455,7 +497,8 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn('endpoint.contains(QStringLiteral("://"))', update_controller)
         self.assertIn('#include "core/utils/constants/configKeys.h"', update_controller)
         self.assertIn("serverJson.value(configKey::serverRoutingRulesSyncHost).toString()", update_controller)
-        self.assertIn("!trimmedHost.contains(QLatin1Char('/'))", update_controller)
+        self.assertIn("normalizedSelfHostedManifestUrl", update_controller)
+        self.assertIn("url.setPath(path + manifestPath)", update_controller)
         self.assertIn("url.setPort(amnezia::protocols::selfHostedUpdates::syncPort);", update_controller)
         self.assertIn("url.setPath(normalizedPath);", update_controller)
         self.assertNotIn('return QStringLiteral("http://%1:%2%3")', update_controller)
@@ -518,6 +561,10 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("dist/selfhosted-updates/", gitignore)
         self.assertIn("dist/selfhosted-windows-client/", gitignore)
         self.assertIn("aqtinstall.log", gitignore)
+        self.assertIn("*.jks", gitignore)
+        self.assertIn("*.keystore", gitignore)
+        self.assertIn("android-release-keystore.env.ps1", gitignore)
+        self.assertIn("selfhosted-update-private.pem", gitignore)
         self.assertIn("get_android_toolchain_dir", build_sh)
         self.assertIn('$QT_ROOT_PATH/android/lib/cmake/Qt6/qt.toolchain.cmake', build_sh)
         self.assertIn('"-o=openssl/*:no_asm=True"', platform_settings)
@@ -644,6 +691,7 @@ class SourceContractTests(unittest.TestCase):
         self.assertNotIn("macos", setup_release.lower())
         self.assertNotIn("ios", setup_release.lower())
         self.assertIn("publish_release.py", local_release)
+        self.assertIn("[switch] $Publish", local_release)
         self.assertIn("--auto-install", local_release)
         self.assertIn("--public-key-base64", local_release)
         self.assertIn("SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64", local_release)
@@ -659,10 +707,15 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("installOrRefreshUpdateHost", bootstrapper)
         self.assertIn("verifyRemoteUpdateHost", bootstrapper)
         self.assertIn("Remote self-hosted update host verified", bootstrapper)
+        self.assertIn("verifyManifestSignature", bootstrapper)
+        self.assertIn("fileSha256ByName", bootstrapper_h)
+        self.assertIn("mktemp -d /tmp/amnezia-client-updates.XXXXXX", bootstrapper)
         self.assertIn("sudo docker exec amnezia-client-updates", bootstrapper)
         self.assertIn("container_manifest_sha256", bootstrapper)
         self.assertIn("--network host", bootstrapper)
         self.assertIn("host_manifest_sha256", bootstrapper)
+        self.assertIn("docker.io/library/busybox:1.36.1", bootstrapper)
+        self.assertNotIn("docker.io/library/busybox:latest", bootstrapper)
         self.assertLess(
             bootstrapper.index("if (!installOrRefreshUpdateHost())"),
             bootstrapper.index("Bundled self-hosted update payload is already published"),
@@ -827,7 +880,7 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn('is_port "$SYNC_PORT"', script)
         self.assertIn('AMNEZIA_UPDATE_PUBLISH_HOST_PORT must be 0 or 1', script)
         self.assertIn('EXPECTED_SUBNET="172.29.172.0/24"', script)
-        self.assertIn('Existing Docker network amnezia-dns-net must include subnet $EXPECTED_SUBNET', script)
+        self.assertIn('NETWORK_NAME="${CONTAINER_NAME}-net"', script)
         self.assertIn('AUTO_VPN_CONTAINERS="amnezia-awg2 amnezia-awg amnezia-wireguard amnezia-openvpn"', script)
         self.assertIn('AMNEZIA_UPDATE_VPN_CONTAINER must name a running VPN container', script)
         self.assertIn('--network "container:$VPN_CONTAINER"', script)
@@ -844,6 +897,10 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("Bridge update endpoint did not become ready", script)
         self.assertIn("Tunnel update endpoint did not become ready", script)
         self.assertIn("Host update endpoint did not become ready", script)
+        self.assertIn("docker.io/library/busybox:1.36.1", script)
+        self.assertNotIn("busybox:latest", script)
+        self.assertIn('sudo docker rm -f "$HOST_CONTAINER_NAME"', script)
+        self.assertIn('grep "^${CONTAINER_NAME}-vpn-"', script)
 
     @unittest.skipUnless(find_sh(), "sh is required to exercise the update host setup script")
     def test_update_host_setup_validates_inputs_before_docker_run(self) -> None:
@@ -1066,6 +1123,37 @@ class ManifestPublisherTests(unittest.TestCase):
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("public-key-base64", result.stderr + result.stdout)
+
+    def test_publish_validates_explicit_artifacts_before_clearing_out_dir(self) -> None:
+        version = "9.9.9.9"
+        out_dir = self.root / "existing-out"
+        out_dir.mkdir()
+        sentinel = out_dir / "keep.txt"
+        sentinel.write_text("old release", encoding="utf-8")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "publish_release.py"),
+                "--version",
+                version,
+                "--private-key",
+                str(self.private_key),
+                "--artifact",
+                f"windows-x64={self.root / 'missing.exe'}",
+                "--out-dir",
+                str(out_dir),
+                "--base-url",
+                "http://172.29.172.252:17865",
+            ],
+            env=self.env,
+            text=True,
+            capture_output=True,
+        )
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(sentinel.is_file())
+        self.assertIn("Explicit update artifact does not exist", result.stderr + result.stdout)
 
     @unittest.skipUnless(find_powershell(), "PowerShell is required for the local release wrapper smoke test")
     def test_local_release_wrapper_verifies_local_non_apple_artifacts(self) -> None:

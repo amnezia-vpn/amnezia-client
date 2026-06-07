@@ -55,16 +55,19 @@ endif()
 if(DEFINED ENV{QT_ROOT_PATH} AND NOT "$ENV{QT_ROOT_PATH}" STREQUAL "")
     list(APPEND _amnezia_android_shader_tools_candidates
         "$ENV{QT_ROOT_PATH}/android_${CMAKE_ANDROID_ARCH_ABI}/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+        "$ENV{QT_ROOT_PATH}/android/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
     )
 endif()
 if(DEFINED ENV{QT_INSTALL_DIR} AND NOT "$ENV{QT_INSTALL_DIR}" STREQUAL "")
     list(APPEND _amnezia_android_shader_tools_candidates
         "$ENV{QT_INSTALL_DIR}/6.10.1/android_${CMAKE_ANDROID_ARCH_ABI}/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+        "$ENV{QT_INSTALL_DIR}/6.10.1/android/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
     )
 endif()
 if(DEFINED ENV{USER} AND NOT "$ENV{USER}" STREQUAL "")
     list(APPEND _amnezia_android_shader_tools_candidates
         "/mnt/c/Users/$ENV{USER}/Qt/6.10.1/android_${CMAKE_ANDROID_ARCH_ABI}/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+        "/mnt/c/Users/$ENV{USER}/Qt/6.10.1/android/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
     )
 endif()
 foreach(_candidate IN LISTS _amnezia_android_shader_tools_candidates)

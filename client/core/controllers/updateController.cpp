@@ -240,22 +240,46 @@ void UpdateController::fetchSelfHostedManifestFromUrls(const QList<QUrl> &manife
     request.setTransferTimeout(kManifestTransferTimeoutMs);
 
     QNetworkReply *reply = amnApp->networkManager()->get(request);
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, manifestUrls, urlIndex, manifestUrl]() {
+    auto *manifestData = new QByteArray();
+    auto *manifestTooLarge = new bool(false);
+    QObject::connect(reply, &QIODevice::readyRead, this, [reply, manifestData, manifestTooLarge]() {
+        if (manifestData->size() > kManifestMaxPayloadBytes) {
+            return;
+        }
+        manifestData->append(reply->readAll());
+        if (manifestData->size() > kManifestMaxPayloadBytes) {
+            *manifestTooLarge = true;
+            reply->abort();
+        }
+    });
+    QObject::connect(reply, &QNetworkReply::metaDataChanged, this, [reply, manifestTooLarge]() {
+        const QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
+        if (contentLength.isValid() && contentLength.toLongLong() > kManifestMaxPayloadBytes) {
+            *manifestTooLarge = true;
+            reply->abort();
+        }
+    });
+    QObject::connect(reply, &QNetworkReply::finished, this,
+                     [this, reply, manifestData, manifestTooLarge, manifestUrls, urlIndex, manifestUrl]() {
         const bool ok = (reply->error() == QNetworkReply::NoError);
         const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         const QString errorString = ok ? QString() : reply->errorString();
-        const QByteArray data = ok ? reply->readAll() : QByteArray();
+        const QByteArray data = ok ? *manifestData : QByteArray();
         reply->deleteLater();
 
-        if (!ok || statusCode < 200 || statusCode >= 300 || data.size() > kManifestMaxPayloadBytes
+        if (!ok || statusCode < 200 || statusCode >= 300 || *manifestTooLarge || data.size() > kManifestMaxPayloadBytes
             || !processSelfHostedManifest(manifestUrl, data)) {
             if (!ok) {
                 logger.info() << "Self-hosted update manifest unavailable at" << manifestUrl.toString() << errorString;
             }
+            delete manifestData;
+            delete manifestTooLarge;
             fetchSelfHostedManifestFromUrls(manifestUrls, urlIndex + 1);
             return;
         }
 
+        delete manifestData;
+        delete manifestTooLarge;
         emit updateFound();
         scheduleSelfHostedAutoInstall();
         finishUpdateCheck();
@@ -390,31 +414,76 @@ bool UpdateController::isNewVersionAvailable(const QString &version) const
 
 QList<QUrl> UpdateController::selfHostedManifestUrls() const
 {
-    QStringList hosts;
-    const auto addHost = [&hosts](const QString &host) {
-        const QString trimmedHost = host.trimmed();
-        if (!trimmedHost.isEmpty() && !trimmedHost.contains(QLatin1Char('/')) && !hosts.contains(trimmedHost)) {
-            hosts.append(trimmedHost);
+    QList<QUrl> urls;
+    const auto addHost = [this, &urls](const QString &host) {
+        const QUrl url = normalizedSelfHostedManifestUrl(host);
+        if (!url.isValid() || url.isEmpty()) {
+            return;
         }
+        const QString normalized = url.toString(QUrl::FullyEncoded);
+        for (const QUrl &existing : urls) {
+            if (existing.toString(QUrl::FullyEncoded) == normalized) {
+                return;
+            }
+        }
+        urls.append(url);
     };
 
     if (m_serversRepository) {
-        const int defaultServerIndex = m_serversRepository->defaultServerIndex();
-        if (defaultServerIndex >= 0 && defaultServerIndex < m_serversRepository->serversCount()) {
-            const QJsonObject serverJson = m_serversRepository->serverJson(defaultServerIndex);
+        const QString defaultServerId = m_serversRepository->defaultServerId();
+        const QVector<QString> orderedServerIds = m_serversRepository->orderedServerIds();
+        QStringList serverIds;
+        if (!defaultServerId.isEmpty()) {
+            serverIds.append(defaultServerId);
+        }
+        for (const QString &serverId : orderedServerIds) {
+            if (!serverIds.contains(serverId)) {
+                serverIds.append(serverId);
+            }
+        }
+        for (const QString &serverId : serverIds) {
+            const int serverIndex = m_serversRepository->indexOfServerId(serverId);
+            if (serverIndex < 0) {
+                continue;
+            }
+            const QJsonObject serverJson = m_serversRepository->serverJson(serverIndex);
             addHost(serverJson.value(configKey::serverRoutingRulesSyncHost).toString());
-            const ServerCredentials credentials = m_serversRepository->serverCredentials(defaultServerIndex);
+            const ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
             addHost(credentials.hostName);
         }
     }
     addHost(QString::fromLatin1(amnezia::protocols::selfHostedUpdates::syncHost));
 
-    QList<QUrl> urls;
-    urls.reserve(hosts.size());
-    for (const QString &host : hosts) {
-        urls.append(QUrl(selfHostedUpdateUrl(host, QString::fromLatin1(amnezia::protocols::selfHostedUpdates::manifestPath))));
-    }
     return urls;
+}
+
+QUrl UpdateController::normalizedSelfHostedManifestUrl(const QString &host) const
+{
+    const QString trimmedHost = host.trimmed();
+    if (trimmedHost.isEmpty()) {
+        return {};
+    }
+
+    const QUrl explicitUrl(trimmedHost);
+    if (explicitUrl.isValid() && !explicitUrl.scheme().isEmpty()) {
+        if (explicitUrl.scheme() != QStringLiteral("http") && explicitUrl.scheme() != QStringLiteral("https")) {
+            return {};
+        }
+        QUrl url = explicitUrl;
+        const QString manifestPath = QString::fromLatin1(amnezia::protocols::selfHostedUpdates::manifestPath);
+        if (url.path().isEmpty() || url.path() == QStringLiteral("/")) {
+            url.setPath(manifestPath);
+        } else if (!url.path().endsWith(manifestPath)) {
+            QString path = url.path().trimmed();
+            while (path.endsWith(QLatin1Char('/'))) {
+                path.chop(1);
+            }
+            url.setPath(path + manifestPath);
+        }
+        return url;
+    }
+
+    return QUrl(selfHostedUpdateUrl(trimmedHost, QString::fromLatin1(amnezia::protocols::selfHostedUpdates::manifestPath)));
 }
 
 QList<QString> UpdateController::platformCandidates() const
@@ -820,15 +889,29 @@ void UpdateController::startArtifactDownload()
     auto *hash = new QCryptographicHash(QCryptographicHash::Sha256);
     auto *bytesWritten = new qint64(0);
     auto *writeFailed = new bool(false);
+    auto *downloadTooLarge = new bool(false);
 
     QNetworkRequest request;
     request.setTransferTimeout(kInstallerTransferTimeoutMs);
     request.setUrl(m_selectedArtifact.url);
 
     QNetworkReply *reply = amnApp->networkManager()->get(request);
-    QObject::connect(reply, &QIODevice::readyRead, this, [reply, file, hash, bytesWritten, writeFailed]() {
+    QObject::connect(reply, &QNetworkReply::metaDataChanged, this, [this, reply, downloadTooLarge]() {
+        const QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
+        if (m_selectedArtifact.size >= 0 && contentLength.isValid()
+            && contentLength.toLongLong() > m_selectedArtifact.size) {
+            *downloadTooLarge = true;
+            reply->abort();
+        }
+    });
+    QObject::connect(reply, &QIODevice::readyRead, this, [this, reply, file, hash, bytesWritten, writeFailed, downloadTooLarge]() {
         const QByteArray chunk = reply->readAll();
-        if (chunk.isEmpty() || *writeFailed) {
+        if (chunk.isEmpty() || *writeFailed || *downloadTooLarge) {
+            return;
+        }
+        if (m_selectedArtifact.size >= 0 && *bytesWritten + chunk.size() > m_selectedArtifact.size) {
+            *downloadTooLarge = true;
+            reply->abort();
             return;
         }
         if (file->write(chunk) != chunk.size()) {
@@ -838,18 +921,22 @@ void UpdateController::startArtifactDownload()
         hash->addData(chunk);
         *bytesWritten += chunk.size();
     });
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, file, hash, bytesWritten, writeFailed, installerPath, partialPath]() {
-        const auto cleanup = [file, hash, bytesWritten, writeFailed]() {
+    QObject::connect(reply, &QNetworkReply::finished, this,
+                     [this, reply, file, hash, bytesWritten, writeFailed, downloadTooLarge, installerPath, partialPath]() {
+        const auto cleanup = [file, hash, bytesWritten, writeFailed, downloadTooLarge]() {
             delete file;
             delete hash;
             delete bytesWritten;
             delete writeFailed;
+            delete downloadTooLarge;
         };
 
-        if (reply->bytesAvailable() > 0 && !*writeFailed) {
+        if (reply->bytesAvailable() > 0 && !*writeFailed && !*downloadTooLarge) {
             const QByteArray chunk = reply->readAll();
             if (!chunk.isEmpty()) {
-                if (file->write(chunk) != chunk.size()) {
+                if (m_selectedArtifact.size >= 0 && *bytesWritten + chunk.size() > m_selectedArtifact.size) {
+                    *downloadTooLarge = true;
+                } else if (file->write(chunk) != chunk.size()) {
                     *writeFailed = true;
                 } else {
                     hash->addData(chunk);
@@ -871,6 +958,14 @@ void UpdateController::startArtifactDownload()
         }
 
         reply->deleteLater();
+
+        if (*downloadTooLarge) {
+            logger.error() << "Self-hosted installer download exceeded manifest size for" << m_selectedArtifact.url.toString();
+            QFile::remove(partialPath);
+            cleanup();
+            finishSelfHostedInstallerAttempt(InstallerHandoffResult::Failed);
+            return;
+        }
 
         if (*writeFailed) {
             logger.error() << "Failed to write full self-hosted installer:" << partialPath << file->errorString();

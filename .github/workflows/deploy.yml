@@ -1051,17 +1051,15 @@ jobs:
   Extra:
     runs-on: ubuntu-latest
     steps:
-      - name: Search a corresponding PR
-        uses: octokit/request-action@v2.x
-        id: pull_request
-        with:
-          route: GET /repos/${{ github.repository }}/pulls
-          head: ${{ github.repository_owner }}:${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Add PR link to build summary
-        if: ${{ fromJSON(steps.pull_request.outputs.data)[0].number != '' }}
-        run: | 
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pr_number="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls?head=${GITHUB_REPOSITORY_OWNER}:${GITHUB_REF_NAME}" --jq '.[0].number // ""')"
+          if [ -z "$pr_number" ]; then
+            exit 0
+          fi
+          pr_title="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}" --jq '.title')"
+          pr_url="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}" --jq '.html_url')"
           echo "Pull request:" >> $GITHUB_STEP_SUMMARY
-          echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "[[#${pr_number}] ${pr_title}](${pr_url})" >> $GITHUB_STEP_SUMMARY

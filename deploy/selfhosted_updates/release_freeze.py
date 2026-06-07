@@ -106,20 +106,25 @@ def plan(args: argparse.Namespace) -> int:
 def record(args: argparse.Namespace) -> int:
     state = read_state(args.state_file)
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    latest_tag = require_release_tag(args.latest_tag, "--latest-tag")
+    baseline_tag = args.baseline_tag or state.get("baselineTag") or latest_tag
+    if baseline_tag:
+        baseline_tag = require_release_tag(baseline_tag, "--baseline-tag")
 
     state["schema"] = 1
     state["upstreamRepo"] = args.upstream_repo
     state["targetBranch"] = args.target_branch
-    state["baselineTag"] = args.baseline_tag or state.get("baselineTag") or args.latest_tag
-    state["latestObservedTag"] = args.latest_tag
+    state["baselineTag"] = baseline_tag
+    state["latestObservedTag"] = latest_tag
     state["updatedAt"] = now
 
     if args.action == "freeze":
-        if not args.release_tag:
-            raise SystemExit("--release-tag is required with --action freeze")
+        release_tag = require_release_tag(args.release_tag, "--release-tag")
+        if not args.release_sha or not args.upstream_dev_sha:
+            raise SystemExit("--release-sha and --upstream-dev-sha are required with --action freeze")
         state["frozen"] = True
-        state["frozenTag"] = args.release_tag
-        state["baselineTag"] = args.release_tag
+        state["frozenTag"] = release_tag
+        state["baselineTag"] = release_tag
         state["frozenAt"] = now
         state["frozenReleaseSha"] = args.release_sha
         state["lastSyncedUpstreamDev"] = args.upstream_dev_sha

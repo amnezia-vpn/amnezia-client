@@ -887,6 +887,7 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
+    /** Opens the Android package installer for a downloaded self-hosted update APK. */
     @Suppress("unused")
     fun installApk(fileName: String): Int {
         Log.i(TAG, "Install APK: $fileName")

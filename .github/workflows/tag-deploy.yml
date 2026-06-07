@@ -118,6 +118,12 @@ jobs:
         java-version: '11'
 
     - name: 'Build project'
+      working-directory: main
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/keystore/debug.keystore
+        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }}
+        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }}
       run: |
         export QT_HOST_PATH="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
         export NDK_VERSION=23c
@@ -131,23 +137,15 @@ jobs:
         fi
 
         export QT_BIN_DIR=${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_arm64_v8a/bin
-        cd main
-        bash deploy/build_android.sh
-
-    - name: 'Signing APK'
-      run: |
-        pwd
-
-        ANDROID_BUILD_TOOLS_VERSION=30.0.3
-
-        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/zipalign -f -v 4 AmneziaVPN-release-unsigned.apk AmneziaVPN-release-aligned.apk
-        ${ANDROID_HOME}/build-tools/${ANDROID_BUILD_TOOLS_VERSION}/apksigner sign --out AmneziaVPN-release-signed.apk --ks keystore/debug.keystore --ks-key-alias ${{ secrets.DEBUG_ANDROID_KEYSTORE_KEY_ALIAS }} --ks-pass pass:${{secrets.DEBUG_ANDROID_KEYSTOTE_KEY_PASS }} AmneziaVPN-release-aligned.apk
+        deploy/build.sh -t android --sign --abi arm64-v8a --build ./deploy/build/arm64-v8a
+        VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/arm64-v8a/CMakeCache.txt | cut -d= -f2)
+        mv deploy/build/arm64-v8a/client/android-build/AmneziaVPN.apk deploy/build/arm64-v8a/client/android-build/AmneziaVPN_${VERSION}_android9+_arm64-v8a.apk
 
     - name: 'Upload signed Android APK'
       uses: actions/upload-artifact@v7
       with:
         name: AmneziaVPN_android_release_apk
-        path: ${{ runner.temp }}/main/AmneziaVPN-release-signed.apk
+        path: main/deploy/build/arm64-v8a/client/android-build/AmneziaVPN_*_android9+_arm64-v8a.apk
         archive: false
         if-no-files-found: error
         retention-days: 7

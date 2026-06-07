@@ -131,9 +131,11 @@ device_backups/
 .idea/
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
+*.jks
+*.keystore
+android-release-keystore.env.ps1
+selfhosted-update-private.pem
+selfhosted-update-public.pem
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild

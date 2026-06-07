@@ -6,7 +6,7 @@ BRIDGE_HOST="${AMNEZIA_UPDATE_BRIDGE_HOST:-172.29.172.252}"
 SYNC_PORT="${AMNEZIA_UPDATE_SYNC_PORT:-17865}"
 CONTAINER_NAME="${AMNEZIA_UPDATE_CONTAINER_NAME:-amnezia-client-updates}"
 HOST_CONTAINER_NAME="${AMNEZIA_UPDATE_HOST_CONTAINER_NAME:-${CONTAINER_NAME}-host}"
-IMAGE="${AMNEZIA_UPDATE_IMAGE:-docker.io/library/busybox:latest}"
+IMAGE="${AMNEZIA_UPDATE_IMAGE:-docker.io/library/busybox:1.36.1}"
 VPN_CONTAINER="${AMNEZIA_UPDATE_VPN_CONTAINER:-}"
 PUBLISH_HOST_PORT="${AMNEZIA_UPDATE_PUBLISH_HOST_PORT:-1}"
 HOST_BIND="${AMNEZIA_UPDATE_HOST_BIND:-0.0.0.0}"
@@ -114,12 +114,17 @@ esac
 
 sudo mkdir -p "$HOST_DIRECTORY/files"
 
-if ! sudo docker network inspect amnezia-dns-net >/dev/null 2>&1; then
-    sudo docker network create --driver bridge --subnet="$EXPECTED_SUBNET" --opt com.docker.network.bridge.name=amn0 amnezia-dns-net
+NETWORK_NAME="amnezia-dns-net"
+if ! sudo docker network inspect "$NETWORK_NAME" >/dev/null 2>&1; then
+    sudo docker network create --driver bridge --subnet="$EXPECTED_SUBNET" --opt com.docker.network.bridge.name=amn0 "$NETWORK_NAME"
 else
-    NETWORK_SUBNETS="$(sudo docker network inspect -f '{{range .IPAM.Config}}{{println .Subnet}}{{end}}' amnezia-dns-net)"
-    printf '%s\n' "$NETWORK_SUBNETS" | grep -qx "$EXPECTED_SUBNET" \
-        || die "Existing Docker network amnezia-dns-net must include subnet $EXPECTED_SUBNET"
+    NETWORK_SUBNETS="$(sudo docker network inspect -f '{{range .IPAM.Config}}{{println .Subnet}}{{end}}' "$NETWORK_NAME")"
+    if ! printf '%s\n' "$NETWORK_SUBNETS" | grep -qx "$EXPECTED_SUBNET"; then
+        NETWORK_NAME="${CONTAINER_NAME}-net"
+        if ! sudo docker network inspect "$NETWORK_NAME" >/dev/null 2>&1; then
+            sudo docker network create --driver bridge --subnet="$EXPECTED_SUBNET" "$NETWORK_NAME"
+        fi
+    fi
 fi
 
 if ! sudo docker image inspect "$IMAGE" >/dev/null 2>&1; then
@@ -148,9 +153,10 @@ if [ -n "$VPN_CONTAINER" ]; then
 fi
 
 sudo docker rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
-if [ "$PUBLISH_HOST_PORT" = "1" ]; then
-    sudo docker rm -f "$HOST_CONTAINER_NAME" >/dev/null 2>&1 || true
-fi
+sudo docker rm -f "$HOST_CONTAINER_NAME" >/dev/null 2>&1 || true
+for stale_container in $(sudo docker ps -a --format '{{.Names}}' | grep "^${CONTAINER_NAME}-vpn-" || true); do
+    sudo docker rm -f "$stale_container" >/dev/null 2>&1 || true
+done
 PORT_ARGS=""
 
 open_host_firewall_port
@@ -159,7 +165,7 @@ open_host_firewall_port
 sudo docker run -d \
     --log-driver none \
     --restart always \
-    --network amnezia-dns-net \
+    --network "$NETWORK_NAME" \
     --ip "$BRIDGE_HOST" \
     --name "$CONTAINER_NAME" \
     $PORT_ARGS \

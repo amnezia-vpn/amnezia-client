@@ -12,9 +12,11 @@ Runtime update behavior lives in the client C++/Qt code:
   route set.
 - `client/platforms/android/*` handles the Android APK installer handoff.
 
-The helper files in this directory do not ship inside the app. Local release
-automation uses them after platform builds to generate the signed manifest,
-verify artifacts, and publish files to the update server.
+The local release helpers in this directory do not ship inside the app. The
+exception is `install_server_update_host.sh`, which is embedded as a Qt resource
+so the self-hosted Windows client can refresh the update host on the server.
+Local release automation uses these helpers after platform builds to generate
+the signed manifest and verify artifacts.
 
 The client checks signed manifests from:
 
@@ -143,9 +145,10 @@ installer is written to
 `dist\selfhosted-windows-client\<version>\AmneziaVPN_<version>_windows_x64_selfhosted.exe`.
 Install that file on the release workstation. On startup, the Windows client
 uses the saved self-hosted admin SSH credentials to upload `files/`, refresh the
-update-host container, and switch `manifest.json` on the server last. Use
-`-NoPublish` to stop the old direct workstation upload path; the bundled Windows
-client upload still works after installation. Use `-NoBundleUpdatesInWindowsClient`
+update-host container, and switch `manifest.json` on the server last. Direct SSH
+publishing from `local_release.ps1` is disabled by default; use `-Publish` only
+when you intentionally want the release script itself to upload to the server.
+The bundled Windows client upload still works after installation. Use `-NoBundleUpdatesInWindowsClient`
 only when you intentionally need a thin Windows installer without embedded
 payload. `-SkipBuild` skips rebuilding platform artifacts, but still rebuilds
 the bundled Windows release client from the existing manifest payload unless
@@ -226,7 +229,7 @@ signing key, then verifies the generated manifest schema, required platforms,
 `SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64`; it is required when publishing to a
 server.
 
-For local publishing configure:
+For explicit `local_release.ps1 -Publish` direct upload configure:
 
 - `SELFHOSTED_UPDATE_BASE_URL`: client-facing base URL, for example
   `http://SERVER_IP:17865`.
