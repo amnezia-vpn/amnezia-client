@@ -167,12 +167,13 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 
 #ifdef AMNEZIA_DESKTOP
     const bool isWg = VpnProtocol::isWireGuardBased(container);
-    const QString preAllocatedIfname = isWg ? allocateIfname() : QString();
+    const bool isXray = VpnProtocol::isXrayBased(container);
+    const bool useTunnelPath = isWg || isXray;
+    const QString preAllocatedIfname = useTunnelPath ? allocateIfname() : QString();
 
-    // Seamless WG -> WG switch path: already connected via Tunnel, new container is also WG.
     if (m_active
         && m_connectionState == Vpn::ConnectionState::Connected
-        && isWg) {
+        && useTunnelPath) {
         if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
             releaseIfname(preAllocatedIfname);
             setConnectionState(Vpn::ConnectionState::Error);
@@ -184,7 +185,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     }
 
     if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
-        if (isWg) releaseIfname(preAllocatedIfname);
+        if (useTunnelPath) releaseIfname(preAllocatedIfname);
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
         return;
@@ -217,8 +218,11 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_remoteAddress = resolvedRemote;
 
 #ifdef AMNEZIA_DESKTOP
-    if (isWg) {
+    if (useTunnelPath) {
         config.insert("ifname", preAllocatedIfname);
+        if (isXray) {
+            config.insert("tunName", preAllocatedIfname);
+        }
         m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
         wireTunnelSignals(m_active, /*isActive=*/true);
         wireDaemonReconnectSignals();
@@ -544,6 +548,9 @@ void VpnConnection::startTunnelSwitch(DockerContainer container,
 {
     QJsonObject config = vpnConfiguration;
     config.insert("ifname", stagingIfname);
+    if (VpnProtocol::isXrayBased(container)) {
+        config.insert("tunName", stagingIfname);
+    }
     appendKillSwitchConfig(config);
     appendSplitTunnelingConfig(config);
 
@@ -560,10 +567,8 @@ void VpnConnection::onTunnelPrepared()
     if (!tunnel) return;
 
     if (tunnel == m_staging && m_active) {
-        const QString oldIfname = m_active->ifname();
-        m_trafficGuard->swap(m_active, m_staging);
-        delete m_active;
-        releaseIfname(oldIfname);
+        Tunnel* oldTunnel = m_active;
+        const QString oldIfname = oldTunnel->ifname();
 
         m_active = m_staging;
         m_staging = nullptr;
@@ -571,6 +576,10 @@ void VpnConnection::onTunnelPrepared()
         m_vpnConfiguration = m_active->config();
         m_remoteAddress = m_active->remoteAddress();
         m_trafficGuard->setConfig(m_vpnConfiguration);
+
+        m_trafficGuard->swap(oldTunnel, m_active);
+        delete oldTunnel;
+        releaseIfname(oldIfname);
         return;
     }
 

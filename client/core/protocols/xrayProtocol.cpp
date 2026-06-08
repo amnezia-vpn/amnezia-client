@@ -28,11 +28,17 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::configKey::splitTunnelType).toInt());
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
+    m_tunName = configuration.value("tunName").toString();
+    if (m_tunName.isEmpty()) {
+        m_tunName = configuration.value("ifname").toString();
+    }
+    if (m_tunName.isEmpty()) {
 #ifdef Q_OS_MACOS
-    m_tunName = configuration.value("tunName").toString("utun22");
+        m_tunName = QStringLiteral("utun22");
 #else
-    m_tunName = configuration.value("tunName").toString("tun2");
+        m_tunName = QStringLiteral("tun2");
 #endif
+    }
     const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
     m_dnsServers.push_back(QHostAddress(primaryDns));
     if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
@@ -167,7 +173,9 @@ void XrayProtocol::stop()
 void XrayProtocol::setPrimary(const QJsonObject &config)
 {
     Q_UNUSED(config)
-    emit primaryReady();
+    QMetaObject::invokeMethod(this, [this]() {
+        emit primaryReady();
+    }, Qt::QueuedConnection);
 }
 
 ErrorCode XrayProtocol::startTun2Socks()
