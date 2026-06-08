@@ -113,6 +113,12 @@ bool VpnProtocol::isWireGuardBased(amnezia::DockerContainer container)
         || container == amnezia::DockerContainer::WireGuard;
 }
 
+bool VpnProtocol::isXrayBased(amnezia::DockerContainer container)
+{
+    return container == amnezia::DockerContainer::Xray
+        || container == amnezia::DockerContainer::SSXray;
+}
+
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {

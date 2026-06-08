@@ -74,6 +74,7 @@ public:
 
     static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
     static bool isWireGuardBased(amnezia::DockerContainer container);
+    static bool isXrayBased(amnezia::DockerContainer container);
 
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
