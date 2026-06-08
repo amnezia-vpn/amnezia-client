@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Монохромный слой для темизированных иконок Android 13+.
+     Переиспользует векторный силуэт логотипа, вписывая его в safe-zone (~61%)
+     adaptive-иконки. Цвет силуэта система заменяет на тему пользователя. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_amnezia_round"
+    android:insetLeft="19.5%"
+    android:insetTop="19.5%"
+    android:insetRight="19.5%"
+    android:insetBottom="19.5%" />

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Тема приложения для Android 12+ (API 31+).
+         Переопределяет NoActionBar, добавляя явную конфигурацию системного
+         splash-экрана, чтобы убрать белую плашку вокруг иконки на заставке.
+         На API < 31 действует базовый NoActionBar из values/styles.xml. -->
+    <style name="NoActionBar">
+        <!-- Базовые атрибуты (синхронизированы с values/styles.xml) -->
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+
+        <!-- Splash-экран Android 12+ -->
+        <!-- Фон заставки — тёмный, в цвет иконки и темы приложения. -->
+        <item name="android:windowSplashScreenBackground">@color/ic_launcher_background</item>
+        <!-- Тёмный фон за иконкой: убирает системную белую плашку. -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+        <!-- Иконка заставки = adaptive-иконка (система покажет цветной foreground). -->
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/icon</item>
+    </style>
+</resources>
