@@ -47,6 +47,8 @@ class IpcInterface
 
     SLOT(bool xrayStart(const QString &ifname, const QString &config));
     SLOT(bool xrayStop(const QString &ifname));
+    SLOT(bool xrayAddUplinkRoutes(const QString &uplinkIface, const QString &uplinkGateway));
+    SLOT(bool xrayRemoveUplinkRoutes(const QString &uplinkIface, const QString &uplinkGateway));
 
     SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
     SLOT( bool stopNetworkCheck() );

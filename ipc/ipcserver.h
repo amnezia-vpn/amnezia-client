@@ -57,6 +57,8 @@ public:
     virtual bool restoreResolvers() override;
     virtual bool xrayStart(const QString& ifname, const QString& cfg) override;
     virtual bool xrayStop(const QString& ifname) override;
+    virtual bool xrayAddUplinkRoutes(const QString& uplinkIface, const QString& uplinkGateway) override;
+    virtual bool xrayRemoveUplinkRoutes(const QString& uplinkIface, const QString& uplinkGateway) override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 
@@ -83,10 +85,6 @@ private:
         QByteArray stdoutBuf;
         QPointer<QEventLoop> startLoop;
         bool startResult = false;
-#ifdef Q_OS_MAC
-        QString uplinkIface;
-        QString uplinkGateway;
-#endif
     };
     QHash<QString, XrayWorker> m_xrayWorkers;
 

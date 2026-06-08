@@ -39,12 +39,6 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
         m_tunName = QStringLiteral("tun2");
 #endif
     }
-    const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
-    m_dnsServers.push_back(QHostAddress(primaryDns));
-    if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
-        const QString secondaryDns = configuration.value(amnezia::configKey::dns2).toString();
-        m_dnsServers.push_back(QHostAddress(secondaryDns));
-    }
 
     QJsonObject xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::Xray)).toObject();
     if (xrayConfiguration.isEmpty()) {
@@ -133,10 +127,6 @@ void XrayProtocol::stop()
     m_phase = Phase::Stopping;
 
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto restoreResolvers = iface->restoreResolvers();
-        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
-            qWarning() << "Failed to restore resolvers";
-
         auto deleteTun = iface->deleteTun(m_tunName);
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
             qWarning() << "Failed to delete tun";
@@ -282,18 +272,9 @@ ErrorCode XrayProtocol::setupRouting()
 {
     return IpcClient::withInterface(
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
-#ifdef Q_OS_WIN
-                const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
-#endif
                 auto createTun = iface->createTun(m_tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
                     qCritical() << "Failed to assign IP address for TUN";
-                    return ErrorCode::InternalError;
-                }
-
-                auto updateResolvers = iface->updateResolvers(m_tunName, m_dnsServers);
-                if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
-                    qCritical() << "Failed to set DNS resolvers for TUN";
                     return ErrorCode::InternalError;
                 }
 

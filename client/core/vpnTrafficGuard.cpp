@@ -13,6 +13,7 @@
 #endif
 
 #include "core/utils/networkUtilities.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/tunnel.h"
 #include "mozilla/localsocketcontroller.h"
 
@@ -352,11 +353,40 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
 {
     if (!tunnel) return;
 #ifdef AMNEZIA_DESKTOP
+    const QString ifname = tunnel->ifname();
+
+    if (VpnProtocol::isXrayBased(tunnel->container())) {
+        const QJsonObject cfg = tunnel->config();
+        const QString primary = cfg.value(amnezia::configKey::dns1).toString();
+        const QString secondary = cfg.value(amnezia::configKey::dns2).toString();
+        QList<QHostAddress> dns;
+        if (!primary.isEmpty()) dns.append(QHostAddress(primary));
+        if (!secondary.isEmpty() && secondary != primary) dns.append(QHostAddress(secondary));
+
+        IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+            auto updateRes = iface->updateResolvers(ifname, dns);
+            if (!updateRes.waitForFinished() || !updateRes.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: updateResolvers failed for" << ifname;
+            }
+#ifdef Q_OS_MAC
+            const auto gw = NetworkUtilities::getGatewayAndIface();
+            const QString uplinkIface = gw.second.name();
+            const QString uplinkGateway = gw.first;
+            if (!uplinkIface.isEmpty() && !uplinkGateway.isEmpty()) {
+                auto add = iface->xrayAddUplinkRoutes(uplinkIface, uplinkGateway);
+                if (!add.waitForFinished() || !add.returnValue()) {
+                    qWarning() << "VpnTrafficGuard::applyPolicy: xrayAddUplinkRoutes failed on" << uplinkIface;
+                }
+            }
+#endif
+        });
+        return;
+    }
+
     const QJsonObject activate = LocalSocketController::buildActivateJson(tunnel->config(), tunnel->ifname());
     const QStringList prefixes = allowedIpPrefixesFor(activate);
     const QStringList excluded = excludedAddressesFor(activate);
     const QStringList dns = resolversFor(activate);
-    const QString ifname = tunnel->ifname();
     const QString peer = tunnel->remoteAddress();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
@@ -379,10 +409,26 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
 {
     if (!tunnel) return;
 #ifdef AMNEZIA_DESKTOP
+    const QString ifname = tunnel->ifname();
+
+    if (VpnProtocol::isXrayBased(tunnel->container())) {
+        IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+            iface->restoreResolvers();
+#ifdef Q_OS_MAC
+            const auto gw = NetworkUtilities::getGatewayAndIface();
+            const QString uplinkIface = gw.second.name();
+            const QString uplinkGateway = gw.first;
+            if (!uplinkIface.isEmpty()) {
+                iface->xrayRemoveUplinkRoutes(uplinkIface, uplinkGateway);
+            }
+#endif
+        });
+        return;
+    }
+
     const QJsonObject activate = LocalSocketController::buildActivateJson(tunnel->config(), tunnel->ifname());
     const QStringList prefixes = allowedIpPrefixesFor(activate);
     const QStringList excluded = excludedAddressesFor(activate);
-    const QString ifname = tunnel->ifname();
     const QString peer = tunnel->remoteAddress();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
