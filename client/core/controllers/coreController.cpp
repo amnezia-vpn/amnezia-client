@@ -254,10 +254,6 @@ void CoreController::initControllers()
 
     m_updateUiController = new UpdateUiController(m_updateController, this);
     setQmlContextProperty("UpdateController", m_updateUiController);
-
-#ifdef Q_OS_WIN
-    m_selfHostedUpdateBootstrapper->start();
-#endif
 }
 
 void CoreController::initAndroidController()

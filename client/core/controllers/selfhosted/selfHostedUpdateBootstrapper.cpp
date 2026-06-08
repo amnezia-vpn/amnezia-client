@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLoggingCategory>
+#include <QPointer>
 #include <QThreadPool>
 #include <QTimer>
 #include <QUrl>
@@ -168,30 +169,48 @@ SelfHostedUpdateBootstrapper::SelfHostedUpdateBootstrapper(SecureServersReposito
 {
 }
 
-void SelfHostedUpdateBootstrapper::start()
+bool SelfHostedUpdateBootstrapper::start()
 {
-    if (m_started) {
-        return;
+    if (m_publishScheduled || m_publishInProgress) {
+        return true;
     }
-    m_started = true;
+    if (m_publishSucceeded) {
+        return false;
+    }
 
     Payload payload;
     const QString payloadDir = findPayloadDir();
     if (payloadDir.isEmpty() || !loadPayload(payloadDir, payload)) {
-        return;
+        return false;
     }
 
     amnezia::ServerCredentials credentials;
     if (!selectServerCredentials(credentials)) {
         logger.info() << "Bundled self-hosted update payload is present, but no writable self-hosted server credentials are available";
-        return;
+        return false;
     }
 
-    QTimer::singleShot(15000, this, [payload, credentials]() {
-        QThreadPool::globalInstance()->start([payload, credentials]() {
-            publishPayload(payload, credentials);
+    m_publishScheduled = true;
+    QTimer::singleShot(15000, this, [this, payload, credentials]() {
+        m_publishScheduled = false;
+        m_publishInProgress = true;
+        QPointer<SelfHostedUpdateBootstrapper> self(this);
+        QThreadPool::globalInstance()->start([self, payload, credentials]() {
+            const bool success = publishPayload(payload, credentials);
+            if (!self) {
+                return;
+            }
+            QMetaObject::invokeMethod(self, [self, success]() {
+                if (!self) {
+                    return;
+                }
+                self->m_publishInProgress = false;
+                self->m_publishSucceeded = success;
+                emit self->publishFinished(success);
+            }, Qt::QueuedConnection);
         });
     });
+    return true;
 }
 
 bool SelfHostedUpdateBootstrapper::publishNow()
@@ -355,11 +374,10 @@ bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::Serv
         return amnezia::ErrorCode::NoError;
     };
     amnezia::ErrorCode error = sshSession.runScript(credentials,
-                                                    QStringLiteral("set -eu\n"
-                                                                   "remote_tmp=$(mktemp -d /tmp/amnezia-client-updates.XXXXXX)\n"
-                                                                   "chmod 700 \"$remote_tmp\"\n"
-                                                                   "mkdir -p \"$remote_tmp/files\"\n"
-                                                                   "printf '%s' \"$remote_tmp\"\n"),
+                                                    QStringLiteral("remote_tmp=$(mktemp -d /tmp/amnezia-client-updates.XXXXXX) && "
+                                                                   "chmod 700 \"$remote_tmp\" && "
+                                                                   "mkdir -p \"$remote_tmp/files\" && "
+                                                                   "printf '%s' \"$remote_tmp\""),
                                                     readRemoteTmp);
     if (error != amnezia::ErrorCode::NoError) {
         logger.warning() << "Failed to prepare remote update payload directory";

@@ -63,7 +63,7 @@ private:
 
     bool m_isConnected = false;
     bool m_isConnectionInProgress = false;
-    QString m_connectionStateText = tr("Connect");
+    QString m_connectionStateText;
 
     Vpn::ConnectionState m_state;
 };

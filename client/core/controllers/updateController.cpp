@@ -183,12 +183,18 @@ QString UpdateController::getVersion() const
     return m_version;
 }
 
-void UpdateController::checkForUpdates()
+bool UpdateController::isUpdateCheckRunning() const
+{
+    return m_updateCheckRunning;
+}
+
+bool UpdateController::checkForUpdates()
 {
     if (m_updateCheckRunning || m_selfHostedInstallInProgress || m_androidApkInstallPermissionPending || !m_appSettingsRepository) {
-        return;
+        return false;
     }
     m_updateCheckRunning = true;
+    m_updateFoundDuringCheck = false;
     m_useSelfHostedArtifact = false;
     m_selectedArtifact = {};
     m_pendingAutoInstallAttemptId.clear();
@@ -199,11 +205,14 @@ void UpdateController::checkForUpdates()
     } else {
         fetchGatewayUrl();
     }
+    return true;
 }
 
 void UpdateController::finishUpdateCheck()
 {
+    const bool updateAvailable = m_updateFoundDuringCheck;
     m_updateCheckRunning = false;
+    emit updateCheckFinished(updateAvailable);
 }
 
 void UpdateController::startBackgroundUpdateChecks()
@@ -280,6 +289,7 @@ void UpdateController::fetchSelfHostedManifestFromUrls(const QList<QUrl> &manife
 
         delete manifestData;
         delete manifestTooLarge;
+        m_updateFoundDuringCheck = true;
         emit updateFound();
         scheduleSelfHostedAutoInstall();
         finishUpdateCheck();
@@ -390,6 +400,7 @@ void UpdateController::fetchReleaseDate()
             finishUpdateCheck();
             return;
         }
+        m_updateFoundDuringCheck = true;
         emit updateFound();
         finishUpdateCheck();
     });

@@ -14,6 +14,18 @@ import "../Components"
 PageType {
     id: root
 
+    Connections {
+        target: UpdateController
+
+        function onManualUpdateCheckStarted() {
+            PageController.showNotificationMessage(qsTr("Checking for updates..."))
+        }
+
+        function onManualUpdateCheckNoUpdates() {
+            PageController.showNotificationMessage(qsTr("No updates available"))
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -147,9 +159,10 @@ PageType {
                 textColor: AmneziaStyle.color.goldenApricot
 
                 text: qsTr("Check for updates")
+                enabled: !UpdateController.checking
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                    UpdateController.checkForUpdates()
                 }
             }
 

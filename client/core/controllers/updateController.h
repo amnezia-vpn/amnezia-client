@@ -23,13 +23,15 @@ public:
     QString getRawChangelogText() const;
     QString getReleaseDate() const;
     QString getVersion() const;
+    bool isUpdateCheckRunning() const;
 
 public slots:
-    void checkForUpdates();
+    bool checkForUpdates();
     void runInstaller();
 
 signals:
     void updateFound();
+    void updateCheckFinished(bool updateAvailable);
 
 private:
     struct UpdateArtifact
@@ -99,6 +101,7 @@ private:
     QString m_pendingAutoInstallAttemptId;
     bool m_useSelfHostedArtifact = false;
     bool m_updateCheckRunning = false;
+    bool m_updateFoundDuringCheck = false;
     bool m_selfHostedInstallInProgress = false;
     bool m_androidApkInstallPermissionPending = false;
 

@@ -17,8 +17,11 @@ class SelfHostedUpdateBootstrapper : public QObject
 public:
     explicit SelfHostedUpdateBootstrapper(SecureServersRepository *serversRepository, QObject *parent = nullptr);
 
-    void start();
+    bool start();
     bool publishNow();
+
+signals:
+    void publishFinished(bool success);
 
 private:
     struct Payload {
@@ -35,7 +38,9 @@ private:
     bool selectServerCredentials(amnezia::ServerCredentials &credentials) const;
     static bool publishPayload(Payload payload, amnezia::ServerCredentials credentials);
 
-    bool m_started = false;
+    bool m_publishScheduled = false;
+    bool m_publishInProgress = false;
+    bool m_publishSucceeded = false;
     SecureServersRepository *m_serversRepository = nullptr;
 };
 

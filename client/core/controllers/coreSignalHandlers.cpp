@@ -26,6 +26,7 @@
 #include "core/controllers/serversController.h"
 #include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/appSplitTunnelingController.h"
+#include "core/controllers/selfhosted/selfHostedUpdateBootstrapper.h"
 #include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/selfhosted/installController.h"
@@ -434,15 +435,31 @@ void CoreSignalHandlers::initNotificationHandler()
 
 void CoreSignalHandlers::initUpdateFoundHandler()
 {
-    connect(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished, m_coreController->m_updateUiController,
-            &UpdateUiController::checkForUpdates);
+    auto scheduleUpdateCheck = [this]() {
+        QTimer::singleShot(5000, m_coreController->m_updateController, &UpdateController::checkForUpdates);
+    };
+
+    connect(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished, m_coreController->m_updateController,
+            &UpdateController::checkForUpdates);
+
+#ifdef Q_OS_WIN
+    connect(m_coreController->m_selfHostedUpdateBootstrapper, &SelfHostedUpdateBootstrapper::publishFinished, this, [scheduleUpdateCheck](bool) {
+        scheduleUpdateCheck();
+    });
+#endif
 
     connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, this, [this](Vpn::ConnectionState state) {
         if (state != Vpn::ConnectionState::Connected) {
             return;
         }
 
-        QTimer::singleShot(5000, m_coreController->m_updateUiController, &UpdateUiController::checkForUpdates);
+#ifdef Q_OS_WIN
+        if (m_coreController->m_selfHostedUpdateBootstrapper->start()) {
+            return;
+        }
+#endif
+
+        QTimer::singleShot(5000, m_coreController->m_updateController, &UpdateController::checkForUpdates);
     });
 
     connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {

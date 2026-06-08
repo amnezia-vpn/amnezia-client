@@ -5,6 +5,7 @@
 #else
     #include <QApplication>
 #endif
+#include <QCoreApplication>
 
 #include "amneziaApplication.h"
 #include "core/controllers/serversController.h"
@@ -25,6 +26,7 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
 
     m_state = Vpn::ConnectionState::Disconnected;
+    m_connectionStateText = QCoreApplication::translate("ConnectionController", "Connect");
 }
 
 void ConnectionUiController::openConnection()
@@ -57,14 +59,14 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
     m_state = state;
 
     m_isConnected = false;
-    m_connectionStateText = tr("Connecting...");
+    m_connectionStateText = QCoreApplication::translate("ConnectionController", "Connecting...");
     switch (state) {
     case Vpn::ConnectionState::Connected: {
         amnApp->networkManager()->clearConnectionCache();
 
         m_isConnectionInProgress = false;
         m_isConnected = true;
-        m_connectionStateText = tr("Connected");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Connected");
         break;
     }
     case Vpn::ConnectionState::Connecting: {
@@ -73,33 +75,33 @@ void ConnectionUiController::onConnectionStateChanged(Vpn::ConnectionState state
     }
     case Vpn::ConnectionState::Reconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Reconnecting...");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Reconnecting...");
         break;
     }
     case Vpn::ConnectionState::Disconnected: {
         m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Connect");
         break;
     }
     case Vpn::ConnectionState::Disconnecting: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Disconnecting...");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Disconnecting...");
         break;
     }
     case Vpn::ConnectionState::Preparing: {
         m_isConnectionInProgress = true;
-        m_connectionStateText = tr("Preparing...");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Preparing...");
         break;
     }
     case Vpn::ConnectionState::Error: {
         m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Connect");
         emit connectionErrorOccurred(getLastConnectionError());
         break;
     }
     case Vpn::ConnectionState::Unknown: {
         m_isConnectionInProgress = false;
-        m_connectionStateText = tr("Connect");
+        m_connectionStateText = QCoreApplication::translate("ConnectionController", "Connect");
         emit connectionErrorOccurred(getLastConnectionError());
         break;
     }

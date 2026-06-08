@@ -1727,6 +1727,16 @@ Thank you for staying with us!</source>
         <translation>Проверить обновления</translation>
     </message>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <source>Checking for updates...</source>
+        <translation>Проверяем обновления...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <source>No updates available</source>
+        <translation>Обновлений нет</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
         <source>Privacy Policy</source>
         <translation>Политика конфиденциальности</translation>

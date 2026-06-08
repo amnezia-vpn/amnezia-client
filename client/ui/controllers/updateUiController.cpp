@@ -5,6 +5,8 @@ UpdateUiController::UpdateUiController(UpdateController* updateController, QObje
 {
     if (m_updateController) {
         connect(m_updateController, &UpdateController::updateFound, this, &UpdateUiController::updateFound);
+        connect(m_updateController, &UpdateController::updateCheckFinished,
+                this, &UpdateUiController::onUpdateCheckFinished);
     }
 }
 
@@ -69,10 +71,25 @@ QString UpdateUiController::getVersion() const
     return m_updateController ? m_updateController->getVersion() : QString();
 }
 
+bool UpdateUiController::isChecking() const
+{
+    return m_isChecking;
+}
+
 void UpdateUiController::checkForUpdates()
 {
-    if (m_updateController) {
-        m_updateController->checkForUpdates();
+    if (!m_updateController || m_manualCheckRunning) {
+        return;
+    }
+
+    const bool wasUpdateCheckRunning = m_updateController->isUpdateCheckRunning();
+    m_manualCheckRunning = true;
+    m_isChecking = true;
+    emit checkingChanged();
+    emit manualUpdateCheckStarted();
+
+    if (!wasUpdateCheckRunning && !m_updateController->checkForUpdates()) {
+        onUpdateCheckFinished(false);
     }
 }
 
@@ -80,5 +97,20 @@ void UpdateUiController::runInstaller()
 {
     if (m_updateController) {
         m_updateController->runInstaller();
+    }
+}
+
+void UpdateUiController::onUpdateCheckFinished(bool updateAvailable)
+{
+    if (!m_manualCheckRunning) {
+        return;
+    }
+
+    m_manualCheckRunning = false;
+    m_isChecking = false;
+    emit checkingChanged();
+
+    if (!updateAvailable) {
+        emit manualUpdateCheckNoUpdates();
     }
 }
