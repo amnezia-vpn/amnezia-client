@@ -437,17 +437,6 @@ bool IpcServer::xrayStart(const QString& ifname, const QString& cfg)
         }
     }
 
-#ifdef Q_OS_MAC
-    const auto gatewayAndIface = NetworkUtilities::getGatewayAndIface();
-    w.uplinkGateway = gatewayAndIface.first;
-    w.uplinkIface = gatewayAndIface.second.name();
-    if (!w.uplinkIface.isEmpty() && !w.uplinkGateway.isEmpty()) {
-        if (!RouterMac::Instance().routeAddXray(w.uplinkIface, w.uplinkGateway)) {
-            qWarning() << "[xray] failed to install xray routes on" << w.uplinkIface;
-        }
-    }
-#endif
-
     const QJsonObject startCmd{{QStringLiteral("op"), QStringLiteral("start")},
                                {QStringLiteral("config"), cfg}};
     w.process->write(QJsonDocument(startCmd).toJson(QJsonDocument::Compact) + '\n');
@@ -457,7 +446,6 @@ bool IpcServer::xrayStart(const QString& ifname, const QString& cfg)
     w.startResult = false;
     loop.exec();
 
-    // Re-fetch: the worker entry may have been removed during the loop (e.g. process finished).
     auto it = m_xrayWorkers.find(ifname);
     if (it == m_xrayWorkers.end()) {
         return false;
@@ -466,11 +454,6 @@ bool IpcServer::xrayStart(const QString& ifname, const QString& cfg)
     const bool ok = it->startResult;
 
     if (!ok) {
-#ifdef Q_OS_MAC
-        if (!it->uplinkIface.isEmpty()) {
-            RouterMac::Instance().routeDeleteXray(it->uplinkIface, it->uplinkGateway);
-        }
-#endif
         m_xrayWorkers.remove(ifname);
     }
 
@@ -499,12 +482,34 @@ bool IpcServer::xrayStop(const QString& ifname)
         }
     }
 
-#ifdef Q_OS_MAC
-    if (!it->uplinkIface.isEmpty()) {
-        RouterMac::Instance().routeDeleteXray(it->uplinkIface, it->uplinkGateway);
-    }
-#endif
-
     m_xrayWorkers.remove(ifname);
     return true;
+}
+
+bool IpcServer::xrayAddUplinkRoutes(const QString& uplinkIface, const QString& uplinkGateway)
+{
+#ifdef Q_OS_MAC
+    if (uplinkIface.isEmpty() || uplinkGateway.isEmpty()) {
+        return false;
+    }
+    return RouterMac::Instance().routeAddXray(uplinkIface, uplinkGateway);
+#else
+    Q_UNUSED(uplinkIface)
+    Q_UNUSED(uplinkGateway)
+    return true;
+#endif
+}
+
+bool IpcServer::xrayRemoveUplinkRoutes(const QString& uplinkIface, const QString& uplinkGateway)
+{
+#ifdef Q_OS_MAC
+    if (uplinkIface.isEmpty()) {
+        return false;
+    }
+    return RouterMac::Instance().routeDeleteXray(uplinkIface, uplinkGateway);
+#else
+    Q_UNUSED(uplinkIface)
+    Q_UNUSED(uplinkGateway)
+    return true;
+#endif
 }
