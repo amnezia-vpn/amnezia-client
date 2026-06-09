@@ -37,6 +37,7 @@ public:
 
     // Server management
     bool renameServer(const QString &serverId, const QString &name);
+    bool changeServerDns(const QString &serverId, const QString &primaryDns, const QString &secondaryDns, const int &dnsMode);
     void removeServer(const QString &serverId);
     void setDefaultServer(const QString &serverId);
 
@@ -57,6 +58,8 @@ public:
     QMap<DockerContainer, ContainerConfig> getServerContainersMap(const QString &serverId) const;
     DockerContainer getDefaultContainer(const QString &serverId) const;
     ContainerConfig getContainerConfig(const QString &serverId, DockerContainer container) const;
+    QPair<QString, QString> getDnsPair(const QString &serverId) const;
+    int getDnsMode(const QString &serverId) const;
 
     // Validation
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;

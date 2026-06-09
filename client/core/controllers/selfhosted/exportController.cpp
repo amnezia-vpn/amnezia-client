@@ -65,13 +65,15 @@ ExportController::ExportResult ExportController::generateConnectionConfig(const 
     }
     ContainerConfig containerConfig = adminConfig->containerConfig(container);
 
+    const QPair<QString, QString> dns = adminConfig->getDnsPair(m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns());
+
     if (ContainerUtils::containerService(container) != ServiceType::Other) {
         SshSession sshSession;
         Proto protocol = ContainerUtils::defaultProtocol(container);
 
         DnsSettings dnsSettings = {
-            m_appSettingsRepository->primaryDns(),
-            m_appSettingsRepository->secondaryDns()
+            dns.first,
+            dns.second
         };
 
         auto configurator = ConfiguratorBase::create(protocol, &sshSession);
@@ -87,10 +89,6 @@ ExportController::ExportResult ExportController::generateConnectionConfig(const 
             emit appendClientRequested(serverId, clientId, clientName, container);
         }
     }
-
-    const QPair<QString, QString> dns = adminConfig->getDnsPair(m_appSettingsRepository->useAmneziaDns(),
-                                                               m_appSettingsRepository->primaryDns(),
-                                                               m_appSettingsRepository->secondaryDns());
 
     adminConfig->containers.clear();
     adminConfig->containers[container] = containerConfig;
@@ -133,16 +131,14 @@ ExportController::NativeConfigResult ExportController::generateNativeConfig(cons
         result.errorCode = ErrorCode::InternalError;
         return result;
     }
-    const QPair<QString, QString> dns = adminConfig->getDnsPair(m_appSettingsRepository->useAmneziaDns(),
-                                                                m_appSettingsRepository->primaryDns(),
-                                                                m_appSettingsRepository->secondaryDns());
+    const QPair<QString, QString> dns = adminConfig->getDnsPair(m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns());
 
     ContainerConfig modifiedContainerConfig = containerConfig;
     modifiedContainerConfig.container = container;
 
     DnsSettings dnsSettings = {
-        m_appSettingsRepository->primaryDns(),
-        m_appSettingsRepository->secondaryDns()
+        dns.first,
+        dns.second
     };
 
     SshSession sshSession;

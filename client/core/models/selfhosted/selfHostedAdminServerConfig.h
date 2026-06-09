@@ -26,6 +26,7 @@ struct SelfHostedAdminServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
+    int dnsMode = 0;
 
     QString userName;
     QString password;
@@ -41,8 +42,7 @@ struct SelfHostedAdminServerConfig {
 
     void clearCachedClientProfile(DockerContainer container);
 
-    QPair<QString, QString> getDnsPair(bool isAmneziaDnsEnabled, const QString &primaryDns,
-                                       const QString &secondaryDns) const;
+    QPair<QString, QString> getDnsPair(const QString &primaryDns, const QString &secondaryDns) const;
 
     QJsonObject toJson() const;
     static SelfHostedAdminServerConfig fromJson(const QJsonObject &json);

@@ -80,8 +80,8 @@ QString getProtocolName(DockerContainer defaultContainer, const QMap<DockerConta
 namespace amnezia
 {
 
-ServerDescription buildServerDescription(const SelfHostedAdminServerConfig &server, bool isAmneziaDnsEnabled)
-{
+ServerDescription buildServerDescription(const SelfHostedAdminServerConfig &server, bool /*isAmneziaDnsEnabled*/)
+    {
     ServerDescription row = buildBaseDescription(server);
     row.selfHostedSshCredentials.hostName = server.hostName;
     row.selfHostedSshCredentials.userName = server.userName;
@@ -92,7 +92,7 @@ ServerDescription buildServerDescription(const SelfHostedAdminServerConfig &serv
                          && !row.selfHostedSshCredentials.secretData.isEmpty();
 
     row.serverName = server.displayName;
-    row.baseDescription = getBaseDescription(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
+    row.baseDescription = getBaseDescription(server.containers, server.dnsMode == 1, row.hasWriteAccess, row.primaryDnsIsAmnezia);
 
     const QString protocolName = getProtocolName(server.defaultContainer, server.containers);
     row.expandedServerDescription = row.baseDescription + row.hostName;
