@@ -212,14 +212,7 @@ ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository
 
 ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &servicesData)
 {
-#if defined(Q_OS_ANDROID)
-    const QLatin1String marketType("playmarket");
-#else
-    const QLatin1String marketType("appstore");
-#endif
-    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::market, marketType)
-                                     .build();
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository).build();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);

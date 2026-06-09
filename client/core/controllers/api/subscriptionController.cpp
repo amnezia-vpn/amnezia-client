@@ -865,17 +865,19 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         QString offerToken;
         for (const QJsonValue &productValue : products) {
             QJsonObject product = productValue.toObject();
-            if (product.value("productId").toString() == productId) {
-                QJsonArray offers = product.value("offers").toArray();
-                if (!offers.isEmpty()) {
-                    offerToken = offers.at(0).toObject().value("offerToken").toString();
-                    qInfo() << "[Billing] Found offer token for product:" << productId;
+            QJsonArray offers = product.value("offers").toArray();
+            for (const QJsonValue &offerValue : offers) {
+                QJsonObject offer = offerValue.toObject();
+                if (offer.value("basePlanId").toString() == productId) {
+                    offerToken = offer.value("offerToken").toString();
+                    qInfo() << "[Billing] Found offer token for basePlanId:" << productId;
                     break;
                 }
             }
+            if (!offerToken.isEmpty()) break;
         }
         if (offerToken.isEmpty()) {
-            qWarning() << "[Billing] No offer token found for product:" << productId;
+            qWarning() << "[Billing] No offer token found for basePlanId:" << productId;
             return qMakePair(false, QString());
         }
         QJsonObject purchaseResult = androidController->purchaseSubscription(offerToken);
