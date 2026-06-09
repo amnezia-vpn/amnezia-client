@@ -1,6 +1,7 @@
 #include "vpnTrafficGuard.h"
 
 #include <QDebug>
+#include <QEventLoop>
 #include <QHostInfo>
 #include <QNetworkInterface>
 #include <QPointer>
@@ -484,7 +485,37 @@ void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
     if (from) {
         to->setHandoverIfname(from->ifname());
     }
+
+    QEventLoop loop;
+    QTimer guard;
+    guard.setSingleShot(true);
+    const auto activatedConn = connect(to, &Tunnel::activated, &loop, &QEventLoop::quit);
+    const auto failedConn = connect(to, &Tunnel::failed, &loop, [&loop](amnezia::ErrorCode) { loop.quit(); });
+    const auto timeoutConn = connect(&guard, &QTimer::timeout, &loop, [&loop]() {
+        qWarning() << "VpnTrafficGuard::swap: timed out waiting for new tunnel activation";
+        loop.quit();
+    });
+
     commit(to);
+
+    guard.start(5000);
+    loop.exec();
+    guard.stop();
+
+    disconnect(activatedConn);
+    disconnect(failedConn);
+    disconnect(timeoutConn);
+
+    // Service IPCs are processed in order on a single connection. Wait on a trailing
+    // sync request so the killswitch enable from the activation handlers is fully
+    // applied before we deactivate the previous tunnel.
+    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        auto reply = iface->flushDns();
+        if (!reply.waitForFinished(5000) || !reply.returnValue()) {
+            qWarning() << "VpnTrafficGuard::swap: trailing sync IPC timed out or failed";
+        }
+    });
+
     if (from) {
         m_allowedEndpoints.removeAll(from->remoteAddress());
 #ifndef Q_OS_WIN

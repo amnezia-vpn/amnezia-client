@@ -577,9 +577,14 @@ void VpnConnection::onTunnelPrepared()
         m_remoteAddress = m_active->remoteAddress();
         m_trafficGuard->setConfig(m_vpnConfiguration);
 
-        m_trafficGuard->swap(oldTunnel, m_active);
-        delete oldTunnel;
-        releaseIfname(oldIfname);
+        // Run the swap from a clean event-loop tick so the nested QEventLoop inside
+        // VpnTrafficGuard::swap does not deadlock the LSC.readData stack frame that
+        // delivered Tunnel::prepared.
+        QMetaObject::invokeMethod(this, [this, oldTunnel, oldIfname]() {
+            m_trafficGuard->swap(oldTunnel, m_active);
+            delete oldTunnel;
+            releaseIfname(oldIfname);
+        }, Qt::QueuedConnection);
         return;
     }
 
