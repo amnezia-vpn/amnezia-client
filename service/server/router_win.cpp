@@ -5,6 +5,8 @@
 #include <tchar.h>
 
 #include <QProcess>
+#include <QHostAddress>
+#include <QScopeGuard>
 #include <QtConcurrent>
 
 #include <core/utils/networkUtilities.h>
@@ -15,6 +17,60 @@ LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 
 QList<QString> RouterWin::kIpv6Subnets = { "fc00::/7", "2000::/4", "3000::/4" };
+
+namespace {
+quint32 ipv4Mask(int prefixLength)
+{
+    return prefixLength == 0 ? 0 : (0xffffffffu << (32 - prefixLength));
+}
+
+bool isRouteAddCandidate(const QString &ipWithMask)
+{
+    constexpr int minPublicBypassPrefixLength = 24;
+    if (!NetworkUtilities::checkIpSubnetFormat(ipWithMask)) {
+        return false;
+    }
+
+    const QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithMask);
+    const QHostAddress address(ip);
+    if (address.protocol() != QAbstractSocket::IPv4Protocol) {
+        return false;
+    }
+
+    int prefixLength = 32;
+    const QStringList parts = ipWithMask.split("/");
+    if (parts.size() == 2) {
+        bool ok = false;
+        prefixLength = parts.at(1).toInt(&ok);
+        if (!ok || prefixLength < 0 || prefixLength > 32) {
+            return false;
+        }
+    }
+    if (prefixLength == 0) {
+        return false;
+    }
+
+    const quint32 rawAddress = address.toIPv4Address();
+    const auto inRange = [rawAddress](quint32 base, int prefix) {
+        const quint32 mask = ipv4Mask(prefix);
+        return (rawAddress & mask) == (base & mask);
+    };
+    if (address.isNull() || address.isLoopback() || address.isBroadcast()
+        || address.isLinkLocal() || address.isMulticast()) {
+        return false;
+    }
+    if (inRange(0x00000000u, 8) || inRange(0x0a000000u, 8)
+        || inRange(0x64400000u, 10) || inRange(0x7f000000u, 8)
+        || inRange(0xac100000u, 12) || inRange(0xc0000000u, 24)
+        || inRange(0xc0000200u, 24) || inRange(0xc0a80000u, 16)
+        || inRange(0xc6120000u, 15) || inRange(0xc6336400u, 24)
+        || inRange(0xcb007100u, 24) || inRange(0xe0000000u, 4)
+        || inRange(0xf0000000u, 4)) {
+        return false;
+    }
+    return prefixLength >= minPublicBypassPrefixLength;
+}
+}
 
 RouterWin &RouterWin::Instance()
 {
@@ -70,7 +126,7 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     }
 
     int success_count = 0;
-    MIB_IPFORWARDROW ipfrow;
+    MIB_IPFORWARDROW ipfrow = {};
 
     ipfrow.dwForwardPolicy = 0;
     ipfrow.dwForwardAge = INFINITE;
@@ -83,6 +139,8 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     IPAddr dwGwAddr = inet_addr(gw.toStdString().c_str());
     if (GetBestInterface(dwGwAddr, &ipfrow.dwForwardIfIndex) != NO_ERROR) {
         qDebug() << "Router::routeAddList : GetBestInterface failed";
+        if (pIpForwardTable)
+            free(pIpForwardTable);
         return false;
     }
 
@@ -106,6 +164,10 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
     for (int i = 0; i < ips.size(); ++i) {
         QString ipWithMask = ips.at(i);
+        if (!isRouteAddCandidate(ipWithMask)) {
+            qWarning().noquote() << "Router::routeAddList: skipping non-routable split route:" << ipWithMask;
+            continue;
+        }
         QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithMask);
 
         if (!NetworkUtilities::checkIPv4Format(ip)) {
@@ -125,13 +187,35 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
         dwStatus = CreateIpForwardEntry(&ipfrow);
         if (dwStatus == NO_ERROR){
-            m_ipForwardRows.insert(ip, ipfrow);
+            m_ipForwardRows.insert(ipWithMask, ipfrow);
             success_count++;
         }
         else if (dwStatus == ERROR_OBJECT_ALREADY_EXISTS) {
-            m_ipForwardRows.insert(ip, ipfrow);
-            success_count++;
-            qDebug() << "Router::routeAdd: warning, route already exist:" << ip << gw;
+            bool deletedExisting = false;
+            for (int rowIndex = 0; rowIndex < (int)pIpForwardTable->dwNumEntries; ++rowIndex) {
+                MIB_IPFORWARDROW existing = pIpForwardTable->table[rowIndex];
+                if (existing.dwForwardDest == ipfrow.dwForwardDest &&
+                    existing.dwForwardMask == ipfrow.dwForwardMask &&
+                    existing.dwForwardNextHop == ipfrow.dwForwardNextHop) {
+                    DWORD deleteStatus = DeleteIpForwardEntry(&existing);
+                    deletedExisting = deleteStatus == ERROR_SUCCESS || deleteStatus == ERROR_NOT_FOUND;
+                    if (!deletedExisting) {
+                        qWarning() << "Router::routeAdd: failed to replace existing route:" << ip << gw << deleteStatus;
+                    }
+                    break;
+                }
+            }
+            if (deletedExisting) {
+                dwStatus = CreateIpForwardEntry(&ipfrow);
+                if (dwStatus == NO_ERROR || dwStatus == ERROR_OBJECT_ALREADY_EXISTS) {
+                    m_ipForwardRows.insert(ipWithMask, ipfrow);
+                    success_count++;
+                } else {
+                    qDebug() << "Router::routeAdd: failed CreateIpForwardEntry() after replace, Error:" << ip << gw << dwStatus;
+                }
+            } else {
+                qDebug() << "Router::routeAdd: warning, unmanaged route already exists:" << ip << gw;
+            }
         }
         else {
             qDebug() << "Router::routeAdd: failed CreateIpForwardEntry(), Error:" << ip << gw << dwStatus;
@@ -151,6 +235,9 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
 bool RouterWin::clearSavedRoutes()
 {
+    auto resumeGuard = qScopeGuard([this] {
+        if (m_suspended) suspendWcmSvc(false);
+    });
     if (m_ipForwardRows.isEmpty()) return true;
 
     qDebug() << "RouterWin::clearSavedRoutes forward rows size:" << m_ipForwardRows.size();
@@ -182,24 +269,25 @@ bool RouterWin::clearSavedRoutes()
     }
 
     int removed_count = 0;
-    for (auto i = m_ipForwardRows.begin(); i != m_ipForwardRows.end(); ++i) {
+    for (auto i = m_ipForwardRows.begin(); i != m_ipForwardRows.end();) {
         dwStatus = DeleteIpForwardEntry(&i.value());
 
-        if (dwStatus != ERROR_SUCCESS) {
+        if (dwStatus != ERROR_SUCCESS && dwStatus != ERROR_NOT_FOUND) {
             qDebug() << "Router::clearSavedRoutes : Could not delete old row" << i.key();
+            ++i;
         }
-        else  removed_count++;
+        else {
+            removed_count++;
+            i = m_ipForwardRows.erase(i);
+        }
     }
 
     if (pIpForwardTable)
         free(pIpForwardTable);
 
-    qDebug() << "Router::clearSavedRoutes : removed routes:" << removed_count << "of" << m_ipForwardRows.size();
-    m_ipForwardRows.clear();
+    qDebug() << "Router::clearSavedRoutes : removed routes:" << removed_count;
 
-    suspendWcmSvc(false);
-
-    return true;
+    return m_ipForwardRows.isEmpty();
 }
 
 int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
@@ -247,8 +335,10 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
 
         if (ip.isEmpty()) continue;
 
-        in_addr maskAddr;
-        inet_pton(AF_INET, mask.toStdString().c_str(), &maskAddr);
+        in_addr maskAddr = {};
+        if (inet_pton(AF_INET, mask.toStdString().c_str(), &maskAddr) != 1) {
+            continue;
+        }
 
         ipMap.insert(inet_addr(ip.toStdString().c_str()), qMakePair(ipMask, maskAddr.S_un.S_addr));
     }
@@ -261,7 +351,17 @@ int RouterWin::routeDeleteList(const QString &gw, const QStringList &ips)
                 ipfrow.dwForwardNextHop == gw_addr) {
             dwStatus = DeleteIpForwardEntry(&pIpForwardTable->table[i]);
             if (dwStatus == ERROR_SUCCESS) {
-                m_ipForwardRows.remove(ipMap.value(ipfrow.dwForwardDest).first);
+                const QString routeKey = ipMap.value(ipfrow.dwForwardDest).first;
+                for (auto tracked = m_ipForwardRows.find(routeKey);
+                     tracked != m_ipForwardRows.end() && tracked.key() == routeKey;) {
+                    if (tracked.value().dwForwardDest == ipfrow.dwForwardDest &&
+                        tracked.value().dwForwardMask == ipfrow.dwForwardMask &&
+                        tracked.value().dwForwardNextHop == ipfrow.dwForwardNextHop) {
+                        tracked = m_ipForwardRows.erase(tracked);
+                        break;
+                    }
+                    ++tracked;
+                }
                 success_count++;
             }
         }

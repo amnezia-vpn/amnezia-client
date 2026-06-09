@@ -6,6 +6,7 @@
 
 #include <qassert.h>
 
+#include <limits>
 #include <memory>
 
 #include "../windowscommons.h"
@@ -21,6 +22,7 @@
 #include <psapi.h>
 
 #include <QCoreApplication>
+#include <QDir>
 #include <QFileInfo>
 #include <QNetworkInterface>
 #include <QScopeGuard>
@@ -287,6 +289,10 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
 
   logger.debug() << "Pushing new Ruleset for Split-Tunnel " << state;
   auto config = generateAppConfiguration(appPaths);
+  if (config.empty()) {
+    logger.warning() << "Split tunnel app configuration is empty";
+    return false;
+  }
 
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_SET_CONFIGURATION, &config[0],
@@ -323,6 +329,10 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   if (getState() == STATE_INITIALIZED) {
     logger.debug() << "State is Init, requires process config";
     auto config = generateProcessBlob();
+    if (config.empty()) {
+      logger.error() << "Failed to generate process config";
+      return false;
+    }
     auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_PROCESSES, &config[0],
                               (DWORD)config.size(), nullptr, 0, &bytesReturned,
                               nullptr);
@@ -340,6 +350,10 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   logger.debug() << "Driver is  ready || new State:" << stateString();
 
   auto config = generateIPConfiguration(inetAdapterIndex, vpnAdapterIndex);
+  if (config.empty()) {
+    logger.error() << "Failed to generate network config";
+    return false;
+  }
   auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_IP_ADDRESSES, &config[0],
                             (DWORD)config.size(), nullptr, 0, &bytesReturned,
                             nullptr);
@@ -404,13 +418,26 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
   size_t cummulated_string_size = 0;
   QStringList dosPaths;
   for (auto const& path : appPaths) {
-    auto dosPath = convertPath(path);
+    auto dosPath = convertPath(QDir::fromNativeSeparators(path.trimmed()));
+    if (dosPath.isEmpty()) {
+      logger.warning() << "Skipping invalid split tunnel app path" << path;
+      continue;
+    }
+    auto stringLength = dosPath.toStdWString().size() * sizeof(wchar_t);
+    if (stringLength > std::numeric_limits<USHORT>::max()) {
+      logger.warning() << "Skipping split tunnel app path with oversized device path"
+                       << dosPath;
+      continue;
+    }
     dosPaths.append(dosPath);
-    cummulated_string_size += dosPath.toStdWString().size() * sizeof(wchar_t);
+    cummulated_string_size += stringLength;
     logger.debug() << dosPath;
   }
+  if (dosPaths.isEmpty()) {
+    return {};
+  }
   size_t bufferSize = sizeof(CONFIGURATION_HEADER) +
-                      (sizeof(CONFIGURATION_ENTRY) * appPaths.size()) +
+                      (sizeof(CONFIGURATION_ENTRY) * dosPaths.size()) +
                       cummulated_string_size;
   std::vector<uint8_t> outBuffer(bufferSize);
 
@@ -418,7 +445,7 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
   auto entry = (CONFIGURATION_ENTRY*)(header + 1);
 
   auto stringDest = &outBuffer[0] + sizeof(CONFIGURATION_HEADER) +
-                    (sizeof(CONFIGURATION_ENTRY) * appPaths.size());
+                    (sizeof(CONFIGURATION_ENTRY) * dosPaths.size());
 
   SIZE_T stringOffset = 0;
 
@@ -437,7 +464,7 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
     stringOffset += stringLength;
   }
 
-  header->NumEntries = appPaths.length();
+  header->NumEntries = dosPaths.size();
   header->TotalLength = bufferSize;
 
   return outBuffer;
@@ -640,7 +667,11 @@ bool WindowsSplitTunnel::isInstalled() {
 }
 
 QString WindowsSplitTunnel::convertPath(const QString& path) {
-  auto parts = path.split("/");
+  const QString normalizedPath = QDir::fromNativeSeparators(path.trimmed());
+  auto parts = normalizedPath.split("/", Qt::SkipEmptyParts);
+  if (parts.isEmpty()) {
+    return "";
+  }
   QString driveLetter = parts.takeFirst();
   if (!driveLetter.contains(":") || parts.size() == 0) {
     // device should contain : for e.g C:
@@ -650,7 +681,7 @@ QString WindowsSplitTunnel::convertPath(const QString& path) {
   auto ok = QueryDosDeviceW(qUtf16Printable(driveLetter),
                             (wchar_t*)buffer.data(), buffer.size() / 2);
 
-  if (ok == ERROR_INSUFFICIENT_BUFFER) {
+  while (ok == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
     buffer.resize(buffer.size() * 2);
     ok = QueryDosDeviceW(qUtf16Printable(driveLetter), (wchar_t*)buffer.data(),
                          buffer.size() / 2);

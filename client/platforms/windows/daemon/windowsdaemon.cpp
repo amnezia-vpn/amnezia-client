@@ -66,8 +66,16 @@ void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
         return;
 
   if (config.m_vpnDisabledApps.length() > 0) {
-      m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex);
-      m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);
+      if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex)) {
+          emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+          m_splitTunnelManager->stop();
+          return;
+      }
+      if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
+          emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
+          m_splitTunnelManager->stop();
+          return;
+      }
   } else {
       m_splitTunnelManager->stop();
   }
@@ -91,13 +99,19 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
   if (config.m_vpnDisabledApps.length() > 0) {
     if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+      m_splitTunnelManager->stop();
+      return true;
     };
     if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
+      m_splitTunnelManager->stop();
+      return true;
     };
     // Now the driver should be running (State == 4)
     if (!m_splitTunnelManager->isRunning()) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+      m_splitTunnelManager->stop();
+      return true;
     }
     return true;
   }

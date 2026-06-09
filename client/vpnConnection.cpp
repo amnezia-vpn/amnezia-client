@@ -192,6 +192,51 @@ QStringList splitRoutesKeepingHostsInVpn(const QStringList &routes, const QStrin
     result.removeDuplicates();
     return result;
 }
+
+bool isRoutableSplitTunnelRoute(const QString &route)
+{
+    constexpr int minPublicBypassPrefixLength = 24;
+    quint32 address = 0;
+    int prefixLength = 32;
+    if (!parseIpv4Route(route, address, prefixLength) || prefixLength == 0) {
+        return false;
+    }
+
+    const QHostAddress hostAddress(address);
+    const auto inRange = [address](quint32 base, int prefix) {
+        const quint32 mask = ipv4Mask(prefix);
+        return (address & mask) == (base & mask);
+    };
+
+    if (hostAddress.isNull() || hostAddress.isLoopback() || hostAddress.isBroadcast()
+        || hostAddress.isLinkLocal() || hostAddress.isMulticast()) {
+        return false;
+    }
+    if (inRange(0x00000000u, 8) || inRange(0x0a000000u, 8)
+        || inRange(0x64400000u, 10) || inRange(0x7f000000u, 8)
+        || inRange(0xac100000u, 12) || inRange(0xc0000000u, 24)
+        || inRange(0xc0000200u, 24) || inRange(0xc0a80000u, 16)
+        || inRange(0xc6120000u, 15) || inRange(0xc6336400u, 24)
+        || inRange(0xcb007100u, 24) || inRange(0xe0000000u, 4)
+        || inRange(0xf0000000u, 4)) {
+        return false;
+    }
+    return prefixLength >= minPublicBypassPrefixLength;
+}
+
+QStringList routableSplitTunnelRoutes(const QStringList &routes)
+{
+    QStringList result;
+    for (const QString &route : routes) {
+        if (isRoutableSplitTunnelRoute(route)) {
+            result.append(route);
+        } else {
+            qWarning() << "Skipping non-routable split tunnel route" << route;
+        }
+    }
+    result.removeDuplicates();
+    return result;
+}
 }
 
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
@@ -427,6 +472,11 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
     const int activeServerIndex = m_serverIndex >= 0 ? m_serverIndex : m_serversRepository->defaultServerIndex();
     QStringList ips;
     QStringList sites;
+    QStringList protectedHosts = serverRoutingRulesSyncHosts();
+    protectedHosts << m_vpnConfiguration.value(configKey::dns1).toString()
+                   << m_vpnConfiguration.value(configKey::dns2).toString();
+    protectedHosts.removeAll(QString());
+    protectedHosts.removeDuplicates();
     const QVariantMap &m = m_appSettingsRepository->vpnSites(mode);
     for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
         if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
@@ -443,12 +493,14 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
             ips.append(i.key());
         } else {
             ips.append(splitTunnelStoredIps(i.value().toString()));
+            sites.append(i.key());
         }
     }
     ips.removeDuplicates();
     if (mode == RouteMode::VpnAllExceptSites) {
-        ips = splitRoutesKeepingHostsInVpn(ips, serverRoutingRulesSyncHosts());
+        ips = splitRoutesKeepingHostsInVpn(ips, protectedHosts);
     }
+    ips = routableSplitTunnelRoutes(ips);
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         iface->routeAddList(gw, ips);
@@ -456,7 +508,7 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
 
     // re-resolve domains
     for (const QString &site : sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
+        const auto &cbResolv = [this, site, gw, mode, ips, protectedHosts](const QHostInfo &hostInfo) {
             const QList<QHostAddress> &addresses = hostInfo.addresses();
             QString ipv4Addr;
             for (const QHostAddress &addr : hostInfo.addresses()) {
@@ -464,14 +516,21 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
                     const QString &ip = addr.toString();
                     // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
                     if (!ips.contains(ip)) {
-                        IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
-                            iface->routeAddList(gw, QStringList() << ip);
-                        });
-                        m_appSettingsRepository->addVpnSite(mode, site, ip);
+                        QStringList routeIps { ip };
+                        if (mode == RouteMode::VpnAllExceptSites) {
+                            routeIps = splitRoutesKeepingHostsInVpn(routeIps, protectedHosts);
+                        }
+                        routeIps = routableSplitTunnelRoutes(routeIps);
+                        if (!routeIps.isEmpty()) {
+                            IpcClient::withInterface([gw, routeIps](QSharedPointer<IpcInterfaceReplica> iface) {
+                                iface->routeAddList(gw, routeIps);
+                            });
+                            m_appSettingsRepository->addVpnSite(mode, site, ip);
+                        }
                     }
                     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
                         auto reply = iface->flushDns();
-                        if (reply.waitForFinished() || !reply.returnValue())
+                        if (!reply.waitForFinished() || !reply.returnValue())
                             qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
                     });
                     break;
@@ -670,6 +729,11 @@ void VpnConnection::appendSplitTunnelingConfig()
     QJsonArray sitesJsonArray;
     if (allowSiteBasedSplitTunneling && routeMode != RouteMode::VpnAllSites) {
         QStringList sites;
+        QStringList protectedHosts = serverRoutingRulesSyncHosts();
+        protectedHosts << m_vpnConfiguration.value(configKey::dns1).toString()
+                       << m_vpnConfiguration.value(configKey::dns2).toString();
+        protectedHosts.removeAll(QString());
+        protectedHosts.removeDuplicates();
         const auto appendSites = [&sites](const QVariantMap &siteMap) {
             for (auto i = siteMap.constBegin(); i != siteMap.constEnd(); ++i) {
                 if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
@@ -683,8 +747,9 @@ void VpnConnection::appendSplitTunnelingConfig()
         appendSites(m_serversRepository->managedVpnSitesForRouting(activeServerIndex, routeMode));
         sites.removeDuplicates();
         if (routeMode == RouteMode::VpnAllExceptSites) {
-            sites = splitRoutesKeepingHostsInVpn(sites, serverRoutingRulesSyncHosts());
+            sites = splitRoutesKeepingHostsInVpn(sites, protectedHosts);
         }
+        sites = routableSplitTunnelRoutes(sites);
         for (const auto &site : sites) {
             sitesJsonArray.append(site);
         }

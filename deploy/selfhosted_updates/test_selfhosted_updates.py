@@ -810,6 +810,10 @@ class SourceContractTests(unittest.TestCase):
     def test_windows_split_tunnel_does_not_route_empty_peer_endpoints(self) -> None:
         wg_windows = (REPO_ROOT / "client/platforms/windows/daemon/wireguardutilswindows.cpp").read_text(encoding="utf-8")
         route_monitor = (REPO_ROOT / "client/platforms/windows/daemon/windowsroutemonitor.cpp").read_text(encoding="utf-8")
+        split_tunnel = (REPO_ROOT / "client/platforms/windows/daemon/windowssplittunnel.cpp").read_text(encoding="utf-8")
+        windows_daemon = (REPO_ROOT / "client/platforms/windows/daemon/windowsdaemon.cpp").read_text(encoding="utf-8")
+        router_win = (REPO_ROOT / "service/server/router_win.cpp").read_text(encoding="utf-8")
+        vpn_connection = (REPO_ROOT / "client/vpnConnection.cpp").read_text(encoding="utf-8")
 
         self.assertIn("if (!config.m_serverIpv4AddrIn.isEmpty())", wg_windows)
         self.assertIn("if (!config.m_serverIpv6AddrIn.isEmpty())", wg_windows)
@@ -817,6 +821,56 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("addr.protocol() == QAbstractSocket::UnknownNetworkLayerProtocol", route_monitor)
         self.assertIn("prefix.address().protocol() == QAbstractSocket::UnknownNetworkLayerProtocol", route_monitor)
         self.assertIn("if (error == NO_ERROR) {\n    updateCapturedRoutes(family, table);", route_monitor)
+        self.assertIn("isOnLinkRoute(row)", route_monitor)
+        self.assertIn("ERROR_OBJECT_ALREADY_EXISTS", route_monitor)
+        self.assertIn("MIB_IPPROTO_LOCAL", route_monitor)
+        self.assertIn("Adopting existing captured route", route_monitor)
+        self.assertIn("NotifyRouteChange2(AF_UNSPEC", route_monitor)
+        self.assertIn("QDir::fromNativeSeparators", split_tunnel)
+        self.assertIn("if (dosPaths.isEmpty())", split_tunnel)
+        self.assertIn("sizeof(CONFIGURATION_ENTRY) * dosPaths.size()", split_tunnel)
+        self.assertIn("header->NumEntries = dosPaths.size()", split_tunnel)
+        self.assertIn("if (config.empty())", split_tunnel)
+        self.assertIn("std::numeric_limits<USHORT>::max()", split_tunnel)
+        self.assertIn("GetLastError() == ERROR_INSUFFICIENT_BUFFER", split_tunnel)
+        self.assertIn("m_splitTunnelManager->stop();\n      return true;", windows_daemon.replace("\r\n", "\n"))
+        self.assertIn("isRouteAddCandidate", router_win)
+        self.assertIn("address.isMulticast()", router_win)
+        self.assertIn("minPublicBypassPrefixLength = 24", router_win)
+        self.assertIn("MIB_IPFORWARDROW ipfrow = {}", router_win)
+        self.assertIn("m_ipForwardRows.insert(ipWithMask, ipfrow)", router_win)
+        self.assertIn("DeleteIpForwardEntry(&existing)", router_win)
+        self.assertIn("routableSplitTunnelRoutes", vpn_connection)
+        self.assertIn("hostAddress.isMulticast()", vpn_connection)
+        self.assertIn("minPublicBypassPrefixLength = 24", vpn_connection)
+        self.assertIn("splitRoutesKeepingHostsInVpn(ips, protectedHosts)", vpn_connection)
+        self.assertIn("if (!reply.waitForFinished() || !reply.returnValue())", vpn_connection)
+
+    def test_windows_dns_prefers_vpn_interface_metric(self) -> None:
+        dns_utils = (REPO_ROOT / "client/platforms/windows/daemon/dnsutilswindows.cpp").read_text(encoding="utf-8")
+        dns_utils_h = (REPO_ROOT / "client/platforms/windows/daemon/dnsutilswindows.h").read_text(encoding="utf-8")
+
+        self.assertIn("VPN_DNS_INTERFACE_METRIC = 1", dns_utils)
+        self.assertIn("preferInterfaceMetric(AF_INET, m_ipv4Metric)", dns_utils)
+        self.assertIn("preferInterfaceMetric(AF_INET6, m_ipv6Metric)", dns_utils)
+        self.assertIn("row.UseAutomaticMetric = false", dns_utils)
+        self.assertIn("SetIpInterfaceEntry(&row)", dns_utils)
+        self.assertIn("restoreInterfaceMetric(AF_INET, m_ipv4Metric)", dns_utils)
+        self.assertIn("restoreInterfaceMetric(AF_INET6, m_ipv6Metric)", dns_utils)
+        self.assertIn("InterfaceMetricState", dns_utils_h)
+
+    def test_site_split_rejects_broad_and_special_bypass_routes(self) -> None:
+        router_win = (REPO_ROOT / "service/server/router_win.cpp").read_text(encoding="utf-8")
+        vpn_connection = (REPO_ROOT / "client/vpnConnection.cpp").read_text(encoding="utf-8")
+
+        for source in (router_win, vpn_connection):
+            self.assertIn("minPublicBypassPrefixLength = 24", source)
+            self.assertIn("inRange(0x0a000000u, 8)", source)
+            self.assertIn("inRange(0xac100000u, 12)", source)
+            self.assertIn("inRange(0xc0a80000u, 16)", source)
+            self.assertIn("inRange(0x64400000u, 10)", source)
+            self.assertIn("inRange(0xe0000000u, 4)", source)
+            self.assertIn("inRange(0xf0000000u, 4)", source)
 
     def test_deploy_upload_artifacts_have_stable_names(self) -> None:
         deploy_workflow = (REPO_ROOT / ".github/workflows/deploy.yml").read_text(encoding="utf-8")

@@ -11,6 +11,67 @@
 
 namespace {
 Logger logger("WindowsRouteMonitor");
+
+bool isZeroIpv6Address(const IN6_ADDR& address) {
+  const IN6_ADDR zero = {};
+  return memcmp(&address, &zero, sizeof(IN6_ADDR)) == 0;
+}
+
+quint32 ipv4PrefixAddress(const IP_ADDRESS_PREFIX& prefix) {
+  return ntohl(prefix.Prefix.Ipv4.sin_addr.S_un.S_addr);
+}
+
+quint32 ipv4Mask(int prefixLength) {
+  return prefixLength == 0 ? 0 : (0xffffffffu << (32 - prefixLength));
+}
+
+bool ipv4PrefixInRange(const IP_ADDRESS_PREFIX& prefix, quint32 base,
+                       int rangePrefixLength) {
+  if (prefix.Prefix.si_family != AF_INET) {
+    return false;
+  }
+  const quint32 mask = ipv4Mask(rangePrefixLength);
+  return (ipv4PrefixAddress(prefix) & mask) == (base & mask);
+}
+
+bool isPrivateOrSpecialIpv4Route(const IP_ADDRESS_PREFIX& prefix) {
+  return ipv4PrefixInRange(prefix, 0x00000000u, 8) ||
+         ipv4PrefixInRange(prefix, 0x0a000000u, 8) ||
+         ipv4PrefixInRange(prefix, 0x64400000u, 10) ||
+         ipv4PrefixInRange(prefix, 0x7f000000u, 8) ||
+         ipv4PrefixInRange(prefix, 0xa9fe0000u, 16) ||
+         ipv4PrefixInRange(prefix, 0xac100000u, 12) ||
+         ipv4PrefixInRange(prefix, 0xc0000000u, 24) ||
+         ipv4PrefixInRange(prefix, 0xc0000200u, 24) ||
+         ipv4PrefixInRange(prefix, 0xc0a80000u, 16) ||
+         ipv4PrefixInRange(prefix, 0xc6120000u, 15) ||
+         ipv4PrefixInRange(prefix, 0xc6336400u, 24) ||
+         ipv4PrefixInRange(prefix, 0xcb007100u, 24) ||
+         ipv4PrefixInRange(prefix, 0xe0000000u, 4) ||
+         ipv4PrefixInRange(prefix, 0xf0000000u, 4);
+}
+
+bool isOnLinkRoute(const MIB_IPFORWARD_ROW2* row) {
+  if (row->NextHop.si_family == AF_UNSPEC) {
+    return row->Protocol == MIB_IPPROTO_LOCAL ||
+           isPrivateOrSpecialIpv4Route(row->DestinationPrefix);
+  }
+
+  if (row->DestinationPrefix.Prefix.si_family == AF_INET) {
+    return row->NextHop.si_family == AF_INET &&
+           row->NextHop.Ipv4.sin_addr.S_un.S_addr == 0 &&
+           (row->Protocol == MIB_IPPROTO_LOCAL ||
+            isPrivateOrSpecialIpv4Route(row->DestinationPrefix));
+  }
+
+  if (row->DestinationPrefix.Prefix.si_family == AF_INET6) {
+    return row->NextHop.si_family == AF_INET6 &&
+           isZeroIpv6Address(row->NextHop.Ipv6.sin6_addr) &&
+           row->Protocol == MIB_IPPROTO_LOCAL;
+  }
+
+  return true;
+}
 };  // namespace
 
 // Attempt to mark routing entries that we create with a relatively
@@ -63,7 +124,7 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
 
-  NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
+  NotifyRouteChange2(AF_UNSPEC, routeChangeCallback, this, FALSE, &m_routeHandle);
 }
 
 WindowsRouteMonitor::~WindowsRouteMonitor() {
@@ -287,6 +348,12 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
         (row->Metric == EXCLUSION_ROUTE_METRIC)) {
       continue;
     }
+    // Connected/on-link routes already belong to their physical interface.
+    // Cloning them into the VPN pollutes the Windows table and can override
+    // local DNS/LAN routing while site split tunneling is being applied.
+    if (isOnLinkRoute(row)) {
+      continue;
+    }
     // Ignore routes which should be excluded.
     if (isRouteExcluded(&row->DestinationPrefix)) {
       continue;
@@ -328,8 +395,15 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     // Route this traffic into the VPN tunnel.
     DWORD result = CreateIpForwardEntry2(data);
     if (result != NO_ERROR) {
-      logger.error() << "Failed to update route:" << result;
-      delete data;
+      if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+        logger.warning() << "Adopting existing captured route for"
+                         << prefix.toString();
+        m_clonedRoutes.insert(prefix, data);
+        data->Age++;
+      } else {
+        logger.error() << "Failed to update route:" << result;
+        delete data;
+      }
     } else {
       m_clonedRoutes.insert(prefix, data);
       data->Age++;
