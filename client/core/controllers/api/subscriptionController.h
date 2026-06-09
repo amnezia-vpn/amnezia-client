@@ -50,7 +50,12 @@ public:
     ErrorCode importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
-                                        int *duplicateServerIndex = nullptr);
+                                        int *duplicateServerIndex = nullptr,
+                                        const QString &endpoint = QStringLiteral("v1/subscriptions"));
+
+    ErrorCode getSubscriptionInfo(const QString &userCountryCode, const QString &serviceType,
+                                  const QString &serviceProtocol, const QString &purchaseToken,
+                                  QByteArray &responseBody);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
