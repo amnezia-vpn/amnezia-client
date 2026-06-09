@@ -763,8 +763,10 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const int index
         }
 
         emit clientRevoked(index);
-        emit clientsUpdated(m_clientsTable);
     }
+
+    emit clientsUpdated(m_clientsTable);
+    emit revokeFinished(errorCode);
 
     return errorCode;
 }
