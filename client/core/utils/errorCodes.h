@@ -71,6 +71,8 @@ namespace amnezia
         OpenSslFailed = 800,
         XrayExecutableCrashed = 803,
         Tun2SockExecutableCrashed = 804,
+        XrayServerUnreachable = 805,
+        XrayConnectivityCheckFailed = 806,
 
         // import and install errors
         ImportInvalidConfigError = 900,
