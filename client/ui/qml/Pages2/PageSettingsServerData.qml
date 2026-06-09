@@ -96,6 +96,7 @@ PageType {
 
     property list<QtObject> serverActions: [
         check,
+        dns,
         reboot,
         remove,
         clear,
@@ -113,6 +114,33 @@ PageType {
             PageController.showBusyIndicator(true)
             InstallController.scanServerForInstalledContainers(ServersUiController.processedServerId)
             PageController.showBusyIndicator(false)
+        }
+    }
+
+    QtObject {
+        id: dns
+
+        property bool isVisible: root.isServerWithWriteAccess
+        readonly property string title: qsTr("DNS server")
+        function getDescription() {
+            var dnsMode = ServersUiController.processedServerDnsMode
+
+            if (dnsMode === 0) return qsTr("DNS by default (1.1.1.1  1.0.0.1)")
+            if (dnsMode === 1) return qsTr("AmneziaDNS")
+            if (dnsMode === 2) {
+                var dnsPair = ServersUiController.getDnsPair(ServersUiController.processedServerId)
+
+                return qsTr("Specified DNS (%1  %2)")
+                        .arg(dnsPair.first)
+                        .arg(dnsPair.second)
+            }
+
+            return ""
+        }
+        readonly property string description: getDescription()
+        readonly property var tColor: AmneziaStyle.color.paleGray
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsServerDns)
         }
     }
 

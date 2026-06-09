@@ -100,6 +100,12 @@ void ServersUiController::editServerName(const QString &serverId, const QString 
     updateModel();
 }
 
+void ServersUiController::editServerDns(const QString &primaryDns, const QString &secondaryDns, const int &dnsMode)
+{
+    m_serversController->changeServerDns(m_processedServerId, primaryDns, secondaryDns, dnsMode);
+    emit processedServerDnsModeChanged(m_processedServerId);
+}
+
 void ServersUiController::setDefaultServer(const QString &serverId)
 {
     if (serverId.isEmpty()) {
@@ -274,6 +280,24 @@ QString ServersUiController::serverName(const QString &serverId) const
 QString ServersUiController::serverHostName(const QString &serverId) const
 {
     return serverDescriptionById(serverId).hostName;
+}
+
+QVariantMap ServersUiController::getDnsPair(const QString &serverId) const
+{
+    QVariantMap result;
+    result["first"] = m_serversController->getDnsPair(serverId).first;
+    result["second"] = m_serversController->getDnsPair(serverId).second;
+    return result;
+}
+
+int ServersUiController::processedServerDnsMode() const
+{
+    return serverDnsMode(m_processedServerId);
+}
+
+int ServersUiController::serverDnsMode(const QString &serverId) const
+{
+    return m_serversController->getDnsMode(serverId);
 }
 
 int ServersUiController::serverDefaultContainer(const QString &serverId) const

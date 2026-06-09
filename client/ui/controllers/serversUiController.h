@@ -30,6 +30,7 @@ class ServersUiController : public QObject
     
     Q_PROPERTY(QString processedServerId READ getProcessedServerId WRITE setProcessedServerId NOTIFY processedServerIdChanged)
     Q_PROPERTY(int processedContainerIndex READ getProcessedContainerIndex WRITE setProcessedContainerIndex NOTIFY processedContainerIndexChanged)
+    Q_PROPERTY(int processedServerDnsMode READ processedServerDnsMode NOTIFY processedServerDnsModeChanged)
     Q_PROPERTY(bool processedServerIsPremium READ processedServerIsPremium NOTIFY processedServerIdChanged)
     
     Q_PROPERTY(bool hasServersFromGatewayApi READ hasServersFromGatewayApi NOTIFY hasServersFromGatewayApiChanged)
@@ -51,6 +52,7 @@ public slots:
     void removeServerAtIndex(int index);
 
     void editServerName(const QString &serverId, const QString &name);
+    void editServerDns(const QString &primaryDns, const QString &secondaryDns, const int &dnsMode);
 
     void setDefaultServer(const QString &serverId);
     void setDefaultServerAtIndex(int index);
@@ -74,6 +76,9 @@ public slots:
 
     QString serverName(const QString &serverId) const;
     QString serverHostName(const QString &serverId) const;
+    QVariantMap getDnsPair(const QString &serverId) const;
+    int processedServerDnsMode() const;
+    int serverDnsMode(const QString &serverId) const;
     int serverDefaultContainer(const QString &serverId) const;
     bool isServerFromApi(const QString &serverId) const;
     bool isServerCountrySelectionAvailable(const QString &serverId) const;
@@ -111,6 +116,7 @@ signals:
     void defaultServerIdChanged(const QString &serverId);
     void processedServerIdChanged(const QString &serverId);
     void processedContainerIndexChanged(int index);
+    void processedServerDnsModeChanged(const QString &serverId);
     void hasServersFromGatewayApiChanged();
     void updateApiCountryModel();
     void updateApiServicesModel();
