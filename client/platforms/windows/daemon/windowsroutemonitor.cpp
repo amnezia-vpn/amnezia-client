@@ -258,9 +258,11 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family) {
 
   PMIB_IPFORWARD_TABLE2 table;
   DWORD error = GetIpForwardTable2(family, &table);
-  if (error != NO_ERROR) {
+  if (error == NO_ERROR) {
     updateCapturedRoutes(family, table);
     FreeMibTable(table);
+  } else {
+    logger.error() << "Failed to fetch routing table:" << error;
   }
 }
 
@@ -370,7 +372,8 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 
   // Silently ignore non-routeable addresses.
   QHostAddress addr = prefix.address();
-  if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
+  if (addr.protocol() == QAbstractSocket::UnknownNetworkLayerProtocol ||
+      addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
       addr.isMulticast()) {
     return true;
   }
@@ -435,6 +438,10 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
 bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   logger.debug() << "Deleting exclusion route for"
                  << prefix.address().toString();
+
+  if (prefix.address().protocol() == QAbstractSocket::UnknownNetworkLayerProtocol) {
+    return true;
+  }
 
   MIB_IPFORWARD_ROW2* data = m_exclusionRoutes.take(prefix);
   if (data == nullptr) {

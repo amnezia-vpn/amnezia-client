@@ -807,6 +807,17 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("an upstream tag alone is not enough", readme)
         self.assertIn("post-release `upstream/dev` commits are not retained", readme)
 
+    def test_windows_split_tunnel_does_not_route_empty_peer_endpoints(self) -> None:
+        wg_windows = (REPO_ROOT / "client/platforms/windows/daemon/wireguardutilswindows.cpp").read_text(encoding="utf-8")
+        route_monitor = (REPO_ROOT / "client/platforms/windows/daemon/windowsroutemonitor.cpp").read_text(encoding="utf-8")
+
+        self.assertIn("if (!config.m_serverIpv4AddrIn.isEmpty())", wg_windows)
+        self.assertIn("if (!config.m_serverIpv6AddrIn.isEmpty())", wg_windows)
+        self.assertNotIn("addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));\n  }", wg_windows)
+        self.assertIn("addr.protocol() == QAbstractSocket::UnknownNetworkLayerProtocol", route_monitor)
+        self.assertIn("prefix.address().protocol() == QAbstractSocket::UnknownNetworkLayerProtocol", route_monitor)
+        self.assertIn("if (error == NO_ERROR) {\n    updateCapturedRoutes(family, table);", route_monitor)
+
     def test_deploy_upload_artifacts_have_stable_names(self) -> None:
         deploy_workflow = (REPO_ROOT / ".github/workflows/deploy.yml").read_text(encoding="utf-8")
         tag_deploy_workflow = (REPO_ROOT / ".github/workflows/tag-deploy.yml").read_text(encoding="utf-8")
