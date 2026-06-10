@@ -17,6 +17,8 @@ param(
     [string] $PublicKeyBase64 = $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64,
     [string] $SshKey = $env:SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH,
     [string] $WslAndroidHome = $(if ($env:WSL_ANDROID_HOME) { $env:WSL_ANDROID_HOME } else { "" }),
+    [ValidateRange(0, 256)]
+    [int] $BuildJobs = 0,
     [switch] $SkipBuild,
     [switch] $Publish,
     [switch] $NoPublish,
@@ -49,6 +51,19 @@ function Assert-ExistingFile([string] $Path, [string] $Label) {
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
         throw "$Label does not exist or is not a file: $Path"
     }
+}
+
+function Resolve-BuildJobs {
+    if ($BuildJobs -gt 0) {
+        return $BuildJobs
+    }
+    if (-not [string]::IsNullOrWhiteSpace($env:AMNEZIA_BUILD_JOBS)) {
+        $parsedJobs = 0
+        if ([int]::TryParse($env:AMNEZIA_BUILD_JOBS, [ref] $parsedJobs) -and $parsedJobs -gt 0) {
+            return $parsedJobs
+        }
+    }
+    return [Math]::Max(1, [Environment]::ProcessorCount)
 }
 
 function Get-ProjectVersion {
@@ -327,10 +342,15 @@ function Copy-Artifact([string] $SourceRoot, [string] $Pattern, [string] $Destin
 }
 
 function Build-WindowsInstaller([string] $BundleDir) {
+    $buildJobs = Resolve-BuildJobs
     $previousConanNoRemote = $env:CONAN_NO_REMOTE
     $previousPublicKeyBase64 = $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64
     $previousBundleDir = $env:SELFHOSTED_UPDATE_BUNDLE_DIR
+    $previousBuildJobs = $env:AMNEZIA_BUILD_JOBS
+    $previousCmakeBuildParallelLevel = $env:CMAKE_BUILD_PARALLEL_LEVEL
     $env:CONAN_NO_REMOTE = "1"
+    $env:AMNEZIA_BUILD_JOBS = [string] $buildJobs
+    $env:CMAKE_BUILD_PARALLEL_LEVEL = [string] $buildJobs
     $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = $PublicKeyBase64
     if ([string]::IsNullOrWhiteSpace($BundleDir)) {
         Remove-Item Env:\SELFHOSTED_UPDATE_BUNDLE_DIR -ErrorAction SilentlyContinue
@@ -338,10 +358,20 @@ function Build-WindowsInstaller([string] $BundleDir) {
         $env:SELFHOSTED_UPDATE_BUNDLE_DIR = $BundleDir
     }
     try {
-        Invoke-External "cmd.exe" @("/d", "/s", "/c", "`"$RepoRoot\deploy\build.bat`" --installer ifw -arch x64")
+        Invoke-External "cmd.exe" @("/d", "/s", "/c", "`"$RepoRoot\deploy\build.bat`" --installer ifw -arch x64 --jobs $buildJobs")
     } finally {
         $env:CONAN_NO_REMOTE = $previousConanNoRemote
         $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = $previousPublicKeyBase64
+        if ($null -eq $previousBuildJobs) {
+            Remove-Item Env:\AMNEZIA_BUILD_JOBS -ErrorAction SilentlyContinue
+        } else {
+            $env:AMNEZIA_BUILD_JOBS = $previousBuildJobs
+        }
+        if ($null -eq $previousCmakeBuildParallelLevel) {
+            Remove-Item Env:\CMAKE_BUILD_PARALLEL_LEVEL -ErrorAction SilentlyContinue
+        } else {
+            $env:CMAKE_BUILD_PARALLEL_LEVEL = $previousCmakeBuildParallelLevel
+        }
         if ($null -eq $previousBundleDir) {
             Remove-Item Env:\SELFHOSTED_UPDATE_BUNDLE_DIR -ErrorAction SilentlyContinue
         } else {
@@ -529,6 +559,8 @@ if ($Preflight) {
 if (-not $SkipBuild) {
     $qtRootPath = Resolve-QtRootPath
     $qifRootPath = Resolve-QifRootPath
+    $buildJobs = Resolve-BuildJobs
+    Write-Step "Use parallel build jobs: $buildJobs"
 
     if ($BuildPlatform -contains "windows") {
         Write-Step "Build Windows x64 installer locally"
@@ -547,9 +579,12 @@ if (-not $SkipBuild) {
         }
         $wslQifRootPath = Resolve-WslQifRootPath
         $linuxExports += "export QIF_ROOT_PATH=$(Quote-Sh $wslQifRootPath)"
+        $linuxExports += "export AMNEZIA_BUILD_JOBS=$(Quote-Sh ([string] $buildJobs))"
+        $linuxExports += "export CMAKE_BUILD_PARALLEL_LEVEL=$(Quote-Sh ([string] $buildJobs))"
+        $linuxExports += "export MAKEFLAGS=$(Quote-Sh ("-j$buildJobs"))"
         $linuxExports += "export CONAN_NO_REMOTE=1"
         $linuxExports += "export SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64=$(Quote-Sh $PublicKeyBase64)"
-        Invoke-WslBash (("{0}; cd {1} && run_repo_build_sh --source {1} --build {2} --target linux --installer IFW" -f ($linuxExports -join "; "), (Quote-Sh $repoWsl), (Quote-Sh $buildWsl)).TrimStart("; "))
+        Invoke-WslBash (("{0}; cd {1} && run_repo_build_sh --source {1} --build {2} --target linux --installer IFW --jobs {3}" -f ($linuxExports -join "; "), (Quote-Sh $repoWsl), (Quote-Sh $buildWsl), $buildJobs).TrimStart("; "))
         Copy-Artifact (Join-Path $RepoRoot "deploy\build-linux") "AmneziaVPN_${Version}_linux_x64.run" $ArtifactDir
     }
 
@@ -565,6 +600,10 @@ if (-not $SkipBuild) {
             "export QT_ANDROID_KEYSTORE_STORE_PASS=$(Quote-Sh $env:QT_ANDROID_KEYSTORE_STORE_PASS)",
             "export ANDROID_HOME=$(Quote-Sh $androidHomeWsl)",
             "export ANDROID_SDK_ROOT=$(Quote-Sh $androidHomeWsl)",
+            "export AMNEZIA_BUILD_JOBS=$(Quote-Sh ([string] $buildJobs))",
+            "export CMAKE_BUILD_PARALLEL_LEVEL=$(Quote-Sh ([string] $buildJobs))",
+            "export MAKEFLAGS=$(Quote-Sh ("-j$buildJobs"))",
+            "export GRADLE_OPTS=$(Quote-Sh ("-Dorg.gradle.workers.max=$buildJobs"))",
             "export CONAN_NO_REMOTE=1",
             'export AWG_ANDROID_GRADLE_USER_HOME="$HOME/.cache/amnezia/awg-android-gradle"',
             "export SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64=$(Quote-Sh $PublicKeyBase64)"
@@ -601,7 +640,7 @@ if (-not $SkipBuild) {
             'if [ -n "${JAVA_HOME:-}" ] && [ -f "$JAVA_HOME/bin/java.exe" ]; then windows_java_home="$JAVA_HOME"; java_shim_dir="$PWD/deploy/build/java-home-shim"; mkdir -p "$java_shim_dir/bin"; for tool in java javac keytool jar; do printf ''#!/bin/sh\nexec "%s/bin/%s.exe" "$@"\n'' "$windows_java_home" "$tool" > "$java_shim_dir/bin/$tool"; chmod +x "$java_shim_dir/bin/$tool"; done; export JAVA_HOME="$java_shim_dir"; export PATH="$JAVA_HOME/bin:$PATH"; fi',
             'sed -i ''s/\r$//'' client/android/gradlew && chmod +x client/android/gradlew',
             'build_dir=./deploy/build-android-arm64-v8a',
-            'run_repo_build_sh --target android --sign --abi arm64-v8a --build "$build_dir"',
+            "run_repo_build_sh --target android --sign --abi arm64-v8a --build `"$build_dir`" --jobs $buildJobs",
             "version=`$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build-android-arm64-v8a/CMakeCache.txt | cut -d= -f2)",
             "cd deploy/build-android-arm64-v8a/client/android-build && rename_artifact AmneziaVPN.apk AmneziaVPN_`${version}_android9+_arm64-v8a.apk && cd - >/dev/null"
         ) -join "; "

@@ -136,6 +136,13 @@ $env:WSL_QIF_ROOT_PATH = "/home/<wsl-user>/Qt/Tools/QtInstallerFramework/4.7"
 powershell -ExecutionPolicy Bypass -File deploy\selfhosted_updates\local_release.ps1
 ```
 
+`local_release.ps1` parallelizes platform builds with the logical processor
+count by default. Override it when you want to leave CPU/RAM for other work:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File deploy\selfhosted_updates\local_release.ps1 -BuildJobs 24
+```
+
 The script calls `deploy\build.bat` for Windows and `deploy/build.sh` through
 WSL for Linux and Android. It copies release artifacts into
 `dist\selfhosted-local-artifacts\<version>`, generates and verifies the signed
