@@ -106,7 +106,8 @@ ErrorCode ConnectionController::isConnectionSupported(const QString &serverId) c
         return ErrorCode::AmneziaServiceNotRunning;
     }
 
-    if (serverConfigUtils::isLegacyApiSubscription(m_serversRepository->serverKind(serverId))) {
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (serverConfigUtils::isLegacyApiSubscription(kind)) {
         return ErrorCode::LegacyApiV1NotSupportedError;
     }
 
@@ -117,6 +118,9 @@ ErrorCode ConnectionController::isConnectionSupported(const QString &serverId) c
     }
 
     if (container == DockerContainer::None) {
+        if (serverConfigUtils::isApiV2Subscription(kind)) {
+            return ErrorCode::NoError;
+        }
         return ErrorCode::NoInstalledContainersError;
     }
 
