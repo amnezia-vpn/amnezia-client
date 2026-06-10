@@ -73,6 +73,7 @@ namespace amnezia
         Tun2SockExecutableCrashed = 804,
         XrayServerUnreachable = 805,
         XrayConnectivityCheckFailed = 806,
+        XrayConnectionLost = 807,
 
         // import and install errors
         ImportInvalidConfigError = 900,

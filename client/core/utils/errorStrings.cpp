@@ -60,7 +60,8 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::AmneziaServiceConnectionFailed): errorMessage = QObject::tr("Amnezia helper service error"); break;
     case (ErrorCode::OpenSslFailed): errorMessage = QObject::tr("OpenSSL failed"); break;
     case (ErrorCode::XrayServerUnreachable): errorMessage = QObject::tr("Can't connect: the VPN server is unreachable"); break;
-    case (ErrorCode::XrayConnectivityCheckFailed): errorMessage = QObject::tr("Connected, but no internet traffic flows through the tunnel"); break;
+    case (ErrorCode::XrayConnectivityCheckFailed): errorMessage = QObject::tr("Can't connect: no internet traffic flows through the tunnel"); break;
+    case (ErrorCode::XrayConnectionLost): errorMessage = QObject::tr("Connection lost: traffic stopped flowing through the tunnel"); break;
 
     // VPN errors
     case (ErrorCode::OpenVpnAdaptersInUseError): errorMessage = QObject::tr("Can't connect: another VPN connection is active"); break;

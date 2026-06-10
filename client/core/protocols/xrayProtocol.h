@@ -54,13 +54,20 @@ private:
     static constexpr int tun2socksRetryDelayMs = 400;
 
     bool m_connectivityProbeStarted = false;
+    bool m_tunResourceBusy = false;
 
     QTimer *m_livenessTimer = nullptr;
     int m_livenessFailures = 0;
-    static constexpr int serverProbeTimeoutMs = 5000;
-    static constexpr int connectivityProbeTimeoutMs = 7000;
-    static constexpr int livenessIntervalMs = 15000;
-    static constexpr int maxLivenessFailures = 3;
+
+    static constexpr int defaultServerProbeTimeoutMs = 5000;
+    static constexpr int defaultConnectivityProbeTimeoutMs = 7000;
+    static constexpr int defaultLivenessIntervalMs = 15000;
+    static constexpr int defaultMaxLivenessFailures = 3;
+
+    int m_serverProbeTimeoutMs = defaultServerProbeTimeoutMs;
+    int m_connectivityProbeTimeoutMs = defaultConnectivityProbeTimeoutMs;
+    int m_livenessIntervalMs = defaultLivenessIntervalMs;
+    int m_maxLivenessFailures = defaultMaxLivenessFailures;
 };
 
 #endif // XRAYPROTOCOL_H

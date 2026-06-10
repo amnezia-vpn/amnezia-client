@@ -13,13 +13,9 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
-#include <QNetworkAccessManager>
 #include <QNetworkInterface>
 #include <QNetworkProxy>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 #include <QTcpSocket>
-#include <QUrl>
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
@@ -124,8 +120,6 @@ ErrorCode XrayProtocol::start()
         return ErrorCode::XrayExecutableCrashed;
     }
 
-    // Fix fingerprint: old configs may contain "Mozilla/5.0" which xray-core rejects.
-    // Replace with the correct default at runtime so stale stored configs still work.
     if (xrayConfigStr.contains("Mozilla/5.0", Qt::CaseInsensitive)) {
         xrayConfigStr.replace("Mozilla/5.0", amnezia::protocols::xray::defaultFingerprint,
                               Qt::CaseInsensitive);
@@ -133,15 +127,12 @@ ErrorCode XrayProtocol::start()
                  << amnezia::protocols::xray::defaultFingerprint;
     }
 
-    // Fix inbound listen address: old configs may use "10.33.0.2" which doesn't exist
-    // until TUN is created. xray must listen on 127.0.0.1 so tun2socks can connect.
     if (xrayConfigStr.contains(amnezia::protocols::xray::defaultLocalAddr)) {
         xrayConfigStr.replace(amnezia::protocols::xray::defaultLocalAddr,
                               amnezia::protocols::xray::defaultLocalListenAddr);
         qDebug() << "XrayProtocol: patched legacy inbound listen address to 127.0.0.1";
     }
 
-    // Safety net: if tun2socks never reports the bridge (e.g. xray hangs), bail out.
     startTimeoutTimer();
 
     return IpcClient::withInterface(
@@ -167,6 +158,25 @@ void XrayProtocol::stop()
     stopTimeoutTimer();
     stopLivenessMonitor();
 
+    if (m_tun2socksProcess) {
+        m_tun2socksProcess->blockSignals(true);
+
+#ifndef Q_OS_WIN
+        m_tun2socksProcess->terminate();
+        auto waitForFinished = m_tun2socksProcess->waitForFinished(1000);
+        if (!waitForFinished.waitForFinished() || !waitForFinished.returnValue()) {
+            qWarning() << "Failed to terminate tun2socks. Killing the process...";
+            m_tun2socksProcess->kill();
+            m_tun2socksProcess->waitForFinished(1000);
+        }
+#else
+        m_tun2socksProcess->kill();
+#endif
+
+        m_tun2socksProcess->close();
+        m_tun2socksProcess.reset();
+    }
+
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();
         if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
@@ -189,31 +199,13 @@ void XrayProtocol::stop()
             qWarning() << "Failed to stop xray";
     });
 
-    if (m_tun2socksProcess) {
-        m_tun2socksProcess->blockSignals(true);
-
-#ifndef Q_OS_WIN
-        m_tun2socksProcess->terminate();
-        auto waitForFinished = m_tun2socksProcess->waitForFinished(1000);
-        if (!waitForFinished.waitForFinished() || !waitForFinished.returnValue()) {
-            qWarning() << "Failed to terminate tun2socks. Killing the process...";
-            m_tun2socksProcess->kill();
-        }
-#else
-        // terminate does not do anything useful on Windows
-        // so just kill the process
-        m_tun2socksProcess->kill();
-#endif
-
-        m_tun2socksProcess->close();
-        m_tun2socksProcess.reset();
-    }
-
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
 ErrorCode XrayProtocol::startTun2Socks()
 {
+    m_tunResourceBusy = false;
+
     m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
     if (!m_tun2socksProcess->waitForSource()) {
         return ErrorCode::AmneziaServiceConnectionFailed;
@@ -238,14 +230,14 @@ ErrorCode XrayProtocol::startTun2Socks()
                 if (!line.contains("[TCP]") && !line.contains("[UDP]"))
                     qDebug() << "[tun2socks]:" << line;
 
+                if (line.contains("resource busy"))
+                    m_tunResourceBusy = true;
+
                 if (line.contains("[STACK] tun://") && line.contains("<-> socks5://") && !m_connectivityProbeStarted) {
                     m_connectivityProbeStarted = true;
                     disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
                     disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, nullptr);
 
-                    // The local tun<->socks bridge is up, but that only means xray is listening
-                    // locally. Verify real end-to-end traffic (xray -> VPS -> internet) through the
-                    // SOCKS5 proxy before declaring the connection established.
                     runConnectivityProbe([this](bool ok) {
                         if (!ok) {
                             qCritical() << "Xray connectivity probe failed: no traffic flows through the tunnel";
@@ -270,15 +262,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this,
             [this](int exitCode, QProcess::ExitStatus exitStatus) {
-                // Check stdout for "resource busy" — the TUN device was not yet released
-                // by the previous tun2socks instance. Retry after a short delay.
-                bool resourceBusy = false;
-                if (m_tun2socksProcess) {
-                    auto readOut = m_tun2socksProcess->readAllStandardOutput();
-                    if (readOut.waitForFinished()) {
-                        resourceBusy = readOut.returnValue().contains("resource busy");
-                    }
-                }
+                const bool resourceBusy = m_tunResourceBusy;
 
                 if (resourceBusy && m_tun2socksRetryCount < maxTun2SocksRetries) {
                     m_tun2socksRetryCount++;
@@ -398,15 +382,13 @@ ErrorCode XrayProtocol::setupRouting()
 bool XrayProtocol::probeServerReachable()
 {
     if (m_remoteAddress.isEmpty() || m_serverPort <= 0) {
-        // Not enough info to probe (e.g. imported config with unusual structure).
-        // Don't block the connection here — the SOCKS5 probe will still catch a dead server.
         qWarning() << "XrayProtocol: skipping server reachability probe (address/port unknown)";
         return true;
     }
 
     QTcpSocket sock;
     sock.connectToHost(m_remoteAddress, static_cast<quint16>(m_serverPort));
-    const bool ok = sock.waitForConnected(serverProbeTimeoutMs);
+    const bool ok = sock.waitForConnected(m_serverProbeTimeoutMs);
     if (!ok) {
         qWarning() << "XrayProtocol: server" << m_remoteAddress << ":" << m_serverPort
                    << "unreachable:" << sock.errorString();
@@ -417,23 +399,22 @@ bool XrayProtocol::probeServerReachable()
 
 void XrayProtocol::runConnectivityProbe(std::function<void(bool)> onResult)
 {
-    auto *nam = new QNetworkAccessManager(this);
+    if (m_remoteAddress.isEmpty() || m_serverPort <= 0) {
+        qWarning() << "XrayProtocol: connectivity probe skipped (server address/port unknown)";
+        onResult(true);
+        return;
+    }
+
+    auto *sock = new QTcpSocket(this);
 
     QNetworkProxy proxy(QNetworkProxy::Socks5Proxy, QStringLiteral("127.0.0.1"),
                         static_cast<quint16>(m_socksPort), m_socksUser, m_socksPassword);
-    // Let the proxy (xray) resolve DNS remotely so the probe also validates the tunnel's DNS path.
     proxy.setCapabilities(QNetworkProxy::TunnelingCapability | QNetworkProxy::HostNameLookupCapability);
-    nam->setProxy(proxy);
-
-    QNetworkRequest req(QUrl(QStringLiteral("http://connectivitycheck.gstatic.com/generate_204")));
-    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-
-    QNetworkReply *reply = nam->get(req);
+    sock->setProxy(proxy);
 
     auto *timeout = new QTimer(this);
     timeout->setSingleShot(true);
 
-    // Guard so exactly one of {finished, timeout} fires the callback.
     auto done = QSharedPointer<bool>::create(false);
 
     auto finish = [=](bool ok) {
@@ -442,20 +423,17 @@ void XrayProtocol::runConnectivityProbe(std::function<void(bool)> onResult)
         *done = true;
         timeout->stop();
         timeout->deleteLater();
-        reply->deleteLater();
-        nam->deleteLater();
+        sock->abort();
+        sock->deleteLater();
         onResult(ok);
     };
 
-    connect(reply, &QNetworkReply::finished, this, [=]() {
-        finish(reply->error() == QNetworkReply::NoError);
-    });
-    connect(timeout, &QTimer::timeout, this, [=]() {
-        reply->abort();
-        finish(false);
-    });
+    connect(sock, &QTcpSocket::connected, this, [=]() { finish(true); });
+    connect(sock, &QAbstractSocket::errorOccurred, this, [=](QAbstractSocket::SocketError) { finish(false); });
+    connect(timeout, &QTimer::timeout, this, [=]() { finish(false); });
 
-    timeout->start(connectivityProbeTimeoutMs);
+    timeout->start(m_connectivityProbeTimeoutMs);
+    sock->connectToHost(m_remoteAddress, static_cast<quint16>(m_serverPort));
 }
 
 void XrayProtocol::startLivenessMonitor()
@@ -472,21 +450,21 @@ void XrayProtocol::startLivenessMonitor()
 
                 if (ok) {
                     m_livenessFailures = 0;
-                } else if (++m_livenessFailures >= maxLivenessFailures) {
+                } else if (++m_livenessFailures >= m_maxLivenessFailures) {
                     qCritical() << "XrayProtocol: liveness check failed" << m_livenessFailures
                                 << "times in a row, the tunnel is dead";
                     stop();
-                    setLastError(ErrorCode::XrayConnectivityCheckFailed);
+                    setLastError(ErrorCode::XrayConnectionLost);
                 } else {
                     qWarning() << "XrayProtocol: liveness check failed (" << m_livenessFailures << "/"
-                               << maxLivenessFailures << ")";
+                               << m_maxLivenessFailures << ")";
                 }
             });
         });
     }
 
     m_livenessFailures = 0;
-    m_livenessTimer->start(livenessIntervalMs);
+    m_livenessTimer->start(m_livenessIntervalMs);
 }
 
 void XrayProtocol::stopLivenessMonitor()
