@@ -24,6 +24,7 @@
     #include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <unistd.h>
+    #include <QFile>
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     #include <sys/param.h>
@@ -536,5 +537,66 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     }
 
     return { gateway, QNetworkInterface::interfaceFromIndex(index) };
+#endif
+}
+
+QPair<QString, QNetworkInterface> NetworkUtilities::getIpv6GatewayAndIface()
+{
+#ifdef Q_OS_LINUX
+    // Parse /proc/net/ipv6_route for the default route (::/0) gateway.
+    // Columns: dest(32hex) destPrefix(2hex) src(32hex) srcPrefix(2hex)
+    //          nextHop(32hex) metric refcnt use flags(8hex) iface
+    QFile routeFile("/proc/net/ipv6_route");
+    if (!routeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return {};
+    }
+
+    constexpr quint32 RTF_UP = 0x0001;
+    constexpr quint32 RTF_GATEWAY = 0x0002;
+    const QString zeroAddr(32, '0');
+
+    // Note: QFile::atEnd() can't be used here — procfs files report size 0,
+    // so atEnd() is true immediately. readLine() returns empty only at real EOF.
+    for (QByteArray rawLine = routeFile.readLine(); !rawLine.isEmpty();
+         rawLine = routeFile.readLine()) {
+        const QString line = QString::fromLatin1(rawLine);
+        const QStringList fields = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+        if (fields.size() < 10) {
+            continue;
+        }
+
+        // Default route: all-zero destination with a /0 prefix length.
+        if (fields.at(1) != "00" || fields.at(0) != zeroAddr) {
+            continue;
+        }
+
+        bool flagsOk = false;
+        const quint32 flags = fields.at(8).toUInt(&flagsOk, 16);
+        if (!flagsOk || !(flags & RTF_UP) || !(flags & RTF_GATEWAY)) {
+            continue;
+        }
+
+        const QString nextHopHex = fields.at(4);
+        if (nextHopHex.size() != 32 || nextHopHex == zeroAddr) {
+            continue;
+        }
+
+        Q_IPV6ADDR raw;
+        bool byteOk = true;
+        for (int i = 0; i < 16 && byteOk; ++i) {
+            raw[i] = static_cast<quint8>(nextHopHex.mid(i * 2, 2).toUInt(&byteOk, 16));
+        }
+        if (!byteOk) {
+            continue;
+        }
+
+        const QString gateway = QHostAddress(raw).toString();
+        const QString ifaceName = fields.at(9).trimmed();
+        qDebug() << "IPv6 gateway" << gateway << "for interface" << ifaceName;
+        return { gateway, QNetworkInterface::interfaceFromName(ifaceName) };
+    }
+    return {};
+#else
+    return {};
 #endif
 }
