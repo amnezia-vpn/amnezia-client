@@ -244,11 +244,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
                     << "container=" << static_cast<int>(container) << "host=" << credentials.hostName
                     << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port
                     << "appendClient=" << appendNewClient;
-    QString flowValue = srv.flow;
-    if (flowValue.isEmpty() && srv.security == QLatin1String("reality")) {
-        flowValue = QStringLiteral("xtls-rprx-vision");
-    }
-
+    const QString flowValue = srv.flow;
     QString realityPublicKey;
     QString realityShortId;
     if (srv.security == QLatin1String("reality")) {

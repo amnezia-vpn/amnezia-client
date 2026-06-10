@@ -272,7 +272,7 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
     }
 
     if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
-        applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+        applyDefaultsToServerConfig(m_protocolConfig.serverConfig, false);
     }
 
     m_originalProtocolConfig = m_protocolConfig;
@@ -283,7 +283,7 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
     }
 }
 
-void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config)
+void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config, bool fillFlowDefault)
 {
     if (config.port.isEmpty()) {
         config.port = protocols::xray::defaultPort;
@@ -306,7 +306,7 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
         config.security = protocols::xray::defaultSecurity;
     }
 
-    if (config.flow.isEmpty()) {
+    if (fillFlowDefault && config.flow.isEmpty()) {
         config.flow = protocols::xray::defaultFlow;
     }
 

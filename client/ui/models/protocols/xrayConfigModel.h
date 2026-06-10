@@ -137,7 +137,7 @@ private:
     amnezia::XrayProtocolConfig m_protocolConfig;
     amnezia::XrayProtocolConfig m_originalProtocolConfig;
 
-    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config);
+    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config, bool fillFlowDefault = true);
 };
 
 #endif // XRAYCONFIGMODEL_H
