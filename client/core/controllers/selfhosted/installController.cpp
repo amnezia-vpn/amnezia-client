@@ -234,7 +234,13 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         } else if (container == DockerContainer::Telemt) {
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
-        clearCachedProfile(serverId, container);
+        // Only revoke/clear the cached client profile when the container was reinstalled
+        // (a fresh client is generated in that case). On a light settings update the
+        // existing client is reused, so revoking it here would break the admin's own
+        // config (matches 4.8.15.4, which cleared the profile only on container update).
+        if (reinstallRequired) {
+            clearCachedProfile(serverId, container);
+        }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }

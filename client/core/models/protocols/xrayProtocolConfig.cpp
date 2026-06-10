@@ -466,6 +466,20 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
                         }
                     }
                 }
+                // The client id lives inside the native config (outbounds[0].settings.vnext[0].users[0].id).
+                // Without extracting it here clientId() returns empty, which broke client revocation
+                // (e.g. "Clear profile" could not find/revoke the entry in the Share list).
+                const QJsonArray outbounds = parsed.value(protocols::xray::outbounds).toArray();
+                if (!outbounds.isEmpty()) {
+                    const QJsonObject settings = outbounds[0].toObject().value(protocols::xray::settings).toObject();
+                    const QJsonArray vnext = settings.value(protocols::xray::vnext).toArray();
+                    if (!vnext.isEmpty()) {
+                        const QJsonArray users = vnext[0].toObject().value(protocols::xray::users).toArray();
+                        if (!users.isEmpty()) {
+                            clientCfg.id = users[0].toObject().value(protocols::xray::id).toString();
+                        }
+                    }
+                }
                 c.clientConfig = clientCfg;
             } else {
                 c.clientConfig = XrayClientConfig::fromJson(parsed);
