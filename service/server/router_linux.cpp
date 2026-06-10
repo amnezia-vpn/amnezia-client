@@ -3,6 +3,7 @@
 #include <QProcess>
 #include <QThread>
 #include <core/utils/utilities.h>
+#include <cerrno>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -57,15 +58,20 @@ bool RouterLinux::routeAdd(const QString &ipWithSubnet, const QString &gw, const
     route.rt_flags = RTF_UP | RTF_GATEWAY;
     route.rt_metric = 0;
 
-    if (int err = ioctl(sock, SIOCADDRT, &route) < 0)
+    if (ioctl(sock, SIOCADDRT, &route) < 0 && errno != EEXIST)
     {
-        qDebug().noquote() << "route add error: gw "
-                           << ((struct sockaddr_in *)&route.rt_gateway)->sin_addr.s_addr
-                           << " ip " << ((struct sockaddr_in *)&route.rt_dst)->sin_addr.s_addr
-                           << " mask " << ((struct sockaddr_in *)&route.rt_genmask)->sin_addr.s_addr << " " << err;
+        qDebug().noquote() << "route add error: gw " << gw << " ip " << ip
+                           << " mask " << mask << " errno " << errno;
         return false;
     }
 
+    // EEXIST means the route is already in the kernel table (e.g. left over from a
+    // prior session). We still want to track it so it gets cleaned up on teardown.
+    for (const Route &r : m_addedRoutes) {
+        if (r.dst == ipWithSubnet && r.gw == gw) {
+            return true;
+        }
+    }
     m_addedRoutes.append({ipWithSubnet, gw});
     return true;
 }
@@ -135,7 +141,13 @@ bool RouterLinux::routeDelete(const QString &ipWithSubnet, const QString &gw, co
 
     if (ioctl(sock, SIOCDELRT, &route) < 0)
     {
-        qDebug().noquote() << "route delete error: gw " << gw << " ip " << ip << " mask " << mask;
+        // ESRCH means the route is already gone (e.g. kernel auto-removed it when
+        // the owning interface went away). The delete is a no-op, not a failure.
+        if (errno == ESRCH) {
+            return true;
+        }
+        qDebug().noquote() << "route delete error: gw " << gw << " ip " << ip
+                           << " mask " << mask << " errno " << errno;
         return false;
     }
     return true;
