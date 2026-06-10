@@ -29,11 +29,8 @@ private:
     ErrorCode setupRouting();
     ErrorCode startTun2Socks();
 
-    // Step 3: fast pre-connect TCP probe to the real VPN server endpoint.
     bool probeServerReachable();
-    // Step 2/4: end-to-end probe through the local SOCKS5 proxy (xray -> VPS -> internet).
     void runConnectivityProbe(std::function<void(bool)> onResult);
-    // Step 4: periodic liveness monitoring after the tunnel is established.
     void startLivenessMonitor();
     void stopLivenessMonitor();
     int extractServerPort() const;

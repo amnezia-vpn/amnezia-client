@@ -60,9 +60,6 @@ bool DaemonLocalServer::initialize() {
     DaemonLocalServerConnection* connection =
         new DaemonLocalServerConnection(&m_server, socket);
     connect(socket, &QLocalSocket::disconnected, connection, [connection]() {
-      // The client holds a single persistent connection for the whole session, so a dropped
-      // socket means the app exited or crashed. Deactivate the tunnel so WireGuard, routing and
-      // DNS don't leak. deactivate() is a safe no-op if nothing is active.
       logger.debug() << "Client connection dropped, deactivating daemon";
       Daemon::instance()->deactivate(true);
       connection->deleteLater();

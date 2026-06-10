@@ -95,7 +95,6 @@ ErrorCode XrayProtocol::start()
 
     m_connectivityProbeStarted = false;
 
-    // Step 3: fail fast if the VPS itself is unreachable, before spawning xray/tun2socks.
     if (!probeServerReachable()) {
         qCritical() << "XrayProtocol: VPN server" << m_remoteAddress << "is unreachable";
         return ErrorCode::XrayServerUnreachable;
@@ -120,6 +119,8 @@ ErrorCode XrayProtocol::start()
         return ErrorCode::XrayExecutableCrashed;
     }
 
+    // Fix fingerprint: old configs may contain "Mozilla/5.0" which xray-core rejects.
+    // Replace with the correct default at runtime so stale stored configs still work.
     if (xrayConfigStr.contains("Mozilla/5.0", Qt::CaseInsensitive)) {
         xrayConfigStr.replace("Mozilla/5.0", amnezia::protocols::xray::defaultFingerprint,
                               Qt::CaseInsensitive);
@@ -127,6 +128,8 @@ ErrorCode XrayProtocol::start()
                  << amnezia::protocols::xray::defaultFingerprint;
     }
 
+    // Fix inbound listen address: old configs may use "10.33.0.2" which doesn't exist
+    // until TUN is created. xray must listen on 127.0.0.1 so tun2socks can connect.
     if (xrayConfigStr.contains(amnezia::protocols::xray::defaultLocalAddr)) {
         xrayConfigStr.replace(amnezia::protocols::xray::defaultLocalAddr,
                               amnezia::protocols::xray::defaultLocalListenAddr);
