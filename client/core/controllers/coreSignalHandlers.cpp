@@ -208,7 +208,7 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
             [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {
                 m_coreController->m_usersController->appendClient(serverId, clientId, clientName, container);
-            });
+            }, Qt::DirectConnection);
 
     connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_installController,
             &InstallController::clearCachedProfile);
