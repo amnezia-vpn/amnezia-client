@@ -114,6 +114,8 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         const QString newServerId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
         const auto admin = m_serversController->selfHostedAdminConfig(newServerId);
         if (!admin.has_value()) {
+            qCritical() << "InstallUiController: install(new): selfHostedAdminConfig nullopt, newServerId=" << newServerId
+                        << "serversCount=" << m_serversController->getServersCount();
             emit installationErrorOccurred(ErrorCode::InternalError);
             return;
         }
@@ -138,6 +140,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
     } else {
         const auto adminBefore = m_serversController->selfHostedAdminConfig(serverId);
         if (!adminBefore.has_value()) {
+            qCritical() << "InstallUiController: install(existing): selfHostedAdminConfig nullopt before install, serverId=" << serverId;
             emit installationErrorOccurred(ErrorCode::InternalError);
             return;
         }
@@ -154,6 +157,7 @@ void InstallUiController::install(DockerContainer container, int port, Transport
 
         const auto adminAfter = m_serversController->selfHostedAdminConfig(serverId);
         if (!adminAfter.has_value()) {
+            qCritical() << "InstallUiController: install(existing): selfHostedAdminConfig nullopt after install, serverId=" << serverId;
             emit installationErrorOccurred(ErrorCode::InternalError);
             return;
         }

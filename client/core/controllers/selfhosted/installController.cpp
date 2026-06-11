@@ -273,6 +273,8 @@ ErrorCode InstallController::updateClientConfig(const QString &serverId, DockerC
         return ErrorCode::NoError;
     }
     default:
+        qCritical() << "InstallController: updateClientConfig: unexpected server kind for serverId=" << serverId
+                    << "kind=" << static_cast<int>(m_serversRepository->serverKind(serverId));
         return ErrorCode::InternalError;
     }
 }
@@ -1235,14 +1237,18 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
 {
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
+        qCritical() << "InstallController: installContainer: selfHostedAdminConfig nullopt, serverId=" << serverId;
         return ErrorCode::InternalError;
     }
     ServerCredentials credentials = adminConfig->credentials();
     if (!credentials.isValid()) {
+        qCritical() << "InstallController: installContainer: credentials invalid, serverId=" << serverId
+                    << "host=" << credentials.hostName << "user=" << credentials.userName
+                    << "port=" << credentials.port << "hasSecret=" << !credentials.secretData.isEmpty();
         return ErrorCode::InternalError;
     }
     SshSession sshSession(this);
-    
+
     QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers, sshSession);
     if (errorCode) {

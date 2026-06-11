@@ -117,6 +117,9 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     connData.port = portStr;
 
     if (connData.clientPrivKey.isEmpty() || connData.clientPubKey.isEmpty()) {
+        qCritical() << "WireguardConfigurator: prepareWireguardConfig: genClientKeys failed"
+                    << "privKey.isEmpty=" << connData.clientPrivKey.isEmpty()
+                    << "pubKey.isEmpty=" << connData.clientPubKey.isEmpty();
         errorCode = ErrorCode::InternalError;
         return connData;
     }
