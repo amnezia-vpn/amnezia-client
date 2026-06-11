@@ -3,6 +3,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonValue>
+#include <QRegularExpression>
 #include <QSet>
 #include <QUuid>
 
@@ -205,14 +206,16 @@ QString SecureServersRepository::nextAvailableServerName() const
         }
     }
 
-    int i = 0;
-    QString candidate;
-    do {
-        i++;
-        candidate = QStringLiteral("Server %1").arg(i);
-    } while (usedNames.contains(candidate));
+    static const QRegularExpression serverNameRe(QStringLiteral("^Server (\\d+)$"));
+    int maxN = 0;
+    for (const QString &name : std::as_const(usedNames)) {
+        const QRegularExpressionMatch match = serverNameRe.match(name);
+        if (match.hasMatch()) {
+            maxN = std::max(maxN, match.captured(1).toInt());
+        }
+    }
 
-    return candidate;
+    return QStringLiteral("Server %1").arg(maxN + 1);
 }
 
 QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
