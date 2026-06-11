@@ -698,12 +698,12 @@ ErrorCode UsersController::revokeXray(const int row,
 
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
     error = sshSession->runScript(
-        credentials, 
+        credentials,
         sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, QString(), QString()))
     );
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to restart xray container";
-        return error;
+        return ErrorCode::NoError;
     }
 
     return error;
