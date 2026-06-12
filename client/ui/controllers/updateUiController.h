@@ -25,6 +25,7 @@ public slots:
 
 signals:
     void updateFound();
+    void installerVerificationFailed(const QString &message);
 
 private:
     UpdateController* m_updateController;

@@ -454,4 +454,12 @@ Window  {
             anchors.fill: parent
         }
     }
+
+    Connections {
+        target: UpdateController
+        function onInstallerVerificationFailed(message) {
+            PageController.showBusyIndicator(false)
+            PageController.showNotificationMessage(message)
+        }
+    }
 }

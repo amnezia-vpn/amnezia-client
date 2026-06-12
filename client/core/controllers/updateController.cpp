@@ -1,6 +1,9 @@
 #include "updateController.h"
 
+#include <QCryptographicHash>
+#include <QFile>
 #include <QNetworkReply>
+#include <QProcess>
 #include <QVersionNumber>
 #include <QUrl>
 #include <QJsonDocument>
@@ -28,6 +31,17 @@ namespace
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.run");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
+#endif
+
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
+    // Pinned signing identity of release installers. spctl prints the origin as
+    //   origin=Developer ID Installer: <Name> (<TEAMID>)
+    // We require this exact substring so a different (even validly notarized)
+    // package is rejected.
+    // TODO(#1): replace with the real release identity before shipping, e.g.
+    //   "Developer ID Installer: Amnezia OU (XXXXXXXXXX)".
+    // Until set, macOS update verification fails closed (updates are rejected).
+    const QLatin1String kExpectedMacSigningOrigin("Developer ID Installer: SET_ME_BEFORE_RELEASE");
 #endif
 }
 
@@ -121,6 +135,10 @@ void UpdateController::fetchGatewayUrl()
                 }
                 m_baseUrl = baseUrl;
 
+                // Expected installer SHA-256 for the requesting OS, delivered over the
+                // encrypted gateway channel (used by Windows/Linux verification).
+                m_expectedSha256 = gatewayData.value("sha256").toString().trimmed().toLower();
+
                 fetchVersionInfo();
             });
     });
@@ -209,6 +227,53 @@ QString UpdateController::composeDownloadUrl() const
 #endif
 }
 
+bool UpdateController::verifySha256(const QByteArray &data) const
+{
+    if (m_expectedSha256.isEmpty()) {
+        logger.error() << "No expected installer checksum provided by gateway; rejecting installer";
+        return false;
+    }
+
+    const QString actual = QString::fromLatin1(QCryptographicHash::hash(data, QCryptographicHash::Sha256).toHex());
+    if (actual.compare(m_expectedSha256, Qt::CaseInsensitive) != 0) {
+        logger.error() << "Installer checksum mismatch. expected:" << m_expectedSha256 << "actual:" << actual;
+        return false;
+    }
+
+    return true;
+}
+
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
+bool UpdateController::verifyMacInstallerSignature(const QString &installerPath) const
+{
+    // Gatekeeper assessment for installer packages: the .pkg must be signed AND
+    // notarized under our Apple Developer ID. spctl writes its verdict to stderr.
+    QProcess spctl;
+    spctl.start(QStringLiteral("/usr/sbin/spctl"),
+                { QStringLiteral("--assess"), QStringLiteral("--type"), QStringLiteral("install"),
+                  QStringLiteral("-vv"), installerPath });
+    if (!spctl.waitForFinished(15000)) {
+        logger.error() << "spctl assessment did not finish in time";
+        return false;
+    }
+
+    const QString output = QString::fromUtf8(spctl.readAllStandardError()) + QString::fromUtf8(spctl.readAllStandardOutput());
+
+    if (spctl.exitStatus() != QProcess::NormalExit || spctl.exitCode() != 0) {
+        logger.error() << "spctl rejected the installer:" << output.trimmed();
+        return false;
+    }
+
+    // Pin the signing identity so a different (even validly notarized) package is rejected.
+    if (!output.contains(kExpectedMacSigningOrigin)) {
+        logger.error() << "Installer signed by an unexpected identity:" << output.trimmed();
+        return false;
+    }
+
+    return true;
+}
+#endif
+
 void UpdateController::runInstaller()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
@@ -225,6 +290,8 @@ void UpdateController::runInstaller()
 
     QObject::connect(reply, &QNetworkReply::finished, [this, reply]() {
         if (reply->error() == QNetworkReply::NoError) {
+            const QByteArray data = reply->readAll();
+
             QFile file(kInstallerLocalPath);
             if (!file.open(QIODevice::WriteOnly)) {
                 logger.error() << "Failed to open installer file for writing:" << kInstallerLocalPath << "Error:" << file.errorString();
@@ -232,7 +299,7 @@ void UpdateController::runInstaller()
                 return;
             }
 
-            if (file.write(reply->readAll()) == -1) {
+            if (file.write(data) == -1) {
                 logger.error() << "Failed to write installer data to file:" << kInstallerLocalPath << "Error:" << file.errorString();
                 file.close();
                 reply->deleteLater();
@@ -240,6 +307,25 @@ void UpdateController::runInstaller()
             }
 
             file.close();
+
+            // Fail-closed: never launch an installer whose authenticity we could not verify.
+    #if defined(Q_OS_MACOS) && !defined(MACOS_NE)
+            if (!verifyMacInstallerSignature(kInstallerLocalPath)) {
+                logger.error() << "Installer signature verification failed; refusing to launch";
+                QFile::remove(kInstallerLocalPath);
+                emit installerVerificationFailed(tr("Update verification failed: the installer signature is invalid. The update was not launched."));
+                reply->deleteLater();
+                return;
+            }
+    #else
+            if (!verifySha256(data)) {
+                logger.error() << "Installer checksum verification failed; refusing to launch";
+                QFile::remove(kInstallerLocalPath);
+                emit installerVerificationFailed(tr("Update verification failed: the installer checksum does not match. The update was not launched."));
+                reply->deleteLater();
+                return;
+            }
+    #endif
 
     #if defined(Q_OS_WINDOWS)
             runWindowsInstaller(kInstallerLocalPath);
