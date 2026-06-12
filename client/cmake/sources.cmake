@@ -22,6 +22,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/coreSignalHandlers.h
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.h
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshSession.h
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshExecutor.h
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/usersController.h
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installController.h
@@ -99,6 +100,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/coreSignalHandlers.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/gatewayController.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshSession.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshExecutor.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/serversController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/usersController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/installController.cpp
