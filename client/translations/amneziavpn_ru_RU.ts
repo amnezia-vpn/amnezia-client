@@ -41,12 +41,12 @@
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="86"/>
         <source>Import completed</source>
-        <translation></translation>
+        <translation>Импорт завершен</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="107"/>
         <source>Export completed</source>
-        <translation></translation>
+        <translation>Экспорт завершен</translation>
     </message>
 </context>
 <context>
