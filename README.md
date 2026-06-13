@@ -13,7 +13,8 @@
 
 [Amnezia](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en) is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
-[![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)](https://amnezia.org)
+[![Setup Wizard](https://github.com/lmdeuser/amnezia-client-hardened/raw/dev/metadata/img-readme/hardened-ui-2.png)](https://amnezia.org)
+[![Double VPN Setup](https://github.com/lmdeuser/amnezia-client-hardened/raw/dev/metadata/img-readme/hardened-ui-1.png)](https://amnezia.org)
 
 ### [Website](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en) | [Alt website link](https://storage.googleapis.com/amnezia/amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en-mirror) | [Documentation](https://docs.amnezia.org) | [Troubleshooting](https://docs.amnezia.org/troubleshooting)
 

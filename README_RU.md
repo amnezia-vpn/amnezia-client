@@ -12,7 +12,8 @@
 ### [English](https://github.com/lmdeuser/amnezia-client-hardened/blob/dev/README.md) | [Русский](https://github.com/lmdeuser/amnezia-client-hardened/blob/dev/README_RU.md)
 [AmneziaVPN](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-ru) — это open source VPN-клиент, ключевая особенность которого заключается в возможности развернуть собственный VPN на вашем сервере.
 
-[![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)](https://amnezia.org)
+[![Setup Wizard](https://github.com/lmdeuser/amnezia-client-hardened/raw/dev/metadata/img-readme/hardened-ui-2.png)](https://amnezia.org)
+[![Double VPN Setup](https://github.com/lmdeuser/amnezia-client-hardened/raw/dev/metadata/img-readme/hardened-ui-1.png)](https://amnezia.org)
 
 ### [Сайт](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-ru) | [Зеркало сайта](https://storage.googleapis.com/amnezia/amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-ru-mirror) | [Документация](https://docs.amnezia.org) | [Решение проблем](https://docs.amnezia.org/troubleshooting)
 
