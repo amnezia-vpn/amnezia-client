@@ -1,11 +1,15 @@
-# Amnezia VPN
+# AmneziaVPN Hardened
 
 ### _Лучший клиент для создания VPN на собственном сервере_
+
+> [!WARNING]
+> **О Форке**: Это неофициальный, кастомный форк оригинального проекта, доработанный для **Self-Hosted** (собственных серверов) и **Double VPN** (двойных цепочек). В него встроены фиксы утечек памяти, устранения гонок данных (race conditions) и нативная сборка пакетов `.deb` под Debian/Ubuntu с `systemd`.
+> **Внимание:** Поскольку этот клиент собран из исходного кода без использования приватных API-ключей Amnezia, **он НЕ поддерживает Amnezia Premium**. Для использования платной подписки используйте только официальные билды.
 
 [![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
-### [English](https://github.com/amnezia-vpn/amnezia-client/blob/dev/README.md) | Русский
+### [English](https://github.com/lmdeuser/amnezia-client-hardened/blob/dev/README.md) | [Русский](https://github.com/lmdeuser/amnezia-client-hardened/blob/dev/README_RU.md)
 [AmneziaVPN](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-ru) — это open source VPN-клиент, ключевая особенность которого заключается в возможности развернуть собственный VPN на вашем сервере.
 
 [![Image](https://github.com/amnezia-vpn/amnezia-client/blob/dev/metadata/img-readme/uipic4.png)](https://amnezia.org)

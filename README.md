@@ -1,13 +1,15 @@
-# Amnezia VPN
+# AmneziaVPN Hardened
 
-### _The best client for self-hosted VPN_
+### _The best client for self-hosted VPN, hardened for Linux_
 
+> [!WARNING]
+> **Fork Notice**: This is a custom fork optimized for **Self-Hosted** and **Double VPN** setups, featuring architecture hardening, memory leak fixes, and native Debian packaging (`.deb` / `systemd`).
+> **Important:** Because this build is compiled from source without Amnezia's proprietary API keys, **you CANNOT use the Amnezia Premium subscription** with this client. For Amnezia Premium, please use the official binaries.
 
 [![Build Status](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml/badge.svg?branch=dev)](https://github.com/amnezia-vpn/amnezia-client/actions/workflows/deploy.yml?query=branch:dev)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/amnezia-vpn/amnezia-client)
 
-### [English]([https://github.com/amnezia-vpn/amnezia-client/blob/dev/README_RU.md](https://github.com/amnezia-vpn/amnezia-client/tree/dev?tab=readme-ov-file#)) | [Русский](https://github.com/amnezia-vpn/amnezia-client/blob/dev/README_RU.md)
-
+### [English](https://github.com/lmdeuser/amnezia-client-hardened/blob/dev/README.md) | [Русский](https://github.com/lmdeuser/amnezia-client-hardened/blob/dev/README_RU.md)
 
 [Amnezia](https://amnezia.org?utm_source=github&utm_campaign=amnezia_website-readme-en) is an open-source VPN client, with a key feature that enables you to deploy your own VPN server on your server.
 
