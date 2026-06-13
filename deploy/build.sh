@@ -77,6 +77,7 @@ fi
 if [[ -z "$BUILD_JOBS" ]]; then
     BUILD_JOBS=1
 fi
+export AMNEZIA_BUILD_JOBS="$BUILD_JOBS"
 
 HOST=$(echo "$HOST" | tr '[:upper:]' '[:lower:]')
 TARGET=$(echo "$TARGET" | tr '[:upper:]' '[:lower:]')

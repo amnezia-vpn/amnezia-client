@@ -11,9 +11,12 @@
 #include <winsock2.h>
 #include <ws2ipdef.h>
 
+#include <atomic>
+
 #include <QHash>
 #include <QMap>
 #include <QObject>
+#include <QTimer>
 
 #include "ipaddress.h"
 
@@ -31,6 +34,7 @@ class WindowsRouteMonitor final : public QObject {
   void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 
   quint64 getLuid() const { return m_luid; }
+  void notifyRouteChanged();
 
  public slots:
   void routeChanged();
@@ -46,6 +50,7 @@ class WindowsRouteMonitor final : public QObject {
   void updateInterfaceMetrics(int family);
   void updateCapturedRoutes(int family);
   void updateCapturedRoutes(int family, void* table);
+  void processRouteChanges();
 
   QHash<IPAddress, MIB_IPFORWARD_ROW2*> m_exclusionRoutes;
   QMap<quint64, ULONG> m_interfaceMetricsIpv4;
@@ -57,6 +62,9 @@ class WindowsRouteMonitor final : public QObject {
 
   const quint64 m_luid = 0;
   HANDLE m_routeHandle = INVALID_HANDLE_VALUE;
+  QTimer m_routeChangeTimer;
+  std::atomic_bool m_routeChangeQueued = false;
+  std::atomic_int m_pendingRouteChanges = 0;
 };
 
 #endif /* WINDOWSROUTEMONITOR_H */

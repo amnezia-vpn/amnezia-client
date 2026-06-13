@@ -20,6 +20,7 @@ if defined ARG_BUILD_INSTALLERS set "ARG_BUILD_INSTALLERS=%ARG_BUILD_INSTALLERS:
 if not defined BUILD_JOBS if defined AMNEZIA_BUILD_JOBS set "BUILD_JOBS=%AMNEZIA_BUILD_JOBS%"
 if not defined BUILD_JOBS set "BUILD_JOBS=%NUMBER_OF_PROCESSORS%"
 if not defined BUILD_JOBS set "BUILD_JOBS=1"
+set "AMNEZIA_BUILD_JOBS=%BUILD_JOBS%"
 set "CMAKE_BUILD_PARALLEL_LEVEL=%BUILD_JOBS%"
 
 :: understand toolchain arch (host_target) and Qt prefix path
@@ -101,7 +102,7 @@ if exist "%VCVARS_PATH%" (
 
 :: build project and installers
 @echo on
-cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true" || goto :fail
+cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true;CL_MPCount=%BUILD_JOBS%;MultiProcMaxCount=%BUILD_JOBS%" || goto :fail
 cmake --build "%BUILD_DIR%" --config Release -- /m:%BUILD_JOBS%  || goto :fail
 @echo off
 for %%I in (%ARG_BUILD_INSTALLERS%) do (

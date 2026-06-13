@@ -24,9 +24,19 @@ quint32 ipv4Mask(int prefixLength)
     return prefixLength == 0 ? 0 : (0xffffffffu << (32 - prefixLength));
 }
 
+bool routeOverlapsIpv4Range(quint32 address, int prefixLength, quint32 base, int rangePrefixLength)
+{
+    const quint32 routeStart = address & ipv4Mask(prefixLength);
+    const quint32 routeEnd = routeStart | ~ipv4Mask(prefixLength);
+    const quint32 rangeStart = base & ipv4Mask(rangePrefixLength);
+    const quint32 rangeEnd = rangeStart | ~ipv4Mask(rangePrefixLength);
+    return routeStart <= rangeEnd && rangeStart <= routeEnd;
+}
+
 bool isRouteAddCandidate(const QString &ipWithMask)
 {
-    constexpr int minPublicBypassPrefixLength = 24;
+    constexpr int minPublicBypassPrefixLength = 16;
+    constexpr int minLocalBypassPrefixLength = 24;
     if (!NetworkUtilities::checkIpSubnetFormat(ipWithMask)) {
         return false;
     }
@@ -55,20 +65,34 @@ bool isRouteAddCandidate(const QString &ipWithMask)
         const quint32 mask = ipv4Mask(prefix);
         return (rawAddress & mask) == (base & mask);
     };
+    const auto routeOverlapsRange = [rawAddress, prefixLength](quint32 base, int prefix) {
+        return routeOverlapsIpv4Range(rawAddress, prefixLength, base, prefix);
+    };
+    if (prefixLength < 32 && (rawAddress & ipv4Mask(prefixLength)) != rawAddress) {
+        return false;
+    }
     if (address.isNull() || address.isLoopback() || address.isBroadcast()
         || address.isLinkLocal() || address.isMulticast()) {
         return false;
     }
-    if (inRange(0x00000000u, 8) || inRange(0x0a000000u, 8)
-        || inRange(0x64400000u, 10) || inRange(0x7f000000u, 8)
-        || inRange(0xac100000u, 12) || inRange(0xc0000000u, 24)
-        || inRange(0xc0000200u, 24) || inRange(0xc0a80000u, 16)
-        || inRange(0xc6120000u, 15) || inRange(0xc6336400u, 24)
-        || inRange(0xcb007100u, 24) || inRange(0xe0000000u, 4)
-        || inRange(0xf0000000u, 4)) {
+    const bool localOrServiceRoute = inRange(0x0a000000u, 8)
+        || inRange(0x64400000u, 10)
+        || inRange(0xac100000u, 12)
+        || inRange(0xc0a80000u, 16);
+    if (routeOverlapsRange(0x00000000u, 8) || routeOverlapsRange(0x7f000000u, 8)
+        || routeOverlapsRange(0xc0000000u, 24)
+        || routeOverlapsRange(0xc0000200u, 24) || routeOverlapsRange(0xc01f0000u, 24)
+        || routeOverlapsRange(0xc01fc400u, 24) || routeOverlapsRange(0xc034c100u, 24)
+        || routeOverlapsRange(0xc0586300u, 24) || routeOverlapsRange(0xc0af3000u, 24)
+        || routeOverlapsRange(0xc6120000u, 15) || routeOverlapsRange(0xc6336400u, 24)
+        || routeOverlapsRange(0xcb007100u, 24) || routeOverlapsRange(0xe0000000u, 4)
+        || routeOverlapsRange(0xf0000000u, 4)) {
         return false;
     }
-    return prefixLength >= minPublicBypassPrefixLength;
+    const int minPrefixLength = localOrServiceRoute
+        ? minLocalBypassPrefixLength
+        : minPublicBypassPrefixLength;
+    return prefixLength >= minPrefixLength;
 }
 }
 
@@ -162,12 +186,44 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     ipfrow.dwForwardMetric4 = 0;
     ipfrow.dwForwardMetric5 = 0;
 
-    for (int i = 0; i < ips.size(); ++i) {
-        QString ipWithMask = ips.at(i);
+    QStringList routeCandidates;
+    routeCandidates.reserve(ips.size());
+    for (const QString &ipWithMask : ips) {
         if (!isRouteAddCandidate(ipWithMask)) {
             qWarning().noquote() << "Router::routeAddList: skipping non-routable split route:" << ipWithMask;
             continue;
         }
+        if (!routeCandidates.contains(ipWithMask)) {
+            routeCandidates.append(ipWithMask);
+        }
+    }
+
+    auto trackManagedRoute = [this](const QString &routeKey, const MIB_IPFORWARDROW &row) {
+        for (auto tracked = m_ipForwardRows.find(routeKey);
+             tracked != m_ipForwardRows.end() && tracked.key() == routeKey;) {
+            if (tracked.value().dwForwardDest == row.dwForwardDest &&
+                tracked.value().dwForwardMask == row.dwForwardMask &&
+                tracked.value().dwForwardNextHop == row.dwForwardNextHop) {
+                tracked = m_ipForwardRows.erase(tracked);
+                continue;
+            }
+            ++tracked;
+        }
+        m_ipForwardRows.insert(routeKey, row);
+    };
+
+    auto resumeSmallRouteBatchGuard = qScopeGuard([this] {
+        if (m_suspended && m_ipForwardRows.size() <= 500) {
+            suspendWcmSvc(false);
+        }
+    });
+
+    if (routeCandidates.size() > 500) {
+        suspendWcmSvc(true);
+    }
+
+    for (int i = 0; i < routeCandidates.size(); ++i) {
+        QString ipWithMask = routeCandidates.at(i);
         QString ip = NetworkUtilities::ipAddressFromIpWithSubnet(ipWithMask);
 
         if (!NetworkUtilities::checkIPv4Format(ip)) {
@@ -187,7 +243,7 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 
         dwStatus = CreateIpForwardEntry(&ipfrow);
         if (dwStatus == NO_ERROR){
-            m_ipForwardRows.insert(ipWithMask, ipfrow);
+            trackManagedRoute(ipWithMask, ipfrow);
             success_count++;
         }
         else if (dwStatus == ERROR_OBJECT_ALREADY_EXISTS) {
@@ -207,8 +263,8 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
             }
             if (deletedExisting) {
                 dwStatus = CreateIpForwardEntry(&ipfrow);
-                if (dwStatus == NO_ERROR || dwStatus == ERROR_OBJECT_ALREADY_EXISTS) {
-                    m_ipForwardRows.insert(ipWithMask, ipfrow);
+                if (dwStatus == NO_ERROR) {
+                    trackManagedRoute(ipWithMask, ipfrow);
                     success_count++;
                 } else {
                     qDebug() << "Router::routeAdd: failed CreateIpForwardEntry() after replace, Error:" << ip << gw << dwStatus;

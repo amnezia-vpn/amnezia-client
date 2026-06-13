@@ -87,17 +87,18 @@ static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
   WindowsRouteMonitor* monitor = (WindowsRouteMonitor*)context;
   Q_UNUSED(type);
 
-  // Ignore route changes that we created.
-  if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
-      (row->Metric == EXCLUSION_ROUTE_METRIC)) {
-    return;
-  }
-  if (monitor->getLuid() == row->InterfaceLuid.Value) {
-    return;
+  if (row != nullptr) {
+    // Ignore route changes that we created.
+    if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
+        (row->Metric == EXCLUSION_ROUTE_METRIC)) {
+      return;
+    }
+    if (monitor->getLuid() == row->InterfaceLuid.Value) {
+      return;
+    }
   }
 
-  // Invoke the route changed signal to do the real work in Qt.
-  QMetaObject::invokeMethod(monitor, "routeChanged", Qt::QueuedConnection);
+  monitor->notifyRouteChanged();
 }
 
 // Perform prefix matching comparison on IP addresses in host order.
@@ -123,6 +124,11 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
     : QObject(parent), m_luid(luid) {
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
+
+  m_routeChangeTimer.setSingleShot(true);
+  m_routeChangeTimer.setInterval(300);
+  connect(&m_routeChangeTimer, &QTimer::timeout,
+          this, &WindowsRouteMonitor::processRouteChanges);
 
   NotifyRouteChange2(AF_UNSPEC, routeChangeCallback, this, FALSE, &m_routeHandle);
 }
@@ -500,12 +506,12 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
     delete data;
     return false;
   }
+  m_exclusionRoutes[prefix] = data;
   updateInterfaceMetrics(family);
   updateCapturedRoutes(family, table);
   updateExclusionRoute(data, table);
   FreeMibTable(table);
 
-  m_exclusionRoutes[prefix] = data;
   return true;
 }
 
@@ -562,14 +568,35 @@ void WindowsRouteMonitor::setDetaultRouteCapture(bool enable) {
 }
 
 void WindowsRouteMonitor::routeChanged() {
-  logger.debug() << "Routes changed";
+  if (!m_routeChangeTimer.isActive()) {
+    m_routeChangeTimer.start();
+  }
+}
 
+void WindowsRouteMonitor::notifyRouteChanged() {
+  m_pendingRouteChanges.fetch_add(1, std::memory_order_relaxed);
+  bool expected = false;
+  if (m_routeChangeQueued.compare_exchange_strong(
+          expected, true, std::memory_order_acq_rel)) {
+    QMetaObject::invokeMethod(this, "routeChanged", Qt::QueuedConnection);
+  }
+}
+
+void WindowsRouteMonitor::processRouteChanges() {
   PMIB_IPFORWARD_TABLE2 table;
   DWORD result = GetIpForwardTable2(AF_UNSPEC, &table);
   if (result != NO_ERROR) {
     logger.error() << "Failed to fetch routing table:" << result;
+    if (!m_routeChangeTimer.isActive()) {
+      m_routeChangeTimer.start();
+    }
     return;
   }
+
+  const int routeChangeCount =
+      m_pendingRouteChanges.exchange(0, std::memory_order_acq_rel);
+  logger.debug() << "Routes changed, processing" << routeChangeCount
+                 << "coalesced notifications";
 
   updateInterfaceMetrics(AF_UNSPEC);
   updateCapturedRoutes(AF_UNSPEC, table);
@@ -578,4 +605,13 @@ void WindowsRouteMonitor::routeChanged() {
   }
 
   FreeMibTable(table);
+
+  m_routeChangeQueued.store(false, std::memory_order_release);
+  if (m_pendingRouteChanges.load(std::memory_order_acquire) > 0) {
+    bool expected = false;
+    if (m_routeChangeQueued.compare_exchange_strong(
+            expected, true, std::memory_order_acq_rel)) {
+      QMetaObject::invokeMethod(this, "routeChanged", Qt::QueuedConnection);
+    }
+  }
 }

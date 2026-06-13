@@ -7,14 +7,15 @@ param(
     [string] $WslAndroidHome = $(if ($env:WSL_ANDROID_HOME) { $env:WSL_ANDROID_HOME } else { "" }),
     [string] $WslJdkUrl = $(if ($env:WSL_JDK_URL) { $env:WSL_JDK_URL } else { "https://aka.ms/download-jdk/microsoft-jdk-17-linux-x64.tar.gz" }),
     [string] $AndroidCmdlineToolsUrl = $(if ($env:ANDROID_CMDLINE_TOOLS_URL) { $env:ANDROID_CMDLINE_TOOLS_URL } else { "https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip" }),
-    [string] $AndroidPlatform = $(if ($env:ANDROID_PLATFORM_VERSION) { $env:ANDROID_PLATFORM_VERSION } else { "android-35" }),
-    [string] $AndroidBuildToolsVersion = $(if ($env:ANDROID_BUILD_TOOLS_VERSION) { $env:ANDROID_BUILD_TOOLS_VERSION } else { "35.0.0" }),
+    [string] $AndroidPlatform = $(if ($env:ANDROID_PLATFORM_VERSION) { $env:ANDROID_PLATFORM_VERSION } else { "android-36" }),
+    [string] $AndroidBuildToolsVersion = $(if ($env:ANDROID_BUILD_TOOLS_VERSION) { $env:ANDROID_BUILD_TOOLS_VERSION } else { "36.0.0" }),
     [string] $AndroidNdkVersion = $(if ($env:ANDROID_NDK_VERSION) { $env:ANDROID_NDK_VERSION } else { "26.1.10909125" }),
     [string] $QtAndroidModules = $(if ($env:QT_ANDROID_MODULES) { $env:QT_ANDROID_MODULES } else { "qtremoteobjects qt5compat" }),
     [string] $KeyDir = $(if ($env:SELFHOSTED_UPDATE_KEY_DIR) { $env:SELFHOSTED_UPDATE_KEY_DIR } else { "C:\keys" }),
     [string] $AndroidReleaseKeystorePath = $(if ($env:QT_ANDROID_KEYSTORE_PATH) { $env:QT_ANDROID_KEYSTORE_PATH } else { "" }),
     [string] $AndroidReleaseKeystoreAlias = $(if ($env:QT_ANDROID_KEYSTORE_ALIAS) { $env:QT_ANDROID_KEYSTORE_ALIAS } else { "release" }),
     [string] $UpdateSyncHost = $(if ($env:SELFHOSTED_UPDATE_SYNC_HOST) { $env:SELFHOSTED_UPDATE_SYNC_HOST } else { "10.8.1.0" }),
+    [string] $BaseUrl = $(if ($env:SELFHOSTED_UPDATE_BASE_URL) { $env:SELFHOSTED_UPDATE_BASE_URL } else { "" }),
     [string] $AndroidReleaseKeystoreEnvFile = "",
     [string] $EnvFile = "",
     [switch] $InstallMissing,
@@ -33,6 +34,9 @@ $PublicKeyPath = Join-Path $KeyDir "selfhosted-update-public.pem"
 
 if ([string]::IsNullOrWhiteSpace($AndroidReleaseKeystorePath)) {
     $AndroidReleaseKeystorePath = Join-Path $KeyDir "android-release.keystore"
+}
+if ([string]::IsNullOrWhiteSpace($BaseUrl)) {
+    $BaseUrl = "http://${UpdateSyncHost}:17865"
 }
 
 if ([string]::IsNullOrWhiteSpace($AndroidReleaseKeystoreEnvFile)) {
@@ -593,6 +597,7 @@ function Write-EnvironmentFile {
         "`$env:WSL_QIF_ROOT_PATH = $(Quote-PsSingle (Resolve-WslQifRoot))",
         "`$env:ANDROID_HOME = $(Quote-PsSingle $AndroidHome)",
         "`$env:WSL_ANDROID_HOME = $(Quote-PsSingle $resolvedWslAndroidHome)",
+        "`$env:SELFHOSTED_UPDATE_BASE_URL = $(Quote-PsSingle $BaseUrl)",
         "`$env:SELFHOSTED_UPDATE_SYNC_HOST = $(Quote-PsSingle $UpdateSyncHost)",
         "`$env:SELFHOSTED_UPDATE_PRIVATE_KEY_PATH = $(Quote-PsSingle $PrivateKeyPath)",
         "`$env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = $(Quote-PsSingle $publicKeyBase64)"

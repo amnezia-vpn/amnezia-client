@@ -11,6 +11,7 @@ param(
     [string] $ArtifactDir = "",
     [string] $OutDir = "",
     [string] $BaseUrl = $env:SELFHOSTED_UPDATE_BASE_URL,
+    [string] $SyncHost = $(if ($env:SELFHOSTED_UPDATE_SYNC_HOST) { $env:SELFHOSTED_UPDATE_SYNC_HOST } else { "10.8.1.0" }),
     [string] $Server = $env:SELFHOSTED_UPDATE_SERVER,
     [string] $ServerDir = $(if ($env:SELFHOSTED_UPDATE_SERVER_DIR) { $env:SELFHOSTED_UPDATE_SERVER_DIR } else { "/opt/amnezia/client-updates" }),
     [string] $PrivateKey = $env:SELFHOSTED_UPDATE_PRIVATE_KEY_PATH,
@@ -72,6 +73,40 @@ function Get-ProjectVersion {
         throw "Could not read AMNEZIAVPN_VERSION from CMakeLists.txt"
     }
     return $Matches[1]
+}
+
+function Get-RequiredAndroidBuildToolsRevision {
+    $androidCmake = Get-Content -LiteralPath (Join-Path $RepoRoot "client\cmake\android.cmake") -Raw
+    if ($androidCmake -match "QT_ANDROID_SDK_BUILD_TOOLS_REVISION\s+([0-9]+(?:\.[0-9]+)+)") {
+        return $Matches[1]
+    }
+    return "36.0.0"
+}
+
+function Assert-ReleaseInputs {
+    Assert-ExistingFile $PrivateKey "SELFHOSTED_UPDATE_PRIVATE_KEY_PATH or -PrivateKey"
+    if ([string]::IsNullOrWhiteSpace($PublicKeyBase64)) {
+        throw "SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 or -PublicKeyBase64 is required"
+    }
+    if ([string]::IsNullOrWhiteSpace($BaseUrl)) {
+        throw "SELFHOSTED_UPDATE_BASE_URL or -BaseUrl is required"
+    }
+    if ([string]::IsNullOrWhiteSpace($SyncHost)) {
+        throw "SELFHOSTED_UPDATE_SYNC_HOST or -SyncHost is required"
+    }
+    if ($SyncHost -match "://|/") {
+        throw "SELFHOSTED_UPDATE_SYNC_HOST must be a host or IP without scheme/path/CIDR: $SyncHost"
+    }
+    if ($Publish) {
+        if ([string]::IsNullOrWhiteSpace($Server)) {
+            throw "SELFHOSTED_UPDATE_SERVER or -Server is required when -Publish is used"
+        }
+        Assert-Command "ssh"
+        Assert-Command "scp"
+        if (-not [string]::IsNullOrWhiteSpace($SshKey)) {
+            Assert-ExistingFile $SshKey "SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH or -SshKey"
+        }
+    }
 }
 
 function Convert-ToWslPath([string] $Path) {
@@ -345,6 +380,7 @@ function Build-WindowsInstaller([string] $BundleDir) {
     $buildJobs = Resolve-BuildJobs
     $previousConanNoRemote = $env:CONAN_NO_REMOTE
     $previousPublicKeyBase64 = $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64
+    $previousSyncHost = $env:SELFHOSTED_UPDATE_SYNC_HOST
     $previousBundleDir = $env:SELFHOSTED_UPDATE_BUNDLE_DIR
     $previousBuildJobs = $env:AMNEZIA_BUILD_JOBS
     $previousCmakeBuildParallelLevel = $env:CMAKE_BUILD_PARALLEL_LEVEL
@@ -352,6 +388,7 @@ function Build-WindowsInstaller([string] $BundleDir) {
     $env:AMNEZIA_BUILD_JOBS = [string] $buildJobs
     $env:CMAKE_BUILD_PARALLEL_LEVEL = [string] $buildJobs
     $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = $PublicKeyBase64
+    $env:SELFHOSTED_UPDATE_SYNC_HOST = $SyncHost
     if ([string]::IsNullOrWhiteSpace($BundleDir)) {
         Remove-Item Env:\SELFHOSTED_UPDATE_BUNDLE_DIR -ErrorAction SilentlyContinue
     } else {
@@ -362,6 +399,11 @@ function Build-WindowsInstaller([string] $BundleDir) {
     } finally {
         $env:CONAN_NO_REMOTE = $previousConanNoRemote
         $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 = $previousPublicKeyBase64
+        if ($null -eq $previousSyncHost) {
+            Remove-Item Env:\SELFHOSTED_UPDATE_SYNC_HOST -ErrorAction SilentlyContinue
+        } else {
+            $env:SELFHOSTED_UPDATE_SYNC_HOST = $previousSyncHost
+        }
         if ($null -eq $previousBuildJobs) {
             Remove-Item Env:\AMNEZIA_BUILD_JOBS -ErrorAction SilentlyContinue
         } else {
@@ -455,9 +497,10 @@ function Assert-JavaForWsl {
 
 function Assert-WslAndroidSdkReady {
     $androidHomeWsl = Resolve-WslAndroidHome
+    $requiredBuildTools = Get-RequiredAndroidBuildToolsRevision
     $script = @(
         ('test -d ' + (Quote-Sh $androidHomeWsl)),
-        ('test -n "$(find ' + (Quote-Sh ($androidHomeWsl + "/build-tools")) + ' -type f -name apksigner -print -quit)"'),
+        ('test -x ' + (Quote-Sh ($androidHomeWsl + "/build-tools/$requiredBuildTools/apksigner"))),
         ('test -n "$(find ' + (Quote-Sh ($androidHomeWsl + "/ndk")) + ' -path "*/toolchains/llvm/prebuilt/linux-x86_64/bin/clang" -executable -print -quit)"'),
         ('test -n "$(find ' + (Quote-Sh ($androidHomeWsl + "/ndk")) + ' -path "*/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++" -executable -print -quit)"')
     ) -join "`n"
@@ -485,23 +528,7 @@ function Assert-LocalReleasePrerequisites {
     Write-Step "Preflight local release prerequisites"
     Assert-Command "python"
     Assert-Command "cmd.exe"
-    Assert-ExistingFile $PrivateKey "SELFHOSTED_UPDATE_PRIVATE_KEY_PATH or -PrivateKey"
-    if ([string]::IsNullOrWhiteSpace($PublicKeyBase64)) {
-        throw "SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64 or -PublicKeyBase64 is required"
-    }
-    if ([string]::IsNullOrWhiteSpace($BaseUrl)) {
-        throw "SELFHOSTED_UPDATE_BASE_URL or -BaseUrl is required"
-    }
-    if ($Publish) {
-        if ([string]::IsNullOrWhiteSpace($Server)) {
-            throw "SELFHOSTED_UPDATE_SERVER or -Server is required when -Publish is used"
-        }
-        Assert-Command "ssh"
-        Assert-Command "scp"
-        if (-not [string]::IsNullOrWhiteSpace($SshKey)) {
-            Assert-ExistingFile $SshKey "SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH or -SshKey"
-        }
-    }
+    Assert-ReleaseInputs
 
     if ($BuildPlatform -contains "linux" -or $BuildPlatform -contains "android") {
         Assert-WslReady
@@ -556,6 +583,8 @@ if ($Preflight) {
     return
 }
 
+Assert-ReleaseInputs
+
 if (-not $SkipBuild) {
     $qtRootPath = Resolve-QtRootPath
     $qifRootPath = Resolve-QifRootPath
@@ -584,6 +613,7 @@ if (-not $SkipBuild) {
         $linuxExports += "export MAKEFLAGS=$(Quote-Sh ("-j$buildJobs"))"
         $linuxExports += "export CONAN_NO_REMOTE=1"
         $linuxExports += "export SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64=$(Quote-Sh $PublicKeyBase64)"
+        $linuxExports += "export SELFHOSTED_UPDATE_SYNC_HOST=$(Quote-Sh $SyncHost)"
         Invoke-WslBash (("{0}; cd {1} && run_repo_build_sh --source {1} --build {2} --target linux --installer IFW --jobs {3}" -f ($linuxExports -join "; "), (Quote-Sh $repoWsl), (Quote-Sh $buildWsl), $buildJobs).TrimStart("; "))
         Copy-Artifact (Join-Path $RepoRoot "deploy\build-linux") "AmneziaVPN_${Version}_linux_x64.run" $ArtifactDir
     }
@@ -606,7 +636,8 @@ if (-not $SkipBuild) {
             "export GRADLE_OPTS=$(Quote-Sh ("-Dorg.gradle.workers.max=$buildJobs"))",
             "export CONAN_NO_REMOTE=1",
             'export AWG_ANDROID_GRADLE_USER_HOME="$HOME/.cache/amnezia/awg-android-gradle"',
-            "export SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64=$(Quote-Sh $PublicKeyBase64)"
+            "export SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64=$(Quote-Sh $PublicKeyBase64)",
+            "export SELFHOSTED_UPDATE_SYNC_HOST=$(Quote-Sh $SyncHost)"
         )
         if (-not [string]::IsNullOrWhiteSpace($env:QT_ANDROID_KEYSTORE_KEY_PASS)) {
             $androidExports += "export QT_ANDROID_KEYSTORE_KEY_PASS=$(Quote-Sh $env:QT_ANDROID_KEYSTORE_KEY_PASS)"
@@ -636,11 +667,12 @@ if (-not $SkipBuild) {
             $androidExportScript,
             "cd $(Quote-Sh $repoWsl)",
             'mkdir -p "$AWG_ANDROID_GRADLE_USER_HOME" "$HOME/.conan2/p/t" && find "$HOME/.conan2/p/t" -mindepth 1 -maxdepth 1 -exec rm -rf {} +',
-            'rename_artifact() { src="$1"; dst="$2"; if [ -f "$src" ]; then mv -f "$src" "$dst"; elif [ ! -f "$dst" ]; then echo "Missing Android artifact: $src or $dst" >&2; return 1; fi; }',
+            'rename_artifact() { src="$1"; dst="$2"; if [ ! -f "$src" ]; then echo "Missing fresh Android artifact: $src" >&2; return 1; fi; rm -f "$dst"; mv -f "$src" "$dst"; }',
             'if [ -n "${JAVA_HOME:-}" ] && [ -f "$JAVA_HOME/bin/java.exe" ]; then windows_java_home="$JAVA_HOME"; java_shim_dir="$PWD/deploy/build/java-home-shim"; mkdir -p "$java_shim_dir/bin"; for tool in java javac keytool jar; do printf ''#!/bin/sh\nexec "%s/bin/%s.exe" "$@"\n'' "$windows_java_home" "$tool" > "$java_shim_dir/bin/$tool"; chmod +x "$java_shim_dir/bin/$tool"; done; export JAVA_HOME="$java_shim_dir"; export PATH="$JAVA_HOME/bin:$PATH"; fi',
             'sed -i ''s/\r$//'' client/android/gradlew && chmod +x client/android/gradlew',
             'build_dir=./deploy/build-android-arm64-v8a',
-            "run_repo_build_sh --target android --sign --abi arm64-v8a --build `"$build_dir`" --jobs $buildJobs",
+            'rm -f deploy/build-android-arm64-v8a/client/android-build/AmneziaVPN_*_android9+_arm64-v8a.apk',
+            "run_repo_build_sh --target android --sign --abi arm64-v8a --build `"`$build_dir`" --jobs $buildJobs",
             "version=`$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build-android-arm64-v8a/CMakeCache.txt | cut -d= -f2)",
             "cd deploy/build-android-arm64-v8a/client/android-build && rename_artifact AmneziaVPN.apk AmneziaVPN_`${version}_android9+_arm64-v8a.apk && cd - >/dev/null"
         ) -join "; "

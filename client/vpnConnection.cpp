@@ -99,6 +99,15 @@ quint32 ipv4Mask(int prefixLength)
     return prefixLength == 0 ? 0 : (0xffffffffu << (32 - prefixLength));
 }
 
+bool routeOverlapsIpv4Range(quint32 address, int prefixLength, quint32 base, int rangePrefixLength)
+{
+    const quint32 routeStart = address & ipv4Mask(prefixLength);
+    const quint32 routeEnd = routeStart | ~ipv4Mask(prefixLength);
+    const quint32 rangeStart = base & ipv4Mask(rangePrefixLength);
+    const quint32 rangeEnd = rangeStart | ~ipv4Mask(rangePrefixLength);
+    return routeStart <= rangeEnd && rangeStart <= routeEnd;
+}
+
 QString ipv4RouteToString(quint32 address, int prefixLength)
 {
     const QString ip = QHostAddress(address).toString();
@@ -195,7 +204,8 @@ QStringList splitRoutesKeepingHostsInVpn(const QStringList &routes, const QStrin
 
 bool isRoutableSplitTunnelRoute(const QString &route)
 {
-    constexpr int minPublicBypassPrefixLength = 24;
+    constexpr int minPublicBypassPrefixLength = 16;
+    constexpr int minLocalBypassPrefixLength = 24;
     quint32 address = 0;
     int prefixLength = 32;
     if (!parseIpv4Route(route, address, prefixLength) || prefixLength == 0) {
@@ -207,21 +217,35 @@ bool isRoutableSplitTunnelRoute(const QString &route)
         const quint32 mask = ipv4Mask(prefix);
         return (address & mask) == (base & mask);
     };
+    const auto routeOverlapsRange = [address, prefixLength](quint32 base, int prefix) {
+        return routeOverlapsIpv4Range(address, prefixLength, base, prefix);
+    };
+    if (prefixLength < 32 && (address & ipv4Mask(prefixLength)) != address) {
+        return false;
+    }
 
     if (hostAddress.isNull() || hostAddress.isLoopback() || hostAddress.isBroadcast()
         || hostAddress.isLinkLocal() || hostAddress.isMulticast()) {
         return false;
     }
-    if (inRange(0x00000000u, 8) || inRange(0x0a000000u, 8)
-        || inRange(0x64400000u, 10) || inRange(0x7f000000u, 8)
-        || inRange(0xac100000u, 12) || inRange(0xc0000000u, 24)
-        || inRange(0xc0000200u, 24) || inRange(0xc0a80000u, 16)
-        || inRange(0xc6120000u, 15) || inRange(0xc6336400u, 24)
-        || inRange(0xcb007100u, 24) || inRange(0xe0000000u, 4)
-        || inRange(0xf0000000u, 4)) {
+    const bool localOrServiceRoute = inRange(0x0a000000u, 8)
+        || inRange(0x64400000u, 10)
+        || inRange(0xac100000u, 12)
+        || inRange(0xc0a80000u, 16);
+    if (routeOverlapsRange(0x00000000u, 8) || routeOverlapsRange(0x7f000000u, 8)
+        || routeOverlapsRange(0xc0000000u, 24)
+        || routeOverlapsRange(0xc0000200u, 24) || routeOverlapsRange(0xc01f0000u, 24)
+        || routeOverlapsRange(0xc01fc400u, 24) || routeOverlapsRange(0xc034c100u, 24)
+        || routeOverlapsRange(0xc0586300u, 24) || routeOverlapsRange(0xc0af3000u, 24)
+        || routeOverlapsRange(0xc6120000u, 15) || routeOverlapsRange(0xc6336400u, 24)
+        || routeOverlapsRange(0xcb007100u, 24) || routeOverlapsRange(0xe0000000u, 4)
+        || routeOverlapsRange(0xf0000000u, 4)) {
         return false;
     }
-    return prefixLength >= minPublicBypassPrefixLength;
+    const int minPrefixLength = localOrServiceRoute
+        ? minLocalBypassPrefixLength
+        : minPublicBypassPrefixLength;
+    return prefixLength >= minPrefixLength;
 }
 
 QStringList routableSplitTunnelRoutes(const QStringList &routes)
