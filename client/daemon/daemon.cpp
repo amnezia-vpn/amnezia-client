@@ -390,55 +390,55 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
   config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
 
-  if (!obj.value("Jc").isNull()) {
-    config.m_junkPacketCount = obj.value("Jc").toString();
+  if (const auto jc = obj.value("Jc"); !jc.isUndefined()) {
+    config.m_junkPacketCount = jc.toString();
   }
-  if (!obj.value("Jmin").isNull()) {
-    config.m_junkPacketMinSize = obj.value("Jmin").toString();
+  if (const auto jmin = obj.value("Jmin"); !jmin.isUndefined()) {
+    config.m_junkPacketMinSize = jmin.toString();
   }
-  if (!obj.value("Jmax").isNull()) {
-    config.m_junkPacketMaxSize = obj.value("Jmax").toString();
+  if (const auto jmax = obj.value("Jmax"); !jmax.isUndefined()) {
+    config.m_junkPacketMaxSize = jmax.toString();
   }
-  if (!obj.value("S1").isNull()) {
-    config.m_initPacketJunkSize = obj.value("S1").toString();
+  if (const auto s1 = obj.value("S1"); !s1.isUndefined()) {
+    config.m_initPacketJunkSize = s1.toString();
   }
-  if (!obj.value("S2").isNull()) {
-    config.m_responsePacketJunkSize = obj.value("S2").toString();
+  if (const auto s2 = obj.value("s2"); !s2.isUndefined()) {
+    config.m_responsePacketJunkSize = s2.toString();
   }
-  if (!obj.value("S3").isNull()) {
-    config.m_cookieReplyPacketJunkSize = obj.value("S3").toString();
+  if (const auto s3 = obj.value("S3"); !s3.isUndefined()) {
+    config.m_cookieReplyPacketJunkSize = s3.toString();
   }
-  if (!obj.value("S4").isNull()) {
-    config.m_transportPacketJunkSize = obj.value("S4").toString();
-  }
-
-  if (!obj.value("H1").isNull()) {
-    config.m_initPacketMagicHeader = obj.value("H1").toString();
-  }
-  if (!obj.value("H2").isNull()) {
-    config.m_responsePacketMagicHeader = obj.value("H2").toString();
-  }
-  if (!obj.value("H3").isNull()) {
-    config.m_underloadPacketMagicHeader = obj.value("H3").toString();
-  }
-  if (!obj.value("H4").isNull()) {
-    config.m_transportPacketMagicHeader = obj.value("H4").toString();
+  if (const auto s4 = obj.value("s4"); !s4.isUndefined()) {
+    config.m_transportPacketJunkSize = s4.toString();
   }
 
-  if (!obj.value("I1").isNull()) {
-    config.m_specialJunk["I1"] = obj.value("I1").toString();
+  if (const auto h1 = obj.value("H1"); !h1.isUndefined()) {
+    config.m_initPacketMagicHeader = h1.toString();
   }
-  if (!obj.value("I2").isNull()) {
-    config.m_specialJunk["I2"] = obj.value("I2").toString();
+  if (const auto h2 = obj.value("H2"); !h2.isUndefined()) {
+    config.m_responsePacketMagicHeader = h2.toString();
   }
-  if (!obj.value("I3").isNull()) {
-    config.m_specialJunk["I3"] = obj.value("I3").toString();
+  if (const auto h3 = obj.value("H3"); !h3.isUndefined()) {
+    config.m_underloadPacketMagicHeader = h3.toString();
   }
-  if (!obj.value("I4").isNull()) {
-    config.m_specialJunk["I4"] = obj.value("I4").toString();
+  if (const auto h4 = obj.value("H4"); !h4.isUndefined()) {
+    config.m_transportPacketMagicHeader = h4.toString();
   }
-  if (!obj.value("I5").isNull()) {
-    config.m_specialJunk["I5"] = obj.value("I5").toString();
+
+  if (const auto i1 = obj.value("I1"); !i1.isUndefined()) {
+    config.m_specialJunk["I1"] = i1.toString();
+  }
+  if (const auto i2 = obj.value("I2"); !i2.isUndefined()) {
+    config.m_specialJunk["I2"] = i2.toString();
+  }
+  if (const auto i3 = obj.value("I3"); !i3.isUndefined()) {
+    config.m_specialJunk["I3"] = i3.toString();
+  }
+  if (const auto i4 = obj.value("I4"); !i4.isUndefined()) {
+    config.m_specialJunk["I4"] = i4.toString();
+  }
+  if (const auto i5 = obj.value("I5"); !i5.isUndefined()) {
+    config.m_specialJunk["I5"] = i5.toString();
   }
 
   return true;
