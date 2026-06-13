@@ -703,7 +703,7 @@ ErrorCode UsersController::revokeXray(const int row,
     );
     if (error != ErrorCode::NoError) {
         logger.error() << "Failed to restart xray container";
-        return ErrorCode::NoError;
+        return error;
     }
 
     return error;

@@ -306,10 +306,6 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
             || container == DockerContainer::Xray || container == DockerContainer::SSXray;
 
     if (asyncUpdate) {
-        // serverIsBusy is rendered by PageSetupWizardInstalling (used by Xray/SSXray)
-        // as "the server is busy installing other software" + a Cancel button, which is
-        // wrong for a normal settings update. Only MtProxy/Telemt settings pages use this
-        // signal as a plain in-progress indicator, so scope it to them.
         const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
         if (emitBusy)
             emit serverIsBusy(true);
