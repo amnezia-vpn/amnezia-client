@@ -58,6 +58,9 @@ public:
     DockerContainer getDefaultContainer(const QString &serverId) const;
     ContainerConfig getContainerConfig(const QString &serverId, DockerContainer container) const;
 
+    std::optional<QJsonObject> getServerRawConfig(const QString &serverId) const;
+    void updateServerRawConfig(const QString &serverId, const QJsonObject &config);
+
     // Validation
     bool isServerFromApiAlreadyExists(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol) const;
     bool hasInstalledContainers(const QString &serverId) const;

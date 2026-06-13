@@ -254,12 +254,12 @@ void AmneziaApplication::startLocalServer() {
     const QString serverName("AmneziaVPNInstance");
     QLocalServer::removeServer(serverName);
 
-    QLocalServer *server = new QLocalServer(this);
-    server->listen(serverName);
+    m_localServer.reset(new QLocalServer(this));
+    m_localServer->listen(serverName);
 
-    QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
-        if (server) {
-            QLocalSocket *clientConnection = server->nextPendingConnection();
+    QObject::connect(m_localServer.get(), &QLocalServer::newConnection, this, [this]() {
+        if (m_localServer) {
+            QLocalSocket *clientConnection = m_localServer->nextPendingConnection();
             clientConnection->deleteLater();
         }
         emit m_coreController->pageController()->raiseMainWindow(); //TODO

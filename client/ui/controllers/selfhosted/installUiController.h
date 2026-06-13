@@ -62,6 +62,11 @@ public slots:
     void setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);
     void clearProcessedServerCredentials();
 
+    Q_INVOKABLE void setDoubleVpnEntryCredentials(const QString &hostName, const QString &userName, const QString &secretData);
+    Q_INVOKABLE bool checkDoubleVpnEntryConnection();
+
+    Q_INVOKABLE bool setupMultihopEntryNode(const QString &serverId, const QString &entryIp, const QString &entryUser, const QString &entryPass, int exitPort);
+
     void scanServerForInstalledContainers(const QString &serverId);
 
     void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
@@ -158,6 +163,8 @@ private:
     ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;
+    ServerCredentials m_doubleVpnEntryCredentials;
+    bool m_isDoubleVpnFlow = false;
 
     QString m_privateKeyPassphrase;
     

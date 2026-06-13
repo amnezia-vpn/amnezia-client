@@ -105,6 +105,8 @@ PageType {
         }
     }
 
+
+
     QtObject {
         id: reboot
 

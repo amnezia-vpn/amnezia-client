@@ -48,9 +48,10 @@ QSharedPointer<IpcProcessInterfaceReplica> IpcClient::CreatePrivilegedProcess()
 
         QSharedPointer<IpcProcessInterfaceReplica> rep(
             node->acquire<IpcProcessInterfaceReplica>(),
-            [node] (IpcProcessInterfaceReplica *ptr) {
+            [node, pid] (IpcProcessInterfaceReplica *ptr) {
                 delete ptr;
                 node->deleteLater();
+                IpcClient::Interface()->freePrivilegedProcess(pid);
             }
         );
         if (rep.isNull()) {

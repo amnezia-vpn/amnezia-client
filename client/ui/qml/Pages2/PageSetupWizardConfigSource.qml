@@ -267,6 +267,7 @@ PageType {
     property list<QtObject> variants: [
         amneziaVpn,
         selfHostVpn,
+        selfHostDoubleVpn,
         backupRestore,
         fileOpen,
         qrScan,
@@ -302,6 +303,19 @@ PageType {
         property bool isVisible: true
         property var handler: function() {
             PageController.goToPage(PageEnum.PageSetupWizardCredentials)
+        }
+    }
+
+    QtObject {
+        id: selfHostDoubleVpn
+
+        property bool featuredAmneziaConnection: false
+        property string title: qsTr("Self-hosted Double VPN")
+        property string description: qsTr("Configure a Double VPN on your own 2 servers")
+        property string imageSource: "qrc:/images/controls/server.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageSetupWizardDoubleCredentials)
         }
     }
 

@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QEventLoop>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QRandomGenerator>
 #include <QRegularExpression>
 #include <QStandardPaths>
@@ -94,9 +95,6 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         m_processedServerCredentials = ServerCredentials();
     }
 
-    QString finishMessage;
-    ErrorCode errorCode;
-
     if (isNewServer) {
         int existingServerIndex = -1;
         if (m_installController->isServerAlreadyExists(serverCredentials, existingServerIndex)) {
@@ -104,37 +102,65 @@ void InstallUiController::install(DockerContainer container, int port, Transport
             return;
         }
 
-        bool wasContainerInstalled = false;
-        errorCode = m_installController->installServer(serverCredentials, container, port, transportProto, wasContainerInstalled);
-        if (errorCode) {
-            emit installationErrorOccurred(errorCode);
-            return;
-        }
+        auto *watcher = new QFutureWatcher<QPair<ErrorCode, bool>>(this);
+        connect(watcher, &QFutureWatcher<QPair<ErrorCode, bool>>::finished, this, [=, this]() {
+            auto result = watcher->result();
+            ErrorCode errorCode = result.first;
+            bool wasContainerInstalled = result.second;
 
-        const QString newServerId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
-        const auto admin = m_serversController->selfHostedAdminConfig(newServerId);
-        if (!admin.has_value()) {
-            emit installationErrorOccurred(ErrorCode::InternalError);
-            return;
-        }
-        QMap<DockerContainer, ContainerConfig> containers = admin->containers;
-        int containersCount = containers.size();
+            if (errorCode) {
+                emit installationErrorOccurred(errorCode);
+                watcher->deleteLater();
+                return;
+            }
 
-        if (wasContainerInstalled) {
-            finishMessage = tr("%1 installed successfully. ").arg(ContainerUtils::containerHumanNames().value(container));
-        } else {
-            finishMessage = tr("%1 is already installed on the server. ").arg(ContainerUtils::containerHumanNames().value(container));
-        }
+            const QString newServerId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
+            const auto admin = m_serversController->selfHostedAdminConfig(newServerId);
+            if (!admin.has_value()) {
+                emit installationErrorOccurred(ErrorCode::InternalError);
+                watcher->deleteLater();
+                return;
+            }
 
-        if (containersCount > 1) {
-            finishMessage += tr("\nAdded containers that were already installed on the server");
-        }
+            QString finishMessage;
+            QMap<DockerContainer, ContainerConfig> containers = admin->containers;
+            int containersCount = containers.size();
 
-        if (!m_connectionController->isConnected()) {
-            m_serversController->setDefaultServer(newServerId);
-        }
+            if (wasContainerInstalled) {
+                finishMessage = tr("%1 installed successfully. ").arg(ContainerUtils::containerHumanNames().value(container));
+            } else {
+                finishMessage = tr("%1 is already installed on the server. ").arg(ContainerUtils::containerHumanNames().value(container));
+            }
 
-        emit installServerFinished(finishMessage);
+            if (containersCount > 1) {
+                finishMessage += tr("\nAdded containers that were already installed on the server");
+            }
+
+            if (!m_connectionController->isConnected()) {
+                m_serversController->setDefaultServer(newServerId);
+            }
+
+            if (m_isDoubleVpnFlow) {
+                bool success = setupMultihopEntryNode(newServerId, m_doubleVpnEntryCredentials.hostName, m_doubleVpnEntryCredentials.userName, m_doubleVpnEntryCredentials.secretData, port);
+                m_isDoubleVpnFlow = false;
+                if (success) {
+                    finishMessage += tr("\nMultihop entry node successfully configured!");
+                } else {
+                    watcher->deleteLater();
+                    return; // Early return to avoid showing success message if entry node failed
+                }
+            }
+
+            emit installServerFinished(finishMessage);
+            watcher->deleteLater();
+        });
+
+        QFuture<QPair<ErrorCode, bool>> future = QtConcurrent::run([=, this]() {
+            bool installed = false;
+            ErrorCode err = m_installController->installServer(serverCredentials, container, port, transportProto, installed);
+            return qMakePair(err, installed);
+        });
+        watcher->setFuture(future);
     } else {
         const auto adminBefore = m_serversController->selfHostedAdminConfig(serverId);
         if (!adminBefore.has_value()) {
@@ -144,41 +170,56 @@ void InstallUiController::install(DockerContainer container, int port, Transport
         QMap<DockerContainer, ContainerConfig> containers = adminBefore->containers;
         int containersCount = containers.size();
 
-        bool wasContainerInstalled = false;
-        errorCode = m_installController->installContainer(serverId, container, port, transportProto,
-                                                          wasContainerInstalled);
-        if (errorCode) {
-            emit installationErrorOccurred(errorCode);
-            return;
-        }
+        auto *watcher = new QFutureWatcher<QPair<ErrorCode, bool>>(this);
+        connect(watcher, &QFutureWatcher<QPair<ErrorCode, bool>>::finished, this, [=, this]() {
+            auto result = watcher->result();
+            ErrorCode errorCode = result.first;
+            bool wasContainerInstalled = result.second;
 
-        const auto adminAfter = m_serversController->selfHostedAdminConfig(serverId);
-        if (!adminAfter.has_value()) {
-            emit installationErrorOccurred(ErrorCode::InternalError);
-            return;
-        }
-        QMap<DockerContainer, ContainerConfig> newContainers = adminAfter->containers;
-        int newContainersCount = newContainers.size();
+            if (errorCode) {
+                emit installationErrorOccurred(errorCode);
+                watcher->deleteLater();
+                return;
+            }
 
-        bool hasNewContainers = (newContainersCount - containersCount) > (wasContainerInstalled ? 1 : 0);
+            const auto adminAfter = m_serversController->selfHostedAdminConfig(serverId);
+            if (!adminAfter.has_value()) {
+                emit installationErrorOccurred(ErrorCode::InternalError);
+                watcher->deleteLater();
+                return;
+            }
+            QMap<DockerContainer, ContainerConfig> newContainers = adminAfter->containers;
+            int newContainersCount = newContainers.size();
 
-        if (wasContainerInstalled) {
-            finishMessage = tr("%1 installed successfully. ").arg(ContainerUtils::containerHumanNames().value(container));
-        } else {
-            finishMessage = tr("%1 is already installed on the server. ").arg(ContainerUtils::containerHumanNames().value(container));
-        }
+            bool hasNewContainers = (newContainersCount - containersCount) > (wasContainerInstalled ? 1 : 0);
+            QString finishMessage;
 
-        if (hasNewContainers) {
-            finishMessage += tr("\nAlready installed containers were found on the server. "
-                                "All installed containers have been added to the application");
-        }
+            if (wasContainerInstalled) {
+                finishMessage = tr("%1 installed successfully. ").arg(ContainerUtils::containerHumanNames().value(container));
+            } else {
+                finishMessage = tr("%1 is already installed on the server. ").arg(ContainerUtils::containerHumanNames().value(container));
+            }
 
-        const bool isServiceInstall = ContainerUtils::containerService(container) == ServiceType::Other;
-        if (!m_connectionController->isConnected() && !isServiceInstall) {
-            m_serversController->setDefaultContainer(serverId, container);
-        }
+            if (hasNewContainers) {
+                finishMessage += tr("\nAlready installed containers were found on the server. "
+                                    "All installed containers have been added to the application");
+            }
 
-        emit installContainerFinished(finishMessage, isServiceInstall);
+            const bool isServiceInstall = ContainerUtils::containerService(container) == ServiceType::Other;
+            if (!m_connectionController->isConnected() && !isServiceInstall) {
+                m_serversController->setDefaultContainer(serverId, container);
+            }
+
+            emit installContainerFinished(finishMessage, isServiceInstall);
+            watcher->deleteLater();
+        });
+
+        QFuture<QPair<ErrorCode, bool>> future = QtConcurrent::run([=, this]() {
+            bool installed = false;
+            ErrorCode err = m_installController->installContainer(serverId, container, port, transportProto, installed);
+            return qMakePair(err, installed);
+        });
+        watcher->setFuture(future);
     }
 }
 
@@ -517,6 +558,8 @@ QRegularExpression InstallUiController::ipAddressRegExp()
 void InstallUiController::clearProcessedServerCredentials()
 {
     m_processedServerCredentials = ServerCredentials();
+    m_doubleVpnEntryCredentials = ServerCredentials();
+    m_isDoubleVpnFlow = false;
 }
 
 void InstallUiController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
@@ -528,6 +571,22 @@ void InstallUiController::setProcessedServerCredentials(const QString &hostName,
     }
     m_processedServerCredentials.userName = userName;
     m_processedServerCredentials.secretData = secretData;
+    m_doubleVpnEntryCredentials = ServerCredentials();
+    m_isDoubleVpnFlow = false;
+}
+
+void InstallUiController::setDoubleVpnEntryCredentials(const QString &hostName, const QString &userName, const QString &secretData)
+{
+    m_doubleVpnEntryCredentials.hostName = hostName;
+    if (m_doubleVpnEntryCredentials.hostName.contains(":")) {
+        m_doubleVpnEntryCredentials.port = m_doubleVpnEntryCredentials.hostName.split(":").at(1).toInt();
+        m_doubleVpnEntryCredentials.hostName = m_doubleVpnEntryCredentials.hostName.split(":").at(0);
+    } else {
+        m_doubleVpnEntryCredentials.port = 22;
+    }
+    m_doubleVpnEntryCredentials.userName = userName;
+    m_doubleVpnEntryCredentials.secretData = secretData;
+    m_isDoubleVpnFlow = true;
 }
 
 void InstallUiController::mountSftpDrive(const QString &serverId, const QString &port, const QString &password, const QString &username)
@@ -553,6 +612,34 @@ bool InstallUiController::checkSshConnection()
 
     QString output;
     ErrorCode errorCode = m_installController->checkSshConnection(m_processedServerCredentials, output, passphraseCallback);
+
+    if (errorCode != ErrorCode::NoError) {
+        emit installationErrorOccurred(errorCode);
+        return false;
+    } else {
+        if (output.contains(tr("Please login as the user"))) {
+            output.replace("\n", "");
+            emit wrongInstallationUser(output);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InstallUiController::checkDoubleVpnEntryConnection()
+{
+    m_privateKeyPassphrase = "";
+
+    auto passphraseCallback = [this]() {
+        emit passphraseRequestStarted();
+        QEventLoop loop;
+        QObject::connect(this, &InstallUiController::passphraseRequestFinished, &loop, &QEventLoop::quit);
+        loop.exec();
+        return m_privateKeyPassphrase;
+    };
+
+    QString output;
+    ErrorCode errorCode = m_installController->checkSshConnection(m_doubleVpnEntryCredentials, output, passphraseCallback);
 
     if (errorCode != ErrorCode::NoError) {
         emit installationErrorOccurred(errorCode);
@@ -669,4 +756,53 @@ void InstallUiController::updateProtocolConfigModel(const QString &serverId, int
 #endif
     default: break;
     }
+}
+
+bool InstallUiController::setupMultihopEntryNode(const QString &serverId, const QString &entryIp, const QString &entryUser, const QString &entryPass, int exitPort)
+{
+    ServerCredentials credentials;
+    credentials.hostName = entryIp;
+    if (credentials.hostName.contains(":")) {
+        credentials.port = credentials.hostName.split(":").at(1).toInt();
+        credentials.hostName = credentials.hostName.split(":").at(0);
+    } else {
+        credentials.port = 22;
+    }
+    credentials.userName = entryUser;
+    credentials.secretData = entryPass;
+
+    auto config = m_serversController->getServerRawConfig(serverId);
+    if (!config.has_value()) return false;
+
+    QString exitIp = config.value().value("defaultIpv4").toString();
+
+    QJsonObject obj = config.value();
+
+    int actualExitPort = exitPort;
+    if (obj.contains("containers")) {
+        QJsonArray containers = obj.value("containers").toArray();
+        for (const QJsonValue &c : containers) {
+            QJsonObject containerObj = c.toObject();
+            QString cName = containerObj.value("container").toString();
+            if (cName == "amnezia-awg" || cName == "amnezia-wireguard" || cName == "amnezia-openvpn") {
+                if (containerObj.contains("port")) {
+                    actualExitPort = containerObj.value("port").toInt();
+                    break;
+                }
+            }
+        }
+    }
+
+    ErrorCode err = m_installController->setupMultihopEntryNode(credentials, exitIp, actualExitPort);
+    if (err != ErrorCode::NoError) {
+        emit installationErrorOccurred(err);
+        return false;
+    }
+
+    // Now update the server config to route through the entry node
+    obj.insert("multihop_port", actualExitPort);
+    obj.insert("defaultIpv4", entryIp);
+    // We update the local settings without ssh
+    m_serversController->updateServerRawConfig(serverId, obj);
+    return true;
 }

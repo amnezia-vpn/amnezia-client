@@ -55,6 +55,7 @@ namespace PageLoader
 
         PageSetupWizardStart,
         PageSetupWizardCredentials,
+        PageSetupWizardDoubleCredentials,
         PageSetupWizardProtocols,
         PageSetupWizardEasy,
         PageSetupWizardProtocolSettings,
@@ -65,6 +66,7 @@ namespace PageLoader
         PageSetupWizardQrReader,
         PageSetupWizardApiServicesList,
         PageSetupWizardApiFreeInfo,
+        PageSetupMultihop,
 
         PageProtocolOpenVpnSettings,
         PageProtocolXraySettings,

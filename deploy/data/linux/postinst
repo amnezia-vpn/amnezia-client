@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+
+APP_NAME=AmneziaVPN
+APP_PATH=/opt/$APP_NAME
+
+# Ensure log directory exists
+if [ ! -d /var/log/$APP_NAME ]; then
+    mkdir -p /var/log/$APP_NAME
+fi
+
+# Copy service to systemd
+cp -f $APP_PATH/$APP_NAME.service /etc/systemd/system/
+
+# Copy desktop and icon
+cp -f $APP_PATH/$APP_NAME.desktop /usr/share/applications/
+cp -f $APP_PATH/$APP_NAME.png /usr/share/pixmaps/
+chmod 555 /usr/share/applications/$APP_NAME.desktop
+
+# Create symlinks
+ln -sf $APP_PATH/bin/$APP_NAME /usr/local/sbin/$APP_NAME || true
+ln -sf $APP_PATH/bin/$APP_NAME /usr/local/bin/$APP_NAME || true
+
+# Update desktop database
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q || true
+fi
+
+# Reload systemd and enable service
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl daemon-reload || true
+    systemctl enable AmneziaVPN.service || true
+    systemctl start AmneziaVPN.service || true
+fi

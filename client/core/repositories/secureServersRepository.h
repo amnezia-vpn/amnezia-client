@@ -3,6 +3,7 @@
 
 #include <QHash>
 #include <QJsonObject>
+#include <QMutex>
 #include <QObject>
 #include <QVector>
 #include <QtGlobal>
@@ -71,6 +72,7 @@ private:
 
     void clearServerStateMaps();
 
+    mutable QMutex m_repositoryMutex;
     SecureQSettings *m_settings;
 
     QHash<QString, QJsonObject> m_serverJsonById;

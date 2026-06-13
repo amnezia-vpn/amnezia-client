@@ -181,11 +181,13 @@ void SecureServersRepository::syncToStorage()
 
 void SecureServersRepository::invalidateCache()
 {
+    QMutexLocker locker(&m_repositoryMutex);
     loadFromStorage();
 }
 
 void SecureServersRepository::clearServers()
 {
+    QMutexLocker locker(&m_repositoryMutex);
     clearServerStateMaps();
 
     m_defaultServerId.clear();
@@ -195,6 +197,7 @@ void SecureServersRepository::clearServers()
 
 QString SecureServersRepository::nextAvailableServerName() const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     QSet<QString> usedNames;
     usedNames.reserve(m_orderedServerIds.size());
 
@@ -217,6 +220,7 @@ QString SecureServersRepository::nextAvailableServerName() const
 
 QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const QString id = normalizedOrGeneratedServerId(serverId);
     if (m_serverJsonById.contains(id) || kind == serverConfigUtils::ConfigType::Invalid) {
         return id;
@@ -240,6 +244,7 @@ QString SecureServersRepository::addServer(const QString &serverId, const QJsonO
 
 void SecureServersRepository::editServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
+    QMutexLocker locker(&m_repositoryMutex);
     if (indexOfServerId(serverId) < 0 || kind == serverConfigUtils::ConfigType::Invalid) {
         return;
     }
@@ -268,6 +273,7 @@ void SecureServersRepository::editServer(const QString &serverId, const QJsonObj
 
 void SecureServersRepository::removeServer(const QString &serverId)
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const int removedIndex = indexOfServerId(serverId);
     if (removedIndex < 0) {
         return;
@@ -302,6 +308,7 @@ void SecureServersRepository::removeServer(const QString &serverId)
 
 serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return serverConfigUtils::ConfigType::Invalid;
@@ -311,6 +318,7 @@ serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString 
 
 std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAdminConfig(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return std::nullopt;
@@ -324,6 +332,7 @@ std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAd
 
 std::optional<SelfHostedUserServerConfig> SecureServersRepository::selfHostedUserConfig(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return std::nullopt;
@@ -337,6 +346,7 @@ std::optional<SelfHostedUserServerConfig> SecureServersRepository::selfHostedUse
 
 std::optional<NativeServerConfig> SecureServersRepository::nativeConfig(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return std::nullopt;
@@ -350,6 +360,7 @@ std::optional<NativeServerConfig> SecureServersRepository::nativeConfig(const QS
 
 std::optional<ApiV2ServerConfig> SecureServersRepository::apiV2Config(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return std::nullopt;
@@ -363,6 +374,7 @@ std::optional<ApiV2ServerConfig> SecureServersRepository::apiV2Config(const QStr
 
 std::optional<LegacyApiServerConfig> SecureServersRepository::legacyApiConfig(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     const auto it = m_serverJsonById.constFind(serverId);
     if (it == m_serverJsonById.constEnd()) {
         return std::nullopt;
@@ -376,11 +388,13 @@ std::optional<LegacyApiServerConfig> SecureServersRepository::legacyApiConfig(co
 
 int SecureServersRepository::serversCount() const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     return m_orderedServerIds.size();
 }
 
 QString SecureServersRepository::serverIdAt(int index) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     if (index < 0 || index >= m_orderedServerIds.size()) {
         return QString();
     }
@@ -389,16 +403,19 @@ QString SecureServersRepository::serverIdAt(int index) const
 
 QVector<QString> SecureServersRepository::orderedServerIds() const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     return m_orderedServerIds;
 }
 
 int SecureServersRepository::indexOfServerId(const QString &serverId) const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     return m_orderedServerIds.indexOf(serverId);
 }
 
 int SecureServersRepository::defaultServerIndex() const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     if (m_orderedServerIds.isEmpty()) {
         return 0;
     }
@@ -408,11 +425,13 @@ int SecureServersRepository::defaultServerIndex() const
 
 QString SecureServersRepository::defaultServerId() const
 {
+    QMutexLocker locker(&m_repositoryMutex);
     return m_defaultServerId;
 }
 
 void SecureServersRepository::setDefaultServer(const QString &serverId)
 {
+    QMutexLocker locker(&m_repositoryMutex);
     if (m_orderedServerIds.isEmpty()) {
         return;
     }

@@ -56,7 +56,9 @@ namespace libssh {
             QEventLoop wait;
             connect(&watcher, &QFutureWatcher<ErrorCode>::finished, &wait, &QEventLoop::quit);
             watcher.setFuture(future);
-            wait.exec(QEventLoop::ExcludeUserInputEvents);
+            if (!future.isFinished()) {
+                wait.exec(QEventLoop::ExcludeUserInputEvents);
+            }
 
             int connectionResult = watcher.result();
 
@@ -185,11 +187,14 @@ namespace libssh {
             }
             return closeChannel();
         });
-        watcher.setFuture(future);
-
         QEventLoop wait;
         QObject::connect(this, &Client::writeToChannelFinished, &wait, &QEventLoop::quit);
-        wait.exec(QEventLoop::ExcludeUserInputEvents);
+        
+        watcher.setFuture(future);
+
+        if (!future.isFinished()) {
+            wait.exec(QEventLoop::ExcludeUserInputEvents);
+        }
 
         return watcher.result();
     }

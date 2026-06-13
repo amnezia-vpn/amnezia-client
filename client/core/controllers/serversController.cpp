@@ -416,3 +416,29 @@ bool ServersController::isLegacyApiV1Server(const QString &serverId) const
     return !serverId.isEmpty()
             && serverConfigUtils::isLegacyApiSubscription(m_serversRepository->serverKind(serverId));
 }
+
+std::optional<QJsonObject> ServersController::getServerRawConfig(const QString &serverId) const
+{
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (kind == serverConfigUtils::ConfigType::Invalid) {
+        return std::nullopt;
+    }
+    
+    // As a hack to get the JSON quickly without changing the repository too much:
+    if (kind == serverConfigUtils::ConfigType::SelfHostedAdmin) {
+        auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (cfg) return cfg->toJson();
+    } else if (kind == serverConfigUtils::ConfigType::SelfHostedUser) {
+        auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
+        if (cfg) return cfg->toJson();
+    }
+    return std::nullopt;
+}
+
+void ServersController::updateServerRawConfig(const QString &serverId, const QJsonObject &config)
+{
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (kind != serverConfigUtils::ConfigType::Invalid) {
+        m_serversRepository->editServer(serverId, config, kind);
+    }
+}

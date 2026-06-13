@@ -19,7 +19,7 @@ int OpenVpnConfigModel::rowCount(const QModelIndex &parent) const
 
 bool OpenVpnConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
         return false;
     }
 

@@ -453,11 +453,13 @@ install(RUNTIME_DEPENDENCY_SET service_deps
     DESTINATION "${RUNTIME_DEPS_DIR}"
 )
 
-qt_generate_deploy_app_script(
-    TARGET ${PROJECT}
-    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(SCRIPT ${QT_DEPLOY_SCRIPT}
-    COMPONENT AmneziaVPN
-)
+if(NOT LINUX OR ANDROID)
+    qt_generate_deploy_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+    install(SCRIPT ${QT_DEPLOY_SCRIPT}
+        COMPONENT AmneziaVPN
+    )
+endif()

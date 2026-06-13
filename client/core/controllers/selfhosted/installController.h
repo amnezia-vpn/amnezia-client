@@ -62,6 +62,8 @@ public:
     
     ErrorCode installContainer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto, ContainerConfig &config);
 
+    ErrorCode setupMultihopEntryNode(const ServerCredentials &credentials, const QString &exitIp, int exitPort);
+
     ErrorCode installServer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto,
                                          bool &wasContainerInstalled);
     ErrorCode installContainer(const QString &serverId, DockerContainer container, int port, TransportProto transportProto,

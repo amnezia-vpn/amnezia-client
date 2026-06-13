@@ -1672,3 +1672,19 @@ QString InstallController::fetchDockerContainerSecret(const QString &serverId, D
     static const QRegularExpression hex32(QStringLiteral("^[0-9a-fA-F]{32}$"));
     return hex32.match(secret).hasMatch() ? secret : QString();
 }
+
+ErrorCode InstallController::setupMultihopEntryNode(const ServerCredentials &credentials, const QString &exitIp, int exitPort)
+{
+    SshSession sshSession;
+
+    QString setupScript = QString(
+        "sudo sysctl -w net.ipv4.ip_forward=1\n"
+        "sudo iptables -t nat -I PREROUTING 1 -p udp --dport %1 -j DNAT --to-destination %2:%1\n"
+        "sudo iptables -t nat -I POSTROUTING 1 -p udp -d %2 --dport %1 -j MASQUERADE\n"
+        "sudo iptables -t nat -I PREROUTING 1 -p tcp --dport %1 -j DNAT --to-destination %2:%1\n"
+        "sudo iptables -t nat -I POSTROUTING 1 -p tcp -d %2 --dport %1 -j MASQUERADE\n"
+    ).arg(exitPort).arg(exitIp);
+
+    ErrorCode err = sshSession.runScript(credentials, setupScript);
+    return err;
+}

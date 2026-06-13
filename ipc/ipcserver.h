@@ -18,6 +18,7 @@ class IpcServer : public IpcInterfaceSource
 public:
     explicit IpcServer(QObject *parent = nullptr);
     virtual int createPrivilegedProcess() override;
+    virtual void freePrivilegedProcess(int pid) override;
 
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;

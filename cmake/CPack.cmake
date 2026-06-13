@@ -18,8 +18,16 @@ list(PREPEND CPACK_COMPONENTS_ALL AmneziaVPN)
 
 if(APPLE)
     set(CPACK_GENERATOR productbuild)
-else()
+elseif(WIN32)
     set(CPACK_GENERATOR IFW)
+else()
+    set(CPACK_GENERATOR DEB IFW)
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libssl-dev | libssl3 | libssl1.1, iptables, iproute2")
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "AmneziaVPN <support@amnezia.org>")
+    set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_SOURCE_DIR}/deploy/data/linux/postinst;${CMAKE_SOURCE_DIR}/deploy/data/linux/prerm")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "net")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/AmneziaVPN")
 endif()
 
 # === CPack IFW generator settings ===

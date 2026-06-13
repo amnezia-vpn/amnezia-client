@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+APP_NAME=AmneziaVPN
+
+killall -9 $APP_NAME || true
+
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl stop AmneziaVPN.service || true
+    systemctl disable AmneziaVPN.service || true
+fi
+
+rm -f /etc/systemd/system/AmneziaVPN.service || true
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl daemon-reload || true
+fi
+
+rm -f /usr/local/sbin/$APP_NAME || true
+rm -f /usr/local/bin/$APP_NAME || true
+rm -f /usr/share/applications/$APP_NAME.desktop || true
+rm -f /usr/share/pixmaps/$APP_NAME.png || true

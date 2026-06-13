@@ -245,15 +245,17 @@ if(WIN32)
     set(deploy_tool_options "--force-openssl --force")
 endif()
 
-qt_generate_deploy_qml_app_script(
-    TARGET ${PROJECT}
-    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-    DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
-)
-install(SCRIPT ${QT_DEPLOY_SCRIPT}
-    COMPONENT AmneziaVPN
-)
+if(NOT LINUX OR ANDROID)
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
+    )
+    install(SCRIPT ${QT_DEPLOY_SCRIPT}
+        COMPONENT AmneziaVPN
+    )
+endif()
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)
     list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")

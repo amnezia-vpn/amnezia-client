@@ -120,9 +120,11 @@
         <file>Pages2/PageSetupWizardApiFreeInfo.qml</file>
         <file>Pages2/PageSetupWizardApiPremiumInfo.qml</file>
         <file>Pages2/PageSetupWizardApiTrialEmail.qml</file>
+        <file>Pages2/PageSetupMultihop.qml</file>
         <file>Pages2/PageSetupWizardApiServicesList.qml</file>
         <file>Pages2/PageSetupWizardConfigSource.qml</file>
         <file>Pages2/PageSetupWizardCredentials.qml</file>
+        <file>Pages2/PageSetupWizardDoubleCredentials.qml</file>
         <file>Pages2/PageSetupWizardEasy.qml</file>
         <file>Pages2/PageSetupWizardInstalling.qml</file>
         <file>Pages2/PageSetupWizardProtocols.qml</file>

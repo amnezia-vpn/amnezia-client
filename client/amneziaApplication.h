@@ -71,6 +71,11 @@ private:
     QThread m_vpnConnectionThread;
 
     QNetworkAccessManager *m_nam;
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    QScopedPointer<class QLocalServer> m_localServer;
+#endif
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 };

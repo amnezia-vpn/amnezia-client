@@ -64,6 +64,29 @@ int IpcServer::createPrivilegedProcess()
     return m_localpid;
 }
 
+void IpcServer::freePrivilegedProcess(int pid)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::freePrivilegedProcess" << pid;
+#endif
+
+    if (!m_processes.contains(pid)) {
+        return;
+    }
+
+    ProcessDescriptor pd = m_processes.value(pid);
+
+    if (pd.serverNode) {
+        pd.serverNode->disableRemoting(pd.ipcProcess.data());
+    }
+
+    if (pd.localServer) {
+        pd.localServer->close();
+    }
+
+    m_processes.remove(pid);
+}
+
 int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
 {
 #ifdef MZ_DEBUG
