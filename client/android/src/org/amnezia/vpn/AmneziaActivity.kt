@@ -792,6 +792,16 @@ class AmneziaActivity : QtActivity() {
                             else -> type = "*/*"
                         }
                     }
+                    // Force system document picker to avoid third-party file managers
+                    // that may lack storage permissions (common on Android TV devices)
+                    val systemPickerPackage = listOf("com.google.android.documentsui", "com.android.documentsui")
+                        .firstOrNull { pkg ->
+                            try { packageManager.getPackageInfo(pkg, 0); true }
+                            catch (_: PackageManager.NameNotFoundException) { false }
+                        }
+                    if (systemPickerPackage != null) {
+                        `package` = systemPickerPackage
+                    }
                 }
             } else {
                 Intent(this@AmneziaActivity, TvFilePicker::class.java)
