@@ -402,13 +402,13 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (const auto s1 = obj.value("S1"); !s1.isUndefined()) {
     config.m_initPacketJunkSize = s1.toString();
   }
-  if (const auto s2 = obj.value("s2"); !s2.isUndefined()) {
+  if (const auto s2 = obj.value("S2"); !s2.isUndefined()) {
     config.m_responsePacketJunkSize = s2.toString();
   }
   if (const auto s3 = obj.value("S3"); !s3.isUndefined()) {
     config.m_cookieReplyPacketJunkSize = s3.toString();
   }
-  if (const auto s4 = obj.value("s4"); !s4.isUndefined()) {
+  if (const auto s4 = obj.value("S4"); !s4.isUndefined()) {
     config.m_transportPacketJunkSize = s4.toString();
   }
 
