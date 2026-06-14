@@ -119,7 +119,7 @@ if errorlevel 1 (
 
 :: build project and installers
 @echo on
-cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CONFIGURATION_TYPES=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true;CL_MPCount=%BUILD_JOBS%;MultiProcMaxCount=%BUILD_JOBS%" || goto :fail
+cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release -DCMAKE_CONFIGURATION_TYPES=Release -DCONAN_INSTALL_BUILD_CONFIGURATIONS=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true;CL_MPCount=%BUILD_JOBS%;MultiProcMaxCount=%BUILD_JOBS%" || goto :fail
 cmake --build "%BUILD_DIR%" --config Release -- /m:%BUILD_JOBS%  || goto :fail
 @echo off
 for %%I in (%ARG_BUILD_INSTALLERS%) do (
