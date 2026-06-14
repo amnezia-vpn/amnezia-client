@@ -100,6 +100,23 @@ if exist "%VCVARS_PATH%" (
     if errorlevel 1 goto :fail
 )
 
+:: Some Conan Windows recipes call tools like mc.exe directly during configure.
+:: vcvarsall can leave Windows SDK tools out of PATH on this workstation, so add
+:: the latest matching SDK bin directory when needed.
+where mc.exe >nul 2>nul
+if errorlevel 1 (
+    set "_sdk_tools_arch=x64"
+    if /i "%ARCH%" == "arm64" set "_sdk_tools_arch=arm64"
+    for /f "delims=" %%I in ('dir /b /ad /o-n "%ProgramFiles(x86)%\Windows Kits\10\bin" 2^>nul') do (
+        if not defined _windows_sdk_bin (
+            if exist "%ProgramFiles(x86)%\Windows Kits\10\bin\%%I\!_sdk_tools_arch!\mc.exe" (
+                set "_windows_sdk_bin=%ProgramFiles(x86)%\Windows Kits\10\bin\%%I\!_sdk_tools_arch!"
+            )
+        )
+    )
+    if defined _windows_sdk_bin set "PATH=!_windows_sdk_bin!;%PATH%"
+)
+
 :: build project and installers
 @echo on
 cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true;CL_MPCount=%BUILD_JOBS%;MultiProcMaxCount=%BUILD_JOBS%" || goto :fail
