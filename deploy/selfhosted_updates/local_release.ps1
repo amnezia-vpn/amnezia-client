@@ -338,7 +338,8 @@ run_repo_build_sh() {
     return "$status"
 }
 '@
-    [System.IO.File]::WriteAllText($tempScript, ($prelude + "`n" + $Script), [System.Text.UTF8Encoding]::new($false))
+    $scriptBody = ($prelude + "`n" + $Script) -replace "`r`n", "`n"
+    [System.IO.File]::WriteAllText($tempScript, $scriptBody, [System.Text.UTF8Encoding]::new($false))
     try {
         $tempScriptWsl = Convert-ToWslPath $tempScript
         Invoke-External "wsl.exe" @("bash", $tempScriptWsl)
@@ -350,7 +351,8 @@ run_repo_build_sh() {
 function Invoke-WslBashOutput([string] $Script) {
     Assert-Command "wsl.exe"
     $tempScript = [System.IO.Path]::ChangeExtension([System.IO.Path]::GetTempFileName(), ".sh")
-    [System.IO.File]::WriteAllText($tempScript, ("set -euo pipefail`n" + $Script), [System.Text.UTF8Encoding]::new($false))
+    $scriptBody = ("set -euo pipefail`n" + $Script) -replace "`r`n", "`n"
+    [System.IO.File]::WriteAllText($tempScript, $scriptBody, [System.Text.UTF8Encoding]::new($false))
     try {
         $tempScriptWsl = Convert-ToWslPath $tempScript
         $output = & wsl.exe bash $tempScriptWsl
