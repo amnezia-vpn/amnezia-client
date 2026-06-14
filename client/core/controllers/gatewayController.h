@@ -9,15 +9,16 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QStringList>
-#include <memory>
 
-#include "core/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
 #endif
 
-class Settings;
+class SecureAppSettingsRepository;
 
 class GatewayController : public QObject
 {
@@ -25,7 +26,7 @@ class GatewayController : public QObject
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, const std::shared_ptr<Settings> &settings,
+                               const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository = nullptr,
                                QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
@@ -69,7 +70,7 @@ private:
     QString m_gatewayEndpoint;
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
-    std::shared_ptr<Settings> m_settings;
+    SecureAppSettingsRepository *m_appSettingsRepository = nullptr;
 
     inline static QString m_proxyUrl;
 };

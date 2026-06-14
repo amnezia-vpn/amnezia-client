@@ -36,6 +36,9 @@
 // ID for the Firewall Sublayer
 DEFINE_GUID(ST_FW_WINFW_BASELINE_SUBLAYER_KEY, 0xc78056ff, 0x2bc1, 0x4211, 0xaa,
             0xdd, 0x7f, 0x35, 0x8d, 0xef, 0x20, 0x2d);
+// win-split-tunnel v1.2.5.0 uses this hardcoded DNS sublayer key.
+DEFINE_GUID(ST_FW_WINFW_DNS_SUBLAYER_KEY, 0x60090787, 0xcca1, 0x4937, 0xaa,
+            0xce, 0x51, 0x25, 0x6e, 0xf4, 0x81, 0xf3);
 // ID for the Mullvad Split-Tunnel Sublayer Provider
 DEFINE_GUID(ST_FW_PROVIDER_KEY, 0xe2c114ee, 0xf32a, 0x4264, 0xa6, 0xcb, 0x3f,
             0xa7, 0x99, 0x63, 0x56, 0xd9);
@@ -49,6 +52,17 @@ constexpr uint8_t LOW_WEIGHT = 0;
 constexpr uint8_t MED_WEIGHT = 7;
 constexpr uint8_t HIGH_WEIGHT = 13;
 constexpr uint8_t MAX_WEIGHT = 15;
+
+bool sublayerExists(HANDLE wfp, const GUID& key, const wchar_t* name) {
+  FWPM_SUBLAYER0* maybeLayer = nullptr;
+  const DWORD result = FwpmSubLayerGetByKey0(wfp, &key, &maybeLayer);
+  if (result == ERROR_SUCCESS) {
+    logger.debug() << "The Sublayer Already Exists:" << QString::fromWCharArray(name);
+    FwpmFreeMemory0((void**)&maybeLayer);
+    return true;
+  }
+  return false;
+}
 }  // namespace
 
 WindowsFirewall* WindowsFirewall::create(QObject* parent) {
@@ -77,6 +91,7 @@ WindowsFirewall* WindowsFirewall::create(QObject* parent) {
   }
   logger.debug() << "Filter engine opened successfully.";
   if (!initSublayer()) {
+    FwpmEngineClose0(engineHandle);
     return nullptr;
   }
   s_instance = new WindowsFirewall(engineHandle, parent);
@@ -116,13 +131,12 @@ bool WindowsFirewall::initSublayer() {
   }
   auto cleanup = qScopeGuard([&] { FwpmEngineClose0(wfp); });
 
-  // Check if the Layer Already Exists
-  FWPM_SUBLAYER0* maybeLayer;
-  result = FwpmSubLayerGetByKey0(wfp, &ST_FW_WINFW_BASELINE_SUBLAYER_KEY,
-                                 &maybeLayer);
-  if (result == ERROR_SUCCESS) {
-    logger.debug() << "The Sublayer Already Exists!";
-    FwpmFreeMemory0((void**)&maybeLayer);
+  const bool baselineExists = sublayerExists(
+      wfp, ST_FW_WINFW_BASELINE_SUBLAYER_KEY,
+      L"Amnezia-SplitTunnel-Baseline-Sublayer");
+  const bool dnsExists = sublayerExists(wfp, ST_FW_WINFW_DNS_SUBLAYER_KEY,
+                                        L"Amnezia-SplitTunnel-DNS-Sublayer");
+  if (baselineExists && dnsExists) {
     return true;
   }
 
@@ -134,20 +148,49 @@ bool WindowsFirewall::initSublayer() {
     return false;
   }
 
-  // Step 3: Add Sublayer
-  FWPM_SUBLAYER0 subLayer;
-  memset(&subLayer, 0, sizeof(subLayer));
-  subLayer.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
-  subLayer.displayData.name = (PWSTR)L"Amnezia-SplitTunnel-Sublayer";
-  subLayer.displayData.description =
-      (PWSTR)L"Filters that enforce a good baseline";
-  subLayer.weight = 0xFFFF;
+  auto addSublayerIfMissing = [&](const GUID& key, const wchar_t* name,
+                                  const wchar_t* description, UINT16 weight) {
+    FWPM_SUBLAYER0* maybeLayer = nullptr;
+    result = FwpmSubLayerGetByKey0(wfp, &key, &maybeLayer);
+    if (result == ERROR_SUCCESS) {
+      logger.debug() << "The Sublayer Already Exists:"
+                     << QString::fromWCharArray(name);
+      FwpmFreeMemory0((void**)&maybeLayer);
+      return true;
+    }
+    if (result != FWP_E_SUBLAYER_NOT_FOUND) {
+      logger.error() << "FwpmSubLayerGetByKey0 failed for"
+                     << QString::fromWCharArray(name) << "Return value:.\n"
+                     << result;
+      return false;
+    }
 
-  result = FwpmSubLayerAdd0(wfp, &subLayer, NULL);
-  if (result != ERROR_SUCCESS) {
-    logger.error() << "FwpmSubLayerAdd0 failed. Return value:.\n" << result;
+    FWPM_SUBLAYER0 subLayer;
+    memset(&subLayer, 0, sizeof(subLayer));
+    subLayer.subLayerKey = key;
+    subLayer.displayData.name = (PWSTR)name;
+    subLayer.displayData.description = (PWSTR)description;
+    subLayer.weight = weight;
+
+    result = FwpmSubLayerAdd0(wfp, &subLayer, NULL);
+    if (result != ERROR_SUCCESS) {
+      logger.error() << "FwpmSubLayerAdd0 failed. Return value:.\n" << result;
+      return false;
+    }
+    return true;
+  };
+
+  if (!addSublayerIfMissing(
+          ST_FW_WINFW_BASELINE_SUBLAYER_KEY,
+          L"Amnezia-SplitTunnel-Baseline-Sublayer",
+          L"Filters that enforce a good baseline", 0xFFFF) ||
+      !addSublayerIfMissing(ST_FW_WINFW_DNS_SUBLAYER_KEY,
+                            L"Amnezia-SplitTunnel-DNS-Sublayer",
+                            L"Filters that enforce DNS handling", 0xFFFE)) {
+    FwpmTransactionAbort0(wfp);
     return false;
   }
+
   // Step 4: Commit!
   result = FwpmTransactionCommit0(wfp);
   if (result != ERROR_SUCCESS) {
@@ -202,7 +245,8 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
   FW_OK(allowHyperVTraffic(MAX_WEIGHT, "Allow Hyper-V Traffic"));
   FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
                                 "Allow all for AmneziaVPN.exe"));
-  FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
+  FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS",
+                           ST_FW_WINFW_DNS_SUBLAYER_KEY));
   FW_OK(allowLoopbackTraffic(MED_WEIGHT,
                              "Allow Loopback traffic on device %1"));
 
@@ -924,6 +968,13 @@ void WindowsFirewall::importAddress(const QHostAddress& addr,
 
 bool WindowsFirewall::blockTrafficOnPort(uint port, uint8_t weight,
                                          const QString& title) {
+  return blockTrafficOnPort(port, weight, title,
+                            ST_FW_WINFW_BASELINE_SUBLAYER_KEY);
+}
+
+bool WindowsFirewall::blockTrafficOnPort(uint port, uint8_t weight,
+                                         const QString& title,
+                                         const GUID& subLayerKey) {
   // Allow Traffic to IP with PORT using any protocol
   FWPM_FILTER_CONDITION0 conds[3];
   conds[0].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
@@ -949,7 +1000,7 @@ bool WindowsFirewall::blockTrafficOnPort(uint port, uint8_t weight,
   filter.action.type = FWP_ACTION_BLOCK;
   filter.weight.type = FWP_UINT8;
   filter.weight.uint8 = weight;
-  filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+  filter.subLayerKey = subLayerKey;
 
   QString description("Block %1 on Port %2");
   filter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V6;

@@ -8,7 +8,7 @@
 
 #include "android_controller.h"
 #include "android_utils.h"
-#include "ui/controllers/importController.h"
+#include "ui/controllers/importUiController.h"
 
 namespace
 {
@@ -22,12 +22,12 @@ namespace
 AndroidController::AndroidController() : QObject()
 {
     connect(this, &AndroidController::status, this,
-            [this](AndroidController::ConnectionState state) {
+            [this](AndroidController::ConnectionState state, int serverIndex) {
                 qDebug() << "Android event: status =" << textConnectionState(state);
                 if (isWaitingStatus) {
                     qDebug() << "Initialization by service status";
                     isWaitingStatus = false;
-                    emit initConnectionState(convertState(state));
+                    emit initConnectionState(convertState(state), serverIndex);
                 }
             },
             Qt::QueuedConnection);
@@ -37,7 +37,8 @@ AndroidController::AndroidController() : QObject()
         [this]() {
             qDebug() << "Android event: service disconnected";
             isWaitingStatus = true;
-            emit connectionStateChanged(Vpn::ConnectionState::Disconnected);
+            // This is the Android Activity-to-service binding state, not the VPN
+            // tunnel state. Actual tunnel updates arrive via vpnStateChanged/status.
         },
         Qt::QueuedConnection);
 
@@ -89,7 +90,7 @@ bool AndroidController::initialize()
     qDebug() << "Initialize AndroidController";
 
     const JNINativeMethod methods[] = {
-        {"onStatus", "(I)V", reinterpret_cast<void *>(onStatus)},
+        {"onStatus", "(II)V", reinterpret_cast<void *>(onStatus)},
         {"onServiceDisconnected", "()V", reinterpret_cast<void *>(onServiceDisconnected)},
         {"onServiceError", "()V", reinterpret_cast<void *>(onServiceError)},
         {"onVpnPermissionRejected", "()V", reinterpret_cast<void *>(onVpnPermissionRejected)},
@@ -97,6 +98,7 @@ bool AndroidController::initialize()
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
+        {"onApkInstallerStarted", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onApkInstallerStarted)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
@@ -328,6 +330,12 @@ void AndroidController::sendTouch(float x, float y)
     callActivityMethod("sendTouch", "(FF)V", x, y);
 }
 
+int AndroidController::installApk(const QString &fileName)
+{
+    return callActivityMethod<jint>("installApk", "(Ljava/lang/String;)I",
+                                    QJniObject::fromString(fileName).object<jstring>());
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;
@@ -443,14 +451,14 @@ QString AndroidController::textConnectionState(AndroidController::ConnectionStat
 
 // JNI functions called by Android
 // static
-void AndroidController::onStatus(JNIEnv *env, jobject thiz, jint stateCode)
+void AndroidController::onStatus(JNIEnv *env, jobject thiz, jint stateCode, jint serverIndex)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
     auto state = ConnectionState(stateCode);
 
-    emit AndroidController::instance()->status(state);
+    emit AndroidController::instance()->status(state, serverIndex);
 }
 
 // static
@@ -518,6 +526,14 @@ void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
 }
 
 // static
+void AndroidController::onApkInstallerStarted(JNIEnv *env, jobject thiz, jstring fileName)
+{
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->apkInstallerStarted(AndroidUtils::convertJString(env, fileName));
+}
+
+// static
 void AndroidController::onConfigImported(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
@@ -538,7 +554,7 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
+    return ImportUiController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }
 // static
 void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp)

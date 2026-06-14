@@ -1,12 +1,11 @@
 #include <QDebug>
 #include <QTimer>
+#include <libssh/libssh.h>
 
-#include "amnezia_application.h"
-#include "core/osSignalHandler.h"
-#include "migrations.h"
+#include "amneziaApplication.h"
+#include "core/utils/osSignalHandler.h"
+#include "core/utils/migrations.h"
 #include "version.h"
-
-#include <QTimer>
 
 #ifdef Q_OS_WIN
     #include "Windows.h"
@@ -24,6 +23,16 @@ bool isAnotherInstanceRunning()
     if (socket.waitForConnected(500)) {
         qWarning() << "AmneziaVPN is already running";
         return true;
+    }
+    return false;
+}
+
+bool isPublishBundledUpdatesOnceCommand(int argc, char *argv[])
+{
+    for (int i = 1; i < argc; ++i) {
+        if (QString::fromLocal8Bit(argv[i]) == QStringLiteral("--publish-bundled-updates-once")) {
+            return true;
+        }
     }
     return false;
 }
@@ -47,12 +56,20 @@ int main(int argc, char *argv[])
     AmneziaApplication app(argc, argv);
     OsSignalHandler::setup();
 
+    ssh_init();
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, []() {
+        ssh_finalize();
+    });
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (isAnotherInstanceRunning()) {
+    const bool publishBundledUpdatesOnce = isPublishBundledUpdatesOnceCommand(argc, argv);
+    if (!publishBundledUpdatesOnce && isAnotherInstanceRunning()) {
         QTimer::singleShot(1000, &app, [&]() { app.quit(); });
         return app.exec();
     }
-    app.startLocalServer();
+    if (!publishBundledUpdatesOnce) {
+        app.startLocalServer();
+    }
 #endif
 
 // Allow to raise app window if secondary instance launched
@@ -75,9 +92,8 @@ int main(int argc, char *argv[])
 
         qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
-        qInfo().noquote() << QString("SSL backend: %1").arg(QSslSocket::sslLibraryVersionString());
 
         return app.exec();
     }
-    return 0;
+    return app.commandExitCode();
 }

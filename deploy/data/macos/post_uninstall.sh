@@ -8,6 +8,7 @@ USER_APP_SUPPORT="$HOME/Library/Application Support/$APP_NAME"
 SYSTEM_APP_SUPPORT="/Library/Application Support/$APP_NAME"
 LOG_FOLDER="/var/log/$APP_NAME"
 CACHES_FOLDER="$HOME/Library/Caches/$APP_NAME"
+SERVICE_GROUP="amnvpn"
 
 # Attempt to quit the GUI application if it's currently running
 if pgrep -x "$APP_NAME" > /dev/null; then
@@ -79,6 +80,22 @@ if sudo pfctl -s info 2>/dev/null | grep -q '^Status: Enabled' && \
    ! sudo pfctl -sr 2>/dev/null | grep -q .; then
     echo "Disabling PF"
     sudo pfctl -d 2>/dev/null || true
+fi
+
+# Remove amnvpn group if it's not referenced by users
+if dscl . -read "/Groups/$SERVICE_GROUP" >/dev/null 2>&1; then
+    group_gid=$(dscl . -read "/Groups/$SERVICE_GROUP" PrimaryGroupID 2>/dev/null | awk '{print $2}')
+    users_with_primary_gid=""
+    if [ -n "$group_gid" ]; then
+        users_with_primary_gid=$(dscl . -list /Users PrimaryGroupID 2>/dev/null | awk -v gid="$group_gid" '$2 == gid {print $1}')
+    fi
+
+    if [ -z "$users_with_primary_gid" ]; then
+        echo "Removing group $SERVICE_GROUP"
+        sudo dscl . -delete "/Groups/$SERVICE_GROUP" || true
+    else
+        echo "Keeping group $SERVICE_GROUP (still used by users): $users_with_primary_gid"
+    fi
 fi
 
 # -----------------------------------------------------------

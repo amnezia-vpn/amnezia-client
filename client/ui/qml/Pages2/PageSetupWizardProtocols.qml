@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import Style 1.0
 
 import "./"
@@ -20,8 +19,8 @@ PageType {
         sourceModel: ContainersModel
         filters: [
             ValueFilter {
-                roleName: "serviceType"
-                value: ProtocolEnum.Vpn
+                roleName: "isVpnContainer"
+                value: true
             },
             ValueFilter {
                 roleName: "isSupported"
@@ -30,6 +29,10 @@ PageType {
             ValueFilter {
                 roleName: "isInstallationAllowed"
                 value: true
+            },
+            ValueFilter {
+                roleName: "isUnsupportedContainer"
+                value: false
             }
         ]
         sorters: RoleSorter {
@@ -45,7 +48,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -93,7 +96,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function () {
-                    ContainersModel.setProcessedContainerIndex(proxyContainersModel.mapToSource(index));
+                    ServersUiController.processedContainerIndex = proxyContainersModel.mapToSource(index)
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings);
                 }
             }

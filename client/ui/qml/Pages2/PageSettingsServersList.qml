@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -25,7 +24,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -73,12 +72,12 @@ PageType {
 
                     descriptionText: {
                         var servicesNameString = ""
-                        var servicesName = ServersModel.getAllInstalledServicesName(index)
+                        var servicesName = ServersUiController.getAllInstalledServicesName(index)
                         for (var i = 0; i < servicesName.length; i++) {
                             servicesNameString += servicesName[i] + " · "
                         }
 
-                        if (ServersModel.isServerFromApi(index)) {
+                        if (ServersUiController.isServerFromApi(serverId)) {
                             return servicesNameString + serverDescription
                         } else {
                             return servicesNameString + hostName
@@ -87,11 +86,11 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                        ServersModel.processedIndex = index
+                        ServersUiController.setProcessedServerId(serverId)
 
-                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
                             PageController.showBusyIndicator(true)
-                            let result = ApiSettingsController.getAccountInfo(false)
+                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
                             PageController.showBusyIndicator(false)
                             if (!result) {
                                 return

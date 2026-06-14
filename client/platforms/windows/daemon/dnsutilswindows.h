@@ -24,9 +24,19 @@ class DnsUtilsWindows final : public DnsUtils {
   bool restoreResolvers() override;
 
  private:
+  struct InterfaceMetricState {
+    bool valid = false;
+    bool automatic = false;
+    ULONG metric = 0;
+  };
+
   quint64 m_luid = 0;
+  InterfaceMetricState m_ipv4Metric;
+  InterfaceMetricState m_ipv6Metric;
   DWORD (*m_setInterfaceDnsSettingsProcAddr)(GUID, const void*) = nullptr;
 
+  void preferInterfaceMetric(int family, InterfaceMetricState& state);
+  void restoreInterfaceMetric(int family, InterfaceMetricState& state);
   bool updateResolversWin32(GUID, const QList<QHostAddress>& resolvers);
   bool updateResolversNetsh(int ifindex, const QList<QHostAddress>& resolvers);
 };

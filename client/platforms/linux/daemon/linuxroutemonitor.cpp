@@ -19,10 +19,10 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "../utilities.h"
+#include "core/utils/utilities.h"
 #include "leakdetector.h"
 #include "logger.h"
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 
 namespace {
 Logger logger("LinuxRouteMonitor");

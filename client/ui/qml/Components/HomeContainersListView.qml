@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -49,7 +48,7 @@ ListViewType {
                 showImage: !isInstalled
 
                 checkable: isInstalled && !ConnectionController.isConnected
-                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
+                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId)
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
@@ -57,15 +56,17 @@ ListViewType {
                         return
                     }
 
-                    if (checked) {
-                        containersDropDown.closeTriggered()
-                        ServersModel.setDefaultContainer(ServersModel.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
-                    } else {
-                        ContainersModel.setProcessedContainerIndex(proxyDefaultServerContainersModel.mapToSource(index))
-                        InstallController.setShouldCreateServer(false)
+                    var containerIndex = proxyDefaultServerContainersModel.mapToSource(index)
+
+                    if (!isInstalled) {
+                        ServersUiController.processedContainerIndex = containerIndex
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.closeTriggered()
+                        return
                     }
+
+                    containersDropDown.closeTriggered()
+                    ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, containerIndex)
                 }
 
                 MouseArea {

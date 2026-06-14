@@ -71,9 +71,16 @@ CMakeLists.txt.user*
 
 # Linux files
 *.7z
+AmneziaVPN_Ubuntu_x64.*
 deploy/AppDir
 deploy/Tools
 deploy/AmneziaVPN*Installer*
+dist/selfhosted-release-env.ps1
+dist/selfhosted-local-artifacts/
+dist/selfhosted-updates/
+dist/selfhosted-windows-client/
+dist/android-device-backups/
+aqtinstall.log
 
 # MACOS files
 .DS_Store
@@ -81,9 +88,13 @@ client/.DS_Store
 ._.DS_Store
 ._*
 *.dmg
+deploy/data/macos/pf/amn.400.allowPIA.conf
 
 # tmp files
 *.*~
+.tmp/
+__pycache__/
+*.py[cod]
 
 #########################  Android
 # Built application files
@@ -113,15 +124,18 @@ proguard/
 
 # Android Studio captures folder
 captures/
+device_backups/
 
 # IntelliJ
 *.iml
 .idea/
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
-#*.jks
-#*.keystore
+*.jks
+*.keystore
+android-release-keystore.env.ps1
+selfhosted-update-private.pem
+selfhosted-update-public.pem
 
 # External native build folder generated in Android Studio 2.2 and later
 .externalNativeBuild

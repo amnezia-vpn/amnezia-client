@@ -87,7 +87,6 @@ extension PacketTunnelProvider {
     }
 
     private func setupAndlaunchOpenVPN(withConfig ovpnConfiguration: Data,
-                                       withShadowSocks viaSS: Bool = false,
                                        completionHandler: @escaping (Error?) -> Void) {
         ovpnLog(.info, message: "Setup and launch")
 
@@ -203,9 +202,6 @@ extension PacketTunnelProvider {
         if let peerInfo = configuration.peerInfo {
             let peerInfoSummary = peerInfo.keys.sorted().map { "\($0)=\(peerInfo[$0] ?? "")" }.joined(separator: " ")
             ovpnLog(.info, title: "PeerInfoOverride", message: peerInfoSummary)
-        }
-        if configString.contains("cloak") {
-            configuration.setPTCloak()
         }
 
         let evaluation: OpenVPNConfigurationEvaluation?

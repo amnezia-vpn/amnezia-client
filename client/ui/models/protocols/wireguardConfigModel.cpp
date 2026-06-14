@@ -1,8 +1,12 @@
 #include "wireguardConfigModel.h"
 
-#include <QJsonDocument>
+#include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/constants/protocolConstants.h"
 
-#include "protocols/protocols_defs.h"
+using namespace amnezia;
+using namespace ProtocolUtils;
 
 WireGuardConfigModel::WireGuardConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
@@ -16,14 +20,24 @@ int WireGuardConfigModel::rowCount(const QModelIndex &parent) const
 
 bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerProps::allContainers().size()) {
+    if (!index.isValid() || index.row() < 0 || index.row() >= ContainerUtils::allContainers().size()) {
         return false;
     }
 
+    QString strValue = value.toString();
+
     switch (role) {
-    case Roles::SubnetAddressRole: m_serverProtocolConfig.insert(config_key::subnet_address, value.toString()); break;
-    case Roles::PortRole: m_serverProtocolConfig.insert(config_key::port, value.toString()); break;
-    case Roles::ClientMtuRole: m_clientProtocolConfig.insert(config_key::mtu, value.toString()); break;
+    case Roles::SubnetAddressRole: m_protocolConfig.serverConfig.subnetAddress = strValue; break;
+    case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
+    case Roles::ClientMtuRole: {
+        if (!m_protocolConfig.clientConfig.has_value()) {
+            m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
+        }
+        m_protocolConfig.clientConfig->mtu = strValue;
+        break;
+    }
+    default:
+        return false;
     }
 
     emit dataChanged(index, index, QList { role });
@@ -33,66 +47,77 @@ bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &val
 QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return false;
+        return QVariant();
     }
 
     switch (role) {
-    case Roles::SubnetAddressRole: return m_serverProtocolConfig.value(config_key::subnet_address).toString();
-    case Roles::PortRole: return m_serverProtocolConfig.value(config_key::port).toString();
-    case Roles::ClientMtuRole: return m_clientProtocolConfig.value(config_key::mtu);
+    case Roles::SubnetAddressRole: return m_protocolConfig.serverConfig.subnetAddress;
+    case Roles::PortRole: return m_protocolConfig.serverConfig.port;
+    case Roles::ClientMtuRole: {
+        if (m_protocolConfig.clientConfig.has_value()) {
+            return m_protocolConfig.clientConfig->mtu;
+        }
+        return QString(protocols::wireguard::defaultMtu);
+    }
     }
 
     return QVariant();
 }
 
-void WireGuardConfigModel::updateModel(const QJsonObject &config)
+void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::WireGuardProtocolConfig &protocolConfig)
 {
     beginResetModel();
-    m_container = ContainerProps::containerFromString(config.value(config_key::container).toString());
-
-    m_fullConfig = config;
-    QJsonObject serverProtocolConfig = config.value(config_key::wireguard).toObject();
-
-    auto defaultTransportProto =
-            ProtocolProps::transportProtoToString(ProtocolProps::defaultTransportProto(Proto::WireGuard), Proto::WireGuard);
-    m_serverProtocolConfig.insert(config_key::transport_proto,
-                                  serverProtocolConfig.value(config_key::transport_proto).toString(defaultTransportProto));
-    m_serverProtocolConfig[config_key::last_config] = serverProtocolConfig.value(config_key::last_config);
-    m_serverProtocolConfig[config_key::subnet_address] = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
-    m_serverProtocolConfig[config_key::port] = serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
-
-    auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
-    QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
-    m_clientProtocolConfig[config_key::mtu] = clientProtocolConfig[config_key::mtu].toString(protocols::wireguard::defaultMtu);
-
+    m_container = container;
+    
+    m_protocolConfig = protocolConfig;
+    
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    
+    if (!m_protocolConfig.clientConfig.has_value()) {
+        m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
+    }
+    applyDefaultsToClientConfig(m_protocolConfig.clientConfig.value());
+    
+    m_originalProtocolConfig = m_protocolConfig;
+    
     endResetModel();
 }
 
-QJsonObject WireGuardConfigModel::getConfig()
+void WireGuardConfigModel::applyDefaultsToServerConfig(amnezia::WireGuardServerConfig& config)
 {
-    const WgConfig oldConfig(m_fullConfig.value(config_key::wireguard).toObject());
-    const WgConfig newConfig(m_serverProtocolConfig);
-
-    if (!oldConfig.hasEqualServerSettings(newConfig)) {
-        m_serverProtocolConfig.remove(config_key::last_config);
-    } else {
-        auto lastConfig = m_serverProtocolConfig.value(config_key::last_config).toString();
-        QJsonObject jsonConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
-        jsonConfig[config_key::mtu] = m_clientProtocolConfig[config_key::mtu];
-
-        m_serverProtocolConfig[config_key::last_config] = QString(QJsonDocument(jsonConfig).toJson());
+    if (config.subnetAddress.isEmpty()) {
+        config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
     }
+    if (config.port.isEmpty()) {
+        config.port = protocols::wireguard::defaultPort;
+    }
+    if (config.transportProto.isEmpty()) {
+        config.transportProto = ProtocolUtils::transportProtoToString(
+            ProtocolUtils::defaultTransportProto(amnezia::Proto::WireGuard), amnezia::Proto::WireGuard);
+    }
+}
 
-    m_fullConfig.insert(config_key::wireguard, m_serverProtocolConfig);
-    return m_fullConfig;
+void WireGuardConfigModel::applyDefaultsToClientConfig(amnezia::WireGuardClientConfig& config)
+{
+    if (config.mtu.isEmpty()) {
+        config.mtu = protocols::wireguard::defaultMtu;
+    }
+}
+
+amnezia::WireGuardProtocolConfig WireGuardConfigModel::getProtocolConfig()
+{
+    bool serverSettingsChanged = !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+    
+    if (serverSettingsChanged) {
+        m_protocolConfig.clearClientConfig();
+    }
+    
+    return m_protocolConfig;
 }
 
 bool WireGuardConfigModel::isServerSettingsEqual()
 {
-    const WgConfig oldConfig(m_fullConfig.value(config_key::wireguard).toObject());
-    const WgConfig newConfig(m_serverProtocolConfig);
-
-    return oldConfig.hasEqualServerSettings(newConfig);
+    return m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
 }
 
 QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
@@ -106,28 +131,3 @@ QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
     return roles;
 }
 
-WgConfig::WgConfig(const QJsonObject &serverProtocolConfig)
-{
-    auto lastConfig = serverProtocolConfig.value(config_key::last_config).toString();
-    QJsonObject clientProtocolConfig = QJsonDocument::fromJson(lastConfig.toUtf8()).object();
-    clientMtu = clientProtocolConfig[config_key::mtu].toString(protocols::wireguard::defaultMtu);
-
-    subnetAddress = serverProtocolConfig.value(config_key::subnet_address).toString(protocols::wireguard::defaultSubnetAddress);
-    port = serverProtocolConfig.value(config_key::port).toString(protocols::wireguard::defaultPort);
-}
-
-bool WgConfig::hasEqualServerSettings(const WgConfig &other) const
-{
-    if (subnetAddress != other.subnetAddress || port != other.port) {
-        return false;
-    }
-    return true;
-}
-
-bool WgConfig::hasEqualClientSettings(const WgConfig &other) const
-{
-    if (clientMtu != other.clientMtu) {
-        return false;
-    }
-    return true;
-}

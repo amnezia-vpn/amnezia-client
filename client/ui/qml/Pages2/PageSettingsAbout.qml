@@ -14,13 +14,25 @@ import "../Components"
 PageType {
     id: root
 
+    Connections {
+        target: UpdateController
+
+        function onManualUpdateCheckStarted() {
+            PageController.showNotificationMessage(qsTr("Checking for updates..."))
+        }
+
+        function onManualUpdateCheckNoUpdates() {
+            PageController.showNotificationMessage(qsTr("No updates available"))
+        }
+    }
+
     BackButtonType {
         id: backButton
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -147,9 +159,10 @@ PageType {
                 textColor: AmneziaStyle.color.goldenApricot
 
                 text: qsTr("Check for updates")
+                enabled: !UpdateController.checking
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                    UpdateController.checkForUpdates()
                 }
             }
 
@@ -170,7 +183,7 @@ PageType {
                 text: qsTr("Privacy Policy")
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("policy"))
+                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl("policy"))
                 }
             }
         }
@@ -223,7 +236,7 @@ PageType {
         readonly property string description: qsTr("Visit official website")
         readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
         }
     }
 }

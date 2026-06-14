@@ -2,9 +2,11 @@
 #define IKEV2CONFIGMODEL_H
 
 #include <QAbstractListModel>
-#include <QJsonObject>
 
-#include "containers/containers_defs.h"
+#include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
+#include "core/utils/protocolEnum.h"
+#include "core/models/protocols/ikev2ProtocolConfig.h"
 
 class Ikev2ConfigModel : public QAbstractListModel
 {
@@ -24,16 +26,16 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
 public slots:
-    void updateModel(const QJsonObject &config);
-    QJsonObject getConfig();
+    void updateModel(amnezia::DockerContainer container, const amnezia::Ikev2ProtocolConfig &protocolConfig);
+    amnezia::Ikev2ProtocolConfig getProtocolConfig();
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    DockerContainer m_container;
-    QJsonObject m_protocolConfig;
-    QJsonObject m_fullConfig;
+    amnezia::DockerContainer m_container;
+    amnezia::Ikev2ProtocolConfig m_protocolConfig;
+    amnezia::Ikev2ProtocolConfig m_originalProtocolConfig;
 };
 
 #endif // IKEV2CONFIGMODEL_H

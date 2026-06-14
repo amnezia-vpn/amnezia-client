@@ -8,7 +8,6 @@ import QtCore
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -21,15 +20,22 @@ import "../Components"
 PageType {
     id: root
 
-    property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
+    property var isServerFromTelegramApi: ServersUiController.isServerFromApi(ServersUiController.defaultServerId)
     
     property bool pageEnabled
+    property bool defaultManagedSplitTunnelingForceEnabled: false
+
+    function reloadDefaultManagedRules() {
+        SitesController.reloadDefaultManagedSites()
+        root.defaultManagedSplitTunnelingForceEnabled = SitesController.isDefaultManagedSplitTunnelingForceEnabled()
+    }
 
     Component.onCompleted: {
+        root.reloadDefaultManagedRules()
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
-        } else if (ServersModel.isDefaultServerDefaultContainerHasSplitTunneling) {
+        } else if (ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling) {
             PageController.showNotificationMessage(qsTr("Default server does not support split tunneling function"))
             root.pageEnabled = false
         } else {
@@ -38,7 +44,33 @@ PageType {
     }
 
     Connections {
+        target: ServersUiController
+
+        function onDefaultServerIndexChanged() {
+            root.reloadDefaultManagedRules()
+        }
+    }
+
+    Connections {
+        target: ConnectionController
+
+        function onServerRoutingRulesChanged(serverIndex) {
+            if (serverIndex === ServersUiController.defaultIndex) {
+                root.reloadDefaultManagedRules()
+            }
+        }
+    }
+
+    Connections {
         target: SitesController
+
+        function onManagedSplitTunnelingForceChanged() {
+            root.defaultManagedSplitTunnelingForceEnabled = SitesController.isDefaultManagedSplitTunnelingForceEnabled()
+        }
+    }
+
+    Connections {
+        target: IpSplitTunnelingController
 
         function onFinished(message) {
             PageController.showNotificationMessage(message)
@@ -73,12 +105,22 @@ PageType {
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = SitesModel.routeMode
+        var currentRouteMode = IpSplitTunnelingController.routeMode
         if ((routeMode.onlyForwardSites === currentRouteMode) || (routeMode.allSites === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptSites === currentRouteMode) {
             return 1
         }
+    }
+
+    function isManagedExceptListVisible() {
+        if (proxyManagedExceptSitesModel.count === 0) {
+            return false
+        }
+        if (!IpSplitTunnelingController.isSplitTunnelingEnabled) {
+            return root.defaultManagedSplitTunnelingForceEnabled
+        }
+        return getRouteModesModelIndex() === 1
     }
 
     ColumnLayout {
@@ -88,7 +130,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -104,11 +146,11 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: SitesModel.isTunnelingEnabled
+                checked: IpSplitTunnelingController.isSplitTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {
-                SitesModel.toggleSplitTunneling(checked)
+                IpSplitTunnelingController.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
@@ -138,13 +180,13 @@ PageType {
                 clickedFunction: function() {
                     selector.text = selectedText
                     selector.closeTriggered()
-                    if (SitesModel.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        SitesModel.routeMode = root.routeModesModel[selectedIndex].type
+                    if (IpSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        IpSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === SitesModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === IpSplitTunnelingController.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -152,7 +194,7 @@ PageType {
                 }
 
                 Connections {
-                    target: SitesModel
+                    target: IpSplitTunnelingController
                     function onRouteModeChanged() {
                         selectedIndex = getRouteModesModelIndex()
                     }
@@ -169,16 +211,16 @@ PageType {
         anchors.top: header.bottom
         anchors.topMargin: 16
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: addSiteButton.implicitHeight + 48 + (searchField.textField.activeFocus ? 0 : SettingsController.imeHeight)
+        anchors.bottomMargin: addSiteButton.implicitHeight + 48 + (searchField.textField.activeFocus ? 0 : PageController.imeHeight)
 
         width: parent.width
 
         enabled: root.pageEnabled
         clip: true
 
-        model: SortFilterProxyModel {
-            id: proxySitesModel
-            sourceModel: SitesModel
+        SortFilterProxyModel {
+            id: proxyManagedExceptSitesModel
+            sourceModel: ManagedExceptSitesModel
             filters: [
                 AnyOf {
                     RegExpFilter {
@@ -195,40 +237,156 @@ PageType {
             ]
         }
 
-        delegate: ColumnLayout {
+        SortFilterProxyModel {
+            id: proxyIpSplitTunnelingModel
+            sourceModel: IpSplitTunnelingModel
+            filters: [
+                AnyOf {
+                    RegExpFilter {
+                        roleName: "url"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                    RegExpFilter {
+                        roleName: "ip"
+                        pattern: ".*" + searchField.textField.text + ".*"
+                        caseSensitivity: Qt.CaseInsensitive
+                    }
+                }
+            ]
+        }
+
+        model: (root.isManagedExceptListVisible() ? proxyManagedExceptSitesModel.count + 1 : 0)
+               + proxyIpSplitTunnelingModel.count
+
+        delegate: Loader {
+            id: rowLoader
+
             width: listView.width
 
-            LabelWithButtonType {
-                id: site
-                Layout.fillWidth: true
+            readonly property bool managedListVisible: root.isManagedExceptListVisible()
+            readonly property int managedHeaderRows: managedListVisible ? 1 : 0
+            readonly property int managedRows: managedListVisible ? proxyManagedExceptSitesModel.count : 0
+            readonly property int managedModelIndex: index - managedHeaderRows
+            readonly property int localModelIndex: index - managedHeaderRows - managedRows
 
-                text: url
-                descriptionText: ip
-                rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+            sourceComponent: managedListVisible && index === 0
+                             ? managedHeaderDelegate
+                             : (managedListVisible && index <= managedRows ? managedRuleDelegate : localRuleDelegate)
 
-                clickedFunction: function() {
-                    var headerText = qsTr("Remove ") + url + "?"
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        SitesController.removeSite(proxySitesModel.mapToSource(index))
-                        if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
-                        }
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
-                        }
-                    }
-
-                    showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            function syncItemIndexes() {
+                if (!item) {
+                    return
                 }
+
+                item.managedModelIndex = managedModelIndex
+                item.localModelIndex = localModelIndex
             }
 
-            DividerType {}
+            onLoaded: syncItemIndexes()
+            onManagedModelIndexChanged: syncItemIndexes()
+            onLocalModelIndexChanged: syncItemIndexes()
+        }
+
+        Component {
+            id: managedHeaderDelegate
+
+            ColumnLayout {
+                width: listView.width
+                property int managedModelIndex: -1
+                property int localModelIndex: -1
+
+                Header2Type {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 8
+                    Layout.bottomMargin: 4
+
+                    headerText: qsTr("Managed by server")
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 8
+
+                    wrapMode: Text.WordWrap
+                    color: AmneziaStyle.color.mutedGray
+                    text: qsTr("Server-managed rules are locked. They are used only when this server is active and the current split tunneling mode applies this list.")
+                }
+            }
+        }
+
+        Component {
+            id: managedRuleDelegate
+
+            ColumnLayout {
+                width: listView.width
+                property int managedModelIndex: -1
+                property int localModelIndex: -1
+
+                readonly property var managedRule: managedModelIndex >= 0 && managedModelIndex < proxyManagedExceptSitesModel.count
+                                                   ? proxyManagedExceptSitesModel.get(managedModelIndex)
+                                                   : { "url": "", "ip": "" }
+
+                LabelWithButtonType {
+                    Layout.fillWidth: true
+
+                    enabled: false
+                    text: managedRule.url || ""
+                    descriptionText: managedRule.ip || ""
+                }
+
+                DividerType {}
+            }
+        }
+
+        Component {
+            id: localRuleDelegate
+
+            ColumnLayout {
+                width: listView.width
+                property int managedModelIndex: -1
+                property int localModelIndex: -1
+
+                readonly property var localRule: localModelIndex >= 0 && localModelIndex < proxyIpSplitTunnelingModel.count
+                                                 ? proxyIpSplitTunnelingModel.get(localModelIndex)
+                                                 : { "url": "", "ip": "" }
+
+                LabelWithButtonType {
+                    id: site
+                    Layout.fillWidth: true
+
+                    text: localRule.url || ""
+                    descriptionText: localRule.ip || ""
+                    rightImageSource: "qrc:/images/controls/trash.svg"
+                    rightImageColor: AmneziaStyle.color.paleGray
+
+                    clickedFunction: function() {
+                        var headerText = qsTr("Remove ") + (localRule.url || "") + "?"
+                        var yesButtonText = qsTr("Continue")
+                        var noButtonText = qsTr("Cancel")
+
+                        var yesButtonFunction = function() {
+                            IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(localModelIndex))
+                            if (!GC.isMobile()) {
+                                site.rightButton.forceActiveFocus()
+                            }
+                        }
+                        var noButtonFunction = function() {
+                            if (!GC.isMobile()) {
+                                site.rightButton.forceActiveFocus()
+                            }
+                        }
+
+                        showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                    }
+                }
+
+                DividerType {}
+            }
         }
     }
 
@@ -265,7 +423,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    SitesController.addSite(textField.text)
+                    IpSplitTunnelingController.addSite(textField.text)
                     textField.text = ""
                     PageController.showBusyIndicator(false)
                 }
@@ -341,7 +499,7 @@ PageType {
                     }
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        SitesController.exportSites(fileName)
+                        IpSplitTunnelingController.exportSites(fileName)
                         moreActionsDrawer.closeTriggered()
                         PageController.showBusyIndicator(false)
                     }
@@ -364,7 +522,7 @@ PageType {
 
                     var yesButtonFunction = function() {
                         PageController.showBusyIndicator(true)
-                        SitesController.removeSites()
+                        IpSplitTunnelingController.removeSites()
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
@@ -482,7 +640,7 @@ PageType {
 
     function importSites(fileName, replaceExistingSites) {
         PageController.showBusyIndicator(true)
-        SitesController.importSites(fileName, replaceExistingSites)
+        IpSplitTunnelingController.importSites(fileName, replaceExistingSites)
         PageController.showBusyIndicator(false)
         importSitesDrawer.closeTriggered()
         moreActionsDrawer.closeTriggered()

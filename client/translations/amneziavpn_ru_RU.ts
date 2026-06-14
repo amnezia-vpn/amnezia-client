@@ -1313,6 +1313,21 @@ Thank you for staying with us!</source>
 <context>
     <name>PageProtocolXraySettings</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="61"/>
+        <source>XRay VLESS settings</source>
+        <translation>Настройки XRay VLESS</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="80"/>
+        <source>More about settings</source>
+        <translation>Подробнее о настройках</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="188"/>
+        <source>Reset settings</source>
+        <translation>Сбросить настройки</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="57"/>
         <source>XRay settings</source>
         <translation>Настройки XRay</translation>
@@ -1710,6 +1725,16 @@ Thank you for staying with us!</source>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
         <source>Check for updates</source>
         <translation>Проверить обновления</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <source>Checking for updates...</source>
+        <translation>Проверяем обновления...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <source>No updates available</source>
+        <translation>Обновлений нет</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
@@ -5382,6 +5407,142 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/qml/main2.qml" line="268"/>
         <source>Save</source>
         <translation>Сохранить</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerServices</name>
+    <message>
+        <source>Server routing rules</source>
+        <translation>Правила маршрутизации сервера</translation>
+    </message>
+    <message>
+        <source>Configure domains and IPs that this server adds to client split tunneling</source>
+        <translation>Настройте домены и IP-адреса, которые этот сервер добавляет в раздельное туннелирование клиента</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerManagedSplitTunneling</name>
+    <message>
+        <source>Server routing rules</source>
+        <translation>Правила маршрутизации сервера</translation>
+    </message>
+    <message>
+        <source>These rules are stored with the server config and are applied in Amnezia VPN only when this server is active.</source>
+        <translation>Эти правила сохраняются в конфигурации сервера и применяются в Amnezia VPN только когда активен этот сервер.</translation>
+    </message>
+    <message>
+        <source>Force split tunneling</source>
+        <translation>Принудительно включать раздельное туннелирование</translation>
+    </message>
+    <message>
+        <source>For clients with split tunneling disabled, enable bypass mode and apply these server bypass rules. Clients using the opposite split tunneling mode keep their own settings.</source>
+        <translation>Для клиентов с отключенным раздельным туннелированием включить режим обхода VPN и применить эти серверные правила обхода. Клиенты, использующие противоположный режим раздельного туннелирования, сохраняют свои настройки.</translation>
+    </message>
+    <message>
+        <source>website or IP/subnet</source>
+        <translation>сайт или IP/подсеть</translation>
+    </message>
+    <message>
+        <source>Remove </source>
+        <translation>Удалить </translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отменить</translation>
+    </message>
+    <message>
+        <source>Additional options</source>
+        <translation>Дополнительные настройки</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation>Импорт</translation>
+    </message>
+    <message>
+        <source>Save site list</source>
+        <translation>Сохранить список сайтов</translation>
+    </message>
+    <message>
+        <source>Save sites</source>
+        <translation>Сохранить сайты</translation>
+    </message>
+    <message>
+        <source>Sites files (*.json)</source>
+        <translation>Файлы сайтов (*.json)</translation>
+    </message>
+    <message>
+        <source>Clear site list</source>
+        <translation>Очистить список сайтов</translation>
+    </message>
+    <message>
+        <source>Clear site list?</source>
+        <translation>Очистить список сайтов?</translation>
+    </message>
+    <message>
+        <source>All sites will be removed from list.</source>
+        <translation>Все сайты будут удалены из списка.</translation>
+    </message>
+    <message>
+        <source>Import a list of sites</source>
+        <translation>Импортировать список сайтов</translation>
+    </message>
+    <message>
+        <source>Replace site list</source>
+        <translation>Заменить список сайтов</translation>
+    </message>
+    <message>
+        <source>Open sites file</source>
+        <translation>Открыть файл сайтов</translation>
+    </message>
+    <message>
+        <source>Add imported sites to existing ones</source>
+        <translation>Добавить импортированные сайты к существующим</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsSplitTunneling</name>
+    <message>
+        <source>Managed by server</source>
+        <translation>Управляется сервером</translation>
+    </message>
+    <message>
+        <source>Server-managed rules are locked. They are used only when this server is active and the current split tunneling mode applies this list.</source>
+        <translation>Правила сервера заблокированы. Они используются только когда активен этот сервер и текущий режим раздельного туннелирования применяет этот список.</translation>
+    </message>
+</context>
+<context>
+    <name>SitesController</name>
+    <message>
+        <source>Failed to parse JSON data: %1</source>
+        <translation>Не удалось разобрать JSON-данные: %1</translation>
+    </message>
+    <message>
+        <source>The JSON data is not an array</source>
+        <translation>JSON-данные не являются массивом</translation>
+    </message>
+    <message>
+        <source>Server routing rules are available only for server admins</source>
+        <translation>Правила маршрутизации сервера доступны только администраторам сервера</translation>
+    </message>
+    <message>
+        <source>Site should be a domain, IP address, or subnet</source>
+        <translation>Сайт должен быть доменом, IP-адресом или подсетью</translation>
+    </message>
+    <message>
+        <source>Managed site updated: %1</source>
+        <translation>Управляемый сайт обновлен: %1</translation>
+    </message>
+    <message>
+        <source>Managed site removed: %1</source>
+        <translation>Управляемый сайт удален: %1</translation>
+    </message>
+    <message>
+        <source>Failed to publish server routing rules for clients</source>
+        <translation>Не удалось опубликовать правила маршрутизации сервера для клиентов</translation>
     </message>
 </context>
 </TS>

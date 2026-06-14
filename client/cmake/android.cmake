@@ -31,29 +31,68 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.cpp
 )
 
-foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
-    set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/amneziawg/android/${abi}/libwg-go.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libck-ovpn-plugin.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpn3.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpnutil.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/librsapss.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/android/${abi}/libcrypto_3.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/android/${abi}/libssl_3.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so
-    )
-endforeach()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray/android/libxray.aar
-        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
+find_package(awg-android REQUIRED)
+set(LIBS ${LIBS} amnezia::awg-android)
+set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${AMNEZIA_ANDROID_LIBWG_PATH} ${AMNEZIA_ANDROID_LIBWG_QUICK_PATH})
+
+set(_amnezia_android_shader_tools_lib "")
+set(_amnezia_android_shader_tools_candidates)
+if(DEFINED ENV{QT_ANDROID_SHADERTOOLS_LIB} AND NOT "$ENV{QT_ANDROID_SHADERTOOLS_LIB}" STREQUAL "")
+    list(APPEND _amnezia_android_shader_tools_candidates "$ENV{QT_ANDROID_SHADERTOOLS_LIB}")
+endif()
+if(DEFINED ENV{QT_ROOT_PATH} AND NOT "$ENV{QT_ROOT_PATH}" STREQUAL "")
+    list(APPEND _amnezia_android_shader_tools_candidates
+        "$ENV{QT_ROOT_PATH}/android_${CMAKE_ANDROID_ARCH_ABI}/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+        "$ENV{QT_ROOT_PATH}/android/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+    )
+endif()
+if(DEFINED ENV{QT_INSTALL_DIR} AND NOT "$ENV{QT_INSTALL_DIR}" STREQUAL "")
+    list(APPEND _amnezia_android_shader_tools_candidates
+        "$ENV{QT_INSTALL_DIR}/6.10.1/android_${CMAKE_ANDROID_ARCH_ABI}/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+        "$ENV{QT_INSTALL_DIR}/6.10.1/android/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+    )
+endif()
+if(DEFINED ENV{USER} AND NOT "$ENV{USER}" STREQUAL "")
+    list(APPEND _amnezia_android_shader_tools_candidates
+        "/mnt/c/Users/$ENV{USER}/Qt/6.10.1/android_${CMAKE_ANDROID_ARCH_ABI}/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+        "/mnt/c/Users/$ENV{USER}/Qt/6.10.1/android/lib/libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so"
+    )
+endif()
+foreach(_candidate IN LISTS _amnezia_android_shader_tools_candidates)
+    file(TO_CMAKE_PATH "${_candidate}" _candidate_cmake)
+    if(EXISTS "${_candidate_cmake}")
+        set(_amnezia_android_shader_tools_lib "${_candidate_cmake}")
+        break()
+    endif()
+endforeach()
+if(_amnezia_android_shader_tools_lib STREQUAL "")
+    message(FATAL_ERROR "Android Qt ShaderTools runtime library is required for Qt5Compat GraphicalEffects. Set QT_ANDROID_SHADERTOOLS_LIB to libQt6ShaderTools_${CMAKE_ANDROID_ARCH_ABI}.so.")
+endif()
+set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS "${_amnezia_android_shader_tools_lib}")
+message(STATUS "Bundling Android Qt ShaderTools runtime: ${_amnezia_android_shader_tools_lib}")
+
+find_package(amnezia-libxray REQUIRED)
+if(DEFINED ENV{HOME})
+    set(_libxray_lock_dir "$ENV{HOME}/.cache/amnezia")
+else()
+    set(_libxray_lock_dir "${CMAKE_BINARY_DIR}/.android-locks")
+endif()
+file(MAKE_DIRECTORY "${_libxray_lock_dir}" "${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray")
+file(LOCK "${_libxray_lock_dir}/libxray-aar-copy.lock" GUARD FILE TIMEOUT 600)
+configure_file(${AMNEZIA_LIBXRAY_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray/libxray.aar COPYONLY)
+
+find_package(openvpn-pt-android REQUIRED)
+set(LIBS ${LIBS} amnezia::openvpn-pt-android)
+set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH})

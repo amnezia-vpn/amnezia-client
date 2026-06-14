@@ -20,9 +20,9 @@ extension PacketTunnelProvider {
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
-            if tunnelConfiguration.peers.first!.allowedIPs
+            let allowedIPStrings = tunnelConfiguration.peers.first!.allowedIPs
                 .map({ $0.stringRepresentation })
-                .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
+            if allowedIPStrings.contains("0.0.0.0/0") || allowedIPStrings.contains("::/0") {
                 if wgConfig.splitTunnelType == 1 {
                     for index in tunnelConfiguration.peers.indices {
                         tunnelConfiguration.peers[index].allowedIPs.removeAll()

@@ -2,7 +2,7 @@
 /client/3rd-prebuild
 /client/android
 /client/cmake
-/client/core/serialization
+/client/core/utils/serialization
 /client/daemon
 /client/fonts
 /client/images

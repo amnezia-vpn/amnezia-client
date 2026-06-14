@@ -4,7 +4,7 @@
 #include <QJniObject>
 #include <QPixmap>
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 
 using namespace amnezia;
 
@@ -55,13 +55,14 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
+    int installApk(const QString &fileName);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
-    void status(ConnectionState state);
+    void status(ConnectionState state, int serverIndex);
     void serviceDisconnected();
     void serviceError();
     void vpnPermissionRejected();
@@ -69,9 +70,10 @@ signals:
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
+    void apkInstallerStarted(QString fileName);
     void configImported(QString config);
     void importConfigFromOutside(QString config);
-    void initConnectionState(Vpn::ConnectionState state);
+    void initConnectionState(Vpn::ConnectionState state, int serverIndex);
     void authenticationResult(bool result);
     void imeInsetsChanged(int heightDp);
     void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
@@ -94,7 +96,7 @@ private:
     static QString textConnectionState(ConnectionState state);
 
     // JNI functions called by Android
-    static void onStatus(JNIEnv *env, jobject thiz, jint stateCode);
+    static void onStatus(JNIEnv *env, jobject thiz, jint stateCode, jint serverIndex);
     static void onServiceDisconnected(JNIEnv *env, jobject thiz);
     static void onServiceError(JNIEnv *env, jobject thiz);
     static void onVpnPermissionRejected(JNIEnv *env, jobject thiz);
@@ -103,6 +105,7 @@ private:
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static void onApkInstallerStarted(JNIEnv *env, jobject thiz, jstring fileName);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
     static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);

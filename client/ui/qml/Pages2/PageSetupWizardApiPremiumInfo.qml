@@ -35,7 +35,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (activeFocus) {
@@ -52,7 +52,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        contentHeight: scrollColumn.implicitHeight + 24
+        contentHeight: scrollColumn.childrenRect.height + 24
 
         ColumnLayout {
             id: scrollColumn
@@ -134,7 +134,7 @@ PageType {
 
                 TermsAndPrivacyText {
                     termsUrl: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                    privacyUrl: LanguageModel.getCurrentSiteUrl("policy")
+                    privacyUrl: LanguageUiController.getCurrentSiteUrl("policy")
                 }
             }
 
@@ -161,7 +161,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
         text: {
             var plan = root.currentPlan
@@ -183,7 +183,7 @@ PageType {
             if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
                 PageController.showBusyIndicator(true)
                 var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-                ApiConfigsController.importPremiumFromAppStore(storeId)
+                SubscriptionUiController.importPremiumFromAppStore(storeId)
                 PageController.showBusyIndicator(false)
                 return
             }

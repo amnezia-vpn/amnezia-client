@@ -25,7 +25,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (this.activeFocus) {
@@ -73,7 +73,7 @@ PageType {
                 id: serverSelector
                 objectName: "serverSelector"
 
-                signal serverSelectorIndexChanged
+                signal severSelectorIndexChanged
                 property int currentIndex: 0
 
                 Layout.fillWidth: true
@@ -109,7 +109,7 @@ PageType {
 
                         if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
                             serverSelector.currentIndex = serverSelectorListView.selectedIndex
-                            serverSelector.serverSelectorIndexChanged()
+                            serverSelector.severSelectorIndexChanged()
                         }
 
                         listView.headerText = qsTr("Accessing ") + serverSelector.text
@@ -118,14 +118,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        serverSelectorListView.currentIndex = ServersModel.isDefaultServerHasWriteAccess() ?
-                                    proxyServersModel.mapFromSource(ServersModel.defaultIndex) : 0
+                        serverSelectorListView.currentIndex = ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId) ?
+                                    proxyServersModel.mapFromSource(ServersUiController.getServerIndexById(ServersUiController.defaultServerId)) : 0
                         serverSelectorListView.triggerCurrentItem()
                     }
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersModel.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.setProcessedServerId(ServersUiController.getServerId(proxyServersModel.mapToSource(selectedIndex)))
                     }
                 }
             }
@@ -155,7 +155,7 @@ PageType {
                         ExportController.exportErrorOccurred(qsTr("Access error!"))
                         return
                     } else {
-                        ExportController.generateFullAccessConfig()
+                        ExportController.generateFullAccessConfig(ServersUiController.processedServerId)
                     }
 
                     PageController.showBusyIndicator(false)

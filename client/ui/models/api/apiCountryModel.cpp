@@ -2,7 +2,9 @@
 
 #include <QJsonObject>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/serverConfigUtils.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "logger.h"
 
 namespace

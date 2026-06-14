@@ -16,7 +16,7 @@ PageType {
     property string trialEmailErrorMessage: ""
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
         function onTrialEmailError(message) {
             root.trialEmailErrorMessage = message
@@ -30,7 +30,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onFocusChanged: {
             if (activeFocus) {
@@ -113,7 +113,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + SettingsController.safeAreaBottomMargin
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
         text: qsTr("Continue")
 
@@ -127,7 +127,7 @@ PageType {
                 return
             }
             PageController.showBusyIndicator(true)
-            var ok = ApiConfigsController.importTrialFromGateway(raw)
+            var ok = SubscriptionUiController.importTrialFromGateway(raw)
             PageController.showBusyIndicator(false)
             if (ok) {
                 PageController.closePage()

@@ -61,6 +61,8 @@ class WindowsFirewall final : public QObject {
   bool blockTrafficTo(const IPAddress& addr, uint8_t weight,
                       const QString& title, const QString& peer = QString());
   bool blockTrafficOnPort(uint port, uint8_t weight, const QString& title);
+  bool blockTrafficOnPort(uint port, uint8_t weight, const QString& title,
+                          const GUID& subLayerKey);
   bool allowTrafficTo(const IPAddress& addr, int weight, const QString& title,
                       const QString& peer = QString());
   bool allowTrafficTo(const QHostAddress& targetIP, uint port, int weight,

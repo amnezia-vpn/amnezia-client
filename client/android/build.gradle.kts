@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import javax.xml.parsers.DocumentBuilderFactory
 
 plugins {
     alias(libs.plugins.android.application)
@@ -15,6 +16,26 @@ kotlin {
 val qtTargetSdkVersion: String by gradleProperties
 val qtTargetAbiList: String by gradleProperties
 val outputBaseName: String by gradleProperties
+
+/** Reads an Android namespaced attribute from the generated Qt manifest template. */
+fun androidManifestAttribute(name: String): String? {
+    val manifestFile = layout.projectDirectory.file("AndroidManifest.xml").asFile
+    if (!manifestFile.isFile) {
+        return null
+    }
+    val documentBuilderFactory = DocumentBuilderFactory.newInstance()
+    documentBuilderFactory.isNamespaceAware = true
+    val manifest = documentBuilderFactory.newDocumentBuilder().parse(manifestFile).documentElement
+    return manifest.getAttributeNS("http://schemas.android.com/apk/res/android", name)
+        .takeIf { it.isNotBlank() && !it.contains("%%INSERT_") }
+}
+
+val qtVersionCode = providers.gradleProperty("qtVersionCode").orNull?.toIntOrNull()
+    ?: androidManifestAttribute("versionCode")?.toIntOrNull()
+    ?: throw GradleException("qtVersionCode must be provided by Qt/CMake for Android release builds")
+val qtVersionName = providers.gradleProperty("qtVersionName").orNull?.takeIf { it.isNotBlank() }
+    ?: androidManifestAttribute("versionName")
+    ?: throw GradleException("qtVersionName must be provided by Qt/CMake for Android release builds")
 
 android {
     namespace = "org.amnezia.vpn"
@@ -36,9 +57,12 @@ android {
     defaultConfig {
         applicationId = "org.amnezia.vpn"
         targetSdk = qtTargetSdkVersion.toInt()
+        versionCode = qtVersionCode
+        versionName = qtVersionName
 
         // keeps language resources for only the locales specified below
         resourceConfigurations += listOf("en", "ru", "b+zh+Hans")
+        ndk.abiFilters += qtTargetAbiList.split(",")
     }
 
     sourceSets {
@@ -52,50 +76,12 @@ android {
         }
     }
 
-    signingConfigs {
-        register("release") {
-            storeFile = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull?.let { file(it) }
-            storePassword = providers.environmentVariable("ANDROID_KEYSTORE_KEY_PASS").orNull
-            keyAlias = providers.environmentVariable("ANDROID_KEYSTORE_KEY_ALIAS").orNull
-            keyPassword = providers.environmentVariable("ANDROID_KEYSTORE_KEY_PASS").orNull
-        }
-    }
-
     buildTypes {
         release {
             // exclude coroutine debug resource from release build
             packaging {
                 resources.excludes += "DebugProbesKt.bin"
             }
-            signingConfig = signingConfigs["release"]
-        }
-
-        create("fdroid") {
-            initWith(getByName("release"))
-            signingConfig = null
-            matchingFallbacks += "release"
-        }
-    }
-
-    splits {
-        abi {
-            isEnable = true
-            reset()
-            include(*qtTargetAbiList.split(',').toTypedArray())
-            isUniversalApk = false
-        }
-    }
-
-    // fix for Qt Creator to allow deploying the application to a device
-    // to enable this fix, add the line outputBaseName=android-build to local.properties
-    if (outputBaseName.isNotEmpty()) {
-        applicationVariants.all {
-            outputs.map { it as BaseVariantOutputImpl }
-                .forEach { output ->
-                    if (output.outputFileName.endsWith(".apk")) {
-                        output.outputFileName = "$outputBaseName-${buildType.name}.apk"
-                    }
-                }
         }
     }
 
@@ -111,7 +97,6 @@ dependencies {
     implementation(project(":wireguard"))
     implementation(project(":awg"))
     implementation(project(":openvpn"))
-    implementation(project(":cloak"))
     implementation(project(":xray"))
     implementation(libs.androidx.core)
     implementation(libs.androidx.activity)

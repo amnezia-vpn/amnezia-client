@@ -9,10 +9,10 @@ import org.amnezia.vpn.protocol.Status
  */
 object QtAndroidController {
 
-    fun onStatus(status: Status) = onStatus(status.state)
-    fun onStatus(protocolState: ProtocolState) = onStatus(protocolState.ordinal)
+    fun onStatus(status: Status, serverIndex: Int) = onStatus(status.state, serverIndex)
+    fun onStatus(protocolState: ProtocolState, serverIndex: Int) = onStatus(protocolState.ordinal, serverIndex)
 
-    external fun onStatus(stateCode: Int)
+    external fun onStatus(stateCode: Int, serverIndex: Int)
     external fun onServiceDisconnected()
     external fun onServiceError()
 
@@ -22,6 +22,9 @@ object QtAndroidController {
     external fun onStatisticsUpdate(rxBytes: Long, txBytes: Long)
 
     external fun onFileOpened(uri: String)
+
+    /** Notifies C++ that Android opened the system APK installer for a downloaded update. */
+    external fun onApkInstallerStarted(fileName: String)
 
     external fun onConfigImported(data: String)
 

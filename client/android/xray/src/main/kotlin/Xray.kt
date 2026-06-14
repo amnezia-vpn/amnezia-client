@@ -77,13 +77,13 @@ class Xray : Protocol() {
             return
         }
 
-        val xrayJsonConfig = config.optJSONObject("xray_config_data")
+        val xrayConfigData = config.optJSONObject("xray_config_data")
             ?: config.optJSONObject("ssxray_config_data")
             ?: throw BadConfigException("config_data not found")
+        val xrayJsonConfig = JSONObject(xrayConfigData.optString("config"))
 
         // Inject SOCKS5 auth before starting xray. Re-uses existing credentials if present.
         ensureInboundAuth(xrayJsonConfig)
-
         val xrayConfig = parseConfig(config, xrayJsonConfig)
 
         (xrayJsonConfig.optJSONObject("log") ?: JSONObject().also { xrayJsonConfig.put("log", it) })

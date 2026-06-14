@@ -20,6 +20,7 @@ constexpr uint32_t WINDOWS_NETSH_TIMEOUT_MSEC = 2000;
 
 namespace {
 Logger logger("DnsUtilsWindows");
+constexpr ULONG VPN_DNS_INTERFACE_METRIC = 1;
 }
 
 DnsUtilsWindows::DnsUtilsWindows(QObject* parent) : DnsUtils(parent) {
@@ -52,13 +53,69 @@ bool DnsUtilsWindows::updateResolvers(const QString& ifname,
     logger.error() << "Failed to resolve interface for" << ifname;
     return false;
   }
+  if (m_luid != 0 && m_luid != entry.InterfaceLuid.Value) {
+    restoreResolvers();
+  }
   m_luid = entry.InterfaceLuid.Value;
+  preferInterfaceMetric(AF_INET, m_ipv4Metric);
+  preferInterfaceMetric(AF_INET6, m_ipv6Metric);
 
   logger.debug() << "Configuring DNS for" << ifname;
   if (m_setInterfaceDnsSettingsProcAddr == nullptr) {
     return updateResolversNetsh(entry.InterfaceIndex, resolvers);
   }
   return updateResolversWin32(entry.InterfaceGuid, resolvers);
+}
+
+void DnsUtilsWindows::preferInterfaceMetric(int family,
+                                            InterfaceMetricState& state) {
+  MIB_IPINTERFACE_ROW row;
+  InitializeIpInterfaceEntry(&row);
+  row.InterfaceLuid.Value = m_luid;
+  row.Family = family;
+  DWORD error = GetIpInterfaceEntry(&row);
+  if (error != NO_ERROR) {
+    logger.warning() << "Failed to read DNS interface metric:" << family
+                     << error;
+    return;
+  }
+
+  if (!state.valid) {
+    state.valid = true;
+    state.automatic = row.UseAutomaticMetric;
+    state.metric = row.Metric;
+  }
+
+  row.UseAutomaticMetric = false;
+  row.Metric = VPN_DNS_INTERFACE_METRIC;
+  error = SetIpInterfaceEntry(&row);
+  if (error != NO_ERROR) {
+    logger.warning() << "Failed to prefer DNS interface metric:" << family
+                     << error;
+  }
+}
+
+void DnsUtilsWindows::restoreInterfaceMetric(int family,
+                                             InterfaceMetricState& state) {
+  if (!state.valid) {
+    return;
+  }
+
+  MIB_IPINTERFACE_ROW row;
+  InitializeIpInterfaceEntry(&row);
+  row.InterfaceLuid.Value = m_luid;
+  row.Family = family;
+  DWORD error = GetIpInterfaceEntry(&row);
+  if (error == NO_ERROR) {
+    row.UseAutomaticMetric = state.automatic;
+    row.Metric = state.metric;
+    error = SetIpInterfaceEntry(&row);
+  }
+  if (error != NO_ERROR && error != ERROR_FILE_NOT_FOUND) {
+    logger.warning() << "Failed to restore DNS interface metric:" << family
+                     << error;
+  }
+  state = {};
 }
 
 bool DnsUtilsWindows::updateResolversWin32(
@@ -168,6 +225,9 @@ bool DnsUtilsWindows::restoreResolvers() {
   error = GetIfEntry2(&entry);
   if (error == ERROR_FILE_NOT_FOUND) {
     // If the interface no longer exists, there is nothing to restore.
+    m_ipv4Metric = {};
+    m_ipv6Metric = {};
+    m_luid = 0;
     return true;
   }
   if (error != NO_ERROR) {
@@ -176,8 +236,14 @@ bool DnsUtilsWindows::restoreResolvers() {
   }
 
   QList<QHostAddress> empty;
+  bool ok = true;
   if (m_setInterfaceDnsSettingsProcAddr == nullptr) {
-    return updateResolversNetsh(entry.InterfaceIndex, empty);
+    ok = updateResolversNetsh(entry.InterfaceIndex, empty);
+  } else {
+    ok = updateResolversWin32(entry.InterfaceGuid, empty);
   }
-  return updateResolversWin32(entry.InterfaceGuid, empty);
+  restoreInterfaceMetric(AF_INET, m_ipv4Metric);
+  restoreInterfaceMetric(AF_INET6, m_ipv6Metric);
+  m_luid = 0;
+  return ok;
 }
