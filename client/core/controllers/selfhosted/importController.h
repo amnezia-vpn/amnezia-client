@@ -12,19 +12,16 @@
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 
-namespace
-{
-    enum class ConfigTypes {
-        Amnezia,
-        OpenVpn,
-        WireGuard,
-        Awg,
-        Xray,
-        ShadowSocks,
-        Backup,
-        Invalid
-    };
-}
+enum class ConfigTypes {
+    Amnezia,
+    OpenVpn,
+    WireGuard,
+    Awg,
+    Xray,
+    ShadowSocks,
+    Backup,
+    Invalid
+};
 
 using namespace amnezia;
 
