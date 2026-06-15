@@ -1252,15 +1252,41 @@ PageType {
                         headerText: qsTr("Workers count")
                         textField.placeholderText: "2"
                         textField.text: workers
-                        textField.maximumLength: 3
+                        textField.maximumLength: 2
+                        textField.inputMethodHints: Qt.ImhDigitsOnly
+                        // Range input like the port field: IntValidator bounds the value and the
+                        // clamp keeps it within 0..maxWorkers on every change (rejects 33+, neg.).
                         textField.validator: IntValidator {
-                            bottom: 1
+                            bottom: 0
                             top: TelemtConfigModel.maxWorkers()
                         }
+                        textField.onTextChanged: {
+                            var cur = workersTextField.textField.text
+                            if (cur === "") {
+                                return
+                            }
+                            var n = parseInt(cur, 10)
+                            var maxW = TelemtConfigModel.maxWorkers()
+                            if (isNaN(n) || n < 0) { n = 0 }
+                            if (n > maxW) { n = maxW }
+                            var clamped = String(n)
+                            if (clamped !== cur) {
+                                textField.text = clamped
+                                textField.cursorPosition = clamped.length
+                            }
+                        }
                         textField.onEditingFinished: {
-                            textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== workers) {
-                                workers = textField.text
+                            var v = workersTextField.textField.text
+                            if (v !== "") {
+                                var m = parseInt(v, 10)
+                                var maxW2 = TelemtConfigModel.maxWorkers()
+                                if (isNaN(m) || m < 0) { m = 0 }
+                                if (m > maxW2) { m = maxW2 }
+                                v = String(m)
+                                textField.text = v
+                            }
+                            if (v !== workers) {
+                                workers = v
                                 TelemtConfigModel.setWorkers(workers)
                             }
                         }

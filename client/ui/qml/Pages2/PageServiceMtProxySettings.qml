@@ -1017,6 +1017,7 @@ PageType {
                     headerText: qsTr("Server port")
                     textField.placeholderText: MtProxyConfigModel.defaultPort()
                     textField.maximumLength: 5
+                    textField.inputMethodHints: Qt.ImhDigitsOnly
                     textField.validator: IntValidator {
                         bottom: 1
                         top: 65535
@@ -1025,8 +1026,16 @@ PageType {
                         var savedPort = port
                         textField.text = (savedPort === MtProxyConfigModel.defaultPort()) ? "" : savedPort
                     }
+                    textField.onTextChanged: {
+                        var cur = portTextField.textField.text
+                        var clean = MtProxyConfigModel.sanitizePortFieldText(cur)
+                        if (clean !== cur) {
+                            textField.text = clean
+                            textField.cursorPosition = clean.length
+                        }
+                    }
                     textField.onEditingFinished: {
-                        textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                        textField.text = MtProxyConfigModel.sanitizePortFieldText(textField.text)
                     }
                 }
 
@@ -1180,9 +1189,21 @@ PageType {
                     visible: transportMode === "faketls"
                     headerText: qsTr("FakeTLS domain")
                     textField.placeholderText: root.previousTlsDomain
+                    textField.validator: RegularExpressionValidator {
+                        regularExpression: /^[A-Za-z0-9.-]*$/
+                    }
                     Component.onCompleted: {
                         var savedDomain = tlsDomain
                         textField.text = (savedDomain === MtProxyConfigModel.defaultTlsDomain() || savedDomain === "") ? "" : savedDomain
+                    }
+                    textField.onTextChanged: {
+                        var t = tlsDomainTextField.textField.text
+                        if (t === "" || MtProxyConfigModel.isFakeTlsDomainTypingIncomplete(t)
+                            || MtProxyConfigModel.isValidFakeTlsDomain(t)) {
+                            tlsDomainTextField.errorText = ""
+                        } else {
+                            tlsDomainTextField.errorText = qsTr("Enter a valid domain name")
+                        }
                     }
                     textField.onEditingFinished: {
                         textField.text = textField.text.replace(/^\s+|\s+$/g, '')
@@ -1560,15 +1581,41 @@ PageType {
                         headerText: qsTr("Workers count")
                         textField.placeholderText: "2"
                         textField.text: workers
-                        textField.maximumLength: 3
+                        textField.maximumLength: 2
+                        textField.inputMethodHints: Qt.ImhDigitsOnly
+                        // Range input like the port field: IntValidator bounds the value and the
+                        // clamp keeps it within 0..maxWorkers on every change (rejects 33+, neg.).
                         textField.validator: IntValidator {
-                            bottom: 1
+                            bottom: 0
                             top: MtProxyConfigModel.maxWorkers()
                         }
+                        textField.onTextChanged: {
+                            var cur = workersTextField.textField.text
+                            if (cur === "") {
+                                return
+                            }
+                            var n = parseInt(cur, 10)
+                            var maxW = MtProxyConfigModel.maxWorkers()
+                            if (isNaN(n) || n < 0) { n = 0 }
+                            if (n > maxW) { n = maxW }
+                            var clamped = String(n)
+                            if (clamped !== cur) {
+                                textField.text = clamped
+                                textField.cursorPosition = clamped.length
+                            }
+                        }
                         textField.onEditingFinished: {
-                            textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== workers) {
-                                workers = textField.text
+                            var v = workersTextField.textField.text
+                            if (v !== "") {
+                                var m = parseInt(v, 10)
+                                var maxW2 = MtProxyConfigModel.maxWorkers()
+                                if (isNaN(m) || m < 0) { m = 0 }
+                                if (m > maxW2) { m = maxW2 }
+                                v = String(m)
+                                textField.text = v
+                            }
+                            if (v !== workers) {
+                                workers = v
                                 MtProxyConfigModel.setWorkers(workers)
                             }
                         }

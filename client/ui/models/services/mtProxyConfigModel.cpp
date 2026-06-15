@@ -398,6 +398,9 @@ bool MtProxyConfigModel::isValidPublicHost(const QString &host) const {
         return NetworkUtilities::checkIPv4Format(t);
     }
     if (a.protocol() == QHostAddress::IPv6Protocol) {
+        if (a.isNull() || a.isLoopback() || a == QHostAddress(QHostAddress::AnyIPv6)) {
+            return false;
+        }
         return true;
     }
     static const QRegularExpression onlyAsciiDigits(QStringLiteral(R"(^\d+$)"));
