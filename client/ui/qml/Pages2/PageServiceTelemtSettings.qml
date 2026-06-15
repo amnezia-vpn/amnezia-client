@@ -8,6 +8,7 @@ import PageEnum 1.0
 import ContainerProps 1.0
 import ProtocolEnum 1.0
 import Style 1.0
+import TelemtConfig 1.0
 
 import "./"
 import "../Controls2"
@@ -40,6 +41,35 @@ PageType {
     property string savedTransportMode: ""
     property string savedTlsDomain: ""
     property string savedPublicHost: ""
+
+    readonly property var natIpv4InputFormat: /^(\d{1,3}\.){0,3}\d{0,3}$/
+
+    function natIpv4FieldShowInvalidError(text) {
+        var t = text ? String(text).replace(/^\s+|\s+$/g, '') : ""
+        if (t === "")
+            return false
+        if (TelemtConfigModel.isValidOptionalIpv4(t))
+            return false
+        var parts = t.split('.')
+        var j
+        for (j = 0; j < parts.length; j++) {
+            if (parts[j].length > 3)
+                return true
+        }
+        if (parts.length > 4)
+            return true
+        if (t.indexOf('.') < 0 && t.length > 3)
+            return true
+        if (t.endsWith('.'))
+            return false
+        if (parts.length < 4)
+            return false
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i] === "")
+                return true
+        }
+        return true
+    }
 
     onSavedTransportModeChanged: {
         if (savedTransportMode === "faketls") {
@@ -889,8 +919,26 @@ PageType {
                     headerText: qsTr("Public host / IP")
                     textField.placeholderText: ServersUiController.serverHostName(ServersUiController.processedServerId)
                     textField.text: publicHost
+                    textField.maximumLength: 253
+                    textField.validator: PublicHostInputValidator {
+                    }
+                    textField.onTextChanged: {
+                        var t = publicHostTextField.textField.text
+                        if (TelemtConfigModel.isPublicHostTypingIncomplete(t)) {
+                            publicHostTextField.errorText = ""
+                        } else if (!TelemtConfigModel.isValidPublicHost(t)) {
+                            publicHostTextField.errorText = qsTr("Enter a valid IP address or domain name")
+                        } else {
+                            publicHostTextField.errorText = ""
+                        }
+                    }
                     textField.onEditingFinished: {
                         textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                        if (!TelemtConfigModel.isValidPublicHost(textField.text)) {
+                            publicHostTextField.errorText = qsTr("Enter a valid IP address or domain name")
+                            return
+                        }
+                        publicHostTextField.errorText = ""
                         if (textField.text !== publicHost) {
                             publicHost = textField.text
                             TelemtConfigModel.setPublicHost(publicHost)
@@ -932,6 +980,7 @@ PageType {
                     headerText: qsTr("Server port")
                     textField.placeholderText: TelemtConfigModel.defaultPort()
                     textField.maximumLength: 5
+                    textField.inputMethodHints: Qt.ImhDigitsOnly
                     textField.validator: IntValidator {
                         bottom: 1
                         top: 65535
@@ -940,8 +989,16 @@ PageType {
                         var savedPort = port
                         textField.text = (savedPort === TelemtConfigModel.defaultPort()) ? "" : savedPort
                     }
+                    textField.onTextChanged: {
+                        var cur = portTextField.textField.text
+                        var clean = TelemtConfigModel.sanitizePortFieldText(cur)
+                        if (clean !== cur) {
+                            textField.text = clean
+                            textField.cursorPosition = clean.length
+                        }
+                    }
                     textField.onEditingFinished: {
-                        textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                        textField.text = TelemtConfigModel.sanitizePortFieldText(textField.text)
                         var portValue = textField.text === "" ? TelemtConfigModel.defaultPort() : textField.text
                         if (portValue !== port) {
                             port = portValue
@@ -969,13 +1026,43 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16
                     headerText: qsTr("Promoted channel tag (optional)")
-                    textField.placeholderText: qsTr("leave empty if not needed")
+                    textField.placeholderText: qsTr("32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)")
                     textField.text: tag
-                    textField.maximumLength: 64
+                    textField.maximumLength: TelemtConfigModel.mtProxyBotTagHexLength()
+                    textField.onTextChanged: {
+                        var cur = tagTextField.textField.text
+                        var clean = TelemtConfigModel.sanitizeMtProxyTagFieldText(cur)
+                        if (clean !== cur) {
+                            textField.text = clean
+                            textField.cursorPosition = clean.length
+                            return
+                        }
+                        var tt = tagTextField.textField.text
+                        if (tt === "") {
+                            tagTextField.errorText = ""
+                            return
+                        }
+                        if (TelemtConfigModel.isMtProxyTagTypingIncomplete(tt)) {
+                            tagTextField.errorText = ""
+                            return
+                        }
+                        if (!TelemtConfigModel.isValidMtProxyTag(tt)) {
+                            tagTextField.errorText = qsTr("Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F).")
+                            return
+                        }
+                        tagTextField.errorText = ""
+                    }
                     textField.onEditingFinished: {
-                        textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                        if (textField.text !== tag) {
-                            tag = textField.text
+                        var raw = textField.text.replace(/^\s+|\s+$/g, '')
+                        var normalized = TelemtConfigModel.sanitizeMtProxyTagFieldText(raw)
+                        textField.text = normalized
+                        if (!TelemtConfigModel.isValidMtProxyTag(normalized)) {
+                            tagTextField.errorText = qsTr("Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.")
+                            return
+                        }
+                        tagTextField.errorText = ""
+                        if (normalized !== tag) {
+                            tag = normalized
                             TelemtConfigModel.setTag(tag)
                         }
                     }
@@ -1059,13 +1146,30 @@ PageType {
                     visible: transportMode === "faketls"
                     headerText: qsTr("FakeTLS domain")
                     textField.placeholderText: root.previousTlsDomain
+                    textField.validator: RegularExpressionValidator {
+                        regularExpression: /^[A-Za-z0-9.-]*$/
+                    }
                     Component.onCompleted: {
                         var savedDomain = tlsDomain
                         textField.text = (savedDomain === TelemtConfigModel.defaultTlsDomain() || savedDomain === "") ? "" : savedDomain
                     }
+                    textField.onTextChanged: {
+                        var t = tlsDomainTextField.textField.text
+                        if (t === "" || TelemtConfigModel.isFakeTlsDomainTypingIncomplete(t)
+                            || TelemtConfigModel.isValidFakeTlsDomain(t)) {
+                            tlsDomainTextField.errorText = ""
+                        } else {
+                            tlsDomainTextField.errorText = qsTr("Enter a valid domain name")
+                        }
+                    }
                     textField.onEditingFinished: {
                         textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                         var domainValue = textField.text === "" ? TelemtConfigModel.defaultTlsDomain() : textField.text
+                        if (!TelemtConfigModel.isValidFakeTlsDomain(domainValue)) {
+                            tlsDomainTextField.errorText = qsTr("Enter a valid domain name")
+                            return
+                        }
+                        tlsDomainTextField.errorText = ""
                         if (domainValue !== tlsDomain) {
                             tlsDomain = domainValue
                             TelemtConfigModel.setTlsDomain(tlsDomain)
@@ -1323,8 +1427,24 @@ PageType {
                         headerText: qsTr("Internal IP")
                         textField.placeholderText: "172.17.0.2"
                         textField.text: natInternalIp
+                        textField.maximumLength: 15
+                        textField.validator: RegularExpressionValidator {
+                            regularExpression: root.natIpv4InputFormat
+                        }
+                        textField.onTextChanged: {
+                            if (root.natIpv4FieldShowInvalidError(textField.text)) {
+                                natInternalIpTextField.errorText = qsTr("Enter a valid IPv4 address")
+                            } else {
+                                natInternalIpTextField.errorText = ""
+                            }
+                        }
                         textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                            if (!TelemtConfigModel.isValidOptionalIpv4(textField.text)) {
+                                natInternalIpTextField.errorText = qsTr("Enter a valid IPv4 address")
+                                return
+                            }
+                            natInternalIpTextField.errorText = ""
                             if (textField.text !== natInternalIp) {
                                 natInternalIp = textField.text
                                 TelemtConfigModel.setNatInternalIp(natInternalIp)
@@ -1342,8 +1462,24 @@ PageType {
                         headerText: qsTr("External IP")
                         textField.placeholderText: "1.2.3.4"
                         textField.text: natExternalIp
+                        textField.maximumLength: 15
+                        textField.validator: RegularExpressionValidator {
+                            regularExpression: root.natIpv4InputFormat
+                        }
+                        textField.onTextChanged: {
+                            if (root.natIpv4FieldShowInvalidError(textField.text)) {
+                                natExternalIpTextField.errorText = qsTr("Enter a valid IPv4 address")
+                            } else {
+                                natExternalIpTextField.errorText = ""
+                            }
+                        }
                         textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
+                            if (!TelemtConfigModel.isValidOptionalIpv4(textField.text)) {
+                                natExternalIpTextField.errorText = qsTr("Enter a valid IPv4 address")
+                                return
+                            }
+                            natExternalIpTextField.errorText = ""
                             if (textField.text !== natExternalIp) {
                                 natExternalIp = textField.text
                                 TelemtConfigModel.setNatExternalIp(natExternalIp)

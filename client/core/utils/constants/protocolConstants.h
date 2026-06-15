@@ -271,6 +271,7 @@ namespace amnezia
             constexpr char workersModeAuto[]       = "auto";
             constexpr char workersModeManual[]     = "manual";
             constexpr int  maxWorkers              = 32;
+            constexpr int  botTagHexLength         = 32;
         }
 
     } // namespace protocols
