@@ -3,5 +3,7 @@ elif which dnf > /dev/null 2>&1; then LOCK_CMD="fuser"; LOCK_FILE="/var/cache/dn
 elif which yum > /dev/null 2>&1; then LOCK_CMD="cat"; LOCK_FILE="/var/run/yum.pid";\
 elif which zypper > /dev/null 2>&1; then LOCK_CMD="cat"; LOCK_FILE="/var/run/zypp.pid";\
 elif which pacman > /dev/null 2>&1; then LOCK_CMD="fuser"; LOCK_FILE="/var/lib/pacman/db.lck";\
+elif which apk > /dev/null 2>&1; then LOCK_CMD="pgrep"; LOCK_FILE="apk";\
+elif which opkg > /dev/null 2>&1; then LOCK_CMD="pgrep"; LOCK_FILE="opkg";\
 else echo "Packet manager not found"; echo "Internal error"; exit 1; fi;\
 if command -v $LOCK_CMD > /dev/null 2>&1; then sudo $LOCK_CMD $LOCK_FILE 2>/dev/null; else echo "$LOCK_CMD not installed"; fi
