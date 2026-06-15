@@ -320,7 +320,7 @@ PageType {
                 Layout.rightMargin: 16
                 visible: isQrCodeVisible
                 horizontalAlignment: Text.AlignHCenter
-                text: qsTr("To read the QR code in the Amnezia app, select \"Add server\" → \"I have data to connect\" → \"QR code, key or settings file\"")
+                text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
             }
         }
     }

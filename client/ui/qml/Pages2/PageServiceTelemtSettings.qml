@@ -1005,17 +1005,26 @@ PageType {
                     }
                 }
 
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 16 * 2
+                    text: qsTr("Transport mode")
+                    color: AmneziaStyle.color.mutedGray
+                    font.pixelSize: 12
+                }
+
                 DropDownType {
                     id: transportModeDropDown
                     Layout.fillWidth: true
-                    Layout.topMargin: 16 * 2
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16
 
                     drawerParent: root
                     drawerHeight: 0.35
-                    descriptionText: qsTr("Transport mode")
+                    headerText: qsTr("Transport mode")
                     text: transportMode === "faketls" ? qsTr("FakeTLS") : qsTr("Standard MTProto")
 
                     listView: Component {
