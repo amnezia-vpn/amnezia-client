@@ -43,6 +43,8 @@ public:
     virtual void setLogsEnabled(bool enabled) override;
     virtual bool createTun(const QString &dev, const QString &subnet) override;
     virtual bool deleteTun(const QString &dev) override;
+    virtual bool applyAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) override;
+    virtual bool removeAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) override;
     virtual bool StartRoutingIpv6() override;
     virtual bool StopRoutingIpv6() override;
     virtual bool disableAllTraffic() override;
