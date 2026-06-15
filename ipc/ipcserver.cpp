@@ -73,6 +73,15 @@ int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
     return Router::routeAddList(gw, ips);
 }
 
+int IpcServer::routeAddTrustedList(const QString &gw, const QStringList &ips)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::routeAddTrustedList";
+#endif
+
+    return Router::routeAddTrustedList(gw, ips);
+}
+
 bool IpcServer::clearSavedRoutes()
 {
 #ifdef MZ_DEBUG

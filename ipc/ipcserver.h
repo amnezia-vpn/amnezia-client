@@ -20,6 +20,7 @@ public:
     virtual int createPrivilegedProcess() override;
 
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
+    virtual int routeAddTrustedList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
     virtual bool flushDns() override;

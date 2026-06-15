@@ -37,6 +37,7 @@ public:
     static RouterWin& Instance();
 
     int routeAddList(const QString &gw, const QStringList &ips);
+    int routeAddTrustedList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     int routeDeleteList(const QString &gw, const QStringList &ips);
     bool flushDns();
@@ -63,6 +64,7 @@ private:
     BOOL SuspendProcess(BOOL fSuspend, DWORD dwProcessId);
 
     QNetworkInterface findLoopbackIface();
+    int routeAddList(const QString &gw, const QStringList &ips, bool validateRoutes);
 
 private:
     RouterWin() {m_dnsUtil = new DnsUtilsWindows(this);}

@@ -10,6 +10,7 @@ class IpcInterface
 
     // Route functions
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
+    SLOT( int routeAddTrustedList(const QString &gw, const QStringList &ips) );
     SLOT( bool clearSavedRoutes() );
     SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
     SLOT( bool flushDns() );

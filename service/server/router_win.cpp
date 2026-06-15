@@ -111,6 +111,16 @@ RouterWin &RouterWin::Instance()
 
 int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
 {
+    return routeAddList(gw, ips, true);
+}
+
+int RouterWin::routeAddTrustedList(const QString &gw, const QStringList &ips)
+{
+    return routeAddList(gw, ips, false);
+}
+
+int RouterWin::routeAddList(const QString &gw, const QStringList &ips, bool validateRoutes)
+{
 //    qDebug().noquote() << QString("ROUTE ADD List: IPs size:%1, GW: %2")
 //                          .arg(ips.size())
 //                          .arg(gw);
@@ -189,8 +199,12 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     QStringList routeCandidates;
     routeCandidates.reserve(ips.size());
     for (const QString &ipWithMask : ips) {
-        if (!isRouteAddCandidate(ipWithMask)) {
+        if (validateRoutes && !isRouteAddCandidate(ipWithMask)) {
             qWarning().noquote() << "Router::routeAddList: skipping non-routable split route:" << ipWithMask;
+            continue;
+        }
+        if (!validateRoutes && !NetworkUtilities::checkIpSubnetFormat(ipWithMask)) {
+            qWarning().noquote() << "Router::routeAddList: skipping invalid trusted split route:" << ipWithMask;
             continue;
         }
         if (!routeCandidates.contains(ipWithMask)) {

@@ -936,6 +936,31 @@ class SourceContractTests(unittest.TestCase):
             self.assertIn("routeOverlapsRange(0xe0000000u, 4)", source)
             self.assertIn("routeOverlapsRange(0xf0000000u, 4)", source)
 
+        self.assertIn("enum class SplitTunnelRouteSource", vpn_connection)
+        self.assertIn("SplitTunnelRouteSource::Client && !isRoutableSplitTunnelRoute(route)", vpn_connection)
+        self.assertIn("SplitTunnelRouteSource::ServerManaged", vpn_connection)
+        self.assertIn("iface->routeAddTrustedList(gw, managedIps)", vpn_connection)
+        self.assertIn("managedVpnSitesForRouting(activeServerIndex, mode)", vpn_connection)
+        self.assertIn("managedVpnSitesForRouting(activeServerIndex, routeMode)", vpn_connection)
+
+        ipc_interface = (REPO_ROOT / "ipc/ipc_interface.rep").read_text(encoding="utf-8")
+        ipc_server = (REPO_ROOT / "ipc/ipcserver.cpp").read_text(encoding="utf-8")
+        router = (REPO_ROOT / "service/server/router.cpp").read_text(encoding="utf-8")
+        self.assertIn("routeAddTrustedList", ipc_interface)
+        self.assertIn("Router::routeAddTrustedList", ipc_server)
+        self.assertIn("RouterWin::Instance().routeAddTrustedList(gw, ips)", router)
+        self.assertIn("validateRoutes && !isRouteAddCandidate(ipWithMask)", router_win)
+        self.assertIn("skipping invalid trusted split route", router_win)
+
+    def test_selfhosted_release_documents_own_monotonic_versioning(self) -> None:
+        cmake = (REPO_ROOT / "CMakeLists.txt").read_text(encoding="utf-8")
+        readme = (REPO_ROOT / "deploy/selfhosted_updates/README.md").read_text(encoding="utf-8")
+
+        self.assertIn("set(AMNEZIAVPN_VERSION 4.9.0.8)", cmake)
+        self.assertIn("set(APP_ANDROID_VERSION_CODE 2129)", cmake)
+        self.assertIn("own monotonically increasing app version", readme)
+        self.assertIn("never update backward to an older fork release", readme)
+
     def test_windows_split_tunnel_creates_driver_dns_sublayer(self) -> None:
         firewall = (REPO_ROOT / "client/platforms/windows/daemon/windowsfirewall.cpp").read_text(encoding="utf-8")
         split_tunnel = (REPO_ROOT / "client/platforms/windows/daemon/windowssplittunnel.cpp").read_text(encoding="utf-8")

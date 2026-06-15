@@ -136,6 +136,13 @@ $env:WSL_QIF_ROOT_PATH = "/home/<wsl-user>/Qt/Tools/QtInstallerFramework/4.7"
 powershell -ExecutionPolicy Bypass -File deploy\selfhosted_updates\local_release.ps1
 ```
 
+The self-hosted fork keeps its own monotonically increasing app version. Do not
+reset `AMNEZIAVPN_VERSION` or `APP_ANDROID_VERSION_CODE` down to the upstream
+release tag after a newer fork build has been published. Upstream releases are
+only the source for official fixes/features that are ported into this branch;
+the self-hosted update version must stay higher than the last published fork
+artifact so installed clients never update backward to an older fork release.
+
 `local_release.ps1` parallelizes platform builds with the logical processor
 count by default. Override it when you want to leave CPU/RAM for other work:
 

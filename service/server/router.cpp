@@ -20,6 +20,17 @@ int Router::routeAddList(const QString &gw, const QStringList &ips)
 #endif
 }
 
+int Router::routeAddTrustedList(const QString &gw, const QStringList &ips)
+{
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().routeAddTrustedList(gw, ips);
+#elif defined (Q_OS_MAC)
+    return RouterMac::Instance().routeAddList(gw, ips);
+#elif defined Q_OS_LINUX
+    return RouterLinux::Instance().routeAddList(gw, ips);
+#endif
+}
+
 bool Router::clearSavedRoutes()
 {
 #ifdef Q_OS_WIN
