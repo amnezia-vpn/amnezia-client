@@ -835,6 +835,20 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
 
     qDebug().noquote() << "InstallController::installDockerWorker" << stdOut;
 
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
+        QString conntrackOut;
+        auto cbConntrack = [&](const QString &data, libssh::Client &) {
+            conntrackOut += data + "\n";
+            return ErrorCode::NoError;
+        };
+        sshSession.runScript(
+                credentials,
+                sshSession.replaceVars(amnezia::scriptData(SharedScriptType::install_conntrack),
+                                       amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
+                cbConntrack, cbConntrack);
+        qDebug().noquote() << "InstallController::installDockerWorker install_conntrack:" << conntrackOut;
+    }
+
     if (container == DockerContainer::Awg2) {
         QRegularExpression regex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
         QRegularExpressionMatch match = regex.match(stdOut);
