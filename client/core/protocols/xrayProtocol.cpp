@@ -272,11 +272,15 @@ ErrorCode XrayProtocol::setupRouting()
 {
     return IpcClient::withInterface(
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
+#ifndef Q_OS_WIN
                 auto createTun = iface->createTun(m_tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
                     qCritical() << "Failed to assign IP address for TUN";
                     return ErrorCode::InternalError;
                 }
+#else
+                Q_UNUSED(iface)
+#endif
 
                 emit tunnelAddressesUpdated(m_vpnGateway, m_vpnLocalAddress);
                 return ErrorCode::NoError;

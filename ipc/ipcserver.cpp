@@ -29,6 +29,9 @@
 #endif
 
 #ifdef Q_OS_WIN
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #include <iphlpapi.h>
     #include "tapcontroller_win.h"
 #endif
 
@@ -210,6 +213,79 @@ bool IpcServer::deleteTun(const QString &dev)
 #endif
 
     return Router::deleteTun(dev);
+}
+
+bool IpcServer::applyAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6)
+{
+#ifdef Q_OS_WIN
+    bool ok = true;
+    // Router::createTun on Windows assigns the address and blocks until it
+    // becomes live on the adapter (NotifyUnicastIpAddressChange callback).
+    if (!ipv4.isEmpty()) {
+        ok &= Router::createTun(ifname, ipv4);
+    }
+    if (!ipv6.isEmpty()) {
+        NET_LUID luid;
+        if (ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t*>(ifname.utf16()), &luid) != NO_ERROR) {
+            qWarning() << "IpcServer::applyAdapterAddress: cannot resolve" << ifname;
+            return false;
+        }
+        const QByteArray ip = ipv6.section('/', 0, 0).toUtf8();
+        MIB_UNICASTIPADDRESS_ROW row;
+        InitializeUnicastIpAddressEntry(&row);
+        row.InterfaceLuid.Value = luid.Value;
+        row.Address.si_family = AF_INET6;
+        row.OnLinkPrefixLength = 128;
+        row.DadState = IpDadStatePreferred;
+        if (InetPtonA(AF_INET6, ip.toStdString().c_str(), &row.Address.Ipv6.sin6_addr) != 1) {
+            qWarning() << "IpcServer::applyAdapterAddress: cannot parse" << ipv6;
+            return false;
+        }
+        DWORD r = CreateUnicastIpAddressEntry(&row);
+        ok &= (r == NO_ERROR || r == ERROR_OBJECT_ALREADY_EXISTS);
+    }
+    return ok;
+#else
+    Q_UNUSED(ifname)
+    Q_UNUSED(ipv4)
+    Q_UNUSED(ipv6)
+    return true;
+#endif
+}
+
+bool IpcServer::removeAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6)
+{
+#ifdef Q_OS_WIN
+    NET_LUID luid;
+    if (ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t*>(ifname.utf16()), &luid) != NO_ERROR) {
+        qWarning() << "IpcServer::removeAdapterAddress: cannot resolve" << ifname;
+        return false;
+    }
+
+    auto removeOne = [&](const QString& addr, int family) -> bool {
+        if (addr.isEmpty()) return true;
+        const QByteArray ip = addr.section('/', 0, 0).toUtf8();
+        MIB_UNICASTIPADDRESS_ROW row;
+        InitializeUnicastIpAddressEntry(&row);
+        row.InterfaceLuid.Value = luid.Value;
+        row.Address.si_family = static_cast<ADDRESS_FAMILY>(family);
+        void* dst = (family == AF_INET)
+                      ? static_cast<void*>(&row.Address.Ipv4.sin_addr)
+                      : static_cast<void*>(&row.Address.Ipv6.sin6_addr);
+        if (InetPtonA(family, ip.toStdString().c_str(), dst) != 1) return false;
+        DWORD r = DeleteUnicastIpAddressEntry(&row);
+        return r == NO_ERROR || r == ERROR_NOT_FOUND;
+    };
+
+    bool ok = removeOne(ipv4, AF_INET);
+    ok &= removeOne(ipv6, AF_INET6);
+    return ok;
+#else
+    Q_UNUSED(ifname)
+    Q_UNUSED(ipv4)
+    Q_UNUSED(ipv6)
+    return true;
+#endif
 }
 
 bool IpcServer::updateResolvers(const QString &ifname, const QList<QHostAddress> &resolvers)

@@ -456,6 +456,30 @@ void VpnTrafficGuard::bringUp(Tunnel* tunnel)
 void VpnTrafficGuard::commit(Tunnel* tunnel)
 {
     if (!tunnel) return;
+
+#if defined(AMNEZIA_DESKTOP) && defined(Q_OS_WIN)
+    if (VpnProtocol::isXrayBased(tunnel->container())) {
+        const QJsonObject &cfg = tunnel->config();
+        const QString ipv4 = cfg.value(QStringLiteral("deviceIpv4Address")).toString();
+        const QString ipv6 = cfg.value(QStringLiteral("deviceIpv6Address")).toString();
+        const QString handover = tunnel->handoverIfname();
+        IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+            if (!handover.isEmpty() && handover != tunnel->ifname()) {
+                auto rm = iface->removeAdapterAddress(handover, ipv4, ipv6);
+                if (!rm.waitForFinished(2000) || !rm.returnValue()) {
+                    qWarning() << "VpnTrafficGuard::commit: removeAdapterAddress failed for"
+                               << handover;
+                }
+            }
+            auto ap = iface->applyAdapterAddress(tunnel->ifname(), ipv4, ipv6);
+            if (!ap.waitForFinished(15000) || !ap.returnValue()) {
+                qWarning() << "VpnTrafficGuard::commit: applyAdapterAddress failed for"
+                           << tunnel->ifname();
+            }
+        });
+    }
+#endif
+
     applyPolicy(tunnel);
     connect(tunnel, &Tunnel::activated, this, [this, tunnel] {
         if (auto p = tunnel->protocol()) {

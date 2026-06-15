@@ -29,6 +29,7 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
 
 using namespace ProtocolUtils;
@@ -222,6 +223,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         config.insert("ifname", preAllocatedIfname);
         if (isXray) {
             config.insert("tunName", preAllocatedIfname);
+            config.insert("deviceIpv4Address", amnezia::protocols::xray::defaultLocalAddr);
         }
         m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
         wireTunnelSignals(m_active, /*isActive=*/true);
@@ -550,11 +552,15 @@ void VpnConnection::startTunnelSwitch(DockerContainer container,
     config.insert("ifname", stagingIfname);
     if (VpnProtocol::isXrayBased(container)) {
         config.insert("tunName", stagingIfname);
+        config.insert("deviceIpv4Address", amnezia::protocols::xray::defaultLocalAddr);
     }
     appendKillSwitchConfig(config);
     appendSplitTunnelingConfig(config);
 
     m_staging = new Tunnel(stagingIfname, container, config, resolvedRemote, this);
+    if (m_active) {
+        m_staging->setHandoverIfname(m_active->ifname());
+    }
     wireTunnelSignals(m_staging, /*isActive=*/false);
 
     setConnectionState(Vpn::ConnectionState::Switching);
