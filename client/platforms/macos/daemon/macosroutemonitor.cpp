@@ -435,7 +435,15 @@ bool MacosRouteMonitor::rtmSendRoute(int action, const IPAddress& prefix,
     return true;
   }
   if ((action == RTM_ADD) && (errno == EEXIST)) {
-    return true;
+    rtm->rtm_type = RTM_DELETE;
+    rtm->rtm_seq = m_rtseq++;
+    write(m_rtsock, rtm, rtm->rtm_msglen);
+    rtm->rtm_type = RTM_ADD;
+    rtm->rtm_seq = m_rtseq++;
+    len = write(m_rtsock, rtm, rtm->rtm_msglen);
+    if (len == rtm->rtm_msglen) {
+      return true;
+    }
   }
   if ((action == RTM_DELETE) && (errno == ESRCH)) {
     return true;
