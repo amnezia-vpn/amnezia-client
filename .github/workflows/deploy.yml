@@ -157,7 +157,7 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
-      run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
+      run: cmake -S . -B build -DPREBUILTS_ONLY=1
     
     - name: 'Authorize in remote'
       if: github.ref == 'refs/heads/dev'
