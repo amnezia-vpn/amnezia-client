@@ -390,20 +390,21 @@ void InstallUiController::refreshContainerStatus(const QString &serverId, int co
         return;
     }
 
+    using StatusResult = std::pair<int, int>; // {status, errorCode}
     InstallController *installController = m_installController;
-    auto *watcher = new QFutureWatcher<int>(this);
-    QObject::connect(watcher, &QFutureWatcher<int>::finished, this, [this, watcher]() {
-        const int status = watcher->result();
+    auto *watcher = new QFutureWatcher<StatusResult>(this);
+    QObject::connect(watcher, &QFutureWatcher<StatusResult>::finished, this, [this, watcher]() {
+        const StatusResult result = watcher->result();
         watcher->deleteLater();
-        emit containerStatusRefreshed(status);
+        emit containerStatusRefreshed(result.first, result.second);
     });
-    QFuture<int> future = QtConcurrent::run([installController, serverId, container]() -> int {
+    QFuture<StatusResult> future = QtConcurrent::run([installController, serverId, container]() -> StatusResult {
         int status = 3;
         const ErrorCode errorCode = installController->queryDockerContainerStatus(serverId, container, status);
         if (errorCode != ErrorCode::NoError) {
-            return 3;
+            return { 3, static_cast<int>(errorCode) };
         }
-        return status;
+        return { status, static_cast<int>(ErrorCode::NoError) };
     });
     watcher->setFuture(future);
 }

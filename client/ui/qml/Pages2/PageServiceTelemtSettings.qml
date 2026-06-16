@@ -20,6 +20,7 @@ PageType {
     id: root
 
     property int containerStatus: 1
+    property int statusErrorCode: 0
     property bool isUpdating: false
     property bool isCheckingStatus: false
     property bool isFetchingSecret: false
@@ -235,6 +236,7 @@ PageType {
             isCheckingStatus = false
             isFetchingSecret = false
             busyIndicatorShown = false
+            statusErrorCode = 0
             PageController.disableControls(false)
             PageController.showBusyIndicator(false)
             diagLoading = false
@@ -324,13 +326,18 @@ PageType {
                 enabled ? qsTr("Telemt started") : qsTr("Telemt stopped"))
         }
 
-        function onContainerStatusRefreshed(status) {
+        function onContainerStatusRefreshed(status, errorCode) {
             if (!root.visible) {
                 isCheckingStatus = false
                 isFetchingSecret = false
                 return
             }
             containerStatus = status
+            root.statusErrorCode = errorCode
+            if (status === 3 && errorCode !== 0) {
+                PageController.showNotificationMessage(
+                    qsTr("Settings locked: connection timed out (error code %1). Re-open the page to retry.").arg(errorCode))
+            }
 
             root.savedTransportMode = TelemtConfigModel.getTransportMode()
             root.savedTlsDomain = TelemtConfigModel.getTlsDomain()
@@ -817,6 +824,8 @@ PageType {
                 width: settingsListView.width
                 spacing: 0
 
+                readonly property bool fieldsEditable: isEnabled && containerStatus === 1 && !root.pageBusy
+
                 function telemtActiveSecretForBaseHex(baseHex) {
                     return root.telemtClientSecretForTabIndex(baseHex, root.syncedSecretTabIndex,
                         root.savedTlsDomain, TelemtConfigModel.defaultTlsDomain())
@@ -848,6 +857,21 @@ PageType {
                             }
                         }
                     }
+                }
+
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 8
+                    visible: !fieldsEditable && !root.pageBusy
+                    text: (containerStatus === 1 || containerStatus === 2)
+                          ? qsTr("Enable Telemt to edit settings")
+                          : (statusErrorCode !== 0
+                             ? qsTr("Settings locked: connection timed out (error code %1). Re-open the page to retry.").arg(statusErrorCode)
+                             : qsTr("Cannot reach the server — settings are unavailable"))
+                    color: AmneziaStyle.color.mutedGray
+                    wrapMode: Text.WordWrap
                 }
 
                 ColumnLayout {
@@ -884,6 +908,7 @@ PageType {
                             image: "qrc:/images/controls/refresh-cw.svg"
                             imageColor: AmneziaStyle.color.paleGray
                             visible: ServersUiController.isProcessedServerHasWriteAccess()
+                            enabled: fieldsEditable
                             onClicked: {
                                 var secretSnapshot = secret
                                 showQuestionDrawer(
@@ -912,6 +937,7 @@ PageType {
 
                 TextFieldWithHeaderType {
                     id: publicHostTextField
+                    enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -973,6 +999,7 @@ PageType {
 
                 TextFieldWithHeaderType {
                     id: portTextField
+                    enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -1021,6 +1048,7 @@ PageType {
 
                 TextFieldWithHeaderType {
                     id: tagTextField
+                    enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -1104,6 +1132,7 @@ PageType {
 
                 DropDownType {
                     id: transportModeDropDown
+                    enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -1139,6 +1168,7 @@ PageType {
 
                 TextFieldWithHeaderType {
                     id: tlsDomainTextField
+                    enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
@@ -1221,6 +1251,7 @@ PageType {
                     Layout.fillWidth: true
                     spacing: 0
                     visible: advancedHeader.expanded
+                    enabled: fieldsEditable
 
                     CaptionTextType {
                         Layout.fillWidth: true
@@ -1646,6 +1677,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.leftMargin: 16
                     visible: ServersUiController.isProcessedServerHasWriteAccess()
+                    enabled: fieldsEditable
                     text: qsTr("Save")
                     clickedFunc: function () {
                         var portValue = portTextField.textField.text === ""
