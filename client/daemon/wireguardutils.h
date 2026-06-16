@@ -37,9 +37,6 @@ class WireguardUtils : public QObject {
   virtual bool addInterface(const InterfaceConfig& config) = 0;
   virtual bool deleteInterface() = 0;
 
-  virtual bool applyDeviceAddresses(const QString& ipv4Address, const QString& ipv6Address) { return true; }
-  virtual bool removeDeviceAddresses(const QString& ipv4Address, const QString& ipv6Address) { return true; }
-
   virtual bool updatePeer(const InterfaceConfig& config) = 0;
   virtual bool deletePeer(const InterfaceConfig& config) = 0;
   virtual QList<PeerStatus> getPeerStatus() = 0;

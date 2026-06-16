@@ -224,6 +224,13 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         if (isXray) {
             config.insert("tunName", preAllocatedIfname);
             config.insert("deviceIpv4Address", amnezia::protocols::xray::defaultLocalAddr);
+        } else if (isWg) {
+            const QString protoName = config.value("protocol").toString();
+            const QJsonObject wgConfig = config.value(protoName + "_config_data").toObject();
+            const QString clientIp = wgConfig.value(amnezia::configKey::clientIp).toString();
+            if (!clientIp.isEmpty()) {
+                config.insert("deviceIpv4Address", clientIp);
+            }
         }
         m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
         wireTunnelSignals(m_active, /*isActive=*/true);
@@ -553,6 +560,13 @@ void VpnConnection::startTunnelSwitch(DockerContainer container,
     if (VpnProtocol::isXrayBased(container)) {
         config.insert("tunName", stagingIfname);
         config.insert("deviceIpv4Address", amnezia::protocols::xray::defaultLocalAddr);
+    } else if (VpnProtocol::isWireGuardBased(container)) {
+        const QString protoName = config.value("protocol").toString();
+        const QJsonObject wgConfig = config.value(protoName + "_config_data").toObject();
+        const QString clientIp = wgConfig.value(amnezia::configKey::clientIp).toString();
+        if (!clientIp.isEmpty()) {
+            config.insert("deviceIpv4Address", clientIp);
+        }
     }
     appendKillSwitchConfig(config);
     appendSplitTunnelingConfig(config);
