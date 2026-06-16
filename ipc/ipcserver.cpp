@@ -35,6 +35,17 @@
     #include "tapcontroller_win.h"
 #endif
 
+#ifdef Q_OS_MAC
+    #include <sys/socket.h>
+    #include <sys/sys_domain.h>
+    #include <sys/kern_control.h>
+    #include <sys/ioctl.h>
+    #include <net/if.h>
+    #include <net/if_utun.h>
+    #include <unistd.h>
+    #include <cstring>
+#endif
+
 
 IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
 {
@@ -213,6 +224,53 @@ bool IpcServer::deleteTun(const QString &dev)
 #endif
 
     return Router::deleteTun(dev);
+}
+
+QString IpcServer::reserveUtunName()
+{
+#ifdef Q_OS_MAC
+    int fd = socket(PF_SYSTEM, SOCK_DGRAM, SYSPROTO_CONTROL);
+    if (fd < 0) {
+        qWarning() << "reserveUtunName: socket() failed:" << strerror(errno);
+        return QString();
+    }
+
+    struct ctl_info info;
+    std::memset(&info, 0, sizeof(info));
+    std::strncpy(info.ctl_name, UTUN_CONTROL_NAME, sizeof(info.ctl_name) - 1);
+    if (ioctl(fd, CTLIOCGINFO, &info) < 0) {
+        qWarning() << "reserveUtunName: CTLIOCGINFO failed:" << strerror(errno);
+        ::close(fd);
+        return QString();
+    }
+
+    struct sockaddr_ctl addr;
+    std::memset(&addr, 0, sizeof(addr));
+    addr.sc_len = sizeof(addr);
+    addr.sc_family = AF_SYSTEM;
+    addr.ss_sysaddr = AF_SYS_CONTROL;
+    addr.sc_id = info.ctl_id;
+    addr.sc_unit = 0;
+
+    if (::connect(fd, reinterpret_cast<struct sockaddr*>(&addr), sizeof(addr)) < 0) {
+        qWarning() << "reserveUtunName: connect() failed:" << strerror(errno);
+        ::close(fd);
+        return QString();
+    }
+
+    char ifname[IFNAMSIZ] = {0};
+    socklen_t len = sizeof(ifname);
+    if (getsockopt(fd, SYSPROTO_CONTROL, UTUN_OPT_IFNAME, ifname, &len) < 0) {
+        qWarning() << "reserveUtunName: getsockopt UTUN_OPT_IFNAME failed:" << strerror(errno);
+        ::close(fd);
+        return QString();
+    }
+
+    ::close(fd);
+    return QString::fromUtf8(ifname);
+#else
+    return QString();
+#endif
 }
 
 bool IpcServer::applyAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6)
