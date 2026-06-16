@@ -128,14 +128,6 @@ bool Daemon::setPrimary(const QString& ifname, const InterfaceConfig& config) {
   const QString priorPrimary = m_primaryIfname;
   m_primaryIfname = ifname;
 
-  if (!priorPrimary.isEmpty() && priorPrimary != ifname) {
-    if (WireguardUtils* oldWg = m_tunnels.value(priorPrimary)) {
-      const InterfaceConfig& oldConfig = m_connections.value(priorPrimary).m_config;
-      oldWg->removeDeviceAddresses(oldConfig.m_deviceIpv4Address, oldConfig.m_deviceIpv6Address);
-    }
-  }
-  wg->applyDeviceAddresses(config.m_deviceIpv4Address, config.m_deviceIpv6Address);
-
   auto failure_guard = qScopeGuard([this, ifname, priorPrimary] {
     deactivateTunnel(ifname);
     m_primaryIfname = priorPrimary;
