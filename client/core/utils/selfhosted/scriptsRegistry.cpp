@@ -367,6 +367,14 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
         vars.append({ { "$TELEMT_USE_MIDDLE_PROXY", c.useMiddleProxy ? QLatin1String("true") : QLatin1String("false") } });
         vars.append({ { "$TELEMT_MASK", c.maskEnabled ? QLatin1String("true") : QLatin1String("false") } });
         vars.append({ { "$TELEMT_TLS_EMULATION", c.tlsEmulation ? QLatin1String("true") : QLatin1String("false") } });
+
+        QStringList additionalList;
+        for (const QString &s : c.additionalSecrets) {
+            if (!s.isEmpty()) {
+                additionalList << s;
+            }
+        }
+        vars.append({ { "$TELEMT_ADDITIONAL_SECRETS", additionalList.join(QLatin1Char(',')) } });
     }
 
     return vars;

@@ -21,7 +21,6 @@ PageType {
     id: root
 
     property int containerStatus: 1
-    // Last status-query error code (0 = none). 305 = SshTimeoutError → server unreachable.
     property int statusErrorCode: 0
     property bool isUpdating: false
     property bool isCheckingStatus: false
@@ -869,6 +868,28 @@ PageType {
                     return "tg://proxy?server=" + mtProxyEffectiveHostForLinks() + "&port=" + port + "&secret=" + mtProxyActiveSecretForBaseHex(baseHex)
                 }
 
+                function mtProxyIsAdditionalPersisted(hex) {
+                    return root.mtProxyIsPersistedAdditionalHex(hex)
+                }
+
+                function mtProxyCopyText(text) {
+                    GC.copyToClipBoard(text)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+
+                function mtProxyShareQr(link) {
+                    ExportController.generateQrFromString(link)
+                    PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
+                        qsTr("MTProxy connection link"), "", "", "")
+                }
+
+                function mtProxyRemoveAdditionalSecret(idx) {
+                    MtProxyConfigModel.removeAdditionalSecret(idx)
+                    if (root.containerStatus === 1) {
+                        root.mtProxyScheduleUpdate(false)
+                    }
+                }
+
                 SwitcherType {
                     id: enableMtProxySwitch
                     Layout.fillWidth: true
@@ -1322,7 +1343,7 @@ PageType {
                         delegate: ColumnLayout {
                             id: addSecretDelegate
                             property bool linksExpanded: false
-                            readonly property bool linksPanelAllowed: root.mtProxyIsPersistedAdditionalHex(modelData)
+                            readonly property bool linksPanelAllowed: settingsRoot.mtProxyIsAdditionalPersisted(modelData)
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
@@ -1379,11 +1400,7 @@ PageType {
                                                 sourceSize.width: 24
                                                 sourceSize.height: 24
                                                 rotation: addSecretDelegate.linksExpanded ? 180 : 0
-                                                Behavior on rotation {
-                                                    NumberAnimation {
-                                                        duration: 150
-                                                    }
-                                                }
+                                                Behavior on rotation { NumberAnimation { duration: 150 } }
                                             }
                                         }
 
@@ -1400,15 +1417,9 @@ PageType {
                                         implicitWidth: 32
                                         implicitHeight: 32
                                         hoverEnabled: true
-                                        visible: ServersUiController.isProcessedServerHasWriteAccess()
                                         image: "qrc:/images/controls/trash.svg"
                                         imageColor: AmneziaStyle.color.vibrantRed
-                                        onClicked: {
-                                            MtProxyConfigModel.removeAdditionalSecret(index)
-                                            if (containerStatus === 1) {
-                                                root.mtProxyScheduleUpdate(false)
-                                            }
-                                        }
+                                        onClicked: settingsRoot.mtProxyRemoveAdditionalSecret(index)
                                     }
                                 }
                             }
@@ -1457,13 +1468,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/qr-code.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                ExportController.generateQrFromString(settingsRoot.mtProxyTmeLinkForAdditional(modelData))
-                                                PageController.goToShareConnectionPage(
-                                                    qsTr("Telegram connection link"),
-                                                    qsTr("MTProxy connection link"),
-                                                    "", "", "")
-                                            }
+                                            onClicked: settingsRoot.mtProxyShareQr(settingsRoot.mtProxyTmeLinkForAdditional(modelData))
                                         }
 
                                         ImageButtonType {
@@ -1472,10 +1477,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/copy.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                GC.copyToClipBoard(settingsRoot.mtProxyTmeLinkForAdditional(modelData))
-                                                PageController.showNotificationMessage(qsTr("Copied"))
-                                            }
+                                            onClicked: settingsRoot.mtProxyCopyText(settingsRoot.mtProxyTmeLinkForAdditional(modelData))
                                         }
                                     }
                                 }
@@ -1512,13 +1514,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/qr-code.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                ExportController.generateQrFromString(settingsRoot.mtProxyTgLinkForAdditional(modelData))
-                                                PageController.goToShareConnectionPage(
-                                                    qsTr("Telegram connection link"),
-                                                    qsTr("MTProxy connection link"),
-                                                    "", "", "")
-                                            }
+                                            onClicked: settingsRoot.mtProxyShareQr(settingsRoot.mtProxyTgLinkForAdditional(modelData))
                                         }
 
                                         ImageButtonType {
@@ -1527,10 +1523,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/copy.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                GC.copyToClipBoard(settingsRoot.mtProxyTgLinkForAdditional(modelData))
-                                                PageController.showNotificationMessage(qsTr("Copied"))
-                                            }
+                                            onClicked: settingsRoot.mtProxyCopyText(settingsRoot.mtProxyTgLinkForAdditional(modelData))
                                         }
                                     }
                                 }
@@ -1615,8 +1608,6 @@ PageType {
                         textField.text: workers
                         textField.maximumLength: 2
                         textField.inputMethodHints: Qt.ImhDigitsOnly
-                        // Range input like the port field: IntValidator bounds the value and the
-                        // clamp keeps it within 0..maxWorkers on every change (rejects 33+, neg.).
                         textField.validator: IntValidator {
                             bottom: 0
                             top: MtProxyConfigModel.maxWorkers()

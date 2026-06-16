@@ -211,6 +211,12 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         if (errorCode == ErrorCode::NoError) {
             errorCode = startupContainerWorker(credentials, container, newConfig, sshSession);
         }
+
+        if (errorCode == ErrorCode::NoError
+            && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt)) {
+            const QString containerName = ContainerUtils::containerToString(container);
+            errorCode = sshSession.runScript(credentials, "sudo docker restart " + containerName);
+        }
     }
 
     const bool skipXrayInboundSync =
@@ -737,18 +743,6 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             if (oldPort != newPort) {
                 return true;
             }
-            const QString oldTransport = oldMt->transportMode.isEmpty() ? QString(
-                    protocols::mtProxy::transportModeStandard)
-                                                                        : oldMt->transportMode;
-            const QString newTransport = newMt->transportMode.isEmpty() ? QString(
-                    protocols::mtProxy::transportModeStandard)
-                                                                        : newMt->transportMode;
-            if (oldTransport != newTransport) {
-                return true;
-            }
-            if (oldMt->tlsDomain != newMt->tlsDomain) {
-                return true;
-            }
         }
     }
 
@@ -761,39 +755,6 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             const QString newPort =
                     newT->port.isEmpty() ? QString(protocols::telemt::defaultPort) : newT->port;
             if (oldPort != newPort) {
-                return true;
-            }
-            const QString oldTransport = oldT->transportMode.isEmpty()
-                    ? QString(protocols::telemt::transportModeStandard)
-                    : oldT->transportMode;
-            const QString newTransport = newT->transportMode.isEmpty()
-                    ? QString(protocols::telemt::transportModeStandard)
-                    : newT->transportMode;
-            if (oldTransport != newTransport) {
-                return true;
-            }
-            if (oldT->tlsDomain != newT->tlsDomain) {
-                return true;
-            }
-            if (oldT->maskEnabled != newT->maskEnabled) {
-                return true;
-            }
-            if (oldT->tlsEmulation != newT->tlsEmulation) {
-                return true;
-            }
-            if (oldT->useMiddleProxy != newT->useMiddleProxy) {
-                return true;
-            }
-            if (oldT->tag != newT->tag) {
-                return true;
-            }
-            const QString oldUser = oldT->userName.isEmpty()
-                    ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                    : oldT->userName;
-            const QString newUser = newT->userName.isEmpty()
-                    ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                    : newT->userName;
-            if (oldUser != newUser) {
                 return true;
             }
         }

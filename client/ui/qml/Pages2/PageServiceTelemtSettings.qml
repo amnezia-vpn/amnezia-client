@@ -20,7 +20,6 @@ PageType {
     id: root
 
     property int containerStatus: 1
-    // Last status-query error code (0 = none). 305 = SshTimeoutError → server unreachable.
     property int statusErrorCode: 0
     property bool isUpdating: false
     property bool isCheckingStatus: false
@@ -871,6 +870,25 @@ PageType {
                     return "tg://proxy?server=" + telemtEffectiveHostForLinks() + "&port=" + port + "&secret=" + telemtActiveSecretForBaseHex(baseHex)
                 }
 
+                function telemtIsAdditionalPersisted(hex) {
+                    return root.telemtIsPersistedAdditionalHex(hex)
+                }
+
+                function telemtCopyText(text) {
+                    GC.copyToClipBoard(text)
+                    PageController.showNotificationMessage(qsTr("Copied"))
+                }
+
+                function telemtShareQr(link) {
+                    ExportController.generateQrFromString(link)
+                    PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
+                        qsTr("Telemt connection link"), "", "", "")
+                }
+
+                function telemtRemoveAdditionalSecret(idx) {
+                    TelemtConfigModel.removeAdditionalSecret(idx)
+                }
+
                 SwitcherType {
                     id: enableTelemtSwitch
                     Layout.fillWidth: true
@@ -1329,7 +1347,7 @@ PageType {
                         delegate: ColumnLayout {
                             id: addSecretDelegate
                             property bool linksExpanded: false
-                            readonly property bool linksPanelAllowed: root.telemtIsPersistedAdditionalHex(modelData)
+                            readonly property bool linksPanelAllowed: settingsRoot.telemtIsAdditionalPersisted(modelData)
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
@@ -1386,11 +1404,7 @@ PageType {
                                                 sourceSize.width: 24
                                                 sourceSize.height: 24
                                                 rotation: addSecretDelegate.linksExpanded ? 180 : 0
-                                                Behavior on rotation {
-                                                    NumberAnimation {
-                                                        duration: 150
-                                                    }
-                                                }
+                                                Behavior on rotation { NumberAnimation { duration: 150 } }
                                             }
                                         }
 
@@ -1407,15 +1421,9 @@ PageType {
                                         implicitWidth: 32
                                         implicitHeight: 32
                                         hoverEnabled: true
-                                        visible: ServersUiController.isProcessedServerHasWriteAccess()
                                         image: "qrc:/images/controls/trash.svg"
                                         imageColor: AmneziaStyle.color.vibrantRed
-                                        onClicked: {
-                                            TelemtConfigModel.removeAdditionalSecret(index)
-                                            if (containerStatus === 1) {
-                                                root.telemtScheduleUpdate(false)
-                                            }
-                                        }
+                                        onClicked: settingsRoot.telemtRemoveAdditionalSecret(index)
                                     }
                                 }
                             }
@@ -1464,13 +1472,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/qr-code.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                ExportController.generateQrFromString(settingsRoot.telemtTmeLinkForAdditional(modelData))
-                                                PageController.goToShareConnectionPage(
-                                                    qsTr("Telegram connection link"),
-                                                    qsTr("Telemt connection link"),
-                                                    "", "", "")
-                                            }
+                                            onClicked: settingsRoot.telemtShareQr(settingsRoot.telemtTmeLinkForAdditional(modelData))
                                         }
 
                                         ImageButtonType {
@@ -1479,10 +1481,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/copy.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                GC.copyToClipBoard(settingsRoot.telemtTmeLinkForAdditional(modelData))
-                                                PageController.showNotificationMessage(qsTr("Copied"))
-                                            }
+                                            onClicked: settingsRoot.telemtCopyText(settingsRoot.telemtTmeLinkForAdditional(modelData))
                                         }
                                     }
                                 }
@@ -1519,13 +1518,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/qr-code.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                ExportController.generateQrFromString(settingsRoot.telemtTgLinkForAdditional(modelData))
-                                                PageController.goToShareConnectionPage(
-                                                    qsTr("Telegram connection link"),
-                                                    qsTr("Telemt connection link"),
-                                                    "", "", "")
-                                            }
+                                            onClicked: settingsRoot.telemtShareQr(settingsRoot.telemtTgLinkForAdditional(modelData))
                                         }
 
                                         ImageButtonType {
@@ -1534,10 +1527,7 @@ PageType {
                                             hoverEnabled: true
                                             image: "qrc:/images/controls/copy.svg"
                                             imageColor: AmneziaStyle.color.paleGray
-                                            onClicked: {
-                                                GC.copyToClipBoard(settingsRoot.telemtTgLinkForAdditional(modelData))
-                                                PageController.showNotificationMessage(qsTr("Copied"))
-                                            }
+                                            onClicked: settingsRoot.telemtCopyText(settingsRoot.telemtTgLinkForAdditional(modelData))
                                         }
                                     }
                                 }
@@ -1622,8 +1612,6 @@ PageType {
                         textField.text: workers
                         textField.maximumLength: 2
                         textField.inputMethodHints: Qt.ImhDigitsOnly
-                        // Range input like the port field: IntValidator bounds the value and the
-                        // clamp keeps it within 0..maxWorkers on every change (rejects 33+, neg.).
                         textField.validator: IntValidator {
                             bottom: 0
                             top: TelemtConfigModel.maxWorkers()
