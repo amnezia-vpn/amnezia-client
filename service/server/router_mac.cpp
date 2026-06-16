@@ -26,6 +26,8 @@ bool RouterMac::routeAdd(const QString &ipWithSubnet, const QString &gw)
         return false;
     }
 
+    routeDelete(ipWithSubnet, gw);
+
     QString cmd;
     if (mask == "255.255.255.255") {
         cmd = QString("route add -host %1 %2").arg(ip).arg(gw);

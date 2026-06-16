@@ -361,6 +361,9 @@ bool IpcServer::restoreResolvers()
     qDebug() << "IpcServer::restoreResolvers";
 #endif
 
+    if (m_xrayWorkers.size() > 1) {
+        return true;
+    }
     return Router::restoreResolvers();
 }
 
@@ -639,6 +642,9 @@ bool IpcServer::xrayRemoveUplinkRoutes(const QString& uplinkIface, const QString
 #ifdef Q_OS_MAC
     if (uplinkIface.isEmpty()) {
         return false;
+    }
+    if (m_xrayWorkers.size() > 1) {
+        return true;
     }
     return RouterMac::Instance().routeDeleteXray(uplinkIface, uplinkGateway);
 #else
