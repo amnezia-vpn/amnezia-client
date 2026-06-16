@@ -125,13 +125,29 @@ Vpn::ConnectionState VpnConnection::connectionState() const
 
 QString VpnConnection::allocateIfname()
 {
+#ifdef Q_OS_MACOS
+    QString kernelAssigned;
+    IpcClient::withInterface([&kernelAssigned](QSharedPointer<IpcInterfaceReplica> iface) {
+        auto reply = iface->reserveUtunName();
+        if (reply.waitForFinished(2000)) {
+            kernelAssigned = reply.returnValue();
+        }
+    });
+    if (kernelAssigned.isEmpty() || m_ifnamesInUse.contains(kernelAssigned)) {
+        qCritical() << "allocateIfname: kernel utun reservation failed";
+        return QString();
+    }
+    m_ifnamesInUse.insert(kernelAssigned);
+    return kernelAssigned;
+#else
     for (int i = 0; ; ++i) {
-        const QString name = QStringLiteral("amn") + QString::number(i);
+        const QString name = QStringLiteral("amn%1").arg(i);
         if (!m_ifnamesInUse.contains(name)) {
             m_ifnamesInUse.insert(name);
             return name;
         }
     }
+#endif
 }
 
 void VpnConnection::releaseIfname(const QString& ifname)
@@ -171,6 +187,11 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     const bool isXray = VpnProtocol::isXrayBased(container);
     const bool useTunnelPath = isWg || isXray;
     const QString preAllocatedIfname = useTunnelPath ? allocateIfname() : QString();
+    if (useTunnelPath && preAllocatedIfname.isEmpty()) {
+        setConnectionState(Vpn::ConnectionState::Error);
+        emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
+        return;
+    }
 
     if (m_active
         && m_connectionState == Vpn::ConnectionState::Connected

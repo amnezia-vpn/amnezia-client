@@ -31,6 +31,8 @@ class IpcInterface
     SLOT( bool createTun(const QString &dev, const QString &subnet) );
     SLOT( bool deleteTun(const QString &dev) );
 
+    SLOT( QString reserveUtunName() );
+
     SLOT( bool applyAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) );
 
     SLOT( bool removeAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) );
