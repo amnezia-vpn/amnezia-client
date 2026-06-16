@@ -20,6 +20,7 @@ PageType {
     id: root
 
     property int containerStatus: 1
+    // Last status-query error code (0 = none). 305 = SshTimeoutError → server unreachable.
     property int statusErrorCode: 0
     property bool isUpdating: false
     property bool isCheckingStatus: false
@@ -189,6 +190,27 @@ PageType {
         })
     }
 
+    property var telemtPersistedAdditionalHex: []
+
+    function telemtRefreshPersistedAdditionalSecrets() {
+        var list = TelemtConfigModel.additionalSecretsList()
+        var a = []
+        for (var i = 0; i < list.length; ++i) {
+            a.push(String(list[i]))
+        }
+        root.telemtPersistedAdditionalHex = a
+    }
+
+    function telemtIsPersistedAdditionalHex(hex) {
+        var h = String(hex)
+        for (var j = 0; j < root.telemtPersistedAdditionalHex.length; ++j) {
+            if (String(root.telemtPersistedAdditionalHex[j]) === h) {
+                return true
+            }
+        }
+        return false
+    }
+
     function statusText() {
         if (isCheckingStatus) {
             return qsTr("Checking...")
@@ -219,6 +241,10 @@ PageType {
         root.savedTransportMode = TelemtConfigModel.getTransportMode()
         root.savedTlsDomain = TelemtConfigModel.getTlsDomain()
         root.savedPublicHost = TelemtConfigModel.getPublicHost()
+
+        Qt.callLater(function () {
+            root.telemtRefreshPersistedAdditionalSecrets()
+        })
 
         Qt.callLater(root.telemtOnPageShown)
     }
@@ -277,6 +303,7 @@ PageType {
             root.savedTransportMode = TelemtConfigModel.getTransportMode()
             root.savedTlsDomain = TelemtConfigModel.getTlsDomain()
             root.savedPublicHost = TelemtConfigModel.getPublicHost()
+            root.telemtRefreshPersistedAdditionalSecrets()
             PageController.showNotificationMessage(message)
             if (closePage) {
                 PageController.closePage()
@@ -821,6 +848,7 @@ PageType {
             reuseItems: false
 
             delegate: ColumnLayout {
+                id: settingsRoot
                 width: settingsListView.width
                 spacing: 0
 
@@ -829,6 +857,18 @@ PageType {
                 function telemtActiveSecretForBaseHex(baseHex) {
                     return root.telemtClientSecretForTabIndex(baseHex, root.syncedSecretTabIndex,
                         root.savedTlsDomain, TelemtConfigModel.defaultTlsDomain())
+                }
+
+                function telemtEffectiveHostForLinks() {
+                    return root.savedPublicHost !== "" ? root.savedPublicHost : ServersUiController.serverHostName(ServersUiController.processedServerId)
+                }
+
+                function telemtTmeLinkForAdditional(baseHex) {
+                    return "https://t.me/proxy?server=" + telemtEffectiveHostForLinks() + "&port=" + port + "&secret=" + telemtActiveSecretForBaseHex(baseHex)
+                }
+
+                function telemtTgLinkForAdditional(baseHex) {
+                    return "tg://proxy?server=" + telemtEffectiveHostForLinks() + "&port=" + port + "&secret=" + telemtActiveSecretForBaseHex(baseHex)
                 }
 
                 SwitcherType {
@@ -1042,6 +1082,17 @@ PageType {
                     visible: transportMode === "faketls" && portTextField.textField.text !== "443" && portTextField.textField.text !== ""
                     text: qsTr("FakeTLS may not work on ports other than 443")
                     color: AmneziaStyle.color.goldenApricot
+                    font.pixelSize: 12
+                    wrapMode: Text.WordWrap
+                }
+
+                CaptionTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 8
+                    text: qsTr("The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.")
+                    color: AmneziaStyle.color.mutedGray
                     font.pixelSize: 12
                     wrapMode: Text.WordWrap
                 }
@@ -1275,37 +1326,220 @@ PageType {
 
                     Repeater {
                         model: additionalSecrets
-                        delegate: RowLayout {
+                        delegate: ColumnLayout {
+                            id: addSecretDelegate
+                            property bool linksExpanded: false
+                            readonly property bool linksPanelAllowed: root.telemtIsPersistedAdditionalHex(modelData)
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
-                            Layout.bottomMargin: 4
-                            spacing: 8
-                            CaptionTextType {
+                            Layout.bottomMargin: 8
+                            spacing: 0
+
+                            onLinksPanelAllowedChanged: {
+                                if (!linksPanelAllowed) {
+                                    linksExpanded = false
+                                }
+                            }
+
+                            Rectangle {
                                 Layout.fillWidth: true
-                                text: modelData
-                                color: AmneziaStyle.color.paleGray
-                                elide: Text.ElideMiddle
-                                font.pixelSize: 13
+                                implicitHeight: collapsedBar.implicitHeight + 16
+                                color: AmneziaStyle.color.onyxBlack
+                                radius: 8
+                                border.color: AmneziaStyle.color.slateGray
+                                border.width: 1
+
+                                RowLayout {
+                                    id: collapsedBar
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: 12
+                                    anchors.rightMargin: 8
+                                    spacing: 8
+
+                                    Item {
+                                        Layout.fillWidth: true
+                                        implicitHeight: Math.max(hexCaption.implicitHeight, 24)
+
+                                        RowLayout {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            spacing: 8
+
+                                            CaptionTextType {
+                                                id: hexCaption
+                                                Layout.fillWidth: true
+                                                text: modelData
+                                                color: AmneziaStyle.color.paleGray
+                                                elide: Text.ElideMiddle
+                                                font.pixelSize: 13
+                                            }
+
+                                            Image {
+                                                width: 24
+                                                height: 24
+                                                visible: addSecretDelegate.linksPanelAllowed
+                                                source: "qrc:/images/controls/chevron-down.svg"
+                                                sourceSize.width: 24
+                                                sourceSize.height: 24
+                                                rotation: addSecretDelegate.linksExpanded ? 180 : 0
+                                                Behavior on rotation {
+                                                    NumberAnimation {
+                                                        duration: 150
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            visible: addSecretDelegate.linksPanelAllowed
+                                            enabled: addSecretDelegate.linksPanelAllowed
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: addSecretDelegate.linksExpanded = !addSecretDelegate.linksExpanded
+                                        }
+                                    }
+
+                                    ImageButtonType {
+                                        implicitWidth: 32
+                                        implicitHeight: 32
+                                        hoverEnabled: true
+                                        visible: ServersUiController.isProcessedServerHasWriteAccess()
+                                        image: "qrc:/images/controls/trash.svg"
+                                        imageColor: AmneziaStyle.color.vibrantRed
+                                        onClicked: {
+                                            TelemtConfigModel.removeAdditionalSecret(index)
+                                            if (containerStatus === 1) {
+                                                root.telemtScheduleUpdate(false)
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            ImageButtonType {
-                                implicitWidth: 32
-                                implicitHeight: 32
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/copy.svg"
-                                imageColor: AmneziaStyle.color.mutedGray
-                                onClicked: { GC.copyToClipBoard(modelData)
-                                    PageController.showNotificationMessage(qsTr("Copied")) }
-                            }
-                            ImageButtonType {
-                                implicitWidth: 32
-                                implicitHeight: 32
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/trash.svg"
-                                imageColor: AmneziaStyle.color.vibrantRed
-                                onClicked: {
-                                    TelemtConfigModel.removeAdditionalSecret(index)
-                                    root.telemtScheduleUpdate(false)
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 8
+                                spacing: 8
+                                visible: addSecretDelegate.linksPanelAllowed && addSecretDelegate.linksExpanded
+
+                                CaptionTextType {
+                                    Layout.fillWidth: true
+                                    text: qsTr("Use Telegram connection link")
+                                    color: AmneziaStyle.color.mutedGray
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: expTmeRow.implicitHeight + 16
+                                    color: AmneziaStyle.color.onyxBlack
+                                    radius: 8
+                                    border.color: AmneziaStyle.color.slateGray
+                                    border.width: 1
+
+                                    RowLayout {
+                                        id: expTmeRow
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: 12
+                                        anchors.rightMargin: 8
+                                        spacing: 4
+
+                                        CaptionTextType {
+                                            Layout.fillWidth: true
+                                            text: settingsRoot.telemtTmeLinkForAdditional(modelData)
+                                            color: AmneziaStyle.color.goldenApricot
+                                            elide: Text.ElideRight
+                                            maximumLineCount: 1
+                                            font.pixelSize: 13
+                                        }
+
+                                        ImageButtonType {
+                                            implicitWidth: 36
+                                            implicitHeight: 36
+                                            hoverEnabled: true
+                                            image: "qrc:/images/controls/qr-code.svg"
+                                            imageColor: AmneziaStyle.color.paleGray
+                                            onClicked: {
+                                                ExportController.generateQrFromString(settingsRoot.telemtTmeLinkForAdditional(modelData))
+                                                PageController.goToShareConnectionPage(
+                                                    qsTr("Telegram connection link"),
+                                                    qsTr("Telemt connection link"),
+                                                    "", "", "")
+                                            }
+                                        }
+
+                                        ImageButtonType {
+                                            implicitWidth: 36
+                                            implicitHeight: 36
+                                            hoverEnabled: true
+                                            image: "qrc:/images/controls/copy.svg"
+                                            imageColor: AmneziaStyle.color.paleGray
+                                            onClicked: {
+                                                GC.copyToClipBoard(settingsRoot.telemtTmeLinkForAdditional(modelData))
+                                                PageController.showNotificationMessage(qsTr("Copied"))
+                                            }
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    implicitHeight: expTgRow.implicitHeight + 16
+                                    color: AmneziaStyle.color.onyxBlack
+                                    radius: 8
+                                    border.color: AmneziaStyle.color.slateGray
+                                    border.width: 1
+
+                                    RowLayout {
+                                        id: expTgRow
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: 12
+                                        anchors.rightMargin: 8
+                                        spacing: 4
+
+                                        CaptionTextType {
+                                            Layout.fillWidth: true
+                                            text: settingsRoot.telemtTgLinkForAdditional(modelData)
+                                            color: AmneziaStyle.color.goldenApricot
+                                            elide: Text.ElideRight
+                                            maximumLineCount: 1
+                                            font.pixelSize: 13
+                                        }
+
+                                        ImageButtonType {
+                                            implicitWidth: 36
+                                            implicitHeight: 36
+                                            hoverEnabled: true
+                                            image: "qrc:/images/controls/qr-code.svg"
+                                            imageColor: AmneziaStyle.color.paleGray
+                                            onClicked: {
+                                                ExportController.generateQrFromString(settingsRoot.telemtTgLinkForAdditional(modelData))
+                                                PageController.goToShareConnectionPage(
+                                                    qsTr("Telegram connection link"),
+                                                    qsTr("Telemt connection link"),
+                                                    "", "", "")
+                                            }
+                                        }
+
+                                        ImageButtonType {
+                                            implicitWidth: 36
+                                            implicitHeight: 36
+                                            hoverEnabled: true
+                                            image: "qrc:/images/controls/copy.svg"
+                                            imageColor: AmneziaStyle.color.paleGray
+                                            onClicked: {
+                                                GC.copyToClipBoard(settingsRoot.telemtTgLinkForAdditional(modelData))
+                                                PageController.showNotificationMessage(qsTr("Copied"))
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1321,7 +1555,6 @@ PageType {
                         text: qsTr("Add additional secret")
                         clickedFunc: function () {
                             TelemtConfigModel.addAdditionalSecret()
-                            root.telemtScheduleUpdate(false)
                         }
                     }
 
@@ -1677,18 +1910,66 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.leftMargin: 16
                     visible: ServersUiController.isProcessedServerHasWriteAccess()
-                    enabled: fieldsEditable
+                    enabled: fieldsEditable && !root.telemtNetworkBlocked
                     text: qsTr("Save")
                     clickedFunc: function () {
+                        if (root.telemtNetworkBlocked) {
+                            PageController.showErrorMessage(qsTr("No internet connection. Connect to the internet to change Telemt settings."))
+                            return
+                        }
+                        publicHostTextField.errorText = ""
+                        tagTextField.errorText = ""
+                        tlsDomainTextField.errorText = ""
+                        natInternalIpTextField.errorText = ""
+                        natExternalIpTextField.errorText = ""
+                        portTextField.errorText = ""
+
                         var portValue = portTextField.textField.text === ""
                             ? TelemtConfigModel.defaultPort()
                             : portTextField.textField.text
+
+                        var errorLines = []
+                        var bullet = "- "
                         if (!portTextField.textField.acceptableInput && portTextField.textField.text !== "") {
-                            portTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
+                            var portErr = qsTr("The port must be in the range of 1 to 65535")
+                            portTextField.errorText = portErr
+                            errorLines.push(bullet + portErr)
+                        }
+                        if (!TelemtConfigModel.isValidPublicHost(publicHostTextField.textField.text)) {
+                            var hostErr = qsTr("Enter a valid IP address or domain name")
+                            publicHostTextField.errorText = hostErr
+                            errorLines.push(bullet + hostErr)
+                        }
+                        var tagNormalized = TelemtConfigModel.sanitizeMtProxyTagFieldText(tagTextField.textField.text)
+                        tagTextField.textField.text = tagNormalized
+                        if (!TelemtConfigModel.isValidMtProxyTag(tagNormalized)) {
+                            var tagErr = qsTr("Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F), or leave empty.")
+                            tagTextField.errorText = tagErr
+                            errorLines.push(bullet + tagErr)
+                        }
+                        var domainValueForSave = tlsDomainTextField.textField.text === ""
+                            ? TelemtConfigModel.defaultTlsDomain()
+                            : tlsDomainTextField.textField.text
+                        if (!TelemtConfigModel.isValidFakeTlsDomain(domainValueForSave)) {
+                            var tlsErr = qsTr("Enter a valid domain name")
+                            tlsDomainTextField.errorText = tlsErr
+                            errorLines.push(bullet + tlsErr)
+                        }
+                        var natIpErr = qsTr("Enter a valid IPv4 address")
+                        if (!TelemtConfigModel.isValidOptionalIpv4(natInternalIpTextField.textField.text)) {
+                            natInternalIpTextField.errorText = natIpErr
+                            errorLines.push(bullet + qsTr("NAT internal IP: enter a valid IPv4 address"))
+                        }
+                        if (!TelemtConfigModel.isValidOptionalIpv4(natExternalIpTextField.textField.text)) {
+                            natExternalIpTextField.errorText = natIpErr
+                            errorLines.push(bullet + qsTr("NAT external IP: enter a valid IPv4 address"))
+                        }
+                        if (errorLines.length > 0) {
+                            PageController.showErrorMessage(errorLines.join("\n"))
                             return
                         }
                         TelemtConfigModel.setPort(portValue)
-                        TelemtConfigModel.setTag(tagTextField.textField.text)
+                        TelemtConfigModel.setTag(tagNormalized)
                         TelemtConfigModel.setPublicHost(publicHostTextField.textField.text)
                         TelemtConfigModel.setTransportMode(transportMode)
                         var domainValue = tlsDomainTextField.textField.text === ""

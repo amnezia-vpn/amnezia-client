@@ -362,6 +362,17 @@ void TelemtConfigModel::removeAdditionalSecret(int idx) {
     emit dataChanged(index(0), index(0), QList<int>{AdditionalSecretsRole});
 }
 
+QVariantList TelemtConfigModel::additionalSecretsList() const {
+    QVariantList out;
+    out.reserve(m_protocolConfig.additionalSecrets.size());
+    for (const auto &s : m_protocolConfig.additionalSecrets) {
+        if (!s.isEmpty()) {
+            out.append(s);
+        }
+    }
+    return out;
+}
+
 void TelemtConfigModel::setEnabled(bool enabled) {
     m_protocolConfig.isEnabled = enabled;
     emit dataChanged(index(0), index(0), QList<int>{IsEnabledRole});
