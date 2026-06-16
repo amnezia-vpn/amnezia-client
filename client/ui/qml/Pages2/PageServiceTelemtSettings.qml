@@ -1390,7 +1390,7 @@ PageType {
                                             CaptionTextType {
                                                 id: hexCaption
                                                 Layout.fillWidth: true
-                                                text: modelData
+                                                text: settingsRoot.telemtActiveSecretForBaseHex(modelData)
                                                 color: AmneziaStyle.color.paleGray
                                                 elide: Text.ElideMiddle
                                                 font.pixelSize: 13
