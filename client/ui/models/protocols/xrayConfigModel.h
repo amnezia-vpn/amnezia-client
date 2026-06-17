@@ -118,6 +118,11 @@ public:
     Q_INVOKABLE static QString mkcpDefaultReadBufferSize();
     Q_INVOKABLE static QString mkcpDefaultWriteBufferSize();
 
+    Q_INVOKABLE static bool isValidHost(const QString &host);
+    Q_INVOKABLE static bool isValidSni(const QString &sni);
+    Q_INVOKABLE static bool isValidPath(const QString &path);
+    Q_INVOKABLE QStringList validationErrors() const;
+
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig);
     amnezia::XrayProtocolConfig getProtocolConfig();
@@ -137,7 +142,7 @@ private:
     amnezia::XrayProtocolConfig m_protocolConfig;
     amnezia::XrayProtocolConfig m_originalProtocolConfig;
 
-    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config);
+    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config, bool fillFlowDefault = true);
 };
 
 #endif // XRAYCONFIGMODEL_H
