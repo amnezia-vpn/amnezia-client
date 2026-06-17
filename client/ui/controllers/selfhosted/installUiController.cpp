@@ -11,6 +11,7 @@
 #include <QtConcurrent>
 
 #include "core/utils/api/apiUtils.h"
+#include "core/utils/selfhosted/sshExecutor.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/connectionController.h"
 #include "core/utils/networkUtilities.h"
@@ -330,7 +331,7 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
         ContainerConfig oldConfigCopy = oldContainerConfig;
         InstallController *installController = m_installController;
         QFuture<ErrorCode> future =
-                QtConcurrent::run([installController, serverId, container, oldConfigCopy,
+                SshExecutor::instance().run(serverId, [installController, serverId, container, oldConfigCopy,
                                    newConfigCopy]() mutable -> ErrorCode {
                     return installController->updateServerConfig(serverId, container, oldConfigCopy, newConfigCopy);
                 });
@@ -478,7 +479,7 @@ void InstallUiController::removeContainer(const QString &serverId, int container
                          });
 
         InstallController *installController = m_installController;
-        QFuture<ErrorCode> future = QtConcurrent::run(
+        QFuture<ErrorCode> future = SshExecutor::instance().run(serverId,
                 [installController, serverId, container]() -> ErrorCode {
                     return installController->removeContainer(serverId, container);
                 });
