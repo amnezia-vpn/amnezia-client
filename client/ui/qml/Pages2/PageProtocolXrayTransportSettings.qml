@@ -15,6 +15,21 @@ import "../Components"
 PageType {
     id: root
 
+    property bool editDirty: false
+
+    function clampInt(text, lo, hi) {
+        if (text === "")
+            return ""
+        var n = parseInt(text, 10)
+        if (isNaN(n))
+            return ""
+        if (n < lo)
+            n = lo
+        if (n > hi)
+            n = hi
+        return String(n)
+    }
+
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -108,10 +123,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("TTI")
-                    subtitleText: qsTr("Default: %1 ms", "mKCP TTI").arg(XrayConfigModel.mkcpDefaultTti())
+                    subtitleText: qsTr("Range 10–100, default %1 ms", "mKCP TTI").arg(XrayConfigModel.mkcpDefaultTti())
                     textField.text: mkcpTti
+                    textField.maximumLength: 3
+                    textField.validator: RegularExpressionValidator { regularExpression: /^(|\d{1,2}|100)$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpTti)
                     textField.onEditingFinished: {
-                        if (textField.text !== mkcpTti) mkcpTti = textField.text
+                        var v = root.clampInt(textField.text, 10, 100)
+                        if (v !== mkcpTti) mkcpTti = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -121,10 +142,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("uplinkCapacity")
-                    subtitleText: qsTr("Default: %1 Mbit/s", "mKCP uplink").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
+                    subtitleText: qsTr("≥ 0, default %1 MB/s", "mKCP uplink").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
                     textField.text: mkcpUplinkCapacity
+                    textField.maximumLength: 10
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpUplinkCapacity)
                     textField.onEditingFinished: {
-                        if (textField.text !== mkcpUplinkCapacity) mkcpUplinkCapacity = textField.text
+                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        if (v !== mkcpUplinkCapacity) mkcpUplinkCapacity = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -134,10 +161,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("downlinkCapacity")
-                    subtitleText: qsTr("Default: %1 Mbit/s", "mKCP downlink").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
+                    subtitleText: qsTr("≥ 0, default %1 MB/s", "mKCP downlink").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
                     textField.text: mkcpDownlinkCapacity
+                    textField.maximumLength: 10
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpDownlinkCapacity)
                     textField.onEditingFinished: {
-                        if (textField.text !== mkcpDownlinkCapacity) mkcpDownlinkCapacity = textField.text
+                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        if (v !== mkcpDownlinkCapacity) mkcpDownlinkCapacity = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -147,10 +180,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("readBufferSize")
-                    subtitleText: qsTr("Default: %1 MiB").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
+                    subtitleText: qsTr("≥ 1, default %1 MB").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
                     textField.text: mkcpReadBufferSize
+                    textField.maximumLength: 10
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpReadBufferSize)
                     textField.onEditingFinished: {
-                        if (textField.text !== mkcpReadBufferSize) mkcpReadBufferSize = textField.text
+                        var v = root.clampInt(textField.text, 1, 2147483647)
+                        if (v !== mkcpReadBufferSize) mkcpReadBufferSize = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -160,10 +199,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("writeBufferSize")
-                    subtitleText: qsTr("Default: %1 MiB").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
+                    subtitleText: qsTr("≥ 1, default %1 MB").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
                     textField.text: mkcpWriteBufferSize
+                    textField.maximumLength: 10
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpWriteBufferSize)
                     textField.onEditingFinished: {
-                        if (textField.text !== mkcpWriteBufferSize) mkcpWriteBufferSize = textField.text
+                        var v = root.clampInt(textField.text, 1, 2147483647)
+                        if (v !== mkcpWriteBufferSize) mkcpWriteBufferSize = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -187,6 +232,7 @@ PageType {
 
                 DropDownType {
                     id: modeDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 16
                     Layout.leftMargin: 16
@@ -239,31 +285,46 @@ PageType {
                 }
 
                 TextFieldWithHeaderType {
+                    id: hostField
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Host")
                     textField.text: xhttpHost
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._:,-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpHost)
                     textField.onEditingFinished: {
-                        if (textField.text !== xhttpHost) xhttpHost = textField.text
+                        var v = textField.text.trim()
+                        if (v !== xhttpHost) xhttpHost = v
+                        else if (textField.text !== v) textField.text = v
+                        hostField.errorText = XrayConfigModel.isValidHost(v) ? "" : qsTr("Enter a valid IP address or domain name")
+                        root.editDirty = false
                     }
                 }
 
                 TextFieldWithHeaderType {
+                    id: pathField
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Path")
                     textField.text: xhttpPath
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9\-._~:\/?#\[\]@!$&'()*+,;=%]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpPath)
                     textField.onEditingFinished: {
-                        if (textField.text !== xhttpPath) xhttpPath = textField.text
+                        var v = textField.text.trim()
+                        if (v !== xhttpPath) xhttpPath = v
+                        else if (textField.text !== v) textField.text = v
+                        pathField.errorText = XrayConfigModel.isValidPath(v) ? "" : qsTr("Path must start with \"/\"")
+                        root.editDirty = false
                     }
                 }
 
                 DropDownType {
                     id: headersDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -307,6 +368,7 @@ PageType {
 
                 DropDownType {
                     id: uplinkMethodDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -386,6 +448,7 @@ PageType {
 
                 DropDownType {
                     id: sessionPlacementDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -429,6 +492,7 @@ PageType {
 
                 DropDownType {
                     id: sessionKeyDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -472,6 +536,7 @@ PageType {
 
                 DropDownType {
                     id: seqPlacementDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -520,13 +585,19 @@ PageType {
                     Layout.topMargin: 8
                     headerText: qsTr("SeqKey")
                     textField.text: xhttpSeqKey
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpSeqKey)
                     textField.onEditingFinished: {
-                        if (textField.text !== xhttpSeqKey) xhttpSeqKey = textField.text
+                        var v = textField.text.trim()
+                        if (v !== xhttpSeqKey) xhttpSeqKey = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
                 DropDownType {
                     id: uplinkDataPlacementDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -575,8 +646,13 @@ PageType {
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkDataKey")
                     textField.text: xhttpUplinkDataKey
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpUplinkDataKey)
                     textField.onEditingFinished: {
-                        if (textField.text !== xhttpUplinkDataKey) xhttpUplinkDataKey = textField.text
+                        var v = textField.text.trim()
+                        if (v !== xhttpUplinkDataKey) xhttpUplinkDataKey = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -597,12 +673,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkChunkSize")
+                    subtitleText: qsTr("≥ 0 (0 = off)")
                     textField.text: xhttpUplinkChunkSize
-                    textField.validator: IntValidator {
-                        bottom: 0
-                    }
+                    textField.maximumLength: 10
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpUplinkChunkSize)
                     textField.onEditingFinished: {
-                        if (textField.text !== xhttpUplinkChunkSize) xhttpUplinkChunkSize = textField.text
+                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        if (v !== xhttpUplinkChunkSize) xhttpUplinkChunkSize = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -612,9 +692,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("scMaxBufferedPosts")
+                    subtitleText: qsTr("≥ 0")
                     textField.text: xhttpScMaxBufferedPosts
+                    textField.maximumLength: 10
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpScMaxBufferedPosts)
                     textField.onEditingFinished: {
-                        if (textField.text !== xhttpScMaxBufferedPosts) xhttpScMaxBufferedPosts = textField.text
+                        var v = root.clampInt(textField.text, 0, 2147483647)
+                        if (v !== xhttpScMaxBufferedPosts) xhttpScMaxBufferedPosts = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -633,8 +720,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScMaxEachPostBytesMin
                     maxValue: xhttpScMaxEachPostBytesMax
-                    onMinChanged: xhttpScMaxEachPostBytesMin = val
-                    onMaxChanged: xhttpScMaxEachPostBytesMax = val
+                    onMinChanged: function(val) { xhttpScMaxEachPostBytesMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xhttpScMaxEachPostBytesMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 CaptionTextType {
@@ -652,8 +740,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScStreamUpServerSecsMin
                     maxValue: xhttpScStreamUpServerSecsMax
-                    onMinChanged: xhttpScStreamUpServerSecsMin = val
-                    onMaxChanged: xhttpScStreamUpServerSecsMax = val
+                    onMinChanged: function(val) { xhttpScStreamUpServerSecsMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xhttpScStreamUpServerSecsMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 CaptionTextType {
@@ -671,8 +760,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScMinPostsIntervalMsMin
                     maxValue: xhttpScMinPostsIntervalMsMax
-                    onMinChanged: xhttpScMinPostsIntervalMsMin = val
-                    onMaxChanged: xhttpScMinPostsIntervalMsMax = val
+                    onMinChanged: function(val) { xhttpScMinPostsIntervalMsMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xhttpScMinPostsIntervalMsMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 // ── Padding and multiplexing ──────────────────────────
@@ -728,10 +818,15 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
             var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
             var yesButtonText = qsTr("Continue")
