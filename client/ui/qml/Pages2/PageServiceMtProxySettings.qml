@@ -16,7 +16,6 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-
 PageType {
     id: root
 
@@ -884,10 +883,9 @@ PageType {
                 }
 
                 function mtProxyRemoveAdditionalSecret(idx) {
+                    // Symmetric with "Add additional secret": only mutate the model here; the change
+                    // is pushed to the server on Save (no immediate server update on add/remove).
                     MtProxyConfigModel.removeAdditionalSecret(idx)
-                    if (root.containerStatus === 1) {
-                        root.mtProxyScheduleUpdate(false)
-                    }
                 }
 
                 SwitcherType {
@@ -1118,7 +1116,7 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16
-                    headerText: qsTr("MTProxy bot tag (optional)")
+                    headerText: qsTr("Promoted channel tag (optional)")
                     textField.placeholderText: qsTr("32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)")
                     textField.text: tag
                     textField.maximumLength: MtProxyConfigModel.mtProxyBotTagHexLength()

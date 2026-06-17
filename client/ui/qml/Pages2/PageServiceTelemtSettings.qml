@@ -304,9 +304,6 @@ PageType {
             root.savedPublicHost = TelemtConfigModel.getPublicHost()
             root.telemtRefreshPersistedAdditionalSecrets()
             PageController.showNotificationMessage(message)
-            if (closePage) {
-                PageController.closePage()
-            }
         }
 
         function onInstallationErrorOccurred() {
@@ -1084,11 +1081,6 @@ PageType {
                     }
                     textField.onEditingFinished: {
                         textField.text = TelemtConfigModel.sanitizePortFieldText(textField.text)
-                        var portValue = textField.text === "" ? TelemtConfigModel.defaultPort() : textField.text
-                        if (portValue !== port) {
-                            port = portValue
-                            TelemtConfigModel.setPort(port)
-                        }
                     }
                 }
 
@@ -1208,7 +1200,7 @@ PageType {
                     Layout.bottomMargin: 16
 
                     drawerParent: root
-                    drawerHeight: 0.35
+                    drawerHeight: 0.4
                     headerText: qsTr("Transport mode")
                     text: transportMode === "faketls" ? qsTr("FakeTLS") : qsTr("Standard MTProto")
 
