@@ -507,7 +507,6 @@ bool MtProxyConfigModel::isValidFakeTlsDomain(const QString &domain) const {
     if (!re.exactMatch(t)) {
         return false;
     }
-    // ee + 32 hex (base secret) + hex(UTF-8 domain); keep headroom under typical client limits.
     if (t.toUtf8().size() > 111) {
         return false;
     }
@@ -581,7 +580,6 @@ QString MtProxyConfigModel::sanitizeMtProxyTagFieldText(const QString &input) co
     if (trimmed.startsWith(QLatin1String("0x"), Qt::CaseInsensitive)) {
         trimmed = trimmed.mid(2).trimmed();
     }
-    // Prefer a contiguous 32-hex run (paste from bot message with extra text).
     static const QRegularExpression runHex(QStringLiteral(R"(([0-9a-fA-F]{32}))"));
     const QRegularExpressionMatch m = runHex.match(trimmed);
     if (m.hasMatch()) {

@@ -88,7 +88,6 @@ public slots:
 
     Q_INVOKABLE void removeAdditionalSecret(int idx);
 
-    /// Current additional secrets list from in-memory config (for QML snapshot vs. unsaved adds).
     Q_INVOKABLE QVariantList additionalSecretsList() const;
 
     Q_INVOKABLE QString generateQrCode(const QString &text);

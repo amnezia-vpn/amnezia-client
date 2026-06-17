@@ -431,7 +431,6 @@ bool TelemtConfigModel::isValidPublicHost(const QString &host) const {
         return NetworkUtilities::checkIPv4Format(t);
     }
     if (a.protocol() == QHostAddress::IPv6Protocol) {
-        // Reject unusable special addresses such as "::" (any), loopback and null.
         if (a.isNull() || a.isLoopback() || a == QHostAddress(QHostAddress::AnyIPv6)) {
             return false;
         }
@@ -541,7 +540,6 @@ bool TelemtConfigModel::isValidFakeTlsDomain(const QString &domain) const {
     if (!re.exactMatch(t)) {
         return false;
     }
-    // ee + 32 hex (base secret) + hex(UTF-8 domain); keep headroom under typical client limits.
     if (t.toUtf8().size() > 111) {
         return false;
     }
@@ -661,7 +659,6 @@ QString TelemtConfigModel::sanitizeMtProxyTagFieldText(const QString &input) con
     if (trimmed.startsWith(QLatin1String("0x"), Qt::CaseInsensitive)) {
         trimmed = trimmed.mid(2).trimmed();
     }
-    // Prefer a contiguous 32-hex run (paste from bot message with extra text).
     static const QRegularExpression runHex(QStringLiteral(R"(([0-9a-fA-F]{32}))"));
     const QRegularExpressionMatch m = runHex.match(trimmed);
     if (m.hasMatch()) {
