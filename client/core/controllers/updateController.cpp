@@ -441,6 +441,7 @@ QList<QUrl> UpdateController::selfHostedManifestUrls() const
         urls.append(url);
     };
 
+    QStringList serverCredentialHosts;
     if (m_serversRepository) {
         const QString defaultServerId = m_serversRepository->defaultServerId();
         const QVector<QString> orderedServerIds = m_serversRepository->orderedServerIds();
@@ -461,10 +462,13 @@ QList<QUrl> UpdateController::selfHostedManifestUrls() const
             const QJsonObject serverJson = m_serversRepository->serverJson(serverIndex);
             addHost(serverJson.value(configKey::serverRoutingRulesSyncHost).toString());
             const ServerCredentials credentials = m_serversRepository->serverCredentials(serverIndex);
-            addHost(credentials.hostName);
+            serverCredentialHosts.append(credentials.hostName);
         }
     }
     addHost(QString::fromLatin1(amnezia::protocols::selfHostedUpdates::syncHost));
+    for (const QString &host : serverCredentialHosts) {
+        addHost(host);
+    }
 
     return urls;
 }

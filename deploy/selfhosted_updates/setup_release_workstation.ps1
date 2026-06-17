@@ -634,7 +634,7 @@ Write-EnvironmentFile
 if ($RunPreflight) {
     Write-Step "Run local release preflight"
     . $EnvFile
-    powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $ScriptRoot "local_release.ps1") -Preflight -NoPublish
+    powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $ScriptRoot "local_release.ps1") -Preflight
 }
 
 Write-Step "Done"

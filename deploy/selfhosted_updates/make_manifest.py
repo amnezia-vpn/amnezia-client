@@ -212,6 +212,7 @@ def main() -> int:
     parser.add_argument("--changelog-file", type=Path)
     parser.add_argument("--base-url", required=True, help="Example: http://172.29.172.252:17865")
     parser.add_argument("--private-key", type=Path, required=True, help="Ed25519 private key PEM")
+    parser.add_argument("--public-key-base64", default=os.environ.get("SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64", ""))
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument(
         "--artifact",
@@ -219,6 +220,7 @@ def main() -> int:
         default=[],
         help="platform=path; examples: windows-x64=AmneziaVPN.exe android-arm64-v8a=app.apk",
     )
+    parser.add_argument("--require-platform", action="append", default=[])
     parser.add_argument(
         "--external",
         action="append",
@@ -306,6 +308,9 @@ def main() -> int:
 
     if not platforms:
         raise SystemExit("at least one --artifact or --external entry is required")
+    missing_platforms = sorted(set(args.require_platform) - set(platforms))
+    if missing_platforms:
+        raise SystemExit("Missing required update artifacts/settings: " + ", ".join(missing_platforms))
 
     changelog = ""
     if args.changelog_file:
@@ -319,14 +324,23 @@ def main() -> int:
         "autoInstall": args.auto_install,
         "platforms": platforms,
     }
+    private_key = args.private_key.expanduser().resolve()
     payload_bytes = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     manifest = {
         "schema": "amnezia-selfhosted-update-v1",
         "signatureAlgorithm": "Ed25519",
         "payload": b64url(payload_bytes),
-        "signature": sign_payload(args.private_key.expanduser().resolve(), payload_bytes),
+        "signature": sign_payload(private_key, payload_bytes),
     }
-    (out_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    manifest_path = out_dir / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if args.public_key_base64 or args.require_platform:
+        from publish_release import verify_manifest, verify_public_key_matches_private
+
+        if args.public_key_base64:
+            verify_public_key_matches_private(args.public_key_base64, private_key)
+        verify_manifest(manifest_path, private_key, version, set(args.require_platform), args.auto_install)
+        print("Verified self-hosted update manifest signature and required platforms", flush=True)
     return 0
 
 

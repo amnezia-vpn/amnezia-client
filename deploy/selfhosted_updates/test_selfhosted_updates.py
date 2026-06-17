@@ -503,6 +503,15 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn('endpoint.contains(QStringLiteral("://"))', update_controller)
         self.assertIn('#include "core/utils/constants/configKeys.h"', update_controller)
         self.assertIn("serverJson.value(configKey::serverRoutingRulesSyncHost).toString()", update_controller)
+        self.assertIn("QStringList serverCredentialHosts;", update_controller)
+        self.assertLess(
+            update_controller.index("serverCredentialHosts.append(credentials.hostName);"),
+            update_controller.index("addHost(QString::fromLatin1(amnezia::protocols::selfHostedUpdates::syncHost));"),
+        )
+        self.assertLess(
+            update_controller.index("addHost(QString::fromLatin1(amnezia::protocols::selfHostedUpdates::syncHost));"),
+            update_controller.index("for (const QString &host : serverCredentialHosts)"),
+        )
         self.assertIn("normalizedSelfHostedManifestUrl", update_controller)
         self.assertIn("url.setPath(path + manifestPath)", update_controller)
         self.assertIn("url.setPort(amnezia::protocols::selfHostedUpdates::syncPort);", update_controller)
@@ -745,13 +754,17 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("android-release-keystore.env.ps1", setup_release)
         self.assertNotIn("macos", setup_release.lower())
         self.assertNotIn("ios", setup_release.lower())
-        self.assertIn("publish_release.py", local_release)
-        self.assertIn("[switch] $Publish", local_release)
+        self.assertIn("make_manifest.py", local_release)
+        self.assertNotIn("[switch] $Publish", local_release)
+        self.assertNotIn("[switch] $NoPublish", local_release)
+        self.assertNotIn("[switch] $NoInstallHost", local_release)
         self.assertIn("--auto-install", local_release)
         self.assertIn("--public-key-base64", local_release)
+        self.assertIn("--require-platform", local_release)
         self.assertIn("SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64", local_release)
         self.assertIn("SELFHOSTED_UPDATE_BASE_URL", local_release)
-        self.assertIn("SELFHOSTED_UPDATE_SERVER", local_release)
+        self.assertNotIn("SELFHOSTED_UPDATE_SERVER", local_release)
+        self.assertNotIn("SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH", local_release)
         self.assertIn("selfhosted-windows-client", readme)
         self.assertIn("selfhosted_updates", readme)
         self.assertIn("recursive package", readme)
@@ -769,6 +782,8 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("bool publishNow()", bootstrapper_h)
         self.assertIn("return publishPayload(payload, credentials);", bootstrapper)
         self.assertIn("installOrRefreshUpdateHost", bootstrapper)
+        self.assertIn('installScript.replace("\\r\\n", "\\n")', bootstrapper)
+        self.assertIn("installScript.replace('\\r', '\\n')", bootstrapper)
         self.assertIn("verifyRemoteUpdateHost", bootstrapper)
         self.assertIn("Remote self-hosted update host verified", bootstrapper)
         self.assertIn("verifyManifestSignature", bootstrapper)
@@ -780,9 +795,12 @@ class SourceContractTests(unittest.TestCase):
         self.assertIn("host_manifest_sha256", bootstrapper)
         self.assertIn("docker.io/library/busybox:1.36.1", bootstrapper)
         self.assertNotIn("docker.io/library/busybox:latest", bootstrapper)
+        self.assertNotIn("Bundled self-hosted update payload is already published", bootstrapper)
+        self.assertNotIn("remoteManifestHash", bootstrapper)
+        self.assertNotIn("readRemoteHash", bootstrapper)
         self.assertLess(
-            bootstrapper.index("if (!installOrRefreshUpdateHost())"),
-            bootstrapper.index("Bundled self-hosted update payload is already published"),
+            bootstrapper.index("uploadLocalFileToHost(credentials, filePath, remotePath)"),
+            bootstrapper.index("Bundled self-hosted update payload published"),
         )
         self.assertIn("publish-bundled-updates-once", app_cpp)
         self.assertIn("m_optPublishBundledUpdatesOnce", app_h)
@@ -1384,7 +1402,6 @@ class ManifestPublisherTests(unittest.TestCase):
                 "-Version",
                 version,
                 "-SkipBuild",
-                "-NoPublish",
                 "-NoBundleUpdatesInWindowsClient",
                 "-ArtifactDir",
                 str(self.root / "artifacts"),
@@ -1502,7 +1519,6 @@ class ManifestPublisherTests(unittest.TestCase):
                 "-Version",
                 "9.9.9.9",
                 "-Preflight",
-                "-NoPublish",
                 "-BuildPlatform",
                 "windows",
                 "-OutDir",
@@ -1551,7 +1567,6 @@ class ManifestPublisherTests(unittest.TestCase):
                 "-Version",
                 "9.9.9.9",
                 "-Preflight",
-                "-NoPublish",
                 "-BuildPlatform",
                 "linux",
                 "-BaseUrl",
@@ -1619,7 +1634,6 @@ class ManifestPublisherTests(unittest.TestCase):
                 "-Version",
                 "9.9.9.9",
                 "-Preflight",
-                "-NoPublish",
                 "-BuildPlatform",
                 "android",
                 "-BaseUrl",

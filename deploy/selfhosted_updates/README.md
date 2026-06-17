@@ -121,8 +121,6 @@ Run from the repository root:
 . .\dist\selfhosted-release-env.ps1
 
 $env:SELFHOSTED_UPDATE_BASE_URL = "http://SERVER_IP:17865"
-$env:SELFHOSTED_UPDATE_SERVER = "root@SERVER_IP"
-$env:SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH = "C:\keys\server-upload-key"
 # Optional override; setup writes this automatically.
 $env:WSL_ANDROID_HOME = "/home/<wsl-user>/Android/sdk"
 # Optional override for Linux .run packaging; must be a Linux IFW root, not C:\Qt.
@@ -159,14 +157,13 @@ installer is written to
 `dist\selfhosted-windows-client\<version>\AmneziaVPN_<version>_windows_x64_selfhosted.exe`.
 Install that file on the release workstation. On startup, the Windows client
 uses the saved self-hosted admin SSH credentials to upload `files/`, refresh the
-update-host container, and switch `manifest.json` on the server last. Direct SSH
-publishing from `local_release.ps1` is disabled by default; use `-Publish` only
-when you intentionally want the release script itself to upload to the server.
-The bundled Windows client upload still works after installation. Use `-NoBundleUpdatesInWindowsClient`
-only when you intentionally need a thin Windows installer without embedded
-payload. `-SkipBuild` skips rebuilding platform artifacts, but still rebuilds
-the bundled Windows release client from the existing manifest payload unless
-`-NoBundleUpdatesInWindowsClient` is also set.
+update-host container, and switch `manifest.json` on the server last.
+`local_release.ps1` does not upload to the server. Use
+`-NoBundleUpdatesInWindowsClient` only when you intentionally need a thin
+Windows installer without embedded payload. `-SkipBuild` skips rebuilding
+platform artifacts, but still rebuilds the bundled Windows release client from
+the existing manifest payload unless `-NoBundleUpdatesInWindowsClient` is also
+set.
 
 The Windows artifact inside the manifest is the thin Windows installer from
 `dist\selfhosted-local-artifacts\<version>`. The self-hosted release workstation
@@ -203,51 +200,18 @@ python deploy/selfhosted_updates/make_manifest.py \
   --auto-install
 ```
 
-Upload the generated directory contents to `/opt/amnezia/client-updates` on the
-self-hosted server and serve it on port `17865`.
+Do not upload `dist/selfhosted-updates/<version>` with the release script. The
+generated Windows self-hosted client is the deployment vehicle: install/run
+`dist\selfhosted-windows-client\<version>\AmneziaVPN_<version>_windows_x64_selfhosted.exe`
+on the release workstation, and that client uploads the signed manifest and all
+three platform artifacts through the saved self-hosted admin SSH credentials.
+The client refreshes the server update-host container and writes
+`manifest.json` last so clients never read a half-published release.
 
-Server-side setup:
-
-```bash
-scp -r dist/selfhosted-updates/* root@SERVER:/opt/amnezia/client-updates/
-ssh root@SERVER 'sh -s' < deploy/selfhosted_updates/install_server_update_host.sh
-```
-
-The one-command publisher wraps manifest generation, upload, and server setup:
-
-```bash
-python deploy/selfhosted_updates/publish_release.py \
-  --version 4.8.16.0 \
-  --private-key selfhosted-update-private.pem \
-  --public-key-base64 "$SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64" \
-  --artifact-dir deploy/build \
-  --base-url http://SERVER_IP:17865 \
-  --server root@SERVER_IP \
-  --require-platform windows-x64 \
-  --require-platform linux-x64 \
-  --require-platform android-arm64-v8a \
-  --auto-install
-```
-
-It autodetects the normal release artifact names, including
-installable upstream aliases such as
-`AmneziaVPN_<version>_x64.exe`. It does
-not treat upstream `linux_x64.tar` archives as Linux auto-installers; Linux
-auto-install requires the fork CI `.run` artifact or an explicit
-`--artifact linux-x64=...run`. The publisher accepts repeated
-`--artifact platform=path` plus `--external platform=url` overrides. Before any upload, the publisher
-verifies that the public key embedded in built clients matches the private
-signing key, then verifies the generated manifest schema, required platforms,
-`autoInstall` flags when enabled, and the Ed25519 signature.
-`--public-key-base64` can also be supplied through
-`SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64`; it is required when publishing to a
-server.
-
-For explicit `local_release.ps1 -Publish` direct upload configure:
+For `local_release.ps1` configure:
 
 - `SELFHOSTED_UPDATE_BASE_URL`: client-facing base URL, for example
   `http://SERVER_IP:17865`.
-- `SELFHOSTED_UPDATE_SERVER`: SSH target, for example `root@SERVER_IP`.
 - `SELFHOSTED_UPDATE_PRIVATE_KEY_PATH`: local path to the Ed25519 update
   signing key.
 - `SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64`: base64 PEM public key embedded in
@@ -255,9 +219,6 @@ For explicit `local_release.ps1 -Publish` direct upload configure:
 - `SELFHOSTED_UPDATE_SYNC_HOST`: compiled fallback host for the private
   manifest endpoint. On this workstation it is `10.8.1.0`; do not include a
   CIDR suffix such as `/1`.
-- `SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH`: local SSH key path for upload.
-- `SELFHOSTED_UPDATE_SERVER_DIR`: optional, defaults to
-  `/opt/amnezia/client-updates`.
 
 The signed manifest sets `autoInstall=true`; clients will start the platform
 installer once per version/platform/artifact identity. This respects OS rules:

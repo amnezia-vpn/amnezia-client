@@ -12,18 +12,12 @@ param(
     [string] $OutDir = "",
     [string] $BaseUrl = $env:SELFHOSTED_UPDATE_BASE_URL,
     [string] $SyncHost = $(if ($env:SELFHOSTED_UPDATE_SYNC_HOST) { $env:SELFHOSTED_UPDATE_SYNC_HOST } else { "10.8.1.0" }),
-    [string] $Server = $env:SELFHOSTED_UPDATE_SERVER,
-    [string] $ServerDir = $(if ($env:SELFHOSTED_UPDATE_SERVER_DIR) { $env:SELFHOSTED_UPDATE_SERVER_DIR } else { "/opt/amnezia/client-updates" }),
     [string] $PrivateKey = $env:SELFHOSTED_UPDATE_PRIVATE_KEY_PATH,
     [string] $PublicKeyBase64 = $env:SELFHOSTED_UPDATE_PUBLIC_KEY_PEM_BASE64,
-    [string] $SshKey = $env:SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH,
     [string] $WslAndroidHome = $(if ($env:WSL_ANDROID_HOME) { $env:WSL_ANDROID_HOME } else { "" }),
     [ValidateRange(0, 256)]
     [int] $BuildJobs = 0,
     [switch] $SkipBuild,
-    [switch] $Publish,
-    [switch] $NoPublish,
-    [switch] $NoInstallHost,
     [switch] $NoBundleUpdatesInWindowsClient,
     [switch] $Preflight
 )
@@ -96,16 +90,6 @@ function Assert-ReleaseInputs {
     }
     if ($SyncHost -match "://|/") {
         throw "SELFHOSTED_UPDATE_SYNC_HOST must be a host or IP without scheme/path/CIDR: $SyncHost"
-    }
-    if ($Publish) {
-        if ([string]::IsNullOrWhiteSpace($Server)) {
-            throw "SELFHOSTED_UPDATE_SERVER or -Server is required when -Publish is used"
-        }
-        Assert-Command "ssh"
-        Assert-Command "scp"
-        if (-not [string]::IsNullOrWhiteSpace($SshKey)) {
-            Assert-ExistingFile $SshKey "SELFHOSTED_UPDATE_SSH_PRIVATE_KEY_PATH or -SshKey"
-        }
     }
 }
 
@@ -573,9 +557,6 @@ if ([string]::IsNullOrWhiteSpace($ArtifactDir)) {
 if ([string]::IsNullOrWhiteSpace($OutDir)) {
     $OutDir = Join-Path $RepoRoot "dist\selfhosted-updates\$Version"
 }
-if ($Publish -and $NoPublish) {
-    throw "-Publish and -NoPublish cannot be used together"
-}
 
 New-Item -ItemType Directory -Force -Path $ArtifactDir | Out-Null
 
@@ -696,35 +677,32 @@ if ([string]::IsNullOrWhiteSpace($PublicKeyBase64)) {
 if ([string]::IsNullOrWhiteSpace($BaseUrl)) {
     throw "SELFHOSTED_UPDATE_BASE_URL or -BaseUrl is required"
 }
-if ($Publish -and [string]::IsNullOrWhiteSpace($Server)) {
-    throw "SELFHOSTED_UPDATE_SERVER or -Server is required when -Publish is used"
-}
 
-$publishArgs = @(
-    "deploy/selfhosted_updates/publish_release.py",
+$requiredArtifactNames = @{
+    "windows-x64" = "AmneziaVPN_${Version}_windows_x64.exe"
+    "linux-x64" = "AmneziaVPN_${Version}_linux_x64.run"
+    "android-arm64-v8a" = "AmneziaVPN_${Version}_android9+_arm64-v8a.apk"
+}
+$manifestArgs = @(
+    "deploy/selfhosted_updates/make_manifest.py",
     "--version", $Version,
     "--base-url", $BaseUrl,
     "--private-key", $PrivateKey,
     "--public-key-base64", $PublicKeyBase64,
-    "--artifact-dir", $ArtifactDir,
     "--out-dir", $OutDir,
     "--auto-install"
 )
 foreach ($platform in $RequirePlatform) {
-    $publishArgs += @("--require-platform", $platform)
-    $publishArgs += @("--include-platform", $platform)
-}
-if ($Publish) {
-    $publishArgs += @("--server", $Server, "--server-dir", $ServerDir)
-    if (-not [string]::IsNullOrWhiteSpace($SshKey)) {
-        $publishArgs += @("--ssh", "ssh -i `"$SshKey`"", "--scp", "scp -i `"$SshKey`"")
+    if (-not $requiredArtifactNames.ContainsKey($platform)) {
+        throw "Unsupported local self-hosted release platform: $platform"
     }
-    if ($NoInstallHost) {
-        $publishArgs += "--no-install-host"
-    }
+    $artifactPath = Join-Path $ArtifactDir $requiredArtifactNames[$platform]
+    Assert-ExistingFile $artifactPath "Self-hosted update artifact $platform"
+    $manifestArgs += @("--require-platform", $platform)
+    $manifestArgs += @("--artifact", "$platform=$artifactPath")
 }
 
-Invoke-External "python" $publishArgs
+Invoke-External "python" $manifestArgs
 
 if (-not $NoBundleUpdatesInWindowsClient -and ($BuildPlatform -contains "windows")) {
     Write-Step "Build Windows release client with bundled update payload"

@@ -360,12 +360,6 @@ bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::Serv
     logger.info() << "Publishing bundled self-hosted update payload" << payload.version;
 
     SshSession sshSession;
-    QString remoteManifestHash;
-    auto readRemoteHash = [&remoteManifestHash](const QString &data, libssh::Client &) {
-        remoteManifestHash += data.trimmed();
-        return amnezia::ErrorCode::NoError;
-    };
-
     const QString serverDir = QString::fromLatin1(amnezia::protocols::selfHostedUpdates::hostDirectory);
     const QString remoteManifest = serverDir + QStringLiteral("/") + QString::fromLatin1(kManifestName);
     QString remoteTmp;
@@ -406,7 +400,11 @@ bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::Serv
             installOutput += data;
             return amnezia::ErrorCode::NoError;
         };
-        amnezia::ErrorCode error = sshSession.uploadFileToHost(credentials, installScriptFile.readAll(), remoteInstallScript);
+        QByteArray installScript = installScriptFile.readAll();
+        installScript.replace("\r\n", "\n");
+        installScript.replace('\r', '\n');
+
+        amnezia::ErrorCode error = sshSession.uploadFileToHost(credentials, installScript, remoteInstallScript);
         if (error == amnezia::ErrorCode::NoError) {
             error = sshSession.runScript(credentials,
                                          QStringLiteral("sh %1 %2").arg(shellQuote(remoteInstallScript), shellQuote(serverDir)),
@@ -456,23 +454,6 @@ bool SelfHostedUpdateBootstrapper::publishPayload(Payload payload, amnezia::Serv
         logger.info() << "Remote self-hosted update host verified" << verifyOutput.trimmed();
         return true;
     };
-
-    const QString hashScript = QStringLiteral(
-            "if [ -f %1 ]; then sha256sum %1 | awk '{print $1}'; fi")
-            .arg(shellQuote(remoteManifest));
-    error = sshSession.runScript(credentials, hashScript, readRemoteHash);
-    if (error == amnezia::ErrorCode::NoError && remoteManifestHash == QString::fromLatin1(payload.manifestSha256)) {
-        if (!installOrRefreshUpdateHost()) {
-            return false;
-        }
-        if (!verifyRemoteUpdateHost()) {
-            cleanupRemoteTmp();
-            return false;
-        }
-        cleanupRemoteTmp();
-        logger.info() << "Bundled self-hosted update payload is already published";
-        return true;
-    }
 
     for (const QString &filePath : payload.filePaths) {
         const QString remotePath = remoteTmp + QStringLiteral("/files/") + QFileInfo(filePath).fileName();
