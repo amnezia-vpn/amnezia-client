@@ -457,10 +457,15 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 sa_tab[RTAX_DST]->sa_family == afinet_type[ip_type] &&
                 sa_tab[RTAX_GATEWAY]->sa_family == afinet_type[ip_type])
             {
+                char ifname[IF_NAMESIZE] = {0};
+                const bool isTun = if_indextoname(rt->rtm_index, ifname)
+                                && QString::fromUtf8(ifname).startsWith("utun");
+
                 if (afinet_type[ip_type] == AF_INET)
                 {
                     if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
                     {
+                        if (isTun) continue;
                         char dstStr4[INET_ADDRSTRLEN];
                         char srcStr4[INET_ADDRSTRLEN];
                         memcpy(srcStr4,
@@ -478,6 +483,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 {
                     if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
                     {
+                        if (isTun) continue;
                         char dstStr6[INET6_ADDRSTRLEN];
                         char srcStr6[INET6_ADDRSTRLEN];
                         memcpy(srcStr6,
