@@ -266,7 +266,7 @@ void TelemtConfigModel::setSecret(const QString &secret) {
 }
 
 bool TelemtConfigModel::validateAndSetSecret(const QString &rawSecret) {
-    if (!QRegularExpression(QStringLiteral("^[0-9a-fA-F]{32}$")).match(rawSecret).hasMatch()) {
+    if (!QRegularExpression("^[0-9a-fA-F]{32}$").match(rawSecret).hasMatch()) {
         return false;
     }
     setData(index(0), rawSecret, SecretRole);
@@ -282,7 +282,11 @@ void TelemtConfigModel::setTag(const QString &tag) {
 }
 
 void TelemtConfigModel::setPublicHost(const QString &host) {
-    setData(index(0), host, PublicHostRole);
+    const QString t = host.trimmed();
+    if (!isValidPublicHost(t)) {
+        return;
+    }
+    setData(index(0), t, PublicHostRole);
 }
 
 void TelemtConfigModel::setTransportMode(const QString &mode) {
@@ -290,13 +294,15 @@ void TelemtConfigModel::setTransportMode(const QString &mode) {
 }
 
 QString TelemtConfigModel::getTransportMode() const {
-    return m_protocolConfig.transportMode.isEmpty() ? QString::fromUtf8(protocols::telemt::transportModeStandard)
-                                                    : m_protocolConfig.transportMode;
+    return m_protocolConfig.transportMode.isEmpty()
+           ? QString(protocols::telemt::transportModeStandard)
+           : m_protocolConfig.transportMode;
 }
 
 QString TelemtConfigModel::getTlsDomain() const {
-    return m_protocolConfig.tlsDomain.isEmpty() ? QString::fromUtf8(protocols::telemt::defaultTlsDomain)
-                                                : m_protocolConfig.tlsDomain;
+    return m_protocolConfig.tlsDomain.isEmpty()
+           ? QString(protocols::telemt::defaultTlsDomain)
+           : m_protocolConfig.tlsDomain;
 }
 
 QString TelemtConfigModel::getPublicHost() const {
@@ -304,7 +310,11 @@ QString TelemtConfigModel::getPublicHost() const {
 }
 
 void TelemtConfigModel::setTlsDomain(const QString &domain) {
-    setData(index(0), domain, TlsDomainRole);
+    const QString t = domain.trimmed();
+    if (!isValidFakeTlsDomain(t)) {
+        return;
+    }
+    setData(index(0), t, TlsDomainRole);
 }
 
 void TelemtConfigModel::setWorkersMode(const QString &mode) {
@@ -320,11 +330,19 @@ void TelemtConfigModel::setNatEnabled(bool enabled) {
 }
 
 void TelemtConfigModel::setNatInternalIp(const QString &ip) {
-    setData(index(0), ip, NatInternalIpRole);
+    const QString t = ip.trimmed();
+    if (!isValidOptionalIpv4(t)) {
+        return;
+    }
+    setData(index(0), t, NatInternalIpRole);
 }
 
 void TelemtConfigModel::setNatExternalIp(const QString &ip) {
-    setData(index(0), ip, NatExternalIpRole);
+    const QString t = ip.trimmed();
+    if (!isValidOptionalIpv4(t)) {
+        return;
+    }
+    setData(index(0), t, NatExternalIpRole);
 }
 
 void TelemtConfigModel::setMaskEnabled(bool enabled) {
@@ -387,15 +405,15 @@ QString TelemtConfigModel::generateQrCode(const QString &text) {
 }
 
 QString TelemtConfigModel::defaultTlsDomain() const {
-    return QString::fromUtf8(protocols::telemt::defaultTlsDomain);
+    return protocols::telemt::defaultTlsDomain;
 }
 
 QString TelemtConfigModel::defaultPort() const {
-    return QString::fromUtf8(protocols::telemt::defaultPort);
+    return protocols::telemt::defaultPort;
 }
 
 QString TelemtConfigModel::defaultWorkers() const {
-    return QString::fromUtf8(protocols::telemt::defaultWorkers);
+    return protocols::telemt::defaultWorkers;
 }
 
 int TelemtConfigModel::maxWorkers() const {
@@ -403,19 +421,19 @@ int TelemtConfigModel::maxWorkers() const {
 }
 
 QString TelemtConfigModel::transportModeStandard() const {
-    return QString::fromUtf8(protocols::telemt::transportModeStandard);
+    return protocols::telemt::transportModeStandard;
 }
 
 QString TelemtConfigModel::transportModeFakeTLS() const {
-    return QString::fromUtf8(protocols::telemt::transportModeFakeTLS);
+    return protocols::telemt::transportModeFakeTLS;
 }
 
 QString TelemtConfigModel::workersModeAuto() const {
-    return QString::fromUtf8(protocols::telemt::workersModeAuto);
+    return protocols::telemt::workersModeAuto;
 }
 
 QString TelemtConfigModel::workersModeManual() const {
-    return QString::fromUtf8(protocols::telemt::workersModeManual);
+    return protocols::telemt::workersModeManual;
 }
 
 bool TelemtConfigModel::isValidPublicHost(const QString &host) const {

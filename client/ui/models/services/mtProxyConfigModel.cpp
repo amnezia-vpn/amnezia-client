@@ -8,8 +8,6 @@
 #include "core/utils/constants/configKeys.h"
 #include "qrcodegen.hpp"
 
-#include <QClipboard>
-#include <QGuiApplication>
 #include <QHostAddress>
 #include <QRegExp>
 #include <QRegularExpression>
@@ -332,7 +330,7 @@ void MtProxyConfigModel::removeAdditionalSecret(int idx) {
 QVariantList MtProxyConfigModel::additionalSecretsList() const {
     QVariantList out;
     out.reserve(m_protocolConfig.additionalSecrets.size());
-    for (const auto &s: m_protocolConfig.additionalSecrets) {
+    for (const auto &s : m_protocolConfig.additionalSecrets) {
         if (!s.isEmpty()) {
             out.append(s);
         }
@@ -513,13 +511,6 @@ bool MtProxyConfigModel::isValidFakeTlsDomain(const QString &domain) const {
     return true;
 }
 
-QString MtProxyConfigModel::clipboardText() const {
-    if (QClipboard *c = QGuiApplication::clipboard()) {
-        return c->text();
-    }
-    return QString();
-}
-
 QString MtProxyConfigModel::sanitizeFakeTlsDomainFieldText(const QString &input) const {
     const QString t = normalizeFakeTlsDomainInput(input);
     QString out;
@@ -594,18 +585,6 @@ QString MtProxyConfigModel::sanitizeMtProxyTagFieldText(const QString &input) co
         }
         const ushort u = c.unicode();
         if ((u >= '0' && u <= '9') || (u >= 'a' && u <= 'f') || (u >= 'A' && u <= 'F')) {
-            out.append(c);
-        }
-    }
-    return out;
-}
-
-QString MtProxyConfigModel::sanitizeWorkersFieldText(const QString &input) const {
-    QString out;
-    out.reserve(qMin(input.size(), 3));
-    for (const QChar &c: input) {
-        const ushort u = c.unicode();
-        if (u >= '0' && u <= '9' && out.size() < 3) {
             out.append(c);
         }
     }
