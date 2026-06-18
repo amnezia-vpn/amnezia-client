@@ -26,6 +26,7 @@ public:
 
     bool routeAdd(const QString &ip, const QString &gw, const int &sock);
     int routeAddList(const QString &gw, const QStringList &ips);
+    int routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     bool routeDelete(const QString &ip, const QString &gw, const int &sock);
     bool routeDeleteList(const QString &gw, const QStringList &ips);

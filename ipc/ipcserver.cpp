@@ -97,6 +97,15 @@ int IpcServer::routeAddList(const QString &gw, const QStringList &ips)
     return Router::routeAddList(gw, ips);
 }
 
+int IpcServer::routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::routeAddListVia" << ifname;
+#endif
+
+    return Router::routeAddListVia(ifname, gw, ips);
+}
+
 bool IpcServer::clearSavedRoutes()
 {
 #ifdef MZ_DEBUG

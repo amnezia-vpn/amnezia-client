@@ -26,6 +26,7 @@ public:
     virtual int createPrivilegedProcess() override;
 
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
+    virtual int routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
     virtual bool addExclusionRoute(const QString &ifname, const QString &addr) override;

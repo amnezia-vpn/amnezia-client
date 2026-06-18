@@ -397,6 +397,9 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         }
 
         if ((*gateway_address) && (*interface)) {
+            if (QString::fromUtf8(interface).startsWith("amn")) {
+                continue;
+            }
             qDebug() << "Gateway " << gateway_address << " for interface " << interface;
             break;
         }
