@@ -613,7 +613,7 @@ void Daemon::checkHandshake() {
       pendingHandshakes++;
     }
   }
-
+  
   // Check again if there were connections that haven't completed a handshake.
   if (pendingHandshakes > 0) {
     m_handshakeTimer.start(HANDSHAKE_POLL_MSEC);
