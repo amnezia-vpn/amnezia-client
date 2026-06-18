@@ -99,6 +99,13 @@ public:
     void importConfigFromData(const QString &data);
     void updateTranslator(const QLocale &locale);
 
+#if defined(Q_OS_IOS)
+    void intentReload();
+    void intentConnect(const QString &countryCode);
+    QString intentGetCountries();
+#endif
+
+
 signals:
     void translationsUpdated();
     void websiteUrlChanged(const QString &newUrl);

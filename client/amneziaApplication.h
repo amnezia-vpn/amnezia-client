@@ -49,6 +49,12 @@ public:
 
 public slots:
     void forceQuit();
+#if defined(Q_OS_IOS)
+    void handleIntentReload();
+    void handleIntentConnect(const QString &countryCode);
+    QString handleIntentGetCountries();
+#endif
+
 
 private:
     static bool m_forceQuit;

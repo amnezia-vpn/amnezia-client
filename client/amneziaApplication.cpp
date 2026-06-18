@@ -25,7 +25,48 @@
 #include "version.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
-         
+
+#if defined(Q_OS_IOS)
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include "core/models/api/apiV2ServerConfig.h"
+#include "core/controllers/api/subscriptionUiController.h"
+#include "core/controllers/serversUiController.h"
+
+extern "C" {
+    void set_intent_callbacks(void (*reloadCallback)(), void (*connectCallback)(const char*), const char* (*getCountriesCallback)());
+}
+
+static AmneziaApplication *g_amnApp = nullptr;
+
+static void intent_reload() {
+    if (g_amnApp) {
+        QMetaObject::invokeMethod(g_amnApp, "handleIntentReload", Qt::QueuedConnection);
+    }
+}
+
+static void intent_connect(const char* c_str) {
+    if (g_amnApp && c_str) {
+        QString countryCode = QString::fromUtf8(c_str);
+        QMetaObject::invokeMethod(g_amnApp, "handleIntentConnect", Qt::QueuedConnection, Q_ARG(QString, countryCode));
+    }
+}
+
+static const char* intent_get_countries() {
+    static QByteArray lastJson;
+    if (g_amnApp) {
+        // Query synchronously from g_amnApp
+        // But since this might be called on a background thread by AppIntents, we can safely just fetch it if data is protected, or use invokeMethod with BlockingQueuedConnection
+        QString jsonStr;
+        QMetaObject::invokeMethod(g_amnApp, "handleIntentGetCountries", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QString, jsonStr));
+        lastJson = jsonStr.toUtf8();
+        return lastJson.constData();
+    }
+    return "[]";
+}
+
+#endif
 
 bool AmneziaApplication::m_forceQuit = false;
 
@@ -35,6 +76,10 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
       m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
       m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
 {
+#if defined(Q_OS_IOS)
+    g_amnApp = this;
+#endif
+
     setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
 
@@ -60,6 +105,11 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
 
 AmneziaApplication::~AmneziaApplication()
 {
+#if defined(Q_OS_IOS)
+    if (g_amnApp == this) {
+        g_amnApp = nullptr;
+    }
+#endif
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnConnection && m_vpnConnectionThread.isRunning()) {
         QMetaObject::invokeMethod(m_vpnConnection.get(), "disconnectSlots", Qt::BlockingQueuedConnection);
@@ -137,6 +187,10 @@ void AmneziaApplication::init()
     m_vpnConnectionThread.start();
 
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
+
+#if defined(Q_OS_IOS)
+    set_intent_callbacks(intent_reload, intent_connect, intent_get_countries);
+#endif
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
 
@@ -307,3 +361,28 @@ QClipboard *AmneziaApplication::getClipboard()
 {
     return this->clipboard();
 }
+
+#if defined(Q_OS_IOS)
+void AmneziaApplication::handleIntentReload()
+{
+    if (m_coreController) {
+        m_coreController->intentReload();
+    }
+}
+
+void AmneziaApplication::handleIntentConnect(const QString &countryCode)
+{
+    if (m_coreController) {
+        m_coreController->intentConnect(countryCode);
+    }
+}
+
+QString AmneziaApplication::handleIntentGetCountries()
+{
+    if (m_coreController) {
+        return m_coreController->intentGetCountries();
+    }
+    return "[]";
+}
+#endif
+
