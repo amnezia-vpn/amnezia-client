@@ -79,12 +79,13 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
             }
             QString dns1 = vpnConfiguration.value(configKey::dns1).toString();
             QString dns2 = vpnConfiguration.value(configKey::dns2).toString();
+            const QString xrayIfname = vpnConfiguration.value("ifname").toString();
 #ifdef Q_OS_MACOS
             if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                iface->routeAddList(protocol->vpnGateway(), QStringList() << dns1 << dns2);
+                iface->routeAddListVia(xrayIfname, protocol->vpnGateway(), QStringList() << dns1 << dns2);
             }
 #else
-            iface->routeAddList(protocol->vpnGateway(), QStringList() << dns1 << dns2);
+            iface->routeAddListVia(xrayIfname, protocol->vpnGateway(), QStringList() << dns1 << dns2);
 #endif
 
             if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
@@ -99,8 +100,7 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
                                                 addSplitTunnelRoutes(protocolPtr->vpnGateway(), m_appSettingsRepository->routeMode());
                                             });
                 } else if (m_appSettingsRepository->routeMode() == amnezia::route_mode_ns::VpnAllExceptSites) {
-                    iface->routeAddList(protocol->vpnGateway(), QStringList() << "0.0.0.0/1");
-                    iface->routeAddList(protocol->vpnGateway(), QStringList() << "128.0.0.0/1");
+                    iface->routeAddListVia(xrayIfname, protocol->vpnGateway(), QStringList() << "0.0.0.0/1" << "128.0.0.0/1");
 
                     iface->routeAddList(protocol->routeGateway(), QStringList() << remoteAddress);
 #ifdef Q_OS_MACOS
@@ -141,7 +141,6 @@ void VpnTrafficGuard::addSplitTunnelRoutes(const QString &gw, amnezia::RouteMode
         iface->routeAddList(gw, ips);
     });
 
-    // re-resolve domains
     for (const QString &site : sites) {
         const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
             for (const QHostAddress &addr : hostInfo.addresses()) {
@@ -238,7 +237,8 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
         if (isXrayBased) {
             if (updatedConfig.value(configKey::splitTunnelType).toInt() == amnezia::route_mode_ns::VpnAllSites) {
                 static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
-                auto routeAddList = iface->routeAddList(gateway, subnets);
+                const QString xrayIfname = tunnel ? tunnel->ifname() : QString();
+                auto routeAddList = iface->routeAddListVia(xrayIfname, gateway, subnets);
                 if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
                     qCritical() << "Failed to set routes for TUN";
                 }

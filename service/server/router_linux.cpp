@@ -87,6 +87,34 @@ int RouterLinux::routeAddList(const QString &gw, const QStringList &ips)
     return cnt;
 }
 
+int RouterLinux::routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips)
+{
+    if (ifname.isEmpty()) {
+        qWarning() << "routeAddListVia: empty ifname";
+        return 0;
+    }
+    int cnt = 0;
+    for (const QString &ip : ips) {
+        QStringList args;
+        args << "route" << "replace" << ip;
+        if (!gw.isEmpty()) {
+            args << "via" << gw;
+        }
+        args << "dev" << ifname << "scope" << "link";
+
+        QProcess p;
+        p.setProcessChannelMode(QProcess::MergedChannels);
+        p.start("ip", args);
+        if (p.waitForFinished(2000) && p.exitCode() == 0) {
+            cnt++;
+        } else {
+            qWarning().noquote() << "routeAddListVia failed:" << ip << "via" << gw << "dev" << ifname
+                                 << "rc=" << p.exitCode() << "out=" << p.readAll();
+        }
+    }
+    return cnt;
+}
+
 bool RouterLinux::clearSavedRoutes()
 {
     int temp_sock = socket(AF_INET, SOCK_DGRAM,  IPPROTO_IP);

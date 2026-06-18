@@ -253,6 +253,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
                 config.insert("deviceIpv4Address", clientIp);
             }
         }
+        m_vpnConfiguration = config;
         m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
         wireTunnelSignals(m_active, /*isActive=*/true);
         wireDaemonReconnectSignals();
