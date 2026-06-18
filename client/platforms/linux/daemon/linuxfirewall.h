@@ -85,6 +85,7 @@ private:
     static void setupTrafficSplitting();
     static void teardownTrafficSplitting();
     static int execute(const QString& command, bool ignoreErrors = false);
+    static int executeIptables(const QString& program, const QStringList& args, bool ignoreErrors = false);
 private:
     // Chain names
     static QString kOutputChain, kRootChain, kPostRoutingChain, kPreRoutingChain;

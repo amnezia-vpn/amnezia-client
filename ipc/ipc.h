@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QRegularExpression>
+#include <QSet>
 
 #include "../client/core/utils/utilities.h"
 
@@ -15,7 +17,8 @@ enum PermittedProcess {
     OpenVPN,
     Wireguard,
     Tun2Socks,
-    CertUtil
+    CertUtil,
+    _Count
 };
 
 inline QString permittedProcessPath(PermittedProcess pid)
@@ -57,15 +60,55 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
     QList<Validator> positionalArgs;
 
     switch (proc) {
+    case OpenVPN: {
+        static const QSet<QString> blocked = {
+            QStringLiteral("--script-security"),
+            QStringLiteral("--up"),
+            QStringLiteral("--down"),
+            QStringLiteral("--route-up"),
+            QStringLiteral("--ipchange"),
+            QStringLiteral("--tls-verify"),
+            QStringLiteral("--plugin"),
+            QStringLiteral("--auth-user-pass-verify"),
+            QStringLiteral("--learn-address"),
+            QStringLiteral("--client-connect"),
+            QStringLiteral("--client-disconnect"),
+            QStringLiteral("--management"),
+            QStringLiteral("--management-external-key")
+        };
+        QStringList out;
+        for (int i = 0; i < args.size(); ++i) {
+            if (blocked.contains(args[i])) {
+                qWarning() << "IPC: blocked OpenVPN argument:" << args[i];
+                ++i; // skip following value
+                continue;
+            }
+            out << args[i];
+        }
+        return out;
+    }
+    case Wireguard: {
+        static const QRegularExpression hookRe(
+            QStringLiteral(R"((?i)(PostUp|PreUp|PostDown|PreDown)\s*=)"));
+        QStringList out;
+        for (const QString& a : args) {
+            if (hookRe.match(a).hasMatch()) {
+                qWarning() << "IPC: blocked WireGuard hook argument:" << a;
+                continue;
+            }
+            out << a;
+        }
+        return out;
+    }
     case Tun2Socks:
         namedArgs["-device"] = [](const QString& v) { return v.startsWith("tun://"); };
         namedArgs["-proxy"] = [](const QString& v) { return v.startsWith("socks5://"); };
         break;
-    default:
-        //FIXME
+    case CertUtil:
         return args;
+    default:
+        return {};
     }
-
 
     QStringList sanitized;
 
