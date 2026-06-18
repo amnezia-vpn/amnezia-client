@@ -556,5 +556,14 @@ void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
 #endif
         revokePolicy(from);
         from->deactivate();
+
+#ifdef Q_OS_MAC
+        if (VpnProtocol::isXrayBased(to->container())) {
+            if (auto p = to->protocol()) {
+                applyKillSwitch(to, p->vpnGateway(), p->vpnLocalAddress());
+                setupRoutes(to->config(), p, to->remoteAddress());
+            }
+        }
+#endif
     }
 }
