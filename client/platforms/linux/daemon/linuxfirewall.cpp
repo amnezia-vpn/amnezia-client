@@ -454,16 +454,33 @@ void LinuxFirewall::updateDNSServers(const QStringList& servers)
     static QStringList existingServers {};
 
     existingServers = servers;
-    execute(QStringLiteral("iptables -F %1.320.allowDNS").arg(kAnchorName));
-    for (const QString& rule : getDNSRules(servers))
-        execute(QStringLiteral("iptables -A %1.320.allowDNS %2").arg(kAnchorName, rule));
+    const QString chain = QStringLiteral("%1.320.allowDNS").arg(kAnchorName);
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
+    const QStringList ifaces = {
+        QStringLiteral("amn0+"), QStringLiteral("tun0+"), QStringLiteral("tun2+")
+    };
+    for (const QString& server : servers) {
+        for (const QString& iface : ifaces) {
+            executeIptables(QStringLiteral("iptables"),
+                {QStringLiteral("-A"), chain, QStringLiteral("-o"), iface,
+                 QStringLiteral("-d"), server, QStringLiteral("-p"), QStringLiteral("udp"),
+                 QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+            executeIptables(QStringLiteral("iptables"),
+                {QStringLiteral("-A"), chain, QStringLiteral("-o"), iface,
+                 QStringLiteral("-d"), server, QStringLiteral("-p"), QStringLiteral("tcp"),
+                 QStringLiteral("--dport"), QStringLiteral("53"), QStringLiteral("-j"), QStringLiteral("ACCEPT")});
+        }
+    }
 }
 
 void LinuxFirewall::updateAllowNets(const QStringList& servers)
 {
-    execute(QStringLiteral("iptables -F %1.110.allowNets").arg(kAnchorName));
-    for (const QString& rule : getAllowRule(servers))
-        execute(QStringLiteral("iptables -A %1.110.allowNets %2").arg(kAnchorName, rule));
+    const QString chain = QStringLiteral("%1.110.allowNets").arg(kAnchorName);
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
+    for (const QString& server : servers)
+        executeIptables(QStringLiteral("iptables"),
+            {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
+             QStringLiteral("-j"), QStringLiteral("ACCEPT")});
 }
 
 void LinuxFirewall::updateBlockNets(const QStringList& servers)
@@ -471,9 +488,12 @@ void LinuxFirewall::updateBlockNets(const QStringList& servers)
     static QStringList existingServers {};
 
     existingServers = servers;
-    execute(QStringLiteral("iptables -F %1.120.blockNets").arg(kAnchorName));
-    for (const QString& rule : getBlockRule(servers))
-        execute(QStringLiteral("iptables -A %1.120.blockNets %2").arg(kAnchorName, rule));
+    const QString chain = QStringLiteral("%1.120.blockNets").arg(kAnchorName);
+    executeIptables(QStringLiteral("iptables"), {QStringLiteral("-F"), chain});
+    for (const QString& server : servers)
+        executeIptables(QStringLiteral("iptables"),
+            {QStringLiteral("-A"), chain, QStringLiteral("-d"), server,
+             QStringLiteral("-j"), QStringLiteral("REJECT")});
 }
 
 int waitForExitCode(QProcess& process)
@@ -499,6 +519,24 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
         logger.warning()  << "(" << exitCode << ") $ " << command;
     else if (false)
         logger.debug() << "(" << exitCode << ") $ " << command;
+    if (!out.isEmpty())
+        logger.info() << out;
+    if (!err.isEmpty())
+        logger.warning() << err;
+    return exitCode;
+}
+
+int LinuxFirewall::executeIptables(const QString &program, const QStringList &args, bool ignoreErrors)
+{
+    QProcess p;
+    p.start(program, args, QProcess::ReadOnly);
+    p.closeWriteChannel();
+
+    int exitCode = waitForExitCode(p);
+    auto out = p.readAllStandardOutput().trimmed();
+    auto err = p.readAllStandardError().trimmed();
+    if ((exitCode != 0 || !err.isEmpty()) && !ignoreErrors)
+        logger.warning() << "(" << exitCode << ") $ " << program << args.join(QLatin1Char(' '));
     if (!out.isEmpty())
         logger.info() << out;
     if (!err.isEmpty())

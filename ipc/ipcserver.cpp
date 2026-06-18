@@ -22,6 +22,27 @@
     #include "tapcontroller_win.h"
 #endif
 
+#ifdef Q_OS_LINUX
+#include <sys/socket.h>
+#include <sys/types.h>
+
+extern uid_t g_allowedUid;
+extern bool g_allowedUidSet;
+
+static bool checkPrivPeerCredentials(QLocalSocket *socket) {
+    struct ucred cred{};
+    socklen_t len = sizeof(cred);
+    if (getsockopt(socket->socketDescriptor(), SOL_SOCKET, SO_PEERCRED, &cred, &len) != 0) {
+        qWarning() << "IpcServer: SO_PEERCRED failed, rejecting privileged process connection";
+        return false;
+    }
+    if (cred.uid == 0) return true;
+    if (g_allowedUidSet && cred.uid == g_allowedUid) return true;
+    qWarning() << "IpcServer: rejected privileged process connection from unauthorized UID" << cred.uid;
+    return false;
+}
+#endif
+
 
 IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
 {
@@ -48,8 +69,16 @@ int IpcServer::createPrivilegedProcess()
     // Make sure any connections are handed to QtRO
     QObject::connect(pd.localServer.data(), &QLocalServer::newConnection, this, [pd]() {
         qDebug() << "IpcServer new connection";
+        QLocalSocket *conn = pd.localServer->nextPendingConnection();
+#ifdef Q_OS_LINUX
+        if (!checkPrivPeerCredentials(conn)) {
+            conn->close();
+            conn->deleteLater();
+            return;
+        }
+#endif
         if (pd.serverNode) {
-            pd.serverNode->addHostSideConnection(pd.localServer->nextPendingConnection());
+            pd.serverNode->addHostSideConnection(conn);
             pd.serverNode->enableRemoting(pd.ipcProcess.data());
         }
     });
