@@ -3,10 +3,42 @@
 
 #include <QApplication>
 #include <QHostAddress>
+#include <QRegularExpression>
 
 #include "../client/protocols/protocols_defs.h"
 #include "qjsonarray.h"
 #include "version.h"
+
+#ifdef Q_OS_LINUX
+static bool isValidIpOrCidr(const QString &value) {
+    static const QRegularExpression re(
+        QStringLiteral(R"(^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$)"));
+    if (!re.match(value).hasMatch()) return false;
+    const QStringList ipParts = value.split(QLatin1Char('/'))[0].split(QLatin1Char('.'));
+    for (const QString &part : ipParts) {
+        bool ok;
+        int octet = part.toInt(&ok);
+        if (!ok || octet < 0 || octet > 255) return false;
+    }
+    if (value.contains(QLatin1Char('/'))) {
+        bool ok;
+        int prefix = value.split(QLatin1Char('/'))[1].toInt(&ok);
+        if (!ok || prefix < 0 || prefix > 32) return false;
+    }
+    return true;
+}
+
+static QStringList filterIpList(const QStringList &values) {
+    QStringList safe;
+    for (const QString &v : values) {
+        if (isValidIpOrCidr(v))
+            safe << v;
+        else
+            qWarning() << "IPC: rejected invalid IP/CIDR value:" << v;
+    }
+    return safe;
+}
+#endif
 
 #ifdef Q_OS_WIN
     #include "../client/platforms/windows/daemon/windowsfirewall.h"
@@ -159,7 +191,11 @@ bool KillSwitch::disableAllTraffic() {
 
 bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 
+#ifdef Q_OS_LINUX
+    m_allowedRanges = filterIpList(ranges);
+#else
     m_allowedRanges = ranges;
+#endif
 
 #ifdef Q_OS_LINUX
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), true);
@@ -182,7 +218,12 @@ bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 }
 
 bool KillSwitch::addAllowedRange(const QStringList &ranges) {
-    for (const QString &range : ranges) {
+#ifdef Q_OS_LINUX
+    const QStringList safeRanges = filterIpList(ranges);
+#else
+    const QStringList &safeRanges = ranges;
+#endif
+    for (const QString &range : safeRanges) {
         if (!range.isEmpty() && !m_allowedRanges.contains(range)) {
             m_allowedRanges.append(range);
         }
@@ -307,9 +348,9 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), blockAll);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), allowNets);
-    LinuxFirewall::updateAllowNets(allownets);
+    LinuxFirewall::updateAllowNets(filterIpList(allownets));
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), blockAll);
-    LinuxFirewall::updateBlockNets(blocknets);
+    LinuxFirewall::updateBlockNets(filterIpList(blocknets));
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
@@ -317,23 +358,35 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
 
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    const QString dns1 = configStr.value(amnezia::config_key::dns1).toString();
+    if (isValidIpOrCidr(dns1))
+        dnsServers.append(dns1);
+    else if (!dns1.isEmpty())
+        qWarning() << "IPC: rejected invalid dns1:" << dns1;
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
+    if (!dns1.contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        const QString dns2 = configStr.value(amnezia::config_key::dns2).toString();
+        if (isValidIpOrCidr(dns2))
+            dnsServers.append(dns2);
+        else if (!dns2.isEmpty())
+            qWarning() << "IPC: rejected invalid dns2:" << dns2;
     }
 
     dnsServers.append("127.0.0.1");
     dnsServers.append("127.0.0.53");
-    
+
     for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
-        dnsServers.append(dns.toString());
+        const QString dnsStr = dns.toString();
+        if (isValidIpOrCidr(dnsStr))
+            dnsServers.append(dnsStr);
+        else if (!dnsStr.isEmpty())
+            qWarning() << "IPC: rejected invalid allowedDnsServer:" << dnsStr;
     }
-    
+
     LinuxFirewall::updateDNSServers(dnsServers);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
