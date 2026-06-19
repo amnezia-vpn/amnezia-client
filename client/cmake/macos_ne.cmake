@@ -166,6 +166,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
     COMMAND /usr/bin/find "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/OpenVPNAdapter.framework" -name "*.sha256" -delete
     COMMAND /usr/bin/codesign --force --sign "Apple Distribution: Privacy Technologies OU"
             "$<TARGET_BUNDLE_DIR:AmneziaVPN>/Contents/Frameworks/OpenVPNAdapter.framework/Versions/Current/OpenVPNAdapter"
-    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR} -no-codesign
     COMMENT "Signing OpenVPNAdapter framework"
 )
