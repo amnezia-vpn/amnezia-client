@@ -65,7 +65,7 @@ void DnsUtilsLinux::onResolverUnregistered() {
 DnsUtilsLinux::~DnsUtilsLinux() {
   MZ_COUNT_DTOR(DnsUtilsLinux);
 
-  if (m_resolver) {
+  if (m_revertOnDestroy && m_resolver) {
     if (m_gatewayIfindex > 0)
       setLinkDefaultRoute(m_gatewayIfindex, true);
 
@@ -119,6 +119,7 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
 }
 
 bool DnsUtilsLinux::restoreResolvers() {
+  m_revertOnDestroy = true;
   m_pendingIfname.clear();
   m_pendingResolvers.clear();
 

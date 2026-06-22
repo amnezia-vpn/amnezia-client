@@ -43,6 +43,7 @@ class DnsUtilsLinux final : public DnsUtils {
   int m_ifindex = 0;
   int m_gatewayIfindex = 0;
   int m_domainRetries = 0;
+  bool m_revertOnDestroy = false;
   QMap<int, DnsLinkDomainList> m_linkDomains;
   QScopedPointer<QDBusInterface> m_resolver;
   QString m_pendingIfname;
