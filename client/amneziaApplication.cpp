@@ -27,7 +27,7 @@
 #include "platforms/ios/QRCodeReaderBase.h"
 
 #if defined(Q_OS_IOS)
-
+#include <QThread>
 
 extern "C" {
     void set_intent_callbacks(void (*reloadCallback)(), void (*connectCallback)(const char*), const char* (*getCountriesCallback)());
@@ -54,7 +54,14 @@ static const char* intent_get_countries() {
         // Query synchronously from g_amnApp
         // But since this might be called on a background thread by AppIntents, we can safely just fetch it if data is protected, or use invokeMethod with BlockingQueuedConnection
         QString jsonStr;
-        QMetaObject::invokeMethod(g_amnApp, "handleIntentGetCountries", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QString, jsonStr));
+        if (QThread::currentThread() == g_amnApp->thread()) {
+            jsonStr = g_amnApp->handleIntentGetCountries();
+        } else {
+            bool ok = QMetaObject::invokeMethod(g_amnApp, "handleIntentGetCountries", Qt::BlockingQueuedConnection, Q_RETURN_ARG(QString, jsonStr));
+            if (!ok) {
+                return "[]";
+            }
+        }
         lastJson = jsonStr.toUtf8();
         return lastJson.constData();
     }

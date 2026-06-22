@@ -74,7 +74,8 @@ struct CountryOptionQuery: EntityQuery {
             if let data = jsonString.data(using: .utf8),
                let array = try? JSONSerialization.jsonObject(with: data, options: []) as? [[String: String]] {
                 for item in array {
-                    if let code = item["code"], let name = item["name"] {
+                    if let code = item["server_country_code"] ?? item["code"],
+                       let name = item["server_country_name"] ?? item["name"] {
                         options.append(CountryOption(id: code, name: name))
                     }
                 }

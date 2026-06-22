@@ -363,7 +363,6 @@ void CoreController::importConfigFromData(const QString &data)
 #if defined(Q_OS_IOS)
 #include <QJsonDocument>
 #include <QJsonArray>
-#include <QJsonObject>
 
 void CoreController::intentReload()
 {
