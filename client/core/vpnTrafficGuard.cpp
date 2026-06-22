@@ -192,7 +192,10 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
     QJsonObject updatedConfig = m_config;
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef Q_OS_WIN
-        const QString ifname = updatedConfig.value("ifname").toString();
+        const bool engineNamedInterface = tunnel
+            && (VpnProtocol::isWireGuardBased(tunnel->container())
+                || VpnProtocol::isXrayBased(tunnel->container()));
+        const QString ifname = engineNamedInterface ? updatedConfig.value("ifname").toString() : QString();
         if (!ifname.isEmpty()) {
             updatedConfig.insert("vpnGateway", gateway);
             updatedConfig.insert("vpnServer", NetworkUtilities::getIPAddress(updatedConfig.value(configKey::hostName).toString()));
@@ -330,7 +333,9 @@ void VpnTrafficGuard::reserve(Tunnel* tunnel)
 {
     if (!tunnel) return;
 #ifdef AMNEZIA_DESKTOP
-    allowEndpoint(tunnel->remoteAddress(), tunnel->ifname());
+    const bool engineNamedInterface = VpnProtocol::isWireGuardBased(tunnel->container())
+                                   || VpnProtocol::isXrayBased(tunnel->container());
+    allowEndpoint(tunnel->remoteAddress(), engineNamedInterface ? tunnel->ifname() : QString());
 #else
     Q_UNUSED(tunnel)
 #endif
@@ -341,9 +346,11 @@ void VpnTrafficGuard::release(Tunnel* tunnel)
     if (!tunnel) return;
     disconnect(tunnel, nullptr, this, nullptr);
 #ifdef AMNEZIA_DESKTOP
+    const bool engineNamedInterface = VpnProtocol::isWireGuardBased(tunnel->container())
+                                   || VpnProtocol::isXrayBased(tunnel->container());
     m_allowedEndpoints.removeAll(tunnel->remoteAddress());
-    IpcClient::withInterface([this, &tunnel](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->disableKillSwitchForTunnel(tunnel->ifname(), m_allowedEndpoints);
+    IpcClient::withInterface([this, &tunnel, engineNamedInterface](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->disableKillSwitchForTunnel(engineNamedInterface ? tunnel->ifname() : QString(), m_allowedEndpoints);
     });
 #else
     Q_UNUSED(tunnel)
@@ -381,6 +388,10 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
             }
 #endif
         });
+        return;
+    }
+
+    if (!VpnProtocol::isWireGuardBased(tunnel->container())) {
         return;
     }
 
@@ -424,6 +435,10 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
             }
 #endif
         });
+        return;
+    }
+
+    if (!VpnProtocol::isWireGuardBased(tunnel->container())) {
         return;
     }
 
