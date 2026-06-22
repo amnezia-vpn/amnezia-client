@@ -43,6 +43,13 @@ void Tunnel::prepare() {
     connect(m_protocol.data(), &VpnProtocol::primaryFailed,
             this, &Tunnel::onPrimaryFailed);
 
+    const amnezia::ErrorCode prepareErr = m_protocol->prepare();
+    if (prepareErr != amnezia::ErrorCode::NoError) {
+        setState(State::Failed);
+        emit failed(prepareErr);
+        return;
+    }
+
     startActivationDeadline(ACTIVATION_TIMEOUT_MSEC);
 
     const amnezia::ErrorCode err = m_protocol->start();

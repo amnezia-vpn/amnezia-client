@@ -137,6 +137,14 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     }
 }
 
+void VpnProtocol::setPrimary(const QJsonObject &config)
+{
+    Q_UNUSED(config)
+    QMetaObject::invokeMethod(this, [this]() {
+        emit primaryReady();
+    }, Qt::QueuedConnection);
+}
+
 QString VpnProtocol::routeGateway() const
 {
     return m_routeGateway;

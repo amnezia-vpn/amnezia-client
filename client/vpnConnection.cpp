@@ -185,7 +185,11 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 #ifdef AMNEZIA_DESKTOP
     const bool isWg = VpnProtocol::isWireGuardBased(container);
     const bool isXray = VpnProtocol::isXrayBased(container);
-    const bool useTunnelPath = isWg || isXray;
+    const bool targetIsSwitchable = isWg || isXray;
+    const bool activeIsSwitchable = m_active
+        && (VpnProtocol::isWireGuardBased(m_active->container())
+            || VpnProtocol::isXrayBased(m_active->container()));
+    const bool useTunnelPath = true;
     const QString preAllocatedIfname = useTunnelPath ? allocateIfname() : QString();
     if (useTunnelPath && preAllocatedIfname.isEmpty()) {
         setConnectionState(Vpn::ConnectionState::Error);
@@ -195,7 +199,8 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 
     if (m_active
         && m_connectionState == Vpn::ConnectionState::Connected
-        && useTunnelPath) {
+        && targetIsSwitchable
+        && activeIsSwitchable) {
         if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
             releaseIfname(preAllocatedIfname);
             setConnectionState(Vpn::ConnectionState::Error);
@@ -221,15 +226,10 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     if (m_active) {
         const QString oldIfname = m_active->ifname();
         m_trafficGuard->tearDown(m_active);
+        m_trafficGuard->flushAll();
         delete m_active;
         m_active = nullptr;
         releaseIfname(oldIfname);
-    }
-    if (m_vpnProtocol) {
-        disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        m_trafficGuard->flushAll();
-        m_vpnProtocol->stop();
-        m_vpnProtocol.reset();
     }
 #endif
 
@@ -261,14 +261,6 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         m_trafficGuard->bringUp(m_active);
         return;
     }
-
-    m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
-    if (!m_vpnProtocol) {
-        setConnectionState(Vpn::ConnectionState::Error);
-        return;
-    }
-    m_vpnProtocol->prepare();
-    m_trafficGuard->setConfig(m_vpnConfiguration);
 #elif defined Q_OS_ANDROID
     androidVpnProtocol = createDefaultAndroidVpnProtocol();
     createAndroidConnections();

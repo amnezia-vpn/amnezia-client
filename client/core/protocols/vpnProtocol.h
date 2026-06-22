@@ -61,7 +61,7 @@ public:
     virtual bool isDisconnected() const;
     virtual ErrorCode start() = 0;
     virtual void stop() = 0;
-    virtual void setPrimary(const QJsonObject& config) { Q_UNUSED(config) }
+    virtual void setPrimary(const QJsonObject& config);
 
     Vpn::ConnectionState connectionState() const;
     ErrorCode lastError() const;
