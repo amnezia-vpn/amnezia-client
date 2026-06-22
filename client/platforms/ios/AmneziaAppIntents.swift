@@ -15,9 +15,9 @@ public func setIntentCallbacks(
     getCountriesCallback: @escaping @convention(c) () -> UnsafePointer<CChar>
 ) {
     if #available(iOS 16.0, *) {
-        IntentCallbacks.reload = reloadCallback
         IntentCallbacks.connect = connectCallback
         IntentCallbacks.getCountries = getCountriesCallback
+        IntentCallbacks.reload = reloadCallback
     }
 }
 

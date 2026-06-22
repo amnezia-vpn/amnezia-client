@@ -367,15 +367,27 @@ void CoreController::importConfigFromData(const QString &data)
 
 void CoreController::intentReload()
 {
-    if (m_subscriptionUiController && m_serversUiController) {
-        m_subscriptionUiController->updateServiceFromGateway(m_serversUiController->processedServerId(), "", "", true);
+    if (m_subscriptionUiController && m_serversUiController && m_serversRepository) {
+        QString serverId = m_serversUiController->processedServerId();
+        if (serverId.isEmpty()) {
+            serverId = m_serversRepository->defaultServerId();
+        }
+        if (!serverId.isEmpty()) {
+            m_subscriptionUiController->updateServiceFromGateway(serverId, "", "", true);
+        }
     }
 }
 
 void CoreController::intentConnect(const QString &countryCode)
 {
-    if (m_subscriptionUiController && m_serversUiController) {
-        m_subscriptionUiController->updateServiceFromGateway(m_serversUiController->processedServerId(), countryCode, "", true);
+    if (m_subscriptionUiController && m_serversUiController && m_serversRepository) {
+        QString serverId = m_serversUiController->processedServerId();
+        if (serverId.isEmpty()) {
+            serverId = m_serversRepository->defaultServerId();
+        }
+        if (!serverId.isEmpty()) {
+            m_subscriptionUiController->updateServiceFromGateway(serverId, countryCode, "", false);
+        }
     }
 }
 

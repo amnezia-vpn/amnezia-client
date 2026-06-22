@@ -27,12 +27,7 @@
 #include "platforms/ios/QRCodeReaderBase.h"
 
 #if defined(Q_OS_IOS)
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QJsonObject>
-#include "core/models/api/apiV2ServerConfig.h"
-#include "core/controllers/api/subscriptionUiController.h"
-#include "core/controllers/serversUiController.h"
+
 
 extern "C" {
     void set_intent_callbacks(void (*reloadCallback)(), void (*connectCallback)(const char*), const char* (*getCountriesCallback)());
@@ -54,7 +49,7 @@ static void intent_connect(const char* c_str) {
 }
 
 static const char* intent_get_countries() {
-    static QByteArray lastJson;
+    thread_local static QByteArray lastJson;
     if (g_amnApp) {
         // Query synchronously from g_amnApp
         // But since this might be called on a background thread by AppIntents, we can safely just fetch it if data is protected, or use invokeMethod with BlockingQueuedConnection
