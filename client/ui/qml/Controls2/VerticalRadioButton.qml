@@ -162,10 +162,12 @@ RadioButton {
                 color: {
                     if (root.enabled) {
                         return root.checked ? selectedTextColor : textColor
-                    } else {
-                        return root.checked ? selectedTextDisabledColor : textDisabledColor
                     }
+                    // When checked but disabled, match the radio indicator
+                    // (selectedRingColor at 0.3 opacity below).
+                    return root.checked ? root.selectedRingColor : textDisabledColor
                 }
+                opacity: (!root.enabled && root.checked) ? 0.3 : 1.0
 
                 Layout.fillWidth: true
 
