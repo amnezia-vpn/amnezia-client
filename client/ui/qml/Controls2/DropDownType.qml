@@ -40,6 +40,7 @@ Item {
     property int rootButtonTextLeftMargins: 16
     property int rootButtonTextTopMargin: 16
     property int rootButtonTextBottomMargin: 16
+    property int rootButtonImageRightMargin: 16
 
     property real drawerHeight: 0.9
     property Item drawerParent
@@ -188,7 +189,7 @@ Item {
         }
 
         ImageButtonType {
-            Layout.rightMargin: 16
+            Layout.rightMargin: root.rootButtonImageRightMargin
 
             implicitWidth: 40
             implicitHeight: 40
