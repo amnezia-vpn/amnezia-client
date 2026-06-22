@@ -16,18 +16,18 @@ Switch {
     property string textColor: AmneziaStyle.color.paleGray
     property string textDisabledColor: AmneziaStyle.color.mutedGray
 
-    property string checkedIndicatorColor: AmneziaStyle.color.richBrown
+    property string checkedIndicatorColor: AmneziaStyle.color.switchCheckedTrack
     property string defaultIndicatorColor: AmneziaStyle.color.transparent
     property string checkedDisabledIndicatorColor: AmneziaStyle.color.deepBrown
 
     property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderFocusedWidth: 1
 
-    property string checkedIndicatorBorderColor: AmneziaStyle.color.richBrown
+    property string checkedIndicatorBorderColor: AmneziaStyle.color.switchCheckedTrackBorder
     property string defaultIndicatorBorderColor: AmneziaStyle.color.charcoalGray
     property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.deepBrown
 
-    property string checkedInnerCircleColor: AmneziaStyle.color.goldenApricot
+    property string checkedInnerCircleColor: AmneziaStyle.color.switchCheckedKnob
     property string defaultInnerCircleColor: AmneziaStyle.color.paleGray
     property string checkedDisabledInnerCircleColor: AmneziaStyle.color.mutedBrown
     property string defaultDisabledInnerCircleColor: AmneziaStyle.color.charcoalGray

@@ -39,6 +39,12 @@ QtObject {
         readonly property color darkCharcoal: '#261E1A'
         readonly property color pearlGray: '#EAEAEC'
 
+        // Checked switch (SwitcherType): brown track with an apricot knob in dark mode.
+        // (Light mode flips to an apricot track with a white knob — see lightColor.)
+        readonly property color switchCheckedTrack: richBrown
+        readonly property color switchCheckedTrackBorder: richBrown
+        readonly property color switchCheckedKnob: goldenApricot
+
         readonly property color primaryButton: paleGray
         readonly property color primaryButtonHovered: lightGray
         readonly property color primaryButtonPressed: mutedGray
@@ -81,6 +87,12 @@ QtObject {
         readonly property color vibrantRed: '#EB5757'
         readonly property color darkCharcoal: '#E3E4E7'       // subtle "in progress" ring
         readonly property color pearlGray: '#2C2D30'          // near-foreground text
+
+        // "On" switch reads as a solid apricot track (the knob's brand color) with a
+        // white knob — the conventional light-mode toggle look.
+        readonly property color switchCheckedTrack: goldenApricot
+        readonly property color switchCheckedTrackBorder: goldenApricot
+        readonly property color switchCheckedKnob: '#FFFFFF'
 
         // Primary filled button: kept the softer apricot (the deeper #E38E41 is reserved
         // for highlights — outlines/text/icons — where contrast matters more).
