@@ -332,6 +332,42 @@
     </message>
 </context>
 <context>
+    <name>ConnectionUiController</name>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="58"/>
+        <source>Connecting...</source>
+        <translation>连接中</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="65"/>
+        <source>Connected</source>
+        <translation>已连接</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="74"/>
+        <source>Reconnecting...</source>
+        <translation>重连中</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.h" line="65"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="94"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="100"/>
+        <source>Connect</source>
+        <translation>连接</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="84"/>
+        <source>Disconnecting...</source>
+        <translation>断开中</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="89"/>
+        <source>Preparing...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>

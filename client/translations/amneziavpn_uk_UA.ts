@@ -246,6 +246,42 @@
     </message>
 </context>
 <context>
+    <name>ConnectionUiController</name>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="58"/>
+        <source>Connecting...</source>
+        <translation>Підключення...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="65"/>
+        <source>Connected</source>
+        <translation>Підключено</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="74"/>
+        <source>Reconnecting...</source>
+        <translation>Перепідключення...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.h" line="65"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="94"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="100"/>
+        <source>Connect</source>
+        <translation>Підключитись</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="84"/>
+        <source>Disconnecting...</source>
+        <translation>Відключаємось...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="89"/>
+        <source>Preparing...</source>
+        <translation>Підготовка...</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>

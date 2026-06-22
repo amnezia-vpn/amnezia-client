@@ -207,6 +207,42 @@
     </message>
 </context>
 <context>
+    <name>ConnectionUiController</name>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="58"/>
+        <source>Connecting...</source>
+        <translation>कनेक्ट...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="65"/>
+        <source>Connected</source>
+        <translation>जुड़ा हुआ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="74"/>
+        <source>Reconnecting...</source>
+        <translation>पुनः कनेक्ट हो रहा है...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.h" line="65"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="94"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="100"/>
+        <source>Connect</source>
+        <translation>कनेक्ट</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="84"/>
+        <source>Disconnecting...</source>
+        <translation>डिस्कनेक्ट हो रहा है...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="89"/>
+        <source>Preparing...</source>
+        <translation>तैयार कर रहे हैं...</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>

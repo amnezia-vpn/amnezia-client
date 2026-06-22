@@ -206,6 +206,42 @@
     </message>
 </context>
 <context>
+    <name>ConnectionUiController</name>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="58"/>
+        <source>Connecting...</source>
+        <translation>جوڑاجارھاھے....</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="65"/>
+        <source>Connected</source>
+        <translation>جوڑاجارھاھے</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="74"/>
+        <source>Reconnecting...</source>
+        <translation>دوبارہ جوڑنےکی کوشش...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.h" line="65"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="94"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="100"/>
+        <source>Connect</source>
+        <translation>جوڑنا</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="84"/>
+        <source>Disconnecting...</source>
+        <translation>منقطع کرنا...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="89"/>
+        <source>Preparing...</source>
+        <translation>تیاری کیا جا رہا ہے...</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>

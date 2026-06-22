@@ -223,6 +223,42 @@
     </message>
 </context>
 <context>
+    <name>ConnectionUiController</name>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="58"/>
+        <source>Connecting...</source>
+        <translation>ချိတ်ဆက်နေပါပြီ...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="65"/>
+        <source>Connected</source>
+        <translation>ချိတ်ဆက်ပြီးသွားပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="74"/>
+        <source>Reconnecting...</source>
+        <translation>ပြန်လည်ချိတ်ဆက်နေပါသည်...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.h" line="65"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="79"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="94"/>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="100"/>
+        <source>Connect</source>
+        <translation>ချိတ်ဆက်မည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="84"/>
+        <source>Disconnecting...</source>
+        <translation>အဆက်အသွယ်ဖြတ်နေပါသည်...</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/connectionUiController.cpp" line="89"/>
+        <source>Preparing...</source>
+        <translation>ပြင်ဆင်နေသည်...</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionTypeSelectionDrawer</name>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
