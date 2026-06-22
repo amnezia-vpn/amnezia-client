@@ -45,6 +45,11 @@ QtObject {
         readonly property color switchCheckedTrackBorder: richBrown
         readonly property color switchCheckedKnob: goldenApricot
 
+        // Notification/toast surface (PopupType). White here so the dark midnightBlack
+        // text reads; light mode flips to a dark surface (see lightColor) so the popup
+        // stays legible and stands out against the light background.
+        readonly property color notificationBackground: '#FFFFFF'
+
         readonly property color primaryButton: paleGray
         readonly property color primaryButtonHovered: lightGray
         readonly property color primaryButtonPressed: mutedGray
@@ -93,6 +98,10 @@ QtObject {
         readonly property color switchCheckedTrack: goldenApricot
         readonly property color switchCheckedTrackBorder: goldenApricot
         readonly property color switchCheckedKnob: '#FFFFFF'
+
+        // Dark toast on the light UI so the white midnightBlack text reads (the old
+        // hardcoded-white popup rendered white-on-white, hiding the message).
+        readonly property color notificationBackground: '#3A3B40'
 
         // Primary filled button: kept the softer apricot (the deeper #E38E41 is reserved
         // for highlights — outlines/text/icons — where contrast matters more).
