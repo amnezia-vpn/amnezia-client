@@ -214,6 +214,22 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: labelWithButtonTheme
+
+                Layout.fillWidth: true
+
+                text: qsTr("Color theme")
+                descriptionText: [qsTr("System"), qsTr("Light"), qsTr("Dark")][AppearanceController.themeMode]
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    selectThemeDrawer.openTriggered()
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
                 id: labelWithButtonLogging
 
                 Layout.fillWidth: true
@@ -266,6 +282,13 @@ PageType {
 
     SelectLanguageDrawer {
         id: selectLanguageDrawer
+
+        width: root.width
+        height: root.height
+    }
+
+    SelectThemeDrawer {
+        id: selectThemeDrawer
 
         width: root.width
         height: root.height

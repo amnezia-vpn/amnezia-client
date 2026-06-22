@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -27,6 +28,7 @@ Button {
     property string rightImageColor: AmneziaStyle.color.paleGray
 
     property string leftImageSource
+    property string leftImageColor: AmneziaStyle.color.mutedGray
 
     property alias focusItem: rightImage
 
@@ -114,6 +116,11 @@ Button {
                     Layout.topMargin: 24
                     Layout.bottomMargin: 24
                     Layout.leftMargin: 24
+
+                    layer.enabled: true
+                    layer.effect: ColorOverlay {
+                        color: root.leftImageColor
+                    }
                 }
 
                 ColumnLayout {

@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -35,10 +34,8 @@ RadioButton {
     property bool isFocusable: true
 
     
-    property string radioButtonInnerCirclePressedSource: "qrc:/images/controls/radio-button-inner-circle-pressed.png"
-    property string radioButtonInnerCircleSource: "qrc:/images/controls/radio-button-inner-circle.png"
-    property string radioButtonPressedSource: "qrc:/images/controls/radio-button-pressed.svg"
-    property string radioButtonDefaultSource: "qrc:/images/controls/radio-button.svg"
+    property string selectedRingColor: AmneziaStyle.color.goldenApricot
+    property string defaultRingColor: AmneziaStyle.color.mutedGray
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
@@ -100,17 +97,8 @@ RadioButton {
         }
 
         Image {
-            source: {
-                if (showImage) {
-                    return imageSource
-                } else if (root.pressed) {
-                    return root.radioButtonInnerCirclePressedSource
-                } else if (root.checked) {
-                    return root.radioButtonInnerCircleSource
-                }
-
-                return ""
-            }
+            visible: root.showImage
+            source: root.showImage ? root.imageSource : ""
 
             opacity: root.enabled ? 1.0 : 0.3
             anchors.centerIn: parent
@@ -119,22 +107,34 @@ RadioButton {
             height: 24
         }
 
-        Image {
-            source: {
-                if (showImage) {
-                    return ""
-                } else if (root.pressed || root.checked) {
-                    return root.radioButtonPressedSource
-                } else {
-                    return root.radioButtonDefaultSource
-                }
-            }
+        Rectangle {
+            visible: !root.showImage
 
-            opacity: root.enabled ? 1.0 : 0.3
             anchors.centerIn: parent
 
             width: 24
             height: 24
+            radius: width / 2
+
+            color: AmneziaStyle.color.transparent
+            border.width: 1.5
+            border.color: root.checked ? root.selectedRingColor : root.defaultRingColor
+            opacity: root.enabled ? 1.0 : 0.3
+
+            Behavior on border.color {
+                PropertyAnimation { duration: 200 }
+            }
+
+            Rectangle {
+                anchors.centerIn: parent
+
+                width: 12
+                height: 12
+                radius: width / 2
+
+                visible: root.checked
+                color: root.selectedRingColor
+            }
         }
     }
 

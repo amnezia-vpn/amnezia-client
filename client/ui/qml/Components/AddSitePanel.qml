@@ -22,7 +22,7 @@ Item {
     Rectangle {
         id: background
         anchors.fill: parent
-        color: "#0E0F12"
+        color: AmneziaStyle.color.midnightBlack
         opacity: 0.85
         z: -1
     }

@@ -49,6 +49,16 @@ void SecureAppSettingsRepository::setAppLanguage(QLocale locale)
     emit appLanguageChanged(locale);
 }
 
+int SecureAppSettingsRepository::getAppThemeMode() const
+{
+    return value("Conf/appTheme", 0).toInt();
+}
+
+void SecureAppSettingsRepository::setAppThemeMode(int mode)
+{
+    setValue("Conf/appTheme", mode);
+}
+
 bool SecureAppSettingsRepository::useAmneziaDns() const
 {
     return value("Conf/useAmneziaDns", true).toBool();
