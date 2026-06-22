@@ -45,6 +45,11 @@ QtObject {
         readonly property color switchCheckedTrackBorder: richBrown
         readonly property color switchCheckedKnob: goldenApricot
 
+        // Checked + disabled switch: deep-brown track, muted-brown knob in dark mode.
+        readonly property color switchCheckedDisabledTrack: deepBrown
+        readonly property color switchCheckedDisabledTrackBorder: deepBrown
+        readonly property color switchCheckedDisabledKnob: mutedBrown
+
         // Notification/toast surface (PopupType). White here so the dark midnightBlack
         // text reads; light mode flips to a dark surface (see lightColor) so the popup
         // stays legible and stands out against the light background.
@@ -98,6 +103,12 @@ QtObject {
         readonly property color switchCheckedTrack: goldenApricot
         readonly property color switchCheckedTrackBorder: goldenApricot
         readonly property color switchCheckedKnob: '#FFFFFF'
+
+        // Disabled "on" pill: a muted/faded apricot track (clearly less vivid than the
+        // enabled #E38E41) with a white knob, so it reads as on-but-inactive.
+        readonly property color switchCheckedDisabledTrack: '#E2B58C'
+        readonly property color switchCheckedDisabledTrackBorder: '#E2B58C'
+        readonly property color switchCheckedDisabledKnob: '#FFFFFF'
 
         // Dark toast on the light UI so the white midnightBlack text reads (the old
         // hardcoded-white popup rendered white-on-white, hiding the message).
