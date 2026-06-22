@@ -28,7 +28,7 @@ class Openvpn(ConanFile):
 
     def build_requirements(self):
         if self._is_windows:
-            self.tool_requires("cmake/[>=3.14 <4]")
+            self.tool_requires("cmake/[>=4.2]")
         else:
             self.tool_requires("libtool/2.4.7")
             self.tool_requires("automake/1.16.5")
