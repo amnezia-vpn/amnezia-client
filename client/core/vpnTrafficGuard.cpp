@@ -18,6 +18,56 @@
 #include "core/tunnel.h"
 #include "mozilla/localsocketcontroller.h"
 
+namespace {
+QStringList allowedIpPrefixesFor(const QJsonObject& activateJson)
+{
+    QStringList prefixes;
+    const QJsonArray ranges = activateJson.value("allowedIPAddressRanges").toArray();
+    for (const QJsonValue& v : ranges) {
+        const QJsonObject r = v.toObject();
+        const QString addr = r.value("address").toString();
+        if (addr.isEmpty()) continue;
+        prefixes.append(QStringLiteral("%1/%2").arg(addr).arg(r.value("range").toInt()));
+    }
+    return prefixes;
+}
+
+QStringList excludedAddressesFor(const QJsonObject& activateJson)
+{
+    QStringList addrs;
+    const QJsonArray excluded = activateJson.value("excludedAddresses").toArray();
+    for (const QJsonValue& v : excluded) {
+        const QString s = v.toString();
+        if (!s.isEmpty()) addrs.append(s);
+    }
+    return addrs;
+}
+
+QStringList resolversFor(const QJsonObject& activateJson)
+{
+    QStringList dns;
+    const QString primary = activateJson.value("primaryDnsServer").toString();
+    if (!primary.isEmpty()) dns.append(primary);
+    const QString secondary = activateJson.value("secondaryDnsServer").toString();
+    if (!secondary.isEmpty()) dns.append(secondary);
+    return dns;
+}
+
+QString interfaceNameForAddress(const QString& address)
+{
+    if (address.isEmpty()) return QString();
+    const QHostAddress target(address);
+    for (const QNetworkInterface& iface : QNetworkInterface::allInterfaces()) {
+        for (const QNetworkAddressEntry& entry : iface.addressEntries()) {
+            if (entry.ip() == target) {
+                return iface.name();
+            }
+        }
+    }
+    return QString();
+}
+}
+
 VpnTrafficGuard::VpnTrafficGuard(SecureAppSettingsRepository* appSettings, QObject *parent)
     : QObject(parent), m_appSettingsRepository(appSettings)
 {
@@ -79,13 +129,22 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
             }
             QString dns1 = vpnConfiguration.value(configKey::dns1).toString();
             QString dns2 = vpnConfiguration.value(configKey::dns2).toString();
-            const QString xrayIfname = vpnConfiguration.value("ifname").toString();
+            const bool isXrayBased = (proto == ProtocolUtils::protoToString(Proto::Xray) ||
+                                      proto == ProtocolUtils::protoToString(Proto::SSXray));
+            const QString tunIfname = isXrayBased
+                ? vpnConfiguration.value("ifname").toString()
+                : interfaceNameForAddress(protocol->vpnLocalAddress());
+#ifdef Q_OS_LINUX
+            const QString tunGw = isXrayBased ? protocol->vpnGateway() : QString();
+#else
+            const QString tunGw = protocol->vpnGateway();
+#endif
 #ifdef Q_OS_MACOS
             if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                iface->routeAddListVia(xrayIfname, protocol->vpnGateway(), QStringList() << dns1 << dns2);
+                iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
             }
 #else
-            iface->routeAddListVia(xrayIfname, protocol->vpnGateway(), QStringList() << dns1 << dns2);
+            iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
 #endif
 
             if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
@@ -100,7 +159,7 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
                                                 addSplitTunnelRoutes(protocolPtr->vpnGateway(), m_appSettingsRepository->routeMode());
                                             });
                 } else if (m_appSettingsRepository->routeMode() == amnezia::route_mode_ns::VpnAllExceptSites) {
-                    iface->routeAddListVia(xrayIfname, protocol->vpnGateway(), QStringList() << "0.0.0.0/1" << "128.0.0.0/1");
+                    iface->routeAddListVia(tunIfname, tunGw, QStringList() << "0.0.0.0/1" << "128.0.0.0/1");
 
                     iface->routeAddList(protocol->routeGateway(), QStringList() << remoteAddress);
 #ifdef Q_OS_MACOS
@@ -192,9 +251,8 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
     QJsonObject updatedConfig = m_config;
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
 #ifdef Q_OS_WIN
-        const bool engineNamedInterface = tunnel
-            && (VpnProtocol::isWireGuardBased(tunnel->container())
-                || VpnProtocol::isXrayBased(tunnel->container()));
+        const bool engineNamedInterface = VpnProtocol::isWireGuardBased(tunnel->container())
+            || VpnProtocol::isXrayBased(tunnel->container());
         const QString ifname = engineNamedInterface ? updatedConfig.value("ifname").toString() : QString();
         if (!ifname.isEmpty()) {
             updatedConfig.insert("vpnGateway", gateway);
@@ -240,7 +298,7 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
         if (isXrayBased) {
             if (updatedConfig.value(configKey::splitTunnelType).toInt() == amnezia::route_mode_ns::VpnAllSites) {
                 static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
-                const QString xrayIfname = tunnel ? tunnel->ifname() : QString();
+                const QString xrayIfname = tunnel->ifname();
                 auto routeAddList = iface->routeAddListVia(xrayIfname, gateway, subnets);
                 if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
                     qCritical() << "Failed to set routes for TUN";
@@ -291,42 +349,6 @@ void VpnTrafficGuard::flushAll()
         }
     });
 #endif
-}
-
-namespace {
-QStringList allowedIpPrefixesFor(const QJsonObject& activateJson)
-{
-    QStringList prefixes;
-    const QJsonArray ranges = activateJson.value("allowedIPAddressRanges").toArray();
-    for (const QJsonValue& v : ranges) {
-        const QJsonObject r = v.toObject();
-        const QString addr = r.value("address").toString();
-        if (addr.isEmpty()) continue;
-        prefixes.append(QStringLiteral("%1/%2").arg(addr).arg(r.value("range").toInt()));
-    }
-    return prefixes;
-}
-
-QStringList excludedAddressesFor(const QJsonObject& activateJson)
-{
-    QStringList addrs;
-    const QJsonArray excluded = activateJson.value("excludedAddresses").toArray();
-    for (const QJsonValue& v : excluded) {
-        const QString s = v.toString();
-        if (!s.isEmpty()) addrs.append(s);
-    }
-    return addrs;
-}
-
-QStringList resolversFor(const QJsonObject& activateJson)
-{
-    QStringList dns;
-    const QString primary = activateJson.value("primaryDnsServer").toString();
-    if (!primary.isEmpty()) dns.append(primary);
-    const QString secondary = activateJson.value("secondaryDnsServer").toString();
-    if (!secondary.isEmpty()) dns.append(secondary);
-    return dns;
-}
 }
 
 void VpnTrafficGuard::reserve(Tunnel* tunnel)
@@ -392,6 +414,28 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
     }
 
     if (!VpnProtocol::isWireGuardBased(tunnel->container())) {
+#ifdef Q_OS_LINUX
+        const auto protocol = tunnel->protocol();
+        const QString realIfname = protocol ? interfaceNameForAddress(protocol->vpnLocalAddress()) : QString();
+        if (realIfname.isEmpty()) {
+            qWarning() << "VpnTrafficGuard::applyPolicy: could not resolve interface for tunnel DNS";
+            return;
+        }
+        const QJsonObject cfg = tunnel->config();
+        const QString primary = cfg.value(amnezia::configKey::dns1).toString();
+        const QString secondary = cfg.value(amnezia::configKey::dns2).toString();
+        QList<QHostAddress> dnsResolvers;
+        if (!primary.isEmpty()) dnsResolvers.append(QHostAddress(primary));
+        if (!secondary.isEmpty() && secondary != primary) dnsResolvers.append(QHostAddress(secondary));
+        if (!dnsResolvers.isEmpty()) {
+            IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto updateRes = iface->updateResolvers(realIfname, dnsResolvers);
+                if (!updateRes.waitForFinished() || !updateRes.returnValue()) {
+                    qWarning() << "VpnTrafficGuard::applyPolicy: updateResolvers failed for" << realIfname;
+                }
+            });
+        }
+#endif
         return;
     }
 
@@ -439,6 +483,11 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
     }
 
     if (!VpnProtocol::isWireGuardBased(tunnel->container())) {
+#ifdef Q_OS_LINUX
+        IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+            iface->restoreResolvers();
+        });
+#endif
         return;
     }
 
