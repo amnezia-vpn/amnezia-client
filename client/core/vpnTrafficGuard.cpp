@@ -141,10 +141,16 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
 #endif
 #ifdef Q_OS_MACOS
             if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+                auto dnsRoutes = iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+                if (!dnsRoutes.waitForFinished()) {
+                    qWarning() << "VpnTrafficGuard::setupRoutes: DNS route request timed out";
+                }
             }
 #else
-            iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+            auto dnsRoutes = iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+            if (!dnsRoutes.waitForFinished()) {
+                qWarning() << "VpnTrafficGuard::setupRoutes: DNS route request timed out";
+            }
 #endif
 
             if (isXrayBased) {
@@ -175,11 +181,21 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
                                                 addSplitTunnelRoutes(protocolPtr->vpnGateway(), m_appSettingsRepository->routeMode());
                                             });
                 } else if (m_appSettingsRepository->routeMode() == amnezia::route_mode_ns::VpnAllExceptSites) {
-                    iface->routeAddListVia(tunIfname, tunGw, QStringList() << "0.0.0.0/1" << "128.0.0.0/1");
+                    static const QStringList catchAll = { "0.0.0.0/1", "128.0.0.0/1" };
+                    auto catchAllRoutes = iface->routeAddListVia(tunIfname, tunGw, catchAll);
+                    if (!catchAllRoutes.waitForFinished() || catchAllRoutes.returnValue() != catchAll.count()) {
+                        qWarning() << "VpnTrafficGuard::setupRoutes: Failed to set catch-all routes";
+                    }
 
-                    iface->routeAddList(protocol->routeGateway(), QStringList() << remoteAddress);
+                    auto serverBypass = iface->routeAddList(protocol->routeGateway(), QStringList() << remoteAddress);
+                    if (!serverBypass.waitForFinished() || serverBypass.returnValue() < 1) {
+                        qWarning() << "VpnTrafficGuard::setupRoutes: Failed to set server bypass route";
+                    }
 #ifdef Q_OS_MACOS
-                    iface->routeAddList(protocol->routeGateway(), QStringList() << dns1 << dns2);
+                    auto dnsBypass = iface->routeAddList(protocol->routeGateway(), QStringList() << dns1 << dns2);
+                    if (!dnsBypass.waitForFinished()) {
+                        qWarning() << "VpnTrafficGuard::setupRoutes: DNS bypass route request timed out";
+                    }
 #endif
                     addSplitTunnelRoutes(protocol->routeGateway(), m_appSettingsRepository->routeMode());
                 }
@@ -213,7 +229,10 @@ void VpnTrafficGuard::addSplitTunnelRoutes(const QString &gw, amnezia::RouteMode
     ips.removeDuplicates();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->routeAddList(gw, ips);
+        auto reply = iface->routeAddList(gw, ips);
+        if (!reply.waitForFinished() || reply.returnValue() != ips.count()) {
+            qWarning() << "VpnTrafficGuard::addSplitTunnelRoutes: Failed to add split tunnel routes";
+        }
     });
 
     for (const QString &site : sites) {
@@ -464,15 +483,32 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
     const QString peer = tunnel->remoteAddress();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        if (!peer.isEmpty()) iface->addExclusionRoute(ifname, peer);
+        if (!peer.isEmpty()) {
+            auto reply = iface->addExclusionRoute(ifname, peer);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: Failed to add exclusion route" << peer;
+            }
+        }
         for (const QString& addr : excluded) {
-            iface->addExclusionRoute(ifname, addr);
+            auto reply = iface->addExclusionRoute(ifname, addr);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: Failed to add exclusion route" << addr;
+            }
         }
         for (const QString& prefix : prefixes) {
-            iface->addAllowedIp(ifname, prefix);
+            auto reply = iface->addAllowedIp(ifname, prefix);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: Failed to add allowed ip" << prefix;
+            }
         }
-        iface->setTunnelResolvers(ifname, dns);
-        iface->flushDns();
+        auto resolvers = iface->setTunnelResolvers(ifname, dns);
+        if (!resolvers.waitForFinished() || !resolvers.returnValue()) {
+            qWarning() << "VpnTrafficGuard::applyPolicy: Failed to set tunnel resolvers";
+        }
+        auto flush = iface->flushDns();
+        if (!flush.waitForFinished() || !flush.returnValue()) {
+            qWarning() << "VpnTrafficGuard::applyPolicy: Failed to flush DNS";
+        }
     });
 #else
     Q_UNUSED(tunnel)
