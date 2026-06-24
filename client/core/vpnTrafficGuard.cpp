@@ -141,10 +141,16 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
 #endif
 #ifdef Q_OS_MACOS
             if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+                auto dnsRoutes = iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+                if (!dnsRoutes.waitForFinished()) {
+                    qWarning() << "VpnTrafficGuard::setupRoutes: DNS route request timed out";
+                }
             }
 #else
-            iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+            auto dnsRoutes = iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
+            if (!dnsRoutes.waitForFinished()) {
+                qWarning() << "VpnTrafficGuard::setupRoutes: DNS route request timed out";
+            }
 #endif
 
             if (isXrayBased) {
@@ -175,11 +181,21 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
                                                 addSplitTunnelRoutes(protocolPtr->vpnGateway(), m_appSettingsRepository->routeMode());
                                             });
                 } else if (m_appSettingsRepository->routeMode() == amnezia::route_mode_ns::VpnAllExceptSites) {
-                    iface->routeAddListVia(tunIfname, tunGw, QStringList() << "0.0.0.0/1" << "128.0.0.0/1");
+                    static const QStringList catchAll = { "0.0.0.0/1", "128.0.0.0/1" };
+                    auto catchAllRoutes = iface->routeAddListVia(tunIfname, tunGw, catchAll);
+                    if (!catchAllRoutes.waitForFinished() || catchAllRoutes.returnValue() != catchAll.count()) {
+                        qWarning() << "VpnTrafficGuard::setupRoutes: Failed to set catch-all routes";
+                    }
 
-                    iface->routeAddList(protocol->routeGateway(), QStringList() << remoteAddress);
+                    auto serverBypass = iface->routeAddList(protocol->routeGateway(), QStringList() << remoteAddress);
+                    if (!serverBypass.waitForFinished() || serverBypass.returnValue() < 1) {
+                        qWarning() << "VpnTrafficGuard::setupRoutes: Failed to set server bypass route";
+                    }
 #ifdef Q_OS_MACOS
-                    iface->routeAddList(protocol->routeGateway(), QStringList() << dns1 << dns2);
+                    auto dnsBypass = iface->routeAddList(protocol->routeGateway(), QStringList() << dns1 << dns2);
+                    if (!dnsBypass.waitForFinished()) {
+                        qWarning() << "VpnTrafficGuard::setupRoutes: DNS bypass route request timed out";
+                    }
 #endif
                     addSplitTunnelRoutes(protocol->routeGateway(), m_appSettingsRepository->routeMode());
                 }
@@ -213,7 +229,10 @@ void VpnTrafficGuard::addSplitTunnelRoutes(const QString &gw, amnezia::RouteMode
     ips.removeDuplicates();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->routeAddList(gw, ips);
+        auto reply = iface->routeAddList(gw, ips);
+        if (!reply.waitForFinished() || reply.returnValue() != ips.count()) {
+            qWarning() << "VpnTrafficGuard::addSplitTunnelRoutes: Failed to add split tunnel routes";
+        }
     });
 
     for (const QString &site : sites) {
@@ -251,7 +270,10 @@ void VpnTrafficGuard::finishFirewallHandover(Tunnel* tunnel)
         return;
     }
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->disableKillSwitchForTunnel(handoverIfname, QStringList());
+        auto reply = iface->disableKillSwitchForTunnel(handoverIfname, QStringList());
+        if (!reply.waitForFinished() || !reply.returnValue()) {
+            qWarning() << "VpnTrafficGuard::finishFirewallHandover: Failed to disable killswitch for" << handoverIfname;
+        }
     });
     tunnel->clearHandoverIfname();
 #else
@@ -274,9 +296,15 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
             updatedConfig.insert("vpnGateway", gateway);
             updatedConfig.insert("vpnServer", NetworkUtilities::getIPAddress(updatedConfig.value(configKey::hostName).toString()));
             if (QVariant(updatedConfig.value(configKey::killSwitchOption).toString()).toBool()) {
-                iface->enableKillSwitch(updatedConfig, 0);
+                auto ksReply = iface->enableKillSwitch(updatedConfig, 0);
+                if (!ksReply.waitForFinished() || !ksReply.returnValue()) {
+                    qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to enable killswitch";
+                }
             }
-            iface->enablePeerTraffic(updatedConfig);
+            auto peerReply = iface->enablePeerTraffic(updatedConfig);
+            if (!peerReply.waitForFinished() || !peerReply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to enable peer traffic";
+            }
         } else {
             QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
             for (int i = 0; i < netInterfaces.size(); i++) {
@@ -287,9 +315,15 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
                         updatedConfig.insert("vpnGateway", gateway);
                         updatedConfig.insert("vpnServer", NetworkUtilities::getIPAddress(updatedConfig.value(configKey::hostName).toString()));
                         if (QVariant(updatedConfig.value(configKey::killSwitchOption).toString()).toBool()) {
-                            iface->enableKillSwitch(updatedConfig, netInterfaces.at(i).index());
+                            auto ksReply = iface->enableKillSwitch(updatedConfig, netInterfaces.at(i).index());
+                            if (!ksReply.waitForFinished() || !ksReply.returnValue()) {
+                                qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to enable killswitch";
+                            }
                         }
-                        iface->enablePeerTraffic(updatedConfig);
+                        auto peerReply = iface->enablePeerTraffic(updatedConfig);
+                        if (!peerReply.waitForFinished() || !peerReply.returnValue()) {
+                            qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to enable peer traffic";
+                        }
                     }
                 }
             }
@@ -316,7 +350,10 @@ void VpnTrafficGuard::flushAll()
 {
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->restoreTunnelResolvers();
+        auto restoreResolvers = iface->restoreTunnelResolvers();
+        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue()) {
+            qWarning() << "VpnTrafficGuard::flushAll: Failed to restore tunnel resolvers";
+        }
         QRemoteObjectPendingReply<bool> reply = iface->disableKillSwitch();
         m_allowedEndpoints.clear();
         //TODO: why it takes so long?
@@ -369,7 +406,10 @@ void VpnTrafficGuard::release(Tunnel* tunnel)
                                    || VpnProtocol::isXrayBased(tunnel->container());
     m_allowedEndpoints.removeAll(tunnel->remoteAddress());
     IpcClient::withInterface([this, &tunnel, engineNamedInterface](QSharedPointer<IpcInterfaceReplica> iface) {
-        iface->disableKillSwitchForTunnel(engineNamedInterface ? tunnel->ifname() : QString(), m_allowedEndpoints);
+        auto reply = iface->disableKillSwitchForTunnel(engineNamedInterface ? tunnel->ifname() : QString(), m_allowedEndpoints);
+        if (!reply.waitForFinished() || !reply.returnValue()) {
+            qWarning() << "VpnTrafficGuard::release: Failed to disable killswitch for tunnel";
+        }
     });
 #else
     Q_UNUSED(tunnel)
@@ -443,15 +483,32 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
     const QString peer = tunnel->remoteAddress();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        if (!peer.isEmpty()) iface->addExclusionRoute(ifname, peer);
+        if (!peer.isEmpty()) {
+            auto reply = iface->addExclusionRoute(ifname, peer);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: Failed to add exclusion route" << peer;
+            }
+        }
         for (const QString& addr : excluded) {
-            iface->addExclusionRoute(ifname, addr);
+            auto reply = iface->addExclusionRoute(ifname, addr);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: Failed to add exclusion route" << addr;
+            }
         }
         for (const QString& prefix : prefixes) {
-            iface->addAllowedIp(ifname, prefix);
+            auto reply = iface->addAllowedIp(ifname, prefix);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::applyPolicy: Failed to add allowed ip" << prefix;
+            }
         }
-        iface->setTunnelResolvers(ifname, dns);
-        iface->flushDns();
+        auto resolvers = iface->setTunnelResolvers(ifname, dns);
+        if (!resolvers.waitForFinished() || !resolvers.returnValue()) {
+            qWarning() << "VpnTrafficGuard::applyPolicy: Failed to set tunnel resolvers";
+        }
+        auto flush = iface->flushDns();
+        if (!flush.waitForFinished() || !flush.returnValue()) {
+            qWarning() << "VpnTrafficGuard::applyPolicy: Failed to flush DNS";
+        }
     });
 #else
     Q_UNUSED(tunnel)
@@ -466,13 +523,19 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
 
     if (VpnProtocol::isXrayBased(tunnel->container())) {
         IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-            iface->restoreResolvers();
+            auto restore = iface->restoreResolvers();
+            if (!restore.waitForFinished() || !restore.returnValue()) {
+                qWarning() << "VpnTrafficGuard::revokePolicy: Failed to restore resolvers";
+            }
 #ifdef Q_OS_MAC
             const auto gw = NetworkUtilities::getGatewayAndIface();
             const QString uplinkIface = gw.second.name();
             const QString uplinkGateway = gw.first;
             if (!uplinkIface.isEmpty()) {
-                iface->xrayRemoveUplinkRoutes(uplinkIface, uplinkGateway);
+                auto remove = iface->xrayRemoveUplinkRoutes(uplinkIface, uplinkGateway);
+                if (!remove.waitForFinished() || !remove.returnValue()) {
+                    qWarning() << "VpnTrafficGuard::revokePolicy: Failed to remove xray uplink routes";
+                }
             }
 #endif
         });
@@ -482,7 +545,10 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
     if (!VpnProtocol::isWireGuardBased(tunnel->container())) {
 #ifdef Q_OS_LINUX
         IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-            iface->restoreResolvers();
+            auto restore = iface->restoreResolvers();
+            if (!restore.waitForFinished() || !restore.returnValue()) {
+                qWarning() << "VpnTrafficGuard::revokePolicy: Failed to restore resolvers";
+            }
         });
 #endif
         return;
@@ -495,12 +561,23 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         for (const QString& prefix : prefixes) {
-            iface->delAllowedIp(ifname, prefix);
+            auto reply = iface->delAllowedIp(ifname, prefix);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::revokePolicy: Failed to remove allowed ip" << prefix;
+            }
         }
         for (const QString& addr : excluded) {
-            iface->delExclusionRoute(ifname, addr);
+            auto reply = iface->delExclusionRoute(ifname, addr);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::revokePolicy: Failed to remove exclusion route" << addr;
+            }
         }
-        if (!peer.isEmpty()) iface->delExclusionRoute(ifname, peer);
+        if (!peer.isEmpty()) {
+            auto reply = iface->delExclusionRoute(ifname, peer);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::revokePolicy: Failed to remove exclusion route" << peer;
+            }
+        }
     });
 #else
     Q_UNUSED(tunnel)
@@ -613,7 +690,10 @@ void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
         m_allowedEndpoints.removeAll(from->remoteAddress());
 #ifndef Q_OS_WIN
         IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
-            iface->resetKillSwitchAllowedRange(m_allowedEndpoints);
+            auto reply = iface->resetKillSwitchAllowedRange(m_allowedEndpoints);
+            if (!reply.waitForFinished() || !reply.returnValue()) {
+                qWarning() << "VpnTrafficGuard::swap: Failed to reset killswitch allowed range";
+            }
         });
 #endif
         revokePolicy(from);
