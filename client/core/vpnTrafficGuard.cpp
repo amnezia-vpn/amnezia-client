@@ -147,6 +147,22 @@ void VpnTrafficGuard::setupRoutes(const QJsonObject &vpnConfiguration, const QSh
             iface->routeAddListVia(tunIfname, tunGw, QStringList() << dns1 << dns2);
 #endif
 
+            if (isXrayBased) {
+                if (vpnConfiguration.value(configKey::splitTunnelType).toInt() == amnezia::route_mode_ns::VpnAllSites) {
+                    static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
+                    auto routeAddList = iface->routeAddListVia(tunIfname, protocol->vpnGateway(), subnets);
+                    if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
+                        qCritical() << "Failed to set routes for TUN";
+                    }
+                }
+                auto stopRoutingIpv6 = iface->StopRoutingIpv6();
+                if (!stopRoutingIpv6.waitForFinished() || !stopRoutingIpv6.returnValue()) {
+                    qCritical() << "Failed to disable IPv6 routing";
+                } else {
+                    m_ipv6RoutingStopped = true;
+                }
+            }
+
             if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
                 iface->routeDeleteList(protocol->vpnGateway(), QStringList() << "0.0.0.0");
                 if (m_appSettingsRepository->routeMode() == amnezia::route_mode_ns::VpnOnlyForwardSites) {
@@ -292,25 +308,6 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
             }
         }
 #endif
-        const QString proto = updatedConfig.value(configKey::vpnProto).toString();
-        const bool isXrayBased = (proto == ProtocolUtils::protoToString(Proto::Xray) ||
-                                  proto == ProtocolUtils::protoToString(Proto::SSXray));
-        if (isXrayBased) {
-            if (updatedConfig.value(configKey::splitTunnelType).toInt() == amnezia::route_mode_ns::VpnAllSites) {
-                static const QStringList subnets = { "1.0.0.0/8", "2.0.0.0/7", "4.0.0.0/6", "8.0.0.0/5", "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
-                const QString xrayIfname = tunnel->ifname();
-                auto routeAddList = iface->routeAddListVia(xrayIfname, gateway, subnets);
-                if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
-                    qCritical() << "Failed to set routes for TUN";
-                }
-            }
-            auto StopRoutingIpv6 = iface->StopRoutingIpv6();
-            if (!StopRoutingIpv6.waitForFinished() || !StopRoutingIpv6.returnValue()) {
-                qCritical() << "Failed to disable IPv6 routing";
-            } else {
-                m_ipv6RoutingStopped = true;
-            }
-        }
     });
 #endif
 }
@@ -539,6 +536,7 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
     connect(tunnel, &Tunnel::activated, this, [this, tunnel] {
         if (auto p = tunnel->protocol()) {
             applyKillSwitch(tunnel, p->vpnGateway(), p->vpnLocalAddress());
+            setupRoutes(tunnel->config(), p, tunnel->remoteAddress());
         }
     });
 #ifdef Q_OS_WIN
