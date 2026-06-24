@@ -1,0 +1,8 @@
+# Локальные сборки
+build/
+build-*/
+cmake-build-*/
+
+# Conan
+CMakeUserPresets.json
+conan.lock
