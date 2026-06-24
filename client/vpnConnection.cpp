@@ -68,16 +68,6 @@ void VpnConnection::onKillSwitchModeChanged(bool enabled)
 
 void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 {
-#ifdef AMNEZIA_DESKTOP
-    switch (state) {
-        case Vpn::ConnectionState::Connected: {
-            m_trafficGuard->setupRoutes(m_vpnConfiguration, vpnProtocol(), m_remoteAddress);
-        } break;
-        default:
-            break;
-    }
-#endif
-
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     if (state == Vpn::ConnectionState::Connected ||
         state == Vpn::ConnectionState::Connecting ||
