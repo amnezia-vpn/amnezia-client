@@ -42,6 +42,7 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import java.io.File
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
@@ -763,7 +764,13 @@ class AmneziaActivity : QtActivity() {
     fun openFile(filter: String?) {
         Log.v(TAG, "Open file with filter: $filter")
         mainScope.launch {
-            val intent = if (!isOnTv()) {
+            val systemPickerPackage = listOf("com.google.android.documentsui", "com.android.documentsui")
+                .firstOrNull { pkg ->
+                    try { packageManager.getPackageInfo(pkg, 0); true }
+                    catch (_: PackageManager.NameNotFoundException) { false }
+                }
+
+            val intent = if (!isOnTv() && systemPickerPackage != null) {
                 val mimeTypes = if (!filter.isNullOrEmpty()) {
                     val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
                     val mime = MimeTypeMap.getSingleton()
@@ -789,6 +796,7 @@ class AmneziaActivity : QtActivity() {
                             else -> type = "*/*"
                         }
                     }
+                    `package` = systemPickerPackage
                 }
             } else {
                 Intent(this@AmneziaActivity, TvFilePicker::class.java)
@@ -800,8 +808,11 @@ class AmneziaActivity : QtActivity() {
                         if (isOnTv() && it?.hasExtra("activityNotFound") == true) {
                             showNoFileBrowserAlertDialog()
                         }
-                        val uri = it?.data?.apply {
-                            grantUriPermission(packageName, this, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        val uri = it?.data?.let { u ->
+                            if (u.scheme == "content") {
+                                try { grantUriPermission(packageName, u, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
+                            }
+                            u
                         }?.toString() ?: ""
                         Log.v(TAG, "Open file: $uri")
                         if (uri.isNotEmpty()) {
@@ -841,7 +852,12 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Get fd for $fileName")
         return blockingCall(Dispatchers.IO) {
             try {
-                pfd = contentResolver.openFileDescriptor(Uri.parse(fileName), "r")
+                val uri = Uri.parse(fileName)
+                pfd = if (uri.scheme == "file") {
+                    ParcelFileDescriptor.open(File(uri.path!!), ParcelFileDescriptor.MODE_READ_ONLY)
+                } else {
+                    contentResolver.openFileDescriptor(uri, "r")
+                }
                 pfd?.fd ?: -1
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get fd: $e")
@@ -1061,13 +1077,11 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun sendTouch(x: Float, y: Float) {
         Log.v(TAG, "Send touch: $x, $y")
-        blockingCall {
             findQtWindow(window.decorView)?.let {
                 Log.v(TAG, "Send touch to $it")
                 it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN))
                 it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP))
             }
-        }
     }
 
     private fun findQtWindow(view: View): View? {
