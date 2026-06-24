@@ -199,6 +199,18 @@ ErrorCode OpenVpnProtocol::start()
     }
 #endif
 
+#ifdef Q_OS_WIN
+    if (m_routeGateway.isEmpty()) {
+        const QString gw = NetworkUtilities::getGatewayAndIface().first;
+        if (!gw.isEmpty()) {
+            m_routeGateway = gw;
+            qDebug() << "Set VPN route gateway" << m_routeGateway;
+        } else {
+            qWarning() << "Unable to set VPN route gateway";
+        }
+    }
+#endif
+
     uint mgmtPort = selectMgmtPort();
     qDebug() << "OpenVpnProtocol::start mgmt port selected:" << mgmtPort;
 
