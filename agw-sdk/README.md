@@ -20,7 +20,11 @@ Qt-free C++20 транспорт к API-шлюзу Amnezia (вынос `GatewayC
   (S3-пути + prod-расшифровка через `SHA-512(pubkey)`), `proxy_picker` (health-check `lmbd-health`),
   встройка в `executePost` с кешем рабочего прокси на инстансе (под мьютексом). Интеграционный тест:
   прямой ответ подозрителен → S3 → health → прокси → успех; повторный запрос идёт сразу на кеш.
-- [ ] Фаза 4 — async/`CancellationToken`, пул потоков.
+- [x] **Фаза 4** — `util::ThreadPool` (drain в деструкторе), `postAsync`(коллбэк на потоке пула)/
+  `postFuture`(`std::future`) поверх `executePost`, `CancellationToken` (проверки между шагами
+  failover + прерывание трансфера через progress-коллбэк curl → `ErrorCode::Cancelled`). Кеш прокси
+  под мьютексом, пул — последний член Impl (рушится первым, дожидаясь задач). TSan чисто; ASan+UBSan
+  10/10.
 - [ ] Фаза 5 — C-ABI + режимы сборки + Dart-smoke.
 - [ ] Фаза 6 — интеграция в Qt-клиент через адаптер.
 
@@ -44,6 +48,17 @@ tests/         unit + golden (+ вендоренный nlohmann для офла�
 cmake -S . -B build-local -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
 cmake --build build-local -j
 ctest --test-dir build-local --output-on-failure
+```
+
+Санитайзеры (macOS): TSan — на конкурентных тестах; ASan+UBSan — `detect_leaks=0` (LSan на Darwin
+не поддержан):
+
+```sh
+cmake -S . -B build-asan -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3) \
+  -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -g -O1" \
+  -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+cmake --build build-asan -j
+ASAN_OPTIONS=detect_leaks=0 ctest --test-dir build-asan --output-on-failure
 ```
 
 ## Сборка через Conan (как в проекте)

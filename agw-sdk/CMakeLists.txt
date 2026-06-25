@@ -21,6 +21,7 @@ set(AGW_DEPS_MODE "shared-deps" CACHE STRING "Dependency mode: shared-deps | ven
 
 # --- зависимости ------------------------------------------------------------
 find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
 
 # libcurl (транспорт по умолчанию). Если не найден — SDK собирается без него, а клиент обязан
 # передать свой IHttpClient через Config (см. default_client_fallback.cpp).
@@ -56,6 +57,7 @@ add_library(agw STATIC
     src/util/uuid.cpp
     src/util/json.cpp
     src/util/url.cpp
+    src/util/thread_pool.cpp
 )
 add_library(agw::agw ALIAS agw)
 
@@ -65,7 +67,7 @@ target_include_directories(agw
 )
 
 target_link_libraries(agw
-    PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json
+    PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json Threads::Threads
 )
 
 if(CURL_FOUND)

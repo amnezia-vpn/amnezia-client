@@ -1,6 +1,7 @@
 #ifndef AGW_HTTP_H
 #define AGW_HTTP_H
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
@@ -27,6 +28,10 @@ struct HttpRequest {
     std::string body;    // тело для POST
     std::vector<std::pair<std::string, std::string>> headers;
     int timeoutMsecs = 0;
+
+    // Кооперативная отмена: если задан и вернёт true во время трансфера — реализация прерывает
+    // его (результат TransportError::Canceled). Пусто = отмена не поддерживается на этот запрос.
+    std::function<bool()> cancelCheck;
 };
 
 struct HttpResponse {

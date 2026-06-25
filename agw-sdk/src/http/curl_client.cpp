@@ -26,6 +26,16 @@ std::size_t writeCallback(char *ptr, std::size_t size, std::size_t nmemb, void *
     return total;
 }
 
+// Прерывание трансфера по запросу отмены: ненулевой возврат → CURLE_ABORTED_BY_CALLBACK.
+int xferCallback(void *clientp, curl_off_t, curl_off_t, curl_off_t, curl_off_t)
+{
+    auto *check = static_cast<const std::function<bool()> *>(clientp);
+    if (check && *check && (*check)()) {
+        return 1;
+    }
+    return 0;
+}
+
 TransportError mapCurlError(CURLcode code, bool &sslError)
 {
     sslError = false;
@@ -85,6 +95,12 @@ HttpResponse CurlHttpClient::send(const HttpRequest &request)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.body);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+
+    if (request.cancelCheck) {
+        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+        curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferCallback);
+        curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &request.cancelCheck);
+    }
 
     if (request.method == "POST") {
         curl_easy_setopt(curl, CURLOPT_POST, 1L);
