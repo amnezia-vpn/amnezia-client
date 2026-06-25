@@ -5,10 +5,14 @@ class AmneziaVPN(ConanFile):
     generators = "VirtualBuildEnv", "CMakeConfigDeps"
 
     options = {
-        "macos_ne": [True, False]
+        "macos_ne": [True, False],
+        # True (по умолчанию): SDK собирается из исходников в дереве клиента (отлаживается) —
+        # тянем его зависимости. False: потребляем готовый Conan-пакет agw-sdk.
+        "agw_sdk_from_source": [True, False]
     }
     default_options = {
-        "macos_ne": False
+        "macos_ne": False,
+        "agw_sdk_from_source": True
     }
 
     def requirements(self):
@@ -45,3 +49,11 @@ class AmneziaVPN(ConanFile):
         self.requires("libssh/0.11.3@amnezia")
         self.requires("openssl/3.6.2")
         self.requires("zlib/1.3.2")
+
+        # AGW SDK — транспорт к API-шлюзу (Qt-free, общий OpenSSL/3.6.2).
+        if self.options.agw_sdk_from_source:
+            # Собираем SDK из исходников (agw-sdk/ через add_subdirectory) — нужны его зависимости.
+            self.requires("libcurl/8.10.1")
+            self.requires("nlohmann_json/3.11.3")
+        else:
+            self.requires("agw-sdk/0.1.0")

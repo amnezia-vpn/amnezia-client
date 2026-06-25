@@ -46,3 +46,19 @@ list(APPEND LIBS OpenSSL::SSL OpenSSL::Crypto)
 
 find_package(libssh REQUIRED)
 list(APPEND LIBS ssh::ssh)
+
+# AGW SDK — транспорт к API-шлюзу (agw-sdk, Qt-free). gatewayController линкуется как адаптер.
+# Два режима:
+#   ON  (по умолчанию) — собираем SDK ИЗ ИСХОДНИКОВ через add_subdirectory: можно заходить
+#                        отладчиком внутрь SDK, символы и -g идут из основной сборки;
+#   OFF                — потребляем готовый Conan-пакет agw-sdk (как другие нативные компоненты).
+option(AGW_SDK_FROM_SOURCE "Build agw-sdk from source (debuggable) instead of the Conan package" ON)
+if(AGW_SDK_FROM_SOURCE)
+    message(STATUS "agw-sdk: building FROM SOURCE (add_subdirectory) — debuggable")
+    add_subdirectory(${CMAKE_SOURCE_DIR}/agw-sdk ${CMAKE_BINARY_DIR}/agw-sdk)
+    list(APPEND LIBS agw::agw)
+else()
+    message(STATUS "agw-sdk: consuming Conan package")
+    find_package(agw-sdk REQUIRED)
+    list(APPEND LIBS agw::agw)
+endif()
