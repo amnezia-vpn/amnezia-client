@@ -25,18 +25,40 @@ Qt-free C++20 транспорт к API-шлюзу Amnezia (вынос `GatewayC
   failover + прерывание трансфера через progress-коллбэк curl → `ErrorCode::Cancelled`). Кеш прокси
   под мьютексом, пул — последний член Impl (рушится первым, дожидаясь задач). TSan чисто; ASan+UBSan
   10/10.
-- [ ] Фаза 5 — C-ABI + режимы сборки + Dart-smoke.
+- [x] **Фаза 5** — C-ABI (`include/agw/c_abi.h` + `src/c_abi.cpp`, `agw_*`: создание/уничтожение,
+  sync/async `post`, токен отмены, освобождение результата; на границе только C-типы). Сборка:
+  object-библиотека → static `agw` + shared `agw_capi` (экспортирует **только** `agw_*`, остальное
+  скрыто). C-smoke (чистый C) и Dart-smoke (`dart:ffi`) проходят. `conan create` (shared-deps)
+  зелёный — пакет с `libagw.a` + `libagw_capi.dylib` + заголовками. Режим `vendored` (статические
+  зависимости) задан в conanfile (`-o deps_mode=vendored`).
 - [ ] Фаза 6 — интеграция в Qt-клиент через адаптер.
 
 ## Раскладка
 
 ```
-include/agw/   публичные заголовки (types.h; config/client/http — Фаза 2+)
+include/agw/   публичные заголовки (types, config, client, http, cancellation, c_abi)
 src/crypto/    AES, RSA, SHA-512, RNG
-src/util/      base64, uuid, json (Qt-Indented), log/thread_pool — позже
-src/protocol/  имена полей API; request_builder/response/error_mapping — Фаза 2
-src/failover/  Фаза 3
-tests/         unit + golden (+ вендоренный nlohmann для офлайн-сборки)
+src/util/      base64, uuid, json (Qt-Indented), url, thread_pool
+src/protocol/  имена полей API, request_builder, response, error_mapping
+src/failover/  bypass_policy, proxy_list, proxy_picker
+src/http/      curl_client (+ fallback)
+src/c_abi.cpp  C-ABI обёртка
+tests/         unit + golden + integration (+ вендоренный nlohmann для офлайн-сборки)
+examples/      c_smoke (чистый C), dart_smoke (dart:ffi)
+```
+
+## C-ABI и потребление из Dart/C
+
+Публичный C-заголовок — `include/agw/c_abi.h`. Shared-библиотека `libagw_capi.*` экспортирует только
+`agw_*`. Примеры:
+
+```sh
+# чистый C
+cc -std=c11 -Iinclude examples/c_smoke/smoke.c -Lbuild-local -lagw_capi -o /tmp/agw_smoke
+DYLD_LIBRARY_PATH=build-local /tmp/agw_smoke         # → код 1105, OK
+
+# Dart (dart:ffi)
+cd examples/dart_smoke && dart pub get && dart run   # → код 1105, OK
 ```
 
 ## Локальная сборка и тесты (без Conan)

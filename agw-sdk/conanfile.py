@@ -9,28 +9,32 @@ class AgwSdkConan(ConanFile):
     description = "AGW SDK — Qt-free C++ transport to the Amnezia API gateway (Tier 1)"
     settings = "os", "compiler", "build_type", "arch"
 
-    # shared-deps: линкуем общий OpenSSL/nlohmann из Conan (наши приложения).
-    # vendored: бандлим зависимости со скрытием символов (сторонние/standalone) — Фаза 5.
+    # shared-deps: линкуем общий OpenSSL/curl/nlohmann из Conan (наши приложения).
+    # vendored: бандлим зависимости статически + скрытие символов (сторонние/standalone).
     options = {
         "deps_mode": ["shared-deps", "vendored"],
         "build_tests": [True, False],
+        "build_capi_shared": [True, False],
     }
     default_options = {
         "deps_mode": "shared-deps",
         "build_tests": False,
+        "build_capi_shared": True,
     }
 
     exports_sources = "CMakeLists.txt", "include/*", "src/*", "tests/*"
 
     def requirements(self):
-        # Версия OpenSSL совпадает с приложением (см. корневой conanfile.py) — без второго OpenSSL.
+        # Версия OpenSSL совпадает с приложением (корневой conanfile.py) — без второго OpenSSL.
         self.requires("openssl/3.6.2")
+        self.requires("libcurl/8.10.1")
         self.requires("nlohmann_json/3.11.3")
-        # libcurl добавляется в Фазе 2 (за IHttpClient).
 
-    def build_requirements(self):
-        if self.options.build_tests:
-            self.test_requires("gtest/1.15.0")
+    def configure(self):
+        # vendored: тянем статические зависимости, чтобы забандлить их в библиотеку.
+        if self.options.deps_mode == "vendored":
+            self.options["openssl"].shared = False
+            self.options["libcurl"].shared = False
 
     def layout(self):
         cmake_layout(self)
@@ -41,6 +45,7 @@ class AgwSdkConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["AGW_DEPS_MODE"] = str(self.options.deps_mode)
         tc.variables["AGW_BUILD_TESTS"] = bool(self.options.build_tests)
+        tc.variables["AGW_BUILD_CAPI_SHARED"] = bool(self.options.build_capi_shared)
         tc.generate()
 
     def build(self):

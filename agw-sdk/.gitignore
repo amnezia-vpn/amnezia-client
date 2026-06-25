@@ -6,3 +6,9 @@ cmake-build-*/
 # Conan
 CMakeUserPresets.json
 conan.lock
+
+# Примеры
+examples/dart_smoke/.dart_tool/
+examples/dart_smoke/pubspec.lock
+examples/c_smoke/smoke
+test_package/
