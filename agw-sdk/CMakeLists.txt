@@ -49,6 +49,9 @@ add_library(agw STATIC
     src/protocol/request_builder.cpp
     src/protocol/response.cpp
     src/protocol/error_mapping.cpp
+    src/failover/bypass_policy.cpp
+    src/failover/proxy_list.cpp
+    src/failover/proxy_picker.cpp
     src/util/base64.cpp
     src/util/uuid.cpp
     src/util/json.cpp

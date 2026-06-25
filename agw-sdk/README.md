@@ -16,7 +16,10 @@ Qt-free C++20 транспорт к API-шлюзу Amnezia (вынос `GatewayC
 - [x] **Фаза 2** — `IHttpClient`(libcurl) + `Config`/`GatewayClient`/`executePost` + sync `post`;
   `request_builder`/`response`/`error_mapping`; интеграционный тест через in-process mock-шлюз
   (полный round-trip: SDK шифрует → «сервер» расшифровывает → шифрует ответ → SDK расшифровывает).
-- [ ] Фаза 3 — failover (S3-список, health-check, перебор прокси).
+- [x] **Фаза 3** — failover: `bypass_policy` (`shouldBypassProxy` дословно), `proxy_list`
+  (S3-пути + prod-расшифровка через `SHA-512(pubkey)`), `proxy_picker` (health-check `lmbd-health`),
+  встройка в `executePost` с кешем рабочего прокси на инстансе (под мьютексом). Интеграционный тест:
+  прямой ответ подозрителен → S3 → health → прокси → успех; повторный запрос идёт сразу на кеш.
 - [ ] Фаза 4 — async/`CancellationToken`, пул потоков.
 - [ ] Фаза 5 — C-ABI + режимы сборки + Dart-smoke.
 - [ ] Фаза 6 — интеграция в Qt-клиент через адаптер.
