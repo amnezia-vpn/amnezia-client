@@ -12,7 +12,7 @@
 #include "qjsonarray.h"
 #include "version.h"
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
 static bool isValidIpOrCidr(const QString &value) {
     static const QRegularExpression re(
         QStringLiteral(R"(^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$)"));
@@ -414,28 +414,40 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), blockAll);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), allowNets);
-    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), allowNets, QStringLiteral("allownets"), allownets);
+    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), allowNets, QStringLiteral("allownets"), filterIpList(allownets));
 
     MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), blockNets);
-    MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), blockNets, QStringLiteral("blocknets"), blocknets);
+    MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), blockNets, QStringLiteral("blocknets"), filterIpList(blocknets));
     MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
 
     QStringList dnsServers;
-    dnsServers.append(configStr.value(amnezia::configKey::dns1).toString());
+    const QString dns1 = configStr.value(amnezia::configKey::dns1).toString();
+    if (isValidIpOrCidr(dns1))
+        dnsServers.append(dns1);
+    else if (!dns1.isEmpty())
+        qWarning() << "IPC: rejected invalid dns1:" << dns1;
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::configKey::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::configKey::dns2).toString());
+    if (!dns1.contains(amnezia::protocols::dns::amneziaDnsIp)) {
+        const QString dns2 = configStr.value(amnezia::configKey::dns2).toString();
+        if (isValidIpOrCidr(dns2))
+            dnsServers.append(dns2);
+        else if (!dns2.isEmpty())
+            qWarning() << "IPC: rejected invalid dns2:" << dns2;
     }
-    
+
     for (auto dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
-        dnsServers.append(dns.toString());
+        const QString dnsStr = dns.toString();
+        if (isValidIpOrCidr(dnsStr))
+            dnsServers.append(dnsStr);
+        else if (!dnsStr.isEmpty())
+            qWarning() << "IPC: rejected invalid allowedDnsServer:" << dnsStr;
     }
     
     MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
