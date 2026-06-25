@@ -13,7 +13,14 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # --- опции ------------------------------------------------------------------
-option(AGW_BUILD_TESTS "Build agw-sdk tests" ON)
+# Когда SDK подключают через add_subdirectory (отладочная сборка в клиенте), по умолчанию НЕ строим
+# тесты и НЕ строим shared C-ABI, чтобы не пачкать родительскую сборку. Standalone — всё включено.
+if(PROJECT_IS_TOP_LEVEL)
+    set(_agw_default_aux ON)
+else()
+    set(_agw_default_aux OFF)
+endif()
+option(AGW_BUILD_TESTS "Build agw-sdk tests" ${_agw_default_aux})
 
 # Режимы зависимостей (Фаза 5): shared-deps — общий OpenSSL из Conan; vendored — бандл.
 # На Фазе 1 определяем only-флаг, реальный механизм бандла появится в Фазе 5.
@@ -91,7 +98,7 @@ target_link_libraries(agw PUBLIC agw_obj)
 add_library(agw::agw ALIAS agw)
 
 # Shared C-ABI библиотека (для dart:ffi и сторонних). Экспортирует только agw_*.
-option(AGW_BUILD_CAPI_SHARED "Build shared C-ABI library (agw_capi)" ON)
+option(AGW_BUILD_CAPI_SHARED "Build shared C-ABI library (agw_capi)" ${_agw_default_aux})
 if(AGW_BUILD_CAPI_SHARED)
     add_library(agw_capi SHARED $<TARGET_OBJECTS:agw_obj>)
     target_link_libraries(agw_capi PRIVATE agw_obj)
@@ -106,16 +113,18 @@ set_target_properties(agw PROPERTIES
     POSITION_INDEPENDENT_CODE ON
 )
 
-# --- установка (для Conan-пакета) -------------------------------------------
-include(GNUInstallDirs)
-install(TARGETS agw ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-if(AGW_BUILD_CAPI_SHARED)
-    install(TARGETS agw_capi
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+# --- установка (только для Conan-пакета / standalone; не при add_subdirectory) ---------------
+if(PROJECT_IS_TOP_LEVEL)
+    include(GNUInstallDirs)
+    install(TARGETS agw ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    if(AGW_BUILD_CAPI_SHARED)
+        install(TARGETS agw_capi
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+    endif()
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/agw
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/agw
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # --- тесты ------------------------------------------------------------------
 if(AGW_BUILD_TESTS)

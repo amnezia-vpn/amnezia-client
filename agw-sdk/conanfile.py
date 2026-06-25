@@ -60,3 +60,6 @@ class AgwSdkConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["agw"]
         self.cpp_info.includedirs = ["include"]
+        # Потребитель подключает: find_package(agw-sdk) + target agw::agw
+        self.cpp_info.set_property("cmake_file_name", "agw-sdk")
+        self.cpp_info.set_property("cmake_target_name", "agw::agw")

@@ -31,7 +31,13 @@ Qt-free C++20 транспорт к API-шлюзу Amnezia (вынос `GatewayC
   скрыто). C-smoke (чистый C) и Dart-smoke (`dart:ffi`) проходят. `conan create` (shared-deps)
   зелёный — пакет с `libagw.a` + `libagw_capi.dylib` + заголовками. Режим `vendored` (статические
   зависимости) задан в conanfile (`-o deps_mode=vendored`).
-- [ ] Фаза 6 — интеграция в Qt-клиент через адаптер.
+- [~] **Фаза 6** — интеграция в Qt-клиент. Готово: `GatewayController` переписан тонким адаптером
+  над `agw::GatewayClient` (сигнатуры один в один, байт-паритет payload, персистентный клиент на
+  окружение, `onBeforeRequest` = iOS inet + desktop kill-switch, async через `QPromise`+маршалинг);
+  проводка сборки (корневой `conanfile` requires `agw-sdk/0.1.0`, `client/cmake/3rdparty.cmake`
+  линкует `agw::agw`). Осталось (вне этого окружения): Qt-сборка под все платформы, перевод
+  синхронных вызовов (`subscription`/`servicesCatalog` `executeRequest`) на рабочий поток, регрессия
+  против dev/prod. См. `docs/plans/gateway-sdk/agw-sdk-tier1-phase6-integration.md`.
 
 ## Раскладка
 

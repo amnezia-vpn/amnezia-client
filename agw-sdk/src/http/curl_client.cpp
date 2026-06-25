@@ -95,6 +95,10 @@ HttpResponse CurlHttpClient::send(const HttpRequest &request)
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.body);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+    // Паритет с QNetworkAccessManager: тот автоматически распаковывает gzip/deflate-ответы.
+    // "" = объявляем все поддерживаемые curl кодировки и прозрачно их декодируем (иначе тело
+    // придёт сжатым и AES-расшифровка ответа шлюза упадёт → ApiConfigDecryptionError).
+    curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
     if (request.cancelCheck) {
         curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
