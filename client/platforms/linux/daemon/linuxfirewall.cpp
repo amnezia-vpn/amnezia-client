@@ -103,13 +103,6 @@ int LinuxFirewall::linkChain(LinuxFirewall::IPVersion ip, const QString& chain, 
     const QString cmd = getCommand(ip);
     if (mustBeFirst)
     {
-        // This monster shell script does the following:
-        // 1. Check if a rule with the appropriate target exists at the top of the parent chain
-        // 2. If not, insert a jump rule at the top of the parent chain
-        // 3. Look for and delete a single rule with the designated target at an index > 1
-        //    (we can't safely delete all rules at once since rule numbers change)
-        // TODO: occasionally this script results in warnings in logs "Bad rule (does a matching rule exist in the chain?)" - this happens when
-        // the e.g OUTPUT chain is empty but this script attempts to delete things from it anyway. It doesn't cause any problems, but we should still fix at some point..
         return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs -r %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
     }
     else
@@ -549,14 +542,12 @@ int LinuxFirewall::executeIptables(const QString &program, const QStringList &ar
 
 void LinuxFirewall::setupTrafficSplitting()
 {
-    // net_cls cgroup v1 is not available on cgroup v2 systems (Ubuntu 22.04+)
     const QString cgroupBase = QStringLiteral("/sys/fs/cgroup/net_cls");
     if (!QFileInfo::exists(cgroupBase)) {
         logger.warning() << "net_cls cgroup v1 not available, traffic splitting disabled";
         return;
     }
 
-    // Ensure routing table is registered before ip rule/route commands
     execute(QStringLiteral(
         "if ! grep -qE '^[0-9]+[[:space:]]+%1$' /etc/iproute2/rt_tables 2>/dev/null ; then "
         "echo '200 %1' >> /etc/iproute2/rt_tables ; fi"

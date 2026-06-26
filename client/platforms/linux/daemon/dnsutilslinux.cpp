@@ -162,10 +162,6 @@ bool DnsUtilsLinux::restoreResolvers() {
   }
   m_linkDomains.clear();
 
-  /* Revert the VPN interface DNS. Save the ifindex so that
-   * onResolverRegistered() can call RevertLink again after flushDns()
-   * restarts systemd-resolved (handles the case where systemd-resolved
-   * is unresponsive at disconnect time). */
   if (m_ifindex > 0) {
     m_revertAfterRegister = m_ifindex;
     m_ifindex = 0;
