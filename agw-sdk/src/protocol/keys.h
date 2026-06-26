@@ -25,6 +25,23 @@ inline constexpr const char *apiConfig = "api_config";
 inline constexpr const char *serviceProtocol = "service_protocol";
 inline constexpr const char *authData = "auth_data";
 inline constexpr const char *subscriptionEndDate = "end_date";
+
+// Поля payload типизированных методов (Tier 2, Шаг 1).
+inline constexpr const char *osVersion = "os_version";
+inline constexpr const char *appVersion = "app_version";
+inline constexpr const char *cliName = "cli_name";
+inline constexpr const char *cliVersion = "cli_version";
+inline constexpr const char *appLanguage = "app_language";
+inline constexpr const char *installationUuid = "installation_uuid";
+inline constexpr const char *services = "services";
+inline constexpr const char *locale = "locale";
+inline constexpr const char *news = "news";
+inline constexpr const char *url = "url";
+
+// account_info / renewal_link (Шаг 2).
+inline constexpr const char *serverCountryCode = "server_country_code";
+inline constexpr const char *subscriptionStatus = "subscription_status";
+inline constexpr const char *renewalUrl = "renewal_url";
 }
 
 #endif

@@ -71,6 +71,8 @@ add_library(agw_obj OBJECT
     src/util/zlib.cpp
     src/services/vpn_key.cpp
     src/services/subscription.cpp
+    src/services/api_methods.cpp
+    src/services/models.cpp
 )
 
 target_include_directories(agw_obj
