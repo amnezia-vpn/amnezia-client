@@ -6,13 +6,15 @@
 #include "systemTrayNotificationHandler.h"
 
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
 #  include "platforms/macos/macosutils.h"
 #endif
 
 #include <QApplication>
 #include <QDesktopServices>
 #include <QIcon>
+#include <QOperatingSystemVersion>
+#include <QSysInfo>
 #include <QWindow>
 
 #include "version.h"
@@ -22,7 +24,6 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     m_systemTrayIcon(parent)
 
 {
-    m_systemTrayIcon.show();
     connect(&m_systemTrayIcon, &QSystemTrayIcon::activated, this, &SystemTrayNotificationHandler::onTrayActivated);
 
     m_trayActionShow =  m_menu.addAction(QIcon(":/images/tray/application.png"), tr("Show") + " " + APPLICATION_NAME, this, [this](){
@@ -44,8 +45,25 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
                                        this,
                                        [&](){ qApp->quit(); });
 
-    m_systemTrayIcon.setContextMenu(&m_menu);
+#ifdef Q_OS_MACOS
+    const auto currentMacosVersion = QOperatingSystemVersion::current();
+    const QString productVersion = QSysInfo::productVersion();
+    bool parsedProductVersion = false;
+    const int productMajorVersion = productVersion.section('.', 0, 0).toInt(&parsedProductVersion);
+    const int majorVersion = parsedProductVersion ? productMajorVersion : currentMacosVersion.majorVersion();
+    // Qt 6.10's Cocoa tray menu path crashes on macOS 26+ when the status item menu is opened.
+    m_contextMenuEnabled = majorVersion < 26;
+#endif
+
+    if (m_contextMenuEnabled) {
+        m_systemTrayIcon.setContextMenu(&m_menu);
+    } else {
+        qWarning().noquote() << QString("Qt tray context menu disabled on macOS %1 to avoid a Cocoa status item crash")
+                                    .arg(QSysInfo::productVersion());
+    }
+
     setTrayState(Vpn::ConnectionState::Disconnected);
+    m_systemTrayIcon.show();
 }
 
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
@@ -74,7 +92,7 @@ void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUr
 void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
 {
     QIcon trayIconMask(QPixmap(iconPath).scaled(128,128));
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
     trayIconMask.setIsMask(true);
 #endif
     m_systemTrayIcon.setIcon(trayIconMask);
@@ -82,8 +100,15 @@ void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
 
 void SystemTrayNotificationHandler::onTrayActivated(QSystemTrayIcon::ActivationReason reason)
 {
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
     if(reason == QSystemTrayIcon::DoubleClick || reason == QSystemTrayIcon::Trigger) {
+        emit raiseRequested();
+    }
+#else
+    if (!m_contextMenuEnabled
+        && (reason == QSystemTrayIcon::DoubleClick
+            || reason == QSystemTrayIcon::Trigger
+            || reason == QSystemTrayIcon::Context)) {
         emit raiseRequested();
     }
 #endif
@@ -170,4 +195,3 @@ void SystemTrayNotificationHandler::showHideWindow() {
 //#endif
 //  }
 }
-

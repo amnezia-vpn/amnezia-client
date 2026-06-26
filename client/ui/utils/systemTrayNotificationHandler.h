@@ -39,6 +39,7 @@ private:
 private:
     QMenu m_menu;
     QSystemTrayIcon m_systemTrayIcon;
+    bool m_contextMenuEnabled = true;
 
     QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;
