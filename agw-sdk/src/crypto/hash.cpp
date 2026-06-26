@@ -6,10 +6,8 @@
 
 namespace agw::crypto
 {
-
     namespace
     {
-
         int hexNibble(char c)
         {
             if (c >= '0' && c <= '9')
@@ -20,8 +18,7 @@ namespace agw::crypto
                 return c - 'A' + 10;
             return -1;
         }
-
-    } // namespace
+    }
 
     std::vector<std::uint8_t> sha512(const std::vector<std::uint8_t> &data)
     {
@@ -59,5 +56,4 @@ namespace agw::crypto
         }
         return out;
     }
-
-} // namespace agw::crypto
+}

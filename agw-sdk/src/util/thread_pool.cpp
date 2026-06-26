@@ -2,7 +2,6 @@
 
 namespace agw::util
 {
-
     ThreadPool::ThreadPool(std::size_t threadCount)
     {
         if (threadCount == 0) {
@@ -45,7 +44,6 @@ namespace agw::util
                 std::unique_lock<std::mutex> lock(m_mutex);
                 m_cv.wait(lock, [this] { return m_stopping || !m_tasks.empty(); });
 
-                // Сначала добиваем очередь, и только на пустой очереди при stopping выходим (drain).
                 if (m_tasks.empty()) {
                     if (m_stopping) {
                         return;
@@ -58,5 +56,4 @@ namespace agw::util
             task();
         }
     }
-
-} // namespace agw::util
+}

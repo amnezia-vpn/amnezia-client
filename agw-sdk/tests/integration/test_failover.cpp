@@ -17,7 +17,6 @@
 using namespace agw;
 
 namespace {
-
 std::string readFile(const std::string &path)
 {
     std::ifstream f(path, std::ios::binary);
@@ -28,8 +27,6 @@ std::string readFile(const std::string &path)
 
 bool contains(const std::string &h, const std::string &n) { return h.find(n) != std::string::npos; }
 
-// Маршрутизирующий мок: прямой POST на шлюз «подозрителен», S3 отдаёт список с живым прокси,
-// health отвечает 200, POST на прокси — хороший ответ.
 class FailoverMock : public IHttpClient {
 public:
     explicit FailoverMock(std::string priv) : m_priv(std::move(priv)) {}
@@ -45,17 +42,16 @@ public:
             if (contains(req.url, "lmbd-health")) {
                 ++healthGets;
                 if (!contains(req.url, "proxy.good.test")) {
-                    resp.error = TransportError::ConnectionError; // нездоровый прокси
+                    resp.error = TransportError::ConnectionError;
                 }
                 return resp;
             }
-            // S3-хранилище: dev-открытый JSON-массив с живым прокси
+
             ++storageGets;
             resp.body = R"(["https://proxy.good.test/"])";
             return resp;
         }
 
-        // POST: расшифровать ключи и вернуть зашифрованный ответ тем же key/iv
         namespace k = protocol::keys;
         util::Json body = util::Json::parse(req.body);
         const auto keyCipher = util::base64Decode(body[k::keyPayload].get<std::string>());
@@ -70,7 +66,7 @@ public:
             plain = R"({"ok":true,"via":"proxy"})";
         } else {
             ++directPosts;
-            plain = R"({"http_status":404,"message":"blocked"})"; // 404 без паттерна → байпас
+            plain = R"({"http_status":404,"message":"blocked"})";
         }
         const std::vector<std::uint8_t> pv(plain.begin(), plain.end());
         const auto cipher = crypto::aesEncryptCbc(pv, aesKey, aesIv);
@@ -81,8 +77,7 @@ public:
 private:
     std::string m_priv;
 };
-
-} // namespace
+}
 
 int main()
 {
@@ -94,7 +89,7 @@ int main()
     Config cfg;
     cfg.gatewayEndpoint = "https://gw.example.test/";
     cfg.agwPublicKeyPem = pub;
-    cfg.isDevEnvironment = true;  // S3-список — открытый
+    cfg.isDevEnvironment = true;
     cfg.s3PrimaryEndpoints = {"https://s3.example.test/"};
     cfg.requestTimeoutMsecs = 5000;
     cfg.httpClient = mock;
@@ -104,28 +99,26 @@ int main()
     const FailoverContext ctx{"prem", "US"};
     const std::string payload = R"({"hello":"world"})";
 
-    // --- post1: прямой подозрителен → failover через прокси ----------------
     {
         Response r = client.post(endpoint, payload, ctx);
         CHECK(r.error == ErrorCode::NoError);
         CHECK_EQ(r.body, std::string(R"({"ok":true,"via":"proxy"})"));
-        CHECK(mock->directPosts == 1);  // один прямой запрос
-        CHECK(mock->storageGets >= 1);  // тянули S3-список
-        CHECK(mock->healthGets >= 1);   // health-check прокси
-        CHECK(mock->proxyPosts == 1);   // успешный POST через прокси
+        CHECK(mock->directPosts == 1);
+        CHECK(mock->storageGets >= 1);
+        CHECK(mock->healthGets >= 1);
+        CHECK(mock->proxyPosts == 1);
     }
 
-    // --- post2: рабочий прокси закеширован → ни S3, ни health не нужны ------
     {
         const int storageBefore = mock->storageGets;
         const int healthBefore = mock->healthGets;
         Response r = client.post(endpoint, payload, ctx);
         CHECK(r.error == ErrorCode::NoError);
         CHECK_EQ(r.body, std::string(R"({"ok":true,"via":"proxy"})"));
-        // прямой запрос ушёл сразу на кешированный прокси — без нового S3/health
+
         CHECK(mock->storageGets == storageBefore);
         CHECK(mock->healthGets == healthBefore);
-        CHECK(mock->directPosts == 1);  // на шлюз больше не ходили
+        CHECK(mock->directPosts == 1);
     }
 
     return AGW_TEST_MAIN_RETURN();

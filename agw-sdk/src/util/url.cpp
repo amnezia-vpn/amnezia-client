@@ -2,7 +2,6 @@
 
 namespace agw::util
 {
-
     std::string formatEndpoint(const std::string &endpoint, const std::string &host)
     {
         const std::string token = "%1";
@@ -23,7 +22,6 @@ namespace agw::util
             start = scheme + 3;
         }
 
-        // конец authority — до первого '/', '?' или '#'
         std::size_t end = url.size();
         for (std::size_t i = start; i < url.size(); ++i) {
             const char c = url[i];
@@ -35,13 +33,11 @@ namespace agw::util
 
         std::string authority = url.substr(start, end - start);
 
-        // отбросить userinfo
         const std::size_t at = authority.find('@');
         if (at != std::string::npos) {
             authority = authority.substr(at + 1);
         }
 
-        // отбросить порт (без поддержки IPv6 в скобках — для шлюза не требуется)
         const std::size_t colon = authority.find(':');
         if (colon != std::string::npos) {
             authority = authority.substr(0, colon);
@@ -49,5 +45,4 @@ namespace agw::util
 
         return authority;
     }
-
-} // namespace agw::util
+}

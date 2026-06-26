@@ -8,7 +8,6 @@ using namespace agw;
 
 int main()
 {
-    // --- json_keys: ключи отсортированы (aes_iv < aes_key < aes_salt), Qt-Indented ---
     {
         util::Json j;
         j["aes_key"] = "KEY";
@@ -24,7 +23,6 @@ int main()
         CHECK_EQ(util::qtIndentedDump(j), expected);
     }
 
-    // --- outer body: api_payload < key_payload ---
     {
         util::Json j;
         j["key_payload"] = "K";
@@ -37,7 +35,6 @@ int main()
         CHECK_EQ(util::qtIndentedDump(j), expected);
     }
 
-    // --- экранирование строк по правилам Qt ---
     {
         util::Json j;
         j["s"] = std::string("a\"b\\c\nd\te\x01");
@@ -48,7 +45,6 @@ int main()
         CHECK_EQ(util::qtIndentedDump(j), expected);
     }
 
-    // --- вложенный объект: отступ растёт на 4 ---
     {
         util::Json j;
         j["outer"]["inner"] = "v";

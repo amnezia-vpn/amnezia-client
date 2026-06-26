@@ -6,7 +6,6 @@
 
 namespace agw::crypto
 {
-
     std::vector<std::uint8_t> DefaultRng::bytes(std::size_t n)
     {
         std::vector<std::uint8_t> out(n);
@@ -18,5 +17,4 @@ namespace agw::crypto
         }
         return out;
     }
-
-} // namespace agw::crypto
+}

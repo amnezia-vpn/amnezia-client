@@ -4,14 +4,10 @@
 
 namespace agw::util
 {
-
     namespace
     {
-
         const char *kHex = "0123456789abcdef";
 
-        // Экранирование строки по правилам qjsonwriter: короткие escape для \b\f\n\r\t,
-        // \u00XX для прочих управляющих (< 0x20), экранируем '"' и '\\', остальное — как есть (UTF-8).
         void appendEscaped(std::string &out, const std::string &s)
         {
             out.push_back('"');
@@ -95,20 +91,18 @@ namespace agw::util
             case Json::value_t::number_unsigned:
             case Json::value_t::number_float:
             default:
-                // best-effort; в транспорте v1 числа в собираемом SDK JSON не встречаются
+
                 out += j.dump();
                 break;
             }
         }
-
-    } // namespace
+    }
 
     std::string qtIndentedDump(const Json &j)
     {
         std::string out;
         dumpValue(out, j, 0);
-        out.push_back('\n'); // QJsonDocument::toJson добавляет завершающий перевод строки
+        out.push_back('\n');
         return out;
     }
-
-} // namespace agw::util
+}

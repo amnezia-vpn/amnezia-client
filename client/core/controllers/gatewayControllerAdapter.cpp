@@ -21,6 +21,8 @@
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
 
+#include "embedded_agw_public_keys.h"
+
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
 #endif
@@ -31,8 +33,6 @@
 
 namespace
 {
-    // agw::ErrorCode → amnezia::ErrorCode. Значения 1100–1120 и NoError=0 совпадают численно;
-    // отмена SDK маппится в ApiConfigTimeoutError (паритет: оригинал так же трактовал cancel/timeout).
     amnezia::ErrorCode mapError(agw::ErrorCode error)
     {
         if (error == agw::ErrorCode::Cancelled) {
@@ -70,7 +70,6 @@ namespace
         cfg.isDevEnvironment = isDevEnvironment;
         cfg.requestTimeoutMsecs = requestTimeoutMsecs;
 
-        // Лог-хук SDK → Qt-логи (SDK не логирует секреты/тела). Помогает диагностике failover/крипты.
         cfg.log = [](agw::LogLevel level, const std::string &message) {
             const QString msg = QString::fromStdString(message);
             switch (level) {
@@ -80,7 +79,6 @@ namespace
             }
         };
 
-        // Хост-специфика перед запросом (один раз, исходный хост). Kill-switch остаётся в приложении.
         cfg.onBeforeRequest = [isStrictKillSwitchEnabled](const std::string &hostStd) {
             const QString host = QString::fromStdString(hostStd);
             (void)host;
@@ -107,7 +105,6 @@ namespace
         return cfg;
     }
 
-    // Реестр долгоживущих клиентов по окружению — кеш прокси переживает запросы (бывш. static m_proxyUrl).
     std::shared_ptr<agw::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                         int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
@@ -127,7 +124,7 @@ namespace
         clients.emplace(key, client);
         return client;
     }
-} // namespace
+}
 
 GatewayControllerAdapter::GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
@@ -145,10 +142,6 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
     qInfo().noquote() << "[agw-adapter] post (sync) endpoint=" << endpoint
                       << "payloadLen=" << payload.size() << "thread=" << QThread::currentThread();
 
-    // Сетевая работа уходит на пул потоков SDK (postAsync), а вызывающий поток крутит локальный
-    // QEventLoop с ExcludeUserInputEvents — ровно как делал прежний Qt-овый GatewayController::post.
-    // Так UI остаётся отзывчивым, сигнатура синхронная, вызывающий код (контроллеры/UI) не меняется.
-    // context — приёмник результата на потоке вызывающего (надёжно вне зависимости от affinity this).
     QEventLoop loop;
     QObject context;
     agw::Response result;
@@ -156,7 +149,6 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
     m_controller->postAsync(
             endpoint.toStdString(), payload,
             [&loop, &context, &result](agw::Response r) {
-                // коллбэк приходит на потоке пула → маршалим в поток вызывающего и будим event loop
                 QMetaObject::invokeMethod(
                         &context,
                         [&loop, &result, r]() {
@@ -199,7 +191,7 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsy
                 qInfo().noquote() << "[agw-adapter] postAsync SDK callback errorCode=" << static_cast<int>(ec)
                                   << "bodyLen=" << body.size() << "poolThread=" << QThread::currentThread()
                                   << "→ marshalling to object thread";
-                // Маршалим результат с потока пула на поток объекта (Qt::QueuedConnection).
+
                 auto deliver = [promise, ec, body]() {
                     promise->addResult(qMakePair(ec, body));
                     promise->finish();

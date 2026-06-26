@@ -7,10 +7,8 @@
 
 namespace agw::failover
 {
-
     namespace
     {
-
         void appendStorageUrls(const std::vector<std::string> &baseUrls, const FailoverContext &ctx,
                                std::vector<std::string> &target)
         {
@@ -40,12 +38,10 @@ namespace agw::failover
                     }
                 }
             } catch (...) {
-                // не JSON / не массив → пустой список (паритет с .array())
             }
             return out;
         }
-
-    } // namespace
+    }
 
     std::vector<std::string> buildStorageUrls(const std::vector<std::string> &primaryBaseUrls,
                                               const std::vector<std::string> &fallbackBaseUrls,
@@ -63,7 +59,6 @@ namespace agw::failover
             return parseEndpointsArray(body);
         }
 
-        // prod: ключ/IV из SHA-512(pubkey) (hex), тело — base64(ciphertext). Сбой расшифровки → throw.
         const std::vector<std::uint8_t> pubBytes(pubKeyPem.begin(), pubKeyPem.end());
         const std::string h = crypto::toHex(crypto::sha512(pubBytes));
         const std::vector<std::uint8_t> key = crypto::fromHex(h.substr(0, 64));
@@ -73,5 +68,4 @@ namespace agw::failover
         const std::vector<std::uint8_t> plain = crypto::aesDecryptCbc(cipher, key, iv);
         return parseEndpointsArray(std::string(plain.begin(), plain.end()));
     }
-
-} // namespace agw::failover
+}

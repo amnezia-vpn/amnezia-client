@@ -9,10 +9,8 @@
 
 namespace agw
 {
-
     namespace
     {
-
         std::once_flag g_curlInitOnce;
 
         void ensureCurlGlobalInit()
@@ -28,7 +26,6 @@ namespace agw
             return total;
         }
 
-        // Прерывание трансфера по запросу отмены: ненулевой возврат → CURLE_ABORTED_BY_CALLBACK.
         int xferCallback(void *clientp, curl_off_t, curl_off_t, curl_off_t, curl_off_t)
         {
             auto *check = static_cast<const std::function<bool()> *>(clientp);
@@ -54,8 +51,7 @@ namespace agw
             default: return TransportError::ConnectionError;
             }
         }
-
-    } // namespace
+    }
 
     CurlHttpClient::CurlHttpClient()
     {
@@ -91,9 +87,7 @@ namespace agw
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response.body);
         curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
-        // Паритет с QNetworkAccessManager: тот автоматически распаковывает gzip/deflate-ответы.
-        // "" = объявляем все поддерживаемые curl кодировки и прозрачно их декодируем (иначе тело
-        // придёт сжатым и AES-расшифровка ответа шлюза упадёт → ApiConfigDecryptionError).
+
         curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
         if (request.cancelCheck) {
@@ -133,7 +127,6 @@ namespace agw
     {
         return std::make_unique<CurlHttpClient>();
     }
+}
 
-} // namespace agw
-
-#endif // AGW_HAVE_CURL
+#endif

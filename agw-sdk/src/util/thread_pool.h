@@ -11,10 +11,6 @@
 
 namespace agw::util
 {
-
-    // Простой пул: очередь задач + воркеры. Деструктор дожидается выполнения ВСЕХ поставленных задач
-    // (drain), затем join — так коллбэк никогда не стреляет в уже разрушенный клиент (пул должен быть
-    // последним членом владельца, чтобы рушиться первым).
     class ThreadPool
     {
     public:
@@ -35,7 +31,6 @@ namespace agw::util
         std::condition_variable m_cv;
         bool m_stopping = false;
     };
+}
 
-} // namespace agw::util
-
-#endif // AGW_UTIL_THREAD_POOL_H
+#endif

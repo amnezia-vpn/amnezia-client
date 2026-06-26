@@ -23,7 +23,6 @@
 using namespace agw;
 
 namespace {
-
 std::string readFile(const std::string &path)
 {
     std::ifstream f(path, std::ios::binary);
@@ -42,7 +41,6 @@ Config baseConfig(std::shared_ptr<IHttpClient> http, const std::string &pub)
     return c;
 }
 
-// Блокируется в send, пока не сработает отмена; затем возвращает Canceled (как curl-abort).
 class BlockingUntilCancelMock : public IHttpClient {
 public:
     std::atomic<int> entered{0};
@@ -58,7 +56,6 @@ public:
     }
 };
 
-// Потокобезопасный мок для стресс-теста: расшифровывает запрос, возвращает фикс. ответ.
 class StatelessMock : public IHttpClient {
 public:
     explicit StatelessMock(std::string priv) : m_priv(std::move(priv)) {}
@@ -86,8 +83,7 @@ public:
 private:
     std::string m_priv;
 };
-
-} // namespace
+}
 
 int main()
 {
@@ -97,7 +93,6 @@ int main()
     const FailoverContext ctx{"prem", "US"};
     const std::string payload = R"({"hello":"world"})";
 
-    // --- postFuture: успех ------------------------------------------------
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->responsePlain = R"({"ok":true,"v":1})";
@@ -109,7 +104,6 @@ int main()
         CHECK_EQ(mock->lastDecryptedPayload, payload);
     }
 
-    // --- postAsync: коллбэк на потоке пула --------------------------------
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->responsePlain = R"({"async":true})";
@@ -124,7 +118,6 @@ int main()
         CHECK_EQ(r.body, std::string(R"({"async":true})"));
     }
 
-    // --- отмена ДО старта → Cancelled, до сети не доходим ------------------
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         GatewayController client(baseConfig(mock, pub));
@@ -136,7 +129,6 @@ int main()
         CHECK(mock->requestCount == 0);
     }
 
-    // --- отмена В ПОЛЁТЕ → Cancelled --------------------------------------
     {
         auto mock = std::make_shared<BlockingUntilCancelMock>();
         GatewayController client(baseConfig(mock, pub));
@@ -147,7 +139,6 @@ int main()
         client.postAsync(
             endpoint, payload, [&p](Response r) { p.set_value(std::move(r)); }, ctx, &token);
 
-        // дождаться входа в send, затем отменить
         while (mock->entered.load() == 0) {
             std::this_thread::sleep_for(std::chrono::milliseconds(2));
         }
@@ -156,7 +147,6 @@ int main()
         CHECK(r.error == ErrorCode::Cancelled);
     }
 
-    // --- конкурентный стресс: много future одновременно -------------------
     {
         auto mock = std::make_shared<StatelessMock>(priv);
         Config cfg = baseConfig(mock, pub);

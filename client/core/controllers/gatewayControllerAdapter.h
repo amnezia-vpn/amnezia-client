@@ -17,8 +17,6 @@ namespace agw
 class GatewayController;
 }
 
-// Тонкий Qt-адаптер над agw::GatewayController (agw-sdk). Сигнатуры — как раньше, вызывающий код не
-// меняется. Транспорт/крипта/failover живут в SDK. См. docs/plans/gateway-sdk/agw-sdk-tier1-phase6-integration.md
 class GatewayControllerAdapter : public QObject
 {
     Q_OBJECT
@@ -31,8 +29,8 @@ public:
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
-    // Долгоживущий клиент окружения (кеш прокси переживает запросы). Берётся из статического реестра.
+
     std::shared_ptr<agw::GatewayController> m_controller;
 };
 
-#endif // GATEWAYCONTROLLERADAPTER_H
+#endif

@@ -15,11 +15,10 @@ std::vector<std::uint8_t> bytesOf(const std::string &s)
 {
     return std::vector<std::uint8_t>(s.begin(), s.end());
 }
-} // namespace
+}
 
 int main()
 {
-    // --- buildStorageUrls: порядок и пути -----------------------------------
     {
         const std::vector<std::string> primary{"https://a/", "https://b/"};
         const std::vector<std::string> fallback{"https://f/"};
@@ -40,7 +39,6 @@ int main()
         CHECK(urls == expected);
     }
 
-    // пустой service → только generic
     {
         const std::vector<std::string> primary{"https://a/", "https://b/"};
         const std::vector<std::string> fallback{"https://f/"};
@@ -54,16 +52,14 @@ int main()
         CHECK(urls == expected);
     }
 
-    // --- decodeProxyList dev: открытый JSON-массив --------------------------
     {
-        const auto list = failover::decodeProxyList(R"(["https://p1/","https://p2/"])", /*dev=*/true, "");
+        const auto list = failover::decodeProxyList(R"(["https://p1/","https://p2/"])", true, "");
         const std::vector<std::string> expected{"https://p1/", "https://p2/"};
         CHECK(list == expected);
-        // не массив → пусто
+
         CHECK(failover::decodeProxyList(R"({"x":1})", true, "").empty());
     }
 
-    // --- decodeProxyList prod: self-consistent (ключ/IV из SHA-512(pubkey)) -
     {
         const std::string pub = "PUBKEYDATA-pem-like";
         const std::string h = crypto::toHex(crypto::sha512(bytesOf(pub)));
@@ -74,11 +70,10 @@ int main()
         const auto cipher = crypto::aesEncryptCbc(bytesOf(arr), key, iv);
         const std::string b64 = util::base64Encode(cipher);
 
-        const auto list = failover::decodeProxyList(b64, /*dev=*/false, pub);
+        const auto list = failover::decodeProxyList(b64, false, pub);
         const std::vector<std::string> expected{"https://prod1/", "https://prod2/"};
         CHECK(list == expected);
 
-        // мусор вместо base64-шифртекста → throw
         bool threw = false;
         try {
             failover::decodeProxyList("###not base64 cipher###", false, pub);

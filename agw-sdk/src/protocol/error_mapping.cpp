@@ -8,11 +8,8 @@
 
 namespace agw::protocol
 {
-
     namespace
     {
-
-        // http_status, влияющие на маппинг (как в apiUtils.cpp).
         constexpr int kConflict = 409;
         constexpr int kNotFound = 404;
         constexpr int kNotImplemented = 501;
@@ -56,8 +53,7 @@ namespace agw::protocol
             }
             return { };
         }
-
-    } // namespace
+    }
 
     ErrorCode mapResponseError(bool sslError, TransportError transportError, const std::string &decryptedBody)
     {
@@ -134,5 +130,4 @@ namespace agw::protocol
         }
         return ErrorCode::ApiConfigDownloadError;
     }
-
-} // namespace agw::protocol
+}

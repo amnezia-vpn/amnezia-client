@@ -25,9 +25,7 @@
 #include "util/uuid.h"
 
 namespace agw {
-
 namespace {
-
 bool isCancelled(const CancellationToken *cancel)
 {
     return cancel != nullptr && cancel->isCancelled();
@@ -59,8 +57,7 @@ const char *transportErrorName(TransportError e)
     }
     return "?";
 }
-
-} // namespace
+}
 
 struct GatewayController::Impl {
     Config config;
@@ -68,9 +65,9 @@ struct GatewayController::Impl {
     std::unique_ptr<crypto::IRng> rng;
 
     std::mutex proxyMutex;
-    std::string cachedProxy;  // рабочий прокси, переживает между запросами (бывш. static m_proxyUrl)
+    std::string cachedProxy;
 
-    util::ThreadPool pool;  // ОБЪЯВЛЕН ПОСЛЕДНИМ: рушится первым → задачи дождутся до сноса остального
+    util::ThreadPool pool;
 
     explicit Impl(Config cfg)
         : config(std::move(cfg)),
@@ -108,12 +105,11 @@ struct GatewayController::Impl {
         cachedProxy = proxy;
     }
 
-    // Один POST через указанный хост. Обновляет resp/dec последней попытки.
     bool attempt(const std::string &endpoint, const std::string &host, const HttpRequest &baseReq,
                  const std::vector<std::uint8_t> &key, const std::vector<std::uint8_t> &iv,
                  HttpResponse &resp, protocol::DecryptResult &dec)
     {
-        HttpRequest req = baseReq;  // то же тело, тот же X-Client-Request-ID, тот же cancelCheck
+        HttpRequest req = baseReq;
         req.url = util::formatEndpoint(endpoint, host);
         dbg("  proxy attempt: POST " + req.url);
 
@@ -365,5 +361,4 @@ std::future<Response> GatewayController::postFuture(const std::string &endpoint,
     });
     return fut;
 }
-
-} // namespace agw
+}

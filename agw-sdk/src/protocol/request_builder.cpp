@@ -8,16 +8,13 @@
 
 namespace agw::protocol
 {
-
     namespace
     {
-
         std::vector<std::uint8_t> bytesOf(const std::string &s)
         {
             return std::vector<std::uint8_t>(s.begin(), s.end());
         }
-
-    } // namespace
+    }
 
     EncryptedRequest buildEncryptedRequest(const std::string &payload, const std::string &publicKeyPem, crypto::IRng &rng)
     {
@@ -28,7 +25,6 @@ namespace agw::protocol
         out.iv = rng.bytes(32);
         out.salt = rng.bytes(8);
 
-        // Невалидный ключ — отдельная ветка до шифрования (как в оригинале).
         if (!crypto::rsaPublicKeyValid(publicKeyPem)) {
             out.error = ErrorCode::ApiMissingAgwPublicKey;
             return out;
@@ -56,5 +52,4 @@ namespace agw::protocol
         out.body = util::qtIndentedDump(body);
         return out;
     }
-
-} // namespace agw::protocol
+}

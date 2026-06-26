@@ -5,11 +5,8 @@
 
 namespace agw::failover
 {
-
     namespace
     {
-
-        // Строки реальных ошибок — при них НЕ байпасим (это валидный ответ, а не блокировка).
         constexpr const char *kPattern1 = "No active configuration found for";
         constexpr const char *kPattern2 = "No non-revoked public key found for";
         constexpr const char *kPattern3 = "Account not found.";
@@ -40,8 +37,7 @@ namespace agw::failover
                 --e;
             return s.substr(b, e - b);
         }
-
-    } // namespace
+    }
 
     bool shouldBypassProxy(TransportError transportError, const std::string &decryptedBody, bool decryptionSuccessful)
     {
@@ -62,7 +58,6 @@ namespace agw::failover
                 }
             }
         } catch (...) {
-            // не объект — apiHttpStatus остаётся -1
         }
 
         if (transportError == TransportError::Canceled || transportError == TransportError::Timeout) {
@@ -102,5 +97,4 @@ namespace agw::failover
         }
         return false;
     }
-
-} // namespace agw::failover
+}

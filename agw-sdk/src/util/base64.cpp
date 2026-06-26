@@ -4,10 +4,8 @@
 
 namespace agw::util
 {
-
     namespace
     {
-
         const char *kStd = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         const char *kUrl = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
@@ -60,19 +58,18 @@ namespace agw::util
                 return 62;
             if (c == '/' || c == '_')
                 return 63;
-            return -1; // '=' и любой мусор пропускаем
+            return -1;
         }
-
-    } // namespace
+    }
 
     std::string base64Encode(const std::vector<std::uint8_t> &data)
     {
-        return encode(data, kStd, /*pad=*/true);
+        return encode(data, kStd, true);
     }
 
     std::string base64UrlEncodeNoPad(const std::vector<std::uint8_t> &data)
     {
-        return encode(data, kUrl, /*pad=*/false);
+        return encode(data, kUrl, false);
     }
 
     std::string base64Encode(const std::string &data)
@@ -90,7 +87,7 @@ namespace agw::util
         for (char c : text) {
             const int v = decodeChar(c);
             if (v < 0) {
-                continue; // пропускаем '=', переводы строк, мусор
+                continue;
             }
             quad[count++] = v;
             if (count == 4) {
@@ -108,5 +105,4 @@ namespace agw::util
         }
         return out;
     }
-
-} // namespace agw::util
+}

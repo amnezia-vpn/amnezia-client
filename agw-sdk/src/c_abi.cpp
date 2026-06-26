@@ -27,12 +27,11 @@ struct agw_cancel_token
 
 namespace agw::detail
 {
-
     namespace
     {
         std::mutex g_testHttpMutex;
         std::shared_ptr<IHttpClient> g_testHttp;
-    } // namespace
+    }
 
     void setNextTestHttpClient(std::shared_ptr<IHttpClient> http)
     {
@@ -47,12 +46,10 @@ namespace agw::detail
         g_testHttp.reset();
         return h;
     }
-
-} // namespace agw::detail
+}
 
 namespace
 {
-
     std::string cstr(const char *s)
     {
         return s ? std::string(s) : std::string();
@@ -77,11 +74,9 @@ namespace
         }
         return out;
     }
-
-} // namespace
+}
 
 extern "C" {
-
 agw_client *agw_client_create(const agw_config *config)
 {
     if (config == nullptr) {
@@ -167,7 +162,7 @@ void agw_client_post_async(agw_client *client, const char *endpoint, const char 
     client->client.postAsync(
             cstr(endpoint), cstr(payload),
             [callback, user_data](agw::Response r) {
-                agw_response cr = toCResponse(r); // владение телом переходит коллбэку
+                agw_response cr = toCResponse(r);
                 callback(cr, user_data);
             },
             ctx, tk);
@@ -203,5 +198,4 @@ void agw_cancel_token_destroy(agw_cancel_token *token)
 {
     delete token;
 }
-
-} // extern "C"
+}

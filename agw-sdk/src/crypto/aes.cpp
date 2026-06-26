@@ -7,10 +7,8 @@
 
 namespace agw::crypto
 {
-
     namespace
     {
-
         using CtxPtr = std::unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)>;
 
         constexpr int kAes256KeyLen = 32;
@@ -25,8 +23,7 @@ namespace agw::crypto
                 throw std::runtime_error("agw::crypto::aes: iv must be at least 16 bytes");
             }
         }
-
-    } // namespace
+    }
 
     std::vector<std::uint8_t> aesEncryptCbc(const std::vector<std::uint8_t> &data, const std::vector<std::uint8_t> &key,
                                             const std::vector<std::uint8_t> &iv)
@@ -38,7 +35,6 @@ namespace agw::crypto
             throw std::runtime_error("agw::crypto::aes: EVP_CIPHER_CTX_new failed");
         }
 
-        // iv.data() — CBC прочитает только первые 16 байт, остаток (если есть) игнорируется.
         if (EVP_EncryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr, key.data(), iv.data()) != 1) {
             throw std::runtime_error("agw::crypto::aes: EVP_EncryptInit_ex failed");
         }
@@ -88,5 +84,4 @@ namespace agw::crypto
         out.resize(static_cast<std::size_t>(total));
         return out;
     }
-
-} // namespace agw::crypto
+}

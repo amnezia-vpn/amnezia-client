@@ -5,10 +5,6 @@
 
 namespace agw
 {
-
-    // Подмножество кодов API-шлюза (1100–1120 из client/core/utils/errorCodes.h).
-    // Numeric-значения сохранены один в один, чтобы Qt-адаптер мапил их без таблицы.
-    // NoError и Cancelled — служебные значения SDK (Cancelled — best-effort отмена, Фаза 4).
     enum class ErrorCode : int {
         NoError = 0,
         Cancelled = 1,
@@ -43,22 +39,17 @@ namespace agw
         Error
     };
 
-    // Результат post(): расшифрованное тело (или тело ошибки) + код.
-    // body несётся наружу даже при ненулевом error — приложение читает тело ошибки.
     struct Response
     {
         ErrorCode error = ErrorCode::NoError;
         std::string body;
     };
 
-    // Контекст failover: по этим полям строятся пути S3 (endpoints-<service>-<country>.json).
-    // Передаётся отдельно от payload — SDK не парсит чужой payload.
     struct FailoverContext
     {
-        std::string serviceType;     // service_type
-        std::string userCountryCode; // user_country_code
+        std::string serviceType;
+        std::string userCountryCode;
     };
+}
 
-} // namespace agw
-
-#endif // AGW_TYPES_H
+#endif

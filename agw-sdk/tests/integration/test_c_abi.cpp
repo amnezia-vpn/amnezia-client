@@ -8,12 +8,11 @@
 #include <utility>
 
 #include "agw/c_abi.h"
-#include "agw/types.h"  // для числовых значений ErrorCode в проверках
+#include "agw/types.h"
 #include "detail/test_hooks.h"
 #include "mock_gateway/mock_gateway.h"
 
 namespace {
-
 std::string readFile(const std::string &path)
 {
     std::ifstream f(path, std::ios::binary);
@@ -39,10 +38,9 @@ void asyncCallback(agw_response r, void *ud)
 {
     auto *sink = static_cast<AsyncSink *>(ud);
     sink->promise.set_value({r.error, r.body ? std::string(r.body, r.body_len) : std::string()});
-    agw_response_free(&r);  // владение телом у коллбэка
+    agw_response_free(&r);
 }
-
-} // namespace
+}
 
 int main()
 {
@@ -50,7 +48,6 @@ int main()
     const std::string priv = readFile(std::string(AGW_FIXTURES_DIR) + "/test_rsa_priv.pem");
     const std::string payload = R"({"hello":"world"})";
 
-    // --- sync post через C-ABI (mock внедрён тест-хуком) -------------------
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->responsePlain = R"({"ok":true,"c":1})";
@@ -61,14 +58,13 @@ int main()
         CHECK(client != nullptr);
 
         agw_response r = agw_client_post(client, "https://%1/api/v1/test", payload.c_str(), "prem", "US", nullptr);
-        CHECK(r.error == 0);  // NoError
+        CHECK(r.error == 0);
         CHECK(r.body != nullptr);
         CHECK_EQ(std::string(r.body, r.body_len), std::string(R"({"ok":true,"c":1})"));
         CHECK_EQ(mock->lastDecryptedPayload, payload);
         agw_response_free(&r);
-        CHECK(r.body == nullptr);  // free обнулил
+        CHECK(r.body == nullptr);
 
-        // --- async post через C-ABI --------------------------------------
         mock->responsePlain = R"({"async":1})";
         AsyncSink sink;
         auto fut = sink.promise.get_future();
@@ -81,7 +77,6 @@ int main()
         agw_client_destroy(client);
     }
 
-    // --- отмена через C-ABI токен -----------------------------------------
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         agw::detail::setNextTestHttpClient(mock);
@@ -90,18 +85,17 @@ int main()
 
         agw_cancel_token *token = agw_cancel_token_create();
         CHECK(token != nullptr);
-        agw_cancel_token_cancel(token);  // отменён до старта
+        agw_cancel_token_cancel(token);
 
         agw_response r = agw_client_post(client, "https://%1/api/v1/test", payload.c_str(), "", "", token);
         CHECK(r.error == static_cast<int>(agw::ErrorCode::Cancelled));
-        CHECK(mock->requestCount == 0);  // до сети не дошли
+        CHECK(mock->requestCount == 0);
         agw_response_free(&r);
 
         agw_cancel_token_destroy(token);
         agw_client_destroy(client);
     }
 
-    // --- невалидный ключ → 1105, без mock ---------------------------------
     {
         agw_config cfg = makeConfig("gw.example.test", "not a pem");
         agw_client *client = agw_client_create(&cfg);
@@ -112,13 +106,12 @@ int main()
         agw_client_destroy(client);
     }
 
-    // null-клиент / null-конфиг не падают
     {
         CHECK(agw_client_create(nullptr) == nullptr);
         agw_response r = agw_client_post(nullptr, "e", "p", "", "", nullptr);
         CHECK(r.error != 0);
         agw_response_free(&r);
-        agw_client_destroy(nullptr);  // no-op
+        agw_client_destroy(nullptr);
     }
 
     return AGW_TEST_MAIN_RETURN();

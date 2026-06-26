@@ -2,7 +2,6 @@
 
 namespace agw::failover
 {
-
     std::string pickHealthyProxy(IHttpClient &http, const std::vector<std::string> &proxyUrls, int timeoutMsecs)
     {
         for (const auto &proxy : proxyUrls) {
@@ -19,5 +18,4 @@ namespace agw::failover
         }
         return { };
     }
-
-} // namespace agw::failover
+}

@@ -4,7 +4,6 @@
 
 namespace agw::protocol
 {
-
     DecryptResult tryDecryptResponse(const std::string &encrypted, const std::vector<std::uint8_t> &key,
                                      const std::vector<std::uint8_t> &iv)
     {
@@ -22,5 +21,4 @@ namespace agw::protocol
         }
         return result;
     }
-
-} // namespace agw::protocol
+}

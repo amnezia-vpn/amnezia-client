@@ -10,10 +10,8 @@
 
 namespace agw::crypto
 {
-
     namespace
     {
-
         using BioPtr = std::unique_ptr<BIO, decltype(&BIO_free)>;
         using PkeyPtr = std::unique_ptr<EVP_PKEY, decltype(&EVP_PKEY_free)>;
         using PkeyCtxPtr = std::unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)>;
@@ -43,8 +41,7 @@ namespace agw::crypto
             }
             return PkeyPtr(raw, EVP_PKEY_free);
         }
-
-    } // namespace
+    }
 
     std::vector<std::uint8_t> rsaEncryptPublicPkcs1(const std::vector<std::uint8_t> &plaintext,
                                                     const std::string &publicKeyPem)
@@ -111,5 +108,4 @@ namespace agw::crypto
         out.resize(outLen);
         return out;
     }
-
-} // namespace agw::crypto
+}
