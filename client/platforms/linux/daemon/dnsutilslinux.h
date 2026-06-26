@@ -40,10 +40,15 @@ class DnsUtilsLinux final : public DnsUtils {
   void dnsDomainsReceived(QDBusPendingCallWatcher*);
 
  private:
+  void scheduleRetry();
+
+ private:
   int m_ifindex = 0;
   int m_gatewayIfindex = 0;
   int m_domainRetries = 0;
   bool m_revertOnDestroy = false;
+  bool m_retryPending = false;
+  int m_revertAfterRegister = 0;
   QMap<int, DnsLinkDomainList> m_linkDomains;
   QScopedPointer<QDBusInterface> m_resolver;
   QString m_pendingIfname;

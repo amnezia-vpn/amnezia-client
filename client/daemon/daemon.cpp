@@ -78,14 +78,6 @@ bool Daemon::activate(const InterfaceConfig& config) {
         return false;
       }
 
-      if (!dnsutils()->restoreResolvers()) {
-        return false;
-      }
-
-      if (!maybeUpdateResolvers(config)) {
-        return false;
-      }
-
       bool status = run(Switch, config);
       logger.debug() << "Connection status:" << status;
       if (status) {
@@ -142,10 +134,6 @@ bool Daemon::activate(const InterfaceConfig& config) {
     return false;
   }
 
-  if (!maybeUpdateResolvers(config)) {
-    return false;
-  }
-
   // set routing
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     if (!wgutils()->updateRoutePrefix(ip)) {
@@ -153,6 +141,12 @@ bool Daemon::activate(const InterfaceConfig& config) {
       return false;
     }
   }
+
+#ifndef Q_OS_LINUX
+  if (!maybeUpdateResolvers(config)) {
+    return false;
+  }
+#endif
 
   bool status = run(Up, config);
   logger.debug() << "Connection status:" << status;
@@ -168,15 +162,20 @@ bool Daemon::activate(const InterfaceConfig& config) {
 bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
+    if (!dnsutils()) {
+      logger.error() << "dnsutils is null, cannot update resolvers";
+      return false;
+    }
+
     QList<QHostAddress> resolvers;
     resolvers.append(QHostAddress(config.m_primaryDnsServer));
     if (!config.m_secondaryDnsServer.isEmpty()) {
         resolvers.append(QHostAddress(config.m_secondaryDnsServer));
     }
 
-    // If the DNS is not the Gateway, it's a user defined DNS
-    // thus, not add any other :)
-    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
+    // If the DNS is the Gateway, also add IPv6 gateway (only if non-empty)
+    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway &&
+        !config.m_serverIpv6Gateway.isEmpty()) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
     }
 

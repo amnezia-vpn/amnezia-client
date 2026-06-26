@@ -51,6 +51,28 @@ void DnsUtilsLinux::onResolverRegistered() {
                                       QDBusConnection::systemBus()));
   logger.debug() << "systemd-resolved available, DNS resolver initialized";
 
+  if (m_revertAfterRegister > 0) {
+    logger.debug() << "Calling RevertLink after restart for ifindex" << m_revertAfterRegister;
+    QDBusMessage msg = QDBusMessage::createMethodCall(
+        DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER, "RevertLink");
+    msg.setArguments({QVariant::fromValue(m_revertAfterRegister)});
+    QDBusPendingReply<> reply = QDBusConnection::systemBus().asyncCall(msg, 5000);
+    int savedIdx = m_revertAfterRegister;
+    m_revertAfterRegister = 0;
+    QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
+    QObject::connect(watcher, &QDBusPendingCallWatcher::finished, this,
+                     [this, savedIdx](QDBusPendingCallWatcher* w) {
+                       QDBusPendingReply<> r = *w;
+                       if (r.isError()) {
+                         logger.debug() << "RevertLink after restart failed for ifindex" << savedIdx
+                                        << ":" << r.error().message();
+                       } else {
+                         logger.debug() << "RevertLink after restart succeeded for ifindex" << savedIdx;
+                       }
+                       w->deleteLater();
+                     });
+  }
+
   if (!m_pendingIfname.isEmpty()) {
     logger.debug() << "Re-applying DNS configuration for" << m_pendingIfname;
     updateResolvers(m_pendingIfname, m_pendingResolvers);
@@ -87,6 +109,8 @@ DnsUtilsLinux::~DnsUtilsLinux() {
 
 bool DnsUtilsLinux::updateResolvers(const QString& ifname,
                                     const QList<QHostAddress>& resolvers) {
+  m_revertAfterRegister = 0;
+
   if (m_gatewayIfindex > 0) {
     setLinkDefaultRoute(m_gatewayIfindex, true);
     m_gatewayIfindex = 0;
@@ -97,6 +121,10 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     logger.error() << "Unable to resolve ifindex for" << ifname;
     return false;
   }
+
+  // Reset retry counter only when called externally (not from scheduleRetry)
+  if (ifname != m_pendingIfname || resolvers != m_pendingResolvers)
+    m_domainRetries = 0;
 
   m_pendingIfname = ifname;
   m_pendingResolvers = resolvers;
@@ -134,26 +162,36 @@ bool DnsUtilsLinux::restoreResolvers() {
   }
   m_linkDomains.clear();
 
-  /* Revert the VPN interface's DNS configuration */
-  if (m_ifindex > 0 && m_resolver) {
-    QList<QVariant> argumentList = {QVariant::fromValue(m_ifindex)};
-    QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-        QStringLiteral("RevertLink"), argumentList);
-
-    QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-    QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                     SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
-
+  /* Revert the VPN interface DNS. Save the ifindex so that
+   * onResolverRegistered() can call RevertLink again after flushDns()
+   * restarts systemd-resolved (handles the case where systemd-resolved
+   * is unresponsive at disconnect time). */
+  if (m_ifindex > 0) {
+    m_revertAfterRegister = m_ifindex;
     m_ifindex = 0;
   }
 
   return true;
 }
 
+void DnsUtilsLinux::scheduleRetry() {
+  if (m_pendingIfname.isEmpty() || m_retryPending || m_domainRetries >= 5)
+    return;
+  m_retryPending = true;
+  ++m_domainRetries;
+  logger.debug() << "Retrying full DNS setup (" << m_domainRetries << "/5)";
+  QTimer::singleShot(1000, this, [this]() {
+    m_retryPending = false;
+    if (!m_pendingIfname.isEmpty())
+      updateResolvers(m_pendingIfname, m_pendingResolvers);
+  });
+}
+
 void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
     logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
+    scheduleRetry();
   }
   delete call;
 }
@@ -175,8 +213,10 @@ void DnsUtilsLinux::setLinkDNS(int ifindex,
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(resolverList);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDNS"), argumentList);
+  QDBusMessage msg = QDBusMessage::createMethodCall(
+      DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER, "SetLinkDNS");
+  msg.setArguments(argumentList);
+  QDBusPendingReply<> reply = QDBusConnection::systemBus().asyncCall(msg, 5000);
 
   QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
   QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
@@ -200,8 +240,10 @@ void DnsUtilsLinux::setLinkDomains(int ifindex,
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(domains);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDomains"), argumentList);
+  QDBusMessage msg = QDBusMessage::createMethodCall(
+      DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER, "SetLinkDomains");
+  msg.setArguments(argumentList);
+  QDBusPendingReply<> reply = QDBusConnection::systemBus().asyncCall(msg, 5000);
 
   QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
   QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
@@ -213,8 +255,10 @@ void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(enable);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDefaultRoute"), argumentList);
+  QDBusMessage msg = QDBusMessage::createMethodCall(
+      DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH, DBUS_RESOLVE_MANAGER, "SetLinkDefaultRoute");
+  msg.setArguments(argumentList);
+  QDBusPendingReply<> reply = QDBusConnection::systemBus().asyncCall(msg, 5000);
 
   QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
   QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
@@ -232,7 +276,7 @@ void DnsUtilsLinux::updateLinkDomains() {
   message << QString(DBUS_RESOLVE_MANAGER);
   message << QString("Domains");
   QDBusPendingReply<QVariant> reply =
-      m_resolver->connection().asyncCall(message);
+      m_resolver->connection().asyncCall(message, 5000);
 
   QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
   QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
@@ -243,15 +287,8 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<QVariant> reply = *call;
   call->deleteLater();
   if (reply.isError()) {
-    // systemd-resolved may still be starting up after a restart — retry a few times
-    if (m_ifindex > 0 && m_domainRetries++ < 5) {
-      logger.debug() << "systemd-resolved not ready yet, retrying DNS setup ("
-                     << m_domainRetries << "/5)";
-      QTimer::singleShot(500, this, &DnsUtilsLinux::updateLinkDomains);
-    } else {
-      logger.warning() << "Failed to configure DNS after 5 retries";
-      m_domainRetries = 0;
-    }
+    logger.debug() << "DBus Domains call failed (may be transient after systemd-resolved restart)";
+    scheduleRetry();
     return;
   }
   m_domainRetries = 0;

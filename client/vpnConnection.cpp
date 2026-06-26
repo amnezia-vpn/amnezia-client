@@ -17,6 +17,7 @@
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
     #include <core/protocols/wireGuardProtocol.h>
+    #include "daemon/wireguardutils.h"
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -127,6 +128,23 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                 else
                     qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
 
+#ifdef Q_OS_LINUX
+                if (ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard) {
+                    QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
+                    QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
+                    QList<QHostAddress> resolvers;
+                    if (!dns1.isEmpty()) resolvers << QHostAddress(dns1);
+                    if (!dns2.isEmpty()) resolvers << QHostAddress(dns2);
+                    if (!resolvers.isEmpty()) {
+                        auto r = iface->updateResolvers(WG_INTERFACE, resolvers);
+                        if (r.waitForFinished() && r.returnValue())
+                            qDebug() << "VpnConnection: DNS resolvers set via systemd-resolved";
+                        else
+                            qWarning() << "VpnConnection: Failed to set DNS resolvers";
+                    }
+                }
+#endif
+
                 if (!ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard) {
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
@@ -160,6 +178,11 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
             } break;
             case Vpn::ConnectionState::Disconnected:
             case Vpn::ConnectionState::Error: {
+#ifdef Q_OS_LINUX
+                if (ContainerUtils::isAwgContainer(container) || container == DockerContainer::WireGuard) {
+                    iface->restoreResolvers();
+                }
+#endif
                 auto flushDns = iface->flushDns();
                 if (flushDns.waitForFinished() && flushDns.returnValue())
                     qDebug() << "VpnConnection::onConnectionStateChanged: Successfully flushed DNS";
