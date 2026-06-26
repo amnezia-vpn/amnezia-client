@@ -42,6 +42,17 @@ inline constexpr const char *url = "url";
 inline constexpr const char *serverCountryCode = "server_country_code";
 inline constexpr const char *subscriptionStatus = "subscription_status";
 inline constexpr const char *renewalUrl = "renewal_url";
+
+// import/trial/captcha/deactivate (Шаг 3).
+inline constexpr const char *publicKey = "public_key";
+inline constexpr const char *email = "email";
+inline constexpr const char *captchaId = "captcha_id";
+inline constexpr const char *captchaSolution = "captcha_solution";
+inline constexpr const char *captchaImage = "captcha_image";
+inline constexpr const char *hint = "hint";
+inline constexpr const char *config = "config";
+inline constexpr const char *protoAwg = "awg";
+inline constexpr const char *protoVless = "vless";
 }
 
 #endif

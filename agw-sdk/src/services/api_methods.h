@@ -89,6 +89,37 @@ AccountInfoResult getAccountInfo(GatewayController &gw, const AccountRequest &re
 // v1/renewal_link → renewal_url.
 RenewalResult getRenewalLink(GatewayController &gw, const AccountRequest &req);
 
+// --- Шаг 3: мутации подписки + капча ----------------------------------------
+
+struct CaptchaInfo {
+    std::string captchaId;
+    std::string captchaImageBase64;  // картинку рисует приложение (UI), не SDK
+    std::string hint;
+};
+
+// Результат import/trial/resolveCaptcha. Если captchaRequired — приложение показывает картинку и
+// зовёт resolveImportCaptcha. На успехе serverConfigJson — РАСПАКОВАННЫЙ конфиг с плейсхолдером
+// $WIREGUARD_CLIENT_PRIVATE_KEY: подстановку приватного ключа и персист сервера делает приложение.
+struct ImportResult {
+    ErrorCode error = ErrorCode::NoError;
+    bool captchaRequired = false;
+    CaptchaInfo captcha;
+    std::string serverConfigJson;
+};
+
+// public_key в payload: для awg — WireGuard client pub key, для vless — xray uuid (определяется
+// по req.serviceProtocol). Генерация ключей — в приложении; сюда приходит готовое значение.
+ImportResult importService(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey);
+
+ImportResult importTrial(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey,
+                         const std::string &email);
+
+ImportResult resolveImportCaptcha(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey,
+                                  const std::string &captchaId, const std::string &captchaSolution);
+
+// v1/revoke_config. Приложение трактует ApiNotFoundError как успех и само правит/удаляет сервер.
+ErrorCode deactivateDevice(GatewayController &gw, const GatewayRequest &req);
+
 } // namespace agw::services
 
 #endif // AGW_SERVICES_API_METHODS_H
