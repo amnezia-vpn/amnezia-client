@@ -8,7 +8,7 @@
 #include <QList>
 #include <QMap>
 #include <QString>
-#include <QMap>
+#include <cstdint> // Добавлено для uint32_t
 #include "ipaddress.h"
 
 class QJsonObject;
@@ -39,6 +39,9 @@ class InterfaceConfig {
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
+  
+  uint32_t m_splitMode = 0; // <-- Добавлено наше поле: 0 = Exclude, 1 = Include
+  
   QStringList m_allowedDnsServers;
   bool m_killSwitchEnabled;
 #if defined(MZ_ANDROID) || defined(MZ_IOS)

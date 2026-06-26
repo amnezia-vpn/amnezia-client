@@ -8,6 +8,7 @@ import QtCore
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import ProtocolEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -58,7 +59,7 @@ PageType {
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = AppSplitTunnelingController.routeMode
+        var currentRouteMode = AppSplitTunnelingModel.routeMode
         if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptApps === currentRouteMode) {
@@ -73,7 +74,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -89,11 +90,11 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: AppSplitTunnelingController.isSplitTunnelingEnabled
+                checked: AppSplitTunnelingModel.isTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {
-                AppSplitTunnelingController.toggleSplitTunneling(checked)
+                AppSplitTunnelingModel.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
@@ -111,7 +112,8 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: (Qt.platform.os === "android") && root.pageEnabled
+            // ИЗМЕНЕНО: Раньше здесь стояло ограничение только для Android. Теперь выпадающий список доступен всегда.
+            enabled: root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -123,13 +125,13 @@ PageType {
                 clickedFunction: function() {
                     selector.text = selectedText
                     selector.closeTriggered()
-                    if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
+                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        AppSplitTunnelingModel.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingModel.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -137,7 +139,7 @@ PageType {
                 }
 
                 Connections {
-                    target: AppSplitTunnelingController
+                    target: AppSplitTunnelingModel
                     function onRouteModeChanged() {
                         selectedIndex = getRouteModesModelIndex()
                     }
@@ -154,7 +156,8 @@ PageType {
             textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
-            visible: (Qt.platform.os === "windows") && root.pageEnabled
+            // ИЗМЕНЕНО: Отключаем показ предупреждающей заглушки на Windows
+            visible: false
         }
     }
 
@@ -165,7 +168,7 @@ PageType {
 
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : PageController.imeHeight)
+        anchors.bottomMargin: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : SettingsController.imeHeight)
         anchors.left: parent.left
         anchors.right: parent.right
         clip: true
@@ -220,7 +223,7 @@ PageType {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         
-        height: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin
+        height: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin
         
         color: AmneziaStyle.color.midnightBlack
         
@@ -235,7 +238,7 @@ PageType {
             anchors.topMargin: 24
             anchors.rightMargin: 16
             anchors.leftMargin: 16
-            anchors.bottomMargin: 24 + PageController.safeAreaBottomMargin
+            anchors.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
 
             TextFieldWithHeaderType {
                 id: searchField

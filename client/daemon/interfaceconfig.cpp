@@ -62,6 +62,9 @@ QJsonObject InterfaceConfig::toJson() const {
   }
   json.insert("vpnDisabledApps", disabledApps);
 
+  // === ДОБАВЛЕНО: Сериализация режима туннелирования (0 = Exclude, 1 = Include) ===
+  json.insert("splitMode", QJsonValue(static_cast<int>(m_splitMode)));
+
   return json;
 }
 

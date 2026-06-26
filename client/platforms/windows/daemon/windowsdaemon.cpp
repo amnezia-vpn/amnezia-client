@@ -24,7 +24,7 @@
 #include "platforms/windows/daemon/windowssplittunnel.h"
 #include "windowsfirewall.h"
 
-#include "core/utils/networkUtilities.h"
+#include "core/networkUtilities.h"
 
 namespace {
 Logger logger("WindowsDaemon");
@@ -62,23 +62,26 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
 }
 
 void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
-    if (m_splitTunnelManager == nullptr)
-        return;
+  if (m_splitTunnelManager == nullptr)
+      return;
 
-  if (config.m_vpnDisabledApps.length() > 0) {
+  QStringList targetApps = config.m_vpnDisabledApps;
+  uint32_t splitMode = config.m_splitMode;
+
+  if (!targetApps.isEmpty()) {
       m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex);
-      m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);
+      m_splitTunnelManager->excludeApps(targetApps, splitMode);
   } else {
       m_splitTunnelManager->stop();
   }
 }
 
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
+  QStringList targetApps = config.m_vpnDisabledApps;
+  uint32_t splitMode = config.m_splitMode;
+
   if (!m_splitTunnelManager) {
-    if (config.m_vpnDisabledApps.length() > 0) {
-      // The Client has sent us a list of disabled apps, but we failed
-      // to init the the split tunnel driver.
-      // So let the client know this was not possible
+    if (!targetApps.isEmpty()) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_INIT_FAILURE);
     }
     return true;
@@ -88,16 +91,21 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     m_splitTunnelManager->stop();
     return true;
   }
-  if (config.m_vpnDisabledApps.length() > 0) {
+  
+  if (!targetApps.isEmpty()) {
     if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
-    };
-    if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
+      return true;
+    }
+    
+    if (!m_splitTunnelManager->excludeApps(targetApps, splitMode)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
-    };
-    // Now the driver should be running (State == 4)
+      return true;
+    }
+    
     if (!m_splitTunnelManager->isRunning()) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+      return true;
     }
     return true;
   }
