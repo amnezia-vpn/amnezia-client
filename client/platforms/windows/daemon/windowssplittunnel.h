@@ -19,7 +19,7 @@
 #include <tlhelp32.h>
 #include <windows.h>
 
-class WindowsFirewall;
+#include "windowsfirewall.h"
 
 class WindowsSplitTunnel final {
  public:
@@ -38,15 +38,17 @@ class WindowsSplitTunnel final {
    * is in STATE_INITIALIZED and the Firewall has been setup.
    * Prefer using create() to get to this state.
    */
-  WindowsSplitTunnel(HANDLE driverIO);
+  WindowsSplitTunnel(HANDLE driverIO, const SplitTunnelDriverSublayerGuids& initGuids);
   /**
    * @brief Destroy the Windows Split Tunnel object and uninstalls the Driver.
    */
   ~WindowsSplitTunnel();
 
   // void excludeApps(const QStringList& paths);
-  // Excludes an Application from the VPN
+  // Excludes an Application from the VPN (Mullvad exclude-list semantics).
   bool excludeApps(const QStringList& appPaths);
+  // Include-only: only listed apps stay in the tunnel; others bypass (requires matching driver).
+  bool configureAppSplit(const QStringList& appPaths, bool forwardOnlyListedApps);
 
   // Fetches and Pushed needed info to move to engaged mode
   bool start(int inetAdapterIndex, int vpnAdapterIndex = 0);
@@ -74,11 +76,13 @@ class WindowsSplitTunnel final {
   static SC_HANDLE installDriver();
   static bool uninstallDriver();
   static bool isInstalled();
-  static bool initDriver(HANDLE driverIO);
+  static bool initDriver(HANDLE driverIO,
+                         const SplitTunnelDriverSublayerGuids& initGuids);
   static DRIVER_STATE getState(HANDLE driverIO);
   static bool resetDriver(HANDLE driverIO);
 
   HANDLE m_driver = INVALID_HANDLE_VALUE;
+  SplitTunnelDriverSublayerGuids m_driverInitGuids {};
   DRIVER_STATE getState();
   QString stateString();
 

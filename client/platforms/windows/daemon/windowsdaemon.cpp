@@ -65,20 +65,28 @@ void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
     if (m_splitTunnelManager == nullptr)
         return;
 
-  if (config.m_vpnDisabledApps.length() > 0) {
+  const bool haveExcludeApps = !config.m_vpnDisabledApps.isEmpty();
+  const bool haveForwardOnlyApps = !config.m_vpnForwardOnlyApps.isEmpty();
+
+  if (haveExcludeApps || haveForwardOnlyApps) {
       m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex);
-      m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);
+      if (haveForwardOnlyApps && !haveExcludeApps) {
+        m_splitTunnelManager->configureAppSplit(config.m_vpnForwardOnlyApps, true);
+      } else {
+        m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps);
+      }
   } else {
       m_splitTunnelManager->stop();
   }
 }
 
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
+  const bool haveExcludeApps = !config.m_vpnDisabledApps.isEmpty();
+  const bool haveForwardOnlyApps = !config.m_vpnForwardOnlyApps.isEmpty();
+
   if (!m_splitTunnelManager) {
-    if (config.m_vpnDisabledApps.length() > 0) {
-      // The Client has sent us a list of disabled apps, but we failed
-      // to init the the split tunnel driver.
-      // So let the client know this was not possible
+    if (haveExcludeApps || haveForwardOnlyApps) {
+      // The Client has sent us app split lists, but we failed to init the driver.
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_INIT_FAILURE);
     }
     return true;
@@ -88,13 +96,20 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     m_splitTunnelManager->stop();
     return true;
   }
-  if (config.m_vpnDisabledApps.length() > 0) {
+  if (haveExcludeApps || haveForwardOnlyApps) {
     if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
     };
-    if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
-      emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
-    };
+    if (haveForwardOnlyApps && !haveExcludeApps) {
+      if (!m_splitTunnelManager->configureAppSplit(config.m_vpnForwardOnlyApps,
+                                                    true)) {
+        emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
+      };
+    } else {
+      if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
+        emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
+      };
+    }
     // Now the driver should be running (State == 4)
     if (!m_splitTunnelManager->isRunning()) {
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);

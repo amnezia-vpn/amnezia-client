@@ -59,6 +59,7 @@ void AppSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
 void AppSplitTunnelingUiController::setRouteMode(int routeMode)
 {
     m_appSplitTunnelingController->setRouteMode(static_cast<amnezia::AppsRouteMode>(routeMode));
+    updateModel();
     emit routeModeChanged();
 }
 
