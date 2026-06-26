@@ -10,6 +10,8 @@
 #include <QMenu>
 #include <QSystemTrayIcon>
 
+class MacOSStatusIcon;
+
 class SystemTrayNotificationHandler : public NotificationHandler {
     Q_OBJECT
 
@@ -40,6 +42,7 @@ private:
     QMenu m_menu;
     QSystemTrayIcon m_systemTrayIcon;
     bool m_contextMenuEnabled = true;
+    MacOSStatusIcon* m_nativeStatusIcon = nullptr;
 
     QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;

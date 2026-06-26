@@ -7,6 +7,7 @@
 
 
 #ifdef Q_OS_MACOS
+#  include "platforms/macos/macosstatusicon.h"
 #  include "platforms/macos/macosutils.h"
 #endif
 
@@ -60,10 +61,15 @@ SystemTrayNotificationHandler::SystemTrayNotificationHandler(QObject* parent) :
     } else {
         qWarning().noquote() << QString("Qt tray context menu disabled on macOS %1 to avoid a Cocoa status item crash")
                                     .arg(QSysInfo::productVersion());
+        m_nativeStatusIcon = new MacOSStatusIcon(this);
+        m_nativeStatusIcon->setMenu(m_menu.toNSMenu());
+        m_nativeStatusIcon->setToolTip(APPLICATION_NAME);
     }
 
     setTrayState(Vpn::ConnectionState::Disconnected);
-    m_systemTrayIcon.show();
+    if (m_contextMenuEnabled) {
+        m_systemTrayIcon.show();
+    }
 }
 
 SystemTrayNotificationHandler::~SystemTrayNotificationHandler() {
@@ -82,6 +88,11 @@ void SystemTrayNotificationHandler::onTranslationsUpdated()
     m_trayActionDisconnect->setText(tr("Disconnect"));
     m_trayActionVisitWebSite->setText(tr("Visit Website"));
     m_trayActionQuit->setText(tr("Quit")+ " " + APPLICATION_NAME);
+#ifdef Q_OS_MACOS
+    if (m_nativeStatusIcon) {
+        m_nativeStatusIcon->setMenu(m_menu.toNSMenu());
+    }
+#endif
 }
 
 void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUrl) {
@@ -91,6 +102,13 @@ void SystemTrayNotificationHandler::updateWebsiteUrl(const QString &newWebsiteUr
 
 void SystemTrayNotificationHandler::setTrayIcon(const QString &iconPath)
 {
+#ifdef Q_OS_MACOS
+    if (m_nativeStatusIcon) {
+        m_nativeStatusIcon->setIcon(iconPath);
+        return;
+    }
+#endif
+
     QIcon trayIconMask(QPixmap(iconPath).scaled(128,128));
 #ifndef Q_OS_MACOS
     trayIconMask.setIsMask(true);
@@ -176,6 +194,14 @@ void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            const QString& message,
                                            int timerMsec) {
   Q_UNUSED(type);
+
+#ifdef Q_OS_MACOS
+  if (m_nativeStatusIcon) {
+    Q_UNUSED(timerMsec);
+    m_nativeStatusIcon->showMessage(title, message);
+    return;
+  }
+#endif
 
   QIcon icon(ConnectedTrayIconName);
   m_systemTrayIcon.showMessage(title, message, icon, timerMsec);

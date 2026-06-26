@@ -54,8 +54,17 @@
  */
 - (void)setIcon:(NSData*)imageData {
   NSImage* image = [[NSImage alloc] initWithData:imageData];
+  if (!image) {
+    return;
+  }
+
+  const CGFloat statusItemHeight = NSHeight([self.statusItem.button bounds]);
+  const CGFloat iconSize = MAX(MIN(statusItemHeight - 4.0, 18.0), 1.0);
+  [image setSize:NSMakeSize(iconSize, iconSize)];
   [image setTemplate:true];
 
+  [self.statusItem.button setImagePosition:NSImageOnly];
+  [self.statusItem.button setImageScaling:NSImageScaleProportionallyDown];
   [self.statusItem.button setImage:image];
   [image release];
 }
