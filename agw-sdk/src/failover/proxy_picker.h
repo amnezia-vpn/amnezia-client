@@ -6,11 +6,12 @@
 
 #include "agw/http.h"
 
-namespace agw::failover {
+namespace agw::failover
+{
 
-// Health-check: для каждого прокси по порядку делает GET <proxy>lmbd-health (с таймаутом);
-// возвращает первый, ответивший без ошибки, иначе "". Паритет с health-веткой bypassProxy.
-std::string pickHealthyProxy(IHttpClient &http, const std::vector<std::string> &proxyUrls, int timeoutMsecs);
+    // Health-check: для каждого прокси по порядку делает GET <proxy>lmbd-health (с таймаутом);
+    // возвращает первый, ответивший без ошибки, иначе "". Паритет с health-веткой bypassProxy.
+    std::string pickHealthyProxy(IHttpClient &http, const std::vector<std::string> &proxyUrls, int timeoutMsecs);
 
 } // namespace agw::failover
 

@@ -3,16 +3,18 @@
 
 #include "agw/http.h"
 
-namespace agw {
+namespace agw
+{
 
-// Реализация IHttpClient на libcurl (blocking). Компилируется только при наличии libcurl
-// (AGW_HAVE_CURL). Per-handle, потокобезопасна при использовании отдельных инстансов на поток.
-class CurlHttpClient : public IHttpClient {
-public:
-    CurlHttpClient();
-    ~CurlHttpClient() override;
-    HttpResponse send(const HttpRequest &request) override;
-};
+    // Реализация IHttpClient на libcurl (blocking). Компилируется только при наличии libcurl
+    // (AGW_HAVE_CURL). Per-handle, потокобезопасна при использовании отдельных инстансов на поток.
+    class CurlHttpClient : public IHttpClient
+    {
+    public:
+        CurlHttpClient();
+        ~CurlHttpClient() override;
+        HttpResponse send(const HttpRequest &request) override;
+    };
 
 } // namespace agw
 

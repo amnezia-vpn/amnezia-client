@@ -7,10 +7,11 @@
 
 // Тест-хук (НЕ часть публичного API): подменить транспорт для следующего agw_client_create,
 // чтобы гонять C-ABI через in-process mock без сети. В боевом пути не используется.
-namespace agw::detail {
+namespace agw::detail
+{
 
-void setNextTestHttpClient(std::shared_ptr<IHttpClient> http);
-std::shared_ptr<IHttpClient> takeNextTestHttpClient();
+    void setNextTestHttpClient(std::shared_ptr<IHttpClient> http);
+    std::shared_ptr<IHttpClient> takeNextTestHttpClient();
 
 } // namespace agw::detail
 
