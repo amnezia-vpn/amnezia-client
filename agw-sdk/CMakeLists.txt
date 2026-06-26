@@ -29,6 +29,7 @@ set(AGW_DEPS_MODE "shared-deps" CACHE STRING "Dependency mode: shared-deps | ven
 # --- зависимости ------------------------------------------------------------
 find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
+find_package(ZLIB REQUIRED)  # Tier 2: qCompress/qUncompress (vpn-ключ, разбор конфигов)
 
 # libcurl (транспорт по умолчанию). Если не найден — SDK собирается без него, а клиент обязан
 # передать свой IHttpClient через Config (см. default_client_fallback.cpp).
@@ -67,6 +68,9 @@ add_library(agw_obj OBJECT
     src/util/json.cpp
     src/util/url.cpp
     src/util/thread_pool.cpp
+    src/util/zlib.cpp
+    src/services/vpn_key.cpp
+    src/services/subscription.cpp
 )
 
 target_include_directories(agw_obj
@@ -75,7 +79,7 @@ target_include_directories(agw_obj
 )
 # PUBLIC, чтобы зависимости и include-пути дотекли до static/shared (и до тестов).
 target_link_libraries(agw_obj
-    PUBLIC OpenSSL::Crypto nlohmann_json::nlohmann_json Threads::Threads
+    PUBLIC OpenSSL::Crypto nlohmann_json::nlohmann_json Threads::Threads ZLIB::ZLIB
 )
 # Скрываем всё по умолчанию: наружу торчат только agw_* (AGW_API = visibility default).
 set_target_properties(agw_obj PROPERTIES

@@ -13,6 +13,18 @@ inline constexpr const char *userCountryCode = "user_country_code";
 
 inline constexpr const char *httpStatus = "http_status";
 inline constexpr const char *message = "message";
+
+// Поля для сборки vpn-ключа и разбора конфигов (Tier 2).
+inline constexpr const char *name = "name";
+inline constexpr const char *description = "description";
+inline constexpr const char *configVersion = "config_version";
+inline constexpr const char *protocol = "protocol";
+inline constexpr const char *apiEndpoint = "api_endpoint";
+inline constexpr const char *apiKey = "api_key";
+inline constexpr const char *apiConfig = "api_config";
+inline constexpr const char *serviceProtocol = "service_protocol";
+inline constexpr const char *authData = "auth_data";
+inline constexpr const char *subscriptionEndDate = "end_date";
 }
 
 #endif

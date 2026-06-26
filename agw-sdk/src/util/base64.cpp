@@ -71,6 +71,10 @@ namespace agw::util
     {
         return encode(data, kUrl, false);
     }
+    std::string base64UrlEncode(const std::vector<std::uint8_t> &data)
+    {
+        return encode(data, kUrl, true);
+    }
 
     std::string base64Encode(const std::string &data)
     {

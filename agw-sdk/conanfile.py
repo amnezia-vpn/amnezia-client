@@ -29,6 +29,7 @@ class AgwSdkConan(ConanFile):
         self.requires("openssl/3.6.2")
         self.requires("libcurl/8.10.1")
         self.requires("nlohmann_json/3.11.3")
+        self.requires("zlib/1.3.2")  # Tier 2: qCompress/qUncompress
 
     def configure(self):
         # vendored: тянем статические зависимости, чтобы забандлить их в библиотеку.
