@@ -5,7 +5,7 @@
 #include <sstream>
 #include <string>
 
-#include "agw/client.h"
+#include "agw/gateway_controller.h"
 #include "agw/config.h"
 #include "mock_gateway/mock_gateway.h"
 
@@ -50,7 +50,7 @@ int main()
         Config cfg = baseConfig(mock, pub);
         cfg.onBeforeRequest = [&](const std::string &h) { seenHost = h; };
 
-        GatewayClient client(std::move(cfg));
+        GatewayController client(std::move(cfg));
         Response r = client.post(endpoint, payload, ctx);
 
         CHECK(r.error == ErrorCode::NoError);
@@ -70,7 +70,7 @@ int main()
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->responsePlain = R"({"http_status":409,"message":"limit"})";
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
         Response r = client.post(endpoint, payload, ctx);
         CHECK(r.error == ErrorCode::ApiConfigLimitError);
         // тело несётся и при ошибке
@@ -81,7 +81,7 @@ int main()
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->simulateSsl = true;
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
         Response r = client.post(endpoint, payload, ctx);
         CHECK(r.error == ErrorCode::ApiConfigSslError);
     }
@@ -90,7 +90,7 @@ int main()
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->simulateTransport = TransportError::Timeout;
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
         Response r = client.post(endpoint, payload, ctx);
         CHECK(r.error == ErrorCode::ApiConfigTimeoutError);
     }
@@ -99,7 +99,7 @@ int main()
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         Config cfg = baseConfig(mock, "not a pem key");
-        GatewayClient client(std::move(cfg));
+        GatewayController client(std::move(cfg));
         Response r = client.post(endpoint, payload, ctx);
         CHECK(r.error == ErrorCode::ApiMissingAgwPublicKey);
         // до сети дело не дошло

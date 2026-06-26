@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "agw/cancellation.h"
-#include "agw/client.h"
+#include "agw/gateway_controller.h"
 #include "agw/config.h"
 #include "detail/test_hooks.h"
 
@@ -17,7 +17,7 @@ struct agw_client
     explicit agw_client(agw::Config cfg) : client(std::move(cfg))
     {
     }
-    agw::GatewayClient client;
+    agw::GatewayController client;
 };
 
 struct agw_cancel_token

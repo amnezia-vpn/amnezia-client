@@ -11,7 +11,7 @@
 #include <vector>
 
 #include "agw/cancellation.h"
-#include "agw/client.h"
+#include "agw/gateway_controller.h"
 #include "agw/config.h"
 #include "crypto/aes.h"
 #include "crypto/rsa.h"
@@ -101,7 +101,7 @@ int main()
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->responsePlain = R"({"ok":true,"v":1})";
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
         std::future<Response> f = client.postFuture(endpoint, payload, ctx);
         Response r = f.get();
         CHECK(r.error == ErrorCode::NoError);
@@ -113,7 +113,7 @@ int main()
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
         mock->responsePlain = R"({"async":true})";
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
 
         std::promise<Response> p;
         std::future<Response> f = p.get_future();
@@ -127,7 +127,7 @@ int main()
     // --- отмена ДО старта → Cancelled, до сети не доходим ------------------
     {
         auto mock = std::make_shared<agw_test::MockGateway>(priv);
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
         CancellationToken token;
         token.cancel();
         std::future<Response> f = client.postFuture(endpoint, payload, ctx, &token);
@@ -139,7 +139,7 @@ int main()
     // --- отмена В ПОЛЁТЕ → Cancelled --------------------------------------
     {
         auto mock = std::make_shared<BlockingUntilCancelMock>();
-        GatewayClient client(baseConfig(mock, pub));
+        GatewayController client(baseConfig(mock, pub));
         CancellationToken token;
 
         std::promise<Response> p;
@@ -161,7 +161,7 @@ int main()
         auto mock = std::make_shared<StatelessMock>(priv);
         Config cfg = baseConfig(mock, pub);
         cfg.threadPoolSize = 8;
-        GatewayClient client(std::move(cfg));
+        GatewayController client(std::move(cfg));
 
         constexpr int N = 64;
         std::vector<std::future<Response>> futs;

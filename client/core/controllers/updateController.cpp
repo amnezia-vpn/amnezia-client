@@ -11,7 +11,7 @@
 #include "amneziaApplication.h"
 #include "logger.h"
 #include "version.h"
-#include "core/controllers/gatewayController.h"
+#include "core/controllers/gatewayControllerAdapter.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
 
@@ -92,7 +92,7 @@ void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bo
 
 void UpdateController::fetchGatewayUrl()
 {
-    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(),
+    auto gatewayController = QSharedPointer<GatewayControllerAdapter>::create(m_appSettingsRepository->getGatewayEndpoint(),
                                                                        m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled());

@@ -1,5 +1,5 @@
-#ifndef GATEWAYCONTROLLER_H
-#define GATEWAYCONTROLLER_H
+#ifndef GATEWAYCONTROLLERADAPTER_H
+#define GATEWAYCONTROLLERADAPTER_H
 
 #include <memory>
 
@@ -14,17 +14,17 @@
 
 namespace agw
 {
-class GatewayClient;
+class GatewayController;
 }
 
-// Тонкий Qt-адаптер над agw::GatewayClient (agw-sdk). Сигнатуры — как раньше, вызывающий код не
+// Тонкий Qt-адаптер над agw::GatewayController (agw-sdk). Сигнатуры — как раньше, вызывающий код не
 // меняется. Транспорт/крипта/failover живут в SDK. См. docs/plans/gateway-sdk/agw-sdk-tier1-phase6-integration.md
-class GatewayController : public QObject
+class GatewayControllerAdapter : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+    explicit GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
@@ -32,7 +32,7 @@ public:
 
 private:
     // Долгоживущий клиент окружения (кеш прокси переживает запросы). Берётся из статического реестра.
-    std::shared_ptr<agw::GatewayClient> m_client;
+    std::shared_ptr<agw::GatewayController> m_controller;
 };
 
-#endif // GATEWAYCONTROLLER_H
+#endif // GATEWAYCONTROLLERADAPTER_H

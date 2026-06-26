@@ -48,7 +48,7 @@ endif()
 # --- библиотека -------------------------------------------------------------
 # Один раз компилируем объекты, из них собираем static (agw) и shared C-ABI (agw_capi).
 add_library(agw_obj OBJECT
-    src/client.cpp
+    src/gateway_controller.cpp
     src/c_abi.cpp
     src/crypto/rng.cpp
     src/crypto/aes.cpp

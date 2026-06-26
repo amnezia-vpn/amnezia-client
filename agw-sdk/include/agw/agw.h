@@ -3,7 +3,7 @@
 
 // Зонтичный заголовок публичного API agw-sdk.
 #include "agw/cancellation.h"
-#include "agw/client.h"
+#include "agw/gateway_controller.h"
 #include "agw/config.h"
 #include "agw/http.h"
 #include "agw/types.h"

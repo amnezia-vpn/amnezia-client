@@ -47,7 +47,7 @@ list(APPEND LIBS OpenSSL::SSL OpenSSL::Crypto)
 find_package(libssh REQUIRED)
 list(APPEND LIBS ssh::ssh)
 
-# AGW SDK — транспорт к API-шлюзу (agw-sdk, Qt-free). gatewayController линкуется как адаптер.
+# AGW SDK — транспорт к API-шлюзу (agw-sdk, Qt-free). gatewayControllerAdapter линкуется как адаптер.
 # Два режима:
 #   ON  (по умолчанию) — собираем SDK ИЗ ИСХОДНИКОВ через add_subdirectory: можно заходить
 #                        отладчиком внутрь SDK, символы и -g идут из основной сборки;

@@ -13,7 +13,7 @@ Qt-free C++20 транспорт к API-шлюзу Amnezia (вынос `GatewayC
 
 - [x] **Фаза 1** — каркас + крипта на OpenSSL EVP (AES-256-CBC, RSA-PKCS1 v1.5, SHA-512), base64
   (std + url), UUID v4, Qt-Indented JSON-сериализатор, golden-тесты крипты.
-- [x] **Фаза 2** — `IHttpClient`(libcurl) + `Config`/`GatewayClient`/`executePost` + sync `post`;
+- [x] **Фаза 2** — `IHttpClient`(libcurl) + `Config`/`GatewayController`/`executePost` + sync `post`;
   `request_builder`/`response`/`error_mapping`; интеграционный тест через in-process mock-шлюз
   (полный round-trip: SDK шифрует → «сервер» расшифровывает → шифрует ответ → SDK расшифровывает).
 - [x] **Фаза 3** — failover: `bypass_policy` (`shouldBypassProxy` дословно), `proxy_list`
@@ -32,7 +32,7 @@ Qt-free C++20 транспорт к API-шлюзу Amnezia (вынос `GatewayC
   зелёный — пакет с `libagw.a` + `libagw_capi.dylib` + заголовками. Режим `vendored` (статические
   зависимости) задан в conanfile (`-o deps_mode=vendored`).
 - [~] **Фаза 6** — интеграция в Qt-клиент. Готово: `GatewayController` переписан тонким адаптером
-  над `agw::GatewayClient` (сигнатуры один в один, байт-паритет payload, персистентный клиент на
+  над `agw::GatewayController` (сигнатуры один в один, байт-паритет payload, персистентный клиент на
   окружение, `onBeforeRequest` = iOS inet + desktop kill-switch, async через `QPromise`+маршалинг);
   проводка сборки (корневой `conanfile` requires `agw-sdk/0.1.0`, `client/cmake/3rdparty.cmake`
   линкует `agw::agw`). Осталось (вне этого окружения): Qt-сборка под все платформы, перевод

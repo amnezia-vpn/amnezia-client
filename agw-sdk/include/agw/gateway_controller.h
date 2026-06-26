@@ -1,5 +1,5 @@
-#ifndef AGW_CLIENT_H
-#define AGW_CLIENT_H
+#ifndef AGW_GATEWAY_CONTROLLER_H
+#define AGW_GATEWAY_CONTROLLER_H
 
 #include <functional>
 #include <future>
@@ -13,15 +13,15 @@
 namespace agw {
 
 // Долгоживущий клиент шлюза. Состояние (кеш прокси) — на инстанс, потокобезопасно (Фаза 4).
-class GatewayClient {
+class GatewayController {
 public:
-    explicit GatewayClient(Config config);
-    ~GatewayClient();
+    explicit GatewayController(Config config);
+    ~GatewayController();
 
-    GatewayClient(GatewayClient &&) noexcept;
-    GatewayClient &operator=(GatewayClient &&) noexcept;
-    GatewayClient(const GatewayClient &) = delete;
-    GatewayClient &operator=(const GatewayClient &) = delete;
+    GatewayController(GatewayController &&) noexcept;
+    GatewayController &operator=(GatewayController &&) noexcept;
+    GatewayController(const GatewayController &) = delete;
+    GatewayController &operator=(const GatewayController &) = delete;
 
     // Синхронный POST: блокирует поток вызывающего. endpoint — формат-строка с "%1" под хост.
     // payload — уже сериализованное тело запроса (SDK его не парсит). Возвращает расшифрованное
@@ -46,4 +46,4 @@ private:
 
 } // namespace agw
 
-#endif // AGW_CLIENT_H
+#endif // AGW_GATEWAY_CONTROLLER_H

@@ -1,4 +1,4 @@
-#include "gatewayController.h"
+#include "gatewayControllerAdapter.h"
 
 #include <map>
 #include <mutex>
@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <QDebug>
+#include <QEventLoop>
 #include <QJsonDocument>
 #include <QPointer>
 #include <QPromise>
@@ -13,7 +14,7 @@
 #include <QStringList>
 #include <QThread>
 
-#include <agw/client.h>
+#include <agw/gateway_controller.h>
 #include <agw/config.h>
 #include <agw/types.h>
 
@@ -95,7 +96,7 @@ namespace
                     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
                         QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
                         if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-                            qWarning() << "GatewayController: addKillSwitchAllowedRange failed";
+                            qWarning() << "GatewayControllerAdapter: addKillSwitchAllowedRange failed";
                         }
                     });
                 }
@@ -107,11 +108,11 @@ namespace
     }
 
     // Реестр долгоживущих клиентов по окружению — кеш прокси переживает запросы (бывш. static m_proxyUrl).
-    std::shared_ptr<agw::GatewayClient> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
+    std::shared_ptr<agw::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                         int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
         static std::mutex mutex;
-        static std::map<std::string, std::shared_ptr<agw::GatewayClient>> clients;
+        static std::map<std::string, std::shared_ptr<agw::GatewayController>> clients;
 
         const std::string key = gatewayEndpoint.toStdString() + "|" + (isDevEnvironment ? "1" : "0") + "|"
                 + std::to_string(requestTimeoutMsecs) + "|" + (isStrictKillSwitchEnabled ? "1" : "0");
@@ -121,34 +122,61 @@ namespace
         if (it != clients.end()) {
             return it->second;
         }
-        auto client = std::make_shared<agw::GatewayClient>(
+        auto client = std::make_shared<agw::GatewayController>(
                 makeConfig(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled));
         clients.emplace(key, client);
         return client;
     }
 } // namespace
 
-GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+GatewayControllerAdapter::GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
-      m_client(getClientForEnv(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
+      m_controller(getClientForEnv(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
 {
 }
 
-amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
 {
     const std::string payload = QJsonDocument(apiPayload).toJson().toStdString();
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
     const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
 
-    const agw::Response r =
-            m_client->post(endpoint.toStdString(), payload, agw::FailoverContext { serviceType, userCountryCode });
+    qInfo().noquote() << "[agw-adapter] post (sync) endpoint=" << endpoint
+                      << "payloadLen=" << payload.size() << "thread=" << QThread::currentThread();
 
-    responseBody = QByteArray::fromStdString(r.body);
-    return mapError(r.error);
+    // Сетевая работа уходит на пул потоков SDK (postAsync), а вызывающий поток крутит локальный
+    // QEventLoop с ExcludeUserInputEvents — ровно как делал прежний Qt-овый GatewayController::post.
+    // Так UI остаётся отзывчивым, сигнатура синхронная, вызывающий код (контроллеры/UI) не меняется.
+    // context — приёмник результата на потоке вызывающего (надёжно вне зависимости от affinity this).
+    QEventLoop loop;
+    QObject context;
+    agw::Response result;
+
+    m_controller->postAsync(
+            endpoint.toStdString(), payload,
+            [&loop, &context, &result](agw::Response r) {
+                // коллбэк приходит на потоке пула → маршалим в поток вызывающего и будим event loop
+                QMetaObject::invokeMethod(
+                        &context,
+                        [&loop, &result, r]() {
+                            result = r;
+                            loop.quit();
+                        },
+                        Qt::QueuedConnection);
+            },
+            agw::FailoverContext { serviceType, userCountryCode });
+
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
+
+    responseBody = QByteArray::fromStdString(result.body);
+    const amnezia::ErrorCode ec = mapError(result.error);
+    qInfo().noquote() << "[agw-adapter] post (sync) result errorCode=" << static_cast<int>(ec)
+                      << "bodyLen=" << responseBody.size();
+    return ec;
 }
 
-QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayController::postAsync(const QString &endpoint, const QJsonObject apiPayload)
+QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsync(const QString &endpoint, const QJsonObject apiPayload)
 {
     auto promise = QSharedPointer<QPromise<QPair<amnezia::ErrorCode, QByteArray>>>::create();
     promise->start();
@@ -158,13 +186,19 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayController::postAsync(cons
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
     const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
 
-    QPointer<GatewayController> self(this);
+    QPointer<GatewayControllerAdapter> self(this);
 
-    m_client->postAsync(
+    qInfo().noquote() << "[agw-adapter] postAsync endpoint=" << endpoint
+                      << "payloadLen=" << payload.size() << "callerThread=" << QThread::currentThread();
+
+    m_controller->postAsync(
             endpoint.toStdString(), payload,
             [promise, self](agw::Response r) {
                 const amnezia::ErrorCode ec = mapError(r.error);
                 const QByteArray body = QByteArray::fromStdString(r.body);
+                qInfo().noquote() << "[agw-adapter] postAsync SDK callback errorCode=" << static_cast<int>(ec)
+                                  << "bodyLen=" << body.size() << "poolThread=" << QThread::currentThread()
+                                  << "→ marshalling to object thread";
                 // Маршалим результат с потока пула на поток объекта (Qt::QueuedConnection).
                 auto deliver = [promise, ec, body]() {
                     promise->addResult(qMakePair(ec, body));

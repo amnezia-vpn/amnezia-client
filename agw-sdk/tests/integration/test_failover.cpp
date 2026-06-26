@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "agw/client.h"
+#include "agw/gateway_controller.h"
 #include "agw/config.h"
 #include "crypto/aes.h"
 #include "crypto/rsa.h"
@@ -99,7 +99,7 @@ int main()
     cfg.requestTimeoutMsecs = 5000;
     cfg.httpClient = mock;
 
-    GatewayClient client(std::move(cfg));
+    GatewayController client(std::move(cfg));
     const std::string endpoint = "%1api/v1/test";
     const FailoverContext ctx{"prem", "US"};
     const std::string payload = R"({"hello":"world"})";
