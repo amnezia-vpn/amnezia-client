@@ -27,6 +27,8 @@ Button {
     property string leftImageColor: textColor
     property bool changeLeftImageSize: true
 
+    property string accessibleName: ""
+
     property bool squareLeftSide: false
 
     property var clickedFunc
@@ -34,6 +36,9 @@ Button {
     property alias buttonTextLabel: buttonText
 
     property bool isFocusable: true
+
+    Accessible.name: accessibleName !== "" ? accessibleName : text
+    Accessible.role: Accessible.Button
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()

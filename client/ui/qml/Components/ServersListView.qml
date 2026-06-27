@@ -99,6 +99,7 @@ ListViewType {
 
                     image: "qrc:/images/controls/settings.svg"
                     imageColor: AmneziaStyle.color.paleGray
+                    accessibleName: qsTr("Server settings for %1").arg(name)
 
                     implicitWidth: 56
                     implicitHeight: 56

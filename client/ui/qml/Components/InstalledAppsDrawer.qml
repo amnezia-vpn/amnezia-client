@@ -120,6 +120,7 @@ DrawerType2 {
             anchors.leftMargin: 16
 
             backgroundColor: AmneziaStyle.color.slateGray
+            headerText: qsTr("Search applications")
 
             textField.placeholderText: qsTr("application name")
         }

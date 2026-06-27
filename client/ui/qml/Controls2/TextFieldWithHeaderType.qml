@@ -25,6 +25,7 @@ Item {
     property alias textField: textField
     property string textFieldTextColor: AmneziaStyle.color.paleGray
     property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
+    property int textFieldInputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
     property bool textFieldEditable: true
 
@@ -110,7 +111,10 @@ Item {
                         enabled: root.textFieldEditable
                         color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
 
-                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                        Accessible.name: root.headerText !== "" ? root.headerText : root.textField.placeholderText
+                        Accessible.role: Accessible.EditableText
+
+                        inputMethodHints: root.textFieldInputMethodHints
 
                         placeholderTextColor: AmneziaStyle.color.charcoalGray
 

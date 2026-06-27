@@ -17,6 +17,8 @@ Button {
     property string imageColor: AmneziaStyle.color.mutedGray
     property string disableImageColor: AmneziaStyle.color.slateGray
 
+    property string accessibleName: ""
+
     property alias backgroundColor: background.color
     property alias backgroundRadius: background.radius
 
@@ -29,6 +31,9 @@ Button {
     icon.color: root.enabled ? imageColor : disableImageColor
 
     property bool isFocusable: true
+
+    Accessible.name: accessibleName
+    Accessible.role: Accessible.Button
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
