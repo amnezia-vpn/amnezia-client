@@ -32,7 +32,7 @@ Button {
 
     property bool isFocusable: true
 
-    Accessible.name: accessibleName
+    Accessible.name: accessibleName !== "" ? accessibleName : defaultAccessibleName()
     Accessible.role: Accessible.Button
 
     Keys.onTabPressed: {
@@ -95,5 +95,20 @@ Button {
         anchors.fill: parent
         enabled: false
         cursorShape: Qt.PointingHandCursor
+    }
+
+    function defaultAccessibleName() {
+        if (image.indexOf("close.svg") !== -1) return qsTr("Close")
+        if (image.indexOf("copy.svg") !== -1) return qsTr("Copy")
+        if (image.indexOf("qr-code.svg") !== -1) return qsTr("Show QR code")
+        if (image.indexOf("trash.svg") !== -1) return qsTr("Delete")
+        if (image.indexOf("refresh-cw.svg") !== -1) return qsTr("Refresh")
+        if (image.indexOf("more-vertical.svg") !== -1) return qsTr("More options")
+        if (image.indexOf("settings") !== -1) return qsTr("Settings")
+        if (image.indexOf("plus.svg") !== -1) return qsTr("Add")
+        if (image.indexOf("chevron-down.svg") !== -1) return qsTr("Expand")
+        if (image.indexOf("chevron-right.svg") !== -1) return qsTr("Open")
+        if (image.indexOf("download.svg") !== -1) return qsTr("Download")
+        return ""
     }
 }

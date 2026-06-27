@@ -37,7 +37,7 @@ Button {
 
     property bool isFocusable: true
 
-    Accessible.name: accessibleName !== "" ? accessibleName : text
+    Accessible.name: accessibleName !== "" ? accessibleName : (text !== "" ? text : defaultAccessibleName())
     Accessible.role: Accessible.Button
 
     Keys.onTabPressed: {
@@ -211,5 +211,14 @@ Button {
         if (root.clickedFunc && typeof root.clickedFunc === "function") {
             root.clickedFunc()
         }
+    }
+
+    function defaultAccessibleName() {
+        var source = leftImageSource !== "" ? leftImageSource : rightImageSource
+        if (source.indexOf("plus.svg") !== -1) return qsTr("Add")
+        if (source.indexOf("chevron-down.svg") !== -1) return qsTr("Expand")
+        if (source.indexOf("chevron-right.svg") !== -1) return qsTr("Open")
+        if (source.indexOf("external-link.svg") !== -1) return qsTr("Open link")
+        return ""
     }
 }

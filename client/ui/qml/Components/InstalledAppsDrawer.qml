@@ -89,6 +89,7 @@ DrawerType2 {
 
                             text: appName
                             checked: isAppSelected
+                            Accessible.name: qsTr("Select %1").arg(appName)
                             onCheckedChanged: {
                                 installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                             }

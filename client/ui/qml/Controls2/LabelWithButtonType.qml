@@ -21,6 +21,7 @@ Item {
 
     property string buttonImageSource
     property string rightImageSource
+    property string rightButtonAccessibleName: root.text
     property string leftImageSource
     property bool isLeftImageHoverEnabled: true
     property bool isSmallLeftImage: false
@@ -276,7 +277,7 @@ Item {
             image: rightImageSource
             imageColor: rightImageColor
             visible: rightImageSource ? true : false
-            accessibleName: root.text
+            accessibleName: root.rightButtonAccessibleName
 
             Layout.alignment: Qt.AlignRight
 

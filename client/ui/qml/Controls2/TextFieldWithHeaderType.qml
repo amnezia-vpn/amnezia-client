@@ -20,6 +20,7 @@ Item {
 
     property string buttonText
     property string buttonImageSource
+    property string buttonAccessibleName: buttonText !== "" ? buttonText : defaultButtonAccessibleName()
     property var clickedFunc
 
     property alias textField: textField
@@ -198,9 +199,10 @@ Item {
     BasicButtonType {
         visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
 
-        focusPolicy: Qt.NoFocus
+        focusPolicy: Qt.StrongFocus
         text: root.buttonText
         leftImageSource: root.buttonImageSource
+        accessibleName: root.buttonAccessibleName
 
         anchors.top: content.top
         anchors.bottom: content.bottom
@@ -219,6 +221,14 @@ Item {
 
     function getBackgroundBorderColor(noneFocusedColor) {
         return textField.focus ? root.borderFocusedColor : noneFocusedColor
+    }
+
+    function defaultButtonAccessibleName() {
+        if (buttonImageSource.indexOf("plus.svg") !== -1) return qsTr("Add")
+        if (buttonImageSource.indexOf("refresh-cw.svg") !== -1) return qsTr("Refresh")
+        if (buttonImageSource.indexOf("eye.svg") !== -1) return qsTr("Show %1").arg(headerText)
+        if (buttonImageSource.indexOf("eye-off.svg") !== -1) return qsTr("Hide %1").arg(headerText)
+        return headerText
     }
 
     Keys.onEnterPressed: {
