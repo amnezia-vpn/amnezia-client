@@ -40,6 +40,7 @@ private:
     QJsonObject m_config;
     bool m_ipv6RoutingStopped = false;
     QStringList m_allowedEndpoints;
+    Tunnel* m_armedTunnel = nullptr;
 };
 
 #endif // VPNTRAFFICGUARD_H
