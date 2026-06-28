@@ -413,6 +413,7 @@ jobs:
     strategy:
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
+        macos_arch: [x86_64, arm64]
         include:
           - xcode-version: 26.4
             os: macos-26
@@ -437,7 +438,7 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
-      run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1
+      run: cmake -S . -B build-${{ matrix.macos_arch }} -G Xcode -DPREBUILTS_ONLY=1 -DAMNEZIA_MACOS_ARCH=${{ matrix.macos_arch }}
     
     - name: 'Authorize in remote'
       if: github.ref == 'refs/heads/dev'
@@ -454,6 +455,14 @@ jobs:
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
+
+    strategy:
+      matrix:
+        include:
+          - macos_arch: x86_64
+            package_arch: x64
+          - macos_arch: arm64
+            package_arch: arm64
 
     env:
       QT_VERSION: 6.10.1
@@ -531,12 +540,12 @@ jobs:
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
       shell: bash
-      run: deploy/build.sh --generator Ninja --installer all
+      run: deploy/build.sh --generator Ninja --installer all --macos-arch ${{ matrix.macos_arch }} --build deploy/build-${{ matrix.macos_arch }}
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN_*_macos_x64.pkg
+        path: deploy/build-${{ matrix.macos_arch }}/AmneziaVPN_*_macos_${{ matrix.package_arch }}.pkg
         archive: false
         retention-days: 7
 

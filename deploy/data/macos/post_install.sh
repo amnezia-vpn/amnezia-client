@@ -56,7 +56,7 @@ run_cmd osascript -e 'tell application "AmneziaVPN" to quit' || true
 
 PLIST_SOURCE="$APP_PATH/Contents/Resources/$PLIST_NAME"
 if [ -f "$PLIST_SOURCE" ]; then
-  run_cmd mv -f "$PLIST_SOURCE" "$LAUNCH_DAEMONS_PLIST_NAME"
+  run_cmd cp -f "$PLIST_SOURCE" "$LAUNCH_DAEMONS_PLIST_NAME"
 else
   log "ERROR: service plist not found at $PLIST_SOURCE"
 fi

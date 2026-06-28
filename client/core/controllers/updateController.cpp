@@ -23,7 +23,13 @@ namespace
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_x64.exe");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
 #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos_x64.pkg");
+    QString installerRemoteFileNamePattern()
+    {
+        if (QSysInfo::currentCpuArchitecture() == QLatin1String("arm64")) {
+            return QStringLiteral("AmneziaVPN_%1_macos_arm64.pkg");
+        }
+        return QStringLiteral("AmneziaVPN_%1_macos_x64.pkg");
+    }
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.run");
@@ -202,7 +208,11 @@ void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& o
 QString UpdateController::composeDownloadUrl() const
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+#if defined(Q_OS_MACOS)
+    const QString fileName = installerRemoteFileNamePattern().arg(m_version);
+#else
     const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
+#endif
     return m_baseUrl + "/" + fileName;
 #else
     return QString();

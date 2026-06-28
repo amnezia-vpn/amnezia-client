@@ -31,6 +31,7 @@ while [[ $# -gt 0 ]]; do
         -g|--generator)     : ${CMAKE_GENERATOR=$2}; shift 2 ;;
         --installer)        installers+=("$2");      shift 2 ;;
         --abi)              abis+=("$2");            shift 2 ;;
+        --macos-arch)       : ${AMNEZIA_MACOS_ARCH:="$2"}; shift 2 ;;
         --sign)             : ${SIGN:=true};         shift   ;;
         --aab)              : ${BUILD_AAB=true};     shift   ;;
         --help|-h|?)
@@ -43,6 +44,7 @@ while [[ $# -gt 0 ]]; do
             echo "  -g|--generator <name>     - use specified generator for CMake"
             echo "  --installer <name|all>    - specify an installer(s) to build. allowed to be used multiple times"
             echo "  --abi                     - specify Android ABIs for target to build for. all by default"
+            echo "  --macos-arch <x86_64|arm64> - specify macOS desktop architecture. x86_64 by default"
             echo "  --sign                    - whether to sign the resulting files. only appicable to Android"
             echo "  --aab                     - whether to build AAB. only applicable to Android"
             exit 0
@@ -191,6 +193,7 @@ args=()
 [[ -n "$CMAKE_TOOLCHAIN_FILE" ]]      && args+=("-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE")
 [[ -n "$QT_HOST_PATH" ]]              && args+=("-DQT_HOST_PATH=$QT_HOST_PATH")
 [[ -n "$CMAKE_OSX_SYSROOT" ]]         && args+=("-DCMAKE_OSX_SYSROOT=$CMAKE_OSX_SYSROOT")
+[[ -n "$AMNEZIA_MACOS_ARCH" ]]        && args+=("-DAMNEZIA_MACOS_ARCH=$AMNEZIA_MACOS_ARCH")
 [[ -n "$MACOS_NE" ]]                  && args+=("-DMACOS_NE=$MACOS_NE")
 [[ -n "$DEPLOY" ]]                    && args+=("-DDEPLOY=$DEPLOY")
 [[ -n "$ANDROID_ABI" ]]               && args+=("-DANDROID_ABI=$ANDROID_ABI")
