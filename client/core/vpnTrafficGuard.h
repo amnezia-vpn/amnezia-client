@@ -28,7 +28,7 @@ public:
     void applyPolicy(Tunnel* tunnel);
     void revokePolicy(Tunnel* tunnel);
 
-    void bringUp(Tunnel* tunnel);
+    void bringUp(Tunnel* tunnel, bool isPrimary = false);
     void commit(Tunnel* tunnel);
     void tearDown(Tunnel* tunnel);
     void swap(Tunnel* from, Tunnel* to);
@@ -40,6 +40,7 @@ private:
     QJsonObject m_config;
     bool m_ipv6RoutingStopped = false;
     QStringList m_allowedEndpoints;
+    Tunnel* m_armedTunnel = nullptr;
 };
 
 #endif // VPNTRAFFICGUARD_H

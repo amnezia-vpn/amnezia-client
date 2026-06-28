@@ -584,10 +584,18 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
 #endif
 }
 
-void VpnTrafficGuard::bringUp(Tunnel* tunnel)
+void VpnTrafficGuard::bringUp(Tunnel* tunnel, bool isPrimary)
 {
     if (!tunnel) return;
     reserve(tunnel);
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    if (isPrimary) {
+        applyKillSwitch(tunnel, QString(), QString());
+        m_armedTunnel = tunnel;
+    }
+#else
+    Q_UNUSED(isPrimary)
+#endif
     tunnel->prepare();
 }
 
@@ -612,7 +620,9 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
     applyPolicy(tunnel);
     connect(tunnel, &Tunnel::activated, this, [this, tunnel] {
         if (auto p = tunnel->protocol()) {
-            applyKillSwitch(tunnel, p->vpnGateway(), p->vpnLocalAddress());
+            if (tunnel != m_armedTunnel) {
+                applyKillSwitch(tunnel, p->vpnGateway(), p->vpnLocalAddress());
+            }
             setupRoutes(tunnel->config(), p, tunnel->remoteAddress());
         }
     });
@@ -628,6 +638,9 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
 void VpnTrafficGuard::tearDown(Tunnel* tunnel)
 {
     if (!tunnel) return;
+    if (tunnel == m_armedTunnel) {
+        m_armedTunnel = nullptr;
+    }
     revokePolicy(tunnel);
     release(tunnel);
     tunnel->deactivate();
@@ -696,6 +709,9 @@ void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
             }
         });
 #endif
+        if (from == m_armedTunnel) {
+            m_armedTunnel = nullptr;
+        }
         revokePolicy(from);
         from->deactivate();
 
