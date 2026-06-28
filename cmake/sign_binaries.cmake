@@ -21,6 +21,10 @@ if(WIN32)
 endif()
 
 if(APPLE)
+    if(NOT CODESIGN_SIGNATURE)
+        set(CODESIGN_SIGNATURE "-")
+    endif()
+
     file(GLOB_RECURSE all_subdirs LIST_DIRECTORIES true "${CPACK_TEMPORARY_DIRECTORY}/*")
 
     set(frameworks ${all_subdirs})
@@ -42,7 +46,7 @@ if(APPLE)
 
     list(APPEND files "${frameworks}" "${dylibs}" "${other_execs}" "${service_exec}" "${client_exec}" "${bundle}")
 
-    if (files AND CODESIGN_SIGNATURE)
+    if(files)
         include(${CMAKE_CURRENT_LIST_DIR}/util/codesign.cmake)
         codesign_sign_files("${files}" "${CODESIGN_SIGNATURE}" "${CODESIGN_KEYCHAIN}")
     endif()
