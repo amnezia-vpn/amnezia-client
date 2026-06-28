@@ -584,17 +584,15 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
 #endif
 }
 
-void VpnTrafficGuard::bringUp(Tunnel* tunnel, bool isPrimary)
+void VpnTrafficGuard::bringUp(Tunnel* tunnel)
 {
     if (!tunnel) return;
     reserve(tunnel);
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
-    if (isPrimary) {
+    if (tunnel->handoverIfname().isEmpty()) {
         applyKillSwitch(tunnel, QString(), QString());
         m_armedTunnel = tunnel;
     }
-#else
-    Q_UNUSED(isPrimary)
 #endif
     tunnel->prepare();
 }

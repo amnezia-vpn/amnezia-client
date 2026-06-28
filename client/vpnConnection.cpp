@@ -248,7 +248,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         wireTunnelSignals(m_active, /*isActive=*/true);
         wireDaemonReconnectSignals();
         m_trafficGuard->setConfig(config);
-        m_trafficGuard->bringUp(m_active, true);
+        m_trafficGuard->bringUp(m_active);
         return;
     }
 #elif defined Q_OS_ANDROID

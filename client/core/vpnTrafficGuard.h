@@ -28,7 +28,7 @@ public:
     void applyPolicy(Tunnel* tunnel);
     void revokePolicy(Tunnel* tunnel);
 
-    void bringUp(Tunnel* tunnel, bool isPrimary = false);
+    void bringUp(Tunnel* tunnel);
     void commit(Tunnel* tunnel);
     void tearDown(Tunnel* tunnel);
     void swap(Tunnel* from, Tunnel* to);
