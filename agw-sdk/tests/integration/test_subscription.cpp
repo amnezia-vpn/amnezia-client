@@ -12,6 +12,7 @@
 #include "services/api_methods.h"
 #include "services/server_config.h"
 #include "util/base64.h"
+#include "util/checksum.h"
 #include "util/json.h"
 #include "util/zlib.h"
 
@@ -159,6 +160,56 @@ int main()
               == GatewayConfigType::AmneziaPremiumV2);
         // self-hosted/прочее → Unknown
         CHECK(configTypeFromJson(util::Json{{"config_version", 0}}, freeV2, premV1) == GatewayConfigType::Unknown);
+    }
+
+    // --- qtChecksum16: эталон CRC-16/X-25 (== Qt qChecksum ISO3309) -------
+    {
+        // Каноничный check-вектор каталога CRC: "123456789" → 0x906E. Независимая сверка с Qt.
+        CHECK(util::qtChecksum16(std::string("123456789")) == 0x906E);
+        CHECK(util::qtChecksum16(std::string("")) == 0x0000);
+    }
+
+    // --- importServiceFromAppStore: успех, key→config, crc, vpnKey --------
+    {
+        const std::string cfg = R"({"config_version":2,"awg":{"client_priv_key":"$WIREGUARD_CLIENT_PRIVATE_KEY"}})";
+        const std::string normalizedKey = util::base64UrlEncodeNoPad(util::qtCompress(bytesOf(cfg), 6));
+
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = util::Json{{"key", "vpn://" + normalizedKey}}.dump();
+        GatewayController gw = makeClient(mock);
+
+        auto res = services::importServiceFromAppStore(gw, baseReq(), "WG_PUB_KEY", "txn-123");
+        CHECK(res.error == ErrorCode::NoError);
+        CHECK_EQ(res.serverConfigJson, cfg);
+        CHECK_EQ(res.vpnKey, normalizedKey);  // без "vpn://"
+        // crc считается над Qt-indented JSON распарсенного конфига
+        const std::uint16_t expectCrc = util::qtChecksum16(util::qtIndentedDump(util::Json::parse(cfg)));
+        CHECK(res.crc == expectCrc);
+        CHECK(res.crc != 0);
+
+        util::Json sent = util::Json::parse(mock->lastDecryptedPayload);
+        CHECK_EQ(sent.value("transaction_id", std::string()), std::string("txn-123"));
+        CHECK_EQ(sent.value("public_key", std::string()), std::string("WG_PUB_KEY"));
+    }
+
+    // --- importServiceFromAppStore: пустой key → ApiPurchaseError ----------
+    {
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = R"({"key":""})";
+        GatewayController gw = makeClient(mock);
+        auto res = services::importServiceFromAppStore(gw, baseReq(), "WG_PUB_KEY", "txn-1");
+        CHECK(res.error == ErrorCode::ApiPurchaseError);
+    }
+
+    // --- importServiceFromAppStore: чужой config_version → ApiPurchaseError -
+    {
+        const std::string cfg = R"({"config_version":1})";  // не AmneziaGateway(2)
+        const std::string normalizedKey = util::base64UrlEncodeNoPad(util::qtCompress(bytesOf(cfg), 6));
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = util::Json{{"key", "vpn://" + normalizedKey}}.dump();
+        GatewayController gw = makeClient(mock);
+        auto res = services::importServiceFromAppStore(gw, baseReq(), "WG_PUB_KEY", "txn-1");
+        CHECK(res.error == ErrorCode::ApiPurchaseError);
     }
 
     return AGW_TEST_MAIN_RETURN();

@@ -53,6 +53,11 @@ inline constexpr const char *hint = "hint";
 inline constexpr const char *config = "config";
 inline constexpr const char *protoAwg = "awg";
 inline constexpr const char *protoVless = "vless";
+
+// iOS IAP / App Store (Шаг 4).
+inline constexpr const char *transactionId = "transaction_id";
+inline constexpr const char *key = "key";  // поле ответа v1/subscriptions: vpn://...
+inline constexpr const char *crc = "crc";
 }
 
 #endif

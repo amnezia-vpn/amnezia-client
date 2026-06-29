@@ -5,6 +5,7 @@
 #include "protocol/keys.h"
 #include "services/models.h"
 #include "util/base64.h"
+#include "util/checksum.h"
 #include "util/json.h"
 #include "util/zlib.h"
 
@@ -194,22 +195,21 @@ bool parseCaptcha(const util::Json &doc, CaptchaInfo &out)
     return true;
 }
 
-// extractServerConfigJsonFromResponse (сетевая часть): config → strip "vpn://" → base64url-decode →
-// qUncompress (если не сжато — как есть). Плейсхолдер $WIREGUARD_CLIENT_PRIVATE_KEY НЕ трогаем.
-ErrorCode extractConfig(const util::Json &response, std::string &outConfig)
+// strip "vpn://" + base64url-decode → normalizedKey + сырые байты ключа.
+std::string normalizeVpnKey(const std::string &raw)
 {
-    std::string data;
-    if (response.is_object()) {
-        auto it = response.find(k::config);
-        if (it != response.end() && it->is_string()) {
-            data = it->get<std::string>();
-        }
-    }
     const std::string prefix = "vpn://";
-    if (data.rfind(prefix, 0) == 0) {
-        data = data.substr(prefix.size());
+    if (raw.rfind(prefix, 0) == 0) {
+        return raw.substr(prefix.size());
     }
-    const std::vector<std::uint8_t> ba = util::base64Decode(data);
+    return raw;
+}
+
+// distillConfig: normalizedKey → base64url-decode → qUncompress (если не сжато — как есть).
+// Плейсхолдер $WIREGUARD_CLIENT_PRIVATE_KEY НЕ трогаем.
+ErrorCode distillConfig(const std::string &normalizedKey, std::string &outConfig)
+{
+    const std::vector<std::uint8_t> ba = util::base64Decode(normalizedKey);
     if (ba.empty()) {
         return ErrorCode::ApiConfigEmptyError;
     }
@@ -220,6 +220,19 @@ ErrorCode extractConfig(const util::Json &response, std::string &outConfig)
         outConfig.assign(ba.begin(), ba.end());  // не сжато — как есть
     }
     return ErrorCode::NoError;
+}
+
+// extractServerConfigJsonFromResponse (сетевая часть): field → strip "vpn://" → base64url-decode → qUncompress.
+ErrorCode extractConfig(const util::Json &response, const char *field, std::string &outConfig)
+{
+    std::string data;
+    if (response.is_object()) {
+        auto it = response.find(field);
+        if (it != response.end() && it->is_string()) {
+            data = it->get<std::string>();
+        }
+    }
+    return distillConfig(normalizeVpnKey(data), outConfig);
 }
 
 ImportResult importCommon(GatewayController &gw, const std::string &endpoint, util::Json payload,
@@ -242,9 +255,12 @@ ImportResult importCommon(GatewayController &gw, const std::string &endpoint, ut
         out.error = r.error;
         return out;
     }
-    out.error = extractConfig(doc, out.serverConfigJson);
+    out.error = extractConfig(doc, k::config, out.serverConfigJson);
     return out;
 }
+
+// ConfigSource::AmneziaGateway — config_version валидного gateway-конфига (Telegram=1, Gateway=2).
+constexpr int kConfigSourceAmneziaGateway = 2;
 
 } // namespace
 
@@ -307,6 +323,54 @@ ErrorCode deactivateDevice(GatewayController &gw, const GatewayRequest &req)
     const Response r = gw.post("%1v1/revoke_config", util::qtIndentedDump(payload),
                                FailoverContext{req.serviceType, req.userCountryCode});
     return r.error;
+}
+
+AppStoreImportResult importServiceFromAppStore(GatewayController &gw, const GatewayRequest &req,
+                                               const std::string &publicKey, const std::string &transactionId)
+{
+    util::Json payload = gatewayRequestToJson(req);
+    appendPublicKey(payload, req.serviceProtocol, publicKey);
+    payload[k::transactionId] = transactionId;
+
+    const Response r = gw.post("%1v1/subscriptions", util::qtIndentedDump(payload),
+                               FailoverContext{req.serviceType, req.userCountryCode});
+
+    AppStoreImportResult out;
+    if (r.error != ErrorCode::NoError) {
+        out.error = r.error;
+        return out;
+    }
+
+    util::Json doc = parseBody(r.body);
+    std::string rawKey;
+    if (doc.is_object()) {
+        auto it = doc.find(k::key);
+        if (it != doc.end() && it->is_string()) {
+            rawKey = it->get<std::string>();
+        }
+    }
+    if (rawKey.empty()) {
+        out.error = ErrorCode::ApiPurchaseError;
+        return out;
+    }
+
+    out.vpnKey = normalizeVpnKey(rawKey);
+    const ErrorCode ec = distillConfig(out.vpnKey, out.serverConfigJson);
+    if (ec != ErrorCode::NoError || out.serverConfigJson.empty()) {
+        out.error = ErrorCode::ApiPurchaseError;
+        return out;
+    }
+
+    util::Json cfg = parseBody(out.serverConfigJson);
+    if (!cfg.is_object() || cfg.value(k::configVersion, 0) != kConfigSourceAmneziaGateway) {
+        out.error = ErrorCode::ApiPurchaseError;  // оригинал: InternalError (в SDK нет — IAP-сбой)
+        return out;
+    }
+
+    // crc = qChecksum(QJsonDocument(configObject).toJson()) — над Qt-indented JSON, не над сырыми байтами.
+    out.crc = util::qtChecksum16(util::qtIndentedDump(cfg));
+    out.error = ErrorCode::NoError;
+    return out;
 }
 
 } // namespace agw::services

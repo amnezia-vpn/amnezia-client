@@ -1,6 +1,7 @@
 #ifndef AGW_SERVICES_API_METHODS_H
 #define AGW_SERVICES_API_METHODS_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -119,6 +120,25 @@ ImportResult resolveImportCaptcha(GatewayController &gw, const GatewayRequest &r
 
 // v1/revoke_config. Приложение трактует ApiNotFoundError как успех и само правит/удаляет сервер.
 ErrorCode deactivateDevice(GatewayController &gw, const GatewayRequest &req);
+
+// --- Шаг 4: iOS IAP (App Store) — шлюзовая часть ----------------------------
+
+// Результат v1/subscriptions. SDK делает только сетевую/крипто-часть: payload + POST + разбор ответа
+// (поле "key" = vpn://...), распаковку конфига и crc (qChecksum/CRC-16 над Qt-indented JSON конфига).
+// vpnKey — нормализованный ключ без префикса "vpn://" (приложение хранит его и дедуплицирует серверы).
+// StoreKit (покупка/восстановление/цены/транзакции), флаги isInAppPurchase/isTestPurchase, дедуп и
+// персист сервера — в приложении. Test/Sandbox vs Prod выбирается КОНФИГОМ переданного GatewayController.
+struct AppStoreImportResult {
+    ErrorCode error = ErrorCode::NoError;
+    std::string serverConfigJson;  // распакованный конфиг ($WIREGUARD_CLIENT_PRIVATE_KEY не трогаем)
+    std::string vpnKey;            // normalizedKey (base64url без "vpn://")
+    std::uint16_t crc = 0;         // qChecksum(qtIndentedDump(config)) — приложение кладёт в ApiV2ServerConfig
+};
+
+// v1/subscriptions: payload = GatewayRequest + public_key (по протоколу) + transaction_id.
+// transactionId приходит из StoreKit (приложение). На успехе config_version обязан быть AmneziaGateway(2).
+AppStoreImportResult importServiceFromAppStore(GatewayController &gw, const GatewayRequest &req,
+                                               const std::string &publicKey, const std::string &transactionId);
 
 } // namespace agw::services
 

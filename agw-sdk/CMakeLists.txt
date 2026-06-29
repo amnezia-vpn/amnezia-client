@@ -69,6 +69,7 @@ add_library(agw_obj OBJECT
     src/util/url.cpp
     src/util/thread_pool.cpp
     src/util/zlib.cpp
+    src/util/checksum.cpp
     src/services/vpn_key.cpp
     src/services/subscription.cpp
     src/services/api_methods.cpp
