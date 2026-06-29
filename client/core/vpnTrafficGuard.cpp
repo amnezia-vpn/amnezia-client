@@ -95,7 +95,7 @@ bool VpnTrafficGuard::allowEndpoint(const QString &remoteAddress, const QString 
     m_allowedEndpoints.append(remoteAddress);
     return IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(ifname, QStringList(remoteAddress));
-        return reply.waitForFinished(1000) && reply.returnValue();
+        return reply.waitForFinished() && reply.returnValue();
     });
 #else
     Q_UNUSED(remoteAddress)
@@ -334,8 +334,7 @@ void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, co
             updatedConfig.insert("vpnServer",
                                 NetworkUtilities::getIPAddress(updatedConfig.value(amnezia::configKey::hostName).toString()));
             QRemoteObjectPendingReply<bool> reply = iface->enableKillSwitch(updatedConfig, 0);
-            //TODO: why it takes so long?
-            if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+            if (!reply.waitForFinished() || !reply.returnValue()) {
                 qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to enable killswitch";
             } else {
                 qDebug() << "VpnTrafficGuard::applyKillSwitch: Successfully enabled killswitch";
@@ -356,8 +355,7 @@ void VpnTrafficGuard::flushAll()
         }
         QRemoteObjectPendingReply<bool> reply = iface->disableKillSwitch();
         m_allowedEndpoints.clear();
-        //TODO: why it takes so long?
-        if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+        if (!reply.waitForFinished() || !reply.returnValue()) {
             qWarning() << "VpnTrafficGuard::flushAll: Failed to disable killswitch";
         } else {
             qDebug() << "VpnTrafficGuard::flushAll: Successfully disabled killswitch";
@@ -607,7 +605,7 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
     if (!ipv4.isEmpty() || !ipv6.isEmpty()) {
         IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
             auto ap = iface->applyAdapterAddress(tunnel->ifname(), ipv4, ipv6);
-            if (!ap.waitForFinished(15000) || !ap.returnValue()) {
+            if (!ap.waitForFinished() || !ap.returnValue()) {
                 qWarning() << "VpnTrafficGuard::commit: applyAdapterAddress failed for"
                            << tunnel->ifname();
             }
@@ -658,7 +656,7 @@ void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
         if (!fromIpv4.isEmpty() || !fromIpv6.isEmpty()) {
             IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
                 auto rm = iface->removeAdapterAddress(from->ifname(), fromIpv4, fromIpv6);
-                if (!rm.waitForFinished(2000) || !rm.returnValue()) {
+                if (!rm.waitForFinished() || !rm.returnValue()) {
                     qWarning() << "VpnTrafficGuard::swap: removeAdapterAddress failed for"
                                << from->ifname();
                 }
@@ -692,7 +690,7 @@ void VpnTrafficGuard::swap(Tunnel* from, Tunnel* to)
     // applied before we deactivate the previous tunnel.
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         auto reply = iface->flushDns();
-        if (!reply.waitForFinished(5000) || !reply.returnValue()) {
+        if (!reply.waitForFinished() || !reply.returnValue()) {
             qWarning() << "VpnTrafficGuard::swap: trailing sync IPC timed out or failed";
         }
     });

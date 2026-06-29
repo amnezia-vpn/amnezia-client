@@ -119,7 +119,7 @@ QString VpnConnection::allocateIfname()
     QString kernelAssigned;
     IpcClient::withInterface([&kernelAssigned](QSharedPointer<IpcInterfaceReplica> iface) {
         auto reply = iface->reserveUtunName();
-        if (reply.waitForFinished(2000)) {
+        if (reply.waitForFinished()) {
             kernelAssigned = reply.returnValue();
         }
     });

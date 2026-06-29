@@ -105,7 +105,7 @@ int RouterLinux::routeAddListVia(const QString &ifname, const QString &gw, const
         QProcess p;
         p.setProcessChannelMode(QProcess::MergedChannels);
         p.start("ip", args);
-        if (p.waitForFinished(2000) && p.exitCode() == 0) {
+        if (p.waitForFinished() && p.exitCode() == 0) {
             cnt++;
         } else {
             qWarning().noquote() << "routeAddListVia failed:" << ip << "via" << gw << "dev" << ifname
