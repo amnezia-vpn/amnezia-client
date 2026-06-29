@@ -235,3 +235,43 @@ amnezia::ErrorCode GatewayControllerAdapter::getServices(const QString &osVersio
     qInfo().noquote() << "[agw-adapter] getServices result errorCode=" << static_cast<int>(ec);
     return ec;
 }
+
+QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayControllerAdapter::getNewsAsync(const QString &locale,
+                                                                                     const QStringList &userCountryCodes,
+                                                                                     const QStringList &serviceTypes)
+{
+    auto controller = m_controller;
+    const std::string localeStd = locale.toStdString();
+    std::vector<std::string> countries;
+    for (const QString &c : userCountryCodes) {
+        countries.push_back(c.toStdString());
+    }
+    std::vector<std::string> types;
+    for (const QString &t : serviceTypes) {
+        types.push_back(t.toStdString());
+    }
+
+    return QtConcurrent::run([controller, localeStd, countries, types]() -> QPair<amnezia::ErrorCode, QJsonArray> {
+        const agw::api::JsonResult r = agw::api::getNews(*controller, localeStd, countries, types);
+        const amnezia::ErrorCode ec = mapError(r.error);
+        if (ec != amnezia::ErrorCode::NoError) {
+            return qMakePair(ec, QJsonArray());
+        }
+        const QJsonArray arr = QJsonDocument::fromJson(QByteArray::fromStdString(r.json)).array();
+        return qMakePair(ec, arr);
+    });
+}
+
+QFuture<QPair<amnezia::ErrorCode, QString>> GatewayControllerAdapter::getUpdaterEndpointAsync(
+        const QString &cliVersion, const QString &osVersion, const QString &installationUuid)
+{
+    auto controller = m_controller;
+    const std::string cv = cliVersion.toStdString();
+    const std::string ov = osVersion.toStdString();
+    const std::string uuid = installationUuid.toStdString();
+
+    return QtConcurrent::run([controller, cv, ov, uuid]() -> QPair<amnezia::ErrorCode, QString> {
+        const agw::api::UrlResult r = agw::api::getUpdaterEndpoint(*controller, cv, ov, uuid);
+        return qMakePair(mapError(r.error), QString::fromStdString(r.url));  // url уже без хвостового '/'
+    });
+}

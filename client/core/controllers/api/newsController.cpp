@@ -80,34 +80,19 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
             apiDefs::requestTimeoutMsecs,
             m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    QJsonObject payload;
-    payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());
-
-    if (services.contains(apiDefs::key::userCountryCode)) {
-        payload.insert(apiDefs::key::userCountryCode, services.value(apiDefs::key::userCountryCode));
+    // Страны/типы — параметрами из серверов приложения; payload + разбор news/{news:[...]} — внутри SDK.
+    QStringList userCountryCodes;
+    for (const QJsonValue &v : services.value(apiDefs::key::userCountryCode).toArray()) {
+        userCountryCodes.append(v.toString());
     }
-    if (services.contains(apiDefs::key::serviceType)) {
-        payload.insert(apiDefs::key::serviceType, services.value(apiDefs::key::serviceType));
+    QStringList serviceTypes;
+    for (const QJsonValue &v : services.value(apiDefs::key::serviceType).toArray()) {
+        serviceTypes.append(v.toString());
     }
 
-    auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
-    return future.then([gatewayController](QPair<ErrorCode, QByteArray> result) -> QPair<ErrorCode, QJsonArray> {
-        auto [errorCode, responseBody] = result;
-        if (errorCode != ErrorCode::NoError) {
-            return qMakePair(errorCode, QJsonArray());
-        }
+    const QString locale = m_appSettingsRepository->getAppLanguage().name().split("_").first();
 
-        QJsonDocument doc = QJsonDocument::fromJson(responseBody);
-        QJsonArray newsArray;
-        if (doc.isArray()) {
-            newsArray = doc.array();
-        } else if (doc.isObject()) {
-            QJsonObject obj = doc.object();
-            if (obj.value("news").isArray()) {
-                newsArray = obj.value("news").toArray();
-            }
-        }
-
-        return qMakePair(ErrorCode::NoError, newsArray);
-    });
+    auto future = gatewayController->getNewsAsync(locale, userCountryCodes, serviceTypes);
+    // gatewayController держим живым до завершения (future самодостаточен, но capture не вредит).
+    return future.then([gatewayController](QPair<ErrorCode, QJsonArray> result) { return result; });
 }

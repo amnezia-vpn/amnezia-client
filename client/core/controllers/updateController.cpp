@@ -97,29 +97,22 @@ void UpdateController::fetchGatewayUrl()
                                                                        7000,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    QJsonObject apiPayload;
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
+    const QString cliVersion = QString(APP_VERSION);
+    const QString osVersion = QSysInfo::productType();
+    const QString installationUuid = m_appSettingsRepository->getInstallationUuid(true);
 
     // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
-    QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
-        gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
-            .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
-                auto [err, gatewayResponse] = result;
+    QTimer::singleShot(1000, this, [this, gatewayController, cliVersion, osVersion, installationUuid]() {
+        gatewayController->getUpdaterEndpointAsync(cliVersion, osVersion, installationUuid)
+            .then(this, [this, gatewayController](QPair<ErrorCode, QString> result) {
+                auto [err, url] = result;
                 if (err != ErrorCode::NoError) {
                     logger.error() << "Gateway request failed, error code:" << static_cast<int>(err);
                     finishUpdateCheck();
                     return;
                 }
 
-                QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
-
-                QString baseUrl = gatewayData.value("url").toString();
-                if (baseUrl.endsWith('/')) {
-                    baseUrl.chop(1);
-                }
-                m_baseUrl = baseUrl;
+                m_baseUrl = url;  // SDK уже срезал хвостовой '/'
 
                 fetchVersionInfo();
             });
