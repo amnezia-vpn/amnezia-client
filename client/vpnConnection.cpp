@@ -104,6 +104,9 @@ ErrorCode VpnConnection::lastError() const
     return ErrorCode::AndroidError;
 #endif
 
+    if (m_lastError != ErrorCode::NoError) {
+        return m_lastError;
+    }
     auto proto = vpnProtocol();
     return proto.isNull() ? ErrorCode::InternalError : proto->lastError();
 }
@@ -163,6 +166,8 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
         setConnectionState(Vpn::ConnectionState::Error);
         return;
     }
+
+    m_lastError = ErrorCode::NoError;
 
     qDebug() << QString("Trying to connect to VPN, server id is %1, container is %2, route mode is")
                         .arg(serverId)
@@ -629,9 +634,11 @@ void VpnConnection::onTunnelFailed(amnezia::ErrorCode error)
         releaseIfname(m_active->ifname());
         m_active->deleteLater();
         m_active = nullptr;
-        setConnectionState(Vpn::ConnectionState::Error);
-        if (error != ErrorCode::NoError) {
-            emit vpnProtocolError(error);
+        if (error == ErrorCode::NoError) {
+            emit serverConnectionTimeout();
+            return;
         }
+        m_lastError = error;
+        setConnectionState(Vpn::ConnectionState::Error);
     }
 }

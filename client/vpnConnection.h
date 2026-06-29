@@ -63,6 +63,7 @@ signals:
     void vpnProtocolError(amnezia::ErrorCode error);
     void serverSwitchFailed();
     void serverSwitchSucceeded();
+    void serverConnectionTimeout();
 
     void serviceIsNotReady();
 
@@ -84,6 +85,7 @@ private:
     Tunnel* m_active = nullptr;
     Tunnel* m_staging = nullptr;
     QSet<QString> m_ifnamesInUse;
+    ErrorCode m_lastError = ErrorCode::NoError;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;

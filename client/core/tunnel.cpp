@@ -86,7 +86,9 @@ void Tunnel::onPrimaryFailed() {
     }
     cancelActivationDeadline();
     setState(State::Failed);
-    emit failed(m_protocol ? m_protocol->lastError() : amnezia::ErrorCode::InternalError);
+    emit failed(m_protocol && m_protocol->lastError() != amnezia::ErrorCode::NoError
+                    ? m_protocol->lastError()
+                    : amnezia::ErrorCode::InternalError);
 }
 
 void Tunnel::deactivate() {
@@ -122,7 +124,7 @@ void Tunnel::startActivationDeadline(int msec) {
                 return;
             }
             setState(State::Failed);
-            emit failed(amnezia::ErrorCode::InternalError);
+            emit failed(amnezia::ErrorCode::NoError);
         });
     }
     m_deadline->start(msec);

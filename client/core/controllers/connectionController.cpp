@@ -30,6 +30,7 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
     connect(m_vpnConnection, &VpnConnection::serverSwitchFailed, this, &ConnectionController::serverSwitchFailed);
     connect(m_vpnConnection, &VpnConnection::serverSwitchSucceeded, this, &ConnectionController::serverSwitchSucceeded);
+    connect(m_vpnConnection, &VpnConnection::serverConnectionTimeout, this, &ConnectionController::serverConnectionTimeout);
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::setConnectionStateRequested, m_vpnConnection, &VpnConnection::setConnectionState, Qt::QueuedConnection);

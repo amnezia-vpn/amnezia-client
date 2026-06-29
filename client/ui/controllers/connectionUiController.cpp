@@ -20,6 +20,7 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
 {
     connect(m_connectionController, &ConnectionController::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
     connect(m_connectionController, &ConnectionController::serverSwitchFailed, this, &ConnectionUiController::serverSwitchFailed);
+    connect(m_connectionController, &ConnectionController::serverConnectionTimeout, this, &ConnectionUiController::serverConnectionTimeout);
 
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
 
