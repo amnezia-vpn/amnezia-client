@@ -43,9 +43,6 @@ public:
     explicit GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
-    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
-    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
-
     // --- Tier 2 (Шаг 6): типизированные методы поверх agw::api::* ---------------
     // sync-методы UI-поток не блокируют (работа на пуле + прокачка QEventLoop);
     // *Async — возвращают QFuture, исполняются целиком на пуле.
