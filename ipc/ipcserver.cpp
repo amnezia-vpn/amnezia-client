@@ -286,8 +286,6 @@ bool IpcServer::applyAdapterAddress(const QString &ifname, const QString &ipv4, 
 {
 #ifdef Q_OS_WIN
     bool ok = true;
-    // Router::createTun on Windows assigns the address and blocks until it
-    // becomes live on the adapter (NotifyUnicastIpAddressChange callback).
     if (!ipv4.isEmpty()) {
         ok &= Router::createTun(ifname, ipv4);
     }

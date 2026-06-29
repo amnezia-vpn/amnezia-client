@@ -184,7 +184,6 @@ ErrorCode XrayProtocol::startTun2Socks()
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, this,
             [this](QProcess::ProcessError error) {
                 if (error != QProcess::FailedToStart) {
-                    // Other errors are reported via the finished signal or are transient.
                     return;
                 }
                 qCritical() << "Tun2socks failed to start";
