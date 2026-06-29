@@ -66,39 +66,6 @@ SubscriptionController::SubscriptionController(SecureServersRepository* serversR
 {
 }
 
-QJsonObject SubscriptionController::GatewayRequestData::toJsonObject() const
-{
-    QJsonObject obj;
-    if (!osVersion.isEmpty()) {
-        obj[apiDefs::key::osVersion] = osVersion;
-    }
-    if (!appVersion.isEmpty()) {
-        obj[apiDefs::key::appVersion] = appVersion;
-    }
-    if (!appLanguage.isEmpty()) {
-        obj[apiDefs::key::appLanguage] = appLanguage;
-    }
-    if (!installationUuid.isEmpty()) {
-        obj[apiDefs::key::uuid] = installationUuid;
-    }
-    if (!userCountryCode.isEmpty()) {
-        obj[apiDefs::key::userCountryCode] = userCountryCode;
-    }
-    if (!serverCountryCode.isEmpty()) {
-        obj[apiDefs::key::serverCountryCode] = serverCountryCode;
-    }
-    if (!serviceType.isEmpty()) {
-        obj[apiDefs::key::serviceType] = serviceType;
-    }
-    if (!serviceProtocol.isEmpty()) {
-        obj[apiDefs::key::serviceProtocol] = serviceProtocol;
-    }
-    if (!authData.isEmpty()) {
-        obj[apiDefs::key::authData] = authData;
-    }
-    return obj;
-}
-
 SubscriptionController::ProtocolData SubscriptionController::generateProtocolData(const QString &protocol)
 {
     ProtocolData protocolData;
@@ -111,15 +78,6 @@ SubscriptionController::ProtocolData SubscriptionController::generateProtocolDat
     }
 
     return protocolData;
-}
-
-void SubscriptionController::appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload)
-{
-    if (protocol == configKey::awg) {
-        apiPayload[apiDefs::key::publicKey] = protocolData.wireGuardClientPubKey;
-    } else if (protocol == configKey::vless) {
-        apiPayload[apiDefs::key::publicKey] = protocolData.xrayUuid;
-    }
 }
 
 ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
@@ -208,13 +166,6 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     }
     
     serverConfigJson[apiDefs::key::apiConfig] = apiConfig;
-}
-
-ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
-{
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
-                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
-    return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,

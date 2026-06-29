@@ -27,21 +27,6 @@ public:
         QString xrayUuid;
     };
 
-    struct GatewayRequestData
-    {
-        QString osVersion;
-        QString appVersion;
-        QString appLanguage;
-        QString installationUuid;
-        QString userCountryCode;
-        QString serverCountryCode;
-        QString serviceType;
-        QString serviceProtocol;
-        QJsonObject authData;
-
-        QJsonObject toJsonObject() const;
-    };
-
     struct CaptchaInfo {
         QString captchaId;
         QString captchaImageBase64;
@@ -53,7 +38,6 @@ public:
                                      SecureAppSettingsRepository* appSettingsRepository);
 
     ProtocolData generateProtocolData(const QString &protocol);
-    void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
@@ -112,7 +96,6 @@ public:
                                           CaptchaInfo *retryCaptchaOut = nullptr);
 
 private:
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(const QString &serverId) const;
     
     ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
