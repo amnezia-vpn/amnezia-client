@@ -53,6 +53,7 @@ ImportResult fromInternal(const services::ImportResult &r)
     out.captcha.captchaImageBase64 = r.captcha.captchaImageBase64;
     out.captcha.hint = r.captcha.hint;
     out.serverConfigJson = r.serverConfigJson;
+    out.rawResponseJson = r.rawResponseJson;
     return out;
 }
 

@@ -152,7 +152,8 @@ typedef struct
     char *captcha_id;
     char *captcha_image; /* base64 (картинку рисует приложение) */
     char *captcha_hint;
-    char *server_config_json; /* на успехе — распакованный конфиг ($WIREGUARD_CLIENT_PRIVATE_KEY цел) */
+    char *server_config_json;  /* на успехе — распакованный конфиг ($WIREGUARD_CLIENT_PRIVATE_KEY цел) */
+    char *raw_response_json;   /* сырое расшифрованное тело (service_info/supported_protocols) */
 } agw_import_result;
 
 /* Результат v1/subscriptions (App Store). vpn_key — без префикса "vpn://"; crc — qChecksum/CRC-16. */

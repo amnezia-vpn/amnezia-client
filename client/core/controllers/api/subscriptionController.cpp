@@ -221,40 +221,46 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             CaptchaInfo &captchaInfo)
 {
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            userCountryCode,
-                                            "",
-                                            serviceType,
-                                            serviceProtocol,
-                                            QJsonObject() };
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = userCountryCode;
+    request.serviceType = serviceType;
+    request.serviceProtocol = serviceProtocol;
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
-
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
-
-    if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
-        if (jsonDoc.isObject()) {
-            QJsonObject jsonObj = jsonDoc.object();
-            captchaInfo.captchaId = jsonObj.value("captcha_id").toString();
-            captchaInfo.captchaImageBase64 = jsonObj.value("captcha_image").toString();
-            captchaInfo.hint = jsonObj.value("hint").toString();
-            captchaInfo.isRequired = true;
-        }
-        return errorCode;
+    // public_key для awg — WG pub key, для vless — xray uuid (паритет с appendProtocolDataToApiPayload).
+    QString publicKey;
+    if (serviceProtocol == configKey::awg) {
+        publicKey = protocolData.wireGuardClientPubKey;
+    } else if (serviceProtocol == configKey::vless) {
+        publicKey = protocolData.xrayUuid;
     }
 
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+                                               m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    // payload (+public_key) + post + разбор капчи — внутри SDK. Сырое тело отдаём в существующий
+    // extractServerConfigJsonFromResponse/updateApiConfigInJson (app-логика без изменений).
+    GatewayControllerAdapter::ImportResult res = gatewayController.importService(request, publicKey);
+
+    if (res.error == ErrorCode::ApiCaptchaRequiredError) {
+        captchaInfo.captchaId = res.captchaId;
+        captchaInfo.captchaImageBase64 = res.captchaImageBase64;
+        captchaInfo.hint = res.hint;
+        captchaInfo.isRequired = true;
+        return res.error;
     }
 
+    if (res.error != ErrorCode::NoError) {
+        return res.error;
+    }
+
+    const QByteArray responseBody = res.rawResponse;
     QJsonObject serverConfigJson;
-    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    ErrorCode errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -954,54 +960,43 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
                                                               const QString &captchaSolution,
                                                               CaptchaInfo *retryCaptchaOut)
 {
-    GatewayRequestData gatewayRequestData{QSysInfo::productType(),
-                                          QString(APP_VERSION),
-                                          m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                          m_appSettingsRepository->getInstallationUuid(true),
-                                          userCountryCode,
-                                          "",
-                                          serviceType,
-                                          serviceProtocol,
-                                          QJsonObject()};
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = userCountryCode;
+    request.serviceType = serviceType;
+    request.serviceProtocol = serviceProtocol;
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
-
-    apiPayload["captcha_id"] = captchaId;
-    QString normalizedSolution;
-    normalizedSolution.reserve(captchaSolution.size());
-    for (const QChar &ch : captchaSolution) {
-        const ushort u = ch.unicode();
-        if (u >= '0' && u <= '9') {
-            normalizedSolution += ch;
-        } else if (u >= 0xFF10 && u <= 0xFF19) {
-            normalizedSolution += QChar(static_cast<char16_t>(u - 0xFF10 + '0'));
-        }
-    }
-    apiPayload["captcha_solution"] = normalizedSolution.isEmpty() ? captchaSolution.trimmed() : normalizedSolution;
-
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
-    if (errorCode != ErrorCode::NoError) {
-        if (retryCaptchaOut
-            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
-                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
-            const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
-            if (jsonDoc.isObject()) {
-                const QJsonObject jsonObj = jsonDoc.object();
-                if (jsonObj.contains(QStringLiteral("captcha_id")) && jsonObj.contains(QStringLiteral("captcha_image"))) {
-                    retryCaptchaOut->captchaId = jsonObj.value(QStringLiteral("captcha_id")).toString();
-                    retryCaptchaOut->captchaImageBase64 = jsonObj.value(QStringLiteral("captcha_image")).toString();
-                    retryCaptchaOut->hint = jsonObj.value(QStringLiteral("hint")).toString();
-                    retryCaptchaOut->isRequired = true;
-                }
-            }
-        }
-        return errorCode;
+    QString publicKey;
+    if (serviceProtocol == configKey::awg) {
+        publicKey = protocolData.wireGuardClientPubKey;
+    } else if (serviceProtocol == configKey::vless) {
+        publicKey = protocolData.xrayUuid;
     }
 
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+                                               m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    // captcha_solution нормализуется в SDK; на повторную капчу — captchaRequired + поля.
+    GatewayControllerAdapter::ImportResult res =
+            gatewayController.resolveImportCaptcha(request, publicKey, captchaId, captchaSolution);
+
+    if (res.error != ErrorCode::NoError) {
+        if (retryCaptchaOut && res.captchaRequired) {
+            retryCaptchaOut->captchaId = res.captchaId;
+            retryCaptchaOut->captchaImageBase64 = res.captchaImageBase64;
+            retryCaptchaOut->hint = res.hint;
+            retryCaptchaOut->isRequired = true;
+        }
+        return res.error;
+    }
+
+    const QByteArray responseBody = res.rawResponse;
     QJsonObject serverConfigJson;
-    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    ErrorCode errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }

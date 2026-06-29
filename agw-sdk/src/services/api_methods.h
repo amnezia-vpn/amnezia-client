@@ -106,6 +106,7 @@ struct ImportResult {
     bool captchaRequired = false;
     CaptchaInfo captcha;
     std::string serverConfigJson;
+    std::string rawResponseJson;  // сырое расшифрованное тело ответа (для service_info/supported_protocols в app)
 };
 
 // public_key в payload: для awg — WireGuard client pub key, для vless — xray uuid (определяется

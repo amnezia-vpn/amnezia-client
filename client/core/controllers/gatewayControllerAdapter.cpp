@@ -106,6 +106,19 @@ namespace
         return cfg;
     }
 
+    GatewayControllerAdapter::ImportResult toAdapterImport(const agw::api::ImportResult &r)
+    {
+        GatewayControllerAdapter::ImportResult out;
+        out.error = mapError(r.error);
+        out.captchaRequired = r.captchaRequired;
+        out.captchaId = QString::fromStdString(r.captcha.captchaId);
+        out.captchaImageBase64 = QString::fromStdString(r.captcha.captchaImageBase64);
+        out.hint = QString::fromStdString(r.captcha.hint);
+        out.serverConfigJson = QString::fromStdString(r.serverConfigJson);
+        out.rawResponse = QByteArray::fromStdString(r.rawResponseJson);
+        return out;
+    }
+
     agw::api::GatewayRequest toApiReq(const GatewayControllerAdapter::GatewayRequest &q)
     {
         agw::api::GatewayRequest r;
@@ -281,6 +294,40 @@ amnezia::ErrorCode GatewayControllerAdapter::deactivateDevice(const GatewayReque
     const amnezia::ErrorCode ec = mapError(err);
     qInfo().noquote() << "[agw-adapter] deactivateDevice result errorCode=" << static_cast<int>(ec);
     return ec;
+}
+
+GatewayControllerAdapter::ImportResult GatewayControllerAdapter::importService(const GatewayRequest &request,
+                                                                               const QString &publicKey)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+
+    agw::api::ImportResult res;
+    runBlocking([controller, req, pk, &res]() { res = agw::api::importService(*controller, req, pk); });
+
+    qInfo().noquote() << "[agw-adapter] importService result errorCode=" << static_cast<int>(mapError(res.error));
+    return toAdapterImport(res);
+}
+
+GatewayControllerAdapter::ImportResult GatewayControllerAdapter::resolveImportCaptcha(const GatewayRequest &request,
+                                                                                     const QString &publicKey,
+                                                                                     const QString &captchaId,
+                                                                                     const QString &captchaSolution)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+    const std::string cid = captchaId.toStdString();
+    const std::string sol = captchaSolution.toStdString();
+
+    agw::api::ImportResult res;
+    runBlocking([controller, req, pk, cid, sol, &res]() {
+        res = agw::api::resolveImportCaptcha(*controller, req, pk, cid, sol);
+    });
+
+    qInfo().noquote() << "[agw-adapter] resolveImportCaptcha result errorCode=" << static_cast<int>(mapError(res.error));
+    return toAdapterImport(res);
 }
 
 QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayControllerAdapter::getNewsAsync(const QString &locale,

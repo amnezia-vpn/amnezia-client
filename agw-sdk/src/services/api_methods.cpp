@@ -242,6 +242,7 @@ ImportResult importCommon(GatewayController &gw, const std::string &endpoint, ut
                                FailoverContext{req.serviceType, req.userCountryCode});
 
     ImportResult out;
+    out.rawResponseJson = r.body;  // сырое тело — приложению для service_info/supported_protocols
     util::Json doc = parseBody(r.body);
 
     // капча: при Required (и при Invalid/Refresh для retry) тащим из тела

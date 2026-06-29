@@ -60,6 +60,27 @@ public:
     // v1/revoke_config. Возвращает ErrorCode как есть (app трактует ApiNotFoundError как успех).
     amnezia::ErrorCode deactivateDevice(const GatewayRequest &request);
 
+    // Результат import/resolveCaptcha. rawResponse — сырое тело (app сам распаковывает конфиг через
+    // существующий extractServerConfigJsonFromResponse + updateApiConfigInJson). serverConfigJson — уже
+    // распакованный конфиг от SDK (на этом пути не используется, но доступен).
+    struct ImportResult
+    {
+        amnezia::ErrorCode error = amnezia::ErrorCode::NoError;
+        bool captchaRequired = false;
+        QString captchaId;
+        QString captchaImageBase64;
+        QString hint;
+        QString serverConfigJson;
+        QByteArray rawResponse;
+    };
+
+    // v1/config. publicKey — WG pub key (awg) или xray uuid (vless). На капчу — captchaRequired + поля.
+    ImportResult importService(const GatewayRequest &request, const QString &publicKey);
+
+    // v1/config с captcha_id/solution (решение нормализуется в SDK). На повторную капчу — captchaRequired.
+    ImportResult resolveImportCaptcha(const GatewayRequest &request, const QString &publicKey,
+                                      const QString &captchaId, const QString &captchaSolution);
+
     QFuture<QPair<amnezia::ErrorCode, QJsonArray>> getNewsAsync(const QString &locale,
                                                                const QStringList &userCountryCodes,
                                                                const QStringList &serviceTypes);

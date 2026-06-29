@@ -171,6 +171,7 @@ namespace
         out.captcha_image = dupStr(r.captcha.captchaImageBase64);
         out.captcha_hint = dupStr(r.captcha.hint);
         out.server_config_json = dupStr(r.serverConfigJson);
+        out.raw_response_json = dupStr(r.rawResponseJson);
         return out;
     }
 }
@@ -490,10 +491,12 @@ void agw_import_result_free(agw_import_result *result)
     std::free(result->captcha_image);
     std::free(result->captcha_hint);
     std::free(result->server_config_json);
+    std::free(result->raw_response_json);
     result->captcha_id = nullptr;
     result->captcha_image = nullptr;
     result->captcha_hint = nullptr;
     result->server_config_json = nullptr;
+    result->raw_response_json = nullptr;
 }
 
 void agw_app_store_result_free(agw_app_store_result *result)

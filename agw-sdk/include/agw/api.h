@@ -66,6 +66,7 @@ struct ImportResult {
     bool captchaRequired = false;
     CaptchaInfo captcha;
     std::string serverConfigJson;
+    std::string rawResponseJson;  // сырое расшифрованное тело (service_info/supported_protocols — в app)
 };
 
 // v1/subscriptions (App Store). vpnKey — без префикса "vpn://"; crc — qChecksum/CRC-16.

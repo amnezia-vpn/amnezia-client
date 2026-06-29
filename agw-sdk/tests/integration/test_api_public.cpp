@@ -136,6 +136,9 @@ int main()
         CHECK(r.error == ErrorCode::NoError);
         CHECK(!r.captchaRequired);
         CHECK_EQ(r.serverConfigJson, cfg);
+        // сырое тело доступно приложению (для service_info/supported_protocols)
+        CHECK(!r.rawResponseJson.empty());
+        CHECK(util::Json::parse(r.rawResponseJson).contains("config"));
         util::Json sent = util::Json::parse(mock->lastDecryptedPayload);
         CHECK_EQ(sent.value("public_key", std::string()), std::string("WG_PUB"));
         CHECK(sent["auth_data"].is_object());  // authDataJson распарсен в объект
