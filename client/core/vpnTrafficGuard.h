@@ -35,7 +35,6 @@ public:
 
 private:
     void addSplitTunnelRoutes(const QString &gateway, amnezia::RouteMode mode);
-    void finishFirewallHandover(Tunnel* tunnel);
     SecureAppSettingsRepository* m_appSettingsRepository;
     QJsonObject m_config;
     bool m_ipv6RoutingStopped = false;
