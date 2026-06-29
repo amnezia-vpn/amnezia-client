@@ -253,6 +253,36 @@ amnezia::ErrorCode GatewayControllerAdapter::getServices(const QString &osVersio
     return ec;
 }
 
+amnezia::ErrorCode GatewayControllerAdapter::importTrial(const GatewayRequest &request, const QString &publicKey,
+                                                         const QString &email, QString &serverConfigJsonOut)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+    const std::string em = email.toStdString();
+
+    agw::api::ImportResult res;
+    runBlocking([controller, req, pk, em, &res]() { res = agw::api::importTrial(*controller, req, pk, em); });
+
+    serverConfigJsonOut = QString::fromStdString(res.serverConfigJson);
+    const amnezia::ErrorCode ec = mapError(res.error);
+    qInfo().noquote() << "[agw-adapter] importTrial result errorCode=" << static_cast<int>(ec);
+    return ec;
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::deactivateDevice(const GatewayRequest &request)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+
+    agw::ErrorCode err = agw::ErrorCode::NoError;
+    runBlocking([controller, req, &err]() { err = agw::api::deactivateDevice(*controller, req); });
+
+    const amnezia::ErrorCode ec = mapError(err);
+    qInfo().noquote() << "[agw-adapter] deactivateDevice result errorCode=" << static_cast<int>(ec);
+    return ec;
+}
+
 QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayControllerAdapter::getNewsAsync(const QString &locale,
                                                                                      const QStringList &userCountryCodes,
                                                                                      const QStringList &serviceTypes)

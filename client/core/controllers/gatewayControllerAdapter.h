@@ -52,6 +52,14 @@ public:
     amnezia::ErrorCode getServices(const QString &osVersion, const QString &appVersion, const QString &cliName,
                                    const QString &appLanguage, QJsonObject &servicesOut);
 
+    // v1/trial. publicKey — WG pub key (awg) или xray uuid (vless), генерит app. На успехе serverConfigJsonOut —
+    // распакованный конфиг (как qUncompress(config)); сборку ApiV2ServerConfig и персист делает app.
+    amnezia::ErrorCode importTrial(const GatewayRequest &request, const QString &publicKey, const QString &email,
+                                   QString &serverConfigJsonOut);
+
+    // v1/revoke_config. Возвращает ErrorCode как есть (app трактует ApiNotFoundError как успех).
+    amnezia::ErrorCode deactivateDevice(const GatewayRequest &request);
+
     QFuture<QPair<amnezia::ErrorCode, QJsonArray>> getNewsAsync(const QString &locale,
                                                                const QStringList &userCountryCodes,
                                                                const QStringList &serviceTypes);

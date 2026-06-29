@@ -279,45 +279,41 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
         return ErrorCode::ApiConfigEmptyError;
     }
 
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            userCountryCode,
-                                            "",
-                                            serviceType,
-                                            serviceProtocol,
-                                            QJsonObject() };
-
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
-    apiPayload.insert(apiDefs::key::email, trimmedEmail);
 
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/trial"), apiPayload, responseBody);
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = userCountryCode;
+    request.serviceType = serviceType;
+    request.serviceProtocol = serviceProtocol;
+
+    // public_key для awg — WG pub key, для vless — xray uuid (паритет с appendProtocolDataToApiPayload).
+    QString publicKey;
+    if (serviceProtocol == configKey::awg) {
+        publicKey = protocolData.wireGuardClientPubKey;
+    } else if (serviceProtocol == configKey::vless) {
+        publicKey = protocolData.xrayUuid;
+    }
+
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+                                               m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    // payload (+public_key, +email) + post + распаковка config — внутри SDK.
+    QString serverConfigJson;
+    ErrorCode errorCode = gatewayController.importTrial(request, publicKey, trimmedEmail, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
-    QString key = responseObject.value(apiDefs::key::config).toString();
-    if (key.isEmpty()) {
+    if (serverConfigJson.isEmpty()) {
         return ErrorCode::ApiConfigEmptyError;
     }
 
-    key.replace(QStringLiteral("vpn://"), QString());
-    QByteArray configBytes = QByteArray::fromBase64(key.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QByteArray uncompressed = qUncompress(configBytes);
-    if (!uncompressed.isEmpty()) {
-        configBytes = uncompressed;
-    }
-
-    if (configBytes.isEmpty()) {
-        return ErrorCode::ApiConfigEmptyError;
-    }
-
-    QJsonObject configObject = QJsonDocument::fromJson(configBytes).object();
+    QJsonObject configObject = QJsonDocument::fromJson(serverConfigJson.toUtf8()).object();
     if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
@@ -496,22 +492,23 @@ ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)
         return ErrorCode::NoError;
     }
 
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2->apiConfig.userCountryCode,
-                                            apiV2->apiConfig.serverCountryCode,
-                                            apiV2->serviceType(),
-                                            "",
-                                            authDataJson };
-
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody, isTestPurchase);
+
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serverCountryCode = apiV2->apiConfig.serverCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.authData = apiV2->authData.toJson();
+
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+    ErrorCode errorCode = gatewayController.deactivateDevice(request);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         return errorCode;
     }
@@ -533,22 +530,23 @@ ErrorCode SubscriptionController::deactivateExternalDevice(const QString &server
         return ErrorCode::NoError;
     }
 
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            uuid,
-                                            apiV2->apiConfig.userCountryCode,
-                                            serverCountryCode,
-                                            apiV2->serviceType(),
-                                            "",
-                                            authDataJson };
-
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_config"), apiPayload, responseBody, isTestPurchase);
+
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = uuid;
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serverCountryCode = serverCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.authData = apiV2->authData.toJson();
+
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+    ErrorCode errorCode = gatewayController.deactivateDevice(request);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         return errorCode;
     }
