@@ -49,4 +49,3 @@ MacOSDaemon* MacOSDaemon::instance() {
   Q_ASSERT(s_daemon);
   return s_daemon;
 }
-

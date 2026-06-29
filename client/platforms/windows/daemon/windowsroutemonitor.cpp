@@ -98,7 +98,6 @@ void WindowsRouteMonitor::updateInterfaceMetrics(int family) {
   // Rebuild the list of interfaces that are valid for routing.
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPINTERFACE_ROW* row = &table->Table[i];
-    // Skip any VPN wintun (own or sibling) so exclusion routes never pick one.
     if (s_vpnLuids.contains(row->InterfaceLuid.Value)) {
       continue;
     }
