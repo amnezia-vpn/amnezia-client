@@ -123,7 +123,7 @@ void Tunnel::startActivationDeadline(int msec) {
                 return;
             }
             setState(State::Failed);
-            emit failed(amnezia::ErrorCode::InternalError);
+            emit failed(amnezia::ErrorCode::VpnConnectionTimeoutError);
         });
     }
     m_deadline->start(msec);
