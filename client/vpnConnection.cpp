@@ -179,9 +179,8 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     const bool activeIsSwitchable = m_active
         && (VpnProtocol::isWireGuardBased(m_active->container())
             || VpnProtocol::isXrayBased(m_active->container()));
-    const bool useTunnelPath = true;
-    const QString preAllocatedIfname = useTunnelPath ? allocateIfname() : QString();
-    if (useTunnelPath && preAllocatedIfname.isEmpty()) {
+    const QString preAllocatedIfname = allocateIfname();
+    if (preAllocatedIfname.isEmpty()) {
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
         return;
@@ -202,7 +201,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     }
 
     if (!m_trafficGuard->allowEndpoint(resolvedRemote, preAllocatedIfname)) {
-        if (useTunnelPath) releaseIfname(preAllocatedIfname);
+        releaseIfname(preAllocatedIfname);
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(ErrorCode::AmneziaServiceConnectionFailed);
         return;
@@ -230,27 +229,25 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_remoteAddress = resolvedRemote;
 
 #ifdef AMNEZIA_DESKTOP
-    if (useTunnelPath) {
-        config.insert("ifname", preAllocatedIfname);
-        if (isXray) {
-            config.insert("tunName", preAllocatedIfname);
-            config.insert("deviceIpv4Address", amnezia::protocols::xray::defaultLocalAddr);
-        } else if (isWg) {
-            const QString protoName = config.value("protocol").toString();
-            const QJsonObject wgConfig = config.value(protoName + "_config_data").toObject();
-            const QString clientIp = wgConfig.value(amnezia::configKey::clientIp).toString();
-            if (!clientIp.isEmpty()) {
-                config.insert("deviceIpv4Address", clientIp);
-            }
+    config.insert("ifname", preAllocatedIfname);
+    if (isXray) {
+        config.insert("tunName", preAllocatedIfname);
+        config.insert("deviceIpv4Address", amnezia::protocols::xray::defaultLocalAddr);
+    } else if (isWg) {
+        const QString protoName = config.value("protocol").toString();
+        const QJsonObject wgConfig = config.value(protoName + "_config_data").toObject();
+        const QString clientIp = wgConfig.value(amnezia::configKey::clientIp).toString();
+        if (!clientIp.isEmpty()) {
+            config.insert("deviceIpv4Address", clientIp);
         }
-        m_vpnConfiguration = config;
-        m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
-        wireTunnelSignals(m_active, /*isActive=*/true);
-        wireDaemonReconnectSignals();
-        m_trafficGuard->setConfig(config);
-        m_trafficGuard->bringUp(m_active);
-        return;
     }
+    m_vpnConfiguration = config;
+    m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
+    wireTunnelSignals(m_active, /*isActive=*/true);
+    wireDaemonReconnectSignals();
+    m_trafficGuard->setConfig(config);
+    m_trafficGuard->bringUp(m_active);
+    return;
 #elif defined Q_OS_ANDROID
     androidVpnProtocol = createDefaultAndroidVpnProtocol();
     createAndroidConnections();
