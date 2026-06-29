@@ -71,6 +71,7 @@ signals:
     void killSwitchModeChangedRequested(bool enabled);
     void serverSwitchFailed();
     void serverSwitchSucceeded();
+    void serverConnectionTimeout();
 
 #ifdef Q_OS_ANDROID
     void restoreConnectionRequested();

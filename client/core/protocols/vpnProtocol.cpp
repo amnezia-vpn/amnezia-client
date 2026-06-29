@@ -20,7 +20,8 @@ VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
       m_rawConfig(configuration),
       m_timeoutTimer(new QTimer(this)),
       m_receivedBytes(0),
-      m_sentBytes(0)
+      m_sentBytes(0),
+      m_lastError(ErrorCode::NoError)
 {
     m_timeoutTimer->setSingleShot(true);
     connect(m_timeoutTimer, &QTimer::timeout, this, &VpnProtocol::onTimeout);
