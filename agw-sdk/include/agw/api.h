@@ -105,6 +105,25 @@ ErrorCode deactivateDevice(GatewayController &gw, const GatewayRequest &req);
 AppStoreImportResult importServiceFromAppStore(GatewayController &gw, const GatewayRequest &req,
                                                const std::string &publicKey, const std::string &transactionId);
 
+struct NativeConfigResult {
+    ErrorCode error = ErrorCode::NoError;
+    std::string config;  // нативный конфиг текстом ($WIREGUARD_CLIENT_PRIVATE_KEY цел)
+};
+
+// v1/config для существующего сервиса (authData в req.authDataJson). isConnectEvent → is_connect_event.
+ImportResult updateService(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey,
+                           bool isConnectEvent);
+
+// v1/account_info → сырое тело JSON текстом (приложение читает нужные поля само).
+JsonResult getAccountInfoRaw(GatewayController &gw, const GatewayRequest &req, const std::string &cliVersion,
+                             const std::string &subscriptionStatus);
+
+// v1/native_config → config текстом. Подстановку WG-ключа делает приложение.
+NativeConfigResult exportNativeConfig(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey);
+
+// v1/revoke_native_config. ApiNotFoundError приложение трактует как успех.
+ErrorCode revokeNativeConfig(GatewayController &gw, const GatewayRequest &req);
+
 } // namespace api
 } // namespace agw
 

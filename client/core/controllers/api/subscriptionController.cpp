@@ -335,38 +335,37 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
                                                             const QString &transactionId, bool isTestPurchase,
                                                             int *duplicateServerIndex)
 {
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            userCountryCode,
-                                            "",
-                                            serviceType,
-                                            serviceProtocol,
-                                            QJsonObject() };
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = userCountryCode;
+    request.serviceType = serviceType;
+    request.serviceProtocol = serviceProtocol;
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
-    apiPayload[apiDefs::key::transactionId] = transactionId;
-
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/subscriptions"), apiPayload, responseBody, isTestPurchase);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
+    QString publicKey;
+    if (serviceProtocol == configKey::awg) {
+        publicKey = protocolData.wireGuardClientPubKey;
+    } else if (serviceProtocol == configKey::vless) {
+        publicKey = protocolData.xrayUuid;
     }
 
-    // Parse the subscription response
-    QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
-    QString key = responseObject.value(QStringLiteral("key")).toString();
-    if (key.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
-        return ErrorCode::ApiPurchaseError;
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    // SDK: payload(+public_key,+transaction_id) + post + разбор key + распаковка config + crc(CRC-16).
+    GatewayControllerAdapter::AppStoreResult res =
+            gatewayController.importServiceFromAppStore(request, publicKey, transactionId);
+    if (res.error != ErrorCode::NoError) {
+        return res.error;
     }
 
-    QString normalizedKey = key;
-    normalizedKey.replace(QStringLiteral("vpn://"), QString());
+    const QString normalizedKey = res.vpnKey;  // уже без "vpn://"
 
-    // Check if server with this VPN key already exists
+    // Check if server with this VPN key already exists (app-state)
     for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
         const auto apiV2 = m_serversRepository->apiV2Config(m_serversRepository->serverIdAt(i));
         QString existingVpnKey = apiV2.has_value() ? apiV2->vpnKey() : QString();
@@ -380,24 +379,12 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
         }
     }
 
-    QByteArray configString = QByteArray::fromBase64(normalizedKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QByteArray configUncompressed = qUncompress(configString);
-    if (!configUncompressed.isEmpty()) {
-        configString = configUncompressed;
-    }
-
-    if (configString.isEmpty()) {
+    if (res.serverConfigJson.isEmpty()) {
         qWarning().noquote() << "[IAP] Subscription response config payload is empty";
         return ErrorCode::ApiPurchaseError;
     }
 
-    QJsonObject configObject = QJsonDocument::fromJson(configString).object();
-
-    quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
-    
-    if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
-        return ErrorCode::InternalError;
-    }
+    QJsonObject configObject = QJsonDocument::fromJson(res.serverConfigJson.toUtf8()).object();
 
     ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
     ApiV2ServerConfig* apiV2 = &apiV2ServerConfig;
@@ -405,7 +392,7 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     apiV2->apiConfig.isTestPurchase = isTestPurchase;
     apiV2->apiConfig.isInAppPurchase = true;
     apiV2->apiConfig.subscriptionExpiredByServer = false;
-    apiV2->crc = crc;
+    apiV2->crc = res.crc;
 
     m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
                                    serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
@@ -423,26 +410,31 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     QString serviceProtocol = apiV2->serviceProtocol();
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
     
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2->apiConfig.userCountryCode,
-                                            newCountryCode,
-                                            apiV2->serviceType(),
-                                            serviceProtocol,
-                                            authDataJson };
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serverCountryCode = newCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.serviceProtocol = serviceProtocol;
+    request.authData = apiV2->authData.toJson();
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
-
-    if (isConnectEvent) {
-        apiPayload[apiDefs::key::isConnectEvent] = true;
+    QString publicKey;
+    if (serviceProtocol == configKey::awg) {
+        publicKey = protocolData.wireGuardClientPubKey;
+    } else if (serviceProtocol == configKey::vless) {
+        publicKey = protocolData.xrayUuid;
     }
 
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, isTestPurchase);
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    GatewayControllerAdapter::ImportResult res = gatewayController.updateService(request, publicKey, isConnectEvent);
+    ErrorCode errorCode = res.error;
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
             ApiV2ServerConfig expiredApiV2 = *apiV2;
@@ -453,12 +445,13 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
         return errorCode;
     }
 
+    const QByteArray responseBody = res.rawResponse;
     QJsonObject serverConfigJson;
     errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    
+
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
     
     if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
@@ -576,28 +569,28 @@ ErrorCode SubscriptionController::exportNativeConfig(const QString &serverId, co
     QString protocol = configKey::awg;
     ProtocolData protocolData = generateProtocolData(protocol);
 
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2->apiConfig.userCountryCode,
-                                            serverCountryCode,
-                                            apiV2->serviceType(),
-                                            protocol,
-                                            authDataJson };
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serverCountryCode = serverCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.serviceProtocol = protocol;
+    request.authData = apiV2->authData.toJson();
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    appendProtocolDataToApiPayload(protocol, protocolData, apiPayload);
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/native_config"), apiPayload, responseBody, isTestPurchase);
+    // SDK отдаёт native config текстом; подстановку WG-приватника делает app.
+    ErrorCode errorCode = gatewayController.exportNativeConfig(request, protocolData.wireGuardClientPubKey, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    QJsonObject jsonConfig = QJsonDocument::fromJson(responseBody).object();
-    nativeConfig = jsonConfig.value(configKey::config).toString();
     nativeConfig.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", protocolData.wireGuardClientPrivKey);
     return ErrorCode::NoError;
 }
@@ -611,21 +604,22 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QString &serverId, co
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     QString protocol = configKey::awg;
 
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2->apiConfig.userCountryCode,
-                                            serverCountryCode,
-                                            apiV2->serviceType(),
-                                            protocol,
-                                            authDataJson };
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serverCountryCode = serverCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.serviceProtocol = protocol;
+    request.authData = apiV2->authData.toJson();
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/revoke_native_config"), apiPayload, responseBody, isTestPurchase);
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+    ErrorCode errorCode = gatewayController.revokeNativeConfig(request);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         return errorCode;
     }
@@ -896,25 +890,27 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
     if (!apiV2.has_value()) {
         return ErrorCode::InternalError;
     }
-    bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
-    
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2->apiConfig.userCountryCode,
-                                            "",
-                                            apiV2->serviceType(),
-                                            "",
-                                            authDataJson };
+    const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::subscriptionStatus] = getSubscriptionStatusForRenewal(apiV2->apiConfig);
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.authData = apiV2->authData.toJson();
 
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+                                               m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
+                                               apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+
+    // payload (+cli_version, +subscription_status) + post внутри SDK; сырое тело разбирает app.
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/account_info"), apiPayload, responseBody, isTestPurchase);
+    ErrorCode errorCode = gatewayController.getAccountInfoRaw(request, QString(APP_VERSION),
+                                                             getSubscriptionStatusForRenewal(apiV2->apiConfig),
+                                                             responseBody);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }

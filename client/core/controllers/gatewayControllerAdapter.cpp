@@ -330,6 +330,85 @@ GatewayControllerAdapter::ImportResult GatewayControllerAdapter::resolveImportCa
     return toAdapterImport(res);
 }
 
+GatewayControllerAdapter::ImportResult GatewayControllerAdapter::updateService(const GatewayRequest &request,
+                                                                               const QString &publicKey,
+                                                                               bool isConnectEvent)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+
+    agw::api::ImportResult res;
+    runBlocking([controller, req, pk, isConnectEvent, &res]() {
+        res = agw::api::updateService(*controller, req, pk, isConnectEvent);
+    });
+
+    qInfo().noquote() << "[agw-adapter] updateService result errorCode=" << static_cast<int>(mapError(res.error));
+    return toAdapterImport(res);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::getAccountInfoRaw(const GatewayRequest &request, const QString &cliVersion,
+                                                              const QString &subscriptionStatus, QByteArray &rawJsonOut)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string cv = cliVersion.toStdString();
+    const std::string ss = subscriptionStatus.toStdString();
+
+    agw::api::JsonResult res;
+    runBlocking([controller, req, cv, ss, &res]() { res = agw::api::getAccountInfoRaw(*controller, req, cv, ss); });
+
+    rawJsonOut = QByteArray::fromStdString(res.json);
+    return mapError(res.error);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::exportNativeConfig(const GatewayRequest &request, const QString &publicKey,
+                                                               QString &nativeConfigOut)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+
+    agw::api::NativeConfigResult res;
+    runBlocking([controller, req, pk, &res]() { res = agw::api::exportNativeConfig(*controller, req, pk); });
+
+    nativeConfigOut = QString::fromStdString(res.config);
+    return mapError(res.error);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::revokeNativeConfig(const GatewayRequest &request)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+
+    agw::ErrorCode err = agw::ErrorCode::NoError;
+    runBlocking([controller, req, &err]() { err = agw::api::revokeNativeConfig(*controller, req); });
+
+    return mapError(err);
+}
+
+GatewayControllerAdapter::AppStoreResult GatewayControllerAdapter::importServiceFromAppStore(
+        const GatewayRequest &request, const QString &publicKey, const QString &transactionId)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+    const std::string tx = transactionId.toStdString();
+
+    agw::api::AppStoreImportResult res;
+    runBlocking([controller, req, pk, tx, &res]() {
+        res = agw::api::importServiceFromAppStore(*controller, req, pk, tx);
+    });
+
+    AppStoreResult out;
+    out.error = mapError(res.error);
+    out.serverConfigJson = QString::fromStdString(res.serverConfigJson);
+    out.vpnKey = QString::fromStdString(res.vpnKey);
+    out.crc = res.crc;
+    qInfo().noquote() << "[agw-adapter] importServiceFromAppStore result errorCode=" << static_cast<int>(out.error);
+    return out;
+}
+
 QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayControllerAdapter::getNewsAsync(const QString &locale,
                                                                                      const QStringList &userCountryCodes,
                                                                                      const QStringList &serviceTypes)

@@ -141,6 +141,26 @@ struct AppStoreImportResult {
 AppStoreImportResult importServiceFromAppStore(GatewayController &gw, const GatewayRequest &req,
                                                const std::string &publicKey, const std::string &transactionId);
 
+// --- Фаза B: update существующего сервиса + native_config + raw account_info -----------------
+
+// v1/config для существующего сервиса (authData в req). isConnectEvent → is_connect_event=true.
+ImportResult updateService(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey,
+                           bool isConnectEvent);
+
+// v1/account_info → сырое разобранное тело (приложение само читает нужные поля).
+JsonResult getAccountInfoRaw(GatewayController &gw, const AccountRequest &req);
+
+struct NativeConfigResult {
+    ErrorCode error = ErrorCode::NoError;
+    std::string config;  // поле config из ответа (открытый текст; $WIREGUARD_CLIENT_PRIVATE_KEY цел)
+};
+
+// v1/native_config → config (нативный конфиг текстом). Подстановку WG-ключа делает приложение.
+NativeConfigResult exportNativeConfig(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey);
+
+// v1/revoke_native_config. ApiNotFoundError приложение трактует как успех.
+ErrorCode revokeNativeConfig(GatewayController &gw, const GatewayRequest &req);
+
 } // namespace agw::services
 
 #endif // AGW_SERVICES_API_METHODS_H

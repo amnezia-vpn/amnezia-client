@@ -374,4 +374,54 @@ AppStoreImportResult importServiceFromAppStore(GatewayController &gw, const Gate
     return out;
 }
 
+ImportResult updateService(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey,
+                           bool isConnectEvent)
+{
+    util::Json payload = gatewayRequestToJson(req);
+    appendPublicKey(payload, req.serviceProtocol, publicKey);
+    if (isConnectEvent) {
+        payload[k::isConnectEvent] = true;
+    }
+    return importCommon(gw, "%1v1/config", std::move(payload), req);
+}
+
+JsonResult getAccountInfoRaw(GatewayController &gw, const AccountRequest &req)
+{
+    const util::Json payload = buildAccountPayload(req);
+    const Response r = gw.post("%1v1/account_info", util::qtIndentedDump(payload),
+                               FailoverContext{req.base.serviceType, req.base.userCountryCode});
+    if (r.error != ErrorCode::NoError) {
+        return {r.error, util::Json()};
+    }
+    return {ErrorCode::NoError, parseBody(r.body)};
+}
+
+NativeConfigResult exportNativeConfig(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey)
+{
+    util::Json payload = gatewayRequestToJson(req);
+    appendPublicKey(payload, req.serviceProtocol, publicKey);
+    const Response r = gw.post("%1v1/native_config", util::qtIndentedDump(payload),
+                               FailoverContext{req.serviceType, req.userCountryCode});
+    if (r.error != ErrorCode::NoError) {
+        return {r.error, std::string()};
+    }
+    util::Json doc = parseBody(r.body);
+    std::string cfg;
+    if (doc.is_object()) {
+        auto it = doc.find(k::config);
+        if (it != doc.end() && it->is_string()) {
+            cfg = it->get<std::string>();
+        }
+    }
+    return {ErrorCode::NoError, std::move(cfg)};
+}
+
+ErrorCode revokeNativeConfig(GatewayController &gw, const GatewayRequest &req)
+{
+    const util::Json payload = gatewayRequestToJson(req);
+    const Response r = gw.post("%1v1/revoke_native_config", util::qtIndentedDump(payload),
+                               FailoverContext{req.serviceType, req.userCountryCode});
+    return r.error;
+}
+
 } // namespace agw::services

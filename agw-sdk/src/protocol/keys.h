@@ -58,6 +58,9 @@ inline constexpr const char *protoVless = "vless";
 inline constexpr const char *transactionId = "transaction_id";
 inline constexpr const char *key = "key";  // поле ответа v1/subscriptions: vpn://...
 inline constexpr const char *crc = "crc";
+
+// update / native_config (Шаг 6, Фаза B).
+inline constexpr const char *isConnectEvent = "is_connect_event";
 }
 
 #endif

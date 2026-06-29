@@ -137,4 +137,28 @@ AppStoreImportResult importServiceFromAppStore(GatewayController &gw, const Gate
     return {r.error, r.serverConfigJson, r.vpnKey, r.crc};
 }
 
+ImportResult updateService(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey,
+                           bool isConnectEvent)
+{
+    return fromInternal(services::updateService(gw, toInternal(req), publicKey, isConnectEvent));
+}
+
+JsonResult getAccountInfoRaw(GatewayController &gw, const GatewayRequest &req, const std::string &cliVersion,
+                             const std::string &subscriptionStatus)
+{
+    const services::JsonResult r = services::getAccountInfoRaw(gw, toAccount(req, cliVersion, subscriptionStatus));
+    return {r.error, dumpOrEmpty(r.value)};
+}
+
+NativeConfigResult exportNativeConfig(GatewayController &gw, const GatewayRequest &req, const std::string &publicKey)
+{
+    const services::NativeConfigResult r = services::exportNativeConfig(gw, toInternal(req), publicKey);
+    return {r.error, r.config};
+}
+
+ErrorCode revokeNativeConfig(GatewayController &gw, const GatewayRequest &req)
+{
+    return services::revokeNativeConfig(gw, toInternal(req));
+}
+
 } // namespace agw::api

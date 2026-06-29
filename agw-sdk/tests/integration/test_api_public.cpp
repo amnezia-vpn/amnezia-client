@@ -181,5 +181,55 @@ int main()
         CHECK(api::deactivateDevice(gw, req) == ErrorCode::ApiNotFoundError);
     }
 
+    // --- updateService: is_connect_event в payload + rawResponse ----------
+    {
+        const std::string cfg = R"({"config_version":2})";
+        const std::string configField = "vpn://" + util::base64UrlEncodeNoPad(util::qtCompress(bytesOf(cfg), 6));
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = util::Json{{"config", configField}}.dump();
+        GatewayController gw = makeClient(mock);
+        api::GatewayRequest req = baseReq();
+        api::ImportResult r = api::updateService(gw, req, "WG_PUB", true);
+        CHECK(r.error == ErrorCode::NoError);
+        CHECK_EQ(r.serverConfigJson, cfg);
+        CHECK(!r.rawResponseJson.empty());
+        util::Json sent = util::Json::parse(mock->lastDecryptedPayload);
+        CHECK(sent.value("is_connect_event", false) == true);
+    }
+
+    // --- getAccountInfoRaw: сырое тело текстом ----------------------------
+    {
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = R"({"service_type":"amnezia-premium","subscription":{"end_date":"2030-01-01T00:00:00Z"}})";
+        GatewayController gw = makeClient(mock);
+        api::GatewayRequest req = baseReq();
+        api::JsonResult r = api::getAccountInfoRaw(gw, req, "4.9.0", "active");
+        CHECK(r.error == ErrorCode::NoError);
+        util::Json doc = util::Json::parse(r.json);
+        CHECK(doc["subscription"].value("end_date", std::string()) == std::string("2030-01-01T00:00:00Z"));
+    }
+
+    // --- exportNativeConfig: config текстом (без распаковки) --------------
+    {
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = R"({"config":"[Interface]\nPrivateKey=$WIREGUARD_CLIENT_PRIVATE_KEY\n"})";
+        GatewayController gw = makeClient(mock);
+        api::GatewayRequest req = baseReq();
+        api::NativeConfigResult r = api::exportNativeConfig(gw, req, "WG_PUB");
+        CHECK(r.error == ErrorCode::NoError);
+        CHECK(r.config.find("$WIREGUARD_CLIENT_PRIVATE_KEY") != std::string::npos);  // плейсхолдер цел
+        util::Json sent = util::Json::parse(mock->lastDecryptedPayload);
+        CHECK_EQ(sent.value("public_key", std::string()), std::string("WG_PUB"));
+    }
+
+    // --- revokeNativeConfig ----------------------------------------------
+    {
+        auto mock = std::make_shared<agw_test::MockGateway>(priv);
+        mock->responsePlain = R"({"http_status":404})";
+        GatewayController gw = makeClient(mock);
+        api::GatewayRequest req = baseReq();
+        CHECK(api::revokeNativeConfig(gw, req) == ErrorCode::ApiNotFoundError);
+    }
+
     return AGW_TEST_MAIN_RETURN();
 }

@@ -81,6 +81,32 @@ public:
     ImportResult resolveImportCaptcha(const GatewayRequest &request, const QString &publicKey,
                                       const QString &captchaId, const QString &captchaSolution);
 
+    // v1/config для существующего сервиса (authData в request). isConnectEvent → is_connect_event.
+    ImportResult updateService(const GatewayRequest &request, const QString &publicKey, bool isConnectEvent);
+
+    // v1/account_info → сырое тело JSON (app сам разбирает нужные поля).
+    amnezia::ErrorCode getAccountInfoRaw(const GatewayRequest &request, const QString &cliVersion,
+                                         const QString &subscriptionStatus, QByteArray &rawJsonOut);
+
+    // v1/native_config → нативный конфиг текстом (подстановку WG-ключа делает app).
+    amnezia::ErrorCode exportNativeConfig(const GatewayRequest &request, const QString &publicKey,
+                                          QString &nativeConfigOut);
+
+    // v1/revoke_native_config. ApiNotFoundError трактуется как успех в app.
+    amnezia::ErrorCode revokeNativeConfig(const GatewayRequest &request);
+
+    // Результат v1/subscriptions (App Store). vpnKey — без "vpn://"; crc — qChecksum/CRC-16.
+    struct AppStoreResult
+    {
+        amnezia::ErrorCode error = amnezia::ErrorCode::NoError;
+        QString serverConfigJson;
+        QString vpnKey;
+        quint16 crc = 0;
+    };
+
+    AppStoreResult importServiceFromAppStore(const GatewayRequest &request, const QString &publicKey,
+                                             const QString &transactionId);
+
     QFuture<QPair<amnezia::ErrorCode, QJsonArray>> getNewsAsync(const QString &locale,
                                                                const QStringList &userCountryCodes,
                                                                const QStringList &serviceTypes);
