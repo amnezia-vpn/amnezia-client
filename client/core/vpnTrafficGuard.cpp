@@ -260,31 +260,23 @@ void VpnTrafficGuard::addSplitTunnelRoutes(const QString &gw, amnezia::RouteMode
 #endif
 }
 
-void VpnTrafficGuard::finishFirewallHandover(Tunnel* tunnel)
-{
-#if defined(AMNEZIA_DESKTOP) && defined(Q_OS_WIN)
-    if (!tunnel) return;
-    const QString handoverIfname = tunnel->handoverIfname();
-    if (handoverIfname.isEmpty() || handoverIfname == tunnel->ifname()) {
-        tunnel->clearHandoverIfname();
-        return;
-    }
-    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto reply = iface->disableKillSwitchForTunnel(handoverIfname, QStringList());
-        if (!reply.waitForFinished() || !reply.returnValue()) {
-            qWarning() << "VpnTrafficGuard::finishFirewallHandover: Failed to disable killswitch for" << handoverIfname;
-        }
-    });
-    tunnel->clearHandoverIfname();
-#else
-    Q_UNUSED(tunnel)
-#endif
-}
-
 void VpnTrafficGuard::applyKillSwitch(Tunnel* tunnel, const QString &gateway, const QString &localAddress)
 {
 #ifdef AMNEZIA_DESKTOP
-    finishFirewallHandover(tunnel);
+#ifdef Q_OS_WIN
+    if (tunnel) {
+        const QString handoverIfname = tunnel->handoverIfname();
+        if (!(handoverIfname.isEmpty() || handoverIfname == tunnel->ifname())) {
+            IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto reply = iface->disableKillSwitchForTunnel(handoverIfname, QStringList());
+                if (!reply.waitForFinished() || !reply.returnValue()) {
+                    qWarning() << "VpnTrafficGuard::applyKillSwitch: Failed to disable killswitch for" << handoverIfname;
+                }
+            });
+        }
+        tunnel->clearHandoverIfname();
+    }
+#endif
 
     QJsonObject updatedConfig = m_config;
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
