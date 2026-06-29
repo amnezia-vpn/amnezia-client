@@ -25,6 +25,21 @@ class GatewayControllerAdapter : public QObject
     Q_OBJECT
 
 public:
+    // Qt-зеркало agw::api::GatewayRequest — app собирает поля (часть из apiV2/настроек), agw-типы наружу
+    // не текут. Пустые поля SDK опускает (паритет с GatewayRequestData::toJsonObject).
+    struct GatewayRequest
+    {
+        QString osVersion;
+        QString appVersion;
+        QString appLanguage;
+        QString installationUuid;
+        QString userCountryCode;
+        QString serverCountryCode;
+        QString serviceType;
+        QString serviceProtocol;
+        QJsonObject authData;
+    };
+
     explicit GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
@@ -44,6 +59,10 @@ public:
     QFuture<QPair<amnezia::ErrorCode, QString>> getUpdaterEndpointAsync(const QString &cliVersion,
                                                                        const QString &osVersion,
                                                                        const QString &installationUuid);
+
+    QFuture<QPair<amnezia::ErrorCode, QString>> getRenewalLinkAsync(const GatewayRequest &request,
+                                                                   const QString &cliVersion,
+                                                                   const QString &subscriptionStatus);
 
 private:
     // Исполняет work на фоновом потоке, прокачивая локальный QEventLoop (как post). UI остаётся живым.

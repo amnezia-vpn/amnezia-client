@@ -106,6 +106,23 @@ namespace
         return cfg;
     }
 
+    agw::api::GatewayRequest toApiReq(const GatewayControllerAdapter::GatewayRequest &q)
+    {
+        agw::api::GatewayRequest r;
+        r.osVersion = q.osVersion.toStdString();
+        r.appVersion = q.appVersion.toStdString();
+        r.appLanguage = q.appLanguage.toStdString();
+        r.installationUuid = q.installationUuid.toStdString();
+        r.userCountryCode = q.userCountryCode.toStdString();
+        r.serverCountryCode = q.serverCountryCode.toStdString();
+        r.serviceType = q.serviceType.toStdString();
+        r.serviceProtocol = q.serviceProtocol.toStdString();
+        if (!q.authData.isEmpty()) {
+            r.authDataJson = QString::fromUtf8(QJsonDocument(q.authData).toJson(QJsonDocument::Compact)).toStdString();
+        }
+        return r;
+    }
+
     std::shared_ptr<agw::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                         int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
@@ -273,5 +290,19 @@ QFuture<QPair<amnezia::ErrorCode, QString>> GatewayControllerAdapter::getUpdater
     return QtConcurrent::run([controller, cv, ov, uuid]() -> QPair<amnezia::ErrorCode, QString> {
         const agw::api::UrlResult r = agw::api::getUpdaterEndpoint(*controller, cv, ov, uuid);
         return qMakePair(mapError(r.error), QString::fromStdString(r.url));  // url уже без хвостового '/'
+    });
+}
+
+QFuture<QPair<amnezia::ErrorCode, QString>> GatewayControllerAdapter::getRenewalLinkAsync(
+        const GatewayRequest &request, const QString &cliVersion, const QString &subscriptionStatus)
+{
+    auto controller = m_controller;
+    const agw::api::GatewayRequest req = toApiReq(request);
+    const std::string cv = cliVersion.toStdString();
+    const std::string ss = subscriptionStatus.toStdString();
+
+    return QtConcurrent::run([controller, req, cv, ss]() -> QPair<amnezia::ErrorCode, QString> {
+        const agw::api::RenewalResult r = agw::api::getRenewalLink(*controller, req, cv, ss);
+        return qMakePair(mapError(r.error), QString::fromStdString(r.renewalUrl));
     });
 }

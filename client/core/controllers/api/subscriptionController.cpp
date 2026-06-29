@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QDateTime>
 #include <QEventLoop>
+#include <QFuture>
 #include <QFutureWatcher>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -920,55 +921,31 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
 
 QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const QString &serverId)
 {
-    auto promise = QSharedPointer<QPromise<QPair<ErrorCode, QString>>>::create();
-    promise->start();
-
     auto apiV2 = m_serversRepository->apiV2Config(serverId);
     if (!apiV2.has_value()) {
-        promise->addResult(qMakePair(ErrorCode::InternalError, QString()));
-        promise->finish();
-        return promise->future();
+        return QtFuture::makeReadyFuture(qMakePair(ErrorCode::InternalError, QString()));
     }
 
-    bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
-    QJsonObject authDataJson = apiV2->authData.toJson();
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            apiV2->apiConfig.userCountryCode,
-                                            "",
-                                            apiV2->serviceType(),
-                                            "",
-                                            authDataJson };
+    const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::subscriptionStatus] = getSubscriptionStatusForRenewal(apiV2->apiConfig);
+    GatewayControllerAdapter::GatewayRequest request;
+    request.osVersion = QSysInfo::productType();
+    request.appVersion = QString(APP_VERSION);
+    request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    request.installationUuid = m_appSettingsRepository->getInstallationUuid(true);
+    request.userCountryCode = apiV2->apiConfig.userCountryCode;
+    request.serviceType = apiV2->serviceType();
+    request.authData = apiV2->authData.toJson();
 
-    auto gatewayController = QSharedPointer<GatewayControllerAdapter>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
-                                                                       m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
-                                                                       apiDefs::requestTimeoutMsecs,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
-    auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
-    auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
-    QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,
-                     [promise, watcher, gatewayController]() {
-                         const auto [errorCode, responseBody] = watcher->result();
-                         watcher->deleteLater();
-                         if (errorCode != ErrorCode::NoError) {
-                             promise->addResult(qMakePair(errorCode, QString()));
-                             promise->finish();
-                             return;
-                         }
+    auto gatewayController = QSharedPointer<GatewayControllerAdapter>::create(
+            m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+            m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
+            m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-                         QJsonObject responseJson = QJsonDocument::fromJson(responseBody).object();
-                         const QString url = responseJson.value("renewal_url").toString();
-                         promise->addResult(qMakePair(ErrorCode::NoError, url));
-                         promise->finish();
-                     });
-    watcher->setFuture(postFuture);
-    return promise->future();
+    // payload (+cli_version, +subscription_status) и извлечение renewal_url — внутри SDK.
+    auto future = gatewayController->getRenewalLinkAsync(request, QString(APP_VERSION),
+                                                         getSubscriptionStatusForRenewal(apiV2->apiConfig));
+    return future.then([gatewayController](QPair<ErrorCode, QString> result) { return result; });
 }
 
 ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &userCountryCode,
