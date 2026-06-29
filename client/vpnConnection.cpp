@@ -244,7 +244,12 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_vpnConfiguration = config;
     m_active = new Tunnel(preAllocatedIfname, container, config, resolvedRemote, this);
     wireTunnelSignals(m_active, /*isActive=*/true);
-    wireDaemonReconnectSignals();
+    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
+        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn,
+                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn,
+                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
+    });
     m_trafficGuard->setConfig(config);
     m_trafficGuard->bringUp(m_active);
     return;
@@ -273,20 +278,6 @@ void VpnConnection::createProtocolConnections()
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
     connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
-
-    wireDaemonReconnectSignals();
-}
-
-void VpnConnection::wireDaemonReconnectSignals()
-{
-#ifdef AMNEZIA_DESKTOP
-    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn,
-                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn,
-                static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
-    });
-#endif
 }
 
 void VpnConnection::appendKillSwitchConfig(QJsonObject &config)
