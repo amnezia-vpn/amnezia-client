@@ -621,10 +621,10 @@ bool IpcServer::xrayStop(const QString& ifname)
         const QJsonObject stopCmd{{QStringLiteral("op"), QStringLiteral("stop")}};
         it->process->write(QJsonDocument(stopCmd).toJson(QJsonDocument::Compact) + '\n');
 
-        if (!it->process->waitForFinished(3000)) {
+        if (!it->process->waitForFinished()) {
             qWarning().noquote() << QStringLiteral("[xray-worker:%1] did not exit after stop, killing").arg(ifname);
             it->process->kill();
-            it->process->waitForFinished(1000);
+            it->process->waitForFinished();
         }
     }
 
