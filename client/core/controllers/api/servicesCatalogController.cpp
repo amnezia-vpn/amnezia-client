@@ -212,37 +212,25 @@ ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository
 
 ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &servicesData)
 {
-    QJsonObject apiPayload;
-    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::appVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
-    apiPayload[apiDefs::key::appLanguage] = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+                                               m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
-    if (errorCode == ErrorCode::NoError) {
-        if (!responseBody.contains(apiDefs::key::services.data())) {
-            errorCode = ErrorCode::ApiServicesMissingError;
-        }
-    }
-
+    // Сборка payload + post + проверка "services" — теперь внутри SDK (agw::api::getServices).
+    QJsonObject services;
+    ErrorCode errorCode = gatewayController.getServices(
+            QSysInfo::productType(), QString(APP_VERSION), QString(APPLICATION_NAME),
+            m_appSettingsRepository->getAppLanguage().name().split("_").first(), services);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    servicesData = QJsonDocument::fromJson(responseBody).object();
+    servicesData = services;
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     mergeStoreKitPricesIntoPremiumPlans(servicesData);
 #endif
 
     return ErrorCode::NoError;
-}
-
-ErrorCode ServicesCatalogController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
-{
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
-    return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 

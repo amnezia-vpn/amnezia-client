@@ -7,21 +7,22 @@
 
 #include <QDebug>
 #include <QEventLoop>
+#include <QFutureWatcher>
 #include <QJsonDocument>
 #include <QPointer>
 #include <QPromise>
 #include <QSharedPointer>
 #include <QStringList>
 #include <QThread>
+#include <QtConcurrent/QtConcurrent>
 
+#include <agw/api.h>
 #include <agw/gateway_controller.h>
 #include <agw/config.h>
 #include <agw/types.h>
 
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
-
-#include "embedded_agw_public_keys.h"
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
@@ -205,4 +206,32 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsy
             agw::FailoverContext { serviceType, userCountryCode });
 
     return future;
+}
+
+void GatewayControllerAdapter::runBlocking(const std::function<void()> &work)
+{
+    QEventLoop loop;
+    QFutureWatcher<void> watcher;
+    QObject::connect(&watcher, &QFutureWatcher<void>::finished, &loop, &QEventLoop::quit);
+    watcher.setFuture(QtConcurrent::run(work));
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::getServices(const QString &osVersion, const QString &appVersion,
+                                                         const QString &cliName, const QString &appLanguage,
+                                                         QJsonObject &servicesOut)
+{
+    qInfo().noquote() << "[agw-adapter] getServices (typed) callerThread=" << QThread::currentThread();
+
+    agw::api::JsonResult res;
+    auto controller = m_controller;
+    runBlocking([controller, &res, osVersion, appVersion, cliName, appLanguage]() {
+        res = agw::api::getServices(*controller, osVersion.toStdString(), appVersion.toStdString(),
+                                    cliName.toStdString(), appLanguage.toStdString());
+    });
+
+    servicesOut = QJsonDocument::fromJson(QByteArray::fromStdString(res.json)).object();
+    const amnezia::ErrorCode ec = mapError(res.error);
+    qInfo().noquote() << "[agw-adapter] getServices result errorCode=" << static_cast<int>(ec);
+    return ec;
 }

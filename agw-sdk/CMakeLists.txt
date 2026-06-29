@@ -75,6 +75,7 @@ add_library(agw_obj OBJECT
     src/services/api_methods.cpp
     src/services/models.cpp
     src/services/server_config.cpp
+    src/api_public.cpp
 )
 
 target_include_directories(agw_obj
