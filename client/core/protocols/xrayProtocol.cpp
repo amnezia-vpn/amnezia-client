@@ -212,7 +212,7 @@ ErrorCode XrayProtocol::startTun2Socks()
                 if (line.contains("[STACK] tun://") && line.contains("<-> socks5://")) {
                     disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
 
-                    if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
+                    if (ErrorCode res = setupTunInterface(); res != ErrorCode::NoError) {
                         stop();
                         setLastError(res);
                     } else {
@@ -270,7 +270,7 @@ ErrorCode XrayProtocol::startTun2Socks()
     return ErrorCode::NoError;
 }
 
-ErrorCode XrayProtocol::setupRouting()
+ErrorCode XrayProtocol::setupTunInterface()
 {
     return IpcClient::withInterface(
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {

@@ -29,7 +29,7 @@ private:
         Stopping,
     };
 
-    ErrorCode setupRouting();
+    ErrorCode setupTunInterface();
     ErrorCode startTun2Socks();
 
     QJsonObject m_xrayConfig;
