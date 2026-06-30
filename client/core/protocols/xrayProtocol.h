@@ -3,11 +3,8 @@
 
 #include "QProcess"
 #include <QtCore/qsharedpointer.h>
-#include <QHostAddress>
-#include <QList>
 
 #include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/utils/ipcClient.h"
 #include "vpnProtocol.h"
@@ -26,14 +23,12 @@ private:
     enum class Phase {
         Inactive,
         Active,
-        Stopping,
     };
 
     ErrorCode setupTunInterface();
     ErrorCode startTun2Socks();
 
     QJsonObject m_xrayConfig;
-    amnezia::RouteMode m_routeMode;
     QString m_remoteAddress;
 
     QString m_socksUser;

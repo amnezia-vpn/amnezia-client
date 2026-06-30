@@ -26,6 +26,14 @@
 #include "router_mac.h"
 #include "core/utils/networkUtilities.h"
 #include <QNetworkInterface>
+#include <sys/socket.h>
+#include <sys/sys_domain.h>
+#include <sys/kern_control.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <net/if_utun.h>
+#include <unistd.h>
+#include <cstring>
 #endif
 
 #ifdef Q_OS_WIN
@@ -33,17 +41,6 @@
     #include <ws2tcpip.h>
     #include <iphlpapi.h>
     #include "tapcontroller_win.h"
-#endif
-
-#ifdef Q_OS_MAC
-    #include <sys/socket.h>
-    #include <sys/sys_domain.h>
-    #include <sys/kern_control.h>
-    #include <sys/ioctl.h>
-    #include <net/if.h>
-    #include <net/if_utun.h>
-    #include <unistd.h>
-    #include <cstring>
 #endif
 
 

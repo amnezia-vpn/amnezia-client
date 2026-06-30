@@ -4,7 +4,7 @@
 #include <QRandomGenerator>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QNetworkInterface>
+#include <QThread>
 
 #include "core/utils/networkUtilities.h"
 #include "ipc.h"

@@ -25,7 +25,6 @@ public:
         Gone,
         Failed,
     };
-    Q_ENUM(State)
 
     Tunnel(QString ifname,
            amnezia::DockerContainer container,
@@ -38,7 +37,6 @@ public:
     const QString& remoteAddress() const { return m_remoteAddress; }
     amnezia::DockerContainer container() const { return m_container; }
     const QJsonObject& config() const { return m_config; }
-    State state() const { return m_state; }
     QSharedPointer<VpnProtocol> protocol() const { return m_protocol; }
 
     const QString& handoverIfname() const { return m_handoverIfname; }
@@ -54,7 +52,6 @@ signals:
     void prepared();
     void activated();
     void failed(amnezia::ErrorCode);
-    void stateChanged(Tunnel::State);
     void bytesChanged(quint64 rxBytes, quint64 txBytes);
     void addressesUpdated(const QString& gateway, const QString& localAddress);
 
