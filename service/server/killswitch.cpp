@@ -156,6 +156,7 @@ bool KillSwitch::disableKillSwitch() {
 #endif
 
     m_allowedRanges.clear();
+    m_splitTunnelAllows.clear();
     return true;
 }
 
@@ -193,6 +194,7 @@ bool KillSwitch::disableAllTraffic() {
     MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
 #endif
     m_allowedRanges.clear();
+    m_splitTunnelAllows.clear();
     return true;
 }
 
