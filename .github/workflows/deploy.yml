@@ -769,6 +769,7 @@ jobs:
 
     - name: 'Install android_x86_64 Qt'
       uses: jurplel/install-qt-action@v4
+      continue-on-error: true
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -781,6 +782,7 @@ jobs:
 
     - name: 'Install android_x86 Qt'
       uses: jurplel/install-qt-action@v4
+      continue-on-error: true
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
