@@ -181,7 +181,6 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     request.serviceType = serviceType;
     request.serviceProtocol = serviceProtocol;
 
-    // public_key для awg — WG pub key, для vless — xray uuid (паритет с appendProtocolDataToApiPayload).
     QString publicKey;
     if (serviceProtocol == configKey::awg) {
         publicKey = protocolData.wireGuardClientPubKey;
@@ -193,8 +192,6 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // payload (+public_key) + post + разбор капчи — внутри SDK. Сырое тело отдаём в существующий
-    // extractServerConfigJsonFromResponse/updateApiConfigInJson (app-логика без изменений).
     GatewayControllerAdapter::ImportResult res = gatewayController.importService(request, publicKey);
 
     if (res.error == ErrorCode::ApiCaptchaRequiredError) {
@@ -247,7 +244,6 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     request.serviceType = serviceType;
     request.serviceProtocol = serviceProtocol;
 
-    // public_key для awg — WG pub key, для vless — xray uuid (паритет с appendProtocolDataToApiPayload).
     QString publicKey;
     if (serviceProtocol == configKey::awg) {
         publicKey = protocolData.wireGuardClientPubKey;
@@ -259,7 +255,6 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // payload (+public_key, +email) + post + распаковка config — внутри SDK.
     QString serverConfigJson;
     ErrorCode errorCode = gatewayController.importTrial(request, publicKey, trimmedEmail, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
@@ -307,16 +302,15 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // SDK: payload(+public_key,+transaction_id) + post + разбор key + распаковка config + crc(CRC-16).
     GatewayControllerAdapter::AppStoreResult res =
             gatewayController.importServiceFromAppStore(request, publicKey, transactionId);
     if (res.error != ErrorCode::NoError) {
         return res.error;
     }
 
-    const QString normalizedKey = res.vpnKey;  // уже без "vpn://"
+    const QString normalizedKey = res.vpnKey;
 
-    // Check if server with this VPN key already exists (app-state)
+    // Check if server with this VPN key already exists
     for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
         const auto apiV2 = m_serversRepository->apiV2Config(m_serversRepository->serverIdAt(i));
         QString existingVpnKey = apiV2.has_value() ? apiV2->vpnKey() : QString();
@@ -536,7 +530,6 @@ ErrorCode SubscriptionController::exportNativeConfig(const QString &serverId, co
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // SDK отдаёт native config текстом; подстановку WG-приватника делает app.
     ErrorCode errorCode = gatewayController.exportNativeConfig(request, protocolData.wireGuardClientPubKey, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
@@ -857,7 +850,6 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // payload (+cli_version, +subscription_status) + post внутри SDK; сырое тело разбирает app.
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.getAccountInfoRaw(request, QString(APP_VERSION),
                                                              getSubscriptionStatusForRenewal(apiV2->apiConfig),
@@ -893,7 +885,6 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
             m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
             m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // payload (+cli_version, +subscription_status) и извлечение renewal_url — внутри SDK.
     auto future = gatewayController->getRenewalLinkAsync(request, QString(APP_VERSION),
                                                          getSubscriptionStatusForRenewal(apiV2->apiConfig));
     return future.then([gatewayController](QPair<ErrorCode, QString> result) { return result; });
@@ -927,7 +918,6 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // captcha_solution нормализуется в SDK; на повторную капчу — captchaRequired + поля.
     GatewayControllerAdapter::ImportResult res =
             gatewayController.resolveImportCaptcha(request, publicKey, captchaId, captchaSolution);
 

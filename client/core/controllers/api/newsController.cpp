@@ -80,7 +80,6 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
             apiDefs::requestTimeoutMsecs,
             m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // Страны/типы — параметрами из серверов приложения; payload + разбор news/{news:[...]} — внутри SDK.
     QStringList userCountryCodes;
     for (const QJsonValue &v : services.value(apiDefs::key::userCountryCode).toArray()) {
         userCountryCodes.append(v.toString());
@@ -93,6 +92,5 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
     const QString locale = m_appSettingsRepository->getAppLanguage().name().split("_").first();
 
     auto future = gatewayController->getNewsAsync(locale, userCountryCodes, serviceTypes);
-    // gatewayController держим живым до завершения (future самодостаточен, но capture не вредит).
     return future.then([gatewayController](QPair<ErrorCode, QJsonArray> result) { return result; });
 }

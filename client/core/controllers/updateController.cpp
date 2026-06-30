@@ -112,7 +112,7 @@ void UpdateController::fetchGatewayUrl()
                     return;
                 }
 
-                m_baseUrl = url;  // SDK уже срезал хвостовой '/'
+                m_baseUrl = url;
 
                 fetchVersionInfo();
             });

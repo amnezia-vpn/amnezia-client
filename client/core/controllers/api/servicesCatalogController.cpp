@@ -216,7 +216,6 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    // Сборка payload + post + проверка "services" — теперь внутри SDK (agw::api::getServices).
     QJsonObject services;
     ErrorCode errorCode = gatewayController.getServices(
             QSysInfo::productType(), QString(APP_VERSION), QString(APPLICATION_NAME),

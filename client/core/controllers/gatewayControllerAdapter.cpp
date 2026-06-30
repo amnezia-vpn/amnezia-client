@@ -371,7 +371,7 @@ QFuture<QPair<amnezia::ErrorCode, QString>> GatewayControllerAdapter::getUpdater
 
     return QtConcurrent::run([controller, cv, ov, uuid]() -> QPair<amnezia::ErrorCode, QString> {
         const agw::api::UrlResult r = agw::api::getUpdaterEndpoint(*controller, cv, ov, uuid);
-        return qMakePair(mapError(r.error), QString::fromStdString(r.url));  // url уже без хвостового '/'
+        return qMakePair(mapError(r.error), QString::fromStdString(r.url));
     });
 }
 
