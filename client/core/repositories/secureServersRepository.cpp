@@ -208,8 +208,8 @@ QString SecureServersRepository::nextAvailableServerName() const
     int i = 0;
     QString candidate;
     do {
-        i++;
-        candidate = QStringLiteral("Server %1").arg(i);
+        ++i;
+        candidate = tr("Server") + QLatin1Char(' ') + QString::number(i);
     } while (usedNames.contains(candidate));
 
     return candidate;

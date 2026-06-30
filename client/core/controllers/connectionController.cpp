@@ -49,14 +49,96 @@ void ConnectionController::setConnectionState(Vpn::ConnectionState state)
     }
 }
 
-ErrorCode ConnectionController::prepareConnection(const QString &serverId,
-                                                 QJsonObject& vpnConfiguration,
-                                                 DockerContainer& container)
+ErrorCode ConnectionController::defaultContainerForServer(const QString &serverId, DockerContainer &container) const
 {
+    const auto kind = m_serversRepository->serverKind(serverId);
+    switch (kind) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
+        const auto cfg = m_serversRepository->apiV2Config(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
+        return ErrorCode::LegacyApiV1NotSupportedError;
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
+        return ErrorCode::InternalError;
+    }
+}
+
+ErrorCode ConnectionController::isConnectionSupported(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return ErrorCode::InternalError;
+    }
+
     if (!isServiceReady()) {
         return ErrorCode::AmneziaServiceNotRunning;
     }
 
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (serverConfigUtils::isLegacyApiSubscription(kind)) {
+        return ErrorCode::LegacyApiV1NotSupportedError;
+    }
+
+    DockerContainer container = DockerContainer::None;
+    const ErrorCode errorCode = defaultContainerForServer(serverId, container);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (container == DockerContainer::None) {
+        if (serverConfigUtils::isApiV2Subscription(kind)) {
+            return ErrorCode::NoError;
+        }
+        return ErrorCode::NoInstalledContainersError;
+    }
+
+    if (ContainerUtils::isUnsupportedContainer(container)) {
+        return ErrorCode::LegacyContainerNotSupportedError;
+    }
+
+    if (!isContainerSupported(container)) {
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    return ErrorCode::NoError;
+}
+
+ErrorCode ConnectionController::prepareConnection(const QString &serverId,
+                                                 QJsonObject& vpnConfiguration,
+                                                 DockerContainer& container)
+{
     ContainerConfig containerConfigModel;
     QPair<QString, QString> dns;
     QString hostName;
@@ -118,10 +200,6 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
     case serverConfigUtils::ConfigType::Invalid:
     default:
         return ErrorCode::InternalError;
-    }
-
-    if (!isContainerSupported(container)) {
-        return ErrorCode::NotSupportedOnThisPlatform;
     }
 
     vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,

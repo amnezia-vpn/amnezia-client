@@ -43,6 +43,11 @@ ContainerConfig SelfHostedUserServerConfig::containerConfig(DockerContainer cont
     return containers.value(container);
 }
 
+void SelfHostedUserServerConfig::updateContainerConfig(DockerContainer container, const ContainerConfig &config)
+{
+    containers[container] = config;
+}
+
 QPair<QString, QString> SelfHostedUserServerConfig::getDnsPair(const QString &primaryDns,
                                                                const QString &secondaryDns) const
 {

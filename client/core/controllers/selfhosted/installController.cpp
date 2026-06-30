@@ -72,6 +72,16 @@ namespace
         }
         return false;
     }
+
+    QString buildRemoveContainerScript(const amnezia::ScriptVars &vars, bool removeDataVolume)
+    {
+        QString script = SshSession::replaceVars(amnezia::scriptData(SharedScriptType::remove_container), vars);
+        if (removeDataVolume) {
+            script += QLatin1String("\nsudo docker volume rm -f $CONTAINER_NAME-data 2>/dev/null || true");
+            script = SshSession::replaceVars(script, vars);
+        }
+        return script;
+    }
 }
 
 InstallController::InstallController(SecureServersRepository *serversRepository,
@@ -120,14 +130,10 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
-    amnezia::ScriptVars removeContainerVars =
+    const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    if (!isUpdate) {
-        removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
-    }
-    sshSession.runScript(credentials,
-                         sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                                removeContainerVars));
+    const bool removeDataVolume = !isUpdate && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
     qDebug().noquote() << "buildContainerWorker start";
@@ -152,8 +158,8 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     return startupContainerWorker(credentials, container, config, sshSession);
 }
 
-ErrorCode InstallController::updateContainer(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
-                                             ContainerConfig &newConfig)
+ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
+                                                ContainerConfig &newConfig)
 {
     if (!isUpdateDockerContainerRequired(container, oldConfig, newConfig)) {
         auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
@@ -185,7 +191,7 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     SshSession sshSession(this);
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
-    qDebug() << "InstallController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
+    qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     bool xrayServerSettingsChanged = false;
     if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
@@ -213,11 +219,11 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged && !skipXrayInboundSync) {
         DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
         XrayConfigurator xrayConfigurator(&sshSession);
-        qDebug() << "InstallController::updateContainer applying Xray server inbound sync, reinstall="
+        qDebug() << "InstallController::updateServerConfig applying Xray server inbound sync, reinstall="
                  << reinstallRequired;
         errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
         if (errorCode != ErrorCode::NoError) {
-            qDebug() << "InstallController::updateContainer Xray inbound sync failed, error="
+            qDebug() << "InstallController::updateServerConfig Xray inbound sync failed, error="
                      << static_cast<int>(errorCode);
         }
     }
@@ -228,12 +234,49 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         } else if (container == DockerContainer::Telemt) {
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
-        clearCachedProfile(serverId, container);
+        if (reinstallRequired) {
+            clearCachedProfile(serverId, container);
+        }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
+}
+
+ErrorCode InstallController::updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig)
+{
+    switch (m_serversRepository->serverKind(serverId)) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        auto config = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        auto config = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::SelfHostedUser);
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        auto config = m_serversRepository->nativeConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::Native);
+        return ErrorCode::NoError;
+    }
+    default:
+        return ErrorCode::InternalError;
+    }
 }
 
 void InstallController::clearCachedProfile(const QString &serverId, DockerContainer container)
@@ -795,8 +838,8 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
     qDebug().noquote() << "InstallController::installDockerWorker" << stdOut;
 
     if (container == DockerContainer::Awg2) {
-        QRegularExpression regex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
-        QRegularExpressionMatch match = regex.match(stdOut);
+        QRegularExpression kernelVersionRegex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
+        QRegularExpressionMatch match = kernelVersionRegex.match(stdOut);
         if (match.hasMatch()) {
             int majorVersion = match.captured(1).toInt();
             int minorVersion = match.captured(2).toInt();
@@ -809,8 +852,19 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
 
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
-    if (stdOut.contains("command not found"))
+    if (stdOut.contains("Container runtime is not supported"))
+        return ErrorCode::ServerContainerRuntimeNotSupported;
+    
+    QRegularExpression notFoundRegex(
+        R"(^.*(?:sudo:|docker:).*not found.*$)",
+        QRegularExpression::MultilineOption);
+
+    if (notFoundRegex.match(stdOut).hasMatch()) {
         return ErrorCode::ServerDockerFailedError;
+    }
+    
+    if (stdOut.contains("Container runtime service not running"))
+        return ErrorCode::ContainerRuntimeServiceNotRunning;
 
     return error;
 }
@@ -847,7 +901,7 @@ ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, 
         return ErrorCode::ServerUserNotInSudo;
     if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
         return ErrorCode::ServerUserDirectoryNotAccessible;
-    if (stdOut.contains("sudoers") || stdOut.contains("is not allowed to run sudo on"))
+    if (stdOut.contains(QRegularExpression(R"(\bsudoers\b)")) || stdOut.contains("is not allowed to") || stdOut.contains("can't do that"))
         return ErrorCode::ServerUserNotAllowedInSudoers;
     if (stdOut.contains("password is required") || stdOut.contains("authentication is required"))
         return ErrorCode::ServerUserPasswordRequired;
@@ -980,12 +1034,11 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
         return ErrorCode::InternalError;
     }
     SshSession sshSession(this);
-    amnezia::ScriptVars removeContainerVars =
+    const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
-    ErrorCode errorCode = sshSession.runScript(
-            credentials,
-            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container), removeContainerVars));
+    const bool removeDataVolume = (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    ErrorCode errorCode =
+            sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
 
     if (errorCode == ErrorCode::NoError) {
         QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
@@ -1463,7 +1516,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProtoStr = containerAndPortMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            if (container == DockerContainer::None) {
+            if (container == DockerContainer::None || ContainerUtils::isUnsupportedContainer(container)) {
                 continue;
             }
 
@@ -1488,7 +1541,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProtoStr = torOrDnsRegMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            if (container == DockerContainer::None) {
+            if (container == DockerContainer::None || ContainerUtils::isUnsupportedContainer(container)) {
                 continue;
             }
 

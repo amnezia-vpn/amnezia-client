@@ -10,7 +10,8 @@ class ClientManagementModel : public QAbstractListModel
 
 public:
     enum Roles {
-        ClientNameRole = Qt::UserRole + 1,
+        ClientIdRole = Qt::UserRole + 1,
+        ClientNameRole,
         CreationDateRole,
         LatestHandshakeRole,
         DataReceivedRole,

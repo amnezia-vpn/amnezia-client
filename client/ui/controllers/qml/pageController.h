@@ -125,6 +125,7 @@ public slots:
     void updateNavigationBarColor(const int color);
 
     void showOnStartup();
+    bool shouldStartMinimized() const;
 
     bool isTriggeredByConnectButton();
     void setTriggeredByConnectButton(bool trigger);

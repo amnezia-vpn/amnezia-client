@@ -1,6 +1,7 @@
 #include "coreSignalHandlers.h"
 
 #include <QTimer>
+#include <QtConcurrent>
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/errorCodes.h"
@@ -33,7 +34,6 @@
 #include "core/controllers/connectionController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
-#include "ui/models/api/apiCountryModel.h"
 #include "ui/models/containersModel.h"
 #include "core/utils/containerEnum.h"
 
@@ -145,7 +145,9 @@ void CoreSignalHandlers::initExportControllerHandler()
             });
     connect(m_coreController->m_exportController, &ExportController::revokeClientRequested, this,
             [this](const QString &serverId, int row, DockerContainer container) {
-                m_coreController->m_usersController->revokeClient(serverId, row, container);
+                QtConcurrent::run([this, serverId, row, container]() {
+                    m_coreController->m_usersController->revokeClient(serverId, row, container);
+                });
             });
     connect(m_coreController->m_exportController, &ExportController::renameClientRequested, this,
             [this](const QString &serverId, int row, const QString &clientName, DockerContainer container) {
@@ -156,15 +158,17 @@ void CoreSignalHandlers::initExportControllerHandler()
 void CoreSignalHandlers::initImportControllerHandler()
 {
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
-        if (!m_coreController->m_connectionController->isConnected()) {
-            int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
-            const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
-            if (!serverId.isEmpty()) {
-                m_coreController->m_serversController->setDefaultServer(serverId);
-            }
-            if (m_coreController->m_serversUiController) {
-                m_coreController->m_serversUiController->setProcessedServerId(serverId);
-            }
+        if (m_coreController->m_connectionUiController->isConnected()) {
+            return;
+        }
+
+        const int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
+        const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
+        if (!serverId.isEmpty()) {
+            m_coreController->m_serversController->setDefaultServer(serverId);
+        }
+        if (m_coreController->m_serversUiController) {
+            m_coreController->m_serversUiController->setProcessedServerId(serverId);
         }
     });
 }
@@ -176,17 +180,14 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
         if (processedServerId.isEmpty()) {
             return;
         }
-        
-        QJsonArray availableCountries;
-        QString serverCountryCode;
 
         const auto apiV2 = m_coreController->m_serversRepository->apiV2Config(processedServerId);
-        if (apiV2.has_value()) {
-            availableCountries = apiV2->apiConfig.availableCountries;
-            serverCountryCode = apiV2->apiConfig.serverCountryCode;
+        if (!apiV2.has_value()) {
+            return;
         }
-        
-        m_coreController->m_apiCountryModel->updateModel(availableCountries, serverCountryCode);
+
+        m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
+                                                           apiV2->apiConfig.serverCountryCode);
     });
 }
 
@@ -204,13 +205,15 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
             [this](const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container) {
-                m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
+                QtConcurrent::run([this, serverId, containerConfig, container]() {
+                    m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
+                });
             });
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
             [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {
                 m_coreController->m_usersController->appendClient(serverId, clientId, clientName, container);
-            });
+            }, Qt::DirectConnection);
 
     connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_installController,
             &InstallController::clearCachedProfile);
@@ -237,13 +240,16 @@ void CoreSignalHandlers::initLanguageHandler()
     connect(m_coreController->m_settingsUiController, &SettingsUiController::resetLanguageToSystem, m_coreController->m_languageUiController, [this]() {
         m_coreController->m_languageUiController->changeLanguage(m_coreController->m_languageUiController->getSystemLanguageEnum());
     });
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::appLanguageChanged, m_coreController->m_languageUiController, [this]() {
+        m_coreController->m_languageUiController->onAppLanguageChanged(m_coreController->m_settingsController->getAppLanguage());
+    });
 }
 
 void CoreSignalHandlers::initAutoConnectHandler()
 {
     if (m_coreController->m_settingsUiController->isAutoConnectEnabled()
         && !m_coreController->m_serversController->getDefaultServerId().isEmpty()) {
-        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->openConnection(); });
+        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->toggleConnection(); });
     }
 }
 
@@ -284,6 +290,8 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateModel);
     connect(m_coreController->m_usersController, &UsersController::clientRenamed,
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateClientName);
+    connect(m_coreController->m_usersController, &UsersController::revokeFinished,
+            m_coreController->m_exportController, &ExportController::revokeFinished);
 }
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
@@ -347,6 +355,9 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
 {
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::unsupportedConnectDrawerRequested,
+            m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
+
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::unsupportedConnectDrawerRequested,
             m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
 }
 

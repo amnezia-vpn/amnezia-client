@@ -56,14 +56,17 @@ ListViewType {
                         return
                     }
 
-                    if (checked) {
-                        containersDropDown.closeTriggered()
-                        ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, proxyDefaultServerContainersModel.mapToSource(index))
-                    } else {
-                        ServersUiController.processedContainerIndex = proxyDefaultServerContainersModel.mapToSource(index)
+                    var containerIndex = proxyDefaultServerContainersModel.mapToSource(index)
+
+                    if (!isInstalled) {
+                        ServersUiController.processedContainerIndex = containerIndex
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.closeTriggered()
+                        return
                     }
+
+                    containersDropDown.closeTriggered()
+                    ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, containerIndex)
                 }
 
                 MouseArea {

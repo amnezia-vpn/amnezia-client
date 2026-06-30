@@ -6,8 +6,36 @@ Menu {
 
     popupType: Popup.Native
 
-    onAboutToShow: blocker.enabled = true
-    onClosed: blocker.enabled = false
+    property Item inputBlocker: null
+
+    Component {
+        id: inputBlockerComponent
+
+        MouseArea {
+            anchors.fill: parent
+            preventStealing: true
+        }
+    }
+
+    onAboutToShow: {
+        if (!textObj || !textObj.window) {
+            return
+        }
+
+        const contentItem = textObj.window.contentItem
+        if (!inputBlocker) {
+            inputBlocker = inputBlockerComponent.createObject(contentItem)
+        } else {
+            inputBlocker.parent = contentItem
+        }
+    }
+
+    onClosed: {
+        if (inputBlocker) {
+            inputBlocker.destroy()
+            inputBlocker = null
+        }
+    }
 
     MenuItem {
         text: qsTr("C&ut")
@@ -30,12 +58,5 @@ Menu {
         text: qsTr("&SelectAll")
         enabled: textObj.length > 0
         onTriggered: textObj.selectAll()
-    }
-
-    MouseArea {
-        id: blocker
-        z: 2
-        enabled: false
-        preventStealing: true
     }
 }
