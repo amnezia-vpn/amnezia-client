@@ -164,6 +164,9 @@ void XrayProtocol::setPrimary(const QJsonObject &config)
 {
     Q_UNUSED(config)
     QMetaObject::invokeMethod(this, [this]() {
+        if (m_phase != Phase::Active) {
+            return;
+        }
         emit primaryReady();
     }, Qt::QueuedConnection);
 }
