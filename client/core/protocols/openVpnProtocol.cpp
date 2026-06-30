@@ -236,8 +236,15 @@ ErrorCode OpenVpnProtocol::start()
     m_openVpnProcess->setArguments(arguments);
 
     qDebug() << arguments.join(" ");
-    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred,
-            [&](QProcess::ProcessError error) { qDebug() << "PrivilegedProcess errorOccurred" << error; });
+    connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, this,
+            [this](QProcess::ProcessError error) {
+                qDebug() << "PrivilegedProcess errorOccurred" << error;
+                if (error == QProcess::FailedToStart) {
+                    qCritical() << "OpenVPN failed to start";
+                    setLastError(ErrorCode::OpenVpnExecutableMissing);
+                    setConnectionState(Vpn::ConnectionState::Disconnected);
+                }
+            });
 
     connect(m_openVpnProcess.data(), &IpcProcessInterfaceReplica::stateChanged,
             [&](QProcess::ProcessState newState) { qDebug() << "PrivilegedProcess stateChanged" << newState; });
