@@ -188,20 +188,23 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex, const QString& ifname
   QList<uint64_t>& perTunnel = ifname.isEmpty() ? m_globalRules
                                                 : m_tunnelRules[ifname];
   if (vpnAdapterIndex < 0) {
-    IPAddress allv4("0.0.0.0/0");
-    if (!blockTrafficTo(allv4, MED_WEIGHT, "Block Internet", perTunnel)) {
-      return false;
-    }
-    IPAddress allv6("::/0");
-    if (!blockTrafficTo(allv6, MED_WEIGHT, "Block Internet", perTunnel)) {
-      return false;
+    if (!m_blockAllInstalled) {
+      IPAddress allv4("0.0.0.0/0");
+      if (!blockTrafficTo(allv4, MED_WEIGHT, "Block Internet", perTunnel)) {
+        return false;
+      }
+      IPAddress allv6("::/0");
+      if (!blockTrafficTo(allv6, MED_WEIGHT, "Block Internet", perTunnel)) {
+        return false;
+      }
+      m_blockAllInstalled = true;
     }
   } else {
     FW_OK(allowTrafficOfAdapter(vpnAdapterIndex, MED_WEIGHT,
                                 "Allow usage of VPN Adapter", perTunnel));
   }
 
-  if (m_globalRules.isEmpty()) {
+  if (!m_baseRulesInstalled) {
     FW_OK(allowDHCPTraffic(MED_WEIGHT, "Allow DHCP Traffic", m_globalRules));
     FW_OK(allowHyperVTraffic(MAX_WEIGHT, "Allow Hyper-V Traffic", m_globalRules));
     FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
@@ -210,6 +213,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex, const QString& ifname
     FW_OK(allowLoopbackTraffic(MED_WEIGHT,
                                "Allow Loopback traffic on device %1",
                                m_globalRules));
+    m_baseRulesInstalled = true;
   }
 
   logger.debug() << "Killswitch on! Globals:" << m_globalRules.length()
@@ -407,6 +411,8 @@ bool WindowsFirewall::allowAllTraffic() {
     }
     m_tunnelRules.clear();
     m_globalRules.clear();
+    m_baseRulesInstalled = false;
+    m_blockAllInstalled = false;
     logger.debug() << "Firewall Disabled!";
     return true;
 }
