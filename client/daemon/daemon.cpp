@@ -493,6 +493,10 @@ bool Daemon::deactivate(bool emitSignals) {
     deactivateTunnel(primary);
   }
 
+  if (auto* dns = dnsutils()) {
+    dns->restoreResolvers();
+  }
+
   m_activationTimer.stop();
   return true;
 }
