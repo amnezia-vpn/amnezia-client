@@ -606,6 +606,7 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
 #endif
 
     applyPolicy(tunnel);
+    disconnect(tunnel, &Tunnel::activated, this, nullptr);
     connect(tunnel, &Tunnel::activated, this, [this, tunnel] {
         if (auto p = tunnel->protocol()) {
             if (tunnel != m_armedTunnel) {
@@ -615,6 +616,7 @@ void VpnTrafficGuard::commit(Tunnel* tunnel)
         }
     });
 #ifdef Q_OS_WIN
+    disconnect(tunnel, &Tunnel::addressesUpdated, this, nullptr);
     connect(tunnel, &Tunnel::addressesUpdated, this,
             [this, tunnel](const QString& gw, const QString& la) {
         applyKillSwitch(tunnel, gw, la);
