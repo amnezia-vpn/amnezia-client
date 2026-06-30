@@ -166,6 +166,9 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     if (rtm->rtm_type == RTN_THROW) {
     if (action == RTM_NEWROUTE) {
         if (m_physicalGateway.isEmpty()) {
+            m_physicalGateway = NetworkUtilities::getGatewayAndIface().first;
+        }
+        if (m_physicalGateway.isEmpty()) {
             logger.warning() << "No physical gateway available, skipping exclusion route";
             return false;
         }
