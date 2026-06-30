@@ -170,7 +170,7 @@ bool WireguardUtilsLinux::deleteInterface() {
 
     // Garbage collect.
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
-    QFile::remove(wgRuntimeDir.filePath(m_ifname + ".name"));
+    QFile::remove(wgRuntimeDir.filePath(m_ifname + ".sock"));
 
     return true;
 }
