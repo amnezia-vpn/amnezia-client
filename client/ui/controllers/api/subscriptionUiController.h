@@ -51,6 +51,7 @@ public slots:
     bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     void revertLastCountryChange();
+    void commitLastCountryChange();
     bool deactivateDevice(const QString &serverId);
     bool deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode);
 

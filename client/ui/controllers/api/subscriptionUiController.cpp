@@ -80,6 +80,9 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
       m_settingsController(settingsController),
       m_connectionController(connectionController)
 {
+    connect(m_connectionController, &ConnectionController::serverSwitchSucceeded, this,
+            &SubscriptionUiController::commitLastCountryChange);
+
     connect(m_apiServicesModel, &ApiServicesModel::serviceSelectionChanged, this, [this]() {
         ApiServicesModel::ApiServicesData selectedServiceData = m_apiServicesModel->selectedServiceData();
         m_apiSubscriptionPlansModel->updateModel(selectedServiceData.subscriptionPlansJson);
@@ -465,6 +468,12 @@ void SubscriptionUiController::revertLastCountryChange()
     m_subscriptionController->restoreApiV2Config(serverId, cfg);
     m_apiCountryModel->updateModel(cfg.apiConfig.availableCountries,
                                    cfg.apiConfig.serverCountryCode);
+}
+
+void SubscriptionUiController::commitLastCountryChange()
+{
+    m_previousCountryServerId.clear();
+    m_previousApiV2Config.reset();
 }
 
 bool SubscriptionUiController::deactivateDevice(const QString &serverId)

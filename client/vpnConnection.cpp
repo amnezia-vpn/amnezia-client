@@ -589,6 +589,7 @@ void VpnConnection::onTunnelPrepared()
             m_trafficGuard->swap(oldTunnel, m_active);
             delete oldTunnel;
             releaseIfname(oldIfname);
+            emit serverSwitchSucceeded();
         }, Qt::QueuedConnection);
         return;
     }
