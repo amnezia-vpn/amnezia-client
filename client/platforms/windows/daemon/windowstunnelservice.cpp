@@ -40,11 +40,12 @@ WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
     WindowsUtils::windowsLog("Failed to open SCManager");
   }
 
-  // Is the service already running? Terminate it.
+  // Clean up the legacy fixed-name tunnel service left by pre-per-tunnel
+  // versions; current tunnels use per-ifname service names handled in start().
   SC_HANDLE service =
-      OpenService((SC_HANDLE)m_scm, TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
+      OpenService((SC_HANDLE)m_scm, LEGACY_TUNNEL_SERVICE_NAME, SERVICE_ALL_ACCESS);
   if (service != nullptr) {
-    logger.info() << "Tunnel already exists. Terminating it.";
+    logger.info() << "Legacy tunnel service exists. Terminating it.";
     stopAndDeleteTunnelService(service);
     CloseServiceHandle(service);
   }
