@@ -38,6 +38,11 @@ private:
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;
     static constexpr int tun2socksRetryDelayMs = 400;
+
+    // Guards against tearing down the shared xray engine more than once.
+    // The destructor also calls stop(); without this the second stop() would
+    // call xrayStop() on the global engine that the local proxy may already own.
+    bool m_teardownDone = false;
 };
 
 #endif // XRAYPROTOCOL_H
