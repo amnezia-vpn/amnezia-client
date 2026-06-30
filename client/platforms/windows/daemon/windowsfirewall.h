@@ -54,6 +54,8 @@ class WindowsFirewall final : public QObject {
   bool m_init = false;
   QList<uint64_t> m_globalRules;
   QMap<QString, QList<uint64_t>> m_tunnelRules;
+  bool m_baseRulesInstalled = false;
+  bool m_blockAllInstalled = false;
 
   bool allowTrafficForAppOnAll(const QString& exePath, int weight,
                                const QString& title, QList<uint64_t>& target);
