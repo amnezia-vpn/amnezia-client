@@ -12,7 +12,6 @@
 #include <QFile>
 #include <QLocalSocket>
 #include <QTimer>
-#include <QThread>
 
 #include "leakdetector.h"
 #include "logger.h"

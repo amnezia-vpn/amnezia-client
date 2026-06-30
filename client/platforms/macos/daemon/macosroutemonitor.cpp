@@ -554,17 +554,6 @@ bool MacosRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   }
 }
 
-void MacosRouteMonitor::flushExclusionRoutes() {
-  while (!m_exclusionRoutes.isEmpty()) {
-    IPAddress prefix = m_exclusionRoutes.takeFirst();
-    if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {
-      rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv4, nullptr);
-    } else if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-      rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv6, nullptr);
-    }
-  }
-}
-
 // static
 QList<QByteArray> MacosRouteMonitor::parseAddrList(const QByteArray& payload) {
   QList<QByteArray> list;

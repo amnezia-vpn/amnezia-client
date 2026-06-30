@@ -12,7 +12,6 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
-#include <QNetworkInterface>
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
@@ -25,7 +24,6 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
 
-    m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::configKey::splitTunnelType).toInt());
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
     m_tunName = configuration.value("tunName").toString();
@@ -124,7 +122,7 @@ void XrayProtocol::stop()
     if (m_phase != Phase::Active) {
         return;
     }
-    m_phase = Phase::Stopping;
+    m_phase = Phase::Inactive;
 
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
         auto deleteTun = iface->deleteTun(m_tunName);
@@ -156,7 +154,6 @@ void XrayProtocol::stop()
         m_tun2socksProcess.reset();
     }
 
-    m_phase = Phase::Inactive;
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 

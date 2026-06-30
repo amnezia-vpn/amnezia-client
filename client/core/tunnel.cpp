@@ -111,7 +111,6 @@ void Tunnel::setState(State next) {
         return;
     }
     m_state = next;
-    emit stateChanged(m_state);
 }
 
 void Tunnel::startActivationDeadline(int msec) {

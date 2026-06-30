@@ -30,7 +30,6 @@ class MacosRouteMonitor final : public QObject {
 
   bool addExclusionRoute(const IPAddress& prefix);
   bool deleteExclusionRoute(const IPAddress& prefix);
-  void flushExclusionRoutes();
 
  private:
   void handleRtmDelete(const struct rt_msghdr* msg, const QByteArray& payload);
