@@ -62,6 +62,7 @@ signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
     void serverSwitchFailed();
+    void serverSwitchSucceeded();
 
     void serviceIsNotReady();
 
