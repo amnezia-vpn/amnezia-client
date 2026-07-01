@@ -541,17 +541,19 @@ void VpnTrafficGuard::revokePolicy(Tunnel* tunnel)
     }
 
     const QJsonObject activate = LocalSocketController::buildActivateJson(tunnel->config(), tunnel->ifname());
-    const QStringList prefixes = allowedIpPrefixesFor(activate);
     const QStringList excluded = excludedAddressesFor(activate);
     const QString peer = tunnel->remoteAddress();
 
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+#ifndef Q_OS_MAC
+        const QStringList prefixes = allowedIpPrefixesFor(activate);
         for (const QString& prefix : prefixes) {
             auto reply = iface->delAllowedIp(ifname, prefix);
             if (!reply.waitForFinished() || !reply.returnValue()) {
                 qWarning() << "VpnTrafficGuard::revokePolicy: Failed to remove allowed ip" << prefix;
             }
         }
+#endif
         for (const QString& addr : excluded) {
             auto reply = iface->delExclusionRoute(ifname, addr);
             if (!reply.waitForFinished() || !reply.returnValue()) {
