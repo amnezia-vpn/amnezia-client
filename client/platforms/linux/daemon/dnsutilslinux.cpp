@@ -11,6 +11,7 @@
 
 #include "leakdetector.h"
 #include "logger.h"
+#include "router_linux.h"
 
 constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
 constexpr const char* DBUS_RESOLVE_PATH = "/org/freedesktop/resolve1";
@@ -52,16 +53,24 @@ DnsUtilsLinux::~DnsUtilsLinux() {
 
 bool DnsUtilsLinux::updateResolvers(const QString& ifname,
                                     const QList<QHostAddress>& resolvers) {
-  m_ifindex = if_nametoindex(qPrintable(ifname));
-  if (m_ifindex <= 0) {
+  const int newIfindex = if_nametoindex(qPrintable(ifname));
+  if (newIfindex <= 0) {
     logger.error() << "Unable to resolve ifindex for" << ifname;
     return false;
   }
 
-  setLinkDNS(m_ifindex, resolvers);
+  const int previousIfindex = m_ifindex;
+  m_ifindex = newIfindex;
+
+  const bool ok = setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
   updateLinkDomains();
-  return true;
+
+  if (previousIfindex > 0 && previousIfindex != newIfindex) {
+    m_resolver->callWithArgumentList(QDBus::Block, QStringLiteral("RevertLink"),
+                                     {QVariant::fromValue(previousIfindex)});
+  }
+  return ok;
 }
 
 bool DnsUtilsLinux::restoreResolvers() {
@@ -95,7 +104,7 @@ void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   delete call;
 }
 
-void DnsUtilsLinux::setLinkDNS(int ifindex,
+bool DnsUtilsLinux::setLinkDNS(int ifindex,
                                const QList<QHostAddress>& resolvers) {
   QList<DnsResolver> resolverList;
   char ifnamebuf[IF_NAMESIZE];
@@ -111,12 +120,24 @@ void DnsUtilsLinux::setLinkDNS(int ifindex,
   QList<QVariant> argumentList;
   argumentList << QVariant::fromValue(ifindex);
   argumentList << QVariant::fromValue(resolverList);
-  QDBusPendingReply<> reply = m_resolver->asyncCallWithArgumentList(
-      QStringLiteral("SetLinkDNS"), argumentList);
 
-  QDBusPendingCallWatcher* watcher = new QDBusPendingCallWatcher(reply, this);
-  QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)), this,
-                   SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
+  constexpr int kDnsCallTimeoutMs = 200;
+  constexpr int kMaxAttempts = 3;
+  m_resolver->setTimeout(kDnsCallTimeoutMs);
+
+  for (int attempt = 1; attempt <= kMaxAttempts; ++attempt) {
+    QDBusMessage reply = m_resolver->callWithArgumentList(
+        QDBus::Block, QStringLiteral("SetLinkDNS"), argumentList);
+    if (reply.type() != QDBusMessage::ErrorMessage) {
+      return true;
+    }
+    logger.error() << "SetLinkDNS failed (attempt" << attempt << "of"
+                   << kMaxAttempts << ")";
+    logger.error() << "SetLinkDNS error:" << reply.errorMessage();
+    logger.debug() << "Restarting resolved to clear its query backlog";
+    RouterLinux::Instance().flushDns();
+  }
+  return false;
 }
 
 void DnsUtilsLinux::setLinkDomains(int ifindex,
