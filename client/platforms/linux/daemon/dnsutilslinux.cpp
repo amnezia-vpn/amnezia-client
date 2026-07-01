@@ -11,7 +11,7 @@
 #include <QTimer>
 #include <QtDBus/QtDBus>
 
-#include "core/networkUtilities.h"
+#include "core/utils/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -92,6 +92,7 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     m_gatewayIfindex = 0;
   }
 
+  const int previousIfindex = m_ifindex;
   m_ifindex = if_nametoindex(qPrintable(ifname));
   if (m_ifindex <= 0) {
     logger.error() << "Unable to resolve ifindex for" << ifname;
@@ -115,6 +116,11 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
   updateLinkDomains();
+
+  if (previousIfindex > 0 && previousIfindex != m_ifindex) {
+    m_resolver->callWithArgumentList(QDBus::Block, QStringLiteral("RevertLink"),
+                                     {QVariant::fromValue(previousIfindex)});
+  }
   return true;
 }
 
@@ -153,6 +159,7 @@ void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
     logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
+    scheduleRetry();
   }
   delete call;
 }
@@ -290,6 +297,19 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
       setLinkDefaultRoute(gwIdx, false);
     }
   }
+}
+
+void DnsUtilsLinux::scheduleRetry() {
+  if (m_pendingIfname.isEmpty() || m_retryPending || m_domainRetries >= 5)
+    return;
+  m_retryPending = true;
+  ++m_domainRetries;
+  logger.debug() << "Retrying full DNS setup (" << m_domainRetries << "/5)";
+  QTimer::singleShot(1000, this, [this]() {
+    m_retryPending = false;
+    if (!m_pendingIfname.isEmpty())
+      updateResolvers(m_pendingIfname, m_pendingResolvers);
+  });
 }
 
 static DnsMetatypeRegistrationProxy s_dnsMetatypeProxy;
