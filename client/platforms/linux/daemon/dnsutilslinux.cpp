@@ -14,6 +14,7 @@
 #include "core/utils/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
+#include "router_linux.h"
 
 constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
 constexpr const char* DBUS_RESOLVE_PATH = "/org/freedesktop/resolve1";
@@ -116,6 +117,7 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
     m_gatewayIfindex = 0;
   }
 
+  const int previousIfindex = m_ifindex;
   m_ifindex = if_nametoindex(qPrintable(ifname));
   if (m_ifindex <= 0) {
     logger.error() << "Unable to resolve ifindex for" << ifname;
@@ -143,6 +145,11 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
   updateLinkDomains();
+
+  if (previousIfindex > 0 && previousIfindex != m_ifindex) {
+    m_resolver->callWithArgumentList(QDBus::Block, QStringLiteral("RevertLink"),
+                                     {QVariant::fromValue(previousIfindex)});
+  }
   return true;
 }
 
@@ -187,6 +194,8 @@ void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
     logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
+    logger.debug() << "Restarting resolved to clear its query backlog";
+    RouterLinux::Instance().flushDns();
     scheduleRetry();
   }
   delete call;
