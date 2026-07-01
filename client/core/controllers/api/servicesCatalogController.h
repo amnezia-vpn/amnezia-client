@@ -17,8 +17,6 @@ public:
     ErrorCode fillAvailableServices(QJsonObject &servicesData);
 
 private:
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody);
-
     SecureAppSettingsRepository* m_appSettingsRepository;
 };
 

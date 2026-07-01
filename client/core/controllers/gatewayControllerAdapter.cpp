@@ -7,13 +7,16 @@
 
 #include <QDebug>
 #include <QEventLoop>
+#include <QFutureWatcher>
 #include <QJsonDocument>
 #include <QPointer>
 #include <QPromise>
 #include <QSharedPointer>
 #include <QStringList>
 #include <QThread>
+#include <QtConcurrent/QtConcurrent>
 
+#include <amnezia/sdk/api.h>
 #include <amnezia/sdk/gateway_controller.h>
 #include <amnezia/sdk/config.h>
 #include <amnezia/sdk/types.h>
@@ -103,6 +106,36 @@ namespace
         return cfg;
     }
 
+    GatewayControllerAdapter::ImportResult toAdapterImport(const amnezia::sdk::api::ImportResult &r)
+    {
+        GatewayControllerAdapter::ImportResult out;
+        out.error = mapError(r.error);
+        out.captchaRequired = r.captchaRequired;
+        out.captchaId = QString::fromStdString(r.captcha.captchaId);
+        out.captchaImageBase64 = QString::fromStdString(r.captcha.captchaImageBase64);
+        out.hint = QString::fromStdString(r.captcha.hint);
+        out.serverConfigJson = QString::fromStdString(r.serverConfigJson);
+        out.rawResponse = QByteArray::fromStdString(r.rawResponseJson);
+        return out;
+    }
+
+    amnezia::sdk::api::GatewayRequest toApiReq(const GatewayControllerAdapter::GatewayRequest &q)
+    {
+        amnezia::sdk::api::GatewayRequest r;
+        r.osVersion = q.osVersion.toStdString();
+        r.appVersion = q.appVersion.toStdString();
+        r.appLanguage = q.appLanguage.toStdString();
+        r.installationUuid = q.installationUuid.toStdString();
+        r.userCountryCode = q.userCountryCode.toStdString();
+        r.serverCountryCode = q.serverCountryCode.toStdString();
+        r.serviceType = q.serviceType.toStdString();
+        r.serviceProtocol = q.serviceProtocol.toStdString();
+        if (!q.authData.isEmpty()) {
+            r.authDataJson = QString::fromUtf8(QJsonDocument(q.authData).toJson(QJsonDocument::Compact)).toStdString();
+        }
+        return r;
+    }
+
     std::shared_ptr<amnezia::sdk::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                         int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
@@ -131,76 +164,227 @@ GatewayControllerAdapter::GatewayControllerAdapter(const QString &gatewayEndpoin
 {
 }
 
-amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+void GatewayControllerAdapter::runBlocking(const std::function<void()> &work)
 {
-    const std::string payload = QJsonDocument(apiPayload).toJson().toStdString();
-    const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
-    const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
-
-    qInfo().noquote() << "[agw-adapter] post (sync) endpoint=" << endpoint
-                      << "payloadLen=" << payload.size() << "thread=" << QThread::currentThread();
-
     QEventLoop loop;
-    QObject context;
-    amnezia::sdk::Response result;
-
-    m_controller->postAsync(
-            endpoint.toStdString(), payload,
-            [&loop, &context, &result](amnezia::sdk::Response r) {
-                QMetaObject::invokeMethod(
-                        &context,
-                        [&loop, &result, r]() {
-                            result = r;
-                            loop.quit();
-                        },
-                        Qt::QueuedConnection);
-            },
-            amnezia::sdk::FailoverContext { serviceType, userCountryCode });
-
+    QFutureWatcher<void> watcher;
+    QObject::connect(&watcher, &QFutureWatcher<void>::finished, &loop, &QEventLoop::quit);
+    watcher.setFuture(QtConcurrent::run(work));
     loop.exec(QEventLoop::ExcludeUserInputEvents);
+}
 
-    responseBody = QByteArray::fromStdString(result.body);
-    const amnezia::ErrorCode ec = mapError(result.error);
-    qInfo().noquote() << "[agw-adapter] post (sync) result errorCode=" << static_cast<int>(ec)
-                      << "bodyLen=" << responseBody.size();
+amnezia::ErrorCode GatewayControllerAdapter::getServices(const QString &osVersion, const QString &appVersion,
+                                                         const QString &cliName, const QString &appLanguage,
+                                                         QJsonObject &servicesOut)
+{
+    qInfo().noquote() << "[agw-adapter] getServices (typed) callerThread=" << QThread::currentThread();
+
+    amnezia::sdk::api::JsonResult res;
+    auto controller = m_controller;
+    runBlocking([controller, &res, osVersion, appVersion, cliName, appLanguage]() {
+        res = amnezia::sdk::api::getServices(*controller, osVersion.toStdString(), appVersion.toStdString(),
+                                    cliName.toStdString(), appLanguage.toStdString());
+    });
+
+    servicesOut = QJsonDocument::fromJson(QByteArray::fromStdString(res.json)).object();
+    const amnezia::ErrorCode ec = mapError(res.error);
+    qInfo().noquote() << "[agw-adapter] getServices result errorCode=" << static_cast<int>(ec);
     return ec;
 }
 
-QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsync(const QString &endpoint, const QJsonObject apiPayload)
+amnezia::ErrorCode GatewayControllerAdapter::importTrial(const GatewayRequest &request, const QString &publicKey,
+                                                         const QString &email, QString &serverConfigJsonOut)
 {
-    auto promise = QSharedPointer<QPromise<QPair<amnezia::ErrorCode, QByteArray>>>::create();
-    promise->start();
-    QFuture<QPair<amnezia::ErrorCode, QByteArray>> future = promise->future();
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+    const std::string em = email.toStdString();
 
-    const std::string payload = QJsonDocument(apiPayload).toJson().toStdString();
-    const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
-    const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
+    amnezia::sdk::api::ImportResult res;
+    runBlocking([controller, req, pk, em, &res]() { res = amnezia::sdk::api::importTrial(*controller, req, pk, em); });
 
-    QPointer<GatewayControllerAdapter> self(this);
+    serverConfigJsonOut = QString::fromStdString(res.serverConfigJson);
+    const amnezia::ErrorCode ec = mapError(res.error);
+    qInfo().noquote() << "[agw-adapter] importTrial result errorCode=" << static_cast<int>(ec);
+    return ec;
+}
 
-    qInfo().noquote() << "[agw-adapter] postAsync endpoint=" << endpoint
-                      << "payloadLen=" << payload.size() << "callerThread=" << QThread::currentThread();
+amnezia::ErrorCode GatewayControllerAdapter::deactivateDevice(const GatewayRequest &request)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
 
-    m_controller->postAsync(
-            endpoint.toStdString(), payload,
-            [promise, self](amnezia::sdk::Response r) {
-                const amnezia::ErrorCode ec = mapError(r.error);
-                const QByteArray body = QByteArray::fromStdString(r.body);
-                qInfo().noquote() << "[agw-adapter] postAsync SDK callback errorCode=" << static_cast<int>(ec)
-                                  << "bodyLen=" << body.size() << "poolThread=" << QThread::currentThread()
-                                  << "→ marshalling to object thread";
+    amnezia::sdk::ErrorCode err = amnezia::sdk::ErrorCode::NoError;
+    runBlocking([controller, req, &err]() { err = amnezia::sdk::api::deactivateDevice(*controller, req); });
 
-                auto deliver = [promise, ec, body]() {
-                    promise->addResult(qMakePair(ec, body));
-                    promise->finish();
-                };
-                if (self) {
-                    QMetaObject::invokeMethod(self.data(), deliver, Qt::QueuedConnection);
-                } else {
-                    deliver();
-                }
-            },
-            amnezia::sdk::FailoverContext { serviceType, userCountryCode });
+    const amnezia::ErrorCode ec = mapError(err);
+    qInfo().noquote() << "[agw-adapter] deactivateDevice result errorCode=" << static_cast<int>(ec);
+    return ec;
+}
 
-    return future;
+GatewayControllerAdapter::ImportResult GatewayControllerAdapter::importService(const GatewayRequest &request,
+                                                                               const QString &publicKey)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+
+    amnezia::sdk::api::ImportResult res;
+    runBlocking([controller, req, pk, &res]() { res = amnezia::sdk::api::importService(*controller, req, pk); });
+
+    qInfo().noquote() << "[agw-adapter] importService result errorCode=" << static_cast<int>(mapError(res.error));
+    return toAdapterImport(res);
+}
+
+GatewayControllerAdapter::ImportResult GatewayControllerAdapter::resolveImportCaptcha(const GatewayRequest &request,
+                                                                                     const QString &publicKey,
+                                                                                     const QString &captchaId,
+                                                                                     const QString &captchaSolution)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+    const std::string cid = captchaId.toStdString();
+    const std::string sol = captchaSolution.toStdString();
+
+    amnezia::sdk::api::ImportResult res;
+    runBlocking([controller, req, pk, cid, sol, &res]() {
+        res = amnezia::sdk::api::resolveImportCaptcha(*controller, req, pk, cid, sol);
+    });
+
+    qInfo().noquote() << "[agw-adapter] resolveImportCaptcha result errorCode=" << static_cast<int>(mapError(res.error));
+    return toAdapterImport(res);
+}
+
+GatewayControllerAdapter::ImportResult GatewayControllerAdapter::updateService(const GatewayRequest &request,
+                                                                               const QString &publicKey,
+                                                                               bool isConnectEvent)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+
+    amnezia::sdk::api::ImportResult res;
+    runBlocking([controller, req, pk, isConnectEvent, &res]() {
+        res = amnezia::sdk::api::updateService(*controller, req, pk, isConnectEvent);
+    });
+
+    qInfo().noquote() << "[agw-adapter] updateService result errorCode=" << static_cast<int>(mapError(res.error));
+    return toAdapterImport(res);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::getAccountInfoRaw(const GatewayRequest &request, const QString &cliVersion,
+                                                              const QString &subscriptionStatus, QByteArray &rawJsonOut)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string cv = cliVersion.toStdString();
+    const std::string ss = subscriptionStatus.toStdString();
+
+    amnezia::sdk::api::JsonResult res;
+    runBlocking([controller, req, cv, ss, &res]() { res = amnezia::sdk::api::getAccountInfoRaw(*controller, req, cv, ss); });
+
+    rawJsonOut = QByteArray::fromStdString(res.json);
+    return mapError(res.error);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::exportNativeConfig(const GatewayRequest &request, const QString &publicKey,
+                                                               QString &nativeConfigOut)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+
+    amnezia::sdk::api::NativeConfigResult res;
+    runBlocking([controller, req, pk, &res]() { res = amnezia::sdk::api::exportNativeConfig(*controller, req, pk); });
+
+    nativeConfigOut = QString::fromStdString(res.config);
+    return mapError(res.error);
+}
+
+amnezia::ErrorCode GatewayControllerAdapter::revokeNativeConfig(const GatewayRequest &request)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+
+    amnezia::sdk::ErrorCode err = amnezia::sdk::ErrorCode::NoError;
+    runBlocking([controller, req, &err]() { err = amnezia::sdk::api::revokeNativeConfig(*controller, req); });
+
+    return mapError(err);
+}
+
+GatewayControllerAdapter::AppStoreResult GatewayControllerAdapter::importServiceFromAppStore(
+        const GatewayRequest &request, const QString &publicKey, const QString &transactionId)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string pk = publicKey.toStdString();
+    const std::string tx = transactionId.toStdString();
+
+    amnezia::sdk::api::AppStoreImportResult res;
+    runBlocking([controller, req, pk, tx, &res]() {
+        res = amnezia::sdk::api::importServiceFromAppStore(*controller, req, pk, tx);
+    });
+
+    AppStoreResult out;
+    out.error = mapError(res.error);
+    out.serverConfigJson = QString::fromStdString(res.serverConfigJson);
+    out.vpnKey = QString::fromStdString(res.vpnKey);
+    out.crc = res.crc;
+    qInfo().noquote() << "[agw-adapter] importServiceFromAppStore result errorCode=" << static_cast<int>(out.error);
+    return out;
+}
+
+QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayControllerAdapter::getNewsAsync(const QString &locale,
+                                                                                     const QStringList &userCountryCodes,
+                                                                                     const QStringList &serviceTypes)
+{
+    auto controller = m_controller;
+    const std::string localeStd = locale.toStdString();
+    std::vector<std::string> countries;
+    for (const QString &c : userCountryCodes) {
+        countries.push_back(c.toStdString());
+    }
+    std::vector<std::string> types;
+    for (const QString &t : serviceTypes) {
+        types.push_back(t.toStdString());
+    }
+
+    return QtConcurrent::run([controller, localeStd, countries, types]() -> QPair<amnezia::ErrorCode, QJsonArray> {
+        const amnezia::sdk::api::JsonResult r = amnezia::sdk::api::getNews(*controller, localeStd, countries, types);
+        const amnezia::ErrorCode ec = mapError(r.error);
+        if (ec != amnezia::ErrorCode::NoError) {
+            return qMakePair(ec, QJsonArray());
+        }
+        const QJsonArray arr = QJsonDocument::fromJson(QByteArray::fromStdString(r.json)).array();
+        return qMakePair(ec, arr);
+    });
+}
+
+QFuture<QPair<amnezia::ErrorCode, QString>> GatewayControllerAdapter::getUpdaterEndpointAsync(
+        const QString &cliVersion, const QString &osVersion, const QString &installationUuid)
+{
+    auto controller = m_controller;
+    const std::string cv = cliVersion.toStdString();
+    const std::string ov = osVersion.toStdString();
+    const std::string uuid = installationUuid.toStdString();
+
+    return QtConcurrent::run([controller, cv, ov, uuid]() -> QPair<amnezia::ErrorCode, QString> {
+        const amnezia::sdk::api::UrlResult r = amnezia::sdk::api::getUpdaterEndpoint(*controller, cv, ov, uuid);
+        return qMakePair(mapError(r.error), QString::fromStdString(r.url));
+    });
+}
+
+QFuture<QPair<amnezia::ErrorCode, QString>> GatewayControllerAdapter::getRenewalLinkAsync(
+        const GatewayRequest &request, const QString &cliVersion, const QString &subscriptionStatus)
+{
+    auto controller = m_controller;
+    const amnezia::sdk::api::GatewayRequest req = toApiReq(request);
+    const std::string cv = cliVersion.toStdString();
+    const std::string ss = subscriptionStatus.toStdString();
+
+    return QtConcurrent::run([controller, req, cv, ss]() -> QPair<amnezia::ErrorCode, QString> {
+        const amnezia::sdk::api::RenewalResult r = amnezia::sdk::api::getRenewalLink(*controller, req, cv, ss);
+        return qMakePair(mapError(r.error), QString::fromStdString(r.renewalUrl));
+    });
 }
