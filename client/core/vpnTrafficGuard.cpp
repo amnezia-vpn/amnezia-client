@@ -495,10 +495,6 @@ void VpnTrafficGuard::applyPolicy(Tunnel* tunnel)
         if (!resolvers.waitForFinished() || !resolvers.returnValue()) {
             qWarning() << "VpnTrafficGuard::applyPolicy: Failed to set tunnel resolvers";
         }
-        auto flush = iface->flushDns();
-        if (!flush.waitForFinished() || !flush.returnValue()) {
-            qWarning() << "VpnTrafficGuard::applyPolicy: Failed to flush DNS";
-        }
     });
 #else
     Q_UNUSED(tunnel)
