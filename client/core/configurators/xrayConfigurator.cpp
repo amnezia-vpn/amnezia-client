@@ -244,11 +244,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
                     << "container=" << static_cast<int>(container) << "host=" << credentials.hostName
                     << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port
                     << "appendClient=" << appendNewClient;
-    QString flowValue = srv.flow;
-    if (flowValue.isEmpty() && srv.security == QLatin1String("reality")) {
-        flowValue = QStringLiteral("xtls-rprx-vision");
-    }
-
+    const QString flowValue = srv.flow;
     QString realityPublicKey;
     QString realityShortId;
     if (srv.security == QLatin1String("reality")) {
@@ -563,9 +559,12 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         if (pad.obfsMode) {
             if (!pad.bytesMin.isEmpty() || !pad.bytesMax.isEmpty()) {
                 QJsonObject br;
-                br[QStringLiteral("from")] = pad.bytesMin.isEmpty() ? 1 : pad.bytesMin.toInt();
-                br[QStringLiteral("to")] = pad.bytesMax.isEmpty() ? (pad.bytesMin.isEmpty() ? 256 : pad.bytesMin.toInt())
-                                                                  : pad.bytesMax.toInt();
+                const int fromV = pad.bytesMin.isEmpty() ? 1 : pad.bytesMin.toInt();
+                int toV = pad.bytesMax.isEmpty() ? 256 : pad.bytesMax.toInt();
+                if (toV < fromV)
+                    toV = fromV;
+                br[QStringLiteral("from")] = fromV;
+                br[QStringLiteral("to")] = toV;
                 xo[QStringLiteral("xPaddingBytes")] = br;
             }
             xo[QStringLiteral("xPaddingKey")] = pad.key.isEmpty() ? QStringLiteral("x_padding") : pad.key;

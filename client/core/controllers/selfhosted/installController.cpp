@@ -234,7 +234,9 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         } else if (container == DockerContainer::Telemt) {
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
-        clearCachedProfile(serverId, container);
+        if (reinstallRequired) {
+            clearCachedProfile(serverId, container);
+        }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }

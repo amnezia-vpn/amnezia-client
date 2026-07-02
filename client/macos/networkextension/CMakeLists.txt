@@ -25,6 +25,8 @@ set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
 
     XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../../../Frameworks @loader_path/../../../../Frameworks"
+
+    XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
 )
 
 if(DEPLOY)
@@ -118,10 +120,20 @@ target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CLIENT_ROOT_DIR}
 target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(openvpnadapter REQUIRED)
+# FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
 target_link_libraries(AmneziaVPNNetworkExtension PRIVATE amnezia::openvpnadapter)
 
 find_package(awg-apple REQUIRED)
 target_link_libraries(AmneziaVPNNetworkExtension PRIVATE amnezia::awg-apple)
 
 find_package(hev-socks5-tunnel REQUIRED)
+# FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
 target_link_libraries(AmneziaVPNNetworkExtension PRIVATE heiher::hev-socks5-tunnel)

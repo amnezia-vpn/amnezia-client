@@ -119,7 +119,13 @@ void AmneziaApplication::init()
                 win->setPersistentSceneGraph(true);
                 win->setPersistentGraphics(true);
 #endif
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
                 win->show();
+#else
+                if (!m_coreController || !m_coreController->pageController()->shouldStartMinimized()) {
+                    win->show();
+                }
+#endif
             }
         },
         Qt::QueuedConnection);

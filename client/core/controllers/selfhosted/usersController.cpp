@@ -698,7 +698,7 @@ ErrorCode UsersController::revokeXray(const int row,
 
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
     error = sshSession->runScript(
-        credentials, 
+        credentials,
         sshSession->replaceVars(restartScript, amnezia::genBaseVars(credentials, container, QString(), QString()))
     );
     if (error != ErrorCode::NoError) {
@@ -758,13 +758,16 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const int index
         ContainerConfig containerCfg = adminConfig->containerConfig(container);
         QString containerClientId = containerCfg.protocolConfig.clientId();
 
-        if (!clientId.isEmpty() && !containerClientId.isEmpty() && containerClientId.contains(clientId)) {
+        const bool isAdminMatch = !clientId.isEmpty() && !containerClientId.isEmpty() && containerClientId.contains(clientId);
+        if (isAdminMatch) {
             emit adminConfigRevoked(serverId, container);
         }
 
         emit clientRevoked(index);
-        emit clientsUpdated(m_clientsTable);
     }
+
+    emit clientsUpdated(m_clientsTable);
+    emit revokeFinished(errorCode);
 
     return errorCode;
 }

@@ -152,5 +152,5 @@ message(${QtCore_location})
 get_filename_component(QT_BIN_DIR_DETECTED "${QtCore_location}/../../../../../bin" ABSOLUTE)
 
 add_custom_command(TARGET ${PROJECT} POST_BUILD
-    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND ${QT_BIN_DIR_DETECTED}/macdeployqt $<TARGET_BUNDLE_DIR:AmneziaVPN> -appstore-compliant -qmldir=${CMAKE_CURRENT_SOURCE_DIR} -no-codesign
 )

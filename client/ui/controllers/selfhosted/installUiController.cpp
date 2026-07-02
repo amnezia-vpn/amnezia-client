@@ -306,14 +306,17 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
             || container == DockerContainer::Xray || container == DockerContainer::SSXray;
 
     if (asyncUpdate) {
-        emit serverIsBusy(true);
+        const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
+        if (emitBusy)
+            emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);
         const Proto protocolTypeCopy = protocolType;
         QObject::connect(watcher, &QFutureWatcher<ErrorCode>::finished, this,
-                         [this, watcher, serverId, container, closePage, protocolTypeCopy]() {
+                         [this, watcher, serverId, container, closePage, protocolTypeCopy, emitBusy]() {
                              const ErrorCode errorCode = watcher->result();
                              watcher->deleteLater();
-                             emit serverIsBusy(false);
+                             if (emitBusy)
+                                 emit serverIsBusy(false);
 
                              if (errorCode == ErrorCode::NoError) {
                                  const ContainerConfig updatedConfig =
