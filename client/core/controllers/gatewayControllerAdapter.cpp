@@ -137,9 +137,6 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
     const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
 
-    qInfo().noquote() << "[agw-adapter] post (sync) endpoint=" << endpoint
-                      << "payloadLen=" << payload.size() << "thread=" << QThread::currentThread();
-
     QEventLoop loop;
     QObject context;
     amnezia::gateway_sdk::Response result;
@@ -161,8 +158,6 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
 
     responseBody = QByteArray::fromStdString(result.body);
     const amnezia::ErrorCode ec = mapError(result.error);
-    qInfo().noquote() << "[agw-adapter] post (sync) result errorCode=" << static_cast<int>(ec)
-                      << "bodyLen=" << responseBody.size();
     return ec;
 }
 
@@ -178,17 +173,11 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsy
 
     QPointer<GatewayControllerAdapter> self(this);
 
-    qInfo().noquote() << "[agw-adapter] postAsync endpoint=" << endpoint
-                      << "payloadLen=" << payload.size() << "callerThread=" << QThread::currentThread();
-
     m_controller->postAsync(
             endpoint.toStdString(), payload,
             [promise, self](amnezia::gateway_sdk::Response r) {
                 const amnezia::ErrorCode ec = mapError(r.error);
                 const QByteArray body = QByteArray::fromStdString(r.body);
-                qInfo().noquote() << "[agw-adapter] postAsync SDK callback errorCode=" << static_cast<int>(ec)
-                                  << "bodyLen=" << body.size() << "poolThread=" << QThread::currentThread()
-                                  << "→ marshalling to object thread";
 
                 auto deliver = [promise, ec, body]() {
                     promise->addResult(qMakePair(ec, body));
