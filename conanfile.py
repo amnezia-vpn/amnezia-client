@@ -46,4 +46,4 @@ class AmneziaVPN(ConanFile):
         self.requires("openssl/3.6.2")
         self.requires("zlib/1.3.2")
 
-        self.requires("amnezia-sdk/0.1.0")
+        self.requires("amnezia-gateway-sdk/0.1.0")

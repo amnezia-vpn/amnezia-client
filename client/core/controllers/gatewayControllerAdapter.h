@@ -12,7 +12,7 @@
 
 #include "core/utils/errorCodes.h"
 
-namespace amnezia::sdk
+namespace amnezia::gateway_sdk
 {
 class GatewayController;
 }
@@ -30,7 +30,7 @@ public:
 
 private:
 
-    std::shared_ptr<amnezia::sdk::GatewayController> m_controller;
+    std::shared_ptr<amnezia::gateway_sdk::GatewayController> m_controller;
 };
 
 #endif

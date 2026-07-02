@@ -47,5 +47,5 @@ list(APPEND LIBS OpenSSL::SSL OpenSSL::Crypto)
 find_package(libssh REQUIRED)
 list(APPEND LIBS ssh::ssh)
 
-find_package(amnezia-sdk REQUIRED)
-list(APPEND LIBS amnezia-sdk::amnezia-sdk)
+find_package(amnezia-gateway-sdk REQUIRED)
+list(APPEND LIBS amnezia-gateway-sdk::amnezia-gateway-sdk)

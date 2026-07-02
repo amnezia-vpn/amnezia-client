@@ -14,9 +14,9 @@
 #include <QStringList>
 #include <QThread>
 
-#include <amnezia/sdk/gateway_controller.h>
-#include <amnezia/sdk/config.h>
-#include <amnezia/sdk/types.h>
+#include <amnezia/gateway_sdk/gateway_controller.h>
+#include <amnezia/gateway_sdk/config.h>
+#include <amnezia/gateway_sdk/types.h>
 
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
@@ -31,9 +31,9 @@
 
 namespace
 {
-    amnezia::ErrorCode mapError(amnezia::sdk::ErrorCode error)
+    amnezia::ErrorCode mapError(amnezia::gateway_sdk::ErrorCode error)
     {
-        if (error == amnezia::sdk::ErrorCode::Cancelled) {
+        if (error == amnezia::gateway_sdk::ErrorCode::Cancelled) {
             return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
         return static_cast<amnezia::ErrorCode>(static_cast<int>(error));
@@ -49,10 +49,10 @@ namespace
         return out;
     }
 
-    amnezia::sdk::Config makeConfig(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs,
+    amnezia::gateway_sdk::Config makeConfig(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs,
                            bool isStrictKillSwitchEnabled)
     {
-        amnezia::sdk::Config cfg;
+        amnezia::gateway_sdk::Config cfg;
         cfg.gatewayEndpoint = gatewayEndpoint.toStdString();
 
         const QByteArray pem = isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
@@ -68,12 +68,12 @@ namespace
         cfg.isDevEnvironment = isDevEnvironment;
         cfg.requestTimeoutMsecs = requestTimeoutMsecs;
 
-        cfg.log = [](amnezia::sdk::LogLevel level, const std::string &message) {
+        cfg.log = [](amnezia::gateway_sdk::LogLevel level, const std::string &message) {
             const QString msg = QString::fromStdString(message);
             switch (level) {
-            case amnezia::sdk::LogLevel::Error: qWarning() << "[amnezia-sdk]" << msg; break;
-            case amnezia::sdk::LogLevel::Warning: qWarning() << "[amnezia-sdk]" << msg; break;
-            default: qDebug() << "[amnezia-sdk]" << msg; break;
+            case amnezia::gateway_sdk::LogLevel::Error: qWarning() << "[amnezia-gateway-sdk]" << msg; break;
+            case amnezia::gateway_sdk::LogLevel::Warning: qWarning() << "[amnezia-gateway-sdk]" << msg; break;
+            default: qDebug() << "[amnezia-gateway-sdk]" << msg; break;
             }
         };
 
@@ -103,11 +103,11 @@ namespace
         return cfg;
     }
 
-    std::shared_ptr<amnezia::sdk::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
+    std::shared_ptr<amnezia::gateway_sdk::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                         int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
         static std::mutex mutex;
-        static std::map<std::string, std::shared_ptr<amnezia::sdk::GatewayController>> clients;
+        static std::map<std::string, std::shared_ptr<amnezia::gateway_sdk::GatewayController>> clients;
 
         const std::string key = gatewayEndpoint.toStdString() + "|" + (isDevEnvironment ? "1" : "0") + "|"
                 + std::to_string(requestTimeoutMsecs) + "|" + (isStrictKillSwitchEnabled ? "1" : "0");
@@ -117,7 +117,7 @@ namespace
         if (it != clients.end()) {
             return it->second;
         }
-        auto client = std::make_shared<amnezia::sdk::GatewayController>(
+        auto client = std::make_shared<amnezia::gateway_sdk::GatewayController>(
                 makeConfig(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled));
         clients.emplace(key, client);
         return client;
@@ -142,11 +142,11 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
 
     QEventLoop loop;
     QObject context;
-    amnezia::sdk::Response result;
+    amnezia::gateway_sdk::Response result;
 
     m_controller->postAsync(
             endpoint.toStdString(), payload,
-            [&loop, &context, &result](amnezia::sdk::Response r) {
+            [&loop, &context, &result](amnezia::gateway_sdk::Response r) {
                 QMetaObject::invokeMethod(
                         &context,
                         [&loop, &result, r]() {
@@ -155,7 +155,7 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
                         },
                         Qt::QueuedConnection);
             },
-            amnezia::sdk::FailoverContext { serviceType, userCountryCode });
+            amnezia::gateway_sdk::FailoverContext { serviceType, userCountryCode });
 
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 
@@ -183,7 +183,7 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsy
 
     m_controller->postAsync(
             endpoint.toStdString(), payload,
-            [promise, self](amnezia::sdk::Response r) {
+            [promise, self](amnezia::gateway_sdk::Response r) {
                 const amnezia::ErrorCode ec = mapError(r.error);
                 const QByteArray body = QByteArray::fromStdString(r.body);
                 qInfo().noquote() << "[agw-adapter] postAsync SDK callback errorCode=" << static_cast<int>(ec)
@@ -200,7 +200,7 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsy
                     deliver();
                 }
             },
-            amnezia::sdk::FailoverContext { serviceType, userCountryCode });
+            amnezia::gateway_sdk::FailoverContext { serviceType, userCountryCode });
 
     return future;
 }
