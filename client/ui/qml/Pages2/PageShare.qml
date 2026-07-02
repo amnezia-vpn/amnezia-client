@@ -91,6 +91,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
+            PageController.showBusyIndicator(false)
             PageController.showErrorMessage(error)
         }
     }

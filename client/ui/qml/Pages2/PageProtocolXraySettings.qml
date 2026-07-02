@@ -109,6 +109,7 @@ PageType {
                 Layout.rightMargin: 16
                 enabled: listView.enabled
                 headerText: qsTr("Port")
+                subtitleText: qsTr("1–65535")
 
                 Binding {
                     target: textFieldWithHeaderType.textField
@@ -119,8 +120,8 @@ PageType {
                 }
 
                 textField.maximumLength: 5
-                textField.validator: IntValidator {
-                    bottom: 1; top: 65535
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^(|\d{1,4}|[1-5]\d{4}|6[0-4]\d{3}|65[0-4]\d{2}|655[0-2]\d|6553[0-5])$/
                 }
                 textField.onActiveFocusChanged: {
                     if (textField.activeFocus && textField.text === "" && port !== "") {
@@ -131,9 +132,19 @@ PageType {
                     root.portDirty = (textField.text !== port)
                 }
                 textField.onEditingFinished: {
-                    if (textField.text !== port) {
-                        port = textField.text
+                    var v = textFieldWithHeaderType.textField.text
+                    if (v !== "") {
+                        var n = parseInt(v, 10)
+                        if (isNaN(n) || n < 1)
+                            n = 1
+                        if (n > 65535)
+                            n = 65535
+                        v = String(n)
+                        if (textFieldWithHeaderType.textField.text !== v)
+                            textFieldWithHeaderType.textField.text = v
                     }
+                    if (v !== port)
+                        port = v
                     root.portDirty = false
                 }
                 checkEmptyText: true
@@ -198,6 +209,11 @@ PageType {
                 text: qsTr("Save")
                 onClicked: function() {
                     forceActiveFocus()
+                    var errs = XrayConfigModel.validationErrors()
+                    if (errs.length > 0) {
+                        PageController.showErrorMessage(errs.join("\n"))
+                        return
+                    }
                     var headerText = qsTr("Save settings?")
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")

@@ -43,6 +43,7 @@ Item {
     property int rootButtonImageRightMargin: 16
 
     property real drawerHeight: 0.9
+    property bool fitContent: false
     property Item drawerParent
     property Component listView
 
@@ -220,11 +221,19 @@ Item {
         parent: drawerParent
 
         anchors.fill: parent
-        expandedHeight: drawerParent.height * drawerHeight
+        property real measuredContentHeight: 0
+        expandedHeight: (root.fitContent && measuredContentHeight > 0)
+            ? Math.min(measuredContentHeight, drawerParent.height * root.drawerHeight)
+            : drawerParent.height * root.drawerHeight
 
         expandedStateContent: Item {
             id: container
             implicitHeight: menu.expandedHeight
+
+            property real fitHeight: backButton.implicitHeight + titleLabel.implicitHeight
+                                     + (listViewLoader.item ? listViewLoader.item.contentHeight : 0) + 48
+            onFitHeightChanged: menu.measuredContentHeight = fitHeight
+            Component.onCompleted: menu.measuredContentHeight = fitHeight
 
             ColumnLayout {
                 id: header
@@ -239,6 +248,7 @@ Item {
                 }
 
                 Header2Type {
+                    id: titleLabel
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16

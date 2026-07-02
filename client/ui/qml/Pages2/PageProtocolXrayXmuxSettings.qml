@@ -15,6 +15,21 @@ import "../Components"
 PageType {
     id: root
 
+    property bool editDirty: false
+
+    function clampSigned(text) {
+        if (text === "" || text === "-")
+            return ""
+        var n = parseInt(text, 10)
+        if (isNaN(n))
+            return ""
+        if (n > 2147483647)
+            n = 2147483647
+        if (n < -2147483648)
+            n = -2147483648
+        return String(n)
+    }
+
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -78,8 +93,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxMaxConcurrencyMin
                     maxValue: xmuxMaxConcurrencyMax
-                    onMinChanged: xmuxMaxConcurrencyMin = val
-                    onMaxChanged: xmuxMaxConcurrencyMax = val
+                    onMinChanged: function(val) { xmuxMaxConcurrencyMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xmuxMaxConcurrencyMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 // maxConnections
@@ -98,8 +114,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxMaxConnectionsMin
                     maxValue: xmuxMaxConnectionsMax
-                    onMinChanged: xmuxMaxConnectionsMin = val
-                    onMaxChanged: xmuxMaxConnectionsMax = val
+                    onMinChanged: function(val) { xmuxMaxConnectionsMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xmuxMaxConnectionsMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 // cMaxReuseTimes
@@ -118,8 +135,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxCMaxReuseTimesMin
                     maxValue: xmuxCMaxReuseTimesMax
-                    onMinChanged: xmuxCMaxReuseTimesMin = val
-                    onMaxChanged: xmuxCMaxReuseTimesMax = val
+                    onMinChanged: function(val) { xmuxCMaxReuseTimesMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xmuxCMaxReuseTimesMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 // hMaxRequestTimes
@@ -138,8 +156,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxHMaxRequestTimesMin
                     maxValue: xmuxHMaxRequestTimesMax
-                    onMinChanged: xmuxHMaxRequestTimesMin = val
-                    onMaxChanged: xmuxHMaxRequestTimesMax = val
+                    onMinChanged: function(val) { xmuxHMaxRequestTimesMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xmuxHMaxRequestTimesMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 // hMaxReusableSecs
@@ -158,8 +177,9 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxHMaxReusableSecsMin
                     maxValue: xmuxHMaxReusableSecsMax
-                    onMinChanged: xmuxHMaxReusableSecsMin = val
-                    onMaxChanged: xmuxHMaxReusableSecsMax = val
+                    onMinChanged: function(val) { xmuxHMaxReusableSecsMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xmuxHMaxReusableSecsMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
                 }
 
                 TextFieldWithHeaderType {
@@ -168,12 +188,16 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 16
                     headerText: qsTr("hKeepAlivePeriod")
+                    subtitleText: qsTr("Integer, may be negative")
                     textField.text: xmuxHKeepAlivePeriod
-                    textField.validator: IntValidator {
-                        bottom: 0
-                    }
+                    textField.maximumLength: 11
+                    textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xmuxHKeepAlivePeriod)
                     textField.onEditingFinished: {
-                        if (textField.text !== xmuxHKeepAlivePeriod) xmuxHKeepAlivePeriod = textField.text
+                        var v = root.clampSigned(textField.text)
+                        if (v !== xmuxHKeepAlivePeriod) xmuxHKeepAlivePeriod = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
             }
@@ -194,7 +218,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {

@@ -32,7 +32,7 @@ XrayXPaddingConfig XrayXPaddingConfig::fromJson(const QJsonObject &json)
     c.bytesMin  = json.value(configKey::xPaddingBytesMin).toString();
     c.bytesMax  = json.value(configKey::xPaddingBytesMax).toString();
     c.obfsMode  = json.value(configKey::xPaddingObfsMode).toBool(true);
-    c.key       = json.value(configKey::xPaddingKey).toString(protocols::xray::defaultSite);
+    c.key       = json.value(configKey::xPaddingKey).toString();
     c.header    = json.value(configKey::xPaddingHeader).toString();
     c.placement = json.value(configKey::xPaddingPlacement).toString(protocols::xray::defaultXPaddingPlacement);
     c.method    = json.value(configKey::xPaddingMethod).toString(protocols::xray::defaultXPaddingMethod);
@@ -365,6 +365,8 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
 bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig &other) const
 {
     return port == other.port
+           && transportProto == other.transportProto
+           && subnetAddress == other.subnetAddress
            && site == other.site
            && security == other.security
            && flow == other.flow
@@ -463,6 +465,17 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
                         QJsonObject inbound = inbounds[0].toObject();
                         if (inbound.contains(protocols::xray::port)) {
                             clientCfg.localPort = QString::number(inbound.value(protocols::xray::port).toInt());
+                        }
+                    }
+                }
+                const QJsonArray outbounds = parsed.value(protocols::xray::outbounds).toArray();
+                if (!outbounds.isEmpty()) {
+                    const QJsonObject settings = outbounds[0].toObject().value(protocols::xray::settings).toObject();
+                    const QJsonArray vnext = settings.value(protocols::xray::vnext).toArray();
+                    if (!vnext.isEmpty()) {
+                        const QJsonArray users = vnext[0].toObject().value(protocols::xray::users).toArray();
+                        if (!users.isEmpty()) {
+                            clientCfg.id = users[0].toObject().value(protocols::xray::id).toString();
                         }
                     }
                 }
