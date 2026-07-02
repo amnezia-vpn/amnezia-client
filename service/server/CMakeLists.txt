@@ -356,6 +356,8 @@ if(WIN32)
 
     find_package(wintun REQUIRED)
     list(APPEND CONAN_BINS $<TARGET_FILE:zx2c4::wintun>)
+
+    list(APPEND CONAN_BINS $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE:OpenSSL::Crypto>)
 else()
     find_package(awg-go REQUIRED)
     list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-go>)
@@ -376,8 +378,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
 if(WIN32)
-    # using PERMISSIONS on Windows appends read-only flag
-    # to the files so just omit it for it
     install(FILES ${CONAN_EXECS}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
