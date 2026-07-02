@@ -14,3 +14,6 @@
 	path = client/3rd/qtgamepad
 	url = https://github.com/amnezia-vpn/qtgamepad.git
 	branch = 6.6
+[submodule "client/3rd/amnezia-gateway-sdk"]
+	path = client/3rd/amnezia-gateway-sdk
+	url = https://github.com/amnezia-vpn/amnezia-gateway-sdk.git
