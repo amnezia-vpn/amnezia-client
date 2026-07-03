@@ -243,7 +243,7 @@ QString IpcServer::reserveUtunName()
 
     struct ctl_info info;
     std::memset(&info, 0, sizeof(info));
-    std::strncpy(info.ctl_name, UTUN_CONTROL_NAME, sizeof(info.ctl_name) - 1);
+    std::memcpy(info.ctl_name, UTUN_CONTROL_NAME, sizeof(UTUN_CONTROL_NAME));
     if (ioctl(fd, CTLIOCGINFO, &info) < 0) {
         qWarning() << "reserveUtunName: CTLIOCGINFO failed:" << strerror(errno);
         ::close(fd);

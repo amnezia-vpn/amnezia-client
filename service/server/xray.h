@@ -29,7 +29,7 @@ private:
 #ifdef Q_OS_LINUX
     QByteArray m_defaultIfaceName;
 #else
-    int m_defaultIfaceIdx;
+    int m_defaultIfaceIdx = 0;
 #endif
 };
 

@@ -53,6 +53,9 @@ void workerMessageHandler(QtMsgType type, const QMessageLogContext&, const QStri
 
 int readStdinChunk(char* buf, int cap)
 {
+    if (buf == nullptr || cap <= 0) {
+        return 0;
+    }
 #ifdef Q_OS_WIN
     DWORD n = 0;
     BOOL ok = ReadFile(GetStdHandle(STD_INPUT_HANDLE), buf, cap, &n, nullptr);
