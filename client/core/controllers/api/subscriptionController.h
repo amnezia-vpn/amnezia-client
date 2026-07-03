@@ -50,8 +50,8 @@ public:
     ErrorCode importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
-                                        int *duplicateServerIndex = nullptr,
-                                        const QString &endpoint = QStringLiteral("v1/subscriptions"));
+                                        int *duplicateServerIndex,
+                                        const QString &endpoint);
 
     ErrorCode getSubscriptionInfo(const QString &userCountryCode, const QString &serviceType,
                                   const QString &serviceProtocol, const QString &purchaseToken,
