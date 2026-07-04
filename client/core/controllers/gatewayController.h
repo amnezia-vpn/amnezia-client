@@ -1,5 +1,5 @@
-#ifndef GATEWAYCONTROLLERADAPTER_H
-#define GATEWAYCONTROLLERADAPTER_H
+#ifndef GATEWAYCONTROLLER_H
+#define GATEWAYCONTROLLER_H
 
 #include <functional>
 #include <memory>
@@ -15,12 +15,12 @@
 
 #include "core/utils/errorCodes.h"
 
-namespace amnezia::sdk
+namespace amnezia::gateway_sdk
 {
-class GatewayController;
+class GatewayClient;
 }
 
-class GatewayControllerAdapter : public QObject
+class GatewayController : public QObject
 {
     Q_OBJECT
 
@@ -38,7 +38,7 @@ public:
         QJsonObject authData;
     };
 
-    explicit GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+    explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode getServices(const QString &osVersion, const QString &appVersion, const QString &cliName,
@@ -101,7 +101,7 @@ public:
 private:
     void runBlocking(const std::function<void()> &work);
 
-    std::shared_ptr<amnezia::sdk::GatewayController> m_controller;
+    std::shared_ptr<amnezia::gateway_sdk::GatewayClient> m_controller;
 };
 
 #endif

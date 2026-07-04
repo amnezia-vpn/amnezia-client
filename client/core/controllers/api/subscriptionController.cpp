@@ -22,7 +22,7 @@
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
-#include "core/controllers/gatewayControllerAdapter.h"
+#include "core/controllers/gatewayController.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -167,12 +167,11 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     
     serverConfigJson[apiDefs::key::apiConfig] = apiConfig;
 }
-
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             CaptchaInfo &captchaInfo)
 {
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -188,11 +187,11 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
         publicKey = protocolData.xrayUuid;
     }
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    GatewayControllerAdapter::ImportResult res = gatewayController.importService(request, publicKey);
+    GatewayController::ImportResult res = gatewayController.importService(request, publicKey);
 
     if (res.error == ErrorCode::ApiCaptchaRequiredError) {
         captchaInfo.captchaId = res.captchaId;
@@ -235,7 +234,7 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
 
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -251,7 +250,7 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
         publicKey = protocolData.xrayUuid;
     }
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
@@ -281,7 +280,7 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
                                                             const QString &transactionId, bool isTestPurchase,
                                                             int *duplicateServerIndex)
 {
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -297,12 +296,12 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
         publicKey = protocolData.xrayUuid;
     }
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    GatewayControllerAdapter::AppStoreResult res =
+    GatewayController::AppStoreResult res =
             gatewayController.importServiceFromAppStore(request, publicKey, transactionId);
     if (res.error != ErrorCode::NoError) {
         return res.error;
@@ -355,7 +354,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     QString serviceProtocol = apiV2->serviceProtocol();
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
     
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -373,12 +372,12 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
         publicKey = protocolData.xrayUuid;
     }
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    GatewayControllerAdapter::ImportResult res = gatewayController.updateService(request, publicKey, isConnectEvent);
+    GatewayController::ImportResult res = gatewayController.updateService(request, publicKey, isConnectEvent);
     ErrorCode errorCode = res.error;
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
@@ -438,7 +437,7 @@ ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)
 
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -448,7 +447,7 @@ ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)
     request.serviceType = apiV2->serviceType();
     request.authData = apiV2->authData.toJson();
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
@@ -476,7 +475,7 @@ ErrorCode SubscriptionController::deactivateExternalDevice(const QString &server
 
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -486,7 +485,7 @@ ErrorCode SubscriptionController::deactivateExternalDevice(const QString &server
     request.serviceType = apiV2->serviceType();
     request.authData = apiV2->authData.toJson();
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
@@ -514,7 +513,7 @@ ErrorCode SubscriptionController::exportNativeConfig(const QString &serverId, co
     QString protocol = configKey::awg;
     ProtocolData protocolData = generateProtocolData(protocol);
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -525,7 +524,7 @@ ErrorCode SubscriptionController::exportNativeConfig(const QString &serverId, co
     request.serviceProtocol = protocol;
     request.authData = apiV2->authData.toJson();
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
@@ -548,7 +547,7 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QString &serverId, co
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     QString protocol = configKey::awg;
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -559,7 +558,7 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QString &serverId, co
     request.serviceProtocol = protocol;
     request.authData = apiV2->authData.toJson();
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
@@ -836,7 +835,7 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
     }
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -845,7 +844,7 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
     request.serviceType = apiV2->serviceType();
     request.authData = apiV2->authData.toJson();
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
@@ -871,7 +870,7 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
 
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
 
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -880,7 +879,7 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
     request.serviceType = apiV2->serviceType();
     request.authData = apiV2->authData.toJson();
 
-    auto gatewayController = QSharedPointer<GatewayControllerAdapter>::create(
+    auto gatewayController = QSharedPointer<GatewayController>::create(
             m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
             m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
             m_appSettingsRepository->isStrictKillSwitchEnabled());
@@ -898,7 +897,7 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
                                                               const QString &captchaSolution,
                                                               CaptchaInfo *retryCaptchaOut)
 {
-    GatewayControllerAdapter::GatewayRequest request;
+    GatewayController::GatewayRequest request;
     request.osVersion = QSysInfo::productType();
     request.appVersion = QString(APP_VERSION);
     request.appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
@@ -914,11 +913,11 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
         publicKey = protocolData.xrayUuid;
     }
 
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
-    GatewayControllerAdapter::ImportResult res =
+    GatewayController::ImportResult res =
             gatewayController.resolveImportCaptcha(request, publicKey, captchaId, captchaSolution);
 
     if (res.error != ErrorCode::NoError) {

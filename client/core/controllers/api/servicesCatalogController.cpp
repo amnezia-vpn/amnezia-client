@@ -10,7 +10,7 @@
 #include <QSet>
 #include <limits>
 
-#include "core/controllers/gatewayControllerAdapter.h"
+#include "core/controllers/gatewayController.h"
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
@@ -212,7 +212,7 @@ ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository
 
 ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &servicesData)
 {
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                                m_appSettingsRepository->isStrictKillSwitchEnabled());
 
@@ -232,4 +232,3 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
     return ErrorCode::NoError;
 }
-

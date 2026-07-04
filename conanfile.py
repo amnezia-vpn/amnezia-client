@@ -5,12 +5,10 @@ class AmneziaVPN(ConanFile):
     generators = "VirtualBuildEnv", "CMakeConfigDeps"
 
     options = {
-        "macos_ne": [True, False],
-        "amnezia_sdk_from_source": [True, False]
+        "macos_ne": [True, False]
     }
     default_options = {
-        "macos_ne": False,
-        "amnezia_sdk_from_source": True
+        "macos_ne": False
     }
 
     def requirements(self):
@@ -48,9 +46,4 @@ class AmneziaVPN(ConanFile):
         self.requires("openssl/3.6.2")
         self.requires("zlib/1.3.2")
 
-        if self.options.amnezia_sdk_from_source:
-            # Building the SDK from source (amnezia-sdk/ via add_subdirectory) needs its deps.
-            self.requires("libcurl/8.10.1")
-            self.requires("nlohmann_json/3.11.3")
-        else:
-            self.requires("amnezia-sdk/0.1.0")
+        self.requires("amnezia-gateway-sdk/0.1.0")
