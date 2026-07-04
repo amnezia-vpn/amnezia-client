@@ -39,7 +39,7 @@ namespace
         return static_cast<amnezia::ErrorCode>(static_cast<int>(error));
     }
 
-    std::vector<std::string> splitCsv(const QString &value)
+    std::vector<std::string> splitEndpointList(const QString &value)
     {
         std::vector<std::string> out;
         const QStringList parts = value.split(", ", Qt::SkipEmptyParts);
@@ -47,6 +47,37 @@ namespace
             out.push_back(p.toStdString());
         }
         return out;
+    }
+
+    class WorkingProxyCache
+    {
+    public:
+        std::string get(const std::string &key)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            auto it = m_store.find(key);
+            return it == m_store.end() ? std::string() : it->second;
+        }
+        void set(const std::string &key, const std::string &value)
+        {
+            std::lock_guard<std::mutex> lock(m_mutex);
+            m_store[key] = value;
+        }
+
+    private:
+        std::mutex m_mutex;
+        std::map<std::string, std::string> m_store;
+    };
+
+    WorkingProxyCache &workingProxyCache()
+    {
+        static WorkingProxyCache cache;
+        return cache;
+    }
+
+    bool isWorkingProxyKey(const std::string &key)
+    {
+        return key.rfind("working_proxy_", 0) == 0;
     }
 
     amnezia::gateway_sdk::Config makeConfig(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs,
@@ -59,14 +90,26 @@ namespace
         cfg.agwPublicKeyPem = std::string(pem.constData(), static_cast<std::size_t>(pem.size()));
 
         if (isDevEnvironment) {
-            cfg.s3PrimaryEndpoints = splitCsv(QString(DEV_S3_ENDPOINT));
+            cfg.s3PrimaryEndpoints = splitEndpointList(QString(DEV_S3_ENDPOINT));
         } else {
-            cfg.s3PrimaryEndpoints = splitCsv(QString(PROD_S3_ENDPOINT));
-            cfg.s3FallbackEndpoints = splitCsv(QString(FALLBACK_S3_ENDPOINT));
+            cfg.s3PrimaryEndpoints = splitEndpointList(QString(PROD_S3_ENDPOINT));
+            cfg.s3FallbackEndpoints = splitEndpointList(QString(FALLBACK_S3_ENDPOINT));
         }
 
         cfg.isDevEnvironment = isDevEnvironment;
         cfg.requestTimeoutMsecs = requestTimeoutMsecs;
+
+        cfg.readCache = [](const std::string &key) -> std::string {
+            if (isWorkingProxyKey(key)) {
+                return workingProxyCache().get(key);
+            }
+            return {};
+        };
+        cfg.writeCache = [](const std::string &key, const std::string &value) {
+            if (isWorkingProxyKey(key)) {
+                workingProxyCache().set(key, value);
+            }
+        };
 
         cfg.log = [](amnezia::gateway_sdk::LogLevel level, const std::string &message) {
             const QString msg = QString::fromStdString(message);
