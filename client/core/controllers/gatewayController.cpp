@@ -1,4 +1,4 @@
-#include "gatewayControllerAdapter.h"
+#include "gatewayController.h"
 
 #include <map>
 #include <mutex>
@@ -14,7 +14,7 @@
 #include <QStringList>
 #include <QThread>
 
-#include <amnezia/gateway_sdk/gateway_controller.h>
+#include <amnezia/gateway_sdk/gateway_client.h>
 #include <amnezia/gateway_sdk/config.h>
 #include <amnezia/gateway_sdk/types.h>
 
@@ -135,7 +135,7 @@ namespace
                     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
                         QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
                         if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-                            qWarning() << "GatewayControllerAdapter: addKillSwitchAllowedRange failed";
+                            qWarning() << "GatewayController: addKillSwitchAllowedRange failed";
                         }
                     });
                 }
@@ -146,11 +146,11 @@ namespace
         return cfg;
     }
 
-    std::shared_ptr<amnezia::gateway_sdk::GatewayController> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
+    std::shared_ptr<amnezia::gateway_sdk::GatewayClient> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                         int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
         static std::mutex mutex;
-        static std::map<std::string, std::shared_ptr<amnezia::gateway_sdk::GatewayController>> clients;
+        static std::map<std::string, std::shared_ptr<amnezia::gateway_sdk::GatewayClient>> clients;
 
         const std::string key = gatewayEndpoint.toStdString() + "|" + (isDevEnvironment ? "1" : "0") + "|"
                 + std::to_string(requestTimeoutMsecs) + "|" + (isStrictKillSwitchEnabled ? "1" : "0");
@@ -160,21 +160,21 @@ namespace
         if (it != clients.end()) {
             return it->second;
         }
-        auto client = std::make_shared<amnezia::gateway_sdk::GatewayController>(
+        auto client = std::make_shared<amnezia::gateway_sdk::GatewayClient>(
                 makeConfig(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled));
         clients.emplace(key, client);
         return client;
     }
 }
 
-GatewayControllerAdapter::GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
       m_controller(getClientForEnv(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
 {
 }
 
-amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
 {
     const std::string payload = QJsonDocument(apiPayload).toJson().toStdString();
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
@@ -204,7 +204,7 @@ amnezia::ErrorCode GatewayControllerAdapter::post(const QString &endpoint, const
     return ec;
 }
 
-QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsync(const QString &endpoint, const QJsonObject apiPayload)
+QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayController::postAsync(const QString &endpoint, const QJsonObject apiPayload)
 {
     auto promise = QSharedPointer<QPromise<QPair<amnezia::ErrorCode, QByteArray>>>::create();
     promise->start();
@@ -214,7 +214,7 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayControllerAdapter::postAsy
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
     const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
 
-    QPointer<GatewayControllerAdapter> self(this);
+    QPointer<GatewayController> self(this);
 
     m_controller->postAsync(
             endpoint.toStdString(), payload,

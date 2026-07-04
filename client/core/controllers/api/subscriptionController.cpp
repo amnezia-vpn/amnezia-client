@@ -21,7 +21,7 @@
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
-#include "core/controllers/gatewayControllerAdapter.h"
+#include "core/controllers/gatewayController.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -211,7 +211,7 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
 
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
 {
-    GatewayControllerAdapter gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled());
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
@@ -946,7 +946,7 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::subscriptionStatus] = getSubscriptionStatusForRenewal(apiV2->apiConfig);
 
-    auto gatewayController = QSharedPointer<GatewayControllerAdapter>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
+    auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                                        apiDefs::requestTimeoutMsecs,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled());

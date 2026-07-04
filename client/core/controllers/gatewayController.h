@@ -1,5 +1,5 @@
-#ifndef GATEWAYCONTROLLERADAPTER_H
-#define GATEWAYCONTROLLERADAPTER_H
+#ifndef GATEWAYCONTROLLER_H
+#define GATEWAYCONTROLLER_H
 
 #include <memory>
 
@@ -14,15 +14,15 @@
 
 namespace amnezia::gateway_sdk
 {
-class GatewayController;
+class GatewayClient;
 }
 
-class GatewayControllerAdapter : public QObject
+class GatewayController : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit GatewayControllerAdapter(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
+    explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
@@ -30,7 +30,7 @@ public:
 
 private:
 
-    std::shared_ptr<amnezia::gateway_sdk::GatewayController> m_controller;
+    std::shared_ptr<amnezia::gateway_sdk::GatewayClient> m_controller;
 };
 
 #endif

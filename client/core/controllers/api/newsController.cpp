@@ -1,6 +1,6 @@
 #include "newsController.h"
 
-#include "core/controllers/gatewayControllerAdapter.h"
+#include "core/controllers/gatewayController.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
@@ -74,7 +74,7 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
         return QtFuture::makeReadyFuture(qMakePair(ErrorCode::NoError, QJsonArray()));
     }
 
-    auto gatewayController = QSharedPointer<GatewayControllerAdapter>::create(
+    auto gatewayController = QSharedPointer<GatewayController>::create(
             m_appSettingsRepository->getGatewayEndpoint(),
             m_appSettingsRepository->isDevGatewayEnv(),
             apiDefs::requestTimeoutMsecs,
