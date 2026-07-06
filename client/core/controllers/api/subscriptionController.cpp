@@ -212,7 +212,7 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
 ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
 {
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
-                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 
@@ -949,7 +949,8 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                                        apiDefs::requestTimeoutMsecs,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
+                                                                       m_appSettingsRepository);
     auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
     QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,
