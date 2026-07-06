@@ -14,19 +14,21 @@
 
 struct amnezia_gateway_sdk_client;
 
+class SecureAppSettingsRepository;
+
 class GatewayController : public QObject
 {
     Q_OBJECT
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
+                               const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
+                               QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
-
     std::shared_ptr<amnezia_gateway_sdk_client> m_controller;
 };
 

@@ -261,17 +261,12 @@ QString TapController::getTapInstallPath()
 
 QString TapController::getOpenVpnPath()
 {
-    return qApp->applicationDirPath() + "\\openvpn\\openvpn.exe";
+    return qApp->applicationDirPath() + "\\openvpn.exe";
 }
 
 QString TapController::getTapDriverDir()
 {
-    if (oldDriversRequired()) {
-        return qApp->applicationDirPath() + "\\tap\\windows_7";
-    }
-    else {
-        return qApp->applicationDirPath() + "\\tap\\windows_10";
-    }
+    return qApp->applicationDirPath() + "\\tap";
 }
 
 bool TapController::removeDriver(const QString& tapInstanceId)
