@@ -90,7 +90,8 @@ class CoreController : public QObject
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
-                            QQmlApplicationEngine *engine, QObject *parent = nullptr);
+                            QQmlApplicationEngine *engine, QObject *parent = nullptr,
+                            bool skipPlatformControllerInit = false);
 
     PageController* pageController() const;
     void setQmlRoot();

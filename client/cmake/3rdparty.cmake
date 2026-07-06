@@ -2,7 +2,7 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules;${CMAKE_MODULE_PATH}")
 
-add_subdirectory(${CLIENT_ROOT_DIR}/3rd/SortFilterProxyModel)
+add_subdirectory(${CLIENT_ROOT_DIR}/3rd/SortFilterProxyModel ${CMAKE_BINARY_DIR}/3rd/SortFilterProxyModel)
 set(LIBS ${LIBS} SortFilterProxyModel)
 include(${CLIENT_ROOT_DIR}/cmake/QSimpleCrypto.cmake)
 
@@ -12,20 +12,20 @@ add_compile_definitions(_WINSOCKAPI_)
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_WITH_QT6 ON)
-add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain EXCLUDE_FROM_ALL)
+add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtkeychain ${CMAKE_BINARY_DIR}/3rd/qtkeychain EXCLUDE_FROM_ALL)
 
 if(ANDROID)
     # Use qtgamepad from amnezia-vpn/qtgamepad repository
     # Only if Qt6CorePrivate is available (required by qtgamepad)
     find_package(Qt6CorePrivate CONFIG QUIET)
     if(Qt6CorePrivate_FOUND)
-        add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtgamepad)
+        add_subdirectory(${CLIENT_ROOT_DIR}/3rd/qtgamepad ${CMAKE_BINARY_DIR}/3rd/qtgamepad)
         # Link both the C++ module and QML plugin
         if(TARGET GamepadLegacy)
-            target_link_libraries(${PROJECT} PRIVATE GamepadLegacy)
+            list(APPEND LIBS GamepadLegacy)
         endif()
         if(TARGET GamepadLegacyQuickPrivate)
-            target_link_libraries(${PROJECT} PRIVATE GamepadLegacyQuickPrivate)
+            list(APPEND LIBS GamepadLegacyQuickPrivate)
         endif()
         message(STATUS "Gamepad support enabled for Android")
     else()
