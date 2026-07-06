@@ -1,5 +1,7 @@
 #include "gatewayController.h"
 
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <mutex>
 #include <string>
@@ -8,15 +10,12 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QJsonDocument>
-#include <QPointer>
 #include <QPromise>
 #include <QSharedPointer>
 #include <QStringList>
 #include <QThread>
 
-#include <amnezia/gateway_sdk/gateway_client.h>
-#include <amnezia/gateway_sdk/config.h>
-#include <amnezia/gateway_sdk/types.h>
+#include <amnezia/gateway_sdk/c_abi.h>
 
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
@@ -31,12 +30,12 @@
 
 namespace
 {
-    amnezia::ErrorCode mapError(amnezia::gateway_sdk::ErrorCode error)
+    amnezia::ErrorCode mapError(int error)
     {
-        if (error == amnezia::gateway_sdk::ErrorCode::Cancelled) {
+        if (error == AMNEZIA_GATEWAY_SDK_CANCELLED) {
             return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
-        return static_cast<amnezia::ErrorCode>(static_cast<int>(error));
+        return static_cast<amnezia::ErrorCode>(error);
     }
 
     std::vector<std::string> splitEndpointList(const QString &value)
@@ -80,97 +79,158 @@ namespace
         return key.rfind("working_proxy_", 0) == 0;
     }
 
-    amnezia::gateway_sdk::Config makeConfig(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs,
-                           bool isStrictKillSwitchEnabled)
+    char *dupC(const std::string &s)
     {
-        amnezia::gateway_sdk::Config cfg;
-        cfg.gatewayEndpoint = gatewayEndpoint.toStdString();
-
-        const QByteArray pem = isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
-        cfg.agwPublicKeyPem = std::string(pem.constData(), static_cast<std::size_t>(pem.size()));
-
-        if (isDevEnvironment) {
-            cfg.s3PrimaryEndpoints = splitEndpointList(QString(DEV_S3_ENDPOINT));
-        } else {
-            cfg.s3PrimaryEndpoints = splitEndpointList(QString(PROD_S3_ENDPOINT));
-            cfg.s3FallbackEndpoints = splitEndpointList(QString(FALLBACK_S3_ENDPOINT));
+        char *buf = static_cast<char *>(std::malloc(s.size() + 1));
+        if (buf != nullptr) {
+            std::memcpy(buf, s.data(), s.size());
+            buf[s.size()] = '\0';
         }
-
-        cfg.isDevEnvironment = isDevEnvironment;
-        cfg.requestTimeoutMsecs = requestTimeoutMsecs;
-
-        cfg.readCache = [](const std::string &key) -> std::string {
-            if (isWorkingProxyKey(key)) {
-                return workingProxyCache().get(key);
-            }
-            return {};
-        };
-        cfg.writeCache = [](const std::string &key, const std::string &value) {
-            if (isWorkingProxyKey(key)) {
-                workingProxyCache().set(key, value);
-            }
-        };
-
-        cfg.log = [](amnezia::gateway_sdk::LogLevel level, const std::string &message) {
-            const QString msg = QString::fromStdString(message);
-            switch (level) {
-            case amnezia::gateway_sdk::LogLevel::Error: qWarning() << "[amnezia-gateway-sdk]" << msg; break;
-            case amnezia::gateway_sdk::LogLevel::Warning: qWarning() << "[amnezia-gateway-sdk]" << msg; break;
-            default: qDebug() << "[amnezia-gateway-sdk]" << msg; break;
-            }
-        };
-
-        cfg.onBeforeRequest = [isStrictKillSwitchEnabled](const std::string &hostStd) {
-            const QString host = QString::fromStdString(hostStd);
-            (void)host;
-            (void)isStrictKillSwitchEnabled;
-#ifdef Q_OS_IOS
-            IosController::Instance()->requestInetAccess();
-            QThread::msleep(10);
-#endif
-#ifdef AMNEZIA_DESKTOP
-            if (isStrictKillSwitchEnabled) {
-                const QString ip = NetworkUtilities::getIPAddress(host);
-                if (!ip.isEmpty()) {
-                    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-                        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
-                        if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-                            qWarning() << "GatewayController: addKillSwitchAllowedRange failed";
-                        }
-                    });
-                }
-            }
-#endif
-        };
-
-        return cfg;
+        return buf;
     }
 
-    std::shared_ptr<amnezia::gateway_sdk::GatewayClient> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
-                                                        int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
+    char *readCacheTramp(const char *key, void *)
     {
-        static std::mutex mutex;
-        static std::map<std::string, std::shared_ptr<amnezia::gateway_sdk::GatewayClient>> clients;
-
-        const std::string key = gatewayEndpoint.toStdString() + "|" + (isDevEnvironment ? "1" : "0") + "|"
-                + std::to_string(requestTimeoutMsecs) + "|" + (isStrictKillSwitchEnabled ? "1" : "0");
-
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = clients.find(key);
-        if (it != clients.end()) {
-            return it->second;
+        const std::string k = key ? key : "";
+        if (!isWorkingProxyKey(k)) {
+            return nullptr;
         }
-        auto client = std::make_shared<amnezia::gateway_sdk::GatewayClient>(
-                makeConfig(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled));
-        clients.emplace(key, client);
-        return client;
+        const std::string v = workingProxyCache().get(k);
+        return v.empty() ? nullptr : dupC(v);
+    }
+
+    void writeCacheTramp(const char *key, const char *value, void *)
+    {
+        const std::string k = key ? key : "";
+        if (isWorkingProxyKey(k)) {
+            workingProxyCache().set(k, value ? value : "");
+        }
+    }
+
+    void logTramp(int level, const char *message, void *)
+    {
+        const QString msg = QString::fromUtf8(message ? message : "");
+        if (level >= 2) {
+            qWarning() << "[amnezia-gateway-sdk]" << msg;
+        } else {
+            qDebug() << "[amnezia-gateway-sdk]" << msg;
+        }
+    }
+
+    struct ClientCtx
+    {
+        bool strictKillSwitch = false;
+    };
+
+    void onBeforeReqTramp(const char *hostC, void *ud)
+    {
+        auto *ctx = static_cast<ClientCtx *>(ud);
+        const QString host = QString::fromUtf8(hostC ? hostC : "");
+        (void)host;
+        (void)ctx;
+#ifdef Q_OS_IOS
+        IosController::Instance()->requestInetAccess();
+        QThread::msleep(10);
+#endif
+#ifdef AMNEZIA_DESKTOP
+        if (ctx != nullptr && ctx->strictKillSwitch) {
+            const QString ip = NetworkUtilities::getIPAddress(host);
+            if (!ip.isEmpty()) {
+                IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                    QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
+                    if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+                        qWarning() << "GatewayController: addKillSwitchAllowedRange failed";
+                    }
+                });
+            }
+        }
+#endif
+    }
+
+    std::shared_ptr<amnezia_gateway_sdk_client> makeClient(const QString &gatewayEndpoint, bool isDevEnvironment,
+                                                           int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
+    {
+        const std::string endpoint = gatewayEndpoint.toStdString();
+
+        const QByteArray pem = isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+        const std::string pemStd(pem.constData(), static_cast<std::size_t>(pem.size()));
+
+        std::vector<std::string> primary;
+        std::vector<std::string> fallback;
+        if (isDevEnvironment) {
+            primary = splitEndpointList(QString(DEV_S3_ENDPOINT));
+        } else {
+            primary = splitEndpointList(QString(PROD_S3_ENDPOINT));
+            fallback = splitEndpointList(QString(FALLBACK_S3_ENDPOINT));
+        }
+        std::vector<const char *> primaryPtrs;
+        for (const auto &s : primary) {
+            primaryPtrs.push_back(s.c_str());
+        }
+        std::vector<const char *> fallbackPtrs;
+        for (const auto &s : fallback) {
+            fallbackPtrs.push_back(s.c_str());
+        }
+
+        auto *ctx = new ClientCtx{ isStrictKillSwitchEnabled };
+
+        amnezia_gateway_sdk_config c{};
+        c.gateway_endpoint = endpoint.c_str();
+        c.amnezia_gateway_sdk_public_key_pem = pemStd.c_str();
+        c.s3_primary_endpoints = primaryPtrs.empty() ? nullptr : primaryPtrs.data();
+        c.s3_primary_count = primaryPtrs.size();
+        c.s3_fallback_endpoints = fallbackPtrs.empty() ? nullptr : fallbackPtrs.data();
+        c.s3_fallback_count = fallbackPtrs.size();
+        c.is_dev_environment = isDevEnvironment ? 1 : 0;
+        c.request_timeout_msecs = requestTimeoutMsecs;
+        c.on_before_request = &onBeforeReqTramp;
+        c.on_before_request_user_data = ctx;
+        c.log = &logTramp;
+        c.read_cache = &readCacheTramp;
+        c.write_cache = &writeCacheTramp;
+
+        amnezia_gateway_sdk_client *raw = amnezia_gateway_sdk_client_create(&c);
+        return std::shared_ptr<amnezia_gateway_sdk_client>(raw, [ctx](amnezia_gateway_sdk_client *p) {
+            amnezia_gateway_sdk_client_destroy(p);
+            delete ctx;
+        });
+    }
+
+    struct PostSink
+    {
+        QEventLoop *loop;
+        QObject *context;
+        amnezia_gateway_sdk_response *out;
+    };
+
+    void postSyncCallback(amnezia_gateway_sdk_response r, void *ud)
+    {
+        auto *sink = static_cast<PostSink *>(ud);
+        *sink->out = r;
+        QMetaObject::invokeMethod(sink->context, [sink]() { sink->loop->quit(); }, Qt::QueuedConnection);
+    }
+
+    struct AsyncHolder
+    {
+        QSharedPointer<QPromise<QPair<amnezia::ErrorCode, QByteArray>>> promise;
+    };
+
+    void postAsyncCallback(amnezia_gateway_sdk_response r, void *ud)
+    {
+        auto *holder = static_cast<AsyncHolder *>(ud);
+        const amnezia::ErrorCode ec = mapError(r.error);
+        const QByteArray body = r.body ? QByteArray(r.body, static_cast<int>(r.body_len)) : QByteArray();
+        holder->promise->addResult(qMakePair(ec, body));
+        holder->promise->finish();
+        amnezia_gateway_sdk_response_free(&r);
+        delete holder;
     }
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
-      m_controller(getClientForEnv(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
+      m_controller(makeClient(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
 {
 }
 
@@ -179,28 +239,21 @@ amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonO
     const std::string payload = QJsonDocument(apiPayload).toJson().toStdString();
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
     const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
+    const std::string endpointStd = endpoint.toStdString();
 
     QEventLoop loop;
     QObject context;
-    amnezia::gateway_sdk::Response result;
+    amnezia_gateway_sdk_response result{};
+    PostSink sink{ &loop, &context, &result };
 
-    m_controller->postAsync(
-            endpoint.toStdString(), payload,
-            [&loop, &context, &result](amnezia::gateway_sdk::Response r) {
-                QMetaObject::invokeMethod(
-                        &context,
-                        [&loop, &result, r]() {
-                            result = r;
-                            loop.quit();
-                        },
-                        Qt::QueuedConnection);
-            },
-            amnezia::gateway_sdk::FailoverContext { serviceType, userCountryCode });
+    amnezia_gateway_sdk_client_post_async(m_controller.get(), endpointStd.c_str(), payload.c_str(), serviceType.c_str(),
+                                          userCountryCode.c_str(), &postSyncCallback, &sink, nullptr);
 
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 
-    responseBody = QByteArray::fromStdString(result.body);
+    responseBody = result.body ? QByteArray(result.body, static_cast<int>(result.body_len)) : QByteArray();
     const amnezia::ErrorCode ec = mapError(result.error);
+    amnezia_gateway_sdk_response_free(&result);
     return ec;
 }
 
@@ -213,26 +266,11 @@ QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayController::postAsync(cons
     const std::string payload = QJsonDocument(apiPayload).toJson().toStdString();
     const std::string serviceType = apiPayload.value(apiDefs::key::serviceType).toString().toStdString();
     const std::string userCountryCode = apiPayload.value(apiDefs::key::userCountryCode).toString().toStdString();
+    const std::string endpointStd = endpoint.toStdString();
 
-    QPointer<GatewayController> self(this);
-
-    m_controller->postAsync(
-            endpoint.toStdString(), payload,
-            [promise, self](amnezia::gateway_sdk::Response r) {
-                const amnezia::ErrorCode ec = mapError(r.error);
-                const QByteArray body = QByteArray::fromStdString(r.body);
-
-                auto deliver = [promise, ec, body]() {
-                    promise->addResult(qMakePair(ec, body));
-                    promise->finish();
-                };
-                if (self) {
-                    QMetaObject::invokeMethod(self.data(), deliver, Qt::QueuedConnection);
-                } else {
-                    deliver();
-                }
-            },
-            amnezia::gateway_sdk::FailoverContext { serviceType, userCountryCode });
+    auto *holder = new AsyncHolder{ promise };
+    amnezia_gateway_sdk_client_post_async(m_controller.get(), endpointStd.c_str(), payload.c_str(), serviceType.c_str(),
+                                          userCountryCode.c_str(), &postAsyncCallback, holder, nullptr);
 
     return future;
 }

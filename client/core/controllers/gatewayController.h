@@ -12,10 +12,7 @@
 
 #include "core/utils/errorCodes.h"
 
-namespace amnezia::gateway_sdk
-{
-class GatewayClient;
-}
+struct amnezia_gateway_sdk_client;
 
 class GatewayController : public QObject
 {
@@ -30,7 +27,7 @@ public:
 
 private:
 
-    std::shared_ptr<amnezia::gateway_sdk::GatewayClient> m_controller;
+    std::shared_ptr<amnezia_gateway_sdk_client> m_controller;
 };
 
 #endif
