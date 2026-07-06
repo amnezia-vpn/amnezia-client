@@ -1,5 +1,7 @@
 #include "gatewayController.h"
 
+#include <cstdlib>
+#include <cstring>
 #include <map>
 #include <mutex>
 #include <string>
@@ -8,18 +10,15 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
+#include <QJsonArray>
 #include <QJsonDocument>
-#include <QPointer>
-#include <QPromise>
 #include <QSharedPointer>
+#include <QString>
 #include <QStringList>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
 
-#include <amnezia/gateway_sdk/api.h>
-#include <amnezia/gateway_sdk/gateway_client.h>
-#include <amnezia/gateway_sdk/config.h>
-#include <amnezia/gateway_sdk/types.h>
+#include <amnezia/gateway_sdk/c_abi.h>
 
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
@@ -34,12 +33,12 @@
 
 namespace
 {
-    amnezia::ErrorCode mapError(amnezia::gateway_sdk::ErrorCode error)
+    amnezia::ErrorCode mapError(int error)
     {
-        if (error == amnezia::gateway_sdk::ErrorCode::Cancelled) {
+        if (error == AMNEZIA_GATEWAY_SDK_CANCELLED) {
             return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
-        return static_cast<amnezia::ErrorCode>(static_cast<int>(error));
+        return static_cast<amnezia::ErrorCode>(error);
     }
 
     std::vector<std::string> splitEndpointList(const QString &value)
@@ -83,127 +82,171 @@ namespace
         return key.rfind("working_proxy_", 0) == 0;
     }
 
-    amnezia::gateway_sdk::Config makeConfig(const QString &gatewayEndpoint, bool isDevEnvironment, int requestTimeoutMsecs,
-                           bool isStrictKillSwitchEnabled)
+    char *dupC(const std::string &s)
     {
-        amnezia::gateway_sdk::Config cfg;
-        cfg.gatewayEndpoint = gatewayEndpoint.toStdString();
-
-        const QByteArray pem = isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
-        cfg.agwPublicKeyPem = std::string(pem.constData(), static_cast<std::size_t>(pem.size()));
-
-        if (isDevEnvironment) {
-            cfg.s3PrimaryEndpoints = splitEndpointList(QString(DEV_S3_ENDPOINT));
-        } else {
-            cfg.s3PrimaryEndpoints = splitEndpointList(QString(PROD_S3_ENDPOINT));
-            cfg.s3FallbackEndpoints = splitEndpointList(QString(FALLBACK_S3_ENDPOINT));
+        char *buf = static_cast<char *>(std::malloc(s.size() + 1));
+        if (buf != nullptr) {
+            std::memcpy(buf, s.data(), s.size());
+            buf[s.size()] = '\0';
         }
-
-        cfg.isDevEnvironment = isDevEnvironment;
-        cfg.requestTimeoutMsecs = requestTimeoutMsecs;
-
-        cfg.readCache = [](const std::string &key) -> std::string {
-            if (isWorkingProxyKey(key)) {
-                return workingProxyCache().get(key);
-            }
-            return {};
-        };
-        cfg.writeCache = [](const std::string &key, const std::string &value) {
-            if (isWorkingProxyKey(key)) {
-                workingProxyCache().set(key, value);
-            }
-        };
-
-        cfg.log = [](amnezia::gateway_sdk::LogLevel level, const std::string &message) {
-            const QString msg = QString::fromStdString(message);
-            switch (level) {
-            case amnezia::gateway_sdk::LogLevel::Error: qWarning() << "[amnezia-sdk]" << msg; break;
-            case amnezia::gateway_sdk::LogLevel::Warning: qWarning() << "[amnezia-sdk]" << msg; break;
-            default: qDebug() << "[amnezia-sdk]" << msg; break;
-            }
-        };
-
-        cfg.onBeforeRequest = [isStrictKillSwitchEnabled](const std::string &hostStd) {
-            const QString host = QString::fromStdString(hostStd);
-            (void)host;
-            (void)isStrictKillSwitchEnabled;
-#ifdef Q_OS_IOS
-            IosController::Instance()->requestInetAccess();
-            QThread::msleep(10);
-#endif
-#ifdef AMNEZIA_DESKTOP
-            if (isStrictKillSwitchEnabled) {
-                const QString ip = NetworkUtilities::getIPAddress(host);
-                if (!ip.isEmpty()) {
-                    IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
-                        QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
-                        if (!reply.waitForFinished(1000) || !reply.returnValue()) {
-                            qWarning() << "GatewayController: addKillSwitchAllowedRange failed";
-                        }
-                    });
-                }
-            }
-#endif
-        };
-
-        return cfg;
+        return buf;
     }
 
-    GatewayController::ImportResult toAdapterImport(const amnezia::gateway_sdk::api::ImportResult &r)
+    char *readCacheTramp(const char *key, void *)
+    {
+        const std::string k = key ? key : "";
+        if (!isWorkingProxyKey(k)) {
+            return nullptr;
+        }
+        const std::string v = workingProxyCache().get(k);
+        return v.empty() ? nullptr : dupC(v);
+    }
+
+    void writeCacheTramp(const char *key, const char *value, void *)
+    {
+        const std::string k = key ? key : "";
+        if (isWorkingProxyKey(k)) {
+            workingProxyCache().set(k, value ? value : "");
+        }
+    }
+
+    void logTramp(int level, const char *message, void *)
+    {
+        const QString msg = QString::fromUtf8(message ? message : "");
+        if (level >= 2) {
+            qWarning() << "[amnezia-sdk]" << msg;
+        } else {
+            qDebug() << "[amnezia-sdk]" << msg;
+        }
+    }
+
+    struct ClientCtx
+    {
+        bool strictKillSwitch = false;
+    };
+
+    void onBeforeReqTramp(const char *hostC, void *ud)
+    {
+        auto *ctx = static_cast<ClientCtx *>(ud);
+        const QString host = QString::fromUtf8(hostC ? hostC : "");
+        (void)host;
+        (void)ctx;
+#ifdef Q_OS_IOS
+        IosController::Instance()->requestInetAccess();
+        QThread::msleep(10);
+#endif
+#ifdef AMNEZIA_DESKTOP
+        if (ctx != nullptr && ctx->strictKillSwitch) {
+            const QString ip = NetworkUtilities::getIPAddress(host);
+            if (!ip.isEmpty()) {
+                IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
+                    QRemoteObjectPendingReply<bool> reply = iface->addKillSwitchAllowedRange(QStringList { ip });
+                    if (!reply.waitForFinished(1000) || !reply.returnValue()) {
+                        qWarning() << "GatewayController: addKillSwitchAllowedRange failed";
+                    }
+                });
+            }
+        }
+#endif
+    }
+
+    struct ReqHold
+    {
+        std::string os, app, lang, uuid, ucc, scc, st, sp, auth;
+        amnezia_gateway_sdk_gateway_request c{};
+
+        void fill(const GatewayController::GatewayRequest &q)
+        {
+            os = q.osVersion.toStdString();
+            app = q.appVersion.toStdString();
+            lang = q.appLanguage.toStdString();
+            uuid = q.installationUuid.toStdString();
+            ucc = q.userCountryCode.toStdString();
+            scc = q.serverCountryCode.toStdString();
+            st = q.serviceType.toStdString();
+            sp = q.serviceProtocol.toStdString();
+            if (!q.authData.isEmpty()) {
+                auth = QString::fromUtf8(QJsonDocument(q.authData).toJson(QJsonDocument::Compact)).toStdString();
+            }
+            c.os_version = os.c_str();
+            c.app_version = app.c_str();
+            c.app_language = lang.c_str();
+            c.installation_uuid = uuid.c_str();
+            c.user_country_code = ucc.c_str();
+            c.server_country_code = scc.c_str();
+            c.service_type = st.c_str();
+            c.service_protocol = sp.c_str();
+            c.auth_data_json = auth.empty() ? nullptr : auth.c_str();
+        }
+    };
+
+    GatewayController::ImportResult toAdapterImport(const amnezia_gateway_sdk_import_result &r)
     {
         GatewayController::ImportResult out;
         out.error = mapError(r.error);
-        out.captchaRequired = r.captchaRequired;
-        out.captchaId = QString::fromStdString(r.captcha.captchaId);
-        out.captchaImageBase64 = QString::fromStdString(r.captcha.captchaImageBase64);
-        out.hint = QString::fromStdString(r.captcha.hint);
-        out.serverConfigJson = QString::fromStdString(r.serverConfigJson);
-        out.rawResponse = QByteArray::fromStdString(r.rawResponseJson);
+        out.captchaRequired = r.captcha_required != 0;
+        out.captchaId = QString::fromUtf8(r.captcha_id ? r.captcha_id : "");
+        out.captchaImageBase64 = QString::fromUtf8(r.captcha_image ? r.captcha_image : "");
+        out.hint = QString::fromUtf8(r.captcha_hint ? r.captcha_hint : "");
+        out.serverConfigJson = QString::fromUtf8(r.server_config_json ? r.server_config_json : "");
+        out.rawResponse = r.raw_response_json ? QByteArray(r.raw_response_json) : QByteArray();
         return out;
     }
 
-    amnezia::gateway_sdk::api::GatewayRequest toApiReq(const GatewayController::GatewayRequest &q)
+    std::shared_ptr<amnezia_gateway_sdk_client> makeClient(const QString &gatewayEndpoint, bool isDevEnvironment,
+                                                           int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
     {
-        amnezia::gateway_sdk::api::GatewayRequest r;
-        r.osVersion = q.osVersion.toStdString();
-        r.appVersion = q.appVersion.toStdString();
-        r.appLanguage = q.appLanguage.toStdString();
-        r.installationUuid = q.installationUuid.toStdString();
-        r.userCountryCode = q.userCountryCode.toStdString();
-        r.serverCountryCode = q.serverCountryCode.toStdString();
-        r.serviceType = q.serviceType.toStdString();
-        r.serviceProtocol = q.serviceProtocol.toStdString();
-        if (!q.authData.isEmpty()) {
-            r.authDataJson = QString::fromUtf8(QJsonDocument(q.authData).toJson(QJsonDocument::Compact)).toStdString();
+        const std::string endpoint = gatewayEndpoint.toStdString();
+
+        const QByteArray pem = isDevEnvironment ? DEV_AGW_PUBLIC_KEY : PROD_AGW_PUBLIC_KEY;
+        const std::string pemStd(pem.constData(), static_cast<std::size_t>(pem.size()));
+
+        std::vector<std::string> primary;
+        std::vector<std::string> fallback;
+        if (isDevEnvironment) {
+            primary = splitEndpointList(QString(DEV_S3_ENDPOINT));
+        } else {
+            primary = splitEndpointList(QString(PROD_S3_ENDPOINT));
+            fallback = splitEndpointList(QString(FALLBACK_S3_ENDPOINT));
         }
-        return r;
-    }
-
-    std::shared_ptr<amnezia::gateway_sdk::GatewayClient> getClientForEnv(const QString &gatewayEndpoint, bool isDevEnvironment,
-                                                        int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
-    {
-        static std::mutex mutex;
-        static std::map<std::string, std::shared_ptr<amnezia::gateway_sdk::GatewayClient>> clients;
-
-        const std::string key = gatewayEndpoint.toStdString() + "|" + (isDevEnvironment ? "1" : "0") + "|"
-                + std::to_string(requestTimeoutMsecs) + "|" + (isStrictKillSwitchEnabled ? "1" : "0");
-
-        std::lock_guard<std::mutex> lock(mutex);
-        auto it = clients.find(key);
-        if (it != clients.end()) {
-            return it->second;
+        std::vector<const char *> primaryPtrs;
+        for (const auto &s : primary) {
+            primaryPtrs.push_back(s.c_str());
         }
-        auto client = std::make_shared<amnezia::gateway_sdk::GatewayClient>(
-                makeConfig(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled));
-        clients.emplace(key, client);
-        return client;
+        std::vector<const char *> fallbackPtrs;
+        for (const auto &s : fallback) {
+            fallbackPtrs.push_back(s.c_str());
+        }
+
+        auto *ctx = new ClientCtx{ isStrictKillSwitchEnabled };
+
+        amnezia_gateway_sdk_config c{};
+        c.gateway_endpoint = endpoint.c_str();
+        c.amnezia_gateway_sdk_public_key_pem = pemStd.c_str();
+        c.s3_primary_endpoints = primaryPtrs.empty() ? nullptr : primaryPtrs.data();
+        c.s3_primary_count = primaryPtrs.size();
+        c.s3_fallback_endpoints = fallbackPtrs.empty() ? nullptr : fallbackPtrs.data();
+        c.s3_fallback_count = fallbackPtrs.size();
+        c.is_dev_environment = isDevEnvironment ? 1 : 0;
+        c.request_timeout_msecs = requestTimeoutMsecs;
+        c.on_before_request = &onBeforeReqTramp;
+        c.on_before_request_user_data = ctx;
+        c.log = &logTramp;
+        c.read_cache = &readCacheTramp;
+        c.write_cache = &writeCacheTramp;
+
+        amnezia_gateway_sdk_client *raw = amnezia_gateway_sdk_client_create(&c);
+        return std::shared_ptr<amnezia_gateway_sdk_client>(raw, [ctx](amnezia_gateway_sdk_client *p) {
+            amnezia_gateway_sdk_client_destroy(p);
+            delete ctx;
+        });
     }
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                      const bool isStrictKillSwitchEnabled, QObject *parent)
     : QObject(parent),
-      m_controller(getClientForEnv(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
+      m_controller(makeClient(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
 {
 }
 
@@ -217,172 +260,167 @@ void GatewayController::runBlocking(const std::function<void()> &work)
 }
 
 amnezia::ErrorCode GatewayController::getServices(const QString &osVersion, const QString &appVersion,
-                                                         const QString &cliName, const QString &appLanguage,
-                                                         QJsonObject &servicesOut)
+                                                  const QString &cliName, const QString &appLanguage,
+                                                  QJsonObject &servicesOut)
 {
-    qInfo().noquote() << "[agw-adapter] getServices (typed) callerThread=" << QThread::currentThread();
-
-    amnezia::gateway_sdk::api::JsonResult res;
-    auto controller = m_controller;
-    runBlocking([controller, &res, osVersion, appVersion, cliName, appLanguage]() {
-        res = amnezia::gateway_sdk::api::getServices(*controller, osVersion.toStdString(), appVersion.toStdString(),
-                                    cliName.toStdString(), appLanguage.toStdString());
+    auto client = m_controller;
+    amnezia_gateway_sdk_json_result res{};
+    runBlocking([&]() {
+        res = amnezia_gateway_sdk_get_services(client.get(), osVersion.toUtf8().constData(), appVersion.toUtf8().constData(),
+                                               cliName.toUtf8().constData(), appLanguage.toUtf8().constData());
     });
 
-    servicesOut = QJsonDocument::fromJson(QByteArray::fromStdString(res.json)).object();
+    servicesOut = QJsonDocument::fromJson(res.json ? QByteArray(res.json, static_cast<int>(res.json_len)) : QByteArray()).object();
     const amnezia::ErrorCode ec = mapError(res.error);
-    qInfo().noquote() << "[agw-adapter] getServices result errorCode=" << static_cast<int>(ec);
+    amnezia_gateway_sdk_json_result_free(&res);
     return ec;
 }
 
 amnezia::ErrorCode GatewayController::importTrial(const GatewayRequest &request, const QString &publicKey,
-                                                         const QString &email, QString &serverConfigJsonOut)
+                                                  const QString &email, QString &serverConfigJsonOut)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string pk = publicKey.toStdString();
-    const std::string em = email.toStdString();
+    auto client = m_controller;
+    amnezia_gateway_sdk_import_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_import_trial(client.get(), &h.c, publicKey.toUtf8().constData(), email.toUtf8().constData());
+    });
 
-    amnezia::gateway_sdk::api::ImportResult res;
-    runBlocking([controller, req, pk, em, &res]() { res = amnezia::gateway_sdk::api::importTrial(*controller, req, pk, em); });
-
-    serverConfigJsonOut = QString::fromStdString(res.serverConfigJson);
+    serverConfigJsonOut = QString::fromUtf8(res.server_config_json ? res.server_config_json : "");
     const amnezia::ErrorCode ec = mapError(res.error);
-    qInfo().noquote() << "[agw-adapter] importTrial result errorCode=" << static_cast<int>(ec);
+    amnezia_gateway_sdk_import_result_free(&res);
     return ec;
 }
 
 amnezia::ErrorCode GatewayController::deactivateDevice(const GatewayRequest &request)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-
-    amnezia::gateway_sdk::ErrorCode err = amnezia::gateway_sdk::ErrorCode::NoError;
-    runBlocking([controller, req, &err]() { err = amnezia::gateway_sdk::api::deactivateDevice(*controller, req); });
-
-    const amnezia::ErrorCode ec = mapError(err);
-    qInfo().noquote() << "[agw-adapter] deactivateDevice result errorCode=" << static_cast<int>(ec);
-    return ec;
-}
-
-GatewayController::ImportResult GatewayController::importService(const GatewayRequest &request,
-                                                                               const QString &publicKey)
-{
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string pk = publicKey.toStdString();
-
-    amnezia::gateway_sdk::api::ImportResult res;
-    runBlocking([controller, req, pk, &res]() { res = amnezia::gateway_sdk::api::importService(*controller, req, pk); });
-
-    qInfo().noquote() << "[agw-adapter] importService result errorCode=" << static_cast<int>(mapError(res.error));
-    return toAdapterImport(res);
-}
-
-GatewayController::ImportResult GatewayController::resolveImportCaptcha(const GatewayRequest &request,
-                                                                                     const QString &publicKey,
-                                                                                     const QString &captchaId,
-                                                                                     const QString &captchaSolution)
-{
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string pk = publicKey.toStdString();
-    const std::string cid = captchaId.toStdString();
-    const std::string sol = captchaSolution.toStdString();
-
-    amnezia::gateway_sdk::api::ImportResult res;
-    runBlocking([controller, req, pk, cid, sol, &res]() {
-        res = amnezia::gateway_sdk::api::resolveImportCaptcha(*controller, req, pk, cid, sol);
+    auto client = m_controller;
+    int err = AMNEZIA_GATEWAY_SDK_OK;
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        err = amnezia_gateway_sdk_deactivate_device(client.get(), &h.c);
     });
-
-    qInfo().noquote() << "[agw-adapter] resolveImportCaptcha result errorCode=" << static_cast<int>(mapError(res.error));
-    return toAdapterImport(res);
+    return mapError(err);
 }
 
-GatewayController::ImportResult GatewayController::updateService(const GatewayRequest &request,
-                                                                               const QString &publicKey,
-                                                                               bool isConnectEvent)
+GatewayController::ImportResult GatewayController::importService(const GatewayRequest &request, const QString &publicKey)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string pk = publicKey.toStdString();
-
-    amnezia::gateway_sdk::api::ImportResult res;
-    runBlocking([controller, req, pk, isConnectEvent, &res]() {
-        res = amnezia::gateway_sdk::api::updateService(*controller, req, pk, isConnectEvent);
+    auto client = m_controller;
+    amnezia_gateway_sdk_import_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_import_service(client.get(), &h.c, publicKey.toUtf8().constData());
     });
+    GatewayController::ImportResult out = toAdapterImport(res);
+    amnezia_gateway_sdk_import_result_free(&res);
+    return out;
+}
 
-    qInfo().noquote() << "[agw-adapter] updateService result errorCode=" << static_cast<int>(mapError(res.error));
-    return toAdapterImport(res);
+GatewayController::ImportResult GatewayController::resolveImportCaptcha(const GatewayRequest &request, const QString &publicKey,
+                                                                       const QString &captchaId, const QString &captchaSolution)
+{
+    auto client = m_controller;
+    amnezia_gateway_sdk_import_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_resolve_import_captcha(client.get(), &h.c, publicKey.toUtf8().constData(),
+                                                         captchaId.toUtf8().constData(), captchaSolution.toUtf8().constData());
+    });
+    GatewayController::ImportResult out = toAdapterImport(res);
+    amnezia_gateway_sdk_import_result_free(&res);
+    return out;
+}
+
+GatewayController::ImportResult GatewayController::updateService(const GatewayRequest &request, const QString &publicKey,
+                                                                bool isConnectEvent)
+{
+    auto client = m_controller;
+    amnezia_gateway_sdk_import_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_update_service(client.get(), &h.c, publicKey.toUtf8().constData(), isConnectEvent ? 1 : 0);
+    });
+    GatewayController::ImportResult out = toAdapterImport(res);
+    amnezia_gateway_sdk_import_result_free(&res);
+    return out;
 }
 
 amnezia::ErrorCode GatewayController::getAccountInfoRaw(const GatewayRequest &request, const QString &cliVersion,
-                                                              const QString &subscriptionStatus, QByteArray &rawJsonOut)
+                                                        const QString &subscriptionStatus, QByteArray &rawJsonOut)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string cv = cliVersion.toStdString();
-    const std::string ss = subscriptionStatus.toStdString();
-
-    amnezia::gateway_sdk::api::JsonResult res;
-    runBlocking([controller, req, cv, ss, &res]() { res = amnezia::gateway_sdk::api::getAccountInfoRaw(*controller, req, cv, ss); });
-
-    rawJsonOut = QByteArray::fromStdString(res.json);
-    return mapError(res.error);
+    auto client = m_controller;
+    amnezia_gateway_sdk_json_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_get_account_info_raw(client.get(), &h.c, cliVersion.toUtf8().constData(),
+                                                       subscriptionStatus.toUtf8().constData());
+    });
+    rawJsonOut = res.json ? QByteArray(res.json, static_cast<int>(res.json_len)) : QByteArray();
+    const amnezia::ErrorCode ec = mapError(res.error);
+    amnezia_gateway_sdk_json_result_free(&res);
+    return ec;
 }
 
 amnezia::ErrorCode GatewayController::exportNativeConfig(const GatewayRequest &request, const QString &publicKey,
-                                                               QString &nativeConfigOut)
+                                                        QString &nativeConfigOut)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string pk = publicKey.toStdString();
-
-    amnezia::gateway_sdk::api::NativeConfigResult res;
-    runBlocking([controller, req, pk, &res]() { res = amnezia::gateway_sdk::api::exportNativeConfig(*controller, req, pk); });
-
-    nativeConfigOut = QString::fromStdString(res.config);
-    return mapError(res.error);
+    auto client = m_controller;
+    amnezia_gateway_sdk_native_config_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_export_native_config(client.get(), &h.c, publicKey.toUtf8().constData());
+    });
+    nativeConfigOut = QString::fromUtf8(res.config ? res.config : "");
+    const amnezia::ErrorCode ec = mapError(res.error);
+    amnezia_gateway_sdk_native_config_result_free(&res);
+    return ec;
 }
 
 amnezia::ErrorCode GatewayController::revokeNativeConfig(const GatewayRequest &request)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-
-    amnezia::gateway_sdk::ErrorCode err = amnezia::gateway_sdk::ErrorCode::NoError;
-    runBlocking([controller, req, &err]() { err = amnezia::gateway_sdk::api::revokeNativeConfig(*controller, req); });
-
+    auto client = m_controller;
+    int err = AMNEZIA_GATEWAY_SDK_OK;
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        err = amnezia_gateway_sdk_revoke_native_config(client.get(), &h.c);
+    });
     return mapError(err);
 }
 
-GatewayController::AppStoreResult GatewayController::importServiceFromAppStore(
-        const GatewayRequest &request, const QString &publicKey, const QString &transactionId)
+GatewayController::AppStoreResult GatewayController::importServiceFromAppStore(const GatewayRequest &request,
+                                                                              const QString &publicKey,
+                                                                              const QString &transactionId)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
-    const std::string pk = publicKey.toStdString();
-    const std::string tx = transactionId.toStdString();
-
-    amnezia::gateway_sdk::api::AppStoreImportResult res;
-    runBlocking([controller, req, pk, tx, &res]() {
-        res = amnezia::gateway_sdk::api::importServiceFromAppStore(*controller, req, pk, tx);
+    auto client = m_controller;
+    amnezia_gateway_sdk_app_store_result res{};
+    runBlocking([&]() {
+        ReqHold h;
+        h.fill(request);
+        res = amnezia_gateway_sdk_import_from_app_store(client.get(), &h.c, publicKey.toUtf8().constData(),
+                                                        transactionId.toUtf8().constData());
     });
-
     AppStoreResult out;
     out.error = mapError(res.error);
-    out.serverConfigJson = QString::fromStdString(res.serverConfigJson);
-    out.vpnKey = QString::fromStdString(res.vpnKey);
+    out.serverConfigJson = QString::fromUtf8(res.server_config_json ? res.server_config_json : "");
+    out.vpnKey = QString::fromUtf8(res.vpn_key ? res.vpn_key : "");
     out.crc = res.crc;
-    qInfo().noquote() << "[agw-adapter] importServiceFromAppStore result errorCode=" << static_cast<int>(out.error);
+    amnezia_gateway_sdk_app_store_result_free(&res);
     return out;
 }
 
 QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayController::getNewsAsync(const QString &locale,
-                                                                                     const QStringList &userCountryCodes,
-                                                                                     const QStringList &serviceTypes)
+                                                                              const QStringList &userCountryCodes,
+                                                                              const QStringList &serviceTypes)
 {
-    auto controller = m_controller;
+    auto client = m_controller;
     const std::string localeStd = locale.toStdString();
     std::vector<std::string> countries;
     for (const QString &c : userCountryCodes) {
@@ -393,41 +431,60 @@ QFuture<QPair<amnezia::ErrorCode, QJsonArray>> GatewayController::getNewsAsync(c
         types.push_back(t.toStdString());
     }
 
-    return QtConcurrent::run([controller, localeStd, countries, types]() -> QPair<amnezia::ErrorCode, QJsonArray> {
-        const amnezia::gateway_sdk::api::JsonResult r = amnezia::gateway_sdk::api::getNews(*controller, localeStd, countries, types);
-        const amnezia::ErrorCode ec = mapError(r.error);
-        if (ec != amnezia::ErrorCode::NoError) {
-            return qMakePair(ec, QJsonArray());
+    return QtConcurrent::run([client, localeStd, countries, types]() -> QPair<amnezia::ErrorCode, QJsonArray> {
+        std::vector<const char *> cc;
+        for (const auto &s : countries) {
+            cc.push_back(s.c_str());
         }
-        const QJsonArray arr = QJsonDocument::fromJson(QByteArray::fromStdString(r.json)).array();
+        std::vector<const char *> st;
+        for (const auto &s : types) {
+            st.push_back(s.c_str());
+        }
+        amnezia_gateway_sdk_json_result r = amnezia_gateway_sdk_get_news(client.get(), localeStd.c_str(),
+                                                                         cc.empty() ? nullptr : cc.data(), cc.size(),
+                                                                         st.empty() ? nullptr : st.data(), st.size());
+        const amnezia::ErrorCode ec = mapError(r.error);
+        QJsonArray arr;
+        if (ec == amnezia::ErrorCode::NoError && r.json != nullptr) {
+            arr = QJsonDocument::fromJson(QByteArray(r.json, static_cast<int>(r.json_len))).array();
+        }
+        amnezia_gateway_sdk_json_result_free(&r);
         return qMakePair(ec, arr);
     });
 }
 
-QFuture<QPair<amnezia::ErrorCode, QString>> GatewayController::getUpdaterEndpointAsync(
-        const QString &cliVersion, const QString &osVersion, const QString &installationUuid)
+QFuture<QPair<amnezia::ErrorCode, QString>> GatewayController::getUpdaterEndpointAsync(const QString &cliVersion,
+                                                                                     const QString &osVersion,
+                                                                                     const QString &installationUuid)
 {
-    auto controller = m_controller;
+    auto client = m_controller;
     const std::string cv = cliVersion.toStdString();
     const std::string ov = osVersion.toStdString();
     const std::string uuid = installationUuid.toStdString();
 
-    return QtConcurrent::run([controller, cv, ov, uuid]() -> QPair<amnezia::ErrorCode, QString> {
-        const amnezia::gateway_sdk::api::UrlResult r = amnezia::gateway_sdk::api::getUpdaterEndpoint(*controller, cv, ov, uuid);
-        return qMakePair(mapError(r.error), QString::fromStdString(r.url));
+    return QtConcurrent::run([client, cv, ov, uuid]() -> QPair<amnezia::ErrorCode, QString> {
+        amnezia_gateway_sdk_url_result r = amnezia_gateway_sdk_get_updater_endpoint(client.get(), cv.c_str(), ov.c_str(), uuid.c_str());
+        const QPair<amnezia::ErrorCode, QString> out = qMakePair(mapError(r.error), QString::fromUtf8(r.url ? r.url : ""));
+        amnezia_gateway_sdk_url_result_free(&r);
+        return out;
     });
 }
 
-QFuture<QPair<amnezia::ErrorCode, QString>> GatewayController::getRenewalLinkAsync(
-        const GatewayRequest &request, const QString &cliVersion, const QString &subscriptionStatus)
+QFuture<QPair<amnezia::ErrorCode, QString>> GatewayController::getRenewalLinkAsync(const GatewayRequest &request,
+                                                                                  const QString &cliVersion,
+                                                                                  const QString &subscriptionStatus)
 {
-    auto controller = m_controller;
-    const amnezia::gateway_sdk::api::GatewayRequest req = toApiReq(request);
+    auto client = m_controller;
+    GatewayRequest req = request;
     const std::string cv = cliVersion.toStdString();
     const std::string ss = subscriptionStatus.toStdString();
 
-    return QtConcurrent::run([controller, req, cv, ss]() -> QPair<amnezia::ErrorCode, QString> {
-        const amnezia::gateway_sdk::api::RenewalResult r = amnezia::gateway_sdk::api::getRenewalLink(*controller, req, cv, ss);
-        return qMakePair(mapError(r.error), QString::fromStdString(r.renewalUrl));
+    return QtConcurrent::run([client, req, cv, ss]() -> QPair<amnezia::ErrorCode, QString> {
+        ReqHold h;
+        h.fill(req);
+        amnezia_gateway_sdk_url_result r = amnezia_gateway_sdk_get_renewal_link(client.get(), &h.c, cv.c_str(), ss.c_str());
+        const QPair<amnezia::ErrorCode, QString> out = qMakePair(mapError(r.error), QString::fromUtf8(r.url ? r.url : ""));
+        amnezia_gateway_sdk_url_result_free(&r);
+        return out;
     });
 }
