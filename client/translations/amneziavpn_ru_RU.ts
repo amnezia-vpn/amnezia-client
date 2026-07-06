@@ -479,6 +479,91 @@ Already installed containers were found on the server. All installed containers 
         <translation>Конфигурация API удалена</translation>
     </message>
     <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="109"/>
+        <source>Checking server access…</source>
+        <translation>Проверка доступа к серверу…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="114"/>
+        <source>Checking server readiness…</source>
+        <translation>Проверка готовности сервера…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="119"/>
+        <source>Installing Docker on the server…</source>
+        <translation>Установка Docker на сервере…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="123"/>
+        <source>Docker ready</source>
+        <translation>Docker готов</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="127"/>
+        <source>Checking port availability…</source>
+        <translation>Проверка доступности порта…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="133"/>
+        <source>Preparing server environment…</source>
+        <translation>Подготовка окружения на сервере…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="139"/>
+        <source>Removing old container…</source>
+        <translation>Удаление старого контейнера…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="146"/>
+        <source>Building the VPN container…</source>
+        <translation>Сборка VPN-контейнера…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="151"/>
+        <source>Container image built</source>
+        <translation>Образ контейнера собран</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="154"/>
+        <source>Starting the container…</source>
+        <translation>Запуск контейнера…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="160"/>
+        <source>Configuring the protocol…</source>
+        <translation>Настройка протокола…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="166"/>
+        <source>Setting up firewall rules…</source>
+        <translation>Настройка правил брандмауэра…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="170"/>
+        <source>Running startup scripts…</source>
+        <translation>Выполнение стартовых скриптов…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="429"/>
+        <source>Generating client configuration…</source>
+        <translation>Генерация клиентской конфигурации…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="1006"/>
+        <source>Removing all containers…</source>
+        <translation>Удаление всех контейнеров…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="1028"/>
+        <source>Removing container…</source>
+        <translation>Удаление контейнера…</translation>
+    </message>
+    <message>
+        <location filename="../core/controllers/selfhosted/installController.cpp" line="1044"/>
+        <source>Cleaning up configuration…</source>
+        <translation>Очистка конфигурации…</translation>
+    </message>
+    <message>
         <location filename="../ui/controllers/installController.cpp" line="818"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 закэшированный профиль очищен</translation>
@@ -584,7 +669,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="81"/>
         <source>Usually it takes no more than 5 minutes</source>
-        <translation>Обычно это занимает не более 5 минут</translation>
+        <translation type="vanished">Обычно это занимает не более 5 минут</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="20"/>
+        <source>Removing…</source>
+        <translation>Удаление…</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="109"/>
+        <source>Removal failed</source>
+        <translation>Ошибка удаления</translation>
     </message>
 </context>
 <context>
@@ -3607,6 +3702,21 @@ Thank you for staying with us!</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="75"/>
         <source>Usually it takes no more than 5 minutes</source>
         <translation>Обычно это занимает не более 5 минут</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="21"/>
+        <source>Connecting to the server…</source>
+        <translation>Подключение к серверу…</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="111"/>
+        <source>Installation failed</source>
+        <translation>Ошибка установки</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="123"/>
+        <source>Server is busy with other updates, waiting…</source>
+        <translation>Сервер занят другими обновлениями, ожидание…</translation>
     </message>
 </context>
 <context>
