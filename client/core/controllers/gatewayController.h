@@ -17,6 +17,8 @@
 
 struct amnezia_gateway_sdk_client;
 
+class SecureAppSettingsRepository;
+
 class GatewayController : public QObject
 {
     Q_OBJECT
@@ -36,7 +38,8 @@ public:
     };
 
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
+                               const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
+                               QObject *parent = nullptr);
 
     amnezia::ErrorCode getServices(const QString &osVersion, const QString &appVersion, const QString &cliName,
                                    const QString &appLanguage, QJsonObject &servicesOut);

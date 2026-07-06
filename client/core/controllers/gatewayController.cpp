@@ -20,6 +20,7 @@
 
 #include <amnezia/gateway_sdk/c_abi.h>
 
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/networkUtilities.h"
 
@@ -92,21 +93,37 @@ namespace
         return buf;
     }
 
-    char *readCacheTramp(const char *key, void *)
+    struct ClientCtx
+    {
+        bool strictKillSwitch = false;
+        SecureAppSettingsRepository *appSettings = nullptr;
+    };
+
+    char *readCacheTramp(const char *key, void *ud)
     {
         const std::string k = key ? key : "";
-        if (!isWorkingProxyKey(k)) {
+        if (isWorkingProxyKey(k)) {
+            const std::string v = workingProxyCache().get(k);
+            return v.empty() ? nullptr : dupC(v);
+        }
+        auto *ctx = static_cast<ClientCtx *>(ud);
+        if (ctx == nullptr || ctx->appSettings == nullptr) {
             return nullptr;
         }
-        const std::string v = workingProxyCache().get(k);
-        return v.empty() ? nullptr : dupC(v);
+        const QByteArray v = ctx->appSettings->readGatewayProxyUrls(QString::fromStdString(k));
+        return v.isEmpty() ? nullptr : dupC(std::string(v.constData(), static_cast<std::size_t>(v.size())));
     }
 
-    void writeCacheTramp(const char *key, const char *value, void *)
+    void writeCacheTramp(const char *key, const char *value, void *ud)
     {
         const std::string k = key ? key : "";
         if (isWorkingProxyKey(k)) {
             workingProxyCache().set(k, value ? value : "");
+            return;
+        }
+        auto *ctx = static_cast<ClientCtx *>(ud);
+        if (ctx != nullptr && ctx->appSettings != nullptr) {
+            ctx->appSettings->writeGatewayProxyUrls(QString::fromStdString(k), QByteArray(value ? value : ""));
         }
     }
 
@@ -119,11 +136,6 @@ namespace
             qDebug() << "[amnezia-sdk]" << msg;
         }
     }
-
-    struct ClientCtx
-    {
-        bool strictKillSwitch = false;
-    };
 
     void onBeforeReqTramp(const char *hostC, void *ud)
     {
@@ -194,7 +206,8 @@ namespace
     }
 
     std::shared_ptr<amnezia_gateway_sdk_client> makeClient(const QString &gatewayEndpoint, bool isDevEnvironment,
-                                                           int requestTimeoutMsecs, bool isStrictKillSwitchEnabled)
+                                                           int requestTimeoutMsecs, bool isStrictKillSwitchEnabled,
+                                                           SecureAppSettingsRepository *appSettings)
     {
         const std::string endpoint = gatewayEndpoint.toStdString();
 
@@ -218,7 +231,7 @@ namespace
             fallbackPtrs.push_back(s.c_str());
         }
 
-        auto *ctx = new ClientCtx{ isStrictKillSwitchEnabled };
+        auto *ctx = new ClientCtx{ isStrictKillSwitchEnabled, appSettings };
 
         amnezia_gateway_sdk_config c{};
         c.gateway_endpoint = endpoint.c_str();
@@ -234,6 +247,7 @@ namespace
         c.log = &logTramp;
         c.read_cache = &readCacheTramp;
         c.write_cache = &writeCacheTramp;
+        c.cache_user_data = ctx;
 
         amnezia_gateway_sdk_client *raw = amnezia_gateway_sdk_client_create(&c);
         return std::shared_ptr<amnezia_gateway_sdk_client>(raw, [ctx](amnezia_gateway_sdk_client *p) {
@@ -244,9 +258,10 @@ namespace
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                                     const bool isStrictKillSwitchEnabled, QObject *parent)
+                                     const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
+                                     QObject *parent)
     : QObject(parent),
-      m_controller(makeClient(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled))
+      m_controller(makeClient(gatewayEndpoint, isDevEnvironment, requestTimeoutMsecs, isStrictKillSwitchEnabled, appSettingsRepository))
 {
 }
 

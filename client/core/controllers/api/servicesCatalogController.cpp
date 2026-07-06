@@ -214,7 +214,7 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 {
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     QJsonObject services;
     ErrorCode errorCode = gatewayController.getServices(

@@ -167,6 +167,7 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     
     serverConfigJson[apiDefs::key::apiConfig] = apiConfig;
 }
+
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             CaptchaInfo &captchaInfo)
@@ -189,7 +190,7 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
 
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     GatewayController::ImportResult res = gatewayController.importService(request, publicKey);
 
@@ -252,7 +253,7 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
 
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     QString serverConfigJson;
     ErrorCode errorCode = gatewayController.importTrial(request, publicKey, trimmedEmail, serverConfigJson);
@@ -299,7 +300,7 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     GatewayController::AppStoreResult res =
             gatewayController.importServiceFromAppStore(request, publicKey, transactionId);
@@ -375,7 +376,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     GatewayController::ImportResult res = gatewayController.updateService(request, publicKey, isConnectEvent);
     ErrorCode errorCode = res.error;
@@ -450,7 +451,7 @@ ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     ErrorCode errorCode = gatewayController.deactivateDevice(request);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         return errorCode;
@@ -488,7 +489,7 @@ ErrorCode SubscriptionController::deactivateExternalDevice(const QString &server
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     ErrorCode errorCode = gatewayController.deactivateDevice(request);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         return errorCode;
@@ -527,7 +528,7 @@ ErrorCode SubscriptionController::exportNativeConfig(const QString &serverId, co
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     ErrorCode errorCode = gatewayController.exportNativeConfig(request, protocolData.wireGuardClientPubKey, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
@@ -561,7 +562,7 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QString &serverId, co
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     ErrorCode errorCode = gatewayController.revokeNativeConfig(request);
     if (errorCode != ErrorCode::NoError && errorCode != ErrorCode::ApiNotFoundError) {
         return errorCode;
@@ -847,7 +848,7 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     QByteArray responseBody;
     ErrorCode errorCode = gatewayController.getAccountInfoRaw(request, QString(APP_VERSION),
@@ -882,7 +883,7 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
     auto gatewayController = QSharedPointer<GatewayController>::create(
             m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
             m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
-            m_appSettingsRepository->isStrictKillSwitchEnabled());
+            m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     auto future = gatewayController->getRenewalLinkAsync(request, QString(APP_VERSION),
                                                          getSubscriptionStatusForRenewal(apiV2->apiConfig));
@@ -915,7 +916,7 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
 
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(),
                                                m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
-                                               m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                               m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
 
     GatewayController::ImportResult res =
             gatewayController.resolveImportCaptcha(request, publicKey, captchaId, captchaSolution);

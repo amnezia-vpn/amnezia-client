@@ -95,7 +95,8 @@ void UpdateController::fetchGatewayUrl()
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(),
                                                                        m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
+                                                                       m_appSettingsRepository);
 
     const QString cliVersion = QString(APP_VERSION);
     const QString osVersion = QSysInfo::productType();
