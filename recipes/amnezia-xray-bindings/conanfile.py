@@ -82,9 +82,6 @@ class AmneziaXrayBindings(ConanFile):
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.apple_arch_flag = None
-        tc.make_args = [
-            "LIB_ARC=libamnezia_xray.a"
-        ]
         env = tc.environment()
         env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
         env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
@@ -115,13 +112,13 @@ class AmneziaXrayBindings(ConanFile):
                 with env.vars(self).apply():
                     at = Autotools(self)
                     at.make(args=[
-                        f"BUILD_DIR={build_dir}"
+                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
                     ])
 
             if is_apple_os(self) and self._is_multiarch:
                 lipo = XCRun(self).find('lipo')
-                archives = [os.path.join(self.build_folder, arch, "libamnezia_xray.a") for arch in self._archs]
-                output = os.path.join(self.build_folder, "libamnezia_xray.a")
+                archives = [os.path.join(self.build_folder, arch, "amnezia_xray.a") for arch in self._archs]
+                output = os.path.join(self.build_folder, "amnezia_xray.a")
                 self.run("{} -create -output {} {}".format(
                     shlex.quote(lipo),
                     shlex.quote(output),
@@ -132,14 +129,16 @@ class AmneziaXrayBindings(ConanFile):
 
     def _rename_header(self):
         if not self._is_windows:
-            rename(self, os.path.join(self.package_folder, "include", "libamnezia_xray.h"),
-                    os.path.join(self.package_folder, "include", "amnezia_xray.h"))
+            rename(self,
+                os.path.join(self.package_folder, "lib", "amnezia_xray.a"),
+                os.path.join(self.package_folder, "lib", "libamnezia_xray.a")
+            )
 
     def package(self):
-        copy(self, "libamnezia_xray.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
-        copy(self, "libamnezia_xray.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "libamnezia_xray.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "libamnezia_xray.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "amnezia_xray.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
+        copy(self, "amnezia_xray.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "amnezia_xray.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "amnezia_xray.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         self._rename_header()
 
     def package_info(self):
