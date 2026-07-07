@@ -1,9 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, chdir
+from conan.tools.files import get, chdir
 from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.apple import is_apple_os
+from conan.tools.apple.apple import _to_apple_arch
+from conan.tools.env import Environment
 
 import os
 import shlex
@@ -14,7 +17,14 @@ class AwgGo(ConanFile):
     version = "0.2.18"
     package_type = "application"
     settings = "os", "arch"
+
     _binary_name = "amneziawg-go"
+
+    _arch_map = {
+        "x86": "386",
+        "x86_64": "amd64",
+        "armv8": "arm64"
+    }
 
     @property
     def _goos(self):
@@ -25,29 +35,12 @@ class AwgGo(ConanFile):
         }.get(str(self.settings.os))
 
     @property
-    def _arch_map(self):
-        return {
-            "x86": "386",
-            "x86_64": "amd64",
-            "armv8": "arm64"
-        }
-
-    @property
     def _archs(self):
         return str(self.settings.arch).split("|")
-
+    
     @property
-    def _goarch(self):
-        goarchs = [self._arch_map.get(arch) for arch in self._archs]
-        return goarchs[0] if len(goarchs) == 1 else None
-
-    @property
-    def _goarchs(self):
-        return [self._arch_map.get(arch) for arch in self._archs]
-
-    @property
-    def _is_universal_macos(self):
-        return str(self.settings.os) == "Macos" and len(self._archs) > 1
+    def _is_multiarch(self):
+        return len(self._archs) > 1
 
     def layout(self):
         basic_layout(self, build_folder=".")
@@ -56,9 +49,14 @@ class AwgGo(ConanFile):
         self.tool_requires("go/1.26.0")
 
     def validate(self):
-        if not self._goos or not all(self._goarchs) or (len(self._archs) > 1 and not self._is_universal_macos):
+        if not self._goos or not all(arch in self._arch_map for arch in self._archs):
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
+            )
+        
+        if self._is_multiarch and not is_apple_os(self):
+            raise ConanInvalidConfiguration(
+                f"{self.name} v{self.version} does not support multiarch builds"
             )
 
     def source(self):
@@ -68,47 +66,57 @@ class AwgGo(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        tc.apple_arch_flag = None
         env = tc.environment()
         env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
         env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
         env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
         env.define("GOTELEMETRY", "off")
         env.define("GOOS", self._goos)
-        env.define("CGO_LDFLAGS", tc.ldflags)
-        env.define("CGO_CFLAGS", tc.cflags)
+        self._ldflags = tc.ldflags
+        self._cflags = tc.cflags
         tc.generate(env)
 
     def build(self):
-        outputs = []
         with chdir(self, self.source_folder):
-            for goarch in self._goarchs:
-                arch_destdir = os.path.join(self.build_folder, f"build-{goarch}")
-                at = Autotools(self)
-                at.make("clean")
-                at.make("install", args=[
-                    f"DESTDIR={shlex.quote(arch_destdir)}",
-                    "BINDIR=",
-                    f"GOARCH={goarch}",
-                ])
-                output_path = os.path.join(arch_destdir, self._binary_name)
-                arch_output_path = os.path.join(self.build_folder, f"{self._binary_name}-{goarch}")
-                os.rename(output_path, arch_output_path)
-                outputs.append(arch_output_path)
+            for arch in self._archs:
+                goarch = self._arch_map.get(arch)
 
-        output = os.path.join(self.build_folder, self._binary_name)
-        if self._is_universal_macos:
-            lipo = XCRun(self).find("lipo")
-            self.run("{} -create {} -output {}".format(
-                shlex.quote(lipo),
-                " ".join(shlex.quote(output) for output in outputs),
-                shlex.quote(output)
-            ))
-            return
+                ldflags = self._ldflags
+                cflags = self._cflags
+                if is_apple_os(self):
+                    ldflags.append(f"-arch {_to_apple_arch(arch)}")
+                    cflags.append(f"-arch {_to_apple_arch(arch)}")
 
-        os.rename(outputs[0], output)
+                env = Environment()
+                env.define("GOARCH", goarch)
+                env.define("CGO_LDFLAGS", " ".join(ldflags))
+                env.define("CGO_CFLAGS", " ".join(cflags))
+                with env.vars(self).apply():
+                    at = Autotools(self)
+                    at.make()
+                    if self._is_multiarch:
+                        os.rename(
+                            os.path.join(self.source_folder, self._binary_name),
+                            os.path.join(self.source_folder, f"{self._binary_name}-{arch}")
+                        )
+
+            if is_apple_os(self) and self._is_multiarch:
+                lipo = XCRun(self).find("lipo")
+                output = os.path.join(self.build_folder, self._binary_name)
+                binaries = [os.path.join(self.build_folder, f"{self._binary_name}-{arch}") for arch in self._archs]
+                self.run("{} -create -output {} {}".format(
+                    shlex.quote(lipo),
+                    shlex.quote(output),
+                    shlex.join(binaries)
+                ))
 
     def package(self):
-        copy(self, self._binary_name, src=self.build_folder, dst=self.package_folder)
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.make("install", args=[
+                f"BINDIR={self.package_folder}",
+            ])
 
     def package_info(self):
         self.cpp_info.exe = True
