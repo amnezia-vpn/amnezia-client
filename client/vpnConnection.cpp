@@ -215,8 +215,11 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
         if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         } else {
-            if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                ips.append(i.value().toString());
+            const QStringList siteIps = SecureAppSettingsRepository::siteIpList(i.value());
+            for (const QString &ip : siteIps) {
+                if (NetworkUtilities::checkIpSubnetFormat(ip)) {
+                    ips.append(ip);
+                }
             }
             sites.append(i.key());
         }
@@ -230,25 +233,32 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
     // re-resolve domains
     for (const QString &site : sites) {
         const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
-            const QList<QHostAddress> &addresses = hostInfo.addresses();
-            QString ipv4Addr;
+            QStringList resolvedIps;
             for (const QHostAddress &addr : hostInfo.addresses()) {
                 if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                    const QString &ip = addr.toString();
-                    // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
-                    if (!ips.contains(ip)) {
-                        IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
-                            iface->routeAddList(gw, QStringList() << ip);
-                        });
-                        m_appSettingsRepository->addVpnSite(mode, site, ip);
-                    }
-                    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                        auto reply = iface->flushDns();
-                        if (reply.waitForFinished() || !reply.returnValue())
-                            qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
-                    });
-                    break;
+                    resolvedIps.append(addr.toString());
                 }
+            }
+            resolvedIps.removeDuplicates();
+            qDebug() << "[SplitTunneling] addSitesRoutes resolved" << site << "->" << resolvedIps;
+
+            QStringList newIps;
+            for (const QString &ip : resolvedIps) {
+                if (!ips.contains(ip)) {
+                    IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
+                        iface->routeAddList(gw, QStringList() << ip);
+                    });
+                    newIps.append(ip);
+                }
+            }
+
+            if (!newIps.isEmpty()) {
+                m_appSettingsRepository->addVpnSite(mode, site, newIps);
+                IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+                    auto reply = iface->flushDns();
+                    if (reply.waitForFinished() || !reply.returnValue())
+                        qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
+                });
             }
         };
         QHostInfo::lookupHost(site, this, cbResolv);
@@ -435,8 +445,13 @@ void VpnConnection::appendSplitTunnelingConfig()
             for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
                 if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
                     sites.append(i.key());
-                } else if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                    sites.append(i.value().toString());
+                } else {
+                    const QStringList siteIps = SecureAppSettingsRepository::siteIpList(i.value());
+                    for (const QString &ip : siteIps) {
+                        if (NetworkUtilities::checkIpSubnetFormat(ip)) {
+                            sites.append(ip);
+                        }
+                    }
                 }
             }
             sites.removeDuplicates();
