@@ -67,6 +67,16 @@ PageType {
                 headerText: qsTr("Back up your configuration")
                 descriptionText: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
             }
+
+            EncryptionIndicator {
+                id: indicator
+
+                visible: SettingsController.isFileEncryptionEnabled()
+                linkEnabled: true
+
+                textString: qsTr("Encryption enabled.")
+                iconPath: "qrc:/images/controls/lock-locked.svg"
+            }
         }
 
         model: 1 // fake model to force the ListView to be created without a model
@@ -140,9 +150,19 @@ PageType {
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {
-                        restoreBackup(filePath)
+                        passwordDrawer.fileName = filePath
+                        SystemController.isFileEncrypted(filePath) ? passwordDrawer.restoreSecuredBackup() : restoreBackup(filePath)
                     }
                 }
+            }
+
+            PasswordDrawer {
+                id: passwordDrawer
+
+                parent: root
+
+                anchors.fill: parent
+                expandedHeight: root.height * 0.45
             }
         }
     }

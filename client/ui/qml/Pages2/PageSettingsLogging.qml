@@ -48,8 +48,8 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Logging")
-                descriptionText: qsTr("Enabling this function will save application's logs automatically. " +
-                                      "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
+                descriptionText: qsTr("Logs help diagnose app errors and connection issues" +
+                                      "Logging is disabled by default. Enable it when troubleshooting or if requested by support")
             }
 
             SwitcherType {
@@ -60,7 +60,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Enable logs")
+                text: qsTr("Enable logging")
 
                 checked: SettingsController.isLoggingEnabled
                 
@@ -77,7 +77,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: -8
 
-                text: qsTr("Clear logs")
+                text: qsTr("Delete all logs")
                 leftImageSource: "qrc:/images/controls/trash.svg"
                 isSmallLeftImage: true
 
@@ -154,7 +154,7 @@ PageType {
                 Layout.topMargin: -8
                 Layout.bottomMargin: -8
 
-                text: qsTr("Export logs")
+                text: qsTr("Save logs to file")
                 leftImageSource: "qrc:/images/controls/save.svg"
                 isSmallLeftImage: true
 
@@ -178,7 +178,7 @@ PageType {
     QtObject {
         id: clientLogs
 
-        readonly property string title: qsTr("Client logs")
+        readonly property string title: qsTr("App logs")
         readonly property string description: qsTr("AmneziaVPN logs")
         readonly property bool isVisible: true
         readonly property var openLogsHandler: function() {

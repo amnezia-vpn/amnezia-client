@@ -199,11 +199,10 @@ Item {
         leftImageSource: root.buttonImageSource
 
         anchors.top: content.top
-        anchors.bottom: content.bottom
         anchors.right: content.right
 
-        height: content.implicitHeight
-        width: content.implicitHeight
+        height: root.errorText !== "" ? content.implicitHeight - errorField.height - 5: content.implicitHeight
+        width: root.errorText !== "" ? content.implicitHeight - errorField.height - 5: content.implicitHeight
         squareLeftSide: true
 
         clickedFunc: function() {

@@ -214,6 +214,23 @@ PageType {
             DividerType {}
 
             LabelWithButtonType {
+                id: labelWithButtonAppPassword
+
+                Layout.fillWidth: true
+
+                text: qsTr("Password & Encryption")
+                descriptionText: qsTr("Password protection for backups and configuration files")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    SettingsController.getPassword() === "" ? PageController.goToPage(PageEnum.PageSettingsAppPassword)
+                                                            : PageController.goToPage(PageEnum.PageSettingsAppEncryption)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
                 id: labelWithButtonLogging
 
                 Layout.fillWidth: true

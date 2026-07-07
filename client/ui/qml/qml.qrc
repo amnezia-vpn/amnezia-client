@@ -7,11 +7,13 @@
         <file>Components/HomeContainersListView.qml</file>
         <file>Components/HomeSplitTunnelingDrawer.qml</file>
         <file>Components/InstalledAppsDrawer.qml</file>
+		<file>Components/PasswordDrawer.qml</file>
         <file>Components/ChangelogDrawer.qml</file>
         <file>Components/QuestionDrawer.qml</file>
         <file>Components/SelectLanguageDrawer.qml</file>
         <file>Components/ServersListView.qml</file>
         <file>Components/SettingsContainersListView.qml</file>
+		<file>Components/EncryptionIndicator.qml</file>
         <file>Components/BenefitRow.qml</file>
         <file>Components/BenefitsPanel.qml</file>
         <file>Components/SubscriptionExpiredDrawer.qml</file>
@@ -100,6 +102,9 @@
         <file>Pages2/PageSettingsApiServerInfo.qml</file>
         <file>Pages2/PageSettingsApplication.qml</file>
         <file>Pages2/PageSettingsAppSplitTunneling.qml</file>
+		<file>Pages2/PageSettingsAppEncryption.qml</file>
+		<file>Pages2/PageSettingsAppPassword.qml</file>
+		<file>Pages2/PageSettingsAppPasswordConfirm.qml</file>
         <file>Pages2/PageSettingsBackup.qml</file>
         <file>Pages2/PageSettingsConnection.qml</file>
         <file>Pages2/PageSettingsDns.qml</file>

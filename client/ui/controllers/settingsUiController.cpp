@@ -137,6 +137,8 @@ void SettingsUiController::backupAppConfig(const QString &fileName)
     if (!SystemController::saveFile(fileName, data)) {
         qInfo() << "SettingsUiController::backupAppConfig: save or share was cancelled or failed";
     }
+    if (isFileEncryptionEnabled())
+        SystemController::encryptFile(fileName, getPassword(), getHint());
 }
 
 void SettingsUiController::restoreAppConfig(const QString &fileName)
@@ -185,6 +187,57 @@ void SettingsUiController::clearSettings()
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     AmneziaVPN::clearSettings();
 #endif
+}
+
+bool SettingsUiController::isFileEncryptionEnabled()
+{
+    return m_settingsController->isFileEncryptionEnabled();
+}
+
+void SettingsUiController::toggleFileEncryption(bool enable)
+{
+    m_settingsController->toggleFileEncryption(enable);
+    emit fileEncryptionStateChanged();
+}
+
+void SettingsUiController::setPassword(QString pwd)
+{
+    m_settingsController->setPassword(pwd);
+}
+
+QString SettingsUiController::getPassword()
+{
+    return m_settingsController->getPassword();
+}
+
+void SettingsUiController::setHint(QString hint)
+{
+    m_settingsController->setHint(hint);
+}
+
+QString SettingsUiController::getHint()
+{
+    return m_settingsController->getHint();
+}
+
+void SettingsUiController::setTempPassword(QString pwd)
+{
+    tempPassword = pwd;
+}
+
+QString SettingsUiController::getTempPassword()
+{
+    return tempPassword;
+}
+
+void SettingsUiController::setTempHint(QString hint)
+{
+    tempHint = hint;
+}
+
+QString SettingsUiController::getTempHint()
+{
+    return tempHint;
 }
 
 bool SettingsUiController::isAutoConnectEnabled()

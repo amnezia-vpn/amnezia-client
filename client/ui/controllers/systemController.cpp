@@ -11,6 +11,21 @@
 #include <QUrl>
 #include <QtConcurrent>
 
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+
+namespace
+{
+    constexpr int SALT_LEN = 16;
+    constexpr int IV_LEN = 12;
+    constexpr int KEY_LEN = 32;
+    constexpr int TAG_LEN = 16;
+    constexpr int PBKDF2_ITER = 100000;
+
+    const QByteArray magicString { "EncData" };
+}
+
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
@@ -102,6 +117,313 @@ bool SystemController::readFile(const QString &fileName, QString &data)
     if(!readFile(fileName, byteArray)) return false;
     data = byteArray;
     return true;
+}
+
+static QString opensslErrString()
+{
+    unsigned long e = ERR_get_error();
+    if (!e)
+        return QStringLiteral("Unknown OpenSSL error");
+    char buf[256];
+    ERR_error_string_n(e, buf, sizeof(buf));
+    return QString::fromUtf8(buf);
+}
+
+static bool deriveKey(const QByteArray &password, const QByteArray &salt, QByteArray &outKey)
+{
+    outKey.resize(KEY_LEN);
+    const unsigned char *pw = reinterpret_cast<const unsigned char *>(password.constData());
+    const unsigned char *s = reinterpret_cast<const unsigned char *>(salt.constData());
+    int ok = PKCS5_PBKDF2_HMAC(reinterpret_cast<const char *>(pw), password.size(), s, salt.size(), PBKDF2_ITER,
+                               EVP_sha256(), KEY_LEN, reinterpret_cast<unsigned char *>(outKey.data()));
+    if (!ok) {
+        qDebug() << opensslErrString();
+    }
+    return ok == 1;
+}
+
+static bool aesCrypt(const QByteArray &in, const QByteArray &key, const QByteArray &iv, QByteArray &out,
+                        QByteArray &tag, bool encrypt)
+{
+    std::unique_ptr<EVP_CIPHER_CTX, void (*)(EVP_CIPHER_CTX *)> ctx { EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free };
+
+    if (!ctx) {
+        qDebug() << "EVP_CIPHER_CTX_new failed";
+        return false;
+    }
+
+    const EVP_CIPHER *cipher = EVP_aes_256_gcm();
+
+    if (1 != EVP_CipherInit_ex(ctx.get(), cipher, nullptr, nullptr, nullptr, encrypt ? 1 : 0)) {
+        qDebug() << opensslErrString();
+        return false;
+    }
+
+    if (1 != EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_IVLEN, iv.size(), nullptr)) {
+        qDebug() << opensslErrString();
+        return false;
+    }
+
+    if (1 != EVP_CipherInit_ex(ctx.get(), nullptr, nullptr, reinterpret_cast<const unsigned char *>(key.constData()),
+                             reinterpret_cast<const unsigned char *>(iv.constData()), -1)) {
+        qDebug() << opensslErrString();
+        return false;
+    }
+
+    out.clear();
+    out.resize(in.size());
+
+    int outlen = 0;
+
+    if (1 != EVP_CipherUpdate(ctx.get(), reinterpret_cast<unsigned char *>(out.data()), &outlen,
+                            reinterpret_cast<const unsigned char *>(in.constData()), in.size())) {
+        qDebug() << opensslErrString();
+        return false;
+    }
+
+    int tmplen = 0;
+
+    if (encrypt) {
+        if (1 != EVP_CipherFinal_ex(ctx.get(), reinterpret_cast<unsigned char *>(out.data()) + outlen, &tmplen)) {
+            qDebug() << opensslErrString();
+            return false;
+        }
+
+        out.resize(outlen + tmplen);
+
+        tag.resize(TAG_LEN);
+        if (1 != EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_GET_TAG, TAG_LEN, tag.data())) {
+            qDebug() << opensslErrString();
+            return false;
+        }
+    } else {
+        if (1 != EVP_CIPHER_CTX_ctrl(ctx.get(), EVP_CTRL_GCM_SET_TAG, tag.size(), const_cast<char *>(tag.constData()))) {
+            qDebug() << opensslErrString();
+            return false;
+        }
+
+        if (1 != EVP_CipherFinal_ex(ctx.get(), reinterpret_cast<unsigned char *>(out.data()) + outlen, &tmplen)) {
+            qDebug() << "Authentication failed: " << opensslErrString();
+            return false;
+        }
+
+        out.resize(outlen + tmplen);
+    }
+
+    return true;
+}
+
+bool SystemController::encryptFile(const QString &filePath, const QString &password, const QString &hint)
+{
+    QFile f(filePath);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "Cannot open file for read: " << f.errorString();
+        return false;
+    }
+
+    QByteArray content = f.readAll();
+    f.close();
+
+    if (content.startsWith(magicString)) {
+        qDebug() << "File already encrypted";
+        return false;
+    }
+
+    QByteArray salt(SALT_LEN, 0);
+    QByteArray iv(IV_LEN, 0);
+    QByteArray key;
+    QByteArray cipher;
+    QByteArray tag;
+
+    if (1 != RAND_bytes(reinterpret_cast<unsigned char *>(salt.data()), SALT_LEN)
+        || 1 != RAND_bytes(reinterpret_cast<unsigned char *>(iv.data()), IV_LEN)) {
+        qDebug() << opensslErrString();
+        return false;
+    }
+
+    if (!deriveKey(password.toUtf8(), salt, key))
+        return false;
+
+    if (!aesCrypt(content, key, iv, cipher, tag, true))
+        return false;
+
+    QByteArray out;
+    QByteArray hintBytes = hint.toUtf8();
+    quint32 hintLen = static_cast<quint32>(hintBytes.size());
+
+    out += magicString;
+    out.append(reinterpret_cast<const char *>(&hintLen), sizeof(hintLen));
+    out += hintBytes;
+    out += salt;
+    out += iv;
+    out += tag;
+    out += cipher;
+
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        qDebug() << "Cannot open file for write: " << f.errorString();
+        return false;
+    }
+
+    if (f.write(out) != out.size()) {
+        qDebug() << "Write failed";
+        f.close();
+        return false;
+    }
+
+    f.close();
+    return true;
+}
+
+QByteArray SystemController::getDecryptedData(const QString &filePath, const QString &password)
+{
+    QFile f(filePath);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "Cannot open file: " << f.errorString();
+        return {};
+    }
+
+    QByteArray content = f.readAll();
+    f.close();
+
+    if (!content.startsWith(magicString)) {
+        qDebug() << "Invalid file format (magic missing)";
+        return {};
+    }
+
+    int pos = magicString.size();
+
+    if (content.size() < pos + static_cast<int>(sizeof(quint32))) {
+        qDebug() << "Corrupted file (no hint length)";
+        return {};
+    }
+
+    quint32 hintLen = 0;
+    memcpy(&hintLen, content.constData() + pos, sizeof(quint32));
+    pos += sizeof(quint32);
+
+    if (content.size() < pos + static_cast<int>(hintLen) + SALT_LEN + IV_LEN + TAG_LEN) {
+        qDebug() << "Corrupted file (invalid sizes)";
+        return {};
+    }
+
+    pos += hintLen;
+
+    QByteArray salt = content.mid(pos, SALT_LEN);
+    pos += SALT_LEN;
+
+    QByteArray iv = content.mid(pos, IV_LEN);
+    pos += IV_LEN;
+
+    QByteArray tag = content.mid(pos, TAG_LEN);
+    pos += TAG_LEN;
+
+    QByteArray cipher = content.mid(pos);
+
+    QByteArray key;
+    if (!deriveKey(password.toUtf8(), salt, key)) {
+        qDebug() << "Key derivation failed";
+        return {};
+    }
+
+    QByteArray plain;
+    if (!aesCrypt(cipher, key, iv, plain, tag, false)) {
+        qDebug() << "Decryption failed (wrong password or corrupted data)";
+        return {};
+    }
+
+    return plain;
+}
+
+bool SystemController::isFileEncrypted(const QString &filePath)
+{
+    QFile f(filePath);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << "Cannot open file for read: %1", f.errorString();
+        return false;
+    }
+    QByteArray data = f.readAll();
+    f.close();
+
+    if (!data.startsWith(magicString)) {
+        qDebug() << "File is not recognized as encrypted (magic missing)";
+        return false;
+    }
+
+    return true;
+}
+
+bool SystemController::isPasswordValid(const QString &filePath, const QString &password)
+{
+    QFile f(filePath);
+    if (!f.open(QIODevice::ReadOnly)) {
+        qDebug() << f.errorString();
+        return false;
+    }
+
+    QByteArray content = f.readAll();
+    f.close();
+
+    if (!content.startsWith(magicString))
+        return false;
+
+    int pos = magicString.size();
+
+    quint32 hintLen = 0;
+    memcpy(&hintLen, content.constData() + pos, sizeof(quint32));
+    pos += sizeof(quint32);
+    pos += hintLen;
+
+    QByteArray salt = content.mid(pos, SALT_LEN);
+    pos += SALT_LEN;
+    QByteArray iv = content.mid(pos, IV_LEN);
+    pos += IV_LEN;
+    QByteArray tag = content.mid(pos, TAG_LEN);
+    pos += TAG_LEN;
+    QByteArray cipher = content.mid(pos);
+
+    QByteArray key;
+    if (!deriveKey(password.toUtf8(), salt, key))
+        return false;
+
+    QByteArray plain;
+    bool ok = aesCrypt(cipher, key, iv, plain, tag, false);
+
+    if (!ok)
+        qDebug() << "Wrong password";
+
+    return ok;
+}
+
+QString SystemController::readHint(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return "";
+
+    QByteArray data;
+    readFile(filePath, data);
+
+    if (!data.startsWith(magicString)) {
+        qDebug() << "Not an encrypted file";
+        return {};
+    }
+
+    int pos = magicString.size();
+
+    if (data.size() < pos + static_cast<int>(sizeof(quint32))) {
+        qDebug() << "Corrupted file (no hint length)";
+        return {};
+    }
+
+    quint32 hintLen = 0;
+    memcpy(&hintLen, data.constData() + pos, sizeof(quint32));
+    pos += sizeof(quint32);
+
+    if (data.size() < pos + static_cast<int>(hintLen)) {
+        qDebug() << "Corrupted file (hint truncated)";
+        return {};
+    }
+
+    return QString::fromUtf8(data.constData() + pos, hintLen);
 }
 
 QString SystemController::getFileName(const QString &acceptLabel, const QString &nameFilter,
