@@ -117,6 +117,7 @@ protected:
     LanguageModel* languageModelProtected() const { return m_languageModel; }
     ConnectionUiController* connectionUiControllerProtected() const { return m_connectionUiController; }
 
+    ConnectionUiController* connectionUiControllerProtected() const { return m_connectionUiController; }
     InstallUiController* installUiControllerProtected() const { return m_installUiController; }
     ImportController* importCoreControllerProtected() const { return m_importCoreController; }
     ExportController* exportControllerProtected() const { return m_exportController; }
