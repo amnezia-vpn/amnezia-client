@@ -1,4 +1,4 @@
-#include "mtproxy_public_host_input.h"
+#include "mtProxyPublicHostInput.h"
 
 #include <QRegularExpression>
 

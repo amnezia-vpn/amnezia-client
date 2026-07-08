@@ -280,6 +280,24 @@ void SecureAppSettingsRepository::toggleDevGatewayEnv(bool enabled)
     setValue("Conf/devGatewayEnv", enabled);
 }
 
+QByteArray SecureAppSettingsRepository::readGatewayProxyUrls(const QString &cacheKey) const
+{
+    if (cacheKey.isEmpty()) {
+        return {};
+    }
+
+    return value(QStringLiteral("Conf/proxyUrls/") + cacheKey).toByteArray();
+}
+
+void SecureAppSettingsRepository::writeGatewayProxyUrls(const QString &cacheKey, const QByteArray &proxyUrlsEncrypted)
+{
+    if (cacheKey.isEmpty()) {
+        return;
+    }
+
+    setValue(QStringLiteral("Conf/proxyUrls/") + cacheKey, proxyUrlsEncrypted);
+}
+
 bool SecureAppSettingsRepository::isKillSwitchEnabled() const
 {
     return value("Conf/killSwitchEnabled", true).toBool();

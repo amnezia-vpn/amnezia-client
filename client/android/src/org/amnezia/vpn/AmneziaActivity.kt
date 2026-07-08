@@ -1077,11 +1077,11 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun sendTouch(x: Float, y: Float) {
         Log.v(TAG, "Send touch: $x, $y")
-            findQtWindow(window.decorView)?.let {
-                Log.v(TAG, "Send touch to $it")
-                it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN))
-                it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP))
-            }
+        findQtWindow(window.decorView)?.let {
+            Log.v(TAG, "Send touch to $it")
+            it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN))
+            it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP))
+        }
     }
 
     private fun findQtWindow(view: View): View? {
