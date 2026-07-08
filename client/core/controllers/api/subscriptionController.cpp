@@ -56,6 +56,38 @@ QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 
     return QStringLiteral("active");
 }
+
+QString normalizeCaptchaSolution(const QString &captchaSolution)
+{
+    QString normalizedSolution;
+    normalizedSolution.reserve(captchaSolution.size());
+    for (const QChar &ch : captchaSolution) {
+        const ushort u = ch.unicode();
+        if (u >= '0' && u <= '9') {
+            normalizedSolution += ch;
+        } else if (u >= 0xFF10 && u <= 0xFF19) {
+            normalizedSolution += QChar(static_cast<char16_t>(u - 0xFF10 + '0'));
+        }
+    }
+    return normalizedSolution.isEmpty() ? captchaSolution.trimmed() : normalizedSolution;
+}
+
+bool fillCaptchaInfoFromResponse(const QByteArray &responseBody, SubscriptionController::CaptchaInfo &captchaInfo)
+{
+    const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
+    if (!jsonDoc.isObject()) {
+        return false;
+    }
+    const QJsonObject jsonObj = jsonDoc.object();
+    if (!jsonObj.contains(QStringLiteral("captcha_id")) || !jsonObj.contains(QStringLiteral("captcha_image"))) {
+        return false;
+    }
+    captchaInfo.captchaId = jsonObj.value(QStringLiteral("captcha_id")).toString();
+    captchaInfo.captchaImageBase64 = jsonObj.value(QStringLiteral("captcha_image")).toString();
+    captchaInfo.hint = jsonObj.value(QStringLiteral("hint")).toString();
+    captchaInfo.isRequired = true;
+    return true;
+}
 }
 
 
@@ -410,7 +442,8 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent)
+ErrorCode SubscriptionController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+                                                           CaptchaInfo *captchaInfoOut, ProtocolData *usedProtocolDataOut)
 {
     auto apiV2 = m_serversRepository->apiV2Config(serverId);
     if (!apiV2.has_value()) {
@@ -419,7 +452,7 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     QString serviceProtocol = apiV2->serviceProtocol();
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    
+
     QJsonObject authDataJson = apiV2->authData.toJson();
     GatewayRequestData gatewayRequestData { QSysInfo::productType(),
                                             QString(APP_VERSION),
@@ -441,6 +474,11 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
+        if (errorCode == ErrorCode::ApiCaptchaRequiredError && captchaInfoOut) {
+            if (fillCaptchaInfoFromResponse(responseBody, *captchaInfoOut) && usedProtocolDataOut) {
+                *usedProtocolDataOut = protocolData;
+            }
+        }
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
             ApiV2ServerConfig expiredApiV2 = *apiV2;
             expiredApiV2.apiConfig.subscriptionExpiredByServer = true;
@@ -450,29 +488,40 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
         return errorCode;
     }
 
+    return applyUpdatedServiceConfig(serverId, serviceProtocol, protocolData, responseBody);
+}
+
+ErrorCode SubscriptionController::applyUpdatedServiceConfig(const QString &serverId, const QString &serviceProtocol,
+                                                           const ProtocolData &protocolData, const QByteArray &responseBody)
+{
+    auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        return ErrorCode::InternalError;
+    }
+
     QJsonObject serverConfigJson;
-    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    ErrorCode errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
-    
+
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
-    
+
     if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
 
     ApiV2ServerConfig newApiV2Config = ApiV2ServerConfig::fromJson(serverConfigJson);
     ApiV2ServerConfig* newApiV2 = &newApiV2Config;
-    
+
     newApiV2->apiConfig.vpnKey = apiV2->apiConfig.vpnKey;
     newApiV2->apiConfig.isTestPurchase = apiV2->apiConfig.isTestPurchase;
     newApiV2->apiConfig.isInAppPurchase = apiV2->apiConfig.isInAppPurchase;
     newApiV2->apiConfig.subscriptionExpiredByServer = false;
-    
+
     newApiV2->authData = apiV2->authData;
     newApiV2->crc = apiV2->crc;
-    
+
     if (apiV2->nameOverriddenByUser) {
         newApiV2->name = apiV2->name;
         newApiV2->displayName = apiV2->displayName;
@@ -482,6 +531,59 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     m_serversRepository->editServer(serverId, newApiV2Config.toJson(),
                                    serverConfigUtils::configTypeFromJson(newApiV2Config.toJson()));
     return ErrorCode::NoError;
+}
+
+ErrorCode SubscriptionController::resolveUpdateServiceCaptcha(const QString &serverId, const QString &newCountryCode,
+                                                              bool isConnectEvent, const ProtocolData &protocolData,
+                                                              const QString &captchaId, const QString &captchaSolution,
+                                                              CaptchaInfo *retryCaptchaOut)
+{
+    auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        return ErrorCode::InternalError;
+    }
+    const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
+    QString serviceProtocol = apiV2->serviceProtocol();
+
+    QJsonObject authDataJson = apiV2->authData.toJson();
+    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
+                                            QString(APP_VERSION),
+                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
+                                            m_appSettingsRepository->getInstallationUuid(true),
+                                            apiV2->apiConfig.userCountryCode,
+                                            newCountryCode,
+                                            apiV2->serviceType(),
+                                            serviceProtocol,
+                                            authDataJson };
+
+    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
+
+    if (isConnectEvent) {
+        apiPayload[apiDefs::key::isConnectEvent] = true;
+    }
+
+    apiPayload["captcha_id"] = captchaId;
+    apiPayload["captcha_solution"] = normalizeCaptchaSolution(captchaSolution);
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        if (retryCaptchaOut
+            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
+                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
+            fillCaptchaInfoFromResponse(responseBody, *retryCaptchaOut);
+        }
+        if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
+            ApiV2ServerConfig expiredApiV2 = *apiV2;
+            expiredApiV2.apiConfig.subscriptionExpiredByServer = true;
+            m_serversRepository->editServer(serverId, expiredApiV2.toJson(),
+                                           serverConfigUtils::configTypeFromJson(expiredApiV2.toJson()));
+        }
+        return errorCode;
+    }
+
+    return applyUpdatedServiceConfig(serverId, serviceProtocol, protocolData, responseBody);
 }
 
 ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)

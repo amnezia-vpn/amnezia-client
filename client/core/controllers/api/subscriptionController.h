@@ -66,7 +66,12 @@ public:
                                         const QString &transactionId, bool isTestPurchase,
                                         int *duplicateServerIndex = nullptr);
 
-    ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent);
+    ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+                                       CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
+
+    ErrorCode resolveUpdateServiceCaptcha(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
+                                          const ProtocolData &protocolData, const QString &captchaId,
+                                          const QString &captchaSolution, CaptchaInfo *retryCaptchaOut = nullptr);
 
     ErrorCode deactivateDevice(const QString &serverId);
 
@@ -115,8 +120,10 @@ private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(const QString &serverId) const;
     
-    ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
+    ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol,
                                                    const ProtocolData &protocolData, QJsonObject &serverConfigJson);
+    ErrorCode applyUpdatedServiceConfig(const QString &serverId, const QString &serviceProtocol,
+                                        const ProtocolData &protocolData, const QByteArray &responseBody);
     void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType, 
                                 const QString &serviceProtocol, const QString &userCountryCode,
                                 const QByteArray &apiResponseBody);
