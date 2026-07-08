@@ -1,11 +1,10 @@
 #include "telemtConfigModel.h"
 
-#include "ui/models/utils/mtproxy_public_host_input.h"
+#include "ui/models/utils/mtProxyPublicHostInput.h"
 
 #include <QHostAddress>
 #include <QRegExp>
 #include <QRegularExpression>
-#include <qqml.h>
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
@@ -15,9 +14,7 @@
 
 using namespace amnezia;
 
-TelemtConfigModel::TelemtConfigModel(QObject *parent) : QAbstractListModel(parent) {
-    qmlRegisterType<PublicHostInputValidator>("TelemtConfig", 1, 0, "PublicHostInputValidator");
-}
+TelemtConfigModel::TelemtConfigModel(QObject *parent) : QAbstractListModel(parent) {}
 
 void TelemtConfigModel::applyDefaults(TelemtProtocolConfig &c) {
     if (c.port.isEmpty()) {

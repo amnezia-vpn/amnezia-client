@@ -1,6 +1,6 @@
 #include "mtProxyConfigModel.h"
 
-#include "ui/models/utils/mtproxy_public_host_input.h"
+#include "ui/models/utils/mtProxyPublicHostInput.h"
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
@@ -12,13 +12,10 @@
 #include <QRegExp>
 #include <QRegularExpression>
 #include <QtGlobal>
-#include <qqml.h>
 
 using namespace amnezia;
 
-MtProxyConfigModel::MtProxyConfigModel(QObject *parent) : QAbstractListModel(parent) {
-    qmlRegisterType<PublicHostInputValidator>("MtProxyConfig", 1, 0, "PublicHostInputValidator");
-}
+MtProxyConfigModel::MtProxyConfigModel(QObject *parent) : QAbstractListModel(parent) {}
 
 int MtProxyConfigModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
