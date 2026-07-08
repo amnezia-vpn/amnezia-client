@@ -1,6 +1,6 @@
 #include "mtProxyConfigModel.h"
 
-#include "ui/models/utils/mtProxyPublicHostInput.h"
+#include "ui/utils/mtProxyPublicHostInput.h"
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"

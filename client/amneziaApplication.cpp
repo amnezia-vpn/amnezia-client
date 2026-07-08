@@ -22,7 +22,7 @@
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/models/installedAppsModel.h"
-#include "ui/models/utils/mtProxyPublicHostInput.h"
+#include "ui/utils/mtProxyPublicHostInput.h"
 #include "version.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"

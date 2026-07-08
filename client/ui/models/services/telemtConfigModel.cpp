@@ -1,6 +1,6 @@
 #include "telemtConfigModel.h"
 
-#include "ui/models/utils/mtProxyPublicHostInput.h"
+#include "ui/utils/mtProxyPublicHostInput.h"
 
 #include <QHostAddress>
 #include <QRegExp>
