@@ -234,10 +234,16 @@ namespace
         auto *holder = static_cast<AsyncHolder *>(ud);
         const amnezia::ErrorCode ec = mapError(r.error);
         const QByteArray body = r.body ? QByteArray(r.body, static_cast<int>(r.body_len)) : QByteArray();
-        holder->promise->addResult(qMakePair(ec, body));
-        holder->promise->finish();
         amnezia_gateway_sdk_response_free(&r);
-        delete holder;
+
+        QMetaObject::invokeMethod(
+                qApp,
+                [holder, ec, body]() {
+                    holder->promise->addResult(qMakePair(ec, body));
+                    holder->promise->finish();
+                    delete holder;
+                },
+                Qt::QueuedConnection);
     }
 }
 
