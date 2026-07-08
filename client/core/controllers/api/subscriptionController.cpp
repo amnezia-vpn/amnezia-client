@@ -977,6 +977,9 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
     QString restoreError;
     QEventLoop waitRestore;
 
+    qInfo().noquote() << "[IAP][processAppStoreRestore] Starting restore. userCountryCode=" << userCountryCode
+                      << "serviceType=" << serviceType << "serviceProtocol=" << serviceProtocol;
+
     IosController::Instance()->restorePurchases([&](bool success, const QList<QVariantMap> &transactions, const QString &errorString) {
         restoreSuccess = success;
         restoredTransactions = transactions;
@@ -984,6 +987,10 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
         waitRestore.quit();
     });
     waitRestore.exec();
+
+    qInfo().noquote() << "[IAP][processAppStoreRestore] restorePurchases result: success=" << restoreSuccess
+                      << "transactions count=" << restoredTransactions.size()
+                      << "error=" << restoreError;
 
     if (!restoreSuccess) {
         qWarning().noquote() << "[IAP] Restore failed:" << restoreError;
@@ -998,12 +1005,16 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
     }
 
     bool isTestPurchase = IosController::Instance()->isTestFlight();
+    qInfo().noquote() << "[IAP][processAppStoreRestore] isTestFlight=" << isTestPurchase;
     QSet<QString> processedTransactions;
 
     for (const QVariantMap &transaction : restoredTransactions) {
         const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
         const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
         const QString transactionProductId = transaction.value(QStringLiteral("productId")).toString();
+
+        qInfo().noquote() << "[IAP][processAppStoreRestore] Processing transaction: transactionId=" << transactionId
+                          << "originalTransactionId=" << originalTransactionId << "productId=" << transactionProductId;
 
         if (originalTransactionId.isEmpty()) {
             qWarning().noquote() << "[IAP] Skipping restored transaction without originalTransactionId" << transactionId;
@@ -1012,6 +1023,7 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
 
         if (processedTransactions.contains(originalTransactionId)) {
             result.duplicateCount++;
+            qInfo().noquote() << "[IAP][processAppStoreRestore] Skipping duplicate originalTransactionId=" << originalTransactionId;
             continue;
         }
         processedTransactions.insert(originalTransactionId);
@@ -1024,7 +1036,10 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
         ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                         originalTransactionId, isTestPurchase,
                                                         &currentDuplicateServerIndex,
-                                                        QStringLiteral("v1/restore_subscription"));
+                                                        QStringLiteral("v1/subscriptions/restore"));
+
+        qInfo().noquote() << "[IAP][processAppStoreRestore] importServiceFromMarket errorCode=" << static_cast<int>(errorCode)
+                          << "for originalTransactionId=" << originalTransactionId;
 
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             result.duplicateConfigAlreadyPresent = true;
@@ -1034,7 +1049,8 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
             qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
                               << "because subscription config with the same vpn_key already exists";
         } else if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction" << originalTransactionId;
+            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction" << originalTransactionId
+                                 << "errorCode=" << static_cast<int>(errorCode);
             result.errorCode = errorCode;
         } else {
             result.hasInstalledConfig = true;
@@ -1044,6 +1060,11 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
     if (!result.hasInstalledConfig) {
         result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
     }
+
+    qInfo().noquote() << "[IAP][processAppStoreRestore] Done. hasInstalledConfig=" << result.hasInstalledConfig
+                      << "duplicateConfigAlreadyPresent=" << result.duplicateConfigAlreadyPresent
+                      << "duplicateCount=" << result.duplicateCount
+                      << "errorCode=" << static_cast<int>(result.errorCode);
 
     return result;
 #else
