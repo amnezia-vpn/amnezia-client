@@ -4,7 +4,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/Modules;${CMAKE_MODULE_PATH}")
 
 add_subdirectory(${CLIENT_ROOT_DIR}/3rd/SortFilterProxyModel)
 set(LIBS ${LIBS} SortFilterProxyModel)
-include(${CLIENT_ROOT_DIR}/cmake/QSimpleCrypto.cmake)
 
 include(${CLIENT_ROOT_DIR}/3rd/qrcodegen/qrcodegen.cmake)
 
@@ -110,7 +109,6 @@ include_directories(
     ${LIBSSH_INCLUDE_DIR}/include
     ${LIBSSH_ROOT_DIR}/include
     ${CLIENT_ROOT_DIR}/3rd/libssh/include
-    ${CLIENT_ROOT_DIR}/3rd/QSimpleCrypto/src/include
     ${CLIENT_ROOT_DIR}/3rd/qtkeychain/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/qtkeychain
     ${CMAKE_CURRENT_BINARY_DIR}/3rd/libssh/include
