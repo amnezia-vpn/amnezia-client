@@ -95,6 +95,18 @@ public:
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);
 
+    // Local proxy
+    QString localProxyOwnerId() const;
+    void setLocalProxyOwnerId(const QString &serverId);
+    quint16 localProxyPort() const;
+    void setLocalProxyPort(quint16 port);
+    bool isLocalProxyPortUserDefined() const;
+    void setLocalProxyPortUserDefined(bool userDefined);
+    bool isLocalProxyHttpEnabled() const;
+    void setLocalProxyHttpEnabled(bool enabled);
+    int localProxyRestartToken() const;
+    void bumpLocalProxyRestartToken();
+
 signals:
     void appLanguageChanged(QLocale locale);
     void allowedDnsServersChanged(const QStringList &servers);
@@ -108,6 +120,8 @@ signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
     void settingsCleared();
+    void localProxySettingsChanged();
+    void localProxyStartFailed(const QString &message);
 
 private:
     void setVpnSites(RouteMode mode, const QVariantMap &sites);

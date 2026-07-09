@@ -152,4 +152,3 @@ ServerCredentials ServersModel::serverCredentials(int index) const
     }
     return m_descriptions.at(index).selfHostedSshCredentials;
 }
-

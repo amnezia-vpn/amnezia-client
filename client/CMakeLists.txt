@@ -14,6 +14,10 @@ set(PACKAGES
     Core5Compat Concurrent LinguistTools
 )
 
+if(NOT ANDROID AND NOT IOS)
+    list(APPEND PACKAGES HttpServer)
+endif()
+
 execute_process(
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMAND git rev-parse --short HEAD
@@ -46,6 +50,10 @@ set(LIBS ${LIBS}
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
 )
+
+if(NOT ANDROID AND NOT IOS)
+    list(APPEND LIBS Qt6::HttpServer)
+endif()
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)

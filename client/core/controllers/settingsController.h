@@ -89,12 +89,27 @@ public:
     QLocale getAppLanguage() const;
     void setAppLanguage(const QLocale &locale);
 
+    // Local proxy
+    bool isLocalProxySupported() const;
+    bool isLocalProxyHttpEnabled() const;
+    int localProxyPort() const;
+    QString localProxyOwnerId() const;
+    bool isLocalProxyPortUserDefined() const;
+    bool setLocalProxyPort(int port);
+    bool isLocalProxyPortBusy(int port) const;
+    int findFirstAvailableLocalProxyPort(int startPort) const;
+    bool enableLocalProxy(const QString &ownerId, int port);
+    void disableLocalProxy();
+
 signals:
     void siteSplitTunnelingRouteModeChanged(RouteMode mode);
     void siteSplitTunnelingToggled(bool enabled);
     void appSplitTunnelingRouteModeChanged(AppsRouteMode mode);
     void appSplitTunnelingToggled(bool enabled);
     void appSplitTunnelingClearAppsList();
+
+    void localProxySettingsUpdated();
+    void localProxyStartFailed(const QString &message);
 
 private:
     QString getPlatform() const;

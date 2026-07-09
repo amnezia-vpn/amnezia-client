@@ -105,6 +105,8 @@
         <file>Pages2/PageSettingsDns.qml</file>
         <file>Pages2/PageSettingsKillSwitch.qml</file>
         <file>Pages2/PageSettingsKillSwitchExceptions.qml</file>
+        <file>Pages2/PageSettingsConnectionType.qml</file>
+        <file>Pages2/PageSettingsLocalProxy.qml</file>
         <file>Pages2/PageSettingsLogging.qml</file>
         <file>Pages2/PageSettingsServerData.qml</file>
         <file>Pages2/PageSettingsServerInfo.qml</file>

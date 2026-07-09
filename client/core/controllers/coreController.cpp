@@ -1,7 +1,10 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
+#include <QDebug>
 #include <QTranslator>
+#include <QStandardPaths>
 #include <QTimer>
 
 #include "core/utils/selfhosted/sshSession.h"
@@ -38,6 +41,10 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     }
     initLogging();
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    initLocalProxy();
+#endif
+
     m_translator = new QTranslator(this);
     if (m_appSettingsRepository) {
         updateTranslator(m_appSettingsRepository->getAppLanguage());
@@ -50,6 +57,69 @@ void CoreController::setQmlContextProperty(const QString &name, QObject *value)
         m_engine->rootContext()->setContextProperty(name, value);
     }
 }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+void CoreController::initLocalProxy()
+{
+    constexpr quint16 kLocalProxyApiPort = 49490;
+
+    m_proxyServer.reset(new ProxyServer(m_serversRepository, m_appSettingsRepository, this));
+
+    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this]() {
+        if (m_appSettingsRepository && m_appSettingsRepository->isLocalProxyHttpEnabled()) {
+            m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+        }
+    });
+
+    auto syncLocalProxy = [this]() {
+        if (!m_proxyServer) {
+            return;
+        }
+
+        const bool httpEnabled = m_appSettingsRepository->isLocalProxyHttpEnabled();
+
+        if (!httpEnabled) {
+            qInfo() << "Local proxy: HTTP API disabled";
+            m_proxyServer->stop();
+            return;
+        }
+
+        if (!m_proxyServer->start(kLocalProxyApiPort)) {
+            qWarning() << "Local proxy: failed to start on port" << kLocalProxyApiPort;
+            m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+            emit m_appSettingsRepository->localProxyStartFailed(tr("Local proxy failed to start. Check if the port is available."));
+            return;
+        }
+
+        if (!m_proxyServer->syncSettings()) {
+            qWarning() << "Local proxy: failed to start proxy core (Xray)";
+            m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+            emit m_appSettingsRepository->localProxyStartFailed(tr("Couldn’t start the proxy due to an internal error. Try restarting the app."));
+            return;
+        }
+
+        qInfo() << "Local proxy: running on 127.0.0.1:" << kLocalProxyApiPort;
+    };
+
+    syncLocalProxy();
+
+    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, this, syncLocalProxy);
+
+    connect(m_serversRepository, &SecureServersRepository::serverEdited, this, [this](const QString &serverId) {
+        if (m_appSettingsRepository && m_appSettingsRepository->isLocalProxyHttpEnabled()
+            && m_appSettingsRepository->localProxyOwnerId() == serverId) {
+            m_appSettingsRepository->bumpLocalProxyRestartToken();
+        }
+    });
+
+    connect(m_serversRepository, &SecureServersRepository::serverRemoved, this, [this](const QString &serverId, int) {
+        if (m_appSettingsRepository && m_appSettingsRepository->localProxyOwnerId() == serverId) {
+            m_appSettingsRepository->setLocalProxyOwnerId(QString());
+            m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+        }
+    });
+}
+#endif
 
 void CoreController::initModels()
 {
@@ -199,6 +269,11 @@ void CoreController::initControllers()
 
     m_pageController = new PageController(m_serversController, m_settingsController, this);
     setQmlContextProperty("PageController", m_pageController);
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    connect(m_connectionController, &ConnectionController::localProxyStoppedBecauseVpnTurnedOn, m_pageController,
+            &PageController::showNotificationMessage);
+#endif
 
     m_serversUiController = new ServersUiController(m_serversController, m_settingsController, m_serversModel, m_containersModel, m_defaultServerContainersModel, this);
     setQmlContextProperty("ServersUiController", m_serversUiController);

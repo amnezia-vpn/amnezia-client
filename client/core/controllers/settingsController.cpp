@@ -8,9 +8,18 @@
 #include "version.h"
 #include "ui/utils/qAutoStart.h"
 #include "logger.h"
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    #include "core/local-proxy/portavailabilityhelper.h"
+#endif
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
+
+namespace {
+constexpr int kDefaultProxyPort = 10808;
+constexpr int kLocalProxyPortMin = 1024;
+constexpr int kLocalProxyPortMax = 65535;
+}
 
 QString getPlatformName()
 {
@@ -38,6 +47,11 @@ SettingsController::SettingsController(SecureServersRepository* serversRepositor
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     m_isDevModeEnabled = m_appSettingsRepository->isDevGatewayEnv();
+
+    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, this,
+            &SettingsController::localProxySettingsUpdated);
+    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxyStartFailed, this,
+            &SettingsController::localProxyStartFailed);
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -364,5 +378,116 @@ void SettingsController::disablePremV1MigrationReminder()
 QString SettingsController::nextAvailableServerName() const
 {
     return m_serversRepository->nextAvailableServerName();
+}
+
+bool SettingsController::isLocalProxySupported() const
+{
+#ifdef AMNEZIA_DESKTOP
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool SettingsController::isLocalProxyHttpEnabled() const
+{
+    return m_appSettingsRepository->isLocalProxyHttpEnabled();
+}
+
+int SettingsController::localProxyPort() const
+{
+    return static_cast<int>(m_appSettingsRepository->localProxyPort());
+}
+
+QString SettingsController::localProxyOwnerId() const
+{
+    return m_appSettingsRepository->localProxyOwnerId();
+}
+
+bool SettingsController::isLocalProxyPortUserDefined() const
+{
+    return m_appSettingsRepository->isLocalProxyPortUserDefined();
+}
+
+bool SettingsController::setLocalProxyPort(int port)
+{
+    if (port < kLocalProxyPortMin || port > kLocalProxyPortMax) {
+        return false;
+    }
+
+    if (m_appSettingsRepository->localProxyPort() == static_cast<quint16>(port)) {
+        m_appSettingsRepository->setLocalProxyPortUserDefined(true);
+        return true;
+    }
+
+    m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(port));
+    m_appSettingsRepository->setLocalProxyPortUserDefined(true);
+    return true;
+}
+
+bool SettingsController::isLocalProxyPortBusy(int port) const
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    return !PortAvailabilityHelper::isPortAvailable(port);
+#else
+    Q_UNUSED(port);
+    return false;
+#endif
+}
+
+int SettingsController::findFirstAvailableLocalProxyPort(int startPort) const
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    const auto port = PortAvailabilityHelper::findFirstAvailablePort(startPort, kLocalProxyPortMax);
+    return port ? *port : -1;
+#else
+    Q_UNUSED(startPort);
+    return -1;
+#endif
+}
+
+bool SettingsController::enableLocalProxy(const QString &ownerId, int port)
+{
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    Q_UNUSED(ownerId);
+    Q_UNUSED(port);
+    return false;
+#else
+    if (port < kLocalProxyPortMin || port > kLocalProxyPortMax || ownerId.isEmpty()) {
+        return false;
+    }
+
+    if (m_appSettingsRepository->isLocalProxyHttpEnabled() && m_appSettingsRepository->localProxyOwnerId() != ownerId) {
+        return false;
+    }
+
+    int selectedPort = port;
+
+    const bool isUserDefinedPort = m_appSettingsRepository->isLocalProxyPortUserDefined();
+    if (isUserDefinedPort) {
+        if (!PortAvailabilityHelper::isPortAvailable(selectedPort)) {
+            return false;
+        }
+    } else if (selectedPort != kDefaultProxyPort && !PortAvailabilityHelper::isPortAvailable(selectedPort)) {
+        return false;
+    }
+
+    if (m_appSettingsRepository->localProxyPort() != static_cast<quint16>(selectedPort)) {
+        m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(selectedPort));
+    }
+    m_appSettingsRepository->setLocalProxyPortUserDefined(isUserDefinedPort);
+
+    m_appSettingsRepository->setLocalProxyOwnerId(ownerId);
+    m_appSettingsRepository->setLocalProxyHttpEnabled(true);
+
+    return true;
+#endif
+}
+
+void SettingsController::disableLocalProxy()
+{
+    if (m_appSettingsRepository->isLocalProxyHttpEnabled()) {
+        m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+    }
 }
 

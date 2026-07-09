@@ -320,11 +320,27 @@ PageType {
             }
 
             LabelWithButtonType {
-                id: vpnKey
+                id: connectionSwitcher
 
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 0
+                text: qsTr("Connection")
+                descriptionText: SettingsController.isLocalProxySupported
+                                  ? qsTr("Protocol selection and local proxy setup")
+                                  : qsTr("Protocol selection")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsConnectionType)
+                }
+            }
+
+            DividerType {}
+
+            LabelWithButtonType {
+                id: vpnKey
+
+                Layout.fillWidth: true
                 visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")

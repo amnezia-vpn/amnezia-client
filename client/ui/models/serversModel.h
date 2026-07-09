@@ -10,6 +10,7 @@
 class ServersModel : public QAbstractListModel
 {
     Q_OBJECT
+
 public:
     enum Roles {
         NameRole = Qt::UserRole + 1,

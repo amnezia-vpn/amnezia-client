@@ -10,7 +10,9 @@ deploy/build_64/*
 winbuild*.bat
 .cache/
 .vscode/
-
+.cursorignore
+.cursor/
+.venv/
 
 # Qt-es
 /.qmake.cache

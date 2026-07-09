@@ -31,6 +31,10 @@ public:
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
+    Q_PROPERTY(bool isLocalProxySupported READ isLocalProxySupported CONSTANT)
+    Q_PROPERTY(bool isLocalProxyHttpEnabled READ isLocalProxyHttpEnabled NOTIFY localProxySettingsUpdated)
+    Q_PROPERTY(int localProxyPort READ localProxyPort WRITE setLocalProxyPort NOTIFY localProxySettingsUpdated)
+    Q_PROPERTY(QString localProxyOwnerId READ localProxyOwnerId NOTIFY localProxySettingsUpdated)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -101,6 +105,17 @@ public slots:
     bool isHomeAdLabelVisible();
     void disableHomeAdLabel();
 
+    bool isLocalProxySupported() const;
+    bool isLocalProxyHttpEnabled() const;
+    int localProxyPort() const;
+    QString localProxyOwnerId() const;
+    bool setLocalProxyPort(int port);
+    bool isLocalProxyPortBusy(int port) const;
+    bool isLocalProxyPortUserDefined() const;
+    int findFirstAvailableLocalProxyPort(int startPort) const;
+    bool enableLocalProxy(const QString &ownerId, int port);
+    void disableLocalProxy();
+
 signals:
     void primaryDnsChanged();
     void secondaryDnsChanged();
@@ -135,6 +150,8 @@ signals:
     void isHomeAdLabelVisibleChanged(bool visible);
     void autoStartChanged();
     void startMinimizedChanged();
+    void localProxySettingsUpdated();
+    void localProxyStartFailed(const QString &message);
 
 private:
     SettingsController* m_settingsController;

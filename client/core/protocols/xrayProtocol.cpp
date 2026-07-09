@@ -68,6 +68,8 @@ ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
 
+    m_teardownDone = false;
+
     // Inject SOCKS5 auth into the inbound before starting xray.
     // Re-uses existing credentials if the config already has them (e.g. imported config).
     amnezia::serialization::inbounds::InboundCredentials creds;
@@ -119,6 +121,17 @@ ErrorCode XrayProtocol::start()
 void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
+
+    // The destructor calls stop() as a safety net, but stop() is also called
+    // explicitly on disconnect. Because stop() spins the event loop via
+    // waitForFinished(), the local proxy may start its own xray on the shared
+    // global engine in between. Running the teardown (xrayStop) twice would then
+    // kill the proxy's just-started xray. Run the engine teardown only once.
+    if (m_teardownDone) {
+        qDebug() << "XrayProtocol::stop() teardown already done, skipping";
+        return;
+    }
+    m_teardownDone = true;
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();

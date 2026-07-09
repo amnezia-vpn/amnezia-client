@@ -88,7 +88,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'linux_gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -201,7 +201,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2022_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -365,7 +365,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'desktop'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver qtwebsockets'
         arch: 'clang_64'
         dir: ${{ runner.temp }}
         set-env: 'true'
@@ -377,7 +377,7 @@ jobs:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
         target: 'ios'
-        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtmultimedia qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -510,7 +510,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         set-env: 'true'
@@ -747,7 +747,7 @@ jobs:
       ANDROID_PLATFORM: android-28
       NDK_VERSION: 27.0.11718014
       QT_VERSION: 6.10.3
-      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools qthttpserver qtwebsockets'
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}

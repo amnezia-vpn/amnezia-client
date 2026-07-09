@@ -37,6 +37,11 @@ SettingsUiController::SettingsUiController(SettingsController* settingsControlle
     if (m_settingsController->isDevGatewayEnv()) {
         m_settingsController->enableDevMode();
     }
+
+    connect(m_settingsController, &SettingsController::localProxySettingsUpdated, this,
+            &SettingsUiController::localProxySettingsUpdated);
+    connect(m_settingsController, &SettingsController::localProxyStartFailed, this,
+            &SettingsUiController::localProxyStartFailed);
 }
 
 void SettingsUiController::toggleAmneziaDns(bool enable)
@@ -357,4 +362,54 @@ void SettingsUiController::disableHomeAdLabel()
 {
     m_settingsController->disableHomeAdLabel();
     emit isHomeAdLabelVisibleChanged(false);
+}
+
+bool SettingsUiController::isLocalProxySupported() const
+{
+    return m_settingsController->isLocalProxySupported();
+}
+
+bool SettingsUiController::isLocalProxyHttpEnabled() const
+{
+    return m_settingsController->isLocalProxyHttpEnabled();
+}
+
+int SettingsUiController::localProxyPort() const
+{
+    return m_settingsController->localProxyPort();
+}
+
+QString SettingsUiController::localProxyOwnerId() const
+{
+    return m_settingsController->localProxyOwnerId();
+}
+
+bool SettingsUiController::setLocalProxyPort(int port)
+{
+    return m_settingsController->setLocalProxyPort(port);
+}
+
+bool SettingsUiController::isLocalProxyPortBusy(int port) const
+{
+    return m_settingsController->isLocalProxyPortBusy(port);
+}
+
+bool SettingsUiController::isLocalProxyPortUserDefined() const
+{
+    return m_settingsController->isLocalProxyPortUserDefined();
+}
+
+int SettingsUiController::findFirstAvailableLocalProxyPort(int startPort) const
+{
+    return m_settingsController->findFirstAvailableLocalProxyPort(startPort);
+}
+
+bool SettingsUiController::enableLocalProxy(const QString &ownerId, int port)
+{
+    return m_settingsController->enableLocalProxy(ownerId, port);
+}
+
+void SettingsUiController::disableLocalProxy()
+{
+    m_settingsController->disableLocalProxy();
 }

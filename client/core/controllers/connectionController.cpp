@@ -218,6 +218,13 @@ ErrorCode ConnectionController::openConnection(const QString &serverId)
         return errorCode;
     }
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (m_appSettingsRepository && m_appSettingsRepository->isLocalProxyHttpEnabled()) {
+        m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+        emit localProxyStoppedBecauseVpnTurnedOn(tr("Local proxy stopped because VPN was turned on"));
+    }
+#endif
+
     emit openConnectionRequested(serverId, container, vpnConfiguration);
     return ErrorCode::NoError;
 }

@@ -78,6 +78,7 @@
 #include "ui/models/newsModel.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    #include "core/local-proxy/proxyserver.h"
     #include "ui/utils/notificationHandler.h"
 #endif
 
@@ -143,6 +144,9 @@ private:
     void initAppleController();
     void initLogging();
     void initSignalHandlers();
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    void initLocalProxy();
+#endif
     void setQmlContextProperty(const QString &name, QObject *value);
 
     QQmlApplicationEngine *m_engine {}; // TODO use parent child system here?
@@ -228,6 +232,10 @@ private:
     TelemtConfigModel* m_telemtConfigModel;
 
     CoreSignalHandlers* m_signalHandlers;
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    QScopedPointer<ProxyServer> m_proxyServer;
+#endif
 };
 
 #endif // CORECONTROLLER_H

@@ -5,6 +5,8 @@
 #include <QJsonObject>
 #include <QUuid>
 
+#include <limits>
+
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
@@ -457,4 +459,60 @@ QByteArray SecureAppSettingsRepository::xraySavedConfigs() const
 void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
 {
     setValue("Xray/savedConfigs", data);
+}
+
+QString SecureAppSettingsRepository::localProxyOwnerId() const
+{
+    return value("Conf/localProxyOwnerId", "").toString();
+}
+
+void SecureAppSettingsRepository::setLocalProxyOwnerId(const QString &serverId)
+{
+    setValue("Conf/localProxyOwnerId", serverId);
+    emit localProxySettingsChanged();
+}
+
+quint16 SecureAppSettingsRepository::localProxyPort() const
+{
+    return static_cast<quint16>(value("Conf/localProxyPort", 10808).toUInt());
+}
+
+void SecureAppSettingsRepository::setLocalProxyPort(quint16 port)
+{
+    setValue("Conf/localProxyPort", port);
+    emit localProxySettingsChanged();
+}
+
+bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
+{
+    return value("Conf/localProxyPortUserDefined", false).toBool();
+}
+
+void SecureAppSettingsRepository::setLocalProxyPortUserDefined(bool userDefined)
+{
+    setValue("Conf/localProxyPortUserDefined", userDefined);
+}
+
+bool SecureAppSettingsRepository::isLocalProxyHttpEnabled() const
+{
+    return value("Conf/localProxyHttpEnabled", false).toBool();
+}
+
+void SecureAppSettingsRepository::setLocalProxyHttpEnabled(bool enabled)
+{
+    setValue("Conf/localProxyHttpEnabled", enabled);
+    emit localProxySettingsChanged();
+}
+
+int SecureAppSettingsRepository::localProxyRestartToken() const
+{
+    return value("Conf/localProxyRestartToken", 0).toInt();
+}
+
+void SecureAppSettingsRepository::bumpLocalProxyRestartToken()
+{
+    const int current = localProxyRestartToken();
+    const int next = (current == std::numeric_limits<int>::max()) ? 0 : (current + 1);
+    setValue("Conf/localProxyRestartToken", next);
+    emit localProxySettingsChanged();
 }
