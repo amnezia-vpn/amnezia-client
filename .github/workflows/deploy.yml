@@ -414,6 +414,10 @@ jobs:
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
         include:
+          - xcode-version: 16.2
+            os: macos-15
+          - xcode-version: 16.4
+            os: macos-15
           - xcode-version: 26.4
             os: macos-26
 
@@ -450,7 +454,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -550,6 +554,10 @@ jobs:
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
         include:
+          - xcode-version: 16.2
+            os: macos-15
+          - xcode-version: 16.4
+            os: macos-15
           - xcode-version: 26.4
             os: macos-26
 
@@ -586,7 +594,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS-NE:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS-NE
     if: ${{ always() }}
@@ -610,6 +618,12 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
     - uses: ./.github/actions/apple-setup-provisioning-profile
       with:
         provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
@@ -646,12 +660,6 @@ jobs:
           export PATH=$PATH:~/go/bin
           go install golang.org/x/mobile/cmd/gomobile@latest
           gomobile init
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
 
     - name: 'Setup python'
       uses: actions/setup-python@v6

@@ -257,6 +257,10 @@ install(SCRIPT ${QT_DEPLOY_SCRIPT}
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)
     list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
+    set_target_properties(${PROJECT} PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
+        XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
+    )
 endif()
 if (LINUX AND NOT ANDROID)
     list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/linux/update-resolv-conf.sh")
