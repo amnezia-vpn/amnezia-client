@@ -1,5 +1,8 @@
 #include "servers_model.h"
 
+#include <QJsonArray>
+#include <QStringList>
+
 #include "core/api/apiDefs.h"
 #include "core/controllers/serverController.h"
 #include "core/networkUtilities.h"
@@ -162,6 +165,26 @@ QVariant ServersModel::data(const QModelIndex &index, int role) const
     }
     case ApiServerCountryCodeRole: {
         return apiConfig.value(configKey::serverCountryCode).toString();
+    }
+    case ApiServiceProtocolRole: {
+        return apiConfig.value(configKey::serviceProtocol).toString();
+    }
+    case ApiAvailableProtocolsRole: {
+        const auto currentCountryCode = apiConfig.value(configKey::serverCountryCode).toString();
+        const auto availableCountries = apiConfig.value(configKey::availableCountries).toArray();
+
+        QStringList availableProtocols;
+        for (const auto &country : availableCountries) {
+            const auto countryObject = country.toObject();
+            if (countryObject.value(configKey::serverCountryCode).toString() != currentCountryCode) {
+                continue;
+            }
+            for (const auto &protocol : countryObject.value(apiDefs::key::availableProtocols).toArray()) {
+                availableProtocols.push_back(protocol.toString());
+            }
+            break;
+        }
+        return availableProtocols;
     }
     case HasAmneziaDns: {
         QString primaryDns = server.value(config_key::dns1).toString();
@@ -471,6 +494,8 @@ QHash<int, QByteArray> ServersModel::roleNames() const
     roles[IsCountrySelectionAvailableRole] = "isCountrySelectionAvailable";
     roles[ApiAvailableCountriesRole] = "apiAvailableCountries";
     roles[ApiServerCountryCodeRole] = "apiServerCountryCode";
+    roles[ApiServiceProtocolRole] = "apiServiceProtocol";
+    roles[ApiAvailableProtocolsRole] = "apiAvailableProtocols";
 
     roles[IsAdVisibleRole] = "isAdVisible";
     roles[AdHeaderRole] = "adHeader";

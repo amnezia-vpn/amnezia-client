@@ -34,7 +34,6 @@ namespace apiDefs
         constexpr QLatin1String serviceType("service_type");
         constexpr QLatin1String cliVersion("cli_version");
         constexpr QLatin1String cliName("cli_name");
-        constexpr QLatin1String supportedProtocols("supported_protocols");
 
         constexpr QLatin1String vpnKey("vpn_key");
         constexpr QLatin1String config("config");
@@ -52,6 +51,7 @@ namespace apiDefs
         constexpr QLatin1String appLanguage("app_language");
 
         constexpr QLatin1String availableCountries("available_countries");
+        constexpr QLatin1String availableProtocols("available_protocols");
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
         constexpr QLatin1String subscriptionEndDate("subscription_end_date");

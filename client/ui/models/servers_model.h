@@ -47,6 +47,8 @@ public:
         IsCountrySelectionAvailableRole,
         ApiAvailableCountriesRole,
         ApiServerCountryCodeRole,
+        ApiServiceProtocolRole,
+        ApiAvailableProtocolsRole,
         IsAdVisibleRole,
         AdHeaderRole,
         AdDescriptionRole,
