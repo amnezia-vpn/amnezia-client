@@ -1036,7 +1036,7 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
         ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                         originalTransactionId, isTestPurchase,
                                                         &currentDuplicateServerIndex,
-                                                        QStringLiteral("v1/subscriptions/restore"));
+                                                        QStringLiteral("v1/restore_subscription"));
 
         qInfo().noquote() << "[IAP][processAppStoreRestore] importServiceFromMarket errorCode=" << static_cast<int>(errorCode)
                           << "for originalTransactionId=" << originalTransactionId;
