@@ -917,7 +917,13 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         QJsonObject purchase = purchases.at(0).toObject();
         QString token = purchase.value("purchaseToken").toString();
         bool isAcknowledged = purchase.value("isAcknowledged").toBool();
-        qInfo() << "[Billing] Purchase success. purchaseToken:" << token << "isAcknowledged:" << isAcknowledged;
+        int purchaseState = purchase.value("purchaseState").toInt(-1);
+        qInfo() << "[Billing] Purchase success. purchaseToken:" << token << "isAcknowledged:" << isAcknowledged << "purchaseState:" << purchaseState;
+        // purchaseState 1 = PURCHASED, 0 = PENDING (user must confirm payment in Google Play)
+        if (purchaseState != 1) {
+            qWarning() << "[Billing] Purchase is in PENDING state, waiting for user to confirm payment";
+            return qMakePair(false, QStringLiteral("pending"));
+        }
         if (!isAcknowledged) {
             QJsonObject ackResult = androidController->acknowledgePurchase(token);
             if (ackResult.value("responseCode").toInt(-1) != 0) {
@@ -935,7 +941,13 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     purchaseOk = watcher.result().first;
     purchaseToken = watcher.result().second;
 
-    if (!purchaseOk || purchaseToken.isEmpty()) {
+    if (!purchaseOk) {
+        if (purchaseToken == QStringLiteral("pending")) {
+            return ErrorCode::ApiPurchasePendingError;
+        }
+        return ErrorCode::ApiPurchaseError;
+    }
+    if (purchaseToken.isEmpty()) {
         return ErrorCode::ApiPurchaseError;
     }
 
