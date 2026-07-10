@@ -98,6 +98,13 @@ namespace amnezia
 
         constexpr char configVersion[] = "config_version";
 
+        constexpr char sendPayload[] = "send_payload";
+        constexpr char sendPayloadEndpoint[] = "endpoint";
+        constexpr char sendPayloadTimeoutMs[] = "timeout_ms";
+        constexpr char sendPayloadProtocol[] = "protocol";
+        constexpr char sendPayloadData[] = "payload";
+        constexpr char sendPayloadExpectedResponse[] = "expected_response";
+
         constexpr char splitTunnelSites[] = "splitTunnelSites";
         constexpr char splitTunnelType[] = "splitTunnelType";
 

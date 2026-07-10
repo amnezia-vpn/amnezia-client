@@ -23,6 +23,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
     ${CLIENT_ROOT_DIR}/core/sshclient.h
     ${CLIENT_ROOT_DIR}/core/networkUtilities.h
+    ${CLIENT_ROOT_DIR}/core/payloadSender.h
     ${CLIENT_ROOT_DIR}/core/serialization/serialization.h
     ${CLIENT_ROOT_DIR}/core/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
@@ -69,6 +70,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/protocols/vpnprotocol.cpp
     ${CLIENT_ROOT_DIR}/core/sshclient.cpp
     ${CLIENT_ROOT_DIR}/core/networkUtilities.cpp
+    ${CLIENT_ROOT_DIR}/core/payloadSender.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/outbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/inbound.cpp
     ${CLIENT_ROOT_DIR}/core/serialization/ss.cpp

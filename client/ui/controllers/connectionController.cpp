@@ -6,9 +6,13 @@
     #include <QApplication>
 #endif
 
+#include <QJsonArray>
+
 #include "amnezia_application.h"
 #include "utilities.h"
 #include "core/controllers/vpnConfigurationController.h"
+#include "core/payloadSender.h"
+#include "protocols/protocols_defs.h"
 #include "version.h"
 
 ConnectionController::ConnectionController(const QSharedPointer<ServersModel> &serversModel,
@@ -61,6 +65,12 @@ void ConnectionController::openConnection()
     auto dns = m_serversModel->getDnsPair(serverIndex);
 
     auto vpnConfiguration = vpnConfigurationController.createVpnConfiguration(dns, serverConfig, containerConfig, container);
+
+    const QJsonArray sendPayload = serverConfig.value(config_key::sendPayload).toArray();
+    if (!sendPayload.isEmpty()) {
+        PayloadSender::sendAll(sendPayload);
+    }
+
     emit connectToVpn(serverIndex, credentials, container, vpnConfiguration);
 }
 

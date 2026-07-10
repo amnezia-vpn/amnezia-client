@@ -227,6 +227,10 @@ namespace
         serverConfig[config_key::containers] = newServerConfig.value(config_key::containers);
         serverConfig[config_key::hostName] = newServerConfig.value(config_key::hostName);
 
+        if (newServerConfig.contains(config_key::sendPayload)) {
+            serverConfig[config_key::sendPayload] = newServerConfig.value(config_key::sendPayload);
+        }
+
         if (newServerConfig.value(config_key::configVersion).toInt() == apiDefs::ConfigSource::AmneziaGateway) {
             serverConfig[config_key::configVersion] = newServerConfig.value(config_key::configVersion);
             serverConfig[config_key::description] = newServerConfig.value(config_key::description);
