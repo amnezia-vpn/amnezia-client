@@ -119,6 +119,7 @@ private:
         bool isConnectEvent = false;
         bool reloadServiceConfig = false;
         bool wasSubscriptionExpired = false;
+        bool fromValidateConfig = false;
         SubscriptionController::ProtocolData updateProtocolData;
 
         bool isPending = false;
@@ -126,6 +127,7 @@ private:
 
 private:
     void emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName);
+    void emitCaptchaUpdateSuccess();
     void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);
 
     QList<QString> getQrCodes();

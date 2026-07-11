@@ -83,7 +83,8 @@ public:
 
     ErrorCode prepareVpnKeyExport(const QString &serverId, QString &vpnKey);
 
-    ErrorCode validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers);
+    ErrorCode validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers,
+                                      CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
 
     void removeApiConfig(const QString &serverId);
 

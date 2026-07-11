@@ -269,14 +269,7 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
 
     if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
-        QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
-        if (jsonDoc.isObject()) {
-            QJsonObject jsonObj = jsonDoc.object();
-            captchaInfo.captchaId = jsonObj.value("captcha_id").toString();
-            captchaInfo.captchaImageBase64 = jsonObj.value("captcha_image").toString();
-            captchaInfo.hint = jsonObj.value("hint").toString();
-            captchaInfo.isRequired = true;
-        }
+        fillCaptchaInfoFromResponse(responseBody, captchaInfo);
         return errorCode;
     }
 
@@ -750,19 +743,20 @@ ErrorCode SubscriptionController::prepareVpnKeyExport(const QString &serverId, Q
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers)
+ErrorCode SubscriptionController::validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers,
+                                                         CaptchaInfo *captchaInfoOut, ProtocolData *usedProtocolDataOut)
 {
     if (!m_serversRepository->apiV2Config(serverId).has_value()) {
         return ErrorCode::NoError;
     }
 
     if (!hasInstalledContainers) {
-        return updateServiceFromGateway(serverId, "", true);
+        return updateServiceFromGateway(serverId, "", true, captchaInfoOut, usedProtocolDataOut);
     }
 
     if (isApiKeyExpired(serverId)) {
         qDebug() << "attempt to update api config by expires_at event";
-        return updateServiceFromGateway(serverId, "", true);
+        return updateServiceFromGateway(serverId, "", true, captchaInfoOut, usedProtocolDataOut);
     }
 
     return ErrorCode::NoError;
@@ -1096,17 +1090,7 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
     appendProtocolDataToApiPayload(serviceProtocol, protocolData, apiPayload);
 
     apiPayload["captcha_id"] = captchaId;
-    QString normalizedSolution;
-    normalizedSolution.reserve(captchaSolution.size());
-    for (const QChar &ch : captchaSolution) {
-        const ushort u = ch.unicode();
-        if (u >= '0' && u <= '9') {
-            normalizedSolution += ch;
-        } else if (u >= 0xFF10 && u <= 0xFF19) {
-            normalizedSolution += QChar(static_cast<char16_t>(u - 0xFF10 + '0'));
-        }
-    }
-    apiPayload["captcha_solution"] = normalizedSolution.isEmpty() ? captchaSolution.trimmed() : normalizedSolution;
+    apiPayload["captcha_solution"] = normalizeCaptchaSolution(captchaSolution);
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
@@ -1114,16 +1098,7 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
         if (retryCaptchaOut
             && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
                 || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
-            const QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
-            if (jsonDoc.isObject()) {
-                const QJsonObject jsonObj = jsonDoc.object();
-                if (jsonObj.contains(QStringLiteral("captcha_id")) && jsonObj.contains(QStringLiteral("captcha_image"))) {
-                    retryCaptchaOut->captchaId = jsonObj.value(QStringLiteral("captcha_id")).toString();
-                    retryCaptchaOut->captchaImageBase64 = jsonObj.value(QStringLiteral("captcha_image")).toString();
-                    retryCaptchaOut->hint = jsonObj.value(QStringLiteral("hint")).toString();
-                    retryCaptchaOut->isRequired = true;
-                }
-            }
+            fillCaptchaInfoFromResponse(responseBody, *retryCaptchaOut);
         }
         return errorCode;
     }
