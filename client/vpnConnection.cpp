@@ -6,6 +6,7 @@
 #include <QHostInfo>
 #include <QJsonObject>
 #include <QObject>
+#include <QSet>
 #include <QSharedPointer>
 #include <QString>
 #include <QStringList>
@@ -35,6 +36,29 @@
 
 using namespace ProtocolUtils;
 
+#ifdef Q_OS_WIN
+namespace
+{
+constexpr int SiteDnsLookupConcurrency = 64;
+constexpr int SiteDnsLookupTimeoutMs = 15000;
+}
+
+struct VpnConnection::SiteResolutionState
+{
+    DockerContainer container;
+    amnezia::RouteMode routeMode = amnezia::RouteMode::VpnAllSites;
+    QJsonObject vpnConfiguration;
+    QStringList hostnames;
+    QStringList resolvedIpv4Addresses;
+    QSet<int> lookupIds;
+    int nextHostnameIndex = 0;
+    int activeLookups = 0;
+    int completedLookups = 0;
+    int failedLookups = 0;
+    bool finished = false;
+};
+#endif
+
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this)
 {
@@ -47,6 +71,9 @@ VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureA
 
 VpnConnection::~VpnConnection()
 {
+#ifdef Q_OS_WIN
+    cancelSiteDnsResolution();
+#endif
 }
 
 void VpnConnection::onBytesChanged(quint64 receivedBytes, quint64 sentBytes)
@@ -215,9 +242,11 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
         if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         } else {
+#ifndef Q_OS_WIN
             if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
                 ips.append(i.value().toString());
             }
+#endif
             sites.append(i.key());
         }
     }
@@ -229,26 +258,53 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
 
     // re-resolve domains
     for (const QString &site : sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
-            const QList<QHostAddress> &addresses = hostInfo.addresses();
-            QString ipv4Addr;
+        const auto cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
+            if (hostInfo.error() != QHostInfo::NoError) {
+                qWarning() << "VpnConnection::addSitesRoutes: failed to resolve" << site
+                           << hostInfo.errorString();
+                return;
+            }
+
+            QStringList ipv4Addresses;
             for (const QHostAddress &addr : hostInfo.addresses()) {
                 if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                    const QString &ip = addr.toString();
-                    // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
-                    if (!ips.contains(ip)) {
-                        IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
-                            iface->routeAddList(gw, QStringList() << ip);
-                        });
-                        m_appSettingsRepository->addVpnSite(mode, site, ip);
-                    }
-                    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                        auto reply = iface->flushDns();
-                        if (reply.waitForFinished() || !reply.returnValue())
-                            qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
-                    });
-                    break;
+                    ipv4Addresses.append(addr.toString());
                 }
+            }
+            ipv4Addresses.removeDuplicates();
+
+            if (ipv4Addresses.isEmpty()) {
+                qWarning() << "VpnConnection::addSitesRoutes: no IPv4 address for" << site;
+                return;
+            }
+
+            QStringList addressesForRoutes = ipv4Addresses;
+#ifndef Q_OS_WIN
+            if (addressesForRoutes.size() > 1) {
+                addressesForRoutes = { addressesForRoutes.constFirst() };
+            }
+#endif
+
+            QStringList addressesToAdd;
+            for (const QString &address : addressesForRoutes) {
+                if (!ips.contains(address)) {
+                    addressesToAdd.append(address);
+                }
+            }
+            addressesToAdd.removeDuplicates();
+
+            if (!addressesToAdd.isEmpty()) {
+                IpcClient::withInterface([gw, addressesToAdd](QSharedPointer<IpcInterfaceReplica> iface) {
+                    iface->routeAddList(gw, addressesToAdd);
+                });
+
+                // Keep the existing single-IP settings format for JSON compatibility.
+                m_appSettingsRepository->addVpnSite(mode, site, addressesToAdd.constFirst());
+                IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+                    auto reply = iface->flushDns();
+                    if (!reply.waitForFinished() || !reply.returnValue())
+                        qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
+                });
             }
         };
         QHostInfo::lookupHost(site, this, cbResolv);
@@ -302,6 +358,154 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_remoteAddress = NetworkUtilities::getIPAddress(vpnConfiguration.value(configKey::hostName).toString());
     setConnectionState(Vpn::ConnectionState::Connecting);
 
+#ifdef Q_OS_WIN
+    cancelSiteDnsResolution();
+    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()
+        && m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllSites) {
+        resolveSiteAddressesAndConnect(container, vpnConfiguration);
+        return;
+    }
+#endif
+
+    continueConnectToVpn(container, vpnConfiguration, {}, false);
+}
+
+#ifdef Q_OS_WIN
+void VpnConnection::resolveSiteAddressesAndConnect(DockerContainer container, const QJsonObject &vpnConfiguration)
+{
+    auto state = QSharedPointer<SiteResolutionState>::create();
+    state->container = container;
+    state->vpnConfiguration = vpnConfiguration;
+
+    state->routeMode = m_appSettingsRepository->routeMode();
+    const QVariantMap sites = m_appSettingsRepository->vpnSites(state->routeMode);
+    for (auto it = sites.constBegin(); it != sites.constEnd(); ++it) {
+        if (NetworkUtilities::checkIpSubnetFormat(it.key())) {
+            state->resolvedIpv4Addresses.append(it.key());
+        } else {
+            state->hostnames.append(it.key());
+        }
+    }
+    state->hostnames.removeDuplicates();
+    state->resolvedIpv4Addresses.removeDuplicates();
+
+    qDebug() << "VpnConnection: resolving site split tunneling hostnames"
+             << "routeMode=" << state->routeMode
+             << "hostnameCount=" << state->hostnames.size()
+             << "explicitAddressCount=" << state->resolvedIpv4Addresses.size();
+
+    m_siteResolutionState = state;
+
+    QTimer::singleShot(SiteDnsLookupTimeoutMs, this, [this, state]() {
+        if (m_siteResolutionState == state && !state->finished) {
+            finishSiteDnsResolution(state, true);
+        }
+    });
+
+    startSiteDnsLookups(state);
+}
+
+void VpnConnection::startSiteDnsLookups(const QSharedPointer<SiteResolutionState> &state)
+{
+    if (m_siteResolutionState != state || state->finished) {
+        return;
+    }
+
+    while (state->activeLookups < SiteDnsLookupConcurrency
+           && state->nextHostnameIndex < state->hostnames.size()) {
+        const QString hostname = state->hostnames.at(state->nextHostnameIndex++);
+        state->activeLookups++;
+
+        const int lookupId = QHostInfo::lookupHost(hostname, this, [this, state](const QHostInfo &hostInfo) {
+            if (m_siteResolutionState != state || state->finished) {
+                return;
+            }
+
+            state->lookupIds.remove(hostInfo.lookupId());
+            state->activeLookups--;
+            state->completedLookups++;
+
+            QStringList ipv4Addresses;
+            for (const QHostAddress &address : hostInfo.addresses()) {
+                if (address.protocol() == QAbstractSocket::IPv4Protocol) {
+                    ipv4Addresses.append(address.toString());
+                }
+            }
+            ipv4Addresses.removeDuplicates();
+
+            if (hostInfo.error() != QHostInfo::NoError || ipv4Addresses.isEmpty()) {
+                state->failedLookups++;
+            } else {
+                state->resolvedIpv4Addresses.append(ipv4Addresses);
+            }
+
+            startSiteDnsLookups(state);
+        });
+        state->lookupIds.insert(lookupId);
+    }
+
+    if (state->activeLookups == 0 && state->nextHostnameIndex >= state->hostnames.size()) {
+        finishSiteDnsResolution(state, false);
+    }
+}
+
+void VpnConnection::finishSiteDnsResolution(const QSharedPointer<SiteResolutionState> &state, bool timedOut)
+{
+    if (m_siteResolutionState != state || state->finished) {
+        return;
+    }
+
+    state->finished = true;
+    const QSet<int> lookupIds = state->lookupIds;
+    for (int lookupId : lookupIds) {
+        QHostInfo::abortHostLookup(lookupId);
+    }
+    state->lookupIds.clear();
+    state->resolvedIpv4Addresses.removeDuplicates();
+
+    qDebug() << "VpnConnection: site split DNS resolution finished"
+             << "timedOut=" << timedOut
+             << "requestedHostnames=" << state->hostnames.size()
+             << "completedLookups=" << state->completedLookups
+             << "failedLookups=" << state->failedLookups
+             << "resolvedAddressCount=" << state->resolvedIpv4Addresses.size();
+
+    const DockerContainer container = state->container;
+    const QJsonObject vpnConfiguration = state->vpnConfiguration;
+    const QStringList resolvedSiteAddresses = state->resolvedIpv4Addresses;
+    m_siteResolutionState.clear();
+
+    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()
+        && m_appSettingsRepository->routeMode() != state->routeMode) {
+        qDebug() << "VpnConnection: route mode changed during DNS resolution; restarting resolution";
+        resolveSiteAddressesAndConnect(container, vpnConfiguration);
+        return;
+    }
+
+    continueConnectToVpn(container, vpnConfiguration, resolvedSiteAddresses, true);
+}
+
+void VpnConnection::cancelSiteDnsResolution()
+{
+    if (m_siteResolutionState.isNull()) {
+        return;
+    }
+
+    const auto state = m_siteResolutionState;
+    state->finished = true;
+    const QSet<int> lookupIds = state->lookupIds;
+    for (int lookupId : lookupIds) {
+        QHostInfo::abortHostLookup(lookupId);
+    }
+    state->lookupIds.clear();
+    m_siteResolutionState.clear();
+}
+#endif
+
+void VpnConnection::continueConnectToVpn(DockerContainer container, const QJsonObject &vpnConfiguration,
+                                         const QStringList &resolvedSiteAddresses,
+                                         bool useResolvedSiteAddresses)
+{
     m_vpnConfiguration = vpnConfiguration;
 
 #ifdef AMNEZIA_DESKTOP
@@ -313,7 +517,12 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     appendKillSwitchConfig();
 #endif
 
-    appendSplitTunnelingConfig();
+    if (!appendSplitTunnelingConfig(resolvedSiteAddresses, useResolvedSiteAddresses)) {
+        qCritical() << "VpnConnection::connectToVpn: site split tunneling has no valid IPv4 addresses";
+        setConnectionState(Vpn::ConnectionState::Error);
+        emit vpnProtocolError(ErrorCode::InternalError);
+        return;
+    }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
@@ -367,11 +576,11 @@ void VpnConnection::appendKillSwitchConfig()
     m_vpnConfiguration.insert(configKey::allowedDnsServers, QVariant(m_appSettingsRepository->getAllowedDnsServers()).toJsonValue());
 }
 
-void VpnConnection::appendSplitTunnelingConfig()
+bool VpnConnection::appendSplitTunnelingConfig(const QStringList &resolvedSiteAddresses, bool useResolvedSiteAddresses)
 {
     if (!m_appSettingsRepository) {
         qCritical() << "VpnConnection::appendSplitTunnelingConfig: repositories not initialized";
-        return;
+        return false;
     }
 
     bool allowSiteBasedSplitTunneling = true;
@@ -429,15 +638,27 @@ void VpnConnection::appendSplitTunnelingConfig()
     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
         routeMode = m_appSettingsRepository->routeMode();
 
+#ifdef Q_OS_WIN
+        if (!allowSiteBasedSplitTunneling) {
+            qCritical() << "VpnConnection: site split tunneling is not supported by this VPN configuration";
+            return false;
+        }
+#endif
+
         if (allowSiteBasedSplitTunneling) {
             QStringList sites;
             const QVariantMap &m = m_appSettingsRepository->vpnSites(routeMode);
             for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
-                if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
-                    sites.append(i.key());
-                } else if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                    sites.append(i.value().toString());
+                if (!useResolvedSiteAddresses) {
+                    if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
+                        sites.append(i.key());
+                    } else if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
+                        sites.append(i.value().toString());
+                    }
                 }
+            }
+            if (useResolvedSiteAddresses) {
+                sites = resolvedSiteAddresses;
             }
             sites.removeDuplicates();
             for (const auto &site : sites) {
@@ -445,11 +666,27 @@ void VpnConnection::appendSplitTunnelingConfig()
             }
 
             if (sitesJsonArray.isEmpty()) {
+#ifdef Q_OS_WIN
+                qCritical() << "VpnConnection: no valid site addresses; refusing to fall back to VpnAllSites";
+                return false;
+#else
                 routeMode = amnezia::RouteMode::VpnAllSites;
+#endif
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
+#ifdef Q_OS_WIN
+                const QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
+                const QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
+                if (NetworkUtilities::checkIpSubnetFormat(dns1)) {
+                    sitesJsonArray.append(dns1);
+                }
+                if (NetworkUtilities::checkIpSubnetFormat(dns2)) {
+                    sitesJsonArray.append(dns2);
+                }
+#else
                 sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns1).toString());
                 sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns2).toString());
+#endif
             }
         }
     }
@@ -481,6 +718,8 @@ void VpnConnection::appendSplitTunnelingConfig()
     qDebug() << QString("App split tunneling is %1, route mode is %2")
                         .arg(m_appSettingsRepository->isAppsSplitTunnelingEnabled() ? "enabled" : "disabled")
                         .arg(appsRouteMode);
+
+    return true;
 }
 
 #ifdef Q_OS_ANDROID
@@ -537,6 +776,10 @@ void VpnConnection::reconnectToVpn() {
 
 void VpnConnection::disconnectFromVpn()
 {
+#ifdef Q_OS_WIN
+    cancelSiteDnsResolution();
+#endif
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
