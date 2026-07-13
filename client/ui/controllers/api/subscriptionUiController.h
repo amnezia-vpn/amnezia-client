@@ -57,6 +57,8 @@ public slots:
 
     void setCurrentProtocol(const QString &serverId, const QString &protocolName);
     bool isVlessProtocol(const QString &serverId);
+    QString currentProtocol(const QString &serverId);
+    QStringList availableProtocols(const QString &serverId);
 
     bool isCaptchaAwaitingUser() const;
     void onCaptchaSolved(const QString &captchaId, const QString &solution);
