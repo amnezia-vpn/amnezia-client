@@ -155,20 +155,21 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     qWarning() << "VpnConnection::onConnectionStateChanged: Failed to flush DNS";
 
                 if (!ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard) {
+                    const auto routeMode = static_cast<amnezia::RouteMode>(
+                        m_vpnConfiguration.value(configKey::splitTunnelType).toInt());
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
 #ifdef Q_OS_MACOS
-                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
+                    if (routeMode != amnezia::RouteMode::VpnAllExceptSites) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #else
                     iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 #endif
 
-                    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
+                    if (routeMode != amnezia::RouteMode::VpnAllSites) {
                         iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
-                        RouteMode routeMode = m_appSettingsRepository->routeMode();
                         if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                             QTimer::singleShot(1000, m_vpnProtocol.data(),
                                                [this, routeMode]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), routeMode); });
@@ -475,8 +476,15 @@ void VpnConnection::finishSiteDnsResolution(const QSharedPointer<SiteResolutionS
     const QStringList resolvedSiteAddresses = state->resolvedIpv4Addresses;
     m_siteResolutionState.clear();
 
-    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()
-        && m_appSettingsRepository->routeMode() != state->routeMode) {
+    const bool siteSplitTunnelingEnabled = m_appSettingsRepository->isSitesSplitTunnelingEnabled();
+    const auto currentRouteMode = m_appSettingsRepository->routeMode();
+    if (!siteSplitTunnelingEnabled || currentRouteMode == amnezia::RouteMode::VpnAllSites) {
+        qDebug() << "VpnConnection: site split tunneling disabled or switched to full tunnel during DNS resolution";
+        continueConnectToVpn(container, vpnConfiguration, {}, false);
+        return;
+    }
+
+    if (currentRouteMode != state->routeMode) {
         qDebug() << "VpnConnection: route mode changed during DNS resolution; restarting resolution";
         resolveSiteAddressesAndConnect(container, vpnConfiguration);
         return;
@@ -635,8 +643,12 @@ bool VpnConnection::appendSplitTunnelingConfig(const QStringList &resolvedSiteAd
 
     amnezia::RouteMode routeMode = amnezia::RouteMode::VpnAllSites;
     QJsonArray sitesJsonArray;
-    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
-        routeMode = m_appSettingsRepository->routeMode();
+    const bool siteSplitTunnelingEnabled = m_appSettingsRepository->isSitesSplitTunnelingEnabled();
+    const auto configuredRouteMode = m_appSettingsRepository->routeMode();
+    const bool siteSplitTunnelingActive =
+        siteSplitTunnelingEnabled && configuredRouteMode != amnezia::RouteMode::VpnAllSites;
+    if (siteSplitTunnelingActive) {
+        routeMode = configuredRouteMode;
 
 #ifdef Q_OS_WIN
         if (!allowSiteBasedSplitTunneling) {
@@ -713,7 +725,7 @@ bool VpnConnection::appendSplitTunnelingConfig(const QStringList &resolvedSiteAd
     m_vpnConfiguration.insert(configKey::splitTunnelApps, appsJsonArray);
 
     qDebug() << QString("Site split tunneling is %1, route mode is %2")
-                        .arg(m_appSettingsRepository->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")
+                        .arg(siteSplitTunnelingActive ? "enabled" : "disabled")
                         .arg(routeMode);
     qDebug() << QString("App split tunneling is %1, route mode is %2")
                         .arg(m_appSettingsRepository->isAppsSplitTunnelingEnabled() ? "enabled" : "disabled")
