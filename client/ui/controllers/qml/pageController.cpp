@@ -64,6 +64,7 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<PageLoader::PageEnum>();
     QString pageName = metaEnum.valueToKey(static_cast<int>(page));
+
     return QStringLiteral(APP_QML_PAGES_PREFIX) + pageName + QStringLiteral(".qml");
 }
 
