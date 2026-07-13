@@ -95,6 +95,7 @@ QJsonObject SubscriptionController::GatewayRequestData::toJsonObject() const
     if (!authData.isEmpty()) {
         obj[apiDefs::key::authData] = authData;
     }
+    obj[apiDefs::key::cliName] = QString(APPLICATION_NAME);
     return obj;
 }
 
