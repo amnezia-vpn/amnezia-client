@@ -18,14 +18,9 @@ qt_standard_project_setup()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
-set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
-
-include_directories(
-    ${QSIMPLECRYPTO_DIR}
-)
-
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto/cryptoUtils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
@@ -38,16 +33,11 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
     ${CMAKE_CURRENT_LIST_DIR}/xray.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${QSIMPLECRYPTO_DIR}/include/QAead.h
-    ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
-    ${QSIMPLECRYPTO_DIR}/include/QRsa.h
-    ${QSIMPLECRYPTO_DIR}/include/QSimpleCrypto_global.h
-    ${QSIMPLECRYPTO_DIR}/include/QX509.h
-    ${QSIMPLECRYPTO_DIR}/include/QX509Store.h
 )
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto/cryptoUtils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
@@ -59,11 +49,6 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xray.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QX509.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QX509Store.cpp
 )
 
 # Mozilla headres
@@ -297,6 +282,7 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../../client
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
