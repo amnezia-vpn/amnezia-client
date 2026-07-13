@@ -144,7 +144,9 @@ Item {
                             }
                         }
 
-                        ContextMenu.menu: ContextMenuType {
+                        ContextMenu.menu: Qt.platform.os === "ios" ? null : contextMenu
+
+                        ContextMenuType {
                             id: contextMenu
                             textObj: textField
                         }

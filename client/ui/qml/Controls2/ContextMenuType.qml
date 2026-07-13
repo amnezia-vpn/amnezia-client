@@ -4,7 +4,7 @@ import QtQuick.Controls
 Menu {
     property var textObj
 
-    popupType: Popup.Native
+    popupType: Qt.platform.os === "ios" ? Popup.Item : Popup.Native
 
     property Item inputBlocker: null
 
