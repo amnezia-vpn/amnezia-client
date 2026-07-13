@@ -1,6 +1,7 @@
 #ifndef SYSTEMCONTROLLER_H
 #define SYSTEMCONTROLLER_H
 
+#include <QByteArray>
 #include <QObject>
 
 class SystemController : public QObject
@@ -9,7 +10,8 @@ class SystemController : public QObject
 public:
     explicit SystemController(QObject *parent = nullptr);
 
-    static void saveFile(const QString &fileName, const QString &data);
+    static bool saveFile(const QString &fileName, const QString &data);
+    static bool saveFile(const QString &fileName, const QByteArray &data);
     static bool readFile(const QString &fileName, QByteArray &data);
     static bool readFile(const QString &fileName, QString &data);
 

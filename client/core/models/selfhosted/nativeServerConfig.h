@@ -3,6 +3,7 @@
 
 #include <QJsonObject>
 #include <QMap>
+#include <QPair>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -16,6 +17,7 @@ using namespace ContainerEnumNS;
 
 struct NativeServerConfig {
     QString description;
+    QString displayName;
     QString hostName;
     QMap<DockerContainer, ContainerConfig> containers;
     DockerContainer defaultContainer;
@@ -24,6 +26,11 @@ struct NativeServerConfig {
     
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;
+
+    void updateContainerConfig(DockerContainer container, const ContainerConfig &config);
+
+    QPair<QString, QString> getDnsPair(const QString &primaryDns, const QString &secondaryDns) const;
+
     QJsonObject toJson() const;
     static NativeServerConfig fromJson(const QJsonObject& json);
 };

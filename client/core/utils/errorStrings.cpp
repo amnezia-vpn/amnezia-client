@@ -30,6 +30,17 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::ServerCgroupMountpoint): errorMessage = QObject::tr("Server error: cgroup mountpoint does not exist"); break;
     case(ErrorCode::DockerPullRateLimit): errorMessage = QObject::tr("Docker error: The pull rate limit has been reached"); break;
     case(ErrorCode::ServerLinuxKernelTooOld): errorMessage = QObject::tr("Server error: Linux kernel is too old"); break;
+    case(ErrorCode::XrayServerConfigInvalid):
+        errorMessage = QObject::tr("Server error: invalid or unreadable XRay server configuration");
+        break;
+    case(ErrorCode::XrayServerNoVlessClients):
+        errorMessage = QObject::tr("Server error: XRay server has no VLESS clients");
+        break;
+    case(ErrorCode::XrayRealityKeysReadFailed):
+        errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
+        break;
+    case(ErrorCode::ServerContainerRuntimeNotSupported): errorMessage = QObject::tr("Server error: The default container runtime available for installation on this server is not supported.\n Install Docker Engine on the server manually and try again."); break;
+    case(ErrorCode::ContainerRuntimeServiceNotRunning): errorMessage = QObject::tr("Container runtime error: The container runtime service is not running.\n Check the container runtime service on the server, or wait about a minute and try again."); break;
 
     // Libssh errors
     case(ErrorCode::SshRequestDeniedError): errorMessage = QObject::tr("SSH request was denied"); break;
@@ -59,6 +70,8 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ImportInvalidConfigError): errorMessage = QObject::tr("The config does not contain any containers and credentials for connecting to the server"); break;
     case (ErrorCode::ImportBackupFileUseRestoreInstead): errorMessage = QObject::tr("Backup files cannot be imported here. Use 'Restore from backup' instead."); break;
     case (ErrorCode::RestoreBackupInvalidError): errorMessage = QObject::tr("Backup file is corrupted or has invalid format"); break;
+    case (ErrorCode::LegacyApiV1NotSupportedError): errorMessage = QObject::tr("This legacy Amnezia subscription format is no longer supported"); break;
+    case (ErrorCode::LegacyContainerNotSupportedError): errorMessage = QObject::tr("This protocol is no longer supported. Please select another protocol or remove this container from the server settings."); break;
     case (ErrorCode::ImportOpenConfigError): errorMessage = QObject::tr("Unable to open config file"); break;
     case (ErrorCode::NoInstalledContainersError): errorMessage = QObject::tr("VPN Protocols is not installed.\n Please install VPN container at first"); break;
 
@@ -83,6 +96,10 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
+    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
+    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
+    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
+    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;

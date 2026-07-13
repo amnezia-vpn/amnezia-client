@@ -35,6 +35,11 @@ namespace amnezia
         ServerCgroupMountpoint = 212,
         DockerPullRateLimit = 213,
         ServerLinuxKernelTooOld = 214,
+        XrayServerConfigInvalid = 215,
+        XrayServerNoVlessClients = 216,
+        XrayRealityKeysReadFailed = 217,
+        ServerContainerRuntimeNotSupported = 218,
+        ContainerRuntimeServiceNotRunning = 219,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -71,10 +76,12 @@ namespace amnezia
 
         // import and install errors
         ImportInvalidConfigError = 900,
-        ImportBackupFileUseRestoreInstead = 903,
-        RestoreBackupInvalidError = 904,
         ImportOpenConfigError = 901,
         NoInstalledContainersError = 902,
+        ImportBackupFileUseRestoreInstead = 903,
+        RestoreBackupInvalidError = 904,
+        LegacyApiV1NotSupportedError = 905,
+        LegacyContainerNotSupportedError = 906,
 
         // Android errors
         AndroidError = 1000,
@@ -97,6 +104,10 @@ namespace amnezia
         ApiSubscriptionNotActiveError = 1114,
         ApiNoPurchasedSubscriptionsError = 1115,
         ApiTrialAlreadyUsedError = 1116,
+        ApiCaptchaRequiredError = 1117,
+        ApiCaptchaInvalidError = 1118,
+        ApiCaptchaRefreshError = 1119,
+        ApiRateLimitError = 1120,
 
         // QFile errors
         OpenError = 1200,
@@ -115,5 +126,3 @@ namespace amnezia
 Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // ERRORCODES_H
-
-

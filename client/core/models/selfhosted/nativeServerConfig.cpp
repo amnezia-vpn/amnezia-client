@@ -9,6 +9,7 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/networkUtilities.h"
 
 namespace amnezia
 {
@@ -26,6 +27,25 @@ ContainerConfig NativeServerConfig::containerConfig(DockerContainer container) c
         return ContainerConfig{};
     }
     return containers.value(container);
+}
+
+void NativeServerConfig::updateContainerConfig(DockerContainer container, const ContainerConfig &config)
+{
+    containers[container] = config;
+}
+
+QPair<QString, QString> NativeServerConfig::getDnsPair(const QString &primaryDns, const QString &secondaryDns) const
+{
+    QString d1 = dns1;
+    QString d2 = dns2;
+
+    if (d1.isEmpty() || !NetworkUtilities::checkIPv4Format(d1)) {
+        d1 = primaryDns;
+    }
+    if (d2.isEmpty() || !NetworkUtilities::checkIPv4Format(d2)) {
+        d2 = secondaryDns;
+    }
+    return { d1, d2 };
 }
 
 QJsonObject NativeServerConfig::toJson() const
@@ -85,6 +105,10 @@ NativeServerConfig NativeServerConfig::fromJson(const QJsonObject& json)
     
     config.dns1 = json.value(configKey::dns1).toString();
     config.dns2 = json.value(configKey::dns2).toString();
+    
+    if (config.displayName.isEmpty()) {
+        config.displayName = config.description.isEmpty() ? config.hostName : config.description;
+    }
     
     return config;
 }

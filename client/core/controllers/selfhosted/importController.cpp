@@ -16,7 +16,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/api/apiEnums.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include "core/utils/api/apiUtils.h"
@@ -27,7 +27,6 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/qrCodeUtils.h"
-#include "core/models/serverConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -208,10 +207,16 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     case ConfigTypes::Amnezia: {
         result.config = QJsonDocument::fromJson(config.toUtf8()).object();
 
-        if (apiUtils::isServerFromApi(result.config)) {
+        if (serverConfigUtils::isServerFromApi(result.config)) {
             auto apiConfig = result.config.value(apiDefs::key::apiConfig).toObject();
             apiConfig[apiDefs::key::vpnKey] = data;
             result.config[apiDefs::key::apiConfig] = apiConfig;
+        }
+
+        if (serverConfigUtils::isLegacyApiSubscription(serverConfigUtils::configTypeFromJson(result.config))) {
+            result.errorCode = ErrorCode::LegacyApiV1NotSupportedError;
+            result.config = {};
+            return result;
         }
 
         processAmneziaConfig(result.config);
@@ -381,18 +386,29 @@ void ImportController::importConfig(const QJsonObject &config)
     credentials.secretData = config.value(configKey::password).toString();
 
     if (credentials.isValid() || config.contains(configKey::containers)) {
-        ServerConfig serverConfig = ServerConfig::fromJson(config);
-        m_serversRepository->addServer(serverConfig);
+        m_serversRepository->addServer(QString(), config, serverConfigUtils::configTypeFromJson(config));
         emit importFinished();
     } else if (config.contains(configKey::configVersion)) {
         quint16 crc = qChecksum(QJsonDocument(config).toJson());
-        if (m_serversRepository->hasServerWithCrc(crc)) {
+        bool hasServerWithCrc = false;
+        const QVector<QString> ids = m_serversRepository->orderedServerIds();
+        for (const QString &id : ids) {
+            const auto apiV2 = m_serversRepository->apiV2Config(id);
+            if (!apiV2.has_value()) {
+                continue;
+            }
+            if (static_cast<quint16>(apiV2->crc) == crc) {
+                hasServerWithCrc = true;
+                break;
+            }
+        }
+
+        if (hasServerWithCrc) {
             emit importErrorOccurred(ErrorCode::ApiConfigAlreadyAdded, true);
         } else {
             QJsonObject configWithCrc = config;
             configWithCrc.insert(configKey::crc, crc);
-            ServerConfig serverConfig = ServerConfig::fromJson(configWithCrc);
-            m_serversRepository->addServer(serverConfig);
+            m_serversRepository->addServer(QString(), configWithCrc, serverConfigUtils::configTypeFromJson(configWithCrc));
             emit importFinished();
         }
     } else {
@@ -470,7 +486,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data) const
     QJsonObject config;
     config[configKey::containers] = arr;
     config[configKey::defaultContainer] = configKey::amneziaOpenvpn;
-    config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+    config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(data);
@@ -629,7 +645,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     QJsonObject config;
     config[configKey::containers] = arr;
     config[configKey::defaultContainer] = containerName;
-    config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+    config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
             "DNS = "
@@ -683,7 +699,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
             ? configKey::amneziaSsxray
             : configKey::amneziaXray;
     if (description.isEmpty()) {
-        config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+        config[configKey::description] = m_serversRepository->nextAvailableServerName();
     } else {
         config[configKey::description] = description;
     }

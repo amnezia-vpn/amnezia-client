@@ -22,9 +22,17 @@ PageType {
     property var processedServer
 
     Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -36,8 +44,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -48,7 +56,7 @@ PageType {
 
     Component.onCompleted: {
         PageController.showBusyIndicator(true)
-        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
+        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
         PageController.showBusyIndicator(false)
     }
 
@@ -119,8 +127,11 @@ PageType {
 
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
-                        SubscriptionUiController.exportVpnKey(ServersUiController.getProcessedServerIndex(), fileName)
+                        let ok = SubscriptionUiController.exportVpnKey(ServersUiController.processedServerId, fileName)
                         PageController.showBusyIndicator(false)
+                        if (ok) {
+                            PageController.showNotificationMessage(qsTr("Config file saved"))
+                        }
                     }
                 }
             }
@@ -141,7 +152,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
                     vpnKeyDrawer.openTriggered()
                 }

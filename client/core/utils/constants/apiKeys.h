@@ -2,7 +2,6 @@
 #define APIKEYS_H
 
 #include <QLatin1String>
-#include "core/utils/api/apiEnums.h"
 
 namespace apiDefs
 {
@@ -82,7 +81,7 @@ namespace apiDefs
         constexpr QLatin1String expiresAt("expires_at");
         constexpr QLatin1String isConnectEvent("is_connect_event");
         constexpr QLatin1String certificate("certificate");
-    }
-}
+    } // namespace key
+} // namespace apiDefs
 
 #endif // APIKEYS_H

@@ -30,11 +30,13 @@ public:
                                  QObject* parent = nullptr);
     ~ConnectionController() = default;
 
-    ErrorCode prepareConnection(int serverIndex,
+    ErrorCode prepareConnection(const QString &serverId,
                                QJsonObject& vpnConfiguration,
                                DockerContainer& container);
 
-    ErrorCode openConnection(int serverIndex);
+    ErrorCode isConnectionSupported(const QString &serverId) const;
+
+    ErrorCode openConnection(const QString &serverId);
 
     void closeConnection();
 
@@ -50,7 +52,10 @@ public:
     void setConnectionState(Vpn::ConnectionState state);
 
     QJsonObject createConnectionConfiguration(const QPair<QString, QString> &dns,
-                                             const ServerConfig &serverConfig,
+                                             bool isApiConfig,
+                                             const QString &hostName,
+                                             const QString &description,
+                                             int configVersion,
                                              const ContainerConfig &containerConfig,
                                              DockerContainer container);
 
@@ -60,7 +65,7 @@ public:
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
-    void openConnectionRequested(int serverIndex, DockerContainer container, const QJsonObject &vpnConfiguration);
+    void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void setConnectionStateRequested(Vpn::ConnectionState state);
     void killSwitchModeChangedRequested(bool enabled);
@@ -70,6 +75,8 @@ signals:
 #endif
 
 private:
+    ErrorCode defaultContainerForServer(const QString &serverId, DockerContainer &container) const;
+
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     VpnConnection* m_vpnConnection;

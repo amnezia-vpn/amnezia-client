@@ -6,14 +6,12 @@
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
-#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/utilities.h"
-#include "core/utils/networkUtilities.h"
+#include "core/utils/serverConfigUtils.h"
 #include "version.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/models/serverConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
 
@@ -51,43 +49,176 @@ void ConnectionController::setConnectionState(Vpn::ConnectionState state)
     }
 }
 
-ErrorCode ConnectionController::prepareConnection(int serverIndex,
-                                                 QJsonObject& vpnConfiguration,
-                                                 DockerContainer& container)
+ErrorCode ConnectionController::defaultContainerForServer(const QString &serverId, DockerContainer &container) const
 {
+    const auto kind = m_serversRepository->serverKind(serverId);
+    switch (kind) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
+        const auto cfg = m_serversRepository->apiV2Config(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
+        return ErrorCode::LegacyApiV1NotSupportedError;
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
+        return ErrorCode::InternalError;
+    }
+}
+
+ErrorCode ConnectionController::isConnectionSupported(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return ErrorCode::InternalError;
+    }
+
     if (!isServiceReady()) {
         return ErrorCode::AmneziaServiceNotRunning;
     }
 
-    ServerConfig serverConfigModel = m_serversRepository->server(serverIndex);
-    container = serverConfigModel.defaultContainer();
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (serverConfigUtils::isLegacyApiSubscription(kind)) {
+        return ErrorCode::LegacyApiV1NotSupportedError;
+    }
+
+    DockerContainer container = DockerContainer::None;
+    const ErrorCode errorCode = defaultContainerForServer(serverId, container);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (container == DockerContainer::None) {
+        if (serverConfigUtils::isApiV2Subscription(kind)) {
+            return ErrorCode::NoError;
+        }
+        return ErrorCode::NoInstalledContainersError;
+    }
+
+    if (ContainerUtils::isUnsupportedContainer(container)) {
+        return ErrorCode::LegacyContainerNotSupportedError;
+    }
 
     if (!isContainerSupported(container)) {
         return ErrorCode::NotSupportedOnThisPlatform;
     }
 
-    ContainerConfig containerConfigModel = m_serversRepository->containerConfig(serverIndex, container);
+    return ErrorCode::NoError;
+}
 
-    auto dns = serverConfigModel.getDnsPair(m_appSettingsRepository->useAmneziaDns(),
-                                            m_appSettingsRepository->primaryDns(),
-                                            m_appSettingsRepository->secondaryDns());
+ErrorCode ConnectionController::prepareConnection(const QString &serverId,
+                                                 QJsonObject& vpnConfiguration,
+                                                 DockerContainer& container)
+{
+    ContainerConfig containerConfigModel;
+    QPair<QString, QString> dns;
+    QString hostName;
+    QString description;
+    int configVersion = 0;
+    bool isApiConfig = false;
 
-    vpnConfiguration = createConnectionConfiguration(dns, serverConfigModel, containerConfigModel, container);
+    const auto kind = m_serversRepository->serverKind(serverId);
+    const QString primaryDns = m_appSettingsRepository->primaryDns();
+    const QString secondaryDns = m_appSettingsRepository->secondaryDns();
+    switch (kind) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = cfg->getDnsPair(m_appSettingsRepository->useAmneziaDns(), primaryDns, secondaryDns);
+        hostName = cfg->hostName;
+        description = cfg->description;
+        break;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
+        hostName = cfg->hostName;
+        description = cfg->description;
+        break;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
+        hostName = cfg->hostName;
+        description = cfg->description;
+        break;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
+        const auto cfg = m_serversRepository->apiV2Config(serverId);
+        if (!cfg.has_value()) return ErrorCode::InternalError;
+        container = cfg->defaultContainer;
+        containerConfigModel = cfg->containerConfig(container);
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
+        hostName = cfg->hostName;
+        description = cfg->description;
+        configVersion = serverConfigUtils::ConfigSource::AmneziaGateway;
+        isApiConfig = true;
+        break;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
+        return ErrorCode::InternalError;
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
+        return ErrorCode::InternalError;
+    }
+
+    vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,
+                                                     containerConfigModel, container);
 
     return ErrorCode::NoError;
 }
 
-ErrorCode ConnectionController::openConnection(int serverIndex)
+ErrorCode ConnectionController::openConnection(const QString &serverId)
 {
     QJsonObject vpnConfiguration;
     DockerContainer container;
 
-    ErrorCode errorCode = prepareConnection(serverIndex, vpnConfiguration, container);
+    ErrorCode errorCode = prepareConnection(serverId, vpnConfiguration, container);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
 
-    emit openConnectionRequested(serverIndex, container, vpnConfiguration);
+    emit openConnectionRequested(serverId, container, vpnConfiguration);
     return ErrorCode::NoError;
 }
 
@@ -120,7 +251,10 @@ ErrorCode ConnectionController::lastConnectionError() const
 }
 
 QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QString, QString> &dns,
-                                                              const ServerConfig &serverConfig,
+                                                              bool isApiConfig,
+                                                              const QString &hostName,
+                                                              const QString &description,
+                                                              int configVersion,
                                                               const ContainerConfig &containerConfig,
                                                               DockerContainer container)
 {
@@ -134,7 +268,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
 
     ConnectionSettings connectionSettings = {
         { dns.first, dns.second },
-        serverConfig.isApiConfig(),
+        isApiConfig,
         {
             m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
             m_appSettingsRepository->routeMode()
@@ -160,10 +294,9 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     vpnConfiguration[configKey::dns1] = dns.first;
     vpnConfiguration[configKey::dns2] = dns.second;
 
-    vpnConfiguration[configKey::hostName] = serverConfig.hostName();
-    vpnConfiguration[configKey::description] = serverConfig.description();
-
-    vpnConfiguration[configKey::configVersion] = serverConfig.configVersion();
+    vpnConfiguration[configKey::hostName] = hostName;
+    vpnConfiguration[configKey::description] = description;
+    vpnConfiguration[configKey::configVersion] = configVersion;
 
     return vpnConfiguration;
 }

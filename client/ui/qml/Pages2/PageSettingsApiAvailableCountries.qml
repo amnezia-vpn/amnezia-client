@@ -24,10 +24,20 @@ PageType {
     property bool isInAppPurchase: false
 
     function updateSubscriptionState() {
-        root.subscriptionExpired = ServersModel.getProcessedServerData("isSubscriptionExpired")
-        root.subscriptionExpiringSoon = ServersModel.getProcessedServerData("isSubscriptionExpiringSoon")
+        root.subscriptionExpired = ServersUiController.isServerSubscriptionExpired(ServersUiController.processedServerId)
+        root.subscriptionExpiringSoon = ServersUiController.isServerSubscriptionExpiringSoon(ServersUiController.processedServerId)
         root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
+    }
+
+    function selectConnectionCountry(countryIndex, countryCode, countryName) {
+        if (countryIndex === ApiCountryModel.currentIndex) {
+            return
+        }
+
+        PageController.showBusyIndicator(true)
+        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, countryCode, countryName)
+        PageController.showBusyIndicator(false)
     }
 
     Component.onCompleted: {
@@ -35,11 +45,19 @@ PageType {
     }
 
     Connections {
-        target: ServersModel
+        target: ServersUiController
 
-        function onProcessedServerChanged() {
+        function onProcessedServerIdChanged() {
             root.processedServer = proxyServersModel.get(0)
             root.updateSubscriptionState()
+        }
+    }
+
+    Connections {
+        target: ServersModel
+
+        function onModelReset() {
+            root.processedServer = proxyServersModel.get(0)
         }
     }
 
@@ -58,8 +76,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -75,7 +93,7 @@ PageType {
 
         model: ApiCountryModel
 
-        currentIndex: 0
+        currentIndex: ApiCountryModel.currentIndex
 
         ButtonGroup {
             id: containersRadioButtonGroup
@@ -108,7 +126,7 @@ PageType {
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
-                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.getProcessedServerIndex(), false)
+                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
                     PageController.showBusyIndicator(false)
                     if (!result) {
                         return
@@ -148,7 +166,7 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.getProcessedServerIndex())
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
 
@@ -196,15 +214,7 @@ PageType {
                             return
                         }
 
-                        if (index !== ApiCountryModel.currentIndex) {
-                            PageController.showBusyIndicator(true)
-                            var prevIndex = ApiCountryModel.currentIndex
-                            ApiCountryModel.currentIndex = index
-                            if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.getProcessedServerIndex(), countryCode, countryName)) {
-                                ApiCountryModel.currentIndex = prevIndex
-                            }
-                            PageController.showBusyIndicator(false)
-                        }
+                        root.selectConnectionCountry(index, countryCode, countryName)
                     }
 
                     Keys.onEnterPressed: {

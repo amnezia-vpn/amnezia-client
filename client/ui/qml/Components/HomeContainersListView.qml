@@ -48,7 +48,7 @@ ListViewType {
                 showImage: !isInstalled
 
                 checkable: isInstalled && !ConnectionController.isConnected
-                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersModel.getDefaultServerData("defaultContainer")
+                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId)
 
                 onClicked: {
                     if (ConnectionController.isConnected && isInstalled) {
@@ -56,14 +56,17 @@ ListViewType {
                         return
                     }
 
-                    if (checked) {
-                        containersDropDown.closeTriggered()
-                        ServersUiController.setDefaultContainer(ServersUiController.defaultIndex, proxyDefaultServerContainersModel.mapToSource(index))
-                    } else {
-                        ServersUiController.processedContainerIndex = proxyDefaultServerContainersModel.mapToSource(index)
+                    var containerIndex = proxyDefaultServerContainersModel.mapToSource(index)
+
+                    if (!isInstalled) {
+                        ServersUiController.processedContainerIndex = containerIndex
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.closeTriggered()
+                        return
                     }
+
+                    containersDropDown.closeTriggered()
+                    ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, containerIndex)
                 }
 
                 MouseArea {

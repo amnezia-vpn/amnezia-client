@@ -106,6 +106,19 @@ PageType {
     }
 
     Connections {
+        objectName: "connectionControllerConnections"
+
+        target: ConnectionController
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredByConnectButton(true)
+
+            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
         objectName: "installControllerConnections"
 
         target: InstallController
@@ -132,9 +145,11 @@ PageType {
             onInstallationErrorOccurred(message)
         }
 
-        function onUpdateContainerFinished(message) {
+        function onUpdateContainerFinished(message, closePage) {
             PageController.showNotificationMessage(message)
-            PageController.closePage()
+            if (closePage) {
+                PageController.closePage()
+            }
         }
 
         function onCachedProfileCleared(message) {
@@ -142,7 +157,7 @@ PageType {
         }
 
         function onRemoveServerFinished(finishedMessage) {
-            if (!ServersModel.getServersCount()) {
+            if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
@@ -151,22 +166,19 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onNoInstalledContainers() {
-            PageController.setTriggeredByConnectButton(true)
-
-            ServersUiController.processedIndex = ServersUiController.defaultIndex
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        function onRemoveAllContainersFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
+            PageController.showNotificationMessage(finishedMessage)
         }
-    }
 
-    Connections {
-        objectName: "connectionControllerConnections"
-
-        target: ConnectionController
-
-        function onReconnectWithUpdatedContainer(message) {
-            PageController.showNotificationMessage(message)
+        function onRemoveContainerFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
             PageController.closePage()
+            PageController.showNotificationMessage(finishedMessage)
         }
     }
 
@@ -224,16 +236,17 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
-        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
-            if (!ConnectionController.isConnected) {
-                if (preferredDefaultIndex !== undefined && preferredDefaultIndex >= 0) {
-                    ServersUiController.setDefaultServerIndex(preferredDefaultIndex)
-                } else {
-                    ServersUiController.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                }
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+        function onApiServerRemoved(message) {
+            if (!ServersUiController.getServersCount()) {
+                PageController.goToPageHome()
+            } else {
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
             }
+            PageController.showNotificationMessage(message)
+        }
 
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             PageController.goToPageHome()
             PageController.showNotificationMessage(message)
         }
@@ -274,7 +287,7 @@ PageType {
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
@@ -348,7 +361,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersUiController.processedIndex = ServersUiController.defaultIndex
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                 tabBar.currentIndex = 0
             }
         }
@@ -362,15 +375,15 @@ PageType {
 
                 function onModelReset() {
                     if (!SettingsController.isOnTv()) {
-                        var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
+                        var hasServerWithWriteAccess = ServersUiController.hasServerWithWriteAccess()
                         shareTabButton.visible = hasServerWithWriteAccess
                         shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
                     }
                 }
             }
 
-            visible: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess()
-            width: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess() ? undefined : 0
+            visible: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess()
+            width: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess() ? undefined : 0
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"

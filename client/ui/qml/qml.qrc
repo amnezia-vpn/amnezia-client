@@ -24,6 +24,7 @@
         <file>Controls2/BackButtonType.qml</file>
         <file>Controls2/BasicButtonType.qml</file>
         <file>Controls2/BusyIndicatorType.qml</file>
+        <file>Controls2/CaptchaDialogType.qml</file>
         <file>Controls2/CardType.qml</file>
         <file>Controls2/CardWithIconsType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>
@@ -77,7 +78,19 @@
         <file>Pages2/PageProtocolRaw.qml</file>
         <file>Pages2/PageProtocolWireGuardSettings.qml</file>
         <file>Pages2/PageProtocolXraySettings.qml</file>
+
+        <file>Pages2/PageProtocolXraySnapshots.qml</file>
+        <file>Pages2/PageProtocolXrayFlowSettings.qml</file>
+        <file>Pages2/PageProtocolXraySecuritySettings.qml</file>
+        <file>Pages2/PageProtocolXrayTransportSettings.qml</file>
+        <file>Pages2/PageProtocolXrayXmuxSettings.qml</file>
+        <file>Pages2/PageProtocolXrayXPaddingSettings.qml</file>
+        <file>Pages2/PageProtocolXrayXPaddingBytesSettings.qml</file>
+        <file>Controls2/MinMaxRowType.qml</file>
+
         <file>Pages2/PageServiceDnsSettings.qml</file>
+        <file>Pages2/PageServiceMtProxySettings.qml</file>
+        <file>Pages2/PageServiceTelemtSettings.qml</file>
         <file>Pages2/PageServiceSftpSettings.qml</file>
         <file>Pages2/PageServiceSocksProxySettings.qml</file>
         <file>Pages2/PageServiceTorWebsiteSettings.qml</file>

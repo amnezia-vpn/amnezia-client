@@ -5,7 +5,6 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ContainerProps 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -34,19 +33,25 @@ ListViewType {
                     if (isVpnContainer) {
                         // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
                         if (isThirdPartyConfig) {
-                            InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                            InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
                     }
 
                     if (isIpsec) {
-                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                        InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
                     } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
+                    } else if (isMtProxy) {
+                        MtProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceMtProxySettings, false)
+                    } else if (isTelemt) {
+                        TelemtConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceTelemtSettings, false)
                     } else {
-                        InstallController.updateProtocols(ServersUiController.processedIndex, containerIndex)
+                        InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
                     }
 

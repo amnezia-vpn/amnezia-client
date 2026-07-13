@@ -16,6 +16,7 @@
 #include "core/models/containerConfig.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
+#include "core/installers/mtProxyInstaller.h"
 
 class SshSession;
 class InstallerBase;
@@ -33,27 +34,43 @@ public:
     ~InstallController();
 
     ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false);
-    ErrorCode updateContainer(int serverIndex, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
 
-    ErrorCode rebootServer(int serverIndex);
-    ErrorCode removeAllContainers(int serverIndex);
-    ErrorCode removeContainer(int serverIndex, DockerContainer container);
+    // Updates server-side container settings (admin self-hosted only): reconfigures the container over SSH.
+    ErrorCode updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
+
+    // Updates client-local settings only: rewrites the stored container config for any self-hosted/native server. No SSH.
+    ErrorCode updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig);
+
+    ErrorCode rebootServer(const QString &serverId);
+    ErrorCode removeAllContainers(const QString &serverId);
+    ErrorCode removeContainer(const QString &serverId, DockerContainer container);
+
+    ErrorCode setDockerContainerEnabledState(const QString &serverId, DockerContainer container, bool enabled);
+
+    /// statusOut: 0 = not deployed, 1 = running, 2 = stopped, 3 = error
+    ErrorCode queryDockerContainerStatus(const QString &serverId, DockerContainer container, int &statusOut);
+
+    ErrorCode queryMtProxyDiagnostics(const QString &serverId, DockerContainer container, int listenPort,
+                                      MtProxyContainerDiagnostics &out);
+
+    QString fetchDockerContainerSecret(const QString &serverId, DockerContainer container);
 
     ContainerConfig generateConfig(DockerContainer container, int port, TransportProto transportProto);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers, SshSession &sshSession);
     
-    ErrorCode scanServerForInstalledContainers(int serverIndex);
+    ErrorCode scanServerForInstalledContainers(const QString &serverId);
     
     ErrorCode installContainer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto, ContainerConfig &config);
 
     ErrorCode installServer(const ServerCredentials &credentials, DockerContainer container, int port, TransportProto transportProto,
                                          bool &wasContainerInstalled);
-    ErrorCode installContainer(int serverIndex, DockerContainer container, int port, TransportProto transportProto,
+    ErrorCode installContainer(const QString &serverId, DockerContainer container, int port, TransportProto transportProto,
                                                bool &wasContainerInstalled);
     
     bool isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
     
-    ErrorCode checkSshConnection(const ServerCredentials &credentials, QString &output, std::function<QString()> passphraseCallback = nullptr);
+    ErrorCode checkSshConnection(ServerCredentials &credentials, QString &output,
+                                 std::function<QString()> passphraseCallback = nullptr);
     
     bool isServerAlreadyExists(const ServerCredentials &credentials, int &existingServerIndex);
     
@@ -62,11 +79,13 @@ public:
 
     void cancelInstallation();
 
-    void clearCachedProfile(int serverIndex, DockerContainer container);
+    void clearCachedProfile(const QString &serverId, DockerContainer container);
 
-    ErrorCode validateAndPrepareConfig(int serverIndex);
+    ErrorCode validateAndPrepareConfig(const QString &serverId);
 
-    void validateConfig(int serverIndex);
+    void validateConfig(const QString &serverId);
+
+    void addEmptyServer(const ServerCredentials &credentials);
 
 signals:
     void configValidated(bool isValid);
@@ -74,8 +93,8 @@ signals:
 
     void serverIsBusy(const bool isBusy);
     void cancelInstallationRequested();
-    void clientRevocationRequested(int serverIndex, const ContainerConfig &containerConfig, DockerContainer container);
-    void clientAppendRequested(int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container);
+    void clientRevocationRequested(const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container);
+    void clientAppendRequested(const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container);
 
 private:
     ErrorCode installDockerWorker(const ServerCredentials &credentials, DockerContainer container, SshSession &sshSession);
@@ -95,9 +114,9 @@ private:
 
     ErrorCode processContainerForAdmin(DockerContainer container, ContainerConfig &containerConfig,
                                        const ServerCredentials &credentials, SshSession &sshSession,
-                                       int serverIndex, const QString &clientName);
+                                       const QString &serverId, const QString &clientName);
 
-    void adminAppendRequested(int serverIndex, DockerContainer container,
+    void adminAppendRequested(const QString &serverId, DockerContainer container,
                               const ContainerConfig &containerConfig, const QString &clientName);
 
     static void updateContainerConfigAfterInstallation(DockerContainer container, ContainerConfig &containerConfig, const QString &stdOut);
@@ -114,4 +133,3 @@ private:
 };
 
 #endif // INSTALLCONTROLLER_H
-

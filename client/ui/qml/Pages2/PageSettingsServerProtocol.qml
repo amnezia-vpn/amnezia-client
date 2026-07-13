@@ -17,7 +17,8 @@ import "../Components"
 PageType {
     id: root
 
-    property bool isClearCacheVisible: ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
+    property bool isUnsupportedContainer: ContainerProps.isUnsupportedContainer(ServersUiController.processedContainerIndex)
+    property bool isClearCacheVisible: !isUnsupportedContainer && ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
 
     BackButtonType {
         id: backButton
@@ -52,10 +53,11 @@ PageType {
                 Layout.bottomMargin: 32
 
                 headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
+                descriptionText: root.isUnsupportedContainer ? qsTr("This protocol is no longer supported.") : ""
             }
         }
 
-        model: ProtocolsModel
+        model: root.isUnsupportedContainer ? null : ProtocolsModel
 
         delegate: ColumnLayout {
             id: delegateContent
@@ -76,7 +78,7 @@ PageType {
 
                 clickedFunction: function() {
                     if (isClientProtocolExists) {
-                        InstallController.openClientSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
+                        InstallController.openClientSettings(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, protocolIndex)
                         PageController.goToPage(clientProtocolPage);
                     } else {
                         PageController.showNotificationMessage(qsTr("Click the \"connect\" button to create a connection configuration"))
@@ -104,7 +106,7 @@ PageType {
                 visible: delegateContent.isServerSettingsVisible
 
                 clickedFunction: function() {
-                    InstallController.openServerSettings(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, protocolIndex)
+                    InstallController.openServerSettings(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, protocolIndex)
                     PageController.goToPage(serverProtocolPage);
                 }
 
@@ -140,14 +142,14 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
                             var message = qsTr("Unable to clear %1 profile while there is an active connection").arg(ContainersModel.getProcessedContainerName())
                             PageController.showNotificationMessage(message)
                             return
                         }
 
                         PageController.showBusyIndicator(true)
-                        InstallController.clearCachedProfile(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                        InstallController.clearCachedProfile(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
                         PageController.showBusyIndicator(false)
                     }
 
@@ -186,12 +188,12 @@ PageType {
 
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-                                && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                                && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Cannot remove active container"))
                         } else
                         {
                             PageController.goToPage(PageEnum.PageDeinstalling)
-                            InstallController.removeContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex)
+                            InstallController.removeContainer(ServersUiController.processedServerId, ServersUiController.processedContainerIndex)
                         }
                     }
                     var noButtonFunction = function() {

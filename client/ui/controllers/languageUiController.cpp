@@ -12,7 +12,6 @@ LanguageUiController::LanguageUiController(SettingsController* settingsControlle
 void LanguageUiController::onAppLanguageChanged(const QLocale &locale)
 {
     emit updateTranslations(locale);
-    emit translationsUpdated();
 }
 
 void LanguageUiController::changeLanguage(const LanguageSettings::AvailableLanguageEnum language)

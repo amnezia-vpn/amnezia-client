@@ -67,6 +67,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsCurrentlyProcessedRole: return container == static_cast<DockerContainer>(m_processedContainerIndex);
     case IsSupportedRole: return ContainerUtils::isSupportedByCurrentPlatform(container);
     case IsShareableRole: return ContainerUtils::isShareable(container);
+    case IsUnsupportedContainerRole: return ContainerUtils::isUnsupportedContainer(container);
     case IsVpnContainerRole: return ContainerUtils::containerService(container) == ServiceType::Vpn;
     case IsServiceContainerRole: return ContainerUtils::containerService(container) == ServiceType::Other;
     case IsIpsecRole: return container == DockerContainer::Ipsec;
@@ -74,6 +75,8 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsSftpRole: return container == DockerContainer::Sftp;
     case IsTorWebsiteRole: return container == DockerContainer::TorWebSite;
     case IsSocks5ProxyRole: return container == DockerContainer::Socks5Proxy;
+    case IsMtProxyRole: return container == DockerContainer::MtProxy;
+    case IsTelemtRole: return container == DockerContainer::Telemt;
     case InstallPageOrderRole: return ContainerUtils::installPageOrder(container);
     }
 
@@ -140,7 +143,8 @@ bool ContainersModel::hasInstalledProtocols()
 
 bool ContainersModel::isInstallationAllowed(DockerContainer container)
 {
-    return container != DockerContainer::Awg;
+    return container != DockerContainer::Awg
+           && !ContainerUtils::isUnsupportedContainer(container);
 }
 
 void ContainersModel::openContainerSettings(int containerIndex)
@@ -174,6 +178,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsCurrentlyProcessedRole] = "isCurrentlyProcessed";
     roles[IsSupportedRole] = "isSupported";
     roles[IsShareableRole] = "isShareable";
+    roles[IsUnsupportedContainerRole] = "isUnsupportedContainer";
     roles[IsInstallationAllowedRole] = "isInstallationAllowed";
     roles[InstallPageOrderRole] = "installPageOrder";
     
@@ -184,5 +189,7 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsSftpRole] = "isSftp";
     roles[IsTorWebsiteRole] = "isTorWebsite";
     roles[IsSocks5ProxyRole] = "isSocks5Proxy";
+    roles[IsMtProxyRole] = "isMtProxy";
+    roles[IsTelemtRole] = "isTelemt";
     return roles;
 }

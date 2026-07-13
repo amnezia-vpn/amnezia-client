@@ -1,12 +1,14 @@
 #include "coreSignalHandlers.h"
 
 #include <QTimer>
+#include <QtConcurrent>
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/controllers/coreController.h"
 #include "core/repositories/secureServersRepository.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnConnection.h"
 #include "ui/controllers/qml/pageController.h"
@@ -32,7 +34,6 @@
 #include "core/controllers/connectionController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
-#include "ui/models/api/apiCountryModel.h"
 #include "ui/models/containersModel.h"
 #include "core/utils/containerEnum.h"
 
@@ -65,7 +66,6 @@ void CoreSignalHandlers::initAllHandlers()
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
     initSubscriptionRefreshHandler();
-    initContainerModelUpdateHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
     initTranslationsUpdatedHandler();
@@ -78,6 +78,7 @@ void CoreSignalHandlers::initAllHandlers()
     initAllowedDnsModelUpdateHandler();
     initAppSplitTunnelingModelUpdateHandler();
     initPrepareConfigHandler();
+    initUnsupportedConnectDrawerHandler();
     initStrictKillSwitchHandler();
     initAndroidSettingsHandler();
     initAndroidConnectionHandler();
@@ -124,11 +125,9 @@ void CoreSignalHandlers::initInstallControllerHandler()
 {
     connect(m_coreController->m_installController, &InstallController::serverIsBusy, m_coreController->m_installUiController, &InstallUiController::serverIsBusy);
     connect(m_coreController->m_installUiController, &InstallUiController::cancelInstallation, m_coreController->m_installController, &InstallController::cancelInstallation);
-    connect(m_coreController->m_installUiController, &InstallUiController::currentContainerUpdated, m_coreController->m_connectionUiController,
-            &ConnectionUiController::onCurrentContainerUpdated);
-    connect(m_coreController->m_serversUiController, &ServersUiController::processedServerIndexChanged,
-        m_coreController->m_installUiController, [this](int index) {
-        if (index >= 0) {
+    connect(m_coreController->m_serversUiController, &ServersUiController::processedServerIdChanged,
+        m_coreController->m_installUiController, [this](const QString &serverId) {
+        if (!serverId.isEmpty()) {
             m_coreController->m_installUiController->clearProcessedServerCredentials();
         }
     });
@@ -137,32 +136,39 @@ void CoreSignalHandlers::initInstallControllerHandler()
 void CoreSignalHandlers::initExportControllerHandler()
 {
     connect(m_coreController->m_exportController, &ExportController::appendClientRequested, this,
-            [this](int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container) {
-                m_coreController->m_usersController->appendClient(serverIndex, clientId, clientName, container);
+            [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {
+                m_coreController->m_usersController->appendClient(serverId, clientId, clientName, container);
             });
     connect(m_coreController->m_exportController, &ExportController::updateClientsRequested, this,
-            [this](int serverIndex, DockerContainer container) {
-                m_coreController->m_usersController->updateClients(serverIndex, container);
+            [this](const QString &serverId, DockerContainer container) {
+                m_coreController->m_usersController->updateClients(serverId, container);
             });
     connect(m_coreController->m_exportController, &ExportController::revokeClientRequested, this,
-            [this](int serverIndex, int row, DockerContainer container) {
-                m_coreController->m_usersController->revokeClient(serverIndex, row, container);
+            [this](const QString &serverId, int row, DockerContainer container) {
+                QtConcurrent::run([this, serverId, row, container]() {
+                    m_coreController->m_usersController->revokeClient(serverId, row, container);
+                });
             });
     connect(m_coreController->m_exportController, &ExportController::renameClientRequested, this,
-            [this](int serverIndex, int row, const QString &clientName, DockerContainer container) {
-                m_coreController->m_usersController->renameClient(serverIndex, row, clientName, container);
+            [this](const QString &serverId, int row, const QString &clientName, DockerContainer container) {
+                m_coreController->m_usersController->renameClient(serverId, row, clientName, container);
             });
 }
 
 void CoreSignalHandlers::initImportControllerHandler()
 {
     connect(m_coreController->m_importCoreController, &ImportController::importFinished, this, [this]() {
-        if (!m_coreController->m_connectionController->isConnected()) {
-            int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
-            m_coreController->m_serversController->setDefaultServerIndex(newServerIndex);
-            if (m_coreController->m_serversUiController) {
-                m_coreController->m_serversUiController->setProcessedServerIndex(newServerIndex);
-            }
+        if (m_coreController->m_connectionUiController->isConnected()) {
+            return;
+        }
+
+        const int newServerIndex = m_coreController->m_serversController->getServersCount() - 1;
+        const QString serverId = m_coreController->m_serversController->getServerId(newServerIndex);
+        if (!serverId.isEmpty()) {
+            m_coreController->m_serversController->setDefaultServer(serverId);
+        }
+        if (m_coreController->m_serversUiController) {
+            m_coreController->m_serversUiController->setProcessedServerId(serverId);
         }
     });
 }
@@ -170,42 +176,27 @@ void CoreSignalHandlers::initImportControllerHandler()
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
 {
     connect(m_coreController->m_serversUiController, &ServersUiController::updateApiCountryModel, this, [this]() {
-        int processedIndex = m_coreController->m_serversUiController->getProcessedServerIndex();
-        if (processedIndex < 0 || processedIndex >= m_coreController->m_serversRepository->serversCount()) {
+        const QString processedServerId = m_coreController->m_serversUiController->getProcessedServerId();
+        if (processedServerId.isEmpty()) {
             return;
         }
-        
-        ServerConfig server = m_coreController->m_serversRepository->server(processedIndex);
-        QJsonArray availableCountries;
-        QString serverCountryCode;
-        
-        if (server.isApiV2()) {
-            const ApiV2ServerConfig* apiV2 = server.as<ApiV2ServerConfig>();
-            if (apiV2) {
-                availableCountries = apiV2->apiConfig.availableCountries;
-                serverCountryCode = apiV2->apiConfig.serverCountryCode;
-            }
+
+        const auto apiV2 = m_coreController->m_serversRepository->apiV2Config(processedServerId);
+        if (!apiV2.has_value()) {
+            return;
         }
-        
-        m_coreController->m_apiCountryModel->updateModel(availableCountries, serverCountryCode);
+
+        m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
+                                                           apiV2->apiConfig.serverCountryCode);
     });
 }
 
 void CoreSignalHandlers::initSubscriptionRefreshHandler()
 {
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::subscriptionRefreshNeeded, this, [this]() {
-        const int defaultServerIndex = m_coreController->m_serversController->getDefaultServerIndex();
-        if (defaultServerIndex >= 0) {
-            m_coreController->m_subscriptionUiController->getAccountInfo(defaultServerIndex, false);
-        }
-    });
-}
-
-void CoreSignalHandlers::initContainerModelUpdateHandler()
-{
-    connect(m_coreController->m_serversController, &ServersController::gatewayStacksExpanded, this, [this]() {
-        if (m_coreController->m_serversUiController->hasServersFromGatewayApi()) {
-            m_coreController->m_apiNewsUiController->fetchNews(false);
+        const QString defaultServerId = m_coreController->m_serversController->getDefaultServerId();
+        if (!defaultServerId.isEmpty()) {
+            m_coreController->m_subscriptionUiController->getAccountInfo(defaultServerId, false);
         }
     });
 }
@@ -213,17 +204,19 @@ void CoreSignalHandlers::initContainerModelUpdateHandler()
 void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
-            [this](int serverIndex, const ContainerConfig &containerConfig, DockerContainer container) {
-                m_coreController->m_usersController->revokeClient(serverIndex, containerConfig, container);
+            [this](const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container) {
+                QtConcurrent::run([this, serverId, containerConfig, container]() {
+                    m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
+                });
             });
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
-            [this](int serverIndex, const QString &clientId, const QString &clientName, DockerContainer container) {
-                m_coreController->m_usersController->appendClient(serverIndex, clientId, clientName, container);
-            });
+            [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {
+                m_coreController->m_usersController->appendClient(serverId, clientId, clientName, container);
+            }, Qt::DirectConnection);
 
-    connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_serversController,
-            &ServersController::clearCachedProfile);
+    connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_installController,
+            &InstallController::clearCachedProfile);
 }
 
 void CoreSignalHandlers::initPassphraseRequestHandler()
@@ -247,12 +240,16 @@ void CoreSignalHandlers::initLanguageHandler()
     connect(m_coreController->m_settingsUiController, &SettingsUiController::resetLanguageToSystem, m_coreController->m_languageUiController, [this]() {
         m_coreController->m_languageUiController->changeLanguage(m_coreController->m_languageUiController->getSystemLanguageEnum());
     });
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::appLanguageChanged, m_coreController->m_languageUiController, [this]() {
+        m_coreController->m_languageUiController->onAppLanguageChanged(m_coreController->m_settingsController->getAppLanguage());
+    });
 }
 
 void CoreSignalHandlers::initAutoConnectHandler()
 {
-    if (m_coreController->m_settingsUiController->isAutoConnectEnabled() && m_coreController->m_serversController->getDefaultServerIndex() >= 0) {
-        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->openConnection(); });
+    if (m_coreController->m_settingsUiController->isAutoConnectEnabled()
+        && !m_coreController->m_serversController->getDefaultServerId().isEmpty()) {
+        QTimer::singleShot(1000, this, [this]() { m_coreController->m_connectionUiController->toggleConnection(); });
     }
 }
 
@@ -271,16 +268,20 @@ void CoreSignalHandlers::initServersModelUpdateHandler()
             m_coreController->m_serversUiController, &ServersUiController::updateModel);
     connect(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged,
             m_coreController->m_serversUiController, &ServersUiController::onDefaultServerChanged);
-    
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded,
-            m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited,
-            m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved,
-            m_coreController->m_serversController, &ServersController::recomputeGatewayStacks);
-    
-    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished,
-            m_coreController->m_serversUiController, &ServersUiController::updateModel);
+
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded, this,
+            [this](const QString &serverId) {
+                if (m_coreController->m_serversRepository->apiV2Config(serverId).has_value()) {
+                    m_coreController->m_apiNewsUiController->fetchNews(false);
+                }
+            });
+
+    connect(m_coreController->m_settingsUiController, &SettingsUiController::restoreBackupFinished, this, [this]() {
+        m_coreController->m_serversUiController->updateModel();
+        if (m_coreController->m_serversUiController->hasServersFromGatewayApi()) {
+            m_coreController->m_apiNewsUiController->fetchNews(false);
+        }
+    });
 }
 
 void CoreSignalHandlers::initClientManagementModelUpdateHandler()
@@ -289,6 +290,8 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateModel);
     connect(m_coreController->m_usersController, &UsersController::clientRenamed,
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateClientName);
+    connect(m_coreController->m_usersController, &UsersController::revokeFinished,
+            m_coreController->m_exportController, &ExportController::revokeFinished);
 }
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
@@ -315,7 +318,19 @@ void CoreSignalHandlers::initPrepareConfigHandler()
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::prepareConfig, this, [this]() {
         m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Preparing);
 
-        m_coreController->m_subscriptionUiController->validateConfig();
+        const QString serverId = m_coreController->m_serversController->getDefaultServerId();
+        if (serverId.isEmpty()) {
+            m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
+            return;
+        }
+
+        const serverConfigUtils::ConfigType kind = m_coreController->m_serversRepository->serverKind(serverId);
+
+        if (serverConfigUtils::isApiV2Subscription(kind) || serverConfigUtils::isLegacyApiSubscription(kind)) {
+            m_coreController->m_subscriptionUiController->validateConfig();
+        } else {
+            m_coreController->m_installUiController->validateConfig();
+        }
     });
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::configValidated, this, [this](bool isValid) {
@@ -324,7 +339,7 @@ void CoreSignalHandlers::initPrepareConfigHandler()
             return;
         }
 
-        m_coreController->m_installUiController->validateConfig();
+        m_coreController->m_connectionUiController->openConnection();
     });
 
     connect(m_coreController->m_installUiController, &InstallUiController::configValidated, this, [this](bool isValid) {
@@ -335,6 +350,15 @@ void CoreSignalHandlers::initPrepareConfigHandler()
 
         m_coreController->m_connectionUiController->openConnection();
     });
+}
+
+void CoreSignalHandlers::initUnsupportedConnectDrawerHandler()
+{
+    connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::unsupportedConnectDrawerRequested,
+            m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
+
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::unsupportedConnectDrawerRequested,
+            m_coreController->m_pageController, &PageController::unsupportedConnectDrawerRequested);
 }
 
 void CoreSignalHandlers::initStrictKillSwitchHandler()
@@ -348,7 +372,10 @@ void CoreSignalHandlers::initAndroidSettingsHandler()
 #ifdef Q_OS_ANDROID
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::saveLogsChanged, AndroidController::instance(), &AndroidController::setSaveLogs);
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, AndroidController::instance(), &AndroidController::setScreenshotsEnabled);
-    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved, AndroidController::instance(), &AndroidController::resetLastServer);
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved, this,
+            [](const QString &/*serverId*/, int removedIndex) {
+                AndroidController::instance()->resetLastServer(removedIndex);
+            });
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::settingsCleared, []() { AndroidController::instance()->resetLastServer(-1); });
 #endif
 }

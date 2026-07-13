@@ -9,6 +9,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/utils/errorCodes.h"
@@ -28,6 +29,8 @@
 #include "ui/models/services/torConfigModel.h"
 #include "core/models/protocols/sftpProtocolConfig.h"
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
+#include "ui/models/services/mtProxyConfigModel.h"
+#include "ui/models/services/telemtConfigModel.h"
 
 class InstallUiController : public QObject
 {
@@ -48,28 +51,36 @@ public:
 #endif
                                SftpConfigModel* sftpConfigModel,
                                Socks5ProxyConfigModel* socks5ConfigModel,
+                               MtProxyConfigModel* mtConfigModel,
+                               TelemtConfigModel* telemtConfigModel,
+                               ConnectionController* connectionController,
                                QObject *parent = nullptr);
     ~InstallUiController();
 
 public slots:
-    void install(DockerContainer container, int port, TransportProto transportProto, int serverIndex);
+    void install(DockerContainer container, int port, TransportProto transportProto, const QString &serverId);
     void setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData);
     void clearProcessedServerCredentials();
 
-    void scanServerForInstalledContainers(int serverIndex);
+    void scanServerForInstalledContainers(const QString &serverId);
 
-    void updateContainer(int serverIndex, int containerIndex, int protocolIndex);
+    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
 
-    void removeServer(int serverIndex);
-    void rebootServer(int serverIndex);
-    void removeAllContainers(int serverIndex);
-    void removeContainer(int serverIndex, int containerIndex);
+    void removeServer(const QString &serverId);
+    void rebootServer(const QString &serverId);
+    void removeAllContainers(const QString &serverId);
+    void removeContainer(const QString &serverId, int containerIndex);
+    void setContainerEnabled(const QString &serverId, int containerIndex, bool enabled);
+    void refreshContainerStatus(const QString &serverId, int containerIndex);
+    void refreshContainerDiagnostics(const QString &serverId, int containerIndex, int port);
+    void fetchContainerSecret(const QString &serverId, int containerIndex);
 
-    void clearCachedProfile(int serverIndex, int containerIndex);
+    void clearCachedProfile(const QString &serverId, int containerIndex);
 
     QRegularExpression ipAddressRegExp();
 
-    void mountSftpDrive(int serverIndex, const QString &port, const QString &password, const QString &username);
+    void mountSftpDrive(const QString &serverId, const QString &port, const QString &password, const QString &username);
 
     bool checkSshConnection();
 
@@ -78,12 +89,12 @@ public slots:
     void addEmptyServer();
 
     void validateConfig();
-    
-    Q_INVOKABLE void updateProtocols(int serverIndex, int containerIndex);
-    
-    void openServerSettings(int serverIndex, int containerIndex, int protocolIndex);
-    void openClientSettings(int serverIndex, int containerIndex, int protocolIndex);
-    
+
+    Q_INVOKABLE void updateProtocols(const QString &serverId, int containerIndex);
+
+    void openServerSettings(const QString &serverId, int containerIndex, int protocolIndex);
+    void openClientSettings(const QString &serverId, int containerIndex, int protocolIndex);
+
     int defaultPort(int protocolIndex);
     int getPortForInstall(int protocolIndex);
     int defaultTransportProto(int protocolIndex);
@@ -94,7 +105,7 @@ signals:
     void installContainerFinished(const QString &finishMessage, bool isServiceInstall);
     void installServerFinished(const QString &finishMessage);
 
-    void updateContainerFinished(const QString &message);
+    void updateContainerFinished(const QString &message, bool closePage);
 
     void scanServerFinished(bool isInstalledContainerFound);
 
@@ -102,6 +113,11 @@ signals:
     void removeServerFinished(const QString &finishedMessage);
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);
+    void setContainerEnabledFinished(bool enabled);
+    void containerStatusRefreshed(int status, int errorCode);
+    void containerDiagnosticsRefreshed(bool portReachable, bool upstreamReachable, int clientsConnected,
+                                       const QString &lastConfigRefresh, const QString &statsEndpoint);
+    void containerSecretFetched(const QString &secret);
 
     void installationErrorOccurred(ErrorCode errorCode);
     void wrongInstallationUser(const QString &message);
@@ -114,12 +130,9 @@ signals:
     void serverIsBusy(const bool isBusy);
     void cancelInstallation();
 
-    void currentContainerUpdated();
-
     void cachedProfileCleared(const QString &message);
     void apiConfigRemoved(const QString &message);
 
-    void noInstalledContainers();
     void configValidated(bool isValid);
 
 private:
@@ -140,12 +153,17 @@ private:
 #endif
     SftpConfigModel* m_sftpConfigModel;
     Socks5ProxyConfigModel* m_socks5ConfigModel;
+    MtProxyConfigModel* m_mtProxyConfigModel;
+    TelemtConfigModel* m_telemtConfigModel;
+    ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
     
-    void updateProtocolConfigModel(int serverIndex, int containerIndex, int protocolIndex);
+    void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
+
+    bool buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig);
 };
 
 #endif // INSTALLUICONTROLLER_H

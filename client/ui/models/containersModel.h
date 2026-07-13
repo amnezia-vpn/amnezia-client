@@ -39,6 +39,8 @@ public:
         IsSupportedRole,
         IsShareableRole,
 
+        IsUnsupportedContainerRole,
+
         InstallPageOrderRole,
         
         // Container type check roles
@@ -48,7 +50,9 @@ public:
         IsDnsRole,
         IsSftpRole,
         IsTorWebsiteRole,
-        IsSocks5ProxyRole
+        IsSocks5ProxyRole,
+        IsMtProxyRole,
+        IsTelemtRole,
     };
     
     Q_INVOKABLE void openContainerSettings(int containerIndex);

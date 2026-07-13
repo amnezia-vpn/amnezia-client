@@ -12,7 +12,6 @@
 #include "core/utils/commonStructs.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
-#include "core/models/serverConfig.h"
 
 class ServersController;
 
@@ -43,49 +42,53 @@ public:
         QJsonObject toJsonObject() const;
     };
 
+    struct CaptchaInfo {
+        QString captchaId;
+        QString captchaImageBase64;
+        QString hint;
+        bool isRequired = false;
+    };
+
     explicit SubscriptionController(SecureServersRepository* serversRepository,
                                      SecureAppSettingsRepository* appSettingsRepository);
 
     ProtocolData generateProtocolData(const QString &protocol);
     void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
-    ErrorCode fillServerConfig(const QJsonObject &serverConfigJson, ServerConfig &serverConfig);
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,
-                                      ServerConfig &serverConfig);
+                                      CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
-                                     const QString &serviceProtocol, const QString &email,
-                                     ServerConfig &serverConfig);
+                                     const QString &serviceProtocol, const QString &email);
 
     ErrorCode importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const ProtocolData &protocolData,
                                         const QString &transactionId, bool isTestPurchase,
-                                        ServerConfig &serverConfig,
                                         int *duplicateServerIndex = nullptr);
 
-    ErrorCode updateServiceFromGateway(int serverIndex, const QString &newCountryCode, bool isConnectEvent);
+    ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent);
 
-    ErrorCode deactivateDevice(int serverIndex);
+    ErrorCode deactivateDevice(const QString &serverId);
 
-    ErrorCode deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
+    ErrorCode deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode);
 
-    ErrorCode exportNativeConfig(int serverIndex, const QString &serverCountryCode, QString &nativeConfig);
+    ErrorCode exportNativeConfig(const QString &serverId, const QString &serverCountryCode, QString &nativeConfig);
 
-    ErrorCode revokeNativeConfig(int serverIndex, const QString &serverCountryCode);
+    ErrorCode revokeNativeConfig(const QString &serverId, const QString &serverCountryCode);
 
-    ErrorCode updateServiceFromTelegram(int serverIndex);
+    ErrorCode prepareVpnKeyExport(const QString &serverId, QString &vpnKey);
 
-    ErrorCode prepareVpnKeyExport(int serverIndex, QString &vpnKey);
+    ErrorCode validateAndUpdateConfig(const QString &serverId, bool hasInstalledContainers);
 
-    ErrorCode validateAndUpdateConfig(int serverIndex, bool hasInstalledContainers);
+    void removeApiConfig(const QString &serverId);
 
-    void removeApiConfig(int serverIndex);
+    bool removeServer(const QString &serverId);
 
-    void setCurrentProtocol(int serverIndex, const QString &protocolName);
-    bool isVlessProtocol(int serverIndex) const;
+    void setCurrentProtocol(const QString &serverId, const QString &protocolName);
+    bool isVlessProtocol(const QString &serverId) const;
 
-    ErrorCode getAccountInfo(int serverIndex, QJsonObject &accountInfo);
-    QFuture<QPair<ErrorCode, QString>> getRenewalLink(int serverIndex);
+    ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
+    QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
 
     struct AppStoreRestoreResult
     {
@@ -98,15 +101,19 @@ public:
 
     ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &productId,
-                                     ServerConfig &serverConfig,
                                      int *duplicateServerIndex = nullptr);
 
     AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
                                                   const QString &serviceProtocol);
 
+    ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
+                                          const QString &serviceProtocol, const ProtocolData &protocolData,
+                                          const QString &captchaId, const QString &captchaSolution,
+                                          CaptchaInfo *retryCaptchaOut = nullptr);
+
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
-    bool isApiKeyExpired(int serverIndex) const;
+    bool isApiKeyExpired(const QString &serverId) const;
     
     ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol, 
                                                    const ProtocolData &protocolData, QJsonObject &serverConfigJson);

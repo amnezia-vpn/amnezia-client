@@ -5,6 +5,7 @@
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -13,6 +14,7 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiCountryModel.h"
 #include "ui/models/api/apiDevicesModel.h"
+
 class SubscriptionUiController : public QObject
 {
     Q_OBJECT
@@ -27,6 +29,7 @@ public:
                          ApiCountryModel* apiCountryModel,
                          ApiDevicesModel* apiDevicesModel,
                          SettingsController* settingsController,
+                         ConnectionController* connectionController,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -34,10 +37,10 @@ public:
     Q_PROPERTY(QString vpnKey READ getVpnKey NOTIFY vpnKeyExportReady)
 
 public slots:
-    bool exportNativeConfig(int serverIndex, const QString &serverCountryCode, const QString &fileName);
-    bool revokeNativeConfig(int serverIndex, const QString &serverCountryCode);
-    bool exportVpnKey(int serverIndex, const QString &fileName);
-    void prepareVpnKeyExport(int serverIndex);
+    bool exportNativeConfig(const QString &serverId, const QString &serverCountryCode, const QString &fileName);
+    bool revokeNativeConfig(const QString &serverId, const QString &serverCountryCode);
+    bool exportVpnKey(const QString &serverId, const QString &fileName);
+    void prepareVpnKeyExport(const QString &serverId);
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
@@ -45,21 +48,27 @@ public slots:
     bool importFreeFromGateway();
     bool restoreServiceFromAppStore();
     bool importTrialFromGateway(const QString &email);
-    bool updateServiceFromGateway(const int serverIndex, const QString &newCountryCode, const QString &newCountryName,
+    bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
-    bool updateServiceFromTelegram(const int serverIndex);
-    bool deactivateDevice(int serverIndex);
-    bool deactivateExternalDevice(int serverIndex, const QString &uuid, const QString &serverCountryCode);
+    bool deactivateDevice(const QString &serverId);
+    bool deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode);
 
     void validateConfig();
 
-    void setCurrentProtocol(int serverIndex, const QString &protocolName);
-    bool isVlessProtocol(int serverIndex);
+    void setCurrentProtocol(const QString &serverId, const QString &protocolName);
+    bool isVlessProtocol(const QString &serverId);
 
-    void removeApiConfig(int serverIndex);
+    bool isCaptchaAwaitingUser() const;
+    void onCaptchaSolved(const QString &captchaId, const QString &solution);
+    void onRefreshCaptchaRequested();
 
-    bool getAccountInfo(int serverIndex, bool reload);
-    void getRenewalLink(int serverIndex);
+    void removeApiConfig(const QString &serverId);
+
+    void removeServer(const QString &serverId);
+
+    bool getAccountInfo(const QString &serverId, bool reload);
+    void getRenewalLink(const QString &serverId);
+
     void updateApiCountryModel();
     void updateApiDevicesModel();
 
@@ -77,8 +86,25 @@ signals:
     void subscriptionRefreshNeeded();
 
     void apiConfigRemoved(const QString &message);
+    void apiServerRemoved(const QString &message);
 
     void vpnKeyExportReady();
+    void captchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
+    void captchaFlowDismissRequested();
+
+    void unsupportedConnectDrawerRequested();
+
+private:
+    struct CaptchaState {
+        QString userCountryCode;
+        QString serviceType;
+        QString serviceProtocol;
+        QString openvpnPrivKey;
+        QString wireguardClientPrivKey;
+        QString wireguardClientPubKey;
+        QString xrayUuid;
+        bool isPending = false;
+    } m_captchaState;
 
 private:
     QList<QString> getQrCodes();
@@ -98,6 +124,7 @@ private:
     ApiCountryModel* m_apiCountryModel;
     ApiDevicesModel* m_apiDevicesModel;
     SettingsController* m_settingsController;
+    ConnectionController* m_connectionController;
 };
 
 #endif // SUBSCRIPTIONUICONTROLLER_H

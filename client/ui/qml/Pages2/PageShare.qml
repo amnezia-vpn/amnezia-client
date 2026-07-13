@@ -42,40 +42,40 @@ PageType {
             var configExtension
             var configFileName
 
-            var serverIndex = ServersUiController.processedIndex
             var containerIndex = ServersUiController.processedContainerIndex
+            var serverId = ServersUiController.processedServerId
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
-                ExportController.generateConnectionConfig(serverIndex, containerIndex, clientNameTextField.textField.text);
+                ExportController.generateConnectionConfig(serverId, containerIndex, clientNameTextField.textField.text);
                 configCaption = qsTr("Save AmneziaVPN config")
                 configExtension = ".vpn"
                 configFileName = "amnezia_config"
                 break;
             }
             case PageShare.ConfigType.OpenVpn: {
-                ExportController.generateOpenVpnConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateOpenVpnConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save OpenVPN config")
                 configExtension = ".ovpn"
                 configFileName = "amnezia_for_openvpn"
                 break
             }
             case PageShare.ConfigType.WireGuard: {
-                ExportController.generateWireGuardConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateWireGuardConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save WireGuard config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_wireguard"
                 break
             }
             case PageShare.ConfigType.Awg: {
-                ExportController.generateAwgConfig(serverIndex, containerIndex, clientNameTextField.textField.text)
+                ExportController.generateAwgConfig(serverId, containerIndex, clientNameTextField.textField.text)
                 configCaption = qsTr("Save AmneziaWG config")
                 configExtension = ".conf"
                 configFileName = "amnezia_for_awg"
                 break
             }
             case PageShare.ConfigType.Xray: {
-                ExportController.generateXrayConfig(serverIndex, clientNameTextField.textField.text)
+                ExportController.generateXrayConfig(serverId, clientNameTextField.textField.text)
                 configCaption = qsTr("Save XRay config")
                 configExtension = ".json"
                 configFileName = "amnezia_for_xray"
@@ -91,6 +91,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
+            PageController.showBusyIndicator(false)
             PageController.showErrorMessage(error)
         }
     }
@@ -249,7 +250,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                            ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -332,8 +333,10 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultIndex)
+                        if (ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId)
+                            && ServersUiController.serverHasInstalledContainers(ServersUiController.defaultServerId)) {
+                            serverSelectorListView.selectedIndex =
+                                proxyServersModel.mapFromSource(ServersUiController.getServerIndexById(ServersUiController.defaultServerId))
                         } else {
                             serverSelectorListView.selectedIndex = 0
                         }
@@ -344,7 +347,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersUiController.processedIndex = proxyServersModel.mapToSource(selectedIndex)
+                        ServersUiController.setProcessedServerId(ServersUiController.getServerId(proxyServersModel.mapToSource(selectedIndex)))
                     }
                 }
             }
@@ -380,6 +383,10 @@ PageType {
                             ValueFilter {
                                 roleName: "isShareable"
                                 value: true
+                            },
+                            ValueFilter {
+                                roleName: "isUnsupportedContainer"
+                                value: false
                             }
                         ]
                     }
@@ -394,9 +401,19 @@ PageType {
                         target: serverSelector
 
                         function onServerSelectorIndexChanged() {
-                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
+                            if (!proxyContainersModel.count) {
+                                root.shareButtonEnabled = false
+                                return
+                            }
+
+                            var defaultContainer = proxyContainersModel.mapFromSource(
+                                        ServersUiController.serverDefaultContainer(ServersUiController.processedServerId))
+                            if (defaultContainer < 0) {
+                                defaultContainer = 0
+                            }
+
                             containerSelectorListView.selectedIndex = defaultContainer
-                            containerSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
+                            containerSelectorListView.positionViewAtIndex(defaultContainer, ListView.Beginning)
                             containerSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -417,7 +434,7 @@ PageType {
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.processedIndex,
+                            ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -792,9 +809,9 @@ PageType {
                                                         clientsListView.freezeFilter = true
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
-                                                                                      clientNameEditor.textField.text,
-                                                                                      ServersUiController.processedIndex,
-                                                                                      ServersUiController.processedContainerIndex)
+                                                                                          clientNameEditor.textField.text,
+                                                                                          ServersUiController.processedServerId,
+                                                                                          ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
                                                         clientNameEditDrawer.closeTriggered()
@@ -829,13 +846,20 @@ PageType {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
-                                                                          ServersUiController.processedIndex,
-                                                                          ServersUiController.processedContainerIndex)
+                                                                              ServersUiController.processedServerId,
+                                                                              ServersUiController.processedContainerIndex)
                                         }
                                         var noButtonFunction = function() {
                                         }
 
-                                        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                                        if (ConnectionController.isRevokeBlockedDuringActiveConnection(
+                                                ServersUiController.processedServerId,
+                                                ServersUiController.processedContainerIndex,
+                                                clientId)) {
+                                            PageController.showNotificationMessage("Unable to revoke current config during active connection")
+                                        } else {
+                                            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                                        }
                                     }
                                 }
                             }
