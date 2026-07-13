@@ -286,7 +286,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     return { resGateway, QNetworkInterface::interfaceFromIndex(resIndex) };
 #endif
 #ifdef Q_OS_LINUX
-    constexpr int BUFFER_SIZE = 100;
+    constexpr int BUFFER_SIZE = 8192;
     int     received_bytes = 0, msg_len = 0, route_attribute_len = 0;
     int     sock = -1, msgseq = 0;
     struct  nlmsghdr *nlh, *nlmsg;
@@ -294,7 +294,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     // This struct contain route attributes (route type)
     struct  rtattr *route_attribute;
     char    gateway_address[INET_ADDRSTRLEN], interface[IF_NAMESIZE];
-    char    msgbuf[BUFFER_SIZE], buffer[BUFFER_SIZE];
+    char    msgbuf[100], buffer[BUFFER_SIZE];
     char    *ptr = buffer;
     struct timeval tv;
 
@@ -339,8 +339,8 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         nlh = (struct nlmsghdr *) ptr;
 
         /* Check if the header is valid */
-        if((NLMSG_OK(nlmsg, received_bytes) == 0) ||
-            (nlmsg->nlmsg_type == NLMSG_ERROR))
+        if((NLMSG_OK(nlh, received_bytes) == 0) ||
+            (nlh->nlmsg_type == NLMSG_ERROR))
         {
             perror("Error in received packet");
             return {};
@@ -355,13 +355,15 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         }
 
         /* Break if its not a multi part message */
-        if ((nlmsg->nlmsg_flags & NLM_F_MULTI) == 0)
+        if ((nlh->nlmsg_flags & NLM_F_MULTI) == 0)
             break;
     }
-    while ((nlmsg->nlmsg_seq != msgseq) || (nlmsg->nlmsg_pid != getpid()));
+    while ((nlh->nlmsg_seq != msgseq) || (nlh->nlmsg_pid != getpid()));
 
     /* parse response */
-    for ( ; NLMSG_OK(nlh, received_bytes); nlh = NLMSG_NEXT(nlh, received_bytes))
+    int remaining = msg_len + received_bytes;
+    nlh = (struct nlmsghdr *) buffer;
+    for ( ; NLMSG_OK(nlh, remaining); nlh = NLMSG_NEXT(nlh, remaining))
     {
         /* Get the route data */
         route_entry = (struct rtmsg *) NLMSG_DATA(nlh);
@@ -369,6 +371,10 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         /* We are just interested in main routing table */
         if (route_entry->rtm_table != RT_TABLE_MAIN)
             continue;
+
+        /* Reset per-route to avoid cross-route state pollution */
+        memset(gateway_address, 0, sizeof(gateway_address));
+        memset(interface, 0, sizeof(interface));
 
         route_attribute = (struct rtattr *) RTM_RTA(route_entry);
         route_attribute_len = RTM_PAYLOAD(nlh);
@@ -391,10 +397,15 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         }
 
         if ((*gateway_address) && (*interface)) {
+            if (QString::fromUtf8(interface).startsWith("amn")) {
+                continue;
+            }
             qDebug() << "Gateway " << gateway_address << " for interface " << interface;
             break;
         }
     }
+    if (!(*gateway_address) || !(*interface))
+        qDebug() << "getGatewayAndIface: no gateway found";
     close(sock);
     return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
 #endif
@@ -449,10 +460,15 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 sa_tab[RTAX_DST]->sa_family == afinet_type[ip_type] &&
                 sa_tab[RTAX_GATEWAY]->sa_family == afinet_type[ip_type])
             {
+                char ifname[IF_NAMESIZE] = {0};
+                const bool isTun = if_indextoname(rt->rtm_index, ifname)
+                                && QString::fromUtf8(ifname).startsWith("utun");
+
                 if (afinet_type[ip_type] == AF_INET)
                 {
                     if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
                     {
+                        if (isTun) continue;
                         char dstStr4[INET_ADDRSTRLEN];
                         char srcStr4[INET_ADDRSTRLEN];
                         memcpy(srcStr4,
@@ -470,6 +486,7 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 {
                     if ((reinterpret_cast<struct sockaddr_in*>(sa_tab[RTAX_DST]))->sin_addr.s_addr == 0)
                     {
+                        if (isTun) continue;
                         char dstStr6[INET6_ADDRSTRLEN];
                         char srcStr6[INET6_ADDRSTRLEN];
                         memcpy(srcStr6,

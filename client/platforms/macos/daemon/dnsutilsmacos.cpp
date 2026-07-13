@@ -185,6 +185,9 @@ bool DnsUtilsMacos::restoreResolvers() {
 }
 
 void DnsUtilsMacos::backupService(const QString& uuid) {
+  if (m_prevServices.contains(uuid)) {
+    return;
+  }
   DnsBackup backup;
   CFStringRef path = CFStringCreateWithFormat(
       kCFAllocatorSystemDefault, nullptr,

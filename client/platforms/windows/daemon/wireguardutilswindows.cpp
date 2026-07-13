@@ -102,37 +102,42 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     return false;
   }
 
-  // We don't want to pass a peer just yet, that will happen later with
-  // a UAPI command in WireguardUtilsWindows::updatePeer(), so truncate
-  // the config file to remove the [Peer] section.
   qsizetype peerStart = configString.indexOf("[Peer]", 0, Qt::CaseSensitive);
   if (peerStart >= 0) {
     configString.truncate(peerStart);
   }
 
-  if (!m_tunnel.start(configString)) {
+  auto stripLine = [&](const QString& key) {
+    qsizetype start = configString.startsWith(key + " = ")
+                          ? 0
+                          : configString.indexOf("\n" + key + " = ");
+    if (start < 0) return;
+    if (start != 0) start += 1;
+    qsizetype end = configString.indexOf('\n', start);
+    if (end < 0) return;
+    configString.remove(start, end - start + 1);
+  };
+
+  stripLine("DNS");
+  if (config.m_deferAddressSetup) {
+    // Wintun rejects duplicate IPv4; daemon will assign at swap time.
+    stripLine("Address");
+  }
+
+  m_ifname = config.m_ifname.isEmpty() ? s_defaultInterfaceName() : config.m_ifname;
+  if (!m_tunnel.start(configString, m_ifname)) {
     logger.error() << "Failed to activate the tunnel service";
     return false;
   }
 
-  // Determine the interface LUID
   NET_LUID luid;
-  QString ifAlias = interfaceName();
-  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)ifAlias.utf16(), &luid);
+  DWORD result = ConvertInterfaceAliasToLuid((wchar_t*)m_ifname.utf16(), &luid);
   if (result != 0) {
     logger.error() << "Failed to lookup LUID:" << result;
     return false;
   }
   m_luid = luid.Value;
   m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
-
-  if (config.m_killSwitchEnabled) {
-    // Enable the windows firewall
-    NET_IFINDEX ifindex;
-    ConvertInterfaceLuidToIndex(&luid, &ifindex);
-    m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
-  }
 
   logger.debug() << "Registration completed";
   return true;
@@ -143,7 +148,6 @@ bool WireguardUtilsWindows::deleteInterface() {
     m_routeMonitor->deleteLater();
   }
 
-  m_firewall->disableKillSwitch();
   m_tunnel.stop();
   return true;
 }
@@ -154,10 +158,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   QByteArray pskKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPskKey));
 
-  if (config.m_killSwitchEnabled) {
-    // Enable the windows firewall for this peer.
-    m_firewall->enablePeerTraffic(config);
-  }
   logger.debug() << "Configuring peer" << publicKey.toHex()
                  << "via" << config.m_serverIpv4AddrIn;
 
@@ -185,12 +185,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
     out << "allowed_ip=" << ip.toString() << "\n";
   }
 
-  // Exclude the server address, except for multihop exit servers.
-  if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
-
   QString reply = m_tunnel.uapiCommand(message);
   logger.debug() << "DATA:" << reply;
   return true;
@@ -199,15 +193,6 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-
-  // Clear exclustion routes for this peer.
-  if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
-
-  // Disable the windows firewall for this peer.
-  m_firewall->disablePeerTraffic(config.m_serverPublicKey);
 
   QString message;
   QTextStream out(&message);

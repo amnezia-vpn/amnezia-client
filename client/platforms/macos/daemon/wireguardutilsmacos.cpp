@@ -9,14 +9,13 @@
 
 #include <QByteArray>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QLocalSocket>
 #include <QTimer>
 
 #include "leakdetector.h"
 #include "logger.h"
-
-#include "killswitch.h"
 
 constexpr const int WG_TUN_PROC_TIMEOUT = 5000;
 constexpr const char* WG_RUNTIME_DIR = "/var/run/amneziawg";
@@ -58,11 +57,12 @@ void WireguardUtilsMacos::tunnelErrorOccurred(QProcess::ProcessError error) {
 }
 
 bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
-  Q_UNUSED(config);
   if (m_tunnel.state() != QProcess::NotRunning) {
     logger.warning() << "Unable to start: tunnel process already running";
     return false;
   }
+
+  const QString ifname = config.m_ifname;
 
   QDir wgRuntimeDir(WG_RUNTIME_DIR);
   if (!wgRuntimeDir.exists()) {
@@ -70,7 +70,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   }
 
   QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
-  QString wgNameFile = wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name");
+  QString wgNameFile = wgRuntimeDir.filePath(ifname + ".name");
   pe.insert("WG_TUN_NAME_FILE", wgNameFile);
 #ifdef MZ_DEBUG
   pe.insert("LOG_LEVEL", "debug");
@@ -92,6 +92,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
     m_tunnel.kill();
     return false;
   }
+  QFile::remove(wgNameFile);
   logger.debug() << "Created wireguard interface" << m_ifname;
 
   // Start the routing table monitor.
@@ -145,30 +146,6 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   int err = uapiErrno(uapiCommand(message));
   if (err != 0) {
     logger.error() << "Interface configuration failed:" << strerror(err);
-  } else {
-    if (config.m_killSwitchEnabled) {
-      FirewallParams params { };
-      params.dnsServers.append(config.m_primaryDnsServer);
-      if (!config.m_secondaryDnsServer.isEmpty()) {
-          params.dnsServers.append(config.m_secondaryDnsServer);
-      }
-
-      if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-          params.blockAll = true;
-          if (config.m_excludedAddresses.size()) {
-              params.allowNets = true;
-              foreach (auto net, config.m_excludedAddresses) {
-                  params.allowAddrs.append(net.toUtf8());
-              }
-          }
-      } else {
-          params.blockNets = true;
-          foreach (auto net, config.m_allowedIPAddressRanges) {
-              params.blockAddrs.append(net.toString());
-          }
-      }
-      applyFirewallRules(params);
-    }
   }
   return (err == 0);
 }
@@ -189,13 +166,6 @@ bool WireguardUtilsMacos::deleteInterface() {
     m_tunnel.kill();
     m_tunnel.waitForFinished(WG_TUN_PROC_TIMEOUT);
   }
-
-  // Garbage collect.
-  QDir wgRuntimeDir(WG_RUNTIME_DIR);
-  QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
-
-  // double-check + ensure our firewall is installed and enabled
-  KillSwitch::instance()->disableKillSwitch();
 
   return true;
 }
@@ -234,13 +204,6 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
     out << "allowed_ip=" << ip.toString() << "\n";
   }
 
-  // Exclude the server address, except for multihop exit servers.
-  if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-      (m_rtmonitor != nullptr)) {
-    m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
-
   int err = uapiErrno(uapiCommand(message));
   if (err != 0) {
     logger.error() << "Peer configuration failed:" << strerror(err);
@@ -251,13 +214,6 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
 bool WireguardUtilsMacos::deletePeer(const InterfaceConfig& config) {
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-
-  // Clear exclustion routes for this peer.
-  if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-      (m_rtmonitor != nullptr)) {
-    m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-  }
 
   QString message;
   QTextStream out(&message);
@@ -389,12 +345,8 @@ bool WireguardUtilsMacos::excludeLocalNetworks(const QList<IPAddress>& routes) {
 
 QString WireguardUtilsMacos::uapiCommand(const QString& command) {
   QLocalSocket socket;
-  QTimer uapiTimeout;
   QDir wgRuntimeDir(WG_RUNTIME_DIR);
   QString wgSocketFile = wgRuntimeDir.filePath(m_ifname + ".sock");
-
-  uapiTimeout.setSingleShot(true);
-  uapiTimeout.start(WG_TUN_PROC_TIMEOUT);
 
   socket.connectToServer(wgSocketFile, QIODevice::ReadWrite);
   if (!socket.waitForConnected(WG_TUN_PROC_TIMEOUT)) {
@@ -410,13 +362,15 @@ QString WireguardUtilsMacos::uapiCommand(const QString& command) {
   }
   socket.write(message);
 
+  QElapsedTimer elapsed;
+  elapsed.start();
   QByteArray reply;
   while (!reply.contains("\n\n")) {
-    if (!uapiTimeout.isActive()) {
+    const qint64 remaining = WG_TUN_PROC_TIMEOUT - elapsed.elapsed();
+    if (remaining <= 0 || !socket.waitForReadyRead(static_cast<int>(remaining))) {
       logger.error() << "UAPI command timed out";
       return QString();
     }
-    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     reply.append(socket.readAll());
   }
 
@@ -462,29 +416,4 @@ QString WireguardUtilsMacos::waitForTunnelName(const QString& filename) {
   }
 
   return QString();
-}
-
-void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
-{
-  // double-check + ensure our firewall is installed and enabled. This is necessary as
-  // other software may disable pfctl before re-enabling with their own rules (e.g other VPNs)
-  if (!MacOSFirewall::isInstalled()) MacOSFirewall::install();
-
-  MacOSFirewall::ensureRootAnchorPriority();
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), params.blockAll);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), params.allowNets);
-  MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), params.allowNets,
-                                QStringLiteral("allownets"), params.allowAddrs);
-
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("120.blockNets"), params.blockNets);
-  MacOSFirewall::setAnchorTable(QStringLiteral("120.blockNets"), params.blockNets,
-                                QStringLiteral("blocknets"), params.blockAddrs);
-
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
-  MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), params.dnsServers);
 }

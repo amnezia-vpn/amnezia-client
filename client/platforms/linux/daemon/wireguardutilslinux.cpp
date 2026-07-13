@@ -8,16 +8,13 @@
 
 #include <QByteArray>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QLocalSocket>
 #include <QTimer>
-#include <QThread>
 
-#include "linuxfirewall.h"
 #include "leakdetector.h"
 #include "logger.h"
-
-#include "killswitch.h"
 
 constexpr const int WG_TUN_PROC_TIMEOUT = 5000;
 constexpr const char* WG_RUNTIME_DIR = "/var/run/amneziawg";
@@ -59,11 +56,12 @@ void WireguardUtilsLinux::tunnelErrorOccurred(QProcess::ProcessError error) {
 }
 
 bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
-    Q_UNUSED(config);
     if (m_tunnel.state() != QProcess::NotRunning) {
         logger.warning() << "Unable to start: tunnel process already running";
         return false;
     }
+
+    const QString ifname = config.m_ifname;
 
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     if (!wgRuntimeDir.exists()) {
@@ -71,7 +69,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     }
 
     QProcessEnvironment pe = QProcessEnvironment::systemEnvironment();
-    QString wgNameFile = wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".sock");
+    QString wgNameFile = wgRuntimeDir.filePath(ifname + ".sock");
     pe.insert("WG_TUN_NAME_FILE", wgNameFile);
 #ifdef MZ_DEBUG
     pe.insert("LOG_LEVEL", "debug");
@@ -79,7 +77,7 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     m_tunnel.setProcessEnvironment(pe);
 
     QDir appPath(QCoreApplication::applicationDirPath());
-    QStringList wgArgs = {"-f", "amn0"};
+    QStringList wgArgs = {"-f", ifname};
     m_tunnel.start(appPath.filePath("amneziawg-go"), wgArgs);
     if (!m_tunnel.waitForStarted(WG_TUN_PROC_TIMEOUT)) {
         logger.error() << "Unable to start tunnel process due to timeout";
@@ -147,29 +145,6 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
-    } else {
-        if (config.m_killSwitchEnabled) {
-            FirewallParams params { };
-            params.dnsServers.append(config.m_primaryDnsServer);
-            if (!config.m_secondaryDnsServer.isEmpty()) {
-                params.dnsServers.append(config.m_secondaryDnsServer);
-            }
-            if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
-                params.blockAll = true;
-                if (config.m_excludedAddresses.size()) {
-                    params.allowNets = true;
-                    foreach (auto net, config.m_excludedAddresses) {
-                        params.allowAddrs.append(net.toUtf8());
-                    }
-                }
-            } else {
-                params.blockNets = true;
-                foreach (auto net, config.m_allowedIPAddressRanges) {
-                    params.blockAddrs.append(net.toString());
-                }
-            }
-            applyFirewallRules(params);
-        }
     }
 
     return (err == 0);
@@ -194,10 +169,8 @@ bool WireguardUtilsLinux::deleteInterface() {
 
     // Garbage collect.
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
-    QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
+    QFile::remove(wgRuntimeDir.filePath(m_ifname + ".sock"));
 
-    // double-check + ensure our firewall is installed and enabled
-    KillSwitch::instance()->disableKillSwitch();
     return true;
 }
 
@@ -234,13 +207,6 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
         out << "allowed_ip=" << ip.toString() << "\n";
     }
 
-    // Exclude the server address, except for multihop exit servers.
-    if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-        (m_rtmonitor != nullptr)) {
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-    }
-
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Peer configuration failed:" << strerror(err);
@@ -251,13 +217,6 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
 bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     QByteArray publicKey =
         QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
-
-    // Clear exclustion routes for this peer.
-    if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
-        (m_rtmonitor != nullptr)) {
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
-    }
 
     QString message;
     QTextStream out(&message);
@@ -338,7 +297,7 @@ bool WireguardUtilsLinux::deleteRoutePrefix(const IPAddress& prefix) {
         return false;
     }
     if (prefix.prefixLength() > 0) {
-        return m_rtmonitor->insertRoute(prefix);
+        return m_rtmonitor->deleteRoute(prefix);
     }
 
     // Ensure that we do not replace the default route.
@@ -389,12 +348,8 @@ bool WireguardUtilsLinux::excludeLocalNetworks(const QList<IPAddress>& routes) {
 
 QString WireguardUtilsLinux::uapiCommand(const QString& command) {
     QLocalSocket socket;
-    QTimer uapiTimeout;
     QDir wgRuntimeDir(WG_RUNTIME_DIR);
     QString wgSocketFile = wgRuntimeDir.filePath(m_ifname + ".sock");
-
-    uapiTimeout.setSingleShot(true);
-    uapiTimeout.start(WG_TUN_PROC_TIMEOUT);
 
     socket.connectToServer(wgSocketFile, QIODevice::ReadWrite);
     if (!socket.waitForConnected(WG_TUN_PROC_TIMEOUT)) {
@@ -410,13 +365,15 @@ QString WireguardUtilsLinux::uapiCommand(const QString& command) {
     }
     socket.write(message);
 
+    QElapsedTimer elapsed;
+    elapsed.start();
     QByteArray reply;
     while (!reply.contains("\n\n")) {
-        if (!uapiTimeout.isActive()) {
+        const qint64 remaining = WG_TUN_PROC_TIMEOUT - elapsed.elapsed();
+        if (remaining <= 0 || !socket.waitForReadyRead(static_cast<int>(remaining))) {
             logger.error() << "UAPI command timed out";
             return QString();
         }
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
         reply.append(socket.readAll());
     }
 
@@ -442,45 +399,15 @@ QString WireguardUtilsLinux::waitForTunnelName(const QString& filename) {
     timeout.setSingleShot(true);
     timeout.start(WG_TUN_PROC_TIMEOUT);
 
-    QFile file(filename);
-
     while ((m_tunnel.state() == QProcess::Running) && timeout.isActive()) {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
-        QString ifname = "amn0";
 
-        // Test-connect to the UAPI socket.
         QLocalSocket sock;
-        QDir wgRuntimeDir(WG_RUNTIME_DIR);
-        QString sockName = wgRuntimeDir.filePath(ifname + ".sock");
-        sock.connectToServer(sockName, QIODevice::ReadWrite);
+        sock.connectToServer(filename, QIODevice::ReadWrite);
         if (sock.waitForConnected(100)) {
-            return ifname;
+            return QFileInfo(filename).baseName();
         }
     }
 
     return QString();
-}
-
-void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
-{
-    // double-check + ensure our firewall is installed and enabled
-    if (!LinuxFirewall::isInstalled()) LinuxFirewall::install();
-
-    // Note: rule precedence is handled inside IpTablesFirewall
-    LinuxFirewall::ensureRootAnchorPriority();
-
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), params.allowNets);
-    LinuxFirewall::updateAllowNets(params.allowAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
-    LinuxFirewall::updateBlockNets(params.blockAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
-    LinuxFirewall::updateDNSServers(params.dnsServers);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 }

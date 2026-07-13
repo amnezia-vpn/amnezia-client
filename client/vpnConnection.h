@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMetaObject>
+#include <QSet>
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
@@ -15,9 +16,8 @@
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 
-#ifdef AMNEZIA_DESKTOP
-#include "core/utils/ipcClient.h"
-#endif
+#include "core/vpnTrafficGuard.h"
+#include "core/tunnel.h"
 
 #ifdef Q_OS_ANDROID
 #include "core/protocols/androidVpnProtocol.h"
@@ -40,8 +40,7 @@ public:
 
     QSharedPointer<VpnProtocol> vpnProtocol() const;
 
-    const QString &remoteAddress() const;
-    void addSitesRoutes(const QString &gw, amnezia::RouteMode mode);
+    const QString &remoteAddress() const { return m_remoteAddress; }
 
 #ifdef Q_OS_ANDROID
     void restoreConnection();
@@ -62,6 +61,9 @@ signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
     void vpnProtocolError(amnezia::ErrorCode error);
+    void serverSwitchFailed();
+    void serverSwitchSucceeded();
+    void serverConnectionTimeout();
 
     void serviceIsNotReady();
 
@@ -75,10 +77,15 @@ protected:
 private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
+    QScopedPointer<VpnTrafficGuard> m_trafficGuard;
 
     QJsonObject m_vpnConfiguration;
-    QJsonObject m_routeMode;
     QString m_remoteAddress;
+
+    Tunnel* m_active = nullptr;
+    Tunnel* m_staging = nullptr;
+    QSet<QString> m_ifnamesInUse;
+    ErrorCode m_lastError = ErrorCode::NoError;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
@@ -93,9 +100,23 @@ private:
    Vpn::ConnectionState m_connectionState;
 
    void createProtocolConnections();
+   void wireTunnelSignals(Tunnel* tunnel, bool isActive);
 
-   void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
+   QString allocateIfname();
+   void releaseIfname(const QString& ifname);
+
+   void appendSplitTunnelingConfig(QJsonObject &config);
+   void appendKillSwitchConfig(QJsonObject &config);
+
+   void startTunnelSwitch(DockerContainer container,
+                          const QJsonObject &vpnConfiguration,
+                          const QString &resolvedRemote,
+                          const QString &stagingIfname);
+
+private slots:
+   void onTunnelPrepared();
+   void onTunnelActivated();
+   void onTunnelFailed(amnezia::ErrorCode error);
 };
 
 #endif // VPNCONNECTION_H

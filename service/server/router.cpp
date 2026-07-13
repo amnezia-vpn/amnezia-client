@@ -20,6 +20,16 @@ int Router::routeAddList(const QString &gw, const QStringList &ips)
 #endif
 }
 
+int Router::routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips)
+{
+#ifdef Q_OS_LINUX
+    return RouterLinux::Instance().routeAddListVia(ifname, gw, ips);
+#else
+    Q_UNUSED(ifname)
+    return routeAddList(gw, ips);
+#endif
+}
+
 bool Router::clearSavedRoutes()
 {
 #ifdef Q_OS_WIN

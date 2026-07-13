@@ -10,8 +10,15 @@ class IpcInterface
 
     // Route functions
     SLOT( int routeAddList(const QString &gw, const QStringList &ips) );
+    SLOT( int routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips) );
     SLOT( bool clearSavedRoutes() );
     SLOT( bool routeDeleteList(const QString &gw, const QStringList &ip) );
+    SLOT( bool addExclusionRoute(const QString &ifname, const QString &addr) );
+    SLOT( bool delExclusionRoute(const QString &ifname, const QString &addr) );
+    SLOT( bool addAllowedIp(const QString &ifname, const QString &prefix) );
+    SLOT( bool delAllowedIp(const QString &ifname, const QString &prefix) );
+    SLOT( bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers) );
+    SLOT( bool restoreTunnelResolvers() );
     SLOT( bool flushDns() );
     SLOT( void resetIpStack() );
 
@@ -25,21 +32,30 @@ class IpcInterface
     SLOT( bool createTun(const QString &dev, const QString &subnet) );
     SLOT( bool deleteTun(const QString &dev) );
 
+    SLOT( QString reserveUtunName() );
+
+    SLOT( bool applyAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) );
+
+    SLOT( bool removeAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) );
+
     SLOT( bool StartRoutingIpv6() );
     SLOT( bool StopRoutingIpv6() );
 
     SLOT( bool disableKillSwitch() );
+    SLOT( bool disableKillSwitchForTunnel( const QString &ifname, const QStringList &remainingRanges ) );
     SLOT( bool disableAllTraffic() );
     SLOT( bool refreshKillSwitch( bool enabled ) );
-    SLOT( bool addKillSwitchAllowedRange( const QStringList ranges ) );
+    SLOT( bool addKillSwitchAllowedRange( const QString &ifname, const QStringList ranges ) );
     SLOT( bool resetKillSwitchAllowedRange( const QStringList ranges ) );
     SLOT( bool enablePeerTraffic( const QJsonObject &configStr) );
     SLOT( bool enableKillSwitch( const QJsonObject &excludeAddr, int vpnAdapterIndex) );
     SLOT( bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) );
     SLOT( bool restoreResolvers() );
 
-    SLOT(bool xrayStart(const QString &config));
-    SLOT(bool xrayStop());
+    SLOT(bool xrayStart(const QString &ifname, const QString &config));
+    SLOT(bool xrayStop(const QString &ifname));
+    SLOT(bool xrayAddUplinkRoutes(const QString &uplinkIface, const QString &uplinkGateway));
+    SLOT(bool xrayRemoveUplinkRoutes(const QString &uplinkIface, const QString &uplinkGateway));
 
     SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
     SLOT( bool stopNetworkCheck() );

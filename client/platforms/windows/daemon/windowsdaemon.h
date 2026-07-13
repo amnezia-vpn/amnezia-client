@@ -14,7 +14,7 @@
 #include "windowstunnelservice.h"
 #include "wireguardutilswindows.h"
 
-#define TUNNEL_SERVICE_NAME L"AmneziaWGTunnel$AmneziaVPN"
+#define LEGACY_TUNNEL_SERVICE_NAME L"AmneziaWGTunnel$AmneziaVPN"
 
 class WindowsDaemon final : public Daemon {
   Q_DISABLE_COPY_MOVE(WindowsDaemon)
@@ -28,8 +28,8 @@ class WindowsDaemon final : public Daemon {
 
  protected:
   bool run(Op op, const InterfaceConfig& config) override;
-  WireguardUtils* wgutils() const override { return m_wgutils.get(); }
   DnsUtils* dnsutils() override { return m_dnsutils; }
+  WireguardUtils* createWgUtils() override;
 
  private:
   void monitorBackendFailure();
@@ -42,7 +42,6 @@ class WindowsDaemon final : public Daemon {
 
   int m_inetAdapterIndex = -1;
 
-  std::unique_ptr<WireguardUtilsWindows> m_wgutils;
   DnsUtilsWindows* m_dnsutils = nullptr;
   std::unique_ptr<WindowsSplitTunnel> m_splitTunnelManager;
   QPointer<WindowsFirewall> m_firewallManager;

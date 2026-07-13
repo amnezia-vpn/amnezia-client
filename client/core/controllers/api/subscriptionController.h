@@ -68,6 +68,8 @@ public:
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent);
 
+    void restoreApiV2Config(const QString &serverId, const ApiV2ServerConfig &config);
+
     ErrorCode deactivateDevice(const QString &serverId);
 
     ErrorCode deactivateExternalDevice(const QString &serverId, const QString &uuid, const QString &serverCountryCode);

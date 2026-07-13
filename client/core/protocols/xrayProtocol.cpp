@@ -12,18 +12,11 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
-#include <QNetworkInterface>
 #include <QtCore/qlogging.h>
 #include <QtCore/qobjectdefs.h>
 #include <QtCore/qprocess.h>
 
 #include <exception>
-
-#ifdef Q_OS_MACOS
-static const QString tunName = "utun22";
-#else
-static const QString tunName = "tun2";
-#endif
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
 {
@@ -31,14 +24,18 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_vpnLocalAddress = amnezia::protocols::xray::defaultLocalAddr;
     m_routeGateway = NetworkUtilities::getGatewayAndIface().first;
 
-    m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::configKey::splitTunnelType).toInt());
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
-    const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
-    m_dnsServers.push_back(QHostAddress(primaryDns));
-    if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
-        const QString secondaryDns = configuration.value(amnezia::configKey::dns2).toString();
-        m_dnsServers.push_back(QHostAddress(secondaryDns));
+    m_tunName = configuration.value("tunName").toString();
+    if (m_tunName.isEmpty()) {
+        m_tunName = configuration.value("ifname").toString();
+    }
+    if (m_tunName.isEmpty()) {
+#ifdef Q_OS_MACOS
+        m_tunName = QStringLiteral("utun22");
+#else
+        m_tunName = QStringLiteral("tun2");
+#endif
     }
 
     QJsonObject xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::Xray)).toObject();
@@ -67,6 +64,8 @@ XrayProtocol::~XrayProtocol()
 ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
+
+    m_phase = Phase::Active;
 
     // Inject SOCKS5 auth into the inbound before starting xray.
     // Re-uses existing credentials if the config already has them (e.g. imported config).
@@ -106,7 +105,7 @@ ErrorCode XrayProtocol::start()
 
     return IpcClient::withInterface(
             [&](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStart = iface->xrayStart(xrayConfigStr);
+                auto xrayStart = iface->xrayStart(m_tunName, xrayConfigStr);
                 if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
                     qCritical() << "Failed to start xray";
                     return ErrorCode::XrayExecutableCrashed;
@@ -120,24 +119,17 @@ void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
 
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-        auto disableKillSwitch = iface->disableKillSwitch();
-        if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
-            qWarning() << "Failed to disable killswitch";
+    if (m_phase != Phase::Active) {
+        return;
+    }
+    m_phase = Phase::Inactive;
 
-        auto StartRoutingIpv6 = iface->StartRoutingIpv6();
-        if (!StartRoutingIpv6.waitForFinished() || !StartRoutingIpv6.returnValue())
-            qWarning() << "Failed to start routing ipv6";
-
-        auto restoreResolvers = iface->restoreResolvers();
-        if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
-            qWarning() << "Failed to restore resolvers";
-
-        auto deleteTun = iface->deleteTun(tunName);
+    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
+        auto deleteTun = iface->deleteTun(m_tunName);
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
             qWarning() << "Failed to delete tun";
 
-        auto xrayStop = iface->xrayStop();
+        auto xrayStop = iface->xrayStop(m_tunName);
         if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
             qWarning() << "Failed to stop xray";
     });
@@ -165,6 +157,17 @@ void XrayProtocol::stop()
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }
 
+void XrayProtocol::setPrimary(const QJsonObject &config)
+{
+    Q_UNUSED(config)
+    QMetaObject::invokeMethod(this, [this]() {
+        if (m_phase != Phase::Active) {
+            return;
+        }
+        emit primaryReady();
+    }, Qt::QueuedConnection);
+}
+
 ErrorCode XrayProtocol::startTun2Socks()
 {
     m_tun2socksProcess = IpcClient::CreatePrivilegedProcess();
@@ -175,10 +178,22 @@ ErrorCode XrayProtocol::startTun2Socks()
     const QString proxyUrl = QString("socks5://%1:%2@127.0.0.1:%3").arg(m_socksUser, m_socksPassword, QString::number(m_socksPort));
 
     m_tun2socksProcess->setProgram(PermittedProcess::Tun2Socks);
-    m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(tunName), "-proxy", proxyUrl });
+    m_tun2socksProcess->setArguments({ "-device", QString("tun://%1").arg(m_tunName), "-proxy", proxyUrl });
 
     connect(
-            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
+            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::errorOccurred, this,
+            [this](QProcess::ProcessError error) {
+                if (error != QProcess::FailedToStart) {
+                    return;
+                }
+                qCritical() << "Tun2socks failed to start";
+                stop();
+                setLastError(ErrorCode::Tun2SockExecutableMissing);
+            },
+            Qt::QueuedConnection);
+
+    connect(
+            m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this,
             [this]() {
                 auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
                 if (!readAllStandardError.waitForFinished()) {
@@ -194,7 +209,7 @@ ErrorCode XrayProtocol::startTun2Socks()
                 if (line.contains("[STACK] tun://") && line.contains("<-> socks5://")) {
                     disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
 
-                    if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
+                    if (ErrorCode res = setupTunInterface(); res != ErrorCode::NoError) {
                         stop();
                         setLastError(res);
                     } else {
@@ -217,13 +232,17 @@ ErrorCode XrayProtocol::startTun2Socks()
                     }
                 }
 
-                if (resourceBusy && m_tun2socksRetryCount < maxTun2SocksRetries) {
+                if (m_phase == Phase::Active && resourceBusy
+                    && m_tun2socksRetryCount < maxTun2SocksRetries) {
                     m_tun2socksRetryCount++;
                     qWarning() << QString("Tun2socks: TUN resource busy, retrying (%1/%2) in %3ms...")
                                       .arg(m_tun2socksRetryCount)
                                       .arg(maxTun2SocksRetries)
                                       .arg(tun2socksRetryDelayMs);
                     QTimer::singleShot(tun2socksRetryDelayMs, this, [this]() {
+                        if (m_phase != Phase::Active) {
+                            return;
+                        }
                         if (ErrorCode err = startTun2Socks(); err != ErrorCode::NoError) {
                             stop();
                             setLastError(err);
@@ -248,85 +267,21 @@ ErrorCode XrayProtocol::startTun2Socks()
     return ErrorCode::NoError;
 }
 
-ErrorCode XrayProtocol::setupRouting()
+ErrorCode XrayProtocol::setupTunInterface()
 {
     return IpcClient::withInterface(
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
-#ifdef Q_OS_WIN
-                const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
-#endif
-                auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
+#ifndef Q_OS_WIN
+                auto createTun = iface->createTun(m_tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
                     qCritical() << "Failed to assign IP address for TUN";
                     return ErrorCode::InternalError;
                 }
-
-                auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
-                if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
-                    qCritical() << "Failed to set DNS resolvers for TUN";
-                    return ErrorCode::InternalError;
-                }
-
-#ifdef Q_OS_WIN
-                int vpnAdapterIndex = -1;
-                QList<QNetworkInterface> netInterfaces = QNetworkInterface::allInterfaces();
-                for (auto &netInterface : netInterfaces) {
-                    for (auto &address : netInterface.addressEntries()) {
-                        if (m_vpnLocalAddress == address.ip().toString())
-                            vpnAdapterIndex = netInterface.index();
-                    }
-                }
 #else
-                static const int vpnAdapterIndex = 0;
+                Q_UNUSED(iface)
 #endif
-                const bool killSwitchEnabled = QVariant(m_rawConfig.value(configKey::killSwitchOption).toString()).toBool();
-                if (killSwitchEnabled) {
-                    if (vpnAdapterIndex != -1) {
-                        QJsonObject config = m_rawConfig;
-                        config.insert("vpnServer", m_remoteAddress);
 
-                        auto enableKillSwitch = IpcClient::Interface()->enableKillSwitch(config, vpnAdapterIndex);
-                        if (!enableKillSwitch.waitForFinished() || !enableKillSwitch.returnValue()) {
-                            qCritical() << "Failed to enable killswitch";
-                            return ErrorCode::InternalError;
-                        }
-                    } else
-                        qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
-                }
-
-                if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
-                    static const QStringList subnets = { "1.0.0.0/8",  "2.0.0.0/7",  "4.0.0.0/6",  "8.0.0.0/5",
-                                                         "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
-
-                    auto routeAddList = iface->routeAddList(m_vpnGateway, subnets);
-                    if (!routeAddList.waitForFinished() || routeAddList.returnValue() != subnets.count()) {
-                        qCritical() << "Failed to set routes for TUN";
-                        return ErrorCode::InternalError;
-                    }
-                }
-
-                auto StopRoutingIpv6 = iface->StopRoutingIpv6();
-                if (!StopRoutingIpv6.waitForFinished() || !StopRoutingIpv6.returnValue()) {
-                    qCritical() << "Failed to disable IPv6 routing";
-                    return ErrorCode::InternalError;
-                }
-
-#ifdef Q_OS_WIN
-                if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
-                    QJsonObject config = m_rawConfig;
-                    config.insert("inetAdapterIndex", inetAdapterIndex);
-                    config.insert("vpnAdapterIndex", vpnAdapterIndex);
-                    config.insert("vpnGateway", m_vpnGateway);
-                    config.insert("vpnServer", m_remoteAddress);
-
-                    auto enablePeerTraffic = iface->enablePeerTraffic(config);
-                    if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
-                        qCritical() << "Failed to enable peer traffic";
-                        return ErrorCode::InternalError;
-                    }
-                } else
-                    qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
-#endif
+                emit tunnelAddressesUpdated(m_vpnGateway, m_vpnLocalAddress);
                 return ErrorCode::NoError;
             },
             []() { return ErrorCode::AmneziaServiceConnectionFailed; });

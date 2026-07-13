@@ -12,8 +12,6 @@
 #include "wireguardutilslinux.h"
 
 class LinuxDaemon final : public Daemon {
-  friend class IPUtilsMacos;
-
  public:
   LinuxDaemon();
   ~LinuxDaemon();
@@ -21,13 +19,15 @@ class LinuxDaemon final : public Daemon {
   static LinuxDaemon* instance();
 
  protected:
-  WireguardUtils* wgutils() const override { return m_wgutils; }
   DnsUtils* dnsutils() override { return m_dnsutils; }
   bool supportIPUtils() const override { return true; }
   IPUtils* iputils() override { return m_iputils; }
 
+  WireguardUtils* createWgUtils() override {
+    return new WireguardUtilsLinux(this);
+  }
+
  private:
-  WireguardUtilsLinux* m_wgutils = nullptr;
   DnsUtilsLinux* m_dnsutils = nullptr;
   IPUtilsLinux* m_iputils = nullptr;
 };

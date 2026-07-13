@@ -7,6 +7,8 @@
 #include <QJsonObject>
 #include <QSysInfo>
 #include <QTimer>
+#include <QStandardPaths>
+#include <QTemporaryDir>
 
 #include "amneziaApplication.h"
 #include "logger.h"

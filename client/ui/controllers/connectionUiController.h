@@ -52,6 +52,8 @@ signals:
     void prepareConfig();
     void unsupportedConnectDrawerRequested();
     void noInstalledContainers();
+    void serverSwitchFailed();
+    void serverConnectionTimeout();
 
 private:
     Vpn::ConnectionState getCurrentConnectionState();

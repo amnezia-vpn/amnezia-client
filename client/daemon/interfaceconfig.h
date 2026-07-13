@@ -13,6 +13,8 @@
 
 class QJsonObject;
 
+constexpr int ACTIVATION_TIMEOUT_MSEC = 30000;
+
 class InterfaceConfig {
   Q_GADGET
 
@@ -57,6 +59,8 @@ class InterfaceConfig {
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
+  QString m_ifname;
+  bool m_deferAddressSetup = false;
 
   QJsonObject toJson() const;
   QString toWgConf(

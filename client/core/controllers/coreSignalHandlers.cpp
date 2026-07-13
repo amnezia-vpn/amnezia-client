@@ -95,6 +95,18 @@ void CoreSignalHandlers::initErrorMessagesHandler()
         m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
     });
 
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::serverConnectionTimeout, this, [this]() {
+        emit m_coreController->m_pageController->showNotificationMessage(
+            tr("Unable to establish VPN connection: connection timed out."));
+        m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
+    });
+
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::serverSwitchFailed, this, [this]() {
+        m_coreController->m_subscriptionUiController->revertLastCountryChange();
+        emit m_coreController->m_pageController->showNotificationMessage(
+            tr("Failed to switch server. Existing connection maintained."));
+    });
+
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_coreController->m_pageController,
             qOverload<ErrorCode>(&PageController::showErrorMessage));
 

@@ -80,6 +80,9 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
       m_settingsController(settingsController),
       m_connectionController(connectionController)
 {
+    connect(m_connectionController, &ConnectionController::serverSwitchSucceeded, this,
+            &SubscriptionUiController::commitLastCountryChange);
+
     connect(m_apiServicesModel, &ApiServicesModel::serviceSelectionChanged, this, [this]() {
         ApiServicesModel::ApiServicesData selectedServiceData = m_apiServicesModel->selectedServiceData();
         m_apiSubscriptionPlansModel->updateModel(selectedServiceData.subscriptionPlansJson);
@@ -418,7 +421,8 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
 {
     bool isConnectEvent = newCountryCode.isEmpty() && newCountryName.isEmpty() && !reloadServiceConfig;
     bool wasSubscriptionExpired = false;
-    if (const auto oldApiV2 = m_serversController->apiV2Config(serverId)) {
+    const auto oldApiV2 = m_serversController->apiV2Config(serverId);
+    if (oldApiV2) {
         wasSubscriptionExpired = oldApiV2->apiConfig.subscriptionExpiredByServer
                 || oldApiV2->apiConfig.isSubscriptionExpired();
     }
@@ -426,6 +430,10 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
     ErrorCode errorCode = m_subscriptionController->updateServiceFromGateway(serverId, newCountryCode, isConnectEvent);
 
     if (errorCode == ErrorCode::NoError) {
+        if (!newCountryCode.isEmpty() && oldApiV2) {
+            m_previousCountryServerId = serverId;
+            m_previousApiV2Config = oldApiV2;
+        }
         if (wasSubscriptionExpired) {
             emit subscriptionRefreshNeeded();
         }
@@ -447,6 +455,26 @@ bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId,
     }
 }
 
+void SubscriptionUiController::revertLastCountryChange()
+{
+    if (m_previousCountryServerId.isEmpty() || !m_previousApiV2Config) {
+        return;
+    }
+    const QString serverId = m_previousCountryServerId;
+    const ApiV2ServerConfig cfg = *m_previousApiV2Config;
+    m_previousCountryServerId.clear();
+    m_previousApiV2Config.reset();
+
+    m_subscriptionController->restoreApiV2Config(serverId, cfg);
+    m_apiCountryModel->updateModel(cfg.apiConfig.availableCountries,
+                                   cfg.apiConfig.serverCountryCode);
+}
+
+void SubscriptionUiController::commitLastCountryChange()
+{
+    m_previousCountryServerId.clear();
+    m_previousApiV2Config.reset();
+}
 
 bool SubscriptionUiController::deactivateDevice(const QString &serverId)
 {

@@ -1,9 +1,14 @@
 #ifndef IPCSERVER_H
 #define IPCSERVER_H
 
+#include <QByteArray>
+#include <QEventLoop>
 #include <QLocalServer>
 #include <QObject>
+#include <QPointer>
+#include <QProcess>
 #include <QRemoteObjectNode>
+#include <QSharedPointer>
 #include <QJsonObject>
 #include "../client/daemon/interfaceconfig.h"
 #include "../client/mozilla/pinghelper.h"
@@ -17,11 +22,19 @@ class IpcServer : public IpcInterfaceSource
 {
 public:
     explicit IpcServer(QObject *parent = nullptr);
+
     virtual int createPrivilegedProcess() override;
 
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
+    virtual int routeAddListVia(const QString &ifname, const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
+    virtual bool addExclusionRoute(const QString &ifname, const QString &addr) override;
+    virtual bool delExclusionRoute(const QString &ifname, const QString &addr) override;
+    virtual bool addAllowedIp(const QString &ifname, const QString &prefix) override;
+    virtual bool delAllowedIp(const QString &ifname, const QString &prefix) override;
+    virtual bool setTunnelResolvers(const QString &ifname, const QStringList &resolvers) override;
+    virtual bool restoreTunnelResolvers() override;
     virtual bool flushDns() override;
     virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;
@@ -31,19 +44,25 @@ public:
     virtual void setLogsEnabled(bool enabled) override;
     virtual bool createTun(const QString &dev, const QString &subnet) override;
     virtual bool deleteTun(const QString &dev) override;
+    virtual QString reserveUtunName() override;
+    virtual bool applyAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) override;
+    virtual bool removeAdapterAddress(const QString &ifname, const QString &ipv4, const QString &ipv6) override;
     virtual bool StartRoutingIpv6() override;
     virtual bool StopRoutingIpv6() override;
     virtual bool disableAllTraffic() override;
-    virtual bool addKillSwitchAllowedRange(QStringList ranges) override;
+    virtual bool addKillSwitchAllowedRange(const QString &ifname, QStringList ranges) override;
     virtual bool resetKillSwitchAllowedRange(QStringList ranges) override;
     virtual bool enablePeerTraffic(const QJsonObject &configStr) override;
     virtual bool enableKillSwitch(const QJsonObject &excludeAddr, int vpnAdapterIndex) override;
     virtual bool disableKillSwitch() override;
+    virtual bool disableKillSwitchForTunnel(const QString &ifname, const QStringList &remainingRanges) override;
     virtual bool refreshKillSwitch( bool enabled ) override;
     virtual bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers) override;
     virtual bool restoreResolvers() override;
-    virtual bool xrayStart(const QString& cfg) override;
-    virtual bool xrayStop() override;
+    virtual bool xrayStart(const QString& ifname, const QString& cfg) override;
+    virtual bool xrayStop(const QString& ifname) override;
+    virtual bool xrayAddUplinkRoutes(const QString& uplinkIface, const QString& uplinkGateway) override;
+    virtual bool xrayRemoveUplinkRoutes(const QString& uplinkIface, const QString& uplinkGateway) override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 
@@ -64,6 +83,16 @@ private:
 
     QMap<int, ProcessDescriptor> m_processes;
     PingHelper m_pingHelper;
+
+    struct XrayWorker {
+        QSharedPointer<QProcess> process;
+        QByteArray stdoutBuf;
+        QPointer<QEventLoop> startLoop;
+        bool startResult = false;
+    };
+    QHash<QString, XrayWorker> m_xrayWorkers;
+
+    void onXrayWorkerLine(const QString& ifname, const QByteArray& line);
 };
 
 #endif // IPCSERVER_H

@@ -51,7 +51,6 @@ MacosRouteMonitor::MacosRouteMonitor(const QString& ifname, QObject* parent)
 
 MacosRouteMonitor::~MacosRouteMonitor() {
   MZ_COUNT_DTOR(MacosRouteMonitor);
-  flushExclusionRoutes();
   if (m_rtsock >= 0) {
     close(m_rtsock);
   }
@@ -436,7 +435,15 @@ bool MacosRouteMonitor::rtmSendRoute(int action, const IPAddress& prefix,
     return true;
   }
   if ((action == RTM_ADD) && (errno == EEXIST)) {
-    return true;
+    rtm->rtm_type = RTM_DELETE;
+    rtm->rtm_seq = m_rtseq++;
+    write(m_rtsock, rtm, rtm->rtm_msglen);
+    rtm->rtm_type = RTM_ADD;
+    rtm->rtm_seq = m_rtseq++;
+    len = write(m_rtsock, rtm, rtm->rtm_msglen);
+    if (len == rtm->rtm_msglen) {
+      return true;
+    }
   }
   if ((action == RTM_DELETE) && (errno == ESRCH)) {
     return true;
@@ -544,17 +551,6 @@ bool MacosRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
     return rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv6, nullptr);
   } else {
     return false;
-  }
-}
-
-void MacosRouteMonitor::flushExclusionRoutes() {
-  while (!m_exclusionRoutes.isEmpty()) {
-    IPAddress prefix = m_exclusionRoutes.takeFirst();
-    if (prefix.address().protocol() == QAbstractSocket::IPv4Protocol) {
-      rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv4, nullptr);
-    } else if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-      rtmSendRoute(RTM_DELETE, prefix, m_defaultIfindexIpv6, nullptr);
-    }
   }
 }
 

@@ -3,11 +3,8 @@
 
 #include "QProcess"
 #include <QtCore/qsharedpointer.h>
-#include <QHostAddress>
-#include <QList>
 
 #include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/utils/ipcClient.h"
 #include "vpnProtocol.h"
@@ -20,14 +17,18 @@ public:
 
     ErrorCode start() override;
     void stop() override;
+    void setPrimary(const QJsonObject &config) override;
 
 private:
-    ErrorCode setupRouting();
+    enum class Phase {
+        Inactive,
+        Active,
+    };
+
+    ErrorCode setupTunInterface();
     ErrorCode startTun2Socks();
 
     QJsonObject m_xrayConfig;
-    amnezia::RouteMode m_routeMode;
-    QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
 
     QString m_socksUser;
@@ -38,6 +39,9 @@ private:
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;
     static constexpr int tun2socksRetryDelayMs = 400;
+
+    QString m_tunName;
+    Phase m_phase = Phase::Inactive;
 };
 
 #endif // XRAYPROTOCOL_H

@@ -498,6 +498,12 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     return ErrorCode::NoError;
 }
 
+void SubscriptionController::restoreApiV2Config(const QString &serverId, const ApiV2ServerConfig &config)
+{
+    const QJsonObject json = config.toJson();
+    m_serversRepository->editServer(serverId, json, serverConfigUtils::configTypeFromJson(json));
+}
+
 ErrorCode SubscriptionController::deactivateDevice(const QString &serverId)
 {
     auto apiV2 = m_serversRepository->apiV2Config(serverId);

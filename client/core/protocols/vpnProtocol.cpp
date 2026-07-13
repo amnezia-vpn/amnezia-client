@@ -20,7 +20,8 @@ VpnProtocol::VpnProtocol(const QJsonObject &configuration, QObject *parent)
       m_rawConfig(configuration),
       m_timeoutTimer(new QTimer(this)),
       m_receivedBytes(0),
-      m_sentBytes(0)
+      m_sentBytes(0),
+      m_lastError(ErrorCode::NoError)
 {
     m_timeoutTimer->setSingleShot(true);
     connect(m_timeoutTimer, &QTimer::timeout, this, &VpnProtocol::onTimeout);
@@ -106,6 +107,19 @@ QString VpnProtocol::vpnLocalAddress() const
     return m_vpnLocalAddress;
 }
 
+bool VpnProtocol::isWireGuardBased(amnezia::DockerContainer container)
+{
+    return container == amnezia::DockerContainer::Awg
+        || container == amnezia::DockerContainer::Awg2
+        || container == amnezia::DockerContainer::WireGuard;
+}
+
+bool VpnProtocol::isXrayBased(amnezia::DockerContainer container)
+{
+    return container == amnezia::DockerContainer::Xray
+        || container == amnezia::DockerContainer::SSXray;
+}
+
 VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &configuration)
 {
     switch (container) {
@@ -124,6 +138,14 @@ VpnProtocol *VpnProtocol::factory(DockerContainer container, const QJsonObject &
     }
 }
 
+void VpnProtocol::setPrimary(const QJsonObject &config)
+{
+    Q_UNUSED(config)
+    QMetaObject::invokeMethod(this, [this]() {
+        emit primaryReady();
+    }, Qt::QueuedConnection);
+}
+
 QString VpnProtocol::routeGateway() const
 {
     return m_routeGateway;
@@ -137,6 +159,7 @@ QString VpnProtocol::textConnectionState(Vpn::ConnectionState connectionState)
     case Vpn::ConnectionState::Preparing: return tr("Preparing");
     case Vpn::ConnectionState::Connecting: return tr("Connecting...");
     case Vpn::ConnectionState::Connected: return tr("Connected");
+    case Vpn::ConnectionState::Switching: return tr("Switching...");
     case Vpn::ConnectionState::Disconnecting: return tr("Disconnecting...");
     case Vpn::ConnectionState::Reconnecting: return tr("Reconnecting...");
     case Vpn::ConnectionState::Error: return tr("Error");

@@ -21,11 +21,10 @@ public:
 
     ErrorCode start() override;
     void stop() override;
-
-    ErrorCode startMzImpl();
-    ErrorCode stopMzImpl();
+    void setPrimary(const QJsonObject& config) override;
 
 private:
+    bool m_stopped = false;
 
     QScopedPointer<ControllerImpl> m_impl;
 };

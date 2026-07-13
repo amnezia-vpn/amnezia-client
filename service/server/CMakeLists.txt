@@ -364,8 +364,6 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
 if(WIN32)
-    # using PERMISSIONS on Windows appends read-only flag
-    # to the files so just omit it for it
     install(FILES ${CONAN_EXECS}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN

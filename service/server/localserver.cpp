@@ -56,14 +56,20 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
 #ifdef Q_OS_LINUX
     // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { LinuxDaemon::instance()->deactivate(); });
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit, [this]() {
+        LinuxDaemon::instance()->deactivate();
+        m_ipcServer.restoreTunnelResolvers();
+        m_ipcServer.disableKillSwitch();
+    });
 #endif
 
 #ifdef Q_OS_MAC
     // Signal handling for a proper shutdown.
-    QObject::connect(qApp, &QCoreApplication::aboutToQuit,
-                     []() { MacOSDaemon::instance()->deactivate(); });
+    QObject::connect(qApp, &QCoreApplication::aboutToQuit, [this]() {
+        MacOSDaemon::instance()->deactivate();
+        m_ipcServer.restoreTunnelResolvers();
+        m_ipcServer.disableKillSwitch();
+    });
 #endif
 
 #ifdef Q_OS_WIN

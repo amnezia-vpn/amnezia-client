@@ -35,14 +35,8 @@ WindowsDaemon::WindowsDaemon() : Daemon(nullptr) {
   m_firewallManager = WindowsFirewall::create(this);
   Q_ASSERT(m_firewallManager != nullptr);
 
-  m_wgutils = WireguardUtilsWindows::create(m_firewallManager, this);
   m_dnsutils = new DnsUtilsWindows(this);
   m_splitTunnelManager = WindowsSplitTunnel::create(m_firewallManager);
-
-  connect(m_wgutils.get(), &WireguardUtilsWindows::backendFailure, this,
-          &WindowsDaemon::monitorBackendFailure);
-  connect(this, &WindowsDaemon::activationFailure,
-          [this]() { m_firewallManager->disableKillSwitch(); });
 }
 
 WindowsDaemon::~WindowsDaemon() {
@@ -136,4 +130,12 @@ void WindowsDaemon::monitorBackendFailure() {
 
   emit backendFailure();
   deactivate();
+}
+
+WireguardUtils* WindowsDaemon::createWgUtils() {
+  auto utils = WireguardUtilsWindows::create(m_firewallManager, this);
+  if (!utils) return nullptr;
+  connect(utils.get(), &WireguardUtilsWindows::backendFailure, this,
+          &WindowsDaemon::monitorBackendFailure);
+  return utils.release();
 }

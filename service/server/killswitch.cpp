@@ -14,6 +14,28 @@
 #ifdef Q_OS_WIN
     #include "../client/platforms/windows/daemon/windowsfirewall.h"
     #include "../client/platforms/windows/daemon/windowsdaemon.h"
+
+namespace {
+int resolveVpnAdapterIndex(const QJsonObject& configStr) {
+    int index = configStr.value("vpnAdapterIndex").toInt();
+    if (index != 0) {
+        return index;
+    }
+    const QString ifname = configStr.value("ifname").toString();
+    if (ifname.isEmpty()) {
+        return 0;
+    }
+    NET_LUID luid;
+    if (ConvertInterfaceAliasToLuid((wchar_t*)ifname.utf16(), &luid) != 0) {
+        return 0;
+    }
+    NET_IFINDEX ifindex = 0;
+    if (ConvertInterfaceLuidToIndex(&luid, &ifindex) != 0) {
+        return 0;
+    }
+    return static_cast<int>(ifindex);
+}
+}
 #endif
 
 #ifdef Q_OS_LINUX
@@ -134,7 +156,18 @@ bool KillSwitch::disableKillSwitch() {
 #endif
 
     m_allowedRanges.clear();
+    m_splitTunnelAllows.clear();
     return true;
+}
+
+bool KillSwitch::disableKillSwitchForTunnel(const QString& ifname, const QStringList& remainingRanges) {
+#ifdef Q_OS_WIN
+    Q_UNUSED(remainingRanges)
+    return WindowsFirewall::create(this)->disableKillSwitchForTunnel(ifname);
+#else
+    Q_UNUSED(ifname)
+    return resetAllowedRange(remainingRanges);
+#endif
 }
 
 bool KillSwitch::disableAllTraffic() {
@@ -161,34 +194,54 @@ bool KillSwitch::disableAllTraffic() {
     MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
 #endif
     m_allowedRanges.clear();
+    m_splitTunnelAllows.clear();
     return true;
+}
+
+QStringList KillSwitch::combinedAllowNets() const {
+    QStringList result = m_allowedRanges;
+    for (const QString &site : m_splitTunnelAllows) {
+        if (!site.isEmpty() && !result.contains(site)) {
+            result.append(site);
+        }
+    }
+    return result;
 }
 
 bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 
     m_allowedRanges = ranges;
+    const QStringList combined = combinedAllowNets();
 
 #ifdef Q_OS_LINUX
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), true);
-    LinuxFirewall::updateAllowNets(m_allowedRanges);
+    LinuxFirewall::updateAllowNets(combined);
 #endif
 
 #ifdef Q_OS_MACOS
     MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), true);
-    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), true, QStringLiteral("allownets"), m_allowedRanges);
+    MacOSFirewall::setAnchorTable(QStringLiteral("110.allowNets"), true, QStringLiteral("allownets"), combined);
 #endif
 
 #ifdef Q_OS_WIN
     if (isStrictKillSwitchEnabled()) {
         WindowsFirewall::create(this)->enableInterface(-1);
     }
-    WindowsFirewall::create(this)->allowTrafficRange(m_allowedRanges);
+    WindowsFirewall::create(this)->allowTrafficRange(combined);
 #endif
 
     return true;
 }
 
-bool KillSwitch::addAllowedRange(const QStringList &ranges) {
+bool KillSwitch::addAllowedRange(const QString &ifname, const QStringList &ranges) {
+#ifdef Q_OS_WIN
+    if (!ifname.isEmpty()) {
+        return WindowsFirewall::create(this)->allowTrafficRange(ranges, ifname);
+    }
+#else
+    Q_UNUSED(ifname)
+#endif
+
     for (const QString &range : ranges) {
         if (!range.isEmpty() && !m_allowedRanges.contains(range)) {
             m_allowedRanges.append(range);
@@ -209,10 +262,14 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         config.m_secondaryDnsServer = configStr.value(amnezia::configKey::dns2).toString();
     }
 
-    config.m_serverPublicKey = "openvpn";
+    config.m_ifname = configStr.value("ifname").toString();
+    const QString protocolName = configStr.value(amnezia::configKey::vpnProto).toString();
+    const QString pubkey = configStr.value(protocolName + "_config_data").toObject()
+                                    .value(amnezia::configKey::serverPubKey).toString();
+    config.m_serverPublicKey = pubkey.isEmpty() ? QStringLiteral("openvpn") : pubkey;
     config.m_serverIpv4Gateway = configStr.value("vpnGateway").toString();
     config.m_serverIpv4AddrIn = configStr.value("vpnServer").toString();
-    int vpnAdapterIndex = configStr.value("vpnAdapterIndex").toInt();
+    int vpnAdapterIndex = resolveVpnAdapterIndex(configStr);
     int inetAdapterIndex = configStr.value("inetAdapterIndex").toInt();
 
     int splitTunnelType = configStr.value("splitTunnelType").toInt();
@@ -271,10 +328,13 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 
 bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex) {
 #ifdef Q_OS_WIN
+    Q_UNUSED(vpnAdapterIndex)
+    const int resolvedIndex = resolveVpnAdapterIndex(configStr);
+    const QString ifname = configStr.value("ifname").toString();
     if (configStr.value("splitTunnelType").toInt() != 0) {
         WindowsFirewall::create(this)->allowAllTraffic();
     }
-    return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
+    return WindowsFirewall::create(this)->enableInterface(resolvedIndex, ifname);
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
@@ -304,6 +364,13 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
         allownets.append(configStr.value("vpnServer").toString());
         for (auto v : splitTunnelSites) {
             allownets.append(v.toString());
+        }
+    }
+
+    m_splitTunnelAllows = allownets;
+    for (const QString &endpoint : m_allowedRanges) {
+        if (!endpoint.isEmpty() && !allownets.contains(endpoint)) {
+            allownets.append(endpoint);
         }
     }
 #endif
