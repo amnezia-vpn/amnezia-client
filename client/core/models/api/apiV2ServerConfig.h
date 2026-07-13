@@ -1,6 +1,7 @@
 #ifndef APIV2SERVERCONFIG_H
 #define APIV2SERVERCONFIG_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QMap>
 #include <QPair>
@@ -28,6 +29,7 @@ struct ApiV2ServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
+    QJsonArray sendPayload;
     
     QString name;
     bool nameOverriddenByUser = false;
