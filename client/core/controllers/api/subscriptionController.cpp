@@ -198,9 +198,6 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     
     if (serverConfigJson.value(configKey::configVersion).toInt() == serverConfigUtils::ConfigSource::AmneziaGateway) {
         QJsonObject responseObj = QJsonDocument::fromJson(apiResponseBody).object();
-        if (responseObj.contains(apiDefs::key::supportedProtocols)) {
-            apiConfig.insert(apiDefs::key::supportedProtocols, responseObj.value(apiDefs::key::supportedProtocols).toArray());
-        }
         if (responseObj.contains(apiDefs::key::serviceInfo)) {
             apiConfig.insert(apiDefs::key::serviceInfo, responseObj.value(apiDefs::key::serviceInfo).toObject());
         }
@@ -418,6 +415,23 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
     }
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
     QString serviceProtocol = apiV2->serviceProtocol();
+
+    if (!newCountryCode.isEmpty()) {
+        const auto availableCountries = apiV2->apiConfig.availableCountries;
+        for (const auto &country : availableCountries) {
+            const auto countryObject = country.toObject();
+            if (countryObject.value(apiDefs::key::serverCountryCode).toString() != newCountryCode) {
+                continue;
+            }
+
+            const auto availableProtocols = countryObject.value(apiDefs::key::availableProtocols).toArray();
+            if (!availableProtocols.isEmpty() && !availableProtocols.contains(serviceProtocol)) {
+                serviceProtocol = availableProtocols.first().toString();
+            }
+            break;
+        }
+    }
+
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
     
     QJsonObject authDataJson = apiV2->authData.toJson();
@@ -750,6 +764,36 @@ bool SubscriptionController::isVlessProtocol(const QString &serverId) const
 {
     auto apiV2 = m_serversRepository->apiV2Config(serverId);
     return apiV2.has_value() && apiV2->serviceProtocol() == "vless";
+}
+
+QString SubscriptionController::currentProtocol(const QString &serverId) const
+{
+    auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    return apiV2.has_value() ? apiV2->serviceProtocol() : QString();
+}
+
+QStringList SubscriptionController::availableProtocols(const QString &serverId) const
+{
+    auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        return {};
+    }
+
+    const auto currentCountryCode = apiV2->apiConfig.serverCountryCode;
+    const auto availableCountries = apiV2->apiConfig.availableCountries;
+
+    QStringList protocols;
+    for (const auto &country : availableCountries) {
+        const auto countryObject = country.toObject();
+        if (countryObject.value(apiDefs::key::serverCountryCode).toString() != currentCountryCode) {
+            continue;
+        }
+        for (const auto &protocol : countryObject.value(apiDefs::key::availableProtocols).toArray()) {
+            protocols.push_back(protocol.toString());
+        }
+        break;
+    }
+    return protocols;
 }
 
 ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,

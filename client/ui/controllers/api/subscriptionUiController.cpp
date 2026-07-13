@@ -508,6 +508,18 @@ bool SubscriptionUiController::isVlessProtocol(const QString &serverId)
 }
 
 
+QString SubscriptionUiController::currentProtocol(const QString &serverId)
+{
+    return m_subscriptionController->currentProtocol(serverId);
+}
+
+
+QStringList SubscriptionUiController::availableProtocols(const QString &serverId)
+{
+    return m_subscriptionController->availableProtocols(serverId);
+}
+
+
 void SubscriptionUiController::removeApiConfig(const QString &serverId)
 {
     m_subscriptionController->removeApiConfig(serverId);
