@@ -22,6 +22,7 @@ namespace PageLoader
         PageSettingsServersList,
         PageSettings,
         PageSettingsServerData,
+        PageSettingsServerDns,
         PageSettingsServerInfo,
         PageSettingsServerProtocols,
         PageSettingsServerServices,

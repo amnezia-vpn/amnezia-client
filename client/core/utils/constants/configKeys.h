@@ -15,6 +15,7 @@ namespace amnezia
 
         constexpr QLatin1String dns1("dns1");
         constexpr QLatin1String dns2("dns2");
+        constexpr QLatin1String dnsMode("dnsMode");
 
         constexpr QLatin1String serverIndex("serverIndex");
         constexpr QLatin1String description("description");

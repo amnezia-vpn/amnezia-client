@@ -156,7 +156,7 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         if (!cfg.has_value()) return ErrorCode::InternalError;
         container = cfg->defaultContainer;
         containerConfigModel = cfg->containerConfig(container);
-        dns = cfg->getDnsPair(m_appSettingsRepository->useAmneziaDns(), primaryDns, secondaryDns);
+        dns = cfg->getDnsPair(primaryDns, secondaryDns);
         hostName = cfg->hostName;
         description = cfg->description;
         break;

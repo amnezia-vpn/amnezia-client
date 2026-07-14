@@ -73,6 +73,7 @@ public slots:
 
     bool isSupportedByCurrentPlatform(const int containerIndex);
     bool isServiceContainer(const int containerIndex);
+    bool isContainerInstalled(const int containerIndex);
 
     bool hasInstalledServices();
     bool hasInstalledProtocols();

@@ -83,6 +83,46 @@ bool ServersController::renameServer(const QString &serverId, const QString &nam
     }
 }
 
+bool ServersController::changeServerDns(const QString &serverId, const QString &primaryDns, const QString &secondaryDns, const int &dnsMode)
+{
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if(kind == serverConfigUtils::ConfigType::SelfHostedAdmin) {
+        auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!cfg.has_value()) return false;
+        cfg->dns1 = primaryDns;
+        cfg->dns2 = secondaryDns;
+        cfg->dnsMode = dnsMode;
+        m_serversRepository->editServer(serverId, cfg->toJson(), kind);
+        return true;
+    }else{
+        return false;
+    }
+}
+
+QPair<QString, QString> ServersController::getDnsPair(const QString &serverId) const
+{
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (kind == serverConfigUtils::ConfigType::SelfHostedAdmin) {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        return cfg.has_value()
+                ? cfg->getDnsPair(m_appSettingsRepository->primaryDns(), m_appSettingsRepository->primaryDns())
+                : QPair<QString, QString>();
+    } else {
+        return QPair<QString, QString>();
+    }
+}
+
+int ServersController::getDnsMode(const QString &serverId) const
+{
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (kind == serverConfigUtils::ConfigType::SelfHostedAdmin) {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        return cfg.has_value() ? cfg->dnsMode : int();
+    } else {
+        return int();
+    }
+}
+
 void ServersController::removeServer(const QString &serverId)
 {
     m_serversRepository->removeServer(serverId);

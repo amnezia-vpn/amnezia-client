@@ -121,6 +121,11 @@ bool ContainersModel::isServiceContainer(const int containerIndex)
     return qvariant_cast<ServiceType>(data(index(containerIndex), ServiceTypeRole) == ServiceType::Other);
 }
 
+bool ContainersModel::isContainerInstalled(const int containerIndex)
+{
+    return qvariant_cast<bool>(data(index(containerIndex), IsInstalledRole));
+}
+
 bool ContainersModel::hasInstalledServices()
 {
     for (const auto &container : m_containers.keys()) {

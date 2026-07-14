@@ -64,15 +64,14 @@ void SelfHostedAdminServerConfig::clearCachedClientProfile(DockerContainer conta
     containers[container] = cleared;
 }
 
-QPair<QString, QString> SelfHostedAdminServerConfig::getDnsPair(bool isAmneziaDnsEnabled, const QString &primaryDns,
-                                                                const QString &secondaryDns) const
+QPair<QString, QString> SelfHostedAdminServerConfig::getDnsPair(const QString &primaryDns, const QString &secondaryDns) const
 {
     QString d1 = dns1;
     QString d2 = dns2;
     const bool dnsOnServer = containers.contains(DockerContainer::Dns);
 
     if (d1.isEmpty() || !NetworkUtilities::checkIPv4Format(d1)) {
-        d1 = (isAmneziaDnsEnabled && dnsOnServer) ? protocols::dns::amneziaDnsIp : primaryDns;
+        d1 = ((dnsMode == 1) && dnsOnServer) ? protocols::dns::amneziaDnsIp : primaryDns;
     }
     if (d2.isEmpty() || !NetworkUtilities::checkIPv4Format(d2)) {
         d2 = secondaryDns;
@@ -109,6 +108,9 @@ QJsonObject SelfHostedAdminServerConfig::toJson() const
     }
     if (!dns2.isEmpty()) {
         obj[configKey::dns2] = dns2;
+    }
+    if (dnsMode > -1) {
+        obj[configKey::dnsMode] = dnsMode;
     }
 
     if (!userName.isEmpty()) {
@@ -147,6 +149,11 @@ SelfHostedAdminServerConfig SelfHostedAdminServerConfig::fromJson(const QJsonObj
 
     config.dns1 = json.value(configKey::dns1).toString();
     config.dns2 = json.value(configKey::dns2).toString();
+    if (json.contains(configKey::dnsMode)) {
+        config.dnsMode = json.value(configKey::dnsMode).toInt();
+    } else {
+        config.dnsMode = 0;
+    }
 
     config.userName = json.value(configKey::userName).toString();
     config.password = json.value(configKey::password).toString();

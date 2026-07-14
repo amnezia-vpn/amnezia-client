@@ -107,6 +107,7 @@
         <file>Pages2/PageSettingsKillSwitchExceptions.qml</file>
         <file>Pages2/PageSettingsLogging.qml</file>
         <file>Pages2/PageSettingsServerData.qml</file>
+		<file>Pages2/PageSettingsServerDns.qml</file>
         <file>Pages2/PageSettingsServerInfo.qml</file>
         <file>Pages2/PageSettingsServerProtocol.qml</file>
         <file>Pages2/PageSettingsServerProtocols.qml</file>
