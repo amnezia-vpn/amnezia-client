@@ -205,10 +205,8 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
             [this](const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container) {
-                QtConcurrent::run([this, serverId, containerConfig, container]() {
-                    m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
-                });
-            });
+                m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
+            }, Qt::DirectConnection);
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
             [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {
