@@ -9,6 +9,13 @@ ExportUiController::ExportUiController(ExportController* exportController, QObje
     : QObject(parent),
       m_exportController(exportController)
 {
+    connect(m_exportController, &ExportController::revokeFinished, this, [this](ErrorCode errorCode) {
+        if (errorCode == ErrorCode::NoError) {
+            emit revokeConfigFinished();
+        } else {
+            emit exportErrorOccurred(errorCode);
+        }
+    });
 }
 
 void ExportUiController::generateFullAccessConfig(const QString &serverId)
@@ -92,7 +99,6 @@ void ExportUiController::updateClientManagementModel(const QString &serverId, in
 void ExportUiController::revokeConfig(int row, const QString &serverId, int containerIndex)
 {
     m_exportController->revokeConfig(row, serverId, containerIndex);
-    emit revokeConfigFinished();
 }
 
 void ExportUiController::renameClient(int row, const QString &clientName, const QString &serverId, int containerIndex)

@@ -29,6 +29,10 @@ PageType {
             ValueFilter {
                 roleName: "isInstallationAllowed"
                 value: true
+            },
+            ValueFilter {
+                roleName: "isUnsupportedContainer"
+                value: false
             }
         ]
         sorters: RoleSorter {

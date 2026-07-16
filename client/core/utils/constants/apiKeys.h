@@ -18,8 +18,8 @@ namespace apiDefs
         constexpr QLatin1String stackType("stack_type");
         constexpr QLatin1String cliVersion("cli_version");
         constexpr QLatin1String cliName("cli_name");
-        constexpr QLatin1String supportedProtocols("supported_protocols");
         constexpr QLatin1String availableCountries("available_countries");
+        constexpr QLatin1String availableProtocols("available_protocols");
         constexpr QLatin1String installationUuid("installation_uuid");
         constexpr QLatin1String uuid("installation_uuid");
         constexpr QLatin1String osVersion("os_version");
@@ -62,6 +62,7 @@ namespace apiDefs
 
         constexpr QLatin1String id("id");
         constexpr QLatin1String orderId("order_id");
+        constexpr QLatin1String migrationCode("migration_code");
         constexpr QLatin1String transactionId("transaction_id");
         constexpr QLatin1String isTestPurchase("is_test_purchase");
         constexpr QLatin1String isInAppPurchase("is_in_app_purchase");

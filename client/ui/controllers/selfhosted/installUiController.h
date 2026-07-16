@@ -64,7 +64,8 @@ public slots:
 
     void scanServerForInstalledContainers(const QString &serverId);
 
-    void updateContainer(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
 
     void removeServer(const QString &serverId);
     void rebootServer(const QString &serverId);
@@ -113,7 +114,7 @@ signals:
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);
     void setContainerEnabledFinished(bool enabled);
-    void containerStatusRefreshed(int status);
+    void containerStatusRefreshed(int status, int errorCode);
     void containerDiagnosticsRefreshed(bool portReachable, bool upstreamReachable, int clientsConnected,
                                        const QString &lastConfigRefresh, const QString &statsEndpoint);
     void containerSecretFetched(const QString &secret);
@@ -132,7 +133,6 @@ signals:
     void cachedProfileCleared(const QString &message);
     void apiConfigRemoved(const QString &message);
 
-    void noInstalledContainers();
     void configValidated(bool isValid);
 
 private:
@@ -162,6 +162,8 @@ private:
     QString m_privateKeyPassphrase;
     
     void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
+
+    bool buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig);
 };
 
 #endif // INSTALLUICONTROLLER_H

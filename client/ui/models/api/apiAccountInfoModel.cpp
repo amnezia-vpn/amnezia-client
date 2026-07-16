@@ -30,7 +30,7 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case SubscriptionStatusRole: {
         if (m_accountInfoData.configType == serverConfigUtils::ConfigType::AmneziaFreeV3) {
-            return tr("Active");
+            return QStringLiteral("<p><a style=\"color: #28c840;\">%1</a>").arg(tr("Active"));
         }
 
         return apiUtils::isSubscriptionExpired(m_accountInfoData.subscriptionEndDate)
@@ -70,12 +70,6 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
             if (lastDownloaded < workerLastUpdated) {
                 return true;
             }
-        }
-        return false;
-    }
-    case IsProtocolSelectionSupportedRole: {
-        if (m_accountInfoData.supportedProtocols.size() > 1) {
-            return true;
         }
         return false;
     }
@@ -131,10 +125,6 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
 
     accountInfoData.subscriptionDescription = accountInfoObject.value(apiDefs::key::subscriptionDescription).toString();
     accountInfoData.isRenewalAvailable = accountInfoObject.value(apiDefs::key::isRenewalAvailable).toBool(false);
-
-    for (const auto &protocol : accountInfoObject.value(apiDefs::key::supportedProtocols).toArray()) {
-        accountInfoData.supportedProtocols.push_back(protocol.toString());
-    }
 
     m_accountInfoData = accountInfoData;
 
@@ -201,7 +191,6 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsComponentVisibleRole] = "isComponentVisible";
     roles[IsSubscriptionRenewalAvailableRole] = "isSubscriptionRenewalAvailable";
     roles[HasExpiredWorkerRole] = "hasExpiredWorker";
-    roles[IsProtocolSelectionSupportedRole] = "isProtocolSelectionSupported";
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
     roles[IsInAppPurchaseRole] = "isInAppPurchase";

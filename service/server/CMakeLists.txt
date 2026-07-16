@@ -18,14 +18,9 @@ qt_standard_project_setup()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
-set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
-
-include_directories(
-    ${QSIMPLECRYPTO_DIR}
-)
-
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto/cryptoUtils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
@@ -38,16 +33,11 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
     ${CMAKE_CURRENT_LIST_DIR}/xray.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${QSIMPLECRYPTO_DIR}/include/QAead.h
-    ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
-    ${QSIMPLECRYPTO_DIR}/include/QRsa.h
-    ${QSIMPLECRYPTO_DIR}/include/QSimpleCrypto_global.h
-    ${QSIMPLECRYPTO_DIR}/include/QX509.h
-    ${QSIMPLECRYPTO_DIR}/include/QX509Store.h
 )
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto/cryptoUtils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
@@ -59,11 +49,6 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xray.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QX509.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QX509Store.cpp
 )
 
 # Mozilla headres
@@ -297,6 +282,7 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../../client
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -316,12 +302,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 if(APPLE)
-    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set_target_properties(${PROJECT} PROPERTIES
-            INSTALL_RPATH "@executable_path/../Frameworks"
-            BUILD_WITH_INSTALL_RPATH TRUE
-        )
-    endif()
+    set_target_properties(${PROJECT} PROPERTIES
+        INSTALL_RPATH "@executable_path/../Frameworks"
+    )
 
     find_library(FW_COREFOUNDATION CoreFoundation)
     find_library(FW_SYSTEMCONFIG SystemConfiguration)
@@ -359,6 +342,8 @@ if(WIN32)
 
     find_package(wintun REQUIRED)
     list(APPEND CONAN_BINS $<TARGET_FILE:zx2c4::wintun>)
+
+    list(APPEND CONAN_BINS $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE:OpenSSL::Crypto>)
 else()
     find_package(awg-go REQUIRED)
     list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-go>)
@@ -428,11 +413,32 @@ endif()
 # install target
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
+    RUNTIME_DEPENDENCY_SET service_deps
     COMPONENT AmneziaVPN
 )
-install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+
+if(APPLE)
+    set(RUNTIME_DEPS_DIR ${CMAKE_INSTALL_BINDIR}/../Frameworks)
+else()
+    set(RUNTIME_DEPS_DIR ${CMAKE_INSTALL_BINDIR})
+endif()
+
+install(RUNTIME_DEPENDENCY_SET service_deps
+    PRE_EXCLUDE_REGEXES
+        [[api-ms-win-.*]]
+        [[ext-ms-.*]]
+        [[kernel32\.dll]]
+        [[hvsifiletrust\.dll]]
+        [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
+        [[.*\.framework]]
+        [[^[Qq]t.*]]
+    POST_EXCLUDE_REGEXES
+        [[^.*[\\/]system32[\\/].*\.dll$]]
+        [[^/lib.*]]
+        [[^/usr/lib.*]]
+    DIRECTORIES ${CONAN_RUNTIME_LIB_DIRS}
     COMPONENT AmneziaVPN
+    DESTINATION "${RUNTIME_DEPS_DIR}"
 )
 
 qt_generate_deploy_app_script(

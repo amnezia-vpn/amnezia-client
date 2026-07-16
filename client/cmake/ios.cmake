@@ -54,7 +54,6 @@ target_include_directories(${PROJECT} PRIVATE ${Qt6Gui_PRIVATE_INCLUDE_DIRS})
 
 
 set_target_properties(${PROJECT} PROPERTIES
-    XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
     MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Info.plist.in
     MACOSX_BUNDLE_ICON_FILE "AppIcon"
     MACOSX_BUNDLE_INFO_STRING "${CLIENT_APPLICATION_NAME}"
@@ -120,6 +119,11 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/StoreKit2Helper.swift
+)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    PROPERTIES MACOSX_PACKAGE_LOCATION Resources
 )
 
 target_sources(${PROJECT} PRIVATE

@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/models/installedAppsModel.h"
+#include "ui/utils/mtProxyPublicHostInput.h"
 #include "version.h"
 #include "core/utils/appUiConfig.h"
 
@@ -120,7 +121,13 @@ void AmneziaApplication::init()
                 win->setPersistentSceneGraph(true);
                 win->setPersistentGraphics(true);
 #endif
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
                 win->show();
+#else
+                if (!m_coreController || !m_coreController->pageController()->shouldStartMinimized()) {
+                    win->show();
+                }
+#endif
             }
         },
         Qt::QueuedConnection);
@@ -215,6 +222,9 @@ void AmneziaApplication::registerTypes()
                              "ContainersModelFilters");
 
     qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
+
+    qmlRegisterType<PublicHostInputValidator>("MtProxyConfig", 1, 0, "PublicHostInputValidator");
+    qmlRegisterType<PublicHostInputValidator>("TelemtConfig", 1, 0, "PublicHostInputValidator");
 
     amnezia::declareQmlProtocolEnum();
     Vpn::declareQmlVpnConnectionStateEnum();

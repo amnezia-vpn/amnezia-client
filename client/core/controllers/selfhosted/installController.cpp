@@ -2,6 +2,7 @@
 
 #include "core/models/protocolConfig.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
@@ -20,7 +21,6 @@
 #include "core/installers/sftpInstaller.h"
 #include "core/installers/socks5Installer.h"
 #include "core/installers/mtProxyInstaller.h"
-#include "core/configurators/xrayConfigurator.h"
 #include "core/installers/telemtInstaller.h"
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
@@ -72,6 +72,16 @@ namespace
         }
         return false;
     }
+
+    QString buildRemoveContainerScript(const amnezia::ScriptVars &vars, bool removeDataVolume)
+    {
+        QString script = SshSession::replaceVars(amnezia::scriptData(SharedScriptType::remove_container), vars);
+        if (removeDataVolume) {
+            script += QLatin1String("\nsudo docker volume rm -f $CONTAINER_NAME-data 2>/dev/null || true");
+            script = SshSession::replaceVars(script, vars);
+        }
+        return script;
+    }
 }
 
 InstallController::InstallController(SecureServersRepository *serversRepository,
@@ -93,7 +103,7 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
                                             bool isUpdate)
 {
     qDebug().noquote() << "InstallController::setupContainer" << ContainerUtils::containerToString(container);
-    SshSession sshSession(this);
+    SshSession sshSession;
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, sshSession);
@@ -120,14 +130,10 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
-    amnezia::ScriptVars removeContainerVars =
+    const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    if (!isUpdate) {
-        removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
-    }
-    sshSession.runScript(credentials,
-                         sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container),
-                                                removeContainerVars));
+    const bool removeDataVolume = !isUpdate && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
     qDebug().noquote() << "buildContainerWorker start";
@@ -152,8 +158,8 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     return startupContainerWorker(credentials, container, config, sshSession);
 }
 
-ErrorCode InstallController::updateContainer(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
-                                             ContainerConfig &newConfig)
+ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
+                                                ContainerConfig &newConfig)
 {
     if (!isUpdateDockerContainerRequired(container, oldConfig, newConfig)) {
         auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
@@ -162,11 +168,11 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         }
         if (container == DockerContainer::MtProxy) {
             ServerCredentials credentials = adminConfig->credentials();
-            SshSession sshSession(this);
+            SshSession sshSession;
             MtProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         } else if (container == DockerContainer::Telemt) {
             ServerCredentials credentials = adminConfig->credentials();
-            SshSession sshSession(this);
+            SshSession sshSession;
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
         adminConfig->updateContainerConfig(container, newConfig);
@@ -182,20 +188,10 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
+    SshSession sshSession;
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
-    qDebug() << "InstallController::updateContainer for container" << container << "reinstall required is" << reinstallRequired;
-
-    bool xrayServerSettingsChanged = false;
-    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
-        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
-        if (oldXrayConfig && newXrayConfig) {
-            xrayServerSettingsChanged =
-                    !oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig);
-        }
-    }
+    qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
@@ -205,20 +201,11 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         if (errorCode == ErrorCode::NoError) {
             errorCode = startupContainerWorker(credentials, container, newConfig, sshSession);
         }
-    }
 
-    const bool skipXrayInboundSync =
-            newConfig.getXrayProtocolConfig() && newConfig.getXrayProtocolConfig()->serverConfig.isThirdPartyConfig;
-
-    if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged && !skipXrayInboundSync) {
-        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
-        XrayConfigurator xrayConfigurator(&sshSession);
-        qDebug() << "InstallController::updateContainer applying Xray server inbound sync, reinstall="
-                 << reinstallRequired;
-        errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
-        if (errorCode != ErrorCode::NoError) {
-            qDebug() << "InstallController::updateContainer Xray inbound sync failed, error="
-                     << static_cast<int>(errorCode);
+        if (errorCode == ErrorCode::NoError
+            && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt)) {
+            const QString containerName = ContainerUtils::containerToString(container);
+            errorCode = sshSession.runScript(credentials, "sudo docker restart " + containerName);
         }
     }
 
@@ -228,12 +215,49 @@ ErrorCode InstallController::updateContainer(const QString &serverId, DockerCont
         } else if (container == DockerContainer::Telemt) {
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
-        clearCachedProfile(serverId, container);
+        if (reinstallRequired) {
+            clearCachedProfile(serverId, container);
+        }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
 
     return errorCode;
+}
+
+ErrorCode InstallController::updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig)
+{
+    switch (m_serversRepository->serverKind(serverId)) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        auto config = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        auto config = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::SelfHostedUser);
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        auto config = m_serversRepository->nativeConfig(serverId);
+        if (!config.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        config->updateContainerConfig(container, newConfig);
+        m_serversRepository->editServer(serverId, config->toJson(), serverConfigUtils::ConfigType::Native);
+        return ErrorCode::NoError;
+    }
+    default:
+        return ErrorCode::InternalError;
+    }
 }
 
 void InstallController::clearCachedProfile(const QString &serverId, DockerContainer container)
@@ -673,13 +697,7 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
 
         if (oldXrayConfig && newXrayConfig) {
-            const QString oldPort = oldXrayConfig->serverConfig.port.isEmpty()
-                    ? QString(protocols::xray::defaultPort)
-                    : oldXrayConfig->serverConfig.port;
-            const QString newPort = newXrayConfig->serverConfig.port.isEmpty()
-                    ? QString(protocols::xray::defaultPort)
-                    : newXrayConfig->serverConfig.port;
-            if (oldPort != newPort) {
+            if (!oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig)) {
                 return true;
             }
         }
@@ -696,18 +714,6 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             if (oldPort != newPort) {
                 return true;
             }
-            const QString oldTransport = oldMt->transportMode.isEmpty() ? QString(
-                    protocols::mtProxy::transportModeStandard)
-                                                                        : oldMt->transportMode;
-            const QString newTransport = newMt->transportMode.isEmpty() ? QString(
-                    protocols::mtProxy::transportModeStandard)
-                                                                        : newMt->transportMode;
-            if (oldTransport != newTransport) {
-                return true;
-            }
-            if (oldMt->tlsDomain != newMt->tlsDomain) {
-                return true;
-            }
         }
     }
 
@@ -720,39 +726,6 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             const QString newPort =
                     newT->port.isEmpty() ? QString(protocols::telemt::defaultPort) : newT->port;
             if (oldPort != newPort) {
-                return true;
-            }
-            const QString oldTransport = oldT->transportMode.isEmpty()
-                    ? QString(protocols::telemt::transportModeStandard)
-                    : oldT->transportMode;
-            const QString newTransport = newT->transportMode.isEmpty()
-                    ? QString(protocols::telemt::transportModeStandard)
-                    : newT->transportMode;
-            if (oldTransport != newTransport) {
-                return true;
-            }
-            if (oldT->tlsDomain != newT->tlsDomain) {
-                return true;
-            }
-            if (oldT->maskEnabled != newT->maskEnabled) {
-                return true;
-            }
-            if (oldT->tlsEmulation != newT->tlsEmulation) {
-                return true;
-            }
-            if (oldT->useMiddleProxy != newT->useMiddleProxy) {
-                return true;
-            }
-            if (oldT->tag != newT->tag) {
-                return true;
-            }
-            const QString oldUser = oldT->userName.isEmpty()
-                    ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                    : oldT->userName;
-            const QString newUser = newT->userName.isEmpty()
-                    ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                    : newT->userName;
-            if (oldUser != newUser) {
                 return true;
             }
         }
@@ -794,9 +767,23 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
 
     qDebug().noquote() << "InstallController::installDockerWorker" << stdOut;
 
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
+        QString conntrackOut;
+        auto cbConntrack = [&](const QString &data, libssh::Client &) {
+            conntrackOut += data + "\n";
+            return ErrorCode::NoError;
+        };
+        sshSession.runScript(
+                credentials,
+                sshSession.replaceVars(amnezia::scriptData(SharedScriptType::install_conntrack),
+                                       amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
+                cbConntrack, cbConntrack);
+        qDebug().noquote() << "InstallController::installDockerWorker install_conntrack:" << conntrackOut;
+    }
+
     if (container == DockerContainer::Awg2) {
-        QRegularExpression regex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
-        QRegularExpressionMatch match = regex.match(stdOut);
+        QRegularExpression kernelVersionRegex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
+        QRegularExpressionMatch match = kernelVersionRegex.match(stdOut);
         if (match.hasMatch()) {
             int majorVersion = match.captured(1).toInt();
             int minorVersion = match.captured(2).toInt();
@@ -809,8 +796,19 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
 
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
-    if (stdOut.contains("command not found"))
+    if (stdOut.contains("Container runtime is not supported"))
+        return ErrorCode::ServerContainerRuntimeNotSupported;
+    
+    QRegularExpression notFoundRegex(
+        R"(^.*(?:sudo:|docker:).*not found.*$)",
+        QRegularExpression::MultilineOption);
+
+    if (notFoundRegex.match(stdOut).hasMatch()) {
         return ErrorCode::ServerDockerFailedError;
+    }
+    
+    if (stdOut.contains("Container runtime service not running"))
+        return ErrorCode::ContainerRuntimeServiceNotRunning;
 
     return error;
 }
@@ -847,7 +845,7 @@ ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, 
         return ErrorCode::ServerUserNotInSudo;
     if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
         return ErrorCode::ServerUserDirectoryNotAccessible;
-    if (stdOut.contains("sudoers") || stdOut.contains("is not allowed to run sudo on"))
+    if (stdOut.contains(QRegularExpression(R"(\bsudoers\b)")) || stdOut.contains("is not allowed to") || stdOut.contains("can't do that"))
         return ErrorCode::ServerUserNotAllowedInSudoers;
     if (stdOut.contains("password is required") || stdOut.contains("authentication is required"))
         return ErrorCode::ServerUserPasswordRequired;
@@ -929,7 +927,7 @@ ErrorCode InstallController::rebootServer(const QString &serverId)
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
+    SshSession sshSession;
 
     QString script = QString("sudo reboot");
 
@@ -957,7 +955,7 @@ ErrorCode InstallController::removeAllContainers(const QString &serverId)
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
+    SshSession sshSession;
     ErrorCode errorCode = sshSession.runScript(credentials, amnezia::scriptData(SharedScriptType::remove_all_containers));
 
     if (errorCode == ErrorCode::NoError) {
@@ -979,13 +977,12 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
-    amnezia::ScriptVars removeContainerVars =
+    SshSession sshSession;
+    const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    removeContainerVars.append({ { "$REMOVE_CONTAINER_DATA", QStringLiteral("1") } });
-    ErrorCode errorCode = sshSession.runScript(
-            credentials,
-            sshSession.replaceVars(amnezia::scriptData(SharedScriptType::remove_container), removeContainerVars));
+    const bool removeDataVolume = (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    ErrorCode errorCode =
+            sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
 
     if (errorCode == ErrorCode::NoError) {
         QMap<DockerContainer, ContainerConfig> containers = adminConfig->containers;
@@ -1089,7 +1086,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(const QString &ser
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
+    SshSession sshSession;
 
     QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers, sshSession);
@@ -1132,7 +1129,7 @@ ErrorCode InstallController::scanServerForInstalledContainers(const QString &ser
 ErrorCode InstallController::installServer(const ServerCredentials &credentials, DockerContainer container, int port,
                                            TransportProto transportProto, bool &wasContainerInstalled)
 {
-    SshSession sshSession(this);
+    SshSession sshSession;
     QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers, sshSession);
     if (errorCode) {
@@ -1201,7 +1198,7 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
+    SshSession sshSession;
     
     QMap<DockerContainer, ContainerConfig> installedContainers;
     ErrorCode errorCode = getAlreadyInstalledContainers(credentials, installedContainers, sshSession);
@@ -1243,7 +1240,7 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
 ErrorCode InstallController::checkSshConnection(ServerCredentials &credentials, QString &output,
                                                 std::function<QString()> passphraseCallback)
 {
-    SshSession sshSession(this);
+    SshSession sshSession;
     ErrorCode errorCode = ErrorCode::NoError;
 
     if (credentials.secretData.contains("BEGIN") && credentials.secretData.contains("PRIVATE KEY")) {
@@ -1463,7 +1460,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProtoStr = containerAndPortMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            if (container == DockerContainer::None) {
+            if (container == DockerContainer::None || ContainerUtils::isUnsupportedContainer(container)) {
                 continue;
             }
 
@@ -1488,7 +1485,7 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
             QString transportProtoStr = torOrDnsRegMatch.captured(3);
             DockerContainer container = ContainerUtils::containerFromString(name);
 
-            if (container == DockerContainer::None) {
+            if (container == DockerContainer::None || ContainerUtils::isUnsupportedContainer(container)) {
                 continue;
             }
 
@@ -1524,7 +1521,7 @@ ErrorCode InstallController::setDockerContainerEnabledState(const QString &serve
         return ErrorCode::InternalError;
     }
     const QString containerName = ContainerUtils::containerToString(container);
-    SshSession sshSession(this);
+    SshSession sshSession;
     const QString script = enabled ? QStringLiteral("sudo docker start %1").arg(containerName)
                                    : QStringLiteral("sudo docker stop %1").arg(containerName);
     const ErrorCode runError = sshSession.runScript(credentials, script);
@@ -1564,7 +1561,7 @@ ErrorCode InstallController::queryDockerContainerStatus(const QString &serverId,
         stdOut += data;
         return ErrorCode::NoError;
     };
-    SshSession sshSession(this);
+    SshSession sshSession;
     const QString script = QStringLiteral(
             "sudo docker inspect --format '{{.State.Status}}' %1 2>/dev/null || echo 'not_found'")
             .arg(containerName);
@@ -1598,7 +1595,7 @@ ErrorCode InstallController::queryMtProxyDiagnostics(const QString &serverId, Do
     if (!credentials.isValid()) {
         return ErrorCode::InternalError;
     }
-    SshSession sshSession(this);
+    SshSession sshSession;
     return MtProxyInstaller::queryDiagnostics(sshSession, credentials, container, listenPort, out);
 }
 
@@ -1621,7 +1618,7 @@ QString InstallController::fetchDockerContainerSecret(const QString &serverId, D
         stdOut += data;
         return ErrorCode::NoError;
     };
-    SshSession sshSession(this);
+    SshSession sshSession;
     const QString path = QStringLiteral("/data/secret");
     const QString cmd = QStringLiteral("sudo docker exec %1 cat %2").arg(containerName, path);
     const ErrorCode errorCode = sshSession.runScript(credentials, cmd, cbReadStdOut);

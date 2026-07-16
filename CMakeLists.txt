@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT AmneziaVPN)
 if(NOT AMNEZIAVPN_VERSION)
-    set(AMNEZIAVPN_VERSION 4.9.0.1 CACHE STRING "Client app version")
+    set(AMNEZIAVPN_VERSION 4.9.0.4 CACHE STRING "Client app version")
 endif()
 
 set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
@@ -20,9 +20,9 @@ project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         HOMEPAGE_URL "https://amnezia.org/"
 )
 
+# trigger conan to kick off `conan install` globally
+find_package(OpenSSL REQUIRED)
 if (PREBUILTS_ONLY)
-    # trigger conan to kick off `conan install`
-    find_package(OpenSSL REQUIRED)
     return()
 endif()
 
@@ -30,7 +30,7 @@ string(TIMESTAMP CURRENT_DATE "%Y-%m-%d")
 set(RELEASE_DATE "${CURRENT_DATE}")
 
 set(APP_MAJOR_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH})
-set(APP_ANDROID_VERSION_CODE 2122)
+set(APP_ANDROID_VERSION_CODE 2133)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     set(MZ_PLATFORM_NAME "linux")

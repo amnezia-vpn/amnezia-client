@@ -23,6 +23,9 @@ jobs:
               - 'recipes/**'
               - 'conanfile.py'
               - '.github/workflows/deploy.yml'
+              - 'cmake/conan_provider.cmake'
+              - 'cmake/platform_settings.cmake'
+              - 'cmake/recipes_bootstrap.cmake'
 
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
@@ -154,7 +157,7 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
-      run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
+      run: cmake -S . -B build -DPREBUILTS_ONLY=1
     
     - name: 'Authorize in remote'
       if: github.ref == 'refs/heads/dev'
@@ -411,6 +414,10 @@ jobs:
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
         include:
+          - xcode-version: 16.2
+            os: macos-15
+          - xcode-version: 16.4
+            os: macos-15
           - xcode-version: 26.4
             os: macos-26
 
@@ -447,7 +454,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -494,7 +501,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '16.2.0'
+        xcode-version: '26.3.0'
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v4
@@ -547,6 +554,10 @@ jobs:
       matrix:
         xcode-version: [16.2, 16.4, 26.4]
         include:
+          - xcode-version: 16.2
+            os: macos-15
+          - xcode-version: 16.4
+            os: macos-15
           - xcode-version: 26.4
             os: macos-26
 
@@ -583,7 +594,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-MacOS-NE:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS-NE
     if: ${{ always() }}
@@ -607,6 +618,12 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
     - uses: ./.github/actions/apple-setup-provisioning-profile
       with:
         provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
@@ -643,12 +660,6 @@ jobs:
           export PATH=$PATH:~/go/bin
           go install golang.org/x/mobile/cmd/gomobile@latest
           gomobile init
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
 
     - name: 'Setup python'
       uses: actions/setup-python@v6

@@ -128,15 +128,11 @@ public slots:
 
     Q_INVOKABLE bool isFakeTlsDomainInputAllowed(const QString &text) const;
 
-    Q_INVOKABLE QString clipboardText() const;
-
     Q_INVOKABLE QString sanitizePublicHostFieldText(const QString &input) const;
 
     Q_INVOKABLE QString sanitizePortFieldText(const QString &input) const;
 
     Q_INVOKABLE QString sanitizeMtProxyTagFieldText(const QString &input) const;
-
-    Q_INVOKABLE QString sanitizeWorkersFieldText(const QString &input) const;
 
     Q_INVOKABLE QString sanitizeOptionalIpv4FieldText(const QString &input) const;
 
