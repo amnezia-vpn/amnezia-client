@@ -17,9 +17,9 @@
 
 #include <QHostAddress>
 #include <QScopeGuard>
-#include <QStringList>
 
 #include "daemon/wireguardutils.h"
+#include "ipv4interfaceaddress.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -163,38 +163,16 @@ bool IPUtilsLinux::setMTUAndUp(const InterfaceConfig& config) {
 }
 
 bool IPUtilsLinux::addIP4AddressToDevice(const InterfaceConfig& config) {
-  QHostAddress deviceAddress;
-  int prefixLength = -1;
-  bool prefixIsValid = false;
-
-  // WireGuard configs can contain both IPv4 and IPv6 addresses in the same
-  // comma-separated Address value. Select the IPv4 entry only.
-  for (const QString& entry : config.m_deviceIpv4Address.split(',')) {
-    const QStringList addressAndPrefix = entry.trimmed().split('/');
-    if (addressAndPrefix.size() != 2) continue;
-
-    QHostAddress candidateAddress(addressAndPrefix.at(0));
-    bool candidatePrefixIsValid = false;
-    const int candidatePrefixLength =
-        addressAndPrefix.at(1).toInt(&candidatePrefixIsValid);
-    if (candidateAddress.protocol() != QAbstractSocket::IPv4Protocol ||
-        !candidatePrefixIsValid || candidatePrefixLength < 0 ||
-        candidatePrefixLength > 32) {
-      continue;
-    }
-
-    deviceAddress = candidateAddress;
-    prefixLength = candidatePrefixLength;
-    prefixIsValid = true;
-    break;
-  }
-
-  if (!prefixIsValid || prefixLength < 0 || prefixLength > 32 ||
-      deviceAddress.protocol() != QAbstractSocket::IPv4Protocol) {
+  const auto parsedAddress =
+      parseIPv4InterfaceAddress(config.m_deviceIpv4Address);
+  if (!parsedAddress.has_value()) {
     logger.error() << "Invalid IPv4 interface address: "
                    << config.m_deviceIpv4Address;
     return false;
   }
+
+  const QHostAddress& deviceAddress = parsedAddress->address;
+  const int prefixLength = parsedAddress->prefixLength;
 
   const int interfaceIndex = if_nametoindex(WG_INTERFACE);
   if (interfaceIndex == 0) {
