@@ -122,7 +122,7 @@ target_sources(${PROJECT} PRIVATE
 )
 
 set_source_files_properties(
-    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    ${CLIENT_IOS_MEDIA_ASSETS_PATH}
     PROPERTIES MACOSX_PACKAGE_LOCATION Resources
 )
 
