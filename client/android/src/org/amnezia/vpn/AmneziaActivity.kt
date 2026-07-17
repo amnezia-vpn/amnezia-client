@@ -47,6 +47,12 @@ import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
 import AppListProvider
+import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.appupdate.AppUpdateOptions
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +79,7 @@ private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
+private const val UPDATE_APP_ACTION_CODE = 5
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
@@ -98,6 +105,9 @@ class AmneziaActivity : QtActivity() {
     private val resumeHandler = Handler(Looper.getMainLooper())
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
+
+    private var appUpdateManager: AppUpdateManager? = null
+    private var pendingUpdateInfo: AppUpdateInfo? = null
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -376,6 +386,18 @@ class AmneziaActivity : QtActivity() {
             QtAndroidController.onActivityResumed()
         }
 
+        appUpdateManager?.appUpdateInfo?.addOnSuccessListener { info ->
+            if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                try {
+                    appUpdateManager?.startUpdateFlowForResult(
+                        info, this, AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(), UPDATE_APP_ACTION_CODE
+                    )
+                } catch (e: Exception) {
+                    Log.w(TAG, "resume update flow failed: ${e.message}")
+                }
+            }
+        }
+
         if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
             val uri = pendingOpenFileUri!!
             openFileDeliveryScheduled = true
@@ -489,9 +511,48 @@ class AmneziaActivity : QtActivity() {
         super.onDestroy()
     }
 
+    fun checkPlayUpdate() {
+        runOnUiThread {
+            val manager = appUpdateManager
+                ?: AppUpdateManagerFactory.create(applicationContext).also { appUpdateManager = it }
+            manager.appUpdateInfo
+                .addOnSuccessListener { info ->
+                    val available = info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                        info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+                    pendingUpdateInfo = if (available) info else null
+                    Log.d(TAG, "Play update available: $available")
+                    QtAndroidController.onPlayUpdateAvailability(available)
+                }
+                .addOnFailureListener { e ->
+                    Log.w(TAG, "checkPlayUpdate failed: ${e.message}")
+                    QtAndroidController.onPlayUpdateAvailability(false)
+                }
+        }
+    }
+
+    fun startPlayUpdateFlow() {
+        runOnUiThread {
+            val manager = appUpdateManager ?: return@runOnUiThread
+            val info = pendingUpdateInfo ?: return@runOnUiThread
+            try {
+                manager.startUpdateFlowForResult(
+                    info, this, AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(), UPDATE_APP_ACTION_CODE
+                )
+            } catch (e: Exception) {
+                Log.w(TAG, "startPlayUpdateFlow failed: ${e.message}")
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "Process activity result, code: ${actionCodeToString(requestCode)}, " +
                 "resultCode: $resultCode, data: $data")
+        if (requestCode == UPDATE_APP_ACTION_CODE) {
+            if (resultCode != RESULT_OK) {
+                QtAndroidController.onPlayUpdateAvailability(true)
+            }
+            return
+        }
         actionResultHandlers[requestCode]?.let { handler ->
             when (resultCode) {
                 RESULT_OK -> handler.onSuccess(data)
@@ -1190,6 +1251,7 @@ class AmneziaActivity : QtActivity() {
                 CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
                 OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
                 CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
+                UPDATE_APP_ACTION_CODE -> "UPDATE_APP"
                 else -> actionCode.toString()
             }
     }

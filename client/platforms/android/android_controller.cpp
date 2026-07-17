@@ -103,7 +103,8 @@ bool AndroidController::initialize()
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
         {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
         {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
-        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)},
+        {"onPlayUpdateAvailability", "(Z)V", reinterpret_cast<void *>(onPlayUpdateAvailability)}
     };
 
     QJniEnvironment env;
@@ -152,6 +153,16 @@ void AndroidController::stop()
 void AndroidController::resetLastServer(int serverIndex)
 {
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
+}
+
+void AndroidController::checkPlayUpdate()
+{
+    callActivityMethod("checkPlayUpdate", "()V");
+}
+
+void AndroidController::startPlayUpdateFlow()
+{
+    callActivityMethod("startPlayUpdateFlow", "()V");
 }
 
 void AndroidController::saveFile(const QString &fileName, const QString &data)
@@ -531,6 +542,14 @@ void AndroidController::onAuthResult(JNIEnv *env, jobject thiz, jboolean result)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->authenticationResult(result);
+}
+
+void AndroidController::onPlayUpdateAvailability(JNIEnv *env, jobject thiz, jboolean available)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->playUpdateAvailability(available);
 }
 
 // static

@@ -23,6 +23,7 @@
 #include "ui/controllers/settingsController.h"
 #include "ui/controllers/sitesController.h"
 #include "ui/controllers/systemController.h"
+#include "ui/controllers/appUpdateController.h"
 
 #include "ui/models/allowed_dns_model.h"
 #include "ui/models/containers_model.h"
@@ -122,6 +123,8 @@ private:
     QScopedPointer<ApiSettingsController> m_apiSettingsController;
     QScopedPointer<ApiConfigsController> m_apiConfigsController;
     QScopedPointer<ApiNewsController> m_apiNewsController;
+
+    QScopedPointer<AppUpdateController> m_appUpdateController;
 
     QSharedPointer<ContainersModel> m_containersModel;
     QSharedPointer<ContainersModel> m_defaultServerContainersModel;
