@@ -4,6 +4,7 @@
 
 #include "iputilslinux.h"
 
+#include <algorithm>
 #include <arpa/inet.h>
 #include <cerrno>
 #include <cstring>
@@ -53,23 +54,32 @@ bool addIPv4Address(int interfaceIndex, const QHostAddress& address,
   interfaceAddress->ifa_scope = RT_SCOPE_UNIVERSE;
   interfaceAddress->ifa_index = interfaceIndex;
 
-  const auto appendAttribute = [&](int type, const void* data, size_t size) {
-    const size_t newLength = NLMSG_ALIGN(message->nlmsg_len) + RTA_SPACE(size);
-    if (newLength > sizeof(buffer)) return false;
+  const auto appendIPv4Attribute = [&](int type) {
+    constexpr size_t payloadSize = sizeof(struct in_addr);
+    const size_t attributeOffset = NLMSG_ALIGN(message->nlmsg_len);
+    const size_t attributeSize = RTA_SPACE(payloadSize);
+    if (attributeOffset > sizeof(buffer) ||
+        attributeSize > sizeof(buffer) - attributeOffset) {
+      return false;
+    }
 
     auto* attribute = reinterpret_cast<struct rtattr*>(
-        buffer + NLMSG_ALIGN(message->nlmsg_len));
+        buffer + attributeOffset);
     attribute->rta_type = type;
-    attribute->rta_len = RTA_LENGTH(size);
-    memcpy(RTA_DATA(attribute), data, size);
-    message->nlmsg_len = newLength;
+    attribute->rta_len = RTA_LENGTH(payloadSize);
+
+    const auto* source = reinterpret_cast<const char*>(&ipv4Address);
+    auto* destination = reinterpret_cast<char*>(RTA_DATA(attribute));
+    std::copy_n(source, payloadSize, destination);
+
+    message->nlmsg_len = attributeOffset + attributeSize;
     return true;
   };
 
   // IFA_LOCAL keeps the configured host address; IFA_ADDRESS describes the
   // same address for a point-to-point WireGuard interface.
-  if (!appendAttribute(IFA_LOCAL, &ipv4Address, sizeof(ipv4Address)) ||
-      !appendAttribute(IFA_ADDRESS, &ipv4Address, sizeof(ipv4Address))) {
+  if (!appendIPv4Attribute(IFA_LOCAL) ||
+      !appendIPv4Attribute(IFA_ADDRESS)) {
     errno = EMSGSIZE;
     return false;
   }
