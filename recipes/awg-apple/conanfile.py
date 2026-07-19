@@ -9,7 +9,7 @@ import os
 
 class AwgApple(ConanFile):
     name = "awg-apple"
-    version = "2.0.2"
+    version = "2.0.3"
     settings = "os", "arch", "compiler"
 
     @property

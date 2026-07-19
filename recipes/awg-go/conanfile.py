@@ -14,7 +14,7 @@ import shlex
 
 class AwgGo(ConanFile):
     name = "awg-go"
-    version = "0.2.18"
+    version = "0.2.19"
     package_type = "application"
     settings = "os", "arch"
 
