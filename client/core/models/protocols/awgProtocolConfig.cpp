@@ -196,11 +196,21 @@ QJsonObject AwgClientConfig::toJson() const
         obj[configKey::transportPacketMagicHeader] = transportPacketMagicHeader;
     }
     
-    obj[configKey::specialJunk1] = specialJunk1;
-    obj[configKey::specialJunk2] = specialJunk2;
-    obj[configKey::specialJunk3] = specialJunk3;
-    obj[configKey::specialJunk4] = specialJunk4;
-    obj[configKey::specialJunk5] = specialJunk5;
+    if (!specialJunk1.isEmpty()) {
+        obj[configKey::specialJunk1] = specialJunk1;
+    }
+    if (!specialJunk2.isEmpty()) {
+        obj[configKey::specialJunk2] = specialJunk2;
+    }
+    if (!specialJunk3.isEmpty()) {
+        obj[configKey::specialJunk3] = specialJunk3;
+    }
+    if (!specialJunk4.isEmpty()) {
+        obj[configKey::specialJunk4] = specialJunk4;
+    }
+    if (!specialJunk5.isEmpty()) {
+        obj[configKey::specialJunk5] = specialJunk5;
+    }
     
     if (isObfuscationEnabled) {
         obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
