@@ -11,7 +11,7 @@ from pathlib import Path
 
 class AmneziaLibxray(ConanFile):
     name = "amnezia-libxray"
-    version = "1.0.0"
+    version = "1.0.1"
     settings = "os", "arch", "compiler"
 
     def configure(self):
@@ -29,8 +29,8 @@ class AmneziaLibxray(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} v{self.version} does not support {self.settings.os}")
 
     def source(self):
-        get(self, "https://github.com/amnezia-vpn/amnezia-libxray/archive/refs/tags/v1.0.0.zip",
-            sha256="0c50c5acd5063a9fc3cfbb5b3e11481d30cfa3762b3cb1d72130248ff498e9df", strip_root=True
+        get(self, f"https://github.com/amnezia-vpn/amnezia-libxray/archive/refs/tags/v{self.version}.zip",
+            sha256="f17bca781d4a2fad4dfda9e8b1c0f6960a3f75f6218b906b1b0e2458652ffa5a", strip_root=True
         )
 
     def generate(self):
