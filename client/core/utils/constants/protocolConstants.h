@@ -64,7 +64,7 @@ namespace amnezia
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "chrome";
-            constexpr char defaultSni[] = "cdn.example.com";
+            constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "HTTP/2";
 
             constexpr char defaultXhttpMode[] = "Auto";
