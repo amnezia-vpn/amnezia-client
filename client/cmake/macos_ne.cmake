@@ -127,6 +127,7 @@ target_sources(${PROJECT} PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKitC/x25519.c
     ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift

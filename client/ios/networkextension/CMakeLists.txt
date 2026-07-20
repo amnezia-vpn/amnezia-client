@@ -94,6 +94,7 @@ target_sources(${CLIENT_IOS_NE_TARGET_NAME} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
