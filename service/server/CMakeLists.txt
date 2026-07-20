@@ -333,6 +333,12 @@ if(APPLE)
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
     )
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        ${CMAKE_SOURCE_DIR}/deploy/data/macos/pf
+        "$<TARGET_FILE_DIR:${PROJECT}>/pf"
+        COMMAND_EXPAND_LISTS
+    )
 endif()
 
 # install non-linked dependencies
