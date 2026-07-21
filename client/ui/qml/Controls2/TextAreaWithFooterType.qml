@@ -79,7 +79,7 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                ContextMenu.menu: Qt.platform.os === "ios" ? null : contextMenu
+                ContextMenu.menu: contextMenu
 
                 ContextMenuType {
                     id: contextMenu
