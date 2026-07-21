@@ -29,6 +29,7 @@ void ConnectionUiController::openConnection()
 {
     const QString serverId = m_serversController->getDefaultServerId();
     if (serverId.isEmpty()) {
+        m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
         return;
     }
 
