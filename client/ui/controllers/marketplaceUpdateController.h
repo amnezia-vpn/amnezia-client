@@ -1,11 +1,11 @@
-#ifndef APPUPDATECONTROLLER_H
-#define APPUPDATECONTROLLER_H
+#ifndef MARKETPLACEUPDATECONTROLLER_H
+#define MARKETPLACEUPDATECONTROLLER_H
 
 #include <QNetworkAccessManager>
 #include <QObject>
 #include <QUrl>
 
-class AppUpdateController : public QObject
+class MarketplaceUpdateController : public QObject
 {
     Q_OBJECT
 
@@ -17,7 +17,7 @@ class AppUpdateController : public QObject
     Q_PROPERTY(QString storeVersion READ storeVersion NOTIFY stateChanged)
 
 public:
-    explicit AppUpdateController(QObject *parent = nullptr);
+    explicit MarketplaceUpdateController(QObject *parent = nullptr);
 
     bool blocking() const { return m_state != UpToDate; }
     bool checking() const { return m_state == Checking; }
@@ -58,4 +58,4 @@ private:
     QString m_storeUrl;
 };
 
-#endif // APPUPDATECONTROLLER_H
+#endif // MARKETPLACEUPDATECONTROLLER_H

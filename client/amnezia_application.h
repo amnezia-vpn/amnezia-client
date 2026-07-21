@@ -15,6 +15,7 @@
 
 #include "core/controllers/coreController.h"
 #include "settings.h"
+#include "ui/controllers/marketplaceUpdateController.h"
 #include "vpnconnection.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
@@ -54,6 +55,7 @@ private:
     std::shared_ptr<Settings> m_settings;
 
     QScopedPointer<CoreController> m_coreController;
+    QScopedPointer<MarketplaceUpdateController> m_marketplaceUpdateController;
 
     QSharedPointer<ContainerProps> m_containerProps;
     QSharedPointer<ProtocolProps> m_protocolProps;

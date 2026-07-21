@@ -335,7 +335,7 @@ Window  {
         anchors.fill: parent
         z: 1000
 
-        active: AppUpdate.blocking
+        active: MarketplaceUpdate.blocking
 
         sourceComponent: Rectangle {
             color: AmneziaStyle.color.midnightBlack
@@ -352,22 +352,22 @@ Window  {
 
                 BusyIndicator {
                     Layout.alignment: Qt.AlignHCenter
-                    running: AppUpdate.checking
-                    visible: AppUpdate.checking
+                    running: MarketplaceUpdate.checking
+                    visible: MarketplaceUpdate.checking
                 }
 
                 Header1TextType {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    visible: !AppUpdate.checking
-                    text: AppUpdate.noInternet ? qsTr("No internet connection") : qsTr("Update required")
+                    visible: !MarketplaceUpdate.checking
+                    text: MarketplaceUpdate.noInternet ? qsTr("No internet connection") : qsTr("Update required")
                 }
 
                 ParagraphTextType {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    visible: !AppUpdate.checking
-                    text: AppUpdate.noInternet
+                    visible: !MarketplaceUpdate.checking
+                    text: MarketplaceUpdate.noInternet
                           ? qsTr("Internet access is required to start AmneziaVPN. Check your connection and try again.")
                           : qsTr("A new version of AmneziaVPN is available. Please update to the latest version to continue.")
                 }
@@ -375,20 +375,20 @@ Window  {
                 BasicButtonType {
                     Layout.fillWidth: true
                     Layout.topMargin: 16
-                    visible: !AppUpdate.checking
-                    text: AppUpdate.noInternet ? qsTr("Retry") : qsTr("Update")
+                    visible: !MarketplaceUpdate.checking
+                    text: MarketplaceUpdate.noInternet ? qsTr("Retry") : qsTr("Update")
                     clickedFunc: function() {
-                        if (AppUpdate.noInternet) {
-                            AppUpdate.recheck()
+                        if (MarketplaceUpdate.noInternet) {
+                            MarketplaceUpdate.recheck()
                         } else {
-                            AppUpdate.openStore()
+                            MarketplaceUpdate.openStore()
                         }
                     }
                 }
 
                 BasicButtonType {
                     Layout.fillWidth: true
-                    visible: !AppUpdate.checking
+                    visible: !MarketplaceUpdate.checking
                     text: qsTr("Exit")
                     defaultColor: AmneziaStyle.color.transparent
                     hoveredColor: AmneziaStyle.color.translucentWhite
@@ -397,7 +397,7 @@ Window  {
                     textColor: AmneziaStyle.color.paleGray
                     borderWidth: 1
                     clickedFunc: function() {
-                        AppUpdate.quit()
+                        MarketplaceUpdate.quit()
                     }
                 }
             }

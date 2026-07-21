@@ -24,8 +24,6 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     initAndroidController();
     initAppleController();
 
-    m_appUpdateController->start();
-
     initNotificationHandler();
 
     m_translator.reset(new QTranslator());
@@ -167,9 +165,6 @@ void CoreController::initControllers()
 
     m_apiNewsController.reset(new ApiNewsController(m_newsModel, m_settings, m_serversModel, this));
     m_engine->rootContext()->setContextProperty("ApiNewsController", m_apiNewsController.get());
-
-    m_appUpdateController.reset(new AppUpdateController(this));
-    m_engine->rootContext()->setContextProperty("AppUpdate", m_appUpdateController.get());
 }
 
 void CoreController::initAndroidController()

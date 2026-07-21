@@ -1,4 +1,4 @@
-#include "appUpdateController.h"
+#include "marketplaceUpdateController.h"
 
 #include <QCoreApplication>
 #include <QDebug>
@@ -36,7 +36,7 @@ constexpr auto kAndroidStoreUrl = "https://play.google.com/store/apps/details?id
 #endif
 } // namespace
 
-AppUpdateController::AppUpdateController(QObject *parent) : QObject(parent)
+MarketplaceUpdateController::MarketplaceUpdateController(QObject *parent) : QObject(parent)
 {
 #if defined(Q_OS_ANDROID) && !defined(QT_DEBUG)
     connect(AndroidController::instance(), &AndroidController::playUpdateAvailability, this,
@@ -45,12 +45,12 @@ AppUpdateController::AppUpdateController(QObject *parent) : QObject(parent)
 #endif
 }
 
-QString AppUpdateController::currentVersion() const
+QString MarketplaceUpdateController::currentVersion() const
 {
     return QString(APP_VERSION);
 }
 
-void AppUpdateController::setState(State state)
+void MarketplaceUpdateController::setState(State state)
 {
     if (m_state == state) {
         return;
@@ -59,7 +59,7 @@ void AppUpdateController::setState(State state)
     emit stateChanged();
 }
 
-void AppUpdateController::start()
+void MarketplaceUpdateController::start()
 {
     setState(Checking);
 
@@ -76,7 +76,7 @@ void AppUpdateController::start()
 #endif
 }
 
-void AppUpdateController::openStore()
+void MarketplaceUpdateController::openStore()
 {
 #if defined(Q_OS_IOS)
     if (!m_storeUrl.isEmpty()) {
@@ -91,13 +91,13 @@ void AppUpdateController::openStore()
 #endif
 }
 
-void AppUpdateController::quit()
+void MarketplaceUpdateController::quit()
 {
     qApp->quit();
 }
 
 #if defined(Q_OS_IOS) || (defined(Q_OS_ANDROID) && defined(QT_DEBUG))
-QUrl AppUpdateController::versionSourceUrl() const
+QUrl MarketplaceUpdateController::versionSourceUrl() const
 {
   #if defined(Q_OS_IOS)
     const QString country = QLocale::system().name().section('_', 1, 1).toLower();
@@ -111,7 +111,7 @@ QUrl AppUpdateController::versionSourceUrl() const
   #endif
 }
 
-bool AppUpdateController::parseVersion(const QByteArray &body, QString &version, QString &storeUrl)
+bool MarketplaceUpdateController::parseVersion(const QByteArray &body, QString &version, QString &storeUrl)
 {
   #if defined(Q_OS_IOS)
     const auto results = QJsonDocument::fromJson(body).object().value("results").toArray();
@@ -137,19 +137,19 @@ bool AppUpdateController::parseVersion(const QByteArray &body, QString &version,
   #endif
 }
 
-void AppUpdateController::applyStoreVersion(const QString &version, const QString &storeUrl)
+void MarketplaceUpdateController::applyStoreVersion(const QString &version, const QString &storeUrl)
 {
     m_storeVersion = version;
     m_storeUrl = storeUrl;
 
     const auto current = QVersionNumber::fromString(currentVersion()).normalized();
     const auto store = QVersionNumber::fromString(version).normalized();
-    qInfo() << "[AppUpdate] current:" << current.toString() << "store:" << store.toString();
+    qInfo() << "[MarketplaceUpdate] current:" << current.toString() << "store:" << store.toString();
 
     setState(store > current ? UpdateRequired : UpToDate);
 }
 
-void AppUpdateController::startHttpCheck(const QUrl &url)
+void MarketplaceUpdateController::startHttpCheck(const QUrl &url)
 {
     QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
@@ -160,7 +160,7 @@ void AppUpdateController::startHttpCheck(const QUrl &url)
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "[AppUpdate] network error:" << reply->errorString();
+            qWarning() << "[MarketplaceUpdate] network error:" << reply->errorString();
             setState(NoInternet);
             return;
         }
@@ -168,7 +168,7 @@ void AppUpdateController::startHttpCheck(const QUrl &url)
         QString version;
         QString storeUrl;
         if (!parseVersion(reply->readAll(), version, storeUrl) || version.isEmpty()) {
-            qWarning() << "[AppUpdate] could not determine store version";
+            qWarning() << "[MarketplaceUpdate] could not determine store version";
             setState(NoInternet);
             return;
         }
