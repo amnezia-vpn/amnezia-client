@@ -239,9 +239,9 @@ Logger::LogStreamer::~LogStreamer()
     case LogLevel::Error: logLevelString = "[ERROR]"; break;
     }
 
-    const QString message = QString("%1 %2 Amnezia %3 : %4")
+    const QString message = QString("%1 %2 %3 %4 : %5")
                                     .arg(QDateTime::currentDateTimeUtc().toString("[yyyy-MM-dd hh:mm:ss.zzzZ]"),
-                                         logLevelString, m_logger->className(), m_data->m_buffer.trimmed());
+                                         logLevelString, APPLICATION_NAME, m_logger->className(), m_data->m_buffer.trimmed());
 
     if (m_file.isOpen()) {
         QTextStream logToFile(&m_file);
