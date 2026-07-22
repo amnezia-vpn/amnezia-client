@@ -38,14 +38,14 @@
 
 ## Links
 
-- [https://amnezia.org](https://amnezia.org/?utm_source=github&utm_campaign=amnezia_website-read) - Project website | [Alternative link (mirror)](https://storage.googleapis.com/amnezia/amnezia.org/utm_source=github&utm_campaign=amnezia_website-read)
-- [https://docs.amnezia.org](https://docs.amnezia.org/?utm_source=github&utm_campaign=amnezia_website-read) - Documentation
+- [https://amnezia.org](https://amnezia.org/?utm_source=github&utm_campaign=amnezia_website-read) - Project website | [Alternative link (mirror)](https://storage.googleapis.com/amnezia/amnezia.org?utm_source=github&utm_campaign=amnezia_website-read)
+- [https://docs.amnezia.org](https://docs.amnezia.org/?utm_source=github&utm_campaign=amnezia_website-read) - Documentation | [Alternative link (mirror)](https://storage.googleapis.com/amnezia/docs?utm_source=github&utm_campaign=amnezia_website-read)
 - [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
 - [https://telegram.me/amnezia_vpn_en](https://telegram.me/amnezia_vpn_en) - Telegram support channel (English) 
 - [https://telegram.me/amnezia_vpn_ir](https://telegram.me/amnezia_vpn_ir) - Telegram support channel (Farsi) 
 - [https://telegram.me/amnezia_vpn_mm](https://telegram.me/amnezia_vpn_mm) - Telegram support channel (Myanmar)  
 - [https://telegram.me/amnezia_vpn](https://telegram.me/amnezia_vpn) - Telegram support channel (Russian)
-- [Get Premium for 6 or 12 months](https://storage.googleapis.com/amnezia/pay/?utm_source=github&utm_campaign=ampay-read)
+- [Get Premium for 6 or 12 months](https://storage.googleapis.com/amnezia/pay?utm_source=github&utm_campaign=ampay-read)
 
 ## Tech
 
