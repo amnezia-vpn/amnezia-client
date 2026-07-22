@@ -13,7 +13,7 @@
 #include "core/utils/networkUtilities.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include "core/utils/swiftInterop.h"
+    #include "core/utils/swiftBridge.h"
 #endif
 
 #include "core/utils/api/apiUtils.h"

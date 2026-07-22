@@ -144,8 +144,8 @@ configure_file(
     @ONLY
 )
 configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/core/utils/swiftInteropConfig.h.in
-    ${CMAKE_CURRENT_BINARY_DIR}/core/utils/swiftInteropConfig.h
+    ${CMAKE_CURRENT_LIST_DIR}/core/utils/swiftBridgeConfig.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/core/utils/swiftBridgeConfig.h
     @ONLY
 )
 # Swift can't consume a `-DGROUP_ID="value"` compile define (Swift -D flags are

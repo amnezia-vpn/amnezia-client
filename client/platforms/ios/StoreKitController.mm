@@ -5,7 +5,7 @@
 #import "StoreKitController.h"
 #import <StoreKit/StoreKit.h>
 #include <QtCore/qglobal.h>
-#import "core/utils/swiftInterop.h"
+#import "core/utils/swiftBridge.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QString>

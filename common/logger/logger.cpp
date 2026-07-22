@@ -17,7 +17,7 @@
 #endif
 
 #ifdef Q_OS_IOS
-    #include "core/utils/swiftInterop.h"
+    #include "core/utils/swiftBridge.h"
 #endif
 
 QFile Logger::m_file;
@@ -146,7 +146,7 @@ QString Logger::getLogFile()
     QString qtLog = file.readAll();
 
 #ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_INTEROP_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
+    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
 #else
     return qtLog;
 #endif
@@ -163,7 +163,7 @@ QString Logger::getServiceLogFile()
     QString qtLog = file.readAll();
 
 #ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_INTEROP_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
+    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
 #else
     return qtLog;
 #endif
@@ -194,7 +194,7 @@ void Logger::clearLogs(bool isServiceLogger)
     file.close();
 
 #ifdef Q_OS_IOS
-    SWIFT_INTEROP_NAMESPACE::swiftDeleteLog();
+    SWIFT_BRIDGE_NAMESPACE::swiftDeleteLog();
 #endif
 
     if (isLogActive) {

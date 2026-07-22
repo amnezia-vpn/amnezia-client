@@ -32,7 +32,7 @@
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
-    #include "core/utils/swiftInterop.h"
+    #include "core/utils/swiftBridge.h"
 #endif
 
 using namespace amnezia;
@@ -792,7 +792,7 @@ void SubscriptionController::removeApiConfig(const QString &serverId)
                                .arg(hostName)
                                .arg("");
 
-    SWIFT_INTEROP_NAMESPACE::removeVPNC(vpncName.toStdString());
+    SWIFT_BRIDGE_NAMESPACE::removeVPNC(vpncName.toStdString());
 #endif
 
     apiV2->dns1.clear();

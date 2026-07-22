@@ -12,6 +12,7 @@ namespace PageLoader
         PageHome,
         PageShare,
         PageDeinstalling,
+        PageAbout,
 
         PageSettingsServersList,
         PageSettings,
@@ -85,6 +86,8 @@ namespace PageLoader
         PageProtocolXrayFlowSettings,
         PageProtocolXraySecuritySettings,
         PageProtocolXrayXPaddingBytesSettings,
+
+        PageSettingsLanguage,
     };
     Q_ENUM_NS(PageEnum)
 
