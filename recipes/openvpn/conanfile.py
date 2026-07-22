@@ -37,7 +37,7 @@ class Openvpn(ConanFile):
             self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
-        self.requires("openssl/3.6.1", visible=False)
+        self.requires("openssl/3.6.2", visible=False)
         self.requires("lz4/1.10.0", visible=False)
         self.requires("lzo/2.10", visible=False)
         if self.settings.os == "Linux":
@@ -80,6 +80,9 @@ class Openvpn(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.extend(["--disable-shared", "--enable-static"])
             tc.configure_args.append("--disable-plugins")
+            if self.settings.os == "Linux":
+                openssl_libdir = self.dependencies["openssl"].cpp_info.aggregated_components().libdirs[0]
+                tc.extra_ldflags.append(f"-Wl,-rpath,{openssl_libdir}")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()

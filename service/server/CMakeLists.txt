@@ -369,6 +369,7 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${CONAN_EXECS} ${CONAN_BINS}
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
+
 if(WIN32)
     # using PERMISSIONS on Windows appends read-only flag
     # to the files so just omit it for it
@@ -377,7 +378,11 @@ if(WIN32)
         COMPONENT AmneziaVPN
     )
 else()
-    install(FILES ${CONAN_EXECS}
+    set(CONAN_EXECS_INSTALL ${CONAN_EXECS})
+    if(LINUX)
+        list(REMOVE_ITEM CONAN_EXECS_INSTALL "$<TARGET_FILE:openvpn::openvpn>")
+    endif()
+    install(FILES ${CONAN_EXECS_INSTALL}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
         PERMISSIONS
@@ -390,6 +395,29 @@ install(FILES ${CONAN_BINS}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT AmneziaVPN
 )
+
+# install openvpn via the service's dep set to ship its openssl, then
+# rewrite conan's absolute build rpath to a relative one for the package
+if(LINUX)
+    install(IMPORTED_RUNTIME_ARTIFACTS openvpn::openvpn
+        RUNTIME_DEPENDENCY_SET service_deps
+        PERMISSIONS
+            OWNER_READ OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE
+        COMPONENT AmneziaVPN
+    )
+    install(CODE "
+        set(_ovpn \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/openvpn\")
+        file(CHMOD \"\${_ovpn}\" PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        file(RPATH_SET FILE \"\${_ovpn}\" NEW_RPATH \"$ORIGIN:$ORIGIN/../lib\")
+        file(CHMOD \"\${_ovpn}\" PERMISSIONS
+            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    "
+        COMPONENT AmneziaVPN
+    )
+endif()
 
 # install drivers
 if (WIN32)
