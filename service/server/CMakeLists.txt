@@ -379,6 +379,18 @@ if(LINUX)
     add_custom_command(TARGET ${PROJECT} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
     )
+elseif(APPLE)
+    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake CONTENT
+[=[
+set(ovpn "$<TARGET_FILE_DIR:AmneziaVPN-service>/openvpn")
+set(dir "$<TARGET_FILE_DIR:OpenSSL::SSL>")
+execute_process(COMMAND install_name_tool -delete_rpath "${dir}" "${ovpn}" ERROR_QUIET)
+execute_process(COMMAND install_name_tool -add_rpath "${dir}" "${ovpn}")
+]=]
+    )
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
+    )
 endif()
 
 if(WIN32)
@@ -425,6 +437,14 @@ if(LINUX)
         file(RPATH_SET FILE \"\${_ovpn}\" NEW_RPATH \"$ORIGIN:$ORIGIN/../lib\")
         file(CHMOD \"\${_ovpn}\" PERMISSIONS
             OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    "
+        COMPONENT AmneziaVPN
+    )
+elseif(APPLE)
+    install(CODE "
+        set(_ovpn \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/openvpn\")
+        execute_process(COMMAND install_name_tool -delete_rpath \"$<TARGET_FILE_DIR:OpenSSL::SSL>\" \"\${_ovpn}\" ERROR_QUIET)
+        execute_process(COMMAND install_name_tool -add_rpath \"@executable_path/../Frameworks\" \"\${_ovpn}\")
     "
         COMPONENT AmneziaVPN
     )

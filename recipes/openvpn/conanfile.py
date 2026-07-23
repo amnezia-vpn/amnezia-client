@@ -86,6 +86,9 @@ class Openvpn(ConanFile):
                 padding = max(0, 256 - len(openssl_libdir) - 2)
                 rpath = f"{openssl_libdir}:/" + "_" * padding
                 tc.extra_ldflags.append(f"-Wl,-rpath,{rpath}")
+            elif self.settings.os == "Macos":
+                # reserve header space so consumers can rewrite rpaths via install_name_tool
+                tc.extra_ldflags.append("-Wl,-headerpad_max_install_names")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
