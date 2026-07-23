@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment
@@ -13,6 +13,9 @@ class AmneziaLibxray(ConanFile):
     name = "amnezia-libxray"
     version = "1.0.1"
     settings = "os", "arch", "compiler"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -44,6 +47,7 @@ class AmneziaLibxray(ConanFile):
         env.vars(self).save_script("conan_provide_androidhome")
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         build_path = os.path.join(self.build_folder, "build.sh")
         build_stat = os.stat(build_path)
         os.chmod(build_path, build_stat.st_mode | stat.S_IEXEC)
