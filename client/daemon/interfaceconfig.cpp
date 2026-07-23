@@ -24,6 +24,9 @@ QJsonObject InterfaceConfig::toJson() const {
   json.insert("serverIpv6AddrIn", QJsonValue(m_serverIpv6AddrIn));
   json.insert("serverPort", QJsonValue((double)m_serverPort));
   json.insert("deviceMTU", QJsonValue(m_deviceMTU));
+  if (!m_persistentKeepalive.isEmpty()) {
+    json.insert("persistentKeepalive", QJsonValue(m_persistentKeepalive));
+  }
   if ((m_hopType == InterfaceConfig::MultiHopExit) ||
       (m_hopType == InterfaceConfig::SingleHop)) {
     json.insert("serverIpv4Gateway", QJsonValue(m_serverIpv4Gateway));
@@ -173,6 +176,9 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     ranges.append(ip.toString());
   }
   out << "AllowedIPs = " << ranges.join(", ") << "\n";
+  if (!m_persistentKeepalive.isEmpty()) {
+    out << "PersistentKeepalive = " << m_persistentKeepalive << "\n";
+  }
 
   return content;
 }

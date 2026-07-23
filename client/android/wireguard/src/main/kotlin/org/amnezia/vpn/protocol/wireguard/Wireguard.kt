@@ -111,7 +111,7 @@ open class Wireguard : Protocol() {
             configExtensionParameters(configData)
         }
 
-        configData.optStringOrNull("persistent_keep_alive")?.let { setPersistentKeepalive(it.toInt()) }
+        configData.optStringOrNull("persistent_keep_alive")?.toIntOrNull()?.let { setPersistentKeepalive(it) }
         configData.getString("client_priv_key").let { setPrivateKeyHex(it.base64ToHex()) }
         configData.getString("server_pub_key").let { setPublicKeyHex(it.base64ToHex()) }
         configData.optStringOrNull("psk_key")?.let { setPreSharedKeyHex(it.base64ToHex()) }
