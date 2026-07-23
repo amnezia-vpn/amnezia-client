@@ -147,6 +147,7 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
 
             constexpr char defaultPort[] = "51820";
+            constexpr char defaultPersistentKeepAlive[] = "25";
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";

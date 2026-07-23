@@ -36,6 +36,7 @@ class InterfaceConfig {
   QString m_secondaryDnsServer;
   int m_serverPort = 0;
   int m_deviceMTU = 1420;
+  QString m_persistentKeepalive;
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;

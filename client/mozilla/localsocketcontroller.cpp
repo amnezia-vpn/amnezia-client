@@ -159,6 +159,11 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("serverIpv4Gateway", wgConfig.value(amnezia::configKey::hostName));
   //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
 
+  if (wgConfig.contains(amnezia::configKey::persistentKeepAlive)) {
+    json.insert("persistentKeepalive",
+                wgConfig.value(amnezia::configKey::persistentKeepAlive).toString());
+  }
+
   json.insert("primaryDnsServer", rawConfig.value(amnezia::configKey::dns1));
 
   // We don't use secondary DNS if primary DNS is AmneziaDNS

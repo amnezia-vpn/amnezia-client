@@ -266,7 +266,7 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     clientConfig.presharedKey = connData.pskKey;
     clientConfig.clientId = connData.clientPubKey;
     clientConfig.allowedIps = QStringList { "0.0.0.0/0", "::/0" };
-    clientConfig.persistentKeepAlive = "25";
+    clientConfig.persistentKeepAlive = protocols::wireguard::defaultPersistentKeepAlive;
     clientConfig.mtu = mtu;
     clientConfig.isObfuscationEnabled = false;
     
