@@ -1,15 +1,10 @@
 #include "marketplaceUpdateController.h"
 
-#include <QCoreApplication>
 #include <QDebug>
 
 #include "version.h"
 
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
-    #include <QDesktopServices>
-#endif
-
-#if defined(Q_OS_IOS) || (defined(Q_OS_ANDROID) && defined(QT_DEBUG))
     #include <QJsonArray>
     #include <QJsonDocument>
     #include <QJsonObject>
@@ -20,83 +15,80 @@
     #include <QVersionNumber>
 #endif
 
+#if defined(Q_OS_IOS)
+    #include "platforms/ios/ios_controller.h"
+#endif
+
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
 #endif
 
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
 namespace
 {
 #if defined(Q_OS_IOS)
 constexpr auto kIosBundleId = "org.amnezia.AmneziaVPN";
 constexpr auto kIosStoreUrlFallback = "itms-apps://itunes.apple.com/app/id1600529900";
-#endif
-#if defined(Q_OS_ANDROID)
+#else
 constexpr auto kAndroidPackage = "org.amnezia.vpn";
 constexpr auto kAndroidStoreUrl = "https://play.google.com/store/apps/details?id=org.amnezia.vpn";
 #endif
 } // namespace
+#endif
 
 MarketplaceUpdateController::MarketplaceUpdateController(QObject *parent) : QObject(parent)
 {
-#if defined(Q_OS_ANDROID) && !defined(QT_DEBUG)
-    connect(AndroidController::instance(), &AndroidController::playUpdateAvailability, this,
-            [this](bool available) { setState(available ? UpdateRequired : UpToDate); },
-            Qt::QueuedConnection);
-#endif
-}
-
-QString MarketplaceUpdateController::currentVersion() const
-{
-    return QString(APP_VERSION);
-}
-
-void MarketplaceUpdateController::setState(State state)
-{
-    if (m_state == state) {
-        return;
-    }
-    m_state = state;
-    emit stateChanged();
 }
 
 void MarketplaceUpdateController::start()
 {
-    setState(Checking);
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+    // Cover the app immediately so the store UI is not visible before the check
+    // resolves (avoids a flash of the main window before the update screen).
+    showCover();
 
-#if defined(Q_OS_IOS)
-    startHttpCheck(versionSourceUrl());
-#elif defined(Q_OS_ANDROID)
-  #if defined(QT_DEBUG)
-    startHttpCheck(versionSourceUrl());
-  #else
-    AndroidController::instance()->checkPlayUpdate();
-  #endif
-#else
-    setState(UpToDate);
-#endif
-}
-
-void MarketplaceUpdateController::openStore()
-{
-#if defined(Q_OS_IOS)
-    if (!m_storeUrl.isEmpty()) {
-        QDesktopServices::openUrl(QUrl(m_storeUrl));
+    const QUrl url = versionSourceUrl();
+    if (!url.isValid()) {
+        hideCover();
+        return;
     }
-#elif defined(Q_OS_ANDROID)
-  #if defined(QT_DEBUG)
-    QDesktopServices::openUrl(QUrl(m_storeUrl.isEmpty() ? QString::fromLatin1(kAndroidStoreUrl) : m_storeUrl));
-  #else
-    AndroidController::instance()->startPlayUpdateFlow();
-  #endif
+
+    QNetworkRequest request(url);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
+    request.setHeader(QNetworkRequest::UserAgentHeader, QByteArrayLiteral("AmneziaVPN"));
+
+    QNetworkReply *reply = m_nam.get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            qWarning() << "[MarketplaceUpdate] network error:" << reply->errorString();
+            hideCover();
+            return;
+        }
+
+        QString version;
+        QString storeUrl;
+        if (!parseStoreVersion(reply->readAll(), version, storeUrl) || version.isEmpty()) {
+            qWarning() << "[MarketplaceUpdate] could not determine store version";
+            hideCover();
+            return;
+        }
+
+        const auto current = QVersionNumber::fromString(QString(APP_VERSION)).normalized();
+        const auto store = QVersionNumber::fromString(version).normalized();
+        qInfo() << "[MarketplaceUpdate] current:" << current.toString() << "store:" << store.toString();
+
+        if (store > current) {
+            showUpdatePrompt(storeUrl);
+        } else {
+            hideCover();
+        }
+    });
 #endif
 }
 
-void MarketplaceUpdateController::quit()
-{
-    qApp->quit();
-}
-
-#if defined(Q_OS_IOS) || (defined(Q_OS_ANDROID) && defined(QT_DEBUG))
+#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
 QUrl MarketplaceUpdateController::versionSourceUrl() const
 {
   #if defined(Q_OS_IOS)
@@ -111,7 +103,7 @@ QUrl MarketplaceUpdateController::versionSourceUrl() const
   #endif
 }
 
-bool MarketplaceUpdateController::parseVersion(const QByteArray &body, QString &version, QString &storeUrl)
+bool MarketplaceUpdateController::parseStoreVersion(const QByteArray &body, QString &version, QString &storeUrl)
 {
   #if defined(Q_OS_IOS)
     const auto results = QJsonDocument::fromJson(body).object().value("results").toArray();
@@ -137,43 +129,35 @@ bool MarketplaceUpdateController::parseVersion(const QByteArray &body, QString &
   #endif
 }
 
-void MarketplaceUpdateController::applyStoreVersion(const QString &version, const QString &storeUrl)
+void MarketplaceUpdateController::showCover()
 {
-    m_storeVersion = version;
-    m_storeUrl = storeUrl;
-
-    const auto current = QVersionNumber::fromString(currentVersion()).normalized();
-    const auto store = QVersionNumber::fromString(version).normalized();
-    qInfo() << "[MarketplaceUpdate] current:" << current.toString() << "store:" << store.toString();
-
-    setState(store > current ? UpdateRequired : UpToDate);
+  #if defined(Q_OS_IOS)
+    IosController::Instance()->showUpdateCover();
+  #else
+    AndroidController::instance()->showUpdateCover();
+  #endif
 }
 
-void MarketplaceUpdateController::startHttpCheck(const QUrl &url)
+void MarketplaceUpdateController::hideCover()
 {
-    QNetworkRequest request(url);
-    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
-    request.setHeader(QNetworkRequest::UserAgentHeader, QByteArrayLiteral("AmneziaVPN"));
+  #if defined(Q_OS_IOS)
+    IosController::Instance()->hideUpdateCover();
+  #else
+    AndroidController::instance()->hideUpdateCover();
+  #endif
+}
 
-    QNetworkReply *reply = m_nam.get(request);
-    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
-        reply->deleteLater();
+void MarketplaceUpdateController::showUpdatePrompt(const QString &storeUrl)
+{
+    const QString title = tr("Update available");
+    const QString message = tr("A new version of AmneziaVPN is available.");
+    const QString updateTitle = tr("Update");
+    const QString skipTitle = tr("Skip");
 
-        if (reply->error() != QNetworkReply::NoError) {
-            qWarning() << "[MarketplaceUpdate] network error:" << reply->errorString();
-            setState(NoInternet);
-            return;
-        }
-
-        QString version;
-        QString storeUrl;
-        if (!parseVersion(reply->readAll(), version, storeUrl) || version.isEmpty()) {
-            qWarning() << "[MarketplaceUpdate] could not determine store version";
-            setState(NoInternet);
-            return;
-        }
-
-        applyStoreVersion(version, storeUrl);
-    });
+  #if defined(Q_OS_IOS)
+    IosController::Instance()->showUpdatePrompt(title, message, updateTitle, skipTitle, storeUrl);
+  #else
+    AndroidController::instance()->showUpdatePrompt(title, message, updateTitle, skipTitle, storeUrl);
+  #endif
 }
 #endif

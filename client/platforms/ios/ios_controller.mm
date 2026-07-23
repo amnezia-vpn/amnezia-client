@@ -1200,3 +1200,138 @@ bool IosController::isTestFlight() {
     NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
     return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
 }
+
+#if !MACOS_NE
+static UIWindow *s_updateCoverWindow = nil;
+
+static UIWindowScene *activeWindowScene() {
+    UIWindowScene *fallback = nil;
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+        if (![scene isKindOfClass:[UIWindowScene class]]) {
+            continue;
+        }
+        fallback = (UIWindowScene *)scene;
+        if (scene.activationState == UISceneActivationStateForegroundActive) {
+            return (UIWindowScene *)scene;
+        }
+    }
+    return fallback;
+}
+#endif
+
+void IosController::showUpdateCover() {
+#if !MACOS_NE
+    void (^build)(void) = ^{
+        if (s_updateCoverWindow) {
+            return;
+        }
+        UIWindowScene *scene = activeWindowScene();
+        if (!scene) {
+            return;
+        }
+        UIWindow *win = [[UIWindow alloc] initWithWindowScene:scene];
+        win.windowLevel = UIWindowLevelAlert + 1;
+        UIViewController *vc = [[[UIViewController alloc] init] autorelease];
+        vc.view.backgroundColor = [UIColor colorWithRed:0.055 green:0.055 blue:0.063 alpha:1.0];
+        win.rootViewController = vc;
+        [win makeKeyAndVisible];
+        s_updateCoverWindow = win;
+    };
+
+    if ([NSThread isMainThread]) {
+        build();
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), build);
+    }
+#endif
+}
+
+void IosController::hideUpdateCover() {
+#if !MACOS_NE
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!s_updateCoverWindow) {
+            return;
+        }
+        s_updateCoverWindow.hidden = YES;
+        [s_updateCoverWindow release];
+        s_updateCoverWindow = nil;
+    });
+#endif
+}
+
+void IosController::showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                                     const QString &skipTitle, const QString &storeUrl) {
+#if !MACOS_NE
+    NSString *nsTitle = title.toNSString();
+    NSString *nsMessage = message.toNSString();
+    NSString *nsUpdate = updateTitle.toNSString();
+    NSString *nsSkip = skipTitle.toNSString();
+    NSString *nsUrl = storeUrl.toNSString();
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!s_updateCoverWindow) {
+            return;
+        }
+        UIViewController *vc = s_updateCoverWindow.rootViewController;
+
+        void (^dismissCover)(void) = ^{
+            s_updateCoverWindow.hidden = YES;
+            [s_updateCoverWindow release];
+            s_updateCoverWindow = nil;
+        };
+
+        UILabel *titleLabel = [[[UILabel alloc] init] autorelease];
+        titleLabel.text = nsTitle;
+        titleLabel.font = [UIFont boldSystemFontOfSize:22];
+        titleLabel.textColor = [UIColor whiteColor];
+        titleLabel.textAlignment = NSTextAlignmentCenter;
+        titleLabel.numberOfLines = 0;
+
+        UILabel *messageLabel = [[[UILabel alloc] init] autorelease];
+        messageLabel.text = nsMessage;
+        messageLabel.font = [UIFont systemFontOfSize:16];
+        messageLabel.textColor = [UIColor colorWithWhite:0.78 alpha:1.0];
+        messageLabel.textAlignment = NSTextAlignmentCenter;
+        messageLabel.numberOfLines = 0;
+
+        UIButton *updateButton = [UIButton buttonWithType:UIButtonTypeSystem];
+        [updateButton setTitle:nsUpdate forState:UIControlStateNormal];
+        [updateButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        updateButton.backgroundColor = [UIColor colorWithRed:1.0 green:0.6 blue:0.0 alpha:1.0];
+        updateButton.titleLabel.font = [UIFont systemFontOfSize:17 weight:UIFontWeightSemibold];
+        updateButton.layer.cornerRadius = 12;
+        [updateButton.heightAnchor constraintEqualToConstant:52].active = YES;
+        [updateButton addAction:[UIAction actionWithHandler:^(__kindof UIAction *action) {
+            NSURL *url = [NSURL URLWithString:nsUrl];
+            if (url) {
+                [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+            }
+            dismissCover();
+        }] forControlEvents:UIControlEventTouchUpInside];
+
+        UIButton *skipButton = [UIButton buttonWithType:UIButtonTypeSystem];
+        [skipButton setTitle:nsSkip forState:UIControlStateNormal];
+        [skipButton setTitleColor:[UIColor colorWithWhite:0.7 alpha:1.0] forState:UIControlStateNormal];
+        skipButton.titleLabel.font = [UIFont systemFontOfSize:17];
+        [skipButton.heightAnchor constraintEqualToConstant:44].active = YES;
+        [skipButton addAction:[UIAction actionWithHandler:^(__kindof UIAction *action) {
+            dismissCover();
+        }] forControlEvents:UIControlEventTouchUpInside];
+
+        UIStackView *stack = [[[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, messageLabel, updateButton, skipButton]] autorelease];
+        stack.axis = UILayoutConstraintAxisVertical;
+        stack.spacing = 16;
+        stack.translatesAutoresizingMaskIntoConstraints = NO;
+        [stack setCustomSpacing:28 afterView:messageLabel];
+        [vc.view addSubview:stack];
+
+        [NSLayoutConstraint activateConstraints:@[
+            [stack.centerYAnchor constraintEqualToAnchor:vc.view.centerYAnchor],
+            [stack.leadingAnchor constraintEqualToAnchor:vc.view.leadingAnchor constant:32],
+            [stack.trailingAnchor constraintEqualToAnchor:vc.view.trailingAnchor constant:-32]
+        ]];
+    });
+#else
+    Q_UNUSED(title) Q_UNUSED(message) Q_UNUSED(updateTitle) Q_UNUSED(skipTitle) Q_UNUSED(storeUrl)
+#endif
+}

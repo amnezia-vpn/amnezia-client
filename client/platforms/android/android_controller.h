@@ -56,8 +56,10 @@ public:
     bool requestAuthentication();
     void sendTouch(float x, float y);
 
-    void checkPlayUpdate();
-    void startPlayUpdateFlow();
+    void showUpdateCover();
+    void hideUpdateCover();
+    void showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                          const QString &skipTitle, const QString &storeUrl);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
@@ -80,7 +82,6 @@ signals:
     void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
     void activityPaused();
     void activityResumed();
-    void playUpdateAvailability(bool available);
 
 private:
     bool isWaitingStatus = true;
@@ -113,7 +114,6 @@ private:
     static void onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp);
     static void onActivityPaused(JNIEnv *env, jobject thiz);
     static void onActivityResumed(JNIEnv *env, jobject thiz);
-    static void onPlayUpdateAvailability(JNIEnv *env, jobject thiz, jboolean available);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);

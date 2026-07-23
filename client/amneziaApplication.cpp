@@ -146,7 +146,6 @@ void AmneziaApplication::init()
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
     m_marketplaceUpdateController.reset(new MarketplaceUpdateController());
-    m_engine->rootContext()->setContextProperty("MarketplaceUpdate", m_marketplaceUpdateController.get());
     m_marketplaceUpdateController->start();
 
     m_engine->addImportPath("qrc:/ui/qml/Modules/");
