@@ -370,6 +370,17 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
 
+# prebuilt openvpn carries the rpath of whatever machine baked it; point the
+# build-tree copy at the local conan openssl (install rewrites it to $ORIGIN)
+if(LINUX)
+    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
+        CONTENT "file(RPATH_SET FILE \"$<TARGET_FILE_DIR:${PROJECT}>/openvpn\" NEW_RPATH \"$<TARGET_FILE_DIR:OpenSSL::SSL>\")\n"
+    )
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
+    )
+endif()
+
 if(WIN32)
     # using PERMISSIONS on Windows appends read-only flag
     # to the files so just omit it for it

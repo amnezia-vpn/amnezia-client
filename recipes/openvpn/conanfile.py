@@ -82,7 +82,10 @@ class Openvpn(ConanFile):
             tc.configure_args.append("--disable-plugins")
             if self.settings.os == "Linux":
                 openssl_libdir = self.dependencies["openssl"].cpp_info.aggregated_components().libdirs[0]
-                tc.extra_ldflags.append(f"-Wl,-rpath,{openssl_libdir}")
+                # pad the rpath so consumers can rewrite it in place (it cannot grow)
+                padding = max(0, 256 - len(openssl_libdir) - 2)
+                rpath = f"{openssl_libdir}:/" + "_" * padding
+                tc.extra_ldflags.append(f"-Wl,-rpath,{rpath}")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
