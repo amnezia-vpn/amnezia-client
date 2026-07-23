@@ -183,6 +183,7 @@ if [[ "$TARGET" == "android" ]]; then
 fi
 
 : ${CMAKE_BUILD_TYPE:=Release}
+: ${JOBS:=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)}
 
 args=()
 [[ -n "$CMAKE_GENERATOR" ]]           && args+=("-G" "$CMAKE_GENERATOR")
@@ -207,9 +208,9 @@ if [[ -n "$FORCE" ]]; then
 fi
 
 run_traced cmake -S "$SOURCE_PATH" -B "$BUILD_PATH" "${args[@]}"
-run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE"
+run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS"
 
-[[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" -t "aab"
+[[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS" -t "aab"
 
 if [ -z "$no_installers" ]; then
     for installer in $INSTALLERS; do
