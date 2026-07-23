@@ -80,6 +80,11 @@ public:
 
     void requestInetAccess();
     bool isTestFlight();
+
+    void showUpdateCover();
+    void hideUpdateCover();
+    void showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                          const QString &skipTitle, const QString &storeUrl);
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);

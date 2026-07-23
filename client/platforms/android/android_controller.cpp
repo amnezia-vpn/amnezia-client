@@ -103,8 +103,7 @@ bool AndroidController::initialize()
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
         {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
         {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
-        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)},
-        {"onPlayUpdateAvailability", "(Z)V", reinterpret_cast<void *>(onPlayUpdateAvailability)}
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
     };
 
     QJniEnvironment env;
@@ -155,14 +154,26 @@ void AndroidController::resetLastServer(int serverIndex)
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
 }
 
-void AndroidController::checkPlayUpdate()
+void AndroidController::showUpdateCover()
 {
-    callActivityMethod("checkPlayUpdate", "()V");
+    callActivityMethod("showUpdateCover", "()V");
 }
 
-void AndroidController::startPlayUpdateFlow()
+void AndroidController::hideUpdateCover()
 {
-    callActivityMethod("startPlayUpdateFlow", "()V");
+    callActivityMethod("hideUpdateCover", "()V");
+}
+
+void AndroidController::showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                                        const QString &skipTitle, const QString &storeUrl)
+{
+    callActivityMethod("showUpdatePrompt",
+                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(title).object<jstring>(),
+                       QJniObject::fromString(message).object<jstring>(),
+                       QJniObject::fromString(updateTitle).object<jstring>(),
+                       QJniObject::fromString(skipTitle).object<jstring>(),
+                       QJniObject::fromString(storeUrl).object<jstring>());
 }
 
 void AndroidController::saveFile(const QString &fileName, const QString &data)
@@ -542,14 +553,6 @@ void AndroidController::onAuthResult(JNIEnv *env, jobject thiz, jboolean result)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->authenticationResult(result);
-}
-
-void AndroidController::onPlayUpdateAvailability(JNIEnv *env, jobject thiz, jboolean available)
-{
-    Q_UNUSED(env);
-    Q_UNUSED(thiz);
-
-    emit AndroidController::instance()->playUpdateAvailability(available);
 }
 
 // static

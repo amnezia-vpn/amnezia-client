@@ -47,12 +47,13 @@ import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
 import AppListProvider
-import com.google.android.play.core.appupdate.AppUpdateInfo
-import com.google.android.play.core.appupdate.AppUpdateManager
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.appupdate.AppUpdateOptions
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.UpdateAvailability
+import android.app.Dialog
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,7 +80,6 @@ private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
-private const val UPDATE_APP_ACTION_CODE = 5
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
@@ -106,8 +106,7 @@ class AmneziaActivity : QtActivity() {
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
 
-    private var appUpdateManager: AppUpdateManager? = null
-    private var pendingUpdateInfo: AppUpdateInfo? = null
+    private var updateCoverDialog: Dialog? = null
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -386,18 +385,6 @@ class AmneziaActivity : QtActivity() {
             QtAndroidController.onActivityResumed()
         }
 
-        appUpdateManager?.appUpdateInfo?.addOnSuccessListener { info ->
-            if (info.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
-                try {
-                    appUpdateManager?.startUpdateFlowForResult(
-                        info, this, AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(), UPDATE_APP_ACTION_CODE
-                    )
-                } catch (e: Exception) {
-                    Log.w(TAG, "resume update flow failed: ${e.message}")
-                }
-            }
-        }
-
         if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
             val uri = pendingOpenFileUri!!
             openFileDeliveryScheduled = true
@@ -511,48 +498,119 @@ class AmneziaActivity : QtActivity() {
         super.onDestroy()
     }
 
-    fun checkPlayUpdate() {
+    fun showUpdateCover() {
         runOnUiThread {
-            val manager = appUpdateManager
-                ?: AppUpdateManagerFactory.create(applicationContext).also { appUpdateManager = it }
-            manager.appUpdateInfo
-                .addOnSuccessListener { info ->
-                    val available = info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                        info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-                    pendingUpdateInfo = if (available) info else null
-                    Log.d(TAG, "Play update available: $available")
-                    QtAndroidController.onPlayUpdateAvailability(available)
-                }
-                .addOnFailureListener { e ->
-                    Log.w(TAG, "checkPlayUpdate failed: ${e.message}")
-                    QtAndroidController.onPlayUpdateAvailability(false)
-                }
+            if (isFinishing || isDestroyed || updateCoverDialog != null) return@runOnUiThread
+            val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            dialog.setCancelable(false)
+            val root = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(0xFF0E0E11.toInt())
+            }
+            dialog.setContentView(root)
+            dialog.show()
+            updateCoverDialog = dialog
         }
     }
 
-    fun startPlayUpdateFlow() {
+    fun hideUpdateCover() {
         runOnUiThread {
-            val manager = appUpdateManager ?: return@runOnUiThread
-            val info = pendingUpdateInfo ?: return@runOnUiThread
-            try {
-                manager.startUpdateFlowForResult(
-                    info, this, AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build(), UPDATE_APP_ACTION_CODE
-                )
-            } catch (e: Exception) {
-                Log.w(TAG, "startPlayUpdateFlow failed: ${e.message}")
+            updateCoverDialog?.dismiss()
+            updateCoverDialog = null
+        }
+    }
+
+    fun showUpdatePrompt(title: String, message: String, updateTitle: String, skipTitle: String, storeUrl: String) {
+        runOnUiThread {
+            if (isFinishing || isDestroyed) return@runOnUiThread
+
+            val dialog = updateCoverDialog ?: Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen).also {
+                it.setCancelable(false)
+                it.show()
+                updateCoverDialog = it
             }
+
+            val density = resources.displayMetrics.density
+            fun dp(value: Int) = (value * density).toInt()
+
+            val root = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(0xFF0E0E11.toInt())
+                setPadding(dp(32), dp(32), dp(32), dp(32))
+            }
+
+            val titleView = TextView(this).apply {
+                text = title
+                textSize = 22f
+                setTextColor(0xFFFFFFFF.toInt())
+                gravity = Gravity.CENTER
+                typeface = Typeface.create(typeface, Typeface.BOLD)
+            }
+
+            val messageView = TextView(this).apply {
+                text = message
+                textSize = 16f
+                setTextColor(0xFFC7C8CB.toInt())
+                gravity = Gravity.CENTER
+                setPadding(0, dp(16), 0, dp(28))
+            }
+
+            val updateButton = Button(this).apply {
+                text = updateTitle
+                isAllCaps = false
+                textSize = 17f
+                setTextColor(0xFF0E0E11.toInt())
+                stateListAnimator = null
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12).toFloat()
+                    setColor(0xFFFBB26A.toInt())
+                }
+                setOnClickListener {
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(storeUrl)))
+                    } catch (e: ActivityNotFoundException) {
+                        Log.w(TAG, "open store failed: ${e.message}")
+                    }
+                    hideUpdateCover()
+                }
+            }
+
+            val skipButton = Button(this).apply {
+                text = skipTitle
+                isAllCaps = false
+                textSize = 17f
+                setTextColor(0xFFD7D8DB.toInt())
+                stateListAnimator = null
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12).toFloat()
+                    setColor(0x00000000)
+                    setStroke(dp(1), 0xFF2C2D30.toInt())
+                }
+                setOnClickListener { hideUpdateCover() }
+            }
+
+            val updateParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
+            ).apply { topMargin = dp(8) }
+
+            val skipParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
+            ).apply { topMargin = dp(12) }
+
+            root.addView(titleView)
+            root.addView(messageView)
+            root.addView(updateButton, updateParams)
+            root.addView(skipButton, skipParams)
+
+            dialog.setContentView(root)
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "Process activity result, code: ${actionCodeToString(requestCode)}, " +
                 "resultCode: $resultCode, data: $data")
-        if (requestCode == UPDATE_APP_ACTION_CODE) {
-            if (resultCode != RESULT_OK) {
-                QtAndroidController.onPlayUpdateAvailability(true)
-            }
-            return
-        }
         actionResultHandlers[requestCode]?.let { handler ->
             when (resultCode) {
                 RESULT_OK -> handler.onSuccess(data)
@@ -1251,7 +1309,6 @@ class AmneziaActivity : QtActivity() {
                 CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
                 OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
                 CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
-                UPDATE_APP_ACTION_CODE -> "UPDATE_APP"
                 else -> actionCode.toString()
             }
     }

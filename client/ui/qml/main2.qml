@@ -9,7 +9,6 @@ import Style 1.0
 
 import "Config"
 import "Controls2"
-import "Controls2/TextTypes"
 import "Components"
 import "Pages2"
 
@@ -326,81 +325,6 @@ Window  {
             id: busyIndicator
             anchors.centerIn: parent
             z: 1
-        }
-    }
-
-    Loader {
-        id: forceUpdateOverlay
-
-        anchors.fill: parent
-        z: 1000
-
-        active: MarketplaceUpdate.blocking
-
-        sourceComponent: Rectangle {
-            color: AmneziaStyle.color.midnightBlack
-
-            MouseArea {
-                anchors.fill: parent
-                hoverEnabled: true
-            }
-
-            ColumnLayout {
-                anchors.centerIn: parent
-                width: Math.min(root.width - 64, 400)
-                spacing: 16
-
-                BusyIndicator {
-                    Layout.alignment: Qt.AlignHCenter
-                    running: MarketplaceUpdate.checking
-                    visible: MarketplaceUpdate.checking
-                }
-
-                Header1TextType {
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
-                    visible: !MarketplaceUpdate.checking
-                    text: MarketplaceUpdate.noInternet ? qsTr("No internet connection") : qsTr("Update required")
-                }
-
-                ParagraphTextType {
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignHCenter
-                    visible: !MarketplaceUpdate.checking
-                    text: MarketplaceUpdate.noInternet
-                          ? qsTr("Internet access is required to start AmneziaVPN. Check your connection and try again.")
-                          : qsTr("A new version of AmneziaVPN is available. Please update to the latest version to continue.")
-                }
-
-                BasicButtonType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    visible: !MarketplaceUpdate.checking
-                    text: MarketplaceUpdate.noInternet ? qsTr("Retry") : qsTr("Update")
-                    clickedFunc: function() {
-                        if (MarketplaceUpdate.noInternet) {
-                            MarketplaceUpdate.recheck()
-                        } else {
-                            MarketplaceUpdate.openStore()
-                        }
-                    }
-                }
-
-                BasicButtonType {
-                    Layout.fillWidth: true
-                    visible: !MarketplaceUpdate.checking
-                    text: qsTr("Exit")
-                    defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.translucentWhite
-                    pressedColor: AmneziaStyle.color.sheerWhite
-                    disabledColor: AmneziaStyle.color.mutedGray
-                    textColor: AmneziaStyle.color.paleGray
-                    borderWidth: 1
-                    clickedFunc: function() {
-                        MarketplaceUpdate.quit()
-                    }
-                }
-            }
         }
     }
 

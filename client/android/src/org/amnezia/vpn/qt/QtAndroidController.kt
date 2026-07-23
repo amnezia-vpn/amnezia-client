@@ -34,6 +34,4 @@ object QtAndroidController {
 
     external fun onActivityPaused()
     external fun onActivityResumed()
-
-    external fun onPlayUpdateAvailability(available: Boolean)
 }
