@@ -231,7 +231,7 @@ install(RUNTIME_DEPENDENCY_SET client_deps
         [[hvsifiletrust\.dll]]
         [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
         [[.*\.framework]]
-        [[^[Qq]t.*]]
+        [[^(lib)?[Qq]t.*]]
     POST_EXCLUDE_REGEXES
         [[^.*[\\/]system32[\\/].*\.dll$]]
         [[^/lib.*]]
