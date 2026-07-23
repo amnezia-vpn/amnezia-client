@@ -88,33 +88,68 @@ open class Wireguard : Protocol() {
             addDnsServer(parseInetAddress(dns.trim()))
         }
 
-        val defRoutes = hashSetOf(
-            InetNetwork("0.0.0.0", 0),
-            InetNetwork("::", 0)
-        )
-        val routes = hashSetOf<InetNetwork>()
-        configData.getJSONArray("allowed_ips").asSequence<String>().map { route ->
-            InetNetwork.parse(route.trim())
-        }.forEach(routes::add)
-        // if the allowed IPs list contains at least one non-default route, disable global split tunneling
-        if (routes.any { it !in defRoutes }) disableSplitTunneling()
-        addRoutes(routes)
-
         configData.optStringOrNull("mtu")?.let { setMtu(it.toInt()) }
-
-        val host = configData.getString("hostName").let { parseInetAddress(it.trim()) }
-        val port = configData.getInt("port")
-        setEndpoint(InetEndpoint(host, port))
+        configData.getString("client_priv_key").let { setPrivateKeyHex(it.base64ToHex()) }
 
         if (configData.optBoolean("isObfuscationEnabled")) {
             setUseProtocolExtension(true)
             configExtensionParameters(configData)
         }
 
-        configData.optStringOrNull("persistent_keep_alive")?.let { setPersistentKeepalive(it.toInt()) }
-        configData.getString("client_priv_key").let { setPrivateKeyHex(it.base64ToHex()) }
-        configData.getString("server_pub_key").let { setPublicKeyHex(it.base64ToHex()) }
-        configData.optStringOrNull("psk_key")?.let { setPreSharedKeyHex(it.base64ToHex()) }
+        val defRoutes = hashSetOf(InetNetwork("0.0.0.0", 0), InetNetwork("::", 0))
+        val peersArray = configData.optJSONArray("peers")
+
+        if (peersArray != null && peersArray.length() > 0) {
+            // Multi-peer: collect union of all peers' allowed IPs for the VPN interface routing table
+            val allRoutes = hashSetOf<InetNetwork>()
+            for (i in 0 until peersArray.length()) {
+                peersArray.getJSONObject(i).getJSONArray("allowed_ips").asSequence<String>()
+                    .map { InetNetwork.parse(it.trim()) }.forEach(allRoutes::add)
+            }
+            if (allRoutes.any { it !in defRoutes }) disableSplitTunneling()
+            addRoutes(allRoutes)
+
+            // Primary peer from first entry
+            val firstPeer = peersArray.getJSONObject(0)
+            val firstAllowedIps = firstPeer.getJSONArray("allowed_ips").asSequence<String>()
+                .map { InetNetwork.parse(it.trim()) }.toList()
+            setPeerAllowedIps(firstAllowedIps)
+            setEndpoint(InetEndpoint(parseInetAddress(firstPeer.getString("hostName").trim()), firstPeer.getInt("port")))
+            firstPeer.optStringOrNull("persistent_keep_alive")?.let { setPersistentKeepalive(it.toInt()) }
+            firstPeer.getString("server_pub_key").let { setPublicKeyHex(it.base64ToHex()) }
+            firstPeer.optStringOrNull("psk_key")?.let { setPreSharedKeyHex(it.base64ToHex()) }
+
+            // Additional peers
+            for (i in 1 until peersArray.length()) {
+                val peerData = peersArray.getJSONObject(i)
+                val peerAllowedIps = peerData.getJSONArray("allowed_ips").asSequence<String>()
+                    .map { InetNetwork.parse(it.trim()) }.toList()
+                addPeer(
+                    PeerConfig(
+                        publicKeyHex = peerData.getString("server_pub_key").base64ToHex(),
+                        preSharedKeyHex = peerData.optStringOrNull("psk_key")?.base64ToHex(),
+                        persistentKeepalive = peerData.optStringOrNull("persistent_keep_alive")?.toInt() ?: 0,
+                        endpoint = InetEndpoint(parseInetAddress(peerData.getString("hostName").trim()), peerData.getInt("port")),
+                        allowedIps = peerAllowedIps
+                    )
+                )
+            }
+        } else {
+            // Single peer (original behavior)
+            val routes = hashSetOf<InetNetwork>()
+            configData.getJSONArray("allowed_ips").asSequence<String>().map { route ->
+                InetNetwork.parse(route.trim())
+            }.forEach(routes::add)
+            if (routes.any { it !in defRoutes }) disableSplitTunneling()
+            addRoutes(routes)
+
+            val host = configData.getString("hostName").let { parseInetAddress(it.trim()) }
+            val port = configData.getInt("port")
+            setEndpoint(InetEndpoint(host, port))
+            configData.optStringOrNull("persistent_keep_alive")?.let { setPersistentKeepalive(it.toInt()) }
+            configData.getString("server_pub_key").let { setPublicKeyHex(it.base64ToHex()) }
+            configData.optStringOrNull("psk_key")?.let { setPreSharedKeyHex(it.base64ToHex()) }
+        }
     }
 
     protected fun WireguardConfig.Builder.configExtensionParameters(configData: JSONObject) {
@@ -201,7 +236,11 @@ open class Wireguard : Protocol() {
             Log.e(TAG, "Failed to get tunnel config")
             return -2
         }
-        val lastHandshake = config.lines().find { it.startsWith("last_handshake_time_sec=") }?.substring(24)?.toLong()
+        // For multi-peer: take the max handshake time across all peers (any connected peer = tunnel active)
+        val lastHandshake = config.lines()
+            .filter { it.startsWith("last_handshake_time_sec=") }
+            .mapNotNull { it.substring(24).toLongOrNull() }
+            .maxOrNull()
         if (lastHandshake == null) {
             Log.e(TAG, "Failed to get last_handshake_time_sec")
             return -2

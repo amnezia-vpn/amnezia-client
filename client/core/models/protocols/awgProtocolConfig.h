@@ -1,6 +1,7 @@
 #ifndef AWGPROTOCOLCONFIG_H
 #define AWGPROTOCOLCONFIG_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QString>
 #include <QStringList>
@@ -60,6 +61,7 @@ struct AwgClientConfig {
     QStringList allowedIps;
     QString persistentKeepAlive;
     QString mtu;
+    QJsonArray peers;
     QString junkPacketCount;
     QString junkPacketMinSize;
     QString junkPacketMaxSize;

@@ -230,7 +230,11 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
 
   out << "replace_allowed_ips=true\n";
   out << "persistent_keepalive_interval=" << WG_KEEPALIVE_PERIOD << "\n";
-  for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
+  // For multi-peer use only the primary peer's own IPs to avoid routing trie conflicts.
+  const QList<IPAddress>& primaryIPs = config.m_primaryPeerAllowedIPRanges.isEmpty()
+      ? config.m_allowedIPAddressRanges
+      : config.m_primaryPeerAllowedIPRanges;
+  for (const IPAddress& ip : primaryIPs) {
     out << "allowed_ip=" << ip.toString() << "\n";
   }
 
@@ -244,8 +248,38 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   int err = uapiErrno(uapiCommand(message));
   if (err != 0) {
     logger.error() << "Peer configuration failed:" << strerror(err);
+    return false;
   }
-  return (err == 0);
+
+  for (const InterfaceConfig::AdditionalPeerConfig& peer : config.m_additionalPeers) {
+    QByteArray pubKey = QByteArray::fromBase64(peer.m_serverPublicKey.toUtf8());
+    QByteArray pskKey = QByteArray::fromBase64(peer.m_serverPskKey.toUtf8());
+
+    QString peerMsg;
+    QTextStream peerOut(&peerMsg);
+    peerOut << "set=1\n";
+    peerOut << "public_key=" << QString(pubKey.toHex()) << "\n";
+    if (!peer.m_serverPskKey.isEmpty()) {
+      peerOut << "preshared_key=" << QString(pskKey.toHex()) << "\n";
+    }
+    peerOut << "endpoint=" << peer.m_serverIpv4AddrIn << ":" << peer.m_serverPort << "\n";
+    peerOut << "replace_allowed_ips=true\n";
+    peerOut << "persistent_keepalive_interval=" << WG_KEEPALIVE_PERIOD << "\n";
+    for (const IPAddress& ip : peer.m_allowedIPAddressRanges) {
+      peerOut << "allowed_ip=" << ip.toString() << "\n";
+    }
+
+    if ((config.m_hopType != InterfaceConfig::MultiHopExit) && m_rtmonitor) {
+      m_rtmonitor->addExclusionRoute(IPAddress(peer.m_serverIpv4AddrIn));
+    }
+
+    int peerErr = uapiErrno(uapiCommand(peerMsg));
+    if (peerErr != 0) {
+      logger.error() << "Additional peer configuration failed:" << strerror(peerErr);
+    }
+  }
+
+  return true;
 }
 
 bool WireguardUtilsMacos::deletePeer(const InterfaceConfig& config) {

@@ -20,7 +20,7 @@ extension PacketTunnelProvider {
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
-            if tunnelConfiguration.peers.first!.allowedIPs
+            if tunnelConfiguration.peers.first?.allowedIPs
                 .map({ $0.stringRepresentation })
                 .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
                 if wgConfig.splitTunnelType == 1 {

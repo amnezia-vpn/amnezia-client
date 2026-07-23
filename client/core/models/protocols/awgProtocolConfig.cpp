@@ -215,7 +215,11 @@ QJsonObject AwgClientConfig::toJson() const
     if (isObfuscationEnabled) {
         obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
     }
-    
+
+    if (!peers.isEmpty()) {
+        obj["peers"] = peers;
+    }
+
     return obj;
 }
 
@@ -260,7 +264,9 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.specialJunk5 = json.value(configKey::specialJunk5).toString();
     
     config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
-    
+
+    config.peers = json.value("peers").toArray();
+
     return config;
 }
 

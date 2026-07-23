@@ -4,8 +4,17 @@ import android.util.Base64
 import org.amnezia.vpn.protocol.BadConfigException
 import org.amnezia.vpn.protocol.ProtocolConfig
 import org.amnezia.vpn.util.net.InetEndpoint
+import org.amnezia.vpn.util.net.InetNetwork
 
 private const val WIREGUARD_DEFAULT_MTU = 1280
+
+data class PeerConfig(
+    val publicKeyHex: String,
+    val preSharedKeyHex: String?,
+    val persistentKeepalive: Int,
+    val endpoint: InetEndpoint,
+    val allowedIps: List<InetNetwork>
+)
 
 open class WireguardConfig protected constructor(
     protocolConfigBuilder: ProtocolConfig.Builder,
@@ -31,6 +40,8 @@ open class WireguardConfig protected constructor(
     var i3: String?,
     var i4: String?,
     var i5: String?,
+    val peerAllowedIps: List<InetNetwork>?,
+    val additionalPeers: List<PeerConfig>,
 ) : ProtocolConfig(protocolConfigBuilder) {
 
     protected constructor(builder: Builder) : this(
@@ -57,6 +68,8 @@ open class WireguardConfig protected constructor(
         builder.i3,
         builder.i4,
         builder.i5,
+        builder.peerAllowedIps,
+        builder.additionalPeers.toList(),
     )
 
     fun toWgUserspaceString(): String = with(StringBuilder()) {
@@ -103,14 +116,22 @@ open class WireguardConfig protected constructor(
 
     open fun appendPeerLine(sb: StringBuilder) = with(sb) {
         appendLine("public_key=$publicKeyHex")
-        routes.filter { it.include }.forEach { route ->
-            appendLine("allowed_ip=${route.inetNetwork}")
-        }
+        val primaryIps = peerAllowedIps ?: routes.filter { it.include }.map { it.inetNetwork }
+        primaryIps.forEach { net -> appendLine("allowed_ip=$net") }
         appendLine("endpoint=$endpoint")
         if (persistentKeepalive != 0)
             appendLine("persistent_keepalive_interval=$persistentKeepalive")
         if (preSharedKeyHex != null)
             appendLine("preshared_key=$preSharedKeyHex")
+        for (peer in additionalPeers) {
+            appendLine("public_key=${peer.publicKeyHex}")
+            peer.allowedIps.forEach { net -> appendLine("allowed_ip=$net") }
+            appendLine("endpoint=${peer.endpoint}")
+            if (peer.persistentKeepalive != 0)
+                appendLine("persistent_keepalive_interval=${peer.persistentKeepalive}")
+            if (peer.preSharedKeyHex != null)
+                appendLine("preshared_key=${peer.preSharedKeyHex}")
+        }
     }
 
     open class Builder : ProtocolConfig.Builder(true) {
@@ -150,6 +171,9 @@ open class WireguardConfig protected constructor(
         internal var i4: String? = null
         internal var i5: String? = null
 
+        internal var peerAllowedIps: List<InetNetwork>? = null
+        internal val additionalPeers: MutableList<PeerConfig> = mutableListOf()
+
         fun setEndpoint(endpoint: InetEndpoint) = apply { this.endpoint = endpoint }
 
         fun setPersistentKeepalive(persistentKeepalive: Int) = apply { this.persistentKeepalive = persistentKeepalive }
@@ -178,6 +202,9 @@ open class WireguardConfig protected constructor(
         fun setI3(i3: String) = apply { this.i3 = i3 }
         fun setI4(i4: String) = apply { this.i4 = i4 }
         fun setI5(i5: String) = apply { this.i5 = i5 }
+
+        fun setPeerAllowedIps(ips: List<InetNetwork>) = apply { this.peerAllowedIps = ips }
+        fun addPeer(peer: PeerConfig) = apply { this.additionalPeers += peer }
 
         override fun build(): WireguardConfig = configBuild().run { WireguardConfig(this@Builder) }
     }

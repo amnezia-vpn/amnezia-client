@@ -37,6 +37,9 @@ class InterfaceConfig {
   int m_serverPort = 0;
   int m_deviceMTU = 1420;
   QList<IPAddress> m_allowedIPAddressRanges;
+  // For multi-peer: primary peer's own IPs only (used for UAPI allowed_ips).
+  // Empty for single-peer (falls back to m_allowedIPAddressRanges).
+  QList<IPAddress> m_primaryPeerAllowedIPRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
   QStringList m_allowedDnsServers;
@@ -57,6 +60,15 @@ class InterfaceConfig {
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
+
+  struct AdditionalPeerConfig {
+    QString m_serverPublicKey;
+    QString m_serverPskKey;
+    QString m_serverIpv4AddrIn;
+    int m_serverPort = 0;
+    QList<IPAddress> m_allowedIPAddressRanges;
+  };
+  QList<AdditionalPeerConfig> m_additionalPeers;
 
   QJsonObject toJson() const;
   QString toWgConf(
