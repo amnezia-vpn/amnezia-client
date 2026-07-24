@@ -9,7 +9,7 @@ import os
 
 class AwgApple(ConanFile):
     name = "awg-apple"
-    version = "2.0.3"
+    version = "3.0.1"
     settings = "os", "arch", "compiler"
 
     @property
@@ -39,7 +39,7 @@ class AwgApple(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amneziawg-apple/archive/refs/tags/v{self.version}.zip",
-            sha256="a868f0dfbded869b6c08b7a7a0e8c1a5485e649a179f4d1715b1b93664ea4fd4", strip_root=True
+            sha256="8efd086e3c51637270be105336692ca89b396b2ea9b71ea30ce28292c61c76e8", strip_root=True
         )
 
     def generate(self):

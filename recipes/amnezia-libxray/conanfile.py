@@ -11,7 +11,7 @@ from pathlib import Path
 
 class AmneziaLibxray(ConanFile):
     name = "amnezia-libxray"
-    version = "1.0.1"
+    version = "1.0.2"
     settings = "os", "arch", "compiler"
 
     def export_sources(self):
@@ -33,7 +33,7 @@ class AmneziaLibxray(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amnezia-libxray/archive/refs/tags/v{self.version}.zip",
-            sha256="f17bca781d4a2fad4dfda9e8b1c0f6960a3f75f6218b906b1b0e2458652ffa5a", strip_root=True
+            sha256="a434a84574b021c4bcd52d9edc906e5ec03eaaab98c192f683f84294b3e4e79c", strip_root=True
         )
 
     def generate(self):
