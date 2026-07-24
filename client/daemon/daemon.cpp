@@ -443,6 +443,28 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
     config.m_specialJunk["I5"] = i5.toString();
   }
 
+  if (const auto headerProtectionKey = obj.value("HeaderProtectionKey"); !headerProtectionKey.isUndefined()) {
+    config.m_headerProtectionKey = headerProtectionKey.toString();
+  }
+  if (const auto contentPaddingAddition = obj.value("ContentPaddingAddition"); !contentPaddingAddition.isUndefined()) {
+    config.m_contentPaddingAddition = contentPaddingAddition.toString();
+  }
+  if (const auto rekeyAfterTime = obj.value("RekeyAfterTime"); !rekeyAfterTime.isUndefined()) {
+    config.m_rekeyAfterTime = rekeyAfterTime.toString();
+  }
+  if (const auto rekeyTimeout = obj.value("RekeyTimeout"); !rekeyTimeout.isUndefined()) {
+    config.m_rekeyTimeout = rekeyTimeout.toString();
+  }
+  if (const auto rejectAfterTime = obj.value("RejectAfterTime"); !rejectAfterTime.isUndefined()) {
+    config.m_rejectAfterTime = rejectAfterTime.toString();
+  }
+  if (const auto keepaliveTimeout = obj.value("KeepaliveTimeout"); !keepaliveTimeout.isUndefined()) {
+    config.m_keepaliveTimeout = keepaliveTimeout.toString();
+  }
+  if (const auto maxHandshakeAttempts = obj.value("MaxHandshakeAttempts"); !maxHandshakeAttempts.isUndefined()) {
+    config.m_maxHandshakeAttempts = maxHandshakeAttempts.toString();
+  }
+
   return true;
 }
 

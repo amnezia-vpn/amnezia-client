@@ -607,6 +607,14 @@ bool IosController::setupWireGuard()
         wgConfig.insert(configKey::junkPacketCount, config[configKey::junkPacketCount]);
         wgConfig.insert(configKey::junkPacketMinSize, config[configKey::junkPacketMinSize]);
         wgConfig.insert(configKey::junkPacketMaxSize, config[configKey::junkPacketMaxSize]);
+
+        wgConfig.insert(configKey::headerProtectionKey, config[configKey::headerProtectionKey]);
+        wgConfig.insert(configKey::contentPaddingAddition, config[configKey::contentPaddingAddition]);
+        wgConfig.insert(configKey::rekeyAfterTime, config[configKey::rekeyAfterTime]);
+        wgConfig.insert(configKey::rekeyTimeout, config[configKey::rekeyTimeout]);
+        wgConfig.insert(configKey::rejectAfterTime, config[configKey::rejectAfterTime]);
+        wgConfig.insert(configKey::keepaliveTimeout, config[configKey::keepaliveTimeout]);
+        wgConfig.insert(configKey::maxHandshakeAttempts, config[configKey::maxHandshakeAttempts]);
     }
 
     QJsonDocument wgConfigDoc(wgConfig);
@@ -716,6 +724,14 @@ bool IosController::setupAwg()
     wgConfig.insert(configKey::specialJunk3, config[configKey::specialJunk3]);
     wgConfig.insert(configKey::specialJunk4, config[configKey::specialJunk4]);
     wgConfig.insert(configKey::specialJunk5, config[configKey::specialJunk5]);
+
+    wgConfig.insert(configKey::headerProtectionKey, config[configKey::headerProtectionKey]);
+    wgConfig.insert(configKey::contentPaddingAddition, config[configKey::contentPaddingAddition]);
+    wgConfig.insert(configKey::rekeyAfterTime, config[configKey::rekeyAfterTime]);
+    wgConfig.insert(configKey::rekeyTimeout, config[configKey::rekeyTimeout]);
+    wgConfig.insert(configKey::rejectAfterTime, config[configKey::rejectAfterTime]);
+    wgConfig.insert(configKey::keepaliveTimeout, config[configKey::keepaliveTimeout]);
+    wgConfig.insert(configKey::maxHandshakeAttempts, config[configKey::maxHandshakeAttempts]);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));

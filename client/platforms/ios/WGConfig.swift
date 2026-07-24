@@ -6,6 +6,8 @@ struct WGConfig: Decodable {
   let junkPacketCount, junkPacketMinSize, junkPacketMaxSize: String?
   let initPacketJunkSize, responsePacketJunkSize, cookieReplyPacketJunkSize, transportPacketJunkSize: String?
   let specialJunk1, specialJunk2, specialJunk3, specialJunk4, specialJunk5: String?
+  let headerProtectionKey: String?
+  let contentPaddingAddition, rekeyAfterTime, rekeyTimeout, rejectAfterTime, keepaliveTimeout, maxHandshakeAttempts: String?
   let dns1: String
   let dns2: String
   let mtu: String
@@ -26,6 +28,11 @@ struct WGConfig: Decodable {
     case junkPacketCount = "Jc", junkPacketMinSize = "Jmin", junkPacketMaxSize = "Jmax"
     case initPacketJunkSize = "S1", responsePacketJunkSize = "S2", cookieReplyPacketJunkSize = "S3", transportPacketJunkSize = "S4"
     case specialJunk1 = "I1", specialJunk2 = "I2", specialJunk3 = "I3", specialJunk4 = "I4", specialJunk5 = "I5"
+    case headerProtectionKey = "HeaderProtectionKey"
+    case contentPaddingAddition = "ContentPaddingAddition"
+    case rekeyAfterTime = "RekeyAfterTime", rekeyTimeout = "RekeyTimeout"
+    case rejectAfterTime = "RejectAfterTime", keepaliveTimeout = "KeepaliveTimeout"
+    case maxHandshakeAttempts = "MaxHandshakeAttempts"
     case dns1
     case dns2
     case mtu
@@ -98,6 +105,28 @@ struct WGConfig: Decodable {
     }
     if let i5 = trimmed(specialJunk5) {
       settingsLines.append("I5 = \(i5)")
+    }
+
+    if let headerProtectionKey = trimmed(headerProtectionKey) {
+      settingsLines.append("HeaderProtectionKey = \(headerProtectionKey)")
+    }
+    if let contentPaddingAddition = trimmed(contentPaddingAddition) {
+      settingsLines.append("ContentPaddingAddition = \(contentPaddingAddition)")
+    }
+    if let rekeyAfterTime = trimmed(rekeyAfterTime) {
+      settingsLines.append("RekeyAfterTime = \(rekeyAfterTime)")
+    }
+    if let rekeyTimeout = trimmed(rekeyTimeout) {
+      settingsLines.append("RekeyTimeout = \(rekeyTimeout)")
+    }
+    if let rejectAfterTime = trimmed(rejectAfterTime) {
+      settingsLines.append("RejectAfterTime = \(rejectAfterTime)")
+    }
+    if let keepaliveTimeout = trimmed(keepaliveTimeout) {
+      settingsLines.append("KeepaliveTimeout = \(keepaliveTimeout)")
+    }
+    if let maxHandshakeAttempts = trimmed(maxHandshakeAttempts) {
+      settingsLines.append("MaxHandshakeAttempts = \(maxHandshakeAttempts)")
     }
 
     return settingsLines.joined(separator: "\n")
