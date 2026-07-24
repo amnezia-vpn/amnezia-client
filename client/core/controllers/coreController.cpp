@@ -366,3 +366,55 @@ void CoreController::importConfigFromData(const QString &data)
         m_importController->importConfig();
     }
 }
+
+#if defined(Q_OS_IOS)
+#include <QJsonDocument>
+#include <QJsonArray>
+
+void CoreController::intentReload()
+{
+    if (m_subscriptionUiController && m_serversUiController && m_serversRepository) {
+        QString serverId = m_serversUiController->processedServerId();
+        if (serverId.isEmpty()) {
+            serverId = m_serversRepository->defaultServerId();
+        }
+        if (!serverId.isEmpty()) {
+            m_subscriptionUiController->updateServiceFromGateway(serverId, "", "", true);
+        }
+    }
+}
+
+void CoreController::intentConnect(const QString &countryCode)
+{
+    if (m_subscriptionUiController && m_serversUiController && m_serversRepository) {
+        QString serverId = m_serversUiController->processedServerId();
+        if (serverId.isEmpty()) {
+            serverId = m_serversRepository->defaultServerId();
+        }
+        if (!serverId.isEmpty()) {
+            m_subscriptionUiController->updateServiceFromGateway(serverId, countryCode, "", false);
+        }
+    }
+}
+
+QString CoreController::intentGetCountries()
+{
+    QJsonArray countriesList;
+    if (m_serversRepository && m_serversUiController) {
+        QString serverId = m_serversUiController->processedServerId();
+        if (serverId.isEmpty()) {
+            serverId = m_serversRepository->defaultServerId();
+        }
+        
+        if (!serverId.isEmpty()) {
+            std::optional<ApiV2ServerConfig> server = m_serversRepository->apiV2Config(serverId);
+            if (server.has_value() && !server->apiConfig.availableCountries.isEmpty()) {
+                countriesList = server->apiConfig.availableCountries;
+            }
+        }
+    }
+    QJsonDocument doc(countriesList);
+    return QString::fromUtf8(doc.toJson(QJsonDocument::Compact));
+}
+#endif
+
