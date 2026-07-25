@@ -60,9 +60,9 @@ class HevSocks5Tunnel(ConanFile):
             self.run(
                 f"libtool -static -o {lib_path}"
                 f" {lib_path}"
-                f" {os.path.join(self.build_folder, "third-part", "lwip", "bin", "liblwip.a")}"
-                f" {os.path.join(self.build_folder, "third-part", "yaml", "bin", "libyaml.a")}"
-                f" {os.path.join(self.build_folder, "third-part", "hev-task-system", "bin", "libhev-task-system.a")}"
+                f" {os.path.join(self.build_folder, 'third-part', 'lwip', 'bin', 'liblwip.a')}"
+                f" {os.path.join(self.build_folder, 'third-part', 'yaml', 'bin', 'libyaml.a')}"
+                f" {os.path.join(self.build_folder, 'third-part', 'hev-task-system', 'bin', 'libhev-task-system.a')}"
             )
 
             include_dir = os.path.join(self.build_folder, "framework_include")

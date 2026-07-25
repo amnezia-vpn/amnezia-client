@@ -211,6 +211,13 @@ else()
     qt_finalize_target(${PROJECT})
 endif()
 
+if(LINUX AND NOT ANDROID)
+    # Bundled Qt libs live next to the binary layout produced by qt deploy.
+    set_target_properties(${PROJECT} PROPERTIES
+        INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib"
+    )
+endif()
+
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     RUNTIME_DEPENDENCY_SET client_deps
@@ -231,7 +238,9 @@ install(RUNTIME_DEPENDENCY_SET client_deps
         [[hvsifiletrust\.dll]]
         [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
         [[.*\.framework]]
+        # Qt is deployed by qt_generate_deploy_* / IMPORTED_RUNTIME_ARTIFACTS below.
         [[^[Qq]t.*]]
+        [[lib[Qq]t.*]]
     POST_EXCLUDE_REGEXES
         [[^.*[\\/]system32[\\/].*\.dll$]]
         [[^/lib.*]]
@@ -240,6 +249,15 @@ install(RUNTIME_DEPENDENCY_SET client_deps
     COMPONENT AmneziaVPN
     DESTINATION "${RUNTIME_DEPS_DIR}"
 )
+
+# RemoteObjects is a hard NEEDED dependency for IPC, but QML-oriented deploy tooling
+# (and older CQtDeployer Linux packs) have skipped it. Install it explicitly.
+if(LINUX AND NOT ANDROID AND TARGET Qt6::RemoteObjects)
+    install(IMPORTED_RUNTIME_ARTIFACTS Qt6::RemoteObjects
+        LIBRARY DESTINATION lib
+        COMPONENT AmneziaVPN
+    )
+endif()
 
 set(deploy_tool_options "")
 if(WIN32)

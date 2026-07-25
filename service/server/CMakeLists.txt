@@ -416,6 +416,12 @@ if (WIN32)
     )
 endif()
 
+if(LINUX AND NOT ANDROID)
+    set_target_properties(${PROJECT} PROPERTIES
+        INSTALL_RPATH "$ORIGIN:$ORIGIN/../lib"
+    )
+endif()
+
 # install target
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -437,7 +443,9 @@ install(RUNTIME_DEPENDENCY_SET service_deps
         [[hvsifiletrust\.dll]]
         [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
         [[.*\.framework]]
+        # Qt is deployed by qt_generate_deploy_* / IMPORTED_RUNTIME_ARTIFACTS below.
         [[^[Qq]t.*]]
+        [[lib[Qq]t.*]]
     POST_EXCLUDE_REGEXES
         [[^.*[\\/]system32[\\/].*\.dll$]]
         [[^/lib.*]]
@@ -446,6 +454,13 @@ install(RUNTIME_DEPENDENCY_SET service_deps
     COMPONENT AmneziaVPN
     DESTINATION "${RUNTIME_DEPS_DIR}"
 )
+
+if(LINUX AND NOT ANDROID AND TARGET Qt6::RemoteObjects)
+    install(IMPORTED_RUNTIME_ARTIFACTS Qt6::RemoteObjects
+        LIBRARY DESTINATION lib
+        COMPONENT AmneziaVPN
+    )
+endif()
 
 qt_generate_deploy_app_script(
     TARGET ${PROJECT}

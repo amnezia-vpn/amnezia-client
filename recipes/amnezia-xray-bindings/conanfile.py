@@ -112,7 +112,7 @@ class AmneziaXrayBindings(ConanFile):
                 with env.vars(self).apply():
                     at = Autotools(self)
                     at.make(args=[
-                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                        "BUILD_DIR={}".format(build_dir.replace("\\", "/") if self._is_windows else build_dir)
                     ])
 
             if is_apple_os(self) and self._is_multiarch:

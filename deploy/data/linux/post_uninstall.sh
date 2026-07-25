@@ -19,10 +19,6 @@ if command -v steamos-readonly &> /dev/null; then
 	echo "steamos-readonly disabled" >> $LOG_FILE
 fi
 
-ls /opt/AmneziaVPN/client/lib/* | while IFS=: read -r dir; do
-	sudo unlink $dir  >> $LOG_FILE
-done
-
 if sudo systemctl is-active --quiet $APP_NAME; then
 	sudo systemctl stop $APP_NAME >> $LOG_FILE
 fi
