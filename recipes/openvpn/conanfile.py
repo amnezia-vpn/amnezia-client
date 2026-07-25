@@ -9,7 +9,7 @@ import os
 
 class Openvpn(ConanFile):
     name = "openvpn"
-    version = "2.7.0"
+    version = "2.7.5"
     package_type = "application"
     settings = "os", "build_type", "arch", "compiler"
 
@@ -49,7 +49,7 @@ class Openvpn(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/OpenVPN/openvpn/archive/refs/tags/v{self.version}.zip",
-            sha256="1a65d8587f932c13d55b1f175ff2e1d61d795d9092788662e888054854d4ee3d", strip_root=True
+            sha256="8b005fb1b4fd008c0e0b8dbd618498efcda89e5843b59364d970ede254f3a049", strip_root=True
         )
 
     def _patch_sources(self):
