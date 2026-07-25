@@ -181,6 +181,11 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const Connect
     config.replace("block-outside-dns", "");
 #endif
 
+    // `ncp-disable` was removed in OpenVPN 2.6 and the bundled openvpn 2.7
+    // rejects it as an unknown option; strip it from the local config only —
+    // exported configs and the server side are left untouched
+    config.remove(QRegularExpression("^ncp-disable[ \t]*\r?\n?", QRegularExpression::MultilineOption));
+
 #if (defined(MZ_MACOS) || defined(MZ_LINUX))
     config.append(QString("\nscript-security 2\n"
                          "up %1/update-resolv-conf.sh\n"

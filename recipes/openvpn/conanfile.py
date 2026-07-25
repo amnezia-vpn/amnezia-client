@@ -99,6 +99,9 @@ class Openvpn(ConanFile):
     def package(self):
         if self._is_windows:
             copy(self, "*openvpn.exe", src=self.build_folder, dst=self.package_folder, keep_path=False)
+            # tapctl creates/deletes adapters for both tap-windows6 and
+            # ovpn-dco hwids; the service uses it to provision the DCO adapter
+            copy(self, "*tapctl.exe", src=self.build_folder, dst=self.package_folder, keep_path=False)
         else:
             copy(self, "openvpn", src=os.path.join(self.build_folder, "src", "openvpn"), dst=self.package_folder)
 
@@ -107,3 +110,7 @@ class Openvpn(ConanFile):
 
         ext = ".exe" if self._is_windows else ""
         self.cpp_info.location = os.path.join(self.package_folder, f"openvpn{ext}")
+        if self._is_windows:
+            self.cpp_info.set_property("cmake_extra_variables", {
+                "OPENVPN_TAPCTL_PATH": os.path.join(self.package_folder, "tapctl.exe").replace("\\", "/")
+            })

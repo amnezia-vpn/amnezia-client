@@ -82,17 +82,13 @@ void OpenVpnProtocol::stop()
 ErrorCode OpenVpnProtocol::prepare()
 {
     return IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-        QRemoteObjectPendingReply<QStringList> listReply = iface->getTapList();
-        if (!listReply.waitForFinished(1000)) {
-            return ErrorCode::InternalError;
-        }
-
-        QStringList list = listReply.returnValue();
-        if (list.empty()) {
-            QRemoteObjectPendingReply<bool> installReply = iface->checkAndInstallDriver();
-            if (!installReply.waitForFinished() || !installReply.returnValue()) {
-                return ErrorCode::OpenVpnTapAdapterError;
-            }
+        // ensures a usable OpenVPN driver on Windows: ovpn-dco (the 2.6+
+        // default data path, installed on first use) with a fallback to
+        // tap-windows6; a no-op on other platforms. The call is idempotent,
+        // so it runs on every connect to survive driver removal.
+        QRemoteObjectPendingReply<bool> installReply = iface->checkAndInstallDriver();
+        if (!installReply.waitForFinished(60000) || !installReply.returnValue()) {
+            return ErrorCode::OpenVpnTapAdapterError;
         }
 
         return ErrorCode::NoError;
@@ -317,8 +313,12 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
         }
 
         if (line.contains("FATAL")) {
-            if (line.contains("tap-windows6 adapters on this system are currently in use or disabled")) {
+            if (line.contains("tap-windows6 adapters on this system are currently in use or disabled")
+                || line.contains("ovpn-dco adapters on this system are in use or disabled")) {
                 emit protocolError(ErrorCode::OpenVpnAdaptersInUseError);
+            } else if (line.contains("There are no TAP-Windows nor Wintun adapters")
+                       || line.contains("adapter using service failed")) {
+                emit protocolError(ErrorCode::OpenVpnTapAdapterError);
             } else {
                 emit protocolError(ErrorCode::OpenVpnUnknownError);
             }
