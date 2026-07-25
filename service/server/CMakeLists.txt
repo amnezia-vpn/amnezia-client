@@ -181,6 +181,7 @@ if(WIN32)
         gdi32
         Advapi32
         Kernel32
+        setupapi
         qt6keychain
     )
 
@@ -414,6 +415,7 @@ if (WIN32)
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
     )
+
 endif()
 
 # install target

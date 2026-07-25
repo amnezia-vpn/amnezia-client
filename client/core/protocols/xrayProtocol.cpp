@@ -133,10 +133,6 @@ void XrayProtocol::stop()
         if (!restoreResolvers.waitForFinished() || !restoreResolvers.returnValue())
             qWarning() << "Failed to restore resolvers";
 
-        auto deleteTun = iface->deleteTun(tunName);
-        if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
-            qWarning() << "Failed to delete tun";
-
         auto xrayStop = iface->xrayStop();
         if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
             qWarning() << "Failed to stop xray";
@@ -161,6 +157,15 @@ void XrayProtocol::stop()
         m_tun2socksProcess->close();
         m_tun2socksProcess.reset();
     }
+
+    // delete the TUN device only after tun2socks released it — removing a
+    // device that is still held open merely marks it pending-removal and
+    // creates exactly the ghost adapter this call is meant to clean up
+    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        auto deleteTun = iface->deleteTun(tunName);
+        if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
+            qWarning() << "Failed to delete tun";
+    });
 
     setConnectionState(Vpn::ConnectionState::Disconnected);
 }

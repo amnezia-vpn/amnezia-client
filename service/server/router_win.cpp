@@ -4,6 +4,10 @@
 #include <tlhelp32.h>
 #include <tchar.h>
 
+#include <initguid.h>
+#include <devguid.h>
+#include <setupapi.h>
+
 #include <QProcess>
 #include <QtConcurrent>
 
@@ -380,6 +384,58 @@ bool RouterWin::createTun(const QString &dev, const QString &subnet)
     return ctx.found;
 }
 
+bool RouterWin::deleteTun(const QString &dev)
+{
+    // Removes the wintun devnode named `dev` (e.g. an orphan left behind when
+    // tun2socks dies without cleaning up, which makes the next connection hang
+    // on adapter creation). The adapter name lives in wintun's private
+    // DEVPKEY_Wintun_Name property — SPDRP_FRIENDLYNAME only holds the tunnel
+    // *type* string, which is shared by every wintun-based product, so
+    // matching by name here is what keeps third-party adapters intact.
+    static const DEVPROPKEY devpkeyWintunName = {
+        { 0x3361c968, 0x2f2e, 0x4660, { 0xb4, 0x7e, 0x69, 0x9c, 0xdc, 0x4c, 0x32, 0xb9 } },
+        DEVPROPID_FIRST_USABLE + 1
+    };
+
+    // no DIGCF_PRESENT: pending-removal ghosts must be enumerated too
+    HDEVINFO devInfo = SetupDiGetClassDevsExW(&GUID_DEVCLASS_NET, L"SWD\\Wintun", nullptr, 0, nullptr, nullptr, nullptr);
+    if (devInfo == INVALID_HANDLE_VALUE) {
+        qWarning() << "RouterWin::deleteTun: SetupDiGetClassDevsExW failed:" << GetLastError();
+        return false;
+    }
+    auto _guardDevInfo = qScopeGuard([devInfo]() { SetupDiDestroyDeviceInfoList(devInfo); });
+
+    SP_DEVINFO_DATA devInfoData;
+    devInfoData.cbSize = sizeof(devInfoData);
+    for (DWORD i = 0; SetupDiEnumDeviceInfo(devInfo, i, &devInfoData); ++i) {
+        DEVPROPTYPE propType = 0;
+        WCHAR name[MAX_PATH] = {};
+        if (!SetupDiGetDevicePropertyW(devInfo, &devInfoData, &devpkeyWintunName, &propType,
+                                       reinterpret_cast<PBYTE>(name), sizeof(name) - sizeof(WCHAR), nullptr, 0)
+            || propType != DEVPROP_TYPE_STRING) {
+            continue;
+        }
+        if (QString::fromWCharArray(name).compare(dev, Qt::CaseInsensitive) != 0) {
+            continue;
+        }
+
+        SP_REMOVEDEVICE_PARAMS params;
+        params.ClassInstallHeader.cbSize = sizeof(SP_CLASSINSTALL_HEADER);
+        params.ClassInstallHeader.InstallFunction = DIF_REMOVE;
+        params.Scope = DI_REMOVEDEVICE_GLOBAL;
+        params.HwProfile = 0;
+        if (!SetupDiSetClassInstallParamsW(devInfo, &devInfoData, &params.ClassInstallHeader, sizeof(params))
+            || !SetupDiCallClassInstaller(DIF_REMOVE, devInfo, &devInfoData)) {
+            qWarning() << "RouterWin::deleteTun: failed to remove wintun adapter" << dev << "error:" << GetLastError();
+            return false;
+        }
+        qDebug() << "RouterWin::deleteTun: removed wintun adapter" << dev;
+    }
+
+    // a missing devnode is not an error — there is simply nothing to clean up
+    return true;
+}
+
 void RouterWin::suspendWcmSvc(bool suspend)
 {
     if (suspend == m_suspended) return;
@@ -564,6 +620,9 @@ bool RouterWin::StartRoutingIpv6()
         [](bool &result, bool success) {
             result = result && success;
         }, true);
+
+        res.waitForFinished();
+        return res.result();
     }
 
     return false;

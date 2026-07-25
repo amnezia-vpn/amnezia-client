@@ -45,6 +45,12 @@ WindowsTunnelLogger::WindowsTunnelLogger(const QString& filename,
   m_startTime = QDateTime::currentMSecsSinceEpoch() * 1000000;
   m_logindex = -1;
 
+  if (filename.isEmpty()) {
+    // no ring log to poll; starting the timer would only make QFile::open
+    // emit a QFSFileEngine warning every RINGLOG_POLL_MSEC forever
+    return;
+  }
+
   connect(&m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
   m_timer.start(RINGLOG_POLL_MSEC);
 }
