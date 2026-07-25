@@ -93,6 +93,14 @@ Component.prototype.createOperations = function()
         }
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
+
+        // upgrade path: a service from a previous install may still be
+        // registered — sc create would fail with 1073 (service exists), so
+        // recreate it to keep binpath/depend current
+        // (1060 = service does not exist, 1062 = service not started)
+        component.addElevatedOperation("Execute", "{0,1060,1062}", "sc", "stop", serviceName());
+        component.addElevatedOperation("Execute", "{0,1060}", "sc", "delete", serviceName());
+
         component.addElevatedOperation("Execute",
                                        ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
                                         "start=", "auto", "depend=", "BFE/nsi"],
