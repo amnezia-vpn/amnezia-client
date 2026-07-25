@@ -408,11 +408,10 @@ void VpnConnection::appendSplitTunnelingConfig()
             for (auto &line : nativeConfigLines) {
                 if (line.contains("PersistentKeepalive")) {
                     auto persistentKeepaliveString = line.split(" = ");
-                    if (persistentKeepaliveString.size() < 1) {
-                        break;
+                    if (persistentKeepaliveString.size() > 1) {
+                        configData.insert(configKey::persistentKeepAlive, persistentKeepaliveString.at(1));
+                        m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     }
-                    configData.insert(configKey::persistentKeepAlive, persistentKeepaliveString.at(1));
-                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }

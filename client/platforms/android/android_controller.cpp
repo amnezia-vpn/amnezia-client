@@ -154,6 +154,28 @@ void AndroidController::resetLastServer(int serverIndex)
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
 }
 
+void AndroidController::showUpdateCover()
+{
+    callActivityMethod("showUpdateCover", "()V");
+}
+
+void AndroidController::hideUpdateCover()
+{
+    callActivityMethod("hideUpdateCover", "()V");
+}
+
+void AndroidController::showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                                        const QString &skipTitle, const QString &storeUrl)
+{
+    callActivityMethod("showUpdatePrompt",
+                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(title).object<jstring>(),
+                       QJniObject::fromString(message).object<jstring>(),
+                       QJniObject::fromString(updateTitle).object<jstring>(),
+                       QJniObject::fromString(skipTitle).object<jstring>(),
+                       QJniObject::fromString(storeUrl).object<jstring>());
+}
+
 void AndroidController::saveFile(const QString &fileName, const QString &data)
 {
     callActivityMethod("saveFile", "(Ljava/lang/String;Ljava/lang/String;)V",

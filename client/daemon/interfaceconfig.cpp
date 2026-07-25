@@ -24,6 +24,9 @@ QJsonObject InterfaceConfig::toJson() const {
   json.insert("serverIpv6AddrIn", QJsonValue(m_serverIpv6AddrIn));
   json.insert("serverPort", QJsonValue((double)m_serverPort));
   json.insert("deviceMTU", QJsonValue(m_deviceMTU));
+  if (!m_persistentKeepalive.isEmpty()) {
+    json.insert("persistentKeepalive", QJsonValue(m_persistentKeepalive));
+  }
   if ((m_hopType == InterfaceConfig::MultiHopExit) ||
       (m_hopType == InterfaceConfig::SingleHop)) {
     json.insert("serverIpv4Gateway", QJsonValue(m_serverIpv4Gateway));
@@ -153,6 +156,28 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << key << " = " << m_specialJunk[key] << "\n";
   }
 
+  if (!m_headerProtectionKey.isEmpty()) {
+    out << "HeaderProtectionKey = " << m_headerProtectionKey << "\n";
+  }
+  if (!m_contentPaddingAddition.isEmpty()) {
+    out << "ContentPaddingAddition = " << m_contentPaddingAddition << "\n";
+  }
+  if (!m_rekeyAfterTime.isEmpty()) {
+    out << "RekeyAfterTime = " << m_rekeyAfterTime << "\n";
+  }
+  if (!m_rekeyTimeout.isEmpty()) {
+    out << "RekeyTimeout = " << m_rekeyTimeout << "\n";
+  }
+  if (!m_rejectAfterTime.isEmpty()) {
+    out << "RejectAfterTime = " << m_rejectAfterTime << "\n";
+  }
+  if (!m_keepaliveTimeout.isEmpty()) {
+    out << "KeepaliveTimeout = " << m_keepaliveTimeout << "\n";
+  }
+  if (!m_maxHandshakeAttempts.isEmpty()) {
+    out << "MaxHandshakeAttempts = " << m_maxHandshakeAttempts << "\n";
+  }
+
   // If any extra config was provided, append it now.
   for (const QString& key : extra.keys()) {
     out << key << " = " << extra[key] << "\n";
@@ -173,6 +198,9 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     ranges.append(ip.toString());
   }
   out << "AllowedIPs = " << ranges.join(", ") << "\n";
+  if (!m_persistentKeepalive.isEmpty()) {
+    out << "PersistentKeepalive = " << m_persistentKeepalive << "\n";
+  }
 
   return content;
 }

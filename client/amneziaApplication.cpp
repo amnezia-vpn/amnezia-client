@@ -146,6 +146,9 @@ void AmneziaApplication::init()
 
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
+    m_marketplaceUpdateController.reset(new MarketplaceUpdateController());
+    m_marketplaceUpdateController->start();
+
     m_engine->addImportPath(QStringLiteral(APP_QML_IMPORT_PATH));
 
     if (m_parser.isSet(m_optImport)) {

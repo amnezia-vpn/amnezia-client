@@ -206,6 +206,7 @@ ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByt
         serverProtocolConfig[configKey::specialJunk3] = clientProtocolConfig.value(configKey::specialJunk3);
         serverProtocolConfig[configKey::specialJunk4] = clientProtocolConfig.value(configKey::specialJunk4);
         serverProtocolConfig[configKey::specialJunk5] = clientProtocolConfig.value(configKey::specialJunk5);
+        serverProtocolConfig[configKey::headerProtectionKey] = clientProtocolConfig.value(configKey::headerProtectionKey);
 
         //
 

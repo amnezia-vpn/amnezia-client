@@ -90,6 +90,14 @@ namespace amnezia
         constexpr QLatin1String specialJunk4("I4");
         constexpr QLatin1String specialJunk5("I5");
 
+        constexpr QLatin1String headerProtectionKey("HeaderProtectionKey");
+        constexpr QLatin1String contentPaddingAddition("ContentPaddingAddition");
+        constexpr QLatin1String rekeyAfterTime("RekeyAfterTime");
+        constexpr QLatin1String rekeyTimeout("RekeyTimeout");
+        constexpr QLatin1String rejectAfterTime("RejectAfterTime");
+        constexpr QLatin1String keepaliveTimeout("KeepaliveTimeout");
+        constexpr QLatin1String maxHandshakeAttempts("MaxHandshakeAttempts");
+
         constexpr QLatin1String protocolVersion("protocol_version");
 
         constexpr QLatin1String openvpn("openvpn");

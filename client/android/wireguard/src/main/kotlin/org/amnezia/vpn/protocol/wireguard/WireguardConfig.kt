@@ -10,7 +10,7 @@ private const val WIREGUARD_DEFAULT_MTU = 1280
 open class WireguardConfig protected constructor(
     protocolConfigBuilder: ProtocolConfig.Builder,
     val endpoint: InetEndpoint,
-    val persistentKeepalive: Int,
+    val persistentKeepalive: String?,
     val publicKeyHex: String,
     val preSharedKeyHex: String?,
     val privateKeyHex: String,
@@ -31,6 +31,13 @@ open class WireguardConfig protected constructor(
     var i3: String?,
     var i4: String?,
     var i5: String?,
+    val headerProtectionKeyHex: String?,
+    val contentPaddingAddition: String?,
+    val rekeyAfterTime: String?,
+    val rekeyTimeout: String?,
+    val rejectAfterTime: String?,
+    val keepaliveTimeout: String?,
+    val maxHandshakeAttempts: String?,
 ) : ProtocolConfig(protocolConfigBuilder) {
 
     protected constructor(builder: Builder) : this(
@@ -57,6 +64,13 @@ open class WireguardConfig protected constructor(
         builder.i3,
         builder.i4,
         builder.i5,
+        builder.headerProtectionKeyHex,
+        builder.contentPaddingAddition,
+        builder.rekeyAfterTime,
+        builder.rekeyTimeout,
+        builder.rejectAfterTime,
+        builder.keepaliveTimeout,
+        builder.maxHandshakeAttempts,
     )
 
     fun toWgUserspaceString(): String = with(StringBuilder()) {
@@ -87,6 +101,13 @@ open class WireguardConfig protected constructor(
             i4?.let { appendLine("i4=$it") }
             i5?.let { appendLine("i5=$it") }
         }
+        headerProtectionKeyHex?.takeIf { it.isNotEmpty() }?.let { appendLine("header_protection_key=$it") }
+        contentPaddingAddition?.takeIf { it.isNotEmpty() }?.let { appendLine("content_padding_addition=$it") }
+        rekeyAfterTime?.takeIf { it.isNotEmpty() }?.let { appendLine("rekey_after_time=$it") }
+        rekeyTimeout?.takeIf { it.isNotEmpty() }?.let { appendLine("rekey_timeout=$it") }
+        rejectAfterTime?.takeIf { it.isNotEmpty() }?.let { appendLine("reject_after_time=$it") }
+        keepaliveTimeout?.takeIf { it.isNotEmpty() }?.let { appendLine("keepalive_timeout=$it") }
+        maxHandshakeAttempts?.takeIf { it.isNotEmpty() }?.let { appendLine("max_handshake_attempts=$it") }
     }
 
     private fun validateProtocolExtensionParameters() {
@@ -107,7 +128,7 @@ open class WireguardConfig protected constructor(
             appendLine("allowed_ip=${route.inetNetwork}")
         }
         appendLine("endpoint=$endpoint")
-        if (persistentKeepalive != 0)
+        if (!persistentKeepalive.isNullOrEmpty() && persistentKeepalive != "0")
             appendLine("persistent_keepalive_interval=$persistentKeepalive")
         if (preSharedKeyHex != null)
             appendLine("preshared_key=$preSharedKeyHex")
@@ -117,7 +138,7 @@ open class WireguardConfig protected constructor(
         internal lateinit var endpoint: InetEndpoint
             private set
 
-        internal var persistentKeepalive: Int = 0
+        internal var persistentKeepalive: String? = null
             private set
 
         internal lateinit var publicKeyHex: String
@@ -149,10 +170,17 @@ open class WireguardConfig protected constructor(
         internal var i3: String? = null
         internal var i4: String? = null
         internal var i5: String? = null
+        internal var headerProtectionKeyHex: String? = null
+        internal var contentPaddingAddition: String? = null
+        internal var rekeyAfterTime: String? = null
+        internal var rekeyTimeout: String? = null
+        internal var rejectAfterTime: String? = null
+        internal var keepaliveTimeout: String? = null
+        internal var maxHandshakeAttempts: String? = null
 
         fun setEndpoint(endpoint: InetEndpoint) = apply { this.endpoint = endpoint }
 
-        fun setPersistentKeepalive(persistentKeepalive: Int) = apply { this.persistentKeepalive = persistentKeepalive }
+        fun setPersistentKeepalive(persistentKeepalive: String) = apply { this.persistentKeepalive = persistentKeepalive }
 
         fun setPublicKeyHex(publicKeyHex: String) = apply { this.publicKeyHex = publicKeyHex }
 
@@ -178,6 +206,13 @@ open class WireguardConfig protected constructor(
         fun setI3(i3: String) = apply { this.i3 = i3 }
         fun setI4(i4: String) = apply { this.i4 = i4 }
         fun setI5(i5: String) = apply { this.i5 = i5 }
+        fun setHeaderProtectionKey(headerProtectionKeyHex: String) = apply { this.headerProtectionKeyHex = headerProtectionKeyHex }
+        fun setContentPaddingAddition(contentPaddingAddition: String) = apply { this.contentPaddingAddition = contentPaddingAddition }
+        fun setRekeyAfterTime(rekeyAfterTime: String) = apply { this.rekeyAfterTime = rekeyAfterTime }
+        fun setRekeyTimeout(rekeyTimeout: String) = apply { this.rekeyTimeout = rekeyTimeout }
+        fun setRejectAfterTime(rejectAfterTime: String) = apply { this.rejectAfterTime = rejectAfterTime }
+        fun setKeepaliveTimeout(keepaliveTimeout: String) = apply { this.keepaliveTimeout = keepaliveTimeout }
+        fun setMaxHandshakeAttempts(maxHandshakeAttempts: String) = apply { this.maxHandshakeAttempts = maxHandshakeAttempts }
 
         override fun build(): WireguardConfig = configBuild().run { WireguardConfig(this@Builder) }
     }

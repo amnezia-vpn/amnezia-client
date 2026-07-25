@@ -3,6 +3,13 @@ package org.amnezia.vpn
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Dialog
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
@@ -99,6 +106,8 @@ class AmneziaActivity : QtActivity() {
     private val resumeHandler = Handler(Looper.getMainLooper())
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
+
+    private var updateCoverDialog: Dialog? = null
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -485,6 +494,116 @@ class AmneziaActivity : QtActivity() {
         notificationStateReceiver = null
         mainScope.cancel()
         super.onDestroy()
+    }
+
+    fun showUpdateCover() {
+        runOnUiThread {
+            if (isFinishing || isDestroyed || updateCoverDialog != null) return@runOnUiThread
+            val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            dialog.setCancelable(false)
+            val root = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(0xFF0E0E11.toInt())
+            }
+            dialog.setContentView(root)
+            dialog.show()
+            updateCoverDialog = dialog
+        }
+    }
+
+    fun hideUpdateCover() {
+        runOnUiThread {
+            updateCoverDialog?.dismiss()
+            updateCoverDialog = null
+        }
+    }
+
+    fun showUpdatePrompt(title: String, message: String, updateTitle: String, skipTitle: String, storeUrl: String) {
+        runOnUiThread {
+            if (isFinishing || isDestroyed) return@runOnUiThread
+
+            val dialog = updateCoverDialog ?: Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen).also {
+                it.setCancelable(false)
+                it.show()
+                updateCoverDialog = it
+            }
+
+            val density = resources.displayMetrics.density
+            fun dp(value: Int) = (value * density).toInt()
+
+            val root = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(0xFF0E0E11.toInt())
+                setPadding(dp(32), dp(32), dp(32), dp(32))
+            }
+
+            val titleView = TextView(this).apply {
+                text = title
+                textSize = 22f
+                setTextColor(0xFFFFFFFF.toInt())
+                gravity = Gravity.CENTER
+                typeface = Typeface.create(typeface, Typeface.BOLD)
+            }
+
+            val messageView = TextView(this).apply {
+                text = message
+                textSize = 16f
+                setTextColor(0xFFC7C8CB.toInt())
+                gravity = Gravity.CENTER
+                setPadding(0, dp(16), 0, dp(28))
+            }
+
+            val updateButton = Button(this).apply {
+                text = updateTitle
+                isAllCaps = false
+                textSize = 17f
+                setTextColor(0xFF0E0E11.toInt())
+                stateListAnimator = null
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12).toFloat()
+                    setColor(0xFFFBB26A.toInt())
+                }
+                setOnClickListener {
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(storeUrl)))
+                    } catch (e: ActivityNotFoundException) {
+                        Log.w(TAG, "open store failed: ${e.message}")
+                    }
+                    hideUpdateCover()
+                }
+            }
+
+            val skipButton = Button(this).apply {
+                text = skipTitle
+                isAllCaps = false
+                textSize = 17f
+                setTextColor(0xFFD7D8DB.toInt())
+                stateListAnimator = null
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12).toFloat()
+                    setColor(0x00000000)
+                    setStroke(dp(1), 0xFF2C2D30.toInt())
+                }
+                setOnClickListener { hideUpdateCover() }
+            }
+
+            val updateParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
+            ).apply { topMargin = dp(8) }
+
+            val skipParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
+            ).apply { topMargin = dp(12) }
+
+            root.addView(titleView)
+            root.addView(messageView)
+            root.addView(updateButton, updateParams)
+            root.addView(skipButton, skipParams)
+
+            dialog.setContentView(root)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
