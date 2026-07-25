@@ -130,6 +130,19 @@ bool IpcServer::checkAndInstallDriver()
 #endif
 }
 
+bool IpcServer::checkAndInstallLegacyDriver()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::checkAndInstallLegacyDriver";
+#endif
+
+#ifdef Q_OS_WIN
+    return TapController::checkAndSetup();
+#else
+    return true;
+#endif
+}
+
 QStringList IpcServer::getTapList()
 {
 #ifdef MZ_DEBUG

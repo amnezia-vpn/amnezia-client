@@ -39,6 +39,40 @@ QString OpenVpnProtocol::defaultConfigPath()
     return p;
 }
 
+#ifdef Q_OS_WIN
+bool OpenVpnProtocol::retryWithLegacyDriver()
+{
+    if (m_legacyDriverRequested) {
+        return false;
+    }
+    m_legacyDriverRequested = true;
+
+    qWarning() << "OpenVpnProtocol: no usable adapter, installing tap-windows6 and retrying";
+
+    // the process is terminated by start() -> cleanupResources(); its
+    // finished() would otherwise race the retry and report Disconnected
+    if (m_openVpnProcess) {
+        m_openVpnProcess->blockSignals(true);
+    }
+
+    const ErrorCode driverError = IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        QRemoteObjectPendingReply<bool> reply = iface->checkAndInstallLegacyDriver();
+        if (!reply.waitForFinished(120000) || !reply.returnValue()) {
+            return ErrorCode::OpenVpnTapAdapterError;
+        }
+        return ErrorCode::NoError;
+    }, []() { return ErrorCode::AmneziaServiceConnectionFailed; });
+
+    if (driverError != ErrorCode::NoError) {
+        emit protocolError(driverError);
+        return true;
+    }
+
+    start();
+    return true;
+}
+#endif
+
 void OpenVpnProtocol::cleanupResources()
 {
     if (m_openVpnProcess || openVpnProcessIsRunning()) {
@@ -313,12 +347,21 @@ void OpenVpnProtocol::onReadyReadDataFromManagementServer()
         }
 
         if (line.contains("FATAL")) {
-            if (line.contains("tap-windows6 adapters on this system are currently in use or disabled")
-                || line.contains("ovpn-dco adapters on this system are in use or disabled")) {
-                emit protocolError(ErrorCode::OpenVpnAdaptersInUseError);
-            } else if (line.contains("There are no TAP-Windows nor Wintun adapters")
-                       || line.contains("adapter using service failed")) {
-                emit protocolError(ErrorCode::OpenVpnTapAdapterError);
+            const bool adapterUnavailable = line.contains("adapters on this system are currently in use or disabled")
+                    || line.contains("There are no TAP-Windows or ovpn-dco adapters")
+                    || line.contains("adapter using service failed");
+
+            if (adapterUnavailable) {
+#ifdef Q_OS_WIN
+                // openvpn asks for tap-windows6 whenever the config is not
+                // DCO-capable; provisioning it on demand turns this fatal
+                // error into a working connection
+                if (retryWithLegacyDriver()) {
+                    return;
+                }
+#endif
+                emit protocolError(line.contains("in use or disabled") ? ErrorCode::OpenVpnAdaptersInUseError
+                                                                       : ErrorCode::OpenVpnTapAdapterError);
             } else {
                 emit protocolError(ErrorCode::OpenVpnUnknownError);
             }
