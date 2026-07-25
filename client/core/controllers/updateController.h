@@ -19,12 +19,23 @@ public:
 
 public slots:
     void checkForUpdates();
+    // Fetches version/changelog/release date without comparing versions and without
+    // emitting updateFound(). Used on mobile, where the store is the update trigger
+    // and the gateway only supplies the changelog text.
+    void fetchReleaseInfo();
     void runInstaller();
 
 signals:
     void updateFound();
+    // Emitted once fetchReleaseInfo() has finished, regardless of success.
+    void releaseInfoFetched();
 
 private:
+    enum class CheckMode {
+        UpdateCheck,
+        ReleaseInfoOnly
+    };
+
     void finishUpdateCheck();
     void fetchGatewayUrl();
     void fetchVersionInfo();
@@ -44,6 +55,7 @@ private:
     QString m_releaseDate;
     QString m_downloadUrl;
     bool m_updateCheckRunning = false;
+    CheckMode m_checkMode = CheckMode::UpdateCheck;
 
 #if defined(Q_OS_WINDOWS)
     int runWindowsInstaller(const QString &installerPath);

@@ -57,13 +57,32 @@ void UpdateController::checkForUpdates()
         return;
     }
     m_updateCheckRunning = true;
+    m_checkMode = CheckMode::UpdateCheck;
+
+    fetchGatewayUrl();
+}
+
+void UpdateController::fetchReleaseInfo()
+{
+    if (m_updateCheckRunning || !m_appSettingsRepository) {
+        // Nothing will be fetched, but the caller still waits for an answer
+        emit releaseInfoFetched();
+        return;
+    }
+    m_updateCheckRunning = true;
+    m_checkMode = CheckMode::ReleaseInfoOnly;
 
     fetchGatewayUrl();
 }
 
 void UpdateController::finishUpdateCheck()
 {
+    const bool releaseInfoOnly = (m_checkMode == CheckMode::ReleaseInfoOnly);
     m_updateCheckRunning = false;
+
+    if (releaseInfoOnly) {
+        emit releaseInfoFetched();
+    }
 }
 
 void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bool, QByteArray)> onDone)
@@ -135,8 +154,8 @@ void UpdateController::fetchVersionInfo()
             return;
         }
         m_version = QString::fromUtf8(data).trimmed();
-        
-        if (!isNewVersionAvailable()) {
+
+        if (m_checkMode == CheckMode::UpdateCheck && !isNewVersionAvailable()) {
             finishUpdateCheck();
             return;
         }
@@ -166,7 +185,9 @@ void UpdateController::fetchReleaseDate()
         }
 
         m_downloadUrl = composeDownloadUrl();
-        emit updateFound();
+        if (m_checkMode == CheckMode::UpdateCheck) {
+            emit updateFound();
+        }
         finishUpdateCheck();
     });
 }

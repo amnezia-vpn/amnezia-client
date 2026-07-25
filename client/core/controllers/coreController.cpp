@@ -158,7 +158,10 @@ void CoreController::initCoreControllers()
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
-    
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    m_marketplaceUpdateController = new MarketplaceUpdateController(m_updateController, this);
+#endif
+
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
     m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
@@ -231,7 +234,7 @@ void CoreController::initControllers()
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
     setQmlContextProperty("ApiNewsController", m_apiNewsUiController);
 
-    m_updateUiController = new UpdateUiController(m_updateController, this);
+    m_updateUiController = new UpdateUiController(m_updateController, m_marketplaceUpdateController, this);
     setQmlContextProperty("UpdateController", m_updateUiController);
 }
 
@@ -286,9 +289,11 @@ void CoreController::initSignalHandlers()
         m_apiNewsUiController->fetchNews(false);
     }
 
-    #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+        m_marketplaceUpdateController->start();
+    #else
         m_updateController->checkForUpdates();
-    #endif    
+    #endif
 }
 
 void CoreController::updateTranslator(const QLocale &locale)

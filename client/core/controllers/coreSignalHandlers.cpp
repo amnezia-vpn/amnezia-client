@@ -439,7 +439,8 @@ void CoreSignalHandlers::initNotificationHandler()
 
 void CoreSignalHandlers::initUpdateFoundHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    // On desktop the gateway version check is the trigger, on mobile it is the store;
+    // both end up in UpdateUiController::updateFound and show the same changelog drawer.
     connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {
         const QString version = m_coreController->m_updateUiController->getVersion();
         const QString updateId = version.isEmpty() ? QStringLiteral("update") : QStringLiteral("update-%1").arg(version);
@@ -447,6 +448,5 @@ void CoreSignalHandlers::initUpdateFoundHandler()
                 updateId, m_coreController->m_updateUiController->getHeaderText(), m_coreController->m_updateUiController->getChangelogText());
         emit m_coreController->m_pageController->showChangelogDrawer();
     });
-#endif
 }
 

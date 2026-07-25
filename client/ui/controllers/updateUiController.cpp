@@ -1,10 +1,20 @@
 #include "updateUiController.h"
 
-UpdateUiController::UpdateUiController(UpdateController* updateController, QObject *parent)
-    : QObject(parent), m_updateController(updateController)
+#include "ui/controllers/marketplaceUpdateController.h"
+
+UpdateUiController::UpdateUiController(UpdateController* updateController,
+                                       MarketplaceUpdateController* marketplaceUpdateController,
+                                       QObject *parent)
+    : QObject(parent), m_updateController(updateController), m_marketplaceUpdateController(marketplaceUpdateController)
 {
     if (m_updateController) {
         connect(m_updateController, &UpdateController::updateFound, this, &UpdateUiController::updateFound);
+    }
+
+    // On mobile the store is the trigger, so the drawer content is refreshed from there
+    if (m_marketplaceUpdateController) {
+        connect(m_marketplaceUpdateController, &MarketplaceUpdateController::updateAvailable, this,
+                &UpdateUiController::updateFound);
     }
 }
 
@@ -41,9 +51,13 @@ QString UpdateUiController::getChangelogText() const
 
 #ifdef Q_OS_WINDOWS
     osSection = "### Windows";
+#elif defined(Q_OS_IOS)
+    osSection = "### iOS";
 #elif defined(Q_OS_MACOS)
     osSection = "### macOS";
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+#elif defined(Q_OS_ANDROID)
+    osSection = "### Android";
+#elif defined(Q_OS_LINUX)
     osSection = "### Linux";
 #endif
 
@@ -78,7 +92,14 @@ void UpdateUiController::checkForUpdates()
 
 void UpdateUiController::runInstaller()
 {
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    // There is no installer to run on mobile, the store handles the update itself
+    if (m_marketplaceUpdateController) {
+        m_marketplaceUpdateController->openStoreUrl();
+    }
+#else
     if (m_updateController) {
         m_updateController->runInstaller();
     }
+#endif
 }

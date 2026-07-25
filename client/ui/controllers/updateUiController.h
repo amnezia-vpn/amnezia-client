@@ -5,6 +5,8 @@
 
 #include "core/controllers/updateController.h"
 
+class MarketplaceUpdateController;
+
 class UpdateUiController : public QObject
 {
     Q_OBJECT
@@ -13,7 +15,9 @@ class UpdateUiController : public QObject
     Q_PROPERTY(QString headerText READ getHeaderText NOTIFY updateFound)
 
 public:
-    explicit UpdateUiController(UpdateController* updateController, QObject *parent = nullptr);
+    explicit UpdateUiController(UpdateController* updateController,
+                                MarketplaceUpdateController* marketplaceUpdateController = nullptr,
+                                QObject *parent = nullptr);
 
     QString getHeaderText() const;
     QString getChangelogText() const;
@@ -28,6 +32,7 @@ signals:
 
 private:
     UpdateController* m_updateController;
+    MarketplaceUpdateController* m_marketplaceUpdateController;
 };
 
 #endif // UPDATEUICONTROLLER_H

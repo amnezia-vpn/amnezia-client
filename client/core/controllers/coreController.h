@@ -26,6 +26,7 @@
 #include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
 #include "ui/controllers/languageUiController.h"
+#include "ui/controllers/marketplaceUpdateController.h"
 #include "ui/controllers/updateUiController.h"
 #include "ui/controllers/api/servicesCatalogUiController.h"
 #include "ui/controllers/networkReachabilityController.h"
@@ -190,6 +191,7 @@ private:
     SubscriptionController* m_subscriptionController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
+    MarketplaceUpdateController* m_marketplaceUpdateController = nullptr;
     InstallController* m_installController;
     ExportController* m_exportController;
     ConnectionController* m_connectionController;
