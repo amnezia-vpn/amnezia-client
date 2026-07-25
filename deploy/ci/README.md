@@ -1,25 +1,26 @@
-# Linux CI builds for Ubuntu 20.04 / 22.04
+# Linux CI builds for Ubuntu 20.04 / 22.04 (compat) + default Build-Linux-Ubuntu
 
-AmneziaVPN Linux installers are produced by GitHub Actions in matching Ubuntu
-containers so the resulting binaries do not require a newer glibc than the
-target OS provides.
+Default Linux installer is still produced by **`Build-Linux-Ubuntu`** on
+`android-runner` (unchanged).
 
-| Artifact | Built in | Runs on |
+Additionally, **`Build-Linux-Ubuntu-Compat`** builds installers inside matching
+Ubuntu containers so binaries do not require a newer glibc than the target OS.
+
+| Job / Artifact | Built in | Runs on |
 |---|---|---|
+| `Build-Linux-Ubuntu` → `AmneziaVPN_*_linux_x64.run` | `android-runner` | newer glibc hosts |
 | `AmneziaVPN_*_linux_x64_ubuntu20.04.run` | `ubuntu:20.04` (glibc 2.31) | Ubuntu 20.04+ |
 | `AmneziaVPN_*_linux_x64_ubuntu22.04.run` | `ubuntu:22.04` (glibc 2.35) | Ubuntu 22.04+ |
-| `AmneziaVPN_*_linux_x64_ubuntu24.04.run` | `ubuntu:24.04` (glibc 2.39) | Ubuntu 24.04+ |
 
-## Why separate jobs
+## Why compat jobs
 
 Official Qt 6.10 Linux binaries need glibc ≥ 2.34, so they cannot be shipped
 for Ubuntu 20.04. The 20.04 job therefore builds Qt from source inside the
-container (cached between runs). The 22.04/24.04 jobs use official Qt packages via
+container (cached between runs). The 22.04 job uses official Qt packages via
 `aqt`.
 
 Conan C/C++ dependencies (OpenSSL, etc.) are always compiled inside the same
-container (`CONAN_INSTALL_ARGS=--build=*`). Reusing prebuilts built on Ubuntu
-24.04 is what caused `GLIBC_2.38 not found` on 20.04/22.04.
+container (`CONAN_INSTALL_ARGS=--build=*`) for compat jobs.
 
 ## Local reproduction
 
