@@ -8,12 +8,13 @@ target OS provides.
 |---|---|---|
 | `AmneziaVPN_*_linux_x64_ubuntu20.04.run` | `ubuntu:20.04` (glibc 2.31) | Ubuntu 20.04+ |
 | `AmneziaVPN_*_linux_x64_ubuntu22.04.run` | `ubuntu:22.04` (glibc 2.35) | Ubuntu 22.04+ |
+| `AmneziaVPN_*_linux_x64_ubuntu24.04.run` | `ubuntu:24.04` (glibc 2.39) | Ubuntu 24.04+ |
 
-## Why two jobs
+## Why separate jobs
 
 Official Qt 6.10 Linux binaries need glibc ≥ 2.34, so they cannot be shipped
 for Ubuntu 20.04. The 20.04 job therefore builds Qt from source inside the
-container (cached between runs). The 22.04 job uses official Qt packages via
+container (cached between runs). The 22.04/24.04 jobs use official Qt packages via
 `aqt`.
 
 Conan C/C++ dependencies (OpenSSL, etc.) are always compiled inside the same

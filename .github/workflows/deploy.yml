@@ -28,7 +28,7 @@ jobs:
               - 'cmake/recipes_bootstrap.cmake'
 
   # Bake Conan prebuilts on the same glibc/distros we ship for, never on
-  # ubuntu-latest (24.04+): otherwise openssl/etc. require GLIBC_2.38 and break 20.04/22.04.
+  # a mismatched host: otherwise openssl/etc. require a newer GLIBC than the target.
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
     needs: Detect-Changes
@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ubuntu: ['20.04', '22.04']
+        ubuntu: ['20.04', '22.04', '24.04']
     container:
       image: ubuntu:${{ matrix.ubuntu }}
       options: --user root
@@ -80,9 +80,10 @@ jobs:
 
 # ------------------------------------------------------
 
-  # Two Linux installers:
-  # - ubuntu20.04: built in ubuntu:20.04 (glibc 2.31) — runs on 20.04 and newer
-  # - ubuntu22.04: built in ubuntu:22.04 (glibc 2.35) — runs on 22.04 and newer
+  # Linux installers per distro glibc baseline:
+  # - ubuntu20.04: ubuntu:20.04 (glibc 2.31) — runs on 20.04+
+  # - ubuntu22.04: ubuntu:22.04 (glibc 2.35) — runs on 22.04+
+  # - ubuntu24.04: ubuntu:24.04 (glibc 2.39) — runs on 24.04+
   Build-Linux-Ubuntu:
     runs-on: ubuntu-latest
     needs: Bake-Prebuilts-Linux
@@ -96,6 +97,9 @@ jobs:
             qt_from_source: true
           - ubuntu: '22.04'
             artifact_tag: ubuntu22.04
+            qt_from_source: false
+          - ubuntu: '24.04'
+            artifact_tag: ubuntu24.04
             qt_from_source: false
     container:
       image: ubuntu:${{ matrix.ubuntu }}
@@ -207,6 +211,10 @@ jobs:
         fi
         if [[ "${{ matrix.ubuntu }}" == "22.04" && "${max_minor}" -gt 35 ]]; then
           echo "ERROR: binary requires ${max}, Ubuntu 22.04 only has glibc 2.35"
+          exit 1
+        fi
+        if [[ "${{ matrix.ubuntu }}" == "24.04" && "${max_minor}" -gt 39 ]]; then
+          echo "ERROR: binary requires ${max}, Ubuntu 24.04 only has glibc 2.39"
           exit 1
         fi
 

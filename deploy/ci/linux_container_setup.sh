@@ -70,10 +70,14 @@ if [[ "${VERSION_ID}" == "20.04" ]]; then
   if [[ ! -f /usr/local/lib/libxcb-cursor.so ]] && [[ ! -f /usr/lib/x86_64-linux-gnu/libxcb-cursor.so.0 ]]; then
     apt-get install -y --no-install-recommends autoconf automake libtool xutils-dev libxcb-render0-dev
     tmp="$(mktemp -d)"
-    git clone --depth 1 https://gitlab.freedesktop.org/xorg/lib/libxcb-cursor.git "${tmp}/libxcb-cursor"
+    # Prefer release tarball — git clone needs submodules and is fragile in CI.
+    cursor_ver="0.1.4"
+    curl -fsSL "https://xcb.freedesktop.org/dist/xcb-util-cursor-${cursor_ver}.tar.xz" \
+      -o "${tmp}/xcb-util-cursor.tar.xz"
+    tar -xJf "${tmp}/xcb-util-cursor.tar.xz" -C "${tmp}"
     (
-      cd "${tmp}/libxcb-cursor"
-      ./autogen.sh --prefix=/usr/local
+      cd "${tmp}/xcb-util-cursor-${cursor_ver}"
+      ./configure --prefix=/usr/local
       make -j"$(nproc)"
       make install
       ldconfig
