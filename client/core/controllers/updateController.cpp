@@ -20,7 +20,11 @@ namespace
     Logger logger("UpdateController");
 
 #if defined(Q_OS_WINDOWS)
+    #if defined(Q_PROCESSOR_ARM_64)
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_arm64.exe");
+    #else
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_x64.exe");
+    #endif
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
 #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos_x64.pkg");

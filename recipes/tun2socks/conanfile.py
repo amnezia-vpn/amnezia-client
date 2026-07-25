@@ -65,9 +65,16 @@ class Tun2Socks(ConanFile):
                 f"{self.name} v{self.version} does not support multiarch builds"
             )
 
+    @property
+    def _is_windows_arm64(self):
+        return self._is_windows and self._archs == ["armv8"]
+
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        if self._is_windows:
+        if self._is_windows and not self._is_windows_arm64:
+            # armv8 skips msys2/mingw entirely: neither has an armv8 build on
+            # conan-center, and tun2socks is pure Go (upstream ships
+            # CGO_ENABLED=0), so the Makefile wrapper is bypassed below
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -97,6 +104,17 @@ class Tun2Socks(ConanFile):
         tc.generate(env)
 
     def build(self):
+        if self._is_windows_arm64:
+            # mirrors the Makefile's `make tun2socks` (CGO_ENABLED=0 go build)
+            # without needing bash/make from msys2
+            out = os.path.join(self.build_folder, self._binary_name_ext)
+            env = Environment()
+            env.define("GOARCH", self._arch_map["armv8"])
+            env.define("CGO_ENABLED", "0")
+            with chdir(self, self.source_folder), env.vars(self).apply():
+                self.run(f'go build -v -trimpath -ldflags="-w -s -buildid=" -o "{out}" .')
+            return
+
         with chdir(self, self.source_folder):
             for arch in self._archs:
                 build_dir = os.path.join(self.build_folder, arch) if self._is_multiarch else self.build_folder

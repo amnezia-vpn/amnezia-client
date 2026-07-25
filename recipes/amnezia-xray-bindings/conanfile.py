@@ -56,13 +56,23 @@ class AmneziaXrayBindings(ConanFile):
     def layout(self):
         basic_layout(self)
 
+    @property
+    def _is_windows_arm64(self):
+        return self._is_windows and self._archs == ["armv8"]
+
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
         if self._is_windows:
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-            self.tool_requires("mingw-builds/15.1.0")
+            if self._is_windows_arm64:
+                # neither msys2 nor mingw-builds has an armv8 build on
+                # conan-center; llvm-mingw provides the aarch64 CGO toolchain
+                # and gendef/dlltool, the Makefile wrapper is bypassed below
+                self.tool_requires("llvm-mingw/20260616")
+            else:
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
+                self.tool_requires("mingw-builds/15.1.0")
 
     def validate(self):
         if not self._goos or not all(arch in self._arch_map for arch in self._archs):
@@ -93,7 +103,29 @@ class AmneziaXrayBindings(ConanFile):
         self._cflags = tc.cflags
         tc.generate(env)
 
+    def _build_windows_arm64(self):
+        # mirrors the Makefile's windows flow (CGO_ENABLED=1 go build
+        # -buildmode=c-shared, then gendef + dlltool for the import library)
+        # without bash/make from msys2
+        dll = os.path.join(self.build_folder, "amnezia_xray.dll")
+        env = Environment()
+        env.define("GOARCH", self._arch_map["armv8"])
+        env.define("CGO_ENABLED", "1")
+        env.define("CC", "aarch64-w64-mingw32-gcc")
+        env.define("CXX", "aarch64-w64-mingw32-g++")
+        env.define("CGO_CFLAGS", " ".join(self._cflags))
+        env.define("CGO_LDFLAGS", " ".join(self._ldflags))
+        with chdir(self, self.source_folder), env.vars(self).apply():
+            self.run(f'go build -ldflags=-w -o "{dll}" -buildmode=c-shared')
+        with chdir(self, self.build_folder), env.vars(self).apply():
+            self.run("gendef amnezia_xray.dll")
+            self.run("aarch64-w64-mingw32-dlltool -d amnezia_xray.def -D amnezia_xray.dll -l amnezia_xray.lib")
+
     def build(self):
+        if self._is_windows_arm64:
+            self._build_windows_arm64()
+            return
+
         with chdir(self, self.source_folder):
             for arch in self._archs:
                 build_dir = os.path.join(self.build_folder, arch) if self._is_multiarch else self.build_folder
