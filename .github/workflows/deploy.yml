@@ -156,6 +156,10 @@ jobs:
     container:
       image: ubuntu:${{ matrix.ubuntu }}
       options: --user root
+    # Container default shell is dash (/bin/sh); bash is required for pipefail/[[ ]].
+    defaults:
+      run:
+        shell: bash
 
     env:
       QT_VERSION: 6.10.1
@@ -175,7 +179,7 @@ jobs:
       run: |
         export DEBIAN_FRONTEND=noninteractive
         apt-get update
-        apt-get install -y --no-install-recommends ca-certificates git
+        apt-get install -y --no-install-recommends ca-certificates git bash curl
 
     - uses: actions/checkout@v4
       with:
