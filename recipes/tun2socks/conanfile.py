@@ -14,7 +14,7 @@ import shlex
 
 class Tun2Socks(ConanFile):
     name = "tun2socks"
-    version = "2.6.0"
+    version = "2.7.0"
     package_type = "application"
     settings = "os", "arch"
 
@@ -86,7 +86,7 @@ class Tun2Socks(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/xjasonlyu/tun2socks/archive/refs/tags/v{self.version}.zip",
-            sha256="a7ef9cec1c30dfe9971af89a8aac767fd3d2a4df833e92b635642c2f0204c701", strip_root=True
+            sha256="ffc4b85bd8a6a1a5fff1c755aeeca81358a435151d82a43cb44a9489a68907a0", strip_root=True
         )
 
     def generate(self):
