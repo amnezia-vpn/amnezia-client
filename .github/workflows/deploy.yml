@@ -27,29 +27,47 @@ jobs:
               - 'cmake/platform_settings.cmake'
               - 'cmake/recipes_bootstrap.cmake'
 
+  # Bake Conan prebuilts on the same glibc/distros we ship for, never on
+  # ubuntu-latest (24.04+): otherwise openssl/etc. require GLIBC_2.38 and break 20.04/22.04.
   Bake-Prebuilts-Linux:
     runs-on: ubuntu-latest
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        ubuntu: ['20.04', '22.04']
+    container:
+      image: ubuntu:${{ matrix.ubuntu }}
+      options: --user root
 
     steps:
+    - name: 'Install git'
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get install -y --no-install-recommends ca-certificates git
+
     - uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
 
-    - uses: actions/setup-python@v6
-      with:
-        python-version: 3.14
+    - name: 'Container setup'
+      run: bash deploy/ci/linux_container_setup.sh
 
     - name: 'Install conan'
-      run: pip install "conan==2.28.0"
+      run: pip3 install "conan==2.28.0"
 
     - name: 'Build dependencies'
       shell: bash
+      env:
+        # Always compile in-container; do not reuse foreign glibc binaries.
+        CONAN_INSTALL_ARGS: "--build=*;-o=openssl/*:shared=True"
       run: |
+        conan profile detect --force
         for build_type in Release Debug; do
-          cmake -S . -B build -DPREBUILTS_ONLY=1 "-DCMAKE_BUILD_TYPE=$build_type"
+          cmake -S . -B "build-${{ matrix.ubuntu }}" -DPREBUILTS_ONLY=1 "-DCMAKE_BUILD_TYPE=$build_type"
         done
 
     - name: 'Authorize in remote'
@@ -62,15 +80,31 @@ jobs:
 
 # ------------------------------------------------------
 
+  # Two Linux installers:
+  # - ubuntu20.04: built in ubuntu:20.04 (glibc 2.31) — runs on 20.04 and newer
+  # - ubuntu22.04: built in ubuntu:22.04 (glibc 2.35) — runs on 22.04 and newer
   Build-Linux-Ubuntu:
-    runs-on: android-runner
-
+    runs-on: ubuntu-latest
     needs: Bake-Prebuilts-Linux
     if: ${{ always() }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - ubuntu: '20.04'
+            artifact_tag: ubuntu20.04
+            qt_from_source: true
+          - ubuntu: '22.04'
+            artifact_tag: ubuntu22.04
+            qt_from_source: false
+    container:
+      image: ubuntu:${{ matrix.ubuntu }}
+      options: --user root
 
     env:
       QT_VERSION: 6.10.1
       QIF_VERSION: 4.7
+      QT_INSTALL_DIR: /opt
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -81,53 +115,125 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
-    - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'desktop'
-        arch: 'linux_gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
-        dir: ${{ runner.temp }}
-        setup-python: 'true'
-        tools: 'tools_ifw'
-        set-env: 'true'
-        aqtversion: '==3.3.0'       
-        py7zrversion: '==0.22.*'  
-        extra: '--base ${{ env.QT_MIRROR }}'
+    - name: 'Install git'
+      run: |
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update
+        apt-get install -y --no-install-recommends ca-certificates git
 
-    - name: 'Setup python'
-      uses: actions/setup-python@v6
-      with:
-        python-version: 3.14
-      
-    - name: 'Install conan'
-      run: pip install "conan==2.28.0"
-
-    - name: 'Install system packages'
-      run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
-
-    - name: 'Get sources'
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
         submodules: 'true'
         fetch-depth: 10
 
+    - name: 'Container setup'
+      run: bash deploy/ci/linux_container_setup.sh
+
+    - name: 'Install conan'
+      run: pip3 install "conan==2.28.0"
+
+    - name: 'Configure Conan for this distro'
+      run: |
+        conan profile detect --force
+        # Do not reuse amnezia remote binaries: same package_id can be linked
+        # against a newer glibc (built on 24.04) and break this container's target.
+        conan remote disable amnezia || true
+
+    - name: 'Cache Qt (source build, 20.04)'
+      if: matrix.qt_from_source
+      uses: actions/cache@v4
+      with:
+        path: /opt/Qt/${{ env.QT_VERSION }}
+        key: qt-src-${{ env.QT_VERSION }}-ubuntu${{ matrix.ubuntu }}-gcc10
+
+    - name: 'Build Qt from source (20.04)'
+      if: matrix.qt_from_source
+      run: bash deploy/ci/build_qt_from_source.sh
+      env:
+        QT_VERSION: ${{ env.QT_VERSION }}
+        QT_PREFIX: /opt/Qt/${{ env.QT_VERSION }}/gcc_64
+
+    - name: 'Install Qt IFW (20.04)'
+      if: matrix.qt_from_source
+      run: bash deploy/ci/install_qt_ifw.sh
+      env:
+        QIF_VERSION: ${{ env.QIF_VERSION }}
+
+    - name: 'Install Qt (official binaries, 22.04+)'
+      if: ${{ !matrix.qt_from_source }}
+      run: |
+        set -euo pipefail
+        pip3 install "aqtinstall==3.3.0" "py7zr==0.22.*"
+        python3 -m aqt install-qt linux desktop "${{ env.QT_VERSION }}" linux_gcc_64 \
+          -m qtremoteobjects qt5compat qtshadertools \
+          -O /opt/Qt \
+          --base "${{ env.QT_MIRROR }}"
+        python3 -m aqt install-tool linux desktop tools_ifw \
+          -O /opt/Qt \
+          --base "${{ env.QT_MIRROR }}"
+        if [[ ! -x /opt/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin/binarycreator ]]; then
+          found="$(find /opt/Qt -type f -name binarycreator 2>/dev/null | head -1 || true)"
+          if [[ -n "${found}" ]]; then
+            mkdir -p "/opt/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin"
+            cp -a "$(dirname "${found}")/." "/opt/Qt/Tools/QtInstallerFramework/${{ env.QIF_VERSION }}/bin/"
+          fi
+        fi
+
     - name: 'Build project'
       shell: bash
       env:
-        QT_INSTALL_DIR: ${{ runner.temp }}
-      run: deploy/build.sh --generator Ninja --installer all
+        # Force compiling all Conan packages inside this glibc.
+        CONAN_INSTALL_ARGS: "--build=*;-o=openssl/*:shared=True"
+      run: deploy/build.sh --generator Ninja --installer all -f
+
+    - name: 'Verify glibc ceiling'
+      shell: bash
+      run: |
+        set -euo pipefail
+        bin="$(find deploy/build -type f -name AmneziaVPN -perm -111 ! -name '*.sh' | head -1)"
+        echo "Checking ${bin}"
+        mapfile -t vers < <(strings "${bin}" | grep -E '^GLIBC_2\.[0-9]+$' | sort -Vu)
+        if [[ ${#vers[@]} -eq 0 ]]; then
+          echo "ERROR: no GLIBC version symbols found in ${bin}"
+          exit 1
+        fi
+        printf 'GLIBC symbols: %s\n' "${vers[*]}"
+        max="${vers[-1]}"
+        echo "Max GLIBC symbol: ${max}"
+        max_minor="${max#GLIBC_2.}"
+        if [[ "${{ matrix.ubuntu }}" == "20.04" && "${max_minor}" -gt 31 ]]; then
+          echo "ERROR: binary requires ${max}, Ubuntu 20.04 only has glibc 2.31"
+          exit 1
+        fi
+        if [[ "${{ matrix.ubuntu }}" == "22.04" && "${max_minor}" -gt 35 ]]; then
+          echo "ERROR: binary requires ${max}, Ubuntu 22.04 only has glibc 2.35"
+          exit 1
+        fi
+
+    - name: 'Tag installer artifact'
+      shell: bash
+      run: |
+        set -euo pipefail
+        shopt -s nullglob
+        files=(deploy/build/AmneziaVPN_*_linux_x64.run)
+        if [[ ${#files[@]} -eq 0 ]]; then
+          echo "No .run installer found"; ls -la deploy/build || true; exit 1
+        fi
+        for f in "${files[@]}"; do
+          mv -v "$f" "${f/_linux_x64.run/_linux_x64_${{ matrix.artifact_tag }}.run}"
+        done
+        ls -la deploy/build/AmneziaVPN_*_linux_x64_*.run
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN_*_linux_x64.run
+        name: AmneziaVPN_linux_${{ matrix.artifact_tag }}
+        path: deploy/build/AmneziaVPN_*_linux_x64_${{ matrix.artifact_tag }}.run
         archive: false
         retention-days: 7
 
     - name: 'Upload translations artifact'
+      if: matrix.ubuntu == '22.04'
       uses: actions/upload-artifact@v4
       with:
         name: AmneziaVPN_translations

@@ -36,4 +36,10 @@ endif()
 
 list(PREPEND _CONAN_INSTALL_ARGS "--build=missing")
 list(JOIN _CONAN_INSTALL_ARGS ";" _CONAN_INSTALL_ARGS_JOINED)
-set(CONAN_INSTALL_ARGS ${_CONAN_INSTALL_ARGS_JOINED} CACHE STRING "" FORCE)
+# CI can override (e.g. CONAN_INSTALL_ARGS='--build=*;-o=openssl/*:shared=True')
+# so Linux containers never reuse binaries linked against a newer glibc.
+if(DEFINED ENV{CONAN_INSTALL_ARGS} AND NOT "$ENV{CONAN_INSTALL_ARGS}" STREQUAL "")
+    set(CONAN_INSTALL_ARGS "$ENV{CONAN_INSTALL_ARGS}" CACHE STRING "" FORCE)
+else()
+    set(CONAN_INSTALL_ARGS ${_CONAN_INSTALL_ARGS_JOINED} CACHE STRING "" FORCE)
+endif()
