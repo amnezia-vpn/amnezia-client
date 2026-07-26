@@ -9,11 +9,9 @@
     #include <QJsonDocument>
     #include <QJsonObject>
     #include <QLocale>
-    #include <QNetworkInformation>
     #include <QNetworkReply>
     #include <QNetworkRequest>
     #include <QRegularExpression>
-    #include <QTimer>
     #include <QVersionNumber>
 
     #include "amneziaApplication.h"
@@ -37,9 +35,6 @@ constexpr auto kIosStoreUrlFallback = "itms-apps://itunes.apple.com/app/id160052
 constexpr auto kAndroidPackage = "org.amnezia.vpn";
 constexpr auto kGithubReleasesUrl = "https://github.com/amnezia-vpn/amnezia-client/releases/latest";
 #endif
-
-constexpr int kMaxNetworkAttempts = 3;
-constexpr int kNetworkRetryMs = 2000;
 } // namespace
 #endif
 
@@ -76,10 +71,6 @@ void MarketplaceUpdateController::onPlayUpdateResult(int status)
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
 void MarketplaceUpdateController::startNetworkCheck()
 {
-    if (m_updateChecked) {
-        return;
-    }
-
     const QUrl url = versionSourceUrl();
     if (!url.isValid()) {
         return;
@@ -96,7 +87,6 @@ void MarketplaceUpdateController::startNetworkCheck()
 
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "[MarketplaceUpdate] network error:" << reply->errorString();
-            retryOrWaitForNetwork();
             return;
         }
 
@@ -104,7 +94,6 @@ void MarketplaceUpdateController::startNetworkCheck()
         QString storeUrl;
         if (!parseStoreVersion(reply->readAll(), version, storeUrl) || version.isEmpty()) {
             qWarning() << "[MarketplaceUpdate] could not determine store version";
-            m_updateChecked = true;
             return;
         }
 
@@ -112,48 +101,10 @@ void MarketplaceUpdateController::startNetworkCheck()
         const auto store = QVersionNumber::fromString(version).normalized();
         qInfo() << "[MarketplaceUpdate] current:" << current.toString() << "store:" << store.toString();
 
-        m_updateChecked = true;
         if (store > current) {
             showUpdatePrompt(storeUrl);
         }
     });
-}
-
-void MarketplaceUpdateController::retryOrWaitForNetwork()
-{
-    if (m_updateChecked) {
-        return;
-    }
-
-    if (++m_networkAttempts < kMaxNetworkAttempts) {
-        QTimer::singleShot(kNetworkRetryMs, this, [this]() { startNetworkCheck(); });
-    } else {
-        armReachabilityWatcher();
-    }
-}
-
-void MarketplaceUpdateController::armReachabilityWatcher()
-{
-    if (m_reachabilityWatcherArmed) {
-        return;
-    }
-    QNetworkInformation::loadDefaultBackend();
-    QNetworkInformation *info = QNetworkInformation::instance();
-    if (!info) {
-        return;
-    }
-    m_reachabilityWatcherArmed = true;
-    connect(info, &QNetworkInformation::reachabilityChanged, this,
-            [this](QNetworkInformation::Reachability reachability) {
-                if (m_updateChecked) {
-                    return;
-                }
-                if (reachability == QNetworkInformation::Reachability::Online) {
-                    qInfo() << "[MarketplaceUpdate] connectivity restored, re-checking";
-                    m_networkAttempts = 0;
-                    startNetworkCheck();
-                }
-            });
 }
 
 QUrl MarketplaceUpdateController::versionSourceUrl() const
