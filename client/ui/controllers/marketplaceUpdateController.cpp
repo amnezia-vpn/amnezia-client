@@ -54,6 +54,7 @@ void MarketplaceUpdateController::start()
     }
 
     QNetworkRequest request(url);
+    request.setTransferTimeout(1000);
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
     request.setHeader(QNetworkRequest::UserAgentHeader, QByteArrayLiteral("AmneziaVPN"));
 
