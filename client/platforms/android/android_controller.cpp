@@ -103,7 +103,8 @@ bool AndroidController::initialize()
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
         {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
         {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
-        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)},
+        {"onPlayUpdateResult", "(I)V", reinterpret_cast<void *>(onPlayUpdateResult)}
     };
 
     QJniEnvironment env;
@@ -154,14 +155,15 @@ void AndroidController::resetLastServer(int serverIndex)
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
 }
 
-void AndroidController::showUpdateCover()
+void AndroidController::checkPlayUpdate(const QString &restartTitle, const QString &restartMessage,
+                                       const QString &restartAction, const QString &restartLater)
 {
-    callActivityMethod("showUpdateCover", "()V");
-}
-
-void AndroidController::hideUpdateCover()
-{
-    callActivityMethod("hideUpdateCover", "()V");
+    callActivityMethod("checkPlayUpdate",
+                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(restartTitle).object<jstring>(),
+                       QJniObject::fromString(restartMessage).object<jstring>(),
+                       QJniObject::fromString(restartAction).object<jstring>(),
+                       QJniObject::fromString(restartLater).object<jstring>());
 }
 
 void AndroidController::showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
@@ -598,6 +600,15 @@ void AndroidController::onActivityResumed(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->activityResumed();
+}
+
+// static
+void AndroidController::onPlayUpdateResult(JNIEnv *env, jobject thiz, jint status)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->playUpdateResult(static_cast<int>(status));
 }
 
 

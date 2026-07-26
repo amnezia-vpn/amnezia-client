@@ -1,7 +1,6 @@
 #ifndef MARKETPLACEUPDATECONTROLLER_H
 #define MARKETPLACEUPDATECONTROLLER_H
 
-#include <QNetworkAccessManager>
 #include <QObject>
 #include <QUrl>
 
@@ -17,13 +16,21 @@ public slots:
 
 private:
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+    void startNetworkCheck();
+    void retryOrWaitForNetwork();
+    void armReachabilityWatcher();
     QUrl versionSourceUrl() const;
     bool parseStoreVersion(const QByteArray &body, QString &version, QString &storeUrl);
-    void showCover();
-    void hideCover();
     void showUpdatePrompt(const QString &storeUrl);
 
-    QNetworkAccessManager m_nam;
+    int m_networkAttempts = 0;
+    bool m_updateChecked = false;
+    bool m_reachabilityWatcherArmed = false;
+#endif
+
+#if defined(Q_OS_ANDROID)
+private slots:
+    void onPlayUpdateResult(int status);
 #endif
 };
 

@@ -81,8 +81,6 @@ public:
     void requestInetAccess();
     bool isTestFlight();
 
-    void showUpdateCover();
-    void hideUpdateCover();
     void showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
                           const QString &skipTitle, const QString &storeUrl);
 signals:

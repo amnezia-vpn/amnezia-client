@@ -9,10 +9,14 @@
     #include <QJsonDocument>
     #include <QJsonObject>
     #include <QLocale>
+    #include <QNetworkInformation>
     #include <QNetworkReply>
     #include <QNetworkRequest>
     #include <QRegularExpression>
+    #include <QTimer>
     #include <QVersionNumber>
+
+    #include "amneziaApplication.h"
 #endif
 
 #if defined(Q_OS_IOS)
@@ -31,8 +35,11 @@ constexpr auto kIosBundleId = "org.amnezia.AmneziaVPN";
 constexpr auto kIosStoreUrlFallback = "itms-apps://itunes.apple.com/app/id1600529900";
 #else
 constexpr auto kAndroidPackage = "org.amnezia.vpn";
-constexpr auto kAndroidStoreUrl = "https://play.google.com/store/apps/details?id=org.amnezia.vpn";
+constexpr auto kGithubReleasesUrl = "https://github.com/amnezia-vpn/amnezia-client/releases/latest";
 #endif
+
+constexpr int kMaxNetworkAttempts = 3;
+constexpr int kNetworkRetryMs = 2000;
 } // namespace
 #endif
 
@@ -42,28 +49,54 @@ MarketplaceUpdateController::MarketplaceUpdateController(QObject *parent) : QObj
 
 void MarketplaceUpdateController::start()
 {
+#if defined(Q_OS_IOS)
+    startNetworkCheck();
+#elif defined(Q_OS_ANDROID)
+    connect(AndroidController::instance(), &AndroidController::playUpdateResult, this,
+            &MarketplaceUpdateController::onPlayUpdateResult, Qt::UniqueConnection);
+
+    const QString restartTitle = tr("Update downloaded");
+    const QString restartMessage = tr("An update to AmneziaVPN has been downloaded. Restart to install it.");
+    const QString restartAction = tr("Restart");
+    const QString restartLater = tr("Later");
+    AndroidController::instance()->checkPlayUpdate(restartTitle, restartMessage, restartAction, restartLater);
+#endif
+}
+
+#if defined(Q_OS_ANDROID)
+void MarketplaceUpdateController::onPlayUpdateResult(int status)
+{
+    if (status == 1) {
+        qInfo() << "[MarketplaceUpdate] Play unavailable, falling back to GitHub";
+        startNetworkCheck();
+    }
+}
+#endif
+
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
-    // Cover the app immediately so the store UI is not visible before the check
-    // resolves (avoids a flash of the main window before the update screen).
-    showCover();
+void MarketplaceUpdateController::startNetworkCheck()
+{
+    if (m_updateChecked) {
+        return;
+    }
 
     const QUrl url = versionSourceUrl();
     if (!url.isValid()) {
-        hideCover();
         return;
     }
 
     QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
     request.setHeader(QNetworkRequest::UserAgentHeader, QByteArrayLiteral("AmneziaVPN"));
+    request.setTransferTimeout(7000);
 
-    QNetworkReply *reply = m_nam.get(request);
+    QNetworkReply *reply = amnApp->networkManager()->get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
             qWarning() << "[MarketplaceUpdate] network error:" << reply->errorString();
-            hideCover();
+            retryOrWaitForNetwork();
             return;
         }
 
@@ -71,7 +104,7 @@ void MarketplaceUpdateController::start()
         QString storeUrl;
         if (!parseStoreVersion(reply->readAll(), version, storeUrl) || version.isEmpty()) {
             qWarning() << "[MarketplaceUpdate] could not determine store version";
-            hideCover();
+            m_updateChecked = true;
             return;
         }
 
@@ -79,16 +112,50 @@ void MarketplaceUpdateController::start()
         const auto store = QVersionNumber::fromString(version).normalized();
         qInfo() << "[MarketplaceUpdate] current:" << current.toString() << "store:" << store.toString();
 
+        m_updateChecked = true;
         if (store > current) {
             showUpdatePrompt(storeUrl);
-        } else {
-            hideCover();
         }
     });
-#endif
 }
 
-#if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
+void MarketplaceUpdateController::retryOrWaitForNetwork()
+{
+    if (m_updateChecked) {
+        return;
+    }
+
+    if (++m_networkAttempts < kMaxNetworkAttempts) {
+        QTimer::singleShot(kNetworkRetryMs, this, [this]() { startNetworkCheck(); });
+    } else {
+        armReachabilityWatcher();
+    }
+}
+
+void MarketplaceUpdateController::armReachabilityWatcher()
+{
+    if (m_reachabilityWatcherArmed) {
+        return;
+    }
+    QNetworkInformation::loadDefaultBackend();
+    QNetworkInformation *info = QNetworkInformation::instance();
+    if (!info) {
+        return;
+    }
+    m_reachabilityWatcherArmed = true;
+    connect(info, &QNetworkInformation::reachabilityChanged, this,
+            [this](QNetworkInformation::Reachability reachability) {
+                if (m_updateChecked) {
+                    return;
+                }
+                if (reachability == QNetworkInformation::Reachability::Online) {
+                    qInfo() << "[MarketplaceUpdate] connectivity restored, re-checking";
+                    m_networkAttempts = 0;
+                    startNetworkCheck();
+                }
+            });
+}
+
 QUrl MarketplaceUpdateController::versionSourceUrl() const
 {
   #if defined(Q_OS_IOS)
@@ -124,26 +191,8 @@ bool MarketplaceUpdateController::parseStoreVersion(const QByteArray &body, QStr
     if (match.hasMatch()) {
         version = match.captured(1);
     }
-    storeUrl = QString::fromLatin1(kAndroidStoreUrl);
+    storeUrl = QString::fromLatin1(kGithubReleasesUrl);
     return !version.isEmpty();
-  #endif
-}
-
-void MarketplaceUpdateController::showCover()
-{
-  #if defined(Q_OS_IOS)
-    IosController::Instance()->showUpdateCover();
-  #else
-    AndroidController::instance()->showUpdateCover();
-  #endif
-}
-
-void MarketplaceUpdateController::hideCover()
-{
-  #if defined(Q_OS_IOS)
-    IosController::Instance()->hideUpdateCover();
-  #else
-    AndroidController::instance()->hideUpdateCover();
   #endif
 }
 
