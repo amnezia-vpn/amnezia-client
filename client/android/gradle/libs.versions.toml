@@ -1,6 +1,6 @@
 [versions]
 agp = "8.6.1"
-kotlin = "1.9.24"
+kotlin = "2.1.0"
 android-billing = "8.0.0"
 androidx-core = "1.13.1"
 androidx-activity = "1.9.1"
