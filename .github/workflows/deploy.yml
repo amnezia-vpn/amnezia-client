@@ -28,7 +28,7 @@ jobs:
               - 'cmake/recipes_bootstrap.cmake'
 
   Bake-Prebuilts-Linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
@@ -63,7 +63,7 @@ jobs:
 # ------------------------------------------------------
 
   Build-Linux-Ubuntu:
-    runs-on: android-runner
+    runs-on: ubuntu-22.04
 
     needs: Bake-Prebuilts-Linux
     if: ${{ always() }}
