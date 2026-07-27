@@ -123,6 +123,7 @@ class BillingProvider(context: Context) : AutoCloseable {
                         .put("billingCycleCount", phase.billingCycleCount)
                         .put("billingPeriod", phase.billingPeriod)
                         .put("formatedPrice", phase.formattedPrice)
+                        .put("priceAmountMicros", phase.priceAmountMicros)
                         .put("recurrenceMode", phase.recurrenceMode)
                 }
             }

@@ -886,19 +886,29 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         }
         QJsonArray products = plansResult.value("products").toArray();
         QString offerToken;
+        QString fallbackOfferToken;
         for (const QJsonValue &productValue : products) {
             QJsonObject product = productValue.toObject();
             QJsonArray offers = product.value("offers").toArray();
             for (const QJsonValue &offerValue : offers) {
                 QJsonObject offer = offerValue.toObject();
-                if (offer.value("basePlanId").toString() == productId) {
-                    offerToken = offer.value("offerToken").toString();
-                    qInfo() << "[Billing] Found offer token for basePlanId:" << productId;
+                if (offer.value("basePlanId").toString() != productId) continue;
+
+                const QString token = offer.value("offerToken").toString();
+                if (fallbackOfferToken.isEmpty()) fallbackOfferToken = token;
+
+                QJsonArray pricingPhases = offer.value("pricingPhases").toArray();
+                const bool hasFreeTrial = !pricingPhases.isEmpty()
+                        && pricingPhases.first().toObject().value("priceAmountMicros").toDouble() == 0;
+                if (hasFreeTrial) {
+                    offerToken = token;
+                    qInfo() << "[Billing] Found free trial offer for basePlanId:" << productId;
                     break;
                 }
             }
             if (!offerToken.isEmpty()) break;
         }
+        if (offerToken.isEmpty()) offerToken = fallbackOfferToken;
         if (offerToken.isEmpty()) {
             qWarning() << "[Billing] No offer token found for basePlanId:" << productId;
             return qMakePair(false, QString());
