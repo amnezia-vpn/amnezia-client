@@ -115,7 +115,10 @@ public class StoreKit2Helper: NSObject {
         Task {
             do {
                 let products = try await Product.products(for: identifiers)
-                let productDicts = products.map { product in productDictionary(for: product) }
+                var productDicts: [NSDictionary] = []
+                for product in products {
+                    productDicts.append(await productDictionary(for: product))
+                }
                 let fetchedIds = Set(products.map { $0.id })
                 let invalidIdentifiers = identifiers.filter { !fetchedIds.contains($0) }
                 DispatchQueue.main.async { completion(productDicts, Array(invalidIdentifiers), nil) }
@@ -140,7 +143,20 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
-    private func productDictionary(for product: Product) -> NSDictionary {
+    private func introOfferPaymentModeString(_ mode: Product.SubscriptionOffer.PaymentMode) -> String {
+        switch mode {
+        case .freeTrial:
+            return "freeTrial"
+        case .payAsYouGo:
+            return "payAsYouGo"
+        case .payUpFront:
+            return "payUpFront"
+        default:
+            return "unknown"
+        }
+    }
+
+    private func productDictionary(for product: Product) async -> NSDictionary {
         let currencyCode = storefrontCurrencyCode(for: product)
         var productData: [String: Any] = [
             "productId": product.id,
@@ -156,6 +172,14 @@ public class StoreKit2Helper: NSObject {
             productData["subscriptionBillingMonths"] = billingMonths
             if let perMonthPrice = displayPricePerMonth(for: product, billingMonths: billingMonths, currencyCode: currencyCode) {
                 productData["displayPricePerMonth"] = perMonthPrice
+            }
+
+            // Free trials stay invisible in the catalog price (matches Android: it silently applies
+            // at purchase time). Only surface genuine paid discounts (payAsYouGo/payUpFront) here.
+            if let introOffer = subscription.introductoryOffer, introOffer.paymentMode != .freeTrial,
+               await subscription.isEligibleForIntroOffer {
+                productData["introOfferDisplayPrice"] = introOffer.displayPrice
+                productData["introOfferPaymentMode"] = introOfferPaymentModeString(introOffer.paymentMode)
             }
         }
         return productData as NSDictionary

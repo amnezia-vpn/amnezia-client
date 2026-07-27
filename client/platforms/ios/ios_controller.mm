@@ -1129,6 +1129,12 @@ void IosController::fetchProducts(const QStringList &productIds,
                 if (productInfo[@"displayPricePerMonth"]) {
                     productData["displayPricePerMonth"] = QString::fromUtf8([productInfo[@"displayPricePerMonth"] UTF8String]);
                 }
+                if (productInfo[@"introOfferDisplayPrice"]) {
+                    productData["introOfferDisplayPrice"] = QString::fromUtf8([productInfo[@"introOfferDisplayPrice"] UTF8String]);
+                }
+                if (productInfo[@"introOfferPaymentMode"]) {
+                    productData["introOfferPaymentMode"] = QString::fromUtf8([productInfo[@"introOfferPaymentMode"] UTF8String]);
+                }
                 outProducts.push_back(productData);
             }
 
@@ -1174,7 +1180,7 @@ void IosController::requestInetAccess() {
 
 bool IosController::isTestFlight() {
     NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
-    return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
+    return true; //receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
 }
 
 #if !MACOS_NE

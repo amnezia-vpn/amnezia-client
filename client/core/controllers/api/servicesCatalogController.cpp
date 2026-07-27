@@ -116,10 +116,20 @@ namespace
             }
 
             SubscriptionPlanQuote quote;
-            quote.displayPrice = displayPrice;
             quote.priceAmount = productInfo.value(QStringLiteral("priceAmount")).toDouble();
             quote.subscriptionBillingMonths = productInfo.value(QStringLiteral("subscriptionBillingMonths")).toDouble();
             quote.displayPricePerMonth = productInfo.value(QStringLiteral("displayPricePerMonth")).toString();
+
+            // If the account is eligible for a paid introductory discount (not a free trial, which
+            // stays invisible here and just applies silently at purchase time), show that price instead.
+            const QString introOfferDisplayPrice = productInfo.value(QStringLiteral("introOfferDisplayPrice")).toString();
+            if (introOfferDisplayPrice.isEmpty()) {
+                quote.displayPrice = displayPrice;
+            } else {
+                quote.displayPrice = introOfferDisplayPrice;
+                qInfo().noquote() << "[IAP] Applying" << productInfo.value(QStringLiteral("introOfferPaymentMode")).toString()
+                                  << "intro offer price for" << productId << ":" << introOfferDisplayPrice;
+            }
             quotesByProductId.insert(productId, quote);
         }
 
@@ -257,7 +267,7 @@ namespace
             serviceObject.insert(configKey::serviceDescription, descriptionObject);
             services.replace(serviceIndex, serviceObject);
         }
-        qInfo().noquote() << "[IAP] Merged store quotes into" << mergedPlanCount << "premium plan(s)";
+        qInfo().noquote() << "[Store] Merged store quotes into" << mergedPlanCount << "premium plan(s)";
         data.insert(apiDefs::key::services, services);
     }
 
