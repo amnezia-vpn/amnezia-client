@@ -30,9 +30,33 @@ import org.amnezia.vpn.util.ErrorCode
 import org.amnezia.vpn.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.NumberFormat
+import java.util.Currency
 
 private const val TAG = "BillingProvider"
 private const val PRODUCT_ID = "premium"
+
+private val billingPeriodRegex = Regex("""P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)W)?(?:(\d+)D)?""")
+
+private fun billingPeriodToMonths(period: String): Double {
+    val match = billingPeriodRegex.matchEntire(period) ?: return 0.0
+    val years = match.groupValues[1].toDoubleOrNull() ?: 0.0
+    val months = match.groupValues[2].toDoubleOrNull() ?: 0.0
+    val weeks = match.groupValues[3].toDoubleOrNull() ?: 0.0
+    val days = match.groupValues[4].toDoubleOrNull() ?: 0.0
+    return years * 12.0 + months + weeks * 7.0 / 30.0 + days / 30.0
+}
+
+private fun displayPricePerMonth(priceAmountMicros: Long, currencyCode: String, billingMonths: Double): String? {
+    if (billingMonths <= 1e-6 || currencyCode.isBlank()) return null
+    return try {
+        val amountPerMonth = (priceAmountMicros / 1_000_000.0) / billingMonths
+        NumberFormat.getCurrencyInstance().apply { currency = Currency.getInstance(currencyCode) }
+            .format(amountPerMonth)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+}
 
 class BillingProvider(context: Context) : AutoCloseable {
 
@@ -119,12 +143,19 @@ class BillingProvider(context: Context) : AutoCloseable {
                     .put("offerToken", offerDetails.offerToken)
                 val pricingPhases = JSONArray().also { offer.put("pricingPhases", it) }
                 offerDetails.pricingPhases.pricingPhaseList.forEach { phase ->
+                    val billingMonths = billingPeriodToMonths(phase.billingPeriod)
                     JSONObject().also { pricingPhases.put(it) }
                         .put("billingCycleCount", phase.billingCycleCount)
                         .put("billingPeriod", phase.billingPeriod)
                         .put("formatedPrice", phase.formattedPrice)
                         .put("priceAmountMicros", phase.priceAmountMicros)
                         .put("recurrenceMode", phase.recurrenceMode)
+                        .put("subscriptionBillingMonths", billingMonths)
+                        .apply {
+                            displayPricePerMonth(phase.priceAmountMicros, phase.priceCurrencyCode, billingMonths)?.let {
+                                put("displayPricePerMonth", it)
+                            }
+                        }
                 }
             }
         }
