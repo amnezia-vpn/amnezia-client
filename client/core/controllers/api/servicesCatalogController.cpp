@@ -123,6 +123,7 @@ namespace
             quotesByProductId.insert(productId, quote);
         }
 
+        qInfo().noquote() << "[IAP] Built StoreKit quote map, quotes:" << quotesByProductId.size();
         return quotesByProductId;
     }
 #elif defined(Q_OS_ANDROID)
@@ -148,6 +149,7 @@ namespace
                        << plansResult.value("responseCode").toInt(-1);
             return quotesByProductId;
         }
+        qInfo() << "[Billing] Fetched subscription plans for price display";
 
         const QJsonArray products = plansResult.value("products").toArray();
         for (const QJsonValue &productValue : products) {
@@ -177,6 +179,7 @@ namespace
                 quotesByProductId.insert(basePlanId, quote);
             }
         }
+        qInfo() << "[Billing] Built Google Play quote map, quotes:" << quotesByProductId.size();
         return quotesByProductId;
     }
 #endif
@@ -188,6 +191,7 @@ namespace
             return;
         }
 
+        int mergedPlanCount = 0;
         for (int serviceIndex = 0; serviceIndex < services.size(); ++serviceIndex) {
             QJsonObject serviceObject = services.at(serviceIndex).toObject();
             if (serviceObject.value(apiDefs::key::serviceType).toString() != serviceType::amneziaPremium) {
@@ -220,6 +224,7 @@ namespace
                 const bool isTrialPlan = planObject.value(configKey::isTrial).toBool();
                 const SubscriptionPlanQuote &quote = *quoteIterator;
                 planObject.insert(configKey::priceLabel, quote.displayPrice);
+                ++mergedPlanCount;
 
                 const double months = quote.subscriptionBillingMonths;
                 if (!isTrialPlan && months > oneMonthThreshold && !quote.displayPricePerMonth.isEmpty()) {
@@ -252,6 +257,7 @@ namespace
             serviceObject.insert(configKey::serviceDescription, descriptionObject);
             services.replace(serviceIndex, serviceObject);
         }
+        qInfo().noquote() << "[IAP] Merged store quotes into" << mergedPlanCount << "premium plan(s)";
         data.insert(apiDefs::key::services, services);
     }
 

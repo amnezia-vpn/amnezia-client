@@ -54,6 +54,7 @@ private fun displayPricePerMonth(priceAmountMicros: Long, currencyCode: String, 
         NumberFormat.getCurrencyInstance().apply { currency = Currency.getInstance(currencyCode) }
             .format(amountPerMonth)
     } catch (e: IllegalArgumentException) {
+        Log.w(TAG, "Unknown currency code from Play Billing: $currencyCode")
         null
     }
 }
@@ -157,6 +158,8 @@ class BillingProvider(context: Context) : AutoCloseable {
                             }
                         }
                 }
+                val regularPhase = offerDetails.pricingPhases.pricingPhaseList.lastOrNull()
+                Log.v(TAG, "Offer ${offerDetails.basePlanId}: regular price = ${regularPhase?.formattedPrice}")
             }
         }
         return resultJson
