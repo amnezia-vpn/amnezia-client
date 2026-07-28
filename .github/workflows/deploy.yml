@@ -913,6 +913,127 @@ jobs:
         archive: false
         retention-days: 7
 
+# ------------------------------------------------------
+
+  Build-Android-Qt610:
+    runs-on: android-runner
+
+    needs: Bake-Prebuilts-Android
+    if: ${{ always() }}
+
+    env:
+      ANDROID_PLATFORM: android-28
+      NDK_VERSION: 27.0.11718014
+      QT_VERSION: 6.10.1
+      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+
+    - name: 'Install desktop Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_armv7 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_armv7'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_arm64_v8a Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Setup Java'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 'Setup Android SDK'
+      uses: android-actions/setup-android@v4
+      with:
+        packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.28.0"
+
+    - name: 'Decode keystore secret to file'
+      env:
+        KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      shell: bash
+      run: |
+        echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
+
+    - name: 'Build project'
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+      shell: bash
+      run: |
+        for abi in arm64-v8a armeabi-v7a; do
+          deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
+
+          VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/${abi}/CMakeCache.txt | cut -d= -f2)
+          (cd deploy/build/${abi}/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android9+_qt_6_10_${abi}.apk)
+        done
+
+    - name: 'Upload arm64-v8a APK'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/arm64-v8a/client/android-build/*.apk
+        archive: false
+        retention-days: 7
+
+    - name: 'Upload armeabi-v7a APK'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/armeabi-v7a/client/android-build/*.apk
+        archive: false
+        retention-days: 7
+
+# ------------------------------------------------------
+
   Extra:
     runs-on: ubuntu-latest
     steps:
