@@ -15,7 +15,7 @@ DrawerType2 {
     property bool isRenewalAvailable: false
 
     onOpened: {
-        isRenewalAvailable = ServersModel.getProcessedServerData("isRenewalAvailable") && !ApiAccountInfoModel.data("isInAppPurchase")
+        isRenewalAvailable = ServersUiController.isServerRenewalAvailable(ServersUiController.defaultServerId) && !ApiAccountInfoModel.data("isInAppPurchase")
     }
 
     expandedStateContent: ColumnLayout {
@@ -28,7 +28,7 @@ DrawerType2 {
         spacing: 0
 
         onImplicitHeightChanged: {
-            root.expandedHeight = content.implicitHeight + 32 + SettingsController.safeAreaBottomMargin
+            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
         }
 
         Item {
@@ -43,7 +43,7 @@ DrawerType2 {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                text: ServersModel.getProcessedServerData("name") + qsTr(" subscription has expired")
+                text: ServersUiController.serverName(ServersUiController.defaultServerId) + qsTr(" subscription has expired")
                 horizontalAlignment: Text.AlignLeft
             }
         }
@@ -76,7 +76,7 @@ DrawerType2 {
             textColor: AmneziaStyle.color.midnightBlack
 
             clickedFunc: function() {
-                ApiSettingsController.getRenewalLink()
+                SubscriptionUiController.getRenewalLink(ServersUiController.defaultServerId)
             }
         }
 
@@ -96,7 +96,7 @@ DrawerType2 {
 
             clickedFunc: function() {
                 PageController.showBusyIndicator(true)
-                let result = ApiSettingsController.getAccountInfo(false)
+                let result = SubscriptionUiController.getAccountInfo(ServersUiController.defaultServerId, false)
                 PageController.showBusyIndicator(false)
                 if (result) {
                     root.closeTriggered()

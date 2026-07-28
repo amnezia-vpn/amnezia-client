@@ -4,7 +4,7 @@
 #include <QJniObject>
 #include <QPixmap>
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 
 using namespace amnezia;
 
@@ -55,6 +55,11 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
+
+    void showUpdateCover();
+    void hideUpdateCover();
+    void showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                          const QString &skipTitle, const QString &storeUrl);
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

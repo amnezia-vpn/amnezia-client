@@ -2,7 +2,7 @@
 
 #include <QProcess>
 #include <QThread>
-#include <utilities.h>
+#include <core/utils/utilities.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <QFileInfo>
 
-#include <core/networkUtilities.h>
+#include <core/utils/networkUtilities.h>
 
 RouterLinux &RouterLinux::Instance()
 {

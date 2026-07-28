@@ -12,6 +12,8 @@ Item {
     property int headerTextMaximumLineCount: 2
     property int headerTextElide: Qt.ElideRight
     property string descriptionText
+    property string descriptionLinkText
+    property string descriptionLinkUrl
     property alias headerRow: headerRow
 
     implicitWidth: content.implicitWidth
@@ -19,7 +21,9 @@ Item {
 
     ColumnLayout {
         id: content
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
 
         RowLayout {
             id: headerRow
@@ -40,6 +44,27 @@ Item {
             text: root.descriptionText
             color: AmneziaStyle.color.mutedGray
             visible: root.descriptionText !== ""
+        }
+
+        ParagraphTextType {
+            id: descriptionLink
+            Layout.topMargin: 16
+            Layout.fillWidth: true
+            text: root.descriptionLinkText !== "" && root.descriptionLinkUrl !== ""
+                  ? ("<a href=\"" + root.descriptionLinkUrl + "\" style=\"color: " + AmneziaStyle.color.goldenApricotString + ";\">" + root.descriptionLinkText + "</a>")
+                  : ""
+            textFormat: Text.RichText
+            visible: root.descriptionLinkText !== ""
+
+            onLinkActivated: function(link) {
+                Qt.openUrlExternally(link)
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+            }
         }
     }
 } 

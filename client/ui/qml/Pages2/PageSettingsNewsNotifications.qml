@@ -19,7 +19,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -69,8 +69,8 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                            NewsModel.markAsRead(index)
-                            NewsModel.processedIndex = index
+                        NewsModel.markAsRead(index)
+                        NewsModel.processedIndex = index
                         PageController.goToPage(PageEnum.PageSettingsNewsDetail)
                     }
                 }

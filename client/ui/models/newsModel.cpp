@@ -1,4 +1,5 @@
 #include "ui/models/newsModel.h"
+#include "core/repositories/secureAppSettingsRepository.h"
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
@@ -9,7 +10,8 @@
 #include <QStandardPaths>
 #include <algorithm>
 
-NewsModel::NewsModel(const std::shared_ptr<Settings> &settings, QObject *parent) : QAbstractListModel(parent), m_settings(settings)
+NewsModel::NewsModel(SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
+    : QAbstractListModel(parent), m_appSettingsRepository(appSettingsRepository)
 {
     loadReadIds();
 }
@@ -31,8 +33,9 @@ QVariant NewsModel::data(const QModelIndex &index, int role) const
     case TitleRole: return item.title;
     case ContentRole: return item.content;
     case TimestampRole: return item.timestamp.toLocalTime().toString(Qt::ISODate);
-    case IsReadRole: return item.read;
+    case IsReadRole: return m_readIds.contains(item.id);
     case IsProcessedRole: return index.row() == m_processedIndex;
+    case IsUpdateRole: return item.isUpdate;
     default: return QVariant();
     }
 }
@@ -46,6 +49,7 @@ QHash<int, QByteArray> NewsModel::roleNames() const
     roles[TimestampRole] = "timestamp";
     roles[IsReadRole] = "read";
     roles[IsProcessedRole] = "isProcessed";
+    roles[IsUpdateRole] = "isUpdate";
     return roles;
 }
 
@@ -53,13 +57,33 @@ void NewsModel::markAsRead(int index)
 {
     if (index < 0 || index >= m_items.size())
         return;
-    if (!m_items[index].read) {
-        m_items[index].read = true;
-        m_readIds.insert(m_items[index].id);
-        saveReadIds();
-        QModelIndex idx = createIndex(index, 0);
-        emit dataChanged(idx, idx, { IsReadRole });
-        emit hasUnreadChanged();
+
+    const QString &itemId = m_items.at(index).id;
+    if (itemId.isEmpty() || m_readIds.contains(itemId))
+        return;
+
+    m_readIds.insert(itemId);
+    saveReadIds();
+
+    QModelIndex idx = createIndex(index, 0);
+    emit dataChanged(idx, idx, { IsReadRole });
+    emit hasUnreadChanged();
+}
+
+void NewsModel::markUpdateAsSkipped()
+{
+    if (!m_updateItem.has_value())
+        return;
+
+    const QString updateId = m_updateItem->id;
+    if (updateId.isEmpty())
+        return;
+
+    for (int i = 0; i < m_items.size(); ++i) {
+        if (m_items.at(i).id == updateId) {
+            markAsRead(i);
+            break;
+        }
     }
 }
 
@@ -76,37 +100,65 @@ void NewsModel::setProcessedIndex(int index)
     emit processedIndexChanged(index);
 }
 
-void NewsModel::updateModel(const QJsonArray &serverItems)
+void NewsModel::setNewsList(const QJsonArray &serverItems)
 {
-    QList<NewsItem> updatedItems;
+    QVector<NewsItem> updatedItems;
+    updatedItems.reserve(serverItems.size());
 
     for (const QJsonValue &value : serverItems) {
         if (!value.isObject())
             continue;
 
-        QJsonObject object = value.toObject();
-        
+        const QJsonObject object = value.toObject();
+
         NewsItem item;
         item.id = object.value("id").toString();
+        if (item.id.isEmpty())
+            continue;
         item.title = object.value("title").toString();
         item.content = object.value("content").toString();
         item.timestamp = QDateTime::fromString(object.value("timestamp").toString(), Qt::ISODate);
-        item.read = m_readIds.contains(object.value("id").toString());
+        item.isUpdate = false;
+
         updatedItems.append(item);
     }
 
+    m_apiItems = updatedItems;
+    updateModel();
+}
+
+void NewsModel::setUpdateNotification(const QString &id, const QString &title, const QString &content)
+{
+    if (id.isEmpty())
+        return;
+
+    NewsItem updateItem;
+    updateItem.id = id;
+    updateItem.title = title;
+    updateItem.content = content;
+    updateItem.timestamp = QDateTime::currentDateTimeUtc();
+    updateItem.isUpdate = true;
+
+    m_updateItem = updateItem;
+    updateModel();
+}
+
+void NewsModel::updateModel()
+{
     beginResetModel();
-    m_items = updatedItems;
+    m_items = m_apiItems;
     std::sort(m_items.begin(), m_items.end(), [](const NewsItem &a, const NewsItem &b) { return a.timestamp > b.timestamp; });
+    if (m_updateItem.has_value()) {
+        m_items.prepend(*m_updateItem);
+    }
     endResetModel();
-    loadReadIds();
     emit hasUnreadChanged();
 }
 
 bool NewsModel::hasUnread() const
 {
     for (const NewsItem &item : m_items) {
-        if (!item.read)
+        if (!m_readIds.contains(item.id))
             return true;
     }
     return false;
@@ -114,11 +166,11 @@ bool NewsModel::hasUnread() const
 
 void NewsModel::loadReadIds()
 {
-    QStringList ids = m_settings->readNewsIds();
+    QStringList ids = m_appSettingsRepository->getReadNewsIds();
     m_readIds = QSet<QString>(ids.begin(), ids.end());
 }
 
 void NewsModel::saveReadIds() const
 {
-    m_settings->setReadNewsIds(QStringList(m_readIds.begin(), m_readIds.end()));
+    m_appSettingsRepository->setReadNewsIds(QStringList(m_readIds.begin(), m_readIds.end()));
 }

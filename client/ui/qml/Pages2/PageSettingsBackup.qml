@@ -17,12 +17,10 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
+    property bool isRestoringBackup: false
+
     Connections {
         target: SettingsController
-
-        function onChangeSettingsErrorOccurred(errorMessage) {
-            PageController.showErrorMessage(errorMessage)
-        }
 
         function onRestoreBackupFinished() {
             PageController.showNotificationMessage(qsTr("Settings restored from backup file"))
@@ -40,7 +38,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -138,9 +136,14 @@ PageType {
                 textColor: AmneziaStyle.color.paleGray
                 borderWidth: 1
 
+                enabled: !root.isRestoringBackup
+
                 text: qsTr("Restore from backup")
 
                 clickedFunc: function() {
+                    if (root.isRestoringBackup) {
+                        return
+                    }
                     var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                                 qsTr("Backup files (*.backup)"))
                     if (filePath !== "") {
@@ -152,6 +155,10 @@ PageType {
     }
 
     function restoreBackup(filePath) {
+        if (root.isRestoringBackup) {
+            return
+        }
+
         var headerText = qsTr("Import settings from a backup file?")
         var descriptionText = qsTr("All current settings will be reset");
         var yesButtonText = qsTr("Continue")
@@ -161,9 +168,13 @@ PageType {
             if (ConnectionController.isConnected) {
                 PageController.showNotificationMessage(qsTr("Cannot restore backup settings during active connection"))
             } else {
+                root.isRestoringBackup = true
                 PageController.showBusyIndicator(true)
-                SettingsController.restoreAppConfig(filePath)
-                PageController.showBusyIndicator(false)
+                Qt.callLater(function() {
+                    SettingsController.restoreAppConfig(filePath)
+                    PageController.showBusyIndicator(false)
+                    root.isRestoringBackup = false
+                })
             }
         }
         var noButtonFunction = function() {

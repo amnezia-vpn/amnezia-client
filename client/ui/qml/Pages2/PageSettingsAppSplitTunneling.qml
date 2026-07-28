@@ -8,7 +8,6 @@ import QtCore
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
 import Style 1.0
 
@@ -59,7 +58,7 @@ PageType {
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = AppSplitTunnelingModel.routeMode
+        var currentRouteMode = AppSplitTunnelingController.routeMode
         if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptApps === currentRouteMode) {
@@ -74,7 +73,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         BackButtonType {
             id: backButton
@@ -90,11 +89,11 @@ PageType {
             enabled: root.pageEnabled
             showSwitcher: true
             switcher {
-                checked: AppSplitTunnelingModel.isTunnelingEnabled
+                checked: AppSplitTunnelingController.isSplitTunnelingEnabled
                 enabled: root.pageEnabled
             }
             switcherFunction: function(checked) {
-                AppSplitTunnelingModel.toggleSplitTunneling(checked)
+                AppSplitTunnelingController.toggleSplitTunneling(checked)
                 selector.text = root.routeModesModel[getRouteModesModelIndex()].name
             }
         }
@@ -124,13 +123,13 @@ PageType {
                 clickedFunction: function() {
                     selector.text = selectedText
                     selector.closeTriggered()
-                    if (AppSplitTunnelingModel.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        AppSplitTunnelingModel.routeMode = root.routeModesModel[selectedIndex].type
+                    if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                        AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
                     }
                 }
 
                 Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingModel.routeMode) {
+                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
                         selector.text = selectedText
                     } else {
                         selector.text = root.routeModesModel[0].name
@@ -138,7 +137,7 @@ PageType {
                 }
 
                 Connections {
-                    target: AppSplitTunnelingModel
+                    target: AppSplitTunnelingController
                     function onRouteModeChanged() {
                         selectedIndex = getRouteModesModelIndex()
                     }
@@ -166,7 +165,7 @@ PageType {
 
         anchors.top: header.bottom
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : SettingsController.imeHeight)
+        anchors.bottomMargin: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : PageController.imeHeight)
         anchors.left: parent.left
         anchors.right: parent.right
         clip: true
@@ -221,7 +220,7 @@ PageType {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         
-        height: addAppButton.implicitHeight + 48 + SettingsController.safeAreaBottomMargin
+        height: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin
         
         color: AmneziaStyle.color.midnightBlack
         
@@ -236,7 +235,7 @@ PageType {
             anchors.topMargin: 24
             anchors.rightMargin: 16
             anchors.leftMargin: 16
-            anchors.bottomMargin: 24 + SettingsController.safeAreaBottomMargin
+            anchors.bottomMargin: 24 + PageController.safeAreaBottomMargin
 
             TextFieldWithHeaderType {
                 id: searchField

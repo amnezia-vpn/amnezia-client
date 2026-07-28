@@ -34,7 +34,7 @@ Rectangle {
     MouseArea {
         id: parentMouse
         anchors.fill: parent
-        cursorShape: Qt.IBeamCursor
+        cursorShape: contextMenu.opened ? Qt.ArrowCursor : Qt.IBeamCursor
         onClicked: textArea.forceActiveFocus()
         hoverEnabled: true
 
@@ -79,7 +79,10 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                ContextMenu.menu: ContextMenuType {
+                ContextMenu.menu: contextMenu
+
+                ContextMenuType {
+                    id: contextMenu
                     textObj: textArea
                 }
 

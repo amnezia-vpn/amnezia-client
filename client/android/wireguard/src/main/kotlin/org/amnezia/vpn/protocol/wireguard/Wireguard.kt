@@ -111,7 +111,7 @@ open class Wireguard : Protocol() {
             configExtensionParameters(configData)
         }
 
-        configData.optStringOrNull("persistent_keep_alive")?.let { setPersistentKeepalive(it.toInt()) }
+        configData.optStringOrNull("persistent_keep_alive")?.let { setPersistentKeepalive(it) }
         configData.getString("client_priv_key").let { setPrivateKeyHex(it.base64ToHex()) }
         configData.getString("server_pub_key").let { setPublicKeyHex(it.base64ToHex()) }
         configData.optStringOrNull("psk_key")?.let { setPreSharedKeyHex(it.base64ToHex()) }
@@ -134,6 +134,20 @@ open class Wireguard : Protocol() {
         configData.optStringOrNull("I3")?.let { setI3(it) }
         configData.optStringOrNull("I4")?.let { setI4(it) }
         configData.optStringOrNull("I5")?.let { setI5(it) }
+        configData.optStringOrNull("HeaderProtectionKey")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setHeaderProtectionKey(it.base64ToHex()) }
+        configData.optStringOrNull("ContentPaddingAddition")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setContentPaddingAddition(it) }
+        configData.optStringOrNull("RekeyAfterTime")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setRekeyAfterTime(it) }
+        configData.optStringOrNull("RekeyTimeout")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setRekeyTimeout(it) }
+        configData.optStringOrNull("RejectAfterTime")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setRejectAfterTime(it) }
+        configData.optStringOrNull("KeepaliveTimeout")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setKeepaliveTimeout(it) }
+        configData.optStringOrNull("MaxHandshakeAttempts")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setMaxHandshakeAttempts(it) }
     }
 
     private fun start(

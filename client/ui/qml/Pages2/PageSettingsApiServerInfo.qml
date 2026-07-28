@@ -77,9 +77,17 @@ PageType {
     }
 
     Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -91,8 +99,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -117,7 +125,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -131,7 +139,7 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-                headerText: root.processedServer.name
+                headerText: root.processedServer != null ? root.processedServer.name : ""
 
                 actionButtonFunction: function() {
                     serverNameEditDrawer.openTriggered()
@@ -186,7 +194,7 @@ PageType {
                 textColor: AmneziaStyle.color.midnightBlack
 
                 clickedFunc: function() {
-                    ApiSettingsController.getRenewalLink()
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
         }
@@ -246,45 +254,14 @@ PageType {
                 text: qsTr("Renew subscription")
 
                 clickedFunc: function() {
-                    ApiSettingsController.getRenewalLink()
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
 
             DividerType {
-                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
-            }
-
-            SwitcherType {
-                id: switcher
-
-                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
-                readonly property bool isProtocolSwitchBlocked: ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
-                enabled: !switcher.isProtocolSwitchBlocked
-
-                text: qsTr("Use VLESS protocol")
-                checked: switcher.isVlessProtocol
-                onToggled: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                    } else {
-                        PageController.showBusyIndicator(true)
-                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
-                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
-                        PageController.showBusyIndicator(false)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: footer.isVisibleForAmneziaFree
+                visible: (!root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase)
+                    || footer.isVisibleForAmneziaFree
             }
 
             WarningType {
@@ -325,7 +302,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
-                    ApiConfigsController.prepareVpnKeyExport()
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
 
                     PageController.showBusyIndicator(false)
                 }
@@ -346,7 +323,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiCountryModel()
+                    SubscriptionUiController.updateApiCountryModel()
                     PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
@@ -366,7 +343,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiDevicesModel()
+                    SubscriptionUiController.updateApiDevicesModel()
                     PageController.goToPage(PageEnum.PageSettingsApiDevices)
                 }
             }
@@ -427,11 +404,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, "", "", true)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -465,12 +442,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice(false)) {
-                                ApiSettingsController.getAccountInfo(true)
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.processedServerId)) {
+                                SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, true)
                             }
                             PageController.showBusyIndicator(false)
                         }
@@ -502,11 +479,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            InstallController.removeProcessedServer()
+                            SubscriptionUiController.removeServer(ServersUiController.processedServerId)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -525,6 +502,6 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.35
 
-        serverNameText: root.processedServer.name
+        serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }
 }
