@@ -38,7 +38,10 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
+# Qt 6.9 minimum: client/ui/qml/Controls2 uses the ContextMenu attached type,
+# introduced in Qt 6.9. Older Qt configures, compiles and links without warnings,
+# then fails at runtime when the QML engine loads the UI.
+find_package(Qt6 6.9 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
