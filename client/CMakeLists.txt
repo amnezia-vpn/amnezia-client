@@ -38,7 +38,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
+find_package(Qt6 6.4 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
@@ -246,12 +246,23 @@ if(WIN32)
     set(deploy_tool_options "--force-openssl --force")
 endif()
 
-qt_generate_deploy_qml_app_script(
-    TARGET ${PROJECT}
-    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-    DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
-)
+# DEPLOY_TOOL_OPTIONS was added in Qt 6.7; passing it to an older Qt fails at
+# configure time with an unknown-keyword error. It is empty on every platform
+# except Windows, so older Qt simply omits it and behaves identically.
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.7)
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
+    )
+else()
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+endif()
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
     COMPONENT AmneziaVPN
 )

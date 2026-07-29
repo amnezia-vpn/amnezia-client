@@ -4,8 +4,6 @@ import QtQuick.Controls
 Menu {
     property var textObj
 
-    popupType: Popup.Native
-
     property Item inputBlocker: null
 
     Component {
