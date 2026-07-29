@@ -255,10 +255,6 @@ namespace amnezia
             constexpr char tlsEmulationKey[]      = "telemt_tls_emulation";
             constexpr char useMiddleProxyKey[]    = "telemt_use_middle_proxy";
             constexpr char userNameKey[]          = "telemt_user_name";
-            // additionalSecrets → extra_N users in [access.users]; natEnabled + natExternalIp →
-            // [general] middle_proxy_nat_ip (single public IP, effective only when use_middle_proxy=true).
-            // workers/workersMode/natInternalIp have no Telemt equivalent — kept for config compatibility,
-            // not shown in UI and not written to config.toml.
             constexpr char additionalSecretsKey[] = "telemt_additional_secrets";
             constexpr char workersKey[]           = "telemt_workers";
             constexpr char workersModeKey[]       = "telemt_workers_mode";
