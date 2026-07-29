@@ -375,6 +375,14 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
             }
         }
         vars.append({ { "$TELEMT_ADDITIONAL_SECRETS", additionalList.join(QLatin1Char(',')) } });
+
+        // Telemt uses a single public IP override (middle_proxy_nat_ip), effective only in ME mode.
+        // Empty → configure_container.sh omits the key and Telemt auto-detects via STUN.
+        QString middleProxyNatIp;
+        if (c.natEnabled && !c.natExternalIp.isEmpty()) {
+            middleProxyNatIp = c.natExternalIp;
+        }
+        vars.append({ { "$TELEMT_MIDDLE_PROXY_NAT_IP", middleProxyNatIp } });
     }
 
     return vars;

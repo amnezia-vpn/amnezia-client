@@ -103,6 +103,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: alpn
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.alpnOptions()
@@ -155,6 +156,7 @@ PageType {
                                 }
                             }
                         }
+                        currentValue: fingerprint
                         clickedFunction: function () {
                             fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
@@ -225,6 +227,7 @@ PageType {
                                 }
                             }
                         }
+                        currentValue: fingerprint
                         clickedFunction: function () {
                             fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText

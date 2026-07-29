@@ -243,6 +243,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpMode
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpModeOptions()
@@ -335,6 +336,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpHeadersTemplate
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpHeadersTemplateOptions()
@@ -379,6 +381,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpUplinkMethod
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpUplinkMethodOptions()
@@ -459,6 +462,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpSessionPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSessionPlacementOptions()
@@ -503,6 +507,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpSessionKey
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSessionKeyOptions()
@@ -547,6 +552,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpSeqPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSeqPlacementOptions()
@@ -608,6 +614,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpUplinkDataPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpUplinkDataPlacementOptions()

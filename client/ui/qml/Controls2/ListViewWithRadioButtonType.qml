@@ -22,6 +22,10 @@ ListViewType {
 
     property int selectedIndex: 0
 
+    // When set, the checkmark follows this value reactively (by matching delegate `name`),
+    // so it stays correct after the bound value changes. Empty → fall back to selectedIndex.
+    property string currentValue: ""
+
     width: rootWidth
     height: root.contentItem.height
 
@@ -131,7 +135,7 @@ ListViewType {
             }
 
             ButtonGroup.group: buttonGroup
-            checked: root.selectedIndex === index
+            checked: root.currentValue !== "" ? (name === root.currentValue) : (root.selectedIndex === index)
 
             onClicked: {
                 root.selectedIndex = index

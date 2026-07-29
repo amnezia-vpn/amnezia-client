@@ -120,6 +120,7 @@ PageType {
                 drawerParent: root
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
+                    currentValue: xPaddingPlacement
                     model: ListModel {
                         Component.onCompleted: {
                             var opts = XrayConfigModel.xPaddingPlacementOptions()
@@ -164,6 +165,7 @@ PageType {
                 drawerParent: root
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
+                    currentValue: xPaddingMethod
                     model: ListModel {
                         Component.onCompleted: {
                             var opts = XrayConfigModel.xPaddingMethodOptions()
