@@ -447,11 +447,22 @@ install(RUNTIME_DEPENDENCY_SET service_deps
     DESTINATION "${RUNTIME_DEPS_DIR}"
 )
 
-qt_generate_deploy_app_script(
-    TARGET ${PROJECT}
-    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
+# Qt 6.5 renamed FILENAME_VARIABLE to OUTPUT_SCRIPT here too -- verified against
+# the Qt 6.4 sources, where this macro accepts only TARGET, FILENAME_VARIABLE and
+# NO_UNSUPPORTED_PLATFORM_ERROR. See the fuller note in client/CMakeLists.txt.
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.5)
+    qt_generate_deploy_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+else()
+    qt_generate_deploy_app_script(
+        TARGET ${PROJECT}
+        FILENAME_VARIABLE QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+endif()
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
     COMPONENT AmneziaVPN
 )

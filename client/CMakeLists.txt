@@ -38,7 +38,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
-find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
+find_package(Qt6 6.4 REQUIRED COMPONENTS ${PACKAGES})
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
@@ -246,12 +246,36 @@ if(WIN32)
     set(deploy_tool_options "--force-openssl --force")
 endif()
 
-qt_generate_deploy_qml_app_script(
-    TARGET ${PROJECT}
-    OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
-    NO_UNSUPPORTED_PLATFORM_ERROR
-    DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
-)
+# This macro's signature changed twice, and passing a keyword an older Qt does
+# not know fails at configure time with "Unexpected arguments". Read off the Qt
+# sources rather than the docs, which describe only the current signature:
+#
+#   6.4  accepts TARGET / FILENAME_VARIABLE, and no multi-value options at all
+#   6.5  renamed FILENAME_VARIABLE to OUTPUT_SCRIPT
+#   6.7  added DEPLOY_TOOL_OPTIONS
+#
+# DEPLOY_TOOL_OPTIONS is empty on every platform except Windows, so omitting it
+# on older Qt changes nothing.
+if(Qt6_VERSION VERSION_GREATER_EQUAL 6.7)
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        DEPLOY_TOOL_OPTIONS ${deploy_tool_options}
+    )
+elseif(Qt6_VERSION VERSION_GREATER_EQUAL 6.5)
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        OUTPUT_SCRIPT QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+else()
+    qt_generate_deploy_qml_app_script(
+        TARGET ${PROJECT}
+        FILENAME_VARIABLE QT_DEPLOY_SCRIPT
+        NO_UNSUPPORTED_PLATFORM_ERROR
+    )
+endif()
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
     COMPONENT AmneziaVPN
 )

@@ -144,7 +144,18 @@ Item {
                             }
                         }
 
-                        ContextMenu.menu: contextMenu
+                        // Opens the context menu explicitly instead of via the ContextMenu
+                        // attached type, which requires Qt 6.9. Only RightButton is
+                        // accepted, so left press/drag still reaches the TextField for
+                        // cursor placement and selection.
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.RightButton
+                            onPressed: {
+                                textField.forceActiveFocus()
+                                contextMenu.popup()
+                            }
+                        }
 
                         ContextMenuType {
                             id: contextMenu
