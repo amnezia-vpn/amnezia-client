@@ -235,7 +235,8 @@ namespace amnezia
 
             constexpr char defaultPort[]           = "443";
             constexpr char defaultWorkers[]        = "2";
-            constexpr int  maxWorkers              = 32;
+            // mtproto-proxy loses connectivity with -M >= 20; keep the cap at the highest known-good value.
+            constexpr int  maxWorkers              = 19;
             constexpr int  botTagHexLength         = 32;
             constexpr char defaultTlsDomain[]      = "googletagmanager.com";
         }
