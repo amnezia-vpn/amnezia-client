@@ -6,6 +6,7 @@
 #include "core/utils/osSignalHandler.h"
 #include "core/utils/migrations.h"
 #include "version.h"
+#include <QIcon>
 
 #ifdef Q_OS_WIN
     #include "Windows.h"
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
     app.setApplicationName(APPLICATION_NAME);
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
+    app.setWindowIcon(QIcon::fromTheme("AmneziaVPN"));
 
     app.loadFonts();
 
