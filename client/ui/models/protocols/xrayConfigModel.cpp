@@ -481,7 +481,6 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
     m_protocolConfig.serverConfig = serverConfig;
     // Clear client config since server settings changed
     m_protocolConfig.clearClientConfig();
-    m_originalProtocolConfig = m_protocolConfig;
     endResetModel();
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
