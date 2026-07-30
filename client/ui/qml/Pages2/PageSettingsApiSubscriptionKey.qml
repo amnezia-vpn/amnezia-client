@@ -77,7 +77,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr(root.processedServer.name + "\nsubscription key")
+                text: (root.processedServer && root.processedServer.name ? root.processedServer.name : "")
+                    + "\n" + qsTr("Subscription key")
                 font.pixelSize: 32
                 font.bold: true
                 color: AmneziaStyle.color.paleGray
@@ -217,7 +218,8 @@ PageType {
 
                 Header2Type {
                     Layout.fillWidth: true
-                    headerText: qsTr(root.processedServer.name + " Subscription key")
+                    headerText: (root.processedServer && root.processedServer.name ? root.processedServer.name : "")
+                        + "\n" + qsTr("Subscription key")
                 }
 
                 TextArea {

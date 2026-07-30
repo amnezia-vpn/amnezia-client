@@ -2140,6 +2140,11 @@ Thank you for staying with us!</source>
 <context>
     <name>PageSettingsApiSubscriptionKey</name>
     <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="72"/>
+        <source>Subscription key</source>
+        <translation>Ключ для подключения</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="85"/>
         <source>Copy key</source>
         <translation>Скопировать ключ</translation>
