@@ -1139,6 +1139,11 @@ class AmneziaActivity : QtActivity() {
     fun isNotificationPermissionGranted(): Boolean = applicationContext.isNotificationPermissionGranted()
 
     @Suppress("unused")
+    fun showVpnStateNotification(title: String, message: String) {
+        ServiceNotification.showVpnStateEvent(applicationContext, title, message)
+    }
+
+    @Suppress("unused")
     fun requestNotificationPermission() {
         val shouldShowPreRequest = shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)
         requestPermission(

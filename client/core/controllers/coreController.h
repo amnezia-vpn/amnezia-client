@@ -77,9 +77,7 @@
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/utils/notificationHandler.h"
-#endif
+class NotificationHandler;
 
 class CoreSignalHandlers;
 
@@ -153,9 +151,7 @@ private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    NotificationHandler* m_notificationHandler;
-#endif
+    NotificationHandler* m_notificationHandler {};
 
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 

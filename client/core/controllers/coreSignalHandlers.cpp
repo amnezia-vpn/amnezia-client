@@ -37,8 +37,8 @@
 #include "ui/models/containersModel.h"
 #include "core/utils/containerEnum.h"
 
+#include "ui/utils/notificationHandler.h"
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "ui/utils/notificationHandler.h"
     #include "ui/utils/systemTrayNotificationHandler.h"
 #endif
 
@@ -419,22 +419,23 @@ void CoreSignalHandlers::initIosSettingsHandler()
 
 void CoreSignalHandlers::initNotificationHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     m_coreController->m_notificationHandler = NotificationHandler::create(m_coreController);
 
     connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, m_coreController->m_notificationHandler,
             &NotificationHandler::setConnectionState);
+    connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_notificationHandler, &NotificationHandler::onTranslationsUpdated);
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     connect(m_coreController->m_notificationHandler, &NotificationHandler::raiseRequested, m_coreController->m_pageController, &PageController::raiseMainWindow);
     connect(m_coreController->m_notificationHandler, &NotificationHandler::connectRequested, m_coreController->m_connectionUiController,
             static_cast<void (ConnectionUiController::*)()>(&ConnectionUiController::openConnection));
     connect(m_coreController->m_notificationHandler, &NotificationHandler::disconnectRequested, m_coreController->m_connectionUiController,
             &ConnectionUiController::closeConnection);
-    connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_notificationHandler, &NotificationHandler::onTranslationsUpdated);
 
-    auto* trayHandler = qobject_cast<SystemTrayNotificationHandler*>(m_coreController->m_notificationHandler);
-    connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
-#endif    
+    if (auto *trayHandler = qobject_cast<SystemTrayNotificationHandler *>(m_coreController->m_notificationHandler)) {
+        connect(m_coreController, &CoreController::websiteUrlChanged, trayHandler, &SystemTrayNotificationHandler::updateWebsiteUrl);
+    }
+#endif
 }
 
 void CoreSignalHandlers::initUpdateFoundHandler()

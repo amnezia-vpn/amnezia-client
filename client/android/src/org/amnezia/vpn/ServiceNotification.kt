@@ -26,6 +26,9 @@ private const val OLD_NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notific
 private const val NOTIFICATION_CHANNEL_ID: String = "org.amnezia.vpn.notifications"
 const val NOTIFICATION_ID = 1337
 
+const val VPN_STATE_EVENT_NOTIFICATION_ID = 1338
+private const val VPN_STATE_EVENT_CHANNEL_ID = "org.amnezia.vpn.vpn_state_events"
+
 private const val GET_ACTIVITY_REQUEST_CODE = 0
 private const val CONNECT_REQUEST_CODE = 1
 private const val DISCONNECT_REQUEST_CODE = 2
@@ -162,7 +165,41 @@ class ServiceNotification(private val context: Context) {
                         .setDescription(context.resources.getString(R.string.notificationChannelDescription))
                         .build()
                 )
+                createNotificationChannel(
+                    Builder(VPN_STATE_EVENT_CHANNEL_ID, NotificationManagerCompat.IMPORTANCE_DEFAULT)
+                        .setShowBadge(false)
+                        .setSound(null, null)
+                        .setVibrationEnabled(false)
+                        .setLightsEnabled(false)
+                        .setName(context.getString(R.string.vpnStateEventChannelName))
+                        .setDescription(context.getString(R.string.vpnStateEventChannelDescription))
+                        .build()
+                )
             }
+        }
+
+        /** Brief alert when VPN connects or disconnects (invoked from Qt via AmneziaActivity). */
+        fun showVpnStateEvent(context: Context, title: String, message: String) {
+            if (!context.isNotificationPermissionGranted()) return
+            val nm = NotificationManagerCompat.from(context)
+            val notification = NotificationCompat.Builder(context, VPN_STATE_EVENT_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_amnezia_round)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_STATUS)
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
+                .setContentIntent(
+                    PendingIntent.getActivity(
+                        context,
+                        GET_ACTIVITY_REQUEST_CODE,
+                        Intent(context, AmneziaActivity::class.java),
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                )
+                .build()
+            nm.notify(VPN_STATE_EVENT_NOTIFICATION_ID, notification)
         }
     }
 }

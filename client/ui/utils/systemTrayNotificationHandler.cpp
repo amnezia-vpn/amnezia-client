@@ -10,6 +10,10 @@
 #  include "platforms/macos/macosutils.h"
 #endif
 
+#ifdef MACOS_NE
+#  include "platforms/macos/macos_ne_vpn_notification.h"
+#endif
+
 #include <QApplication>
 #include <QDesktopServices>
 #include <QIcon>
@@ -151,6 +155,12 @@ void SystemTrayNotificationHandler::notify(NotificationHandler::Message type,
                                            const QString& message,
                                            int timerMsec) {
   Q_UNUSED(type);
+
+#ifdef MACOS_NE
+  Q_UNUSED(timerMsec);
+  macosNePostVpnStateNotification(title, message);
+  return;
+#endif
 
   QIcon icon(ConnectedTrayIconName);
   m_systemTrayIcon.showMessage(title, message, icon, timerMsec);

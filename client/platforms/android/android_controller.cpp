@@ -329,6 +329,16 @@ void AndroidController::requestNotificationPermission()
     callActivityMethod("requestNotificationPermission", "()V");
 }
 
+void AndroidController::showVpnStateNotification(const QString &title, const QString &message)
+{
+    if (!isNotificationPermissionGranted()) {
+        return;
+    }
+    callActivityMethod("showVpnStateNotification", "(Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(title).object<jstring>(),
+                       QJniObject::fromString(message).object<jstring>());
+}
+
 bool AndroidController::requestAuthentication()
 {
     QEventLoop wait;
