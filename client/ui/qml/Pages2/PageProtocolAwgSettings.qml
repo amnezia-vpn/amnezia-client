@@ -298,18 +298,6 @@ PageType {
             }
 
             AwgTextField {
-                id: headerProtectionKeyTextField
-
-                visible: isAwg3
-
-                headerText: qsTr("HeaderProtectionKey - Header protection key")
-                textField.text: serverHeaderProtectionKey
-
-                scroller: smartScroll
-                onEdited: (text) => { serverHeaderProtectionKey = text }
-            }
-
-            AwgTextField {
                 id: contentPaddingAdditionTextField
 
                 visible: isAwg3
@@ -400,7 +388,6 @@ PageType {
                          transportPacketMagicHeaderTextField.errorText === "" &&
                          responsePacketMagicHeaderTextField.errorText === "" &&
                          initPacketMagicHeaderTextField.errorText === "" &&
-                         headerProtectionKeyTextField.errorText === "" &&
                          contentPaddingAdditionTextField.errorText === "" &&
                          rekeyAfterTimeTextField.errorText === "" &&
                          rekeyTimeoutTextField.errorText === "" &&

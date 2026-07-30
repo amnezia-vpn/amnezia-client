@@ -51,7 +51,6 @@ public:
         ServerSpecialJunk4Role,
         ServerSpecialJunk5Role,
 
-        ServerHeaderProtectionKeyRole,
         ServerContentPaddingAdditionRole,
         ServerRekeyAfterTimeRole,
         ServerRekeyTimeoutRole,

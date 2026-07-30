@@ -341,16 +341,6 @@ PageType {
                 textField.text: serverTransportPacketMagicHeader
             }
 
-            AwgTextField {
-                id: headerProtectionKeyTextField
-
-                visible: isAwg3
-                enabled: false
-
-                headerText: "HeaderProtectionKey - Header protection key"
-                textField.text: serverHeaderProtectionKey
-            }
-
         }
     }
 

@@ -64,7 +64,6 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ServerSpecialJunk3Role: m_protocolConfig.serverConfig.specialJunk3 = strValue; break;
     case Roles::ServerSpecialJunk4Role: m_protocolConfig.serverConfig.specialJunk4 = strValue; break;
     case Roles::ServerSpecialJunk5Role: m_protocolConfig.serverConfig.specialJunk5 = strValue; break;
-    case Roles::ServerHeaderProtectionKeyRole: m_protocolConfig.serverConfig.headerProtectionKey = strValue; break;
     case Roles::ServerContentPaddingAdditionRole: m_protocolConfig.serverConfig.contentPaddingAddition = strValue; break;
     case Roles::ServerRekeyAfterTimeRole: m_protocolConfig.serverConfig.rekeyAfterTime = strValue; break;
     case Roles::ServerRekeyTimeoutRole: m_protocolConfig.serverConfig.rekeyTimeout = strValue; break;
@@ -122,7 +121,6 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerSpecialJunk4Role: return m_protocolConfig.serverConfig.specialJunk4;
     case Roles::ServerSpecialJunk5Role: return m_protocolConfig.serverConfig.specialJunk5;
 
-    case Roles::ServerHeaderProtectionKeyRole: return m_protocolConfig.serverConfig.headerProtectionKey;
     case Roles::ServerContentPaddingAdditionRole: return m_protocolConfig.serverConfig.contentPaddingAddition;
     case Roles::ServerRekeyAfterTimeRole: return m_protocolConfig.serverConfig.rekeyAfterTime;
     case Roles::ServerRekeyTimeoutRole: return m_protocolConfig.serverConfig.rekeyTimeout;
@@ -236,7 +234,6 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerSpecialJunk4Role] = "serverSpecialJunk4";
     roles[ServerSpecialJunk5Role] = "serverSpecialJunk5";
 
-    roles[ServerHeaderProtectionKeyRole] = "serverHeaderProtectionKey";
     roles[ServerContentPaddingAdditionRole] = "serverContentPaddingAddition";
     roles[ServerRekeyAfterTimeRole] = "serverRekeyAfterTime";
     roles[ServerRekeyTimeoutRole] = "serverRekeyTimeout";
