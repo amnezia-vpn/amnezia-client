@@ -2,6 +2,7 @@
 #define CONFIGKEYS_H
 
 #include <QLatin1String>
+#include <QStringList>
 
 namespace amnezia
 {
@@ -98,7 +99,32 @@ namespace amnezia
         constexpr QLatin1String keepaliveTimeout("KeepaliveTimeout");
         constexpr QLatin1String maxHandshakeAttempts("MaxHandshakeAttempts");
 
-        constexpr QLatin1String protocolVersion("protocol_version");
+        inline QStringList awgProtocolKeys()
+        {
+            return { junkPacketCount,
+                     junkPacketMinSize,
+                     junkPacketMaxSize,
+                     initPacketJunkSize,
+                     responsePacketJunkSize,
+                     cookieReplyPacketJunkSize,
+                     transportPacketJunkSize,
+                     initPacketMagicHeader,
+                     responsePacketMagicHeader,
+                     underloadPacketMagicHeader,
+                     transportPacketMagicHeader,
+                     specialJunk1,
+                     specialJunk2,
+                     specialJunk3,
+                     specialJunk4,
+                     specialJunk5,
+                     headerProtectionKey,
+                     contentPaddingAddition,
+                     rekeyAfterTime,
+                     rekeyTimeout,
+                     rejectAfterTime,
+                     keepaliveTimeout,
+                     maxHandshakeAttempts };
+        }
 
         constexpr QLatin1String openvpn("openvpn");
         constexpr QLatin1String wireguard("wireguard");
