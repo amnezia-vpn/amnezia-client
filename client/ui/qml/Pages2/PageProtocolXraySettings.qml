@@ -247,9 +247,9 @@ PageType {
                 visible: listView.enabled
                 clickedFunction: function() {
                     var yesButtonFunction = function() {
-                        XrayConfigModel.resetToDefaults()
                         PageController.showNotificationMessage(
                             qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
+                        XrayConfigModel.resetToDefaults()
                     }
                     showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
                         qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {

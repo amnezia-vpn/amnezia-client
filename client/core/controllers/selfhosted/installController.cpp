@@ -11,6 +11,7 @@
 #include <QtConcurrent>
 
 #include "core/configurators/configuratorBase.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -207,6 +208,14 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             const QString containerName = ContainerUtils::containerToString(container);
             errorCode = sshSession.runScript(credentials, "sudo docker restart " + containerName);
         }
+    }
+
+    if (errorCode == ErrorCode::NoError
+        && (container == DockerContainer::Xray || container == DockerContainer::SSXray)) {
+        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+        XrayConfigurator xrayConfigurator(&sshSession);
+        errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings,
+                                                                 /*appendNewClient*/ false);
     }
 
     if (errorCode == ErrorCode::NoError) {
