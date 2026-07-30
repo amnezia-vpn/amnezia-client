@@ -10,22 +10,38 @@
 #import <UserNotifications/UserNotifications.h>
 #import <QResource>
 
+#include <QAction>
+
+@interface MacOSStatusIconMenuTarget : NSObject {
+ @public
+  QAction* action;
+}
+- (void)triggerAction:(id)sender;
+@end
+
+@implementation MacOSStatusIconMenuTarget
+- (void)triggerAction:(id)sender {
+  Q_UNUSED(sender);
+  if (action) {
+    action->trigger();
+  }
+}
+@end
+
 /**
- * Creates a NSStatusItem with that can hold an icon. Additionally a NSView is
- * set as a subview to the button item of the status item. The view serves as
- * an indicator that can be displayed in color eventhough the icon is set as a
- * template. In that way we give the system control over it’s effective
- * appearance.
+ * Creates a NSStatusItem that holds the tray icon. The icon is set as a
+ * template image, so the system controls its effective appearance for the
+ * current menu bar theme. The connection status is baked into the artwork, so
+ * no separate colored indicator is drawn.
  */
 @interface MacOSStatusIconDelegate : NSObject
 @property(assign) NSStatusItem* statusItem;
-@property(assign) NSView* statusIndicator;
+@property(retain) NSMenu* nativeMenu;
+@property(retain) NSMutableArray* menuActionTargets;
 
-- (void)setIcon:(NSData*)imageData;
-- (void)setIndicator;
-- (void)setIndicatorColor:(NSColor*)color;
-- (void)setMenu:(NSMenu*)statusBarMenu;
+- (void)setIcon:(NSData*)imageData asTemplate:(BOOL)asTemplate;
 - (void)setToolTip:(NSString*)tooltip;
+- (void)rebuildMenuFromQMenu:(QMenu*)menu;
 @end
 
 @implementation MacOSStatusIconDelegate
@@ -36,56 +52,36 @@
  */
 - (id)init {
   self = [super init];
+  self.menuActionTargets = [[NSMutableArray alloc] init];
 
   // Create status item
   self.statusItem =
       [[[NSStatusBar systemStatusBar] statusItemWithLength:NSSquareStatusItemLength] retain];
   self.statusItem.visible = true;
-  // Add the indicator as a subview
-  [self setIndicator];
 
   return self;
+}
+
+- (void)dealloc {
+  self.nativeMenu = nil;
+  self.menuActionTargets = nil;
+  [super dealloc];
 }
 
 /**
  * Sets the image for the status icon.
  *
- * @param iconPath The data for the icon image.
+ * @param imageData The data for the icon image.
+ * @param asTemplate When true the icon is a template image recolored by the
+ *        system for the current menu bar appearance. When false the icon is
+ *        rendered in its original colors (used for the colored error icon).
  */
-- (void)setIcon:(NSData*)imageData {
+- (void)setIcon:(NSData*)imageData asTemplate:(BOOL)asTemplate {
   NSImage* image = [[NSImage alloc] initWithData:imageData];
-  [image setTemplate:true];
+  [image setTemplate:asTemplate];
 
   [self.statusItem.button setImage:image];
   [image release];
-}
-
-/**
- * Adds status indicator as a subview to the status item button.
- */
-- (void)setIndicator {
-  float viewHeight = NSHeight([self.statusItem.button bounds]);
-  float dotSize = viewHeight * 0.35;
-  float dotOrigin = (viewHeight - dotSize) * 0.8;
-
-  NSView* dot = [[NSView alloc] initWithFrame:NSMakeRect(dotOrigin, dotOrigin, dotSize, dotSize)];
-  self.statusIndicator = dot;
-  self.statusIndicator.wantsLayer = true;
-  self.statusIndicator.layer.cornerRadius = dotSize * 0.5;
-
-  [self.statusItem.button addSubview:self.statusIndicator];
-  [dot release];
-}
-
-/**
- * Sets the color if the indicator.
- *
- * @param color The indicator background color.
- */
-- (void)setIndicatorColor:(NSColor*)color {
-  if (self.statusIndicator) {
-    self.statusIndicator.layer.backgroundColor = color.CGColor;
-  }
 }
 
 /**
@@ -104,6 +100,44 @@
  */
 - (void)setToolTip:(NSString*)tooltip {
   [self.statusItem.button setToolTip:tooltip];
+}
+
+- (void)rebuildMenuFromQMenu:(QMenu*)menu {
+  [self.menuActionTargets removeAllObjects];
+
+  if (self.nativeMenu) {
+    [self.statusItem setMenu:nil];
+    self.nativeMenu = nil;
+  }
+
+  if (!menu) {
+    return;
+  }
+
+  NSMenu* nsMenu = [[NSMenu alloc] initWithTitle:@""];
+  for (QAction* action : menu->actions()) {
+    if (action->isSeparator()) {
+      [nsMenu addItem:[NSMenuItem separatorItem]];
+      continue;
+    }
+
+    MacOSStatusIconMenuTarget* target = [[MacOSStatusIconMenuTarget alloc] init];
+    target->action = action;
+    [self.menuActionTargets addObject:target];
+    [target release];
+
+    NSMenuItem* item = [[NSMenuItem alloc] initWithTitle:action->text().toNSString()
+                                                  action:@selector(triggerAction:)
+                                           keyEquivalent:@""];
+    [item setTarget:target];
+    [item setEnabled:action->isEnabled()];
+    [item setHidden:!action->isVisible()];
+    [nsMenu addItem:item];
+    [item release];
+  }
+
+  self.nativeMenu = nsMenu;
+  [self.statusItem setMenu:nsMenu];
 }
 @end
 
@@ -138,27 +172,31 @@ void MacOSStatusIcon::setIcon(const QString& iconPath) {
   QResource imageResource = QResource(iconPath);
   Q_ASSERT(imageResource.isValid());
 
-  [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData()];
+  [m_statusBarIcon setIcon:imageResource.uncompressedData().toNSData() asTemplate:true];
 }
 
-void MacOSStatusIcon::setIndicatorColor(const QColor& indicatorColor) {
-  logger.debug() << "Set indicator color";
+void MacOSStatusIcon::setIconFromData(const QByteArray& imageData, bool asTemplate) {
+  logger.debug() << "Set icon from rendered data";
 
-  if (!indicatorColor.isValid()) {
-    [m_statusBarIcon setIndicatorColor:[NSColor clearColor]];
+  if (imageData.isEmpty()) {
     return;
   }
 
-  NSColor* color = [NSColor colorWithCalibratedRed:indicatorColor.red() / 255.0f
-                                             green:indicatorColor.green() / 255.0f
-                                              blue:indicatorColor.blue() / 255.0f
-                                             alpha:indicatorColor.alpha() / 255.0f];
-  [m_statusBarIcon setIndicatorColor:color];
+  NSData* data = [NSData dataWithBytes:imageData.constData() length:imageData.size()];
+  [m_statusBarIcon setIcon:data asTemplate:asTemplate];
 }
 
-void MacOSStatusIcon::setMenu(NSMenu* statusBarMenu) {
-  logger.debug() << "Set menu";
-  [m_statusBarIcon setMenu:statusBarMenu];
+void MacOSStatusIcon::setMenu(QMenu* menu) {
+  m_qtMenu = menu;
+  rebuildNativeMenu();
+
+  if (menu) {
+    connect(menu, &QMenu::aboutToShow, this, [this]() { rebuildNativeMenu(); });
+  }
+}
+
+void MacOSStatusIcon::rebuildNativeMenu() {
+  [m_statusBarIcon rebuildMenuFromQMenu:m_qtMenu.data()];
 }
 
 void MacOSStatusIcon::setToolTip(const QString& tooltip) {
@@ -174,7 +212,7 @@ void MacOSStatusIcon::showMessage(const QString& title, const QString& message) 
   // This is a no-op is authorization has been granted.
   [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert |
                                            UNAuthorizationOptionBadge)
-                        completionHandler:^(BOOL granted, NSError* _Nullable error) {
+                        completionHandler:^(__unused BOOL granted, NSError* _Nullable error) {
                           if (error) {
                             // Note: This error may happen if the application is not signed.
                             NSLog(@"Error asking for permission to send notifications %@", error);

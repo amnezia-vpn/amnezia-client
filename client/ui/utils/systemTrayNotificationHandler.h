@@ -6,16 +6,18 @@
 #define SYSTEMTRAYNOTIFICATIONHANDLER_H
 
 #include "notificationHandler.h"
+#include "trayIconBackend.h"
 
 #include <QMenu>
-#include <QSystemTrayIcon>
+
+#include <memory>
 
 class SystemTrayNotificationHandler : public NotificationHandler {
     Q_OBJECT
 
 public:
     explicit SystemTrayNotificationHandler(QObject* parent);
-    ~SystemTrayNotificationHandler();
+    ~SystemTrayNotificationHandler() override;
 
     void setConnectionState(Vpn::ConnectionState state) override;
 
@@ -23,35 +25,37 @@ public:
 
 public slots:
     void updateWebsiteUrl(const QString &newWebsiteUrl);
+    void setConnectionError();
+    void clearConnectionError();
 
 protected:
-    virtual void notify(Message type, const QString& title,
-                        const QString& message, int timerMsec) override;
+    void notify(Message type, const QString& title,
+                const QString& message, int timerMsec) override;
 
 private:
-    void showHideWindow();
-
     void setTrayState(Vpn::ConnectionState state);
     void onTrayActivated(QSystemTrayIcon::ActivationReason reason);
-
-    void setTrayIcon(const QString &iconPath);
+    void refreshTheme();
+    void updateTrayIcon();
+    TrayIconVisual currentTrayVisual() const;
 
 private:
     QMenu m_menu;
-    QSystemTrayIcon m_systemTrayIcon;
+    std::unique_ptr<TrayIconBackend> m_trayIcon;
 
     QAction* m_trayActionShow = nullptr;
     QAction* m_trayActionConnect = nullptr;
     QAction* m_trayActionDisconnect = nullptr;
     QAction* m_trayActionVisitWebSite = nullptr;
     QAction* m_trayActionQuit = nullptr;
-    QAction* m_statusLabel = nullptr;    
+    QAction* m_statusLabel = nullptr;
     QAction* m_separator = nullptr;
 
-    const QString ConnectedTrayIconName = "active.png";
-    const QString DisconnectedTrayIconName = "default.png";
-    const QString ErrorTrayIconName = "error.png";
-    QString  websiteUrl = "https://amnezia.org";
+    Vpn::ConnectionState m_trayState = Vpn::ConnectionState::Unknown;
+    bool m_isDarkTheme = false;
+    bool m_errorLatched = false;
+
+    QString websiteUrl = "https://amnezia.org";
 };
 
 #endif  // SYSTEMTRAYNOTIFICATIONHANDLER_H

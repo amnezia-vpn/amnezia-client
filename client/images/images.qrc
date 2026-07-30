@@ -66,9 +66,12 @@
         <file>controls/text-cursor.svg</file>
         <file>controls/trash.svg</file>
         <file>controls/x-circle.svg</file>
-        <file>tray/active.png</file>
-        <file>tray/default.png</file>
-        <file>tray/error.png</file>
+        <file>tray/off-black.svg</file>
+        <file>tray/off-light.svg</file>
+        <file>tray/on-black.svg</file>
+        <file>tray/on-white.svg</file>
+        <file>tray/error-black.svg</file>
+        <file>tray/error-white.svg</file>
         <file>controls/monitor.svg</file>
     </qresource>
 </RCC>

@@ -273,6 +273,10 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.h
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
+        ${CLIENT_ROOT_DIR}/ui/utils/trayIconBackend.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTrayTheme.h
+        ${CLIENT_ROOT_DIR}/ui/utils/trayIconCommon.h
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.h
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.h
@@ -284,20 +288,81 @@ if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
         ${CLIENT_ROOT_DIR}/core/utils/ipcClient.cpp
         ${CLIENT_ROOT_DIR}/mozilla/localsocketcontroller.cpp
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTrayTheme.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/trayIconCommon.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/openVpnProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/wireGuardProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/xrayProtocol.cpp
         ${CLIENT_ROOT_DIR}/core/protocols/awgProtocol.cpp
     )
+
+    if(APPLE AND NOT MACOS_NE)
+        set(HEADERS ${HEADERS}
+            ${CLIENT_ROOT_DIR}/platforms/macos/mactrayiconbackend.h
+            ${CLIENT_ROOT_DIR}/platforms/macos/mactraytheme.h
+        )
+        set(SOURCES ${SOURCES}
+            ${CLIENT_ROOT_DIR}/platforms/macos/mactrayiconbackend.mm
+            ${CLIENT_ROOT_DIR}/platforms/macos/mactraytheme.cpp
+        )
+    endif()
 endif()
 
 if(APPLE AND MACOS_NE)
     # Include only the tray notification handler in NE builds
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.h
+        ${CLIENT_ROOT_DIR}/ui/utils/trayIconBackend.h
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTrayTheme.h
+        ${CLIENT_ROOT_DIR}/ui/utils/trayIconCommon.h
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.h
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.h
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.h
+        ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/ui/utils/systemTrayNotificationHandler.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTheme.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/platformTrayTheme.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/trayIconCommon.cpp
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.cpp
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.cpp
+        ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.cpp
+    )
+endif()
+
+if(WIN32)
+    set(HEADERS ${HEADERS}
+            ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.h
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.h
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.h
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.h
+            ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.h
+    )
+    set(SOURCES ${SOURCES}
+            ${CLIENT_ROOT_DIR}/platforms/windows/windowsutils.cpp
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintrayiconbackend.cpp
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintrayicon.cpp
+            ${CLIENT_ROOT_DIR}/platforms/windows/wintraytheme.cpp
+            ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.cpp
+    )
+endif()
+
+if(LINUX)
+    set(HEADERS ${HEADERS}
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.h
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxtrayiconbackend.h
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxtraytheme.h
+            ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.h
+    )
+    set(SOURCES ${SOURCES}
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxutils.cpp
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxtrayiconbackend.cpp
+            ${CLIENT_ROOT_DIR}/platforms/linux/linuxtraytheme.cpp
+            ${CLIENT_ROOT_DIR}/ui/utils/trayThemeChangeFilter.cpp
     )
 endif()
