@@ -144,6 +144,14 @@ QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) c
     normalized.replace("https://", "");
     normalized.replace("http://", "");
     normalized.replace("ftp://", "");
+
+    // A CIDR range is not a URL: the part after the slash is a prefix length,
+    // not a path. Stripping it turns 91.108.4.0/22 into 91.108.4.0, which is
+    // later routed as a /32 host route, so the rest of the subnet misses the tunnel.
+    if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalized)) {
+        return normalized;
+    }
+
     normalized = normalized.split("/", Qt::SkipEmptyParts).first();
     return normalized;
 }
