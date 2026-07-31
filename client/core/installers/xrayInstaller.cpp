@@ -26,6 +26,31 @@ namespace
         }
         return fp;
     }
+
+    // Parse an xray int range: "from-to" string, plain int, or legacy {from,to} object.
+    void parseIntRange(const QJsonValue &v, QString &minOut, QString &maxOut)
+    {
+        if (v.isString()) {
+            const QString s = v.toString().trimmed();
+            const int dash = s.indexOf(QLatin1Char('-'), 1);
+            if (dash > 0) {
+                minOut = s.left(dash).trimmed();
+                maxOut = s.mid(dash + 1).trimmed();
+            } else if (!s.isEmpty()) {
+                minOut = s;
+                maxOut = s;
+            }
+        } else if (v.isDouble()) {
+            minOut = QString::number(v.toInt());
+            maxOut = minOut;
+        } else if (v.isObject()) {
+            const QJsonObject o = v.toObject();
+            if (o.contains(QLatin1String("from")) || o.contains(QLatin1String("to"))) {
+                minOut = QString::number(o.value(QLatin1String("from")).toInt());
+                maxOut = QString::number(o.value(QLatin1String("to")).toInt());
+            }
+        }
+    }
 }
 
 using namespace amnezia;
@@ -215,9 +240,10 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         srv.xhttp.uplinkDataKey = xhttpObj.value("uplinkDataKey").toString();
 
         if (xhttpObj.contains(QLatin1String("uplinkChunkSize"))) {
-            QJsonObject uc = xhttpObj.value("uplinkChunkSize").toObject();
-            if (!uc.isEmpty())
-                srv.xhttp.uplinkChunkSize = QString::number(uc.value("from").toInt());
+            QString ucMin, ucMax;
+            parseIntRange(xhttpObj.value("uplinkChunkSize"), ucMin, ucMax);
+            if (!ucMin.isEmpty())
+                srv.xhttp.uplinkChunkSize = ucMin;
         } else if (xhttpObj.contains(QLatin1String("xhttpUplinkChunkSize"))) {
             srv.xhttp.uplinkChunkSize = QString::number(xhttpObj.value("xhttpUplinkChunkSize").toInt());
         }
@@ -226,11 +252,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         }
 
         auto readRange = [&](const char *key, QString &minOut, QString &maxOut) {
-            QJsonObject r = xhttpObj.value(QLatin1String(key)).toObject();
-            if (!r.isEmpty()) {
-                minOut = QString::number(r.value("from").toInt());
-                maxOut = QString::number(r.value("to").toInt());
-            }
+            parseIntRange(xhttpObj.value(QLatin1String(key)), minOut, maxOut);
         };
         readRange("scMaxEachPostBytes", srv.xhttp.scMaxEachPostBytesMin, srv.xhttp.scMaxEachPostBytesMax);
         readRange("scMinPostsIntervalMs", srv.xhttp.scMinPostsIntervalMsMin, srv.xhttp.scMinPostsIntervalMsMax);
@@ -243,10 +265,11 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             srv.xhttp.xPadding.header = pad.value("xPaddingHeader").toString();
             srv.xhttp.xPadding.placement = pad.value("xPaddingPlacement").toString();
             srv.xhttp.xPadding.method = pad.value("xPaddingMethod").toString();
-            QJsonObject bytesRange = pad.value("xPaddingBytes").toObject();
-            if (!bytesRange.isEmpty()) {
-                srv.xhttp.xPadding.bytesMin = QString::number(bytesRange.value("from").toInt());
-                srv.xhttp.xPadding.bytesMax = QString::number(bytesRange.value("to").toInt());
+            QString bytesMin, bytesMax;
+            parseIntRange(pad.value("xPaddingBytes"), bytesMin, bytesMax);
+            if (!bytesMin.isEmpty()) {
+                srv.xhttp.xPadding.bytesMin = bytesMin;
+                srv.xhttp.xPadding.bytesMax = bytesMax;
             }
             QString pl = srv.xhttp.xPadding.placement.toLower();
             if (pl == QLatin1String("cookie"))
@@ -264,7 +287,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
                 srv.xhttp.xPadding.method = QStringLiteral("Tokenish");
         };
         if (xhttpObj.contains(QLatin1String("xPaddingObfsMode")) || xhttpObj.contains(QLatin1String("xPaddingKey"))
-            || !xhttpObj.value("xPaddingBytes").toObject().isEmpty()) {
+            || xhttpObj.contains(QLatin1String("xPaddingBytes"))) {
             loadPaddingFromObject(xhttpObj);
         } else if (xhttpObj.contains(QLatin1String("xPadding")) && xhttpObj.value("xPadding").isObject()) {
             const QJsonObject nested = xhttpObj.value("xPadding").toObject();
@@ -280,11 +303,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             srv.xhttp.xmux.enabled = true;
 
             auto readMuxRange = [&](const char *key, QString &minOut, QString &maxOut) {
-                QJsonObject r = mux.value(QLatin1String(key)).toObject();
-                if (!r.isEmpty()) {
-                    minOut = QString::number(r.value("from").toInt());
-                    maxOut = QString::number(r.value("to").toInt());
-                }
+                parseIntRange(mux.value(QLatin1String(key)), minOut, maxOut);
             };
             readMuxRange("maxConcurrency", srv.xhttp.xmux.maxConcurrencyMin, srv.xhttp.xmux.maxConcurrencyMax);
             readMuxRange("maxConnections", srv.xhttp.xmux.maxConnectionsMin, srv.xhttp.xmux.maxConnectionsMax);
