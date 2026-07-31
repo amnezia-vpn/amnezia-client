@@ -40,4 +40,4 @@ MaxHandshakeAttempts = $MAX_HANDSHAKE_ATTEMPTS
 EOF
 
 # Every AWG parameter is optional - drop the lines whose value came out empty
-sed -i '/= *$/d' /opt/amnezia/awg/awg0.conf
+sed -i '/^[^=]*= *$/d' /opt/amnezia/awg/awg0.conf
