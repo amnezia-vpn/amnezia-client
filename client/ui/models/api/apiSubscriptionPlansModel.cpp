@@ -17,6 +17,8 @@ namespace configKey
     constexpr char isTrial[] = "is_trial";
     constexpr char serviceProtocol[] = "service_protocol";
     constexpr char storeProductId[] = "store_product_id";
+    constexpr char hasFreeTrial[] = "has_free_trial";
+    constexpr char trialDays[] = "trial_days";
 }
 }
 
@@ -56,6 +58,10 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.serviceProtocol;
     case StoreProductIdRole:
         return plan.storeProductId;
+    case HasFreeTrialRole:
+        return plan.hasFreeTrial;
+    case TrialDaysRole:
+        return plan.trialDays;
     default:
         return {};
     }
@@ -72,6 +78,8 @@ QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
         { IsTrialRole, "isTrial" },
         { ServiceProtocolRole, "serviceProtocol" },
         { StoreProductIdRole, "storeProductId" },
+        { HasFreeTrialRole, "hasFreeTrial" },
+        { TrialDaysRole, "trialDays" },
     };
 }
 
@@ -94,6 +102,8 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         subscriptionPlan.isTrial = planObject.value(configKey::isTrial).toBool();
         subscriptionPlan.serviceProtocol = planObject.value(configKey::serviceProtocol).toString();
         subscriptionPlan.storeProductId = planObject.value(configKey::storeProductId).toString();
+        subscriptionPlan.hasFreeTrial = planObject.value(configKey::hasFreeTrial).toBool();
+        subscriptionPlan.trialDays = planObject.value(configKey::trialDays).toInt();
         m_subscriptionPlans.append(std::move(subscriptionPlan));
     }
     endResetModel();
@@ -128,4 +138,14 @@ int ApiSubscriptionPlansModel::recommendedRowIndex() const
         }
     }
     return 0;
+}
+
+bool ApiSubscriptionPlansModel::hasAnyFreeTrial() const
+{
+    for (const SubscriptionPlanItem &plan : m_subscriptionPlans) {
+        if (plan.hasFreeTrial) {
+            return true;
+        }
+    }
+    return false;
 }

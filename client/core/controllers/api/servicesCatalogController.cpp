@@ -35,6 +35,8 @@ namespace
         constexpr char subtitle[] = "subtitle";
         constexpr char isTrial[] = "is_trial";
         constexpr char minPriceLabel[] = "min_price_label";
+        constexpr char hasFreeTrial[] = "has_free_trial";
+        constexpr char trialDays[] = "trial_days";
     }
 
     namespace serviceType
@@ -48,6 +50,8 @@ namespace
         double priceAmount = 0.0;
         double subscriptionBillingMonths = 0.0;
         QString displayPricePerMonth;
+        bool hasFreeTrial = false;
+        int trialDays = 0;
     };
 
     constexpr double oneMonthThreshold = 1.0 + 1e-6;
@@ -119,6 +123,8 @@ namespace
             quote.priceAmount = productInfo.value(QStringLiteral("priceAmount")).toDouble();
             quote.subscriptionBillingMonths = productInfo.value(QStringLiteral("subscriptionBillingMonths")).toDouble();
             quote.displayPricePerMonth = productInfo.value(QStringLiteral("displayPricePerMonth")).toString();
+            quote.hasFreeTrial = productInfo.value(QStringLiteral("hasFreeTrial")).toBool();
+            quote.trialDays = productInfo.value(QStringLiteral("trialDays")).toInt();
 
             // If the account is eligible for a paid introductory discount (not a free trial, which
             // stays invisible here and just applies silently at purchase time), show that price instead.
@@ -162,6 +168,25 @@ namespace
         qInfo() << "[Billing] Fetched subscription plans for price display";
 
         const QJsonArray products = plansResult.value("products").toArray();
+
+        // A base plan can have several offers (e.g. a plain listing plus a separate
+        // promotional free-trial offer). Scan all offers per basePlanId up front so a
+        // trial is found even when it isn't the first offer encountered below.
+        QHash<QString, int> trialDaysByBasePlanId;
+        for (const QJsonValue &productValue : products) {
+            const QJsonArray offers = productValue.toObject().value("offers").toArray();
+            for (const QJsonValue &offerValue : offers) {
+                const QJsonObject offer = offerValue.toObject();
+                const QString basePlanId = offer.value("basePlanId").toString();
+                if (basePlanId.isEmpty() || trialDaysByBasePlanId.contains(basePlanId)) {
+                    continue;
+                }
+                if (offer.value("hasFreeTrial").toBool()) {
+                    trialDaysByBasePlanId.insert(basePlanId, offer.value("trialDays").toInt());
+                }
+            }
+        }
+
         for (const QJsonValue &productValue : products) {
             const QJsonArray offers = productValue.toObject().value("offers").toArray();
             for (const QJsonValue &offerValue : offers) {
@@ -186,6 +211,8 @@ namespace
                 quote.priceAmount = regularPhase.value("priceAmountMicros").toDouble() / 1000000.0;
                 quote.subscriptionBillingMonths = regularPhase.value("subscriptionBillingMonths").toDouble();
                 quote.displayPricePerMonth = regularPhase.value("displayPricePerMonth").toString();
+                quote.hasFreeTrial = trialDaysByBasePlanId.contains(basePlanId);
+                quote.trialDays = trialDaysByBasePlanId.value(basePlanId, 0);
                 quotesByProductId.insert(basePlanId, quote);
             }
         }
@@ -234,6 +261,8 @@ namespace
                 const bool isTrialPlan = planObject.value(configKey::isTrial).toBool();
                 const SubscriptionPlanQuote &quote = *quoteIterator;
                 planObject.insert(configKey::priceLabel, quote.displayPrice);
+                planObject.insert(configKey::hasFreeTrial, quote.hasFreeTrial);
+                planObject.insert(configKey::trialDays, quote.trialDays);
                 ++mergedPlanCount;
 
                 const double months = quote.subscriptionBillingMonths;

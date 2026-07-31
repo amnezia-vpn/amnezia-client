@@ -156,6 +156,21 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
+    private func introOfferTrialDays(_ period: Product.SubscriptionPeriod) -> Int {
+        switch period.unit {
+        case .day:
+            return period.value
+        case .week:
+            return period.value * 7
+        case .month:
+            return period.value * 30
+        case .year:
+            return period.value * 365
+        @unknown default:
+            return period.value
+        }
+    }
+
     private func productDictionary(for product: Product) async -> NSDictionary {
         let currencyCode = storefrontCurrencyCode(for: product)
         var productData: [String: Any] = [
@@ -174,12 +189,14 @@ public class StoreKit2Helper: NSObject {
                 productData["displayPricePerMonth"] = perMonthPrice
             }
 
-            // Free trials stay invisible in the catalog price (matches Android: it silently applies
-            // at purchase time). Only surface genuine paid discounts (payAsYouGo/payUpFront) here.
-            if let introOffer = subscription.introductoryOffer, introOffer.paymentMode != .freeTrial,
-               await subscription.isEligibleForIntroOffer {
-                productData["introOfferDisplayPrice"] = introOffer.displayPrice
-                productData["introOfferPaymentMode"] = introOfferPaymentModeString(introOffer.paymentMode)
+            if let introOffer = subscription.introductoryOffer, await subscription.isEligibleForIntroOffer {
+                if introOffer.paymentMode == .freeTrial {
+                    productData["hasFreeTrial"] = true
+                    productData["trialDays"] = introOfferTrialDays(introOffer.period)
+                } else {
+                    productData["introOfferDisplayPrice"] = introOffer.displayPrice
+                    productData["introOfferPaymentMode"] = introOfferPaymentModeString(introOffer.paymentMode)
+                }
             }
         }
         return productData as NSDictionary

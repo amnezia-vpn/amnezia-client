@@ -47,6 +47,15 @@ private fun billingPeriodToMonths(period: String): Double {
     return years * 12.0 + months + weeks * 7.0 / 30.0 + days / 30.0
 }
 
+private fun billingPeriodToDays(period: String): Int {
+    val match = billingPeriodRegex.matchEntire(period) ?: return 0
+    val years = match.groupValues[1].toIntOrNull() ?: 0
+    val months = match.groupValues[2].toIntOrNull() ?: 0
+    val weeks = match.groupValues[3].toIntOrNull() ?: 0
+    val days = match.groupValues[4].toIntOrNull() ?: 0
+    return years * 365 + months * 30 + weeks * 7 + days
+}
+
 private fun displayPricePerMonth(priceAmountMicros: Long, currencyCode: String, billingMonths: Double): String? {
     if (billingMonths <= 1e-6 || currencyCode.isBlank()) return null
     return try {
@@ -160,6 +169,13 @@ class BillingProvider(context: Context) : AutoCloseable {
                 }
                 val regularPhase = offerDetails.pricingPhases.pricingPhaseList.lastOrNull()
                 Log.v(TAG, "Offer ${offerDetails.basePlanId}: regular price = ${regularPhase?.formattedPrice}")
+
+                val trialPhase = offerDetails.pricingPhases.pricingPhaseList.firstOrNull()
+                val hasFreeTrial = trialPhase != null && trialPhase.priceAmountMicros == 0L
+                offer.put("hasFreeTrial", hasFreeTrial)
+                if (hasFreeTrial) {
+                    offer.put("trialDays", billingPeriodToDays(trialPhase!!.billingPeriod))
+                }
             }
         }
         return resultJson

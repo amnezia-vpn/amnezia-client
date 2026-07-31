@@ -1135,6 +1135,12 @@ void IosController::fetchProducts(const QStringList &productIds,
                 if (productInfo[@"introOfferPaymentMode"]) {
                     productData["introOfferPaymentMode"] = QString::fromUtf8([productInfo[@"introOfferPaymentMode"] UTF8String]);
                 }
+                if (productInfo[@"hasFreeTrial"]) {
+                    productData["hasFreeTrial"] = [productInfo[@"hasFreeTrial"] boolValue];
+                }
+                if (productInfo[@"trialDays"]) {
+                    productData["trialDays"] = [productInfo[@"trialDays"] intValue];
+                }
                 outProducts.push_back(productData);
             }
 

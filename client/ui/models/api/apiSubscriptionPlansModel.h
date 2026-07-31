@@ -18,7 +18,9 @@ public:
         CheckoutUrlRole,
         IsTrialRole,
         ServiceProtocolRole,
-        StoreProductIdRole
+        StoreProductIdRole,
+        HasFreeTrialRole,
+        TrialDaysRole
     };
     Q_ENUM(Roles)
 
@@ -33,6 +35,7 @@ public:
 
     Q_INVOKABLE QVariantMap planAt(int row) const;
     Q_INVOKABLE int recommendedRowIndex() const;
+    Q_INVOKABLE bool hasAnyFreeTrial() const;
 
 private:
     struct SubscriptionPlanItem
@@ -45,6 +48,8 @@ private:
         bool isTrial = false;
         QString serviceProtocol;
         QString storeProductId;
+        bool hasFreeTrial = false;
+        int trialDays = 0;
     };
 
     QVector<SubscriptionPlanItem> m_subscriptionPlans;
