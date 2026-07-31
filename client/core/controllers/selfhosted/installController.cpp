@@ -11,7 +11,6 @@
 #include <QtConcurrent>
 
 #include "core/configurators/configuratorBase.h"
-#include "core/configurators/xrayConfigurator.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -197,6 +196,11 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
+
+        if (errorCode == ErrorCode::NoError
+            && (container == DockerContainer::Xray || container == DockerContainer::SSXray)) {
+            errorCode = prepareContainerConfig(container, credentials, newConfig, sshSession);
+        }
     } else {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
@@ -208,14 +212,6 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             const QString containerName = ContainerUtils::containerToString(container);
             errorCode = sshSession.runScript(credentials, "sudo docker restart " + containerName);
         }
-    }
-
-    if (errorCode == ErrorCode::NoError
-        && (container == DockerContainer::Xray || container == DockerContainer::SSXray)) {
-        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
-        XrayConfigurator xrayConfigurator(&sshSession);
-        errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings,
-                                                                 /*appendNewClient*/ false);
     }
 
     if (errorCode == ErrorCode::NoError) {
@@ -493,6 +489,13 @@ ErrorCode InstallController::buildContainerWorker(const ServerCredentials &crede
     if (stdOut.contains("have reached") && stdOut.contains("pull rate limit"))
         return ErrorCode::DockerPullRateLimit;
 
+    if (stdOut.contains("returned a non-zero code")
+        || stdOut.contains("failed to solve")
+        || stdOut.contains("Unable to find image")
+        || stdOut.contains("Couldn't connect to server")
+        || (stdOut.contains("curl:") && stdOut.contains("(")))
+        return ErrorCode::ServerDockerFailedError;
+
     return error;
 }
 
@@ -517,6 +520,27 @@ ErrorCode InstallController::runContainerWorker(const ServerCredentials &credent
         return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("invalid publish"))
         return ErrorCode::ServerDockerFailedError;
+    if (stdOut.contains("Unable to find image") || stdOut.contains("No such image"))
+        return ErrorCode::ServerDockerFailedError;
+
+    if (e != ErrorCode::NoError)
+        return e;
+
+    const QString containerName = ContainerUtils::containerToString(container);
+    QString stateOut;
+    auto cbState = [&stateOut](const QString &data, libssh::Client &) {
+        stateOut += data;
+        return ErrorCode::NoError;
+    };
+    sshSession.runScript(credentials,
+                         QStringLiteral("sudo docker inspect --format '{{.State.Running}}' %1 2>/dev/null || echo notfound")
+                                 .arg(containerName),
+                         cbState);
+    if (!stateOut.contains("true")) {
+        qWarning().noquote() << "runContainerWorker: container" << containerName
+                             << "is not running after start:" << stateOut.trimmed();
+        return ErrorCode::ServerDockerFailedError;
+    }
 
     return e;
 }
