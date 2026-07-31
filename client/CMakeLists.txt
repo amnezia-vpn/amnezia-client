@@ -39,6 +39,7 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
+find_package(OpenSSL REQUIRED)
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
@@ -231,7 +232,7 @@ install(RUNTIME_DEPENDENCY_SET client_deps
         [[hvsifiletrust\.dll]]
         [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
         [[.*\.framework]]
-        [[^[Qq]t.*]]
+        [[^(lib)?[Qq]t.*]]
     POST_EXCLUDE_REGEXES
         [[^.*[\\/]system32[\\/].*\.dll$]]
         [[^/lib.*]]
