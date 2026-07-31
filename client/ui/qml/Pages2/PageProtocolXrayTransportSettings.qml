@@ -123,7 +123,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("TTI")
-                    subtitleText: qsTr("Range 10–100, default %1 ms", "mKCP TTI").arg(XrayConfigModel.mkcpDefaultTti())
+                    hintText: qsTr("Transmission time interval (ms). Valid range: 10–100. Default: %1.").arg(XrayConfigModel.mkcpDefaultTti())
                     textField.text: mkcpTti
                     textField.maximumLength: 3
                     textField.validator: RegularExpressionValidator { regularExpression: /^(|\d{1,2}|100)$/ }
@@ -142,7 +142,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("uplinkCapacity")
-                    subtitleText: qsTr("≥ 0, default %1 MB/s", "mKCP uplink").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
+                    hintText: qsTr("Uplink capacity (MB/s). Maximum: 2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
                     textField.text: mkcpUplinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -161,7 +161,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("downlinkCapacity")
-                    subtitleText: qsTr("≥ 0, default %1 MB/s", "mKCP downlink").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
+                    hintText: qsTr("Downlink capacity (MB/s). Maximum: 2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
                     textField.text: mkcpDownlinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -180,7 +180,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("readBufferSize")
-                    subtitleText: qsTr("≥ 1, default %1 MB").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
+                    hintText: qsTr("Read buffer size (MB). Range: 1–2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
                     textField.text: mkcpReadBufferSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -199,7 +199,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("writeBufferSize")
-                    subtitleText: qsTr("≥ 1, default %1 MB").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
+                    hintText: qsTr("Write buffer size (MB). Range: 1–2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
                     textField.text: mkcpWriteBufferSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -680,7 +680,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkChunkSize")
-                    subtitleText: qsTr("≥ 0 (0 = off)")
+                    hintText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.")
                     textField.text: xhttpUplinkChunkSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -699,7 +699,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("scMaxBufferedPosts")
-                    subtitleText: qsTr("≥ 0")
+                    hintText: qsTr("Max buffered POSTs. Range: 0–2147483647.")
                     textField.text: xhttpScMaxBufferedPosts
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }

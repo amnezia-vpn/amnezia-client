@@ -188,7 +188,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 16
                     headerText: qsTr("hKeepAlivePeriod")
-                    subtitleText: qsTr("Integer, may be negative")
+                    hintText: qsTr("HTTP keep-alive period. Integer, may be negative.")
                     textField.text: xmuxHKeepAlivePeriod
                     textField.maximumLength: 11
                     textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }

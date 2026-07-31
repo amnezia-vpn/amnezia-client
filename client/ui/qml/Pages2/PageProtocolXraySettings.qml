@@ -109,7 +109,7 @@ PageType {
                 Layout.rightMargin: 16
                 enabled: listView.enabled
                 headerText: qsTr("Port")
-                subtitleText: qsTr("1–65535")
+                hintText: qsTr("Valid range: 1–65535.")
 
                 Binding {
                     target: textFieldWithHeaderType.textField
