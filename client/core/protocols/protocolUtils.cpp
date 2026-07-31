@@ -222,3 +222,62 @@ QString ProtocolUtils::getProtocolVersionString(const QJsonObject &protocolConfi
     if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
     return "";
 }
+
+QStringList ProtocolUtils::parseAllowedIps(const QString &allowedIpsString)
+{
+    QStringList result;
+    for (const QString &part : allowedIpsString.split(',', Qt::SkipEmptyParts)) {
+        const QString trimmed = part.trimmed();
+        if (!trimmed.isEmpty()) {
+            result.append(trimmed);
+        }
+    }
+    return result;
+}
+
+QStringList ProtocolUtils::normalizeAllowedIpsList(const QStringList &allowedIps)
+{
+    QStringList result;
+    for (const QString &ip : allowedIps) {
+        if (ip.contains(',')) {
+            result.append(parseAllowedIps(ip));
+        } else {
+            const QString trimmed = ip.trimmed();
+            if (!trimmed.isEmpty()) {
+                result.append(trimmed);
+            }
+        }
+    }
+    return result;
+}
+
+bool ProtocolUtils::isFullTunnelAllowedIps(const QStringList &allowedIps)
+{
+    return allowedIps.contains("0.0.0.0/0") && allowedIps.contains("::/0");
+}
+
+bool ProtocolUtils::hasServerSideSplitTunneling(const QStringList &allowedIps, const QString &nativeConfig)
+{
+    const QStringList normalizedIps = normalizeAllowedIpsList(allowedIps);
+    if (!normalizedIps.isEmpty()) {
+        return !isFullTunnelAllowedIps(normalizedIps);
+    }
+
+    if (nativeConfig.isEmpty()) {
+        return false;
+    }
+
+    for (const QString &line : nativeConfig.split('\n')) {
+        if (!line.contains("AllowedIPs")) {
+            continue;
+        }
+        const QStringList parts = line.split(" = ");
+        if (parts.size() < 2) {
+            break;
+        }
+        const QStringList parsedIps = parseAllowedIps(parts.at(1));
+        return !parsedIps.isEmpty() && !isFullTunnelAllowedIps(parsedIps);
+    }
+
+    return false;
+}

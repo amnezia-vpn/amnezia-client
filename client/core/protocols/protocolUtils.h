@@ -41,6 +41,11 @@ namespace amnezia
 
         QString getProtocolVersion(const QJsonObject &protocolConfig);
         QString getProtocolVersionString(const QJsonObject &protocolConfig);
+
+        QStringList parseAllowedIps(const QString &allowedIpsString);
+        QStringList normalizeAllowedIpsList(const QStringList &allowedIps);
+        bool isFullTunnelAllowedIps(const QStringList &allowedIps);
+        bool hasServerSideSplitTunneling(const QStringList &allowedIps, const QString &nativeConfig = QString());
     }
 }
 

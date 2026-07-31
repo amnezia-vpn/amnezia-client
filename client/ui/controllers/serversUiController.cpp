@@ -3,6 +3,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
+#include "core/protocols/protocolUtils.h"
 #include "core/models/protocolConfig.h"
 #include "core/models/containerConfig.h"
 
@@ -221,19 +222,10 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
     const ContainerConfig containerConfig = m_serversController->getContainerConfig(defaultServerId, defaultContainer);
     
     if (defaultContainer == DockerContainer::Awg || defaultContainer == DockerContainer::WireGuard) {
-        auto hasSplitTunnelingFromAllowedIps = [](const QStringList& allowedIps, const QString& nativeConfig) -> bool {
-            bool hasSplitTunneling = !allowedIps.isEmpty() && !allowedIps.contains("0.0.0.0/0");
-            if (!hasSplitTunneling && !nativeConfig.isEmpty()) {
-                hasSplitTunneling = nativeConfig.contains("AllowedIPs") 
-                    && !nativeConfig.contains("AllowedIPs = 0.0.0.0/0, ::/0");
-            }
-            return hasSplitTunneling;
-        };
-        
         if (defaultContainer == DockerContainer::Awg) {
             if (const auto* awgConfig = containerConfig.getAwgProtocolConfig()) {
                 if (awgConfig->hasClientConfig()) {
-                    return hasSplitTunnelingFromAllowedIps(
+                    return ProtocolUtils::hasServerSideSplitTunneling(
                         awgConfig->clientConfig->allowedIps,
                         awgConfig->clientConfig->nativeConfig
                     );
@@ -242,7 +234,7 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
         } else if (defaultContainer == DockerContainer::WireGuard) {
             if (const auto* wgConfig = containerConfig.getWireGuardProtocolConfig()) {
                 if (wgConfig->hasClientConfig()) {
-                    return hasSplitTunnelingFromAllowedIps(
+                    return ProtocolUtils::hasServerSideSplitTunneling(
                         wgConfig->clientConfig->allowedIps,
                         wgConfig->clientConfig->nativeConfig
                     );

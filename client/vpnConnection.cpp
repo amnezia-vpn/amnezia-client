@@ -31,6 +31,7 @@
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/serverConfigUtils.h"
+#include "core/protocols/protocolUtils.h"
 #include "vpnConnection.h"
 
 using namespace ProtocolUtils;
@@ -382,7 +383,8 @@ void VpnConnection::appendSplitTunnelingConfig()
         allowSiteBasedSplitTunneling = false;
         auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
         if (configData.value(configKey::allowedIps).isString()) {
-            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(configKey::allowedIps).toString().split(", "));
+            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(
+                    parseAllowedIps(configData.value(configKey::allowedIps).toString()));
             configData.insert(configKey::allowedIps, allowedIpsJsonArray);
             m_vpnConfiguration.insert(protocolName + "_config_data", configData);
         } else if (configData.value(configKey::allowedIps).isUndefined()) {
@@ -391,10 +393,10 @@ void VpnConnection::appendSplitTunnelingConfig()
             for (auto &line : nativeConfigLines) {
                 if (line.contains("AllowedIPs")) {
                     auto allowedIpsString = line.split(" = ");
-                    if (allowedIpsString.size() < 1) {
+                    if (allowedIpsString.size() < 2) {
                         break;
                     }
-                    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
+                    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(parseAllowedIps(allowedIpsString.at(1)));
                     configData.insert(configKey::allowedIps, allowedIpsJsonArray);
                     m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
@@ -418,7 +420,11 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
 
         QJsonArray allowedIpsJsonArray = configData.value(configKey::allowedIps).toArray();
-        if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
+        QStringList allowedIpsList;
+        for (const QJsonValue &val : allowedIpsJsonArray) {
+            allowedIpsList.append(val.toString());
+        }
+        if (isFullTunnelAllowedIps(normalizeAllowedIpsList(allowedIpsList))) {
             allowSiteBasedSplitTunneling = true;
         }
     }

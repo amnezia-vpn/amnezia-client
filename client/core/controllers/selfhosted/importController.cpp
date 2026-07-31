@@ -567,7 +567,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     }
 
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(
-                configMap.value(protocols::wireguard::AllowedIPs).split(", "));
+                ProtocolUtils::parseAllowedIps(configMap.value(protocols::wireguard::AllowedIPs)));
 
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
 
