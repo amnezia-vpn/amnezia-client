@@ -213,6 +213,8 @@ namespace
                 quote.displayPricePerMonth = regularPhase.value("displayPricePerMonth").toString();
                 quote.hasFreeTrial = trialDaysByBasePlanId.contains(basePlanId);
                 quote.trialDays = trialDaysByBasePlanId.value(basePlanId, 0);
+                qInfo().noquote() << "[Billing] Quote for" << basePlanId << "price:" << quote.displayPrice
+                                  << "hasFreeTrial:" << quote.hasFreeTrial << "trialDays:" << quote.trialDays;
                 quotesByProductId.insert(basePlanId, quote);
             }
         }

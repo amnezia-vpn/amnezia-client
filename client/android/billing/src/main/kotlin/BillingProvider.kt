@@ -176,6 +176,16 @@ class BillingProvider(context: Context) : AutoCloseable {
                 if (hasFreeTrial) {
                     offer.put("trialDays", billingPeriodToDays(trialPhase!!.billingPeriod))
                 }
+
+                val phasesSummary = offerDetails.pricingPhases.pricingPhaseList.joinToString(", ") {
+                    "${it.billingPeriod}:${it.formattedPrice}"
+                }
+                Log.i(
+                    TAG,
+                    "Raw offer from Play: basePlanId=${offerDetails.basePlanId} offerId=${offerDetails.offerId} " +
+                        "offerToken=${offerDetails.offerToken} phases=[$phasesSummary] hasFreeTrial=$hasFreeTrial" +
+                        if (hasFreeTrial) " trialDays=${offer.getInt("trialDays")}" else ""
+                )
             }
         }
         return resultJson
