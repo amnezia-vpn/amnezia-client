@@ -11,6 +11,7 @@
 #include <QtConcurrent>
 
 #include "core/configurators/configuratorBase.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -152,6 +153,15 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         return e;
     qDebug().noquote() << "InstallController::setupContainer configureContainerWorker finished";
 
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+        XrayConfigurator xrayConfigurator(&sshSession);
+        e = xrayConfigurator.writeServerConfigForSetup(credentials, container, config, dnsSettings);
+        if (e)
+            return e;
+        qDebug().noquote() << "InstallController::setupContainer xray writeServerConfigForSetup finished";
+    }
+
     setupServerFirewall(credentials, sshSession);
     qDebug().noquote() << "InstallController::setupContainer setupServerFirewall finished";
 
@@ -191,16 +201,14 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     SshSession sshSession;
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+        reinstallRequired = true;
+    }
     qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
-
-        if (errorCode == ErrorCode::NoError
-            && (container == DockerContainer::Xray || container == DockerContainer::SSXray)) {
-            errorCode = prepareContainerConfig(container, credentials, newConfig, sshSession);
-        }
     } else {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
@@ -402,6 +410,11 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     }
 
     if (ContainerUtils::containerService(container) != ServiceType::Other) {
+        if ((container == DockerContainer::Xray || container == DockerContainer::SSXray)
+            && containerConfig.protocolConfig.hasClientConfig()) {
+            return ErrorCode::NoError;
+        }
+
         Proto protocol = ContainerUtils::defaultProtocol(container);
 
         DnsSettings dnsSettings = {
