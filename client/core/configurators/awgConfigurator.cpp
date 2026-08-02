@@ -96,10 +96,8 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     newClientConfig.specialJunk4 = configMap.value(configKey::specialJunk4);
     newClientConfig.specialJunk5 = configMap.value(configKey::specialJunk5);
     
-    if (container == DockerContainer::Awg2) {
-        newClientConfig.cookieReplyPacketJunkSize = configMap.value(configKey::cookieReplyPacketJunkSize);
-        newClientConfig.transportPacketJunkSize = configMap.value(configKey::transportPacketJunkSize);
-    }
+    newClientConfig.cookieReplyPacketJunkSize = configMap.value(configKey::cookieReplyPacketJunkSize);
+    newClientConfig.transportPacketJunkSize = configMap.value(configKey::transportPacketJunkSize);
     
     newClientConfig.isObfuscationEnabled = false;
     
