@@ -1,0 +1,75 @@
+enable_language(Swift)
+
+set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
+
+add_executable(vpncontrolwidget)
+set_target_properties(vpncontrolwidget PROPERTIES
+    XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
+    BUNDLE_EXTENSION appex
+
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
+    MACOSX_BUNDLE_INFO_STRING "AmneziaVPNWidget"
+    MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPNWidget"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.widget"
+    MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
+    MACOSX_BUNDLE_LONG_VERSION_STRING "${APPLE_PROJECT_VERSION}-${CMAKE_PROJECT_VERSION_TWEAK}"
+    MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
+
+    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.widget"
+    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNWidget.entitlements
+    XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
+    XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${BUILD_ID}"
+    XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPNWidget"
+
+    XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
+    XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
+    XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
+    XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
+)
+
+if(DEPLOY)
+    set_target_properties(vpncontrolwidget PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "distr ios.org.amnezia.AmneziaVPN.widget"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "dev ios.org.amnezia.AmneziaVPN.widget"
+    )
+else()
+    set_target_properties(vpncontrolwidget PROPERTIES
+        XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
+    )
+endif()
+
+set_target_properties(vpncontrolwidget PROPERTIES
+    XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
+    XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
+    XCODE_ATTRIBUTE_SWIFT_OPTIMIZATION_LEVEL "-Onone"
+)
+
+set_target_properties(vpncontrolwidget PROPERTIES
+    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
+)
+
+find_library(FW_WIDGETKIT WidgetKit)
+find_library(FW_SWIFTUI SwiftUI)
+find_library(FW_APPINTENTS AppIntents)
+
+target_link_libraries(vpncontrolwidget PRIVATE
+    ${FW_WIDGETKIT}
+    ${FW_SWIFTUI}
+    ${FW_APPINTENTS}
+)
+
+target_sources(vpncontrolwidget PRIVATE
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNWidgetState.swift
+    ${CMAKE_CURRENT_SOURCE_DIR}/VPNControlWidget.swift
+    ${CMAKE_CURRENT_SOURCE_DIR}/VPNControlWidgetPreviews.swift
+    ${CMAKE_CURRENT_SOURCE_DIR}/VPNWidgetIntent.swift
+    ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
+)
+
+set_property(TARGET vpncontrolwidget APPEND PROPERTY RESOURCE
+    ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
+    ${CMAKE_CURRENT_SOURCE_DIR}/en.lproj/Localizable.strings
+)

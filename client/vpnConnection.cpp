@@ -540,6 +540,7 @@ void VpnConnection::disconnectFromVpn()
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
     disconnect(&m_checkTimer, &QTimer::timeout, IosController::Instance(), &IosController::checkStatus);
+    return;
 #endif
 
     if (m_vpnProtocol.isNull()) {

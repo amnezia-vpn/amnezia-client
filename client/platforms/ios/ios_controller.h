@@ -90,6 +90,7 @@ signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void importConfigFromOutside(const QString);
     void importBackupFromOutside(const QString);
+    void vpnWidgetToggleRequested();
 
     void finished();
 
