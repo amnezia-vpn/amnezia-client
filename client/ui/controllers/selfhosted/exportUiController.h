@@ -26,6 +26,9 @@ public slots:
     void generateAwgConfig(const QString &serverId, int containerIndex, const QString &clientName);
     void generateXrayConfig(const QString &serverId, const QString &clientName);
     void generateQrFromString(const QString &text);
+    // Plain single QR of the raw string (no Amnezia chunk envelope) — for external links like
+    // tg://proxy that a third-party app / camera must scan directly.
+    void generateQrFromStringRaw(const QString &text);
 
     QString getConfig();
     QString getNativeConfigString();
