@@ -39,6 +39,9 @@ PageType {
             width: listView.width
             spacing: 0
 
+            // REALITY is not supported with the mKCP transport (xray refuses reality+mkcp).
+            readonly property bool realityAllowed: transport !== "mkcp"
+
             BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -77,8 +80,19 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Reality")
+                enabled: realityAllowed
                 checked: security === "reality"
                 onClicked: security = "reality"
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                visible: !realityAllowed
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("REALITY is not supported with the mKCP transport. Use None or TLS.")
             }
 
             DividerType {
@@ -187,6 +201,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
+                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
                     textField.onTextEdited: root.editDirty = (textField.text !== sni)
@@ -258,6 +273,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
+                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
                     textField.onTextEdited: root.editDirty = (textField.text !== sni)
