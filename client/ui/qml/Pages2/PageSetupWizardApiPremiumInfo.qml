@@ -65,7 +65,7 @@ PageType {
 
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 24
+                Layout.topMargin: 8
                 Layout.bottomMargin: 12
                 visible: !!root.currentPlan && !!root.currentPlan.hasFreeTrial
                 radius: 10
@@ -126,7 +126,10 @@ PageType {
             BasicButtonType {
                 id: changePlanButton
 
+                implicitHeight: 25
+
                 Layout.alignment: Qt.AlignRight
+                Layout.topMargin: -(root.selectedPlanIndex === ApiSubscriptionPlansModel.rowCount() - 1 ? 24 : 12) + 6
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
                 visible: root.anyPlanHasFreeTrial && !root.plansExpanded && ApiSubscriptionPlansModel.rowCount() > 1
