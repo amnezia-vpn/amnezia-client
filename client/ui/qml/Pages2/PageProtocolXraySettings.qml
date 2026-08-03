@@ -110,6 +110,7 @@ PageType {
                 enabled: listView.enabled
                 headerText: qsTr("Port")
                 hintText: qsTr("Valid range: 1–65535.")
+                placeholderText: XrayConfigModel.portDefault()
 
                 Binding {
                     target: textFieldWithHeaderType.textField

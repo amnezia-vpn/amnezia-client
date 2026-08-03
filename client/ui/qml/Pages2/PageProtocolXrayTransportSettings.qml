@@ -123,7 +123,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("TTI")
-                    hintText: qsTr("Transmission time interval (ms). Valid range: 10–100. Default: %1.").arg(XrayConfigModel.mkcpDefaultTti())
+                    hintText: qsTr("Transmission time interval (ms). Valid range: 10–100.")
+                    placeholderText: XrayConfigModel.mkcpDefaultTti()
                     textField.text: mkcpTti
                     textField.maximumLength: 3
                     textField.validator: RegularExpressionValidator { regularExpression: /^(|\d{1,2}|100)$/ }
@@ -142,7 +143,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("uplinkCapacity")
-                    hintText: qsTr("Uplink capacity (MB/s). Maximum: 2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
+                    hintText: qsTr("Uplink capacity (MB/s). Maximum: 2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultUplinkCapacity()
                     textField.text: mkcpUplinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -161,7 +163,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("downlinkCapacity")
-                    hintText: qsTr("Downlink capacity (MB/s). Maximum: 2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
+                    hintText: qsTr("Downlink capacity (MB/s). Maximum: 2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultDownlinkCapacity()
                     textField.text: mkcpDownlinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -180,7 +183,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("readBufferSize")
-                    hintText: qsTr("Read buffer size (MB). Range: 1–2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
+                    hintText: qsTr("Read buffer size (MB). Range: 1–2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultReadBufferSize()
                     textField.text: mkcpReadBufferSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -199,7 +203,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("writeBufferSize")
-                    hintText: qsTr("Write buffer size (MB). Range: 1–2147483647. Default: %1.").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
+                    hintText: qsTr("Write buffer size (MB). Range: 1–2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultWriteBufferSize()
                     textField.text: mkcpWriteBufferSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -292,6 +297,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Host")
+                    placeholderText: XrayConfigModel.xhttpHostDefault()
                     textField.text: xhttpHost
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._:,-]*$/ }
                     textField.onTextEdited: root.editDirty = (textField.text !== xhttpHost)
@@ -681,6 +687,7 @@ PageType {
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkChunkSize")
                     hintText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.")
+                    placeholderText: XrayConfigModel.xhttpUplinkChunkSizeDefault()
                     textField.text: xhttpUplinkChunkSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -727,6 +734,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScMaxEachPostBytesMin
                     maxValue: xhttpScMaxEachPostBytesMax
+                    minPlaceholder: XrayConfigModel.scMaxEachPostBytesMinDefault()
+                    maxPlaceholder: XrayConfigModel.scMaxEachPostBytesMaxDefault()
                     onMinChanged: function(val) { xhttpScMaxEachPostBytesMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xhttpScMaxEachPostBytesMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -747,6 +756,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScStreamUpServerSecsMin
                     maxValue: xhttpScStreamUpServerSecsMax
+                    minPlaceholder: XrayConfigModel.scStreamUpServerSecsMinDefault()
+                    maxPlaceholder: XrayConfigModel.scStreamUpServerSecsMaxDefault()
                     onMinChanged: function(val) { xhttpScStreamUpServerSecsMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xhttpScStreamUpServerSecsMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -767,6 +778,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScMinPostsIntervalMsMin
                     maxValue: xhttpScMinPostsIntervalMsMax
+                    minPlaceholder: XrayConfigModel.scMinPostsIntervalMsMinDefault()
+                    maxPlaceholder: XrayConfigModel.scMinPostsIntervalMsMaxDefault()
                     onMinChanged: function(val) { xhttpScMinPostsIntervalMsMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xhttpScMinPostsIntervalMsMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
