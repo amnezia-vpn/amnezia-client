@@ -7,6 +7,7 @@
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
 #include <QTimer>
+#include <QStringList>
 
 #include "core/protocols/vpnProtocol.h"
 #include "core/utils/errorCodes.h"
@@ -73,6 +74,10 @@ protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
 
 private:
+#ifdef Q_OS_WIN
+    struct SiteResolutionState;
+#endif
+
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
 
@@ -90,12 +95,24 @@ private:
    void createAndroidConnections();
 #endif
 
-   Vpn::ConnectionState m_connectionState;
+    Vpn::ConnectionState m_connectionState;
 
-   void createProtocolConnections();
+    void createProtocolConnections();
 
-   void appendSplitTunnelingConfig();
-   void appendKillSwitchConfig();
+    bool appendSplitTunnelingConfig(const QStringList &resolvedSiteAddresses = {}, bool useResolvedSiteAddresses = false);
+    void appendKillSwitchConfig();
+    void continueConnectToVpn(DockerContainer container, const QJsonObject &vpnConfiguration,
+                              const QStringList &resolvedSiteAddresses,
+                              bool useResolvedSiteAddresses);
+
+#ifdef Q_OS_WIN
+    QSharedPointer<SiteResolutionState> m_siteResolutionState;
+
+    void resolveSiteAddressesAndConnect(DockerContainer container, const QJsonObject &vpnConfiguration);
+    void startSiteDnsLookups(const QSharedPointer<SiteResolutionState> &state);
+    void finishSiteDnsResolution(const QSharedPointer<SiteResolutionState> &state, bool timedOut);
+    void cancelSiteDnsResolution();
+#endif
 };
 
 #endif // VPNCONNECTION_H
