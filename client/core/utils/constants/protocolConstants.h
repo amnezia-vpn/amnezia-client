@@ -86,6 +86,10 @@ namespace amnezia
 
             constexpr char defaultXPaddingPlacement[] = "Cookie";
             constexpr char defaultXPaddingMethod[] = "Repeat-x";
+            constexpr char defaultXPaddingKey[] = "x_padding";
+            constexpr char defaultXPaddingHeader[] = "X-Padding";
+            constexpr char defaultXPaddingBytesMin[] = "1";
+            constexpr char defaultXPaddingBytesMax[] = "256";
 
             constexpr char defaultMkcpTti[] = "50";
             constexpr char defaultMkcpUplinkCapacity[] = "5";

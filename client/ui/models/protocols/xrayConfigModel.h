@@ -118,6 +118,21 @@ public:
     Q_INVOKABLE static QString mkcpDefaultReadBufferSize();
     Q_INVOKABLE static QString mkcpDefaultWriteBufferSize();
 
+    Q_INVOKABLE static QString portDefault();
+    Q_INVOKABLE static QString sniDefault();
+    Q_INVOKABLE static QString xhttpHostDefault();
+    Q_INVOKABLE static QString xhttpUplinkChunkSizeDefault();
+    Q_INVOKABLE static QString scMaxEachPostBytesMinDefault();
+    Q_INVOKABLE static QString scMaxEachPostBytesMaxDefault();
+    Q_INVOKABLE static QString scMinPostsIntervalMsMinDefault();
+    Q_INVOKABLE static QString scMinPostsIntervalMsMaxDefault();
+    Q_INVOKABLE static QString scStreamUpServerSecsMinDefault();
+    Q_INVOKABLE static QString scStreamUpServerSecsMaxDefault();
+    Q_INVOKABLE static QString xPaddingKeyDefault();
+    Q_INVOKABLE static QString xPaddingHeaderDefault();
+    Q_INVOKABLE static QString xPaddingBytesMinDefault();
+    Q_INVOKABLE static QString xPaddingBytesMaxDefault();
+
     Q_INVOKABLE static bool isValidHost(const QString &host);
     Q_INVOKABLE static bool isValidSni(const QString &sni);
     Q_INVOKABLE static bool isValidPath(const QString &path);

@@ -589,6 +589,76 @@ QString XrayConfigModel::mkcpDefaultWriteBufferSize()
     return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
 }
 
+QString XrayConfigModel::portDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultPort);
+}
+
+QString XrayConfigModel::sniDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultSni);
+}
+
+QString XrayConfigModel::xhttpHostDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpHost);
+}
+
+QString XrayConfigModel::xhttpUplinkChunkSizeDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpUplinkChunkSize);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMin);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMax);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMin);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMax);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMin);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMax);
+}
+
+QString XrayConfigModel::xPaddingKeyDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingKey);
+}
+
+QString XrayConfigModel::xPaddingHeaderDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingHeader);
+}
+
+QString XrayConfigModel::xPaddingBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMin);
+}
+
+QString XrayConfigModel::xPaddingBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMax);
+}
+
 namespace {
     bool isValidSingleHost(const QString &t)
     {

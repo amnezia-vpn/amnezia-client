@@ -24,6 +24,7 @@ Item {
     property var clickedFunc
 
     property alias textField: textField
+    property alias placeholderText: textField.placeholderText
     property string textFieldTextColor: AmneziaStyle.color.paleGray
     property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
 
@@ -216,8 +217,7 @@ Item {
         }
     }
 
-    // (i) hint: shown next to the field when hintText is set. Tap to reveal a styled tooltip with
-    // the extra info (e.g. max / valid value) that no longer lives in the always-visible subtitle.
+    // (i) hint: tap to reveal a tooltip with hintText
     ImageButtonType {
         id: hintButton
         visible: root.hintText !== ""
