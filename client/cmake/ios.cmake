@@ -121,6 +121,11 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/StoreKit2Helper.swift
 )
 
+set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets
+    PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+)
+
 target_sources(${PROJECT} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/AmneziaVPNLaunchScreen.storyboard
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/Media.xcassets

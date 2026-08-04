@@ -36,6 +36,7 @@ class InterfaceConfig {
   QString m_secondaryDnsServer;
   int m_serverPort = 0;
   int m_deviceMTU = 1420;
+  QString m_persistentKeepalive;
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
@@ -57,6 +58,14 @@ class InterfaceConfig {
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
+
+  QString m_headerProtectionKey;
+  QString m_contentPaddingAddition;
+  QString m_rekeyAfterTime;
+  QString m_rekeyTimeout;
+  QString m_rejectAfterTime;
+  QString m_keepaliveTimeout;
+  QString m_maxHandshakeAttempts;
 
   QJsonObject toJson() const;
   QString toWgConf(
