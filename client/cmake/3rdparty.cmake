@@ -49,5 +49,6 @@ list(APPEND LIBS OpenSSL::SSL OpenSSL::Crypto)
 find_package(libssh REQUIRED)
 list(APPEND LIBS ssh::ssh)
 
-find_package(amnezia-gateway-sdk REQUIRED)
+add_subdirectory(${CLIENT_ROOT_DIR}/3rd/amnezia-gateway-sdk ${CMAKE_BINARY_DIR}/3rd/amnezia-gateway-sdk EXCLUDE_FROM_ALL)
+#find_package(amnezia-gateway-sdk REQUIRED)
 list(APPEND LIBS amnezia-gateway-sdk::amnezia-gateway-sdk)

@@ -33,7 +33,7 @@ namespace
 {
     amnezia::ErrorCode mapError(int error)
     {
-        if (error == AMNEZIA_GATEWAY_SDK_CANCELLED) {
+        if (error == AMNEZIA_GATEWAY_API_CANCELLED) {
             return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
         return static_cast<amnezia::ErrorCode>(error);
