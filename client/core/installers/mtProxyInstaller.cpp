@@ -71,48 +71,62 @@ ErrorCode MtProxyInstaller::queryDiagnostics(SshSession &sshSession, const Serve
                                              DockerContainer container, int listenPort,
                                              MtProxyContainerDiagnostics &out)
 {
-    out = {};
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
-        return ErrorCode::InternalError;
-    }
-    const QString containerName = ContainerUtils::containerToString(container);
-    const QString script =
-            QStringLiteral(
-                    "PORT_OK=$(sudo docker exec %1 sh -c 'ss -tlnp 2>/dev/null | grep -q :%2 && echo yes || echo no' 2>/dev/null || echo no); "
-                    "TG_OK=$(curl -s --max-time 5 -o /dev/null -w '%%{http_code}' https://core.telegram.org/getProxySecret 2>/dev/null | grep -q '200' && echo yes || echo no); "
-                    "CLIENTS=$(sudo docker exec amnezia-mtproxy sh -c 'curl -s --max-time 3 http://localhost:2398/stats 2>/dev/null | grep -o \"total_special_connections:[0-9]*\" | cut -d: -f2' 2>/dev/null); "
-                    "CONF_TIME=$(sudo docker exec amnezia-mtproxy sh -c 'stat -c \"%%y\" /data/proxy-multi.conf 2>/dev/null | cut -d. -f1' 2>/dev/null || echo unknown); "
-                    "echo \"PORT_OK=${PORT_OK}\"; "
-                    "echo \"TG_OK=${TG_OK}\"; "
-                    "echo \"CLIENTS=${CLIENTS:-0}\"; "
-                    "echo \"CONF_TIME=${CONF_TIME}\"; "
-                    "echo \"STATS=http://localhost:2398/stats\";")
-                    .arg(containerName)
-                    .arg(listenPort);
+    out = { };
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
+        const QString containerName = ContainerUtils::containerToString(container);
+        const bool isTelemt = container == DockerContainer::Telemt;
 
-    QString stdOut;
-    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data;
-        return ErrorCode::NoError;
-    };
-    const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-    for (const QString &line : stdOut.split('\n', Qt::SkipEmptyParts)) {
-        if (line.startsWith(QLatin1String("PORT_OK="))) {
-            out.portReachable = line.mid(8).trimmed() == QLatin1String("yes");
-        } else if (line.startsWith(QLatin1String("TG_OK="))) {
-            out.upstreamReachable = line.mid(6).trimmed() == QLatin1String("yes");
-        } else if (line.startsWith(QLatin1String("CLIENTS="))) {
-            out.clientsConnected = line.mid(8).trimmed().toInt();
-        } else if (line.startsWith(QLatin1String("CONF_TIME="))) {
-            out.lastConfigRefresh = line.mid(10).trimmed();
-        } else if (line.startsWith(QLatin1String("STATS="))) {
-            out.statsEndpoint = line.mid(6).trimmed();
+        const QString sportFilter = QString::number(listenPort);
+        const QString peersCmd = QStringLiteral("sudo conntrack -L -p tcp --dport ") + sportFilter
+                + QStringLiteral(" 2>/dev/null | grep ESTABLISHED | awk '{for(i=1;i<=NF;i++) if($i ~ /^src=/){print "
+                                 "substr($i,5); break}}'");
+        const QString publicFilter = QStringLiteral(" | grep -vE "
+                                                    "'^(10\\.|127\\.|169\\.254\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3["
+                                                    "01])\\.|::1$|fe80:|f[cd][0-9a-f][0-9a-f]:)'");
+        const QString clientsCmd =
+                QStringLiteral("CLIENTS=$(") + peersCmd + publicFilter + QStringLiteral(" | sort -u | grep -c .); ");
+        const QString confFile =
+                isTelemt ? QStringLiteral("/data/config.toml") : QStringLiteral("/data/proxy-multi.conf");
+        const QString statsUrl = QString();
+
+        const QString script = QStringLiteral("CN=") + containerName + QStringLiteral("; ")
+                + QStringLiteral("PORT_OK=$(sudo ss -tlnp 2>/dev/null | grep -q :") + QString::number(listenPort)
+                + QStringLiteral(" && echo yes || echo no); ")
+                + QStringLiteral("TG_OK=$(curl -s --max-time 5 -o /dev/null -w '%{http_code}' "
+                                 "https://core.telegram.org/getProxySecret 2>/dev/null | grep -q '200' && echo yes || "
+                                 "echo no); ")
+                + clientsCmd + QStringLiteral("CONF_TIME=$(sudo docker exec \"$CN\" sh -c 'stat -c \"%y\" ") + confFile
+                + QStringLiteral(" 2>/dev/null | cut -d. -f1' 2>/dev/null || echo unknown); ")
+                + QStringLiteral("echo \"PORT_OK=${PORT_OK}\"; ") + QStringLiteral("echo \"TG_OK=${TG_OK}\"; ")
+                + QStringLiteral("echo \"CLIENTS=${CLIENTS:-0}\"; ") + QStringLiteral("echo \"CONF_TIME=${CONF_TIME}\"; ")
+                + QStringLiteral("echo \"STATS=") + statsUrl + QStringLiteral("\";");
+
+        QString stdOut;
+        auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+            stdOut += data;
+            return ErrorCode::NoError;
+        };
+        const ErrorCode errorCode = sshSession.runScript(credentials, script, cbReadStdOut);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
         }
+        for (const QString &line : stdOut.split('\n', Qt::SkipEmptyParts)) {
+            if (line.startsWith(QLatin1String("PORT_OK="))) {
+                out.portReachable = line.mid(8).trimmed() == QLatin1String("yes");
+            } else if (line.startsWith(QLatin1String("TG_OK="))) {
+                out.upstreamReachable = line.mid(6).trimmed() == QLatin1String("yes");
+            } else if (line.startsWith(QLatin1String("CLIENTS="))) {
+                out.clientsConnected = line.mid(8).trimmed().toInt();
+            } else if (line.startsWith(QLatin1String("CONF_TIME="))) {
+                out.lastConfigRefresh = line.mid(10).trimmed();
+            } else if (line.startsWith(QLatin1String("STATS="))) {
+                out.statsEndpoint = line.mid(6).trimmed();
+            }
+        }
+        return ErrorCode::NoError;
     }
-    return ErrorCode::NoError;
+
+    return ErrorCode::InternalError;
 }
 
 void MtProxyInstaller::uploadClientSettingsSnapshot(SshSession &sshSession, const ServerCredentials &credentials,

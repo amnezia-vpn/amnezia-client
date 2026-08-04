@@ -15,7 +15,7 @@
 
 #include "core/utils/errorCodes.h"
 
-struct amnezia_gateway_sdk_client;
+struct amnezia_gateway_api_client;
 
 class SecureAppSettingsRepository;
 
@@ -40,6 +40,10 @@ public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
                                QObject *parent = nullptr);
+
+    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+
+    QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
     amnezia::ErrorCode getServices(const QString &osVersion, const QString &appVersion, const QString &cliName,
                                    const QString &appLanguage, QJsonObject &servicesOut);
@@ -101,7 +105,7 @@ public:
 private:
     void runBlocking(const std::function<void()> &work);
 
-    std::shared_ptr<amnezia_gateway_sdk_client> m_controller;
+    std::shared_ptr<amnezia_gateway_api_client> m_controller;
 };
 
 #endif

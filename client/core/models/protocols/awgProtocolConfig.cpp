@@ -74,6 +74,28 @@ QJsonObject AwgServerConfig::toJson() const
     obj[configKey::specialJunk4] = specialJunk4;
     obj[configKey::specialJunk5] = specialJunk5;
     
+    if (!headerProtectionKey.isEmpty()) {
+        obj[configKey::headerProtectionKey] = headerProtectionKey;
+    }
+    if (!contentPaddingAddition.isEmpty()) {
+        obj[configKey::contentPaddingAddition] = contentPaddingAddition;
+    }
+    if (!rekeyAfterTime.isEmpty()) {
+        obj[configKey::rekeyAfterTime] = rekeyAfterTime;
+    }
+    if (!rekeyTimeout.isEmpty()) {
+        obj[configKey::rekeyTimeout] = rekeyTimeout;
+    }
+    if (!rejectAfterTime.isEmpty()) {
+        obj[configKey::rejectAfterTime] = rejectAfterTime;
+    }
+    if (!keepaliveTimeout.isEmpty()) {
+        obj[configKey::keepaliveTimeout] = keepaliveTimeout;
+    }
+    if (!maxHandshakeAttempts.isEmpty()) {
+        obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
+    }
+    
     if (isThirdPartyConfig) {
         obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
@@ -109,6 +131,14 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.specialJunk3 = json.value(configKey::specialJunk3).toString();
     config.specialJunk4 = json.value(configKey::specialJunk4).toString();
     config.specialJunk5 = json.value(configKey::specialJunk5).toString();
+
+    config.headerProtectionKey = json.value(configKey::headerProtectionKey).toString();
+    config.contentPaddingAddition = json.value(configKey::contentPaddingAddition).toString();
+    config.rekeyAfterTime = json.value(configKey::rekeyAfterTime).toString();
+    config.rekeyTimeout = json.value(configKey::rekeyTimeout).toString();
+    config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
+    config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
+    config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
     
     config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
@@ -196,11 +226,43 @@ QJsonObject AwgClientConfig::toJson() const
         obj[configKey::transportPacketMagicHeader] = transportPacketMagicHeader;
     }
     
-    obj[configKey::specialJunk1] = specialJunk1;
-    obj[configKey::specialJunk2] = specialJunk2;
-    obj[configKey::specialJunk3] = specialJunk3;
-    obj[configKey::specialJunk4] = specialJunk4;
-    obj[configKey::specialJunk5] = specialJunk5;
+    if (!specialJunk1.isEmpty()) {
+        obj[configKey::specialJunk1] = specialJunk1;
+    }
+    if (!specialJunk2.isEmpty()) {
+        obj[configKey::specialJunk2] = specialJunk2;
+    }
+    if (!specialJunk3.isEmpty()) {
+        obj[configKey::specialJunk3] = specialJunk3;
+    }
+    if (!specialJunk4.isEmpty()) {
+        obj[configKey::specialJunk4] = specialJunk4;
+    }
+    if (!specialJunk5.isEmpty()) {
+        obj[configKey::specialJunk5] = specialJunk5;
+    }
+
+    if (!headerProtectionKey.isEmpty()) {
+        obj[configKey::headerProtectionKey] = headerProtectionKey;
+    }
+    if (!contentPaddingAddition.isEmpty()) {
+        obj[configKey::contentPaddingAddition] = contentPaddingAddition;
+    }
+    if (!rekeyAfterTime.isEmpty()) {
+        obj[configKey::rekeyAfterTime] = rekeyAfterTime;
+    }
+    if (!rekeyTimeout.isEmpty()) {
+        obj[configKey::rekeyTimeout] = rekeyTimeout;
+    }
+    if (!rejectAfterTime.isEmpty()) {
+        obj[configKey::rejectAfterTime] = rejectAfterTime;
+    }
+    if (!keepaliveTimeout.isEmpty()) {
+        obj[configKey::keepaliveTimeout] = keepaliveTimeout;
+    }
+    if (!maxHandshakeAttempts.isEmpty()) {
+        obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
+    }
     
     if (isObfuscationEnabled) {
         obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
@@ -248,6 +310,14 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.specialJunk3 = json.value(configKey::specialJunk3).toString();
     config.specialJunk4 = json.value(configKey::specialJunk4).toString();
     config.specialJunk5 = json.value(configKey::specialJunk5).toString();
+
+    config.headerProtectionKey = json.value(configKey::headerProtectionKey).toString();
+    config.contentPaddingAddition = json.value(configKey::contentPaddingAddition).toString();
+    config.rekeyAfterTime = json.value(configKey::rekeyAfterTime).toString();
+    config.rekeyTimeout = json.value(configKey::rekeyTimeout).toString();
+    config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
+    config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
+    config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
     
     config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
     
@@ -310,7 +380,8 @@ bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
         transportPacketMagicHeader != other.transportPacketMagicHeader ||
         specialJunk1 != other.specialJunk1 || specialJunk2 != other.specialJunk2 ||
         specialJunk3 != other.specialJunk3 || specialJunk4 != other.specialJunk4 ||
-        specialJunk5 != other.specialJunk5) {
+        specialJunk5 != other.specialJunk5 ||
+        headerProtectionKey != other.headerProtectionKey) {
         return false;
     }
 

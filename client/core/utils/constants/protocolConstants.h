@@ -64,7 +64,7 @@ namespace amnezia
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "chrome";
-            constexpr char defaultSni[] = "cdn.example.com";
+            constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "HTTP/2";
 
             constexpr char defaultXhttpMode[] = "Auto";
@@ -147,6 +147,7 @@ namespace amnezia
             constexpr char defaultSubnetCidr[] = "24";
 
             constexpr char defaultPort[] = "51820";
+            constexpr char defaultPersistentKeepAlive[] = "25";
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
             constexpr char defaultMtu[] = "1280";
@@ -271,6 +272,7 @@ namespace amnezia
             constexpr char workersModeAuto[]       = "auto";
             constexpr char workersModeManual[]     = "manual";
             constexpr int  maxWorkers              = 32;
+            constexpr int  botTagHexLength         = 32;
         }
 
     } // namespace protocols

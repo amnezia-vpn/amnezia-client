@@ -285,6 +285,10 @@ void CoreController::initSignalHandlers()
     if (m_serversUiController->hasServersFromGatewayApi()) {
         m_apiNewsUiController->fetchNews(false);
     }
+
+    #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+        m_updateController->checkForUpdates();
+    #endif    
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
