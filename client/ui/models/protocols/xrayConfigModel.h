@@ -105,7 +105,6 @@ public:
     Q_INVOKABLE static QStringList xhttpHeadersTemplateOptions();
     Q_INVOKABLE static QStringList xhttpUplinkMethodOptions();
     Q_INVOKABLE static QStringList xhttpSessionPlacementOptions();
-    Q_INVOKABLE static QStringList xhttpSessionKeyOptions();
     Q_INVOKABLE static QStringList xhttpSeqPlacementOptions();
     Q_INVOKABLE static QStringList xhttpUplinkDataPlacementOptions();
     Q_INVOKABLE static QStringList xPaddingPlacementOptions();

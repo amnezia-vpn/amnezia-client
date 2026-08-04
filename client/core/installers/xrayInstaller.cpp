@@ -150,7 +150,13 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         QJsonArray alpnArr = tls.value("alpn").toArray();
         QStringList alpnList;
         for (const QJsonValue &v : alpnArr) {
-            alpnList << v.toString();
+            QString t = v.toString().trimmed();
+            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("h2");
+            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("http/1.1");
+            if (!t.isEmpty())
+                alpnList << t;
         }
         srv.alpn = alpnList.join(",");
     }
@@ -209,7 +215,9 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
                 return QStringLiteral("Query");
             return core;
         };
-        QString sess = xhttpObj.value("sessionPlacement").toString();
+        QString sess = xhttpObj.value("sessionIDPlacement").toString();
+        if (sess.isEmpty())
+            sess = xhttpObj.value("sessionPlacement").toString();
         if (sess.isEmpty())
             sess = xhttpObj.value("scSessionPlacement").toString();
         srv.xhttp.sessionPlacement = sessionSeqUi(sess);
@@ -235,7 +243,9 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             udata = xhttpObj.value("scUplinkDataPlacement").toString();
         srv.xhttp.uplinkDataPlacement = uplinkDataUi(udata);
 
-        srv.xhttp.sessionKey = xhttpObj.value("sessionKey").toString();
+        srv.xhttp.sessionKey = xhttpObj.value("sessionIDKey").toString();
+        if (srv.xhttp.sessionKey.isEmpty())
+            srv.xhttp.sessionKey = xhttpObj.value("sessionKey").toString();
         srv.xhttp.seqKey = xhttpObj.value("seqKey").toString();
         srv.xhttp.uplinkDataKey = xhttpObj.value("uplinkDataKey").toString();
 

@@ -623,9 +623,14 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         const QString alpnEff = srv.alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : srv.alpn;
         QJsonArray alpnArray;
         for (const QString &a : alpnEff.split(QLatin1Char(','))) {
-            const QString t = a.trimmed();
-            if (!t.isEmpty())
-                alpnArray.append(t);
+            QString t = a.trimmed();
+            if (t.isEmpty())
+                continue;
+            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("h2");
+            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("http/1.1");
+            alpnArray.append(t);
         }
         if (!alpnArray.isEmpty())
             tlsSettings[QStringLiteral("alpn")] = alpnArray;
@@ -669,16 +674,20 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
 
         const QString sessPl = normalizeSessionSeqPlacement(xhttp.sessionPlacement);
         if (!sessPl.isEmpty())
-            xo[QStringLiteral("sessionPlacement")] = sessPl;
+            xo[QStringLiteral("sessionIDPlacement")] = sessPl;
         const QString seqPl = normalizeSessionSeqPlacement(xhttp.seqPlacement);
         if (!seqPl.isEmpty())
             xo[QStringLiteral("seqPlacement")] = seqPl;
         if (!xhttp.sessionKey.isEmpty())
-            xo[QStringLiteral("sessionKey")] = xhttp.sessionKey;
+            xo[QStringLiteral("sessionIDKey")] = xhttp.sessionKey;
         if (!xhttp.seqKey.isEmpty())
             xo[QStringLiteral("seqKey")] = xhttp.seqKey;
 
-        xo[QStringLiteral("uplinkDataPlacement")] = normalizeUplinkDataPlacement(xhttp.uplinkDataPlacement);
+        const QString uDataPl = normalizeUplinkDataPlacement(xhttp.uplinkDataPlacement);
+        const bool uDataNeedsPacketUp =
+                uDataPl == QLatin1String("header") || uDataPl == QLatin1String("cookie");
+        if (!(uDataNeedsPacketUp && modeEff != QLatin1String("packet-up")))
+            xo[QStringLiteral("uplinkDataPlacement")] = uDataPl;
         if (!xhttp.uplinkDataKey.isEmpty())
             xo[QStringLiteral("uplinkDataKey")] = xhttp.uplinkDataKey;
 

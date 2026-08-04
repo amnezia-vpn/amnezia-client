@@ -500,48 +500,20 @@ PageType {
                     }
                 }
 
-                DropDownType {
-                    id: sessionKeyDropDown
-                    fitContent: true
+                TextFieldWithHeaderType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: xhttpSessionKey
-                    descriptionText: qsTr("SessionKey")
+                    Layout.topMargin: 8
                     headerText: qsTr("SessionKey")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
-                        currentValue: xhttpSessionKey
-                        model: ListModel {
-                            Component.onCompleted: {
-                                var opts = XrayConfigModel.xhttpSessionKeyOptions()
-                                for (var i = 0; i < opts.length; i++) {
-                                    append({name: opts[i]})
-                                }
-                            }
-                        }
-                        clickedFunction: function () {
-                            xhttpSessionKey = selectedText
-                            sessionKeyDropDown.text = selectedText
-                            sessionKeyDropDown.closeTriggered()
-                        }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpSessionKey) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            sessionKeyDropDown.text = xhttpSessionKey
-                        }
+                    textField.text: xhttpSessionKey
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpSessionKey)
+                    textField.onEditingFinished: {
+                        var v = textField.text.trim()
+                        if (v !== xhttpSessionKey) xhttpSessionKey = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -615,7 +587,7 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     text: xhttpUplinkDataPlacement
-                    descriptionText: qsTr("UplinkDataPlacement")
+                    descriptionText: qsTr("Header/Cookie apply only in Packet-up mode")
                     headerText: qsTr("UplinkDataPlacement")
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {

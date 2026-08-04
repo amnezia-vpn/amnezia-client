@@ -514,7 +514,7 @@ QStringList XrayConfigModel::fingerprintOptions()
 
 QStringList XrayConfigModel::alpnOptions()
 {
-    return { "HTTP/2", "HTTP/1.1", "HTTP/2,HTTP/1.1" };
+    return { "h2", "http/1.1", "h2,http/1.1" };
 }
 
 QStringList XrayConfigModel::xhttpModeOptions()
@@ -534,17 +534,12 @@ QStringList XrayConfigModel::xhttpUplinkMethodOptions()
 
 QStringList XrayConfigModel::xhttpSessionPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
-}
-
-QStringList XrayConfigModel::xhttpSessionKeyOptions()
-{
-    return { "Path", "Header", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()

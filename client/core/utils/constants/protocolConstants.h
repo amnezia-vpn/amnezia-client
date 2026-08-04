@@ -65,13 +65,13 @@ namespace amnezia
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "chrome";
             constexpr char defaultSni[] = "www.googletagmanager.com";
-            constexpr char defaultAlpn[] = "HTTP/2";
+            constexpr char defaultAlpn[] = "h2";
 
             constexpr char defaultXhttpMode[] = "Auto";
             constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
-            constexpr char defaultXhttpSessionKey[] = "Path";
+            constexpr char defaultXhttpSessionKey[] = "";
             constexpr char defaultXhttpSeqPlacement[] = "Path";
             constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
 
