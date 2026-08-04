@@ -871,9 +871,9 @@ jobs:
         done
 
         BASE_VERSION_CODE=$(grep -oP '(?<=set\(APP_ANDROID_VERSION_CODE )\d+' CMakeLists.txt)
-        APP_ANDROID_MIN_SDK=30 APP_ANDROID_MAX_SDK=36 APP_ANDROID_VERSION_CODE=$((BASE_VERSION_CODE + 2)) deploy/build.sh -t android --sign --aab --build ./deploy/build/aab
+        APP_ANDROID_MIN_SDK=30 APP_ANDROID_VERSION_CODE=$((BASE_VERSION_CODE + 2)) deploy/build.sh -t android --sign --aab --build ./deploy/build/aab
 
-        (cd deploy/build/aab/client/android-build/build/outputs/bundle/release && mv android-build-release.aab AmneziaVPN_${VERSION}_android11-16.aab)
+        (cd deploy/build/aab/client/android-build/build/outputs/bundle/release && mv android-build-release.aab AmneziaVPN_${VERSION}_android11+.aab)
 
     - name: 'Upload universal APK'
       uses: actions/upload-artifact@v7
@@ -882,7 +882,7 @@ jobs:
         archive: false
         retention-days: 7
 
-    - name: 'Upload android11-16 AAB'
+    - name: 'Upload android11+ AAB'
       uses: actions/upload-artifact@v7
       with:
         path: deploy/build/aab/client/android-build/build/outputs/bundle/release/*.aab
