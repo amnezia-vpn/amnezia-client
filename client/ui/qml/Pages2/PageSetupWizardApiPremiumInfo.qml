@@ -247,7 +247,7 @@ PageType {
                         return qsTr("Continue")
                     }
                     if (plan.hasFreeTrial) {
-                        return qsTr("Try free for %1 days").arg(plan.trialDays)
+                        return qsTr("Start %1-day free trial").arg(plan.trialDays)
                     }
                     return qsTr("Subscribe — %1 for %2").arg(String(plan.billingPeriod)).arg(String(plan.priceLabel))
                 }
@@ -299,10 +299,10 @@ PageType {
                         return ""
                     }
                     if (plan.hasFreeTrial) {
-                        return qsTr("Free for %1 days. Next, %2/%3, auto-renewal. Cancel at any time in the settings.")
+                        return qsTr("%1 days free, then %2/%3. Auto-renews until canceled. Cancel anytime in Settings.")
                                 .arg(plan.trialDays).arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                     }
-                    return qsTr("%1/%2, auto-renewal. Cancel at any time in the settings.")
+                    return qsTr("%1/%2, auto-renewal. Cancel at anytime in the Settings.")
                             .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                 }
             }
