@@ -318,8 +318,6 @@ PageType {
                 Layout.bottomMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                // Hide the Amnezia-app hint for external links (e.g. tg://proxy): that QR is a plain
-                // link meant for Telegram / the camera, not for import into the Amnezia app.
                 visible: isQrCodeVisible
                          && !(pageShareConnection.isSelfHostedConfig
                               && (ExportController.config.startsWith("tg://")
