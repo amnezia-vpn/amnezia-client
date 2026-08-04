@@ -93,7 +93,9 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                ContextMenu.menu: ContextMenuType {
+                ContextMenu.menu: contextMenu
+
+                ContextMenuType {
                     id: contextMenu
                     textObj: textArea
                 }

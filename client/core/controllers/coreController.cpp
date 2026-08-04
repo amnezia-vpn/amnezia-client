@@ -22,7 +22,8 @@
 #endif
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
-                               QQmlApplicationEngine *engine, QObject *parent)
+                               QQmlApplicationEngine *engine, QObject *parent,
+                               bool skipPlatformControllerInit)
     : QObject(parent), m_vpnConnection(vpnConnection), m_settings(settings), m_engine(engine)
 {
     initRepositories();
@@ -31,8 +32,10 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     initControllers();
     initSignalHandlers();
 
-    initAndroidController();
-    initAppleController();
+    if (!skipPlatformControllerInit) {
+        initAndroidController();
+        initAppleController();
+    }
     initLogging();
 
     m_translator = new QTranslator(this);
@@ -285,6 +288,10 @@ void CoreController::initSignalHandlers()
     if (m_serversUiController->hasServersFromGatewayApi()) {
         m_apiNewsUiController->fetchNews(false);
     }
+
+    #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+        m_updateController->checkForUpdates();
+    #endif    
 }
 
 void CoreController::updateTranslator(const QLocale &locale)

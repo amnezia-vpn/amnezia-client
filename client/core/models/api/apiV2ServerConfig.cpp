@@ -121,7 +121,11 @@ QJsonObject ApiV2ServerConfig::toJson() const
     if (!dns2.isEmpty()) {
         obj[configKey::dns2] = dns2;
     }
-    
+
+    if (!sendPayload.isEmpty()) {
+        obj[configKey::sendPayload] = sendPayload;
+    }
+
     if (crc > 0) {
         obj[configKey::crc] = crc;
     }
@@ -165,6 +169,7 @@ ApiV2ServerConfig ApiV2ServerConfig::fromJson(const QJsonObject& json)
     
     config.dns1 = json.value(configKey::dns1).toString();
     config.dns2 = json.value(configKey::dns2).toString();
+    config.sendPayload = json.value(configKey::sendPayload).toArray();
     
     config.crc = json.value(configKey::crc).toInt(0);
     

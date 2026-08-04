@@ -39,6 +39,13 @@ struct AwgServerConfig {
     QString specialJunk3;
     QString specialJunk4;
     QString specialJunk5;
+    QString headerProtectionKey;
+    QString contentPaddingAddition;
+    QString rekeyAfterTime;
+    QString rekeyTimeout;
+    QString rejectAfterTime;
+    QString keepaliveTimeout;
+    QString maxHandshakeAttempts;
     bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
@@ -76,6 +83,13 @@ struct AwgClientConfig {
     QString specialJunk3;
     QString specialJunk4;
     QString specialJunk5;
+    QString headerProtectionKey;
+    QString contentPaddingAddition;
+    QString rekeyAfterTime;
+    QString rekeyTimeout;
+    QString rejectAfterTime;
+    QString keepaliveTimeout;
+    QString maxHandshakeAttempts;
     bool isObfuscationEnabled = false;
     
     QJsonObject toJson() const;

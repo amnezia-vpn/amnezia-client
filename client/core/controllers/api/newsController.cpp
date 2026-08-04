@@ -78,7 +78,8 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
             m_appSettingsRepository->getGatewayEndpoint(),
             m_appSettingsRepository->isDevGatewayEnv(),
             apiDefs::requestTimeoutMsecs,
-            m_appSettingsRepository->isStrictKillSwitchEnabled());
+            m_appSettingsRepository->isStrictKillSwitchEnabled(),
+            m_appSettingsRepository);
 
     QJsonObject payload;
     payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());

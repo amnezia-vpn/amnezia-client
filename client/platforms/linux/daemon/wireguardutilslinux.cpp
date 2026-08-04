@@ -144,6 +144,30 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
         out << key.toLower() << "=" << config.m_specialJunk.value(key) << "\n";
     }
 
+    if (!config.m_headerProtectionKey.isEmpty()) {
+        QByteArray headerProtectionKey =
+            QByteArray::fromBase64(config.m_headerProtectionKey.toUtf8());
+        out << "header_protection_key=" << QString(headerProtectionKey.toHex()) << "\n";
+    }
+    if (!config.m_contentPaddingAddition.isEmpty()) {
+        out << "content_padding_addition=" << config.m_contentPaddingAddition << "\n";
+    }
+    if (!config.m_rekeyAfterTime.isEmpty()) {
+        out << "rekey_after_time=" << config.m_rekeyAfterTime << "\n";
+    }
+    if (!config.m_rekeyTimeout.isEmpty()) {
+        out << "rekey_timeout=" << config.m_rekeyTimeout << "\n";
+    }
+    if (!config.m_rejectAfterTime.isEmpty()) {
+        out << "reject_after_time=" << config.m_rejectAfterTime << "\n";
+    }
+    if (!config.m_keepaliveTimeout.isEmpty()) {
+        out << "keepalive_timeout=" << config.m_keepaliveTimeout << "\n";
+    }
+    if (!config.m_maxHandshakeAttempts.isEmpty()) {
+        out << "max_handshake_attempts=" << config.m_maxHandshakeAttempts << "\n";
+    }
+
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
         logger.error() << "Interface configuration failed:" << strerror(err);
@@ -229,7 +253,9 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     out << config.m_serverPort << "\n";
 
     out << "replace_allowed_ips=true\n";
-    out << "persistent_keepalive_interval=" << WG_KEEPALIVE_PERIOD << "\n";
+    if (!config.m_persistentKeepalive.isEmpty()) {
+        out << "persistent_keepalive_interval=" << config.m_persistentKeepalive << "\n";
+    }
     for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
         out << "allowed_ip=" << ip.toString() << "\n";
     }

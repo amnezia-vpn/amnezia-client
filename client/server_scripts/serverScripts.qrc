@@ -18,6 +18,7 @@
         <file>dns/Dockerfile</file>
         <file>dns/run_container.sh</file>
         <file>install_docker.sh</file>
+        <file>install_conntrack.sh</file>
         <file>ipsec/configure_container.sh</file>
         <file>ipsec/Dockerfile</file>
         <file>ipsec/mobileconfig.plist</file>
