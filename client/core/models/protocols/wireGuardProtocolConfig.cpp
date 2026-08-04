@@ -140,7 +140,7 @@ WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
     config.persistentKeepAlive = json.value(configKey::persistentKeepAlive).toString();
     config.mtu = json.value(configKey::mtu).toString();
 
-    for (const QString &key : configKey::awgParamKeys()) {
+    for (const QString &key : configKey::awgProtocolKeys()) {
         const QString value = json.value(key).toString();
         if (!value.isEmpty()) {
             config.awgParams.insert(key, value);

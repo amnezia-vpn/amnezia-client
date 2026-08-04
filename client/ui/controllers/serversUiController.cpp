@@ -5,6 +5,8 @@
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocolConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/utils/constants/protocolConstants.h"
 
 using namespace amnezia;
 
@@ -383,6 +385,53 @@ bool ServersUiController::processedServerIsPremium() const
 bool ServersUiController::isDefaultServerCurrentlyProcessed() const
 {
     return m_serversController->getDefaultServerId() == m_processedServerId;
+}
+
+bool ServersUiController::serverHasOutdatedAwgContainer(const QString &serverId) const
+{
+    // The warning suggests reinstalling the container, so it only makes sense
+    // for servers the user can administer
+    if (!isServerHasWriteAccess(serverId)) {
+        return false;
+    }
+
+    for (DockerContainer container : { DockerContainer::Awg, DockerContainer::Awg2 }) {
+        const ContainerConfig containerConfig = m_serversController->getContainerConfig(serverId, container);
+        if (const auto* awgConfig = containerConfig.getAwgProtocolConfig()) {
+            if (awgConfig->serverConfig.protocolVersion != protocols::awg::awgV3) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool ServersUiController::defaultServerHasOutdatedAwgContainer() const
+{
+    return serverHasOutdatedAwgContainer(getDefaultServerId());
+}
+
+bool ServersUiController::isContainerOutdatedAwg(int containerIndex) const
+{
+    if (!isProcessedServerHasWriteAccess()) {
+        return false;
+    }
+
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (!ContainerUtils::isAwgContainer(container)) {
+        return false;
+    }
+
+    const ContainerConfig containerConfig = m_serversController->getContainerConfig(m_processedServerId, container);
+    if (const auto* awgConfig = containerConfig.getAwgProtocolConfig()) {
+        return awgConfig->serverConfig.protocolVersion != protocols::awg::awgV3;
+    }
+    return false;
+}
+
+bool ServersUiController::isProcessedContainerOutdatedAwg() const
+{
+    return isContainerOutdatedAwg(m_processedContainerIndex);
 }
 
 bool ServersUiController::isProcessedServerHasWriteAccess() const
