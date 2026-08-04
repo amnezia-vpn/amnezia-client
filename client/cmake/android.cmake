@@ -9,33 +9,12 @@ set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
 # set QTP0002 policy: target properties that specify Android-specific paths may contain generator expressions
 qt_policy(SET QTP0002 NEW)
 
-set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
-
-# Qt has no target property for android:maxSdkVersion, so when a max SDK is requested we
-# stage a copy of the package source dir with a <uses-sdk> tag injected into the manifest;
-# the Android Gradle Plugin manifest merger combines it with the min/targetSdk it generates
-# from QT_ANDROID_MIN/TARGET_SDK_VERSION.
-if(DEFINED APP_ANDROID_MAX_SDK)
-    set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/android-package-source)
-    file(REMOVE_RECURSE ${APP_ANDROID_PACKAGE_SOURCE_DIR})
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/android/ DESTINATION ${APP_ANDROID_PACKAGE_SOURCE_DIR})
-
-    set(manifest_path ${APP_ANDROID_PACKAGE_SOURCE_DIR}/AndroidManifest.xml)
-    file(READ ${manifest_path} manifest_contents)
-    string(REPLACE
-        "android:installLocation=\"auto\">"
-        "android:installLocation=\"auto\">\n\n    <uses-sdk android:maxSdkVersion=\"${APP_ANDROID_MAX_SDK}\" />"
-        manifest_contents "${manifest_contents}")
-    file(WRITE ${manifest_path} "${manifest_contents}")
-endif()
-
 set_target_properties(${PROJECT} PROPERTIES
     QT_ANDROID_VERSION_NAME ${CMAKE_PROJECT_VERSION}
     QT_ANDROID_VERSION_CODE ${APP_ANDROID_VERSION_CODE}
     QT_ANDROID_MIN_SDK_VERSION ${APP_ANDROID_MIN_SDK}
     QT_ANDROID_TARGET_SDK_VERSION 36
     QT_ANDROID_SDK_BUILD_TOOLS_REVISION 36.0.0
-    QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR}
 )
 
 set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE_BUILD_TYPE")
@@ -75,3 +54,26 @@ file(COPY ${AMNEZIA_LIBXRAY_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/androi
 find_package(openvpn-pt-android REQUIRED)
 set(LIBS ${LIBS} amnezia::openvpn-pt-android)
 set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH})
+
+set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
+
+# Qt has no target property for android:maxSdkVersion, so when a max SDK is requested we
+# stage a copy of the package source dir (taken after libxray.aar and other extra libs have
+# been copied into it above) with a <uses-sdk> tag injected into the manifest; the Android
+# Gradle Plugin manifest merger combines it with the min/targetSdk it generates from
+# QT_ANDROID_MIN/TARGET_SDK_VERSION.
+if(DEFINED APP_ANDROID_MAX_SDK)
+    set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/android-package-source)
+    file(REMOVE_RECURSE ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/android/ DESTINATION ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+
+    set(manifest_path ${APP_ANDROID_PACKAGE_SOURCE_DIR}/AndroidManifest.xml)
+    file(READ ${manifest_path} manifest_contents)
+    string(REPLACE
+        "android:installLocation=\"auto\">"
+        "android:installLocation=\"auto\">\n\n    <uses-sdk android:maxSdkVersion=\"${APP_ANDROID_MAX_SDK}\" />"
+        manifest_contents "${manifest_contents}")
+    file(WRITE ${manifest_path} "${manifest_contents}")
+endif()
+
+set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR})
