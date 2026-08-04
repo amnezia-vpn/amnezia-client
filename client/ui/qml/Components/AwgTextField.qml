@@ -21,12 +21,17 @@ TextFieldWithHeaderType {
     checkEmptyText: false
 
     property RegularExpressionValidator rangeValidator: RegularExpressionValidator {
-        regularExpression: /^(\d+(-\d+)?)?$/
+        regularExpression: /^\d*(-\d*)?$/
     }
 
     textField.validator: rangeValidation ? rangeValidator : null
 
-    textField.onEditingFinished: root.edited(root.textField.text)
+    textField.onEditingFinished: {
+        if (root.rangeValidation) {
+            root.textField.text = root.textField.text.replace(/^-+|-+$/g, "")
+        }
+        root.edited(root.textField.text)
+    }
 
     textField.onActiveFocusChanged: {
         if (root.textField.activeFocus && root.scroller) {
