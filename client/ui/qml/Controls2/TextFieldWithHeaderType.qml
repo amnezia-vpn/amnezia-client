@@ -144,7 +144,9 @@ Item {
                             }
                         }
 
-                        ContextMenu.menu: ContextMenuType {
+                        ContextMenu.menu: contextMenu
+
+                        ContextMenuType {
                             id: contextMenu
                             textObj: textField
                         }

@@ -57,6 +57,8 @@ public slots:
 
     void setCurrentProtocol(const QString &serverId, const QString &protocolName);
     bool isVlessProtocol(const QString &serverId);
+    QString currentProtocol(const QString &serverId);
+    QStringList availableProtocols(const QString &serverId);
 
     bool isCaptchaAwaitingUser() const;
     void onCaptchaSolved(const QString &captchaId, const QString &solution);
@@ -95,7 +97,15 @@ signals:
     void unsupportedConnectDrawerRequested();
 
 private:
+    enum class CaptchaFlow {
+        Import,
+        Update
+    };
+
     struct CaptchaState {
+        CaptchaFlow flow = CaptchaFlow::Import;
+
+        // Import flow
         QString userCountryCode;
         QString serviceType;
         QString serviceProtocol;
@@ -103,10 +113,25 @@ private:
         QString wireguardClientPrivKey;
         QString wireguardClientPubKey;
         QString xrayUuid;
+
+        // Update flow
+        QString serverId;
+        QString newCountryCode;
+        QString newCountryName;
+        bool isConnectEvent = false;
+        bool reloadServiceConfig = false;
+        bool wasSubscriptionExpired = false;
+        bool fromValidateConfig = false;
+        SubscriptionController::ProtocolData updateProtocolData;
+
         bool isPending = false;
     } m_captchaState;
 
 private:
+    void emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName);
+    void emitCaptchaUpdateSuccess();
+    void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);
+
     QList<QString> getQrCodes();
     int getQrCodesCount();
     QString getVpnKey();

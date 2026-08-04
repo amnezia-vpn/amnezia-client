@@ -6,9 +6,10 @@
 #include <QOperatingSystemVersion>
 
 #include "tapcontroller_win.h"
+#include "core/utils/utilities.h"
 
 #define TAP_EXE_ERROR { \
-    qDebug() << "TapController: Can't start tapinstall.exe"; \
+    qDebug() << "TapController: Can't start devcon.exe"; \
     return false; \
     }
 
@@ -76,7 +77,7 @@ QStringList TapController::getTapList()
     QProcess tapInstallProc;
     tapInstallProc.start(getTapInstallPath(), QStringList() << "find" << "tap0901" );
     if(!tapInstallProc.waitForStarted()) {
-        qDebug() << "TapController: TapController: Can't start tapinstall.exe";
+        qDebug() << "TapController: Can't start devcon.exe";
         return QStringList();
     }
     tapInstallProc.waitForFinished();
@@ -256,12 +257,12 @@ bool TapController::checkOpenVpn()
 
 QString TapController::getTapInstallPath()
 {
-    return getTapDriverDir() + "\\tapinstall.exe";
+    return getTapDriverDir() + "\\devcon.exe";
 }
 
 QString TapController::getOpenVpnPath()
 {
-    return qApp->applicationDirPath() + "\\openvpn.exe";
+    return Utils::openVpnExecPath();
 }
 
 QString TapController::getTapDriverDir()

@@ -115,7 +115,7 @@ protected:
     AppSplitTunnelingModel* appSplitTunnelingModelProtected() const { return m_appSplitTunnelingModel; }
     IpSplitTunnelingModel* ipSplitTunnelingModelProtected() const { return m_ipSplitTunnelingModel; }
     LanguageModel* languageModelProtected() const { return m_languageModel; }
-
+    ConnectionUiController* connectionUiControllerProtected() const { return m_connectionUiController; }
     InstallUiController* installUiControllerProtected() const { return m_installUiController; }
     ImportController* importCoreControllerProtected() const { return m_importCoreController; }
     ExportController* exportControllerProtected() const { return m_exportController; }

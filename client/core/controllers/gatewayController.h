@@ -12,7 +12,7 @@
 
 #include "core/utils/errorCodes.h"
 
-struct amnezia_gateway_sdk_client;
+struct amnezia_gateway_api_client;
 
 class SecureAppSettingsRepository;
 
@@ -29,7 +29,7 @@ public:
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
-    std::shared_ptr<amnezia_gateway_sdk_client> m_controller;
+    std::shared_ptr<amnezia_gateway_api_client> m_controller;
 };
 
 #endif

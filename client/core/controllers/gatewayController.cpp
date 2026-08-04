@@ -159,7 +159,7 @@ namespace
 #endif
     }
 
-    std::shared_ptr<amnezia_gateway_sdk_client> makeClient(const QString &gatewayEndpoint, bool isDevEnvironment,
+    std::shared_ptr<amnezia_gateway_api_client> makeClient(const QString &gatewayEndpoint, bool isDevEnvironment,
                                                            int requestTimeoutMsecs, bool isStrictKillSwitchEnabled,
                                                            SecureAppSettingsRepository *appSettings)
     {
@@ -203,8 +203,8 @@ namespace
         c.write_cache = &writeCacheTramp;
         c.cache_user_data = ctx;
 
-        amnezia_gateway_sdk_client *raw = amnezia_gateway_sdk_client_create(&c);
-        return std::shared_ptr<amnezia_gateway_sdk_client>(raw, [ctx](amnezia_gateway_sdk_client *p) {
+        amnezia_gateway_api_client *raw = amnezia_gateway_sdk_client_create(&c);
+        return std::shared_ptr<amnezia_gateway_api_client>(raw, [ctx](amnezia_gateway_api_client *p) {
             amnezia_gateway_sdk_client_destroy(p);
             delete ctx;
         });

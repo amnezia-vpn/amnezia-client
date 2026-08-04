@@ -20,13 +20,42 @@ Popup {
     signal captchaSolved(string captchaId, string solution)
     signal refreshCaptchaRequested()
 
+    readonly property int keyboardHeight: {
+        if (PageController.imeHeight > 0) {
+            return PageController.imeHeight
+        }
+        if (Qt.platform.os === "ios" && Qt.inputMethod.visible) {
+            const r = Qt.inputMethod.keyboardRectangle
+            if (r.height <= 0) {
+                return 0
+            }
+            return Math.max(0, Math.round(parent.height - r.y))
+        }
+        return 0
+    }
+
     leftMargin: 25
     rightMargin: 25
     bottomMargin: 70 + SettingsController.safeAreaBottomMargin
 
     width: parent.width - leftMargin - rightMargin
 
-    anchors.centerIn: parent
+    x: Math.round((parent.width - width) / 2)
+    y: {
+        const centered = Math.round((parent.height - height) / 2)
+        if (root.keyboardHeight === 0) {
+            return centered
+        }
+        return Math.max(20, Math.min(centered, parent.height - root.keyboardHeight - height - 16))
+    }
+
+    Behavior on y {
+        NumberAnimation {
+            duration: 150
+            easing.type: Easing.OutCubic
+        }
+    }
+
     modal: true
     closePolicy: Popup.NoAutoClose
 
@@ -37,7 +66,7 @@ Popup {
     onOpened: {
         timer.start()
         solutionField.textField.text = ""
-        solutionField.textField.focus = true
+        solutionField.textField.forceActiveFocus()
     }
 
     onCaptchaIdChanged: {

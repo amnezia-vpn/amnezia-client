@@ -114,7 +114,7 @@ signals:
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);
     void setContainerEnabledFinished(bool enabled);
-    void containerStatusRefreshed(int status);
+    void containerStatusRefreshed(int status, int errorCode);
     void containerDiagnosticsRefreshed(bool portReachable, bool upstreamReachable, int clientsConnected,
                                        const QString &lastConfigRefresh, const QString &statsEndpoint);
     void containerSecretFetched(const QString &secret);
