@@ -297,6 +297,26 @@ PageType {
                 onEdited: (text) => { serverSpecialJunk5 = text }
             }
 
+            CheckBoxType {
+                id: headerProtectionCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg3
+
+                text: qsTr("HeaderProtectionKey")
+
+                checked: serverHeaderProtectionEnabled
+                onCheckedChanged: {
+                    if (checked !== serverHeaderProtectionEnabled) {
+                        serverHeaderProtectionEnabled = checked
+                    }
+                }
+            }
+
             AwgTextField {
                 id: contentPaddingAdditionTextField
 

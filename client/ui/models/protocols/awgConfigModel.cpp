@@ -2,6 +2,8 @@
 
 #include <QJsonDocument>
 
+#include "core/configurators/wireguardConfigurator.h"
+
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -70,6 +72,18 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ServerRejectAfterTimeRole: m_protocolConfig.serverConfig.rejectAfterTime = strValue; break;
     case Roles::ServerKeepaliveTimeoutRole: m_protocolConfig.serverConfig.keepaliveTimeout = strValue; break;
     case Roles::ServerMaxHandshakeAttemptsRole: m_protocolConfig.serverConfig.maxHandshakeAttempts = strValue; break;
+    case Roles::ServerHeaderProtectionEnabledRole: {
+        if (value.toBool()) {
+            if (m_protocolConfig.serverConfig.headerProtectionKey.isEmpty()) {
+                const QString originalKey = m_originalProtocolConfig.serverConfig.headerProtectionKey;
+                m_protocolConfig.serverConfig.headerProtectionKey =
+                        originalKey.isEmpty() ? WireguardConfigurator::genClientKeys().clientPrivKey : originalKey;
+            }
+        } else {
+            m_protocolConfig.serverConfig.headerProtectionKey.clear();
+        }
+        break;
+    }
     default:
         return false;
     }
@@ -103,6 +117,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ClientRejectAfterTimeRole: return m_protocolConfig.clientConfig->rejectAfterTime;
     case Roles::ClientKeepaliveTimeoutRole: return m_protocolConfig.clientConfig->keepaliveTimeout;
     case Roles::ClientMaxHandshakeAttemptsRole: return m_protocolConfig.clientConfig->maxHandshakeAttempts;
+    case Roles::ClientHeaderProtectionEnabledRole: return !m_protocolConfig.clientConfig->headerProtectionKey.isEmpty();
 
     case Roles::ServerJunkPacketCountRole: return m_protocolConfig.serverConfig.junkPacketCount;
     case Roles::ServerJunkPacketMinSizeRole: return m_protocolConfig.serverConfig.junkPacketMinSize;
@@ -127,6 +142,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerRejectAfterTimeRole: return m_protocolConfig.serverConfig.rejectAfterTime;
     case Roles::ServerKeepaliveTimeoutRole: return m_protocolConfig.serverConfig.keepaliveTimeout;
     case Roles::ServerMaxHandshakeAttemptsRole: return m_protocolConfig.serverConfig.maxHandshakeAttempts;
+    case Roles::ServerHeaderProtectionEnabledRole: return !m_protocolConfig.serverConfig.headerProtectionKey.isEmpty();
 
     case Roles::IsAwg2Role: {
         QString version = serverProtocolVersion();
@@ -157,7 +173,7 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
 
 QString AwgConfigModel::serverProtocolVersion() const
 {
-    return m_protocolConfig.serverProtocolVersion();
+    return m_protocolConfig.serverConfig.protocolVersion;
 }
 
 void AwgConfigModel::applyDefaultsToClientConfig(amnezia::AwgClientConfig& config)
@@ -215,6 +231,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ClientRejectAfterTimeRole] = "clientRejectAfterTime";
     roles[ClientKeepaliveTimeoutRole] = "clientKeepaliveTimeout";
     roles[ClientMaxHandshakeAttemptsRole] = "clientMaxHandshakeAttempts";
+    roles[ClientHeaderProtectionEnabledRole] = "clientHeaderProtectionEnabled";
 
     roles[ServerJunkPacketCountRole] = "serverJunkPacketCount";
     roles[ServerJunkPacketMinSizeRole] = "serverJunkPacketMinSize";
@@ -240,6 +257,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerRejectAfterTimeRole] = "serverRejectAfterTime";
     roles[ServerKeepaliveTimeoutRole] = "serverKeepaliveTimeout";
     roles[ServerMaxHandshakeAttemptsRole] = "serverMaxHandshakeAttempts";
+    roles[ServerHeaderProtectionEnabledRole] = "serverHeaderProtectionEnabled";
 
     roles[IsAwg2Role] = "isAwg2";
     roles[IsAwg3Role] = "isAwg3";

@@ -62,6 +62,9 @@ QJsonObject AwgServerConfig::toJson() const
     if (!transportProto.isEmpty()) {
         obj[configKey::transportProto] = transportProto;
     }
+    if (!protocolVersion.isEmpty()) {
+        obj[configKey::protocolVersion] = protocolVersion;
+    }
     if (!subnetAddress.isEmpty()) {
         obj[configKey::subnetAddress] = subnetAddress;
     }
@@ -145,6 +148,7 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     
     config.port = json.value(configKey::port).toString();
     config.transportProto = json.value(configKey::transportProto).toString();
+    config.protocolVersion = json.value(configKey::protocolVersion).toString();
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
     config.subnetCidr = json.value(configKey::subnetCidr).toString();
     

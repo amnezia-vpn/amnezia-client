@@ -255,7 +255,7 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$SPECIAL_JUNK_4", config.specialJunk4 } });
         vars.append({ { "$SPECIAL_JUNK_5", config.specialJunk5 } });
 
-        const bool isAwg3 = awgProtocolConfig->serverProtocolVersion() == protocols::awg::awgV3;
+        const bool isAwg3 = config.protocolVersion == protocols::awg::awgV3;
         vars.append({ { "$PERSISTENT_KEEPALIVE", isAwg3 ? QString(protocols::awg::defaultPersistentKeepAlive)
                                                         : QString(protocols::wireguard::defaultPersistentKeepAlive) } });
 

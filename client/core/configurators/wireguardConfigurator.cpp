@@ -228,8 +228,7 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
         }
     }
     
-    const auto* awgProtocolConfig = containerConfig.getAwgProtocolConfig();
-    const bool isAwg3 = awgProtocolConfig && awgProtocolConfig->serverProtocolVersion() == protocols::awg::awgV3;
+    const bool isAwg3 = awgServerConfig && awgServerConfig->protocolVersion == protocols::awg::awgV3;
 
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));

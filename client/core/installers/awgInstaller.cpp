@@ -29,6 +29,7 @@ ContainerConfig AwgInstaller::generateConfig(DockerContainer container, int port
     ContainerConfig config = createBaseConfig(container, port, transportProto);
     if (auto* awgConfig = config.getAwgProtocolConfig()) {
         generateAwgParameters(awgConfig->serverConfig);
+        awgConfig->serverConfig.protocolVersion = protocols::awg::awgV3;
     }
     return config;
 }
@@ -143,8 +144,10 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         awgConfig->serverConfig.rejectAfterTime = serverConfigMap.value(configKey::rejectAfterTime);
         awgConfig->serverConfig.keepaliveTimeout = serverConfigMap.value(configKey::keepaliveTimeout);
         awgConfig->serverConfig.maxHandshakeAttempts = serverConfigMap.value(configKey::maxHandshakeAttempts);
+
+        awgConfig->serverConfig.protocolVersion = awgConfig->serverProtocolVersion();
     }
-    
+
     return ErrorCode::NoError;
 }
 

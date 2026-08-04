@@ -71,6 +71,8 @@ namespace amnezia
 
         constexpr QLatin1String lastConfig("last_config");
 
+        constexpr QLatin1String protocolVersion("protocol_version");
+
         constexpr QLatin1String isThirdPartyConfig("isThirdPartyConfig");
         constexpr QLatin1String isObfuscationEnabled("isObfuscationEnabled");
 

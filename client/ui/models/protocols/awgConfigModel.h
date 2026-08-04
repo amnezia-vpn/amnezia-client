@@ -32,6 +32,7 @@ public:
         ClientRejectAfterTimeRole,
         ClientKeepaliveTimeoutRole,
         ClientMaxHandshakeAttemptsRole,
+        ClientHeaderProtectionEnabledRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,
@@ -57,6 +58,7 @@ public:
         ServerRejectAfterTimeRole,
         ServerKeepaliveTimeoutRole,
         ServerMaxHandshakeAttemptsRole,
+        ServerHeaderProtectionEnabledRole,
 
         IsAwg2Role,
         IsAwg3Role

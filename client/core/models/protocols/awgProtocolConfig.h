@@ -20,6 +20,7 @@ namespace AwgConstant
 struct AwgServerConfig {
     QString port;
     QString transportProto;
+    QString protocolVersion;
     QString subnetAddress;
     QString subnetCidr;
     QString junkPacketCount;
