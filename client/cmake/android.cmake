@@ -57,11 +57,6 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_P
 
 set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 
-# Qt has no target property for android:maxSdkVersion, so when a max SDK is requested we
-# stage a copy of the package source dir (taken after libxray.aar and other extra libs have
-# been copied into it above) with a <uses-sdk> tag injected into the manifest; the Android
-# Gradle Plugin manifest merger combines it with the min/targetSdk it generates from
-# QT_ANDROID_MIN/TARGET_SDK_VERSION.
 if(DEFINED APP_ANDROID_MAX_SDK)
     set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/android-package-source)
     file(REMOVE_RECURSE ${APP_ANDROID_PACKAGE_SOURCE_DIR})
