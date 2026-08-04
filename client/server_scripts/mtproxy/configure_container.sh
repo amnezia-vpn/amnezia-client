@@ -47,6 +47,9 @@ else
     FAKETLS_SECRET=""
 fi
 
+# Persist mode + domain so a re-added server can restore FakeTLS on scan (secret alone is not enough).
+printf 'mode=%s\ndomain=%s\n' "$TRANSPORT_MODE" "$MTPROXY_TLS_DOMAIN" > /data/mtproxy-meta
+
 # Active link secret depends on transport mode
 if [ "$TRANSPORT_MODE" = "faketls" ] && [ -n "$FAKETLS_SECRET" ]; then
     LINK_SECRET="$FAKETLS_SECRET"

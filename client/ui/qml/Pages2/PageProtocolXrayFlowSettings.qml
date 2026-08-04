@@ -93,7 +93,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 8
                 visible: !visionAllowed
-                color: AmneziaStyle.color.mutedGray
+                color: AmneziaStyle.color.goldenApricot
                 text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport.")
             }
 
