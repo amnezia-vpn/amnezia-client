@@ -18,7 +18,7 @@ enum PermittedProcess {
     Wireguard,
     Tun2Socks,
     CertUtil,
-    _Count
+    PermittedProcessCount
 };
 
 inline QString permittedProcessPath(PermittedProcess pid)
@@ -61,44 +61,34 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
 
     switch (proc) {
     case OpenVPN: {
-        static const QSet<QString> blocked = {
-            QStringLiteral("--script-security"),
-            QStringLiteral("--up"),
-            QStringLiteral("--down"),
-            QStringLiteral("--route-up"),
-            QStringLiteral("--ipchange"),
-            QStringLiteral("--tls-verify"),
-            QStringLiteral("--plugin"),
-            QStringLiteral("--auth-user-pass-verify"),
-            QStringLiteral("--learn-address"),
-            QStringLiteral("--client-connect"),
-            QStringLiteral("--client-disconnect"),
-            QStringLiteral("--management"),
-            QStringLiteral("--management-external-key")
-        };
+        // Whitelist only args actually used by the client:
+        // --config <path>, --management <host> <port>, --management-client
         QStringList out;
         for (int i = 0; i < args.size(); ++i) {
-            if (blocked.contains(args[i])) {
-                qWarning() << "IPC: blocked OpenVPN argument:" << args[i];
-                ++i; // skip following value
-                continue;
+            const QString &arg = args[i];
+            if (arg == QStringLiteral("--config") && i + 1 < args.size()) {
+                out << arg << args[++i];
+            } else if (arg == QStringLiteral("--management") && i + 2 < args.size()) {
+                out << arg << args[i + 1] << args[i + 2];
+                i += 2;
+            } else if (arg == QStringLiteral("--management-client")) {
+                out << arg;
+            } else {
+                qWarning() << "IPC: blocked unknown OpenVPN argument:" << arg;
             }
-            out << args[i];
         }
         return out;
     }
     case Wireguard: {
-        static const QRegularExpression hookRe(
-            QStringLiteral(R"((?i)(PostUp|PreUp|PostDown|PreDown)\s*=)"));
-        QStringList out;
-        for (const QString& a : args) {
-            if (hookRe.match(a).hasMatch()) {
-                qWarning() << "IPC: blocked WireGuard hook argument:" << a;
-                continue;
+        // Whitelist only subcommand + config file path (wg-quick up/down <conf>)
+        if (args.size() == 2) {
+            const QString &sub = args[0];
+            if (sub == QStringLiteral("up") || sub == QStringLiteral("down")) {
+                return args;
             }
-            out << a;
         }
-        return out;
+        qWarning() << "IPC: blocked unexpected WireGuard arguments";
+        return {};
     }
     case Tun2Socks:
         namedArgs["-device"] = [](const QString& v) { return v.startsWith("tun://"); };

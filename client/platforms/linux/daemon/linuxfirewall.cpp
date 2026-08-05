@@ -189,40 +189,6 @@ void LinuxFirewall::uninstallAnchor(LinuxFirewall::IPVersion ip, const QString& 
     deleteChain(ip, actualChain, tableName);
 }
 
-QStringList LinuxFirewall::getDNSRules(const QStringList& servers)
-{
-    QStringList result;
-    for (const QString& server : servers)
-    {
-        result << QStringLiteral("-o amn0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o amn0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun0+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun0+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun2+ -d %1 -p udp --dport 53 -j ACCEPT").arg(server);
-        result << QStringLiteral("-o tun2+ -d %1 -p tcp --dport 53 -j ACCEPT").arg(server);
-    }
-    return result;
-}
-
-QStringList LinuxFirewall::getAllowRule(const QStringList& servers)
-{
-    QStringList result;
-    for (const QString& server : servers)
-    {
-        result << QStringLiteral("-d %1 -j ACCEPT").arg(server);
-    }
-    return result;
-}
-
-QStringList LinuxFirewall::getBlockRule(const QStringList& servers)
-{
-    QStringList result;
-    for (const QString& server : servers)
-    {
-        result << QStringLiteral("-d %1 -j REJECT").arg(server);
-    }
-    return result;
-}
 
 
 void LinuxFirewall::install()

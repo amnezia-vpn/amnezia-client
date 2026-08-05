@@ -78,7 +78,7 @@ void IpcServerProcess::setProcessChannelMode(QProcess::ProcessChannelMode mode)
 void IpcServerProcess::setProgram(int programId)
 {
     if (programId <= static_cast<int>(amnezia::PermittedProcess::Invalid) ||
-        programId >= static_cast<int>(amnezia::PermittedProcess::_Count)) {
+        programId >= static_cast<int>(amnezia::PermittedProcess::PermittedProcessCount)) {
         qWarning() << "IPC: invalid programId" << programId << ", ignoring";
         return;
     }
