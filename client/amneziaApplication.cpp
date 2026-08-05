@@ -26,6 +26,9 @@
 #include "version.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ioscontextmenu.h"
+#endif
          
 
 bool AmneziaApplication::m_forceQuit = false;
@@ -137,6 +140,10 @@ void AmneziaApplication::init()
     m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", true);
 #else
     m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", false);
+#endif
+
+#ifdef Q_OS_IOS
+    m_engine->rootContext()->setContextProperty("IosContextMenu", new IosContextMenu(this));
 #endif
 
     m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));

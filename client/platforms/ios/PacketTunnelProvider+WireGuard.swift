@@ -16,7 +16,6 @@ extension PacketTunnelProvider {
         do {
             let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
             let wgConfigStr = wgConfig.str
-            wg_log(.info, title: "config: ", message: wgConfig.redux)
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
