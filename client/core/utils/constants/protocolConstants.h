@@ -68,7 +68,6 @@ namespace amnezia
             constexpr char defaultAlpn[] = "h2";
 
             constexpr char defaultXhttpMode[] = "Auto";
-            constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
             constexpr char defaultXhttpSessionKey[] = "";

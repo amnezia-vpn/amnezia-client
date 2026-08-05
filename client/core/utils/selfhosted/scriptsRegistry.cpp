@@ -329,6 +329,7 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
             workers = (transportMode == QLatin1String(protocols::mtProxy::transportModeFakeTLS)) ? QStringLiteral("0")
                                                                                                  : QStringLiteral("2");
         }
+        vars.append({{"$MTPROXY_WORKERS_MODE", workersMode}});
         vars.append({{"$MTPROXY_WORKERS", workers}});
 
         vars.append({{"$MTPROXY_NAT_ENABLED", c.natEnabled ? QStringLiteral("1") : QStringLiteral("0")}});

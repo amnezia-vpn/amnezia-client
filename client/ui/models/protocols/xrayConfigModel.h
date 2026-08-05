@@ -33,7 +33,6 @@ public:
         XhttpModeRole,
         XhttpHostRole,
         XhttpPathRole,
-        XhttpHeadersTemplateRole,
         XhttpUplinkMethodRole,
         XhttpDisableGrpcRole,
         XhttpDisableSseRole,
@@ -102,7 +101,6 @@ public:
     Q_INVOKABLE static QStringList fingerprintOptions();
     Q_INVOKABLE static QStringList alpnOptions();
     Q_INVOKABLE static QStringList xhttpModeOptions();
-    Q_INVOKABLE static QStringList xhttpHeadersTemplateOptions();
     Q_INVOKABLE static QStringList xhttpUplinkMethodOptions();
     Q_INVOKABLE static QStringList xhttpSessionPlacementOptions();
     Q_INVOKABLE static QStringList xhttpSeqPlacementOptions();

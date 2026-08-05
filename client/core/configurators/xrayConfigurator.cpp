@@ -103,14 +103,14 @@ namespace {
         obj[QString::fromUtf8(key)] = makeRangeString(minV, maxV);
     }
 
-    // vision flow only valid with raw/tcp; drop it for xhttp/mkcp.
     QString effectiveClientFlow(const amnezia::XrayServerConfig &srv)
     {
         const bool rawTransport = srv.transport.isEmpty() || srv.transport == QLatin1String("raw");
-        return rawTransport ? srv.flow : QString();
+        const bool secureFlow =
+                srv.security == QLatin1String("tls") || srv.security == QLatin1String("reality");
+        return (rawTransport && secureFlow) ? srv.flow : QString();
     }
 
-    // reality unsupported with mkcp (xray refuses) → fall back to none.
     QString effectiveSecurity(const amnezia::XrayServerConfig &srv)
     {
         if (srv.transport == QLatin1String("mkcp") && srv.security == QLatin1String("reality")) {
@@ -656,9 +656,7 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         if (!xhttp.path.isEmpty())
             xo[QStringLiteral("path")] = xhttp.path;
         QString modeEff = normalizeXhttpMode(xhttp.mode);
-        // xhttp+reality: auto/packet-up hang silently; force stream mode (xray #5635).
-        if (srv.security == QLatin1String("reality")
-            && (modeEff == QLatin1String("auto") || modeEff == QLatin1String("packet-up"))) {
+        if (modeEff == QLatin1String("auto") || modeEff == QLatin1String("packet-up")) {
             modeEff = QStringLiteral("stream-one");
         }
         xo[QStringLiteral("mode")] = modeEff;

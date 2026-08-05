@@ -35,6 +35,10 @@ PageType {
         return value
     }
 
+    function formatFlow(value) {
+        return value === "" ? qsTr("Empty") : value
+    }
+
     BackButtonType {
         id: backButton
 
@@ -169,7 +173,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Security")
-                descriptionText: root.formatSecurity(security)
+                descriptionText: root.formatSecurity((security === "reality" && transport === "mkcp") ? "none" : security)
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
                 clickedFunction: function() {
@@ -183,7 +187,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Flow")
-                descriptionText: flow
+                descriptionText: root.formatFlow((transport === "" || transport === "raw") ? flow : "")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
                 clickedFunction: function() {

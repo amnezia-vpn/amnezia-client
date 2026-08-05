@@ -70,8 +70,6 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::XhttpPathRole: xhttp.path = str;
         break;
-    case Roles::XhttpHeadersTemplateRole: xhttp.headersTemplate = str;
-        break;
     case Roles::XhttpUplinkMethodRole: xhttp.uplinkMethod = str;
         break;
     case Roles::XhttpDisableGrpcRole: xhttp.disableGrpc = value.toBool();
@@ -206,7 +204,6 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::XhttpModeRole: return xhttp.mode;
     case Roles::XhttpHostRole: return xhttp.host;
     case Roles::XhttpPathRole: return xhttp.path;
-    case Roles::XhttpHeadersTemplateRole: return xhttp.headersTemplate;
     case Roles::XhttpUplinkMethodRole: return xhttp.uplinkMethod;
     case Roles::XhttpDisableGrpcRole: return xhttp.disableGrpc;
     case Roles::XhttpDisableSseRole: return xhttp.disableSse;
@@ -335,9 +332,6 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
     if (config.xhttp.mode.isEmpty()) {
         config.xhttp.mode = protocols::xray::defaultXhttpMode;
     }
-    if (config.xhttp.headersTemplate.isEmpty()) {
-        config.xhttp.headersTemplate = protocols::xray::defaultXhttpHeadersTemplate;
-    }
     if (config.xhttp.uplinkMethod.isEmpty()) {
         config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
     }
@@ -404,7 +398,6 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
     roles[XhttpModeRole] = "xhttpMode";
     roles[XhttpHostRole] = "xhttpHost";
     roles[XhttpPathRole] = "xhttpPath";
-    roles[XhttpHeadersTemplateRole] = "xhttpHeadersTemplate";
     roles[XhttpUplinkMethodRole] = "xhttpUplinkMethod";
     roles[XhttpDisableGrpcRole] = "xhttpDisableGrpc";
     roles[XhttpDisableSseRole] = "xhttpDisableSse";
@@ -520,11 +513,6 @@ QStringList XrayConfigModel::alpnOptions()
 QStringList XrayConfigModel::xhttpModeOptions()
 {
     return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
-}
-
-QStringList XrayConfigModel::xhttpHeadersTemplateOptions()
-{
-    return { "HTTP", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()

@@ -56,7 +56,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("None")
-                checked: security === "none"
+                checked: security === "none" || (security === "reality" && !realityAllowed)
                 onClicked: security = "none"
             }
 
@@ -81,7 +81,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: qsTr("Reality")
                 enabled: realityAllowed
-                checked: security === "reality"
+                checked: security === "reality" && realityAllowed
                 onClicked: security = "reality"
             }
 
@@ -217,7 +217,7 @@ PageType {
 
             // ── Reality fields ────────────────────────────────────────
             ColumnLayout {
-                visible: security === "reality"
+                visible: security === "reality" && realityAllowed
                 Layout.fillWidth: true
                 spacing: 0
 

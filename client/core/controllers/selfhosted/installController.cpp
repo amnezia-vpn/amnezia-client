@@ -505,8 +505,7 @@ ErrorCode InstallController::buildContainerWorker(const ServerCredentials &crede
     if (stdOut.contains("returned a non-zero code")
         || stdOut.contains("failed to solve")
         || stdOut.contains("Unable to find image")
-        || stdOut.contains("Couldn't connect to server")
-        || (stdOut.contains("curl:") && stdOut.contains("(")))
+        || stdOut.contains("Couldn't connect to server"))
         return ErrorCode::ServerDockerFailedError;
 
     return error;
@@ -535,25 +534,6 @@ ErrorCode InstallController::runContainerWorker(const ServerCredentials &credent
         return ErrorCode::ServerDockerFailedError;
     if (stdOut.contains("Unable to find image") || stdOut.contains("No such image"))
         return ErrorCode::ServerDockerFailedError;
-
-    if (e != ErrorCode::NoError)
-        return e;
-
-    const QString containerName = ContainerUtils::containerToString(container);
-    QString stateOut;
-    auto cbState = [&stateOut](const QString &data, libssh::Client &) {
-        stateOut += data;
-        return ErrorCode::NoError;
-    };
-    sshSession.runScript(credentials,
-                         QStringLiteral("sudo docker inspect --format '{{.State.Running}}' %1 2>/dev/null || echo notfound")
-                                 .arg(containerName),
-                         cbState);
-    if (!stateOut.contains("true")) {
-        qWarning().noquote() << "runContainerWorker: container" << containerName
-                             << "is not running after start:" << stateOut.trimmed();
-        return ErrorCode::ServerDockerFailedError;
-    }
 
     return e;
 }

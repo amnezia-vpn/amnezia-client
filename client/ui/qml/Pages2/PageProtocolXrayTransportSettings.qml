@@ -330,51 +330,6 @@ PageType {
                 }
 
                 DropDownType {
-                    id: headersDropDown
-                    fitContent: true
-                    Layout.fillWidth: true
-                    Layout.topMargin: 8
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: xhttpHeadersTemplate
-                    descriptionText: qsTr("Headers template")
-                    headerText: qsTr("Headers template")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
-                        currentValue: xhttpHeadersTemplate
-                        model: ListModel {
-                            Component.onCompleted: {
-                                var opts = XrayConfigModel.xhttpHeadersTemplateOptions()
-                                for (var i = 0; i < opts.length; i++) {
-                                    append({name: opts[i]})
-                                }
-                            }
-                        }
-                        clickedFunction: function () {
-                            xhttpHeadersTemplate = selectedText
-                            headersDropDown.text = selectedText
-                            headersDropDown.closeTriggered()
-                        }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpHeadersTemplate) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            headersDropDown.text = xhttpHeadersTemplate
-                        }
-                    }
-                }
-
-                DropDownType {
                     id: uplinkMethodDropDown
                     fitContent: true
                     Layout.fillWidth: true

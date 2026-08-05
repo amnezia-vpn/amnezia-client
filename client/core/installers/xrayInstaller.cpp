@@ -190,12 +190,6 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         srv.xhttp.host = xhttpObj.value("host").toString();
         srv.xhttp.path = xhttpObj.value("path").toString();
 
-        {
-            const QJsonObject hdrs = xhttpObj.value("headers").toObject();
-            if (hdrs.contains(QLatin1String("Host")) || !hdrs.isEmpty())
-                srv.xhttp.headersTemplate = QStringLiteral("HTTP");
-        }
-
         if (xhttpObj.contains(QLatin1String("uplinkHTTPMethod")))
             srv.xhttp.uplinkMethod = xhttpObj.value("uplinkHTTPMethod").toString();
         else

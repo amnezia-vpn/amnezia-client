@@ -54,7 +54,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Empty")
-                checked: flow === ""
+                checked: flow === "" || !visionAllowed
                 onClicked: flow = ""
             }
 
@@ -67,7 +67,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision"
                 enabled: visionAllowed
-                checked: flow === "xtls-rprx-vision"
+                checked: flow === "xtls-rprx-vision" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision"
             }
 
@@ -80,7 +80,7 @@ PageType {
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision-udp443"
                 enabled: visionAllowed
-                checked: flow === "xtls-rprx-vision-udp443"
+                checked: flow === "xtls-rprx-vision-udp443" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision-udp443"
             }
 
