@@ -37,7 +37,35 @@ struct WireGuardClientConfig {
     QString persistentKeepAlive;
     QString mtu;
     bool isObfuscationEnabled = false;
-    
+
+    // AmneziaWG obfuscation parameters. A native WireGuard config imported with
+    // "Enable WireGuard obfuscation" is stored in the WireGuard container with
+    // these set; they must round-trip so an already-obfuscated profile keeps
+    // working after upgrade instead of degrading to plain WireGuard.
+    QString junkPacketCount;
+    QString junkPacketMinSize;
+    QString junkPacketMaxSize;
+    QString initPacketJunkSize;
+    QString responsePacketJunkSize;
+    QString cookieReplyPacketJunkSize;
+    QString transportPacketJunkSize;
+    QString initPacketMagicHeader;
+    QString responsePacketMagicHeader;
+    QString underloadPacketMagicHeader;
+    QString transportPacketMagicHeader;
+    QString specialJunk1;
+    QString specialJunk2;
+    QString specialJunk3;
+    QString specialJunk4;
+    QString specialJunk5;
+    QString headerProtectionKey;
+    QString contentPaddingAddition;
+    QString rekeyAfterTime;
+    QString rekeyTimeout;
+    QString rejectAfterTime;
+    QString keepaliveTimeout;
+    QString maxHandshakeAttempts;
+
     QJsonObject toJson() const;
     static WireGuardClientConfig fromJson(const QJsonObject& json);
 };
