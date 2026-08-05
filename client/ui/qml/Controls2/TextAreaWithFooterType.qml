@@ -79,7 +79,23 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                ContextMenu.menu: contextMenu
+                ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
+                ContextMenu.onRequested: function(position) {
+                    contextMenu.requestNative(position)
+                }
+
+                // Native iOS text fields select the word and show the edit
+                // menu on double tap; Qt does neither on touch.
+                TapHandler {
+                    enabled: contextMenu.useNativeEditMenu
+                    acceptedDevices: PointerDevice.TouchScreen
+                    onDoubleTapped: function(eventPoint) {
+                        textArea.forceActiveFocus()
+                        textArea.cursorPosition = textArea.positionAt(eventPoint.position.x, eventPoint.position.y)
+                        textArea.selectWord()
+                        contextMenu.requestNative(eventPoint.position)
+                    }
+                }
 
                 ContextMenuType {
                     id: contextMenu

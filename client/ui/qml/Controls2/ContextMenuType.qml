@@ -6,6 +6,20 @@ Menu {
 
     popupType: Popup.Native
 
+    // On Qt < 6.10 the ContextMenu attached type has no native backing on iOS
+    // and opens this Qt-drawn menu instead. In that case the native edit menu
+    // is presented through UIEditMenuInteraction (IosContextMenu is registered
+    // only in iOS builds; on Qt >= 6.10 isAvailable() returns false and the
+    // attached type shows the native menu itself).
+    readonly property bool useNativeEditMenu: typeof IosContextMenu !== "undefined" && IosContextMenu.isAvailable()
+
+    function requestNative(position) {
+        if (useNativeEditMenu && textObj) {
+            textObj.forceActiveFocus()
+            IosContextMenu.present(textObj, position.x, position.y)
+        }
+    }
+
     property Item inputBlocker: null
 
     Component {
