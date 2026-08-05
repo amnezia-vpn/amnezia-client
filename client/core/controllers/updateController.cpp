@@ -99,6 +99,7 @@ void UpdateController::fetchGatewayUrl()
                                                                        m_appSettingsRepository);
 
     QJsonObject apiPayload;
+    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
     apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
     apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
     apiPayload[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
