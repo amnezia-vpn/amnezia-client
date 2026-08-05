@@ -5,6 +5,7 @@
 #include "macosstatusicon.h"
 #include "leakdetector.h"
 
+#include <QDebug>
 #include <QMenu>
 
 #import <Cocoa/Cocoa.h>
@@ -32,6 +33,7 @@ MacOSStatusIcon::~MacOSStatusIcon() {
 void MacOSStatusIcon::setIcon(const QString& iconPath) {
   QResource resource(iconPath);
   if (!resource.isValid()) {
+    qWarning() << "MacOSStatusIcon: invalid icon resource" << iconPath;
     return;
   }
 
@@ -48,9 +50,16 @@ void MacOSStatusIcon::setMenu(QMenu* menu) {
 
 void MacOSStatusIcon::showMessage(const QString& title, const QString& message) {
   UNUserNotificationCenter* center = [UNUserNotificationCenter currentNotificationCenter];
+
+  // This is a no-op if authorization has already been granted.
   [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert |
                                            UNAuthorizationOptionBadge)
-                        completionHandler:^(BOOL, NSError*){
+                        completionHandler:^(BOOL, NSError* _Nullable error) {
+                          if (error) {
+                            // Note: this error may happen if the application is not signed.
+                            qWarning() << "MacOSStatusIcon: notification authorization error:"
+                                       << QString::fromNSString(error.localizedDescription);
+                          }
                         }];
 
   UNMutableNotificationContent* content = [[UNMutableNotificationContent alloc] init];
@@ -63,5 +72,11 @@ void MacOSStatusIcon::showMessage(const QString& title, const QString& message) 
                                                                         trigger:nil];
   [content release];
 
-  [center addNotificationRequest:request withCompletionHandler:nil];
+  [center addNotificationRequest:request
+           withCompletionHandler:^(NSError* _Nullable error) {
+             if (error) {
+               qWarning() << "MacOSStatusIcon: local notification failed:"
+                          << QString::fromNSString(error.localizedDescription);
+             }
+           }];
 }

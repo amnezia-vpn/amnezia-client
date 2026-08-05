@@ -34,7 +34,6 @@ set(LIBS ${LIBS}
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
@@ -45,7 +44,6 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_contro
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
-    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
