@@ -1,7 +1,12 @@
 set(CPACK_PACKAGE_VENDOR            AmneziaVPN)
 set(CPACK_PACKAGE_VERSION           ${AMNEZIAVPN_VERSION})
 if(WIN32)
-    set(CPACK_PACKAGE_FILE_NAME "AmneziaVPN_${AMNEZIAVPN_VERSION}_windows_x64")
+    if(CMAKE_CXX_COMPILER_ARCHITECTURE_ID MATCHES "ARM64" OR CMAKE_GENERATOR_PLATFORM MATCHES "ARM64")
+        set(_AMNEZIA_WIN_ARCH "arm64")
+    else()
+        set(_AMNEZIA_WIN_ARCH "x64")
+    endif()
+    set(CPACK_PACKAGE_FILE_NAME "AmneziaVPN_${AMNEZIAVPN_VERSION}_windows_${_AMNEZIA_WIN_ARCH}")
 elseif(APPLE AND NOT IOS AND NOT MACOS_NE)
     set(CPACK_PACKAGE_FILE_NAME "AmneziaVPN_${AMNEZIAVPN_VERSION}_macos_x64")
 elseif(LINUX AND NOT ANDROID)
@@ -35,6 +40,9 @@ set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT                ${CMAKE_SOURCE_DIR}/deploy/i
 
 # === CPack WIX generator settings ===
 set(CPACK_WIX_VERSION               4)
+if(WIN32)
+    set(CPACK_WIX_ARCHITECTURE      ${_AMNEZIA_WIN_ARCH})
+endif()
 set(CPACK_WIX_UPGRADE_GUID          "{2D55AC62-96D6-4692-8C05-0D85BBF95485}")
 set(CPACK_WIX_PRODUCT_ICON          ${CMAKE_SOURCE_DIR}/client/images/app.ico)
 set(CPACK_WIX_CUSTOM_XMLNS          "util=http://wixtoolset.org/schemas/v4/wxs/util")
@@ -72,6 +80,22 @@ if(WIN32)
         DESTINATION "."
         COMPONENT AmneziaVPN
     )
+
+    # componentscript.js bootstraps the VC++ runtime from vc_redist.<arch>.exe
+    # in the install dir, so stage the redistributable matching the target arch
+    set(_AMNEZIA_VC_REDIST "${CMAKE_BINARY_DIR}/vc_redist.${_AMNEZIA_WIN_ARCH}.exe")
+    if(NOT EXISTS "${_AMNEZIA_VC_REDIST}")
+        file(DOWNLOAD "https://aka.ms/vc14/vc_redist.${_AMNEZIA_WIN_ARCH}.exe" "${_AMNEZIA_VC_REDIST}"
+             STATUS _AMNEZIA_VC_REDIST_STATUS)
+        list(GET _AMNEZIA_VC_REDIST_STATUS 0 _AMNEZIA_VC_REDIST_CODE)
+        if(NOT _AMNEZIA_VC_REDIST_CODE EQUAL 0)
+            file(REMOVE "${_AMNEZIA_VC_REDIST}")
+            message(WARNING "Failed to download vc_redist.${_AMNEZIA_WIN_ARCH}.exe; the installer will not bootstrap the VC++ runtime")
+        endif()
+    endif()
+    if(EXISTS "${_AMNEZIA_VC_REDIST}")
+        install(PROGRAMS "${_AMNEZIA_VC_REDIST}" DESTINATION "." COMPONENT AmneziaVPN)
+    endif()
 endif()
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)

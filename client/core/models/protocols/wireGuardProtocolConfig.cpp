@@ -109,7 +109,80 @@ QJsonObject WireGuardClientConfig::toJson() const
     if (isObfuscationEnabled) {
         obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
     }
-    
+
+    // Round-trip AmneziaWG obfuscation parameters. Written only when present so
+    // a plain WireGuard config stays clean, while an obfuscated one keeps its
+    // junk params across the config model instead of degrading to plain WG.
+    if (!junkPacketCount.isEmpty()) {
+        obj[configKey::junkPacketCount] = junkPacketCount;
+    }
+    if (!junkPacketMinSize.isEmpty()) {
+        obj[configKey::junkPacketMinSize] = junkPacketMinSize;
+    }
+    if (!junkPacketMaxSize.isEmpty()) {
+        obj[configKey::junkPacketMaxSize] = junkPacketMaxSize;
+    }
+    if (!initPacketJunkSize.isEmpty()) {
+        obj[configKey::initPacketJunkSize] = initPacketJunkSize;
+    }
+    if (!responsePacketJunkSize.isEmpty()) {
+        obj[configKey::responsePacketJunkSize] = responsePacketJunkSize;
+    }
+    if (!cookieReplyPacketJunkSize.isEmpty()) {
+        obj[configKey::cookieReplyPacketJunkSize] = cookieReplyPacketJunkSize;
+    }
+    if (!transportPacketJunkSize.isEmpty()) {
+        obj[configKey::transportPacketJunkSize] = transportPacketJunkSize;
+    }
+    if (!initPacketMagicHeader.isEmpty()) {
+        obj[configKey::initPacketMagicHeader] = initPacketMagicHeader;
+    }
+    if (!responsePacketMagicHeader.isEmpty()) {
+        obj[configKey::responsePacketMagicHeader] = responsePacketMagicHeader;
+    }
+    if (!underloadPacketMagicHeader.isEmpty()) {
+        obj[configKey::underloadPacketMagicHeader] = underloadPacketMagicHeader;
+    }
+    if (!transportPacketMagicHeader.isEmpty()) {
+        obj[configKey::transportPacketMagicHeader] = transportPacketMagicHeader;
+    }
+    if (!specialJunk1.isEmpty()) {
+        obj[configKey::specialJunk1] = specialJunk1;
+    }
+    if (!specialJunk2.isEmpty()) {
+        obj[configKey::specialJunk2] = specialJunk2;
+    }
+    if (!specialJunk3.isEmpty()) {
+        obj[configKey::specialJunk3] = specialJunk3;
+    }
+    if (!specialJunk4.isEmpty()) {
+        obj[configKey::specialJunk4] = specialJunk4;
+    }
+    if (!specialJunk5.isEmpty()) {
+        obj[configKey::specialJunk5] = specialJunk5;
+    }
+    if (!headerProtectionKey.isEmpty()) {
+        obj[configKey::headerProtectionKey] = headerProtectionKey;
+    }
+    if (!contentPaddingAddition.isEmpty()) {
+        obj[configKey::contentPaddingAddition] = contentPaddingAddition;
+    }
+    if (!rekeyAfterTime.isEmpty()) {
+        obj[configKey::rekeyAfterTime] = rekeyAfterTime;
+    }
+    if (!rekeyTimeout.isEmpty()) {
+        obj[configKey::rekeyTimeout] = rekeyTimeout;
+    }
+    if (!rejectAfterTime.isEmpty()) {
+        obj[configKey::rejectAfterTime] = rejectAfterTime;
+    }
+    if (!keepaliveTimeout.isEmpty()) {
+        obj[configKey::keepaliveTimeout] = keepaliveTimeout;
+    }
+    if (!maxHandshakeAttempts.isEmpty()) {
+        obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
+    }
+
     return obj;
 }
 
@@ -135,7 +208,34 @@ WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
     config.mtu = json.value(configKey::mtu).toString();
     
     config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
-    
+
+    // Preserve AmneziaWG obfuscation parameters (see header): without this a
+    // WireGuard config that had obfuscation enabled loses its junk params on
+    // read and silently degrades to plain WireGuard.
+    config.junkPacketCount = json.value(configKey::junkPacketCount).toString();
+    config.junkPacketMinSize = json.value(configKey::junkPacketMinSize).toString();
+    config.junkPacketMaxSize = json.value(configKey::junkPacketMaxSize).toString();
+    config.initPacketJunkSize = json.value(configKey::initPacketJunkSize).toString();
+    config.responsePacketJunkSize = json.value(configKey::responsePacketJunkSize).toString();
+    config.cookieReplyPacketJunkSize = json.value(configKey::cookieReplyPacketJunkSize).toString();
+    config.transportPacketJunkSize = json.value(configKey::transportPacketJunkSize).toString();
+    config.initPacketMagicHeader = json.value(configKey::initPacketMagicHeader).toString();
+    config.responsePacketMagicHeader = json.value(configKey::responsePacketMagicHeader).toString();
+    config.underloadPacketMagicHeader = json.value(configKey::underloadPacketMagicHeader).toString();
+    config.transportPacketMagicHeader = json.value(configKey::transportPacketMagicHeader).toString();
+    config.specialJunk1 = json.value(configKey::specialJunk1).toString();
+    config.specialJunk2 = json.value(configKey::specialJunk2).toString();
+    config.specialJunk3 = json.value(configKey::specialJunk3).toString();
+    config.specialJunk4 = json.value(configKey::specialJunk4).toString();
+    config.specialJunk5 = json.value(configKey::specialJunk5).toString();
+    config.headerProtectionKey = json.value(configKey::headerProtectionKey).toString();
+    config.contentPaddingAddition = json.value(configKey::contentPaddingAddition).toString();
+    config.rekeyAfterTime = json.value(configKey::rekeyAfterTime).toString();
+    config.rekeyTimeout = json.value(configKey::rekeyTimeout).toString();
+    config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
+    config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
+    config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
+
     return config;
 }
 

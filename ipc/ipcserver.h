@@ -25,6 +25,7 @@ public:
     virtual bool flushDns() override;
     virtual void resetIpStack() override;
     virtual bool checkAndInstallDriver() override;
+    virtual bool checkAndInstallLegacyDriver() override;
     virtual QStringList getTapList() override;
     virtual void cleanUp() override;
     virtual void clearLogs() override;

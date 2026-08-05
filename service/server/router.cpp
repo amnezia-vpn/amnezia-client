@@ -80,6 +80,9 @@ bool Router::createTun(const QString &dev, const QString &subnet)
 
 bool Router::deleteTun(const QString &dev)
 {
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().deleteTun(dev);
+#endif
 #ifdef Q_OS_LINUX
     return RouterLinux::Instance().deleteTun(dev);
 #endif

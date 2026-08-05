@@ -55,6 +55,17 @@ private:
     void updateVpnGateway(const QString &line);
 
     QSharedPointer<IpcProcessInterfaceReplica> m_openVpnProcess;
+
+#ifdef Q_OS_WIN
+    // openvpn falls back to tap-windows6 on its own for configs the ovpn-dco
+    // driver cannot handle (compression, --fragment, proxies, non-AEAD
+    // ciphers, --dev tap). Only the DCO adapter is provisioned up front, so
+    // that fallback dies with "There are no TAP-Windows or ovpn-dco adapters
+    // on this system" — install the legacy driver on demand and retry once.
+    bool retryWithLegacyDriver();
+
+    bool m_legacyDriverRequested = false;
+#endif
 };
 
 #endif // OPENVPNPROTOCOL_H

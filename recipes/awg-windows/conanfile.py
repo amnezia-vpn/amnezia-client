@@ -55,7 +55,12 @@ class AwgWindows(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("mingw-builds/15.1.0")
+        if self._goarch == "arm64":
+            # mingw-builds only ships an x86_64-w64-mingw32 gcc; CGO for
+            # GOARCH=arm64 needs an aarch64 mingw toolchain
+            self.tool_requires("llvm-mingw/20260616")
+        else:
+            self.tool_requires("mingw-builds/15.1.0")
         self.tool_requires("go/1.26.0")
 
     def requirements(self):
@@ -87,6 +92,11 @@ class AwgWindows(ConanFile):
         env.define("CGO_ENABLED", "1")
         env.define("CGO_LDFLAGS", tc.ldflags)
         env.define("CGO_CFLAGS", tc.cflags)
+        if self._goarch == "arm64":
+            # go invokes plain "gcc" by default, which llvm-mingw does not
+            # provide unprefixed — select the aarch64 cross driver explicitly
+            env.define("CC", "aarch64-w64-mingw32-gcc")
+            env.define("CXX", "aarch64-w64-mingw32-g++")
         tc.generate(env)
 
     def build(self):

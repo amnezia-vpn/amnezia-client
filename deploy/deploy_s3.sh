@@ -40,7 +40,8 @@ download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${
 download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_android9+_x86_64.apk
 download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_linux_x64.run
 download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_macos_x64.pkg
-download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_windows_x64.exe 
+download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_windows_x64.exe
+download_file https://github.com/amnezia-vpn/amnezia-client/releases/download/${VERSION}/AmneziaVPN_${VERSION}_windows_arm64.exe
 
 cd ../
 

@@ -38,6 +38,18 @@ function vcRuntimeIsInstalled()
     return (installer.findPath("msvcp140.dll", [installer.value("RootDir")+ "\\Windows\\System32\\"]).length !== 0)
 }
 
+function vcRedistFileName()
+{
+    var arch = systemInfo.currentCpuArchitecture;
+    if (arch === "arm64" || arch === "aarch64") {
+        return "vc_redist.arm64.exe";
+    }
+    if (arch.search("64") < 0) {
+        return "vc_redist.x86.exe";
+    }
+    return "vc_redist.x64.exe";
+}
+
 function Component()
 {
     component.loaded.connect(this, Component.prototype.componentLoaded);
@@ -73,18 +85,22 @@ Component.prototype.createOperations = function()
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {
-			if (systemInfo.currentCpuArchitecture.search("64") < 0) {
-				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
-			}
-			else {
-				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
-			}
-
+            // 1638 = a newer runtime is already installed, 3010 = success, reboot required
+            component.addElevatedOperation("Execute", "{0,1638,3010}", "@TargetDir@\\" + vcRedistFileName(),
+                                           "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
         } else {
-            console.log("Microsoft Visual C++ 2017 Redistributable already installed");
+            console.log("Microsoft Visual C++ Redistributable already installed");
         }
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"
+
+        // upgrade path: a service from a previous install may still be
+        // registered — sc create would fail with 1073 (service exists), so
+        // recreate it to keep binpath/depend current
+        // (1060 = service does not exist, 1062 = service not started)
+        component.addElevatedOperation("Execute", "{0,1060,1062}", "sc", "stop", serviceName());
+        component.addElevatedOperation("Execute", "{0,1060}", "sc", "delete", serviceName());
+
         component.addElevatedOperation("Execute",
                                        ["sc", "create", serviceName(), "binpath=", pu_path + serviceName() + ".exe",
                                         "start=", "auto", "depend=", "BFE/nsi"],

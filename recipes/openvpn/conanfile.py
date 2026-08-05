@@ -4,11 +4,12 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake, CMakeDeps
 
+import glob
 import os
 
 class Openvpn(ConanFile):
     name = "openvpn"
-    version = "2.7.0"
+    version = "2.7.5"
     package_type = "application"
     settings = "os", "build_type", "arch", "compiler"
 
@@ -48,15 +49,34 @@ class Openvpn(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/OpenVPN/openvpn/archive/refs/tags/v{self.version}.zip",
-            sha256="1a65d8587f932c13d55b1f175ff2e1d61d795d9092788662e888054854d4ee3d", strip_root=True
+            sha256="8b005fb1b4fd008c0e0b8dbd618498efcda89e5843b59364d970ede254f3a049", strip_root=True
         )
 
     def _patch_sources(self):
-        replace_in_file(self, 
+        replace_in_file(self,
             os.path.join(self.source_folder, "CMakeLists.txt"),
             "/Qspectre",
             ""
         )
+
+    def _find_mc_compiler(self):
+        # src/openvpnserv needs the Windows message compiler; with the VS
+        # generator nothing puts the SDK bin dir on PATH unless the console
+        # ran vcvars, so resolve mc.exe explicitly and let find_program use it
+        host = {"ARM64": "arm64", "AMD64": "x64", "x86": "x86"}.get(
+            os.environ.get("PROCESSOR_ARCHITECTURE", ""), "x64")
+        candidates = []
+        sdk_bin = os.environ.get("WindowsSdkVerBinPath")
+        if sdk_bin:
+            candidates.append(os.path.join(sdk_bin, host, "mc.exe"))
+        pf86 = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
+        candidates.extend(sorted(
+            glob.glob(os.path.join(pf86, "Windows Kits", "10", "bin", "10.*", host, "mc.exe")),
+            reverse=True))
+        for candidate in candidates:
+            if os.path.exists(candidate):
+                return candidate.replace("\\", "/")
+        return None
 
     def generate(self):
         self._patch_sources()
@@ -73,6 +93,9 @@ class Openvpn(ConanFile):
             tc.extra_cxxflags = [ f"-I{tap_include_path}", f"-I{applink_include_path}" ]
             tc.cache_variables["BUILD_TESTING"] = False
             tc.cache_variables["ENABLE_PKCS11"] = False
+            mc_compiler = self._find_mc_compiler()
+            if mc_compiler:
+                tc.cache_variables["MC_COMPILER"] = mc_compiler
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -108,6 +131,9 @@ class Openvpn(ConanFile):
     def package(self):
         if self._is_windows:
             copy(self, "*openvpn.exe", src=self.build_folder, dst=self.package_folder, keep_path=False)
+            # tapctl creates/deletes adapters for both tap-windows6 and
+            # ovpn-dco hwids; the service uses it to provision the DCO adapter
+            copy(self, "*tapctl.exe", src=self.build_folder, dst=self.package_folder, keep_path=False)
         else:
             copy(self, "openvpn", src=os.path.join(self.build_folder, "src", "openvpn"), dst=self.package_folder)
 
@@ -116,3 +142,7 @@ class Openvpn(ConanFile):
 
         ext = ".exe" if self._is_windows else ""
         self.cpp_info.location = os.path.join(self.package_folder, f"openvpn{ext}")
+        if self._is_windows:
+            self.cpp_info.set_property("cmake_extra_variables", {
+                "OPENVPN_TAPCTL_PATH": os.path.join(self.package_folder, "tapctl.exe").replace("\\", "/")
+            })

@@ -129,6 +129,7 @@ if(WIN32)
 
     set(HEADERS ${HEADERS}
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.h
+        ${CMAKE_CURRENT_LIST_DIR}/dcocontroller_win.h
         ${CMAKE_CURRENT_LIST_DIR}/router_win.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemontunnel.h
@@ -149,6 +150,7 @@ if(WIN32)
 
     set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_LIST_DIR}/tapcontroller_win.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/dcocontroller_win.cpp
         ${CMAKE_CURRENT_LIST_DIR}/router_win.cpp
 
         ${CMAKE_CURRENT_SOURCE_DIR}/../../client/platforms/windows/daemon/windowsdaemon.cpp
@@ -181,6 +183,7 @@ if(WIN32)
         gdi32
         Advapi32
         Kernel32
+        setupapi
         qt6keychain
     )
 
@@ -357,6 +360,9 @@ endif()
 
 find_package(openvpn REQUIRED)
 list(APPEND CONAN_EXECS $<TARGET_FILE:openvpn::openvpn>)
+if(WIN32 AND OPENVPN_TAPCTL_PATH)
+    list(APPEND CONAN_EXECS ${OPENVPN_TAPCTL_PATH})
+endif()
 
 find_package(tun2socks REQUIRED)
 list(APPEND CONAN_EXECS $<TARGET_FILE:xjasonlyu::tun2socks>)
@@ -471,6 +477,17 @@ if (WIN32)
     )
     install(DIRECTORY "${WIN_SPLIT_TUNNEL_BIN}/"
         DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT AmneziaVPN
+    )
+
+    find_package(ovpn-dco-win REQUIRED)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${OVPN_DCO_WIN_BIN}"
+            "$<TARGET_FILE_DIR:${PROJECT}>/dco"
+    )
+    install(DIRECTORY "${OVPN_DCO_WIN_BIN}/"
+        DESTINATION "${CMAKE_INSTALL_BINDIR}/dco"
         COMPONENT AmneziaVPN
     )
 endif()

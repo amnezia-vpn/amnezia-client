@@ -20,6 +20,7 @@
 
 #ifdef Q_OS_WIN
     #include "tapcontroller_win.h"
+    #include "dcocontroller_win.h"
 #endif
 
 
@@ -113,6 +114,26 @@ bool IpcServer::checkAndInstallDriver()
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::checkAndInstallDriver";
+#endif
+
+#ifdef Q_OS_WIN
+    // OpenVPN 2.7 uses the ovpn-dco driver by default (wintun was removed);
+    // tap-windows6 stays as the fallback data path for non-DCO configs
+    // (non-AEAD ciphers, compression, proxy options, --dev tap)
+    if (DcoController::Instance().checkAndSetup()) {
+        return true;
+    }
+    qWarning() << "IpcServer: ovpn-dco setup failed, falling back to tap-windows6";
+    return TapController::checkAndSetup();
+#else
+    return true;
+#endif
+}
+
+bool IpcServer::checkAndInstallLegacyDriver()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::checkAndInstallLegacyDriver";
 #endif
 
 #ifdef Q_OS_WIN

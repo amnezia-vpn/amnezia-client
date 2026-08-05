@@ -262,6 +262,134 @@ jobs:
 
 # ------------------------------------------------------
 
+  Bake-Prebuilts-Windows-ARM64:
+    runs-on: windows-11-arm
+    needs: Detect-Changes
+    if: needs.Detect-Changes.outputs.recipes_changed == 'true'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'arm64'
+
+    - name: 'Install conan'
+      run: pip install "conan==2.28.0"
+
+    - name: 'Build dependencies'
+      run: cmake -S . -B build -A ARM64 -DPREBUILTS_ONLY=1
+
+    - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
+      run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
+
+    - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
+      run: conan upload -r amnezia "*" -c
+
+# ------------------------------------------------------
+
+  Build-Windows-ARM64:
+    runs-on: windows-11-arm
+
+    needs: Bake-Prebuilts-Windows-ARM64
+    if: ${{ always() }}
+
+    env:
+      QT_VERSION: 6.10.1
+      QIF_VERSION: 4.7
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Install Qt'
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2022_arm64_cross_compiled'
+        modules: 'qtremoteobjects qt5compat qtshadertools'
+        dir: ${{ runner.temp }}
+        setup-python: 'true'
+        tools: 'tools_ifw'
+        set-env: 'true'
+        aqtversion: '==3.3.0'
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Setup mvsc'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: 'arm64'
+
+    - name: 'Setup .NET SDK'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: 'Install WiX Toolset'
+      shell: powershell
+      run: |
+        dotnet tool install --global wix --version 4.0.6
+        wix extension add -g WixToolset.UI.wixext/4.0.6
+        wix extension add -g WixToolset.Util.wixext/4.0.6
+        wix extension list -g
+        $wixBinDir = Join-Path $env:USERPROFILE ".dotnet\tools"
+        echo "WIX_BIN_DIR=$wixBinDir" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    - name: 'Install conan'
+      run: pip install "conan==2.28.0"
+
+    - name: 'Build project'
+      shell: cmd
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+      run: |
+        set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
+        deploy\build.bat -arch arm64 --installer all
+
+    - name: 'Upload WIX installer artifact'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/AmneziaVPN_*_windows_arm64.msi
+        archive: false
+        retention-days: 7
+
+    - name: 'Upload IFW installer artifact'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/AmneziaVPN_*_windows_arm64.exe
+        archive: false
+        retention-days: 7
+
+# ------------------------------------------------------
+
   Bake-Prebuilts-iOS:
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
