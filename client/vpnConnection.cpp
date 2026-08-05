@@ -17,6 +17,7 @@
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
     #include <core/protocols/wireGuardProtocol.h>
+    #include <QRemoteObjectPendingCallWatcher>
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -230,9 +231,12 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
         iface->routeAddList(gw, ips);
     });
 
+    auto remainingLookups = QSharedPointer<int>::create(sites.size());
+    auto needFlush = QSharedPointer<bool>::create(false);
+
     // re-resolve domains
     for (const QString &site : sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
+        const auto &cbResolv = [this, site, gw, mode, ips, remainingLookups, needFlush](const QHostInfo &hostInfo) {
             QStringList resolvedIps;
             for (const QHostAddress &addr : hostInfo.addresses()) {
                 if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
@@ -245,7 +249,7 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
             QStringList newIps;
             for (const QString &ip : resolvedIps) {
                 if (!ips.contains(ip)) {
-                    IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
+                    IpcClient::withInterface([gw, ip](QSharedPointer<IpcInterfaceReplica> iface) {
                         iface->routeAddList(gw, QStringList() << ip);
                     });
                     newIps.append(ip);
@@ -254,12 +258,29 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
 
             if (!newIps.isEmpty()) {
                 m_appSettingsRepository->addVpnSite(mode, site, newIps);
-                IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                    auto reply = iface->flushDns();
-                    if (reply.waitForFinished() || !reply.returnValue())
-                        qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
-                });
+                *needFlush = true;
             }
+
+            if (--(*remainingLookups) > 0)
+                return;
+
+            if (!*needFlush)
+                return;
+
+            // Async flush: never waitForFinished() here — that re-enters the event loop and
+            // can re-enter this QHostInfo callback until the stack overflows (0xc00000fd).
+            IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
+                QRemoteObjectPendingReply<bool> reply = iface->flushDns();
+                auto *watcher = new QRemoteObjectPendingCallWatcher(reply, this);
+                QObject::connect(watcher, &QRemoteObjectPendingCallWatcher::finished, this,
+                        [](QRemoteObjectPendingCallWatcher *call) {
+                            if (call->error() != QRemoteObjectPendingCall::NoError
+                                || !call->returnValue().toBool()) {
+                                qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
+                            }
+                            call->deleteLater();
+                        });
+            });
         };
         QHostInfo::lookupHost(site, this, cbResolv);
     }
