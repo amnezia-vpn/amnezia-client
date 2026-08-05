@@ -983,6 +983,30 @@ jobs:
         py7zrversion: '==0.22.*'
         extra: '--base ${{ env.QT_MIRROR }}'
 
+    - name: 'Install android_x86 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
+    - name: 'Install android_x86_64 Qt'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        host: 'linux'
+        target: 'android'
+        arch: 'android_x86_64'
+        modules: ${{ env.QT_MODULES }}
+        dir: ${{ runner.temp }}
+        py7zrversion: '==0.22.*'
+        extra: '--base ${{ env.QT_MIRROR }}'
+
     - name: 'Setup Java'
       uses: actions/setup-java@v4
       with:
@@ -1019,7 +1043,7 @@ jobs:
         APP_ANDROID_MAX_SDK: 29
       shell: bash
       run: |
-        for abi in arm64-v8a armeabi-v7a; do
+        for abi in arm64-v8a armeabi-v7a x86 x86_64; do
           deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
 
           VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/${abi}/CMakeCache.txt | cut -d= -f2)
@@ -1042,6 +1066,20 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         path: deploy/build/armeabi-v7a/client/android-build/*.apk
+        archive: false
+        retention-days: 7
+
+    - name: 'Upload x86 APK'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/x86/client/android-build/*.apk
+        archive: false
+        retention-days: 7
+
+    - name: 'Upload x86_64 APK'
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/build/x86_64/client/android-build/*.apk
         archive: false
         retention-days: 7
 
