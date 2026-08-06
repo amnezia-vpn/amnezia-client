@@ -17,34 +17,6 @@
     #include "tapcontroller_win.h"
 #endif
 
-#ifdef Q_OS_LINUX
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-uid_t g_allowedUid = static_cast<uid_t>(-1);
-bool g_allowedUidSet = false;
-
-static bool checkPeerCredentials(QLocalSocket *socket) {
-    struct ucred cred{};
-    socklen_t len = sizeof(cred);
-    if (getsockopt(socket->socketDescriptor(), SOL_SOCKET, SO_PEERCRED, &cred, &len) != 0) {
-        qWarning() << "LocalServer: SO_PEERCRED failed, rejecting connection";
-        return false;
-    }
-    if (cred.uid == 0) return true;
-    if (!g_allowedUidSet) {
-        g_allowedUid = cred.uid;
-        g_allowedUidSet = true;
-        qDebug() << "LocalServer: registered session UID" << g_allowedUid;
-    }
-    if (cred.uid != g_allowedUid) {
-        qWarning() << "LocalServer: rejected connection from unauthorized UID" << cred.uid;
-        return false;
-    }
-    return true;
-}
-#endif
 
 namespace {
 Logger logger("WgDaemonServer");
@@ -65,13 +37,6 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
     QObject::connect(m_server.data(), &QLocalServer::newConnection, this, [this]() {
         qDebug() << "LocalServer new connection";
         QLocalSocket *conn = m_server->nextPendingConnection();
-#ifdef Q_OS_LINUX
-        if (!checkPeerCredentials(conn)) {
-            conn->close();
-            conn->deleteLater();
-            return;
-        }
-#endif
         m_serverNode.addHostSideConnection(conn);
 
         if (!m_isRemotingEnabled) {
