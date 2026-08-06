@@ -77,6 +77,29 @@
     </message>
 </context>
 <context>
+    <name>AppSplitTunnelingUiController</name>
+    <message>
+        <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="28"/>
+        <source>Application added: %1</source>
+        <translation>Приложение добавлено: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="30"/>
+        <source>The application has already been added</source>
+        <translation>Приложение уже было добавлено</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="40"/>
+        <source>The selected applications have been added</source>
+        <translation>Выбранные приложения уже были добавлены</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="50"/>
+        <source>Application removed: %1</source>
+        <translation>Приложение удалено: %1</translation>
+    </message>
+</context>
+<context>
     <name>ConnectionUiController</name>
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="59"/>
@@ -1190,7 +1213,7 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     <message>
         <location filename="../ui/controllers/serversUiController.cpp" line="97"/>
         <source>Use the remove action to delete this legacy config.</source>
-        <translation>Воспользуйтесь действием "Удалить" чтобы удалить эту устаревшую конфигурацию.</translation>
+        <translation>Воспользуйтесь действием &quot;Удалить&quot; чтобы удалить эту устаревшую конфигурацию.</translation>
     </message>
 </context>
 <context>
@@ -1231,8 +1254,18 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="275"/>
-        <source>Subscription restored successfully.</source>
-        <translation>Подписка успешно восстановлена.</translation>
+        <source>Subscription restored successfully</source>
+        <translation>Подписка успешно восстановлена</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
+        <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
+        <translation>Этот email уже использовался для активации пробного периода. Понравился сервис? Оформите подписку Premium</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
+        <source>API config removed</source>
+        <translation>Конфигурация API удалена</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="303"/>
@@ -1253,11 +1286,6 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <translation>Введите цифры с изображения чтобы продолжить</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
-        <source>This email address has already been used to activate a trial. If you like the service, you can upgrade to Premium</source>
-        <translation>Этот адрес электронной почты уже использовался для активации пробного периода. Если вам понравился сервис, вы можете оформить подписку Premium</translation>
-    </message>
-    <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="532"/>
         <source>API config reloaded</source>
         <translation>Конфигурация API перезагружена</translation>
@@ -1266,11 +1294,6 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="536"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Страна подключения изменена на %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
-        <source>Api config removed</source>
-        <translation>Конфигурация API удалена</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="660"/>

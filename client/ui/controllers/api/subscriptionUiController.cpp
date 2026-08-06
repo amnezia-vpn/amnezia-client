@@ -272,7 +272,7 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
         return false;
     }
 
-    emit installServerFromApiFinished(tr("Subscription restored successfully."));
+    emit installServerFromApiFinished(tr("Subscription restored successfully"));
     if (result.duplicateCount > 0) {
         qInfo().noquote() << "[IAP] Skipped" << result.duplicateCount
                           << "duplicate restored transactions for original transaction IDs already processed";
@@ -469,7 +469,7 @@ bool SubscriptionUiController::importTrialFromGateway(const QString &email)
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiTrialAlreadyUsedError) {
             emit trialEmailError(
-                    tr("This email address has already been used to activate a trial. If you like the service, you can upgrade to Premium"));
+                    tr("This email address has already been used to activate a trial. Like the service? Upgrade to Premium"));
         } else {
             emit errorOccurred(errorCode);
         }
@@ -648,7 +648,7 @@ QStringList SubscriptionUiController::availableProtocols(const QString &serverId
 void SubscriptionUiController::removeApiConfig(const QString &serverId)
 {
     m_subscriptionController->removeApiConfig(serverId);
-    emit apiConfigRemoved(tr("Api config removed"));
+    emit apiConfigRemoved(tr("API config removed"));
 }
 
 void SubscriptionUiController::removeServer(const QString &serverId)
