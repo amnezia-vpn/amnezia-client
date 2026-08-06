@@ -33,6 +33,7 @@
 #include "linuxfirewall.h"
 #include "logger.h"
 #include "xray_defs.h"
+#include <QFileInfo>
 #include <QProcess>
 
 #define BRAND_CODE "amn"
@@ -109,7 +110,7 @@ int LinuxFirewall::linkChain(LinuxFirewall::IPVersion ip, const QString& chain, 
         //    (we can't safely delete all rules at once since rule numbers change)
         // TODO: occasionally this script results in warnings in logs "Bad rule (does a matching rule exist in the chain?)" - this happens when
         // the e.g OUTPUT chain is empty but this script attempts to delete things from it anyway. It doesn't cause any problems, but we should still fix at some point..
-        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
+        return execute(QStringLiteral("if ! %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) == 1 && $2 == \"%3\" { found=1 } END { if(found==1) { exit 0 } else { exit 1 } }' ; then %1 -I %2 -j %3 -t %4 && %1 -L %2 -n --line-numbers -t %4 2> /dev/null | awk 'int($1) > 1 && $2 == \"%3\" { print $1; exit }' | xargs -r %1 -t %4 -D %2 ; fi").arg(cmd, parent, chain, tableName));
     }
     else
         return execute(QStringLiteral("if ! %1 -C %2 -j %3 -t %4 2> /dev/null ; then %1 -A %2 -j %3 -t %4; fi").arg(cmd, parent, chain, tableName));
@@ -501,13 +502,22 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
         logger.debug() << "(" << exitCode << ") $ " << command;
     if (!out.isEmpty())
         logger.info() << out;
-    if (!err.isEmpty())
+    if (!err.isEmpty() && !ignoreErrors)
         logger.warning() << err;
     return exitCode;
 }
 
 void LinuxFirewall::setupTrafficSplitting()
 {
+    const QString cgroupBase = QStringLiteral("/sys/fs/cgroup/net_cls");
+    if (!QFileInfo::exists(cgroupBase)) {
+        logger.warning() << "net_cls cgroup v1 not available, traffic splitting disabled";
+        return;
+    }
+    execute(QStringLiteral(
+        "if ! grep -qE '^[0-9]+[[:space:]]+%1$' /etc/iproute2/rt_tables 2>/dev/null ; then "
+        "echo '200 %1' >> /etc/iproute2/rt_tables ; fi"
+    ).arg(kRtableName));
     auto cGroupDir = "/sys/fs/cgroup/net_cls/" BRAND_CODE "vpnexclusions/";
     logger.info() << "Should be setting up cgroup in" << cGroupDir << "for traffic splitting";
     execute(QStringLiteral("if [ ! -d %1 ] ; then mkdir %1 ; sleep 0.1 ; echo %2 > %1/net_cls.classid ; fi").arg(cGroupDir).arg(kCGroupId));

@@ -14,6 +14,7 @@
 #include "core/utils/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
+#include "router_linux.h"
 
 constexpr const char* DBUS_RESOLVE_SERVICE = "org.freedesktop.resolve1";
 constexpr const char* DBUS_RESOLVE_PATH = "/org/freedesktop/resolve1";
@@ -159,6 +160,8 @@ void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
     logger.debug() << "DBus call failed (may be transient after systemd-resolved restart)";
+    logger.debug() << "Restarting resolved to clear its query backlog";
+    RouterLinux::Instance().flushDns();
     scheduleRetry();
   }
   delete call;
