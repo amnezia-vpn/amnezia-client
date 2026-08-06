@@ -745,11 +745,29 @@ jobs:
     needs: Bake-Prebuilts-Android
     if: ${{ always() }}
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: 'android9-10'
+            qt_version: '6.10.1'
+            min_sdk: 28
+            max_sdk: 29
+            version_code_offset: 0
+          - label: 'android11+'
+            qt_version: '6.10.3'
+            min_sdk: 30
+            max_sdk: ''
+            version_code_offset: 1
+
     env:
-      ANDROID_PLATFORM: android-28
+      ANDROID_PLATFORM: android-${{ matrix.min_sdk }}
       NDK_VERSION: 27.0.11718014
-      QT_VERSION: 6.10.3
+      QT_VERSION: ${{ matrix.qt_version }}
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      APP_ANDROID_MIN_SDK: ${{ matrix.min_sdk }}
+      APP_ANDROID_MAX_SDK: ${{ matrix.max_sdk }}
+      APP_ANDROID_VERSION_CODE_OFFSET: ${{ matrix.version_code_offset }}
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -857,236 +875,68 @@ jobs:
         QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
         QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        LABEL: ${{ matrix.label }}
       shell: bash
       run: |
-        BASE_VERSION_CODE=$(grep -oP '(?<=set\(APP_ANDROID_VERSION_CODE )\d+' CMakeLists.txt)
-        VERSION_CODE=$((BASE_VERSION_CODE + 2))
+        OUT=deploy/artifacts
+        rm -rf $OUT && mkdir -p $OUT
 
-        APP_ANDROID_VERSION_CODE=$VERSION_CODE deploy/build.sh -t android --sign --aab
+        deploy/build.sh -t android --sign --aab
 
         VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
 
-        (cd deploy/build/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android11+_universal.apk)
+        mv deploy/build/client/android-build/AmneziaVPN.apk \
+           $OUT/AmneziaVPN_${VERSION}_${LABEL}_universal.apk
+        mv deploy/build/client/android-build/build/outputs/bundle/release/android-build-release.aab \
+           $OUT/AmneziaVPN_${VERSION}_${LABEL}.aab
 
         for abi in arm64-v8a armeabi-v7a x86 x86_64; do
-          APP_ANDROID_VERSION_CODE=$VERSION_CODE deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
-          (cd deploy/build/${abi}/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android11+_${abi}.apk)
+          deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
+          mv deploy/build/${abi}/client/android-build/AmneziaVPN.apk \
+             $OUT/AmneziaVPN_${VERSION}_${LABEL}_${abi}.apk
         done
 
-        APP_ANDROID_MIN_SDK=30 APP_ANDROID_VERSION_CODE=$VERSION_CODE deploy/build.sh -t android --sign --aab --build ./deploy/build/aab
-
-        (cd deploy/build/aab/client/android-build/build/outputs/bundle/release && mv android-build-release.aab AmneziaVPN_${VERSION}_android11+.aab)
+        ls -l $OUT
 
     - name: 'Upload universal APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/client/android-build/*.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload android11+ AAB'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/aab/client/android-build/build/outputs/bundle/release/*.aab
+        path: deploy/artifacts/*_universal.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload arm64-v8a APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/arm64-v8a/client/android-build/*.apk
+        path: deploy/artifacts/*_arm64-v8a.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload armeabi-v7a APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/armeabi-v7a/client/android-build/*.apk
+        path: deploy/artifacts/*_armeabi-v7a.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload x86 APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/x86/client/android-build/*.apk
+        path: deploy/artifacts/*_x86.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload x86_64 APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/x86_64/client/android-build/*.apk
+        path: deploy/artifacts/*_x86_64.apk
         archive: false
         retention-days: 7
 
-# ------------------------------------------------------
-
-  Build-Android-Qt610:
-    runs-on: android-runner
-
-    needs: Bake-Prebuilts-Android
-    if: ${{ always() }}
-
-    env:
-      ANDROID_PLATFORM: android-28
-      NDK_VERSION: 27.0.11718014
-      QT_VERSION: 6.10.1
-      QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
-      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
-      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
-      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
-      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
-      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
-      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
-      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
-      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
-
-    steps:
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-
-    - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'desktop'
-        arch: 'linux_gcc_64'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
-
-    - name: 'Install android_armv7 Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_armv7'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
-
-    - name: 'Install android_arm64_v8a Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_arm64_v8a'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
-
-    - name: 'Install android_x86 Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_x86'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
-
-    - name: 'Install android_x86_64 Qt'
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        host: 'linux'
-        target: 'android'
-        arch: 'android_x86_64'
-        modules: ${{ env.QT_MODULES }}
-        dir: ${{ runner.temp }}
-        py7zrversion: '==0.22.*'
-        extra: '--base ${{ env.QT_MIRROR }}'
-
-    - name: 'Setup Java'
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '17'
-
-    - name: 'Setup Android SDK'
-      uses: android-actions/setup-android@v4
-      with:
-        packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
-
-    - name: 'Setup python'
-      uses: actions/setup-python@v6
-      with:
-        python-version: 3.14
-
-    - name: 'Install conan'
-      run: pip install "conan==2.28.0"
-
-    - name: 'Decode keystore secret to file'
-      env:
-        KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
-      shell: bash
-      run: |
-        echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
-
-    - name: 'Build project'
-      env:
-        QT_INSTALL_DIR: ${{ runner.temp }}
-        QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
-        QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
-        QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
-        APP_ANDROID_MIN_SDK: 28
-        APP_ANDROID_MAX_SDK: 29
-      shell: bash
-      run: |
-        for abi in arm64-v8a armeabi-v7a x86 x86_64; do
-          deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
-
-          VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/${abi}/CMakeCache.txt | cut -d= -f2)
-          (cd deploy/build/${abi}/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android9-10_qt_6_10_${abi}.apk)
-        done
-
-        BASE_VERSION_CODE=$(grep -oP '(?<=set\(APP_ANDROID_VERSION_CODE )\d+' CMakeLists.txt)
-        APP_ANDROID_VERSION_CODE=$((BASE_VERSION_CODE + 1)) deploy/build.sh -t android --sign --aab --build ./deploy/build/aab
-
-        (cd deploy/build/aab/client/android-build/build/outputs/bundle/release && mv android-build-release.aab AmneziaVPN_${VERSION}_android9-10.aab)
-
-    - name: 'Upload arm64-v8a APK'
+    - name: 'Upload AAB'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/arm64-v8a/client/android-build/*.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload armeabi-v7a APK'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/armeabi-v7a/client/android-build/*.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload x86 APK'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/x86/client/android-build/*.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload x86_64 APK'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/x86_64/client/android-build/*.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload android9-10 AAB'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/aab/client/android-build/build/outputs/bundle/release/*.aab
+        path: deploy/artifacts/*.aab
         archive: false
         retention-days: 7
 

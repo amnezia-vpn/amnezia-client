@@ -57,18 +57,24 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_P
 
 set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
 
-if(DEFINED APP_ANDROID_MAX_SDK)
+if(APP_ANDROID_MAX_SDK)
     set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/android-package-source)
     file(REMOVE_RECURSE ${APP_ANDROID_PACKAGE_SOURCE_DIR})
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/android/ DESTINATION ${APP_ANDROID_PACKAGE_SOURCE_DIR})
 
     set(manifest_path ${APP_ANDROID_PACKAGE_SOURCE_DIR}/AndroidManifest.xml)
+    set(manifest_anchor "android:installLocation=\"auto\">")
     file(READ ${manifest_path} manifest_contents)
     string(REPLACE
-        "android:installLocation=\"auto\">"
-        "android:installLocation=\"auto\">\n\n    <uses-sdk android:maxSdkVersion=\"${APP_ANDROID_MAX_SDK}\" />"
-        manifest_contents "${manifest_contents}")
-    file(WRITE ${manifest_path} "${manifest_contents}")
+        "${manifest_anchor}"
+        "${manifest_anchor}\n\n    <uses-sdk android:maxSdkVersion=\"${APP_ANDROID_MAX_SDK}\" />"
+        patched_contents "${manifest_contents}")
+    if(patched_contents STREQUAL manifest_contents)
+        message(FATAL_ERROR
+            "Failed to set maxSdkVersion=${APP_ANDROID_MAX_SDK}: anchor '${manifest_anchor}' "
+            "not found in ${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml")
+    endif()
+    file(WRITE ${manifest_path} "${patched_contents}")
 endif()
 
 set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR})
