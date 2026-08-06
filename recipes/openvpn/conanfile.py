@@ -37,7 +37,7 @@ class Openvpn(ConanFile):
             self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
-        self.requires("openssl/3.6.1", visible=False)
+        self.requires("openssl/3.6.2", visible=False)
         self.requires("lz4/1.10.0", visible=False)
         self.requires("lzo/2.10", visible=False)
         if self.settings.os == "Linux":
@@ -80,6 +80,15 @@ class Openvpn(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.extend(["--disable-shared", "--enable-static"])
             tc.configure_args.append("--disable-plugins")
+            if self.settings.os == "Linux":
+                openssl_libdir = self.dependencies["openssl"].cpp_info.aggregated_components().libdirs[0]
+                # pad the rpath so consumers can rewrite it in place (it cannot grow)
+                padding = max(0, 256 - len(openssl_libdir) - 2)
+                rpath = f"{openssl_libdir}:/" + "_" * padding
+                tc.extra_ldflags.append(f"-Wl,-rpath,{rpath}")
+            elif self.settings.os == "Macos":
+                # reserve header space so consumers can rewrite rpaths via install_name_tool
+                tc.extra_ldflags.append("-Wl,-headerpad_max_install_names")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()

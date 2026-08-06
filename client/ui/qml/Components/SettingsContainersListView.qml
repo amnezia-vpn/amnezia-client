@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -18,11 +19,14 @@ ListViewType {
     delegate: ColumnLayout {
         width: root.width
 
+        property bool isOutdatedAwgContainer: Boolean(isInstalled && ServersUiController.isContainerOutdatedAwg(root.model.mapToSource(index)))
+
         LabelWithButtonType {
             Layout.fillWidth: true
 
             text: name
             descriptionText: description
+            rightWarningImageSource: isOutdatedAwgContainer ? "qrc:/images/controls/alert-circle.svg" : ""
             rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
             clickedFunction: function() {

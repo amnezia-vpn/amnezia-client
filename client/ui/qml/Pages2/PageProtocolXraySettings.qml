@@ -35,6 +35,10 @@ PageType {
         return value
     }
 
+    function formatFlow(value) {
+        return value === "" ? qsTr("Empty") : value
+    }
+
     BackButtonType {
         id: backButton
 
@@ -109,7 +113,8 @@ PageType {
                 Layout.rightMargin: 16
                 enabled: listView.enabled
                 headerText: qsTr("Port")
-                subtitleText: qsTr("1–65535")
+                hintText: qsTr("Valid range: 1–65535.")
+                placeholderText: XrayConfigModel.portDefault()
 
                 Binding {
                     target: textFieldWithHeaderType.textField
@@ -168,7 +173,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Security")
-                descriptionText: root.formatSecurity(security)
+                descriptionText: root.formatSecurity((security === "reality" && transport === "mkcp") ? "none" : security)
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
                 clickedFunction: function() {
@@ -182,7 +187,7 @@ PageType {
             LabelWithButtonType {
                 Layout.fillWidth: true
                 text: qsTr("Flow")
-                descriptionText: flow
+                descriptionText: root.formatFlow((transport === "" || transport === "raw") ? flow : "")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 enabled: listView.enabled
                 clickedFunction: function() {
@@ -247,9 +252,9 @@ PageType {
                 visible: listView.enabled
                 clickedFunction: function() {
                     var yesButtonFunction = function() {
-                        XrayConfigModel.resetToDefaults()
                         PageController.showNotificationMessage(
                             qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
+                        XrayConfigModel.resetToDefaults()
                     }
                     showQuestionDrawer(qsTr("Reset settings?"), qsTr("All XRay settings will be restored to defaults."),
                         qsTr("Reset"), qsTr("Cancel"), yesButtonFunction, function() {

@@ -24,6 +24,9 @@ Item {
     property int minLimit: 0
     property int maxLimit: 2147483647
 
+    property string minPlaceholder: ""
+    property string maxPlaceholder: ""
+
     property string hintText: root.minLimit > 0
                               ? (root.minLimit + "–" + root.maxLimit)
                               : ("≤ " + root.maxLimit)
@@ -73,6 +76,7 @@ Item {
                 property string lastValid: ""
                 Layout.fillWidth: true
                 headerText: qsTr("Min")
+                placeholderText: root.minPlaceholder
                 textField.maximumLength: 10
                 textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
                 textField.onActiveFocusChanged: {
@@ -87,10 +91,9 @@ Item {
                         if (!isNaN(mx) && parseInt(v, 10) > mx)
                             root.maxChanged(v)
                     }
-                    if (v !== root.minValue)
-                        root.minChanged(v)
-                    else if (minField.textField.text !== v)
+                    if (minField.textField.text !== v)
                         minField.textField.text = v
+                    root.minChanged(v)
                 }
 
                 Binding {
@@ -108,6 +111,7 @@ Item {
                 property string lastValid: ""
                 Layout.fillWidth: true
                 headerText: qsTr("Max")
+                placeholderText: root.maxPlaceholder
                 textField.maximumLength: 10
                 textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
                 textField.onActiveFocusChanged: {
@@ -122,10 +126,9 @@ Item {
                         if (!isNaN(mn) && parseInt(v, 10) < mn)
                             v = String(mn)
                     }
-                    if (v !== root.maxValue)
-                        root.maxChanged(v)
-                    else if (maxField.textField.text !== v)
+                    if (maxField.textField.text !== v)
                         maxField.textField.text = v
+                    root.maxChanged(v)
                 }
 
                 Binding {

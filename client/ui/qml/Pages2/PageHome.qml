@@ -299,6 +299,26 @@ PageType {
                         }
                     }
 
+                    ImageButtonType {
+                        id: outdatedContainerWarningIcon
+                        objectName: "outdatedContainerWarningIcon"
+
+                        Layout.rightMargin: 8
+
+                        visible: drawer.isCollapsedStateActive() && ServersUiController.defaultServerHasOutdatedAwgContainer
+
+                        hoverEnabled: false
+                        image: "qrc:/images/controls/alert-circle.svg"
+                        imageColor: AmneziaStyle.color.goldenApricot
+
+                        icon.width: 18
+                        icon.height: 18
+                        backgroundRadius: 16
+                        horizontalPadding: 4
+                        topPadding: 4
+                        bottomPadding: 3
+                    }
+
                     Header1TextType {
                         id: collapsedButtonHeader
                         objectName: "collapsedButtonHeader"

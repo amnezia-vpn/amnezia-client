@@ -56,6 +56,7 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             AwgProtocolConfig awgConfig;
             awgConfig.serverConfig.port = portStr;
             awgConfig.serverConfig.transportProto = transportProtoStr;
+            awgConfig.serverConfig.subnetAddress = protocols::wireguard::defaultSubnetAddress;
             config.protocolConfig = awgConfig;
             break;
         }
@@ -63,6 +64,7 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             WireGuardProtocolConfig wgConfig;
             wgConfig.serverConfig.port = portStr;
             wgConfig.serverConfig.transportProto = transportProtoStr;
+            wgConfig.serverConfig.subnetAddress = protocols::wireguard::defaultSubnetAddress;
             config.protocolConfig = wgConfig;
             break;
         }
@@ -76,8 +78,16 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
         case Proto::Xray:
         case Proto::SSXray: {
             XrayProtocolConfig xrayConfig;
-            xrayConfig.serverConfig.port = portStr;
-            xrayConfig.serverConfig.transportProto = transportProtoStr;
+            XrayServerConfig &srv = xrayConfig.serverConfig;
+            srv.port = portStr;
+            srv.transportProto = transportProtoStr;
+            srv.transport = protocols::xray::defaultTransport;
+            srv.security = protocols::xray::defaultSecurity;
+            srv.flow = protocols::xray::defaultFlow;
+            srv.site = protocols::xray::defaultSite;
+            srv.sni = protocols::xray::defaultSni;
+            srv.fingerprint = protocols::xray::defaultFingerprint;
+            srv.alpn = protocols::xray::defaultAlpn;
             config.protocolConfig = xrayConfig;
             break;
         }

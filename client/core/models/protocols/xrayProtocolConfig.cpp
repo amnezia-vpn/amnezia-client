@@ -81,7 +81,6 @@ QJsonObject XrayXhttpConfig::toJson() const
     if (!mode.isEmpty())            obj[configKey::xhttpMode]            = mode;
     if (!host.isEmpty())            obj[configKey::xhttpHost]            = host;
     if (!path.isEmpty())            obj[configKey::xhttpPath]            = path;
-    if (!headersTemplate.isEmpty()) obj[configKey::xhttpHeadersTemplate] = headersTemplate;
     if (!uplinkMethod.isEmpty())    obj[configKey::xhttpUplinkMethod]    = uplinkMethod;
     obj[configKey::xhttpDisableGrpc] = disableGrpc;
     obj[configKey::xhttpDisableSse]  = disableSse;
@@ -116,7 +115,6 @@ namespace
         c.mode = QString();
         c.host = QString();
         c.path = QString();
-        c.headersTemplate = QString();
         c.uplinkMethod = QString();
         c.disableGrpc = false;
         c.disableSse = false;
@@ -154,9 +152,6 @@ XrayXhttpConfig XrayXhttpConfig::fromJson(const QJsonObject &json)
     }
     if (json.contains(configKey::xhttpPath)) {
         c.path = json.value(configKey::xhttpPath).toString();
-    }
-    if (json.contains(configKey::xhttpHeadersTemplate)) {
-        c.headersTemplate = json.value(configKey::xhttpHeadersTemplate).toString();
     }
     if (json.contains(configKey::xhttpUplinkMethod)) {
         c.uplinkMethod = json.value(configKey::xhttpUplinkMethod).toString();

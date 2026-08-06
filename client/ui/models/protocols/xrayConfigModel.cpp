@@ -70,8 +70,6 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::XhttpPathRole: xhttp.path = str;
         break;
-    case Roles::XhttpHeadersTemplateRole: xhttp.headersTemplate = str;
-        break;
     case Roles::XhttpUplinkMethodRole: xhttp.uplinkMethod = str;
         break;
     case Roles::XhttpDisableGrpcRole: xhttp.disableGrpc = value.toBool();
@@ -206,7 +204,6 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::XhttpModeRole: return xhttp.mode;
     case Roles::XhttpHostRole: return xhttp.host;
     case Roles::XhttpPathRole: return xhttp.path;
-    case Roles::XhttpHeadersTemplateRole: return xhttp.headersTemplate;
     case Roles::XhttpUplinkMethodRole: return xhttp.uplinkMethod;
     case Roles::XhttpDisableGrpcRole: return xhttp.disableGrpc;
     case Roles::XhttpDisableSseRole: return xhttp.disableSse;
@@ -335,9 +332,6 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
     if (config.xhttp.mode.isEmpty()) {
         config.xhttp.mode = protocols::xray::defaultXhttpMode;
     }
-    if (config.xhttp.headersTemplate.isEmpty()) {
-        config.xhttp.headersTemplate = protocols::xray::defaultXhttpHeadersTemplate;
-    }
     if (config.xhttp.uplinkMethod.isEmpty()) {
         config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
     }
@@ -404,7 +398,6 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
     roles[XhttpModeRole] = "xhttpMode";
     roles[XhttpHostRole] = "xhttpHost";
     roles[XhttpPathRole] = "xhttpPath";
-    roles[XhttpHeadersTemplateRole] = "xhttpHeadersTemplate";
     roles[XhttpUplinkMethodRole] = "xhttpUplinkMethod";
     roles[XhttpDisableGrpcRole] = "xhttpDisableGrpc";
     roles[XhttpDisableSseRole] = "xhttpDisableSse";
@@ -481,7 +474,6 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
     m_protocolConfig.serverConfig = serverConfig;
     // Clear client config since server settings changed
     m_protocolConfig.clearClientConfig();
-    m_originalProtocolConfig = m_protocolConfig;
     endResetModel();
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
@@ -515,17 +507,12 @@ QStringList XrayConfigModel::fingerprintOptions()
 
 QStringList XrayConfigModel::alpnOptions()
 {
-    return { "HTTP/2", "HTTP/1.1", "HTTP/2,HTTP/1.1" };
+    return { "h2", "http/1.1", "h2,http/1.1" };
 }
 
 QStringList XrayConfigModel::xhttpModeOptions()
 {
     return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
-}
-
-QStringList XrayConfigModel::xhttpHeadersTemplateOptions()
-{
-    return { "HTTP", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()
@@ -535,17 +522,12 @@ QStringList XrayConfigModel::xhttpUplinkMethodOptions()
 
 QStringList XrayConfigModel::xhttpSessionPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
-}
-
-QStringList XrayConfigModel::xhttpSessionKeyOptions()
-{
-    return { "Path", "Header", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
@@ -588,6 +570,76 @@ QString XrayConfigModel::mkcpDefaultReadBufferSize()
 QString XrayConfigModel::mkcpDefaultWriteBufferSize()
 {
     return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
+}
+
+QString XrayConfigModel::portDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultPort);
+}
+
+QString XrayConfigModel::sniDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultSni);
+}
+
+QString XrayConfigModel::xhttpHostDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpHost);
+}
+
+QString XrayConfigModel::xhttpUplinkChunkSizeDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpUplinkChunkSize);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMin);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMax);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMin);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMax);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMin);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMax);
+}
+
+QString XrayConfigModel::xPaddingKeyDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingKey);
+}
+
+QString XrayConfigModel::xPaddingHeaderDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingHeader);
+}
+
+QString XrayConfigModel::xPaddingBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMin);
+}
+
+QString XrayConfigModel::xPaddingBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMax);
 }
 
 namespace {

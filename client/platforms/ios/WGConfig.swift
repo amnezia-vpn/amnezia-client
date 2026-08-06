@@ -148,24 +148,4 @@ struct WGConfig: Decodable {
     \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
     """
   }
-
-  var redux: String {
-    """
-    [Interface]
-    Address = \(clientIP)
-    DNS = \(dns1), \(dns2)
-    MTU = \(mtu)
-    PrivateKey = ***
-    \(settings)
-    [Peer]
-    PublicKey = ***
-    PresharedKey = ***
-    AllowedIPs = \(allowedIPs.joined(separator: ", "))
-    Endpoint = \(hostName):\(port)
-    \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
-
-    SplitTunnelType = \(splitTunnelType)
-    SplitTunnelSites = \(splitTunnelSites.joined(separator: ", "))
-    """
-  }
 }

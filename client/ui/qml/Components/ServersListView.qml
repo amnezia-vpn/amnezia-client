@@ -94,6 +94,20 @@ ListViewType {
                 }
 
                 ImageButtonType {
+                    id: outdatedContainerWarningIcon
+                    objectName: "outdatedContainerWarningIcon"
+
+                    visible: ServersUiController.serverHasOutdatedAwgContainer(serverId)
+
+                    hoverEnabled: false
+                    image: "qrc:/images/controls/alert-circle.svg"
+                    imageColor: AmneziaStyle.color.goldenApricot
+
+                    implicitWidth: 40
+                    implicitHeight: 56
+                }
+
+                ImageButtonType {
                     id: serverInfoButton
                     objectName: "serverInfoButton"
 

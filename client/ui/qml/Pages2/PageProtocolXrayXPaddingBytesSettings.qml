@@ -63,6 +63,8 @@ PageType {
                 Layout.rightMargin: 16
                 minValue: xPaddingBytesMin
                 maxValue: xPaddingBytesMax
+                minPlaceholder: XrayConfigModel.xPaddingBytesMinDefault()
+                maxPlaceholder: XrayConfigModel.xPaddingBytesMaxDefault()
                 onMinChanged: function(val) { xPaddingBytesMin = val; root.editDirty = false }
                 onMaxChanged: function(val) { xPaddingBytesMax = val; root.editDirty = false }
                 onEdited: root.editDirty = true
