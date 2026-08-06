@@ -61,8 +61,6 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
 
     switch (proc) {
     case OpenVPN: {
-        // Whitelist only args actually used by the client:
-        // --config <path>, --management <host> <port>, --management-client
         namedArgs["--config"] = [](const QString& v) { return !v.isEmpty(); };
         namedArgs["--management"] = [](const QString& v) { return !v.isEmpty(); };
         namedArgs["--management-client"] = nullptr;
@@ -72,17 +70,6 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
             return ok && port > 0 && port <= 65535;
         });
         break;
-    }
-    case Wireguard: {
-        // Whitelist only subcommand + config file path (wg-quick up/down <conf>)
-        if (args.size() == 2) {
-            const QString &sub = args[0];
-            if (sub == QStringLiteral("up") || sub == QStringLiteral("down")) {
-                return args;
-            }
-        }
-        qWarning() << "IPC: blocked unexpected WireGuard arguments";
-        return {};
     }
     case Tun2Socks:
         namedArgs["-device"] = [](const QString& v) { return v.startsWith("tun://"); };

@@ -17,7 +17,6 @@
     #include "tapcontroller_win.h"
 #endif
 
-
 namespace {
 Logger logger("WgDaemonServer");
 }
@@ -36,8 +35,7 @@ LocalServer::LocalServer(QObject *parent) : QObject(parent),
 
     QObject::connect(m_server.data(), &QLocalServer::newConnection, this, [this]() {
         qDebug() << "LocalServer new connection";
-        QLocalSocket *conn = m_server->nextPendingConnection();
-        m_serverNode.addHostSideConnection(conn);
+        m_serverNode.addHostSideConnection(m_server->nextPendingConnection());
 
         if (!m_isRemotingEnabled) {
             m_isRemotingEnabled = true;
