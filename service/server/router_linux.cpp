@@ -177,7 +177,7 @@ bool RouterLinux::flushDns()
         return false;
     }
 
-    p.waitForFinished();
+    p.waitForFinished(3000);
     QByteArray output = p.readAll();
     if ((p.exitStatus() != QProcess::NormalExit) || (p.exitCode() != 0)) {
         qDebug().noquote() << "Failed to flush DNS: " + output;

@@ -519,6 +519,7 @@ void LinuxFirewall::teardownTrafficSplitting()
 {
     logger.info() << "Tearing down cgroup and routing rules";
     execute(QStringLiteral("if ip rule list | grep -q %1; then ip rule del from all fwmark %1 lookup %2 2> /dev/null ; fi").arg(kPacketTag, kRtableName));
-    execute(QStringLiteral("ip route flush table %1").arg(kRtableName));
+    execute(QStringLiteral("ip route flush table %1").arg(kRtableName), true);
     execute(QStringLiteral("ip route flush cache"));
+    execute(QStringLiteral("sed -i '/%1/d' /etc/iproute2/rt_tables").arg(kRtableName));
 }
