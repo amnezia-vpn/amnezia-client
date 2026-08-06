@@ -1,5 +1,6 @@
 #include "apiUtils.h"
 
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include <QDateTime>
@@ -46,6 +47,14 @@ namespace
         }
         return output;
     }
+}
+
+QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSettingsRepository)
+{
+    if (appSettingsRepository == nullptr) {
+        return {};
+    }
+    return appSettingsRepository->getAppLanguage().name().split("_").first();
 }
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
