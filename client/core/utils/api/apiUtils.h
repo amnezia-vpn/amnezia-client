@@ -11,8 +11,12 @@
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 
+class SecureAppSettingsRepository;
+
 namespace apiUtils
 {
+    QString getAppLanguageCode(const SecureAppSettingsRepository *appSettingsRepository);
+
     bool isSubscriptionExpired(const QString &subscriptionEndDate);
 
     bool isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays = 30);
