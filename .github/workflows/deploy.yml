@@ -754,11 +754,19 @@ jobs:
             min_sdk: 28
             max_sdk: 29
             version_code_offset: 0
+            build_aab: true
           - label: 'android11+'
             qt_version: '6.10.3'
             min_sdk: 30
             max_sdk: ''
             version_code_offset: 1
+            build_aab: true
+          - label: 'android9-10-qt610-3'
+            qt_version: '6.10.3'
+            min_sdk: 28
+            max_sdk: 29
+            version_code_offset: 0
+            build_aab: false
 
     env:
       ANDROID_PLATFORM: android-${{ matrix.min_sdk }}
@@ -876,19 +884,27 @@ jobs:
         QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
         LABEL: ${{ matrix.label }}
+        BUILD_AAB: ${{ matrix.build_aab }}
       shell: bash
       run: |
         OUT=deploy/artifacts
         rm -rf $OUT && mkdir -p $OUT
 
-        deploy/build.sh -t android --sign --aab
+        if [[ "$BUILD_AAB" == "true" ]]; then
+          deploy/build.sh -t android --sign --aab
+        else
+          deploy/build.sh -t android --sign
+        fi
 
         VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
 
         mv deploy/build/client/android-build/AmneziaVPN.apk \
            $OUT/AmneziaVPN_${VERSION}_${LABEL}_universal.apk
-        mv deploy/build/client/android-build/build/outputs/bundle/release/android-build-release.aab \
-           $OUT/AmneziaVPN_${VERSION}_${LABEL}.aab
+
+        if [[ "$BUILD_AAB" == "true" ]]; then
+          mv deploy/build/client/android-build/build/outputs/bundle/release/android-build-release.aab \
+             $OUT/AmneziaVPN_${VERSION}_${LABEL}.aab
+        fi
 
         for abi in arm64-v8a armeabi-v7a x86 x86_64; do
           deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
@@ -934,6 +950,7 @@ jobs:
         retention-days: 7
 
     - name: 'Upload AAB'
+      if: ${{ matrix.build_aab }}
       uses: actions/upload-artifact@v7
       with:
         path: deploy/artifacts/*.aab
