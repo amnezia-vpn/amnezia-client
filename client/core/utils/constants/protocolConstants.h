@@ -65,13 +65,12 @@ namespace amnezia
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "chrome";
             constexpr char defaultSni[] = "www.googletagmanager.com";
-            constexpr char defaultAlpn[] = "HTTP/2";
+            constexpr char defaultAlpn[] = "h2";
 
             constexpr char defaultXhttpMode[] = "Auto";
-            constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
-            constexpr char defaultXhttpSessionKey[] = "Path";
+            constexpr char defaultXhttpSessionKey[] = "";
             constexpr char defaultXhttpSeqPlacement[] = "Path";
             constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
 
@@ -86,6 +85,10 @@ namespace amnezia
 
             constexpr char defaultXPaddingPlacement[] = "Cookie";
             constexpr char defaultXPaddingMethod[] = "Repeat-x";
+            constexpr char defaultXPaddingKey[] = "x_padding";
+            constexpr char defaultXPaddingHeader[] = "X-Padding";
+            constexpr char defaultXPaddingBytesMin[] = "1";
+            constexpr char defaultXPaddingBytesMax[] = "256";
 
             constexpr char defaultMkcpTti[] = "50";
             constexpr char defaultMkcpUplinkCapacity[] = "5";
@@ -247,7 +250,8 @@ namespace amnezia
 
             constexpr char defaultPort[]           = "443";
             constexpr char defaultWorkers[]        = "2";
-            constexpr int  maxWorkers              = 32;
+            // mtproto-proxy loses connectivity with -M >= 20; keep the cap at the highest known-good value.
+            constexpr int  maxWorkers              = 19;
             constexpr int  botTagHexLength         = 32;
             constexpr char defaultTlsDomain[]      = "googletagmanager.com";
         }
@@ -266,7 +270,6 @@ namespace amnezia
             constexpr char tlsEmulationKey[]      = "telemt_tls_emulation";
             constexpr char useMiddleProxyKey[]    = "telemt_use_middle_proxy";
             constexpr char userNameKey[]          = "telemt_user_name";
-            // Stored for UI only (Telemt server ignores these; same controls as MTProxy page)
             constexpr char additionalSecretsKey[] = "telemt_additional_secrets";
             constexpr char workersKey[]           = "telemt_workers";
             constexpr char workersModeKey[]       = "telemt_workers_mode";

@@ -176,7 +176,8 @@ QByteArray SshSession::getTextFileFromContainer(DockerContainer container, const
 
     errorCode = ErrorCode::NoError;
 
-    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerUtils::containerToString(container), path);
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2' 2>/dev/null || od -An -v -tx1 '%2'\"")
+                             .arg(ContainerUtils::containerToString(container), path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {

@@ -566,22 +566,6 @@ PageType {
                                 implicitWidth: 36
                                 implicitHeight: 36
                                 hoverEnabled: true
-                                image: "qrc:/images/controls/qr-code.svg"
-                                imageColor: AmneziaStyle.color.paleGray
-                                visible: secret !== ""
-                                onClicked: {
-                                    ExportController.generateQrFromString(tmeLink())
-                                    PageController.goToShareConnectionPage(
-                                        qsTr("Telegram connection link"),
-                                        qsTr("MTProxy connection link"),
-                                        "", "", "")
-                                }
-                            }
-
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
                                 image: "qrc:/images/controls/copy.svg"
                                 imageColor: AmneziaStyle.color.paleGray
                                 visible: secret !== ""
@@ -630,7 +614,7 @@ PageType {
                                 image: "qrc:/images/controls/qr-code.svg"
                                 imageColor: AmneziaStyle.color.paleGray
                                 onClicked: {
-                                    ExportController.generateQrFromString(tgLink())
+                                    ExportController.generateQrFromStringRaw(tgLink())
                                     PageController.goToShareConnectionPage(
                                         qsTr("Telegram connection link"),
                                         qsTr("MTProxy connection link"),
@@ -877,7 +861,7 @@ PageType {
                     }
 
                     function mtProxyShareQr(link) {
-                        ExportController.generateQrFromString(link)
+                        ExportController.generateQrFromStringRaw(link)
                         PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
                             qsTr("MTProxy connection link"), "", "", "")
                     }
@@ -1460,15 +1444,6 @@ PageType {
                                                 elide: Text.ElideRight
                                                 maximumLineCount: 1
                                                 font.pixelSize: 13
-                                            }
-
-                                            ImageButtonType {
-                                                implicitWidth: 36
-                                                implicitHeight: 36
-                                                hoverEnabled: true
-                                                image: "qrc:/images/controls/qr-code.svg"
-                                                imageColor: AmneziaStyle.color.paleGray
-                                                onClicked: settingsRoot.mtProxyShareQr(settingsRoot.mtProxyTmeLinkForAdditional(modelData))
                                             }
 
                                             ImageButtonType {

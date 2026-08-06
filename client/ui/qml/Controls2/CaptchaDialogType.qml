@@ -232,6 +232,7 @@ Popup {
                 textField.placeholderTextColor: AmneziaStyle.color.mutedGray
                 textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
                 textField.maximumLength: 6
+                textField.validator: RegularExpressionValidator { regularExpression: /^[0-9]{0,6}$/ }
                 textField.font.letterSpacing: 2
 
                 textField.onAccepted: {

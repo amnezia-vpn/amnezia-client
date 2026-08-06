@@ -39,6 +39,9 @@ PageType {
             width: listView.width
             spacing: 0
 
+            // REALITY is not supported with the mKCP transport (xray refuses reality+mkcp).
+            readonly property bool realityAllowed: transport !== "mkcp"
+
             BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -53,7 +56,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("None")
-                checked: security === "none"
+                checked: security === "none" || (security === "reality" && !realityAllowed)
                 onClicked: security = "none"
             }
 
@@ -77,8 +80,19 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Reality")
-                checked: security === "reality"
+                enabled: realityAllowed
+                checked: security === "reality" && realityAllowed
                 onClicked: security = "reality"
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                visible: !realityAllowed
+                color: AmneziaStyle.color.goldenApricot
+                text: qsTr("REALITY is not supported with the mKCP transport. Use None or TLS.")
             }
 
             DividerType {
@@ -103,6 +117,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: alpn
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.alpnOptions()
@@ -155,6 +170,7 @@ PageType {
                                 }
                             }
                         }
+                        currentValue: fingerprint
                         clickedFunction: function () {
                             fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
@@ -185,6 +201,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
+                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
                     textField.onTextEdited: root.editDirty = (textField.text !== sni)
@@ -200,7 +217,7 @@ PageType {
 
             // ── Reality fields ────────────────────────────────────────
             ColumnLayout {
-                visible: security === "reality"
+                visible: security === "reality" && realityAllowed
                 Layout.fillWidth: true
                 spacing: 0
 
@@ -225,6 +242,7 @@ PageType {
                                 }
                             }
                         }
+                        currentValue: fingerprint
                         clickedFunction: function () {
                             fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText
@@ -255,6 +273,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
+                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
                     textField.onTextEdited: root.editDirty = (textField.text !== sni)

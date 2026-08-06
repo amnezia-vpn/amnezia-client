@@ -319,6 +319,9 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 visible: isQrCodeVisible
+                         && !(pageShareConnection.isSelfHostedConfig
+                              && (ExportController.config.startsWith("tg://")
+                                  || ExportController.config.startsWith("https://t.me")))
                 horizontalAlignment: Text.AlignHCenter
                 text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
             }

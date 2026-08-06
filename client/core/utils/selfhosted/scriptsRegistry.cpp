@@ -341,6 +341,7 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
             workers = (transportMode == QLatin1String(protocols::mtProxy::transportModeFakeTLS)) ? QStringLiteral("0")
                                                                                                  : QStringLiteral("2");
         }
+        vars.append({{"$MTPROXY_WORKERS_MODE", workersMode}});
         vars.append({{"$MTPROXY_WORKERS", workers}});
 
         vars.append({{"$MTPROXY_NAT_ENABLED", c.natEnabled ? QStringLiteral("1") : QStringLiteral("0")}});
@@ -387,6 +388,12 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
             }
         }
         vars.append({ { "$TELEMT_ADDITIONAL_SECRETS", additionalList.join(QLatin1Char(',')) } });
+
+        QString middleProxyNatIp;
+        if (c.natEnabled && !c.natExternalIp.isEmpty()) {
+            middleProxyNatIp = c.natExternalIp;
+        }
+        vars.append({ { "$TELEMT_MIDDLE_PROXY_NAT_IP", middleProxyNatIp } });
     }
 
     return vars;

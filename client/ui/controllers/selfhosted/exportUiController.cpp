@@ -69,6 +69,14 @@ void ExportUiController::generateQrFromString(const QString &text)
     emit exportConfigChanged();
 }
 
+void ExportUiController::generateQrFromStringRaw(const QString &text)
+{
+    clearPreviousConfig();
+    m_config = text;
+    m_qrCodes = { qrCodeUtils::generatePlainQrCodeImage(text.toUtf8()) };
+    emit exportConfigChanged();
+}
+
 QString ExportUiController::getConfig()
 {
     return m_config;

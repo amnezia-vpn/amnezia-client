@@ -186,7 +186,6 @@ namespace amnezia
         constexpr QLatin1String xhttpMode("xhttp_mode"); // Auto | Packet-up | Stream-up | Stream-one
         constexpr QLatin1String xhttpHost("xhttp_host");
         constexpr QLatin1String xhttpPath("xhttp_path");
-        constexpr QLatin1String xhttpHeadersTemplate("xhttp_headers_template"); // HTTP | None
         constexpr QLatin1String xhttpUplinkMethod("xhttp_uplink_method");       // POST | PUT | PATCH
         constexpr QLatin1String xhttpDisableGrpc("xhttp_disable_grpc");         // bool
         constexpr QLatin1String xhttpDisableSse("xhttp_disable_sse");           // bool
