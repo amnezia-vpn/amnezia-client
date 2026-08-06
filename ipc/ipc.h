@@ -63,21 +63,15 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
     case OpenVPN: {
         // Whitelist only args actually used by the client:
         // --config <path>, --management <host> <port>, --management-client
-        QStringList out;
-        for (int i = 0; i < args.size(); ++i) {
-            const QString &arg = args[i];
-            if (arg == QStringLiteral("--config") && i + 1 < args.size()) {
-                out << arg << args[++i];
-            } else if (arg == QStringLiteral("--management") && i + 2 < args.size()) {
-                out << arg << args[i + 1] << args[i + 2];
-                i += 2;
-            } else if (arg == QStringLiteral("--management-client")) {
-                out << arg;
-            } else {
-                qWarning() << "IPC: blocked unknown OpenVPN argument:" << arg;
-            }
-        }
-        return out;
+        namedArgs["--config"] = [](const QString& v) { return !v.isEmpty(); };
+        namedArgs["--management"] = [](const QString& v) { return !v.isEmpty(); };
+        namedArgs["--management-client"] = nullptr;
+        positionalArgs.append([](const QString& v) {
+            bool ok;
+            int port = v.toInt(&ok);
+            return ok && port > 0 && port <= 65535;
+        });
+        break;
     }
     case Wireguard: {
         // Whitelist only subcommand + config file path (wg-quick up/down <conf>)
