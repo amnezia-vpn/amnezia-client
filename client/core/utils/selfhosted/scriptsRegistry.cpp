@@ -254,8 +254,20 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$SPECIAL_JUNK_3", config.specialJunk3 } });
         vars.append({ { "$SPECIAL_JUNK_4", config.specialJunk4 } });
         vars.append({ { "$SPECIAL_JUNK_5", config.specialJunk5 } });
+
+        const bool isAwg3 = config.protocolVersion == protocols::awg::awgV3;
+        vars.append({ { "$PERSISTENT_KEEPALIVE", isAwg3 ? QString(protocols::awg::defaultPersistentKeepAlive)
+                                                        : QString(protocols::wireguard::defaultPersistentKeepAlive) } });
+
+        vars.append({ { "$HEADER_PROTECTION_KEY", config.headerProtectionKey } });
+        vars.append({ { "$CONTENT_PADDING_ADDITION", config.contentPaddingAddition } });
+        vars.append({ { "$REKEY_AFTER_TIME", config.rekeyAfterTime } });
+        vars.append({ { "$REKEY_TIMEOUT", config.rekeyTimeout } });
+        vars.append({ { "$REJECT_AFTER_TIME", config.rejectAfterTime } });
+        vars.append({ { "$KEEPALIVE_TIMEOUT", config.keepaliveTimeout } });
+        vars.append({ { "$MAX_HANDSHAKE_ATTEMPTS", config.maxHandshakeAttempts } });
     }
-    
+
     return vars;
 }
 

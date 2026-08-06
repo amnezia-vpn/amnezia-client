@@ -196,6 +196,13 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
+
+        // Reinstall pulls the latest container image, so the server runs the latest protocol version
+        if (errorCode == ErrorCode::NoError && container == DockerContainer::Awg2) {
+            if (auto* awgConfig = newConfig.getAwgProtocolConfig()) {
+                awgConfig->serverConfig.protocolVersion = protocols::awg::awgV3;
+            }
+        }
     } else {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {

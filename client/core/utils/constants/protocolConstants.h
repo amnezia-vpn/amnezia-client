@@ -183,15 +183,16 @@ namespace amnezia
             constexpr char defaultJunkPacketCount[] = "3";
             constexpr char defaultJunkPacketMinSize[] = "10";
             constexpr char defaultJunkPacketMaxSize[] = "30";
-            constexpr char defaultInitPacketJunkSize[] = "15";
-            constexpr char defaultResponsePacketJunkSize[] = "18";
-            constexpr char defaultCookieReplyPacketJunkSize[] = "20";
-            constexpr char defaultTransportPacketJunkSize[] = "23";
+            constexpr int junkPacketSizeMin = 12;
+            constexpr int initPacketJunkSizeMax = 150;
+            constexpr int responsePacketJunkSizeMax = 150;
+            constexpr int cookieReplyPacketJunkSizeMax = 64;
+            constexpr int defaultTransportPacketJunkSize = 12;
 
-            constexpr char defaultInitPacketMagicHeader[] = "1020325451";
-            constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
-            constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
-            constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+            constexpr char defaultInitPacketMagicHeader[] = "1";
+            constexpr char defaultResponsePacketMagicHeader[] = "2";
+            constexpr char defaultUnderloadPacketMagicHeader[] = "3";
+            constexpr char defaultTransportPacketMagicHeader[] = "4";
             constexpr char defaultSpecialJunk1[] = "<r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>";
             constexpr char defaultSpecialJunk2[] = "";
             constexpr char defaultSpecialJunk3[] = "";
@@ -200,6 +201,17 @@ namespace amnezia
 
             constexpr char awgV1_5[] = "1.5";
             constexpr char awgV2[] = "2";
+            constexpr char awgV3[] = "3";
+
+            constexpr char defaultContentPaddingAddition[] = "10-100";
+            constexpr char defaultRekeyAfterTime[] = "100-120";
+            constexpr char defaultRekeyTimeout[] = "3-7";
+            constexpr char defaultRejectAfterTime[] = "150-180";
+            constexpr char defaultKeepaliveTimeout[] = "5-15";
+            constexpr char defaultMaxHandshakeAttempts[] = "15-20";
+            constexpr char defaultPersistentKeepAlive[] = "25-35";
+
+
         }
 
         namespace socks5Proxy

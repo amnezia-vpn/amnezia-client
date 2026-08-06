@@ -552,6 +552,18 @@ bool IosController::setupOpenVPN()
     return startOpenVPN(openVPNConfigStr);
 }
 
+static void insertNonEmptyAwgParams(QJsonObject &wgConfig, const QJsonObject &config)
+{
+    const QStringList awgProtocolKeys = configKey::awgProtocolKeys();
+
+    for (const QString &key : awgProtocolKeys) {
+        const QJsonValue value = config.value(key);
+        if (value.isString() && !value.toString().isEmpty()) {
+            wgConfig.insert(key, value);
+        }
+    }
+}
+
 bool IosController::setupWireGuard()
 {
     QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
@@ -593,29 +605,7 @@ bool IosController::setupWireGuard()
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
     }
 
-    if (config.contains(configKey::isObfuscationEnabled) && config.value(configKey::isObfuscationEnabled).toBool()) {
-        wgConfig.insert(configKey::initPacketMagicHeader, config[configKey::initPacketMagicHeader]);
-        wgConfig.insert(configKey::responsePacketMagicHeader, config[configKey::responsePacketMagicHeader]);
-        wgConfig.insert(configKey::underloadPacketMagicHeader, config[configKey::underloadPacketMagicHeader]);
-        wgConfig.insert(configKey::transportPacketMagicHeader, config[configKey::transportPacketMagicHeader]);
-
-        wgConfig.insert(configKey::initPacketJunkSize, config[configKey::initPacketJunkSize]);
-        wgConfig.insert(configKey::responsePacketJunkSize, config[configKey::responsePacketJunkSize]);
-        wgConfig.insert(configKey::cookieReplyPacketJunkSize, config[configKey::cookieReplyPacketJunkSize]);
-        wgConfig.insert(configKey::transportPacketJunkSize, config[configKey::transportPacketJunkSize]);
-
-        wgConfig.insert(configKey::junkPacketCount, config[configKey::junkPacketCount]);
-        wgConfig.insert(configKey::junkPacketMinSize, config[configKey::junkPacketMinSize]);
-        wgConfig.insert(configKey::junkPacketMaxSize, config[configKey::junkPacketMaxSize]);
-
-        wgConfig.insert(configKey::headerProtectionKey, config[configKey::headerProtectionKey]);
-        wgConfig.insert(configKey::contentPaddingAddition, config[configKey::contentPaddingAddition]);
-        wgConfig.insert(configKey::rekeyAfterTime, config[configKey::rekeyAfterTime]);
-        wgConfig.insert(configKey::rekeyTimeout, config[configKey::rekeyTimeout]);
-        wgConfig.insert(configKey::rejectAfterTime, config[configKey::rejectAfterTime]);
-        wgConfig.insert(configKey::keepaliveTimeout, config[configKey::keepaliveTimeout]);
-        wgConfig.insert(configKey::maxHandshakeAttempts, config[configKey::maxHandshakeAttempts]);
-    }
+    insertNonEmptyAwgParams(wgConfig, config);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -705,33 +695,7 @@ bool IosController::setupAwg()
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
     }
 
-    wgConfig.insert(configKey::initPacketMagicHeader, config[configKey::initPacketMagicHeader]);
-    wgConfig.insert(configKey::responsePacketMagicHeader, config[configKey::responsePacketMagicHeader]);
-    wgConfig.insert(configKey::underloadPacketMagicHeader, config[configKey::underloadPacketMagicHeader]);
-    wgConfig.insert(configKey::transportPacketMagicHeader, config[configKey::transportPacketMagicHeader]);
-
-    wgConfig.insert(configKey::initPacketJunkSize, config[configKey::initPacketJunkSize]);
-    wgConfig.insert(configKey::responsePacketJunkSize, config[configKey::responsePacketJunkSize]);
-    wgConfig.insert(configKey::cookieReplyPacketJunkSize, config[configKey::cookieReplyPacketJunkSize]);
-    wgConfig.insert(configKey::transportPacketJunkSize, config[configKey::transportPacketJunkSize]);
-
-    wgConfig.insert(configKey::junkPacketCount, config[configKey::junkPacketCount]);
-    wgConfig.insert(configKey::junkPacketMinSize, config[configKey::junkPacketMinSize]);
-    wgConfig.insert(configKey::junkPacketMaxSize, config[configKey::junkPacketMaxSize]);
-
-    wgConfig.insert(configKey::specialJunk1, config[configKey::specialJunk1]);
-    wgConfig.insert(configKey::specialJunk2, config[configKey::specialJunk2]);
-    wgConfig.insert(configKey::specialJunk3, config[configKey::specialJunk3]);
-    wgConfig.insert(configKey::specialJunk4, config[configKey::specialJunk4]);
-    wgConfig.insert(configKey::specialJunk5, config[configKey::specialJunk5]);
-
-    wgConfig.insert(configKey::headerProtectionKey, config[configKey::headerProtectionKey]);
-    wgConfig.insert(configKey::contentPaddingAddition, config[configKey::contentPaddingAddition]);
-    wgConfig.insert(configKey::rekeyAfterTime, config[configKey::rekeyAfterTime]);
-    wgConfig.insert(configKey::rekeyTimeout, config[configKey::rekeyTimeout]);
-    wgConfig.insert(configKey::rejectAfterTime, config[configKey::rejectAfterTime]);
-    wgConfig.insert(configKey::keepaliveTimeout, config[configKey::keepaliveTimeout]);
-    wgConfig.insert(configKey::maxHandshakeAttempts, config[configKey::maxHandshakeAttempts]);
+    insertNonEmptyAwgParams(wgConfig, config);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));

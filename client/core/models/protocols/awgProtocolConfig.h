@@ -90,8 +90,6 @@ struct AwgClientConfig {
     QString rejectAfterTime;
     QString keepaliveTimeout;
     QString maxHandshakeAttempts;
-    bool isObfuscationEnabled = false;
-    
     QJsonObject toJson() const;
     static AwgClientConfig fromJson(const QJsonObject& json);
 };
@@ -103,6 +101,10 @@ struct AwgProtocolConfig {
     QJsonObject toJson() const;
     static AwgProtocolConfig fromJson(const QJsonObject& json);
     
+    QString serverProtocolVersion() const;
+    QString clientProtocolVersion() const;
+    static QString protocolVersionString(const QString &version);
+
     bool hasClientConfig() const;
     void setClientConfig(const AwgClientConfig& config);
     void clearClientConfig();

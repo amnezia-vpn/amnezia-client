@@ -18,6 +18,7 @@
 #include <QLocalSocket>
 #include <QObject>
 #include <QStandardPaths>
+#include <QStringList>
 #include <QTimer>
 
 #include "leakdetector.h"
@@ -251,64 +252,13 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   json.insert(amnezia::configKey::killSwitchOption, rawConfig.value(amnezia::configKey::killSwitchOption));
 
-  if (protocolName == amnezia::configKey::awg) {
-    json.insert(amnezia::configKey::junkPacketCount, wgConfig.value(amnezia::configKey::junkPacketCount));
-    json.insert(amnezia::configKey::junkPacketMinSize, wgConfig.value(amnezia::configKey::junkPacketMinSize));
-    json.insert(amnezia::configKey::junkPacketMaxSize, wgConfig.value(amnezia::configKey::junkPacketMaxSize));
-    json.insert(amnezia::configKey::initPacketJunkSize, wgConfig.value(amnezia::configKey::initPacketJunkSize));
-    json.insert(amnezia::configKey::responsePacketJunkSize, wgConfig.value(amnezia::configKey::responsePacketJunkSize));
-    json.insert(amnezia::configKey::cookieReplyPacketJunkSize, wgConfig.value(amnezia::configKey::cookieReplyPacketJunkSize));
-    json.insert(amnezia::configKey::transportPacketJunkSize, wgConfig.value(amnezia::configKey::transportPacketJunkSize));
-    json.insert(amnezia::configKey::initPacketMagicHeader, wgConfig.value(amnezia::configKey::initPacketMagicHeader));
-    json.insert(amnezia::configKey::responsePacketMagicHeader, wgConfig.value(amnezia::configKey::responsePacketMagicHeader));
-    json.insert(amnezia::configKey::underloadPacketMagicHeader, wgConfig.value(amnezia::configKey::underloadPacketMagicHeader));
-    json.insert(amnezia::configKey::transportPacketMagicHeader, wgConfig.value(amnezia::configKey::transportPacketMagicHeader));
-    json.insert(amnezia::configKey::specialJunk1, wgConfig.value(amnezia::configKey::specialJunk1));
-    json.insert(amnezia::configKey::specialJunk2, wgConfig.value(amnezia::configKey::specialJunk2));
-    json.insert(amnezia::configKey::specialJunk3, wgConfig.value(amnezia::configKey::specialJunk3));
-    json.insert(amnezia::configKey::specialJunk4, wgConfig.value(amnezia::configKey::specialJunk4));
-    json.insert(amnezia::configKey::specialJunk5, wgConfig.value(amnezia::configKey::specialJunk5));
-    json.insert(amnezia::configKey::headerProtectionKey, wgConfig.value(amnezia::configKey::headerProtectionKey));
-    json.insert(amnezia::configKey::contentPaddingAddition, wgConfig.value(amnezia::configKey::contentPaddingAddition));
-    json.insert(amnezia::configKey::rekeyAfterTime, wgConfig.value(amnezia::configKey::rekeyAfterTime));
-    json.insert(amnezia::configKey::rekeyTimeout, wgConfig.value(amnezia::configKey::rekeyTimeout));
-    json.insert(amnezia::configKey::rejectAfterTime, wgConfig.value(amnezia::configKey::rejectAfterTime));
-    json.insert(amnezia::configKey::keepaliveTimeout, wgConfig.value(amnezia::configKey::keepaliveTimeout));
-    json.insert(amnezia::configKey::maxHandshakeAttempts, wgConfig.value(amnezia::configKey::maxHandshakeAttempts));
-  } else if (!wgConfig.value(amnezia::configKey::junkPacketCount).isUndefined()
-             && !wgConfig.value(amnezia::configKey::junkPacketMinSize).isUndefined()
-             && !wgConfig.value(amnezia::configKey::junkPacketMaxSize).isUndefined()
-             && !wgConfig.value(amnezia::configKey::initPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::configKey::responsePacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::configKey::cookieReplyPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::configKey::transportPacketJunkSize).isUndefined()
-             && !wgConfig.value(amnezia::configKey::initPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::configKey::responsePacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::configKey::underloadPacketMagicHeader).isUndefined()
-             && !wgConfig.value(amnezia::configKey::transportPacketMagicHeader).isUndefined()) {
-    json.insert(amnezia::configKey::junkPacketCount, wgConfig.value(amnezia::configKey::junkPacketCount));
-    json.insert(amnezia::configKey::junkPacketMinSize, wgConfig.value(amnezia::configKey::junkPacketMinSize));
-    json.insert(amnezia::configKey::junkPacketMaxSize, wgConfig.value(amnezia::configKey::junkPacketMaxSize));
-    json.insert(amnezia::configKey::initPacketJunkSize, wgConfig.value(amnezia::configKey::initPacketJunkSize));
-    json.insert(amnezia::configKey::responsePacketJunkSize, wgConfig.value(amnezia::configKey::responsePacketJunkSize));
-    json.insert(amnezia::configKey::cookieReplyPacketJunkSize, wgConfig.value(amnezia::configKey::cookieReplyPacketJunkSize));
-    json.insert(amnezia::configKey::transportPacketJunkSize, wgConfig.value(amnezia::configKey::transportPacketJunkSize));
-    json.insert(amnezia::configKey::initPacketMagicHeader, wgConfig.value(amnezia::configKey::initPacketMagicHeader));
-    json.insert(amnezia::configKey::responsePacketMagicHeader, wgConfig.value(amnezia::configKey::responsePacketMagicHeader));
-    json.insert(amnezia::configKey::underloadPacketMagicHeader, wgConfig.value(amnezia::configKey::underloadPacketMagicHeader));
-    json.insert(amnezia::configKey::transportPacketMagicHeader, wgConfig.value(amnezia::configKey::transportPacketMagicHeader));
-    json.insert(amnezia::configKey::specialJunk1, wgConfig.value(amnezia::configKey::specialJunk1));
-    json.insert(amnezia::configKey::specialJunk2, wgConfig.value(amnezia::configKey::specialJunk2));
-    json.insert(amnezia::configKey::specialJunk3, wgConfig.value(amnezia::configKey::specialJunk3));
-    json.insert(amnezia::configKey::specialJunk4, wgConfig.value(amnezia::configKey::specialJunk4));
-    json.insert(amnezia::configKey::specialJunk5, wgConfig.value(amnezia::configKey::specialJunk5));
-    json.insert(amnezia::configKey::headerProtectionKey, wgConfig.value(amnezia::configKey::headerProtectionKey));
-    json.insert(amnezia::configKey::contentPaddingAddition, wgConfig.value(amnezia::configKey::contentPaddingAddition));
-    json.insert(amnezia::configKey::rekeyAfterTime, wgConfig.value(amnezia::configKey::rekeyAfterTime));
-    json.insert(amnezia::configKey::rekeyTimeout, wgConfig.value(amnezia::configKey::rekeyTimeout));
-    json.insert(amnezia::configKey::rejectAfterTime, wgConfig.value(amnezia::configKey::rejectAfterTime));
-    json.insert(amnezia::configKey::keepaliveTimeout, wgConfig.value(amnezia::configKey::keepaliveTimeout));
-    json.insert(amnezia::configKey::maxHandshakeAttempts, wgConfig.value(amnezia::configKey::maxHandshakeAttempts));
+  const QStringList awgProtocolKeys = amnezia::configKey::awgProtocolKeys();
+
+  for (const QString &key : awgProtocolKeys) {
+    const QJsonValue value = wgConfig.value(key);
+    if (value.isString() && !value.toString().isEmpty()) {
+      json.insert(key, value);
+    }
   }
 
   write(json);
