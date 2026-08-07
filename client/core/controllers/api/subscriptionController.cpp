@@ -878,6 +878,22 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     QObject::connect(&watcher, &QFutureWatcher<QPair<bool, QString>>::finished, &waitLoop, &QEventLoop::quit);
 
     QFuture<QPair<bool, QString>> future = QtConcurrent::run([androidController, productId]() {
+        // If the user already has an active "premium" subscription, upgrade/replace it with proration
+        // instead of stacking a second, independent purchase that Google Play would just queue behind it.
+        QString oldPurchaseToken;
+        QJsonObject existingPurchasesResult = androidController->queryPurchases();
+        if (existingPurchasesResult.value("responseCode").toInt(-1) == 0) {
+            const QJsonArray existingPurchases = existingPurchasesResult.value("purchases").toArray();
+            for (const QJsonValue &purchaseValue : existingPurchases) {
+                const QJsonObject existingPurchase = purchaseValue.toObject();
+                if (existingPurchase.value("purchaseState").toInt(-1) == 1) { // PURCHASED
+                    oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
+                    qInfo() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
+                    break;
+                }
+            }
+        }
+
         QJsonObject plansResult = androidController->getSubscriptionPlans();
         int responseCode = plansResult.value("responseCode").toInt(-1);
         if (responseCode != 0) {
@@ -895,11 +911,18 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
                 if (offer.value("basePlanId").toString() != productId) continue;
 
                 const QString token = offer.value("offerToken").toString();
-                if (fallbackOfferToken.isEmpty()) fallbackOfferToken = token;
-
                 QJsonArray pricingPhases = offer.value("pricingPhases").toArray();
                 const bool hasFreeTrial = !pricingPhases.isEmpty()
                         && pricingPhases.first().toObject().value("priceAmountMicros").toDouble() == 0;
+
+                // Google Play's subscription replacement API rejects switching to an offer with an
+                // introductory/trial phase ("Requested replacement mode is not supported for this
+                // request"), so an upgrade must always target the regular, non-trial offer - skip
+                // trial offers entirely here rather than just deprioritizing them.
+                if (hasFreeTrial && !oldPurchaseToken.isEmpty()) continue;
+
+                if (fallbackOfferToken.isEmpty()) fallbackOfferToken = token;
+
                 if (hasFreeTrial) {
                     offerToken = token;
                     qInfo() << "[Billing] Found free trial offer for basePlanId:" << productId;
@@ -913,7 +936,9 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
             qWarning() << "[Billing] No offer token found for basePlanId:" << productId;
             return qMakePair(false, QString());
         }
-        QJsonObject purchaseResult = androidController->purchaseSubscription(offerToken);
+        QJsonObject purchaseResult = oldPurchaseToken.isEmpty()
+                ? androidController->purchaseSubscription(offerToken)
+                : androidController->upgradeSubscription(offerToken, oldPurchaseToken);
         responseCode = purchaseResult.value("responseCode").toInt(-1);
         if (responseCode != 0) {
             qWarning() << "[Billing] Purchase failed, responseCode:" << responseCode;

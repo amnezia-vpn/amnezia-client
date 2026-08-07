@@ -262,9 +262,13 @@ class BillingProvider(context: Context) : AutoCloseable {
             .build()
 
         val subscriptionUpdateParams = oldPurchaseToken?.let {
+            // Per Google Play docs, switching between auto-renewing plans within the same
+            // subscription only supports CHARGE_FULL_PRICE or WITHOUT_PRORATION - any other mode
+            // (e.g. CHARGE_PRORATED_PRICE) is rejected with DEVELOPER_ERROR "Requested replacement
+            // mode is not supported for this request".
             BillingFlowParams.SubscriptionUpdateParams.newBuilder()
                 .setOldPurchaseToken(oldPurchaseToken)
-                .setSubscriptionReplacementMode(ReplacementMode.WITHOUT_PRORATION)
+                .setSubscriptionReplacementMode(ReplacementMode.CHARGE_FULL_PRICE)
                 .build()
         }
 
