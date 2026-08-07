@@ -201,13 +201,20 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     SshSession sshSession;
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
-    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-        reinstallRequired = true;
-    }
     qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     ErrorCode errorCode = ErrorCode::NoError;
-    if (reinstallRequired) {
+    if ((container == DockerContainer::Xray || container == DockerContainer::SSXray) && !reinstallRequired) {
+        // Settings changed but don't require a full reinstall (e.g. flow/security tweak): merge them
+        // into the existing server.json in place instead of regenerating keys and every client entry.
+        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
+        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
+        if (oldXrayConfig && newXrayConfig && !oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig)) {
+            DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+            XrayConfigurator xrayConfigurator(&sshSession);
+            errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
+        }
+    } else if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
 
         // Reinstall pulls the latest container image, so the server runs the latest protocol version
