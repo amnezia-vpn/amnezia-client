@@ -33,6 +33,7 @@ int LanguageUiController::getCurrentLanguageIndex() const
     case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
     case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
     case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
+    case QLocale::Korean: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Korean); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }
@@ -64,6 +65,7 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
     case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
     case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
     case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
+    case QLocale::Korean: return LanguageSettings::AvailableLanguageEnum::Korean;
     case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
     default: return LanguageSettings::AvailableLanguageEnum::English;
     }
@@ -100,6 +102,7 @@ QString LanguageUiController::getLocalLanguageName(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
     case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
     case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
+    case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
     default: break;
     }
 
@@ -118,6 +121,7 @@ QLocale LanguageUiController::languageEnumToLocale(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Burmese: return QLocale::Burmese;
     case LanguageSettings::AvailableLanguageEnum::Urdu: return QLocale::Urdu;
     case LanguageSettings::AvailableLanguageEnum::Hindi: return QLocale::Hindi;
+    case LanguageSettings::AvailableLanguageEnum::Korean: return QLocale::Korean;
     default: return QLocale::English;
     }
 }
