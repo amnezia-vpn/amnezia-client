@@ -77,14 +77,14 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: root.buttonActiveFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
+                color: root.buttonActiveFocus ? AmneziaStyle.focus.borderColor : AmneziaStyle.color.goldenApricot
                 source: backgroundCircle
             }
 
             ShapePath {
                 fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.paleGray
-                strokeWidth: root.buttonActiveFocus ? 1 : 0
+                strokeColor: AmneziaStyle.focus.borderColor
+                strokeWidth: root.buttonActiveFocus ? AmneziaStyle.focus.borderWidth : 0
                 capStyle: ShapePath.RoundCap
 
                 PathAngleArc {

@@ -30,9 +30,6 @@ Item {
     property string rootButtonBackgroundHoveredColor: AmneziaStyle.color.onyxBlack
     property string rootButtonBackgroundPressedColor: AmneziaStyle.color.onyxBlack
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
     property string rootButtonHoveredBorderColor: AmneziaStyle.color.charcoalGray
     property string rootButtonDefaultBorderColor: AmneziaStyle.color.slateGray
     property string rootButtonPressedBorderColor: AmneziaStyle.color.paleGray
@@ -114,18 +111,20 @@ Item {
         id: focusBorder
 
         color: AmneziaStyle.color.transparent
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
         anchors.fill: rootButtonContent
         radius: 16
 
+        FocusIndicatorType {
+            control: root
+            baseRadius: focusBorder.radius
+        }
 
         Rectangle {
             id: rootButtonBackground
 
             anchors.fill: focusBorder
-            anchors.margins: root.activeFocus ? 2 : 0
-            radius: root.activeFocus ? 14 : 16
+            anchors.margins: root.activeFocus ? AmneziaStyle.focus.backgroundInset : 0
+            radius: 16 - anchors.margins
 
             color: {
                 if (root.enabled) {

@@ -13,7 +13,7 @@ Rectangle {
 
     property string borderHoveredColor: AmneziaStyle.color.charcoalGray
     property string borderNormalColor: AmneziaStyle.color.slateGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderFocusedColor: AmneziaStyle.focus.borderColor
 
     height: 148
     color: AmneziaStyle.color.onyxBlack
