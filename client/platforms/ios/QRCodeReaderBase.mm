@@ -111,10 +111,22 @@ static UIWindow *amneziaKeyWindowForQrCamera(void)
         return NO;
     }
 
-    CGRect bounds = keyWindow.bounds;
-    [self.videoPreviewPlayer setFrame:bounds];
-    self.videoPreviewPlayer.zPosition = -1000.f;
-    [keyWindow.layer insertSublayer:self.videoPreviewPlayer atIndex:0];
+    QRect cameraRect = _qrCodeReader ? _qrCodeReader->cameraSize() : QRect();
+    CGRect previewFrame;
+    if (cameraRect.width() > 0 && cameraRect.height() > 0) {
+        CGFloat statusBarHeight = 0.f;
+        if (@available(iOS 13.0, *)) {
+            statusBarHeight = keyWindow.windowScene.statusBarManager.statusBarFrame.size.height;
+        } else {
+            statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+        }
+        previewFrame = CGRectMake(cameraRect.x(), cameraRect.y() + statusBarHeight,
+                                  cameraRect.width(), cameraRect.height());
+    } else {
+        previewFrame = keyWindow.bounds;
+    }
+    [self.videoPreviewPlayer setFrame:previewFrame];
+    [keyWindow.layer addSublayer:self.videoPreviewPlayer];
 
     AVCaptureSession *runningSession = self.captureSession;
     dispatch_async(_sessionQueue, ^{
