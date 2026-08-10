@@ -884,10 +884,15 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         // instead of stacking a second, independent purchase that Google Play would just queue behind it.
         QString oldPurchaseToken;
         QJsonObject existingPurchasesResult = androidController->queryPurchases();
+        qInfo().noquote() << "[Billing] queryPurchases raw result:" << QJsonDocument(existingPurchasesResult).toJson(QJsonDocument::Compact);
         if (existingPurchasesResult.value("responseCode").toInt(-1) == 0) {
             const QJsonArray existingPurchases = existingPurchasesResult.value("purchases").toArray();
             for (const QJsonValue &purchaseValue : existingPurchases) {
                 const QJsonObject existingPurchase = purchaseValue.toObject();
+                qInfo().noquote() << "[Billing] queryPurchases entry: purchaseToken=" << existingPurchase.value("purchaseToken").toString()
+                                   << "purchaseState=" << existingPurchase.value("purchaseState").toInt(-1)
+                                   << "isAutoRenewing=" << existingPurchase.value("isAutoRenewing").toBool()
+                                   << "isAcknowledged=" << existingPurchase.value("isAcknowledged").toBool();
                 if (existingPurchase.value("purchaseState").toInt(-1) == 1) { // PURCHASED
                     oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
                     qInfo() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
