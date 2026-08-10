@@ -154,8 +154,13 @@ QString IpSplitTunnelingController::normalizeHostname(const QString &hostname) c
     normalized.replace("https://", "");
     normalized.replace("http://", "");
     normalized.replace("ftp://", "");
-    normalized = normalized.split("/", Qt::SkipEmptyParts).first();
-    return normalized;
+
+    if (NetworkUtilities::ipAddressWithSubnetRegExp().exactMatch(normalized)) {
+        return normalized;
+    }
+
+    const QStringList parts = normalized.split("/", Qt::SkipEmptyParts);
+    return parts.isEmpty() ? QString() : parts.first();
 }
 
 bool IpSplitTunnelingController::validateHostname(const QString &hostname) const
