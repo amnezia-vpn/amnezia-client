@@ -18,14 +18,9 @@ qt_standard_project_setup()
 
 configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
-set(QSIMPLECRYPTO_DIR ${CMAKE_CURRENT_LIST_DIR}/../../client/3rd/QSimpleCrypto/src)
-
-include_directories(
-    ${QSIMPLECRYPTO_DIR}
-)
-
 set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.h
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto/cryptoUtils.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.h
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.h
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipc.h
@@ -38,16 +33,11 @@ set(HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.h
     ${CMAKE_CURRENT_LIST_DIR}/xray.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
-    ${QSIMPLECRYPTO_DIR}/include/QAead.h
-    ${QSIMPLECRYPTO_DIR}/include/QBlockCipher.h
-    ${QSIMPLECRYPTO_DIR}/include/QRsa.h
-    ${QSIMPLECRYPTO_DIR}/include/QSimpleCrypto_global.h
-    ${QSIMPLECRYPTO_DIR}/include/QX509.h
-    ${QSIMPLECRYPTO_DIR}/include/QX509Store.h
 )
 
 set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/utilities.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto/cryptoUtils.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/secureQSettings.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../client/core/utils/networkUtilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc/ipcserver.cpp
@@ -59,11 +49,6 @@ set(SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/killswitch.cpp
     ${CMAKE_CURRENT_LIST_DIR}/systemservice.cpp
     ${CMAKE_CURRENT_LIST_DIR}/xray.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QAead.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QBlockCipher.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QRsa.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QX509.cpp
-    ${QSIMPLECRYPTO_DIR}/sources/QX509Store.cpp
 )
 
 # Mozilla headres
@@ -297,6 +282,7 @@ include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../../client
     ${CMAKE_CURRENT_LIST_DIR}/../../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../../common/logger
+    ${CMAKE_CURRENT_LIST_DIR}/../../common/crypto
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
@@ -316,12 +302,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 if(APPLE)
-    if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set_target_properties(${PROJECT} PROPERTIES
-            INSTALL_RPATH "@executable_path/../Frameworks"
-            BUILD_WITH_INSTALL_RPATH TRUE
-        )
-    endif()
+    set_target_properties(${PROJECT} PROPERTIES
+        INSTALL_RPATH "@executable_path/../Frameworks"
+    )
 
     find_library(FW_COREFOUNDATION CoreFoundation)
     find_library(FW_SYSTEMCONFIG SystemConfiguration)
@@ -350,6 +333,12 @@ if(APPLE)
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
     )
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E $<IF:$<CONFIG:Debug>,copy_directory,true>
+        ${CMAKE_SOURCE_DIR}/deploy/data/macos/pf
+        "$<TARGET_FILE_DIR:${PROJECT}>/pf"
+        COMMAND_EXPAND_LISTS
+    )
 endif()
 
 # install non-linked dependencies
@@ -359,6 +348,8 @@ if(WIN32)
 
     find_package(wintun REQUIRED)
     list(APPEND CONAN_BINS $<TARGET_FILE:zx2c4::wintun>)
+
+    list(APPEND CONAN_BINS $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE:OpenSSL::Crypto>)
 else()
     find_package(awg-go REQUIRED)
     list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-go>)
@@ -378,6 +369,30 @@ add_custom_command(TARGET ${PROJECT} POST_BUILD
         ${CONAN_EXECS} ${CONAN_BINS}
         "$<TARGET_FILE_DIR:${PROJECT}>"
 )
+
+# prebuilt openvpn carries the rpath of whatever machine baked it; point the
+# build-tree copy at the local conan openssl (install rewrites it to $ORIGIN)
+if(LINUX)
+    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
+        CONTENT "file(RPATH_SET FILE \"$<TARGET_FILE_DIR:${PROJECT}>/openvpn\" NEW_RPATH \"$<TARGET_FILE_DIR:OpenSSL::SSL>\")\n"
+    )
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
+    )
+elseif(APPLE)
+    file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake CONTENT
+[=[
+set(ovpn "$<TARGET_FILE_DIR:AmneziaVPN-service>/openvpn")
+set(dir "$<TARGET_FILE_DIR:OpenSSL::SSL>")
+execute_process(COMMAND install_name_tool -delete_rpath "${dir}" "${ovpn}" ERROR_QUIET)
+execute_process(COMMAND install_name_tool -add_rpath "${dir}" "${ovpn}")
+]=]
+    )
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/set_openvpn_rpath.cmake
+    )
+endif()
+
 if(WIN32)
     # using PERMISSIONS on Windows appends read-only flag
     # to the files so just omit it for it
@@ -386,7 +401,11 @@ if(WIN32)
         COMPONENT AmneziaVPN
     )
 else()
-    install(FILES ${CONAN_EXECS}
+    set(CONAN_EXECS_INSTALL ${CONAN_EXECS})
+    if(LINUX)
+        list(REMOVE_ITEM CONAN_EXECS_INSTALL "$<TARGET_FILE:openvpn::openvpn>")
+    endif()
+    install(FILES ${CONAN_EXECS_INSTALL}
         DESTINATION ${CMAKE_INSTALL_BINDIR}
         COMPONENT AmneziaVPN
         PERMISSIONS
@@ -399,6 +418,37 @@ install(FILES ${CONAN_BINS}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT AmneziaVPN
 )
+
+# install openvpn via the service's dep set to ship its openssl, then
+# rewrite conan's absolute build rpath to a relative one for the package
+if(LINUX)
+    install(IMPORTED_RUNTIME_ARTIFACTS openvpn::openvpn
+        RUNTIME_DEPENDENCY_SET service_deps
+        PERMISSIONS
+            OWNER_READ OWNER_EXECUTE
+            GROUP_READ GROUP_EXECUTE
+            WORLD_READ WORLD_EXECUTE
+        COMPONENT AmneziaVPN
+    )
+    install(CODE "
+        set(_ovpn \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/openvpn\")
+        file(CHMOD \"\${_ovpn}\" PERMISSIONS
+            OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        file(RPATH_SET FILE \"\${_ovpn}\" NEW_RPATH \"$ORIGIN:$ORIGIN/../lib\")
+        file(CHMOD \"\${_ovpn}\" PERMISSIONS
+            OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    "
+        COMPONENT AmneziaVPN
+    )
+elseif(APPLE)
+    install(CODE "
+        set(_ovpn \"\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/openvpn\")
+        execute_process(COMMAND install_name_tool -delete_rpath \"$<TARGET_FILE_DIR:OpenSSL::SSL>\" \"\${_ovpn}\" ERROR_QUIET)
+        execute_process(COMMAND install_name_tool -add_rpath \"@executable_path/../Frameworks\" \"\${_ovpn}\")
+    "
+        COMPONENT AmneziaVPN
+    )
+endif()
 
 # install drivers
 if (WIN32)
@@ -428,11 +478,32 @@ endif()
 # install target
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
+    RUNTIME_DEPENDENCY_SET service_deps
     COMPONENT AmneziaVPN
 )
-install(FILES $<TARGET_RUNTIME_DLLS:${PROJECT}>
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+
+if(APPLE)
+    set(RUNTIME_DEPS_DIR ${CMAKE_INSTALL_BINDIR}/../Frameworks)
+else()
+    set(RUNTIME_DEPS_DIR ${CMAKE_INSTALL_BINDIR})
+endif()
+
+install(RUNTIME_DEPENDENCY_SET service_deps
+    PRE_EXCLUDE_REGEXES
+        [[api-ms-win-.*]]
+        [[ext-ms-.*]]
+        [[kernel32\.dll]]
+        [[hvsifiletrust\.dll]]
+        [[libc\.so\..*]] [[libgcc_s\.so\..*]] [[libm\.so\..*]] [[libstdc\+\+\.so\..*]]
+        [[.*\.framework]]
+        [[^(lib)?[Qq]t.*]]
+    POST_EXCLUDE_REGEXES
+        [[^.*[\\/]system32[\\/].*\.dll$]]
+        [[^/lib.*]]
+        [[^/usr/lib.*]]
+    DIRECTORIES ${CONAN_RUNTIME_LIB_DIRS}
     COMPONENT AmneziaVPN
+    DESTINATION "${RUNTIME_DEPS_DIR}"
 )
 
 qt_generate_deploy_app_script(

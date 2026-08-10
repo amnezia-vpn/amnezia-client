@@ -5,29 +5,29 @@
 #include <QUrl>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QSysInfo>
 #include <QTimer>
 
 #include "amneziaApplication.h"
-#include "logger.h"
-#include "version.h"
 #include "core/controllers/gatewayController.h"
+#include "core/utils/api/gatewayPayloadBuilder.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/errorStrings.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
+#include "logger.h"
+#include "version.h"
 
 namespace
 {
     Logger logger("UpdateController");
 
 #if defined(Q_OS_WINDOWS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-win64.exe");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_windows_x64.exe");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN_installer.exe";
-#elif defined(Q_OS_MACOS)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-Darwin.pkg");
+#elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_macos_x64.pkg");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.pkg";
 #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN-%1-Linux.run");
+    const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.run");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
 #endif
 }
@@ -105,12 +105,12 @@ void UpdateController::fetchGatewayUrl()
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(),
                                                                        m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
+                                                                       m_appSettingsRepository);
 
-    QJsonObject apiPayload;
-    apiPayload[apiDefs::key::cliVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::installationUuid] = m_appSettingsRepository->getInstallationUuid(true);
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::cliVersion, QString(APP_VERSION))
+                                     .build();
 
     // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
     QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
@@ -201,7 +201,7 @@ void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QSt
         logger.error() << QString("Network error occurred while fetching %1: %2 %3")
                           .arg(operation, reply->errorString(), QString::number(error));
     });
-    
+
     QObject::connect(reply, &QNetworkReply::sslErrors, [operation](const QList<QSslError> &errors) {
         QStringList errorStrings;
         for (const QSslError &err : errors) {
@@ -213,21 +213,13 @@ void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QSt
 
 void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& operation)
 {
-    if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
-        || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-        logger.error() << errorString(ErrorCode::ApiConfigTimeoutError);
-    } else {
-        QString err = reply->errorString();
-        logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
-        logger.error() << "Error message:" << err;
-        logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-        logger.error() << errorString(ErrorCode::ApiConfigDownloadError);
-    }
+    logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
+    logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 }
 
 QString UpdateController::composeDownloadUrl() const
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
     return m_baseUrl + "/" + fileName;
 #else
@@ -237,7 +229,7 @@ QString UpdateController::composeDownloadUrl() const
 
 void UpdateController::runInstaller()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (m_downloadUrl.isEmpty()) {
         logger.error() << "Download URL is empty";
         return;
@@ -269,23 +261,15 @@ void UpdateController::runInstaller()
 
     #if defined(Q_OS_WINDOWS)
             runWindowsInstaller(kInstallerLocalPath);
-    #elif defined(Q_OS_MACOS)
+    #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
             runMacInstaller(kInstallerLocalPath);
     #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
             runLinuxInstaller(kInstallerLocalPath);
     #endif
         } else {
-            if (reply->error() == QNetworkReply::NetworkError::OperationCanceledError
-                || reply->error() == QNetworkReply::NetworkError::TimeoutError) {
-                logger.error() << errorString(ErrorCode::ApiConfigTimeoutError);
-            } else {
-                QString err = reply->errorString();
-                logger.error() << QString::fromUtf8(reply->readAll());
-                logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
-                logger.error() << "Error message:" << err;
-                logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-                logger.error() << errorString(ErrorCode::ApiConfigDownloadError);
-            }
+            logger.error() << "Installer download failed, network error:" << static_cast<int>(reply->error())
+                           << reply->errorString();
+            logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
         }
         reply->deleteLater();
     });
@@ -309,7 +293,7 @@ int UpdateController::runWindowsInstaller(const QString &installerPath)
 }
 #endif
 
-#if defined(Q_OS_MACOS)
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
 int UpdateController::runMacInstaller(const QString &installerPath)
 {
     // Create temporary directory for extraction

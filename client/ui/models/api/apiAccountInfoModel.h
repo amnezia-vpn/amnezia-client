@@ -22,7 +22,6 @@ public:
         IsComponentVisibleRole,
         IsSubscriptionRenewalAvailableRole,
         HasExpiredWorkerRole,
-        IsProtocolSelectionSupportedRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
         IsInAppPurchaseRole,
@@ -58,8 +57,6 @@ private:
         int maxDeviceCount;
 
         serverConfigUtils::ConfigType configType;
-
-        QStringList supportedProtocols;
 
         QString subscriptionDescription;
 

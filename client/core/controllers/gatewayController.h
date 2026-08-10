@@ -18,13 +18,16 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
+class SecureAppSettingsRepository;
+
 class GatewayController : public QObject
 {
     Q_OBJECT
 
 public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
-                               const bool isStrictKillSwitchEnabled, QObject *parent = nullptr);
+                               const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
+                               QObject *parent = nullptr);
 
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject &apiPayload,
@@ -62,7 +65,7 @@ private:
                      std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
 
     void getProxyUrlsAsync(const QSharedPointer<GatewayController> &life, const QStringList &proxyStorageUrls, int currentProxyStorageIndex,
-                           const std::function<void(const QStringList &)> &onComplete);
+                           const QString &proxyUrlsCacheKey, const std::function<void(const QStringList &)> &onComplete);
     void getProxyUrlAsync(const QSharedPointer<GatewayController> &life, const QStringList &proxyUrls, int currentProxyIndex,
                           const std::function<void(const QString &)> &onComplete);
     void bypassProxyAsync(
@@ -73,6 +76,7 @@ private:
     QString m_gatewayEndpoint;
     bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
+    SecureAppSettingsRepository *m_appSettingsRepository = nullptr;
 
     inline static QString m_proxyUrl;
 };

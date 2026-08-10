@@ -1,6 +1,8 @@
 message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 
-set(APP_ANDROID_MIN_SDK 28)
+if(NOT DEFINED APP_ANDROID_MIN_SDK)
+    set(APP_ANDROID_MIN_SDK 28)
+endif()
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 
@@ -13,7 +15,6 @@ set_target_properties(${PROJECT} PROPERTIES
     QT_ANDROID_MIN_SDK_VERSION ${APP_ANDROID_MIN_SDK}
     QT_ANDROID_TARGET_SDK_VERSION 36
     QT_ANDROID_SDK_BUILD_TOOLS_REVISION 36.0.0
-    QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
 )
 
 set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE_BUILD_TYPE")
@@ -53,3 +54,27 @@ file(COPY ${AMNEZIA_LIBXRAY_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/androi
 find_package(openvpn-pt-android REQUIRED)
 set(LIBS ${LIBS} amnezia::openvpn-pt-android)
 set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH})
+
+set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
+
+if(APP_ANDROID_MAX_SDK)
+    set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/android-package-source)
+    file(REMOVE_RECURSE ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/android/ DESTINATION ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+
+    set(manifest_path ${APP_ANDROID_PACKAGE_SOURCE_DIR}/AndroidManifest.xml)
+    set(manifest_anchor "android:installLocation=\"auto\">")
+    file(READ ${manifest_path} manifest_contents)
+    string(REPLACE
+        "${manifest_anchor}"
+        "${manifest_anchor}\n\n    <uses-sdk android:maxSdkVersion=\"${APP_ANDROID_MAX_SDK}\" />"
+        patched_contents "${manifest_contents}")
+    if(patched_contents STREQUAL manifest_contents)
+        message(FATAL_ERROR
+            "Failed to set maxSdkVersion=${APP_ANDROID_MAX_SDK}: anchor '${manifest_anchor}' "
+            "not found in ${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml")
+    endif()
+    file(WRITE ${manifest_path} "${patched_contents}")
+endif()
+
+set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR})

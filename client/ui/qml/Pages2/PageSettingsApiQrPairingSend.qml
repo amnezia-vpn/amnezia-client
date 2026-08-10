@@ -248,7 +248,7 @@ PageType {
                 clickedFunc: function() {
                     keepPhonePairingInBackgroundOnClose = true
                     PairingUiController.submitPhonePairing(PairingUiController.pendingPhonePairingUuid,
-                                                           ServersUiController.getProcessedServerIndex())
+                                                           ServersUiController.getServerIndexById(ServersUiController.processedServerId))
                     Qt.callLater(function() {
                         PageController.closePage()
                     })

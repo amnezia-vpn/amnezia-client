@@ -410,7 +410,8 @@ bool PairingUiController::canOpenTvQrPairingPage()
     const bool isTestPurchase = false;
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                         m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), kGatewayProbeTimeoutMsecs,
-                                        m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                        m_appSettingsRepository->isStrictKillSwitchEnabled(),
+                                        m_appSettingsRepository);
     QByteArray responseBody;
     const ErrorCode err = gatewayController.post(QString::fromLatin1(kGatewayProbePath), payload, responseBody);
     if (err != ErrorCode::NoError) {
@@ -480,7 +481,8 @@ void PairingUiController::dispatchTvGenerateQrAttempt(quint64 generation, int re
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                                        m_pairingController->pairingLongPollTimeoutMsecs(),
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
+                                                                       m_appSettingsRepository);
 
     const QJsonObject payload = m_pairingController->buildGenerateQrPayload(m_tvSessionUuid);
     QNetworkReply *replyRaw = nullptr;
@@ -675,7 +677,8 @@ void PairingUiController::dispatchPhoneScanQrAttempt(const QString &qrUuid, cons
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
                                                                        m_appSettingsRepository->isDevGatewayEnv(isTestPurchase),
                                                                        apiDefs::requestTimeoutMsecs,
-                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled());
+                                                                       m_appSettingsRepository->isStrictKillSwitchEnabled(),
+                                                                       m_appSettingsRepository);
 
     const QJsonObject payload = m_pairingController->buildScanQrPayload(qrUuid, vpnKey, serviceInfo, supportedProtocols, apiKey,
                                                                         serviceType, userCountryCode);

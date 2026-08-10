@@ -9,6 +9,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/selfhosted/usersController.h"
 #include "core/controllers/selfhosted/installController.h"
 #include "core/utils/errorCodes.h"
@@ -52,6 +53,7 @@ public:
                                Socks5ProxyConfigModel* socks5ConfigModel,
                                MtProxyConfigModel* mtConfigModel,
                                TelemtConfigModel* telemtConfigModel,
+                               ConnectionController* connectionController,
                                QObject *parent = nullptr);
     ~InstallUiController();
 
@@ -62,7 +64,8 @@ public slots:
 
     void scanServerForInstalledContainers(const QString &serverId);
 
-    void updateContainer(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
 
     void removeServer(const QString &serverId);
     void rebootServer(const QString &serverId);
@@ -111,7 +114,7 @@ signals:
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);
     void setContainerEnabledFinished(bool enabled);
-    void containerStatusRefreshed(int status);
+    void containerStatusRefreshed(int status, int errorCode);
     void containerDiagnosticsRefreshed(bool portReachable, bool upstreamReachable, int clientsConnected,
                                        const QString &lastConfigRefresh, const QString &statsEndpoint);
     void containerSecretFetched(const QString &secret);
@@ -127,12 +130,9 @@ signals:
     void serverIsBusy(const bool isBusy);
     void cancelInstallation();
 
-    void currentContainerUpdated();
-
     void cachedProfileCleared(const QString &message);
     void apiConfigRemoved(const QString &message);
 
-    void noInstalledContainers();
     void configValidated(bool isValid);
 
 private:
@@ -155,12 +155,15 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
     
     void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
+
+    bool buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig);
 };
 
 #endif // INSTALLUICONTROLLER_H

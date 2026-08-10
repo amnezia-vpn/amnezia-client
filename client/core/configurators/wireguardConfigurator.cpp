@@ -228,10 +228,19 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
         }
     }
     
+    const bool isAwg3 = awgServerConfig && awgServerConfig->protocolVersion == protocols::awg::awgV3;
+
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
     QString config = m_sshSession->replaceVars(scriptData, vars);
+
+    // The template lists every possible key, but each parameter is optional -
+    // drop the lines whose value came out empty
+    static const QRegularExpression emptyValueLine(R"(^\s*\S+\s*=\s*$)");
+    auto configTemplateLines = config.split("\n");
+    configTemplateLines.removeIf([](const QString &line) { return emptyValueLine.match(line).hasMatch(); });
+    config = configTemplateLines.join("\n");
 
     ConnectionData connData = prepareWireguardConfig(credentials, container, wireguardServerConfig, awgServerConfig, dnsSettings, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -266,7 +275,8 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     clientConfig.presharedKey = connData.pskKey;
     clientConfig.clientId = connData.clientPubKey;
     clientConfig.allowedIps = QStringList { "0.0.0.0/0", "::/0" };
-    clientConfig.persistentKeepAlive = "25";
+    clientConfig.persistentKeepAlive = isAwg3 ? protocols::awg::defaultPersistentKeepAlive
+                                              : protocols::wireguard::defaultPersistentKeepAlive;
     clientConfig.mtu = mtu;
     clientConfig.isObfuscationEnabled = false;
     

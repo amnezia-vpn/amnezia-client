@@ -21,6 +21,7 @@ enum SharedScriptType {
     // General scripts
     prepare_host,
     install_docker,
+    install_conntrack,
     build_container,
     remove_container,
     remove_all_containers,

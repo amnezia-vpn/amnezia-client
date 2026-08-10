@@ -5,6 +5,7 @@
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
+#include "core/controllers/connectionController.h"
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -28,6 +29,7 @@ public:
                          ApiCountryModel* apiCountryModel,
                          ApiDevicesModel* apiDevicesModel,
                          SettingsController* settingsController,
+                         ConnectionController* connectionController,
                          QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY vpnKeyExportReady)
@@ -55,6 +57,12 @@ public slots:
 
     void setCurrentProtocol(const QString &serverId, const QString &protocolName);
     bool isVlessProtocol(const QString &serverId);
+    QString currentProtocol(const QString &serverId);
+    QStringList availableProtocols(const QString &serverId);
+
+    bool isCaptchaAwaitingUser() const;
+    void onCaptchaSolved(const QString &captchaId, const QString &solution);
+    void onRefreshCaptchaRequested();
 
     void removeApiConfig(const QString &serverId);
 
@@ -83,10 +91,47 @@ signals:
     void apiServerRemoved(const QString &message);
 
     void vpnKeyExportReady();
+    void captchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
+    void captchaFlowDismissRequested();
 
     void unsupportedConnectDrawerRequested();
 
 private:
+    enum class CaptchaFlow {
+        Import,
+        Update
+    };
+
+    struct CaptchaState {
+        CaptchaFlow flow = CaptchaFlow::Import;
+
+        // Import flow
+        QString userCountryCode;
+        QString serviceType;
+        QString serviceProtocol;
+        QString openvpnPrivKey;
+        QString wireguardClientPrivKey;
+        QString wireguardClientPubKey;
+        QString xrayUuid;
+
+        // Update flow
+        QString serverId;
+        QString newCountryCode;
+        QString newCountryName;
+        bool isConnectEvent = false;
+        bool reloadServiceConfig = false;
+        bool wasSubscriptionExpired = false;
+        bool fromValidateConfig = false;
+        SubscriptionController::ProtocolData updateProtocolData;
+
+        bool isPending = false;
+    } m_captchaState;
+
+private:
+    void emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName);
+    void emitCaptchaUpdateSuccess();
+    void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);
+
     QList<QString> getQrCodes();
     int getQrCodesCount();
     QString getVpnKey();
@@ -104,6 +149,7 @@ private:
     ApiCountryModel* m_apiCountryModel;
     ApiDevicesModel* m_apiDevicesModel;
     SettingsController* m_settingsController;
+    ConnectionController* m_connectionController;
 };
 
 #endif // SUBSCRIPTIONUICONTROLLER_H

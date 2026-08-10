@@ -1,8 +1,8 @@
 #include "apiUtils.h"
 
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/configKeys.h"
-#include <QLatin1Char>
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -47,6 +47,19 @@ namespace
         }
         return output;
     }
+}
+
+QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSettingsRepository)
+{
+    if (appSettingsRepository == nullptr) {
+        return {};
+    }
+    return appSettingsRepository->getAppLanguage().name().split("_").first();
+}
+
+QString apiUtils::getCountryFlagCode(const QString &serverCountryCode)
+{
+    return serverCountryCode.section('-', 0, 0).toUpper();
 }
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
@@ -105,14 +118,13 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
     const int httpStatusCodeNotFound = 404;
     const int httpStatusCodeNotImplemented = 501;
     const int httpStatusCodePaymentRequired = 402;
+    const int httpStatusCodeTooManyRequests = 429;
+    const int httpStatusCodeRequestTimeout = 408;
     const int httpStatusCodeUnprocessableEntity = 422;
 
     if (!sslErrors.empty()) {
         qDebug().noquote() << sslErrors;
         return amnezia::ErrorCode::ApiConfigSslError;
-    }
-    if (replyError == QNetworkReply::NoError) {
-        return amnezia::ErrorCode::NoError;
     }
     if (replyError == QNetworkReply::NetworkError::OperationCanceledError
         || replyError == QNetworkReply::NetworkError::TimeoutError) {
@@ -124,14 +136,14 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         return amnezia::ErrorCode::ApiUpdateRequestError;
     }
 
-    qDebug() << QString::fromUtf8(responseBody);
-    qDebug() << replyError;
-    qDebug() << httpStatusCode;
-
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (jsonDoc.isObject()) {
         QJsonObject jsonObj = jsonDoc.object();
         const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+
+        if (httpStatusFromBody == httpStatusCodeTooManyRequests) {
+            return amnezia::ErrorCode::ApiRateLimitError;
+        }
         if (httpStatusFromBody == httpStatusCodeConflict) {
             if (apiErrorMessageFromJson(jsonObj).contains(trialAlreadyUsedMessage, Qt::CaseInsensitive)) {
                 return amnezia::ErrorCode::ApiTrialAlreadyUsedError;
@@ -140,6 +152,9 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
         }
         if (httpStatusFromBody == httpStatusCodeNotFound) {
             return amnezia::ErrorCode::ApiNotFoundError;
+        }
+        if (httpStatusFromBody == httpStatusCodeRequestTimeout) {
+            return amnezia::ErrorCode::ApiConfigTimeoutError;
         }
         if (httpStatusFromBody == httpStatusCodeNotImplemented) {
             return amnezia::ErrorCode::ApiUpdateRequestError;
@@ -151,6 +166,18 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiConfigDownloadError;
         }
         if (httpStatusFromBody == httpStatusCodePaymentRequired) {
+            const QString message = apiErrorMessageFromJson(jsonObj);
+            if (message.contains(QLatin1String("refresh_captcha"), Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiCaptchaRefreshError;
+            }
+            if (message.contains(QLatin1String("invalid_captcha"), Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiCaptchaInvalidError;
+            }
+            if (jsonObj.contains(QStringLiteral("captcha_id")) || jsonObj.contains(QStringLiteral("captcha_image"))
+                || message.compare(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive) == 0
+                || message.contains(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive)) {
+                return amnezia::ErrorCode::ApiCaptchaRequiredError;
+            }
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
 
@@ -164,11 +191,14 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive)) {
             return amnezia::ErrorCode::ApiNotFoundError;
         }
-        if (httpStatusCode == httpStatusCodeNotFound) {
-            return amnezia::ErrorCode::ApiNotFoundError;
-        }
 
-        return amnezia::ErrorCode::ApiConfigDownloadError;
+        if (httpStatusFromBody >= 300) {
+            return amnezia::ErrorCode::ApiConfigDownloadError;
+        }
+    }
+
+    if (replyError == QNetworkReply::NoError) {
+        return amnezia::ErrorCode::NoError;
     }
 
     if (httpStatusCode == httpStatusCodeNotFound) {
@@ -271,19 +301,4 @@ QString apiUtils::getPremiumV2VpnKey(const QJsonObject &serverConfigObject)
     vpnKeyText = QString("vpn://%1").arg(QString(signedData.toBase64(QByteArray::Base64UrlEncoding)));
 
     return vpnKeyText;
-}
-
-QString apiUtils::countryCodeBaseForFlag(const QString &fullCountryCode)
-{
-    const QString trimmed = fullCountryCode.trimmed();
-    if (trimmed.isEmpty()) {
-        return QString();
-    }
-    const int dashIdx = trimmed.indexOf(QLatin1Char('-'));
-    const QString base = dashIdx < 0 ? trimmed : trimmed.left(dashIdx);
-    const QString normalized = base.trimmed();
-    if (normalized.isEmpty()) {
-        return QString();
-    }
-    return normalized.toUpper();
 }

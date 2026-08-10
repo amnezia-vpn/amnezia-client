@@ -2,6 +2,10 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QObject>
+#include <QSet>
+
+#include <algorithm>
 
 #include "../../../core/utils/protocolEnum.h"
 #include "../../../core/protocols/protocolUtils.h"
@@ -12,6 +16,41 @@ using namespace amnezia;
 using namespace ProtocolUtils;
 namespace amnezia
 {
+
+namespace
+{
+    template <typename T>
+    QString awgVersionOf(const T &config)
+    {
+        auto hasValue = [](const QString &value) { return !value.trimmed().isEmpty(); };
+
+        const QStringList awg3Params = { config.headerProtectionKey, config.contentPaddingAddition,
+                                         config.rekeyAfterTime,      config.rekeyTimeout,
+                                         config.rejectAfterTime,     config.keepaliveTimeout,
+                                         config.maxHandshakeAttempts };
+        if (std::any_of(awg3Params.begin(), awg3Params.end(), hasValue)) {
+            return protocols::awg::awgV3;
+        }
+
+        const QStringList junkSizes = { config.cookieReplyPacketJunkSize, config.transportPacketJunkSize };
+        const QStringList magicHeaders = { config.initPacketMagicHeader, config.responsePacketMagicHeader,
+                                           config.underloadPacketMagicHeader, config.transportPacketMagicHeader };
+        bool hasJunkSizes = std::any_of(junkSizes.begin(), junkSizes.end(), hasValue);
+        bool hasHeaderRanges = std::any_of(magicHeaders.begin(), magicHeaders.end(),
+                                           [](const QString &header) { return header.contains('-'); });
+        if (hasJunkSizes || hasHeaderRanges) {
+            return protocols::awg::awgV2;
+        }
+
+        const QStringList specialJunk = { config.specialJunk1, config.specialJunk2, config.specialJunk3,
+                                          config.specialJunk4, config.specialJunk5 };
+        if (std::any_of(specialJunk.begin(), specialJunk.end(), hasValue)) {
+            return protocols::awg::awgV1_5;
+        }
+
+        return QString();
+    }
+} // namespace
 
 QJsonObject AwgServerConfig::toJson() const
 {
@@ -74,6 +113,28 @@ QJsonObject AwgServerConfig::toJson() const
     obj[configKey::specialJunk4] = specialJunk4;
     obj[configKey::specialJunk5] = specialJunk5;
     
+    if (!headerProtectionKey.isEmpty()) {
+        obj[configKey::headerProtectionKey] = headerProtectionKey;
+    }
+    if (!contentPaddingAddition.isEmpty()) {
+        obj[configKey::contentPaddingAddition] = contentPaddingAddition;
+    }
+    if (!rekeyAfterTime.isEmpty()) {
+        obj[configKey::rekeyAfterTime] = rekeyAfterTime;
+    }
+    if (!rekeyTimeout.isEmpty()) {
+        obj[configKey::rekeyTimeout] = rekeyTimeout;
+    }
+    if (!rejectAfterTime.isEmpty()) {
+        obj[configKey::rejectAfterTime] = rejectAfterTime;
+    }
+    if (!keepaliveTimeout.isEmpty()) {
+        obj[configKey::keepaliveTimeout] = keepaliveTimeout;
+    }
+    if (!maxHandshakeAttempts.isEmpty()) {
+        obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
+    }
+
     if (isThirdPartyConfig) {
         obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
     }
@@ -109,7 +170,15 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.specialJunk3 = json.value(configKey::specialJunk3).toString();
     config.specialJunk4 = json.value(configKey::specialJunk4).toString();
     config.specialJunk5 = json.value(configKey::specialJunk5).toString();
-    
+
+    config.headerProtectionKey = json.value(configKey::headerProtectionKey).toString();
+    config.contentPaddingAddition = json.value(configKey::contentPaddingAddition).toString();
+    config.rekeyAfterTime = json.value(configKey::rekeyAfterTime).toString();
+    config.rekeyTimeout = json.value(configKey::rekeyTimeout).toString();
+    config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
+    config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
+    config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
+
     config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
     return config;
@@ -196,16 +265,44 @@ QJsonObject AwgClientConfig::toJson() const
         obj[configKey::transportPacketMagicHeader] = transportPacketMagicHeader;
     }
     
-    obj[configKey::specialJunk1] = specialJunk1;
-    obj[configKey::specialJunk2] = specialJunk2;
-    obj[configKey::specialJunk3] = specialJunk3;
-    obj[configKey::specialJunk4] = specialJunk4;
-    obj[configKey::specialJunk5] = specialJunk5;
-    
-    if (isObfuscationEnabled) {
-        obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
+    if (!specialJunk1.isEmpty()) {
+        obj[configKey::specialJunk1] = specialJunk1;
     }
-    
+    if (!specialJunk2.isEmpty()) {
+        obj[configKey::specialJunk2] = specialJunk2;
+    }
+    if (!specialJunk3.isEmpty()) {
+        obj[configKey::specialJunk3] = specialJunk3;
+    }
+    if (!specialJunk4.isEmpty()) {
+        obj[configKey::specialJunk4] = specialJunk4;
+    }
+    if (!specialJunk5.isEmpty()) {
+        obj[configKey::specialJunk5] = specialJunk5;
+    }
+
+    if (!headerProtectionKey.isEmpty()) {
+        obj[configKey::headerProtectionKey] = headerProtectionKey;
+    }
+    if (!contentPaddingAddition.isEmpty()) {
+        obj[configKey::contentPaddingAddition] = contentPaddingAddition;
+    }
+    if (!rekeyAfterTime.isEmpty()) {
+        obj[configKey::rekeyAfterTime] = rekeyAfterTime;
+    }
+    if (!rekeyTimeout.isEmpty()) {
+        obj[configKey::rekeyTimeout] = rekeyTimeout;
+    }
+    if (!rejectAfterTime.isEmpty()) {
+        obj[configKey::rejectAfterTime] = rejectAfterTime;
+    }
+    if (!keepaliveTimeout.isEmpty()) {
+        obj[configKey::keepaliveTimeout] = keepaliveTimeout;
+    }
+    if (!maxHandshakeAttempts.isEmpty()) {
+        obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
+    }
+
     return obj;
 }
 
@@ -248,21 +345,26 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.specialJunk3 = json.value(configKey::specialJunk3).toString();
     config.specialJunk4 = json.value(configKey::specialJunk4).toString();
     config.specialJunk5 = json.value(configKey::specialJunk5).toString();
-    
-    config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
-    
+
+    config.headerProtectionKey = json.value(configKey::headerProtectionKey).toString();
+    config.contentPaddingAddition = json.value(configKey::contentPaddingAddition).toString();
+    config.rekeyAfterTime = json.value(configKey::rekeyAfterTime).toString();
+    config.rekeyTimeout = json.value(configKey::rekeyTimeout).toString();
+    config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
+    config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
+    config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
     return config;
 }
 
 QJsonObject AwgProtocolConfig::toJson() const
 {
     QJsonObject obj = serverConfig.toJson();
-    
+
     if (clientConfig.has_value()) {
         QJsonObject clientJson = clientConfig->toJson();
         obj[configKey::lastConfig] = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
     }
-    
+
     return obj;
 }
 
@@ -281,6 +383,24 @@ AwgProtocolConfig AwgProtocolConfig::fromJson(const QJsonObject& json)
     }
     
     return config;
+}
+
+QString AwgProtocolConfig::serverProtocolVersion() const
+{
+    return awgVersionOf(serverConfig);
+}
+
+QString AwgProtocolConfig::clientProtocolVersion() const
+{
+    return clientConfig.has_value() ? awgVersionOf(clientConfig.value()) : QString();
+}
+
+QString AwgProtocolConfig::protocolVersionString(const QString &version)
+{
+    if (version == protocols::awg::awgV3) return QObject::tr(" (version 3)");
+    if (version == protocols::awg::awgV2) return QObject::tr(" (version 2)");
+    if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
+    return "";
 }
 
 bool AwgProtocolConfig::hasClientConfig() const
@@ -310,16 +430,15 @@ bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
         transportPacketMagicHeader != other.transportPacketMagicHeader ||
         specialJunk1 != other.specialJunk1 || specialJunk2 != other.specialJunk2 ||
         specialJunk3 != other.specialJunk3 || specialJunk4 != other.specialJunk4 ||
-        specialJunk5 != other.specialJunk5) {
+        specialJunk5 != other.specialJunk5 ||
+        cookieReplyPacketJunkSize != other.cookieReplyPacketJunkSize ||
+        transportPacketJunkSize != other.transportPacketJunkSize ||
+        headerProtectionKey != other.headerProtectionKey ||
+        contentPaddingAddition != other.contentPaddingAddition ||
+        rekeyAfterTime != other.rekeyAfterTime || rekeyTimeout != other.rekeyTimeout ||
+        rejectAfterTime != other.rejectAfterTime || keepaliveTimeout != other.keepaliveTimeout ||
+        maxHandshakeAttempts != other.maxHandshakeAttempts) {
         return false;
-    }
-
-    bool isV2 = protocolVersion == protocols::awg::awgV2;
-    if (isV2) {
-        if (cookieReplyPacketJunkSize != other.cookieReplyPacketJunkSize ||
-            transportPacketJunkSize != other.transportPacketJunkSize) {
-            return false;
-        }
     }
 
     return true;
@@ -327,7 +446,15 @@ bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
 
 bool AwgProtocolConfig::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
 {
-    return (h1 == h2) || (h1 == h3) || (h1 == h4) || (h2 == h3) || (h2 == h4) || (h3 == h4);
+    QSet<QString> uniqueHeaders;
+    int filledHeaders = 0;
+    for (const QString &header : { h1, h2, h3, h4 }) {
+        if (!header.trimmed().isEmpty()) {
+            ++filledHeaders;
+            uniqueHeaders.insert(header);
+        }
+    }
+    return uniqueHeaders.size() != filledHeaders;
 }
 
 bool AwgProtocolConfig::isPacketSizeEqual(int s1, int s2, int s3, int s4)

@@ -20,7 +20,7 @@ class OpenvpnPtAndroid(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("swig/4.1.1")
-        self.tool_requires("go/1.26.0")
+        self.tool_requires("go/1.23.12")
         self.tool_requires("cmake/[>=3.4.1 <4]")
 
     def validate(self):

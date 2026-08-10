@@ -18,14 +18,17 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          base: ${{ github.event.before }}
           filters: |
             recipes:
               - 'recipes/**'
               - 'conanfile.py'
+              - '.github/workflows/deploy.yml'
+              - 'cmake/conan_provider.cmake'
+              - 'cmake/platform_settings.cmake'
+              - 'cmake/recipes_bootstrap.cmake'
 
   Bake-Prebuilts-Linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
@@ -40,7 +43,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       shell: bash
@@ -50,15 +53,17 @@ jobs:
         done
 
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
 
   Build-Linux-Ubuntu:
-    runs-on: android-runner
+    runs-on: ubuntu-22.04
 
     needs: Bake-Prebuilts-Linux
     if: ${{ always() }}
@@ -98,7 +103,7 @@ jobs:
         python-version: 3.14
       
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Install system packages'
       run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
@@ -118,7 +123,7 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-Linux.run
+        path: deploy/build/AmneziaVPN_*_linux_x64.run
         archive: false
         retention-days: 7
 
@@ -149,15 +154,17 @@ jobs:
     - uses: ilammy/msvc-dev-cmd@v1
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
-      run: cmake -S . -B build -G "Visual Studio 17 2022" -DPREBUILTS_ONLY=1
+      run: cmake -S . -B build -DPREBUILTS_ONLY=1
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -229,7 +236,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       shell: cmd
@@ -242,27 +249,31 @@ jobs:
     - name: 'Upload WIX installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-win64.msi
+        path: deploy/build/AmneziaVPN_*_windows_x64.msi
         archive: false
         retention-days: 7
       
     - name: 'Upload IFW installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-win64.exe
+        path: deploy/build/AmneziaVPN_*_windows_x64.exe
         archive: false
         retention-days: 7
 
 # ------------------------------------------------------
 
   Bake-Prebuilts-iOS:
-    runs-on: macos-latest
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
-        xcode-version: [26.0]
+        xcode-version: [26.0, 26.4]
+        include:
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -279,15 +290,17 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -344,7 +357,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '26.1'
+        xcode-version: '26.0'
 
     - name: 'Install desktop Qt'
       uses: jurplel/install-qt-action@v3
@@ -376,7 +389,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install deps'
-      run: pip install "conan==2.26.2" jsonschema jinja2
+      run: pip install "conan==2.28.0" jsonschema jinja2
 
     - name: 'Build project'
       env:
@@ -394,14 +407,21 @@ jobs:
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS:
-    runs-on: macos-latest
-
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
-        xcode-version: [16.2, 16.4]
+        xcode-version: [16.2, 16.4, 26.4]
+        include:
+          - xcode-version: 16.2
+            os: macos-15
+          - xcode-version: 16.4
+            os: macos-15
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -418,21 +438,23 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
 
   Build-MacOS:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     needs: Bake-Prebuilts-MacOS
     if: ${{ always() }}
@@ -479,7 +501,7 @@ jobs:
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '16.2.0'
+        xcode-version: '26.3.0'
 
     - name: 'Install Qt'
       uses: jurplel/install-qt-action@v4
@@ -502,13 +524,15 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
         CODESIGN_SIGNATURE: ${{ secrets.MAC_SIGNER_ID }}
         CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
+        CODESIGN_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-path }}
+        CODESIGN_INSTALLER_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-path }}
         NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
@@ -518,20 +542,28 @@ jobs:
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/AmneziaVPN-*-Darwin.pkg
+        path: deploy/build/AmneziaVPN_*_macos_x64.pkg
         archive: false
         retention-days: 7
 
 # ------------------------------------------------------
 
   Bake-Prebuilts-MacOS-NE:
-    runs-on: macos-latest
     needs: Detect-Changes
     if: needs.Detect-Changes.outputs.recipes_changed == 'true'
 
     strategy:
       matrix:
-        xcode-version: [16.2, 16.4]
+        xcode-version: [16.2, 16.4, 26.4]
+        include:
+          - xcode-version: 16.2
+            os: macos-15
+          - xcode-version: 16.4
+            os: macos-15
+          - xcode-version: 26.4
+            os: macos-26
+
+    runs-on: ${{ matrix.os || 'macos-latest' }}
 
     steps:
     - uses: actions/checkout@v4
@@ -548,21 +580,23 @@ jobs:
         xcode-version: ${{ matrix.xcode-version }}
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build dependencies'
       run: cmake -S . -B build -G Xcode -DPREBUILTS_ONLY=1 -DMACOS_NE=TRUE
     
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
 
   Build-MacOS-NE:
-    runs-on: macos-latest
+    runs-on: macos-26
 
     needs: Bake-Prebuilts-MacOS-NE
     if: ${{ always() }}
@@ -586,6 +620,12 @@ jobs:
       PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
 
     steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
     - uses: ./.github/actions/apple-setup-provisioning-profile
       with:
         provisioning_profile_base64: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
@@ -623,19 +663,13 @@ jobs:
           go install golang.org/x/mobile/cmd/gomobile@latest
           gomobile init
 
-    - name: 'Get sources'
-      uses: actions/checkout@v4
-      with:
-        submodules: 'true'
-        fetch-depth: 10
-
     - name: 'Setup python'
       uses: actions/setup-python@v6
       with:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Build project'
       run: |
@@ -671,7 +705,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Setup Android SDK'
       uses: android-actions/setup-android@v4
@@ -696,9 +730,11 @@ jobs:
         done
 
     - name: 'Authorize in remote'
+      if: github.ref == 'refs/heads/dev'
       run: conan remote login amnezia "${{ secrets.CONAN_USER }}" -p "${{ secrets.CONAN_PASSWORD }}"
 
     - name: 'Upload baked prebuilts'
+      if: github.ref == 'refs/heads/dev'
       run: conan upload -r amnezia "*" -c
 
 # ------------------------------------------------------
@@ -709,11 +745,37 @@ jobs:
     needs: Bake-Prebuilts-Android
     if: ${{ always() }}
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: 'android9-10'
+            qt_version: '6.10.1'
+            min_sdk: 28
+            max_sdk: 29
+            version_code_offset: 0
+            build_aab: true
+          - label: 'android11+'
+            qt_version: '6.10.3'
+            min_sdk: 30
+            max_sdk: ''
+            version_code_offset: 1
+            build_aab: true
+          - label: 'android9-10-qt610-3'
+            qt_version: '6.10.3'
+            min_sdk: 28
+            max_sdk: 29
+            version_code_offset: 0
+            build_aab: false
+
     env:
-      ANDROID_PLATFORM: android-28
+      ANDROID_PLATFORM: android-${{ matrix.min_sdk }}
       NDK_VERSION: 27.0.11718014
-      QT_VERSION: 6.10.1
+      QT_VERSION: ${{ matrix.qt_version }}
       QT_MODULES: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+      APP_ANDROID_MIN_SDK: ${{ matrix.min_sdk }}
+      APP_ANDROID_MAX_SDK: ${{ matrix.max_sdk }}
+      APP_ANDROID_VERSION_CODE_OFFSET: ${{ matrix.version_code_offset }}
       PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
       PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
       FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
@@ -806,7 +868,7 @@ jobs:
         python-version: 3.14
 
     - name: 'Install conan'
-      run: pip install "conan==2.26.2"
+      run: pip install "conan==2.28.0"
 
     - name: 'Decode keystore secret to file'
       env:
@@ -821,61 +883,81 @@ jobs:
         QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
         QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
         QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        LABEL: ${{ matrix.label }}
+        BUILD_AAB: ${{ matrix.build_aab }}
       shell: bash
       run: |
-        deploy/build.sh -t android --sign --aab
+        OUT=deploy/artifacts
+        rm -rf $OUT && mkdir -p $OUT
+
+        if [[ "$BUILD_AAB" == "true" ]]; then
+          deploy/build.sh -t android --sign --aab
+        else
+          deploy/build.sh -t android --sign
+        fi
 
         VERSION=$(grep CMAKE_PROJECT_VERSION:STATIC deploy/build/CMakeCache.txt | cut -d= -f2)
 
-        (cd deploy/build/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android9+_universal.apk)
-        (cd deploy/build/client/android-build/build/outputs/bundle/release && mv android-build-release.aab AmneziaVPN_${VERSION}.aab)
+        mv deploy/build/client/android-build/AmneziaVPN.apk \
+           $OUT/AmneziaVPN_${VERSION}_${LABEL}_universal.apk
+
+        if [[ "$BUILD_AAB" == "true" ]]; then
+          mv deploy/build/client/android-build/build/outputs/bundle/release/android-build-release.aab \
+             $OUT/AmneziaVPN_${VERSION}_${LABEL}.aab
+        fi
 
         for abi in arm64-v8a armeabi-v7a x86 x86_64; do
           deploy/build.sh -t android --sign --abi ${abi} --build ./deploy/build/${abi}
-          (cd deploy/build/${abi}/client/android-build && mv AmneziaVPN.apk AmneziaVPN_${VERSION}_android9+_${abi}.apk)
+          mv deploy/build/${abi}/client/android-build/AmneziaVPN.apk \
+             $OUT/AmneziaVPN_${VERSION}_${LABEL}_${abi}.apk
         done
+
+        ls -l $OUT
 
     - name: 'Upload universal APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/client/android-build/*.apk
-        archive: false
-        retention-days: 7
-
-    - name: 'Upload AAB'
-      uses: actions/upload-artifact@v7
-      with:
-        path: deploy/build/client/android-build/build/outputs/bundle/release/*.aab
+        path: deploy/artifacts/*_universal.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload arm64-v8a APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/arm64-v8a/client/android-build/*.apk
+        path: deploy/artifacts/*_arm64-v8a.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload armeabi-v7a APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/armeabi-v7a/client/android-build/*.apk
+        path: deploy/artifacts/*_armeabi-v7a.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload x86 APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/x86/client/android-build/*.apk
+        path: deploy/artifacts/*_x86.apk
         archive: false
         retention-days: 7
 
     - name: 'Upload x86_64 APK'
       uses: actions/upload-artifact@v7
       with:
-        path: deploy/build/x86_64/client/android-build/*.apk
+        path: deploy/artifacts/*_x86_64.apk
         archive: false
         retention-days: 7
+
+    - name: 'Upload AAB'
+      if: ${{ matrix.build_aab }}
+      uses: actions/upload-artifact@v7
+      with:
+        path: deploy/artifacts/*.aab
+        archive: false
+        retention-days: 7
+
+# ------------------------------------------------------
 
   Extra:
     runs-on: ubuntu-latest
@@ -894,3 +976,4 @@ jobs:
         run: | 
           echo "Pull request:" >> $GITHUB_STEP_SUMMARY
           echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+

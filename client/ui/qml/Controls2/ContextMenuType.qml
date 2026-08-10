@@ -6,8 +6,50 @@ Menu {
 
     popupType: Qt.platform.os === "ios" ? Popup.Item : Popup.Native
 
-    onAboutToShow: blocker.enabled = true
-    onClosed: blocker.enabled = false
+    // On Qt < 6.10 the ContextMenu attached type has no native backing on iOS
+    // and opens this Qt-drawn menu instead. In that case the native edit menu
+    // is presented through UIEditMenuInteraction (IosContextMenu is registered
+    // only in iOS builds; on Qt >= 6.10 isAvailable() returns false and the
+    // attached type shows the native menu itself).
+    readonly property bool useNativeEditMenu: typeof IosContextMenu !== "undefined" && IosContextMenu.isAvailable()
+
+    function requestNative(position) {
+        if (useNativeEditMenu && textObj) {
+            textObj.forceActiveFocus()
+            IosContextMenu.present(textObj, position.x, position.y)
+        }
+    }
+
+    property Item inputBlocker: null
+
+    Component {
+        id: inputBlockerComponent
+
+        MouseArea {
+            anchors.fill: parent
+            preventStealing: true
+        }
+    }
+
+    onAboutToShow: {
+        if (!textObj || !textObj.window) {
+            return
+        }
+
+        const contentItem = textObj.window.contentItem
+        if (!inputBlocker) {
+            inputBlocker = inputBlockerComponent.createObject(contentItem)
+        } else {
+            inputBlocker.parent = contentItem
+        }
+    }
+
+    onClosed: {
+        if (inputBlocker) {
+            inputBlocker.destroy()
+            inputBlocker = null
+        }
+    }
 
     MenuItem {
         text: qsTr("C&ut")
@@ -30,12 +72,5 @@ Menu {
         text: qsTr("&SelectAll")
         enabled: textObj.length > 0
         onTriggered: textObj.selectAll()
-    }
-
-    MouseArea {
-        id: blocker
-        z: 2
-        enabled: false
-        preventStealing: true
     }
 }

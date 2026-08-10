@@ -209,16 +209,3 @@ QString ProtocolUtils::key_proto_config_path(Proto p)
     return protoToString(p) + "_config_path";
 }
 
-QString ProtocolUtils::getProtocolVersion(const QJsonObject &protocolConfig)
-{
-    return protocolConfig.value(configKey::protocolVersion).toString();
-}
-
-QString ProtocolUtils::getProtocolVersionString(const QJsonObject &protocolConfig)
-{
-    auto version = getProtocolVersion(protocolConfig);
-
-    if (version == protocols::awg::awgV2) return QObject::tr(" (version 2)");
-    if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
-    return "";
-}

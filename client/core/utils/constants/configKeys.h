@@ -2,6 +2,7 @@
 #define CONFIGKEYS_H
 
 #include <QLatin1String>
+#include <QStringList>
 
 namespace amnezia
 {
@@ -24,6 +25,13 @@ namespace amnezia
         constexpr QLatin1String accessToken("api_key");
         constexpr QLatin1String config("config");
         constexpr QLatin1String configVersion("config_version");
+
+        constexpr QLatin1String sendPayload("send_payload");
+        constexpr QLatin1String sendPayloadEndpoint("endpoint");
+        constexpr QLatin1String sendPayloadTimeoutMs("timeout_ms");
+        constexpr QLatin1String sendPayloadProtocol("protocol");
+        constexpr QLatin1String sendPayloadData("payload");
+        constexpr QLatin1String sendPayloadExpectedResponse("expected_response");
 
         constexpr QLatin1String containers("containers");
         constexpr QLatin1String container("container");
@@ -63,6 +71,8 @@ namespace amnezia
 
         constexpr QLatin1String lastConfig("last_config");
 
+        constexpr QLatin1String protocolVersion("protocol_version");
+
         constexpr QLatin1String isThirdPartyConfig("isThirdPartyConfig");
         constexpr QLatin1String isObfuscationEnabled("isObfuscationEnabled");
 
@@ -83,7 +93,40 @@ namespace amnezia
         constexpr QLatin1String specialJunk4("I4");
         constexpr QLatin1String specialJunk5("I5");
 
-        constexpr QLatin1String protocolVersion("protocol_version");
+        constexpr QLatin1String headerProtectionKey("HeaderProtectionKey");
+        constexpr QLatin1String contentPaddingAddition("ContentPaddingAddition");
+        constexpr QLatin1String rekeyAfterTime("RekeyAfterTime");
+        constexpr QLatin1String rekeyTimeout("RekeyTimeout");
+        constexpr QLatin1String rejectAfterTime("RejectAfterTime");
+        constexpr QLatin1String keepaliveTimeout("KeepaliveTimeout");
+        constexpr QLatin1String maxHandshakeAttempts("MaxHandshakeAttempts");
+
+        inline QStringList awgProtocolKeys()
+        {
+            return { junkPacketCount,
+                     junkPacketMinSize,
+                     junkPacketMaxSize,
+                     initPacketJunkSize,
+                     responsePacketJunkSize,
+                     cookieReplyPacketJunkSize,
+                     transportPacketJunkSize,
+                     initPacketMagicHeader,
+                     responsePacketMagicHeader,
+                     underloadPacketMagicHeader,
+                     transportPacketMagicHeader,
+                     specialJunk1,
+                     specialJunk2,
+                     specialJunk3,
+                     specialJunk4,
+                     specialJunk5,
+                     headerProtectionKey,
+                     contentPaddingAddition,
+                     rekeyAfterTime,
+                     rekeyTimeout,
+                     rejectAfterTime,
+                     keepaliveTimeout,
+                     maxHandshakeAttempts };
+        }
 
         constexpr QLatin1String openvpn("openvpn");
         constexpr QLatin1String wireguard("wireguard");
@@ -143,7 +186,6 @@ namespace amnezia
         constexpr QLatin1String xhttpMode("xhttp_mode"); // Auto | Packet-up | Stream-up | Stream-one
         constexpr QLatin1String xhttpHost("xhttp_host");
         constexpr QLatin1String xhttpPath("xhttp_path");
-        constexpr QLatin1String xhttpHeadersTemplate("xhttp_headers_template"); // HTTP | None
         constexpr QLatin1String xhttpUplinkMethod("xhttp_uplink_method");       // POST | PUT | PATCH
         constexpr QLatin1String xhttpDisableGrpc("xhttp_disable_grpc");         // bool
         constexpr QLatin1String xhttpDisableSse("xhttp_disable_sse");           // bool

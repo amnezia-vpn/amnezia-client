@@ -24,6 +24,7 @@
         <file>Controls2/BackButtonType.qml</file>
         <file>Controls2/BasicButtonType.qml</file>
         <file>Controls2/BusyIndicatorType.qml</file>
+        <file>Controls2/CaptchaDialogType.qml</file>
         <file>Controls2/CardType.qml</file>
         <file>Controls2/CardWithIconsType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>

@@ -486,7 +486,7 @@ QJsonObject ImportController::extractOpenVpnConfig(const QString &data) const
     QJsonObject config;
     config[configKey::containers] = arr;
     config[configKey::defaultContainer] = configKey::amneziaOpenvpn;
-    config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+    config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp("dhcp-option DNS (\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
     QRegularExpressionMatchIterator dnsMatch = dnsRegExp.globalMatch(data);
@@ -572,47 +572,19 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
 
     QString protocolName = configKey::wireguard;
-    QString protocolVersion;
     ConfigTypes detectedType = ConfigTypes::WireGuard;
 
-    const QStringList requiredJunkFields = { configKey::junkPacketCount,           configKey::junkPacketMinSize,
-                                             configKey::junkPacketMaxSize,         configKey::initPacketJunkSize,
-                                             configKey::responsePacketJunkSize,    configKey::initPacketMagicHeader,
-                                             configKey::responsePacketMagicHeader, configKey::underloadPacketMagicHeader,
-                                             configKey::transportPacketMagicHeader };
+    const QStringList awgProtocolKeys = configKey::awgProtocolKeys();
 
-    const QStringList optionalJunkFields = { configKey::cookieReplyPacketJunkSize,
-                                             configKey::transportPacketJunkSize,
-                                             configKey::specialJunk1,    configKey::specialJunk2,    configKey::specialJunk3,
-                                             configKey::specialJunk4,    configKey::specialJunk5
-    };
-
-    bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),
-                                            [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
-    if (hasAllRequiredFields) {
-        for (const QString &field : requiredJunkFields) {
-            lastConfig[field] = configMap.value(field);
-        }
-
-        for (const QString &field : optionalJunkFields) {
-            if (!configMap.value(field).isEmpty()) {
-                lastConfig[field] = configMap.value(field);
+    bool hasAwgKeys = std::any_of(awgProtocolKeys.begin(), awgProtocolKeys.end(),
+                                    [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
+    if (hasAwgKeys) {
+        for (const QString &key : awgProtocolKeys) {
+            if (!configMap.value(key).isEmpty()) {
+                lastConfig[key] = configMap.value(key);
             }
         }
 
-        bool hasCookieReplyPacketJunkSize = !configMap.value(configKey::cookieReplyPacketJunkSize).isEmpty();
-        bool hasTransportPacketJunkSize = !configMap.value(configKey::transportPacketJunkSize).isEmpty();
-        bool hasSpecialJunk = !configMap.value(configKey::specialJunk1).isEmpty() ||
-                              !configMap.value(configKey::specialJunk2).isEmpty() ||
-                              !configMap.value(configKey::specialJunk3).isEmpty() ||
-                              !configMap.value(configKey::specialJunk4).isEmpty() ||
-                              !configMap.value(configKey::specialJunk5).isEmpty();
-
-        if (hasCookieReplyPacketJunkSize && hasTransportPacketJunkSize) {
-            protocolVersion = "2";
-        } else if (hasSpecialJunk && !hasCookieReplyPacketJunkSize && !hasTransportPacketJunkSize) {
-            protocolVersion = "1.5";
-        }
         protocolName = configKey::awg;
         detectedType = ConfigTypes::Awg;
     }
@@ -630,9 +602,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     wireguardConfig[configKey::isThirdPartyConfig] = true;
     wireguardConfig[configKey::port] = port;
     wireguardConfig[configKey::transportProto] = protocols::openvpn::defaultTransportProto;
-    if (protocolName == configKey::awg && !protocolVersion.isEmpty()) {
-        wireguardConfig[configKey::protocolVersion] = protocolVersion;
-    }
 
     QJsonObject containers;
     QString containerName = (protocolName == configKey::awg) ? configKey::amneziaAwg : configKey::amneziaWireguard;
@@ -645,7 +614,7 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     QJsonObject config;
     config[configKey::containers] = arr;
     config[configKey::defaultContainer] = containerName;
-    config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+    config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
     const static QRegularExpression dnsRegExp(
             "DNS = "
@@ -699,7 +668,7 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
             ? configKey::amneziaSsxray
             : configKey::amneziaXray;
     if (description.isEmpty()) {
-        config[configKey::description] = m_appSettingsRepository->nextAvailableServerName();
+        config[configKey::description] = m_serversRepository->nextAvailableServerName();
     } else {
         config[configKey::description] = description;
     }

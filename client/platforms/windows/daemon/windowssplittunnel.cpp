@@ -24,6 +24,7 @@
 #include <QFileInfo>
 #include <QNetworkInterface>
 #include <QScopeGuard>
+#include <QUrl>
 
 #pragma region
 
@@ -146,6 +147,18 @@ ProcessInfo getProcessInfo(HANDLE process, const PROCESSENTRY32W& processMeta) {
     pi.DevicePath = imagepath;
   }
   return pi;
+}
+
+QString normalizeExecutablePath(const QString& path) {
+  QString normalized = path.trimmed();
+  if (normalized.startsWith("file:", Qt::CaseInsensitive)) {
+    const QString localPath = QUrl(normalized).toLocalFile();
+    if (!localPath.isEmpty()) {
+      normalized = localPath;
+    }
+  }
+  normalized.replace('/', '\\');
+  return normalized;
 }
 
 }  // namespace
@@ -287,6 +300,10 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
 
   logger.debug() << "Pushing new Ruleset for Split-Tunnel " << state;
   auto config = generateAppConfiguration(appPaths);
+  if (config.empty()) {
+    logger.error() << "No valid split-tunnel application rules generated";
+    return false;
+  }
 
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_SET_CONFIGURATION, &config[0],
@@ -314,7 +331,7 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
     auto ok = DeviceIoControl(m_driver, IOCTL_INITIALIZE, nullptr, 0, nullptr,
                               0, &bytesReturned, nullptr);
     if (!ok) {
-      logger.error() << "Driver init failed";
+      logger.error() << "Driver init failed. Error:" << GetLastError();
       return false;
     }
   }
@@ -323,11 +340,16 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   if (getState() == STATE_INITIALIZED) {
     logger.debug() << "State is Init, requires process config";
     auto config = generateProcessBlob();
+    if (config.empty()) {
+      logger.error() << "Process configuration blob is empty";
+      return false;
+    }
     auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_PROCESSES, &config[0],
                               (DWORD)config.size(), nullptr, 0, &bytesReturned,
                               nullptr);
     if (!ok) {
-      logger.error() << "Failed to set Process Config";
+      logger.error() << "Failed to set Process Config. Error:"
+                     << GetLastError();
       return false;
     }
     logger.debug() << "Set Process Config ok || new State:" << stateString();
@@ -340,11 +362,16 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   logger.debug() << "Driver is  ready || new State:" << stateString();
 
   auto config = generateIPConfiguration(inetAdapterIndex, vpnAdapterIndex);
+  if (config.empty()) {
+    logger.error() << "Network configuration blob is empty. Internet adapter:"
+                   << inetAdapterIndex << "VPN adapter:" << vpnAdapterIndex;
+    return false;
+  }
   auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_IP_ADDRESSES, &config[0],
                             (DWORD)config.size(), nullptr, 0, &bytesReturned,
                             nullptr);
   if (!ok) {
-    logger.error() << "Failed to set Network Config";
+    logger.error() << "Failed to set Network Config. Error:" << GetLastError();
     return false;
   }
   logger.debug() << "New Network Config Applied || new State:" << stateString();
@@ -404,13 +431,22 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
   size_t cummulated_string_size = 0;
   QStringList dosPaths;
   for (auto const& path : appPaths) {
-    auto dosPath = convertPath(path);
+    const QString normalizedPath = normalizeExecutablePath(path);
+    auto dosPath = convertPath(normalizedPath);
+    if (dosPath.isEmpty()) {
+      logger.error() << "Rejecting split-tunnel app path with empty device "
+                        "conversion:"
+                     << normalizedPath;
+      continue;
+    }
     dosPaths.append(dosPath);
     cummulated_string_size += dosPath.toStdWString().size() * sizeof(wchar_t);
-    logger.debug() << dosPath;
+  }
+  if (dosPaths.isEmpty()) {
+    return {};
   }
   size_t bufferSize = sizeof(CONFIGURATION_HEADER) +
-                      (sizeof(CONFIGURATION_ENTRY) * appPaths.size()) +
+                      (sizeof(CONFIGURATION_ENTRY) * dosPaths.size()) +
                       cummulated_string_size;
   std::vector<uint8_t> outBuffer(bufferSize);
 
@@ -418,7 +454,7 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
   auto entry = (CONFIGURATION_ENTRY*)(header + 1);
 
   auto stringDest = &outBuffer[0] + sizeof(CONFIGURATION_HEADER) +
-                    (sizeof(CONFIGURATION_ENTRY) * appPaths.size());
+                    (sizeof(CONFIGURATION_ENTRY) * dosPaths.size());
 
   SIZE_T stringOffset = 0;
 
@@ -437,7 +473,7 @@ std::vector<uint8_t> WindowsSplitTunnel::generateAppConfiguration(
     stringOffset += stringLength;
   }
 
-  header->NumEntries = appPaths.length();
+  header->NumEntries = dosPaths.length();
   header->TotalLength = bufferSize;
 
   return outBuffer;
@@ -449,9 +485,7 @@ std::vector<std::byte> WindowsSplitTunnel::generateIPConfiguration(
 
   auto config = reinterpret_cast<IP_ADDRESSES_CONFIG*>(&out[0]);
 
-  auto ifaces = QNetworkInterface::allInterfaces();
-
-    if (vpnAdapterIndex == 0) {
+  if (vpnAdapterIndex == 0) {
     vpnAdapterIndex = WindowsCommons::VPNAdapterIndex();
   }
   // Always the VPN
@@ -520,7 +554,7 @@ std::vector<uint8_t> WindowsSplitTunnel::generateProcessBlob() {
     auto process_handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE,
                                       currentProcess.th32ProcessID);
 
-    if (process_handle == INVALID_HANDLE_VALUE) {
+    if (process_handle == nullptr) {
       continue;
     }
     ProcessInfo info = getProcessInfo(process_handle, currentProcess);
@@ -640,23 +674,48 @@ bool WindowsSplitTunnel::isInstalled() {
 }
 
 QString WindowsSplitTunnel::convertPath(const QString& path) {
-  auto parts = path.split("/");
+  const QString normalizedPath = normalizeExecutablePath(path);
+  if (normalizedPath.isEmpty()) {
+    logger.error() << "Empty executable path for DOS device conversion";
+    return "";
+  }
+  auto parts = normalizedPath.split("\\", Qt::SkipEmptyParts);
+  if (parts.isEmpty()) {
+    logger.error() << "Invalid executable path for DOS device conversion:"
+                   << normalizedPath;
+    return "";
+  }
   QString driveLetter = parts.takeFirst();
   if (!driveLetter.contains(":") || parts.size() == 0) {
     // device should contain : for e.g C:
+    logger.error() << "Invalid executable path for DOS device conversion:"
+                   << normalizedPath;
     return "";
   }
-  QByteArray buffer(2048, 0xFFu);
-  auto ok = QueryDosDeviceW(qUtf16Printable(driveLetter),
-                            (wchar_t*)buffer.data(), buffer.size() / 2);
-
-  if (ok == ERROR_INSUFFICIENT_BUFFER) {
+  QByteArray buffer(2048 * sizeof(wchar_t), 0);
+  DWORD ok = 0;
+  DWORD err = ERROR_SUCCESS;
+  for (int attempt = 0; attempt < 4; ++attempt) {
+    ok = QueryDosDeviceW(reinterpret_cast<LPCWSTR>(driveLetter.utf16()),
+                         reinterpret_cast<LPWSTR>(buffer.data()),
+                         buffer.size() / sizeof(wchar_t));
+    if (ok != 0) {
+      break;
+    }
+    err = GetLastError();
+    if (err != ERROR_INSUFFICIENT_BUFFER) {
+      WindowsUtils::windowsLog("Err fetching dos path");
+      logger.error() << "QueryDosDeviceW failed for" << driveLetter
+                     << "error:" << err;
+      return "";
+    }
     buffer.resize(buffer.size() * 2);
-    ok = QueryDosDeviceW(qUtf16Printable(driveLetter), (wchar_t*)buffer.data(),
-                         buffer.size() / 2);
+    buffer.fill(0);
   }
   if (ok == 0) {
     WindowsUtils::windowsLog("Err fetching dos path");
+    logger.error() << "QueryDosDeviceW failed after buffer growth for"
+                   << driveLetter << "error:" << err;
     return "";
   }
   QString deviceName;

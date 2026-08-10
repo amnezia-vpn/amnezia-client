@@ -32,6 +32,13 @@ QList<QString> qrCodeUtils::generateQrCodeImageSeries(const QByteArray &data)
     return chunks;
 }
 
+QString qrCodeUtils::generatePlainQrCodeImage(const QByteArray &data)
+{
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(data, qrcodegen::QrCode::Ecc::LOW);
+    QString svg = QString::fromStdString(toSvgString(qr, 1));
+    return svgToBase64(svg);
+}
+
 QString qrCodeUtils::svgToBase64(const QString &image)
 {
     return "data:image/svg;base64," + QString::fromLatin1(image.toUtf8().toBase64().data());

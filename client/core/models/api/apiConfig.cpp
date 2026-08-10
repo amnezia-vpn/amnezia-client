@@ -143,11 +143,10 @@ QJsonObject ApiConfig::toJson() const
     if (!availableCountries.isEmpty()) {
         obj[apiDefs::key::availableCountries] = availableCountries;
     }
-    
     if (!supportedProtocols.isEmpty()) {
         obj[apiDefs::key::supportedProtocols] = supportedProtocols;
     }
-    
+
     QJsonObject serviceInfoObj = serviceInfo.toJson();
     if (!serviceInfoObj.isEmpty()) {
         obj[apiDefs::key::serviceInfo] = serviceInfoObj;

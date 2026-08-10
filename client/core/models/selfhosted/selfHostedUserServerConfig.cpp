@@ -8,6 +8,7 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
+#include "core/utils/networkUtilities.h"
 
 namespace amnezia
 {
@@ -42,15 +43,32 @@ ContainerConfig SelfHostedUserServerConfig::containerConfig(DockerContainer cont
     return containers.value(container);
 }
 
+void SelfHostedUserServerConfig::updateContainerConfig(DockerContainer container, const ContainerConfig &config)
+{
+    containers[container] = config;
+}
+
+QPair<QString, QString> SelfHostedUserServerConfig::getDnsPair(const QString &primaryDns,
+                                                               const QString &secondaryDns) const
+{
+    QString d1 = dns1;
+    QString d2 = dns2;
+
+    if (d1.isEmpty() || !NetworkUtilities::checkIPv4Format(d1)) {
+        d1 = primaryDns;
+    }
+    if (d2.isEmpty() || !NetworkUtilities::checkIPv4Format(d2)) {
+        d2 = secondaryDns;
+    }
+    return { d1, d2 };
+}
+
 QJsonObject SelfHostedUserServerConfig::toJson() const
 {
     QJsonObject obj;
 
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;
-    }
-    if (!displayName.isEmpty()) {
-        obj[configKey::displayName] = displayName;
     }
     if (!hostName.isEmpty()) {
         obj[configKey::hostName] = hostName;
@@ -84,7 +102,6 @@ SelfHostedUserServerConfig SelfHostedUserServerConfig::fromJson(const QJsonObjec
     SelfHostedUserServerConfig config;
 
     config.description = json.value(configKey::description).toString();
-    config.displayName = json.value(configKey::displayName).toString();
     config.hostName = json.value(configKey::hostName).toString();
 
     QJsonArray containersArray = json.value(configKey::containers).toArray();

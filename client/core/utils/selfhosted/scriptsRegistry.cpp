@@ -50,6 +50,7 @@ QString amnezia::scriptName(SharedScriptType type)
     switch (type) {
     case SharedScriptType::prepare_host: return QLatin1String("prepare_host.sh");
     case SharedScriptType::install_docker: return QLatin1String("install_docker.sh");
+    case SharedScriptType::install_conntrack: return QLatin1String("install_conntrack.sh");
     case SharedScriptType::build_container: return QLatin1String("build_container.sh");
     case SharedScriptType::remove_container: return QLatin1String("remove_container.sh");
     case SharedScriptType::remove_all_containers: return QLatin1String("remove_all_containers.sh");
@@ -253,8 +254,20 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$SPECIAL_JUNK_3", config.specialJunk3 } });
         vars.append({ { "$SPECIAL_JUNK_4", config.specialJunk4 } });
         vars.append({ { "$SPECIAL_JUNK_5", config.specialJunk5 } });
+
+        const bool isAwg3 = config.protocolVersion == protocols::awg::awgV3;
+        vars.append({ { "$PERSISTENT_KEEPALIVE", isAwg3 ? QString(protocols::awg::defaultPersistentKeepAlive)
+                                                        : QString(protocols::wireguard::defaultPersistentKeepAlive) } });
+
+        vars.append({ { "$HEADER_PROTECTION_KEY", config.headerProtectionKey } });
+        vars.append({ { "$CONTENT_PADDING_ADDITION", config.contentPaddingAddition } });
+        vars.append({ { "$REKEY_AFTER_TIME", config.rekeyAfterTime } });
+        vars.append({ { "$REKEY_TIMEOUT", config.rekeyTimeout } });
+        vars.append({ { "$REJECT_AFTER_TIME", config.rejectAfterTime } });
+        vars.append({ { "$KEEPALIVE_TIMEOUT", config.keepaliveTimeout } });
+        vars.append({ { "$MAX_HANDSHAKE_ATTEMPTS", config.maxHandshakeAttempts } });
     }
-    
+
     return vars;
 }
 
@@ -295,6 +308,8 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
 
         vars.append({{"$MTPROXY_PORT", c.port.isEmpty() ? QString(protocols::mtProxy::defaultPort) : c.port}});
         vars.append({{"$MTPROXY_SECRET", c.secret}});
+        vars.append({{"$MTPROXY_REGENERATE_SECRET",
+                      c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0")}});
         vars.append({{"$MTPROXY_TAG", c.tag}});
         vars.append({{"$MTPROXY_TRANSPORT_MODE",
                       c.transportMode.isEmpty() ? QString(protocols::mtProxy::transportModeStandard)
@@ -326,6 +341,7 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
             workers = (transportMode == QLatin1String(protocols::mtProxy::transportModeFakeTLS)) ? QStringLiteral("0")
                                                                                                  : QStringLiteral("2");
         }
+        vars.append({{"$MTPROXY_WORKERS_MODE", workersMode}});
         vars.append({{"$MTPROXY_WORKERS", workers}});
 
         vars.append({{"$MTPROXY_NAT_ENABLED", c.natEnabled ? QStringLiteral("1") : QStringLiteral("0")}});
@@ -350,6 +366,8 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
         vars.append({ { "$TELEMT_TOML_TLS", faketls ? QLatin1String("true") : QLatin1String("false") } });
         vars.append({ { "$TELEMT_PORT", c.port.isEmpty() ? QString(protocols::telemt::defaultPort) : c.port } });
         vars.append({ { "$TELEMT_SECRET", c.secret } });
+        vars.append({ { "$TELEMT_REGENERATE_SECRET",
+                         c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0") } });
         vars.append({ { "$TELEMT_TAG", c.tag } });
         QString tlsDomain = c.tlsDomain;
         if (tlsDomain.isEmpty()) {
@@ -362,6 +380,20 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
         vars.append({ { "$TELEMT_USE_MIDDLE_PROXY", c.useMiddleProxy ? QLatin1String("true") : QLatin1String("false") } });
         vars.append({ { "$TELEMT_MASK", c.maskEnabled ? QLatin1String("true") : QLatin1String("false") } });
         vars.append({ { "$TELEMT_TLS_EMULATION", c.tlsEmulation ? QLatin1String("true") : QLatin1String("false") } });
+
+        QStringList additionalList;
+        for (const QString &s : c.additionalSecrets) {
+            if (!s.isEmpty()) {
+                additionalList << s;
+            }
+        }
+        vars.append({ { "$TELEMT_ADDITIONAL_SECRETS", additionalList.join(QLatin1Char(',')) } });
+
+        QString middleProxyNatIp;
+        if (c.natEnabled && !c.natExternalIp.isEmpty()) {
+            middleProxyNatIp = c.natExternalIp;
+        }
+        vars.append({ { "$TELEMT_MIDDLE_PROXY_NAT_IP", middleProxyNatIp } });
     }
 
     return vars;

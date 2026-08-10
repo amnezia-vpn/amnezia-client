@@ -35,6 +35,11 @@ namespace amnezia
         ServerCgroupMountpoint = 212,
         DockerPullRateLimit = 213,
         ServerLinuxKernelTooOld = 214,
+        XrayServerConfigInvalid = 215,
+        XrayServerNoVlessClients = 216,
+        XrayRealityKeysReadFailed = 217,
+        ServerContainerRuntimeNotSupported = 218,
+        ContainerRuntimeServiceNotRunning = 219,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -76,6 +81,7 @@ namespace amnezia
         ImportBackupFileUseRestoreInstead = 903,
         RestoreBackupInvalidError = 904,
         LegacyApiV1NotSupportedError = 905,
+        LegacyContainerNotSupportedError = 906,
 
         // Android errors
         AndroidError = 1000,
@@ -108,6 +114,14 @@ namespace amnezia
         ApiPairingMissingMetadataError = 1122,
         ApiPairingSessionExpiredError = 1123,
 
+        // Captcha errors (gateway 402 payment_required with captcha markers)
+        ApiCaptchaRequiredError = 1124,
+        ApiCaptchaInvalidError = 1125,
+        ApiCaptchaRefreshError = 1126,
+
+        // Rate limiting (HTTP 429 Too Many Requests)
+        ApiRateLimitError = 1127,
+
         // QFile errors
         OpenError = 1200,
         ReadError = 1201,
@@ -125,5 +139,3 @@ namespace amnezia
 Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // ERRORCODES_H
-
-

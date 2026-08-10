@@ -48,7 +48,6 @@ struct XrayXhttpConfig {
     QString mode             = protocols::xray::defaultXhttpMode;  // Auto|Packet-up|Stream-up|Stream-one
     QString host             = protocols::xray::defaultXhttpHost;
     QString path;
-    QString headersTemplate  = protocols::xray::defaultXhttpHeadersTemplate;  // HTTP|None
     QString uplinkMethod     = protocols::xray::defaultXhttpUplinkMethod;  // POST|PUT|PATCH
     bool    disableGrpc      = true;
     bool    disableSse       = true;
@@ -75,6 +74,7 @@ struct XrayXhttpConfig {
     XrayXmuxConfig     xmux;
 
     QJsonObject toJson() const;
+    /// Reads only keys present in JSON (no Amnezia UI defaults). Use XrayConfigModel::applyDefaultsToServerConfig for UI.
     static XrayXhttpConfig fromJson(const QJsonObject &json);
 };
 
@@ -99,15 +99,13 @@ struct XrayServerConfig {
     QString site;
     bool isThirdPartyConfig = false;
 
-    // New: Security
-    QString security = protocols::xray::defaultSecurity;
-    QString flow = protocols::xray::defaultFlow;
-    QString fingerprint = protocols::xray::defaultFingerprint;
-    QString sni = protocols::xray::defaultSni;
-    QString alpn = protocols::xray::defaultAlpn;
+    QString security;
+    QString flow;
+    QString fingerprint;
+    QString sni;
+    QString alpn;
 
-    // New: Transport
-    QString transport = protocols::xray::defaultTransport;
+    QString transport;
     XrayXhttpConfig xhttp;
     XrayMkcpConfig mkcp;
 
@@ -139,6 +137,10 @@ struct XrayProtocolConfig {
     bool hasClientConfig() const;
     void setClientConfig(const XrayClientConfig &config);
     void clearClientConfig();
+
+    bool needsClientHydration = false;
+
+    bool hydrateServerConfigFromClientNative();
 };
 
 } // namespace amnezia

@@ -11,8 +11,17 @@
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 
+class SecureAppSettingsRepository;
+
 namespace apiUtils
 {
+    QString getAppLanguageCode(const SecureAppSettingsRepository *appSettingsRepository);
+
+    // The gateway may report a country code with a region suffix, e.g. "us-west", while flag
+    // resources are named after the ISO 3166-1 alpha-2 code alone. Returns the part before the dash
+    // in upper case.
+    QString getCountryFlagCode(const QString &serverCountryCode);
+
     bool isSubscriptionExpired(const QString &subscriptionEndDate);
 
     bool isSubscriptionExpiringSoon(const QString &subscriptionEndDate, int withinDays = 30);
@@ -27,9 +36,6 @@ namespace apiUtils
 
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
     QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
-
-    // ISO2-style segment for flagKit assets (e.g. US-WEST -> US). Do not use in API request bodies.
-    QString countryCodeBaseForFlag(const QString &fullCountryCode);
 }
 
 #endif // APIUTILS_H
