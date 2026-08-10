@@ -57,6 +57,11 @@ QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSetti
     return appSettingsRepository->getAppLanguage().name().split("_").first();
 }
 
+QString apiUtils::getCountryFlagCode(const QString &serverCountryCode)
+{
+    return serverCountryCode.section('-', 0, 0).toUpper();
+}
+
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
 {
     if (subscriptionEndDate.isEmpty()) {

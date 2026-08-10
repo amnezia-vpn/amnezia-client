@@ -1,5 +1,6 @@
 #include "serversUiController.h"
 
+#include "core/utils/api/apiUtils.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -205,10 +206,14 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
 QString ServersUiController::getDefaultServerImagePathCollapsed() const
 {
     const auto &description = serverDescriptionById(getDefaultServerId());
-    if (!description.isApiV2 || description.apiServerCountryCode.isEmpty()) {
+    if (!description.isApiV2) {
         return "";
     }
-    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(description.apiServerCountryCode.toUpper());
+    const QString flagCode = apiUtils::getCountryFlagCode(description.apiServerCountryCode);
+    if (flagCode.isEmpty()) {
+        return "";
+    }
+    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(flagCode);
 }
 
 QString ServersUiController::getDefaultServerDescriptionExpanded() const
