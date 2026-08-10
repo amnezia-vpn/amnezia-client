@@ -235,7 +235,7 @@ PageType {
                     Layout.rightMargin: 32
                     Layout.alignment: Qt.AlignRight
 
-                    source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                    source: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
                 }
             }
 
