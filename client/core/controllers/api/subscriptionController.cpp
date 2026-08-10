@@ -10,6 +10,7 @@
 #include <QSet>
 #include <QUuid>
 #include <QVariantMap>
+#include <tuple>
 
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/configurators/wireguardConfigurator.h"
@@ -872,12 +873,13 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     auto androidController = AndroidController::instance();
     QString purchaseToken;
     bool purchaseOk = false;
+    bool isUpgrade = false;
 
-    QFutureWatcher<QPair<bool, QString>> watcher;
+    QFutureWatcher<std::tuple<bool, QString, bool>> watcher;
     QEventLoop waitLoop;
-    QObject::connect(&watcher, &QFutureWatcher<QPair<bool, QString>>::finished, &waitLoop, &QEventLoop::quit);
+    QObject::connect(&watcher, &QFutureWatcher<std::tuple<bool, QString, bool>>::finished, &waitLoop, &QEventLoop::quit);
 
-    QFuture<QPair<bool, QString>> future = QtConcurrent::run([androidController, productId]() {
+    QFuture<std::tuple<bool, QString, bool>> future = QtConcurrent::run([androidController, productId]() {
         // If the user already has an active "premium" subscription, upgrade/replace it with proration
         // instead of stacking a second, independent purchase that Google Play would just queue behind it.
         QString oldPurchaseToken;
@@ -893,12 +895,13 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
                 }
             }
         }
+        const bool isUpgrade = !oldPurchaseToken.isEmpty();
 
         QJsonObject plansResult = androidController->getSubscriptionPlans();
         int responseCode = plansResult.value("responseCode").toInt(-1);
         if (responseCode != 0) {
             qWarning() << "[Billing] Failed to get subscription plans, responseCode:" << responseCode;
-            return qMakePair(false, QString());
+            return std::make_tuple(false, QString(), isUpgrade);
         }
         QJsonArray products = plansResult.value("products").toArray();
         QString offerToken;
@@ -915,10 +918,6 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
                 const bool hasFreeTrial = !pricingPhases.isEmpty()
                         && pricingPhases.first().toObject().value("priceAmountMicros").toDouble() == 0;
 
-                // Google Play's subscription replacement API rejects switching to an offer with an
-                // introductory/trial phase ("Requested replacement mode is not supported for this
-                // request"), so an upgrade must always target the regular, non-trial offer - skip
-                // trial offers entirely here rather than just deprioritizing them.
                 if (hasFreeTrial && !oldPurchaseToken.isEmpty()) continue;
 
                 if (fallbackOfferToken.isEmpty()) fallbackOfferToken = token;
@@ -934,7 +933,7 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         if (offerToken.isEmpty()) offerToken = fallbackOfferToken;
         if (offerToken.isEmpty()) {
             qWarning() << "[Billing] No offer token found for basePlanId:" << productId;
-            return qMakePair(false, QString());
+            return std::make_tuple(false, QString(), isUpgrade);
         }
         QJsonObject purchaseResult = oldPurchaseToken.isEmpty()
                 ? androidController->purchaseSubscription(offerToken)
@@ -942,12 +941,12 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         responseCode = purchaseResult.value("responseCode").toInt(-1);
         if (responseCode != 0) {
             qWarning() << "[Billing] Purchase failed, responseCode:" << responseCode;
-            return qMakePair(false, QString());
+            return std::make_tuple(false, QString(), isUpgrade);
         }
         QJsonArray purchases = purchaseResult.value("purchases").toArray();
         if (purchases.isEmpty()) {
             qWarning() << "[Billing] Purchase succeeded but no purchases returned";
-            return qMakePair(false, QString());
+            return std::make_tuple(false, QString(), isUpgrade);
         }
         QJsonObject purchase = purchases.at(0).toObject();
         QString token = purchase.value("purchaseToken").toString();
@@ -957,7 +956,7 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         // purchaseState 1 = PURCHASED, 0 = PENDING (user must confirm payment in Google Play)
         if (purchaseState != 1) {
             qWarning() << "[Billing] Purchase is in PENDING state, waiting for user to confirm payment";
-            return qMakePair(false, QStringLiteral("pending"));
+            return std::make_tuple(false, QStringLiteral("pending"), isUpgrade);
         }
         if (!isAcknowledged) {
             QJsonObject ackResult = androidController->acknowledgePurchase(token);
@@ -967,14 +966,13 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
                 qInfo() << "[Billing] Purchase acknowledged successfully";
             }
         }
-        return qMakePair(true, token);
+        return std::make_tuple(true, token, isUpgrade);
     });
 
     watcher.setFuture(future);
     waitLoop.exec();
 
-    purchaseOk = watcher.result().first;
-    purchaseToken = watcher.result().second;
+    std::tie(purchaseOk, purchaseToken, isUpgrade) = watcher.result();
 
     if (!purchaseOk) {
         if (purchaseToken == QStringLiteral("pending")) {
@@ -984,6 +982,14 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     }
     if (purchaseToken.isEmpty()) {
         return ErrorCode::ApiPurchaseError;
+    }
+
+    if (isUpgrade) {
+        // The existing server's subscription record (expiry/plan) is refreshed lazily the next time
+        // the user opens the subscription/country screen (SubscriptionUiController::getAccountInfo),
+        // so there's nothing left to write here - just report success.
+        qInfo() << "[Billing] Upgrade acknowledged, skipping getSubscriptionInfo/importServiceFromMarket for existing server";
+        return ErrorCode::ApiSubscriptionUpgraded;
     }
 
     // First call: determine if this is a test purchase
