@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(PROJECT AmneziaVPN)
-set(AMNEZIAVPN_VERSION 5.0.1.1)
+set(PROJECT BKV VPN)
+set(BKV VPN_VERSION 5.0.1.1)
 
 set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
@@ -13,9 +13,8 @@ set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
     ${CMAKE_SOURCE_DIR}/cmake/conan_provider.cmake
     CACHE STRING "" FORCE)
 
-project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
-        DESCRIPTION "AmneziaVPN"
-        HOMEPAGE_URL "https://amnezia.org/"
+project(${PROJECT} VERSION ${BKV VPN_VERSION}
+        DESCRIPTION "BKV VPN"
 )
 
 # trigger conan to kick off `conan install` globally

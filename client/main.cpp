@@ -26,9 +26,9 @@ void anchorOpenSSL() {
 bool isAnotherInstanceRunning()
 {
     QLocalSocket socket;
-    socket.connectToServer("AmneziaVPNInstance");
+    socket.connectToServer("BKV VPNInstance");
     if (socket.waitForConnected(500)) {
-        qWarning() << "AmneziaVPN is already running";
+        qWarning() << "BKV VPN is already running";
         return true;
     }
     return false;
