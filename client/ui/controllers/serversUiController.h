@@ -29,7 +29,7 @@ class ServersUiController : public QObject
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIdChanged)
     Q_PROPERTY(bool defaultServerHasOutdatedAwgContainer READ defaultServerHasOutdatedAwgContainer NOTIFY defaultServerIdChanged)
 
-    Q_PROPERTY(bool isDefaultServerContainXRayConfigs READ isDefaultServerContainXRayConfigs NOTIFY defaultServerIndexChanged)
+    Q_PROPERTY(bool isDefaultServerContainXRayConfigs READ isDefaultServerContainXRayConfigs NOTIFY defaultServerIdChanged)
     
     Q_PROPERTY(QString processedServerId READ getProcessedServerId WRITE setProcessedServerId NOTIFY processedServerIdChanged)
     Q_PROPERTY(int processedContainerIndex READ getProcessedContainerIndex WRITE setProcessedContainerIndex NOTIFY processedContainerIndexChanged)
@@ -93,6 +93,7 @@ public slots:
     bool isServerSubscriptionExpiringSoon(const QString &serverId) const;
 
     bool isDefaultServerContainXRayConfigs() const;
+    bool isServerContainXRayConfigs(const QString &serverId) const;
     
     QString getProcessedServerId() const;
     void setProcessedServerId(const QString &serverId);

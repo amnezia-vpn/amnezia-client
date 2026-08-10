@@ -34,6 +34,9 @@ namespace amnezia
         if (!description.isEmpty()) {
             obj[configKey::description] = this->description;
         }
+        if (!displayName.isEmpty()) {
+            obj[configKey::displayName] = displayName;
+        }
         if (!hostName.isEmpty()) {
             obj[configKey::hostName] = hostName;
         }
@@ -58,6 +61,9 @@ namespace amnezia
             obj[configKey::dns2] = dns2;
         }
 
+        if (!subLink.isEmpty()) {
+            obj[configKey::xraySubscriptionLink] = subLink;
+        }
         if (!configString.isEmpty()) {
             obj[configKey::xraySubscriptionConfig] = configString;
         }
@@ -76,6 +82,7 @@ namespace amnezia
         XRaySubscriptionConfig config;
 
         config.description = json.value(configKey::description).toString();
+        config.displayName = json.value(configKey::displayName).toString();
         config.hostName = json.value(configKey::hostName).toString();
 
         QJsonArray containersArray = json.value(configKey::containers).toArray();
@@ -95,6 +102,11 @@ namespace amnezia
         config.dns1 = json.value(configKey::dns1).toString();
         config.dns2 = json.value(configKey::dns2).toString();
 
+        if (config.displayName.isEmpty()) {
+            config.displayName = config.description.isEmpty() ? config.hostName : config.description;
+        }
+
+        config.subLink = json.value(configKey::xraySubscriptionLink).toString();
         config.configString = json.value(configKey::xraySubscriptionConfig).toArray();
         config.configName = json.value(configKey::xraySubscriptionConfigName).toArray();
         config.currentConfig = json.value(configKey::xraySubscriptionConfigCurrent).toInt();

@@ -9,6 +9,7 @@
 #include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/selfhosted/selfHostedUserServerConfig.h"
 #include "core/models/selfhosted/nativeServerConfig.h"
+#include "core/models/selfhosted/xraySubscriptionConfig.h"
 #include "core/models/api/legacyApiServerConfig.h"
 #include "core/models/api/apiV2ServerConfig.h"
 
@@ -49,6 +50,8 @@ struct ServerDescription
     bool isSubscriptionExpired = false;
     bool isSubscriptionExpiringSoon = false;
 
+    bool isXRaySubscription = false;
+
     QString collapsedServerDescription;
     QString expandedServerDescription;
 };
@@ -56,6 +59,7 @@ struct ServerDescription
 ServerDescription buildServerDescription(const SelfHostedAdminServerConfig &server, bool isAmneziaDnsEnabled);
 ServerDescription buildServerDescription(const SelfHostedUserServerConfig &server, bool isAmneziaDnsEnabled);
 ServerDescription buildServerDescription(const NativeServerConfig &server, bool isAmneziaDnsEnabled);
+ServerDescription buildServerDescription(const XRaySubscriptionConfig &server, bool isAmneziaDnsEnabled);
 ServerDescription buildServerDescription(const LegacyApiServerConfig &server, bool isAmneziaDnsEnabled);
 ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool isAmneziaDnsEnabled);
 

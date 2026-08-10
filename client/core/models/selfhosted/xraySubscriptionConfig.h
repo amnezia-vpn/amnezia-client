@@ -19,12 +19,14 @@ namespace amnezia
     struct XRaySubscriptionConfig
     {
         QString description;
+        QString displayName;
         QString hostName;
         QMap<DockerContainer, ContainerConfig> containers;
         DockerContainer defaultContainer;
         QString dns1;
         QString dns2;
 
+        QString subLink;
         QJsonArray configString;
         QJsonArray configName;
         int currentConfig;

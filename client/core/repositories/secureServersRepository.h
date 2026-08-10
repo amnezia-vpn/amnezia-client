@@ -11,6 +11,7 @@
 #include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/selfhosted/selfHostedUserServerConfig.h"
 #include "core/models/selfhosted/nativeServerConfig.h"
+#include "core/models/selfhosted/xraySubscriptionConfig.h"
 #include "core/models/api/apiV2ServerConfig.h"
 #include "core/models/api/legacyApiServerConfig.h"
 #include "core/models/containerConfig.h"
@@ -34,6 +35,7 @@ public:
     std::optional<SelfHostedAdminServerConfig> selfHostedAdminConfig(const QString &serverId) const;
     std::optional<SelfHostedUserServerConfig> selfHostedUserConfig(const QString &serverId) const;
     std::optional<NativeServerConfig> nativeConfig(const QString &serverId) const;
+    std::optional<XRaySubscriptionConfig> xraySubscriptionConfig(const QString &serverId) const;
     std::optional<ApiV2ServerConfig> apiV2Config(const QString &serverId) const;
     std::optional<LegacyApiServerConfig> legacyApiConfig(const QString &serverId) const;
 
@@ -45,12 +47,6 @@ public:
     int defaultServerIndex() const;
     QString defaultServerId() const;
     void setDefaultServer(const QString &serverId);
-
-    void setCurrentConfigIndex(const int serverIndex, int index);
-    int getCurrentConfigIndex(const int serverIndex) const;
-    QString getConfigString(const int serverIndex, const int index) const;
-    QString getConfigName(const int serverIndex, const int index) const;
-    QJsonArray getConfigNames(const int serverIndex) const;
 
     void clearServers();
 

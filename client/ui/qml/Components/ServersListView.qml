@@ -68,7 +68,7 @@ ListViewType {
                     text: name
                     descriptionText: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
                         ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew") : qsTr("Subscription expiring soon"))
-                        : serverDescription
+                        : (isXRayConfigSelectionAvailable ? ServersUiController.getConfigName(ServersUiController.getCurrentConfigIndex()) : serverDescription)
                     descriptionColor: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
                         ? (isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot)
                         : AmneziaStyle.color.mutedGray
@@ -135,7 +135,7 @@ ListViewType {
 
                                 PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                             }
-                        } else if (ServersModel.getProcessedServerData("isXRayConfigSelectionAvailable")) {
+                        } else if (ServersUiController.isServerContainXRayConfigs(ServersUiController.processedServerId)) {
                             PageController.goToPage(PageEnum.PageSettingsXRayAvailableConfigs)
                         } else {
                             PageController.goToPage(PageEnum.PageSettingsServerInfo)

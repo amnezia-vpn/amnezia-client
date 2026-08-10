@@ -41,6 +41,7 @@ namespace amnezia
         constexpr QLatin1String protocol("protocol");
         constexpr QLatin1String protocols("protocols");
 
+        constexpr QLatin1String xraySubscriptionLink("xray_subscription_link");
         constexpr QLatin1String xraySubscriptionConfig("xray_subscription_config");
         constexpr QLatin1String xraySubscriptionConfigName("xray_subscription_config_name");
         constexpr QLatin1String xraySubscriptionConfigCurrent("xray_subscription_config_current");

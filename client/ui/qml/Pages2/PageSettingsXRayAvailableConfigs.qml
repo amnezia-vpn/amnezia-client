@@ -20,9 +20,25 @@ PageType {
     property var processedServer
 
     Connections {
+        target: PageController
+
+        function onGoToPageSettingsServerServices() {
+            tabBar.setCurrentIndex(root.pageSettingsServerServices)
+        }
+    }
+
+    Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -34,8 +50,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -123,7 +139,7 @@ PageType {
                         if (index !== ServersUiController.getCurrentConfigIndex()) {
                             PageController.showBusyIndicator(true)
                             ServersUiController.setCurrentConfigIndex(index)
-                            ImportController.editServerConfigWithData(ServersUiController.getConfigString(index), ServersUiController.getProcessedServerIndex())
+                            ImportController.editServerConfigWithData(ServersUiController.getProcessedServerId(), ServersUiController.getConfigString(index))
                             PageController.showBusyIndicator(false)
                         }
                     }

@@ -84,6 +84,8 @@ PageType {
 
                         if (ServersUiController.isServerFromApi(serverId)) {
                             return servicesNameString + serverDescription
+                        }  else if (ServersUiController.isServerContainXRayConfigs(ServersUiController.processedServerId)) {
+                            return ServersUiController.getConfigName(ServersUiController.getCurrentConfigIndex())
                         } else {
                             return servicesNameString + hostName
                         }
@@ -102,7 +104,7 @@ PageType {
                             }
 
                             PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                        }  else if (ServersModel.getProcessedServerData("isXRayConfigSelectionAvailable")) {
+                        }  else if (ServersUiController.isServerContainXRayConfigs(ServersUiController.processedServerId)) {
                             PageController.goToPage(PageEnum.PageSettingsXRayServerInfo)
                         } else {
                             PageController.goToPage(PageEnum.PageSettingsServerInfo)

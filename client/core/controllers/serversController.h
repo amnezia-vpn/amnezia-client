@@ -44,11 +44,12 @@ public:
     void setDefaultContainer(const QString &serverId, DockerContainer container);
 
     // XRay subscription config getters/setters
-    void setCurrentConfigIndex(const int serverIndex, int index);
-    int getCurrentConfigIndex(const int serverIndex) const;
-    QString getConfigString(const int serverIndex, const int index) const;
-    QString getConfigName(const int serverIndex, const int index) const;
-    QJsonArray getConfigNames(const int serverIndex) const;
+    QString getSubLink(const QString &serverId) const;
+    QString getConfigString(const QString &serverId, const int index) const;
+    QString getConfigName(const QString &serverId, const int index) const;
+    QJsonArray getConfigNames(const QString &serverId) const;
+    int getCurrentConfigIndex(const QString &serverId) const;
+    void setCurrentConfigIndex(const QString &serverId, int index);
 
     // Getters
     QVector<ServerDescription> buildServerDescriptions(bool isAmneziaDnsEnabled) const;

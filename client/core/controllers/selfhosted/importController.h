@@ -64,7 +64,7 @@ public:
     int qrChunksTotal() const;
 
     ImportResult importLink(const QUrl &url);
-    ImportResult editServerConfigWithData(QString data, int serverIndex, const QJsonObject &uiConfig);
+    ImportResult editServerConfigWithData(const QString &serverId, QString data, const QJsonObject &uiConfig);
     bool isValidBase64(const QByteArray &input);
 
     void importConfig(const QJsonObject &config);

@@ -360,7 +360,7 @@ PageType {
                     spacing: 0
 
                     BasicButtonType {
-                        enabled: (ServersUiController.defaultServerImagePathCollapsed !== ""  || ServersUiController.isDefaultServerContainXRayConfigs) && drawer.isCollapsedStateActive
+                        enabled: (ServersUiController.defaultServerImagePathCollapsed !== ""  || ServersUiController.isServerContainXRayConfigs) && drawer.isCollapsedStateActive
                         hoverEnabled: enabled
 
                         implicitHeight: 36
@@ -404,7 +404,7 @@ PageType {
 
                                     PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                                 }
-                            } else if (ServersModel.getProcessedServerData("isXRayConfigSelectionAvailable")) {
+                            } else if (ServersUiController.isServerContainXRayConfigs(ServersUiController.processedServerId)) {
                                     PageController.goToPage(PageEnum.PageSettingsXRayAvailableConfigs)
                             } else {
                                 PageController.goToPage(PageEnum.PageSettingsServerInfo)

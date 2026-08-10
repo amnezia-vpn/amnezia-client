@@ -393,6 +393,9 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
     QNetworkAccessManager manager;
 
     QNetworkRequest request(url);
+    request.setRawHeader("User-Agent", "v2rayN/7.10");
+    request.setRawHeader("Accept", "*/*");
+    request.setRawHeader("Accept-Encoding", "identity");
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
 
     QNetworkReply *reply = manager.get(request);
@@ -422,13 +425,9 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
         return result;
     }
 
-    if (reply->error() != QNetworkReply::NoError) {
-        qWarning() << "Network error:" << reply->errorString();
-        reply->deleteLater();
-
-        result.errorCode = ErrorCode::ImportInvalidConfigError;
-        return result;
-    }
+    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    qDebug() << "HttpStatusCode:" << status;
+    qDebug() << "Reason:" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute);
 
     QByteArray data = reply->readAll();
     reply->deleteLater();
@@ -440,7 +439,26 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
     }
 
     QByteArray decoded;
-    QString text;
+    QString text = QString::fromUtf8(data).trimmed();
+
+    if (text.startsWith("<!DOCTYPE") || text.startsWith("<html")) {
+        result.errorCode = ErrorCode::UnknownError;
+        return result;
+    }
+
+    bool looksLikeSubscription = text.contains("vmess://") || text.contains("vless://") || text.contains("trojan://")
+            || text.contains("ss://") || text.contains("ssd://");
+
+    if (!looksLikeSubscription) {
+        QByteArray decoded = QByteArray::fromBase64(data);
+        QString decodedText = QString::fromUtf8(decoded).trimmed();
+
+        bool looksLikeSubscription2 = decodedText.contains("vmess://") || decodedText.contains("vless://")
+                || decodedText.contains("trojan://") || decodedText.contains("ss://") || decodedText.contains("ssd://");
+
+        if (looksLikeSubscription2)
+            text = decodedText;
+    }
 
     if (isValidBase64(data)) {
         decoded = QByteArray::fromBase64(data);
@@ -477,7 +495,7 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
 
         QString name = QUrl::fromPercentEncoding(url.fragment().toUtf8());
 
-        name.isEmpty() ? name = "Unnamed" : name = "[" + name.replace(" /", "]");
+        name.isEmpty() ? name = "Unnamed" : name = "[" + name.contains(" /") ? name.replace(" /", "]") : "]";
 
         if (!name.contains("v2ray") && supported) {
             configStrings.append(cfg);
@@ -502,7 +520,8 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
         serverConfig.insert(it.key(), it.value());
     }
 
-    serverConfig.insert(configKey::description, m_appSettingsRepository->nextAvailableServerName());
+    serverConfig.insert(configKey::description, m_serversRepository->nextAvailableServerName());
+    serverConfig[configKey::xraySubscriptionLink] = url.toString();
     serverConfig[configKey::xraySubscriptionConfig] = configStrings;
     serverConfig[configKey::xraySubscriptionConfigName] = configNames;
     serverConfig[configKey::xraySubscriptionConfigCurrent] = 0;
@@ -512,39 +531,45 @@ ImportController::ImportResult ImportController::importLink(const QUrl &url)
     return result;
 }
 
-ImportController::ImportResult ImportController::editServerConfigWithData(QString data, int serverIndex, const QJsonObject& uiConfig)
+ImportController::ImportResult ImportController::editServerConfigWithData(const QString &serverId, QString data, const QJsonObject &uiConfig)
 {
     ImportResult result = extractConfigFromData(data);
 
     if (result.errorCode != ErrorCode::NoError)
         return result;
 
-    const QJsonObject currentConfig = m_serversRepository->server(serverIndex).toJson();
     QJsonObject editedConfig = result.config;
 
-    for (auto it = uiConfig.begin(); it != uiConfig.end(); ++it) {
-        editedConfig.insert(it.key(), it.value());
-    }
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    switch (kind) {
+    case serverConfigUtils::ConfigType::XRaySubscription: {
+        auto cfg = m_serversRepository->xraySubscriptionConfig(serverId);
+        if (!cfg.has_value()) {
+            result.errorCode = ErrorCode::ImportInvalidConfigError;
+            break;
+        }
 
-    if (currentConfig.contains(configKey::description)) {
+        QJsonObject currentConfig = cfg->toJson();
+
+        for (auto it = uiConfig.begin(); it != uiConfig.end(); ++it) {
+            editedConfig.insert(it.key(), it.value());
+        }
+
         editedConfig.insert(configKey::description, currentConfig.value(configKey::description));
-    }
-
-    if (currentConfig.contains(configKey::xraySubscriptionConfig)) {
+        editedConfig.insert(configKey::xraySubscriptionLink, currentConfig.value(configKey::xraySubscriptionLink));
         editedConfig.insert(configKey::xraySubscriptionConfig, currentConfig.value(configKey::xraySubscriptionConfig));
+        editedConfig.insert(configKey::xraySubscriptionConfigName,
+                            currentConfig.value(configKey::xraySubscriptionConfigName));
+        editedConfig.insert(configKey::xraySubscriptionConfigCurrent,
+                            currentConfig.value(configKey::xraySubscriptionConfigCurrent));
+
+        m_serversRepository->editServer(serverId, editedConfig, kind);
+
+        break;
     }
-
-    if (currentConfig.contains(configKey::xraySubscriptionConfigName)) {
-        editedConfig.insert(configKey::xraySubscriptionConfigName, currentConfig.value(configKey::xraySubscriptionConfigName));
+    case serverConfigUtils::ConfigType::Invalid:
+    default: result.errorCode = ErrorCode::ImportInvalidConfigError;
     }
-
-    if (currentConfig.contains(configKey::xraySubscriptionConfigCurrent)) {
-        editedConfig.insert(configKey::xraySubscriptionConfigCurrent, currentConfig.value(configKey::xraySubscriptionConfigCurrent));
-    }
-
-    const ServerConfig finalServerConfig = ServerConfig::fromJson(editedConfig);
-
-    m_serversRepository->editServer(serverIndex, finalServerConfig);
 
     result.config = editedConfig;
 
