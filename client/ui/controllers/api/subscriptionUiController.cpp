@@ -236,20 +236,19 @@ bool SubscriptionUiController::importPremiumFromPlayMarket(const QString &storeP
     }
 
     int duplicateServerIndex = -1;
+    bool wasUpgrade = false;
     ErrorCode errorCode = m_subscriptionController->processPlayMarketPurchase(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol(),
         productId,
-        &duplicateServerIndex);
+        &duplicateServerIndex, &wasUpgrade);
 
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
-            emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
-            return true;
-        }
-        if (errorCode == ErrorCode::ApiSubscriptionUpgraded) {
-            emit installServerFromApiFinished(tr("Your subscription has been upgraded"));
+            const QString message = wasUpgrade ? tr("Your subscription has been upgraded")
+                                                 : tr("This subscription has already been added");
+            emit installServerFromApiFinished(message, duplicateServerIndex);
             return true;
         }
         emit errorOccurred(errorCode);

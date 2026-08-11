@@ -109,7 +109,6 @@ namespace amnezia
         ApiRateLimitError = 1120,
         ApiNoPurchasesToRestore = 1121,
         ApiPurchasePendingError = 1122,
-        ApiSubscriptionUpgraded = 1123,
 
         // QFile errors
         OpenError = 1200,

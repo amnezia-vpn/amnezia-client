@@ -867,7 +867,7 @@ ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCou
 
 ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
                                                              const QString &serviceProtocol, const QString &productId,
-                                                             int *duplicateServerIndex)
+                                                             int *duplicateServerIndex, bool *wasUpgrade)
 {
 #if defined(Q_OS_ANDROID)
     auto androidController = AndroidController::instance();
@@ -985,12 +985,10 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         return ErrorCode::ApiPurchaseError;
     }
 
-    if (isUpgrade) {
-        qInfo() << "[Billing] Upgrade acknowledged, skipping getSubscriptionInfo/importServiceFromMarket for existing server";
-        return ErrorCode::ApiSubscriptionUpgraded;
+    if (wasUpgrade) {
+        *wasUpgrade = isUpgrade;
     }
 
-    // First call: determine if this is a test purchase
     QByteArray checkResponse;
     ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
     qWarning() << "[Billing][processPlayMarketPurchase] getSubscriptionInfo errorCode:" << static_cast<int>(checkError) << "response:" << checkResponse;
@@ -1003,7 +1001,6 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
     qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
 
-    // Second call: import service with correct isTestPurchase flag
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
     return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                      purchaseToken, isTestPurchase, duplicateServerIndex,
