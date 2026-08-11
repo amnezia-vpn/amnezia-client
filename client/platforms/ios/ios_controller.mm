@@ -1186,7 +1186,7 @@ void IosController::requestInetAccess() {
 
 bool IosController::isTestFlight() {
     NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
-    return true; //receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
+    return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
 }
 
 #if !MACOS_NE
