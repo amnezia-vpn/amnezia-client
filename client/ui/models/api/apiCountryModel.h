@@ -57,7 +57,7 @@ private:
 
     QVector<CountryInfo> m_countries;
     QHash<QString, IssuedConfigInfo> m_issuedConfigs;
-    int m_currentIndex;
+    int m_currentIndex = -1;
 };
 
 #endif // APICOUNTRYMODEL_H

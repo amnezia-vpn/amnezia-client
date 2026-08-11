@@ -59,6 +59,11 @@ void ApiCountryModel::updateModel(const QJsonArray &countries, const QString &cu
 {
     beginResetModel();
 
+    const int previousIndex = m_currentIndex;
+    if (!currentCountryCode.isEmpty()) {
+        m_currentIndex = -1;
+    }
+
     m_countries.clear();
     for (int i = 0; i < countries.size(); i++) {
         CountryInfo countryInfo;
@@ -67,14 +72,17 @@ void ApiCountryModel::updateModel(const QJsonArray &countries, const QString &cu
         countryInfo.countryName = countryObject.value(apiDefs::key::serverCountryName).toString();
         countryInfo.countryCode = countryObject.value(apiDefs::key::serverCountryCode).toString();
 
-        if (countryInfo.countryCode == currentCountryCode) {
+        if (!currentCountryCode.isEmpty() && countryInfo.countryCode == currentCountryCode) {
             m_currentIndex = i;
-            emit currentIndexChanged(m_currentIndex);
         }
         m_countries.push_back(countryInfo);
     }
 
     endResetModel();
+
+    if (m_currentIndex != previousIndex) {
+        emit currentIndexChanged(m_currentIndex);
+    }
 }
 
 void ApiCountryModel::updateIssuedConfigsInfo(const QJsonArray &issuedConfigs)

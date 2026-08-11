@@ -95,10 +95,6 @@ PageType {
 
         currentIndex: ApiCountryModel.currentIndex
 
-        ButtonGroup {
-            id: containersRadioButtonGroup
-        }
-
         header: ColumnLayout {
             width: menuContent.width
 
@@ -197,12 +193,10 @@ PageType {
 
                     text: countryName
 
-                    ButtonGroup.group: containersRadioButtonGroup
-
                     imageSource: "qrc:/images/controls/download.svg"
 
+                    checkable: false
                     checked: index === ApiCountryModel.currentIndex
-                    checkable: !ConnectionController.isConnected
 
                     onClicked: {
                         if (ConnectionController.isConnectionInProgress) {
@@ -217,18 +211,8 @@ PageType {
                         root.selectConnectionCountry(index, countryCode, countryName)
                     }
 
-                    Keys.onEnterPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                    Keys.onReturnPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
+                    Keys.onEnterPressed: containerRadioButton.clicked()
+                    Keys.onReturnPressed: containerRadioButton.clicked()
                 }
 
                 Image {
