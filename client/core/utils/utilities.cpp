@@ -290,6 +290,11 @@ QString Utils::tun2socksPath()
     return Utils::executable("tun2socks", true);
 }
 
+QString Utils::securityPath()
+{
+    return "/usr/bin/security";
+}
+
 #ifdef Q_OS_WIN
 // Inspired from http://stackoverflow.com/a/15281070/1529139
 // and http://stackoverflow.com/q/40059902/1529139
