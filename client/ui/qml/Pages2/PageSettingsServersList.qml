@@ -85,7 +85,7 @@ PageType {
                         if (ServersUiController.isServerFromApi(serverId)) {
                             return servicesNameString + serverDescription
                         }  else if (ServersUiController.isServerContainXRayConfigs(ServersUiController.processedServerId)) {
-                            return ServersUiController.getConfigName(ServersUiController.getCurrentConfigIndex())
+                            return ServersUiController.getConfigName(serverId, ServersUiController.getCurrentConfigIndex())
                         } else {
                             return servicesNameString + hostName
                         }

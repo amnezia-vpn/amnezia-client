@@ -115,6 +115,7 @@ public slots:
     int getCurrentConfigIndex() const;
     QString getConfigString(const int index) const;
     QString getConfigName(const int index) const;
+    QString getConfigName(const QString &serverId, const int index) const;
     QJsonArray getConfigNames() const;
     
     QString getServerId(int index) const;

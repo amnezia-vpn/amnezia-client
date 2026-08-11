@@ -68,7 +68,7 @@ ListViewType {
                     text: name
                     descriptionText: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
                         ? (isSubscriptionExpired ? qsTr("Subscription expired. Please renew") : qsTr("Subscription expiring soon"))
-                        : (isXRayConfigSelectionAvailable ? ServersUiController.getConfigName(ServersUiController.getCurrentConfigIndex()) : serverDescription)
+                        : (isXRayConfigSelectionAvailable ? ServersUiController.getConfigName(serverId, ServersUiController.getCurrentConfigIndex()) : serverDescription)
                     descriptionColor: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
                         ? (isSubscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot)
                         : AmneziaStyle.color.mutedGray
@@ -87,6 +87,10 @@ ListViewType {
                         root.selectedIndex = index
 
                         ServersUiController.setDefaultServerAtIndex(index)
+
+                        if (isXRayConfigSelectionAvailable) {
+                            ImportController.editServerConfigWithData(ServersUiController.getProcessedServerId(), ServersUiController.getConfigString(index))
+                        }
                     }
 
                     Keys.onEnterPressed: serverRadioButton.clicked()

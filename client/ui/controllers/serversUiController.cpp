@@ -570,6 +570,10 @@ QString ServersUiController::getConfigName(const int index) const
 {
     return m_serversController->getConfigName(m_processedServerId, index);
 }
+QString ServersUiController::getConfigName(const QString &serverId, const int index) const
+{
+    return m_serversController->getConfigName(serverId, index);
+}
 
 QJsonArray ServersUiController::getConfigNames() const
 {
