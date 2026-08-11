@@ -93,6 +93,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxMaxConcurrencyMin
                     maxValue: xmuxMaxConcurrencyMax
+                    minPlaceholder: "0"
+                    maxPlaceholder: "0"
                     onMinChanged: function(val) { xmuxMaxConcurrencyMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xmuxMaxConcurrencyMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -114,6 +116,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxMaxConnectionsMin
                     maxValue: xmuxMaxConnectionsMax
+                    minPlaceholder: "0"
+                    maxPlaceholder: "0"
                     onMinChanged: function(val) { xmuxMaxConnectionsMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xmuxMaxConnectionsMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -135,6 +139,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxCMaxReuseTimesMin
                     maxValue: xmuxCMaxReuseTimesMax
+                    minPlaceholder: "0"
+                    maxPlaceholder: "0"
                     onMinChanged: function(val) { xmuxCMaxReuseTimesMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xmuxCMaxReuseTimesMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -156,6 +162,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxHMaxRequestTimesMin
                     maxValue: xmuxHMaxRequestTimesMax
+                    minPlaceholder: "0"
+                    maxPlaceholder: "0"
                     onMinChanged: function(val) { xmuxHMaxRequestTimesMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xmuxHMaxRequestTimesMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -177,6 +185,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xmuxHMaxReusableSecsMin
                     maxValue: xmuxHMaxReusableSecsMax
+                    minPlaceholder: "0"
+                    maxPlaceholder: "0"
                     onMinChanged: function(val) { xmuxHMaxReusableSecsMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xmuxHMaxReusableSecsMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -188,7 +198,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 16
                     headerText: qsTr("hKeepAlivePeriod")
-                    subtitleText: qsTr("Integer, may be negative")
+                    hintText: qsTr("HTTP keep-alive period. Integer, may be negative.")
                     textField.text: xmuxHKeepAlivePeriod
                     textField.maximumLength: 11
                     textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }

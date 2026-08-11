@@ -1,5 +1,6 @@
 #include "apiUtils.h"
 
+#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include <QDateTime>
@@ -46,6 +47,19 @@ namespace
         }
         return output;
     }
+}
+
+QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSettingsRepository)
+{
+    if (appSettingsRepository == nullptr) {
+        return {};
+    }
+    return appSettingsRepository->getAppLanguage().name().split("_").first();
+}
+
+QString apiUtils::getCountryFlagCode(const QString &serverCountryCode)
+{
+    return serverCountryCode.section('-', 0, 0).toUpper();
 }
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)

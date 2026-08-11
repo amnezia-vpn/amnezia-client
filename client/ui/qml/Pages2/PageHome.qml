@@ -25,6 +25,8 @@ PageType {
     property string apiCurrentProtocol: ""
 
     readonly property bool isApiProtocolSelectionVisible: ServersUiController.isDefaultServerFromApi && root.apiAvailableProtocols.length > 0
+    readonly property bool isOutdatedAwgWarningVisible: drawer.isCollapsedStateActive()
+                                                        && ServersUiController.defaultServerHasOutdatedAwgContainer
 
     function updateApiProtocolState() {
         if (ServersUiController.isDefaultServerFromApi) {
@@ -350,7 +352,9 @@ PageType {
                     objectName: "rowLayoutLabel"
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                     Layout.topMargin: 8
-                    Layout.bottomMargin: root.isApiProtocolSelectionVisible ? 8 : (drawer.isCollapsedStateActive ? 44 : ServersUiController.isDefaultServerFromApi ? 61 : 16)
+                    Layout.bottomMargin: root.isOutdatedAwgWarningVisible
+                                         ? 8
+                                         : (root.isApiProtocolSelectionVisible ? 8 : (drawer.isCollapsedStateActive ? 44 : ServersUiController.isDefaultServerFromApi ? 61 : 16))
                     spacing: 0
 
                     BasicButtonType {
@@ -403,6 +407,23 @@ PageType {
                             }
                         }
                     }
+                }
+
+                WarningType {
+                    objectName: "outdatedContainerWarning"
+
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.bottomMargin: 24
+
+                    visible: root.isOutdatedAwgWarningVisible
+
+                    backGroundColor: AmneziaStyle.color.transparent
+                    iconPath: "qrc:/images/controls/alert-circle.svg"
+                    imageColor: AmneziaStyle.color.goldenApricot
+                    textColor: AmneziaStyle.color.goldenApricot
+                    textString: qsTr("AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.0 container.")
                 }
 
                 RowLayout {

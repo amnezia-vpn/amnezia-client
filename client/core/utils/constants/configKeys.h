@@ -2,6 +2,7 @@
 #define CONFIGKEYS_H
 
 #include <QLatin1String>
+#include <QStringList>
 
 namespace amnezia
 {
@@ -70,6 +71,8 @@ namespace amnezia
 
         constexpr QLatin1String lastConfig("last_config");
 
+        constexpr QLatin1String protocolVersion("protocol_version");
+
         constexpr QLatin1String isThirdPartyConfig("isThirdPartyConfig");
         constexpr QLatin1String isObfuscationEnabled("isObfuscationEnabled");
 
@@ -98,7 +101,32 @@ namespace amnezia
         constexpr QLatin1String keepaliveTimeout("KeepaliveTimeout");
         constexpr QLatin1String maxHandshakeAttempts("MaxHandshakeAttempts");
 
-        constexpr QLatin1String protocolVersion("protocol_version");
+        inline QStringList awgProtocolKeys()
+        {
+            return { junkPacketCount,
+                     junkPacketMinSize,
+                     junkPacketMaxSize,
+                     initPacketJunkSize,
+                     responsePacketJunkSize,
+                     cookieReplyPacketJunkSize,
+                     transportPacketJunkSize,
+                     initPacketMagicHeader,
+                     responsePacketMagicHeader,
+                     underloadPacketMagicHeader,
+                     transportPacketMagicHeader,
+                     specialJunk1,
+                     specialJunk2,
+                     specialJunk3,
+                     specialJunk4,
+                     specialJunk5,
+                     headerProtectionKey,
+                     contentPaddingAddition,
+                     rekeyAfterTime,
+                     rekeyTimeout,
+                     rejectAfterTime,
+                     keepaliveTimeout,
+                     maxHandshakeAttempts };
+        }
 
         constexpr QLatin1String openvpn("openvpn");
         constexpr QLatin1String wireguard("wireguard");
@@ -158,7 +186,6 @@ namespace amnezia
         constexpr QLatin1String xhttpMode("xhttp_mode"); // Auto | Packet-up | Stream-up | Stream-one
         constexpr QLatin1String xhttpHost("xhttp_host");
         constexpr QLatin1String xhttpPath("xhttp_path");
-        constexpr QLatin1String xhttpHeadersTemplate("xhttp_headers_template"); // HTTP | None
         constexpr QLatin1String xhttpUplinkMethod("xhttp_uplink_method");       // POST | PUT | PATCH
         constexpr QLatin1String xhttpDisableGrpc("xhttp_disable_grpc");         // bool
         constexpr QLatin1String xhttpDisableSse("xhttp_disable_sse");           // bool
