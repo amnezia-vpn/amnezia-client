@@ -248,6 +248,10 @@ bool SubscriptionUiController::importPremiumFromPlayMarket(const QString &storeP
             emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
             return true;
         }
+        if (errorCode == ErrorCode::ApiSubscriptionUpgraded) {
+            emit installServerFromApiFinished(tr("Your subscription has been upgraded"));
+            return true;
+        }
         emit errorOccurred(errorCode);
         return false;
     }

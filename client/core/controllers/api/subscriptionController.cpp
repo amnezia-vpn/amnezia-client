@@ -889,10 +889,6 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
             const QJsonArray existingPurchases = existingPurchasesResult.value("purchases").toArray();
             for (const QJsonValue &purchaseValue : existingPurchases) {
                 const QJsonObject existingPurchase = purchaseValue.toObject();
-                qInfo().noquote() << "[Billing] queryPurchases entry: purchaseToken=" << existingPurchase.value("purchaseToken").toString()
-                                   << "purchaseState=" << existingPurchase.value("purchaseState").toInt(-1)
-                                   << "isAutoRenewing=" << existingPurchase.value("isAutoRenewing").toBool()
-                                   << "isAcknowledged=" << existingPurchase.value("isAcknowledged").toBool();
                 if (existingPurchase.value("purchaseState").toInt(-1) == 1) { // PURCHASED
                     oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
                     qInfo() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
@@ -990,9 +986,6 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     }
 
     if (isUpgrade) {
-        // The existing server's subscription record (expiry/plan) is refreshed lazily the next time
-        // the user opens the subscription/country screen (SubscriptionUiController::getAccountInfo),
-        // so there's nothing left to write here - just report success.
         qInfo() << "[Billing] Upgrade acknowledged, skipping getSubscriptionInfo/importServiceFromMarket for existing server";
         return ErrorCode::ApiSubscriptionUpgraded;
     }
