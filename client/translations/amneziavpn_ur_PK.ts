@@ -49,24 +49,6 @@
     </message>
 </context>
 <context>
-    <name>ApiConfigsController</name>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
-        <source>%1 installed successfully.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
-        <source>API config reloaded</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
-        <source>Successfully changed the country of connection to %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>ApiServicesModel</name>
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="74"/>
@@ -116,7 +98,7 @@
     </message>
 </context>
 <context>
-    <name>AppSplitTunnelingController</name>
+    <name>AppSplitTunnelingUiController</name>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="23"/>
         <source>Application added: %1</source>
@@ -147,7 +129,25 @@
     </message>
 </context>
 <context>
-    <name>ConnectionController</name>
+    <name>ConnectionTypeSelectionDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
+        <source>Add new connection</source>
+        <translation>نیا کنکشن کا اندراج کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
+        <source>Configure your server</source>
+        <translation>اپنے سرور کو ترتیب دیں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
+        <source>Open config file, key or QR code</source>
+        <translation>کھولو کنفیگ فاءیل،کی یا کور کوڈ</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionUiController</name>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="70"/>
         <location filename="../ui/controllers/connectionController.cpp" line="98"/>
@@ -203,24 +203,6 @@
         <location filename="../ui/controllers/connectionController.cpp" line="133"/>
         <source>Settings updated successfully</source>
         <translation>دوبارہ ترتیب تاذہ کامیاب</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionTypeSelectionDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
-        <source>Add new connection</source>
-        <translation>نیا کنکشن کا اندراج کریں</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
-        <source>Configure your server</source>
-        <translation>اپنے سرور کو ترتیب دیں</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
-        <source>Open config file, key or QR code</source>
-        <translation>کھولو کنفیگ فاءیل،کی یا کور کوڈ</translation>
     </message>
 </context>
 <context>
@@ -308,7 +290,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>ImportController</name>
+    <name>ImportUiController</name>
     <message>
         <source>Unable to open file</source>
         <translation type="vanished">فائل کو کھولنے سے قاصر ہے</translation>
@@ -334,7 +316,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>InstallController</name>
+    <name>InstallUiController</name>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="156"/>
         <source>%1 installed successfully. </source>
@@ -421,6 +403,49 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="151"/>
         <source>Add selected</source>
         <translation>ایپلیکیشن کا نام</translation>
+    </message>
+</context>
+<context>
+    <name>IpSplitTunnelingUiController</name>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="24"/>
+        <source>Hostname not look like ip adress or domain name</source>
+        <translation>میزبان کا نام آئی پی ایڈریس یا ڈومین نام نظر نہیں آ رہا ہے</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="66"/>
+        <source>New site added: %1</source>
+        <translation>نیا سائٹ شامل ہوگئی ہے: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="78"/>
+        <source>Site removed: %1</source>
+        <translation>سائٹ ہٹا دی گئی ہے: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="85"/>
+        <source>Can&apos;t open file: %1</source>
+        <translation>فائل نہیں کھول سکتا: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="91"/>
+        <source>Failed to parse JSON data from file: %1</source>
+        <translation>فائل سے JSON ڈیٹا پارس کرنے میں ناکامی: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="96"/>
+        <source>The JSON data is not an array in file: %1</source>
+        <translation>فائل میں JSON ڈیٹا ایک ایرے نہیں ہے: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="126"/>
+        <source>Import completed</source>
+        <translation>واردات مکمل ہوگئی ہے</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="145"/>
+        <source>Export completed</source>
+        <translation>ایکسپورٹ مکمل ہوگیا</translation>
     </message>
 </context>
 <context>
@@ -4539,7 +4564,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
 </context>
 <context>
-    <name>SettingsController</name>
+    <name>SettingsUiController</name>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="148"/>
         <source>Backup file is corrupted</source>
@@ -4592,46 +4617,21 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
 </context>
 <context>
-    <name>SitesController</name>
+    <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="24"/>
-        <source>Hostname not look like ip adress or domain name</source>
-        <translation>میزبان کا نام آئی پی ایڈریس یا ڈومین نام نظر نہیں آ رہا ہے</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
+        <source>%1 installed successfully.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="66"/>
-        <source>New site added: %1</source>
-        <translation>نیا سائٹ شامل ہوگئی ہے: %1</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <source>API config reloaded</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="78"/>
-        <source>Site removed: %1</source>
-        <translation>سائٹ ہٹا دی گئی ہے: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="85"/>
-        <source>Can&apos;t open file: %1</source>
-        <translation>فائل نہیں کھول سکتا: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="91"/>
-        <source>Failed to parse JSON data from file: %1</source>
-        <translation>فائل سے JSON ڈیٹا پارس کرنے میں ناکامی: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="96"/>
-        <source>The JSON data is not an array in file: %1</source>
-        <translation>فائل میں JSON ڈیٹا ایک ایرے نہیں ہے: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="126"/>
-        <source>Import completed</source>
-        <translation>واردات مکمل ہوگئی ہے</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="145"/>
-        <source>Export completed</source>
-        <translation>ایکسپورٹ مکمل ہوگیا</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
+        <source>Successfully changed the country of connection to %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

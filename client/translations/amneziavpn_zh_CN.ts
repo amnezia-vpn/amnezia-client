@@ -2,29 +2,6 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
-    <name>AllowedDnsController</name>
-    <message>
-        <source>Can&apos;t open file: %1</source>
-        <translation type="obsolete">无法打开文件: %1</translation>
-    </message>
-    <message>
-        <source>Failed to parse JSON data from file: %1</source>
-        <translation type="obsolete">JSON解析失败，文件: %1</translation>
-    </message>
-    <message>
-        <source>The JSON data is not an array in file: %1</source>
-        <translation type="obsolete">文件中的JSON数据不是一个数组，文件: %1</translation>
-    </message>
-    <message>
-        <source>Import completed</source>
-        <translation type="obsolete">完成导入</translation>
-    </message>
-    <message>
-        <source>Export completed</source>
-        <translation type="obsolete">完成导出</translation>
-    </message>
-</context>
-<context>
     <name>AllowedDnsUiController</name>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="30"/>
@@ -88,30 +65,6 @@
     <message>
         <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="48"/>
         <source>%1 out of %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>ApiConfigsController</name>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="401"/>
-        <source>%1 installed successfully.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="373"/>
-        <source>Subscription restored successfully.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="427"/>
-        <source>API config reloaded</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="431"/>
-        <source>Successfully changed the country of connection to %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -277,7 +230,25 @@
     </message>
 </context>
 <context>
-    <name>ConnectionController</name>
+    <name>ConnectionTypeSelectionDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
+        <source>Add new connection</source>
+        <translation>添加新连接</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
+        <source>Configure your server</source>
+        <translation>配置您的服务器</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
+        <source>Open config file, key or QR code</source>
+        <translation>配置文件，授权码或二维码</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionUiController</name>
     <message>
         <location filename="../ui/controllers/connectionController.h" line="78"/>
         <location filename="../ui/controllers/connectionController.cpp" line="105"/>
@@ -329,24 +300,6 @@
     <message>
         <source>The selected protocol is not supported on the current platform</source>
         <translation type="obsolete">当前平台不支持所选协议</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionTypeSelectionDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
-        <source>Add new connection</source>
-        <translation>添加新连接</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
-        <source>Configure your server</source>
-        <translation>配置您的服务器</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
-        <source>Open config file, key or QR code</source>
-        <translation>配置文件，授权码或二维码</translation>
     </message>
 </context>
 <context>
@@ -439,7 +392,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>ImportController</name>
+    <name>ImportUiController</name>
     <message>
         <location filename="../ui/controllers/importController.cpp" line="692"/>
         <source>Scanned %1 of %2.</source>
@@ -454,80 +407,6 @@ Can&apos;t be disabled for current server</source>
         <location filename="../ui/controllers/importController.cpp" line="731"/>
         <source>&lt;br&gt;In the imported configuration, potentially dangerous lines were found:</source>
         <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>InstallController</name>
-    <message>
-        <source> installed successfully. </source>
-        <translation type="obsolete">安装成功</translation>
-    </message>
-    <message>
-        <source> is already installed on the server. </source>
-        <translation type="obsolete"> 已安装在服务器上</translation>
-    </message>
-    <message>
-        <source>%1 installed successfully. </source>
-        <translation type="vanished">%1 安装成功。</translation>
-    </message>
-    <message>
-        <source>%1 is already installed on the server. </source>
-        <translation type="vanished">服务器上已经安装 %1。</translation>
-    </message>
-    <message>
-        <source>
-Added containers that were already installed on the server</source>
-        <translation type="vanished">添加已安装在服务器上的容器</translation>
-    </message>
-    <message>
-        <source>
-Already installed containers were found on the server. All installed containers have been added to the application</source>
-        <translation type="vanished">
-在服务上发现已经安装协议并添加至应用</translation>
-    </message>
-    <message>
-        <source>Settings updated successfully</source>
-        <translation type="vanished">配置更新成功</translation>
-    </message>
-    <message>
-        <source>Server &apos;%1&apos; was rebooted</source>
-        <translation type="vanished">服务器 &apos;%1&apos; 已重新启动</translation>
-    </message>
-    <message>
-        <source>Server &apos;%1&apos; was removed</source>
-        <translation type="vanished">已移除服务器 &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>All containers from server &apos;%1&apos; have been removed</source>
-        <translation type="vanished">服务器 &apos;%1&apos; 的所有容器已移除</translation>
-    </message>
-    <message>
-        <source>%1 has been removed from the server &apos;%2&apos;</source>
-        <translation type="vanished">%1 已从服务器 &apos;%2&apos; 上移除</translation>
-    </message>
-    <message>
-        <source>1% has been removed from the server &apos;%2&apos;</source>
-        <translation type="obsolete">%1 已从服务器 &apos;%2&apos; 上移除</translation>
-    </message>
-    <message>
-        <source>Server &apos;</source>
-        <translation type="obsolete">服务器 </translation>
-    </message>
-    <message>
-        <source>&apos; was removed</source>
-        <translation type="obsolete"> 已经移除</translation>
-    </message>
-    <message>
-        <source> has been removed from the server &apos;</source>
-        <translation type="obsolete"> 协议已从</translation>
-    </message>
-    <message>
-        <source>Please login as the user</source>
-        <translation type="vanished">请以用户身份登录</translation>
-    </message>
-    <message>
-        <source>Server added successfully</source>
-        <translation type="vanished">增加服务器成功</translation>
     </message>
 </context>
 <context>
@@ -619,6 +498,41 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="137"/>
         <source>Add selected</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>IpSplitTunnelingUiController</name>
+    <message>
+        <source>Hostname not look like ip adress or domain name</source>
+        <translation type="vanished">请输入有效的域名或IP地址</translation>
+    </message>
+    <message>
+        <source>New site added: %1</source>
+        <translation type="vanished">已经添加新网站: %1</translation>
+    </message>
+    <message>
+        <source>Site removed: %1</source>
+        <translation type="vanished">已移除网站: %1</translation>
+    </message>
+    <message>
+        <source>Can&apos;t open file: %1</source>
+        <translation type="vanished">无法打开文件: %1</translation>
+    </message>
+    <message>
+        <source>Failed to parse JSON data from file: %1</source>
+        <translation type="vanished">JSON解析失败，文件: %1</translation>
+    </message>
+    <message>
+        <source>The JSON data is not an array in file: %1</source>
+        <translation type="vanished">文件中的JSON数据不是一个数组，文件: %1</translation>
+    </message>
+    <message>
+        <source>Import completed</source>
+        <translation type="vanished">完成导入</translation>
+    </message>
+    <message>
+        <source>Export completed</source>
+        <translation type="vanished">完成导出</translation>
     </message>
 </context>
 <context>
@@ -5643,7 +5557,7 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
 </context>
 <context>
-    <name>SettingsController</name>
+    <name>SettingsUiController</name>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="252"/>
         <source>Backup file is corrupted</source>
@@ -5695,41 +5609,6 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
     </message>
 </context>
 <context>
-    <name>SitesController</name>
-    <message>
-        <source>Hostname not look like ip adress or domain name</source>
-        <translation type="vanished">请输入有效的域名或IP地址</translation>
-    </message>
-    <message>
-        <source>New site added: %1</source>
-        <translation type="vanished">已经添加新网站: %1</translation>
-    </message>
-    <message>
-        <source>Site removed: %1</source>
-        <translation type="vanished">已移除网站: %1</translation>
-    </message>
-    <message>
-        <source>Can&apos;t open file: %1</source>
-        <translation type="vanished">无法打开文件: %1</translation>
-    </message>
-    <message>
-        <source>Failed to parse JSON data from file: %1</source>
-        <translation type="vanished">JSON解析失败，文件: %1</translation>
-    </message>
-    <message>
-        <source>The JSON data is not an array in file: %1</source>
-        <translation type="vanished">文件中的JSON数据不是一个数组，文件: %1</translation>
-    </message>
-    <message>
-        <source>Import completed</source>
-        <translation type="vanished">完成导入</translation>
-    </message>
-    <message>
-        <source>Export completed</source>
-        <translation type="vanished">完成导出</translation>
-    </message>
-</context>
-<context>
     <name>SitesUiController</name>
     <message>
         <location filename="../ui/controllers/sitesUiController.cpp" line="29"/>
@@ -5775,6 +5654,30 @@ While it offers a blend of security, stability, and speed, it&apos;s essential t
         <location filename="../ui/controllers/sitesUiController.cpp" line="162"/>
         <source>Export completed</source>
         <translation type="unfinished">完成导出</translation>
+    </message>
+</context>
+<context>
+    <name>SubscriptionUiController</name>
+    <message>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="401"/>
+        <source>%1 installed successfully.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="373"/>
+        <source>Subscription restored successfully.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="427"/>
+        <source>API config reloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="431"/>
+        <source>Successfully changed the country of connection to %1</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

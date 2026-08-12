@@ -49,24 +49,6 @@
     </message>
 </context>
 <context>
-    <name>ApiConfigsController</name>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
-        <source>%1 installed successfully.</source>
-        <translation type="unfinished">%1 ခုကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
-        <source>API config reloaded</source>
-        <translation type="unfinished">API config ကို ပြန်လည်စတင်လိုက်ပါပြီ</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
-        <source>Successfully changed the country of connection to %1</source>
-        <translation type="unfinished">ချိတ်ဆက်မှုနိုင်ငံကို %1 သို့ အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ</translation>
-    </message>
-</context>
-<context>
     <name>ApiServicesModel</name>
     <message>
         <source>Classic VPN for comfortable work, downloading large files and watching videos. Works for any sites. Speed up to %1 MBit/s</source>
@@ -132,7 +114,7 @@
     </message>
 </context>
 <context>
-    <name>AppSplitTunnelingController</name>
+    <name>AppSplitTunnelingUiController</name>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="23"/>
         <source>Application added: %1</source>
@@ -163,7 +145,25 @@
     </message>
 </context>
 <context>
-    <name>ConnectionController</name>
+    <name>ConnectionTypeSelectionDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
+        <source>Add new connection</source>
+        <translation>ချိတ်ဆက်မှုအသစ်ထည့်သွင်းမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
+        <source>Configure your server</source>
+        <translation>သင်၏ဆာဗာကို စီစဉ်ချိန်ညှိမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
+        <source>Open config file, key or QR code</source>
+        <translation>config ဖိုင်၊ key သို့မဟုတ် QR ကုဒ်ကို ဖွင့်မည်</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionUiController</name>
     <message>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
@@ -220,24 +220,6 @@
         <location filename="../ui/controllers/connectionController.cpp" line="103"/>
         <source>Disconnecting...</source>
         <translation>အဆက်အသွယ်ဖြတ်နေပါသည်...</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionTypeSelectionDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
-        <source>Add new connection</source>
-        <translation>ချိတ်ဆက်မှုအသစ်ထည့်သွင်းမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
-        <source>Configure your server</source>
-        <translation>သင်၏ဆာဗာကို စီစဉ်ချိန်ညှိမည်</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
-        <source>Open config file, key or QR code</source>
-        <translation>config ဖိုင်၊ key သို့မဟုတ် QR ကုဒ်ကို ဖွင့်မည်</translation>
     </message>
 </context>
 <context>
@@ -326,7 +308,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>ImportController</name>
+    <name>ImportUiController</name>
     <message>
         <source>Unable to open file</source>
         <translation type="vanished">ဖိုင်ကိုဖွင့်၍မရပါ</translation>
@@ -356,7 +338,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>InstallController</name>
+    <name>InstallUiController</name>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="156"/>
         <source>%1 installed successfully. </source>
@@ -455,6 +437,49 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="151"/>
         <source>Add selected</source>
         <translation>ရွေးချယ်ထားသည်များကိုထည့်မည်</translation>
+    </message>
+</context>
+<context>
+    <name>IpSplitTunnelingUiController</name>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="24"/>
+        <source>Hostname not look like ip adress or domain name</source>
+        <translation>လက်ခံသူအမည်သည် ip လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်နှင့် မတူပါ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="66"/>
+        <source>New site added: %1</source>
+        <translation>ဆိုဒ်အသစ်ထပ်ထည့်ပြီးပါပြီ: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="78"/>
+        <source>Site removed: %1</source>
+        <translation>ဆိုက်ကို ဖယ်ရှားလိုက်သည်: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="85"/>
+        <source>Can&apos;t open file: %1</source>
+        <translation>ဖိုင်ကိုဖွင့်၍မရပါ: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="91"/>
+        <source>Failed to parse JSON data from file: %1</source>
+        <translation>JSON ဒေတာကို ဖိုင်မှ ခွဲခြမ်းထုပ်ယူမှု မအောင်မြင်ပါ: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="96"/>
+        <source>The JSON data is not an array in file: %1</source>
+        <translation>JSON ဒေတာသည် ဖိုင်ထဲရှိ array တစ်ခုမဟုတ်ပါ: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="126"/>
+        <source>Import completed</source>
+        <translation>တင်သွင်းခြင်းပြီးဆုံးသွားပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="145"/>
+        <source>Export completed</source>
+        <translation>ထုတ်ယူခြင်းပြီးဆုံးသွားပါပြီ</translation>
     </message>
 </context>
 <context>
@@ -4567,7 +4592,7 @@ For more detailed information, you can
     </message>
 </context>
 <context>
-    <name>SettingsController</name>
+    <name>SettingsUiController</name>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="170"/>
         <source>All settings have been reset to default values</source>
@@ -4620,46 +4645,21 @@ For more detailed information, you can
     </message>
 </context>
 <context>
-    <name>SitesController</name>
+    <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="24"/>
-        <source>Hostname not look like ip adress or domain name</source>
-        <translation>လက်ခံသူအမည်သည် ip လိပ်စာ သို့မဟုတ် ဒိုမိန်းအမည်နှင့် မတူပါ</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
+        <source>%1 installed successfully.</source>
+        <translation type="unfinished">%1 ခုကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="66"/>
-        <source>New site added: %1</source>
-        <translation>ဆိုဒ်အသစ်ထပ်ထည့်ပြီးပါပြီ: %1</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <source>API config reloaded</source>
+        <translation type="unfinished">API config ကို ပြန်လည်စတင်လိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="78"/>
-        <source>Site removed: %1</source>
-        <translation>ဆိုက်ကို ဖယ်ရှားလိုက်သည်: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="85"/>
-        <source>Can&apos;t open file: %1</source>
-        <translation>ဖိုင်ကိုဖွင့်၍မရပါ: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="91"/>
-        <source>Failed to parse JSON data from file: %1</source>
-        <translation>JSON ဒေတာကို ဖိုင်မှ ခွဲခြမ်းထုပ်ယူမှု မအောင်မြင်ပါ: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="96"/>
-        <source>The JSON data is not an array in file: %1</source>
-        <translation>JSON ဒေတာသည် ဖိုင်ထဲရှိ array တစ်ခုမဟုတ်ပါ: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="126"/>
-        <source>Import completed</source>
-        <translation>တင်သွင်းခြင်းပြီးဆုံးသွားပါပြီ</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="145"/>
-        <source>Export completed</source>
-        <translation>ထုတ်ယူခြင်းပြီးဆုံးသွားပါပြီ</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
+        <source>Successfully changed the country of connection to %1</source>
+        <translation type="unfinished">ချိတ်ဆက်မှုနိုင်ငံကို %1 သို့ အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ</translation>
     </message>
 </context>
 <context>

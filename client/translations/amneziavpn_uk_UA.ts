@@ -72,24 +72,6 @@
     </message>
 </context>
 <context>
-    <name>ApiConfigsController</name>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
-        <source>%1 installed successfully.</source>
-        <translation type="unfinished">%1 встановлено успішно.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
-        <source>API config reloaded</source>
-        <translation type="unfinished">Конфігурацію API перезавантажено</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
-        <source>Successfully changed the country of connection to %1</source>
-        <translation type="unfinished">Успішно змінено країну підключення на %1</translation>
-    </message>
-</context>
-<context>
     <name>ApiServicesModel</name>
     <message>
         <source>Classic VPN for comfortable work, downloading large files and watching videos. Works for any sites. Speed up to %1 MBit/s</source>
@@ -155,7 +137,7 @@
     </message>
 </context>
 <context>
-    <name>AppSplitTunnelingController</name>
+    <name>AppSplitTunnelingUiController</name>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingController.cpp" line="23"/>
         <source>Application added: %1</source>
@@ -186,7 +168,25 @@
     </message>
 </context>
 <context>
-    <name>ConnectionController</name>
+    <name>ConnectionTypeSelectionDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
+        <source>Add new connection</source>
+        <translation>Додати нове з&apos;єднання</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
+        <source>Configure your server</source>
+        <translation>Налаштувати свій сервер</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
+        <source>Open config file, key or QR code</source>
+        <translation>Відкрити файл конфігурації, ключ або QR код</translation>
+    </message>
+</context>
+<context>
+    <name>ConnectionUiController</name>
     <message>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
@@ -243,24 +243,6 @@
         <location filename="../ui/controllers/connectionController.cpp" line="103"/>
         <source>Disconnecting...</source>
         <translation>Відключаємось...</translation>
-    </message>
-</context>
-<context>
-    <name>ConnectionTypeSelectionDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
-        <source>Add new connection</source>
-        <translation>Додати нове з&apos;єднання</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
-        <source>Configure your server</source>
-        <translation>Налаштувати свій сервер</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
-        <source>Open config file, key or QR code</source>
-        <translation>Відкрити файл конфігурації, ключ або QR код</translation>
     </message>
 </context>
 <context>
@@ -357,7 +339,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>ImportController</name>
+    <name>ImportUiController</name>
     <message>
         <source>Unable to open file</source>
         <translation type="vanished">Неможливо відкрити файл</translation>
@@ -387,7 +369,7 @@ Can&apos;t be disabled for current server</source>
     </message>
 </context>
 <context>
-    <name>InstallController</name>
+    <name>InstallUiController</name>
     <message>
         <location filename="../ui/controllers/installController.cpp" line="156"/>
         <source>%1 installed successfully. </source>
@@ -485,6 +467,49 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="151"/>
         <source>Add selected</source>
         <translation>Додати вибране</translation>
+    </message>
+</context>
+<context>
+    <name>IpSplitTunnelingUiController</name>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="24"/>
+        <source>Hostname not look like ip adress or domain name</source>
+        <translation>Ім’я хосту не схоже на ip-адресу чи доменне ім’я</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="66"/>
+        <source>New site added: %1</source>
+        <translation>Додано новий сайт %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="78"/>
+        <source>Site removed: %1</source>
+        <translation>Сайт видалено %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="85"/>
+        <source>Can&apos;t open file: %1</source>
+        <translation>Неможливо відкрити файл: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="91"/>
+        <source>Failed to parse JSON data from file: %1</source>
+        <translation>Не вдалося розібрати JSON-данні із файлу: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="96"/>
+        <source>The JSON data is not an array in file: %1</source>
+        <translation>Данні JSON не являються масивом в файлі: %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="126"/>
+        <source>Import completed</source>
+        <translation>Імпорт завершено</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/sitesController.cpp" line="145"/>
+        <source>Export completed</source>
+        <translation>Експорт завершено</translation>
     </message>
 </context>
 <context>
@@ -5054,7 +5079,7 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
 </context>
 <context>
-    <name>SettingsController</name>
+    <name>SettingsUiController</name>
     <message>
         <location filename="../ui/controllers/settingsController.cpp" line="170"/>
         <source>All settings have been reset to default values</source>
@@ -5111,46 +5136,21 @@ This means that AmneziaWG keeps the fast performance of the original while addin
     </message>
 </context>
 <context>
-    <name>SitesController</name>
+    <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="24"/>
-        <source>Hostname not look like ip adress or domain name</source>
-        <translation>Ім’я хосту не схоже на ip-адресу чи доменне ім’я</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="203"/>
+        <source>%1 installed successfully.</source>
+        <translation type="unfinished">%1 встановлено успішно.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="66"/>
-        <source>New site added: %1</source>
-        <translation>Додано новий сайт %1</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="257"/>
+        <source>API config reloaded</source>
+        <translation type="unfinished">Конфігурацію API перезавантажено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="78"/>
-        <source>Site removed: %1</source>
-        <translation>Сайт видалено %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="85"/>
-        <source>Can&apos;t open file: %1</source>
-        <translation>Неможливо відкрити файл: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="91"/>
-        <source>Failed to parse JSON data from file: %1</source>
-        <translation>Не вдалося розібрати JSON-данні із файлу: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="96"/>
-        <source>The JSON data is not an array in file: %1</source>
-        <translation>Данні JSON не являються масивом в файлі: %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="126"/>
-        <source>Import completed</source>
-        <translation>Імпорт завершено</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/sitesController.cpp" line="145"/>
-        <source>Export completed</source>
-        <translation>Експорт завершено</translation>
+        <location filename="../ui/controllers/api/apiConfigsController.cpp" line="261"/>
+        <source>Successfully changed the country of connection to %1</source>
+        <translation type="unfinished">Успішно змінено країну підключення на %1</translation>
     </message>
 </context>
 <context>
