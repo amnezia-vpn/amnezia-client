@@ -13,7 +13,6 @@
 #include "qjsonarray.h"
 #include "version.h"
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
 static bool isValidIpOrCidr(const QString &value) {
     static const QRegularExpression re(
         QStringLiteral(R"(^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$)"));
@@ -31,8 +30,6 @@ static bool isValidIpOrCidr(const QString &value) {
     }
     return true;
 }
-
-#endif
 
 #ifdef Q_OS_WIN
     #include "../client/platforms/windows/daemon/windowsfirewall.h"
@@ -189,15 +186,11 @@ bool KillSwitch::disableAllTraffic() {
 
 bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     if (!std::all_of(ranges.cbegin(), ranges.cend(), isValidIpOrCidr)) {
         qCritical() << "IPC: invalid IP/CIDR in ranges, rejecting resetAllowedRange";
         return false;
     }
     m_allowedRanges = ranges;
-#else
-    m_allowedRanges = ranges;
-#endif
 
 #ifdef Q_OS_LINUX
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), true);
@@ -220,12 +213,10 @@ bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 }
 
 bool KillSwitch::addAllowedRange(const QStringList &ranges) {
-#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     if (!std::all_of(ranges.cbegin(), ranges.cend(), isValidIpOrCidr)) {
         qCritical() << "IPC: invalid IP/CIDR in ranges, rejecting addAllowedRange";
         return false;
     }
-#endif
     for (const QString &range : ranges) {
         if (!range.isEmpty() && !m_allowedRanges.contains(range)) {
             m_allowedRanges.append(range);
@@ -324,6 +315,18 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     QStringList allownets;
     QStringList blocknets;
     QStringList allowedDnsServers;
+
+    const QString dns1 = configStr.value(amnezia::configKey::dns1).toString();
+    // We don't use secondary DNS if primary DNS is AmneziaDNS
+    const QString dns2 = dns1.contains(amnezia::protocols::dns::amneziaDnsIp)
+            ? QString()
+            : configStr.value(amnezia::configKey::dns2).toString();
+
+    if ((!dns1.isEmpty() && !isValidIpOrCidr(dns1)) || (!dns2.isEmpty() && !isValidIpOrCidr(dns2))) {
+        qCritical() << "IPC: invalid dns1/dns2, rejecting enableKillSwitch";
+        return false;
+    }
+
     for (const QJsonValue &dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
         if (!dns.isString()) break;
         const QString dnsStr = dns.toString();
@@ -352,6 +355,12 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
             allownets.append(v.toString());
         }
     }
+
+    if (!std::all_of(allownets.cbegin(), allownets.cend(), isValidIpOrCidr) ||
+        !std::all_of(blocknets.cbegin(), blocknets.cend(), isValidIpOrCidr)) {
+        qCritical() << "IPC: invalid IP/CIDR in allownets/blocknets, rejecting enableKillSwitch";
+        return false;
+    }
 #endif
 
 #ifdef Q_OS_LINUX
@@ -363,11 +372,6 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), blockAll);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), allowNets);
-    if (!std::all_of(allownets.cbegin(), allownets.cend(), isValidIpOrCidr) ||
-        !std::all_of(blocknets.cbegin(), blocknets.cend(), isValidIpOrCidr)) {
-        qCritical() << "IPC: invalid IP/CIDR in allownets/blocknets, rejecting enableKillSwitch";
-        return false;
-    }
     LinuxFirewall::updateAllowNets(allownets);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), blockAll);
     LinuxFirewall::updateBlockNets(blocknets);
@@ -379,20 +383,10 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
 
-    const QString dns1 = configStr.value(amnezia::configKey::dns1).toString();
-    if (isValidIpOrCidr(dns1))
+    if (!dns1.isEmpty())
         dnsServers.append(dns1);
-    else if (!dns1.isEmpty())
-        qWarning() << "IPC: rejected invalid dns1:" << dns1;
-
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!dns1.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        const QString dns2 = configStr.value(amnezia::configKey::dns2).toString();
-        if (isValidIpOrCidr(dns2))
-            dnsServers.append(dns2);
-        else if (!dns2.isEmpty())
-            qWarning() << "IPC: rejected invalid dns2:" << dns2;
-    }
+    if (!dns2.isEmpty())
+        dnsServers.append(dns2);
 
     dnsServers.append("127.0.0.1");
     dnsServers.append("127.0.0.53");
@@ -410,11 +404,6 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
         MacOSFirewall::install();
 
     MacOSFirewall::ensureRootAnchorPriority();
-    if (!std::all_of(allownets.cbegin(), allownets.cend(), isValidIpOrCidr) ||
-        !std::all_of(blocknets.cbegin(), blocknets.cend(), isValidIpOrCidr)) {
-        qCritical() << "IPC: invalid IP/CIDR in allownets/blocknets, rejecting enableKillSwitch";
-        return false;
-    }
     MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("100.blockAll"), blockAll);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("110.allowNets"), allowNets);
@@ -428,20 +417,10 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
 
     QStringList dnsServers;
-    const QString dns1 = configStr.value(amnezia::configKey::dns1).toString();
-    if (isValidIpOrCidr(dns1))
+    if (!dns1.isEmpty())
         dnsServers.append(dns1);
-    else if (!dns1.isEmpty())
-        qWarning() << "IPC: rejected invalid dns1:" << dns1;
-
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!dns1.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        const QString dns2 = configStr.value(amnezia::configKey::dns2).toString();
-        if (isValidIpOrCidr(dns2))
-            dnsServers.append(dns2);
-        else if (!dns2.isEmpty())
-            qWarning() << "IPC: rejected invalid dns2:" << dns2;
-    }
+    if (!dns2.isEmpty())
+        dnsServers.append(dns2);
 
     dnsServers.append(allowedDnsServers);
 

@@ -48,9 +48,8 @@ int IpcServer::createPrivilegedProcess()
     // Make sure any connections are handed to QtRO
     QObject::connect(pd.localServer.data(), &QLocalServer::newConnection, this, [pd]() {
         qDebug() << "IpcServer new connection";
-        QLocalSocket *conn = pd.localServer->nextPendingConnection();
         if (pd.serverNode) {
-            pd.serverNode->addHostSideConnection(conn);
+            pd.serverNode->addHostSideConnection(pd.localServer->nextPendingConnection());
             pd.serverNode->enableRemoting(pd.ipcProcess.data());
         }
     });
