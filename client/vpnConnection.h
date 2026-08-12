@@ -51,6 +51,7 @@ public slots:
     void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void reconnectToVpn();
+    void requestReconnect();
     void disconnectFromVpn();
 
     void onKillSwitchModeChanged(bool enabled);
@@ -82,6 +83,10 @@ private:
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
+
+    // Coalesces bursts of wakeup/networkChanged signals (e.g. several Wi-Fi
+    // re-associations right after a sleep resume) into a single reconnect.
+    QTimer m_reconnectDebounceTimer;
 
 #ifdef Q_OS_ANDROID
    AndroidVpnProtocol* androidVpnProtocol = nullptr;
