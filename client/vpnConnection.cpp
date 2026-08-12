@@ -36,14 +36,21 @@
 
 using namespace ProtocolUtils;
 
+namespace {
+    constexpr int RECONNECT_DEBOUNCE_MSEC = 1500;
+}
+
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
-    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this)
+    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this), m_reconnectDebounceTimer(this)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(IosController::Instance(), &IosController::bytesChanged, this, &VpnConnection::onBytesChanged);
 #endif
+
+    m_reconnectDebounceTimer.setSingleShot(true);
+    connect(&m_reconnectDebounceTimer, &QTimer::timeout, this, &VpnConnection::reconnectToVpn);
 }
 
 VpnConnection::~VpnConnection()
@@ -381,8 +388,8 @@ void VpnConnection::createProtocolConnections()
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
+        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::requestReconnect, Qt::QueuedConnection);
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::requestReconnect, Qt::QueuedConnection);
     });
 #endif
 }
@@ -547,6 +554,11 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 {
     double mbps = bytes * 8 / 1e6;
     return QString("%1 %2").arg(QString::number(mbps, 'f', 2)).arg(tr("Mbps")); // Mbit/s
+}
+
+void VpnConnection::requestReconnect() {
+    qDebug() << "Reconnect requested; debouncing for" << RECONNECT_DEBOUNCE_MSEC << "ms";
+    m_reconnectDebounceTimer.start(RECONNECT_DEBOUNCE_MSEC);
 }
 
 void VpnConnection::reconnectToVpn() {

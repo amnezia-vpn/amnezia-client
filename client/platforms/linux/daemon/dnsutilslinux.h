@@ -6,7 +6,12 @@
 #define DNSUTILSLINUX_H
 
 #include <QDBusInterface>
+#include <QScopedPointer>
 #include <QDBusPendingCallWatcher>
+#include <QDBusServiceWatcher>
+#include <QHostAddress>
+#include <QList>
+#include <QString>
 
 #include "daemon/dnsutils.h"
 #include "dbustypeslinux.h"
@@ -29,13 +34,22 @@ class DnsUtilsLinux final : public DnsUtils {
   void updateLinkDomains();
 
  private slots:
+  void onResolverRegistered();
+  void onResolverUnregistered();
   void dnsCallCompleted(QDBusPendingCallWatcher*);
   void dnsDomainsReceived(QDBusPendingCallWatcher*);
 
  private:
+  void scheduleRetry();
+
   int m_ifindex = 0;
+  int m_gatewayIfindex = 0;
+  int m_domainRetries = 0;
+  bool m_retryPending = false;
   QMap<int, DnsLinkDomainList> m_linkDomains;
-  QDBusInterface* m_resolver = nullptr;
+  QScopedPointer<QDBusInterface> m_resolver;
+  QString m_pendingIfname;
+  QList<QHostAddress> m_pendingResolvers;
 };
 
 #endif  // DNSUTILSLINUX_H

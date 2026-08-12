@@ -178,11 +178,16 @@ bool RouterLinux::flushDns()
     }
 
     p.waitForFinished();
-    QByteArray output(p.readAll());
+    QByteArray output = p.readAll();
+    if ((p.exitStatus() != QProcess::NormalExit) || (p.exitCode() != 0)) {
+        qDebug().noquote() << "Failed to flush DNS: " + output;
+        return false;
+    }
+
     if (output.isEmpty())
         qDebug().noquote() << "Flush dns completed";
     else
-        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+        qDebug().noquote() << "OUTPUT systemctl restart: " + output;
 
     return true;
 }
