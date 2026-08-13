@@ -46,6 +46,8 @@ struct AwgServerConfig {
     QString rejectAfterTime;
     QString keepaliveTimeout;
     QString maxHandshakeAttempts;
+    QString randomTrailers;
+    QString disableCookies;
     bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
@@ -90,6 +92,8 @@ struct AwgClientConfig {
     QString rejectAfterTime;
     QString keepaliveTimeout;
     QString maxHandshakeAttempts;
+    QString randomTrailers;
+    QString disableCookies;
     QJsonObject toJson() const;
     static AwgClientConfig fromJson(const QJsonObject& json);
 };

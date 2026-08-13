@@ -204,7 +204,7 @@ namespace amnezia
 
             constexpr char awgV1_5[] = "1.5";
             constexpr char awgV2[] = "2";
-            constexpr char awgV3[] = "3";
+            constexpr char awgV3[] = "3.1";
 
             constexpr char defaultContentPaddingAddition[] = "10-100";
             constexpr char defaultRekeyAfterTime[] = "100-120";
@@ -213,6 +213,10 @@ namespace amnezia
             constexpr char defaultKeepaliveTimeout[] = "5-15";
             constexpr char defaultMaxHandshakeAttempts[] = "15-20";
             constexpr char defaultPersistentKeepAlive[] = "25-35";
+            constexpr char defaultRandomTrailers[] = "on";
+            constexpr char defaultDisableCookies[] = "on";
+            constexpr char awgBoolOn[] = "on";
+            constexpr char awgBoolOff[] = "off";
 
 
         }

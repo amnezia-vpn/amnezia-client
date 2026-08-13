@@ -266,6 +266,8 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$REJECT_AFTER_TIME", config.rejectAfterTime } });
         vars.append({ { "$KEEPALIVE_TIMEOUT", config.keepaliveTimeout } });
         vars.append({ { "$MAX_HANDSHAKE_ATTEMPTS", config.maxHandshakeAttempts } });
+        vars.append({ { "$RANDOM_TRAILERS", config.randomTrailers } });
+        vars.append({ { "$DISABLE_COOKIES", config.disableCookies } });
     }
 
     return vars;
