@@ -92,6 +92,7 @@ private:
     amnezia::AwgProtocolConfig m_originalProtocolConfig;
     
     QString serverProtocolVersion() const;
+    void applyDefaultsToServerConfig(amnezia::AwgServerConfig& config);
     void applyDefaultsToClientConfig(amnezia::AwgClientConfig& config);
 };
 

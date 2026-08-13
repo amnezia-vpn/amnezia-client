@@ -189,6 +189,8 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
     
     m_protocolConfig = protocolConfig;
     
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+
     if (!m_protocolConfig.clientConfig.has_value()) {
         m_protocolConfig.clientConfig = amnezia::AwgClientConfig{};
     }
@@ -202,6 +204,13 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
 QString AwgConfigModel::serverProtocolVersion() const
 {
     return m_protocolConfig.serverConfig.protocolVersion;
+}
+
+void AwgConfigModel::applyDefaultsToServerConfig(amnezia::AwgServerConfig& config)
+{
+    if (config.subnetAddress.isEmpty()) {
+        config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
+    }
 }
 
 void AwgConfigModel::applyDefaultsToClientConfig(amnezia::AwgClientConfig& config)
