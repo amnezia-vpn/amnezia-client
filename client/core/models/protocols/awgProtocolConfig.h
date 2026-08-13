@@ -52,8 +52,9 @@ struct AwgServerConfig {
     
     QJsonObject toJson() const;
     static AwgServerConfig fromJson(const QJsonObject& json);
-    
+
     bool hasEqualServerSettings(const AwgServerConfig& other) const;
+    bool hasAwg3Params() const;
 };
 
 struct AwgClientConfig {

@@ -462,6 +462,13 @@ bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
     return true;
 }
 
+bool AwgServerConfig::hasAwg3Params() const
+{
+    return !headerProtectionKey.isEmpty() || !contentPaddingAddition.isEmpty() || !rekeyAfterTime.isEmpty()
+            || !rekeyTimeout.isEmpty() || !rejectAfterTime.isEmpty() || !keepaliveTimeout.isEmpty()
+            || !maxHandshakeAttempts.isEmpty() || !randomTrailers.isEmpty() || !disableCookies.isEmpty();
+}
+
 bool AwgProtocolConfig::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
 {
     QSet<QString> uniqueHeaders;
