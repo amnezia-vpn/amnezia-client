@@ -14,7 +14,7 @@ import shlex
 
 class AwgGo(ConanFile):
     name = "awg-go"
-    version = "3.0.1"
+    version = "3.1.20260813"
     package_type = "application"
     settings = "os", "arch"
 
@@ -61,7 +61,7 @@ class AwgGo(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amneziawg-go/archive/refs/tags/v{self.version}.zip",
-            sha256="3ab9655b894c6fe43dfcba6d1e3cbfff20ca1f1928eae6242875541e82488247", strip_root=True
+            sha256="873179495285df5ca8bfe6d689ae4fa4b14267099e7f2e2f76fc74d947bfd364", strip_root=True
         )
 
     def generate(self):
