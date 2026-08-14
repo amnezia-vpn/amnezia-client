@@ -23,6 +23,7 @@ namespace apiDefs
         constexpr QLatin1String installationUuid("installation_uuid");
         constexpr QLatin1String uuid("installation_uuid");
         constexpr QLatin1String osVersion("os_version");
+        constexpr QLatin1String distribution("distribution");
         constexpr QLatin1String userCountryCode("user_country_code");
         constexpr QLatin1String serverCountryCode("server_country_code");
         constexpr QLatin1String serverCountryName("server_country_name");

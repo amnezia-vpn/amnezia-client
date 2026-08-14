@@ -57,6 +57,17 @@ QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSetti
     return appSettingsRepository->getAppLanguage().name().split("_").first();
 }
 
+QString apiUtils::getDistributionChannel()
+{
+#if defined(Q_OS_ANDROID)
+    return {};
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+    return QStringLiteral("appstore");
+#else
+    return QStringLiteral("github");
+#endif
+}
+
 QString apiUtils::getCountryFlagCode(const QString &serverCountryCode)
 {
     return serverCountryCode.section('-', 0, 0).toUpper();
