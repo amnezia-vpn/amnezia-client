@@ -27,7 +27,8 @@ namespace
         const QStringList awg3Params = { config.headerProtectionKey, config.contentPaddingAddition,
                                          config.rekeyAfterTime,      config.rekeyTimeout,
                                          config.rejectAfterTime,     config.keepaliveTimeout,
-                                         config.maxHandshakeAttempts };
+                                         config.maxHandshakeAttempts, config.randomTrailers,
+                                         config.disableCookies };
         if (std::any_of(awg3Params.begin(), awg3Params.end(), hasValue)) {
             return protocols::awg::awgV3;
         }
@@ -134,6 +135,12 @@ QJsonObject AwgServerConfig::toJson() const
     if (!maxHandshakeAttempts.isEmpty()) {
         obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
     }
+    if (!randomTrailers.isEmpty()) {
+        obj[configKey::randomTrailers] = randomTrailers;
+    }
+    if (!disableCookies.isEmpty()) {
+        obj[configKey::disableCookies] = disableCookies;
+    }
 
     if (isThirdPartyConfig) {
         obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
@@ -178,6 +185,8 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
     config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
     config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
+    config.randomTrailers = json.value(configKey::randomTrailers).toString();
+    config.disableCookies = json.value(configKey::disableCookies).toString();
 
     config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
@@ -302,6 +311,12 @@ QJsonObject AwgClientConfig::toJson() const
     if (!maxHandshakeAttempts.isEmpty()) {
         obj[configKey::maxHandshakeAttempts] = maxHandshakeAttempts;
     }
+    if (!randomTrailers.isEmpty()) {
+        obj[configKey::randomTrailers] = randomTrailers;
+    }
+    if (!disableCookies.isEmpty()) {
+        obj[configKey::disableCookies] = disableCookies;
+    }
 
     return obj;
 }
@@ -353,6 +368,8 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.rejectAfterTime = json.value(configKey::rejectAfterTime).toString();
     config.keepaliveTimeout = json.value(configKey::keepaliveTimeout).toString();
     config.maxHandshakeAttempts = json.value(configKey::maxHandshakeAttempts).toString();
+    config.randomTrailers = json.value(configKey::randomTrailers).toString();
+    config.disableCookies = json.value(configKey::disableCookies).toString();
     return config;
 }
 
@@ -397,7 +414,7 @@ QString AwgProtocolConfig::clientProtocolVersion() const
 
 QString AwgProtocolConfig::protocolVersionString(const QString &version)
 {
-    if (version == protocols::awg::awgV3) return QObject::tr(" (version 3)");
+    if (version == protocols::awg::awgV3) return QObject::tr(" (version 3.1)");
     if (version == protocols::awg::awgV2) return QObject::tr(" (version 2)");
     if (version == protocols::awg::awgV1_5) return QObject::tr(" (version 1.5)");
     return "";
@@ -437,11 +454,19 @@ bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
         contentPaddingAddition != other.contentPaddingAddition ||
         rekeyAfterTime != other.rekeyAfterTime || rekeyTimeout != other.rekeyTimeout ||
         rejectAfterTime != other.rejectAfterTime || keepaliveTimeout != other.keepaliveTimeout ||
-        maxHandshakeAttempts != other.maxHandshakeAttempts) {
+        maxHandshakeAttempts != other.maxHandshakeAttempts ||
+        randomTrailers != other.randomTrailers || disableCookies != other.disableCookies) {
         return false;
     }
 
     return true;
+}
+
+bool AwgServerConfig::hasAwg3Params() const
+{
+    return !headerProtectionKey.isEmpty() || !contentPaddingAddition.isEmpty() || !rekeyAfterTime.isEmpty()
+            || !rekeyTimeout.isEmpty() || !rejectAfterTime.isEmpty() || !keepaliveTimeout.isEmpty()
+            || !maxHandshakeAttempts.isEmpty() || !randomTrailers.isEmpty() || !disableCookies.isEmpty();
 }
 
 bool AwgProtocolConfig::isHeadersEqual(const QString &h1, const QString &h2, const QString &h3, const QString &h4)
