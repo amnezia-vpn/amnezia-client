@@ -952,9 +952,7 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
         return errorCode;
     }
 
-    accountInfo = QJsonDocument::fromJson(responseBody).object();
-
-    qDebug() << accountInfo;
+    accountInfo = QJsonDocument::fromJson(responseBody).object();    
 
     return ErrorCode::NoError;
 }
