@@ -22,6 +22,7 @@
 
 QFile Logger::m_file;
 QTextStream Logger::m_textStream;
+QMutex Logger::m_fileMutex;
 QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 QString Logger::m_serviceLogFileName = QString("%1.log").arg(SERVICE_NAME);
 
@@ -68,14 +69,17 @@ bool Logger::init(bool isServiceLogger)
         return false;
     }
 
-    m_file.setFileName(appDir.filePath(logFileName));
-    if (!m_file.open(QIODevice::Append)) {
-        qWarning() << "Cannot open log file:" << logFileName;
-        return false;
-    }
+    {
+        QMutexLocker locker(&m_fileMutex);
+        m_file.setFileName(appDir.filePath(logFileName));
+        if (!m_file.open(QIODevice::Append)) {
+            qWarning() << "Cannot open log file:" << logFileName;
+            return false;
+        }
 
-    m_file.setTextModeEnabled(true);
-    m_textStream.setDevice(&m_file);
+        m_file.setTextModeEnabled(true);
+        m_textStream.setDevice(&m_file);
+    }
 
     qInstallMessageHandler(messageHandler);
 
@@ -84,6 +88,7 @@ bool Logger::init(bool isServiceLogger)
 
 void Logger::deInit()
 {
+    QMutexLocker locker(&m_fileMutex);
     m_textStream.setDevice(nullptr);
     m_file.close();
 }
@@ -137,8 +142,11 @@ QString Logger::serviceLogsFilePath()
 
 QString Logger::getLogFile()
 {
-    if (m_file.isOpen()) {
-        m_file.flush();
+    {
+        QMutexLocker locker(&m_fileMutex);
+        if (m_file.isOpen()) {
+            m_file.flush();
+        }
     }
     QFile file(userLogsFilePath());
 
@@ -154,8 +162,11 @@ QString Logger::getLogFile()
 
 QString Logger::getServiceLogFile()
 {
-    if (m_file.isOpen()) {
-        m_file.flush();
+    {
+        QMutexLocker locker(&m_fileMutex);
+        if (m_file.isOpen()) {
+            m_file.flush();
+        }
     }
     QFile file(serviceLogsFilePath());
 
@@ -184,8 +195,12 @@ bool Logger::openLogsFolder(bool isServiceLogger)
 
 void Logger::clearLogs(bool isServiceLogger)
 {
-    bool isLogActive = m_file.isOpen();
-    m_file.close();
+    bool isLogActive;
+    {
+        QMutexLocker locker(&m_fileMutex);
+        isLogActive = m_file.isOpen();
+        m_file.close();
+    }
 
     QFile file(isServiceLogger ? serviceLogsFilePath() : userLogsFilePath());
 
@@ -243,9 +258,12 @@ Logger::LogStreamer::~LogStreamer()
                                     .arg(QDateTime::currentDateTimeUtc().toString("[yyyy-MM-dd hh:mm:ss.zzzZ]"),
                                          logLevelString, m_logger->className(), m_data->m_buffer.trimmed());
 
-    if (m_file.isOpen()) {
-        QTextStream logToFile(&m_file);
-        logToFile << message << Qt::endl << Qt::flush;
+    {
+        QMutexLocker locker(&m_fileMutex);
+        if (m_file.isOpen()) {
+            QTextStream logToFile(&m_file);
+            logToFile << message << Qt::endl << Qt::flush;
+        }
     }
 
     QTextStream logToOutput((m_logLevel == LogLevel::Error) ? stderr : stdout);
