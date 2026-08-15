@@ -50,6 +50,13 @@ WireguardProtocol::~WireguardProtocol()
 
 void WireguardProtocol::stop()
 {
+    // stop() is called both explicitly by callers and unconditionally from
+    // the destructor; guard against running deactivate() twice for one
+    // connection.
+    if (m_stopped) {
+        return;
+    }
+    m_stopped = true;
     stopMzImpl();
     return;
 }
@@ -75,5 +82,6 @@ ErrorCode WireguardProtocol::stopMzImpl()
 
 ErrorCode WireguardProtocol::start()
 {
+    m_stopped = false;
     return startMzImpl();
 }
