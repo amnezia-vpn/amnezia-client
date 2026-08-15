@@ -321,7 +321,8 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
         vlessServer.serverName = realitySettings.value(amnezia::protocols::xray::serverName).toString();
         vlessServer.publicKey = realitySettings.value(amnezia::protocols::xray::publicKey).toString();
         vlessServer.shortId = realitySettings.value(amnezia::protocols::xray::shortId).toString();
-        vlessServer.fingerprint = realitySettings.value(amnezia::protocols::xray::fingerprint).toString("chrome");
+        vlessServer.fingerprint = realitySettings.value(amnezia::protocols::xray::fingerprint)
+                                          .toString(amnezia::protocols::xray::defaultFingerprint);
         vlessServer.spiderX = realitySettings.value(amnezia::protocols::xray::spiderX).toString("");
     } else if (vlessServer.security == "tls") {
         QJsonObject tlsSettings = streamSettings.value("tlsSettings").toObject();

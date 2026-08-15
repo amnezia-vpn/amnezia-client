@@ -119,6 +119,36 @@ namespace {
             c.replace(legacyListen, listenOk);
             changed = true;
         }
+
+        QJsonParseError parseError;
+        QJsonDocument document = QJsonDocument::fromJson(c.toUtf8(), &parseError);
+        if (parseError.error == QJsonParseError::NoError && document.isObject()) {
+            QJsonObject root = document.object();
+            QJsonArray outbounds = root.value(amnezia::protocols::xray::outbounds).toArray();
+            for (qsizetype i = 0; i < outbounds.size(); ++i) {
+                QJsonObject outbound = outbounds.at(i).toObject();
+                QJsonObject stream = outbound.value(amnezia::protocols::xray::streamSettings).toObject();
+                if (stream.value(amnezia::protocols::xray::security).toString() != QLatin1String("reality"))
+                    continue;
+
+                QJsonObject reality = stream.value(amnezia::protocols::xray::realitySettings).toObject();
+                if (reality.value(amnezia::protocols::xray::fingerprint).toString()
+                        .compare(QLatin1String("chrome"), Qt::CaseInsensitive) != 0) {
+                    continue;
+                }
+
+                reality[amnezia::protocols::xray::fingerprint] =
+                        QString::fromLatin1(amnezia::protocols::xray::defaultFingerprint);
+                stream[amnezia::protocols::xray::realitySettings] = reality;
+                outbound[amnezia::protocols::xray::streamSettings] = stream;
+                outbounds[i] = outbound;
+                changed = true;
+            }
+            if (changed) {
+                root[amnezia::protocols::xray::outbounds] = outbounds;
+                c = QJsonDocument(root).toJson(QJsonDocument::Compact);
+            }
+        }
         if (changed) {
             pc.setNativeConfig(c);
         }
