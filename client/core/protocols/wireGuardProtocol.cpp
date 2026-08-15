@@ -50,9 +50,6 @@ WireguardProtocol::~WireguardProtocol()
 
 void WireguardProtocol::stop()
 {
-    // stop() is called both explicitly by callers and unconditionally from
-    // the destructor; guard against running deactivate() twice for one
-    // connection.
     if (m_stopped) {
         return;
     }
