@@ -85,7 +85,7 @@ bool WindowsServiceManager::startPolling(DWORD goal_state, int max_wait_sec) {
       return true;
     }
 
-    logger.debug() << "Polling Status" << m_state_target
+    logger.debug() << "Polling Status" << goal_state
                    << "wanted, has: " << status.dwCurrentState;
     Sleep(1000);
     ++tries;
@@ -117,7 +117,10 @@ bool WindowsServiceManager::startService() {
                          NULL);      // no arguments
   if (ok) {
     logger.debug() << ("Service start requested");
-    startPolling(SERVICE_RUNNING, 30);
+    ok = startPolling(SERVICE_RUNNING, 30);
+    if (!ok) {
+      logger.error() << "Timed out waiting for the service to start";
+    }
   } else {
     WindowsUtils::windowsLog("StartService failed");
   }
@@ -134,7 +137,10 @@ bool WindowsServiceManager::stopService() {
   bool ok = ControlService(m_service, SERVICE_CONTROL_STOP, &status);
   if (ok) {
     logger.debug() << ("Service stop requested");
-    startPolling(SERVICE_STOPPED, 10);
+    ok = startPolling(SERVICE_STOPPED, 10);
+    if (!ok) {
+      logger.error() << "Timed out waiting for the service to stop";
+    }
   } else {
     WindowsUtils::windowsLog("StopService failed");
   }

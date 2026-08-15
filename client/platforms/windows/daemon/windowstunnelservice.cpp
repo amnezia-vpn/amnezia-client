@@ -50,7 +50,7 @@ WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
 }
 
 WindowsTunnelService::~WindowsTunnelService() {
-  MZ_COUNT_CTOR(WindowsTunnelService);
+  MZ_COUNT_DTOR(WindowsTunnelService);
   stop();
   CloseServiceHandle((SC_HANDLE)m_scm);
 }
