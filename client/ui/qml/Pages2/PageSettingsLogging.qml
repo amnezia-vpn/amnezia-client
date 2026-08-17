@@ -204,7 +204,7 @@ PageType {
         }
     }
 
-    readonly property bool networkDiagnosticsAvailable: Qt.platform.os === "windows" || Qt.platform.os === "linux"
+    readonly property bool networkDiagnosticsAvailable: Qt.platform.os === "windows" || Qt.platform.os === "linux" || Qt.platform.os === "osx"
 
     // Show service logs only if this is NOT a macOS build with
     // Network-Extension (IsMacOsNeBuild is injected from C++ at run-time)

@@ -21,13 +21,17 @@ const QStringList kSectionOrder = { "system",          "adapters",           "li
 const QStringList kSectionOrder = { "system",     "adapters",           "link-type",     "drivers",
                                      "routes",     "route-resolution",   "dns",           "ipv6-localhost",
                                      "proxy",      "services-processes", "firewall",      "netfilter-full" };
+#elif defined(Q_OS_MACOS)
+const QStringList kSectionOrder = { "system",     "adapters",           "link-type",     "drivers",
+                                     "routes",     "route-resolution",   "dns",           "ipv6-localhost",
+                                     "proxy",      "services-processes", "firewall" };
 #endif
 
 }
 
 QString NetworkDiagnostics::run()
 {
-#if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX)
+#if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)
     return QStringLiteral("ERROR: network diagnostics is not supported on this platform");
 #else
     QTemporaryDir tempDir;
@@ -38,6 +42,9 @@ QString NetworkDiagnostics::run()
 #if defined(Q_OS_WIN)
     const QString resourcePath = QStringLiteral(":/network_diagnostics/network-diagnostics-windows.ps1");
     const QString scriptPath = tempDir.filePath(QStringLiteral("network-diagnostics-windows.ps1"));
+#elif defined(Q_OS_MACOS)
+    const QString resourcePath = QStringLiteral(":/network_diagnostics/network-diagnostics-macos.sh");
+    const QString scriptPath = tempDir.filePath(QStringLiteral("network-diagnostics-macos.sh"));
 #else
     const QString resourcePath = QStringLiteral(":/network_diagnostics/network-diagnostics-linux.sh");
     const QString scriptPath = tempDir.filePath(QStringLiteral("network-diagnostics-linux.sh"));
@@ -48,7 +55,7 @@ QString NetworkDiagnostics::run()
     }
 
     QProcess process;
-    process.setWorkingDirectory(tempDir.path()); // both scripts write ./snapshot-<label>/ relative to CWD
+    process.setWorkingDirectory(tempDir.path()); // scripts write ./snapshot-<label>/ relative to CWD
 
 #if defined(Q_OS_WIN)
     process.start(QStringLiteral("powershell"),
