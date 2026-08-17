@@ -51,6 +51,9 @@ public slots:
     void exportServiceLogsFile(const QString &fileName);
     void clearLogs();
 
+    bool runNetworkDiagnostics();
+    void exportNetworkDiagnosticsFile(const QString &fileName);
+
     void backupAppConfig(const QString &fileName);
     void restoreAppConfig(const QString &fileName);
     void restoreAppConfigFromData(const QByteArray &data);

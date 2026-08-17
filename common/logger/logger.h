@@ -20,6 +20,7 @@ public:
     static void deInit();
 
     static bool setServiceLogsEnabled(bool enabled);
+    static bool runNetworkDiagnostics();
 
     static bool openLogsFolder(bool isServiceLogger);
 
@@ -29,10 +30,13 @@ public:
 
     static QString userLogsFilePath();
     static QString serviceLogsFilePath();
+    static QString newNetworkDiagnosticsFilePath();
+    static QString latestNetworkDiagnosticsFilePath();
     static QString systemLogDir();
 
     static QString getLogFile();
     static QString getServiceLogFile();
+    static QString getNetworkDiagnosticsFile();
 
     // compat with Mozilla logger
     Logger(const QString &className)
