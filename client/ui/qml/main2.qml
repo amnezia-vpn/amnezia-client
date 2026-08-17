@@ -36,6 +36,7 @@ Window  {
     Connections {
         target: ConnectionController
         function onSystemWoke() {
+            console.log("ConnectionController.systemWoke received")
             root.clearStuckUiBlockIfNeeded("system wakeup")
         }
     }
