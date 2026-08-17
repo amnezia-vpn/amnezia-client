@@ -50,11 +50,6 @@ Window  {
                     refreshTimer.restart()
                 }
             }
-
-            if ((Qt.platform.os === "windows" || Qt.platform.os === "linux")
-                    && Qt.application.state === Qt.ApplicationActive) {
-                root.clearStuckUiBlockIfNeeded("app becoming active again")
-            }
         }
     }
 

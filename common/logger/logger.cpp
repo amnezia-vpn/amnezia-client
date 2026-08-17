@@ -69,16 +69,20 @@ bool Logger::init(bool isServiceLogger)
         return false;
     }
 
+    bool opened = false;
     {
         QMutexLocker locker(&m_fileMutex);
         m_file.setFileName(appDir.filePath(logFileName));
-        if (!m_file.open(QIODevice::Append)) {
-            qWarning() << "Cannot open log file:" << logFileName;
-            return false;
+        opened = m_file.open(QIODevice::Append);
+        if (opened) {
+            m_file.setTextModeEnabled(true);
+            m_textStream.setDevice(&m_file);
         }
+    }
 
-        m_file.setTextModeEnabled(true);
-        m_textStream.setDevice(&m_file);
+    if (!opened) {
+        qWarning() << "Cannot open log file:" << logFileName;
+        return false;
     }
 
     qInstallMessageHandler(messageHandler);
