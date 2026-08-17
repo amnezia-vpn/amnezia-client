@@ -23,18 +23,13 @@ const QStringList kSectionOrder = { "system",     "adapters",           "link-ty
                                      "proxy",      "services-processes", "firewall",      "netfilter-full" };
 #endif
 
-} // namespace
+}
 
 QString NetworkDiagnostics::run()
 {
 #if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX)
     return QStringLiteral("ERROR: network diagnostics is not supported on this platform");
 #else
-    // QTemporaryDir() with no template creates a randomly-named, owner-only
-    // (0700) directory under the system temp path. Do NOT switch this to a
-    // fixed/predictable path: this code runs as root/SYSTEM, and a predictable
-    // path that a local non-privileged user could pre-create or symlink ahead
-    // of time is a classic TOCTOU/symlink privilege-escalation vector.
     QTemporaryDir tempDir;
     if (!tempDir.isValid()) {
         return QStringLiteral("ERROR: failed to create secure temp directory");
@@ -51,8 +46,6 @@ QString NetworkDiagnostics::run()
     if (!QFile::copy(resourcePath, scriptPath)) {
         return QStringLiteral("ERROR: failed to extract diagnostics script");
     }
-    // No chmod +x: the script is always invoked through an explicit
-    // interpreter below, so it never needs its own execute bit.
 
     QProcess process;
     process.setWorkingDirectory(tempDir.path()); // both scripts write ./snapshot-<label>/ relative to CWD
@@ -84,7 +77,11 @@ QString NetworkDiagnostics::run()
             out << "=== " << section << " === (section missing)\n\n";
             continue;
         }
-        out << QString::fromUtf8(sectionFile.readAll()) << "\n";
+        QString sectionText = QString::fromUtf8(sectionFile.readAll());
+        if (sectionText.startsWith(QChar(0xFEFF))) {
+            sectionText.remove(0, 1);
+        }
+        out << sectionText << "\n";
         sectionsFound++;
     }
 
@@ -93,6 +90,5 @@ QString NetworkDiagnostics::run()
     }
 
     return combined;
-    // tempDir's destructor recursively removes the directory (script + snapshot output).
 #endif
 }
