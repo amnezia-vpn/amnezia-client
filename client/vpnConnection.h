@@ -65,6 +65,8 @@ signals:
 
     void serviceIsNotReady();
 
+    void systemWoke();
+
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
