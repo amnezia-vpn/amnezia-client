@@ -511,9 +511,10 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
             continue;
         } else {
-            QStringList parts = trimmedLine.split(" = ");
-            if (parts.count() == 2) {
-                configMap[parts.at(0).trimmed()] = parts.at(1).trimmed();
+            const qsizetype separatorIndex = trimmedLine.indexOf('=');
+            if (separatorIndex > 0) {
+                configMap[trimmedLine.left(separatorIndex).trimmed()] =
+                        trimmedLine.mid(separatorIndex + 1).trimmed();
             }
         }
     }
@@ -566,8 +567,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         lastConfig[configKey::persistentKeepAlive] = configMap.value(protocols::wireguard::PersistentKeepalive);
     }
 
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(
-                configMap.value(protocols::wireguard::AllowedIPs).split(", "));
+    const QStringList allowedIps = configMap.value(protocols::wireguard::AllowedIPs).split(
+            QRegularExpression("\\s*,\\s*"), Qt::SkipEmptyParts);
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIps);
 
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
 
@@ -635,11 +637,24 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
 {
     QJsonParseError parserErr;
     QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
+    if (parserErr.error != QJsonParseError::NoError || !jsonConf.isObject()) {
+        qDebug() << "Xray config JSON parse failed:" << parserErr.errorString();
+        return QJsonObject();
+    }
+
+    const QJsonObject parsedConfig = jsonConf.object();
+    if (!parsedConfig.value(protocols::xray::inbounds).isArray()
+            || !parsedConfig.value(protocols::xray::outbounds).isArray()) {
+        qDebug() << "Xray config is missing inbounds or outbounds";
+        return QJsonObject();
+    }
+
+    const QString serializedConfig = QString::fromUtf8(jsonConf.toJson());
 
     QJsonObject xrayVpnConfig;
-    xrayVpnConfig[configKey::config] = jsonConf.toJson().constData();
+    xrayVpnConfig[configKey::config] = serializedConfig;
     QJsonObject lastConfig;
-    lastConfig[configKey::lastConfig] = jsonConf.toJson().constData();
+    lastConfig[configKey::lastConfig] = serializedConfig;
     lastConfig[configKey::isThirdPartyConfig] = true;
 
     QJsonObject containers;
