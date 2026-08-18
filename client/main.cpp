@@ -1,12 +1,18 @@
 #include <QDebug>
 #include <QTimer>
+#include <libssh/libssh.h>
+#include <openssl/ssl.h>
 
-#include "amnezia_application.h"
-#include "core/osSignalHandler.h"
-#include "migrations.h"
+#include "amneziaApplication.h"
+#include "core/utils/osSignalHandler.h"
+#include "core/utils/migrations.h"
 #include "version.h"
 
-#include <QTimer>
+
+// use openssl symbols to prevent linker throwing-off the OpenSSL dependency
+void anchorOpenSSL() {
+    SSL_CTX_free(SSL_CTX_new(TLS_method()));
+}
 
 #ifdef Q_OS_WIN
     #include "Windows.h"
@@ -47,6 +53,13 @@ int main(int argc, char *argv[])
     AmneziaApplication app(argc, argv);
     OsSignalHandler::setup();
 
+    anchorOpenSSL();
+
+    ssh_init();
+    QObject::connect(&app, &QCoreApplication::aboutToQuit, []() {
+        ssh_finalize();
+    });
+
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     if (isAnotherInstanceRunning()) {
         QTimer::singleShot(1000, &app, [&]() { app.quit(); });
@@ -75,7 +88,6 @@ int main(int argc, char *argv[])
 
         qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
-        qInfo().noquote() << QString("SSL backend: %1").arg(QSslSocket::sslLibraryVersionString());
 
         return app.exec();
     }

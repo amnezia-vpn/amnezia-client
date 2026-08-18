@@ -7,12 +7,12 @@
 #include <QHash>
 #include <QDebug>
 #include <QObject>
+#include <QNetworkInterface>
 
 #include "../client/platforms/windows/daemon/dnsutilswindows.h"
 
 #include <WinSock2.h>  //includes Windows.h
 #include <WS2tcpip.h>
-
 
 #include <iphlpapi.h>
 #include <IcmpAPI.h>
@@ -45,11 +45,14 @@ public:
     bool StartRoutingIpv6();
     bool StopRoutingIpv6();
 
+    bool createTun(const QString &dev, const QString &subnet);
     void suspendWcmSvc(bool suspend);
     bool updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers);
     bool restoreResolvers();
 
 private:
+    static QList<QString> kIpv6Subnets;
+
     RouterWin(RouterWin const &) = delete;
     RouterWin& operator= (RouterWin const&) = delete;
 
@@ -58,6 +61,8 @@ private:
     BOOL EnableDebugPrivilege();
     BOOL InitNtFunctions();
     BOOL SuspendProcess(BOOL fSuspend, DWORD dwProcessId);
+
+    QNetworkInterface findLoopbackIface();
 
 private:
     RouterWin() {m_dnsUtil = new DnsUtilsWindows(this);}

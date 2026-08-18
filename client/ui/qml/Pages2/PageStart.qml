@@ -106,6 +106,19 @@ PageType {
     }
 
     Connections {
+        objectName: "connectionControllerConnections"
+
+        target: ConnectionController
+
+        function onNoInstalledContainers() {
+            PageController.setTriggeredByConnectButton(true)
+
+            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        }
+    }
+
+    Connections {
         objectName: "installControllerConnections"
 
         target: InstallController
@@ -132,21 +145,19 @@ PageType {
             onInstallationErrorOccurred(message)
         }
 
-        function onUpdateContainerFinished(message) {
+        function onUpdateContainerFinished(message, closePage) {
             PageController.showNotificationMessage(message)
-            PageController.closePage()
+            if (closePage) {
+                PageController.closePage()
+            }
         }
 
         function onCachedProfileCleared(message) {
             PageController.showNotificationMessage(message)
         }
 
-        function onApiConfigRemoved(message) {
-            PageController.showNotificationMessage(message)
-        }
-
-        function onRemoveProcessedServerFinished(finishedMessage) {
-            if (!ServersModel.getServersCount()) {
+        function onRemoveServerFinished(finishedMessage) {
+            if (!ServersUiController.getServersCount()) {
                 PageController.goToPageHome()
             } else {
                 PageController.goToStartPage()
@@ -155,23 +166,19 @@ PageType {
             PageController.showNotificationMessage(finishedMessage)
         }
 
-        function onNoInstalledContainers() {
-            PageController.setTriggeredByConnectButton(true)
-
-            ServersModel.processedIndex = ServersModel.getDefaultServerIndex()
-            InstallController.setShouldCreateServer(false)
-            PageController.goToPage(PageEnum.PageSetupWizardEasy)
+        function onRemoveAllContainersFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
+            PageController.showNotificationMessage(finishedMessage)
         }
-    }
 
-    Connections {
-        objectName: "connectionControllerConnections"
-
-        target: ConnectionController
-
-        function onReconnectWithUpdatedContainer(message) {
-            PageController.showNotificationMessage(message)
+        function onRemoveContainerFinished(finishedMessage) {
+            if (tabBarStackView.currentItem.objectName === PageController.getPagePath(PageEnum.PageDeinstalling)) {
+                PageController.closePage()
+            }
             PageController.closePage()
+            PageController.showNotificationMessage(finishedMessage)
         }
     }
 
@@ -215,7 +222,7 @@ PageType {
     }
 
     Connections {
-        target: ApiSettingsController
+        target: SubscriptionUiController
 
         function onErrorOccurred(error) {
             PageController.showErrorMessage(error)
@@ -223,14 +230,23 @@ PageType {
     }
 
     Connections {
-        target: ApiConfigsController
+        target: SubscriptionUiController
 
-        function onInstallServerFromApiFinished(message) {
-            if (!ConnectionController.isConnected) {
-                ServersModel.setDefaultServerIndex(ServersModel.getServersCount() - 1);
-                ServersModel.processedIndex = ServersModel.defaultIndex
+        function onApiConfigRemoved(message) {
+            PageController.showNotificationMessage(message)
+        }
+
+        function onApiServerRemoved(message) {
+            if (!ServersUiController.getServersCount()) {
+                PageController.goToPageHome()
+            } else {
+                PageController.goToStartPage()
+                PageController.goToPage(PageEnum.PageSettingsServersList)
             }
+            PageController.showNotificationMessage(message)
+        }
 
+        function onInstallServerFromApiFinished(message, preferredDefaultIndex) {
             PageController.goToPageHome()
             PageController.showNotificationMessage(message)
         }
@@ -271,14 +287,13 @@ PageType {
             } else {
                 tabBar.visible = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
         }
 
         Keys.onPressed: function(event) {
-            console.debug(">>>> ", event.key, " Event is caught by StartPage")
             switch (event.key) {
             case Qt.Key_Tab:
             case Qt.Key_Down:
@@ -304,12 +319,12 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        
+
         // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
-        anchors.bottomMargin: SettingsController.imeHeight
+        anchors.bottomMargin: PageController.imeHeight
 
         topPadding: 8
-        bottomPadding: 8 + SettingsController.safeAreaBottomMargin
+        bottomPadding: 8 + PageController.safeAreaBottomMargin
         leftPadding: 96
         rightPadding: 96
 
@@ -346,7 +361,7 @@ PageType {
             image: "qrc:/images/controls/home.svg"
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
-                ServersModel.processedIndex = ServersModel.defaultIndex
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                 tabBar.currentIndex = 0
             }
         }
@@ -360,15 +375,15 @@ PageType {
 
                 function onModelReset() {
                     if (!SettingsController.isOnTv()) {
-                        var hasServerWithWriteAccess = ServersModel.hasServerWithWriteAccess()
+                        var hasServerWithWriteAccess = ServersUiController.hasServerWithWriteAccess()
                         shareTabButton.visible = hasServerWithWriteAccess
                         shareTabButton.width = hasServerWithWriteAccess ? undefined : 0
                     }
                 }
             }
 
-            visible: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess()
-            width: !SettingsController.isOnTv() && ServersModel.hasServerWithWriteAccess() ? undefined : 0
+            visible: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess()
+            width: !SettingsController.isOnTv() && ServersUiController.hasServerWithWriteAccess() ? undefined : 0
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
@@ -383,12 +398,12 @@ PageType {
             objectName: "settingsTabButton"
 
             isSelected: tabBar.currentIndex === 2
-            image: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            image: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"
                 value: "transparent"
-                when: (ServersModel.hasServersFromGatewayApi && NewsModel.hasUnread)
+                when: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread)
             }
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)

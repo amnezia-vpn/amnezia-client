@@ -16,6 +16,8 @@ import "../Config"
 PageType {
     id: root
 
+    property bool isRestoringBackup: false
+
     Connections {
         target: ImportController
 
@@ -41,7 +43,7 @@ PageType {
                 property bool isVisible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
                 
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 24 + PageController.safeAreaTopMargin
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
@@ -222,8 +224,13 @@ PageType {
                 headerText: title
                 bodyText: description
 
+                showRecommendedBadge: featuredAmneziaConnection
+                recommendedText: featuredAmneziaConnection ? qsTr("Recommended") : ""
+
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: imageSource
+
+                enabled: !root.isRestoringBackup
 
                 onClicked: { handler() }
 
@@ -242,7 +249,7 @@ PageType {
                 Layout.alignment: Qt.AlignHCenter
                 implicitHeight: 32
 
-                visible: Qt.platform.os !== "ios"
+                visible: Qt.platform.os !== "ios" && !IsMacOsNeBuild
 
                 defaultColor: AmneziaStyle.color.transparent
                 hoveredColor: AmneziaStyle.color.translucentWhite
@@ -255,7 +262,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
                 }
             }
         }
@@ -267,6 +274,7 @@ PageType {
         backupRestore,
         fileOpen,
         qrScan,
+        restorePurchases,
         siteLink
     ]
     
@@ -274,12 +282,13 @@ PageType {
         id: amneziaVpn
 
         property string title: qsTr("VPN by Amnezia")
-        property string description: qsTr("Connect to classic paid and free VPN services from Amnezia")
+        property string description: qsTr("The easiest way to connect to the VPN")
         property string imageSource: "qrc:/images/controls/amnezia.svg"
+        property bool featuredAmneziaConnection: true
         property bool isVisible: true
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            var result = ApiConfigsController.fillAvailableServices()
+            var result = SubscriptionUiController.fillAvailableServices()
             PageController.showBusyIndicator(false)
             if (result) {
                 PageController.goToPage(PageEnum.PageSetupWizardApiServicesList)
@@ -290,6 +299,7 @@ PageType {
     QtObject {
         id: selfHostVpn
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("Self-hosted VPN")
         property string description: qsTr("Configure Amnezia VPN on your own server")
         property string imageSource: "qrc:/images/controls/server.svg"
@@ -302,17 +312,25 @@ PageType {
     QtObject {
         id: backupRestore
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("Restore from backup")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/archive-restore.svg"
         property bool isVisible: PageController.isStartPageVisible()
         property var handler: function() {
+            if (root.isRestoringBackup) {
+                return
+            }
             var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                         qsTr("Backup files (*.backup)"))
             if (filePath !== "") {
+                root.isRestoringBackup = true
                 PageController.showBusyIndicator(true)
-                SettingsController.restoreAppConfig(filePath)
-                PageController.showBusyIndicator(false)
+                Qt.callLater(function() {
+                    SettingsController.restoreAppConfig(filePath)
+                    PageController.showBusyIndicator(false)
+                    root.isRestoringBackup = false
+                })
             }
         }
     }
@@ -320,13 +338,13 @@ PageType {
     QtObject {
         id: fileOpen
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("File with connection settings")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/folder-search-2.svg"
         property bool isVisible: true
         property var handler: function() {
-            var nameFilter = !ServersModel.getServersCount() ? "Config or backup files (*.vpn *.ovpn *.conf *.json *.backup)" :
-                                                               "Config files (*.vpn *.ovpn *.conf *.json)"
+            var nameFilter = "Config files (*.vpn *.ovpn *.conf *.json)"
             var fileName = SystemController.getFileName(qsTr("Open config file"), nameFilter)
             if (fileName !== "") {
                 if (ImportController.extractConfigFromFile(fileName)) {
@@ -339,6 +357,7 @@ PageType {
     QtObject {
         id: qrScan
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("QR code")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/scan-line.svg"
@@ -352,14 +371,30 @@ PageType {
     }
 
     QtObject {
+        id: restorePurchases
+
+        property bool featuredAmneziaConnection: false
+        property string title: qsTr("Restore purchases")
+        property string description: qsTr("")
+        property string imageSource: "qrc:/images/controls/refresh-cw.svg"
+        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
+        property var handler: function() {
+            PageController.showBusyIndicator(true)
+            SubscriptionUiController.restoreServiceFromAppStore()
+            PageController.showBusyIndicator(false)
+        }
+    }
+
+    QtObject {
         id: siteLink
 
+        property bool featuredAmneziaConnection: false
         property string title: qsTr("I have nothing")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/help-circle.svg"
-        property bool isVisible: PageController.isStartPageVisible() && Qt.platform.os !== "ios"
+        property bool isVisible: PageController.isStartPageVisible() && Qt.platform.os !== "ios" && !IsMacOsNeBuild
         property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
         }
     }
 }

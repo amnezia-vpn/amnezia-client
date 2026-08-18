@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ContainerEnum 1.0
+import ProtocolEnum 1.0
 import Style 1.0
 
 import "./"
@@ -23,7 +23,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
         
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -40,7 +40,7 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
 
-        enabled: ServersModel.isProcessedServerHasWriteAccess()
+        enabled: ServersUiController.isProcessedServerHasWriteAccess()
 
         header: ColumnLayout {
             width: listView.width
@@ -192,6 +192,16 @@ PageType {
                         ListElement { name : qsTr("SHA1") }
                     }
 
+                    function updateSelectedIndex() {
+                        hashDropDown.text = hash
+                        for (var i = 0; i < hashListView.model.count; i++) {
+                            if (hashListView.model.get(i).name === hash) {
+                                selectedIndex = i
+                                break
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         hashDropDown.text = selectedText
                         hash = hashDropDown.text
@@ -199,13 +209,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        hashDropDown.text = hash
+                        updateSelectedIndex()
+                    }
+                }
 
-                        for (var i = 0; i < hashListView.model.count; i++) {
-                            if (hashListView.model.get(i).name === hashDropDown.text) {
-                                currentIndex = i
-                            }
-                        }
+                Connections {
+                    target: listView.model
+                    function onDataChanged() {
+                        hashListView.updateSelectedIndex()
                     }
                 }
             }
@@ -242,6 +253,16 @@ PageType {
                         ListElement { name : qsTr("none") }
                     }
 
+                    function updateSelectedIndex() {
+                        cipherDropDown.text = cipher
+                        for (var i = 0; i < cipherListView.model.count; i++) {
+                            if (cipherListView.model.get(i).name === cipher) {
+                                selectedIndex = i
+                                break
+                            }
+                        }
+                    }
+
                     clickedFunction: function() {
                         cipherDropDown.text = selectedText
                         cipher = cipherDropDown.text
@@ -249,13 +270,14 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        cipherDropDown.text = cipher
+                        updateSelectedIndex()
+                    }
+                }
 
-                        for (var i = 0; i < cipherListView.model.count; i++) {
-                            if (cipherListView.model.get(i).name === cipherDropDown.text) {
-                                currentIndex = i
-                            }
-                        }
+                Connections {
+                    target: listView.model
+                    function onDataChanged() {
+                        cipherListView.updateSelectedIndex()
                     }
                 }
             }
@@ -406,13 +428,13 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()) {
+                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
                             PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                             return
                         }
 
                         PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateContainer(OpenVpnConfigModel.getConfig())
+                        InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.OpenVpn)
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {

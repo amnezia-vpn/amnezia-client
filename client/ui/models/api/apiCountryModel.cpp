@@ -2,7 +2,10 @@
 
 #include <QJsonObject>
 
-#include "core/api/apiDefs.h"
+#include "core/utils/api/apiUtils.h"
+#include "core/utils/serverConfigUtils.h"
+#include "core/utils/constants/apiKeys.h"
+#include "core/utils/constants/apiConstants.h"
 #include "logger.h"
 
 namespace
@@ -39,7 +42,7 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
         return countryInfo.countryName;
     }
     case CountryImageCodeRole: {
-        return countryInfo.countryCode.toUpper();
+        return apiUtils::getCountryFlagCode(countryInfo.countryCode);
     }
     case IsIssuedRole: {
         return isIssued;

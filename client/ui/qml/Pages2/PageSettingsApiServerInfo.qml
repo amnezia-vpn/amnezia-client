@@ -52,10 +52,42 @@ PageType {
 
     property var processedServer
 
+    property bool isSubscriptionExpired: false
+    property bool isSubscriptionExpiringSoon: false
+    property bool isSubscriptionRenewalAvailable: false
+    property bool isInAppPurchase: false
+
+    function updateSubscriptionState() {
+        root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
+        root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
+        root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
+    }
+
+    Component.onCompleted: {
+        root.updateSubscriptionState()
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+
+        function onModelReset() {
+            root.updateSubscriptionState()
+        }
+    }
+
+    Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
     Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -67,8 +99,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -93,7 +125,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -103,15 +135,66 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
 
                 actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-                headerText: root.processedServer.name
-                descriptionText: ApiAccountInfoModel.data("serviceDescription")
+                headerText: root.processedServer != null ? root.processedServer.name : ""
 
                 actionButtonFunction: function() {
                     serverNameEditDrawer.openTriggered()
+                }
+            }
+
+            ParagraphTextType {
+                visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                text: root.isSubscriptionExpired
+                    ? qsTr("Subscription expired")
+                    : qsTr("Subscription expiring soon")
+
+                color: root.isSubscriptionExpired
+                    ? AmneziaStyle.color.vibrantRed
+                    : AmneziaStyle.color.goldenApricot
+            }
+
+            ParagraphTextType {
+                visible: ApiAccountInfoModel.data("serviceDescription") !== ""
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
+
+                text: ApiAccountInfoModel.data("serviceDescription")
+                color: AmneziaStyle.color.mutedGray
+            }
+
+            BasicButtonType {
+                visible: (root.isSubscriptionExpired || root.isSubscriptionExpiringSoon)
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                Layout.bottomMargin: 8
+
+                text: qsTr("Renew subscription")
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                clickedFunc: function() {
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
         }
@@ -151,36 +234,40 @@ PageType {
 
             readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
 
-            SwitcherType {
-                id: switcher
+            BasicButtonType {
+                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
-                readonly property bool isVlessProtocol: ApiConfigsController.isVlessProtocol()
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 16
+                Layout.bottomMargin: 16
 
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                implicitHeight: 25
 
-                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.goldenApricot
+                leftImageSource: "qrc:/images/controls/refresh-cw.svg"
+                leftImageColor: AmneziaStyle.color.goldenApricot
 
-                text: qsTr("Use VLESS protocol")
-                checked: switcher.isVlessProtocol
-                onToggled: function() {
-                    if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                    } else {
-                        PageController.showBusyIndicator(true)
-                        ApiConfigsController.setCurrentProtocol(switcher.isVlessProtocol ? "awg" : "vless")
-                        ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
-                        PageController.showBusyIndicator(false)
-                    }
+                text: qsTr("Renew subscription")
+
+                clickedFunc: function() {
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
+            }
+
+            DividerType {
+                visible: (!root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase)
+                    || footer.isVisibleForAmneziaFree
             }
 
             WarningType {
                 id: warning
 
-                Layout.topMargin: 32
+                Layout.topMargin: 24
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
                 Layout.fillWidth: true
@@ -204,7 +291,7 @@ PageType {
                 id: vpnKey
 
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 32
+                Layout.topMargin: warning.visible ? 16 : 0
 
                 visible: footer.isVisibleForAmneziaFree
 
@@ -215,7 +302,7 @@ PageType {
                     PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
                     PageController.showBusyIndicator(true)
 
-                    ApiConfigsController.prepareVpnKeyExport()
+                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
 
                     PageController.showBusyIndicator(false)
                 }
@@ -236,7 +323,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiCountryModel()
+                    SubscriptionUiController.updateApiCountryModel()
                     PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
@@ -256,7 +343,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    ApiSettingsController.updateApiDevicesModel()
+                    SubscriptionUiController.updateApiDevicesModel()
                     PageController.goToPage(PageEnum.PageSettingsApiDevices)
                 }
             }
@@ -317,11 +404,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot reload API config during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            ApiConfigsController.updateServiceFromGateway(ServersModel.processedIndex, "", "", true)
+                            SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, "", "", true)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -355,12 +442,12 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice(false)) {
-                                ApiSettingsController.getAccountInfo(true)
+                            if (SubscriptionUiController.deactivateDevice(ServersUiController.processedServerId)) {
+                                SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, true)
                             }
                             PageController.showBusyIndicator(false)
                         }
@@ -392,13 +479,11 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
                         } else {
                             PageController.showBusyIndicator(true)
-                            if (ApiConfigsController.deactivateDevice(true)) {
-                                InstallController.removeProcessedServer()
-                            }
+                            SubscriptionUiController.removeServer(ServersUiController.processedServerId)
                             PageController.showBusyIndicator(false)
                         }
                     }
@@ -417,6 +502,6 @@ PageType {
         anchors.fill: parent
         expandedHeight: parent.height * 0.35
 
-        serverNameText: root.processedServer.name
+        serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }
 }

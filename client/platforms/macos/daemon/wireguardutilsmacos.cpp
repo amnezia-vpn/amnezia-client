@@ -79,7 +79,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
 
   QDir appPath(QCoreApplication::applicationDirPath());
   QStringList wgArgs = {"-f", "utun"};
-  m_tunnel.start(appPath.filePath("wireguard-go"), wgArgs);
+  m_tunnel.start(appPath.filePath("amneziawg-go"), wgArgs);
   if (!m_tunnel.waitForStarted(WG_TUN_PROC_TIMEOUT)) {
     logger.error() << "Unable to start tunnel process due to timeout";
     m_tunnel.kill();
@@ -141,11 +141,35 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   for (const QString& key : config.m_specialJunk.keys()) {
       out << key.toLower() << "=" << config.m_specialJunk.value(key) << "\n";
   }
-  for (const QString& key : config.m_controlledJunk.keys()) {
-      out << key.toLower() << "=" << config.m_controlledJunk.value(key) << "\n";
+
+  if (!config.m_headerProtectionKey.isEmpty()) {
+    QByteArray headerProtectionKey =
+        QByteArray::fromBase64(config.m_headerProtectionKey.toUtf8());
+    out << "header_protection_key=" << QString(headerProtectionKey.toHex()) << "\n";
   }
-  if (!config.m_specialHandshakeTimeout.isEmpty()) {
-      out << "itime=" << config.m_specialHandshakeTimeout << "\n";
+  if (!config.m_contentPaddingAddition.isEmpty()) {
+    out << "content_padding_addition=" << config.m_contentPaddingAddition << "\n";
+  }
+  if (!config.m_rekeyAfterTime.isEmpty()) {
+    out << "rekey_after_time=" << config.m_rekeyAfterTime << "\n";
+  }
+  if (!config.m_rekeyTimeout.isEmpty()) {
+    out << "rekey_timeout=" << config.m_rekeyTimeout << "\n";
+  }
+  if (!config.m_rejectAfterTime.isEmpty()) {
+    out << "reject_after_time=" << config.m_rejectAfterTime << "\n";
+  }
+  if (!config.m_keepaliveTimeout.isEmpty()) {
+    out << "keepalive_timeout=" << config.m_keepaliveTimeout << "\n";
+  }
+  if (!config.m_maxHandshakeAttempts.isEmpty()) {
+    out << "max_handshake_attempts=" << config.m_maxHandshakeAttempts << "\n";
+  }
+  if (!config.m_randomTrailers.isEmpty()) {
+    out << "random_trailers=" << InterfaceConfig::awgBoolToUapi(config.m_randomTrailers) << "\n";
+  }
+  if (!config.m_disableCookies.isEmpty()) {
+    out << "disable_cookies=" << InterfaceConfig::awgBoolToUapi(config.m_disableCookies) << "\n";
   }
 
   int err = uapiErrno(uapiCommand(message));
@@ -235,7 +259,9 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   out << config.m_serverPort << "\n";
 
   out << "replace_allowed_ips=true\n";
-  out << "persistent_keepalive_interval=" << WG_KEEPALIVE_PERIOD << "\n";
+  if (!config.m_persistentKeepalive.isEmpty()) {
+    out << "persistent_keepalive_interval=" << config.m_persistentKeepalive << "\n";
+  }
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     out << "allowed_ip=" << ip.toString() << "\n";
   }

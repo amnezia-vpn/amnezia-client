@@ -34,7 +34,7 @@ Rectangle {
     MouseArea {
         id: parentMouse
         anchors.fill: parent
-        cursorShape: Qt.IBeamCursor
+        cursorShape: contextMenu.opened ? Qt.ArrowCursor : Qt.IBeamCursor
         onClicked: textArea.forceActiveFocus()
         hoverEnabled: true
 
@@ -79,24 +79,31 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                MouseArea {
-                    id: textAreaMouse
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-                    hoverEnabled: true
-                    onClicked: {
-                        fl.interactive = true
-                        contextMenu.open()
-                    }
+                ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
+                ContextMenu.onRequested: function(position) {
+                    contextMenu.requestNative(position)
                 }
 
-                onFocusChanged: {
-                    root.border.color = getBorderColor(borderNormalColor)
+                // Native iOS text fields select the word and show the edit
+                // menu on double tap; Qt does neither on touch.
+                TapHandler {
+                    enabled: contextMenu.useNativeEditMenu
+                    acceptedDevices: PointerDevice.TouchScreen
+                    onDoubleTapped: function(eventPoint) {
+                        textArea.forceActiveFocus()
+                        textArea.cursorPosition = textArea.positionAt(eventPoint.position.x, eventPoint.position.y)
+                        textArea.selectWord()
+                        contextMenu.requestNative(eventPoint.position)
+                    }
                 }
 
                 ContextMenuType {
                     id: contextMenu
                     textObj: textArea
+                }
+
+                onFocusChanged: {
+                    root.border.color = getBorderColor(borderNormalColor)
                 }
             }
 

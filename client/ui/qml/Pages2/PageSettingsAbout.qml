@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -170,7 +170,7 @@ PageType {
                 text: qsTr("Privacy Policy")
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl("policy"))
+                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl("policy"))
                 }
             }
         }
@@ -223,7 +223,7 @@ PageType {
         readonly property string description: qsTr("Visit official website")
         readonly property string imageSource: "qrc:/images/controls/amnezia.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally(LanguageModel.getCurrentSiteUrl())
+            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
         }
     }
 }

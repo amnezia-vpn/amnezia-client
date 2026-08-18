@@ -72,9 +72,9 @@ void NetworkWatcher::initialize() {
   connect(m_impl, &NetworkWatcherImpl::unsecuredNetwork, this,
           &NetworkWatcher::unsecuredNetwork);
   connect(m_impl, &NetworkWatcherImpl::networkChanged, this,
-          &NetworkWatcher::networkChange);
-  connect(m_impl, &NetworkWatcherImpl::sleepMode, this,
-          &NetworkWatcher::onSleepMode);
+          &NetworkWatcher::networkChanged);
+  connect(m_impl, &NetworkWatcherImpl::wakeup, this,
+          &NetworkWatcher::wakeup);
   m_impl->initialize();
 
   // Enable sleep/wake monitoring for VPN auto-reconnection
@@ -95,12 +95,6 @@ void NetworkWatcher::initialize() {
 void NetworkWatcher::settingsChanged() {
   // For Amnezia: Keep NetworkWatcher always active for sleep/wake monitoring
   logger.debug() << "NetworkWatcher settings changed - keeping sleep monitoring active";
-}
-
-void NetworkWatcher::onSleepMode()
-{
-  logger.debug() << "Resumed from sleep mode";
-  emit sleepMode();
 }
 
 void NetworkWatcher::unsecuredNetwork(const QString& networkName,

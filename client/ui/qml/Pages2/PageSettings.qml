@@ -40,7 +40,7 @@ PageType {
             BaseHeaderType {
                 id: header
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 24 + PageController.safeAreaTopMargin
                 Layout.bottomMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
@@ -148,10 +148,10 @@ PageType {
         id: news
 
         property string title: qsTr("News & Notifications")
-        readonly property string leftImagePath: NewsModel.hasUnread ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
-        property bool isVisible: ServersModel.hasServersFromGatewayApi
+        readonly property string leftImagePath: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled() ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
+        property bool isVisible: ServersUiController.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
-            if (!ServersModel.hasServersFromGatewayApi) {
+            if (!ServersUiController.hasServersFromGatewayApi) {
                 return;
             }
             PageController.showBusyIndicator(true)

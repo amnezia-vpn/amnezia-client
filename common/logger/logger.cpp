@@ -9,11 +9,11 @@
 #include <QStandardPaths>
 #include <QUrl>
 
-#include "utilities.h"
+#include "core/utils/utilities.h"
 #include "version.h"
 
 #ifdef AMNEZIA_DESKTOP
-    #include <core/ipcclient.h>
+    #include <core/utils/ipcClient.h>
 #endif
 
 #ifdef Q_OS_IOS
@@ -91,21 +91,14 @@ void Logger::deInit()
 bool Logger::setServiceLogsEnabled(bool enabled)
 {
 #ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient = new IpcClient;
-
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            return false;
-        }
-    }
-
-    if (m_IpcClient->Interface()) {
-        m_IpcClient->Interface()->setLogsEnabled(enabled);
-    } else {
-        qWarning() << "Error occurred setting up service logs";
+    return IpcClient::withInterface([enabled](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->setLogsEnabled(enabled);
+        qDebug() << "Logger::setServiceLogsEnabled(): Logs transitioned to be " << (enabled ? "enabled" : "disabled");
+        return true;
+    },[](){
+        qWarning() << "Logger::setServiceLogsEnabled(): Service is not running";
         return false;
-    }
+    });
 #endif
 
     return true;
@@ -144,7 +137,9 @@ QString Logger::serviceLogsFilePath()
 
 QString Logger::getLogFile()
 {
-    m_file.flush();
+    if (m_file.isOpen()) {
+        m_file.flush();
+    }
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
@@ -159,7 +154,9 @@ QString Logger::getLogFile()
 
 QString Logger::getServiceLogFile()
 {
-    m_file.flush();
+    if (m_file.isOpen()) {
+        m_file.flush();
+    }
     QFile file(serviceLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
@@ -208,20 +205,12 @@ void Logger::clearLogs(bool isServiceLogger)
 void Logger::clearServiceLogs()
 {
 #ifdef AMNEZIA_DESKTOP
-    IpcClient *m_IpcClient = new IpcClient;
-
-    if (!m_IpcClient->isSocketConnected()) {
-        if (!IpcClient::init(m_IpcClient)) {
-            qWarning() << "Error occurred when init IPC client";
-            return;
-        }
-    }
-
-    if (m_IpcClient->Interface()) {
-        m_IpcClient->Interface()->clearLogs();
-    } else {
-        qWarning() << "Error occurred cleaning up service logs";
-    }
+    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        iface->clearLogs();
+        qDebug() << "Logger::clearServiceLogs(): Logs cleared";
+    }, []() {
+        qWarning() << "Logger::clearServiceLogs(): Service is not running";
+    });
 #endif
 }
 

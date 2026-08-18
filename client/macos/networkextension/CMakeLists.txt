@@ -7,24 +7,19 @@ add_executable(AmneziaVPNNetworkExtension)
 message("executable_path is: @executable_path/../../Frameworks")
 set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
     XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
-    # MACOSX_BUNDLE YES
     BUNDLE_EXTENSION appex
-    MACOSX_BUNDLE_SHORT_VERSION_STRING "${APPLE_PROJECT_VERSION}"
-    MACOSX_BUNDLE_INFO_STRING "AmneziaVPNNetworkExtension"
-    MACOSX_BUNDLE_BUNDLE_NAME "AmneziaVPNNetworkExtension"
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
-    XCODE_ATTRIBUTE_PRODUCT_BUNDLE_NAME "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
     XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNNetworkExtension.entitlements
     XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
-    XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${BUILD_ID}"
+    XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
     XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPNNetworkExtension"
 
     XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
-    XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
-    XCODE_ATTRIBUTE_MACOSX_DEPLOYMENT_TARGET "11.0"
 
     XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../../../Frameworks @loader_path/../../../../Frameworks"
+
+    XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
 )
 
 if(DEPLOY)
@@ -114,25 +109,24 @@ set_property(TARGET AmneziaVPNNetworkExtension APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
 )
 
-## Build wireguard-go-version.h
-execute_process(
-    COMMAND go list -m golang.zx2c4.com/wireguard
-    WORKING_DIRECTORY ${CLIENT_ROOT_DIR}/3rd/wireguard-apple/Sources/WireGuardKitGo
-    OUTPUT_VARIABLE WG_VERSION_FULL
-)
-string(REGEX REPLACE ".*v\([0-9.]*\).*" "\\1" WG_VERSION_STRING 1.1.1)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/wireguard-go-version.h.in
-               ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
-target_sources(AmneziaVPNNetworkExtension PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR}/wireguard-go-version.h)
-
 target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CLIENT_ROOT_DIR})
 target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(AmneziaVPNNetworkExtension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/wireguard/macos/universal2/libwg-go.a)
+find_package(openvpnadapter REQUIRED)
+# FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
+target_link_libraries(AmneziaVPNNetworkExtension PRIVATE amnezia::openvpnadapter)
 
-message(${CLIENT_ROOT_DIR})
-message(${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a)
-target_link_libraries(AmneziaVPNNetworkExtension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/libhev-socks5-tunnel.a)
+find_package(awg-apple REQUIRED)
+target_link_libraries(AmneziaVPNNetworkExtension PRIVATE amnezia::awg-apple)
 
-target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CLIENT_ROOT_DIR}/3rd-prebuilt/3rd-prebuilt/xray/HevSocks5Tunnel.xcframework/macos-arm64_x86_64/Headers)
+find_package(hev-socks5-tunnel REQUIRED)
+# FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
+target_link_libraries(AmneziaVPNNetworkExtension PRIVATE heiher::hev-socks5-tunnel)

@@ -10,6 +10,8 @@ deploy/build_64/*
 winbuild*.bat
 .cache/
 .vscode/
+.venv/
+.cursor*
 
 
 # Qt-es
@@ -81,6 +83,7 @@ client/.DS_Store
 ._.DS_Store
 ._*
 *.dmg
+deploy/data/macos/pf/amn.400.allowPIA.conf
 
 # tmp files
 *.*~
@@ -140,3 +143,6 @@ ios-ne-build.sh
 macos-ne-build.sh
 macos-signed-build.sh
 macos-with-sign-build.sh
+DeveloperIdApplicationCertificate.p12
+DeveloperIdInstallerCertificate.p12
+

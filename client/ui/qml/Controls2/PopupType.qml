@@ -15,7 +15,7 @@ Popup {
 
     leftMargin: 25
     rightMargin: 25
-    bottomMargin: 70 + SettingsController.safeAreaBottomMargin
+    bottomMargin: 70 + PageController.safeAreaBottomMargin
 
     width: parent.width - leftMargin - rightMargin
 
@@ -72,7 +72,7 @@ Popup {
                 Layout.fillWidth: true
 
                 onLinkActivated: function(link) {
-                    Qt.openUrlExternally(LanguageModel.getCurrentDocsUrl(link))
+                    Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
                 }
 
                 text: root.text

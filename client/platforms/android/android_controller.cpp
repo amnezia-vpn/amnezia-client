@@ -8,7 +8,7 @@
 
 #include "android_controller.h"
 #include "android_utils.h"
-#include "ui/controllers/importController.h"
+#include "ui/controllers/importUiController.h"
 
 namespace
 {
@@ -101,7 +101,9 @@ bool AndroidController::initialize()
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
-        {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)}
+        {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
+        {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
     };
 
     QJniEnvironment env;
@@ -150,6 +152,28 @@ void AndroidController::stop()
 void AndroidController::resetLastServer(int serverIndex)
 {
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
+}
+
+void AndroidController::showUpdateCover()
+{
+    callActivityMethod("showUpdateCover", "()V");
+}
+
+void AndroidController::hideUpdateCover()
+{
+    callActivityMethod("hideUpdateCover", "()V");
+}
+
+void AndroidController::showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                                        const QString &skipTitle, const QString &storeUrl)
+{
+    callActivityMethod("showUpdatePrompt",
+                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(title).object<jstring>(),
+                       QJniObject::fromString(message).object<jstring>(),
+                       QJniObject::fromString(updateTitle).object<jstring>(),
+                       QJniObject::fromString(skipTitle).object<jstring>(),
+                       QJniObject::fromString(storeUrl).object<jstring>());
 }
 
 void AndroidController::saveFile(const QString &fileName, const QString &data)
@@ -536,7 +560,7 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    return ImportController::decodeQrCode(AndroidUtils::convertJString(env, data));
+    return ImportUiController::decodeQrCode(AndroidUtils::convertJString(env, data));
 }
 // static
 void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp)
@@ -557,4 +581,23 @@ void AndroidController::onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jin
     qDebug() << "Android system bars insets changed: nav bar =" << navBarHeightDp << "dp, status bar =" << statusBarHeightDp << "dp";
     emit AndroidController::instance()->systemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp);
 }
+
+// static
+void AndroidController::onActivityPaused(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->activityPaused();
+}
+
+// static
+void AndroidController::onActivityResumed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->activityResumed();
+}
+
 

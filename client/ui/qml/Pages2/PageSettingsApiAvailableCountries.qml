@@ -18,12 +18,54 @@ PageType {
     id: root
 
     property var processedServer
+    property bool subscriptionExpired: false
+    property bool subscriptionExpiringSoon: false
+    property bool isSubscriptionRenewalAvailable: false
+    property bool isInAppPurchase: false
+
+    function updateSubscriptionState() {
+        root.subscriptionExpired = ServersUiController.isServerSubscriptionExpired(ServersUiController.processedServerId)
+        root.subscriptionExpiringSoon = ServersUiController.isServerSubscriptionExpiringSoon(ServersUiController.processedServerId)
+        root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
+        root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
+    }
+
+    function selectConnectionCountry(countryIndex, countryCode, countryName) {
+        if (countryIndex === ApiCountryModel.currentIndex) {
+            return
+        }
+
+        PageController.showBusyIndicator(true)
+        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, countryCode, countryName)
+        PageController.showBusyIndicator(false)
+    }
+
+    Component.onCompleted: {
+        root.updateSubscriptionState()
+    }
+
+    Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+            root.updateSubscriptionState()
+        }
+    }
 
     Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
+        target: ApiAccountInfoModel
+
+        function onModelReset() {
+            root.updateSubscriptionState()
         }
     }
 
@@ -34,8 +76,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -51,7 +93,7 @@ PageType {
 
         model: ApiCountryModel
 
-        currentIndex: 0
+        currentIndex: ApiCountryModel.currentIndex
 
         ButtonGroup {
             id: containersRadioButtonGroup
@@ -66,7 +108,7 @@ PageType {
                 id: backButton
                 objectName: "backButton"
 
-                Layout.topMargin: 20 + SettingsController.safeAreaTopMargin
+                Layout.topMargin: 20 + PageController.safeAreaTopMargin
             }
 
             HeaderTypeWithButton {
@@ -76,16 +118,15 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 10
+                Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
 
                 actionButtonImage: "qrc:/images/controls/settings.svg"
 
                 headerText: root.processedServer.name
-                descriptionText: qsTr("Location for connection")
 
                 actionButtonFunction: function() {
                     PageController.showBusyIndicator(true)
-                    let result = ApiSettingsController.getAccountInfo(false)
+                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
                     PageController.showBusyIndicator(false)
                     if (!result) {
                         return
@@ -93,6 +134,51 @@ PageType {
 
                     PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                 }
+            }
+
+            ParagraphTextType {
+                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
+                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+            }
+
+            BasicButtonType {
+                visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 28
+                Layout.bottomMargin: 0
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                text: qsTr("Renew subscription")
+
+                clickedFunc: function() {
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
+                }
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
+                Layout.bottomMargin: 8
+
+                text: qsTr("Location for connection")
+                color: AmneziaStyle.color.mutedGray
             }
         }
 
@@ -128,15 +214,7 @@ PageType {
                             return
                         }
 
-                        if (index !== ApiCountryModel.currentIndex) {
-                            PageController.showBusyIndicator(true)
-                            var prevIndex = ApiCountryModel.currentIndex
-                            ApiCountryModel.currentIndex = index
-                            if (!ApiConfigsController.updateServiceFromGateway(ServersModel.defaultIndex, countryCode, countryName)) {
-                                ApiCountryModel.currentIndex = prevIndex
-                            }
-                            PageController.showBusyIndicator(false)
-                        }
+                        root.selectConnectionCountry(index, countryCode, countryName)
                     }
 
                     Keys.onEnterPressed: {
@@ -157,7 +235,7 @@ PageType {
                     Layout.rightMargin: 32
                     Layout.alignment: Qt.AlignRight
 
-                    source: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                    source: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
                 }
             }
 

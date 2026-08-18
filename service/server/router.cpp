@@ -66,6 +66,9 @@ void Router::resetIpStack()
 
 bool Router::createTun(const QString &dev, const QString &subnet)
 {
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().createTun(dev, subnet);
+#endif
 #ifdef Q_OS_LINUX
     return RouterLinux::Instance().createTun(dev, subnet);
 #endif

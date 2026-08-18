@@ -3,10 +3,33 @@
 
 #include <QApplication>
 #include <QHostAddress>
+#include <QRegularExpression>
+#include <algorithm>
 
-#include "../client/protocols/protocols_defs.h"
+#include "../client/core/utils/protocolEnum.h"
+#include "../client/core/protocols/protocolUtils.h"
+#include "../client/core/utils/constants/configKeys.h"
+#include "../client/core/utils/constants/protocolConstants.h"
 #include "qjsonarray.h"
 #include "version.h"
+
+static bool isValidIpOrCidr(const QString &value) {
+    static const QRegularExpression re(
+        QStringLiteral(R"(^(\d{1,3}\.){3}\d{1,3}(/\d{1,2})?$)"));
+    if (!re.match(value).hasMatch()) return false;
+    const QStringList ipParts = value.split(QLatin1Char('/'))[0].split(QLatin1Char('.'));
+    for (const QString &part : ipParts) {
+        bool ok;
+        int octet = part.toInt(&ok);
+        if (!ok || octet < 0 || octet > 255) return false;
+    }
+    if (value.contains(QLatin1Char('/'))) {
+        bool ok;
+        int prefix = value.split(QLatin1Char('/'))[1].toInt(&ok);
+        if (!ok || prefix < 0 || prefix > 32) return false;
+    }
+    return true;
+}
 
 #ifdef Q_OS_WIN
     #include "../client/platforms/windows/daemon/windowsfirewall.h"
@@ -33,18 +56,10 @@ KillSwitch* KillSwitch::instance()
 
 bool KillSwitch::init()
 {
-#ifdef Q_OS_LINUX
-    if (!LinuxFirewall::isInstalled()) {
-        LinuxFirewall::install();
-    }
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     m_appSettigns = QSharedPointer<SecureQSettings>(new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, nullptr));
 #endif
-#ifdef Q_OS_MACOS
-    if (!MacOSFirewall::isInstalled()) {
-        MacOSFirewall::install();
-    }
-    m_appSettigns = QSharedPointer<SecureQSettings>(new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, nullptr));
-#endif
+
     if (isStrictKillSwitchEnabled()) {
         return disableAllTraffic();
     }
@@ -79,7 +94,6 @@ bool KillSwitch::isStrictKillSwitchEnabled()
                              + "\\" + QString(APPLICATION_NAME), QSettings::NativeFormat);
     return RegHLM.value("strictKillSwitchEnabled", false).toBool();
 #endif
-    m_appSettigns->sync();
     return m_appSettigns->value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
@@ -90,6 +104,7 @@ bool KillSwitch::disableKillSwitch() {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("130.allowMarkedXray"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), false);
@@ -102,6 +117,7 @@ bool KillSwitch::disableKillSwitch() {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), false);
+        LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("130.allowMarkedXray"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), false);
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
@@ -124,6 +140,7 @@ bool KillSwitch::disableKillSwitch() {
         MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), false);
         MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), false);
         MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), false);
+        MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), false);
     } else {
         MacOSFirewall::uninstall();
     }
@@ -149,6 +166,7 @@ bool KillSwitch::disableAllTraffic() {
         LinuxFirewall::install();
     }
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("130.allowMarkedXray"), false);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
 #endif
@@ -168,6 +186,10 @@ bool KillSwitch::disableAllTraffic() {
 
 bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 
+    if (!std::all_of(ranges.cbegin(), ranges.cend(), isValidIpOrCidr)) {
+        qCritical() << "IPC: invalid IP/CIDR in ranges, rejecting resetAllowedRange";
+        return false;
+    }
     m_allowedRanges = ranges;
 
 #ifdef Q_OS_LINUX
@@ -191,6 +213,10 @@ bool KillSwitch::resetAllowedRange(const QStringList &ranges) {
 }
 
 bool KillSwitch::addAllowedRange(const QStringList &ranges) {
+    if (!std::all_of(ranges.cbegin(), ranges.cend(), isValidIpOrCidr)) {
+        qCritical() << "IPC: invalid IP/CIDR in ranges, rejecting addAllowedRange";
+        return false;
+    }
     for (const QString &range : ranges) {
         if (!range.isEmpty() && !m_allowedRanges.contains(range)) {
             m_allowedRanges.append(range);
@@ -204,11 +230,11 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
 #ifdef Q_OS_WIN
     InterfaceConfig config;
 
-    config.m_primaryDnsServer = configStr.value(amnezia::config_key::dns1).toString();
+    config.m_primaryDnsServer = configStr.value(amnezia::configKey::dns1).toString();
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
     if (!config.m_primaryDnsServer.contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        config.m_secondaryDnsServer = configStr.value(amnezia::config_key::dns2).toString();
+        config.m_secondaryDnsServer = configStr.value(amnezia::configKey::dns2).toString();
     }
 
     config.m_serverPublicKey = "openvpn";
@@ -246,14 +272,14 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         }
     }
 
-    for (const QJsonValue &i : configStr.value(amnezia::config_key::splitTunnelApps).toArray()) {
+    for (const QJsonValue &i : configStr.value(amnezia::configKey::splitTunnelApps).toArray()) {
         if (!i.isString()) {
             break;
         }
         config.m_vpnDisabledApps.append(i.toString());
     }
 
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
+    for (auto dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
         if (!dns.isString()) {
             break;
         }
@@ -261,7 +287,7 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
     }
 
     // killSwitch toggle
-    if (QVariant(configStr.value(amnezia::config_key::killSwitchOption).toString()).toBool()) {
+    if (QVariant(configStr.value(amnezia::configKey::killSwitchOption).toString()).toBool()) {
         WindowsFirewall::create(this)->enablePeerTraffic(config);
     }
 
@@ -285,15 +311,39 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     bool blockAll = 0;
     bool allowNets = 0;
     bool blockNets = 0;
+    bool allowMarkedXray = 0;
     QStringList allownets;
     QStringList blocknets;
+    QStringList allowedDnsServers;
+
+    const QString dns1 = configStr.value(amnezia::configKey::dns1).toString();
+    // We don't use secondary DNS if primary DNS is AmneziaDNS
+    const QString dns2 = dns1.contains(amnezia::protocols::dns::amneziaDnsIp)
+            ? QString()
+            : configStr.value(amnezia::configKey::dns2).toString();
+
+    if ((!dns1.isEmpty() && !isValidIpOrCidr(dns1)) || (!dns2.isEmpty() && !isValidIpOrCidr(dns2))) {
+        qCritical() << "IPC: invalid dns1/dns2, rejecting enableKillSwitch";
+        return false;
+    }
+
+    for (const QJsonValue &dns : configStr.value(amnezia::configKey::allowedDnsServers).toArray()) {
+        if (!dns.isString()) break;
+        const QString dnsStr = dns.toString();
+        if (isValidIpOrCidr(dnsStr))
+            allowedDnsServers.append(dnsStr);
+        else if (!dnsStr.isEmpty())
+            qWarning() << "IPC: rejected invalid allowedDnsServer:" << dnsStr;
+    }
 
     if (splitTunnelType == 0) {
         blockAll = true;
         allowNets = true;
+        allowMarkedXray = true;
         allownets.append(configStr.value("vpnServer").toString());
     } else if (splitTunnelType == 1) {
         blockNets = true;
+        allowMarkedXray = true;
         for (auto v : splitTunnelSites) {
             blocknets.append(v.toString());
         }
@@ -304,6 +354,12 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
         for (auto v : splitTunnelSites) {
             allownets.append(v.toString());
         }
+    }
+
+    if (!std::all_of(allownets.cbegin(), allownets.cend(), isValidIpOrCidr) ||
+        !std::all_of(blocknets.cbegin(), blocknets.cend(), isValidIpOrCidr)) {
+        qCritical() << "IPC: invalid IP/CIDR in allownets/blocknets, rejecting enableKillSwitch";
+        return false;
     }
 #endif
 
@@ -317,8 +373,9 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), blockAll);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), allowNets);
     LinuxFirewall::updateAllowNets(allownets);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), blockAll);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), blockNets);
     LinuxFirewall::updateBlockNets(blocknets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("130.allowMarkedXray"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
@@ -326,23 +383,15 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
     QStringList dnsServers;
 
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
-
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
-    }
+    if (!dns1.isEmpty())
+        dnsServers.append(dns1);
+    if (!dns2.isEmpty())
+        dnsServers.append(dns2);
 
     dnsServers.append("127.0.0.1");
     dnsServers.append("127.0.0.53");
-    
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
-        if (!dns.isString()) {
-            break;
-        }
-        dnsServers.append(dns.toString());
-    }
-    
+    dnsServers.append(allowedDnsServers);
+
     LinuxFirewall::updateDNSServers(dnsServers);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
@@ -368,22 +417,16 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
     MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
 
     QStringList dnsServers;
-    dnsServers.append(configStr.value(amnezia::config_key::dns1).toString());
+    if (!dns1.isEmpty())
+        dnsServers.append(dns1);
+    if (!dns2.isEmpty())
+        dnsServers.append(dns2);
 
-    // We don't use secondary DNS if primary DNS is AmneziaDNS
-    if (!configStr.value(amnezia::config_key::dns1).toString().contains(amnezia::protocols::dns::amneziaDnsIp)) {
-        dnsServers.append(configStr.value(amnezia::config_key::dns2).toString());
-    }
-    
-    for (auto dns : configStr.value(amnezia::config_key::allowedDnsServers).toArray()) {
-        if (!dns.isString()) {
-            break;
-        }
-        dnsServers.append(dns.toString());
-    }
-    
+    dnsServers.append(allowedDnsServers);
+
     MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
     MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), dnsServers);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), true);
 #endif
     return true;
 }

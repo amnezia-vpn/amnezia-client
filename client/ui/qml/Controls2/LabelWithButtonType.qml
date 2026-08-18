@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -21,6 +22,8 @@ Item {
     property string buttonImageSource
     property string rightImageSource
     property string leftImageSource
+    property string rightWarningImageSource
+    property string rightWarningImageColor: AmneziaStyle.color.goldenApricot
     property bool isLeftImageHoverEnabled: true
     property bool isSmallLeftImage: false
 
@@ -37,6 +40,7 @@ Item {
     property int borderFocusedWidth: 1
 
     property string rightImageColor: AmneziaStyle.color.paleGray
+    property string leftImageColor: ""
 
     property bool descriptionOnTop: false
     property bool hideDescription: true
@@ -71,6 +75,8 @@ Item {
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
     MouseArea {
+        id: mouseArea
+
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         hoverEnabled: root.enabled
@@ -138,6 +144,14 @@ Item {
 
                 anchors.centerIn: parent
                 source: leftImageSource
+                visible: leftImageColor === ""
+            }
+
+            ColorOverlay {
+                anchors.fill: leftImage
+                source: leftImage
+                color: leftImageColor
+                visible: leftImageColor !== ""
             }
         }
 
@@ -210,6 +224,33 @@ Item {
                 function replaceWithAsterisks(input) {
                     return '*'.repeat(input.length)
                 }
+            }
+        }
+
+        Rectangle {
+            id: rightWarningImageBackground
+
+            visible: rightWarningImageSource !== ""
+
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 40
+            Layout.alignment: Qt.AlignRight
+
+            radius: 12
+            color: AmneziaStyle.color.transparent
+
+            Image {
+                id: rightWarningImage
+
+                anchors.centerIn: parent
+                source: rightWarningImageSource
+                visible: false
+            }
+
+            ColorOverlay {
+                anchors.fill: rightWarningImage
+                source: rightWarningImage
+                color: rightWarningImageColor
             }
         }
 
@@ -296,13 +337,13 @@ Item {
     }
 
     Keys.onEnterPressed: {
-        if (clickedFunction && typeof clickedFunction === "function") {
+        if (!rightImageSource && clickedFunction && typeof clickedFunction === "function") {
             clickedFunction()
         }
     }
 
     Keys.onReturnPressed: {
-        if (clickedFunction && typeof clickedFunction === "function") {
+        if (!rightImageSource && clickedFunction && typeof clickedFunction === "function") {
             clickedFunction()
         }
     }

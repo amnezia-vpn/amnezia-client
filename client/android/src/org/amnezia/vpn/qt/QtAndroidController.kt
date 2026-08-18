@@ -31,4 +31,7 @@ object QtAndroidController {
 
     external fun onImeInsetsChanged(heightDp: Int)
     external fun onSystemBarsInsetsChanged(navBarHeightDp: Int, statusBarHeightDp: Int)
+
+    external fun onActivityPaused()
+    external fun onActivityResumed()
 }

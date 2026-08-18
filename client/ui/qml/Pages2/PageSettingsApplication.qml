@@ -20,7 +20,7 @@ PageType {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         onActiveFocusChanged: {
             if(backButton.enabled && backButton.activeFocus) {
@@ -108,9 +108,9 @@ PageType {
                 text: qsTr("Auto start")
                 descriptionText: qsTr("Launch the application every time the device is starts")
 
-                checked: SettingsController.isAutoStartEnabled()
+                checked: SettingsController.autoStartEnabled
                 onToggled: function() {
-                    if (checked !== SettingsController.isAutoStartEnabled()) {
+                    if (checked !== SettingsController.autoStartEnabled) {
                         SettingsController.toggleAutoStart(checked)
                     }
                 }
@@ -154,13 +154,36 @@ PageType {
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized (works with autostart option turned on)")
 
-                enabled: switcherAutoStart.checked
+                enabled: SettingsController.autoStartEnabled
                 opacity: enabled ? 1.0 : 0.5
 
-                checked: SettingsController.startMinimized
+                checked: SettingsController.autoStartEnabled && SettingsController.startMinimized
                 onToggled: function() {
                     if (checked !== SettingsController.startMinimized) {
                         SettingsController.toggleStartMinimized(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: !GC.isMobile() && ServersUiController.hasServersFromGatewayApi
+            }
+
+            SwitcherType {
+                id: switcherNewsNotificationEnabled
+
+                visible: ServersUiController.hasServersFromGatewayApi
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("News Notification")
+                descriptionText: qsTr("Show a notification icon for unread news")
+
+                checked: SettingsController.isNewsNotificationsEnabled()
+                onToggled: function() {
+                    if (checked !== SettingsController.isNewsNotificationsEnabled()) {
+                        SettingsController.toggleNewsNotificationsEnabled(checked)
                     }
                 }
             }
@@ -180,7 +203,7 @@ PageType {
                 Layout.fillWidth: true
 
                 text: qsTr("Language")
-                descriptionText: LanguageModel.currentLanguageName
+                descriptionText: LanguageUiController.currentLanguageName
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
@@ -222,7 +245,7 @@ PageType {
                     var noButtonText = qsTr("Cancel")
 
                     var yesButtonFunction = function() {
-                        if (ServersModel.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
+                        if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot reset settings during active connection"))
                         } else
                         {

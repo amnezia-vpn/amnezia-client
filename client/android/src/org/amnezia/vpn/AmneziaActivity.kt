@@ -3,6 +3,13 @@ package org.amnezia.vpn
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.app.Dialog
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
@@ -26,6 +33,8 @@ import android.os.ParcelFileDescriptor
 import android.os.SystemClock
 import android.provider.OpenableColumns
 import android.provider.Settings
+import android.view.InputDevice
+import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -40,6 +49,7 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import java.io.File
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
@@ -73,6 +83,8 @@ private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
+private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
+private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
 
 class AmneziaActivity : QtActivity() {
 
@@ -88,6 +100,14 @@ class AmneziaActivity : QtActivity() {
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
     private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
+
+    private var isActivityResumed = false
+    private var hasWindowFocus = false
+    private val resumeHandler = Handler(Looper.getMainLooper())
+    private var pendingOpenFileUri: String? = null
+    private var openFileDeliveryScheduled = false
+
+    private var updateCoverDialog: Dialog? = null
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -190,17 +210,21 @@ class AmneziaActivity : QtActivity() {
                 doBindService()
             }
         )
+        pendingOpenFileUri = savedInstanceState?.getString(KEY_PENDING_OPEN_FILE_URI)
+        openFileDeliveryScheduled = false
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
+    }
+
     private fun loadLibs() {
         listOf(
-            "rsapss",
-            "crypto_3",
-            "ssl_3",
-            "ssh"
+            "rsapss"
         ).forEach {
             loadSharedLibrary(this.applicationContext, it)
         }
@@ -260,6 +284,11 @@ class AmneziaActivity : QtActivity() {
     }
 
     override fun onStop() {
+        isActivityResumed = false
+        hasWindowFocus = false
+        // Cancel all pending operations when activity stops
+        resumeHandler.removeCallbacksAndMessages(null)
+        openFileDeliveryScheduled = false
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
         mainScope.launch {
@@ -269,23 +298,128 @@ class AmneziaActivity : QtActivity() {
         super.onStop()
     }
 
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        hasWindowFocus = hasFocus
+        Log.d(TAG, "Window focus changed: hasFocus=$hasFocus")
+
+        if (!hasFocus) {
+            // Cancel pending operations if window loses focus
+            resumeHandler.removeCallbacksAndMessages(null)
+        } else if (isActivityResumed && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            window.decorView.apply {
+                invalidate()
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(1f, 1f)
+                    }
+                }, 50)
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(2f, 2f)
+                        requestLayout()
+                        invalidate()
+                    }
+                }, 150)
+            }
+        }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val keyCode = event.keyCode
+        val pressed = event.action == KeyEvent.ACTION_DOWN
+
+        when (keyCode) {
+            KeyEvent.KEYCODE_BUTTON_A,
+            KeyEvent.KEYCODE_BUTTON_B,
+            KeyEvent.KEYCODE_BUTTON_X,
+            KeyEvent.KEYCODE_BUTTON_Y,
+            KeyEvent.KEYCODE_BUTTON_START,
+            KeyEvent.KEYCODE_BUTTON_SELECT -> {
+                    nativeGamepadKeyEvent(0, keyCode, pressed)
+                    return true
+            }
+            KeyEvent.KEYCODE_DPAD_CENTER,
+            KeyEvent.KEYCODE_DPAD_UP,
+            KeyEvent.KEYCODE_DPAD_DOWN,
+            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                    val syntheticKeyCode = if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) KeyEvent.KEYCODE_ENTER else keyCode
+                    val synthetic = KeyEvent(
+                        event.downTime, event.eventTime, event.action, syntheticKeyCode,
+                        event.repeatCount, event.metaState, -1, event.scanCode,
+                        event.flags, InputDevice.SOURCE_KEYBOARD
+                    )
+                    return super.dispatchKeyEvent(synthetic)
+            }
+        }
+
+        return super.dispatchKeyEvent(event)
+    }
+
+    private external fun nativeGamepadKeyEvent(deviceId: Int, keyCode: Int, pressed: Boolean)
+
+    override fun onPause() {
+        // Notify Qt to stop rendering BEFORE super.onPause() destroys the EGL surface.
+        // Using a coroutine here would be too late — the surface is gone by the time
+        // the coroutine runs. A direct synchronous call gives Qt's render thread the
+        // best chance to process visible=false before surface destruction.
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityPaused()
+        }
+        super.onPause()
+        isActivityResumed = false
+        // Cancel all pending operations when activity pauses
+        resumeHandler.removeCallbacksAndMessages(null)
+        openFileDeliveryScheduled = false
+        Log.d(TAG, "Pause Amnezia activity")
+    }
+
     override fun onResume() {
         super.onResume()
+        isActivityResumed = true
+        Log.d(TAG, "Resume Amnezia activity")
+        if (qtInitialized.isCompleted) {
+            QtAndroidController.onActivityResumed()
+        }
+
+        if (pendingOpenFileUri != null && !openFileDeliveryScheduled) {
+            val uri = pendingOpenFileUri!!
+            openFileDeliveryScheduled = true
+            resumeHandler.postDelayed({
+                if (!isFinishing && !isDestroyed) {
+                    pendingOpenFileUri = null
+                    openFileDeliveryScheduled = false
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onFileOpened(uri)
+                    }
+                }
+            }, OPEN_FILE_AFTER_RESUME_DELAY_MS)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             window.decorView.apply {
                 invalidate()
 
-                postDelayed({
-                    sendTouch(1f, 1f)
+                resumeHandler.postDelayed({
+                    // Check if activity is still resumed and has focus before executing
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(1f, 1f)
+                    }
                 }, 100)
-                
-                postDelayed({
-                    sendTouch(2f, 2f)
+
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        sendTouch(2f, 2f)
+                    }
                 }, 200)
-                
-                postDelayed({
-                    requestLayout()
-                    invalidate()
+
+                resumeHandler.postDelayed({
+                    if (isActivityResumed && hasWindowFocus && !isFinishing && !isDestroyed) {
+                        requestLayout()
+                        invalidate()
+                    }
                 }, 250)
             }
         }
@@ -314,6 +448,11 @@ class AmneziaActivity : QtActivity() {
                 addFlags(LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
                 statusBarColor = getColor(R.color.black)
             }
+
+            WindowInsetsControllerCompat(window, window.decorView).apply {
+                isAppearanceLightStatusBars = false
+                isAppearanceLightNavigationBars = false
+            }
         }
     }
 
@@ -321,36 +460,150 @@ class AmneziaActivity : QtActivity() {
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
             val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
             val imeVisible = windowInsets.isVisible(WindowInsetsCompat.Type.ime())
-            
+
             val imeHeight = if (imeVisible) imeInsets.bottom else 0
 
             val density = resources.displayMetrics.density
             val imeHeightDp = (imeHeight / density).toInt()
-            
+
             // Also track system bars (navigation bar, status bar) changes
             val systemBarsInsets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             val navBarHeight = systemBarsInsets.bottom
             val navBarHeightDp = (navBarHeight / density).toInt()
             val statusBarHeight = systemBarsInsets.top
             val statusBarHeightDp = (statusBarHeight / density).toInt()
-            
+
             mainScope.launch {
                 qtInitialized.await()
                 QtAndroidController.onImeInsetsChanged(imeHeightDp)
                 QtAndroidController.onSystemBarsInsetsChanged(navBarHeightDp, statusBarHeightDp)
             }
-            
+
             // Return windowInsets instead of CONSUMED to allow proper handling
             windowInsets
         }
     }
 
     override fun onDestroy() {
+        isActivityResumed = false
+        hasWindowFocus = false
+        // Cancel all pending operations when activity is destroyed
+        resumeHandler.removeCallbacksAndMessages(null)
         Log.d(TAG, "Destroy Amnezia activity")
         unregisterBroadcastReceiver(notificationStateReceiver)
         notificationStateReceiver = null
         mainScope.cancel()
         super.onDestroy()
+    }
+
+    fun showUpdateCover() {
+        runOnUiThread {
+            if (isFinishing || isDestroyed || updateCoverDialog != null) return@runOnUiThread
+            val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+            dialog.setCancelable(false)
+            val root = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(0xFF0E0E11.toInt())
+            }
+            dialog.setContentView(root)
+            dialog.show()
+            updateCoverDialog = dialog
+        }
+    }
+
+    fun hideUpdateCover() {
+        runOnUiThread {
+            updateCoverDialog?.dismiss()
+            updateCoverDialog = null
+        }
+    }
+
+    fun showUpdatePrompt(title: String, message: String, updateTitle: String, skipTitle: String, storeUrl: String) {
+        runOnUiThread {
+            if (isFinishing || isDestroyed) return@runOnUiThread
+
+            val dialog = updateCoverDialog ?: Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen).also {
+                it.setCancelable(false)
+                it.show()
+                updateCoverDialog = it
+            }
+
+            val density = resources.displayMetrics.density
+            fun dp(value: Int) = (value * density).toInt()
+
+            val root = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                gravity = Gravity.CENTER
+                setBackgroundColor(0xFF0E0E11.toInt())
+                setPadding(dp(32), dp(32), dp(32), dp(32))
+            }
+
+            val titleView = TextView(this).apply {
+                text = title
+                textSize = 22f
+                setTextColor(0xFFFFFFFF.toInt())
+                gravity = Gravity.CENTER
+                typeface = Typeface.create(typeface, Typeface.BOLD)
+            }
+
+            val messageView = TextView(this).apply {
+                text = message
+                textSize = 16f
+                setTextColor(0xFFC7C8CB.toInt())
+                gravity = Gravity.CENTER
+                setPadding(0, dp(16), 0, dp(28))
+            }
+
+            val updateButton = Button(this).apply {
+                text = updateTitle
+                isAllCaps = false
+                textSize = 17f
+                setTextColor(0xFF0E0E11.toInt())
+                stateListAnimator = null
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12).toFloat()
+                    setColor(0xFFFBB26A.toInt())
+                }
+                setOnClickListener {
+                    try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(storeUrl)))
+                    } catch (e: ActivityNotFoundException) {
+                        Log.w(TAG, "open store failed: ${e.message}")
+                    }
+                    hideUpdateCover()
+                }
+            }
+
+            val skipButton = Button(this).apply {
+                text = skipTitle
+                isAllCaps = false
+                textSize = 17f
+                setTextColor(0xFFD7D8DB.toInt())
+                stateListAnimator = null
+                background = GradientDrawable().apply {
+                    cornerRadius = dp(12).toFloat()
+                    setColor(0x00000000)
+                    setStroke(dp(1), 0xFF2C2D30.toInt())
+                }
+                setOnClickListener { hideUpdateCover() }
+            }
+
+            val updateParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
+            ).apply { topMargin = dp(8) }
+
+            val skipParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
+            ).apply { topMargin = dp(12) }
+
+            root.addView(titleView)
+            root.addView(messageView)
+            root.addView(updateButton, updateParams)
+            root.addView(skipButton, skipParams)
+
+            dialog.setContentView(root)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -630,7 +883,13 @@ class AmneziaActivity : QtActivity() {
     fun openFile(filter: String?) {
         Log.v(TAG, "Open file with filter: $filter")
         mainScope.launch {
-            val intent = if (!isOnTv()) {
+            val systemPickerPackage = listOf("com.google.android.documentsui", "com.android.documentsui")
+                .firstOrNull { pkg ->
+                    try { packageManager.getPackageInfo(pkg, 0); true }
+                    catch (_: PackageManager.NameNotFoundException) { false }
+                }
+
+            val intent = if (!isOnTv() && systemPickerPackage != null) {
                 val mimeTypes = if (!filter.isNullOrEmpty()) {
                     val extensionRegex = "\\*\\.([a-z0-9]+)".toRegex(IGNORE_CASE)
                     val mime = MimeTypeMap.getSingleton()
@@ -656,6 +915,7 @@ class AmneziaActivity : QtActivity() {
                             else -> type = "*/*"
                         }
                     }
+                    `package` = systemPickerPackage
                 }
             } else {
                 Intent(this@AmneziaActivity, TvFilePicker::class.java)
@@ -667,13 +927,20 @@ class AmneziaActivity : QtActivity() {
                         if (isOnTv() && it?.hasExtra("activityNotFound") == true) {
                             showNoFileBrowserAlertDialog()
                         }
-                        val uri = it?.data?.apply {
-                            grantUriPermission(packageName, this, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        val uri = it?.data?.let { u ->
+                            if (u.scheme == "content") {
+                                try { grantUriPermission(packageName, u, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
+                            }
+                            u
                         }?.toString() ?: ""
                         Log.v(TAG, "Open file: $uri")
-                        mainScope.launch {
-                            qtInitialized.await()
-                            QtAndroidController.onFileOpened(uri)
+                        if (uri.isNotEmpty()) {
+                            pendingOpenFileUri = uri
+                        } else {
+                            mainScope.launch {
+                                qtInitialized.await()
+                                QtAndroidController.onFileOpened(uri)
+                            }
                         }
                     }
                 ))
@@ -702,9 +969,14 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun getFd(fileName: String): Int {
         Log.v(TAG, "Get fd for $fileName")
-        return blockingCall {
+        return blockingCall(Dispatchers.IO) {
             try {
-                pfd = contentResolver.openFileDescriptor(Uri.parse(fileName), "r")
+                val uri = Uri.parse(fileName)
+                pfd = if (uri.scheme == "file") {
+                    ParcelFileDescriptor.open(File(uri.path!!), ParcelFileDescriptor.MODE_READ_ONLY)
+                } else {
+                    contentResolver.openFileDescriptor(uri, "r")
+                }
                 pfd?.fd ?: -1
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get fd: $e")
@@ -924,12 +1196,10 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun sendTouch(x: Float, y: Float) {
         Log.v(TAG, "Send touch: $x, $y")
-        blockingCall {
-            findQtWindow(window.decorView)?.let {
-                Log.v(TAG, "Send touch to $it")
-                it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN))
-                it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP))
-            }
+        findQtWindow(window.decorView)?.let {
+            Log.v(TAG, "Send touch to $it")
+            it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_DOWN))
+            it.dispatchTouchEvent(createEvent(x, y, SystemClock.uptimeMillis(), MotionEvent.ACTION_UP))
         }
     }
 

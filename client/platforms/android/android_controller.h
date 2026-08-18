@@ -4,7 +4,7 @@
 #include <QJniObject>
 #include <QPixmap>
 
-#include "protocols/vpnprotocol.h"
+#include "core/protocols/vpnProtocol.h"
 
 using namespace amnezia;
 
@@ -56,6 +56,11 @@ public:
     bool requestAuthentication();
     void sendTouch(float x, float y);
 
+    void showUpdateCover();
+    void hideUpdateCover();
+    void showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
+                          const QString &skipTitle, const QString &storeUrl);
+
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 
@@ -75,6 +80,8 @@ signals:
     void authenticationResult(bool result);
     void imeInsetsChanged(int heightDp);
     void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
+    void activityPaused();
+    void activityResumed();
 
 private:
     bool isWaitingStatus = true;
@@ -105,6 +112,8 @@ private:
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
     static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);
     static void onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp);
+    static void onActivityPaused(JNIEnv *env, jobject thiz);
+    static void onActivityResumed(JNIEnv *env, jobject thiz);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);

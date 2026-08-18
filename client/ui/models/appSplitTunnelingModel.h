@@ -2,9 +2,11 @@
 #define APPSPLITTUNNELINGMODEL_H
 
 #include <QAbstractListModel>
+#include <QVector>
 
-#include "settings.h"
-#include "core/defs.h"
+#include "core/utils/errorCodes.h"
+#include "core/utils/routeModes.h"
+#include "core/utils/commonStructs.h"
 
 class AppSplitTunnelingModel: public QAbstractListModel
 {
@@ -17,40 +19,20 @@ public:
         PackageAppIconRole
     };
 
-    explicit AppSplitTunnelingModel(std::shared_ptr<Settings> settings, QObject *parent = nullptr);
+    explicit AppSplitTunnelingModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    Q_PROPERTY(int routeMode READ getRouteMode WRITE setRouteMode NOTIFY routeModeChanged)
-    Q_PROPERTY(bool isTunnelingEnabled READ isSplitTunnelingEnabled NOTIFY splitTunnelingToggled)
-
 public slots:
-    bool addApp(const InstalledAppInfo &appInfo);
-    void removeApp(QModelIndex index);
-    void clearAppsList();
-
-    int getRouteMode();
-    void setRouteMode(int routeMode);
-
-    bool isSplitTunnelingEnabled();
-    void toggleSplitTunneling(bool enabled);
-
-signals:
-    void routeModeChanged();
-    void splitTunnelingToggled();
+    void updateModel(const QVector<amnezia::InstalledAppInfo> &apps);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    std::shared_ptr<Settings> m_settings;
-
-    bool m_isSplitTunnelingEnabled;
-    Settings::AppsRouteMode m_currentRouteMode;
-
-    QVector<InstalledAppInfo> m_apps;
+    QVector<amnezia::InstalledAppInfo> m_apps;
 };
 
 #endif // APPSPLITTUNNELINGMODEL_H

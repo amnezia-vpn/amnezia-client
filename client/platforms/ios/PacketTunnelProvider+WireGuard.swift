@@ -16,7 +16,6 @@ extension PacketTunnelProvider {
         do {
             let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
             let wgConfigStr = wgConfig.str
-            wg_log(.info, title: "config: ", message: wgConfig.redux)
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
@@ -94,15 +93,24 @@ extension PacketTunnelProvider {
             }
         } catch {
             wg_log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
-            completionHandler(nil)
+            errorNotifier.notify(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
+            completionHandler(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             return
         }
     }
 
     func handleWireguardStatusMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
-        wgAdapter?.getRuntimeConfiguration { settings in
-            let components = settings!.components(separatedBy: "\n")
+        guard let wgAdapter = wgAdapter else {
+            completionHandler(nil)
+            return
+        }
+        wgAdapter.getRuntimeConfiguration { settings in
+            guard let settings = settings else {
+                completionHandler(nil)
+                return
+            }
+            let components = settings.components(separatedBy: "\n")
 
             var settingsDictionary: [String: String] = [:]
             for component in components {
@@ -131,7 +139,7 @@ extension PacketTunnelProvider {
         }
     }
 
-    private func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
+    func handleWireguardAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         guard let completionHandler = completionHandler else { return }
         if messageData.count == 1 && messageData[0] == 0 {
             wgAdapter?.getRuntimeConfiguration { settings in
@@ -176,7 +184,7 @@ extension PacketTunnelProvider {
     }
 
     func stopWireguard(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-        wg_log(.info, message: "Stopping tunnel: reason: \(reason.description)")
+        wg_log(.info, message: "Stopping tunnel: reason: \(reason.amneziaDescription)")
 
         wgAdapter?.stop { error in
             ErrorNotifier.removeLastErrorFile()

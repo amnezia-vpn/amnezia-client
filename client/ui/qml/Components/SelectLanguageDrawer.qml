@@ -57,7 +57,7 @@ DrawerType2 {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
 
-            property int selectedIndex: LanguageModel.currentLanguageIndex
+            property int selectedIndex: LanguageUiController.currentLanguageIndex
 
             model: LanguageModel
 
@@ -158,7 +158,7 @@ DrawerType2 {
 
                         onClicked: {
                             listView.selectedIndex = index
-                            LanguageModel.changeLanguage(languageIndex)
+                            LanguageUiController.changeLanguage(languageIndex)
                             root.closeTriggered()
                         }
                     }

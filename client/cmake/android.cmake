@@ -1,6 +1,8 @@
 message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 
-set(APP_ANDROID_MIN_SDK 28)
+if(NOT DEFINED APP_ANDROID_MIN_SDK)
+    set(APP_ANDROID_MIN_SDK 28)
+endif()
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 
@@ -13,43 +15,66 @@ set_target_properties(${PROJECT} PROPERTIES
     QT_ANDROID_MIN_SDK_VERSION ${APP_ANDROID_MIN_SDK}
     QT_ANDROID_TARGET_SDK_VERSION 36
     QT_ANDROID_SDK_BUILD_TOOLS_REVISION 36.0.0
-    QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android
 )
 
 set(QT_ANDROID_MULTI_ABI_FORWARD_VARS "QT_NO_GLOBAL_APK_TARGET_PART_OF_ALL;CMAKE_BUILD_TYPE")
 
 # We need to include qtprivate api's
 # As QAndroidBinder is not yet implemented with a public api
-set(LIBS ${LIBS} Qt6::CorePrivate -ljnigraphics)
+# Check if Qt6::CorePrivate is available (may not be in all Qt versions/configurations)
+if(TARGET Qt6::CorePrivate)
+    set(LIBS ${LIBS} Qt6::CorePrivate)
+endif()
+set(LIBS ${LIBS} -ljnigraphics)
 
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/platforms/android)
 
 set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.h
 )
 
 set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_controller.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/android/android_utils.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/protocols/android_vpnprotocol.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/core/installedAppsImageProvider.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/protocols/androidVpnProtocol.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/core/utils/installedAppsImageProvider.cpp
 )
 
-foreach(abi IN ITEMS ${QT_ANDROID_ABIS})
-    set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_EXTRA_LIBS
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/amneziawg/android/${abi}/libwg-go.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libck-ovpn-plugin.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpn3.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/libovpnutil.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openvpn/android/${abi}/librsapss.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/android/${abi}/libcrypto_3.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/openssl/android/${abi}/libssl_3.so
-        ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/libssh/android/${abi}/libssh.so
-    )
-endforeach()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/3rd-prebuilt/3rd-prebuilt/xray/android/libxray.aar
-        DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
+find_package(awg-android REQUIRED)
+set(LIBS ${LIBS} amnezia::awg-android)
+set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${AMNEZIA_ANDROID_LIBWG_PATH} ${AMNEZIA_ANDROID_LIBWG_QUICK_PATH})
+
+find_package(amnezia-libxray REQUIRED)
+file(COPY ${AMNEZIA_LIBXRAY_PATH} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/android/xray/libXray)
+
+find_package(openvpn-pt-android REQUIRED)
+set(LIBS ${LIBS} amnezia::openvpn-pt-android)
+set_property(TARGET ${PROJECT} APPEND PROPERTY QT_ANDROID_EXTRA_LIBS ${OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH})
+
+set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/android)
+
+if(APP_ANDROID_MAX_SDK)
+    set(APP_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/android-package-source)
+    file(REMOVE_RECURSE ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/android/ DESTINATION ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+
+    set(manifest_path ${APP_ANDROID_PACKAGE_SOURCE_DIR}/AndroidManifest.xml)
+    set(manifest_anchor "android:installLocation=\"auto\">")
+    file(READ ${manifest_path} manifest_contents)
+    string(REPLACE
+        "${manifest_anchor}"
+        "${manifest_anchor}\n\n    <uses-sdk android:maxSdkVersion=\"${APP_ANDROID_MAX_SDK}\" />"
+        patched_contents "${manifest_contents}")
+    if(patched_contents STREQUAL manifest_contents)
+        message(FATAL_ERROR
+            "Failed to set maxSdkVersion=${APP_ANDROID_MAX_SDK}: anchor '${manifest_anchor}' "
+            "not found in ${CMAKE_CURRENT_SOURCE_DIR}/android/AndroidManifest.xml")
+    endif()
+    file(WRITE ${manifest_path} "${patched_contents}")
+endif()
+
+set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR})

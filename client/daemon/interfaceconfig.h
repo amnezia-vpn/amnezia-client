@@ -36,6 +36,7 @@ class InterfaceConfig {
   QString m_secondaryDnsServer;
   int m_serverPort = 0;
   int m_deviceMTU = 1420;
+  QString m_persistentKeepalive;
   QList<IPAddress> m_allowedIPAddressRanges;
   QStringList m_excludedAddresses;
   QStringList m_vpnDisabledApps;
@@ -57,12 +58,24 @@ class InterfaceConfig {
   QString m_underloadPacketMagicHeader;
   QString m_transportPacketMagicHeader;
   QMap<QString, QString> m_specialJunk;
-  QMap<QString, QString> m_controlledJunk;
-  QString m_specialHandshakeTimeout;
+
+  QString m_headerProtectionKey;
+  QString m_contentPaddingAddition;
+  QString m_rekeyAfterTime;
+  QString m_rekeyTimeout;
+  QString m_rejectAfterTime;
+  QString m_keepaliveTimeout;
+  QString m_maxHandshakeAttempts;
+  QString m_randomTrailers;
+  QString m_disableCookies;
 
   QJsonObject toJson() const;
   QString toWgConf(
       const QMap<QString, QString>& extra = QMap<QString, QString>()) const;
+
+  // Converts awg-quick on/off (and 0/1/true/false) to UAPI 1/0.
+  // amneziawg-go uses strconv.ParseBool and rejects "on"/"off".
+  static QString awgBoolToUapi(const QString& value);
 };
 
 #endif  // INTERFACECONFIG_H

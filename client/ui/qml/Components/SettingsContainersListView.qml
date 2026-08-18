@@ -5,9 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
-import ContainerEnum 1.0
-import ContainerProps 1.0
+import Style 1.0
 
 import "../Controls2"
 import "../Controls2/TextTypes"
@@ -21,45 +19,49 @@ ListViewType {
     delegate: ColumnLayout {
         width: root.width
 
+        property bool isOutdatedAwgContainer: Boolean(isInstalled && ServersUiController.isContainerOutdatedAwg(root.model.mapToSource(index)))
+
         LabelWithButtonType {
             Layout.fillWidth: true
 
             text: name
             descriptionText: description
+            rightWarningImageSource: isOutdatedAwgContainer ? "qrc:/images/controls/alert-circle.svg" : ""
             rightImageSource: isInstalled ? "qrc:/images/controls/chevron-right.svg" : "qrc:/images/controls/download.svg"
 
             clickedFunction: function() {
                 if (isInstalled) {
                     var containerIndex = root.model.mapToSource(index)
-                    ContainersModel.setProcessedContainerIndex(containerIndex)
+                    ServersUiController.processedContainerIndex = containerIndex
 
-                    if (serviceType !== ProtocolEnum.Other) {
-                        if (config[ContainerProps.containerTypeToString(containerIndex)]["isThirdPartyConfig"]) {
-                            ProtocolsModel.updateModel(config)
+                    if (isVpnContainer) {
+                        // var isThirdPartyConfig = root.model.data(index, ContainersModel.IsThirdPartyConfigRole)
+                        if (isThirdPartyConfig) {
+                            InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                             PageController.goToPage(PageEnum.PageProtocolRaw)
                             return
                         }
                     }
 
-                    switch (containerIndex) {
-                    case ContainerEnum.Ipsec: {
-                        ProtocolsModel.updateModel(config)
+                    if (isIpsec) {
+                        InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageProtocolRaw)
-                        break
-                    }
-                    case ContainerEnum.Dns: {
+                    } else if (isDns) {
                         PageController.goToPage(PageEnum.PageServiceDnsSettings)
-                        break
-                    }
-                    default: {
-                        ProtocolsModel.updateModel(config)
+                    } else if (isMtProxy) {
+                        MtProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceMtProxySettings, false)
+                    } else if (isTelemt) {
+                        TelemtConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceTelemtSettings, false)
+                    } else {
+                        InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
-                    }
                     }
 
                 } else {
-                    ContainersModel.setProcessedContainerIndex(root.model.mapToSource(index))
-                    InstallController.setShouldCreateServer(false)
+                    var containerIndex = root.model.mapToSource(index)
+                    ServersUiController.processedContainerIndex = containerIndex
                     PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                 }
             }

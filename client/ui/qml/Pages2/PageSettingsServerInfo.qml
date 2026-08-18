@@ -5,9 +5,7 @@ import QtQuick.Layouts
 import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import ContainerProps 1.0
-import ProtocolProps 1.0
 import Style 1.0
 
 import "./"
@@ -34,9 +32,17 @@ PageType {
     }
 
     Connections {
+        target: ServersUiController
+
+        function onProcessedServerIdChanged() {
+            root.processedServer = proxyServersModel.get(0)
+        }
+    }
+
+    Connections {
         target: ServersModel
 
-        function onProcessedServerChanged() {
+        function onModelReset() {
             root.processedServer = proxyServersModel.get(0)
         }
     }
@@ -48,8 +54,8 @@ PageType {
         sourceModel: ServersModel
         filters: [
             ValueFilter {
-                roleName: "isCurrentlyProcessed"
-                value: true
+                roleName: "serverId"
+                value: ServersUiController.processedServerId
             }
         ]
 
@@ -62,7 +68,7 @@ PageType {
         objectName: "mainLayout"
 
         anchors.fill: parent
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
         spacing: 4
 
@@ -82,11 +88,14 @@ PageType {
 
             actionButtonImage: "qrc:/images/controls/edit-3.svg"
 
-            headerText: root.processedServer.name
+            headerText: root.processedServer != null ? root.processedServer.name : ""
             descriptionText: {
-                if (root.processedServer.isServerFromTelegramApi) {
+                if (root.processedServer == null) {
+                    return ""
+                }
+                if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
                     return root.processedServer.serverDescription
-                } else if (root.processedServer.hasWriteAccess) {
+                } else if (ServersUiController.isProcessedServerHasWriteAccess()) {
                     return root.processedServer.credentialsLogin + " · " + root.processedServer.hostName
                 } else {
                     return root.processedServer.hostName
@@ -106,7 +115,7 @@ PageType {
             anchors.fill: parent
             expandedHeight: root.height * 0.35
 
-            serverNameText: root.processedServer.name
+            serverNameText: root.processedServer != null ? root.processedServer.name : ""
         }
 
         TabBar {
@@ -114,8 +123,8 @@ PageType {
 
             Layout.fillWidth: true
 
-            currentIndex: (ServersModel.getProcessedServerData("isServerFromTelegramApi")
-                           && !ServersModel.getProcessedServerData("hasInstalledContainers")) ?
+            currentIndex: (ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+                           && !ServersUiController.serverHasInstalledContainers(ServersUiController.processedServerId)) ?
                               root.pageSettingsServerData : root.pageSettingsServerProtocols
 
             background: Rectangle {

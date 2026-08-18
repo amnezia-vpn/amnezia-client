@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/client_scripts">
+        <file>mac_installer.sh</file>
+    </qresource>
+</RCC>
