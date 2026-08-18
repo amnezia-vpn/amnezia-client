@@ -17,7 +17,10 @@ using namespace QKeychain;
 namespace {
     constexpr const char *settingsKeyTag = "settingsKeyTag";
     constexpr const char *settingsIvTag = "settingsIvTag";
-    constexpr const char *keyChainName = "AmneziaVPN-Keychain";
+#ifndef CLIENT_KEYCHAIN_NAME_STR
+#define CLIENT_KEYCHAIN_NAME_STR "AmneziaVPN-Keychain"
+#endif
+    constexpr const char *keyChainName = CLIENT_KEYCHAIN_NAME_STR;
 }
 
 SecureQSettings::SecureQSettings(const QString &organization, const QString &application, QObject *parent, bool enableEncryption)

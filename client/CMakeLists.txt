@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-set(PROJECT AmneziaVPN)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/clientBrandingDefaults.cmake)
+
+set(PROJECT ${CLIENT_TARGET_NAME})
 project(${PROJECT})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -57,6 +59,9 @@ qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
 target_include_directories(${PROJECT} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
+target_compile_definitions(${PROJECT} PRIVATE
+    CLIENT_KEYCHAIN_NAME_STR=\"${CLIENT_KEYCHAIN_NAME}\"
+)
 
 if(WIN32 OR (APPLE AND NOT IOS AND NOT MACOS_NE) OR (LINUX AND NOT ANDROID))
     qt_add_repc_replicas(${PROJECT} ${CMAKE_CURRENT_LIST_DIR}/../ipc/ipc_interface.rep)
@@ -67,23 +72,28 @@ qt6_add_resources(QRC ${QRC}
     ${CMAKE_CURRENT_LIST_DIR}/images/images.qrc
     ${CMAKE_CURRENT_LIST_DIR}/images/flagKit.qrc
     ${CMAKE_CURRENT_LIST_DIR}/client_scripts/clientScripts.qrc
-    ${CMAKE_CURRENT_LIST_DIR}/ui/qml/qml.qrc
+    ${CLIENT_QML_QRC_FILE}
     ${CMAKE_CURRENT_LIST_DIR}/server_scripts/serverScripts.qrc
+    ${CLIENT_EXTRA_QRC}
 )
 
 # -- i18n begin
-set(AMNEZIAVPN_TS_FILES
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ru_RU.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_zh_CN.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_fa_IR.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ar_EG.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_my_MM.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ur_PK.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_hi_IN.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_es_ES.ts
-    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ko_KR.ts
-)
+if(CLIENT_TS_FILES)
+    set(AMNEZIAVPN_TS_FILES ${CLIENT_TS_FILES})
+else()
+    set(AMNEZIAVPN_TS_FILES
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ru_RU.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_zh_CN.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_fa_IR.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ar_EG.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_my_MM.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_uk_UA.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ur_PK.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_hi_IN.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_es_ES.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ko_KR.ts
+    )
+endif()
 
 file(GLOB_RECURSE AMNEZIAVPN_QML_FILES ${CMAKE_CURRENT_LIST_DIR}/ui/qml/*.qml)
 
@@ -106,13 +116,18 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/3rdparty.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/sources.cmake)
 
-include_directories(
+set(_client_include_dirs
     ${CMAKE_CURRENT_LIST_DIR}/../ipc
     ${CMAKE_CURRENT_LIST_DIR}/../common/logger
     ${CMAKE_CURRENT_LIST_DIR}/../common/crypto
     ${CMAKE_CURRENT_LIST_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+if(CLIENT_BRANDING_INCLUDE_DIR)
+    list(APPEND _client_include_dirs ${CLIENT_BRANDING_INCLUDE_DIR})
+endif()
+list(APPEND _client_include_dirs ${CMAKE_CURRENT_LIST_DIR})
+include_directories(${_client_include_dirs})
 
 if(MACOS_NE)
     message("MACOS_NE is ON")
@@ -128,6 +143,26 @@ include_directories(mozilla/shared)
 include_directories(mozilla/models)
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/../version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/core/utils)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/core/utils/appUiConfig.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/core/utils/appUiConfig.h
+    @ONLY
+)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/core/utils/swiftBridgeConfig.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/core/utils/swiftBridgeConfig.h
+    @ONLY
+)
+# Swift can't consume a `-DGROUP_ID="value"` compile define (Swift -D flags are
+# presence-only), unlike the Objective-C++ sources that read GROUP_ID directly.
+# Generate a Swift constant instead so Log.swift can use the branded app group.
+set(CLIENT_GROUP_IDENTIFIER_SWIFT_FILE ${CMAKE_CURRENT_BINARY_DIR}/platforms/ios/GroupIdentifier.swift)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/GroupIdentifier.swift.in
+    ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
+    @ONLY
+)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")

@@ -212,9 +212,7 @@ ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository
 
 ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &servicesData)
 {
-    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::cliName, QString(APPLICATION_NAME))
-                                     .build();
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository).build();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);

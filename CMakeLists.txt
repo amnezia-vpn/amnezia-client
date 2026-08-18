@@ -4,7 +4,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(PROJECT AmneziaVPN)
-set(AMNEZIAVPN_VERSION 5.0.1.1)
+if(NOT AMNEZIAVPN_VERSION)
+    set(AMNEZIAVPN_VERSION 5.0.1.1 CACHE STRING "Client app version")
+endif()
 
 set(QT_CREATOR_SKIP_PACKAGE_MANAGER_SETUP ON CACHE BOOL "" FORCE)
 set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES
@@ -59,14 +61,14 @@ if(APPLE AND NOT IOS)
     endif()
 
     configure_file(
-        "${CMAKE_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
         "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
         @ONLY
     )
 
     file(COPY_FILE
         "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
-        "${CMAKE_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
+        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
         ONLY_IF_DIFFERENT
     )
 endif()

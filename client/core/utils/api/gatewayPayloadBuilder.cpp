@@ -32,6 +32,7 @@ GatewayPayloadBuilder::GatewayPayloadBuilder(const SecureAppSettingsRepository *
 {
     m_payload[apiDefs::key::osVersion] = QSysInfo::productType();
     m_payload[apiDefs::key::appVersion] = QString(APP_VERSION);
+    m_payload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
 
     const QString distributionChannel = apiUtils::getDistributionChannel();
     if (!distributionChannel.isEmpty()) {

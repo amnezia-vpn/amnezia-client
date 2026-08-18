@@ -4,7 +4,8 @@
 
 #import "StoreKitController.h"
 #import <StoreKit/StoreKit.h>
-#import <AmneziaVPN-Swift.h>
+#include <QtCore/qglobal.h>
+#import "core/utils/swiftBridge.h"
 
 #include <QtCore/QDebug>
 #include <QtCore/QString>

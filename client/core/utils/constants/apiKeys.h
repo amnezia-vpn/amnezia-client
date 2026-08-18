@@ -67,7 +67,6 @@ namespace apiDefs
 
         constexpr QLatin1String id("id");
         constexpr QLatin1String orderId("order_id");
-        constexpr QLatin1String migrationCode("migration_code");
         constexpr QLatin1String transactionId("transaction_id");
         constexpr QLatin1String isTestPurchase("is_test_purchase");
         constexpr QLatin1String isInAppPurchase("is_in_app_purchase");

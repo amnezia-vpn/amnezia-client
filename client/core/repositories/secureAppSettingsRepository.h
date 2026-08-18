@@ -90,8 +90,6 @@ public:
 
     bool isHomeAdLabelVisible() const;
     void disableHomeAdLabel();
-    bool isPremV1MigrationReminderActive() const;
-    void disablePremV1MigrationReminder();
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &cfg);
     void clearSettings();
