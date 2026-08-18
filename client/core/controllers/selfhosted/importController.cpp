@@ -511,9 +511,10 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
             continue;
         } else {
-            QStringList parts = trimmedLine.split(" = ");
-            if (parts.count() == 2) {
-                configMap[parts.at(0).trimmed()] = parts.at(1).trimmed();
+            const qsizetype separatorIndex = trimmedLine.indexOf('=');
+            if (separatorIndex > 0) {
+                configMap[trimmedLine.left(separatorIndex).trimmed()] =
+                        trimmedLine.mid(separatorIndex + 1).trimmed();
             }
         }
     }
@@ -566,53 +567,26 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         lastConfig[configKey::persistentKeepAlive] = configMap.value(protocols::wireguard::PersistentKeepalive);
     }
 
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(
-                configMap.value(protocols::wireguard::AllowedIPs).split(", "));
+    const QStringList allowedIps = configMap.value(protocols::wireguard::AllowedIPs).split(
+            QRegularExpression("\\s*,\\s*"), Qt::SkipEmptyParts);
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIps);
 
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
 
     QString protocolName = configKey::wireguard;
-    QString protocolVersion;
     ConfigTypes detectedType = ConfigTypes::WireGuard;
 
-    const QStringList requiredJunkFields = { configKey::junkPacketCount,           configKey::junkPacketMinSize,
-                                             configKey::junkPacketMaxSize,         configKey::initPacketJunkSize,
-                                             configKey::responsePacketJunkSize,    configKey::initPacketMagicHeader,
-                                             configKey::responsePacketMagicHeader, configKey::underloadPacketMagicHeader,
-                                             configKey::transportPacketMagicHeader };
+    const QStringList awgProtocolKeys = configKey::awgProtocolKeys();
 
-    const QStringList optionalJunkFields = { configKey::cookieReplyPacketJunkSize,
-                                             configKey::transportPacketJunkSize,
-                                             configKey::specialJunk1,    configKey::specialJunk2,    configKey::specialJunk3,
-                                             configKey::specialJunk4,    configKey::specialJunk5
-    };
-
-    bool hasAllRequiredFields = std::all_of(requiredJunkFields.begin(), requiredJunkFields.end(),
-                                            [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
-    if (hasAllRequiredFields) {
-        for (const QString &field : requiredJunkFields) {
-            lastConfig[field] = configMap.value(field);
-        }
-
-        for (const QString &field : optionalJunkFields) {
-            if (!configMap.value(field).isEmpty()) {
-                lastConfig[field] = configMap.value(field);
+    bool hasAwgKeys = std::any_of(awgProtocolKeys.begin(), awgProtocolKeys.end(),
+                                    [&configMap](const QString &field) { return !configMap.value(field).isEmpty(); });
+    if (hasAwgKeys) {
+        for (const QString &key : awgProtocolKeys) {
+            if (!configMap.value(key).isEmpty()) {
+                lastConfig[key] = configMap.value(key);
             }
         }
 
-        bool hasCookieReplyPacketJunkSize = !configMap.value(configKey::cookieReplyPacketJunkSize).isEmpty();
-        bool hasTransportPacketJunkSize = !configMap.value(configKey::transportPacketJunkSize).isEmpty();
-        bool hasSpecialJunk = !configMap.value(configKey::specialJunk1).isEmpty() ||
-                              !configMap.value(configKey::specialJunk2).isEmpty() ||
-                              !configMap.value(configKey::specialJunk3).isEmpty() ||
-                              !configMap.value(configKey::specialJunk4).isEmpty() ||
-                              !configMap.value(configKey::specialJunk5).isEmpty();
-
-        if (hasCookieReplyPacketJunkSize && hasTransportPacketJunkSize) {
-            protocolVersion = "2";
-        } else if (hasSpecialJunk && !hasCookieReplyPacketJunkSize && !hasTransportPacketJunkSize) {
-            protocolVersion = "1.5";
-        }
         protocolName = configKey::awg;
         detectedType = ConfigTypes::Awg;
     }
@@ -630,9 +604,6 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     wireguardConfig[configKey::isThirdPartyConfig] = true;
     wireguardConfig[configKey::port] = port;
     wireguardConfig[configKey::transportProto] = protocols::openvpn::defaultTransportProto;
-    if (protocolName == configKey::awg && !protocolVersion.isEmpty()) {
-        wireguardConfig[configKey::protocolVersion] = protocolVersion;
-    }
 
     QJsonObject containers;
     QString containerName = (protocolName == configKey::awg) ? configKey::amneziaAwg : configKey::amneziaWireguard;
@@ -666,11 +637,24 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
 {
     QJsonParseError parserErr;
     QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
+    if (parserErr.error != QJsonParseError::NoError || !jsonConf.isObject()) {
+        qDebug() << "Xray config JSON parse failed:" << parserErr.errorString();
+        return QJsonObject();
+    }
+
+    const QJsonObject parsedConfig = jsonConf.object();
+    if (!parsedConfig.value(protocols::xray::inbounds).isArray()
+            || !parsedConfig.value(protocols::xray::outbounds).isArray()) {
+        qDebug() << "Xray config is missing inbounds or outbounds";
+        return QJsonObject();
+    }
+
+    const QString serializedConfig = QString::fromUtf8(jsonConf.toJson());
 
     QJsonObject xrayVpnConfig;
-    xrayVpnConfig[configKey::config] = jsonConf.toJson().constData();
+    xrayVpnConfig[configKey::config] = serializedConfig;
     QJsonObject lastConfig;
-    lastConfig[configKey::lastConfig] = jsonConf.toJson().constData();
+    lastConfig[configKey::lastConfig] = serializedConfig;
     lastConfig[configKey::isThirdPartyConfig] = true;
 
     QJsonObject containers;

@@ -24,7 +24,7 @@
 	<false/>
 
 	<key>LSMinimumSystemVersion</key>
-	<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 
 	<key>CFBundleDisplayName</key>
 	<string>AmneziaVPNNetworkExtension</string>

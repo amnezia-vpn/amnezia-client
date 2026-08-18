@@ -221,7 +221,10 @@ ExportController::ExportResult ExportController::generateWireGuardConfig(const Q
         result.config.append(line + "\n");
     }
 
-    result.qrCodes << generateSingleQrCode(result.config.toUtf8());
+    const QString qr = qrCodeUtils::generatePlainQrCodeImage(result.config.toUtf8());
+    if (!qr.isEmpty()) {
+        result.qrCodes << qr;
+    }
     return result;
 }
 
@@ -252,7 +255,10 @@ ExportController::ExportResult ExportController::generateAwgConfig(const QString
         result.config.append(line + "\n");
     }
 
-    result.qrCodes << generateSingleQrCode(result.config.toUtf8());
+    const QString qr = qrCodeUtils::generatePlainQrCodeImage(result.config.toUtf8());
+    if (!qr.isEmpty()) {
+        result.qrCodes << qr;
+    }
     return result;
 }
 
@@ -369,10 +375,4 @@ QString ExportController::generateVpnUrl(const QByteArray &compressedConfig)
 QList<QString> ExportController::generateQrCodesFromConfig(const QByteArray &data)
 {
     return qrCodeUtils::generateQrCodeImageSeries(data);
-}
-
-QString ExportController::generateSingleQrCode(const QByteArray &data)
-{
-    auto qr = qrCodeUtils::generateQrCode(data);
-    return qrCodeUtils::svgToBase64(QString::fromStdString(toSvgString(qr, 1)));
 }

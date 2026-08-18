@@ -120,34 +120,60 @@ QVariantMap SecureAppSettingsRepository::vpnSites(RouteMode mode) const
     return value("Conf/" + routeModeString(mode)).toMap();
 }
 
+QStringList SecureAppSettingsRepository::siteIpList(const QVariant &value)
+{
+    // QVariant::toStringList() handles both a QStringList/QVariantList and a single QString
+    // (a single string is returned as a one-element list), which covers the legacy format.
+    QStringList result = value.toStringList();
+    result.removeAll(QString());
+    result.removeDuplicates();
+    return result;
+}
+
 void SecureAppSettingsRepository::setVpnSites(RouteMode mode, const QVariantMap &sites)
 {
     setValue("Conf/" + routeModeString(mode), sites);
 }
 
-bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QString &ip)
+bool SecureAppSettingsRepository::addVpnSite(RouteMode mode, const QString &site, const QStringList &ips)
 {
     QVariantMap sites = vpnSites(mode);
-    if (sites.contains(site) && ip.isEmpty())
+    const bool siteExisted = sites.contains(site);
+
+    if (siteExisted && ips.isEmpty())
         return false;
 
-    sites.insert(site, ip);
+    QStringList mergedIps = siteIpList(sites.value(site));
+    bool changed = !siteExisted;
+    for (const QString &ip : ips) {
+        if (!ip.isEmpty() && !mergedIps.contains(ip)) {
+            mergedIps.append(ip);
+            changed = true;
+        }
+    }
+
+    if (!changed)
+        return false;
+
+    sites.insert(site, mergedIps);
     setVpnSites(mode, sites);
     emit sitesChanged(mode);
     return true;
 }
 
-void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString, QString> &sites)
+void SecureAppSettingsRepository::addVpnSites(RouteMode mode, const QMap<QString, QStringList> &sites)
 {
     QVariantMap allSites = vpnSites(mode);
     for (auto i = sites.constBegin(); i != sites.constEnd(); ++i) {
         const QString &site = i.key();
-        const QString &ip = i.value();
 
-        if (allSites.contains(site) && allSites.value(site) == ip)
-            continue;
+        QStringList mergedIps = siteIpList(allSites.value(site));
+        for (const QString &ip : i.value()) {
+            if (!ip.isEmpty() && !mergedIps.contains(ip))
+                mergedIps.append(ip);
+        }
 
-        allSites.insert(site, ip);
+        allSites.insert(site, mergedIps);
     }
 
     setVpnSites(mode, allSites);

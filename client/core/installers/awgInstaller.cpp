@@ -1,11 +1,10 @@
 #include "awgInstaller.h"
 
-#include <QPair>
 #include <QRandomGenerator>
 #include <QSet>
 #include <QStringList>
-#include <QVector>
 
+#include "core/configurators/wireguardConfigurator.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -28,109 +27,59 @@ AwgInstaller::AwgInstaller(QObject *parent)
 ContainerConfig AwgInstaller::generateConfig(DockerContainer container, int port, TransportProto transportProto)
 {
     ContainerConfig config = createBaseConfig(container, port, transportProto);
-    
-    bool isAwg2 = (container == DockerContainer::Awg2);
-    
     if (auto* awgConfig = config.getAwgProtocolConfig()) {
-        generateAwgParameters(awgConfig->serverConfig, isAwg2);
-        
-        if (isAwg2) {
-            awgConfig->serverConfig.protocolVersion = "2";
-        }
+        generateAwgParameters(awgConfig->serverConfig);
+        awgConfig->serverConfig.protocolVersion = protocols::awg::awgV3;
     }
-    
     return config;
 }
 
-void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig, bool isAwg2)
+void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
 {
     QString junkPacketCount = QString::number(QRandomGenerator::global()->bounded(4, 7));
     QString junkPacketMinSize = QString::number(10);
     QString junkPacketMaxSize = QString::number(50);
 
-    int s1 = QRandomGenerator::global()->bounded(15, 150);
-    int s2 = QRandomGenerator::global()->bounded(15, 150);
-    int s3 = QRandomGenerator::global()->bounded(0, 64);
-    int s4 = QRandomGenerator::global()->bounded(0, 20);
+    int s1 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::initPacketJunkSizeMax);
+    int s2 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::responsePacketJunkSizeMax);
+    int s3 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::cookieReplyPacketJunkSizeMax);
+    int s4 = protocols::awg::defaultTransportPacketJunkSize;
 
     // Ensure all values are unique and don't create equal packet sizes
-    QSet<int> usedValues;
-    usedValues.insert(s1);
+    QSet<int> usedValues { s1, s4 };
 
     while (usedValues.contains(s2) || s1 + amnezia::AwgConstant::messageInitiationSize == s2 + amnezia::AwgConstant::messageResponseSize) {
-        s2 = QRandomGenerator::global()->bounded(15, 150);
+        s2 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::responsePacketJunkSizeMax);
     }
     usedValues.insert(s2);
 
     while (usedValues.contains(s3) || s1 + amnezia::AwgConstant::messageInitiationSize == s3 + amnezia::AwgConstant::messageCookieReplySize
            || s2 + amnezia::AwgConstant::messageResponseSize == s3 + amnezia::AwgConstant::messageCookieReplySize) {
-        s3 = QRandomGenerator::global()->bounded(0, 64);
-    }
-    usedValues.insert(s3);
-
-    while (usedValues.contains(s4)) {
-        s4 = QRandomGenerator::global()->bounded(0, 20);
-    }
-
-    QString initPacketJunkSize = QString::number(s1);
-    QString responsePacketJunkSize = QString::number(s2);
-    QString cookieReplyPacketJunkSize = QString::number(s3);
-    QString transportPacketJunkSize = QString::number(s4);
-
-    QString initPacketMagicHeader;
-    QString responsePacketMagicHeader;
-    QString underloadPacketMagicHeader;
-    QString transportPacketMagicHeader;
-
-    if (isAwg2) {
-        // AWG 2.0: use range format for magic headers
-        QVector<QPair<QString, QString>> headersValue;
-        int min = 5;
-        auto max = (std::numeric_limits<qint32>::max)();
-        while (headersValue.size() != 4) {
-            auto first = QRandomGenerator::global()->bounded(min, max);
-            auto second = QRandomGenerator::global()->bounded(first, max);
-            min = second;
-            headersValue.push_back(QPair<QString, QString>(QString::number(first), QString::number(second)));
-        }
-
-        initPacketMagicHeader = headersValue.at(0).first + "-" + headersValue.at(0).second;
-        responsePacketMagicHeader = headersValue.at(1).first + "-" + headersValue.at(1).second;
-        underloadPacketMagicHeader = headersValue.at(2).first + "-" + headersValue.at(2).second;
-        transportPacketMagicHeader = headersValue.at(3).first + "-" + headersValue.at(3).second;
-    } else {
-        // AWG legacy: use single values for magic headers
-        QSet<QString> headersValue;
-        while (headersValue.size() != 4) {
-            auto max = (std::numeric_limits<qint32>::max)();
-            headersValue.insert(QString::number(QRandomGenerator::global()->bounded(5, max)));
-        }
-
-        auto headersValueList = headersValue.values();
-        initPacketMagicHeader = headersValueList.at(0);
-        responsePacketMagicHeader = headersValueList.at(1);
-        underloadPacketMagicHeader = headersValueList.at(2);
-        transportPacketMagicHeader = headersValueList.at(3);
+        s3 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::cookieReplyPacketJunkSizeMax);
     }
 
     serverConfig.junkPacketCount = junkPacketCount;
     serverConfig.junkPacketMinSize = junkPacketMinSize;
     serverConfig.junkPacketMaxSize = junkPacketMaxSize;
-    serverConfig.initPacketJunkSize = initPacketJunkSize;
-    serverConfig.responsePacketJunkSize = responsePacketJunkSize;
-    serverConfig.initPacketMagicHeader = initPacketMagicHeader;
-    serverConfig.responsePacketMagicHeader = responsePacketMagicHeader;
-    serverConfig.underloadPacketMagicHeader = underloadPacketMagicHeader;
-    serverConfig.transportPacketMagicHeader = transportPacketMagicHeader;
+    serverConfig.initPacketJunkSize = QString::number(s1);
+    serverConfig.responsePacketJunkSize = QString::number(s2);
+    serverConfig.cookieReplyPacketJunkSize = QString::number(s3);
+    serverConfig.transportPacketJunkSize = QString::number(s4);
 
-    serverConfig.cookieReplyPacketJunkSize = cookieReplyPacketJunkSize;
-    serverConfig.transportPacketJunkSize = transportPacketJunkSize;
+    serverConfig.initPacketMagicHeader = protocols::awg::defaultInitPacketMagicHeader;
+    serverConfig.responsePacketMagicHeader = protocols::awg::defaultResponsePacketMagicHeader;
+    serverConfig.underloadPacketMagicHeader = protocols::awg::defaultUnderloadPacketMagicHeader;
+    serverConfig.transportPacketMagicHeader = protocols::awg::defaultTransportPacketMagicHeader;
 
-    serverConfig.specialJunk1 = protocols::awg::defaultSpecialJunk1;
-    serverConfig.specialJunk2 = protocols::awg::defaultSpecialJunk2;
-    serverConfig.specialJunk3 = protocols::awg::defaultSpecialJunk3;
-    serverConfig.specialJunk4 = protocols::awg::defaultSpecialJunk4;
-    serverConfig.specialJunk5 = protocols::awg::defaultSpecialJunk5;
+    serverConfig.headerProtectionKey = WireguardConfigurator::genClientKeys().clientPrivKey;
+    serverConfig.contentPaddingAddition = protocols::awg::defaultContentPaddingAddition;
+    serverConfig.rekeyAfterTime = protocols::awg::defaultRekeyAfterTime;
+    serverConfig.rekeyTimeout = protocols::awg::defaultRekeyTimeout;
+    serverConfig.rejectAfterTime = protocols::awg::defaultRejectAfterTime;
+    serverConfig.keepaliveTimeout = protocols::awg::defaultKeepaliveTimeout;
+    serverConfig.maxHandshakeAttempts = protocols::awg::defaultMaxHandshakeAttempts;
+    serverConfig.randomTrailers = protocols::awg::defaultRandomTrailers;
+    serverConfig.disableCookies = protocols::awg::defaultDisableCookies;
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
@@ -187,14 +136,22 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         awgConfig->serverConfig.specialJunk4 = serverConfigMap.value(QString("# ") + configKey::specialJunk4);
         awgConfig->serverConfig.specialJunk5 = serverConfigMap.value(QString("# ") + configKey::specialJunk5);
 
-        // AWG 2.0 specific fields
-        if (container == DockerContainer::Awg2) {
-            awgConfig->serverConfig.protocolVersion = "2";
-            awgConfig->serverConfig.cookieReplyPacketJunkSize = serverConfigMap.value(configKey::cookieReplyPacketJunkSize);
-            awgConfig->serverConfig.transportPacketJunkSize = serverConfigMap.value(configKey::transportPacketJunkSize);
-        }
+        awgConfig->serverConfig.cookieReplyPacketJunkSize = serverConfigMap.value(configKey::cookieReplyPacketJunkSize);
+        awgConfig->serverConfig.transportPacketJunkSize = serverConfigMap.value(configKey::transportPacketJunkSize);
+
+        awgConfig->serverConfig.headerProtectionKey = serverConfigMap.value(configKey::headerProtectionKey);
+        awgConfig->serverConfig.contentPaddingAddition = serverConfigMap.value(configKey::contentPaddingAddition);
+        awgConfig->serverConfig.rekeyAfterTime = serverConfigMap.value(configKey::rekeyAfterTime);
+        awgConfig->serverConfig.rekeyTimeout = serverConfigMap.value(configKey::rekeyTimeout);
+        awgConfig->serverConfig.rejectAfterTime = serverConfigMap.value(configKey::rejectAfterTime);
+        awgConfig->serverConfig.keepaliveTimeout = serverConfigMap.value(configKey::keepaliveTimeout);
+        awgConfig->serverConfig.maxHandshakeAttempts = serverConfigMap.value(configKey::maxHandshakeAttempts);
+        awgConfig->serverConfig.randomTrailers = serverConfigMap.value(configKey::randomTrailers);
+        awgConfig->serverConfig.disableCookies = serverConfigMap.value(configKey::disableCookies);
+
+        awgConfig->serverConfig.protocolVersion = awgConfig->serverProtocolVersion();
     }
-    
+
     return ErrorCode::NoError;
 }
 

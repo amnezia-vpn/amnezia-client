@@ -566,22 +566,6 @@ PageType {
                                 implicitWidth: 36
                                 implicitHeight: 36
                                 hoverEnabled: true
-                                image: "qrc:/images/controls/qr-code.svg"
-                                imageColor: AmneziaStyle.color.paleGray
-                                visible: secret !== ""
-                                onClicked: {
-                                    ExportController.generateQrFromString(tmeLink())
-                                    PageController.goToShareConnectionPage(
-                                        qsTr("Telegram connection link"),
-                                        qsTr("Telemt connection link"),
-                                        "", "", "")
-                                }
-                            }
-
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
                                 image: "qrc:/images/controls/copy.svg"
                                 imageColor: AmneziaStyle.color.paleGray
                                 visible: secret !== ""
@@ -630,7 +614,7 @@ PageType {
                                 image: "qrc:/images/controls/qr-code.svg"
                                 imageColor: AmneziaStyle.color.paleGray
                                 onClicked: {
-                                    ExportController.generateQrFromString(tgLink())
+                                    ExportController.generateQrFromStringRaw(tgLink())
                                     PageController.goToShareConnectionPage(
                                         qsTr("Telegram connection link"),
                                         qsTr("Telemt connection link"),
@@ -877,7 +861,7 @@ PageType {
                     }
 
                     function telemtShareQr(link) {
-                        ExportController.generateQrFromString(link)
+                        ExportController.generateQrFromStringRaw(link)
                         PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
                             qsTr("Telemt connection link"), "", "", "")
                     }
@@ -1466,15 +1450,6 @@ PageType {
                                                 implicitWidth: 36
                                                 implicitHeight: 36
                                                 hoverEnabled: true
-                                                image: "qrc:/images/controls/qr-code.svg"
-                                                imageColor: AmneziaStyle.color.paleGray
-                                                onClicked: settingsRoot.telemtShareQr(settingsRoot.telemtTmeLinkForAdditional(modelData))
-                                            }
-
-                                            ImageButtonType {
-                                                implicitWidth: 36
-                                                implicitHeight: 36
-                                                hoverEnabled: true
                                                 image: "qrc:/images/controls/copy.svg"
                                                 imageColor: AmneziaStyle.color.paleGray
                                                 onClicked: settingsRoot.telemtCopyText(settingsRoot.telemtTmeLinkForAdditional(modelData))
@@ -1549,161 +1524,18 @@ PageType {
                             Layout.bottomMargin: 8
                         }
 
-                        LabelTextType {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.bottomMargin: 4
-                            text: qsTr("Worker mode")
-                        }
-
-                        ButtonGroup {
-                            id: workerModeGroup
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            Layout.bottomMargin: 4
-                            spacing: 0
-                            visible: transportMode !== "faketls"
-
-                            HorizontalRadioButton {
-                                Layout.fillWidth: true
-                                text: qsTr("Auto")
-                                ButtonGroup.group: workerModeGroup
-                                checked: workersMode === "auto"
-                                onClicked: { workersMode = "auto"; TelemtConfigModel.setWorkersMode("auto") }
-                            }
-                            HorizontalRadioButton {
-                                Layout.fillWidth: true
-                                text: qsTr("Manual")
-                                ButtonGroup.group: workerModeGroup
-                                checked: workersMode === "manual"
-                                onClicked: { workersMode = "manual"; TelemtConfigModel.setWorkersMode("manual") }
-                            }
-                        }
-
-                        CaptionTextType {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            Layout.bottomMargin: 8
-                            visible: transportMode === "faketls"
-                            text: qsTr("Workers are set to 0 automatically for FakeTLS mode.")
-                            color: AmneziaStyle.color.mutedGray
-                            font.pixelSize: 12
-                            wrapMode: Text.WordWrap
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: workersTextField
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            Layout.bottomMargin: 16
-                            visible: workersMode === "manual" && transportMode !== "faketls"
-                            headerText: qsTr("Workers count")
-                            textField.placeholderText: "2"
-                            textField.text: workers
-                            textField.maximumLength: 2
-                            textField.inputMethodHints: Qt.ImhDigitsOnly
-                            textField.validator: IntValidator {
-                                bottom: 0
-                                top: TelemtConfigModel.maxWorkers()
-                            }
-                            textField.onTextChanged: {
-                                var cur = workersTextField.textField.text
-                                if (cur === "") {
-                                    return
-                                }
-                                var n = parseInt(cur, 10)
-                                var maxW = TelemtConfigModel.maxWorkers()
-                                if (isNaN(n) || n < 0) {
-                                    n = 0
-                                }
-                                if (n > maxW) {
-                                    n = maxW
-                                }
-                                var clamped = String(n)
-                                if (clamped !== cur) {
-                                    textField.text = clamped
-                                    textField.cursorPosition = clamped.length
-                                }
-                            }
-                            textField.onEditingFinished: {
-                                var v = workersTextField.textField.text
-                                if (v !== "") {
-                                    var m = parseInt(v, 10)
-                                    var maxW2 = TelemtConfigModel.maxWorkers()
-                                    if (isNaN(m) || m < 0) {
-                                        m = 0
-                                    }
-                                    if (m > maxW2) {
-                                        m = maxW2
-                                    }
-                                    v = String(m)
-                                    textField.text = v
-                                }
-                                if (v !== workers) {
-                                    workers = v
-                                    TelemtConfigModel.setWorkers(workers)
-                                }
-                            }
-                        }
-
-                        DividerType {
-                            Layout.fillWidth: true
-                            Layout.bottomMargin: 8
-                        }
-
                         SwitcherType {
                             Layout.fillWidth: true
                             Layout.rightMargin: 16
                             Layout.leftMargin: 16
                             Layout.bottomMargin: 4
-                            text: qsTr("Server is behind NAT / Docker bridge")
-                            descriptionText: qsTr("Enable if your server is not directly accessible from the internet, e.g. Docker or private network")
+                            text: qsTr("Set public IP manually")
+                            descriptionText: qsTr("By default the proxy auto-detects its public IP. Enable to override it manually, e.g. when the server is behind NAT / Docker bridge")
                             checked: natEnabled
                             onToggled: function () {
                                 if (checked !== natEnabled) {
                                     natEnabled = checked
                                     TelemtConfigModel.setNatEnabled(natEnabled)
-                                }
-                            }
-                        }
-
-                        TextFieldWithHeaderType {
-                            id: natInternalIpTextField
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
-                            Layout.bottomMargin: 16
-                            visible: natEnabled
-                            headerText: qsTr("Internal IP")
-                            textField.placeholderText: "172.17.0.2"
-                            textField.text: natInternalIp
-                            textField.maximumLength: 15
-                            textField.validator: RegularExpressionValidator {
-                                regularExpression: root.natIpv4InputFormat
-                            }
-                            textField.onTextChanged: {
-                                if (root.natIpv4FieldShowInvalidError(textField.text)) {
-                                    natInternalIpTextField.errorText = qsTr("Enter a valid IPv4 address")
-                                } else {
-                                    natInternalIpTextField.errorText = ""
-                                }
-                            }
-                            textField.onEditingFinished: {
-                                textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                                if (!TelemtConfigModel.isValidOptionalIpv4(textField.text)) {
-                                    natInternalIpTextField.errorText = qsTr("Enter a valid IPv4 address")
-                                    return
-                                }
-                                natInternalIpTextField.errorText = ""
-                                if (textField.text !== natInternalIp) {
-                                    natInternalIp = textField.text
-                                    TelemtConfigModel.setNatInternalIp(natInternalIp)
                                 }
                             }
                         }
@@ -1715,7 +1547,7 @@ PageType {
                             Layout.rightMargin: 16
                             Layout.bottomMargin: 16
                             visible: natEnabled
-                            headerText: qsTr("External IP")
+                            headerText: qsTr("Public IP")
                             textField.placeholderText: "1.2.3.4"
                             textField.text: natExternalIp
                             textField.maximumLength: 15
@@ -1912,7 +1744,6 @@ PageType {
                             publicHostTextField.errorText = ""
                             tagTextField.errorText = ""
                             tlsDomainTextField.errorText = ""
-                            natInternalIpTextField.errorText = ""
                             natExternalIpTextField.errorText = ""
                             portTextField.errorText = ""
 
@@ -1948,13 +1779,9 @@ PageType {
                                 errorLines.push(bullet + tlsErr)
                             }
                             var natIpErr = qsTr("Enter a valid IPv4 address")
-                            if (!TelemtConfigModel.isValidOptionalIpv4(natInternalIpTextField.textField.text)) {
-                                natInternalIpTextField.errorText = natIpErr
-                                errorLines.push(bullet + qsTr("NAT internal IP: enter a valid IPv4 address"))
-                            }
                             if (!TelemtConfigModel.isValidOptionalIpv4(natExternalIpTextField.textField.text)) {
                                 natExternalIpTextField.errorText = natIpErr
-                                errorLines.push(bullet + qsTr("NAT external IP: enter a valid IPv4 address"))
+                                errorLines.push(bullet + qsTr("Public IP: enter a valid IPv4 address"))
                             }
                             if (errorLines.length > 0) {
                                 PageController.showErrorMessage(errorLines.join("\n"))
@@ -1969,15 +1796,7 @@ PageType {
                                 : tlsDomainTextField.textField.text
                             TelemtConfigModel.setTlsDomain(domainValue)
 
-                            if (transportMode === "faketls") {
-                                workers = "0"
-                                TelemtConfigModel.setWorkers("0")
-                            } else {
-                                TelemtConfigModel.setWorkersMode(workersMode)
-                                TelemtConfigModel.setWorkers(workers)
-                            }
                             TelemtConfigModel.setNatEnabled(natEnabled)
-                            TelemtConfigModel.setNatInternalIp(natInternalIpTextField.textField.text)
                             TelemtConfigModel.setNatExternalIp(natExternalIpTextField.textField.text)
 
                             previousPort = port

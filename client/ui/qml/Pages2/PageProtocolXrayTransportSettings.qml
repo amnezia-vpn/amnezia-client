@@ -123,7 +123,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("TTI")
-                    subtitleText: qsTr("Range 10–100, default %1 ms", "mKCP TTI").arg(XrayConfigModel.mkcpDefaultTti())
+                    hintText: qsTr("Transmission time interval (ms). Valid range: 10–100.")
+                    placeholderText: XrayConfigModel.mkcpDefaultTti()
                     textField.text: mkcpTti
                     textField.maximumLength: 3
                     textField.validator: RegularExpressionValidator { regularExpression: /^(|\d{1,2}|100)$/ }
@@ -142,7 +143,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("uplinkCapacity")
-                    subtitleText: qsTr("≥ 0, default %1 MB/s", "mKCP uplink").arg(XrayConfigModel.mkcpDefaultUplinkCapacity())
+                    hintText: qsTr("Uplink capacity (MB/s). Maximum: 2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultUplinkCapacity()
                     textField.text: mkcpUplinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -161,7 +163,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("downlinkCapacity")
-                    subtitleText: qsTr("≥ 0, default %1 MB/s", "mKCP downlink").arg(XrayConfigModel.mkcpDefaultDownlinkCapacity())
+                    hintText: qsTr("Downlink capacity (MB/s). Maximum: 2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultDownlinkCapacity()
                     textField.text: mkcpDownlinkCapacity
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -180,7 +183,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("readBufferSize")
-                    subtitleText: qsTr("≥ 1, default %1 MB").arg(XrayConfigModel.mkcpDefaultReadBufferSize())
+                    hintText: qsTr("Read buffer size (MB). Range: 1–2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultReadBufferSize()
                     textField.text: mkcpReadBufferSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -199,7 +203,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("writeBufferSize")
-                    subtitleText: qsTr("≥ 1, default %1 MB").arg(XrayConfigModel.mkcpDefaultWriteBufferSize())
+                    hintText: qsTr("Write buffer size (MB). Range: 1–2147483647.")
+                    placeholderText: XrayConfigModel.mkcpDefaultWriteBufferSize()
                     textField.text: mkcpWriteBufferSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -243,6 +248,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpMode
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpModeOptions()
@@ -291,6 +297,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Host")
+                    placeholderText: XrayConfigModel.xhttpHostDefault()
                     textField.text: xhttpHost
                     textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9._:,-]*$/ }
                     textField.onTextEdited: root.editDirty = (textField.text !== xhttpHost)
@@ -323,50 +330,6 @@ PageType {
                 }
 
                 DropDownType {
-                    id: headersDropDown
-                    fitContent: true
-                    Layout.fillWidth: true
-                    Layout.topMargin: 8
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: xhttpHeadersTemplate
-                    descriptionText: qsTr("Headers template")
-                    headerText: qsTr("Headers template")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
-                        model: ListModel {
-                            Component.onCompleted: {
-                                var opts = XrayConfigModel.xhttpHeadersTemplateOptions()
-                                for (var i = 0; i < opts.length; i++) {
-                                    append({name: opts[i]})
-                                }
-                            }
-                        }
-                        clickedFunction: function () {
-                            xhttpHeadersTemplate = selectedText
-                            headersDropDown.text = selectedText
-                            headersDropDown.closeTriggered()
-                        }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpHeadersTemplate) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            headersDropDown.text = xhttpHeadersTemplate
-                        }
-                    }
-                }
-
-                DropDownType {
                     id: uplinkMethodDropDown
                     fitContent: true
                     Layout.fillWidth: true
@@ -379,6 +342,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpUplinkMethod
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpUplinkMethodOptions()
@@ -459,6 +423,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpSessionPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSessionPlacementOptions()
@@ -490,47 +455,20 @@ PageType {
                     }
                 }
 
-                DropDownType {
-                    id: sessionKeyDropDown
-                    fitContent: true
+                TextFieldWithHeaderType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    text: xhttpSessionKey
-                    descriptionText: qsTr("SessionKey")
+                    Layout.topMargin: 8
                     headerText: qsTr("SessionKey")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
-                        model: ListModel {
-                            Component.onCompleted: {
-                                var opts = XrayConfigModel.xhttpSessionKeyOptions()
-                                for (var i = 0; i < opts.length; i++) {
-                                    append({name: opts[i]})
-                                }
-                            }
-                        }
-                        clickedFunction: function () {
-                            xhttpSessionKey = selectedText
-                            sessionKeyDropDown.text = selectedText
-                            sessionKeyDropDown.closeTriggered()
-                        }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpSessionKey) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    Connections {
-                        target: XrayConfigModel
-
-                        function onDataChanged() {
-                            sessionKeyDropDown.text = xhttpSessionKey
-                        }
+                    textField.text: xhttpSessionKey
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xhttpSessionKey)
+                    textField.onEditingFinished: {
+                        var v = textField.text.trim()
+                        if (v !== xhttpSessionKey) xhttpSessionKey = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
                     }
                 }
 
@@ -547,6 +485,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpSeqPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpSeqPlacementOptions()
@@ -603,11 +542,12 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     text: xhttpUplinkDataPlacement
-                    descriptionText: qsTr("UplinkDataPlacement")
+                    descriptionText: qsTr("Header/Cookie apply only in Packet-up mode")
                     headerText: qsTr("UplinkDataPlacement")
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: xhttpUplinkDataPlacement
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.xhttpUplinkDataPlacementOptions()
@@ -673,7 +613,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("UplinkChunkSize")
-                    subtitleText: qsTr("≥ 0 (0 = off)")
+                    hintText: qsTr("Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.")
+                    placeholderText: XrayConfigModel.xhttpUplinkChunkSizeDefault()
                     textField.text: xhttpUplinkChunkSize
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -692,7 +633,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("scMaxBufferedPosts")
-                    subtitleText: qsTr("≥ 0")
+                    hintText: qsTr("Max buffered POSTs. Range: 0–2147483647.")
                     textField.text: xhttpScMaxBufferedPosts
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
@@ -720,6 +661,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScMaxEachPostBytesMin
                     maxValue: xhttpScMaxEachPostBytesMax
+                    minPlaceholder: XrayConfigModel.scMaxEachPostBytesMinDefault()
+                    maxPlaceholder: XrayConfigModel.scMaxEachPostBytesMaxDefault()
                     onMinChanged: function(val) { xhttpScMaxEachPostBytesMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xhttpScMaxEachPostBytesMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -740,6 +683,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScStreamUpServerSecsMin
                     maxValue: xhttpScStreamUpServerSecsMax
+                    minPlaceholder: XrayConfigModel.scStreamUpServerSecsMinDefault()
+                    maxPlaceholder: XrayConfigModel.scStreamUpServerSecsMaxDefault()
                     onMinChanged: function(val) { xhttpScStreamUpServerSecsMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xhttpScStreamUpServerSecsMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true
@@ -760,6 +705,8 @@ PageType {
                     Layout.rightMargin: 16
                     minValue: xhttpScMinPostsIntervalMsMin
                     maxValue: xhttpScMinPostsIntervalMsMax
+                    minPlaceholder: XrayConfigModel.scMinPostsIntervalMsMinDefault()
+                    maxPlaceholder: XrayConfigModel.scMinPostsIntervalMsMaxDefault()
                     onMinChanged: function(val) { xhttpScMinPostsIntervalMsMin = val; root.editDirty = false }
                     onMaxChanged: function(val) { xhttpScMinPostsIntervalMsMax = val; root.editDirty = false }
                     onEdited: root.editDirty = true

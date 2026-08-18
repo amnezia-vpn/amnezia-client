@@ -123,7 +123,7 @@ case "$TARGET" in
     android)
         no_installers=1
         : ${CMAKE_GENERATOR:="Ninja"}
-        : ${ANDROID_PLATFORM:="android-28"}
+        : ${ANDROID_PLATFORM:="android-${APP_ANDROID_MIN_SDK:-28}"}
 
         if [[ -n "$SIGN" ]]; then
             QT_ANDROID_SIGN_APK=TRUE
@@ -183,6 +183,7 @@ if [[ "$TARGET" == "android" ]]; then
 fi
 
 : ${CMAKE_BUILD_TYPE:=Release}
+: ${JOBS:=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)}
 
 args=()
 [[ -n "$CMAKE_GENERATOR" ]]           && args+=("-G" "$CMAKE_GENERATOR")
@@ -197,6 +198,9 @@ args=()
 [[ -n "$ANDROID_SDK_ROOT" ]]          && args+=("-DANDROID_SDK_ROOT=$ANDROID_SDK_ROOT")
 [[ -n "$ANDROID_NDK_ROOT" ]]          && args+=("-DANDROID_NDK_ROOT=$ANDROID_NDK_ROOT")
 [[ -n "$ANDROID_PLATFORM" ]]          && args+=("-DANDROID_PLATFORM=$ANDROID_PLATFORM")
+[[ -n "$APP_ANDROID_MIN_SDK" ]]       && args+=("-DAPP_ANDROID_MIN_SDK=$APP_ANDROID_MIN_SDK")
+[[ -n "$APP_ANDROID_MAX_SDK" ]]       && args+=("-DAPP_ANDROID_MAX_SDK=$APP_ANDROID_MAX_SDK")
+[[ -n "$APP_ANDROID_VERSION_CODE_OFFSET" ]] && args+=("-DAPP_ANDROID_VERSION_CODE_OFFSET=$APP_ANDROID_VERSION_CODE_OFFSET")
 [[ -n "$QT_ANDROID_SIGN_APK" ]]       && args+=("-DQT_ANDROID_SIGN_APK=$QT_ANDROID_SIGN_APK")
 [[ -n "$QT_ANDROID_SIGN_AAB" ]]       && args+=("-DQT_ANDROID_SIGN_AAB=$QT_ANDROID_SIGN_AAB")
 [[ -n "$QT_ANDROID_ABIS" ]]           && args+=("-DQT_ANDROID_ABIS=$QT_ANDROID_ABIS")
@@ -207,9 +211,9 @@ if [[ -n "$FORCE" ]]; then
 fi
 
 run_traced cmake -S "$SOURCE_PATH" -B "$BUILD_PATH" "${args[@]}"
-run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE"
+run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS"
 
-[[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" -t "aab"
+[[ -n "$BUILD_AAB" ]] && run_traced cmake --build "$BUILD_PATH" --config "$CMAKE_BUILD_TYPE" --parallel "$JOBS" -t "aab"
 
 if [ -z "$no_installers" ]; then
     for installer in $INSTALLERS; do

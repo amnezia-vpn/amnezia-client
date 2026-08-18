@@ -74,7 +74,7 @@ PageType {
                 hideDescription: isWorkerExpired ? false : true
                 descriptionColor: AmneziaStyle.color.vibrantRed
 
-                leftImageSource: "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg"
+                leftImageSource: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
                 rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
 
                 clickedFunction: function() {

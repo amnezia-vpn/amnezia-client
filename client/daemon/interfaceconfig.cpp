@@ -118,42 +118,44 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "DNS = " << dnsServers.join(", ") << "\n";
   }
 
-  if (!m_junkPacketCount.isNull()) {
+  if (!m_junkPacketCount.isEmpty()) {
     out << "Jc = " << m_junkPacketCount << "\n";
   }
-  if (!m_junkPacketMinSize.isNull()) {
+  if (!m_junkPacketMinSize.isEmpty()) {
     out << "JMin = " << m_junkPacketMinSize << "\n";
   }
-  if (!m_junkPacketMaxSize.isNull()) {
+  if (!m_junkPacketMaxSize.isEmpty()) {
     out << "JMax = " << m_junkPacketMaxSize << "\n";
   }
-  if (!m_initPacketJunkSize.isNull()) {
+  if (!m_initPacketJunkSize.isEmpty()) {
     out << "S1 = " << m_initPacketJunkSize << "\n";
   }
-  if (!m_responsePacketJunkSize.isNull()) {
+  if (!m_responsePacketJunkSize.isEmpty()) {
     out << "S2 = " << m_responsePacketJunkSize << "\n";
   }
-  if (!m_cookieReplyPacketJunkSize.isNull()) {
+  if (!m_cookieReplyPacketJunkSize.isEmpty()) {
     out << "S3 = " << m_cookieReplyPacketJunkSize << "\n";
   }
-  if (!m_transportPacketJunkSize.isNull()) {
+  if (!m_transportPacketJunkSize.isEmpty()) {
     out << "S4 = " << m_transportPacketJunkSize << "\n";
   }
-  if (!m_initPacketMagicHeader.isNull()) {
+  if (!m_initPacketMagicHeader.isEmpty()) {
     out << "H1 = " << m_initPacketMagicHeader << "\n";
   }
-  if (!m_responsePacketMagicHeader.isNull()) {
+  if (!m_responsePacketMagicHeader.isEmpty()) {
     out << "H2 = " << m_responsePacketMagicHeader << "\n";
   }
-  if (!m_underloadPacketMagicHeader.isNull()) {
+  if (!m_underloadPacketMagicHeader.isEmpty()) {
     out << "H3 = " << m_underloadPacketMagicHeader << "\n";
   }
-  if (!m_transportPacketMagicHeader.isNull()) {
+  if (!m_transportPacketMagicHeader.isEmpty()) {
     out << "H4 = " << m_transportPacketMagicHeader << "\n";
   }
 
   for (const QString& key : m_specialJunk.keys()) {
-    out << key << " = " << m_specialJunk[key] << "\n";
+    if (!m_specialJunk[key].isEmpty()) {
+      out << key << " = " << m_specialJunk[key] << "\n";
+    }
   }
 
   if (!m_headerProtectionKey.isEmpty()) {
@@ -176,6 +178,12 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   }
   if (!m_maxHandshakeAttempts.isEmpty()) {
     out << "MaxHandshakeAttempts = " << m_maxHandshakeAttempts << "\n";
+  }
+  if (!m_randomTrailers.isEmpty()) {
+    out << "RandomTrailers = " << m_randomTrailers << "\n";
+  }
+  if (!m_disableCookies.isEmpty()) {
+    out << "DisableCookies = " << m_disableCookies << "\n";
   }
 
   // If any extra config was provided, append it now.
@@ -203,4 +211,14 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   }
 
   return content;
+}
+
+QString InterfaceConfig::awgBoolToUapi(const QString& value) {
+  const QString v = value.trimmed().toLower();
+  if (v == QLatin1String("on") || v == QLatin1String("1") ||
+      v == QLatin1String("true") || v == QLatin1String("t") ||
+      v == QLatin1String("yes")) {
+    return QStringLiteral("1");
+  }
+  return QStringLiteral("0");
 }

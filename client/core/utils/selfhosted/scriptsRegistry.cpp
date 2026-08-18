@@ -254,8 +254,21 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$SPECIAL_JUNK_3", config.specialJunk3 } });
         vars.append({ { "$SPECIAL_JUNK_4", config.specialJunk4 } });
         vars.append({ { "$SPECIAL_JUNK_5", config.specialJunk5 } });
+
+        vars.append({ { "$PERSISTENT_KEEPALIVE", config.hasAwg3Params() ? QString(protocols::awg::defaultPersistentKeepAlive)
+                                                                        : QString(protocols::wireguard::defaultPersistentKeepAlive) } });
+
+        vars.append({ { "$HEADER_PROTECTION_KEY", config.headerProtectionKey } });
+        vars.append({ { "$CONTENT_PADDING_ADDITION", config.contentPaddingAddition } });
+        vars.append({ { "$REKEY_AFTER_TIME", config.rekeyAfterTime } });
+        vars.append({ { "$REKEY_TIMEOUT", config.rekeyTimeout } });
+        vars.append({ { "$REJECT_AFTER_TIME", config.rejectAfterTime } });
+        vars.append({ { "$KEEPALIVE_TIMEOUT", config.keepaliveTimeout } });
+        vars.append({ { "$MAX_HANDSHAKE_ATTEMPTS", config.maxHandshakeAttempts } });
+        vars.append({ { "$RANDOM_TRAILERS", config.randomTrailers } });
+        vars.append({ { "$DISABLE_COOKIES", config.disableCookies } });
     }
-    
+
     return vars;
 }
 
@@ -329,6 +342,7 @@ amnezia::ScriptVars amnezia::genMtProxyVars(const ContainerConfig &containerConf
             workers = (transportMode == QLatin1String(protocols::mtProxy::transportModeFakeTLS)) ? QStringLiteral("0")
                                                                                                  : QStringLiteral("2");
         }
+        vars.append({{"$MTPROXY_WORKERS_MODE", workersMode}});
         vars.append({{"$MTPROXY_WORKERS", workers}});
 
         vars.append({{"$MTPROXY_NAT_ENABLED", c.natEnabled ? QStringLiteral("1") : QStringLiteral("0")}});
@@ -375,6 +389,12 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
             }
         }
         vars.append({ { "$TELEMT_ADDITIONAL_SECRETS", additionalList.join(QLatin1Char(',')) } });
+
+        QString middleProxyNatIp;
+        if (c.natEnabled && !c.natExternalIp.isEmpty()) {
+            middleProxyNatIp = c.natExternalIp;
+        }
+        vars.append({ { "$TELEMT_MIDDLE_PROXY_NAT_IP", middleProxyNatIp } });
     }
 
     return vars;

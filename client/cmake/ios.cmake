@@ -31,6 +31,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ioscontextmenu.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
@@ -42,11 +43,18 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller_wrapper.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosnotificationhandler.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ioscontextmenu.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/StoreKitController.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/AmneziaSceneDelegateHooks.mm
+)
+
+# The context menu helper uses ARC-only constructs (weak references); the
+# rest of the Objective-C++ sources build with manual reference counting.
+set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ioscontextmenu.mm
+    PROPERTIES COMPILE_OPTIONS "-fobjc-arc"
 )
 
 
@@ -69,7 +77,6 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_ATTRIBUTE_PRODUCT_NAME "${CLIENT_APPLICATION_NAME}"
     XCODE_ATTRIBUTE_BUNDLE_INFO_STRING "${CLIENT_APPLICATION_NAME}"
     XCODE_GENERATE_SCHEME TRUE
-    XCODE_ATTRIBUTE_ENABLE_BITCODE "NO"
     XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME "AppIcon"
     XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY "1,2"
     XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
@@ -78,7 +85,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_APP_EXTENSIONS ${CLIENT_IOS_NE_TARGET_NAME}
 )
 
-if(DEFINED DEPLOY)
+if(DEPLOY)
     set_target_properties(${PROJECT} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"

@@ -1,7 +1,6 @@
 #include "servicesCatalogController.h"
 
 #include <QJsonDocument>
-#include <QSysInfo>
 #include <QJsonArray>
 #include <QEventLoop>
 #include <QDebug>
@@ -11,6 +10,7 @@
 #include <limits>
 
 #include "core/controllers/gatewayController.h"
+#include "core/utils/api/gatewayPayloadBuilder.h"
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
@@ -212,11 +212,7 @@ ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository
 
 ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &servicesData)
 {
-    QJsonObject apiPayload;
-    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::appVersion] = QString(APP_VERSION);
-    apiPayload[apiDefs::key::cliName] = QString(APPLICATION_NAME);
-    apiPayload[apiDefs::key::appLanguage] = m_appSettingsRepository->getAppLanguage().name().split("_").first();
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository).build();
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);

@@ -19,6 +19,7 @@ PageType {
 
     property bool isUnsupportedContainer: ContainerProps.isUnsupportedContainer(ServersUiController.processedContainerIndex)
     property bool isClearCacheVisible: !isUnsupportedContainer && ServersUiController.isProcessedServerHasWriteAccess() && !ContainersModel.isServiceContainer(ServersUiController.processedContainerIndex)
+    property bool isOutdatedAwgContainer: ServersUiController.isProcessedContainerOutdatedAwg()
 
     BackButtonType {
         id: backButton
@@ -50,10 +51,24 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 32
+                Layout.bottomMargin: root.isOutdatedAwgContainer ? 16 : 32
 
                 headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
                 descriptionText: root.isUnsupportedContainer ? qsTr("This protocol is no longer supported.") : ""
+            }
+
+            WarningType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
+
+                visible: root.isOutdatedAwgContainer
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+                imageColor: AmneziaStyle.color.goldenApricot
+                textColor: AmneziaStyle.color.goldenApricot
+                textString: qsTr("AmneziaWG 2.0 is outdated and does not include the latest security improvements, but it will continue to work. Moving to AmneziaWG 3.1 by deploying a new container on the server is recommended for stronger protocol security")
             }
         }
 

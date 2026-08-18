@@ -27,21 +27,6 @@ public:
         QString xrayUuid;
     };
 
-    struct GatewayRequestData
-    {
-        QString osVersion;
-        QString appVersion;
-        QString appLanguage;
-        QString installationUuid;
-        QString userCountryCode;
-        QString serverCountryCode;
-        QString serviceType;
-        QString serviceProtocol;
-        QJsonObject authData;
-
-        QJsonObject toJsonObject() const;
-    };
-
     struct CaptchaInfo {
         QString captchaId;
         QString captchaImageBase64;
@@ -53,7 +38,8 @@ public:
                                      SecureAppSettingsRepository* appSettingsRepository);
 
     ProtocolData generateProtocolData(const QString &protocol);
-    void appendProtocolDataToApiPayload(const QString &protocol, const ProtocolData &protocolData, QJsonObject &apiPayload);
+
+    static QString publicKeyForProtocol(const QString &protocol, const ProtocolData &protocolData);
 
     ErrorCode importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const ProtocolData &protocolData,

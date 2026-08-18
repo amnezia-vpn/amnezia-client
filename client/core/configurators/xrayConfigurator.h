@@ -30,7 +30,16 @@ public:
                                                    bool appendNewClient,
                                                    QString *outClientId = nullptr);
 
+    amnezia::ErrorCode writeServerConfigForSetup(const amnezia::ServerCredentials &credentials,
+                                                 amnezia::DockerContainer container,
+                                                 amnezia::ContainerConfig &containerConfig,
+                                                 const amnezia::DnsSettings &dnsSettings);
+
 private:
+    amnezia::ErrorCode readContainerKeyFile(amnezia::DockerContainer container,
+                                            const amnezia::ServerCredentials &credentials,
+                                            const QString &path, QString &out) const;
+
     QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
                                 const amnezia::DnsSettings &dnsSettings,
                                 amnezia::ErrorCode &errorCode);
@@ -50,9 +59,6 @@ private:
                                            const amnezia::ServerCredentials &credentials,
                                            QString &outPublicKey,
                                            QString &outShortId) const;
-
-    QJsonObject mergeStreamSettingsForServerInbound(const amnezia::XrayServerConfig &srv,
-                                                    const QJsonObject &existingStreamSettings) const;
 
     QJsonObject buildStreamSettings(const amnezia::XrayServerConfig &srv,
                                     const QString &clientId) const;

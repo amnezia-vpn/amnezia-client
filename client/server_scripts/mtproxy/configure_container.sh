@@ -47,6 +47,20 @@ else
     FAKETLS_SECRET=""
 fi
 
+# Persist deployment state for restore on re-scan.
+{
+    printf 'mode=%s\n'          "$TRANSPORT_MODE"
+    printf 'domain=%s\n'        "$MTPROXY_TLS_DOMAIN"
+    printf 'tag=%s\n'           "$MTPROXY_TAG"
+    printf 'additional=%s\n'    "$MTPROXY_ADDITIONAL_SECRETS"
+    printf 'workers_mode=%s\n'  "$MTPROXY_WORKERS_MODE"
+    printf 'workers=%s\n'       "$MTPROXY_WORKERS"
+    printf 'nat_enabled=%s\n'   "$MTPROXY_NAT_ENABLED"
+    printf 'nat_internal=%s\n'  "$MTPROXY_NAT_INTERNAL_IP"
+    printf 'nat_external=%s\n'  "$MTPROXY_NAT_EXTERNAL_IP"
+    printf 'public_host=%s\n'   "$MTPROXY_PUBLIC_HOST"
+} > /data/mtproxy-meta
+
 # Active link secret depends on transport mode
 if [ "$TRANSPORT_MODE" = "faketls" ] && [ -n "$FAKETLS_SECRET" ]; then
     LINK_SECRET="$FAKETLS_SECRET"

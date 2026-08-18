@@ -148,6 +148,10 @@ open class Wireguard : Protocol() {
             ?.let { setKeepaliveTimeout(it) }
         configData.optStringOrNull("MaxHandshakeAttempts")?.trim()?.takeIf { it.isNotEmpty() }
             ?.let { setMaxHandshakeAttempts(it) }
+        configData.optStringOrNull("RandomTrailers")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setRandomTrailers(it) }
+        configData.optStringOrNull("DisableCookies")?.trim()?.takeIf { it.isNotEmpty() }
+            ?.let { setDisableCookies(it) }
     }
 
     private fun start(

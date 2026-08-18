@@ -8,6 +8,7 @@ struct WGConfig: Decodable {
   let specialJunk1, specialJunk2, specialJunk3, specialJunk4, specialJunk5: String?
   let headerProtectionKey: String?
   let contentPaddingAddition, rekeyAfterTime, rekeyTimeout, rejectAfterTime, keepaliveTimeout, maxHandshakeAttempts: String?
+  let randomTrailers, disableCookies: String?
   let dns1: String
   let dns2: String
   let mtu: String
@@ -33,6 +34,7 @@ struct WGConfig: Decodable {
     case rekeyAfterTime = "RekeyAfterTime", rekeyTimeout = "RekeyTimeout"
     case rejectAfterTime = "RejectAfterTime", keepaliveTimeout = "KeepaliveTimeout"
     case maxHandshakeAttempts = "MaxHandshakeAttempts"
+    case randomTrailers = "RandomTrailers", disableCookies = "DisableCookies"
     case dns1
     case dns2
     case mtu
@@ -128,6 +130,12 @@ struct WGConfig: Decodable {
     if let maxHandshakeAttempts = trimmed(maxHandshakeAttempts) {
       settingsLines.append("MaxHandshakeAttempts = \(maxHandshakeAttempts)")
     }
+    if let randomTrailers = trimmed(randomTrailers) {
+      settingsLines.append("RandomTrailers = \(randomTrailers)")
+    }
+    if let disableCookies = trimmed(disableCookies) {
+      settingsLines.append("DisableCookies = \(disableCookies)")
+    }
 
     return settingsLines.joined(separator: "\n")
   }
@@ -146,26 +154,6 @@ struct WGConfig: Decodable {
     AllowedIPs = \(allowedIPs.joined(separator: ", "))
     Endpoint = \(hostName):\(port)
     \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
-    """
-  }
-
-  var redux: String {
-    """
-    [Interface]
-    Address = \(clientIP)
-    DNS = \(dns1), \(dns2)
-    MTU = \(mtu)
-    PrivateKey = ***
-    \(settings)
-    [Peer]
-    PublicKey = ***
-    PresharedKey = ***
-    AllowedIPs = \(allowedIPs.joined(separator: ", "))
-    Endpoint = \(hostName):\(port)
-    \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
-
-    SplitTunnelType = \(splitTunnelType)
-    SplitTunnelSites = \(splitTunnelSites.joined(separator: ", "))
     """
   }
 }

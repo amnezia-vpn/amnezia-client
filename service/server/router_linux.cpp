@@ -269,11 +269,11 @@ bool RouterLinux::deleteTun(const QString &dev)
     ret = send(rtnl, &req, req.nh.nlmsg_len, 0);
     if (ret < 0)
         qDebug().noquote() << "can't send: errno";
-    ret = (unsigned int)ret != req.nh.nlmsg_len;
+    const bool success = (unsigned int)ret == req.nh.nlmsg_len;
 
     close(rtnl);
-    qDebug().noquote() << "deleteTun ret" << ret;
-    return ret;
+    qDebug().noquote() << "deleteTun ret" << success;
+    return success;
 }
 
 bool RouterLinux::updateResolvers(const QString& ifname, const QList<QHostAddress>& resolvers)

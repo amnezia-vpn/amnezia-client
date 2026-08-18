@@ -11,6 +11,7 @@ Item {
 
     property string headerText
     property string subtitleText // optional line under header (e.g. default value hint)
+    property string hintText // optional (i) info tooltip next to the header (e.g. range / max / default)
     property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
     property string headerTextColor: AmneziaStyle.color.mutedGray
 
@@ -23,6 +24,7 @@ Item {
     property var clickedFunc
 
     property alias textField: textField
+    property alias placeholderText: textField.placeholderText
     property string textFieldTextColor: AmneziaStyle.color.paleGray
     property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
 
@@ -144,7 +146,23 @@ Item {
                             }
                         }
 
-                        ContextMenu.menu: contextMenu
+                        ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
+                        ContextMenu.onRequested: function(position) {
+                            contextMenu.requestNative(position)
+                        }
+
+                        // Native iOS text fields select the word and show the
+                        // edit menu on double tap; Qt does neither on touch.
+                        TapHandler {
+                            enabled: contextMenu.useNativeEditMenu
+                            acceptedDevices: PointerDevice.TouchScreen
+                            onDoubleTapped: function(eventPoint) {
+                                textField.forceActiveFocus()
+                                textField.cursorPosition = textField.positionAt(eventPoint.position.x, eventPoint.position.y)
+                                textField.selectWord()
+                                contextMenu.requestNative(eventPoint.position)
+                            }
+                        }
 
                         ContextMenuType {
                             id: contextMenu
@@ -211,6 +229,52 @@ Item {
         clickedFunc: function() {
             if (root.clickedFunc && typeof root.clickedFunc === "function") {
                 root.clickedFunc()
+            }
+        }
+    }
+
+    // (i) hint: tap to reveal a tooltip with hintText
+    ImageButtonType {
+        id: hintButton
+        visible: root.hintText !== ""
+        focusPolicy: Qt.NoFocus
+        hoverEnabled: true
+
+        image: "qrc:/images/controls/info.svg"
+        imageColor: hintTooltip.opened ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
+
+        anchors.top: content.top
+        anchors.right: content.right
+        anchors.topMargin: 10
+        anchors.rightMargin: 12
+
+        implicitWidth: 28
+        implicitHeight: 28
+
+        onClicked: hintTooltip.opened ? hintTooltip.close() : hintTooltip.open()
+
+        ToolTip {
+            id: hintTooltip
+            parent: hintButton
+            x: hintButton.width - width
+            y: -height - 6
+            width: Math.min(280, root.width - 24)
+            delay: 0
+            timeout: 8000
+            closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
+
+            contentItem: Text {
+                text: root.hintText
+                color: AmneziaStyle.color.paleGray
+                wrapMode: Text.WordWrap
+                font.pixelSize: 14
+                font.family: "PT Root UI VF"
+            }
+            background: Rectangle {
+                color: AmneziaStyle.color.slateGray
+                radius: 12
+                border.color: AmneziaStyle.color.charcoalGray
+                border.width: 1
             }
         }
     }

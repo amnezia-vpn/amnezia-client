@@ -85,6 +85,12 @@ namespace {
         return t.toLower();
     }
 
+    // xray wants int ranges as "from-to" string, not a {from,to} object.
+    QString makeRangeString(const QString &minV, const QString &maxV)
+    {
+        return minV + QLatin1Char('-') + maxV;
+    }
+
     void putIntRangeIfAny(QJsonObject &obj, const char *key, QString minV, QString maxV, const char *fallbackMin,
                           const char *fallbackMax)
     {
@@ -94,10 +100,23 @@ namespace {
             minV = QString::fromLatin1(fallbackMin);
         if (maxV.isEmpty())
             maxV = QString::fromLatin1(fallbackMax);
-        QJsonObject r;
-        r[QStringLiteral("from")] = minV.toInt();
-        r[QStringLiteral("to")] = maxV.toInt();
-        obj[QString::fromUtf8(key)] = r;
+        obj[QString::fromUtf8(key)] = makeRangeString(minV, maxV);
+    }
+
+    QString effectiveClientFlow(const amnezia::XrayServerConfig &srv)
+    {
+        const bool rawTransport = srv.transport.isEmpty() || srv.transport == QLatin1String("raw");
+        const bool secureFlow =
+                srv.security == QLatin1String("tls") || srv.security == QLatin1String("reality");
+        return (rawTransport && secureFlow) ? srv.flow : QString();
+    }
+
+    QString effectiveSecurity(const amnezia::XrayServerConfig &srv)
+    {
+        if (srv.transport == QLatin1String("mkcp") && srv.security == QLatin1String("reality")) {
+            return QStringLiteral("none");
+        }
+        return srv.security;
     }
 
     // Desktop applies this in XrayProtocol::start(); iOS/Android pass JSON straight to libxray — same fixes here.
@@ -192,33 +211,6 @@ ErrorCode XrayConfigurator::readRealityKeyFiles(const DockerContainer container,
     return readKeyFile(QString::fromLatin1(amnezia::protocols::xray::shortidPath), outShortId);
 }
 
-QJsonObject XrayConfigurator::mergeStreamSettingsForServerInbound(const XrayServerConfig &srv,
-                                                                  const QJsonObject &existingStreamSettings) const
-{
-    QJsonObject streamSettings = buildStreamSettings(srv, QString());
-
-    if (srv.security != QLatin1String("reality")) {
-        return streamSettings;
-    }
-
-    const QJsonObject newRs = streamSettings[amnezia::protocols::xray::realitySettings].toObject();
-    QJsonObject oldRs = existingStreamSettings[amnezia::protocols::xray::realitySettings].toObject();
-    QJsonObject merged = oldRs.isEmpty() ? newRs : oldRs;
-
-    const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultSite) : srv.site;
-    const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
-
-    if (newRs.contains(amnezia::protocols::xray::fingerprint)) {
-        merged[amnezia::protocols::xray::fingerprint] = newRs[amnezia::protocols::xray::fingerprint];
-    }
-    merged[amnezia::protocols::xray::serverNames] = QJsonArray { sniEff };
-    if (!merged.contains(QStringLiteral("dest"))) {
-        merged[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
-    }
-
-    streamSettings[amnezia::protocols::xray::realitySettings] = merged;
-    return streamSettings;
-}
 
 ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials &credentials, DockerContainer container,
                                                         ContainerConfig &containerConfig, const DnsSettings &dnsSettings,
@@ -244,10 +236,10 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
                     << "container=" << static_cast<int>(container) << "host=" << credentials.hostName
                     << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port
                     << "appendClient=" << appendNewClient;
-    const QString flowValue = srv.flow;
+    const QString flowValue = effectiveClientFlow(srv);
     QString realityPublicKey;
     QString realityShortId;
-    if (srv.security == QLatin1String("reality")) {
+    if (effectiveSecurity(srv) == QLatin1String("reality")) {
         errorCode = readRealityKeyFiles(container, credentials, realityPublicKey, realityShortId);
         if (errorCode != ErrorCode::NoError) {
             logger.error() << "Xray applyServerSettings: readRealityKeyFiles failed, error="
@@ -287,13 +279,6 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     if (!inbound.contains(amnezia::protocols::xray::settings)) {
         logger.error() << "Inbound missing 'settings' field";
         return ErrorCode::XrayServerConfigInvalid;
-    }
-
-    const QJsonObject existingStream = inbound[amnezia::protocols::xray::streamSettings].toObject();
-    inbound[amnezia::protocols::xray::streamSettings] = mergeStreamSettingsForServerInbound(srv, existingStream);
-
-    if (!srv.port.isEmpty()) {
-        inbound[amnezia::protocols::xray::port] = srv.port.toInt();
     }
 
     QJsonObject settings = inbound[amnezia::protocols::xray::settings].toObject();
@@ -363,6 +348,129 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     return ErrorCode::NoError;
 }
 
+ErrorCode XrayConfigurator::readContainerKeyFile(DockerContainer container, const ServerCredentials &credentials,
+                                                 const QString &path, QString &out) const
+{
+    out.clear();
+    for (int attempt = 0; attempt < 3; ++attempt) {
+        ErrorCode fileError = ErrorCode::NoError;
+        out = QString::fromUtf8(m_sshSession->getTextFileFromContainer(container, credentials, path, fileError));
+        out.replace(QLatin1Char('\n'), QString());
+        out.replace(QLatin1Char('\r'), QString());
+        if (fileError == ErrorCode::NoError && !out.isEmpty()) {
+            return ErrorCode::NoError;
+        }
+        if (attempt < 2) {
+            QThread::msleep(500);
+        }
+    }
+    logger.error() << "Xray readContainerKeyFile: failed path=" << path;
+    return ErrorCode::XrayRealityKeysReadFailed;
+}
+
+ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &credentials, DockerContainer container,
+                                                      ContainerConfig &containerConfig, const DnsSettings &dnsSettings)
+{
+    Q_UNUSED(dnsSettings);
+    namespace px = amnezia::protocols::xray;
+
+    const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>();
+    if (!xrayCfg) {
+        logger.error() << "Xray writeServerConfigForSetup: missing XrayProtocolConfig";
+        return ErrorCode::InternalError;
+    }
+    const XrayServerConfig &srv = xrayCfg->serverConfig;
+    if (srv.isThirdPartyConfig) {
+        logger.info() << "Xray writeServerConfigForSetup: skipped (third-party/native profile)";
+        return ErrorCode::NoError;
+    }
+
+    logger.info() << "Xray writeServerConfigForSetup: start container=" << static_cast<int>(container)
+                  << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port;
+
+    ErrorCode errorCode = ErrorCode::NoError;
+
+    QString clientId;
+    errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::uuidPath), clientId);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    const QString securityEff = effectiveSecurity(srv);
+
+    QString realityPrivateKey;
+    QString realityPublicKey;
+    QString realityShortId;
+    if (securityEff == QLatin1String("reality")) {
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PrivateKeyPath), realityPrivateKey);
+        if (errorCode != ErrorCode::NoError)
+            return errorCode;
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PublicKeyPath), realityPublicKey);
+        if (errorCode != ErrorCode::NoError)
+            return errorCode;
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::shortidPath), realityShortId);
+        if (errorCode != ErrorCode::NoError)
+            return errorCode;
+    }
+
+    QJsonObject streamSettings = buildStreamSettings(srv, clientId);
+    if (securityEff == QLatin1String("reality")) {
+        const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(px::defaultSite) : srv.site;
+        const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
+        const QString fpEff = srv.fingerprint.isEmpty() ? QString::fromLatin1(px::defaultFingerprint) : srv.fingerprint;
+        QJsonObject rs;
+        rs[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
+        rs[px::fingerprint] = fpEff;
+        rs[QStringLiteral("privateKey")] = realityPrivateKey;
+        rs[px::serverNames] = QJsonArray { sniEff };
+        rs[QStringLiteral("shortIds")] = QJsonArray { realityShortId };
+        streamSettings[px::realitySettings] = rs;
+    }
+
+    QJsonObject clientEntry;
+    clientEntry[px::id] = clientId;
+    const QString flowValue = effectiveClientFlow(srv);
+    if (!flowValue.isEmpty()) {
+        clientEntry[px::flow] = flowValue;
+    }
+
+    QJsonObject settings;
+    settings[px::clients] = QJsonArray { clientEntry };
+    settings[QStringLiteral("decryption")] = QStringLiteral("none");
+
+    QJsonObject inbound;
+    inbound[px::port] = srv.port.isEmpty() ? QString(px::defaultPort).toInt() : srv.port.toInt();
+    inbound[QStringLiteral("protocol")] = QStringLiteral("vless");
+    inbound[px::settings] = settings;
+    inbound[px::streamSettings] = streamSettings;
+
+    QJsonObject serverConfig;
+    serverConfig[QStringLiteral("log")] = QJsonObject { { QStringLiteral("loglevel"), QStringLiteral("error") } };
+    serverConfig[px::inbounds] = QJsonArray { inbound };
+    serverConfig[px::outbounds] =
+            QJsonArray { QJsonObject { { QStringLiteral("protocol"), QStringLiteral("freedom") } } };
+
+    const QString json = QString::fromUtf8(QJsonDocument(serverConfig).toJson());
+    errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json,
+                                                        QString::fromLatin1(px::serverConfigPath),
+                                                        libssh::ScpOverwriteMode::ScpOverwriteExisting);
+    if (errorCode != ErrorCode::NoError) {
+        logger.error() << "Xray writeServerConfigForSetup: upload failed, error=" << static_cast<int>(errorCode);
+        return errorCode;
+    }
+
+    XrayProtocolConfig updated =
+            buildClientProtocolConfig(credentials, container, srv, clientId, errorCode, realityPublicKey, realityShortId);
+    if (errorCode != ErrorCode::NoError) {
+        logger.error() << "Xray writeServerConfigForSetup: buildClientProtocolConfig failed, error="
+                       << static_cast<int>(errorCode);
+        return errorCode;
+    }
+    containerConfig.protocolConfig = updated;
+    logger.info() << "Xray writeServerConfigForSetup: done, clientId=" << clientId;
+    return ErrorCode::NoError;
+}
+
 QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
                                                const ContainerConfig &containerConfig,
                                                const DnsSettings &dnsSettings,
@@ -389,7 +497,9 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     QString xrayPublicKey = prefetchedRealityPublicKey;
     QString xrayShortId = prefetchedRealityShortId;
 
-    if (srv.security == QLatin1String("reality")) {
+    const QString securityEff = effectiveSecurity(srv);
+
+    if (securityEff == QLatin1String("reality")) {
         if (xrayPublicKey.isEmpty() || xrayShortId.isEmpty()) {
             errorCode = readRealityKeyFiles(container, credentials, xrayPublicKey, xrayShortId);
             if (errorCode != ErrorCode::NoError) {
@@ -401,8 +511,9 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     QJsonObject userObj;
     userObj[amnezia::protocols::xray::id] = clientId;
     userObj[amnezia::protocols::xray::encryption] = QStringLiteral("none");
-    if (!srv.flow.isEmpty()) {
-        userObj[amnezia::protocols::xray::flow] = srv.flow;
+    const QString flowValue = effectiveClientFlow(srv);
+    if (!flowValue.isEmpty()) {
+        userObj[amnezia::protocols::xray::flow] = flowValue;
     }
 
     QJsonObject vnextEntry;
@@ -419,7 +530,7 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     outbound[amnezia::protocols::xray::settings] = outboundSettings;
 
     QJsonObject streamObj = buildStreamSettings(srv, clientId);
-    if (srv.security == QLatin1String("reality")) {
+    if (securityEff == QLatin1String("reality")) {
         QJsonObject rs = streamObj[amnezia::protocols::xray::realitySettings].toObject();
         rs[amnezia::protocols::xray::publicKey] = xrayPublicKey;
         rs[amnezia::protocols::xray::shortId] = xrayShortId;
@@ -468,18 +579,24 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         networkValue = QStringLiteral("kcp");
     streamSettings[px::network] = networkValue;
 
-    streamSettings[px::security] = srv.security;
+    const QString securityEff = effectiveSecurity(srv);
+    streamSettings[px::security] = securityEff;
 
-    if (srv.security == QLatin1String("tls")) {
+    if (securityEff == QLatin1String("tls")) {
         QJsonObject tlsSettings;
         const QString sniEff = srv.sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : srv.sni;
         tlsSettings[px::serverName] = sniEff;
         const QString alpnEff = srv.alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : srv.alpn;
         QJsonArray alpnArray;
         for (const QString &a : alpnEff.split(QLatin1Char(','))) {
-            const QString t = a.trimmed();
-            if (!t.isEmpty())
-                alpnArray.append(t);
+            QString t = a.trimmed();
+            if (t.isEmpty())
+                continue;
+            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("h2");
+            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("http/1.1");
+            alpnArray.append(t);
         }
         if (!alpnArray.isEmpty())
             tlsSettings[QStringLiteral("alpn")] = alpnArray;
@@ -488,7 +605,7 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         streamSettings[QStringLiteral("tlsSettings")] = tlsSettings;
     }
 
-    if (srv.security == QLatin1String("reality")) {
+    if (securityEff == QLatin1String("reality")) {
         QJsonObject realSettings;
         const QString fpEff = srv.fingerprint.isEmpty() ? QString::fromLatin1(px::defaultFingerprint) : srv.fingerprint;
         realSettings[px::fingerprint] = fpEff;
@@ -504,13 +621,13 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         xo[QStringLiteral("host")] = hostEff;
         if (!xhttp.path.isEmpty())
             xo[QStringLiteral("path")] = xhttp.path;
-        xo[QStringLiteral("mode")] = normalizeXhttpMode(xhttp.mode);
-
-        if (xhttp.headersTemplate.compare(QLatin1String("HTTP"), Qt::CaseInsensitive) == 0) {
-            QJsonObject headers;
-            headers[QStringLiteral("Host")] = hostEff;
-            xo[QStringLiteral("headers")] = headers;
+        QString modeEff = normalizeXhttpMode(xhttp.mode);
+        if (modeEff == QLatin1String("auto") || modeEff == QLatin1String("packet-up")) {
+            modeEff = QStringLiteral("stream-one");
         }
+        xo[QStringLiteral("mode")] = modeEff;
+
+        // No "Host" in headers: xray rejects it when the top-level "host" field is set.
 
         const QString methodEff =
                 xhttp.uplinkMethod.isEmpty() ? QString::fromLatin1(px::defaultXhttpUplinkMethod) : xhttp.uplinkMethod;
@@ -521,27 +638,27 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
 
         const QString sessPl = normalizeSessionSeqPlacement(xhttp.sessionPlacement);
         if (!sessPl.isEmpty())
-            xo[QStringLiteral("sessionPlacement")] = sessPl;
+            xo[QStringLiteral("sessionIDPlacement")] = sessPl;
         const QString seqPl = normalizeSessionSeqPlacement(xhttp.seqPlacement);
         if (!seqPl.isEmpty())
             xo[QStringLiteral("seqPlacement")] = seqPl;
         if (!xhttp.sessionKey.isEmpty())
-            xo[QStringLiteral("sessionKey")] = xhttp.sessionKey;
+            xo[QStringLiteral("sessionIDKey")] = xhttp.sessionKey;
         if (!xhttp.seqKey.isEmpty())
             xo[QStringLiteral("seqKey")] = xhttp.seqKey;
 
-        xo[QStringLiteral("uplinkDataPlacement")] = normalizeUplinkDataPlacement(xhttp.uplinkDataPlacement);
+        const QString uDataPl = normalizeUplinkDataPlacement(xhttp.uplinkDataPlacement);
+        const bool uDataNeedsPacketUp =
+                uDataPl == QLatin1String("header") || uDataPl == QLatin1String("cookie");
+        if (!(uDataNeedsPacketUp && modeEff != QLatin1String("packet-up")))
+            xo[QStringLiteral("uplinkDataPlacement")] = uDataPl;
         if (!xhttp.uplinkDataKey.isEmpty())
             xo[QStringLiteral("uplinkDataKey")] = xhttp.uplinkDataKey;
 
         const QString ucs = xhttp.uplinkChunkSize.isEmpty() ? QString::fromLatin1(px::defaultXhttpUplinkChunkSize)
                                                             : xhttp.uplinkChunkSize;
         if (!ucs.isEmpty() && ucs != QLatin1String("0")) {
-            const int v = ucs.toInt();
-            QJsonObject chunkR;
-            chunkR[QStringLiteral("from")] = v;
-            chunkR[QStringLiteral("to")] = v;
-            xo[QStringLiteral("uplinkChunkSize")] = chunkR;
+            xo[QStringLiteral("uplinkChunkSize")] = ucs.toInt();
         }
 
         if (!xhttp.scMaxBufferedPosts.isEmpty())
@@ -558,17 +675,20 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         xo[QStringLiteral("xPaddingObfsMode")] = pad.obfsMode;
         if (pad.obfsMode) {
             if (!pad.bytesMin.isEmpty() || !pad.bytesMax.isEmpty()) {
-                QJsonObject br;
-                const int fromV = pad.bytesMin.isEmpty() ? 1 : pad.bytesMin.toInt();
-                int toV = pad.bytesMax.isEmpty() ? 256 : pad.bytesMax.toInt();
+                const int fromV = pad.bytesMin.isEmpty()
+                        ? QString::fromLatin1(px::defaultXPaddingBytesMin).toInt()
+                        : pad.bytesMin.toInt();
+                int toV = pad.bytesMax.isEmpty()
+                        ? QString::fromLatin1(px::defaultXPaddingBytesMax).toInt()
+                        : pad.bytesMax.toInt();
                 if (toV < fromV)
                     toV = fromV;
-                br[QStringLiteral("from")] = fromV;
-                br[QStringLiteral("to")] = toV;
-                xo[QStringLiteral("xPaddingBytes")] = br;
+                xo[QStringLiteral("xPaddingBytes")] = makeRangeString(QString::number(fromV), QString::number(toV));
             }
-            xo[QStringLiteral("xPaddingKey")] = pad.key.isEmpty() ? QStringLiteral("x_padding") : pad.key;
-            xo[QStringLiteral("xPaddingHeader")] = pad.header.isEmpty() ? QStringLiteral("X-Padding") : pad.header;
+            xo[QStringLiteral("xPaddingKey")] =
+                    pad.key.isEmpty() ? QString::fromLatin1(px::defaultXPaddingKey) : pad.key;
+            xo[QStringLiteral("xPaddingHeader")] =
+                    pad.header.isEmpty() ? QString::fromLatin1(px::defaultXPaddingHeader) : pad.header;
             xo[QStringLiteral("xPaddingPlacement")] = normalizeXPaddingPlacement(
                     pad.placement.isEmpty() ? QString::fromLatin1(px::defaultXPaddingPlacement) : pad.placement);
             xo[QStringLiteral("xPaddingMethod")] = normalizeXPaddingMethod(
@@ -579,12 +699,14 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         if (xhttp.xmux.enabled) {
             QJsonObject mux;
             auto addMuxRange = [&](const char *key, const QString &a, const QString &b) {
-                if (a.isEmpty() && b.isEmpty())
+                // omit empty / 0-0 ranges (xray may reject "0-0")
+                const bool aZero = a.isEmpty() || a == QLatin1String("0");
+                const bool bZero = b.isEmpty() || b == QLatin1String("0");
+                if (aZero && bZero)
                     return;
-                QJsonObject r;
-                r[QStringLiteral("from")] = a.isEmpty() ? 0 : a.toInt();
-                r[QStringLiteral("to")] = b.isEmpty() ? 0 : b.toInt();
-                mux[QString::fromUtf8(key)] = r;
+                const QString aV = a.isEmpty() ? QStringLiteral("0") : a;
+                const QString bV = b.isEmpty() ? QStringLiteral("0") : b;
+                mux[QString::fromUtf8(key)] = makeRangeString(aV, bV);
             };
             addMuxRange("maxConcurrency", xhttp.xmux.maxConcurrencyMin, xhttp.xmux.maxConcurrencyMax);
             addMuxRange("maxConnections", xhttp.xmux.maxConnectionsMin, xhttp.xmux.maxConnectionsMax);

@@ -2,6 +2,7 @@
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
+#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/models/containerConfig.h"
@@ -20,6 +21,8 @@ namespace {
     constexpr QLatin1String kMtProxyClientJsonPath("/data/amnezia-mtproxy-client.json");
     constexpr QLatin1String kMtProxyClientJsonUploadPath("data/amnezia-mtproxy-client.json");
     constexpr QLatin1String kMtProxySecretPath("/data/secret");
+    constexpr QLatin1String kMtProxyMetaPath("/data/mtproxy-meta");
+    constexpr QLatin1String kMtProxyStartScriptPath("/opt/amnezia/start.sh");
 }
 
 MtProxyInstaller::MtProxyInstaller(QObject *parent)
@@ -53,14 +56,98 @@ ErrorCode MtProxyInstaller::extractConfigFromContainer(DockerContainer container
         }
     }
 
+    static const QRegularExpression hex32(QStringLiteral("^[0-9a-fA-F]{32}$"));
+    const auto addExtra = [&](const QString &s) {
+        if (hex32.match(s).hasMatch() && !mt->additionalSecrets.contains(s)) {
+            mt->additionalSecrets.append(s);
+        }
+    };
+
     ErrorCode secretErr = ErrorCode::NoError;
     const QByteArray secretRaw =
             sshSession->getTextFileFromContainer(container, credentials, QString(kMtProxySecretPath), secretErr);
     const QString sec = QString::fromUtf8(secretRaw).trimmed();
-    if (sec.length() == 32) {
-        static const QRegularExpression hex32(QStringLiteral("^[0-9a-fA-F]{32}$"));
-        if (hex32.match(sec).hasMatch()) {
-            mt->secret = sec;
+    if (sec.length() == 32 && hex32.match(sec).hasMatch()) {
+        mt->secret = sec;
+    }
+
+    bool metaRestored = false;
+    ErrorCode metaErr = ErrorCode::NoError;
+    const QByteArray metaRaw =
+            sshSession->getTextFileFromContainer(container, credentials, QString(kMtProxyMetaPath), metaErr);
+    if (metaErr == ErrorCode::NoError && !metaRaw.trimmed().isEmpty()) {
+        QString mode, domain, workersMode, workers, natInternal, natExternal;
+        bool natEnabled = false;
+        const QList<QByteArray> lines = metaRaw.split('\n');
+        for (const QByteArray &rawLine : lines) {
+            const QString line = QString::fromUtf8(rawLine).trimmed();
+            const int eq = line.indexOf('=');
+            if (eq < 0) {
+                continue;
+            }
+            const QString key = line.left(eq);
+            const QString val = line.mid(eq + 1).trimmed();
+            if (key == QLatin1String("mode")) mode = val;
+            else if (key == QLatin1String("domain")) domain = val;
+            else if (key == QLatin1String("tag")) { if (mt->tag.isEmpty()) mt->tag = val; }
+            else if (key == QLatin1String("additional")) {
+                for (const QString &s : val.split(',', Qt::SkipEmptyParts)) addExtra(s.trimmed());
+            }
+            else if (key == QLatin1String("workers_mode")) workersMode = val;
+            else if (key == QLatin1String("workers")) workers = val;
+            else if (key == QLatin1String("nat_enabled")) natEnabled = (val == QLatin1String("1"));
+            else if (key == QLatin1String("nat_internal")) natInternal = val;
+            else if (key == QLatin1String("nat_external")) natExternal = val;
+            else if (key == QLatin1String("public_host")) { if (mt->publicHost.isEmpty()) mt->publicHost = val; }
+        }
+        if (!mode.isEmpty()) {
+            mt->transportMode = mode;
+            if (!domain.isEmpty()) mt->tlsDomain = domain;
+            if (!workersMode.isEmpty()) mt->workersMode = workersMode;
+            if (workersMode == QLatin1String(protocols::mtProxy::workersModeManual) && !workers.isEmpty()) {
+                mt->workers = workers;
+            }
+            if (natEnabled) {
+                mt->natEnabled = true;
+                mt->natInternalIp = natInternal;
+                mt->natExternalIp = natExternal;
+            }
+            metaRestored = true;
+        }
+    }
+    if (!metaRestored) {
+        ErrorCode startErr = ErrorCode::NoError;
+        const QByteArray startRaw =
+                sshSession->getTextFileFromContainer(container, credentials, QString(kMtProxyStartScriptPath), startErr);
+        if (startErr == ErrorCode::NoError && !startRaw.trimmed().isEmpty()) {
+            const QString start = QString::fromUtf8(startRaw);
+            static const QRegularExpression modeRe(QStringLiteral("\\[ \"(standard|faketls)\" = \"faketls\" \\]"));
+            const QRegularExpressionMatch m = modeRe.match(start);
+            if (m.hasMatch()) {
+                mt->transportMode = m.captured(1);
+                if (m.captured(1) == QLatin1String(protocols::mtProxy::transportModeFakeTLS)) {
+                    static const QRegularExpression domRe(QStringLiteral("--domain ([A-Za-z0-9.\\-]+)"));
+                    const QRegularExpressionMatch dm = domRe.match(start);
+                    if (dm.hasMatch()) mt->tlsDomain = dm.captured(1);
+                }
+            }
+            static const QRegularExpression tagRe(QStringLiteral("-P ([0-9a-fA-F]{32})"));
+            const QRegularExpressionMatch tm = tagRe.match(start);
+            if (tm.hasMatch() && mt->tag.isEmpty()) mt->tag = tm.captured(1);
+
+            static const QRegularExpression addRe(QStringLiteral("echo \"([0-9a-fA-F,]+)\" \\| tr ',' ' '"));
+            const QRegularExpressionMatch am = addRe.match(start);
+            if (am.hasMatch()) {
+                for (const QString &s : am.captured(1).split(',', Qt::SkipEmptyParts)) addExtra(s.trimmed());
+            }
+
+            static const QRegularExpression natRe(QStringLiteral("NAT_VALUE=\"([0-9.]+):([0-9.]+)\""));
+            const QRegularExpressionMatch nm = natRe.match(start);
+            if (nm.hasMatch()) {
+                mt->natEnabled = true;
+                mt->natInternalIp = nm.captured(1);
+                mt->natExternalIp = nm.captured(2);
+            }
         }
     }
 

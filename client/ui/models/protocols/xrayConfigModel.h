@@ -33,7 +33,6 @@ public:
         XhttpModeRole,
         XhttpHostRole,
         XhttpPathRole,
-        XhttpHeadersTemplateRole,
         XhttpUplinkMethodRole,
         XhttpDisableGrpcRole,
         XhttpDisableSseRole,
@@ -102,10 +101,8 @@ public:
     Q_INVOKABLE static QStringList fingerprintOptions();
     Q_INVOKABLE static QStringList alpnOptions();
     Q_INVOKABLE static QStringList xhttpModeOptions();
-    Q_INVOKABLE static QStringList xhttpHeadersTemplateOptions();
     Q_INVOKABLE static QStringList xhttpUplinkMethodOptions();
     Q_INVOKABLE static QStringList xhttpSessionPlacementOptions();
-    Q_INVOKABLE static QStringList xhttpSessionKeyOptions();
     Q_INVOKABLE static QStringList xhttpSeqPlacementOptions();
     Q_INVOKABLE static QStringList xhttpUplinkDataPlacementOptions();
     Q_INVOKABLE static QStringList xPaddingPlacementOptions();
@@ -117,6 +114,21 @@ public:
     Q_INVOKABLE static QString mkcpDefaultDownlinkCapacity();
     Q_INVOKABLE static QString mkcpDefaultReadBufferSize();
     Q_INVOKABLE static QString mkcpDefaultWriteBufferSize();
+
+    Q_INVOKABLE static QString portDefault();
+    Q_INVOKABLE static QString sniDefault();
+    Q_INVOKABLE static QString xhttpHostDefault();
+    Q_INVOKABLE static QString xhttpUplinkChunkSizeDefault();
+    Q_INVOKABLE static QString scMaxEachPostBytesMinDefault();
+    Q_INVOKABLE static QString scMaxEachPostBytesMaxDefault();
+    Q_INVOKABLE static QString scMinPostsIntervalMsMinDefault();
+    Q_INVOKABLE static QString scMinPostsIntervalMsMaxDefault();
+    Q_INVOKABLE static QString scStreamUpServerSecsMinDefault();
+    Q_INVOKABLE static QString scStreamUpServerSecsMaxDefault();
+    Q_INVOKABLE static QString xPaddingKeyDefault();
+    Q_INVOKABLE static QString xPaddingHeaderDefault();
+    Q_INVOKABLE static QString xPaddingBytesMinDefault();
+    Q_INVOKABLE static QString xPaddingBytesMaxDefault();
 
     Q_INVOKABLE static bool isValidHost(const QString &host);
     Q_INVOKABLE static bool isValidSni(const QString &sni);

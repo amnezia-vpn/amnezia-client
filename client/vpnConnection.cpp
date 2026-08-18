@@ -17,6 +17,7 @@
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
     #include <core/protocols/wireGuardProtocol.h>
+    #include <QRemoteObjectPendingCallWatcher>
 #endif
 
 #ifdef Q_OS_ANDROID
@@ -36,7 +37,11 @@
 using namespace ProtocolUtils;
 
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
-    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this)
+    : QObject(parent),
+      m_serversRepository(serversRepository),
+      m_appSettingsRepository(appSettingsRepository),
+      m_checkTimer(this),
+      m_connectionState(Vpn::ConnectionState::Disconnected)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
@@ -215,8 +220,11 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
         if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
             ips.append(i.key());
         } else {
-            if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                ips.append(i.value().toString());
+            const QStringList siteIps = SecureAppSettingsRepository::siteIpList(i.value());
+            for (const QString &ip : siteIps) {
+                if (NetworkUtilities::checkIpSubnetFormat(ip)) {
+                    ips.append(ip);
+                }
             }
             sites.append(i.key());
         }
@@ -227,29 +235,56 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
         iface->routeAddList(gw, ips);
     });
 
+    auto remainingLookups = QSharedPointer<int>::create(sites.size());
+    auto needFlush = QSharedPointer<bool>::create(false);
+
     // re-resolve domains
     for (const QString &site : sites) {
-        const auto &cbResolv = [this, site, gw, mode, ips](const QHostInfo &hostInfo) {
-            const QList<QHostAddress> &addresses = hostInfo.addresses();
-            QString ipv4Addr;
+        const auto &cbResolv = [this, site, gw, mode, ips, remainingLookups, needFlush](const QHostInfo &hostInfo) {
+            QStringList resolvedIps;
             for (const QHostAddress &addr : hostInfo.addresses()) {
                 if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
-                    const QString &ip = addr.toString();
-                    // qDebug() << "VpnConnection::addSitesRoutes updating site" << site << ip;
-                    if (!ips.contains(ip)) {
-                        IpcClient::withInterface([&gw, &ip](QSharedPointer<IpcInterfaceReplica> iface) {
-                            iface->routeAddList(gw, QStringList() << ip);
-                        });
-                        m_appSettingsRepository->addVpnSite(mode, site, ip);
-                    }
-                    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
-                        auto reply = iface->flushDns();
-                        if (reply.waitForFinished() || !reply.returnValue())
-                            qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
-                    });
-                    break;
+                    resolvedIps.append(addr.toString());
                 }
             }
+            resolvedIps.removeDuplicates();
+            qDebug() << "[SplitTunneling] addSitesRoutes resolved" << site << "->" << resolvedIps;
+
+            QStringList newIps;
+            for (const QString &ip : resolvedIps) {
+                if (!ips.contains(ip)) {
+                    IpcClient::withInterface([gw, ip](QSharedPointer<IpcInterfaceReplica> iface) {
+                        iface->routeAddList(gw, QStringList() << ip);
+                    });
+                    newIps.append(ip);
+                }
+            }
+
+            if (!newIps.isEmpty()) {
+                m_appSettingsRepository->addVpnSite(mode, site, newIps);
+                *needFlush = true;
+            }
+
+            if (--(*remainingLookups) > 0)
+                return;
+
+            if (!*needFlush)
+                return;
+
+            // Async flush: never waitForFinished() here — that re-enters the event loop and
+            // can re-enter this QHostInfo callback until the stack overflows (0xc00000fd).
+            IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
+                QRemoteObjectPendingReply<bool> reply = iface->flushDns();
+                auto *watcher = new QRemoteObjectPendingCallWatcher(reply, this);
+                QObject::connect(watcher, &QRemoteObjectPendingCallWatcher::finished, this,
+                        [](QRemoteObjectPendingCallWatcher *call) {
+                            if (call->error() != QRemoteObjectPendingCall::NoError
+                                || !call->returnValue().toBool()) {
+                                qWarning() << "VpnConnection::addSitesRoutes: Failed to flush DNS";
+                            }
+                            call->deleteLater();
+                        });
+            });
         };
         QHostInfo::lookupHost(site, this, cbResolv);
     }
@@ -389,12 +424,13 @@ void VpnConnection::appendSplitTunnelingConfig()
             auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
             for (auto &line : nativeConfigLines) {
-                if (line.contains("AllowedIPs")) {
-                    auto allowedIpsString = line.split(" = ");
-                    if (allowedIpsString.size() < 1) {
-                        break;
+                auto allowedIpsString = line.split("=", Qt::KeepEmptyParts);
+                if (allowedIpsString.size() >= 2 && allowedIpsString.first().trimmed() == QStringLiteral("AllowedIPs")) {
+                    QJsonArray allowedIpsJsonArray;
+                    const QString allowedIps = allowedIpsString.mid(1).join(QStringLiteral("=")).trimmed();
+                    for (const QString &allowedIp : allowedIps.split(",", Qt::SkipEmptyParts)) {
+                        allowedIpsJsonArray.append(allowedIp.trimmed());
                     }
-                    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
                     configData.insert(configKey::allowedIps, allowedIpsJsonArray);
                     m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
@@ -406,12 +442,12 @@ void VpnConnection::appendSplitTunnelingConfig()
             auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
             for (auto &line : nativeConfigLines) {
-                if (line.contains("PersistentKeepalive")) {
-                    auto persistentKeepaliveString = line.split(" = ");
-                    if (persistentKeepaliveString.size() > 1) {
-                        configData.insert(configKey::persistentKeepAlive, persistentKeepaliveString.at(1));
-                        m_vpnConfiguration.insert(protocolName + "_config_data", configData);
-                    }
+                auto persistentKeepaliveString = line.split("=", Qt::KeepEmptyParts);
+                if (persistentKeepaliveString.size() >= 2
+                        && persistentKeepaliveString.first().trimmed() == QStringLiteral("PersistentKeepalive")) {
+                    configData.insert(configKey::persistentKeepAlive,
+                                      persistentKeepaliveString.mid(1).join(QStringLiteral("=")).trimmed());
+                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }
@@ -434,8 +470,13 @@ void VpnConnection::appendSplitTunnelingConfig()
             for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
                 if (NetworkUtilities::checkIpSubnetFormat(i.key())) {
                     sites.append(i.key());
-                } else if (NetworkUtilities::checkIpSubnetFormat(i.value().toString())) {
-                    sites.append(i.value().toString());
+                } else {
+                    const QStringList siteIps = SecureAppSettingsRepository::siteIpList(i.value());
+                    for (const QString &ip : siteIps) {
+                        if (NetworkUtilities::checkIpSubnetFormat(ip)) {
+                            sites.append(ip);
+                        }
+                    }
                 }
             }
             sites.removeDuplicates();

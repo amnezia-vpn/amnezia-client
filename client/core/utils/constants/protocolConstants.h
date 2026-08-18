@@ -65,13 +65,12 @@ namespace amnezia
             constexpr char defaultTransport[] = "raw";
             constexpr char defaultFingerprint[] = "chrome";
             constexpr char defaultSni[] = "www.googletagmanager.com";
-            constexpr char defaultAlpn[] = "HTTP/2";
+            constexpr char defaultAlpn[] = "h2";
 
             constexpr char defaultXhttpMode[] = "Auto";
-            constexpr char defaultXhttpHeadersTemplate[] = "HTTP";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
-            constexpr char defaultXhttpSessionKey[] = "Path";
+            constexpr char defaultXhttpSessionKey[] = "";
             constexpr char defaultXhttpSeqPlacement[] = "Path";
             constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
 
@@ -86,6 +85,10 @@ namespace amnezia
 
             constexpr char defaultXPaddingPlacement[] = "Cookie";
             constexpr char defaultXPaddingMethod[] = "Repeat-x";
+            constexpr char defaultXPaddingKey[] = "x_padding";
+            constexpr char defaultXPaddingHeader[] = "X-Padding";
+            constexpr char defaultXPaddingBytesMin[] = "1";
+            constexpr char defaultXPaddingBytesMax[] = "256";
 
             constexpr char defaultMkcpTti[] = "50";
             constexpr char defaultMkcpUplinkCapacity[] = "5";
@@ -183,15 +186,16 @@ namespace amnezia
             constexpr char defaultJunkPacketCount[] = "3";
             constexpr char defaultJunkPacketMinSize[] = "10";
             constexpr char defaultJunkPacketMaxSize[] = "30";
-            constexpr char defaultInitPacketJunkSize[] = "15";
-            constexpr char defaultResponsePacketJunkSize[] = "18";
-            constexpr char defaultCookieReplyPacketJunkSize[] = "20";
-            constexpr char defaultTransportPacketJunkSize[] = "23";
+            constexpr int junkPacketSizeMin = 12;
+            constexpr int initPacketJunkSizeMax = 150;
+            constexpr int responsePacketJunkSizeMax = 150;
+            constexpr int cookieReplyPacketJunkSizeMax = 64;
+            constexpr int defaultTransportPacketJunkSize = 12;
 
-            constexpr char defaultInitPacketMagicHeader[] = "1020325451";
-            constexpr char defaultResponsePacketMagicHeader[] = "3288052141";
-            constexpr char defaultTransportPacketMagicHeader[] = "2528465083";
-            constexpr char defaultUnderloadPacketMagicHeader[] = "1766607858";
+            constexpr char defaultInitPacketMagicHeader[] = "1";
+            constexpr char defaultResponsePacketMagicHeader[] = "2";
+            constexpr char defaultUnderloadPacketMagicHeader[] = "3";
+            constexpr char defaultTransportPacketMagicHeader[] = "4";
             constexpr char defaultSpecialJunk1[] = "<r 2><b 0x858000010001000000000669636c6f756403636f6d0000010001c00c000100010000105a00044d583737>";
             constexpr char defaultSpecialJunk2[] = "";
             constexpr char defaultSpecialJunk3[] = "";
@@ -200,6 +204,21 @@ namespace amnezia
 
             constexpr char awgV1_5[] = "1.5";
             constexpr char awgV2[] = "2";
+            constexpr char awgV3[] = "3.1";
+
+            constexpr char defaultContentPaddingAddition[] = "10-100";
+            constexpr char defaultRekeyAfterTime[] = "100-120";
+            constexpr char defaultRekeyTimeout[] = "3-7";
+            constexpr char defaultRejectAfterTime[] = "150-180";
+            constexpr char defaultKeepaliveTimeout[] = "5-15";
+            constexpr char defaultMaxHandshakeAttempts[] = "15-20";
+            constexpr char defaultPersistentKeepAlive[] = "25-35";
+            constexpr char defaultRandomTrailers[] = "on";
+            constexpr char defaultDisableCookies[] = "on";
+            constexpr char awgBoolOn[] = "on";
+            constexpr char awgBoolOff[] = "off";
+
+
         }
 
         namespace socks5Proxy
@@ -235,7 +254,8 @@ namespace amnezia
 
             constexpr char defaultPort[]           = "443";
             constexpr char defaultWorkers[]        = "2";
-            constexpr int  maxWorkers              = 32;
+            // mtproto-proxy loses connectivity with -M >= 20; keep the cap at the highest known-good value.
+            constexpr int  maxWorkers              = 19;
             constexpr int  botTagHexLength         = 32;
             constexpr char defaultTlsDomain[]      = "googletagmanager.com";
         }
@@ -254,7 +274,6 @@ namespace amnezia
             constexpr char tlsEmulationKey[]      = "telemt_tls_emulation";
             constexpr char useMiddleProxyKey[]    = "telemt_use_middle_proxy";
             constexpr char userNameKey[]          = "telemt_user_name";
-            // Stored for UI only (Telemt server ignores these; same controls as MTProxy page)
             constexpr char additionalSecretsKey[] = "telemt_additional_secrets";
             constexpr char workersKey[]           = "telemt_workers";
             constexpr char workersModeKey[]       = "telemt_workers_mode";

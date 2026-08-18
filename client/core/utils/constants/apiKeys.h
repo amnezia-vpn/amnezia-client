@@ -23,6 +23,7 @@ namespace apiDefs
         constexpr QLatin1String installationUuid("installation_uuid");
         constexpr QLatin1String uuid("installation_uuid");
         constexpr QLatin1String osVersion("os_version");
+        constexpr QLatin1String distribution("distribution");
         constexpr QLatin1String userCountryCode("user_country_code");
         constexpr QLatin1String serverCountryCode("server_country_code");
         constexpr QLatin1String serverCountryName("server_country_name");
@@ -40,6 +41,10 @@ namespace apiDefs
         constexpr QLatin1String lastDownloaded("last_downloaded");
         constexpr QLatin1String sourceType("source_type");
         constexpr QLatin1String appLanguage("app_language");
+        constexpr QLatin1String locale("locale");
+
+        constexpr QLatin1String captchaId("captcha_id");
+        constexpr QLatin1String captchaSolution("captcha_solution");
 
         constexpr QLatin1String activeDeviceCount("active_device_count");
         constexpr QLatin1String maxDeviceCount("max_device_count");
