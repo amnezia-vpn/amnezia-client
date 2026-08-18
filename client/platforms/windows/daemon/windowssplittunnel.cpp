@@ -514,6 +514,7 @@ bool WindowsSplitTunnel::getAddress(int adapterIndex, IN_ADDR* out_ipv4,
   }
   auto guard = qScopeGuard([table]() { FreeMibTable(table); });
 
+  // Select addresses Windows can use as a source on this interface.
   const MIB_UNICASTIPADDRESS_ROW* bestIpv4 = nullptr;
   const MIB_UNICASTIPADDRESS_ROW* bestIpv6 = nullptr;
   for (ULONG i = 0; i < table->NumEntries; i++) {
@@ -528,6 +529,7 @@ bool WindowsSplitTunnel::getAddress(int adapterIndex, IN_ADDR* out_ipv4,
       if (!addr.isGlobal()) {
         continue;
       }
+      // Prefer an address that completed duplicate-address detection.
       if (bestIpv4 != nullptr && bestIpv4->DadState >= row->DadState) {
         continue;
       }
@@ -543,6 +545,7 @@ bool WindowsSplitTunnel::getAddress(int adapterIndex, IN_ADDR* out_ipv4,
         continue;
       }
       QHostAddress other(bestIpv6->Address.Ipv6.sin6_addr.s6_addr);
+      // Prefer globally routable IPv6 over unique-local addresses.
       if (addr.isUniqueLocalUnicast() && !other.isUniqueLocalUnicast()) {
         continue;
       }
