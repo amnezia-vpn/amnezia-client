@@ -101,6 +101,26 @@ bool apiUtils::isSubscriptionExpiringSoon(const QString &subscriptionEndDate, in
     return endDate <= nowUtc.addDays(withinDays);
 }
 
+amnezia::ErrorCode apiUtils::errorCodeFromGatewayJsonHttpStatus(const QJsonObject &jsonObj)
+{
+    if (!jsonObj.contains(QStringLiteral("http_status"))) {
+        return amnezia::ErrorCode::NoError;
+    }
+    const int st = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+    switch (st) {
+    case 200: return amnezia::ErrorCode::NoError;
+    case 400: return amnezia::ErrorCode::ApiConfigEmptyError;
+    case 403: return amnezia::ErrorCode::ApiPairingForbiddenError;
+    case 404: return amnezia::ErrorCode::ApiNotFoundError;
+    case 408: return amnezia::ErrorCode::ApiConfigTimeoutError;
+    case 409: return amnezia::ErrorCode::ApiPairingConflictError;
+    case 429: return amnezia::ErrorCode::ApiPairingRateLimitedError;
+    case 500: return amnezia::ErrorCode::ApiConfigDownloadError;
+    case 503: return amnezia::ErrorCode::ApiPairingServiceUnavailableError;
+    default: return amnezia::ErrorCode::ApiConfigDownloadError;
+    }
+}
+
 amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
                                                      const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                      const QByteArray &responseBody)
@@ -172,6 +192,17 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
         }
 
+        const QString msg = apiErrorMessageFromJson(jsonObj);
+        if (msg.contains(QStringLiteral("QR session"), Qt::CaseInsensitive)
+            && (msg.contains(QStringLiteral("not found"), Qt::CaseInsensitive)
+                || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive))) {
+            return amnezia::ErrorCode::ApiPairingSessionExpiredError;
+        }
+        if (msg.contains(QStringLiteral("not found"), Qt::CaseInsensitive)
+            || msg.contains(QStringLiteral("expired"), Qt::CaseInsensitive)) {
+            return amnezia::ErrorCode::ApiNotFoundError;
+        }
+
         if (httpStatusFromBody >= 300) {
             return amnezia::ErrorCode::ApiConfigDownloadError;
         }
@@ -179,6 +210,10 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 
     if (replyError == QNetworkReply::NoError) {
         return amnezia::ErrorCode::NoError;
+    }
+
+    if (httpStatusCode == httpStatusCodeNotFound) {
+        return amnezia::ErrorCode::ApiNotFoundError;
     }
 
     qDebug() << "something went wrong";

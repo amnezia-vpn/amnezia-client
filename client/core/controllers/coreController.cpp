@@ -156,6 +156,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
+    m_pairingController = new PairingController(m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
@@ -227,6 +228,9 @@ void CoreController::initControllers()
                                                               m_apiCountryModel, m_apiDevicesModel, m_settingsController,
                                                               m_connectionController, this);
     setQmlContextProperty("SubscriptionUiController", m_subscriptionUiController);
+
+    m_pairingUiController = new PairingUiController(m_pairingController, m_serversController, m_subscriptionController, m_appSettingsRepository, this);
+    setQmlContextProperty("PairingUiController", m_pairingUiController);
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
     setQmlContextProperty("ApiNewsController", m_apiNewsUiController);

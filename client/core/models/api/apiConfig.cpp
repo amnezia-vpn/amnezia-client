@@ -143,7 +143,10 @@ QJsonObject ApiConfig::toJson() const
     if (!availableCountries.isEmpty()) {
         obj[apiDefs::key::availableCountries] = availableCountries;
     }
-    
+    if (!supportedProtocols.isEmpty()) {
+        obj[apiDefs::key::supportedProtocols] = supportedProtocols;
+    }
+
     QJsonObject serviceInfoObj = serviceInfo.toJson();
     if (!serviceInfoObj.isEmpty()) {
         obj[apiDefs::key::serviceInfo] = serviceInfoObj;
@@ -194,6 +197,7 @@ ApiConfig ApiConfig::fromJson(const QJsonObject& json)
     config.issuedConfigs = json.value(apiDefs::key::issuedConfigs).toInt(0);
     
     config.availableCountries = json.value(apiDefs::key::availableCountries).toArray();
+    config.supportedProtocols = json.value(apiDefs::key::supportedProtocols).toArray();
     
     QJsonObject serviceInfoObj = json.value(apiDefs::key::serviceInfo).toObject();
     if (!serviceInfoObj.isEmpty()) {

@@ -34,4 +34,10 @@ object QtAndroidController {
 
     external fun onActivityPaused()
     external fun onActivityResumed()
+
+    external fun onCameraPermissionResult(granted: Boolean)
+
+    external fun onPairingQrCameraClosed()
+
+    external fun onPairingQrCameraUserDismissed()
 }

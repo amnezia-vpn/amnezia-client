@@ -10,6 +10,8 @@
 #endif
 
 #include "ui/controllers/api/subscriptionUiController.h"
+#include "ui/controllers/api/pairingUiController.h"
+#include "core/controllers/api/pairingController.h"
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
@@ -177,6 +179,7 @@ private:
     UpdateUiController* m_updateUiController;
 
     SubscriptionUiController* m_subscriptionUiController;
+    PairingUiController* m_pairingUiController;
     ApiNewsUiController* m_apiNewsUiController;
     
     ServicesCatalogUiController* m_servicesCatalogUiController;
@@ -188,6 +191,7 @@ private:
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    PairingController* m_pairingController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
     InstallController* m_installController;

@@ -104,10 +104,23 @@ namespace amnezia
         ApiSubscriptionNotActiveError = 1114,
         ApiNoPurchasedSubscriptionsError = 1115,
         ApiTrialAlreadyUsedError = 1116,
-        ApiCaptchaRequiredError = 1117,
-        ApiCaptchaInvalidError = 1118,
-        ApiCaptchaRefreshError = 1119,
-        ApiRateLimitError = 1120,
+
+        // QR pairing (gateway /v1/generate_qr, /v1/scan_qr)
+        ApiPairingForbiddenError = 1117,
+        ApiPairingConflictError = 1118,
+        ApiPairingRateLimitedError = 1119,
+        ApiPairingServiceUnavailableError = 1120,
+        ApiPairingPayloadTooLargeError = 1121,
+        ApiPairingMissingMetadataError = 1122,
+        ApiPairingSessionExpiredError = 1123,
+
+        // Captcha errors (gateway 402 payment_required with captcha markers)
+        ApiCaptchaRequiredError = 1124,
+        ApiCaptchaInvalidError = 1125,
+        ApiCaptchaRefreshError = 1126,
+
+        // Rate limiting (HTTP 429 Too Many Requests)
+        ApiRateLimitError = 1127,
 
         // QFile errors
         OpenError = 1200,

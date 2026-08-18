@@ -9,6 +9,7 @@
 #include "android_controller.h"
 #include "android_utils.h"
 #include "ui/controllers/importUiController.h"
+#include "ui/controllers/api/pairingUiController.h"
 
 namespace
 {
@@ -103,7 +104,10 @@ bool AndroidController::initialize()
         {"onImeInsetsChanged", "(I)V", reinterpret_cast<void *>(onImeInsetsChanged)},
         {"onSystemBarsInsetsChanged", "(II)V", reinterpret_cast<void *>(onSystemBarsInsetsChanged)},
         {"onActivityPaused", "()V", reinterpret_cast<void *>(onActivityPaused)},
-        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)}
+        {"onActivityResumed", "()V", reinterpret_cast<void *>(onActivityResumed)},
+        {"onCameraPermissionResult", "(Z)V", reinterpret_cast<void *>(onCameraPermissionResult)},
+        {"onPairingQrCameraClosed", "()V", reinterpret_cast<void *>(onPairingQrCameraClosed)},
+        {"onPairingQrCameraUserDismissed", "()V", reinterpret_cast<void *>(onPairingQrCameraUserDismissed)}
     };
 
     QJniEnvironment env;
@@ -223,6 +227,21 @@ bool AndroidController::isCameraPresent()
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");
 }
 
+bool AndroidController::isCameraPermissionGranted()
+{
+    return callActivityMethod<jboolean>("isCameraPermissionGranted", "()Z");
+}
+
+void AndroidController::requestCameraPermissionForQrPairing()
+{
+    callActivityMethod("requestCameraPermissionForQrPairing", "()V");
+}
+
+void AndroidController::openApplicationDetailsSettings()
+{
+    callActivityMethod("openApplicationDetailsSettings", "()V");
+}
+
 bool AndroidController::isOnTv()
 {
     return callActivityMethod<jboolean>("isOnTv", "()Z");
@@ -246,6 +265,11 @@ int AndroidController::getNavigationBarHeight()
 void AndroidController::startQrReaderActivity()
 {
     callActivityMethod("startQrCodeReader", "()V");
+}
+
+void AndroidController::startPairingQrReaderActivity()
+{
+    callActivityMethod("startPairingQrCodeReader", "()V");
 }
 
 void AndroidController::setSaveLogs(bool enabled)
@@ -560,7 +584,11 @@ bool AndroidController::decodeQrCode(JNIEnv *env, jobject thiz, jstring data)
 {
     Q_UNUSED(thiz);
 
-    return ImportUiController::decodeQrCode(AndroidUtils::convertJString(env, data));
+    const QString code = AndroidUtils::convertJString(env, data);
+    if (PairingUiController::tryConsumeAndroidQrScan(code)) {
+        return true;
+    }
+    return ImportUiController::decodeQrCode(code);
 }
 // static
 void AndroidController::onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp)
@@ -598,6 +626,33 @@ void AndroidController::onActivityResumed(JNIEnv *env, jobject thiz)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->activityResumed();
+}
+
+// static
+void AndroidController::onCameraPermissionResult(JNIEnv *env, jobject thiz, jboolean granted)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->cameraPermissionResult(static_cast<bool>(granted));
+}
+
+// static
+void AndroidController::onPairingQrCameraClosed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    PairingUiController::notifyAndroidPairingQrCameraClosed();
+}
+
+// static
+void AndroidController::onPairingQrCameraUserDismissed(JNIEnv *env, jobject thiz)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    PairingUiController::notifyAndroidPairingQrCameraUserDismissed();
 }
 
 

@@ -38,11 +38,15 @@ public:
     void closeFd();
     QString getFileName(const QString &uri);
     bool isCameraPresent();
+    bool isCameraPermissionGranted();
+    void requestCameraPermissionForQrPairing();
+    void openApplicationDetailsSettings();
     bool isOnTv();
     bool isEdgeToEdgeEnabled();
     int getStatusBarHeight();
     int getNavigationBarHeight();
     void startQrReaderActivity();
+    void startPairingQrReaderActivity();
     void setSaveLogs(bool enabled);
     void exportLogsFile(const QString &fileName);
     void clearLogs();
@@ -82,6 +86,7 @@ signals:
     void systemBarsInsetsChanged(int navBarHeightDp, int statusBarHeightDp);
     void activityPaused();
     void activityResumed();
+    void cameraPermissionResult(bool granted);
 
 private:
     bool isWaitingStatus = true;
@@ -114,6 +119,9 @@ private:
     static void onSystemBarsInsetsChanged(JNIEnv *env, jobject thiz, jint navBarHeightDp, jint statusBarHeightDp);
     static void onActivityPaused(JNIEnv *env, jobject thiz);
     static void onActivityResumed(JNIEnv *env, jobject thiz);
+    static void onCameraPermissionResult(JNIEnv *env, jobject thiz, jboolean granted);
+    static void onPairingQrCameraClosed(JNIEnv *env, jobject thiz);
+    static void onPairingQrCameraUserDismissed(JNIEnv *env, jobject thiz);
 
     template <typename Ret, typename ...Args>
     static auto callActivityMethod(const char *methodName, const char *signature, Args &&...args);

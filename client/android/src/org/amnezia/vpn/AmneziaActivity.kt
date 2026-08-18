@@ -49,6 +49,9 @@ import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import java.io.File
 import java.io.IOException
 import kotlin.LazyThreadSafetyMode.NONE
@@ -81,12 +84,18 @@ private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
+private const val CHECK_CAMERA_PERMISSION_ACTION_CODE = 5
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
 
-class AmneziaActivity : QtActivity() {
+class AmneziaActivity : QtActivity(), LifecycleOwner {
+
+    private val lifecycleRegistry = LifecycleRegistry(this)
+
+    override val lifecycle: Lifecycle
+        get() = lifecycleRegistry
 
     private lateinit var mainScope: CoroutineScope
     private val qtInitialized = CompletableDeferred<Unit>()
@@ -107,6 +116,7 @@ class AmneziaActivity : QtActivity() {
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
 
+    private var lastPairingQrReaderStartUptimeMs: Long = 0L
     private var updateCoverDialog: Dialog? = null
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
@@ -215,6 +225,7 @@ class AmneziaActivity : QtActivity() {
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -272,6 +283,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onStart() {
         super.onStart()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
         Log.d(TAG, "Start Amnezia activity")
         mainScope.launch {
             qtInitialized.await()
@@ -295,6 +307,7 @@ class AmneziaActivity : QtActivity() {
             qtInitialized.await()
             QtAndroidController.onServiceDisconnected()
         }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         super.onStop()
     }
 
@@ -367,6 +380,7 @@ class AmneziaActivity : QtActivity() {
         if (qtInitialized.isCompleted) {
             QtAndroidController.onActivityPaused()
         }
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         super.onPause()
         isActivityResumed = false
         // Cancel all pending operations when activity pauses
@@ -377,6 +391,7 @@ class AmneziaActivity : QtActivity() {
 
     override fun onResume() {
         super.onResume()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
         isActivityResumed = true
         Log.d(TAG, "Resume Amnezia activity")
         if (qtInitialized.isCompleted) {
@@ -493,6 +508,7 @@ class AmneziaActivity : QtActivity() {
         unregisterBroadcastReceiver(notificationStateReceiver)
         notificationStateReceiver = null
         mainScope.cancel()
+        lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         super.onDestroy()
     }
 
@@ -1016,6 +1032,66 @@ class AmneziaActivity : QtActivity() {
     fun isCameraPresent(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
 
     @Suppress("unused")
+    fun isCameraPermissionGranted(): Boolean =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+
+    @Suppress("unused")
+    fun requestCameraPermissionForQrPairing() {
+        if (isCameraPermissionGranted()) {
+            mainScope.launch {
+                qtInitialized.await()
+                QtAndroidController.onCameraPermissionResult(true)
+            }
+            return
+        }
+        runOnUiThread {
+            AlertDialog.Builder(this)
+                .setTitle(R.string.cameraPermissionDialogTitle)
+                .setMessage(R.string.cameraPermissionDialogMessage)
+                .setNegativeButton(R.string.cancel) { _, _ ->
+                    mainScope.launch {
+                        qtInitialized.await()
+                        QtAndroidController.onCameraPermissionResult(false)
+                    }
+                }
+                .setPositiveButton(R.string.cameraPermissionContinue) { _, _ ->
+                    requestPermission(
+                        Manifest.permission.CAMERA,
+                        CHECK_CAMERA_PERMISSION_ACTION_CODE,
+                        PermissionRequestHandler(
+                            onSuccess = {
+                                mainScope.launch {
+                                    qtInitialized.await()
+                                    QtAndroidController.onCameraPermissionResult(true)
+                                }
+                            },
+                            onFail = {
+                                mainScope.launch {
+                                    qtInitialized.await()
+                                    QtAndroidController.onCameraPermissionResult(false)
+                                }
+                            },
+                            onAny = {}
+                        )
+                    )
+                }
+                .show()
+        }
+    }
+
+    @Suppress("unused")
+    fun openApplicationDetailsSettings() {
+        try {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                data = Uri.fromParts("package", packageName, null)
+                startActivity(this)
+            }
+        } catch (e: ActivityNotFoundException) {
+            Log.e(TAG, "openApplicationDetailsSettings: $e")
+        }
+    }
+
+    @Suppress("unused")
     fun isOnTv(): Boolean = applicationContext.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
 
     @Suppress("unused")
@@ -1059,6 +1135,19 @@ class AmneziaActivity : QtActivity() {
     fun startQrCodeReader() {
         Log.v(TAG, "Start camera")
         Intent(this, CameraActivity::class.java).also {
+            startActivity(it)
+        }
+    }
+
+    @Suppress("unused")
+    fun startPairingQrCodeReader() {
+        val now = SystemClock.uptimeMillis()
+        if (now - lastPairingQrReaderStartUptimeMs < 1200L) {
+            return
+        }
+        lastPairingQrReaderStartUptimeMs = now
+        Intent(this, CameraActivity::class.java).also {
+            it.putExtra(CameraActivity.EXTRA_PAIRING_QR_CAMERA, true)
             startActivity(it)
         }
     }
@@ -1312,6 +1401,7 @@ class AmneziaActivity : QtActivity() {
                 CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
                 OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
                 CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
+                CHECK_CAMERA_PERMISSION_ACTION_CODE -> "CHECK_CAMERA_PERMISSION"
                 else -> actionCode.toString()
             }
     }

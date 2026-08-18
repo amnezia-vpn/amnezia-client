@@ -1,16 +1,56 @@
 #if !MACOS_NE
 #include "QRCodeReaderBase.h"
 
+#include <QByteArray>
+
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+
+static UIWindow *amneziaKeyWindowForQrCamera(void)
+{
+    UIApplication *app = [UIApplication sharedApplication];
+
+    if (@available(iOS 13.0, *)) {
+        for (UIScene *scene in app.connectedScenes) {
+            if (scene.activationState != UISceneActivationStateForegroundActive) {
+                continue;
+            }
+            if (![scene isKindOfClass:[UIWindowScene class]]) {
+                continue;
+            }
+            UIWindowScene *windowScene = (UIWindowScene *)scene;
+            for (UIWindow *window in windowScene.windows) {
+                if (window.isKeyWindow) {
+                    return window;
+                }
+            }
+            for (UIWindow *window in windowScene.windows) {
+                if (!window.isHidden) {
+                    return window;
+                }
+            }
+        }
+    }
+
+    if (app.keyWindow) {
+        return app.keyWindow;
+    }
+    for (UIWindow *window in app.windows) {
+        if (window.isKeyWindow) {
+            return window;
+        }
+    }
+    return app.windows.firstObject;
+}
 
 @interface QRCodeReaderImpl : UIViewController
 @end
 
 @interface QRCodeReaderImpl () <AVCaptureMetadataOutputObjectsDelegate>
-@property (nonatomic) QRCodeReader* qrCodeReader;
-@property (nonatomic, strong) AVCaptureSession *captureSession;
-@property (nonatomic, strong) AVCaptureVideoPreviewLayer *videoPreviewPlayer;
+@property (nonatomic, assign) QRCodeReader *qrCodeReader;
+@property (nonatomic, retain) AVCaptureSession *captureSession;
+@property (nonatomic, retain) AVCaptureVideoPreviewLayer *videoPreviewPlayer;
+@property (nonatomic) dispatch_queue_t sessionQueue;
 @end
 
 
@@ -19,61 +59,127 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    _captureSession = nil;
+    self.captureSession = nil;
+    if (!_sessionQueue) {
+        _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
+    }
 }
 
-- (void)setQrCodeReader: (QRCodeReader*)value {
+- (void)setQrCodeReader:(QRCodeReader *)value {
     _qrCodeReader = value;
 }
 
-- (BOOL)startReading {
-    NSError *error;
+- (BOOL)startReadingOnMainThread {
+    [self stopReadingOnMainThread];
 
-    AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
-    AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice: captureDevice error: &error];
+    NSError *error = nil;
 
-    if(!deviceInput) {
-        NSLog(@"Error %@", error.localizedDescription);
+    AVCaptureDevice *captureDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    if (!captureDevice) {
         return NO;
     }
 
-    _captureSession = [[AVCaptureSession alloc]init];
-    [_captureSession addInput:deviceInput];
+    AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:captureDevice error:&error];
+
+    if (!deviceInput) {
+        return NO;
+    }
+
+    AVCaptureSession *session = [[AVCaptureSession alloc] init];
+    [session addInput:deviceInput];
 
     AVCaptureMetadataOutput *capturedMetadataOutput = [[AVCaptureMetadataOutput alloc] init];
-    [_captureSession addOutput:capturedMetadataOutput];
+    [session addOutput:capturedMetadataOutput];
 
-    dispatch_queue_t dispatchQueue;
-    dispatchQueue = dispatch_queue_create("myQueue", NULL);
-    [capturedMetadataOutput setMetadataObjectsDelegate: self queue: dispatchQueue];
-    [capturedMetadataOutput setMetadataObjectTypes: [NSArray arrayWithObject:AVMetadataObjectTypeQRCode]];
+    if (!_sessionQueue) {
+        _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
+    }
+    [capturedMetadataOutput setMetadataObjectsDelegate:self queue:_sessionQueue];
+    [capturedMetadataOutput setMetadataObjectTypes:[NSArray arrayWithObject:AVMetadataObjectTypeQRCode]];
 
-    _videoPreviewPlayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession: _captureSession];
-    
-    CGFloat statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+    self.captureSession = session;
+    [session release];
 
-    QRect cameraRect = _qrCodeReader->cameraSize();
-    CGRect cameraCGRect = CGRectMake(cameraRect.x(),
-                                     cameraRect.y() + statusBarHeight,
-                                     cameraRect.width(),
-                                     cameraRect.height());
+    AVCaptureVideoPreviewLayer *preview = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
+    [preview setVideoGravity:AVLayerVideoGravityResizeAspectFill];
+    self.videoPreviewPlayer = preview;
+    [preview release];
 
-    [_videoPreviewPlayer setVideoGravity: AVLayerVideoGravityResizeAspectFill];
-    [_videoPreviewPlayer setFrame: cameraCGRect];
+    UIWindow *keyWindow = amneziaKeyWindowForQrCamera();
+    if (!keyWindow) {
+        [self stopReadingOnMainThread];
+        return NO;
+    }
 
-    CALayer* layer = [UIApplication sharedApplication].keyWindow.layer;
-    [layer addSublayer: _videoPreviewPlayer];
+    QRect cameraRect = _qrCodeReader ? _qrCodeReader->cameraSize() : QRect();
+    CGRect previewFrame;
+    if (cameraRect.width() > 0 && cameraRect.height() > 0) {
+        CGFloat statusBarHeight = 0.f;
+        if (@available(iOS 13.0, *)) {
+            statusBarHeight = keyWindow.windowScene.statusBarManager.statusBarFrame.size.height;
+        } else {
+            statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
+        }
+        previewFrame = CGRectMake(cameraRect.x(), cameraRect.y() + statusBarHeight,
+                                  cameraRect.width(), cameraRect.height());
+    } else {
+        previewFrame = keyWindow.bounds;
+    }
+    [self.videoPreviewPlayer setFrame:previewFrame];
+    [keyWindow.layer addSublayer:self.videoPreviewPlayer];
 
-    [_captureSession startRunning];
+    AVCaptureSession *runningSession = self.captureSession;
+    dispatch_async(_sessionQueue, ^{
+        [runningSession startRunning];
+    });
 
     return YES;
 }
 
-- (void)stopReading {
-    [_captureSession stopRunning];
-    _captureSession = nil;
+- (BOOL)startReading {
+    if ([NSThread isMainThread]) {
+        return [self startReadingOnMainThread];
+    }
+    __block BOOL ok = NO;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        ok = [self startReadingOnMainThread];
+    });
+    return ok;
+}
 
-    [_videoPreviewPlayer removeFromSuperlayer];
+- (void)stopReadingOnMainThread {
+    AVCaptureSession *session = self.captureSession;
+    self.captureSession = nil;
+
+    if (session) {
+        if (!_sessionQueue) {
+            _sessionQueue = dispatch_queue_create("org.amnezia.qr.session", DISPATCH_QUEUE_SERIAL);
+        }
+        dispatch_sync(_sessionQueue, ^{
+            @try {
+                if ([session isRunning]) {
+                    [session stopRunning];
+                }
+            } @catch (NSException *ex) {
+                NSLog(@"Session stopRunning exception: %@", ex);
+            }
+        });
+    }
+
+    if (self.videoPreviewPlayer) {
+        [self.videoPreviewPlayer removeFromSuperlayer];
+        self.videoPreviewPlayer = nil;
+    }
+}
+
+- (void)stopReading {
+    if ([NSThread isMainThread]) {
+        [self stopReadingOnMainThread];
+    } else {
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            [self stopReadingOnMainThread];
+        });
+    }
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output didOutputMetadataObjects:(NSArray<__kindof AVMetadataObject *> *)metadataObjects fromConnection:(AVCaptureConnection *)connection {
@@ -82,7 +188,15 @@
         AVMetadataMachineReadableCodeObject *metadataObject = [metadataObjects objectAtIndex:0];
 
         if ([[metadataObject type] isEqualToString: AVMetadataObjectTypeQRCode]) {
-            _qrCodeReader->emit codeReaded([metadataObject stringValue].UTF8String);
+            NSString *value = [metadataObject stringValue];
+            if (value.length == 0) {
+                return;
+            }
+            QRCodeReader *cpp = _qrCodeReader;
+            const QByteArray utf8([value UTF8String]);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                cpp->notifyCodeRead(QString::fromUtf8(utf8));
+            });
         }
     }
 }
@@ -109,6 +223,10 @@ void QRCodeReader::startReading() {
 void QRCodeReader::stopReading() {
     [m_qrCodeReader stopReading];
 }
+
+void QRCodeReader::notifyCodeRead(const QString &code) {
+    emit codeReaded(code);
+}
 #else
 #include "QRCodeReaderBase.h"
 
@@ -124,4 +242,5 @@ QRect QRCodeReader::cameraSize() {
 void QRCodeReader::startReading() {}
 void QRCodeReader::stopReading() {}
 void QRCodeReader::setCameraSize(QRect) {}
+void QRCodeReader::notifyCodeRead(const QString &) {}
 #endif

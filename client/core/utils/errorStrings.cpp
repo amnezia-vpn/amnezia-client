@@ -96,10 +96,13 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
-    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
-    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
-    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
-    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiPairingForbiddenError): errorMessage = QObject::tr("QR pairing was rejected (forbidden)"); break;
+    case (ErrorCode::ApiPairingConflictError): errorMessage = QObject::tr("This QR code has already been used"); break;
+    case (ErrorCode::ApiPairingRateLimitedError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiPairingServiceUnavailableError): errorMessage = QObject::tr("Service temporarily unavailable. Please try again later"); break;
+    case (ErrorCode::ApiPairingPayloadTooLargeError): errorMessage = QObject::tr("QR pairing data is too large to send"); break;
+    case (ErrorCode::ApiPairingMissingMetadataError): errorMessage = QObject::tr("This subscription is missing data required to transfer via QR (service type or country). Refresh the subscription or pick another server."); break;
+    case (ErrorCode::ApiPairingSessionExpiredError): errorMessage = QObject::tr("The QR code session has ended. Show a new QR code on the other device and scan again."); break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
@@ -108,6 +111,14 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::UnspecifiedError): errorMessage =  QObject::tr("QFile error: An unspecified error occurred"); break;
     case(ErrorCode::FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
     case(ErrorCode::AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
+
+    // Captcha errors
+    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
+    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
+    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
+
+    // Rate limiting (HTTP 429)
+    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
 
     case(ErrorCode::InternalError):
     default:

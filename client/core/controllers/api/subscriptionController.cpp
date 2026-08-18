@@ -298,6 +298,71 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     return ErrorCode::NoError;
 }
 
+ErrorCode SubscriptionController::importServerFromQrPairingResponse(const QString &vpnConfigKey, const QJsonObject &serviceInfo,
+                                                                    const QJsonArray &supportedProtocols,
+                                                                    int *duplicateServerIndex)
+{
+    if (vpnConfigKey.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    QString normalizedKey = vpnConfigKey;
+    normalizedKey.replace(QStringLiteral("vpn://"), QString());
+
+    for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
+        const auto apiV2 = m_serversRepository->apiV2Config(m_serversRepository->serverIdAt(i));
+        QString existingVpnKey = apiV2.has_value() ? apiV2->vpnKey() : QString();
+        existingVpnKey.replace(QStringLiteral("vpn://"), QString());
+        if (!existingVpnKey.isEmpty() && existingVpnKey == normalizedKey) {
+            if (duplicateServerIndex) {
+                *duplicateServerIndex = i;
+            }
+            return ErrorCode::ApiConfigAlreadyAdded;
+        }
+    }
+
+    QByteArray configString =
+            QByteArray::fromBase64(normalizedKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
+    QByteArray configUncompressed = qUncompress(configString);
+    if (!configUncompressed.isEmpty()) {
+        configString = configUncompressed;
+    }
+    if (configString.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    QJsonObject serverJson = QJsonDocument::fromJson(configString).object();
+    if (serverJson.isEmpty()) {
+        return ErrorCode::ApiConfigEmptyError;
+    }
+
+    if (serverJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
+        return ErrorCode::InternalError;
+    }
+
+    QJsonObject apiConfig = serverJson.value(apiDefs::key::apiConfig).toObject();
+    if (!serviceInfo.isEmpty()) {
+        apiConfig.insert(apiDefs::key::serviceInfo, serviceInfo);
+    }
+    if (!supportedProtocols.isEmpty()) {
+        apiConfig.insert(apiDefs::key::supportedProtocols, supportedProtocols);
+    }
+    serverJson[apiDefs::key::apiConfig] = apiConfig;
+
+    ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(serverJson);
+    if (apiV2ServerConfig.apiConfig.vpnKey.isEmpty()) {
+        QString fullKey = vpnConfigKey.trimmed();
+        if (!fullKey.startsWith(QStringLiteral("vpn://"))) {
+            fullKey = QStringLiteral("vpn://") + fullKey;
+        }
+        apiV2ServerConfig.apiConfig.vpnKey = fullKey;
+    }
+
+    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
+                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
+    return ErrorCode::NoError;
+}
+
 ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             const QString &transactionId, bool isTestPurchase,
@@ -979,7 +1044,7 @@ QFuture<QPair<ErrorCode, QString>> SubscriptionController::getRenewalLink(const 
                                                                        apiDefs::requestTimeoutMsecs,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled(),
                                                                        m_appSettingsRepository);
-    auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload);
+    auto postFuture = gatewayController->postAsync(QString("%1v1/renewal_link"), apiPayload, nullptr, gatewayController);
     auto *watcher = new QFutureWatcher<QPair<ErrorCode, QByteArray>>();
     QObject::connect(watcher, &QFutureWatcher<QPair<ErrorCode, QByteArray>>::finished,
                      [promise, watcher, gatewayController]() {

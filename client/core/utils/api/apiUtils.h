@@ -33,6 +33,8 @@ namespace apiUtils
                                                const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
                                                const QByteArray &responseBody);
 
+    amnezia::ErrorCode errorCodeFromGatewayJsonHttpStatus(const QJsonObject &jsonObj);
+
     QString getPremiumV1VpnKey(const QJsonObject &serverConfigObject);
     QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
 }

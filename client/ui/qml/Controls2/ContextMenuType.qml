@@ -4,7 +4,7 @@ import QtQuick.Controls
 Menu {
     property var textObj
 
-    popupType: Popup.Native
+    popupType: Qt.platform.os === "ios" ? Popup.Item : Popup.Native
 
     // On Qt < 6.10 the ContextMenu attached type has no native backing on iOS
     // and opens this Qt-drawn menu instead. In that case the native edit menu

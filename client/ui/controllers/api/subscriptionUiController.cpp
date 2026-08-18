@@ -16,6 +16,10 @@
 #include <QFutureWatcher>
 #include <QTimer>
 
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ios_controller.h"
+#endif
+
 namespace
 {
     namespace configKey
@@ -681,7 +685,11 @@ bool SubscriptionUiController::getAccountInfo(const QString &serverId, bool relo
     if (reload) {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
+#ifdef Q_OS_IOS
+        wait.exec();
+#else
         wait.exec(QEventLoop::ExcludeUserInputEvents);
+#endif
     }
     QJsonObject accountInfo;
     ErrorCode errorCode = m_subscriptionController->getAccountInfo(serverId, accountInfo);

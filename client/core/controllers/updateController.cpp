@@ -8,12 +8,13 @@
 #include <QTimer>
 
 #include "amneziaApplication.h"
-#include "logger.h"
-#include "version.h"
 #include "core/controllers/gatewayController.h"
 #include "core/utils/api/gatewayPayloadBuilder.h"
 #include "core/utils/constants/apiKeys.h"
+#include "core/utils/errorStrings.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
+#include "logger.h"
+#include "version.h"
 
 namespace
 {
@@ -56,6 +57,10 @@ void UpdateController::checkForUpdates()
     if (m_updateCheckRunning || !m_appSettingsRepository) {
         return;
     }
+
+    if (m_appSettingsRepository->isDevGatewayEnv()) {
+        return;
+    }
     m_updateCheckRunning = true;
 
     fetchGatewayUrl();
@@ -92,6 +97,11 @@ void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bo
 
 void UpdateController::fetchGatewayUrl()
 {
+    if (!m_appSettingsRepository || m_appSettingsRepository->isDevGatewayEnv()) {
+        finishUpdateCheck();
+        return;
+    }
+
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(),
                                                                        m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
@@ -104,11 +114,19 @@ void UpdateController::fetchGatewayUrl()
 
     // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
     QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
-        gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
-            .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
+        if (!m_appSettingsRepository || m_appSettingsRepository->isDevGatewayEnv()) {
+            finishUpdateCheck();
+            return;
+        }
+        gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload, nullptr, gatewayController)
+            .then(this, [this](QPair<ErrorCode, QByteArray> result) {
                 auto [err, gatewayResponse] = result;
                 if (err != ErrorCode::NoError) {
-                    logger.error() << "Gateway request failed, error code:" << static_cast<int>(err);
+                    if (err == ErrorCode::ApiNotFoundError) {
+                        logger.debug() << "Update check: updater_endpoint not found on gateway";
+                    } else {
+                        logger.error() << errorString(err);
+                    }
                     finishUpdateCheck();
                     return;
                 }

@@ -113,6 +113,9 @@ void AmneziaApplication::init()
             // install filter on main window
             if (auto win = qobject_cast<QQuickWindow*>(obj)) {
                 win->installEventFilter(this);
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+                win->setDefaultAlphaBuffer(true);
+#endif
 #ifdef Q_OS_ANDROID
                 QObject::connect(win, &QQuickWindow::sceneGraphError,
                     [](QQuickWindow::SceneGraphError, const QString &msg) {
