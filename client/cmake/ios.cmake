@@ -15,6 +15,7 @@ find_library(FW_FOUNDATION Foundation)
 find_library(FW_STOREKIT StoreKit)
 find_library(FW_USERNOTIFICATIONS UserNotifications)
 find_library(FW_NETWORKEXTENSION NetworkExtension)
+find_library(FW_WIDGETKIT WidgetKit)
 
 set(LIBS ${LIBS}
     ${FW_AUTHENTICATIONSERVICES}
@@ -24,6 +25,7 @@ set(LIBS ${LIBS}
     ${FW_STOREKIT}
     ${FW_USERNOTIFICATIONS}
     ${FW_NETWORKEXTENSION}
+    ${FW_WIDGETKIT}
 )
 
 
@@ -82,7 +84,7 @@ set_target_properties(${PROJECT} PROPERTIES
     XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/Frameworks"
-    XCODE_EMBED_APP_EXTENSIONS networkextension
+    XCODE_EMBED_APP_EXTENSIONS "networkextension;vpncontrolwidget"
 )
 
 if(DEPLOY)
@@ -123,6 +125,8 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/LogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNWidgetState.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/VPNWidgetBridge.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/StoreKit2Helper.swift
@@ -145,4 +149,5 @@ set_property(TARGET ${PROJECT} APPEND PROPERTY RESOURCE
 )
 
 add_subdirectory(ios/networkextension)
-add_dependencies(${PROJECT} networkextension)
+add_subdirectory(ios/widget)
+add_dependencies(${PROJECT} networkextension vpncontrolwidget)

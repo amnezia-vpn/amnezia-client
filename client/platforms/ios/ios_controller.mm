@@ -317,10 +317,12 @@ bool IosController::connectVpn(amnezia::Proto proto, const QJsonObject& configur
 void IosController::disconnectVpn()
 {
     if (!m_currentTunnel) {
+        emitConnectionStateIfChanged(Vpn::ConnectionState::Disconnected);
         return;
     }
 
     if ([m_currentTunnel.connection isKindOfClass:[NETunnelProviderSession class]]) {
+        emitConnectionStateIfChanged(Vpn::ConnectionState::Disconnecting);
         [(NETunnelProviderSession *)m_currentTunnel.connection stopTunnel];
     }
 }

@@ -84,6 +84,17 @@
 	</dict>
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>org.amnezia.AmneziaVPN.widget</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>amneziavpn</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleIcons</key>
 	<dict>
 		<key>CFBundlePrimaryIcon</key>

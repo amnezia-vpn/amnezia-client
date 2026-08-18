@@ -2,6 +2,7 @@
 
 #include <QTimer>
 #include <QtConcurrent>
+#include <memory>
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/errorCodes.h"
@@ -36,6 +37,7 @@
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/containersModel.h"
 #include "core/utils/containerEnum.h"
+#include "core/utils/containers/containerUtils.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/utils/notificationHandler.h"
@@ -48,7 +50,34 @@
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
+    #include <QGuiApplication>
     #include <AmneziaVPN-Swift.h>
+#endif
+
+#ifdef Q_OS_IOS
+namespace {
+QString widgetStateString(Vpn::ConnectionState state)
+{
+    switch (state) {
+    case Vpn::ConnectionState::Connected:
+        return QStringLiteral("connected");
+    case Vpn::ConnectionState::Disconnected:
+        return QStringLiteral("disconnected");
+    case Vpn::ConnectionState::Connecting:
+    case Vpn::ConnectionState::Preparing:
+    case Vpn::ConnectionState::Reconnecting:
+        return QStringLiteral("connecting");
+    case Vpn::ConnectionState::Disconnecting:
+        return QStringLiteral("disconnecting");
+    case Vpn::ConnectionState::Error:
+        return QStringLiteral("error");
+    case Vpn::ConnectionState::Unknown:
+        return QStringLiteral("unavailable");
+    }
+    return QStringLiteral("unavailable");
+}
+
+}
 #endif
 
 CoreSignalHandlers::CoreSignalHandlers(CoreController* coreController, QObject* parent)
@@ -84,6 +113,7 @@ void CoreSignalHandlers::initAllHandlers()
     initAndroidConnectionHandler();
     initIosImportHandler();
     initIosSettingsHandler();
+    initIosWidgetHandler();
     initNotificationHandler();
     initUpdateFoundHandler();
 }
@@ -417,6 +447,74 @@ void CoreSignalHandlers::initIosSettingsHandler()
 #endif
 }
 
+void CoreSignalHandlers::initIosWidgetHandler()
+{
+#ifdef Q_OS_IOS
+    auto lastState = std::make_shared<Vpn::ConnectionState>(Vpn::ConnectionState::Disconnected);
+    const auto syncWidgetState = [this](Vpn::ConnectionState state) {
+        const QString serverId = m_coreController->m_serversController->getDefaultServerId();
+        const DockerContainer container = m_coreController->m_serversController->getDefaultContainer(serverId);
+        const QString protocolName = ContainerUtils::containerHumanNames().value(container);
+        const QString serverName = m_coreController->m_serversController->notificationDisplayName(serverId);
+
+        QString tunnelName;
+        if (!serverName.isEmpty() && !protocolName.isEmpty()) {
+            tunnelName = QStringLiteral("%1 %2").arg(serverName, protocolName);
+        } else {
+            tunnelName = protocolName;
+        }
+
+        const bool hasConfiguration = !serverId.isEmpty()
+                && !protocolName.isEmpty()
+                && container != DockerContainer::None;
+
+        AmneziaVPN::swiftUpdateVPNWidgetState(
+            widgetStateString(state).toStdString(),
+            protocolName.toStdString(),
+            serverName.toStdString(),
+            tunnelName.toStdString(),
+            hasConfiguration);
+    };
+
+    connect(IosController::Instance(), &IosController::vpnWidgetToggleRequested, this, [this]() {
+        emit m_coreController->m_pageController->goToPageHome();
+        m_coreController->m_connectionUiController->toggleConnection();
+    });
+
+    const auto consumePendingWidgetToggle = [this]() {
+        if (!AmneziaVPN::swiftConsumeVPNWidgetToggleRequest()) {
+            return;
+        }
+        emit m_coreController->m_pageController->goToPageHome();
+        m_coreController->m_connectionUiController->toggleConnection();
+    };
+
+    QTimer::singleShot(1200, this, consumePendingWidgetToggle);
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this,
+            [consumePendingWidgetToggle](Qt::ApplicationState state) {
+                if (state == Qt::ApplicationActive) {
+                    QTimer::singleShot(500, qGuiApp, consumePendingWidgetToggle);
+                }
+            });
+
+    connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, this,
+            [lastState, syncWidgetState](Vpn::ConnectionState state) {
+                *lastState = state;
+                syncWidgetState(state);
+            });
+
+    const auto syncCurrentState = [lastState, syncWidgetState]() {
+        syncWidgetState(*lastState);
+    };
+
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::defaultServerChanged, this, syncCurrentState);
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverEdited, this, syncCurrentState);
+    connect(m_coreController->m_serversRepository, &SecureServersRepository::serverRemoved, this, syncCurrentState);
+
+    QTimer::singleShot(0, this, syncCurrentState);
+#endif
+}
+
 void CoreSignalHandlers::initNotificationHandler()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
@@ -449,4 +547,3 @@ void CoreSignalHandlers::initUpdateFoundHandler()
     });
 #endif
 }
-

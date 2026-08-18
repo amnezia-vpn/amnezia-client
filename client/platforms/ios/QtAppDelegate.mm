@@ -35,6 +35,13 @@
 - (BOOL)application:(UIApplication *)app
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
+    if (!url.fileURL && [url.scheme isEqualToString:@"amneziavpn"] && [url.host isEqualToString:@"widget"] && [url.path isEqualToString:@"/toggle"]) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+            IosController::Instance()->vpnWidgetToggleRequested();
+        });
+        return YES;
+    }
+
     if (url.fileURL) {
         QString filePath(url.path.UTF8String);
         if (filePath.isEmpty()) return NO;

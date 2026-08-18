@@ -14,7 +14,18 @@ static SceneOpenURLContexts g_originalSceneOpenURLContexts = nullptr;
 
 static void amnezia_handleURL(NSURL *url)
 {
-    if (!url || !url.isFileURL) {
+    if (!url) {
+        return;
+    }
+
+    if (!url.isFileURL && [url.scheme isEqualToString:@"amneziavpn"] && [url.host isEqualToString:@"widget"] && [url.path isEqualToString:@"/toggle"]) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            IosController::Instance()->vpnWidgetToggleRequested();
+        });
+        return;
+    }
+
+    if (!url.isFileURL) {
         return;
     }
 

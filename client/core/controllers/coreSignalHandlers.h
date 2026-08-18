@@ -39,6 +39,7 @@ private:
     void initAndroidConnectionHandler();
     void initIosImportHandler();
     void initIosSettingsHandler();
+    void initIosWidgetHandler();
     void initNotificationHandler();
     void initUpdateFoundHandler();
 
@@ -46,4 +47,3 @@ private:
 };
 
 #endif // CORESIGNALHANDLERS_H
-
