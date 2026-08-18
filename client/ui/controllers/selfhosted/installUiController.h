@@ -160,7 +160,9 @@ private:
     ServerCredentials m_processedServerCredentials;
 
     QString m_privateKeyPassphrase;
-    
+
+    bool m_serverConfigUpdateInProgress = false;
+
     void updateProtocolConfigModel(const QString &serverId, int containerIndex, int protocolIndex);
 
     bool buildContainerConfigFromModel(int containerIndex, int protocolIndex, ContainerConfig &containerConfig);

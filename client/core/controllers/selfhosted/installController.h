@@ -104,6 +104,11 @@ private:
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
 
+    ErrorCode readXrayStateBeforeVolumeMigration(const ServerCredentials &credentials, DockerContainer container,
+                                                 SshSession &sshSession, QMap<QString, QString> &outFiles);
+    ErrorCode restoreXrayStateIntoDataVolume(const ServerCredentials &credentials, DockerContainer container,
+                                             SshSession &sshSession, const QMap<QString, QString> &files);
+
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
     ErrorCode isUserInSudo(const ServerCredentials &credentials, SshSession &sshSession);
     ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, SshSession &sshSession);

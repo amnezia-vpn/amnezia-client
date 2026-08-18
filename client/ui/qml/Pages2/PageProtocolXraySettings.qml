@@ -219,8 +219,19 @@ PageType {
                         PageController.showErrorMessage(errs.join("\n"))
                         return
                     }
+                    var pendingPort = textFieldWithHeaderType.textField.text
+                    var touchesServer = XrayConfigModel.pendingChangeTouchesServer(pendingPort)
+                    var breaksIssued = XrayConfigModel.pendingChangeBreaksIssuedConfigs(pendingPort)
+
                     var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                    var descriptionText
+                    if (breaksIssued) {
+                        descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.")
+                    } else if (touchesServer) {
+                        descriptionText = qsTr("The server will be restarted. This takes a few seconds, and connections that were already shared keep working.")
+                    } else {
+                        descriptionText = qsTr("These settings only affect this device. The server will not be changed.")
+                    }
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
                     var yesButtonFunction = function() {

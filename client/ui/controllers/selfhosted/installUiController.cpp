@@ -35,6 +35,11 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "logger.h"
+
+namespace {
+    Logger logger("InstallUiController");
+}
 
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,
@@ -306,7 +311,17 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     const bool asyncUpdate = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
             || container == DockerContainer::Xray || container == DockerContainer::SSXray;
 
+    logger.info() << "InstallUiController: server config save dispatched for container"
+                  << ContainerUtils::containerToString(container) << ", async" << (asyncUpdate ? "yes" : "no");
+
     if (asyncUpdate) {
+        if (m_serverConfigUpdateInProgress) {
+            logger.warning() << "InstallUiController: server config save rejected for container"
+                             << ContainerUtils::containerToString(container) << ", an update is already running";
+            return;
+        }
+        m_serverConfigUpdateInProgress = true;
+
         const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
         if (emitBusy)
             emit serverIsBusy(true);
@@ -316,16 +331,22 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
                          [this, watcher, serverId, container, closePage, protocolTypeCopy, emitBusy]() {
                              const ErrorCode errorCode = watcher->result();
                              watcher->deleteLater();
+                             m_serverConfigUpdateInProgress = false;
                              if (emitBusy)
                                  emit serverIsBusy(false);
 
                              if (errorCode == ErrorCode::NoError) {
+                                 logger.info() << "InstallUiController: async server config save finished for container"
+                                               << ContainerUtils::containerToString(container);
                                  const ContainerConfig updatedConfig =
                                          m_serversController->getContainerConfig(serverId, container);
                                  m_protocolModel->updateModel(updatedConfig);
                                  updateProtocolConfigModel(serverId, static_cast<int>(container), static_cast<int>(protocolTypeCopy));
                                  emit updateContainerFinished(tr("Settings updated successfully"), closePage);
                              } else {
+                                 logger.error() << "InstallUiController: async server config save failed for container"
+                                                << ContainerUtils::containerToString(container) << ", error="
+                                                << static_cast<int>(errorCode);
                                  emit installationErrorOccurred(errorCode);
                              }
                          });
@@ -345,6 +366,8 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     ErrorCode errorCode = m_installController->updateServerConfig(serverId, container, oldContainerConfig, containerConfig);
 
     if (errorCode == ErrorCode::NoError) {
+        logger.info() << "InstallUiController: server config save finished for container"
+                      << ContainerUtils::containerToString(container);
         ContainerConfig updatedConfig = m_serversController->getContainerConfig(serverId, container);
         m_protocolModel->updateModel(updatedConfig);
         updateProtocolConfigModel(serverId, static_cast<int>(container), static_cast<int>(protocolType));
@@ -352,6 +375,8 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
         return;
     }
 
+    logger.error() << "InstallUiController: server config save failed for container"
+                   << ContainerUtils::containerToString(container) << ", error=" << static_cast<int>(errorCode);
     emit installationErrorOccurred(errorCode);
 }
 

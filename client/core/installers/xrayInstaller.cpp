@@ -11,6 +11,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
 #include "logger.h"
 
@@ -105,6 +106,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
     }
 
     XrayServerConfig &srv = xrayConfig->serverConfig;
+    XrayClientTemplate &tpl = xrayConfig->clientTemplate;
 
     // ── Port ─────────────────────────────────────────────────────────
     if (inbound.contains(protocols::xray::port)) {
@@ -138,14 +140,18 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             srv.site = srv.sni;
         }
 
-        srv.fingerprint = normalizeXrayFingerprint(rs.value(protocols::xray::fingerprint).toString());
+        if (rs.contains(protocols::xray::fingerprint)) {
+            tpl.fingerprint = normalizeXrayFingerprint(rs.value(protocols::xray::fingerprint).toString());
+        }
     }
 
     // ── TLS settings ──────────────────────────────────────────────────
     if (srv.security == "tls") {
         QJsonObject tls = streamSettings.value("tlsSettings").toObject();
         srv.sni = tls.value(protocols::xray::serverName).toString();
-        srv.fingerprint = normalizeXrayFingerprint(tls.value(protocols::xray::fingerprint).toString());
+        if (tls.contains(protocols::xray::fingerprint)) {
+            tpl.fingerprint = normalizeXrayFingerprint(tls.value(protocols::xray::fingerprint).toString());
+        }
 
         QJsonArray alpnArr = tls.value("alpn").toArray();
         QStringList alpnList;
@@ -190,12 +196,15 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         srv.xhttp.host = xhttpObj.value("host").toString();
         srv.xhttp.path = xhttpObj.value("path").toString();
 
-        if (xhttpObj.contains(QLatin1String("uplinkHTTPMethod")))
-            srv.xhttp.uplinkMethod = xhttpObj.value("uplinkHTTPMethod").toString();
-        else
-            srv.xhttp.uplinkMethod = xhttpObj.value("method").toString();
+        if (xhttpObj.contains(QLatin1String("uplinkHTTPMethod"))) {
+            tpl.uplinkMethod = xhttpObj.value("uplinkHTTPMethod").toString();
+        } else if (xhttpObj.contains(QLatin1String("method"))) {
+            tpl.uplinkMethod = xhttpObj.value("method").toString();
+        }
 
-        srv.xhttp.disableGrpc = xhttpObj.value("noGRPCHeader").toBool(true);
+        if (xhttpObj.contains(QLatin1String("noGRPCHeader"))) {
+            srv.xhttp.disableGrpc = xhttpObj.value("noGRPCHeader").toBool(true);
+        }
         srv.xhttp.disableSse = xhttpObj.value("noSSEHeader").toBool(true);
 
         auto sessionSeqUi = [](const QString &core) -> QString {
@@ -247,9 +256,9 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             QString ucMin, ucMax;
             parseIntRange(xhttpObj.value("uplinkChunkSize"), ucMin, ucMax);
             if (!ucMin.isEmpty())
-                srv.xhttp.uplinkChunkSize = ucMin;
+                tpl.uplinkChunkSize = ucMin;
         } else if (xhttpObj.contains(QLatin1String("xhttpUplinkChunkSize"))) {
-            srv.xhttp.uplinkChunkSize = QString::number(xhttpObj.value("xhttpUplinkChunkSize").toInt());
+            tpl.uplinkChunkSize = QString::number(xhttpObj.value("xhttpUplinkChunkSize").toInt());
         }
         if (xhttpObj.contains(QLatin1String("scMaxBufferedPosts"))) {
             srv.xhttp.scMaxBufferedPosts = QString::number(xhttpObj.value("scMaxBufferedPosts").toVariant().toLongLong());
@@ -259,7 +268,9 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             parseIntRange(xhttpObj.value(QLatin1String(key)), minOut, maxOut);
         };
         readRange("scMaxEachPostBytes", srv.xhttp.scMaxEachPostBytesMin, srv.xhttp.scMaxEachPostBytesMax);
-        readRange("scMinPostsIntervalMs", srv.xhttp.scMinPostsIntervalMsMin, srv.xhttp.scMinPostsIntervalMsMax);
+        if (xhttpObj.contains(QLatin1String("scMinPostsIntervalMs"))) {
+            readRange("scMinPostsIntervalMs", tpl.scMinPostsIntervalMsMin, tpl.scMinPostsIntervalMsMax);
+        }
         readRange("scStreamUpServerSecs", srv.xhttp.scStreamUpServerSecsMin, srv.xhttp.scStreamUpServerSecsMax);
 
         auto loadPaddingFromObject = [&](const QJsonObject &pad) {
@@ -304,19 +315,19 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
 
         if (xhttpObj.contains(QLatin1String("xmux"))) {
             QJsonObject mux = xhttpObj.value("xmux").toObject();
-            srv.xhttp.xmux.enabled = true;
+            tpl.xmux.enabled = true;
 
             auto readMuxRange = [&](const char *key, QString &minOut, QString &maxOut) {
                 parseIntRange(mux.value(QLatin1String(key)), minOut, maxOut);
             };
-            readMuxRange("maxConcurrency", srv.xhttp.xmux.maxConcurrencyMin, srv.xhttp.xmux.maxConcurrencyMax);
-            readMuxRange("maxConnections", srv.xhttp.xmux.maxConnectionsMin, srv.xhttp.xmux.maxConnectionsMax);
-            readMuxRange("cMaxReuseTimes", srv.xhttp.xmux.cMaxReuseTimesMin, srv.xhttp.xmux.cMaxReuseTimesMax);
-            readMuxRange("hMaxRequestTimes", srv.xhttp.xmux.hMaxRequestTimesMin, srv.xhttp.xmux.hMaxRequestTimesMax);
-            readMuxRange("hMaxReusableSecs", srv.xhttp.xmux.hMaxReusableSecsMin, srv.xhttp.xmux.hMaxReusableSecsMax);
+            readMuxRange("maxConcurrency", tpl.xmux.maxConcurrencyMin, tpl.xmux.maxConcurrencyMax);
+            readMuxRange("maxConnections", tpl.xmux.maxConnectionsMin, tpl.xmux.maxConnectionsMax);
+            readMuxRange("cMaxReuseTimes", tpl.xmux.cMaxReuseTimesMin, tpl.xmux.cMaxReuseTimesMax);
+            readMuxRange("hMaxRequestTimes", tpl.xmux.hMaxRequestTimesMin, tpl.xmux.hMaxRequestTimesMax);
+            readMuxRange("hMaxReusableSecs", tpl.xmux.hMaxReusableSecsMin, tpl.xmux.hMaxReusableSecsMax);
 
             if (mux.contains(QLatin1String("hKeepAlivePeriod")))
-                srv.xhttp.xmux.hKeepAlivePeriod = QString::number(mux.value("hKeepAlivePeriod").toVariant().toLongLong());
+                tpl.xmux.hKeepAlivePeriod = QString::number(mux.value("hKeepAlivePeriod").toVariant().toLongLong());
         }
     }
 
@@ -332,13 +343,28 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         if (kcp.contains("downlinkCapacity")) {
             srv.mkcp.downlinkCapacity = QString::number(kcp["downlinkCapacity"].toInt());
         }
-        if (kcp.contains("readBufferSize")) {
-            srv.mkcp.readBufferSize = QString::number(kcp["readBufferSize"].toInt());
+        if (kcp.contains("mtu")) {
+            srv.mkcp.mtu = QString::number(kcp["mtu"].toInt());
         }
-        if (kcp.contains("writeBufferSize")) {
-            srv.mkcp.writeBufferSize = QString::number(kcp["writeBufferSize"].toInt());
+        if (kcp.contains("cwndMultiplier")) {
+            srv.mkcp.cwndMultiplier = QString::number(kcp["cwndMultiplier"].toInt());
         }
-        srv.mkcp.congestion = kcp.value("congestion").toBool(true);
+        if (kcp.contains("maxSendingWindow")) {
+            srv.mkcp.maxSendingWindow = QString::number(kcp["maxSendingWindow"].toInt());
+        }
+    }
+
+    {
+        XrayConfigurator configurator(sshSession);
+        bool found = false;
+        const XrayClientTemplate stored = configurator.readClientTemplate(credentials, container, found);
+        if (found) {
+            tpl = stored;
+            logger.info() << "Xray extractConfigFromContainer: adopted the client template from the server,"
+                          << "fingerprint=" << tpl.fingerprint << "uplinkMethod=" << tpl.uplinkMethod;
+        } else {
+            logger.info() << "Xray extractConfigFromContainer: no client template on the server to adopt";
+        }
     }
 
     return ErrorCode::NoError;

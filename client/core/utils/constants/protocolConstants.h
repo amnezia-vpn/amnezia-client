@@ -48,11 +48,13 @@ namespace amnezia
 
         namespace xray
         {
+            constexpr char dataDir[] = "/opt/amnezia/xray";
             constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
             constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
             constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
             constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
             constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
+            constexpr char clientTemplatePath[] = "/opt/amnezia/xray/template.json";
             constexpr char defaultSite[] = "www.googletagmanager.com";
 
             constexpr char defaultPort[] = "443";
@@ -67,7 +69,7 @@ namespace amnezia
             constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "h2";
 
-            constexpr char defaultXhttpMode[] = "Auto";
+            constexpr char defaultXhttpMode[] = "Stream-one";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
             constexpr char defaultXhttpSessionKey[] = "";
@@ -93,8 +95,8 @@ namespace amnezia
             constexpr char defaultMkcpTti[] = "50";
             constexpr char defaultMkcpUplinkCapacity[] = "5";
             constexpr char defaultMkcpDownlinkCapacity[] = "20";
-            constexpr char defaultMkcpReadBufferSize[] = "2";
-            constexpr char defaultMkcpWriteBufferSize[] = "2";
+            constexpr char defaultMkcpMtu[] = "1350";
+            constexpr char defaultMkcpCwndMultiplier[] = "1";
 
             constexpr char outbounds[] = "outbounds";
             constexpr char inbounds[] = "inbounds";

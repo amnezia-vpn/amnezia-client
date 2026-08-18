@@ -5,9 +5,15 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
+#include "core/utils/containers/containerUtils.h"
+#include "logger.h"
 
 #include <QHostAddress>
 #include <QRegularExpression>
+
+namespace {
+    Logger logger("XrayConfigModel");
+}
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -34,10 +40,11 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
     const bool wasUnsavedChanges = hasUnsavedChanges();
 
     auto& srv = m_protocolConfig.serverConfig;
+    auto& tpl = m_protocolConfig.clientTemplate;
     auto& xhttp = srv.xhttp;
     auto& mkcp = srv.mkcp;
     auto& pad = xhttp.xPadding;
-    auto& mux = xhttp.xmux;
+    auto& mux = tpl.xmux;
 
     QString str = value.toString();
 
@@ -56,9 +63,11 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
 
     // ── Security ──────────────────────────────────────────────────────
-    case Roles::FingerprintRole: srv.fingerprint = str;
+    case Roles::FingerprintRole: tpl.fingerprint = str;
         break;
-    case Roles::SniRole: srv.sni = str;
+    case Roles::SniRole:
+        srv.sni = str;
+        srv.site = str;
         break;
     case Roles::AlpnRole: srv.alpn = str;
         break;
@@ -70,7 +79,7 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::XhttpPathRole: xhttp.path = str;
         break;
-    case Roles::XhttpUplinkMethodRole: xhttp.uplinkMethod = str;
+    case Roles::XhttpUplinkMethodRole: tpl.uplinkMethod = str;
         break;
     case Roles::XhttpDisableGrpcRole: xhttp.disableGrpc = value.toBool();
         break;
@@ -90,7 +99,7 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
     case Roles::XhttpUplinkDataKeyRole: xhttp.uplinkDataKey = str;
         break;
 
-    case Roles::XhttpUplinkChunkSizeRole: xhttp.uplinkChunkSize = str;
+    case Roles::XhttpUplinkChunkSizeRole: tpl.uplinkChunkSize = str;
         break;
     case Roles::XhttpScMaxBufferedPostsRole: xhttp.scMaxBufferedPosts = str;
         break;
@@ -98,9 +107,9 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::XhttpScMaxEachPostBytesMaxRole: xhttp.scMaxEachPostBytesMax = str;
         break;
-    case Roles::XhttpScMinPostsIntervalMsMinRole: xhttp.scMinPostsIntervalMsMin = str;
+    case Roles::XhttpScMinPostsIntervalMsMinRole: tpl.scMinPostsIntervalMsMin = str;
         break;
-    case Roles::XhttpScMinPostsIntervalMsMaxRole: xhttp.scMinPostsIntervalMsMax = str;
+    case Roles::XhttpScMinPostsIntervalMsMaxRole: tpl.scMinPostsIntervalMsMax = str;
         break;
     case Roles::XhttpScStreamUpServerSecsMinRole: xhttp.scStreamUpServerSecsMin = str;
         break;
@@ -114,11 +123,11 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::MkcpDownlinkCapacityRole: mkcp.downlinkCapacity = str;
         break;
-    case Roles::MkcpReadBufferSizeRole: mkcp.readBufferSize = str;
+    case Roles::MkcpMtuRole: mkcp.mtu = str;
         break;
-    case Roles::MkcpWriteBufferSizeRole: mkcp.writeBufferSize = str;
+    case Roles::MkcpCwndMultiplierRole: mkcp.cwndMultiplier = str;
         break;
-    case Roles::MkcpCongestionRole: mkcp.congestion = value.toBool();
+    case Roles::MkcpMaxSendingWindowRole: mkcp.maxSendingWindow = str;
         break;
 
     // ── xPadding ──────────────────────────────────────────────────────
@@ -181,10 +190,11 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     }
 
     const auto& srv = m_protocolConfig.serverConfig;
+    const auto& tpl = m_protocolConfig.clientTemplate;
     const auto& xhttp = srv.xhttp;
     const auto& mkcp = srv.mkcp;
     const auto& pad = xhttp.xPadding;
-    const auto& mux = xhttp.xmux;
+    const auto& mux = tpl.xmux;
 
     switch (role)
     {
@@ -196,7 +206,7 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::FlowRole: return srv.flow;
 
     // ── Security ──────────────────────────────────────────────────────
-    case Roles::FingerprintRole: return srv.fingerprint;
+    case Roles::FingerprintRole: return tpl.fingerprint;
     case Roles::SniRole: return srv.sni;
     case Roles::AlpnRole: return srv.alpn;
 
@@ -204,7 +214,7 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::XhttpModeRole: return xhttp.mode;
     case Roles::XhttpHostRole: return xhttp.host;
     case Roles::XhttpPathRole: return xhttp.path;
-    case Roles::XhttpUplinkMethodRole: return xhttp.uplinkMethod;
+    case Roles::XhttpUplinkMethodRole: return tpl.uplinkMethod;
     case Roles::XhttpDisableGrpcRole: return xhttp.disableGrpc;
     case Roles::XhttpDisableSseRole: return xhttp.disableSse;
 
@@ -215,12 +225,12 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::XhttpUplinkDataPlacementRole: return xhttp.uplinkDataPlacement;
     case Roles::XhttpUplinkDataKeyRole: return xhttp.uplinkDataKey;
 
-    case Roles::XhttpUplinkChunkSizeRole: return xhttp.uplinkChunkSize;
+    case Roles::XhttpUplinkChunkSizeRole: return tpl.uplinkChunkSize;
     case Roles::XhttpScMaxBufferedPostsRole: return xhttp.scMaxBufferedPosts;
     case Roles::XhttpScMaxEachPostBytesMinRole: return xhttp.scMaxEachPostBytesMin;
     case Roles::XhttpScMaxEachPostBytesMaxRole: return xhttp.scMaxEachPostBytesMax;
-    case Roles::XhttpScMinPostsIntervalMsMinRole: return xhttp.scMinPostsIntervalMsMin;
-    case Roles::XhttpScMinPostsIntervalMsMaxRole: return xhttp.scMinPostsIntervalMsMax;
+    case Roles::XhttpScMinPostsIntervalMsMinRole: return tpl.scMinPostsIntervalMsMin;
+    case Roles::XhttpScMinPostsIntervalMsMaxRole: return tpl.scMinPostsIntervalMsMax;
     case Roles::XhttpScStreamUpServerSecsMinRole: return xhttp.scStreamUpServerSecsMin;
     case Roles::XhttpScStreamUpServerSecsMaxRole: return xhttp.scStreamUpServerSecsMax;
 
@@ -228,9 +238,9 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::MkcpTtiRole: return mkcp.tti;
     case Roles::MkcpUplinkCapacityRole: return mkcp.uplinkCapacity;
     case Roles::MkcpDownlinkCapacityRole: return mkcp.downlinkCapacity;
-    case Roles::MkcpReadBufferSizeRole: return mkcp.readBufferSize;
-    case Roles::MkcpWriteBufferSizeRole: return mkcp.writeBufferSize;
-    case Roles::MkcpCongestionRole: return mkcp.congestion;
+    case Roles::MkcpMtuRole: return mkcp.mtu;
+    case Roles::MkcpCwndMultiplierRole: return mkcp.cwndMultiplier;
+    case Roles::MkcpMaxSendingWindowRole: return mkcp.maxSendingWindow;
 
     // ── xPadding ──────────────────────────────────────────────────────
     case Roles::XPaddingBytesMinRole: return pad.bytesMin;
@@ -262,6 +272,8 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
 void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig)
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
+    const bool templateFromPreSplitRecord = protocolConfig.clientTemplate.formatVersion == 0
+            || protocolConfig.needsTemplateMaterialization;
 
     beginResetModel();
 
@@ -274,11 +286,27 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
     if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
         applyDefaultsToServerConfig(m_protocolConfig.serverConfig, false);
+        if (m_protocolConfig.clientTemplate.fingerprint.isEmpty()) {
+            m_protocolConfig.clientTemplate.fingerprint = protocols::xray::defaultFingerprint;
+        }
+        if (m_protocolConfig.clientTemplate.uplinkMethod.isEmpty()) {
+            m_protocolConfig.clientTemplate.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
+        }
     }
 
     m_originalProtocolConfig = m_protocolConfig;
 
     endResetModel();
+
+    logger.info() << "XrayConfigModel: model loaded for container"
+                  << ContainerUtils::containerToString(container) << ", transport"
+                  << m_protocolConfig.serverConfig.transport << ", security"
+                  << m_protocolConfig.serverConfig.security << ", third-party"
+                  << (m_protocolConfig.serverConfig.isThirdPartyConfig ? "yes" : "no") << ", client template"
+                  << ((templateFromPreSplitRecord || protocolConfig.templateWasMaterialized)
+                              ? "materialized from pre-split record"
+                              : "read as-is");
+
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
     }
@@ -286,75 +314,7 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
 void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config, bool fillFlowDefault)
 {
-    if (config.port.isEmpty()) {
-        config.port = protocols::xray::defaultPort;
-    }
-
-    if (config.transportProto.isEmpty()) {
-        config.transportProto = ProtocolUtils::transportProtoToString(
-            ProtocolUtils::defaultTransportProto(amnezia::Proto::Xray), amnezia::Proto::Xray);
-    }
-
-    if (config.site.isEmpty()) {
-        config.site = protocols::xray::defaultSite;
-    }
-
-    if (config.transport.isEmpty()) {
-        config.transport = protocols::xray::defaultTransport;
-    }
-
-    if (config.security.isEmpty()) {
-        config.security = protocols::xray::defaultSecurity;
-    }
-
-    if (fillFlowDefault && config.flow.isEmpty()) {
-        config.flow = protocols::xray::defaultFlow;
-    }
-
-    if (config.fingerprint.isEmpty()) {
-        config.fingerprint = protocols::xray::defaultFingerprint;
-    } else if (config.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
-        config.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
-    }
-
-    if (config.sni.isEmpty()) {
-        config.sni = protocols::xray::defaultSni;
-    }
-
-    if (config.alpn.isEmpty()) {
-        config.alpn = protocols::xray::defaultAlpn;
-    }
-
-    // XHTTP transport defaults
-    if (config.xhttp.host.isEmpty()) {
-        config.xhttp.host = protocols::xray::defaultXhttpHost;
-    }
-    if (config.xhttp.mode.isEmpty()) {
-        config.xhttp.mode = protocols::xray::defaultXhttpMode;
-    }
-    if (config.xhttp.uplinkMethod.isEmpty()) {
-        config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
-    }
-    if (config.xhttp.sessionPlacement.isEmpty()) {
-        config.xhttp.sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
-    }
-    if (config.xhttp.sessionKey.isEmpty()) {
-        config.xhttp.sessionKey = protocols::xray::defaultXhttpSessionKey;
-    }
-    if (config.xhttp.seqPlacement.isEmpty()) {
-        config.xhttp.seqPlacement = protocols::xray::defaultXhttpSeqPlacement;
-    }
-    if (config.xhttp.uplinkDataPlacement.isEmpty()) {
-        config.xhttp.uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
-    }
-
-    // xPadding defaults
-    if (config.xhttp.xPadding.placement.isEmpty()) {
-        config.xhttp.xPadding.placement = protocols::xray::defaultXPaddingPlacement;
-    }
-    if (config.xhttp.xPadding.method.isEmpty()) {
-        config.xhttp.xPadding.method = protocols::xray::defaultXPaddingMethod;
-    }
+    config.applyDefaults(fillFlowDefault);
 }
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
@@ -363,9 +323,34 @@ amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
             !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
 
     if (serverSettingsChanged) {
+        logger.info() << "XrayConfigModel: server settings changed, dropping the cached client config";
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
+}
+
+amnezia::XrayServerConfig XrayConfigModel::pendingServerConfig(const QString &pendingPort) const
+{
+    amnezia::XrayServerConfig pending = m_protocolConfig.serverConfig;
+    if (!pendingPort.isEmpty()) {
+        pending.port = pendingPort;
+    }
+    return pending;
+}
+
+bool XrayConfigModel::pendingChangeTouchesServer(const QString &pendingPort) const
+{
+    const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
+    const bool touchesServer = !pending.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+    logger.debug() << "XrayConfigModel: save verdict, touches server" << (touchesServer ? "yes" : "no")
+                   << ", breaks issued configs"
+                   << (pending.breaksIssuedConfigs(m_originalProtocolConfig.serverConfig) ? "yes" : "no");
+    return touchesServer;
+}
+
+bool XrayConfigModel::pendingChangeBreaksIssuedConfigs(const QString &pendingPort) const
+{
+    return pendingServerConfig(pendingPort).breaksIssuedConfigs(m_originalProtocolConfig.serverConfig);
 }
 
 bool XrayConfigModel::isServerSettingsEqual() const
@@ -375,7 +360,8 @@ bool XrayConfigModel::isServerSettingsEqual() const
 
 bool XrayConfigModel::hasUnsavedChanges() const
 {
-    return !isServerSettingsEqual();
+    return m_protocolConfig.serverConfig.toJson() != m_originalProtocolConfig.serverConfig.toJson()
+            || m_protocolConfig.clientTemplate.toJson() != m_originalProtocolConfig.clientTemplate.toJson();
 }
 
 QHash<int, QByteArray> XrayConfigModel::roleNames() const
@@ -422,9 +408,9 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
     roles[MkcpTtiRole] = "mkcpTti";
     roles[MkcpUplinkCapacityRole] = "mkcpUplinkCapacity";
     roles[MkcpDownlinkCapacityRole] = "mkcpDownlinkCapacity";
-    roles[MkcpReadBufferSizeRole] = "mkcpReadBufferSize";
-    roles[MkcpWriteBufferSizeRole] = "mkcpWriteBufferSize";
-    roles[MkcpCongestionRole] = "mkcpCongestion";
+    roles[MkcpMtuRole] = "mkcpMtu";
+    roles[MkcpCwndMultiplierRole] = "mkcpCwndMultiplier";
+    roles[MkcpMaxSendingWindowRole] = "mkcpMaxSendingWindow";
 
     // xPadding
     roles[XPaddingBytesMinRole] = "xPaddingBytesMin";
@@ -459,22 +445,40 @@ void XrayConfigModel::resetToDefaults()
     beginResetModel();
     m_protocolConfig.serverConfig = amnezia::XrayServerConfig{};
     applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    m_protocolConfig.clientTemplate = amnezia::XrayClientTemplate{};
+    m_protocolConfig.clientTemplate.formatVersion = 1;
     endResetModel();
+
+    logger.info() << "XrayConfigModel: server settings and client template reset to defaults";
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
     }
 }
 
-void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverConfig)
+void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverConfig,
+                                       const amnezia::XrayClientTemplate &clientTemplate)
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
+    const bool templateRecovered = clientTemplate.formatVersion == 0;
 
     beginResetModel();
     m_protocolConfig.serverConfig = serverConfig;
+    m_protocolConfig.clientTemplate = clientTemplate;
+    if (m_protocolConfig.clientTemplate.formatVersion == 0) {
+        m_protocolConfig.clientTemplate.formatVersion = 1;
+    }
+    if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
+        m_protocolConfig.serverConfig.applyDefaults(false);
+    }
     // Clear client config since server settings changed
     m_protocolConfig.clearClientConfig();
     endResetModel();
+
+    logger.info() << "XrayConfigModel: snapshot applied, transport" << m_protocolConfig.serverConfig.transport
+                  << ", security" << m_protocolConfig.serverConfig.security << ", client template"
+                  << (templateRecovered ? "recovered from legacy server fields" : "carried by the snapshot")
+                  << ", cached client config dropped";
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
@@ -512,7 +516,7 @@ QStringList XrayConfigModel::alpnOptions()
 
 QStringList XrayConfigModel::xhttpModeOptions()
 {
-    return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
+    return { "Stream-up", "Stream-one" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()
@@ -532,8 +536,7 @@ QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
 {
-    // Matches splithttp uplink payload placement (packet-up / advanced)
-    return { "Body", "Auto", "Header", "Cookie" };
+    return { "Body", "Auto" };
 }
 
 QStringList XrayConfigModel::xPaddingPlacementOptions()
@@ -562,14 +565,14 @@ QString XrayConfigModel::mkcpDefaultDownlinkCapacity()
     return QString::fromLatin1(protocols::xray::defaultMkcpDownlinkCapacity);
 }
 
-QString XrayConfigModel::mkcpDefaultReadBufferSize()
+QString XrayConfigModel::mkcpDefaultMtu()
 {
-    return QString::fromLatin1(protocols::xray::defaultMkcpReadBufferSize);
+    return QString::fromLatin1(protocols::xray::defaultMkcpMtu);
 }
 
-QString XrayConfigModel::mkcpDefaultWriteBufferSize()
+QString XrayConfigModel::mkcpDefaultCwndMultiplier()
 {
-    return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
+    return QString::fromLatin1(protocols::xray::defaultMkcpCwndMultiplier);
 }
 
 QString XrayConfigModel::portDefault()
