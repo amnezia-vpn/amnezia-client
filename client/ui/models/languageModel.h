@@ -16,7 +16,8 @@ namespace LanguageSettings
         Arabic,
         Burmese,
         Urdu,
-        Hindi
+        Hindi,
+        Korean
     };
     Q_ENUM_NS(AvailableLanguageEnum)
 
