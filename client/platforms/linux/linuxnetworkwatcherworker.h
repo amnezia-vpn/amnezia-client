@@ -39,6 +39,10 @@ class LinuxNetworkWatcherWorker final : public QObject {
   // initialization. When a property of them changes, we check if the access
   // point is active and unsecure.
   QStringList m_devicePaths;
+
+  // Set on NM_STATE_ASLEEP, cleared when NetworkManager comes back. Guards
+  // wakeup() so it fires on the resume transition, not on going to sleep.
+  bool m_wasAsleep = false;
 };
 
 #endif  // LINUXNETWORKWATCHERWORKER_H

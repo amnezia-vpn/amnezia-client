@@ -37,7 +37,6 @@
 enum NMState {
     NM_STATE_UNKNOWN = 0,
     NM_STATE_ASLEEP = 10,
-    NM_STATE_DISABLED = 10,
     NM_STATE_DISCONNECTED = 20,
     NM_STATE_DISCONNECTING = 30,
     NM_STATE_CONNECTING = 40,
@@ -202,9 +201,18 @@ void LinuxNetworkWatcherWorker::NMStateChanged(quint32 state)
 {
     logger.debug() << "NMStateChanged " << state;
 
-    if (state == NM_STATE_ASLEEP || state == NM_STATE_DISABLED) {
+    // NM_STATE_ASLEEP means networking just went *down* (e.g. NM tearing
+    // interfaces down for suspend), not that the system woke up. Fire
+    // wakeup() on the transition back out of it, once NM starts doing
+    // anything again, rather than on entering it.
+    if (state == NM_STATE_ASLEEP) {
+        m_wasAsleep = true;
+    } else if (m_wasAsleep) {
+        m_wasAsleep = false;
         emit wakeup();
-    } else if (state == NM_STATE_CONNECTED_GLOBAL) {
+    }
+
+    if (state == NM_STATE_CONNECTED_GLOBAL) {
         emit networkChanged();
     }
 }
