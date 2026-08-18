@@ -55,4 +55,3 @@ QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLan
 
     return strLanguage;
 }
-
