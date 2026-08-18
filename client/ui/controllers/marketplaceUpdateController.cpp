@@ -2,6 +2,7 @@
 
 #include <QDebug>
 
+#include "core/utils/appUiConfig.h"
 #include "version.h"
 
 #if defined(Q_OS_IOS) || defined(Q_OS_ANDROID)
@@ -27,11 +28,10 @@
 namespace
 {
 #if defined(Q_OS_IOS)
-constexpr auto kIosBundleId = "org.amnezia.AmneziaVPN";
-constexpr auto kIosStoreUrlFallback = "itms-apps://itunes.apple.com/app/id1600529900";
+constexpr auto kIosBundleId = APP_IOS_BUNDLE_ID;
+constexpr auto kIosStoreUrlFallback = APP_IOS_STORE_URL_FALLBACK;
 #else
-constexpr auto kAndroidPackage = "org.amnezia.vpn";
-constexpr auto kAndroidStoreUrl = "https://play.google.com/store/apps/details?id=org.amnezia.vpn";
+constexpr auto kAndroidPackage = APP_ANDROID_PACKAGE;
 #endif
 } // namespace
 #endif
@@ -56,7 +56,7 @@ void MarketplaceUpdateController::start()
     QNetworkRequest request(url);
     request.setTransferTimeout(1000);
     request.setAttribute(QNetworkRequest::CacheLoadControlAttribute, QNetworkRequest::AlwaysNetwork);
-    request.setHeader(QNetworkRequest::UserAgentHeader, QByteArrayLiteral("AmneziaVPN"));
+    request.setHeader(QNetworkRequest::UserAgentHeader, QByteArray(APPLICATION_NAME));
 
     QNetworkReply *reply = m_nam.get(request);
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
@@ -94,13 +94,13 @@ QUrl MarketplaceUpdateController::versionSourceUrl() const
 {
   #if defined(Q_OS_IOS)
     const QString country = QLocale::system().name().section('_', 1, 1).toLower();
-    QString url = QStringLiteral("https://itunes.apple.com/lookup?bundleId=%1").arg(kIosBundleId);
+    QString url = QStringLiteral("https://itunes.apple.com/lookup?bundleId=%1").arg(QLatin1String(kIosBundleId));
     if (!country.isEmpty()) {
         url += QStringLiteral("&country=%1").arg(country);
     }
     return QUrl(url);
   #else
-    return QUrl(QStringLiteral("https://play.google.com/store/apps/details?id=%1&hl=en&gl=US").arg(kAndroidPackage));
+    return QUrl(QStringLiteral("https://play.google.com/store/apps/details?id=%1&hl=en&gl=US").arg(QLatin1String(kAndroidPackage)));
   #endif
 }
 
@@ -125,7 +125,7 @@ bool MarketplaceUpdateController::parseStoreVersion(const QByteArray &body, QStr
     if (match.hasMatch()) {
         version = match.captured(1);
     }
-    storeUrl = QString::fromLatin1(kAndroidStoreUrl);
+    storeUrl = QStringLiteral("https://play.google.com/store/apps/details?id=%1").arg(QLatin1String(kAndroidPackage));
     return !version.isEmpty();
   #endif
 }
@@ -151,7 +151,7 @@ void MarketplaceUpdateController::hideCover()
 void MarketplaceUpdateController::showUpdatePrompt(const QString &storeUrl)
 {
     const QString title = tr("Update available");
-    const QString message = tr("A new version of AmneziaVPN is available.");
+    const QString message = tr("A new version of %1 is available.").arg(QStringLiteral(APPLICATION_NAME));
     const QString updateTitle = tr("Update");
     const QString skipTitle = tr("Skip");
 

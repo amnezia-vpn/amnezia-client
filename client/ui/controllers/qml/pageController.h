@@ -9,6 +9,7 @@
 #include "core/utils/commonStructs.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/serversController.h"
+#include "ui/utils/pageEnum.h"
 
 namespace PageLoader
 {

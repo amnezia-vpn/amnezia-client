@@ -71,6 +71,8 @@ void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const
     
     m_protocolConfig = protocolConfig;
     
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+
     if (!m_protocolConfig.clientConfig.has_value()) {
         m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
     }
@@ -79,6 +81,13 @@ void WireGuardConfigModel::updateModel(amnezia::DockerContainer container, const
     m_originalProtocolConfig = m_protocolConfig;
     
     endResetModel();
+}
+
+void WireGuardConfigModel::applyDefaultsToServerConfig(amnezia::WireGuardServerConfig& config)
+{
+    if (config.subnetAddress.isEmpty()) {
+        config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
+    }
 }
 
 void WireGuardConfigModel::applyDefaultsToClientConfig(amnezia::WireGuardClientConfig& config)

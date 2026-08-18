@@ -211,33 +211,6 @@ ErrorCode XrayConfigurator::readRealityKeyFiles(const DockerContainer container,
     return readKeyFile(QString::fromLatin1(amnezia::protocols::xray::shortidPath), outShortId);
 }
 
-QJsonObject XrayConfigurator::mergeStreamSettingsForServerInbound(const XrayServerConfig &srv,
-                                                                  const QJsonObject &existingStreamSettings) const
-{
-    QJsonObject streamSettings = buildStreamSettings(srv, QString());
-
-    if (effectiveSecurity(srv) != QLatin1String("reality")) {
-        return streamSettings;
-    }
-
-    const QJsonObject newRs = streamSettings[amnezia::protocols::xray::realitySettings].toObject();
-    QJsonObject oldRs = existingStreamSettings[amnezia::protocols::xray::realitySettings].toObject();
-    QJsonObject merged = oldRs.isEmpty() ? newRs : oldRs;
-
-    const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultSite) : srv.site;
-    const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
-
-    if (newRs.contains(amnezia::protocols::xray::fingerprint)) {
-        merged[amnezia::protocols::xray::fingerprint] = newRs[amnezia::protocols::xray::fingerprint];
-    }
-    merged[amnezia::protocols::xray::serverNames] = QJsonArray { sniEff };
-    if (!merged.contains(QStringLiteral("dest"))) {
-        merged[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
-    }
-
-    streamSettings[amnezia::protocols::xray::realitySettings] = merged;
-    return streamSettings;
-}
 
 ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials &credentials, DockerContainer container,
                                                         ContainerConfig &containerConfig, const DnsSettings &dnsSettings,
@@ -306,13 +279,6 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     if (!inbound.contains(amnezia::protocols::xray::settings)) {
         logger.error() << "Inbound missing 'settings' field";
         return ErrorCode::XrayServerConfigInvalid;
-    }
-
-    const QJsonObject existingStream = inbound[amnezia::protocols::xray::streamSettings].toObject();
-    inbound[amnezia::protocols::xray::streamSettings] = mergeStreamSettingsForServerInbound(srv, existingStream);
-
-    if (!srv.port.isEmpty()) {
-        inbound[amnezia::protocols::xray::port] = srv.port.toInt();
     }
 
     QJsonObject settings = inbound[amnezia::protocols::xray::settings].toObject();

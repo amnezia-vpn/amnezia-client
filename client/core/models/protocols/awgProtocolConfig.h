@@ -46,12 +46,15 @@ struct AwgServerConfig {
     QString rejectAfterTime;
     QString keepaliveTimeout;
     QString maxHandshakeAttempts;
+    QString randomTrailers;
+    QString disableCookies;
     bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static AwgServerConfig fromJson(const QJsonObject& json);
-    
+
     bool hasEqualServerSettings(const AwgServerConfig& other) const;
+    bool hasAwg3Params() const;
 };
 
 struct AwgClientConfig {
@@ -90,6 +93,8 @@ struct AwgClientConfig {
     QString rejectAfterTime;
     QString keepaliveTimeout;
     QString maxHandshakeAttempts;
+    QString randomTrailers;
+    QString disableCookies;
     QJsonObject toJson() const;
     static AwgClientConfig fromJson(const QJsonObject& json);
 };
