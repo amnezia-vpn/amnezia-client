@@ -24,6 +24,7 @@
 #include "ui/models/installedAppsModel.h"
 #include "ui/utils/mtProxyPublicHostInput.h"
 #include "version.h"
+#include "core/utils/appUiConfig.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
 #ifdef Q_OS_IOS
@@ -102,7 +103,7 @@ void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
 
-    const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
+    const QUrl url(QStringLiteral(APP_QML_ENTRYPOINT));
     QObject::connect(
         m_engine, &QQmlApplicationEngine::objectCreated, this,
         [this, url](QObject *obj, const QUrl &objUrl) {
@@ -155,7 +156,7 @@ void AmneziaApplication::init()
     m_marketplaceUpdateController.reset(new MarketplaceUpdateController());
     m_marketplaceUpdateController->start();
 
-    m_engine->addImportPath("qrc:/ui/qml/Modules/");
+    m_engine->addImportPath(QStringLiteral(APP_QML_IMPORT_PATH));
 
     if (m_parser.isSet(m_optImport)) {
         const QString data = m_parser.value(m_optImport);
@@ -244,7 +245,7 @@ void AmneziaApplication::loadFonts()
 {
     QQuickStyle::setStyle("Basic");
 
-    QFontDatabase::addApplicationFont(":/fonts/pt-root-ui_vf.ttf");
+    QFontDatabase::addApplicationFont(QStringLiteral(APP_UI_FONT_RESOURCE));
 }
 
 bool AmneziaApplication::parseCommands()
@@ -271,7 +272,7 @@ bool AmneziaApplication::parseCommands()
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
 void AmneziaApplication::startLocalServer() {
-    const QString serverName("AmneziaVPNInstance");
+    const QString serverName(APP_INSTANCE_NAME);
     QLocalServer::removeServer(serverName);
 
     QLocalServer *server = new QLocalServer(this);

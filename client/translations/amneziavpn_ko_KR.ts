@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_CN">
+<TS version="2.1" language="ko_KR">
 <context>
     <name>AllowedDnsUiController</name>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="33"/>
         <source>The address does not look like a valid IP address</source>
-        <translation>该地址看起来不是有效的 IP 地址</translation>
+        <translation>올바른 IP 주소가 아닌 것 같습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="38"/>
         <source>New DNS server added: %1</source>
-        <translation>已添加新的 DNS 服务器：%1</translation>
+        <translation>새 DNS 서버가 추가되었습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="40"/>
         <source>DNS server already exists: %1</source>
-        <translation>DNS 服务器已存在：%1</translation>
+        <translation>DNS 서버가 이미 존재합니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="49"/>
         <source>DNS server removed: %1</source>
-        <translation>已移除 DNS 服务器：%1</translation>
+        <translation>DNS 서버가 삭제되었습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="56"/>
         <source>Can&apos;t open file: %1</source>
-        <translation>无法打开文件: %1</translation>
+        <translation>파일을 열 수 없습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="62"/>
         <source>Failed to parse JSON data from file: %1</source>
-        <translation>JSON解析失败，文件: %1</translation>
+        <translation>JSON 데이터를 읽을 수 없습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="67"/>
         <source>The JSON data is not an array in file: %1</source>
-        <translation>文件中的JSON数据不是一个数组，文件: %1</translation>
+        <translation>JSON 데이터가 배열이 아닙니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="86"/>
         <source>Import completed</source>
-        <translation>完成导入</translation>
+        <translation>가져오기가 완료되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="107"/>
         <source>Export completed</source>
-        <translation>完成导出</translation>
+        <translation>내보내기가 완료되었습니다</translation>
     </message>
 </context>
 <context>
@@ -55,17 +55,17 @@
         <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="33"/>
         <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="38"/>
         <source>Active</source>
-        <translation>有效</translation>
+        <translation>활성</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="37"/>
         <source>Inactive</source>
-        <translation>无效</translation>
+        <translation>비활성</translation>
     </message>
     <message>
         <location filename="../ui/models/api/apiAccountInfoModel.cpp" line="51"/>
         <source>%1 out of %2</source>
-        <translation>%1 / %2</translation>
+        <translation>%2개 중 %1개</translation>
     </message>
 </context>
 <context>
@@ -73,7 +73,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="77"/>
         <source>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.&lt;/a&gt;</source>
-        <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;您所在的地区不可用。如果您已启用 VPN，请将其关闭，返回上一屏幕后重试。&lt;/a&gt;</translation>
+        <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;현재 지역에서는 사용할 수 없습니다. VPN이 활성화되어 있다면 비활성화하고, 이전 화면으로 돌아간 후 다시 시도하세요.&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
@@ -81,22 +81,22 @@
     <message>
         <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="28"/>
         <source>Application added: %1</source>
-        <translation>已添加应用：%1</translation>
+        <translation>애플리케이션이 추가되었습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="30"/>
         <source>The application has already been added</source>
-        <translation>该应用已添加</translation>
+        <translation>애플리케이션이 이미 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="40"/>
         <source>The selected applications have been added</source>
-        <translation>已添加所选应用</translation>
+        <translation>선택한 애플리케이션이 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="50"/>
         <source>Application removed: %1</source>
-        <translation>已移除应用：%1</translation>
+        <translation>애플리케이션이 삭제되었습니다: %1</translation>
     </message>
 </context>
 <context>
@@ -104,12 +104,12 @@
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="18"/>
         <source>Enter the digits from the image to continue</source>
-        <translation>请输入图片中的数字以继续</translation>
+        <translation>계속하려면 이미지의 숫자를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="228"/>
         <source>Digits from the image</source>
-        <translation>图片中的数字</translation>
+        <translation>이미지의 숫자</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="231"/>
@@ -119,12 +119,12 @@
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="254"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="271"/>
         <source>Close</source>
-        <translation>关闭</translation>
+        <translation>닫기</translation>
     </message>
 </context>
 <context>
@@ -132,12 +132,12 @@
     <message>
         <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="70"/>
         <source>Update</source>
-        <translation>更新</translation>
+        <translation>업데이트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="96"/>
         <source>Skip</source>
-        <translation>跳过</translation>
+        <translation>건너뛰기</translation>
     </message>
 </context>
 <context>
@@ -145,7 +145,7 @@
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="54"/>
         <source>Unable to disconnect during configuration preparation</source>
-        <translation>配置准备期间无法断开连接</translation>
+        <translation>구성을 준비하는 동안에는 연결을 해제할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -153,17 +153,17 @@
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="36"/>
         <source>Add new connection</source>
-        <translation>添加新连接</translation>
+        <translation>새 연결 추가</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="44"/>
         <source>Configure your server</source>
-        <translation>配置您的服务器</translation>
+        <translation>서버 구성</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ConnectionTypeSelectionDrawer.qml" line="59"/>
         <source>Open config file, key or QR code</source>
-        <translation>配置文件，授权码或二维码</translation>
+        <translation>구성 파일, 키 또는 QR 코드 열기</translation>
     </message>
 </context>
 <context>
@@ -171,17 +171,17 @@
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="59"/>
         <source>Connecting...</source>
-        <translation>连接中</translation>
+        <translation>연결 중...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="66"/>
         <source>Connected</source>
-        <translation>已连接</translation>
+        <translation>연결됨</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="75"/>
         <source>Reconnecting...</source>
-        <translation>重连中</translation>
+        <translation>다시 연결 중...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="80"/>
@@ -189,17 +189,17 @@
         <location filename="../ui/controllers/connectionUiController.cpp" line="101"/>
         <location filename="../ui/controllers/connectionUiController.h" line="65"/>
         <source>Connect</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="85"/>
         <source>Disconnecting...</source>
-        <translation>断开中</translation>
+        <translation>연결 해제 중...</translation>
     </message>
     <message>
         <location filename="../ui/controllers/connectionUiController.cpp" line="90"/>
         <source>Preparing...</source>
-        <translation>准备中</translation>
+        <translation>준비 중...</translation>
     </message>
 </context>
 <context>
@@ -207,22 +207,22 @@
     <message>
         <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="55"/>
         <source>C&amp;ut</source>
-        <translation>剪切</translation>
+        <translation>잘라내기(&amp;U)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="60"/>
         <source>&amp;Copy</source>
-        <translation>拷贝</translation>
+        <translation>복사(&amp;C)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="65"/>
         <source>&amp;Paste</source>
-        <translation>粘贴</translation>
+        <translation>붙여넣기(&amp;P)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/ContextMenuType.qml" line="72"/>
         <source>&amp;SelectAll</source>
-        <translation>全选</translation>
+        <translation>모두 선택(&amp;S)</translation>
     </message>
 </context>
 <context>
@@ -230,7 +230,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="55"/>
         <source>Unable change protocol while there is an active connection</source>
-        <translation>已建立连接时无法更改服务器配置</translation>
+        <translation>연결이 활성화된 동안에는 프로토콜을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -238,46 +238,46 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="34"/>
         <source>Split tunneling</source>
-        <translation>隧道分离</translation>
+        <translation>분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="35"/>
         <source>Allows you to connect to some sites or applications through a VPN connection and bypass others</source>
-        <translation>允许您通过 VPN 连接连接到某些站点或应用程序，并绕过其他站点或应用程序</translation>
+        <translation>일부 사이트나 애플리케이션은 VPN을 통해 연결하고 나머지는 우회할 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="45"/>
         <source>Split tunneling on the server</source>
-        <translation>服务器上的分割隧道</translation>
+        <translation>서버의 분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="46"/>
         <source>Enabled 
 Can&apos;t be disabled for current server</source>
-        <translation>已启用 
-无法禁用当前服务器</translation>
+        <translation>활성화됨 
+현재 서버에서는 비활성화할 수 없음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="64"/>
         <source>Site-based split tunneling</source>
-        <translation>基于网站的隧道分离</translation>
+        <translation>사이트별 분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="65"/>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="84"/>
         <source>Enabled</source>
-        <translation>开启</translation>
+        <translation>활성화됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="65"/>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="84"/>
         <source>Disabled</source>
-        <translation>禁用</translation>
+        <translation>비활성화됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="83"/>
         <source>App-based split tunneling</source>
-        <translation>基于应用的隧道分离</translation>
+        <translation>앱별 분할 터널링</translation>
     </message>
 </context>
 <context>
@@ -285,7 +285,7 @@ Can&apos;t be disabled for current server</source>
     <message>
         <location filename="../ui/controllers/importUiController.cpp" line="185"/>
         <source>Scanned %1 of %2.</source>
-        <translation>扫描 %1 of %2.</translation>
+        <translation>%2개 중 %1개를 검사했습니다.</translation>
     </message>
 </context>
 <context>
@@ -294,70 +294,70 @@ Can&apos;t be disabled for current server</source>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="125"/>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="167"/>
         <source>%1 installed successfully. </source>
-        <translation>%1 安装成功。</translation>
+        <translation>%1이(가) 성공적으로 설치되었습니다. </translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="127"/>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="169"/>
         <source>%1 is already installed on the server. </source>
-        <translation>服务器上已经安装 %1。</translation>
+        <translation>%1은(는) 서버에 이미 설치되어 있습니다. </translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="131"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
-添加已安装在服务器上的容器</translation>
+서버에 이미 설치되어 있던 컨테이너가 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="173"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
-在服务上发现已经安装协议并添加至应用</translation>
+서버에서 이미 설치된 컨테이너를 찾았습니다. 설치된 모든 컨테이너가 애플리케이션에 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="288"/>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="327"/>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="351"/>
         <source>Settings updated successfully</source>
-        <translation>配置更新成功</translation>
+        <translation>설정이 성공적으로 업데이트되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="471"/>
         <source>Server &apos;%1&apos; was rebooted</source>
-        <translation>服务器 &apos;%1&apos; 已重新启动</translation>
+        <translation>서버 %1이(가) 재부팅되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="485"/>
         <source>Server &apos;%1&apos; was removed</source>
-        <translation>已移除服务器 &apos;%1&apos;</translation>
+        <translation>서버 %1이(가) 삭제되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="494"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
-        <translation>服务器 &apos;%1&apos; 的所有容器已移除</translation>
+        <translation>서버 %1의 모든 컨테이너가 삭제되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="520"/>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="538"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
-        <translation>%1 已从服务器 &apos;%2&apos; 上移除</translation>
+        <translation>서버 %2에서 %1이(가) 삭제되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="553"/>
         <source>%1 cached profile cleared</source>
-        <translation>已清除 %1 的缓存配置</translation>
+        <translation>%1 캐시 프로필이 삭제되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="607"/>
         <source>Please login as the user</source>
-        <translation>请以用户身份登录</translation>
+        <translation>해당 사용자로 로그인하세요</translation>
     </message>
     <message>
         <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="631"/>
         <source>Server added successfully</source>
-        <translation>增加服务器成功</translation>
+        <translation>서버가 성공적으로 추가되었습니다</translation>
     </message>
 </context>
 <context>
@@ -365,17 +365,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="57"/>
         <source>Choose application</source>
-        <translation>选择应用</translation>
+        <translation>애플리케이션 선택</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="124"/>
         <source>application name</source>
-        <translation>应用名称</translation>
+        <translation>애플리케이션 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="137"/>
         <source>Add selected</source>
-        <translation>添加所选</translation>
+        <translation>선택 항목 추가</translation>
     </message>
 </context>
 <context>
@@ -383,12 +383,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="224"/>
         <source>Failed to parse JSON data: %1</source>
-        <translation>解析 JSON 数据失败：%1</translation>
+        <translation>JSON 데이터를 읽을 수 없습니다: %1</translation>
     </message>
     <message>
         <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="229"/>
         <source>The JSON data is not an array</source>
-        <translation>JSON 数据不是数组</translation>
+        <translation>JSON 데이터가 배열이 아닙니다</translation>
     </message>
 </context>
 <context>
@@ -396,32 +396,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="22"/>
         <source>New site added: %1</source>
-        <translation>已经添加新网站: %1</translation>
+        <translation>사이트가 추가되었습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="31"/>
         <source>Site removed: %1</source>
-        <translation>已移除网站: %1</translation>
+        <translation>사이트가 삭제되었습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="38"/>
         <source>Site list cleared!</source>
-        <translation>站点列表已清空！</translation>
+        <translation>사이트 목록이 초기화 되었습니다!</translation>
     </message>
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="45"/>
         <source>Can&apos;t open file: %1</source>
-        <translation>无法打开文件: %1</translation>
+        <translation>파일을 열 수 없습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="51"/>
         <source>Import completed</source>
-        <translation>完成导入</translation>
+        <translation>가져오기가 완료되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="64"/>
         <source>Export completed</source>
-        <translation>完成导出</translation>
+        <translation>내보내기가 완료되었습니다</translation>
     </message>
 </context>
 <context>
@@ -429,22 +429,22 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="153"/>
         <source>Update available</source>
-        <translation>有可用更新</translation>
+        <translation>업데이트 가능</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
         <source>A new version of AmneziaVPN is available.</source>
-        <translation>AmneziaVPN 有新版本可用。</translation>
+        <translation>새 AmneziaVPN 버전을 사용할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
         <source>Update</source>
-        <translation>更新</translation>
+        <translation>업데이트</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="156"/>
         <source>Skip</source>
-        <translation>跳过</translation>
+        <translation>건너뛰기</translation>
     </message>
 </context>
 <context>
@@ -452,12 +452,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="78"/>
         <source>Min</source>
-        <translation>最小值</translation>
+        <translation>최솟값</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="113"/>
         <source>Max</source>
-        <translation>最大值</translation>
+        <translation>최댓값</translation>
     </message>
 </context>
 <context>
@@ -471,22 +471,22 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="58"/>
         <source>VPN Connected</source>
-        <translation>已连接到VPN</translation>
+        <translation>VPN 연결됨</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="65"/>
         <source>VPN Disconnected</source>
-        <translation>已从VPN断开</translation>
+        <translation>VPN 연결 해제됨</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="88"/>
         <source>AmneziaVPN notification</source>
-        <translation>AmneziaVPN 提示</translation>
+        <translation>AmneziaVPN 알림</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="89"/>
         <source>Unsecured network detected: </source>
-        <translation>发现不安全网络</translation>
+        <translation>암호화되지 않은 네트워크가 감지되었습니다: </translation>
     </message>
 </context>
 <context>
@@ -494,12 +494,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="52"/>
         <source>Removing services from %1</source>
-        <translation>正从 %1 移除服务</translation>
+        <translation>%1에서 서비스를 제거하는 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDeinstalling.qml" line="81"/>
         <source>Usually it takes no more than 5 minutes</source>
-        <translation>大约5分钟之内完成</translation>
+        <translation>일반적으로 5분 이내에 완료됩니다</translation>
     </message>
 </context>
 <context>
@@ -507,22 +507,22 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="60"/>
         <source>Gateway endpoint</source>
-        <translation>网关端点</translation>
+        <translation>게이트웨이 엔드포인트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="85"/>
         <source>Settings saved</source>
-        <translation>配置已保存</translation>
+        <translation>설정이 저장되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
-        <translation>开发网关环境</translation>
+        <translation>개발용 게이트웨이 환경</translation>
     </message>
 </context>
 <context>
@@ -530,49 +530,49 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="121"/>
         <source>Logging enabled</source>
-        <translation>日志记录已启用</translation>
+        <translation>로깅 활성화됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="149"/>
         <source>Dev gateway enabled</source>
-        <translation>开发网关已启用</translation>
+        <translation>개발용 게이트웨이 활성화됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="191"/>
         <source>Split tunneling enabled</source>
-        <translation>用户分隔隧道已启用</translation>
+        <translation>분할 터널링 활성화됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="191"/>
         <source>Split tunneling disabled</source>
-        <translation>分隔隧道已禁用</translation>
+        <translation>분할 터널링 비활성화됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="426"/>
         <source>AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.</source>
-        <translation>AmneziaWG 2.0 已过时且不再受支持。继续使用需要全新安装 AmneziaWG 3.1 容器。</translation>
+        <translation>AmneziaWG 2.0은 오래되어 더 이상 지원되지 않습니다. 계속 사용하려면 AmneziaWG 3.1 컨테이너를 새로 설치해야 합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="472"/>
         <source>Unable change protocol while trying to make an active connection</source>
-        <translation>正在尝试建立连接时无法更改协议</translation>
+        <translation>연결을 시도하는 동안에는 프로토콜을 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="476"/>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="686"/>
         <source>Cannot change protocol during active connection</source>
-        <translation>存在活动连接时无法更改协议</translation>
+        <translation>연결이 활성화된 동안에는 프로토콜을 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="518"/>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="636"/>
         <source>VPN protocol</source>
-        <translation>VPN协议</translation>
+        <translation>VPN 프로토콜</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="571"/>
         <source>Servers</source>
-        <translation>服务器</translation>
+        <translation>서버</translation>
     </message>
 </context>
 <context>
@@ -580,7 +580,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="56"/>
         <source>AmneziaWG settings</source>
-        <translation>AmneziaWG 配置</translation>
+        <translation>AmneziaWG 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="80"/>
@@ -590,27 +590,27 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="132"/>
         <source>I1 - First special junk packet</source>
-        <translation>I1 - 第一个特殊垃圾数据包</translation>
+        <translation>I1 - 첫 번째 특수 정크 패킷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="142"/>
         <source>I2 - Second special junk packet</source>
-        <translation>I2 - 第二个特殊垃圾数据包</translation>
+        <translation>I2 - 두 번째 특수 정크 패킷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="152"/>
         <source>I3 - Third special junk packet</source>
-        <translation>I3 - 第三个特殊垃圾数据包</translation>
+        <translation>I3 - 세 번째 특수 정크 패킷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="162"/>
         <source>I4 - Fourth special junk packet</source>
-        <translation>I4 - 第四个特殊垃圾数据包</translation>
+        <translation>I4 - 네 번째 특수 정크 패킷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="172"/>
         <source>I5 - Fifth special junk packet</source>
-        <translation>I5 - 第五个特殊垃圾数据包</translation>
+        <translation>I5 - 다섯 번째 특수 정크 패킷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="189"/>
@@ -620,32 +620,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="199"/>
         <source>ContentPaddingAddition - Content padding addition</source>
-        <translation>ContentPaddingAddition - 内容填充增量</translation>
+        <translation>ContentPaddingAddition - 콘텐츠 패딩 추가</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="211"/>
         <source>RekeyAfterTime - Rekey after time</source>
-        <translation>RekeyAfterTime - 指定时间后重新协商密钥</translation>
+        <translation>RekeyAfterTime - 키 갱신 시간</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="223"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - 重新协商密钥超时</translation>
+        <translation>RekeyTimeout - 키 갱신 시간 제한</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="235"/>
         <source>RejectAfterTime - Reject after time</source>
-        <translation>RejectAfterTime - 指定时间后拒绝</translation>
+        <translation>RejectAfterTime - 거부 시간</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="247"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - Keepalive 超时</translation>
+        <translation>KeepaliveTimeout - 연결 유지 시간 제한</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="259"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
-        <translation>MaxHandshakeAttempts - 最大握手尝试次数</translation>
+        <translation>MaxHandshakeAttempts - 최대 핸드셰이크 시도 횟수</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="276"/>
@@ -660,42 +660,42 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="306"/>
         <source>Server settings</source>
-        <translation>服务器设置</translation>
+        <translation>서버 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="314"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="409"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="418"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="419"/>
         <source>Only the settings for this device will be changed</source>
-        <translation>仅更改此设备的设置</translation>
+        <translation>이 기기의 설정만 변경됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="420"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="421"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -703,97 +703,97 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="68"/>
         <source>AmneziaWG settings</source>
-        <translation>AmneziaWG 配置</translation>
+        <translation>AmneziaWG 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="81"/>
         <source>VPN address subnet</source>
-        <translation>VPN 地址子网</translation>
+        <translation>VPN 주소 서브넷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="131"/>
         <source>Jc - Junk packet count</source>
-        <translation>Jc - 垃圾数据包数量</translation>
+        <translation>Jc - 정크 패킷 수</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="141"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation>Jmin - 垃圾数据包最小大小</translation>
+        <translation>Jmin - 정크 패킷 최소 크기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="151"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation>Jmax - 垃圾数据包最大大小</translation>
+        <translation>Jmax - 정크 패킷 최대 크기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="161"/>
         <source>S1 - Init packet junk size</source>
-        <translation>S1 - 初始化包垃圾数据大小</translation>
+        <translation>S1 - 초기 패킷 정크 크기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="171"/>
         <source>S2 - Response packet junk size</source>
-        <translation>S2 - 响应包垃圾数据大小</translation>
+        <translation>S2 - 응답 패킷 정크 크기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="183"/>
         <source>S3 - Cookie reply packet junk size</source>
-        <translation>S3 - Cookie 回复包垃圾数据大小</translation>
+        <translation>S3 - 쿠키 응답 패킷 정크 크기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="195"/>
         <source>S4 - Transport packet junk size</source>
-        <translation>S4 - 传输包垃圾数据大小</translation>
+        <translation>S4 - 전송 패킷 정크 크기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="207"/>
         <source>H1 - Init packet magic header</source>
-        <translation>H1 - 初始化包魔术头</translation>
+        <translation>H1 - 초기 패킷 매직 헤더</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
         <source>H2 - Response packet magic header</source>
-        <translation>H2 - 响应包魔术头</translation>
+        <translation>H2 - 응답 패킷 매직 헤더</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="231"/>
         <source>H3 - Underload packet magic header</source>
-        <translation>H3 - 低负载包魔术头</translation>
+        <translation>H3 - 언더로드 패킷 매직 헤더</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="243"/>
         <source>H4 - Transport packet magic header</source>
-        <translation>H4 - 传输包魔术头</translation>
+        <translation>H4 - 전송 패킷 매직 헤더</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="253"/>
         <source>I1 - Special junk 1</source>
-        <translation>I1 - 特殊垃圾数据 1</translation>
+        <translation>I1 - 특수 정크 1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="263"/>
         <source>I2 - Special junk 2</source>
-        <translation>I2 - 特殊垃圾数据 2</translation>
+        <translation>I2 - 특수 정크 2</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="273"/>
         <source>I3 - Special junk 3</source>
-        <translation>I3 - 特殊垃圾数据 3</translation>
+        <translation>I3 - 특수 정크 3</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="283"/>
         <source>I4 - Special junk 4</source>
-        <translation>I4 - 特殊垃圾数据 4</translation>
+        <translation>I4 - 특수 정크 4</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="293"/>
         <source>I5 - Special junk 5</source>
-        <translation>I5 - 特殊垃圾数据 5</translation>
+        <translation>I5 - 특수 정크 5</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="310"/>
@@ -803,32 +803,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="326"/>
         <source>ContentPaddingAddition - Content padding addition</source>
-        <translation>ContentPaddingAddition - 内容填充增量</translation>
+        <translation>ContentPaddingAddition - 콘텐츠 패딩 추가</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
         <source>RekeyAfterTime - Rekey after time</source>
-        <translation>RekeyAfterTime - 指定时间后重新协商密钥</translation>
+        <translation>RekeyAfterTime - 키 갱신 시간</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="352"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - 重新协商密钥超时</translation>
+        <translation>RekeyTimeout - 키 갱신 시간 제한</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="365"/>
         <source>RejectAfterTime - Reject after time</source>
-        <translation>RejectAfterTime - 指定时间后拒绝</translation>
+        <translation>RejectAfterTime - 거부 시간</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="378"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - Keepalive 超时</translation>
+        <translation>KeepaliveTimeout - 연결 유지 시간 제한</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="391"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
-        <translation>MaxHandshakeAttempts - 最大握手尝试次数</translation>
+        <translation>MaxHandshakeAttempts - 최대 핸드셰이크 시도 횟수</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="408"/>
@@ -843,42 +843,42 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="467"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="482"/>
         <source>The values of the H1-H4 fields must be unique</source>
-        <translation>H1-H4 字段的值必须唯一</translation>
+        <translation>H1~H4 필드 값은 서로 달라야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="490"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
-        <translation>字段 S1 + 消息发起大小 (148) 的值不得等于 S2 + 消息响应大小 (92) + S3 + Cookie 回复大小 (64) + S4 + 传输包大小 (32)</translation>
+        <translation>S1 필드 값 + 메시지 시작 크기(148)는 S2 + 메시지 응답 크기(92) + S3 + 쿠키 응답 크기(64) + S4 + 전송 패킷 크기(32)와 같아서는 안 됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="495"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="496"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="497"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="498"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="502"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -886,33 +886,33 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="55"/>
         <source>OpenVPN Settings</source>
-        <translation>OpenVPN 设置</translation>
+        <translation>OpenVPN 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="76"/>
         <source>VPN address subnet</source>
-        <translation>VPN 地址子网</translation>
+        <translation>VPN 주소 서브넷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="94"/>
         <source>Network protocol</source>
-        <translation>网络协议</translation>
+        <translation>네트워크 프로토콜</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="131"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="153"/>
         <source>Auto-negotiate encryption</source>
-        <translation>自定义加密方式</translation>
+        <translation>암호화 자동 협상</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="172"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
         <source>Hash</source>
-        <translation>Hash</translation>
+        <translation>해시</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="183"/>
@@ -968,7 +968,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="233"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="234"/>
         <source>Cipher</source>
-        <translation>加密算法</translation>
+        <translation>암호화 방식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="244"/>
@@ -1018,63 +1018,63 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="253"/>
         <source>none</source>
-        <translation>无</translation>
+        <translation>없음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="305"/>
         <source>TLS auth</source>
-        <translation>TLS认证</translation>
+        <translation>TLS 인증</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="322"/>
         <source>Block DNS requests outside of VPN</source>
-        <translation>阻止VPN外的DNS请求</translation>
+        <translation>VPN 외부의 DNS 요청 차단</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="343"/>
         <source>Additional client configuration commands</source>
-        <translation>附加客户端配置命令</translation>
+        <translation>추가 클라이언트 구성 명령</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="362"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="399"/>
         <source>Commands:</source>
-        <translation>命令:</translation>
+        <translation>명령:</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="380"/>
         <source>Additional server configuration commands</source>
-        <translation>附加服务器端配置命令</translation>
+        <translation>추가 서버 구성 명령</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="420"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="425"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="426"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="427"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="428"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="432"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1082,42 +1082,42 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="52"/>
         <source> settings</source>
-        <translation> 配置</translation>
+        <translation> 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="68"/>
         <source>Show connection options</source>
-        <translation>显示连接选项</translation>
+        <translation>연결 옵션 표시</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="124"/>
         <source>Connection options %1</source>
-        <translation>%1 连接选项</translation>
+        <translation>%1 연결 옵션</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="176"/>
         <source>Remove </source>
-        <translation>移除 </translation>
+        <translation>제거 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="180"/>
         <source>Remove %1 from server?</source>
-        <translation>从服务器移除 %1 ?</translation>
+        <translation>서버에서 %1을(를) 제거하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="181"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="182"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="183"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
 </context>
 <context>
@@ -1125,7 +1125,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="58"/>
         <source>WG settings</source>
-        <translation>WG 设置</translation>
+        <translation>WG 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="68"/>
@@ -1135,42 +1135,42 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="86"/>
         <source>Server settings</source>
-        <translation>服务器设置</translation>
+        <translation>서버 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="98"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="117"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="120"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="121"/>
         <source>Only the settings for this device will be changed</source>
-        <translation>仅更改此设备的设置</translation>
+        <translation>이 기기의 설정만 변경됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="122"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="123"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="127"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1178,47 +1178,47 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="59"/>
         <source>WG settings</source>
-        <translation>WG 设置</translation>
+        <translation>WG 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="70"/>
         <source>VPN address subnet</source>
-        <translation>VPN 地址子网</translation>
+        <translation>VPN 주소 서브넷</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="89"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="115"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="120"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="121"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="122"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="123"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="127"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1226,47 +1226,47 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="49"/>
         <source>Flow</source>
-        <translation>Flow</translation>
+        <translation>흐름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="56"/>
         <source>Empty</source>
-        <translation>空</translation>
+        <translation>비어 있음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="97"/>
         <source>xtls-rprx-vision is available only with the RAW (TCP) transport.</source>
-        <translation>xtls-rprx-vision 仅在 RAW (TCP) 传输下可用。</translation>
+        <translation>xtls-rprx-vision은 RAW(TCP) 전송 방식에서만 사용할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="118"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="120"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="121"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="122"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="123"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="126"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1274,12 +1274,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="51"/>
         <source>Security</source>
-        <translation>Security</translation>
+        <translation>보안</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="58"/>
         <source>None</source>
-        <translation>无</translation>
+        <translation>없음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="70"/>
@@ -1294,7 +1294,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="95"/>
         <source>REALITY is not supported with the mKCP transport. Use None or TLS.</source>
-        <translation>mKCP 传输不支持 REALITY。请使用 None 或 TLS。</translation>
+        <translation>mKCP 전송 방식에서는 REALITY가 지원되지 않습니다. 없음 또는 TLS를 사용하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="115"/>
@@ -1308,49 +1308,49 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="232"/>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="233"/>
         <source>Fingerprint</source>
-        <translation>Fingerprint</translation>
+        <translation>지문</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="203"/>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="275"/>
         <source>Server Name (SNI)</source>
-        <translation>服务器名称 (SNI)</translation>
+        <translation>서버 이름(SNI)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="212"/>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="284"/>
         <source>Enter a valid IP address or domain name</source>
-        <translation>请输入有效的 IP 地址或域名</translation>
+        <translation>유효한 IP 주소 또는 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="308"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="315"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="316"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="317"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="318"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="321"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1358,103 +1358,103 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="39"/>
         <source>Empty</source>
-        <translation>空</translation>
+        <translation>비어 있음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="82"/>
         <source>You have read-only access to this server. XRay settings cannot be edited.</source>
-        <translation>您对此服务器仅有只读权限，无法编辑 XRay 设置。</translation>
+        <translation>이 서버에 대한 읽기 전용 권한만 있습니다. XRay 설정을 편집할 수 없습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="93"/>
         <source>XRay VLESS settings</source>
-        <translation>XRay VLESS 设置</translation>
+        <translation>XRay VLESS 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="94"/>
         <source>More about settings</source>
-        <translation>了解更多设置</translation>
+        <translation>설정 자세히 알아보기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="115"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="116"/>
         <source>Valid range: 1–65535.</source>
-        <translation>有效范围：1–65535。</translation>
+        <translation>유효 범위: 1~65535.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="161"/>
         <source>Transport</source>
-        <translation>Transport</translation>
+        <translation>전송 방식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="175"/>
         <source>Security</source>
-        <translation>Security</translation>
+        <translation>보안</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="189"/>
         <source>Flow</source>
-        <translation>Flow</translation>
+        <translation>흐름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="214"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="222"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="223"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="224"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="225"/>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="260"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="228"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="250"/>
         <source>Reset settings</source>
-        <translation>重置设置</translation>
+        <translation>설정 초기화</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="256"/>
         <source>Settings were reset to defaults. Tap Save to apply them on the server.</source>
-        <translation>设置已恢复为默认值。点按“保存”以在服务器上应用。</translation>
+        <translation>설정이 기본값으로 초기화되었습니다. 서버에 적용하려면 저장을 누르세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="259"/>
         <source>Reset settings?</source>
-        <translation>要重置设置吗？</translation>
+        <translation>설정을 초기화하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="259"/>
         <source>All XRay settings will be restored to defaults.</source>
-        <translation>所有 XRay 设置将恢复为默认值。</translation>
+        <translation>모든 XRay 설정이 기본값으로 복원됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="260"/>
         <source>Reset</source>
-        <translation>重置</translation>
+        <translation>초기화</translation>
     </message>
 </context>
 <context>
@@ -1462,105 +1462,105 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="31"/>
         <source>Save XRay configuration</source>
-        <translation>保存 XRay 配置</translation>
+        <translation>XRay 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="32"/>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="116"/>
         <source>JSON files (*.json)</source>
-        <translation>JSON 文件 (*.json)</translation>
+        <translation>JSON 파일 (*.json)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="41"/>
         <source>Configuration saved</source>
-        <translation>配置已保存</translation>
+        <translation>구성이 저장되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="73"/>
         <source>XRay Configurations</source>
-        <translation>XRay 配置</translation>
+        <translation>XRay 구성</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="79"/>
         <source>Create configuration based on current settings</source>
-        <translation>基于当前设置创建配置</translation>
+        <translation>현재 설정을 기반으로 구성 만들기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="93"/>
         <source>Export settings</source>
-        <translation>导出设置</translation>
+        <translation>설정 내보내기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="110"/>
         <source>Import settings</source>
-        <translation>导入设置</translation>
+        <translation>설정 가져오기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="111"/>
         <source>In JSON format</source>
-        <translation>JSON 格式</translation>
+        <translation>JSON 형식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="115"/>
         <source>Open XRay configuration</source>
-        <translation>打开 XRay 配置</translation>
+        <translation>XRay 구성 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="121"/>
         <source>Failed to import configuration</source>
-        <translation>导入配置失败</translation>
+        <translation>구성을 가져오지 못했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="123"/>
         <source>Configuration imported successfully</source>
-        <translation>配置导入成功</translation>
+        <translation>구성을 성공적으로 가져왔습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="140"/>
         <source>Configurations</source>
-        <translation>配置</translation>
+        <translation>구성</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="160"/>
         <source>No saved configurations yet.
 Create one from the current settings.</source>
-        <translation>尚无已保存的配置。
-可基于当前设置创建一个。</translation>
+        <translation>아직 저장된 구성이 없습니다.
+현재 설정으로 구성을 만드세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="236"/>
         <source>Apply configuration</source>
-        <translation>应用配置</translation>
+        <translation>구성 적용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="251"/>
         <source>Export configuration</source>
-        <translation>导出配置</translation>
+        <translation>구성 내보내기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="266"/>
         <source>Delete configuration</source>
-        <translation>删除配置</translation>
+        <translation>구성 삭제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="276"/>
         <source>Delete configuration?</source>
-        <translation>要删除该配置吗？</translation>
+        <translation>구성을 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="277"/>
         <source>This action cannot be undone.</source>
-        <translation>此操作无法撤销。</translation>
+        <translation>이 작업은 되돌릴 수 없습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="278"/>
         <source>Delete</source>
-        <translation>删除</translation>
+        <translation>삭제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="278"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
 </context>
 <context>
@@ -1568,7 +1568,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="61"/>
         <source>Transport</source>
-        <translation>Transport</translation>
+        <translation>전송 방식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="69"/>
@@ -1583,7 +1583,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="82"/>
         <source>Advanced users</source>
-        <translation>高级用户</translation>
+        <translation>고급 사용자용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="94"/>
@@ -1593,7 +1593,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="116"/>
         <source>mKCP Settings</source>
-        <translation>mKCP 设置</translation>
+        <translation>mKCP 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="125"/>
@@ -1603,7 +1603,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="126"/>
         <source>Transmission time interval (ms). Valid range: 10–100.</source>
-        <translation>传输时间间隔 (ms)。有效范围：10–100。</translation>
+        <translation>전송 시간 간격(ms). 유효 범위: 10~100.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="145"/>
@@ -1613,7 +1613,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="146"/>
         <source>Uplink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>上行容量 (MB/s)。最大值：2147483647。</translation>
+        <translation>업링크 용량(MB/s). 최댓값: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="165"/>
@@ -1623,7 +1623,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="166"/>
         <source>Downlink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>下行容量 (MB/s)。最大值：2147483647。</translation>
+        <translation>다운링크 용량(MB/s). 최댓값: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="185"/>
@@ -1633,7 +1633,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="186"/>
         <source>Read buffer size (MB). Range: 1–2147483647.</source>
-        <translation>读取缓冲区大小 (MB)。范围：1–2147483647。</translation>
+        <translation>읽기 버퍼 크기(MB). 범위: 1~2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="205"/>
@@ -1643,43 +1643,43 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="206"/>
         <source>Write buffer size (MB). Range: 1–2147483647.</source>
-        <translation>写入缓冲区大小 (MB)。范围：1–2147483647。</translation>
+        <translation>쓰기 버퍼 크기(MB). 범위: 1~2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="224"/>
         <source>Congestion</source>
-        <translation>Congestion</translation>
+        <translation>혼잡 제어</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="246"/>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="247"/>
         <source>Mode</source>
-        <translation>规则</translation>
+        <translation>모드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="289"/>
         <source>HTTP Profile</source>
-        <translation>HTTP 配置</translation>
+        <translation>HTTP 프로필</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="299"/>
         <source>Host</source>
-        <translation>主机</translation>
+        <translation>호스트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="308"/>
         <source>Enter a valid IP address or domain name</source>
-        <translation>请输入有效的 IP 地址或域名</translation>
+        <translation>유효한 IP 주소 또는 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="319"/>
         <source>Path</source>
-        <translation>Path</translation>
+        <translation>경로</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="327"/>
         <source>Path must start with &quot;/&quot;</source>
-        <translation>路径必须以 &quot;/&quot; 开头</translation>
+        <translation>경로는 &quot;/&quot;로 시작해야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="340"/>
@@ -1690,7 +1690,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="381"/>
         <source>Disable gRPC Header</source>
-        <translation>禁用 gRPC 标头</translation>
+        <translation>gRPC 헤더 비활성화</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="382"/>
@@ -1700,7 +1700,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="393"/>
         <source>Disable SSE Header</source>
-        <translation>禁用 SSE 标头</translation>
+        <translation>SSE 헤더 비활성화</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="394"/>
@@ -1710,7 +1710,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="409"/>
         <source>Session &amp; Sequence</source>
-        <translation>会话与序列</translation>
+        <translation>세션 및 시퀀스</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="421"/>
@@ -1737,7 +1737,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="545"/>
         <source>Header/Cookie apply only in Packet-up mode</source>
-        <translation>标头/Cookie 仅在 Packet-up 模式下生效</translation>
+        <translation>헤더/쿠키는 Packet-up 모드에만 적용됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="546"/>
@@ -1752,7 +1752,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="606"/>
         <source>Traffic Shaping</source>
-        <translation>流量整形</translation>
+        <translation>트래픽 셰이핑</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="615"/>
@@ -1762,7 +1762,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="616"/>
         <source>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</source>
-        <translation>上行分块大小（字节）。最大值：2147483647。0 表示关闭。</translation>
+        <translation>업링크 청크 크기(바이트). 최댓값: 2147483647. 0 = 꺼짐.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="635"/>
@@ -1772,7 +1772,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="636"/>
         <source>Max buffered POSTs. Range: 0–2147483647.</source>
-        <translation>最大缓冲 POST 数。范围：0–2147483647。</translation>
+        <translation>버퍼링되는 최대 POST 수. 범위: 0~2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="655"/>
@@ -1792,7 +1792,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="722"/>
         <source>Padding and multiplexing</source>
-        <translation>填充与多路复用</translation>
+        <translation>패딩 및 다중화</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="728"/>
@@ -1807,42 +1807,42 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="741"/>
         <source>On</source>
-        <translation>开</translation>
+        <translation>켜짐</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="741"/>
         <source>Off</source>
-        <translation>关</translation>
+        <translation>꺼짐</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="770"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="777"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="778"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="779"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="780"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="783"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1855,37 +1855,37 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="56"/>
         <source>Range</source>
-        <translation>范围</translation>
+        <translation>범위</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="91"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="93"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="94"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="95"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="96"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="99"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1930,32 +1930,32 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="220"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="222"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="223"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="224"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="225"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="228"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -1999,37 +1999,37 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="201"/>
         <source>HTTP keep-alive period. Integer, may be negative.</source>
-        <translation>HTTP keep-alive 周期。整数，可为负数。</translation>
+        <translation>HTTP 연결 유지 주기입니다. 음수일 수 있는 정수입니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="233"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="235"/>
         <source>Save settings?</source>
-        <translation>保存设置？</translation>
+        <translation>설정을 저장하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="236"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>이 연결을 공유한 모든 사용자가 더 이상 연결할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="237"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="238"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="241"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>存在活动连接时无法更改设置</translation>
+        <translation>연결이 활성화된 동안에는 설정을 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -2038,38 +2038,38 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="52"/>
         <source>A DNS service is installed on your server, and it is only accessible via VPN.
 </source>
-        <translation>您的服务器已安装DNS服务，仅能通过VPN访问。
+        <translation>서버에 DNS 서비스가 설치되어 있으며 VPN을 통해서만 접속할 수 있습니다.
 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>其地址与您的服务器地址相同。您可以在 设置 连接 中进行配置。</translation>
+        <translation>DNS 주소는 서버 주소와 같습니다. 설정의 연결 탭에서 DNS를 구성할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="68"/>
         <source>Remove </source>
-        <translation>移除</translation>
+        <translation>삭제: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="72"/>
         <source>Remove %1 from server?</source>
-        <translation>从服务器移除 %1 ?</translation>
+        <translation>서버에서 %1을(를) 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="73"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="74"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="79"/>
         <source>Cannot remove AmneziaDNS from running server</source>
-        <translation>无法从正在运行的服务器移除 AmneziaDNS</translation>
+        <translation>실행 중인 서버에서는 AmneziaDNS를 삭제할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -2077,90 +2077,90 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="215"/>
         <source>Checking...</source>
-        <translation>检查中...</translation>
+        <translation>확인 중...</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="218"/>
         <source>Updating</source>
-        <translation>更新中</translation>
+        <translation>업데이트 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="222"/>
         <source>Not deployed</source>
-        <translation>未部署</translation>
+        <translation>배포되지 않음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="225"/>
         <source>Running</source>
-        <translation>运行中</translation>
+        <translation>실행 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="228"/>
         <source>Stopped</source>
-        <translation>已停止</translation>
+        <translation>중지됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="231"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation>오류</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="234"/>
         <source>Unknown</source>
-        <translation>未知</translation>
+        <translation>알 수 없음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="349"/>
         <source>MTProxy started</source>
-        <translation>MTProxy 已启动</translation>
+        <translation>MTProxy가 시작되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="349"/>
         <source>MTProxy stopped</source>
-        <translation>MTProxy 已停止</translation>
+        <translation>MTProxy가 중지되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="362"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="910"/>
         <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
-        <translation>设置已锁定：连接超时（错误代码 %1）。请重新打开页面后重试。</translation>
+        <translation>설정이 잠겼습니다. 연결 시간이 초과되었습니다(오류 코드 %1). 다시 시도하려면 페이지를 다시 여세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="442"/>
         <source>MTProxy settings</source>
-        <translation>MTProxy 设置</translation>
+        <translation>MTProxy 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="443"/>
         <source>Read more about this settings</source>
-        <translation>了解更多关于这些设置</translation>
+        <translation>이 설정에 대해 자세히 알아보기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="453"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1884"/>
         <source>No internet connection. Connect to the internet to change MTProxy settings.</source>
-        <translation>无网络连接。请连接互联网以更改 MTProxy 设置。</translation>
+        <translation>인터넷에 연결되어 있지 않습니다. MTProxy 설정을 변경하려면 인터넷에 연결하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="478"/>
         <source>Connection</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="482"/>
         <source>Settings</source>
-        <translation>设置</translation>
+        <translation>설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="532"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1419"/>
         <source>Use Telegram connection link</source>
-        <translation>使用 Telegram 连接链接</translation>
+        <translation>Telegram 연결 링크 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="558"/>
         <source>Deploy MTProxy first</source>
-        <translation>请先部署 MTProxy</translation>
+        <translation>먼저 MTProxy를 배포하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="574"/>
@@ -2171,183 +2171,183 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="860"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1849"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="619"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="865"/>
         <source>Telegram connection link</source>
-        <translation>Telegram 连接链接</translation>
+        <translation>Telegram 연결 링크</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="620"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="866"/>
         <source>MTProxy connection link</source>
-        <translation>MTProxy 连接链接</translation>
+        <translation>MTProxy 연결 링크</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="647"/>
         <source>Or enter the proxy details manually.</source>
-        <translation>或手动输入代理信息。</translation>
+        <translation>또는 프록시 정보를 직접 입력하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="653"/>
         <source>How to do it</source>
-        <translation>操作方法</translation>
+        <translation>설정 방법</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="695"/>
         <source>Host</source>
-        <translation>主机</translation>
+        <translation>호스트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="731"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>密钥</translation>
+        <translation>시크릿</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="802"/>
         <source>Delete MTProxy</source>
-        <translation>删除 MTProxy</translation>
+        <translation>MTProxy 삭제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="805"/>
         <source>Remove %1 from server?</source>
-        <translation>从服务器移除 %1 ?</translation>
+        <translation>서버에서 %1을(를) 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="806"/>
         <source>The proxy will be stopped and all users will lose access.</source>
-        <translation>代理将被停止，所有用户将失去访问权限。</translation>
+        <translation>프록시가 중지되고 모든 사용자가 접속할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="807"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="808"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="957"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="880"/>
         <source>Enable MTProxy</source>
-        <translation>启用 MTProxy</translation>
+        <translation>MTProxy 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="908"/>
         <source>Enable MTProxy to edit settings</source>
-        <translation>启用 MTProxy 后才能编辑设置</translation>
+        <translation>설정을 편집하려면 MTProxy를 사용 설정하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="911"/>
         <source>Cannot reach the server — settings are unavailable</source>
-        <translation>无法连接服务器 — 设置不可用</translation>
+        <translation>서버에 연결할 수 없어 설정을 사용할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>基础密钥</translation>
+        <translation>기본 시크릿</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="936"/>
         <source>Not generated</source>
-        <translation>未生成</translation>
+        <translation>생성되지 않음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>要生成新密钥吗？</translation>
+        <translation>새 시크릿을 생성하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="955"/>
         <source>All existing connection links will stop working. Users will need new links.</source>
-        <translation>所有现有连接链接将失效，用户需要新的链接。</translation>
+        <translation>기존 연결 링크가 모두 작동하지 않게 됩니다. 사용자에게 새 링크가 필요합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="956"/>
         <source>Generate</source>
-        <translation>生成</translation>
+        <translation>생성</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="966"/>
         <source>New secret saved. It will be applied when MTProxy is started.</source>
-        <translation>新密钥已保存，将在 MTProxy 启动时生效。</translation>
+        <translation>새 시크릿을 저장했습니다. MTProxy가 시작될 때 적용됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="984"/>
         <source>Public host / IP</source>
-        <translation>公网主机 / IP</translation>
+        <translation>공개 호스트/IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="995"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1003"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1906"/>
         <source>Enter a valid IP address or domain name</source>
-        <translation>请输入有效的 IP 地址或域名</translation>
+        <translation>올바른 IP 주소 또는 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1020"/>
         <source>Leave empty to use server IP automatically</source>
-        <translation>留空则自动使用服务器 IP</translation>
+        <translation>서버 IP를 자동으로 사용하려면 비워 두세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1033"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ 这会覆盖连接链接中的服务器 IP。请确认该主机/域名指向您的服务器。</translation>
+        <translation>⚠ 연결 링크의 서버 IP를 재정의합니다. 이 호스트/도메인이 서버를 가리키는지 확인하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1046"/>
         <source>Server port</source>
-        <translation>服务器端口</translation>
+        <translation>서버 포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1077"/>
         <source>FakeTLS may not work on ports other than 443</source>
-        <translation>FakeTLS 在非 443 端口上可能无法工作</translation>
+        <translation>FakeTLS는 443 이외의 포트에서 작동하지 않을 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1088"/>
         <source>The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.</source>
-        <translation>推广频道在 @MTProxyBot 中设置。请将代理标签粘贴到此处：恰好 32 位十六进制字符（0-9、A-F），与机器人消息中一致 — 或留空。</translation>
+        <translation>홍보 채널은 @MTProxyBot에서 설정합니다. 봇 메시지에 표시된 정확히 32자의 16진수(0-9, A-F) 프록시 태그를 여기에 붙여 넣거나 비워 두세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1101"/>
         <source>Promoted channel tag (optional)</source>
-        <translation>推广频道标签（可选）</translation>
+        <translation>홍보 채널 태그(선택 사항)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1102"/>
         <source>32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)</source>
-        <translation>来自 @MTProxyBot 的 32 位十六进制字符（例如 3b7b2fa9…）</translation>
+        <translation>@MTProxyBot의 16진수 32자(예: 3b7b2fa9…)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1123"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F).</source>
-        <translation>代理标签必须为恰好 32 位十六进制字符（0-9、A-F）。</translation>
+        <translation>프록시 태그는 정확히 32자의 16진수(0-9, A-F)여야 합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1133"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.</source>
-        <translation>代理标签必须为恰好 32 位十六进制字符（0-9、A-F）。不使用时请留空。</translation>
+        <translation>프록시 태그는 정확히 32자의 16진수(0-9, A-F)여야 합니다. 사용하지 않으면 비워 두세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1152"/>
         <source>Get a tag from</source>
-        <translation>从此处获取标签</translation>
+        <translation>태그 받기:</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1173"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1188"/>
         <source>Transport mode</source>
-        <translation>传输模式</translation>
+        <translation>전송 모드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1189"/>
@@ -2359,89 +2359,89 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1189"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1193"/>
         <source>Standard MTProto</source>
-        <translation>Standard MTProto</translation>
+        <translation>표준 MTProto</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>FakeTLS 域名</translation>
+        <translation>FakeTLS 도메인</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1237"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1244"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1921"/>
         <source>Enter a valid domain name</source>
-        <translation>请输入有效的域名</translation>
+        <translation>올바른 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1265"/>
         <source>The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.</source>
-        <translation>域名会被编码进 FakeTLS 客户端密钥（ee + base_secret + hex(domain)），且必须支持 HTTPS / TLS 1.3。</translation>
+        <translation>도메인은 FakeTLS 클라이언트 시크릿(ee + base_secret + hex(domain))에 인코딩됩니다. HTTPS/TLS 1.3을 지원해야 합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1272"/>
         <source>⚠ Changing the domain will invalidate all previously issued FakeTLS connection links.</source>
-        <translation>⚠ 更改域名将使此前签发的所有 FakeTLS 连接链接失效。</translation>
+        <translation>⚠ 도메인을 변경하면 이전에 발급된 모든 FakeTLS 연결 링크가 무효화됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1285"/>
         <source>Advanced</source>
-        <translation>高级</translation>
+        <translation>고급</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>附加密钥</translation>
+        <translation>추가 시크릿</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1315"/>
         <source>Add extra secrets to allow gradual migration without disconnecting existing users.</source>
-        <translation>添加附加密钥可实现平滑迁移，而不必断开现有用户。</translation>
+        <translation>기존 사용자의 연결을 끊지 않고 점진적으로 이전하려면 추가 시크릿을 등록하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>添加附加密钥</translation>
+        <translation>추가 시크릿 등록</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1531"/>
         <source>Worker mode</source>
-        <translation>工作进程模式</translation>
+        <translation>워커 모드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1548"/>
         <source>Auto</source>
-        <translation>自动</translation>
+        <translation>자동</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1555"/>
         <source>Manual</source>
-        <translation>手动</translation>
+        <translation>수동</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1568"/>
         <source>Workers are set to 0 automatically for FakeTLS mode.</source>
-        <translation>在 FakeTLS 模式下，工作进程数会自动设为 0。</translation>
+        <translation>FakeTLS 모드에서는 워커 수가 자동으로 0으로 설정됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1581"/>
         <source>Workers count</source>
-        <translation>工作进程数</translation>
+        <translation>워커 수</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1640"/>
         <source>Server is behind NAT / Docker bridge</source>
-        <translation>服务器位于 NAT / Docker 网桥之后</translation>
+        <translation>서버가 NAT/Docker 브리지 뒤에 있음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1641"/>
         <source>Enable if your server is not directly accessible from the internet, e.g. Docker or private network</source>
-        <translation>如果您的服务器无法从互联网直接访问（例如 Docker 或专用网络），请启用此项</translation>
+        <translation>Docker 또는 사설 네트워크처럼 인터넷에서 서버에 직접 접속할 수 없는 경우 사용하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1658"/>
         <source>Internal IP</source>
-        <translation>内网 IP</translation>
+        <translation>내부 IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1667"/>
@@ -2450,22 +2450,22 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1710"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1925"/>
         <source>Enter a valid IPv4 address</source>
-        <translation>请输入有效的 IPv4 地址</translation>
+        <translation>올바른 IPv4 주소를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1693"/>
         <source>External IP</source>
-        <translation>外网 IP</translation>
+        <translation>외부 IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1741"/>
         <source>Diagnostics</source>
-        <translation>诊断</translation>
+        <translation>진단</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1769"/>
         <source>Public port reachable</source>
-        <translation>公网端口可达</translation>
+        <translation>공개 포트 접속 가능</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1773"/>
@@ -2479,73 +2479,73 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1773"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1793"/>
         <source>Yes</source>
-        <translation>是</translation>
+        <translation>예</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1773"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1793"/>
         <source>No</source>
-        <translation>否</translation>
+        <translation>아니요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1789"/>
         <source>Telegram upstream reachable</source>
-        <translation>Telegram 上游可达</translation>
+        <translation>Telegram 업스트림 접속 가능</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1809"/>
         <source>Clients connected</source>
-        <translation>已连接客户端</translation>
+        <translation>연결된 클라이언트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1829"/>
         <source>Last config refresh</source>
-        <translation>上次配置刷新</translation>
+        <translation>마지막 구성 새로 고침</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1842"/>
         <source>Stats endpoint</source>
-        <translation>统计端点</translation>
+        <translation>통계 엔드포인트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
         <source>Refreshing…</source>
-        <translation>刷新中…</translation>
+        <translation>새로 고치는 중…</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
         <source>Tap ↻ to refresh diagnostics</source>
-        <translation>点按 ↻ 刷新诊断</translation>
+        <translation>진단을 새로 고치려면 ↻을 누르세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1867"/>
         <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
-        <translation>如果更改设置，代理连接链接将随之改变，旧链接将失效。</translation>
+        <translation>설정을 변경하면 프록시 연결 링크가 변경되며 이전 링크는 작동하지 않습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1881"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1901"/>
         <source>The port must be in the range of 1 to 65535</source>
-        <translation>端口必须在 1 到 65535 之间</translation>
+        <translation>포트는 1~65535 범위여야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1913"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F), or leave empty.</source>
-        <translation>代理标签必须为恰好 32 位十六进制字符（0-9、A-F），或留空。</translation>
+        <translation>프록시 태그는 정확히 32자의 16진수(0-9, A-F)여야 하며, 사용하지 않으면 비워 두세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1928"/>
         <source>NAT internal IP: enter a valid IPv4 address</source>
-        <translation>NAT 内网 IP：请输入有效的 IPv4 地址</translation>
+        <translation>NAT 내부 IP: 올바른 IPv4 주소를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1932"/>
         <source>NAT external IP: enter a valid IPv4 address</source>
-        <translation>NAT 外网 IP：请输入有效的 IPv4 地址</translation>
+        <translation>NAT 외부 IP: 올바른 IPv4 주소를 입력하세요</translation>
     </message>
 </context>
 <context>
@@ -2553,17 +2553,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="23"/>
         <source>Settings updated successfully</source>
-        <translation>配置更新成功</translation>
+        <translation>설정이 성공적으로 업데이트되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="64"/>
         <source>SFTP settings</source>
-        <translation>SFTP 配置</translation>
+        <translation>SFTP 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="75"/>
         <source>Host</source>
-        <translation>主机</translation>
+        <translation>호스트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="85"/>
@@ -2571,49 +2571,49 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="127"/>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="150"/>
         <source>Copied</source>
-        <translation>拷贝</translation>
+        <translation>복사했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="96"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="117"/>
         <source>User name</source>
-        <translation>用户名</translation>
+        <translation>사용자 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="138"/>
         <source>Password</source>
-        <translation>密码</translation>
+        <translation>비밀번호</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="172"/>
         <source>Mount folder on device</source>
-        <translation>挂载文件夹</translation>
+        <translation>기기에 폴더 마운트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="197"/>
         <source>In order to mount remote SFTP folder as local drive, perform following steps: &lt;br&gt;</source>
-        <translation>为将远程 SFTP 文件夹挂载到本地，请执行以下步骤: &lt;br&gt;</translation>
+        <translation>원격 SFTP 폴더를 로컬 드라이브로 마운트하려면 다음 단계를 수행하세요: &lt;br&gt;</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="199"/>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="202"/>
         <source>&lt;br&gt;1. Install the latest version of </source>
-        <translation>&lt;br&gt;1. 安装最新版的 </translation>
+        <translation>&lt;br&gt;1. 최신 버전 설치: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="200"/>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="203"/>
         <source>&lt;br&gt;2. Install the latest version of </source>
-        <translation>&lt;br&gt;2. 安装最新版的 </translation>
+        <translation>&lt;br&gt;2. 최신 버전 설치: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="232"/>
         <source>Detailed instructions</source>
-        <translation>详细说明</translation>
+        <translation>자세한 안내</translation>
     </message>
 </context>
 <context>
@@ -2621,18 +2621,18 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="25"/>
         <source>Settings updated successfully</source>
-        <translation>配置更新成功</translation>
+        <translation>설정이 성공적으로 업데이트되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="64"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="188"/>
         <source>SOCKS5 settings</source>
-        <translation>SOCKS5 设置</translation>
+        <translation>SOCKS5 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="73"/>
         <source>Host</source>
-        <translation>主机</translation>
+        <translation>호스트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="83"/>
@@ -2640,50 +2640,50 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="121"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="142"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="92"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="199"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="111"/>
         <source>User name</source>
-        <translation>用户名</translation>
+        <translation>사용자 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="130"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="243"/>
         <source>Password</source>
-        <translation>密码</translation>
+        <translation>비밀번호</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="220"/>
         <source>Username</source>
-        <translation>用户名</translation>
+        <translation>사용자 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="272"/>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="307"/>
         <source>Change connection settings</source>
-        <translation>更改连接设置</translation>
+        <translation>연결 설정 변경</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="276"/>
         <source>The port must be in the range of 1 to 65535</source>
-        <translation>端口必须在 1 到 65535 之间</translation>
+        <translation>포트는 1~65535 범위여야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="280"/>
         <source>Password cannot be empty</source>
-        <translation>密码不能为空</translation>
+        <translation>비밀번호는 비워 둘 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="283"/>
         <source>Username cannot be empty</source>
-        <translation>用户名不能为空</translation>
+        <translation>사용자 이름은 비워 둘 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -2691,90 +2691,90 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="215"/>
         <source>Checking...</source>
-        <translation>检查中...</translation>
+        <translation>확인 중...</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="218"/>
         <source>Updating</source>
-        <translation>更新中</translation>
+        <translation>업데이트 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="222"/>
         <source>Not deployed</source>
-        <translation>未部署</translation>
+        <translation>배포되지 않음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="225"/>
         <source>Running</source>
-        <translation>运行中</translation>
+        <translation>실행 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="228"/>
         <source>Stopped</source>
-        <translation>已停止</translation>
+        <translation>중지됨</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="231"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation>오류</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="234"/>
         <source>Unknown</source>
-        <translation>未知</translation>
+        <translation>알 수 없음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="349"/>
         <source>Telemt started</source>
-        <translation>Telemt 已启动</translation>
+        <translation>Telemt가 시작되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="349"/>
         <source>Telemt stopped</source>
-        <translation>Telemt 已停止</translation>
+        <translation>Telemt가 중지되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="362"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="910"/>
         <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
-        <translation>设置已锁定：连接超时（错误代码 %1）。请重新打开页面后重试。</translation>
+        <translation>설정이 잠겼습니다. 연결 시간이 초과되었습니다(오류 코드 %1). 다시 시도하려면 페이지를 다시 여세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="442"/>
         <source>Telemt settings</source>
-        <translation>Telemt 设置</translation>
+        <translation>Telemt 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="443"/>
         <source>Read more about this settings</source>
-        <translation>了解更多关于这些设置</translation>
+        <translation>이 설정에 대해 자세히 알아보기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="453"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1741"/>
         <source>No internet connection. Connect to the internet to change Telemt settings.</source>
-        <translation>无网络连接。请连接互联网以更改 Telemt 设置。</translation>
+        <translation>인터넷에 연결되어 있지 않습니다. Telemt 설정을 변경하려면 인터넷에 연결하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="478"/>
         <source>Connection</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="482"/>
         <source>Settings</source>
-        <translation>设置</translation>
+        <translation>설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="532"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1419"/>
         <source>Use Telegram connection link</source>
-        <translation>使用 Telegram 连接链接</translation>
+        <translation>Telegram 연결 링크 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="558"/>
         <source>Deploy Telemt first</source>
-        <translation>请先部署 Telemt</translation>
+        <translation>먼저 Telemt를 배포하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="574"/>
@@ -2785,183 +2785,183 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="860"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1706"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="619"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="865"/>
         <source>Telegram connection link</source>
-        <translation>Telegram 连接链接</translation>
+        <translation>Telegram 연결 링크</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="620"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="866"/>
         <source>Telemt connection link</source>
-        <translation>Telemt 连接链接</translation>
+        <translation>Telemt 연결 링크</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="647"/>
         <source>Or enter the proxy details manually.</source>
-        <translation>或手动输入代理信息。</translation>
+        <translation>또는 프록시 정보를 직접 입력하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="653"/>
         <source>How to do it</source>
-        <translation>操作方法</translation>
+        <translation>설정 방법</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="695"/>
         <source>Host</source>
-        <translation>主机</translation>
+        <translation>호스트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="731"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>密钥</translation>
+        <translation>시크릿</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="802"/>
         <source>Delete Telemt</source>
-        <translation>删除 Telemt</translation>
+        <translation>Telemt 삭제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="805"/>
         <source>Remove %1 from server?</source>
-        <translation>从服务器移除 %1 ?</translation>
+        <translation>서버에서 %1을(를) 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="806"/>
         <source>The proxy will be stopped and all users will lose access.</source>
-        <translation>代理将被停止，所有用户将失去访问权限。</translation>
+        <translation>프록시가 중지되고 모든 사용자가 접속할 수 없게 됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="807"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="808"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="957"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="880"/>
         <source>Enable Telemt</source>
-        <translation>启用 Telemt</translation>
+        <translation>Telemt 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="908"/>
         <source>Enable Telemt to edit settings</source>
-        <translation>启用 Telemt 后才能编辑设置</translation>
+        <translation>설정을 편집하려면 Telemt를 사용 설정하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="911"/>
         <source>Cannot reach the server — settings are unavailable</source>
-        <translation>无法连接服务器 — 设置不可用</translation>
+        <translation>서버에 연결할 수 없어 설정을 사용할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>基础密钥</translation>
+        <translation>기본 시크릿</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="936"/>
         <source>Not generated</source>
-        <translation>未生成</translation>
+        <translation>생성되지 않음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>要生成新密钥吗？</translation>
+        <translation>새 시크릿을 생성하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="955"/>
         <source>All existing connection links will stop working. Users will need new links.</source>
-        <translation>所有现有连接链接将失效，用户需要新的链接。</translation>
+        <translation>기존 연결 링크가 모두 작동하지 않게 됩니다. 사용자에게 새 링크가 필요합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="956"/>
         <source>Generate</source>
-        <translation>生成</translation>
+        <translation>생성</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="966"/>
         <source>New secret saved. It will be applied when Telemt is started.</source>
-        <translation>新密钥已保存，将在 Telemt 启动时生效。</translation>
+        <translation>새 시크릿을 저장했습니다. Telemt가 시작될 때 적용됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="984"/>
         <source>Public host / IP</source>
-        <translation>公网主机 / IP</translation>
+        <translation>공개 호스트/IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="995"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1003"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1762"/>
         <source>Enter a valid IP address or domain name</source>
-        <translation>请输入有效的 IP 地址或域名</translation>
+        <translation>올바른 IP 주소 또는 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1020"/>
         <source>Leave empty to use server IP automatically</source>
-        <translation>留空则自动使用服务器 IP</translation>
+        <translation>서버 IP를 자동으로 사용하려면 비워 두세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1033"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ 这会覆盖连接链接中的服务器 IP。请确认该主机/域名指向您的服务器。</translation>
+        <translation>⚠ 연결 링크의 서버 IP를 재정의합니다. 이 호스트/도메인이 서버를 가리키는지 확인하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1046"/>
         <source>Server port</source>
-        <translation>服务器端口</translation>
+        <translation>서버 포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1077"/>
         <source>FakeTLS may not work on ports other than 443</source>
-        <translation>FakeTLS 在非 443 端口上可能无法工作</translation>
+        <translation>FakeTLS는 443 이외의 포트에서 작동하지 않을 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1088"/>
         <source>The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.</source>
-        <translation>推广频道在 @MTProxyBot 中设置。请将代理标签粘贴到此处：恰好 32 位十六进制字符（0-9、A-F），与机器人消息中一致 — 或留空。</translation>
+        <translation>홍보 채널은 @MTProxyBot에서 설정합니다. 봇 메시지에 표시된 정확히 32자의 16진수(0-9, A-F) 프록시 태그를 여기에 붙여 넣거나 비워 두세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1101"/>
         <source>Promoted channel tag (optional)</source>
-        <translation>推广频道标签（可选）</translation>
+        <translation>홍보 채널 태그(선택 사항)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1102"/>
         <source>32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)</source>
-        <translation>来自 @MTProxyBot 的 32 位十六进制字符（例如 3b7b2fa9…）</translation>
+        <translation>@MTProxyBot의 16진수 32자(예: 3b7b2fa9…)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1123"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F).</source>
-        <translation>代理标签必须为恰好 32 位十六进制字符（0-9、A-F）。</translation>
+        <translation>프록시 태그는 정확히 32자의 16진수(0-9, A-F)여야 합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1133"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.</source>
-        <translation>代理标签必须为恰好 32 位十六进制字符（0-9、A-F）。不使用时请留空。</translation>
+        <translation>프록시 태그는 정확히 32자의 16진수(0-9, A-F)여야 합니다. 사용하지 않으면 비워 두세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1152"/>
         <source>Get a tag from</source>
-        <translation>从此处获取标签</translation>
+        <translation>태그 받기:</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1173"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1188"/>
         <source>Transport mode</source>
-        <translation>传输模式</translation>
+        <translation>전송 모드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1189"/>
@@ -2973,81 +2973,81 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1189"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1193"/>
         <source>Standard MTProto</source>
-        <translation>Standard MTProto</translation>
+        <translation>표준 MTProto</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>FakeTLS 域名</translation>
+        <translation>FakeTLS 도메인</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1237"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1244"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1777"/>
         <source>Enter a valid domain name</source>
-        <translation>请输入有效的域名</translation>
+        <translation>올바른 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1265"/>
         <source>The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.</source>
-        <translation>域名会被编码进 FakeTLS 客户端密钥（ee + base_secret + hex(domain)），且必须支持 HTTPS / TLS 1.3。</translation>
+        <translation>도메인은 FakeTLS 클라이언트 시크릿(ee + base_secret + hex(domain))에 인코딩됩니다. HTTPS/TLS 1.3을 지원해야 합니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1272"/>
         <source>⚠ Changing the domain will invalidate all previously issued FakeTLS connection links.</source>
-        <translation>⚠ 更改域名将使此前签发的所有 FakeTLS 连接链接失效。</translation>
+        <translation>⚠ 도메인을 변경하면 이전에 발급된 모든 FakeTLS 연결 링크가 무효화됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1285"/>
         <source>Advanced</source>
-        <translation>高级</translation>
+        <translation>고급</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>附加密钥</translation>
+        <translation>추가 시크릿</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1315"/>
         <source>Add extra secrets to allow gradual migration without disconnecting existing users.</source>
-        <translation>添加附加密钥可实现平滑迁移，而不必断开现有用户。</translation>
+        <translation>기존 사용자의 연결을 끊지 않고 점진적으로 이전하려면 추가 시크릿을 등록하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>添加附加密钥</translation>
+        <translation>추가 시크릿 등록</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
         <source>Set public IP manually</source>
-        <translation>手动设置公网 IP</translation>
+        <translation>공개 IP 직접 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1533"/>
         <source>By default the proxy auto-detects its public IP. Enable to override it manually, e.g. when the server is behind NAT / Docker bridge</source>
-        <translation>默认情况下代理会自动检测自身公网 IP。启用后可手动指定，例如服务器位于 NAT 或 Docker 网桥之后时</translation>
+        <translation>기본적으로 프록시는 공개 IP를 자동 감지합니다. 서버가 NAT/Docker 브리지 뒤에 있는 경우처럼 직접 재정의하려면 사용하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1550"/>
         <source>Public IP</source>
-        <translation>公网 IP</translation>
+        <translation>공개 IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1559"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1567"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1781"/>
         <source>Enter a valid IPv4 address</source>
-        <translation>请输入有效的 IPv4 地址</translation>
+        <translation>올바른 IPv4 주소를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1598"/>
         <source>Diagnostics</source>
-        <translation>诊断</translation>
+        <translation>진단</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1626"/>
         <source>Public port reachable</source>
-        <translation>公网端口可达</translation>
+        <translation>공개 포트 접속 가능</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1630"/>
@@ -3061,68 +3061,68 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1630"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1650"/>
         <source>Yes</source>
-        <translation>是</translation>
+        <translation>예</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1630"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1650"/>
         <source>No</source>
-        <translation>否</translation>
+        <translation>아니요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1646"/>
         <source>Telegram upstream reachable</source>
-        <translation>Telegram 上游可达</translation>
+        <translation>Telegram 업스트림 접속 가능</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1666"/>
         <source>Clients connected</source>
-        <translation>已连接客户端</translation>
+        <translation>연결된 클라이언트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1686"/>
         <source>Last config refresh</source>
-        <translation>上次配置刷新</translation>
+        <translation>마지막 구성 새로 고침</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1699"/>
         <source>Stats endpoint</source>
-        <translation>统计端点</translation>
+        <translation>통계 엔드포인트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
         <source>Refreshing…</source>
-        <translation>刷新中…</translation>
+        <translation>새로 고치는 중…</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
         <source>Tap ↻ to refresh diagnostics</source>
-        <translation>点按 ↻ 刷新诊断</translation>
+        <translation>진단을 새로 고치려면 ↻을 누르세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1724"/>
         <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
-        <translation>如果更改设置，代理连接链接将随之改变，旧链接将失效。</translation>
+        <translation>설정을 변경하면 프록시 연결 링크가 변경되며 이전 링크는 작동하지 않습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1738"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1757"/>
         <source>The port must be in the range of 1 to 65535</source>
-        <translation>端口必须在 1 到 65535 之间</translation>
+        <translation>포트는 1~65535 범위여야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1769"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F), or leave empty.</source>
-        <translation>代理标签必须为恰好 32 位十六进制字符（0-9、A-F），或留空。</translation>
+        <translation>프록시 태그는 정확히 32자의 16진수(0-9, A-F)여야 하며, 사용하지 않으면 비워 두세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1784"/>
         <source>Public IP: enter a valid IPv4 address</source>
-        <translation>公网 IP：请输入有效的 IPv4 地址</translation>
+        <translation>공개 IP: 올바른 IPv4 주소를 입력하세요</translation>
     </message>
 </context>
 <context>
@@ -3130,37 +3130,37 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="24"/>
         <source>Settings updated successfully</source>
-        <translation>配置更新成功</translation>
+        <translation>설정이 성공적으로 업데이트되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="59"/>
         <source>Tor website settings</source>
-        <translation>Tor网站配置</translation>
+        <translation>Tor 웹사이트 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="75"/>
         <source>Website address</source>
-        <translation>网址</translation>
+        <translation>웹사이트 주소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="86"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="102"/>
         <source>Use &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt; to open this URL.</source>
-        <translation>用 &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor 浏览器&lt;/a&gt; 打开上面网址.</translation>
+        <translation>이 URL을 열려면 &lt;a href=&quot;https://www.torproject.org/download/&quot; style=&quot;color: #FBB26A;&quot;&gt;Tor Browser&lt;/a&gt;를 사용하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="117"/>
         <source>After creating your onion site, it takes a few minutes for the Tor network to make it available for use.</source>
-        <translation>创建您的洋葱网站后，需要几分钟时间，才能使其在Tor网络上可用</translation>
+        <translation>onion 사이트를 만든 후 Tor 네트워크에서 사용할 수 있게 되기까지 몇 분 정도 걸립니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTorWebsiteSettings.qml" line="126"/>
         <source>When configuring WordPress set the this onion address as domain.</source>
-        <translation>配置 WordPress 时，将此洋葱地址设置为域。</translation>
+        <translation>WordPress를 구성할 때 이 onion 주소를 도메인으로 설정하세요.</translation>
     </message>
 </context>
 <context>
@@ -3168,47 +3168,47 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="48"/>
         <source>Settings</source>
-        <translation>设置</translation>
+        <translation>설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="85"/>
         <source>Close application</source>
-        <translation>关闭应用</translation>
+        <translation>애플리케이션 종료</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
         <source>Servers</source>
-        <translation>服务器</translation>
+        <translation>서버</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="128"/>
         <source>Connection</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="139"/>
         <source>Application</source>
-        <translation>应用</translation>
+        <translation>애플리케이션</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="150"/>
         <source>News &amp; Notifications</source>
-        <translation>新闻与通知</translation>
+        <translation>뉴스 및 알림</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="166"/>
         <source>Backup</source>
-        <translation>备份</translation>
+        <translation>백업</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="177"/>
         <source>About AmneziaVPN</source>
-        <translation>关于</translation>
+        <translation>AmneziaVPN 정보</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="188"/>
         <source>Dev console</source>
-        <translation>开发者控制台</translation>
+        <translation>개발자 콘솔</translation>
     </message>
 </context>
 <context>
@@ -3216,42 +3216,42 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="61"/>
         <source>Support Amnezia</source>
-        <translation>支持Amnezia</translation>
+        <translation>Amnezia 후원하기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="76"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
-        <translation>Amnezia 是一款免费的开源应用程序。 如果您喜欢的话可以支持开发者。</translation>
+        <translation>Amnezia는 무료 오픈 소스 애플리케이션입니다. 마음에 드신다면 개발자들을 후원해 주세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="86"/>
         <source>Contacts</source>
-        <translation>联系方式</translation>
+        <translation>연락처</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
         <source>Software version: %1</source>
-        <translation>软件版本: %1</translation>
+        <translation>소프트웨어 버전: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
         <source>Check for updates</source>
-        <translation>检查更新</translation>
+        <translation>업데이트 확인</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
         <source>Privacy Policy</source>
-        <translation>隐私政策</translation>
+        <translation>개인정보 처리방침</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="189"/>
         <source>Telegram group</source>
-        <translation>电报群</translation>
+        <translation>Telegram 그룹</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="190"/>
         <source>To discuss features</source>
-        <translation>用于功能讨论</translation>
+        <translation>기능에 대해 논의하기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="193"/>
@@ -3266,7 +3266,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
         <source>For reviews and bug reports</source>
-        <translation>用于评论和提交软件的缺陷</translation>
+        <translation>의견 및 버그 신고</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="204"/>
@@ -3281,7 +3281,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
         <source>Discover the source code</source>
-        <translation>查看源代码</translation>
+        <translation>소스 코드 살펴보기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
@@ -3291,12 +3291,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="222"/>
         <source>Website</source>
-        <translation>官网</translation>
+        <translation>웹사이트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="223"/>
         <source>Visit official website</source>
-        <translation>访问官方网站</translation>
+        <translation>공식 웹사이트 방문</translation>
     </message>
 </context>
 <context>
@@ -3304,32 +3304,32 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="147"/>
         <source>Subscription expired</source>
-        <translation>订阅已过期</translation>
+        <translation>구독이 만료되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="147"/>
         <source>Subscription expiring soon</source>
-        <translation>订阅即将到期</translation>
+        <translation>구독이 곧 만료됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="166"/>
         <source>Renew subscription</source>
-        <translation>续订</translation>
+        <translation>구독 갱신</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="180"/>
         <source>Location for connection</source>
-        <translation>连接位置</translation>
+        <translation>연결 위치</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="209"/>
         <source>Unable change server location while trying to make an active connection</source>
-        <translation>正在尝试建立连接时无法更改服务器位置</translation>
+        <translation>연결을 시도하는 동안에는 서버 위치를 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="213"/>
         <source>Unable change server location while there is an active connection</source>
-        <translation>存在活动连接时无法更改服务器位置</translation>
+        <translation>연결 중에는 서버 위치를 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -3337,57 +3337,57 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="45"/>
         <source>Active Devices</source>
-        <translation>活动设备</translation>
+        <translation>활성 기기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="46"/>
         <source>Manage currently connected devices</source>
-        <translation>管理当前已连接的设备</translation>
+        <translation>현재 연결된 기기 관리</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="55"/>
         <source>You can find the identifier on the Support tab or, for older versions of the app, by tapping &apos;+&apos; and then the three dots at the top of the page.</source>
-        <translation>您可以在“支持”选项卡中找到该标识符；在较旧版本的应用中，可点按“+”，然后点按页面顶部的三个点。</translation>
+        <translation>식별자는 지원 탭에서 확인할 수 있습니다. 이전 버전의 앱에서는 &apos;+&apos;를 누른 다음 페이지 상단의 점 세 개를 누르세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="69"/>
         <source> (current device)</source>
-        <translation>（当前设备）</translation>
+        <translation> (현재 기기)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="70"/>
         <source>Support tag: </source>
-        <translation>支持标签：</translation>
+        <translation>지원 태그: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="70"/>
         <source>Last updated: </source>
-        <translation>上次更新：</translation>
+        <translation>마지막 업데이트: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="75"/>
         <source>Cannot unlink device during active connection</source>
-        <translation>存在活动连接时无法解绑设备</translation>
+        <translation>연결 중에는 기기 연결을 해제할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="79"/>
         <source>Are you sure you want to unlink this device?</source>
-        <translation>确定要解绑此设备吗？</translation>
+        <translation>이 기기의 연결을 해제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
-        <translation>此操作会将该设备从您的订阅中解绑。您可以随时在设备的订阅设置中点按“重新加载 API 配置”重新连接。</translation>
+        <translation>이 작업은 기기를 구독에서 연결 해제합니다. 기기의 구독 설정에서 &quot;API 구성 다시 불러오기&quot;를 누르면 언제든 다시 연결할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="81"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="82"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
 </context>
 <context>
@@ -3455,7 +3455,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="64"/>
         <source>Routers</source>
-        <translation>路由器</translation>
+        <translation>라우터</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="65"/>
@@ -3465,12 +3465,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="101"/>
         <source>How to connect on another device</source>
-        <translation>如何在其他设备上连接</translation>
+        <translation>다른 기기에서 연결하는 방법</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="102"/>
         <source>Setup guides on the Amnezia website</source>
-        <translation>Amnezia 网站上的设置指南</translation>
+        <translation>Amnezia 웹사이트의 설정 가이드</translation>
     </message>
 </context>
 <context>
@@ -3478,82 +3478,82 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="23"/>
         <source>Save AmneziaVPN config</source>
-        <translation>保存配置</translation>
+        <translation>AmneziaVPN 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="60"/>
         <source>Configuration Files</source>
-        <translation>配置文件</translation>
+        <translation>구성 파일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="61"/>
         <source>For router setup or the AmneziaWG app</source>
-        <translation>用于路由器设置或 AmneziaWG 应用</translation>
+        <translation>라우터 설정 또는 AmneziaWG 앱용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="73"/>
         <source>The configuration needs to be reissued</source>
-        <translation>需要重新签发该配置</translation>
+        <translation>구성을 다시 발급해야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="135"/>
         <source> configuration file</source>
-        <translation> 配置文件</translation>
+        <translation> 구성 파일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="149"/>
         <source>Generate a new configuration file</source>
-        <translation>生成新的配置文件</translation>
+        <translation>새 구성 파일 생성</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="150"/>
         <source>The previously created one will stop working</source>
-        <translation>先前创建的将失效</translation>
+        <translation>이전에 만든 파일은 더 이상 작동하지 않습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="168"/>
         <source>Revoke the current configuration file</source>
-        <translation>吊销当前配置文件</translation>
+        <translation>현재 구성 파일 폐기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="198"/>
         <source>Config file saved</source>
-        <translation>配置文件已保存</translation>
+        <translation>구성 파일이 저장되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="212"/>
         <source>The config has been revoked</source>
-        <translation>该配置已被吊销</translation>
+        <translation>구성이 폐기되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="219"/>
         <source>Generate a new %1 configuration file?</source>
-        <translation>要生成新的 %1 配置文件吗？</translation>
+        <translation>새 %1 구성 파일을 생성하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="221"/>
         <source>Revoke the current %1 configuration file?</source>
-        <translation>要吊销当前的 %1 配置文件吗？</translation>
+        <translation>현재 %1 구성 파일을 폐기하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="224"/>
         <source>Your previous configuration file will no longer work, and it will not be possible to connect using it</source>
-        <translation>您之前的配置文件将不再有效，也无法用它连接</translation>
+        <translation>이전 구성 파일은 더 이상 작동하지 않으며 해당 파일로 연결할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="225"/>
         <source>Download</source>
-        <translation>下载</translation>
+        <translation>다운로드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="225"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="226"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
 </context>
 <context>
@@ -3561,137 +3561,137 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
         <source>Subscription Status</source>
-        <translation>订阅状态</translation>
+        <translation>구독 상태</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="38"/>
         <source>Valid Until</source>
-        <translation>有效期至</translation>
+        <translation>유효 기간</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="47"/>
         <source>Active Connections</source>
-        <translation>活动连接</translation>
+        <translation>활성 연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="158"/>
         <source>Subscription expired</source>
-        <translation>订阅已过期</translation>
+        <translation>구독이 만료되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="159"/>
         <source>Subscription expiring soon</source>
-        <translation>订阅即将到期</translation>
+        <translation>구독이 곧 만료됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="189"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="254"/>
         <source>Renew subscription</source>
-        <translation>续订</translation>
+        <translation>구독 갱신</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="277"/>
         <source>Configurations have been updated for some countries. Download and install the updated configuration files</source>
-        <translation>部分国家/地区的配置已更新。请下载并安装更新后的配置文件</translation>
+        <translation>일부 국가의 구성이 업데이트되었습니다. 업데이트된 구성 파일을 다운로드하여 설치하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="298"/>
         <source>Subscription Key</source>
-        <translation>订阅密钥</translation>
+        <translation>구독 키</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="320"/>
         <source>Configuration Files</source>
-        <translation>配置文件</translation>
+        <translation>구성 파일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="322"/>
         <source>Manage configuration files</source>
-        <translation>管理配置文件</translation>
+        <translation>구성 파일 관리</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="340"/>
         <source>Active Devices</source>
-        <translation>活动设备</translation>
+        <translation>활성 기기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="342"/>
         <source>Manage currently connected devices</source>
-        <translation>管理当前已连接的设备</translation>
+        <translation>현재 연결된 기기 관리</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="359"/>
         <source>Support</source>
-        <translation>支持</translation>
+        <translation>지원</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="374"/>
         <source>How to connect on another device</source>
-        <translation>如何在其他设备上连接</translation>
+        <translation>다른 기기에서 연결하는 방법</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="399"/>
         <source>Reload API config</source>
-        <translation>重新加载 API 配置</translation>
+        <translation>API 구성 다시 불러오기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="402"/>
         <source>Reload API config?</source>
-        <translation>要重新加载 API 配置吗？</translation>
+        <translation>API 구성을 다시 불러오시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="403"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="441"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="478"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="404"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="442"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="479"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="408"/>
         <source>Cannot reload API config during active connection</source>
-        <translation>存在活动连接时无法重新加载 API 配置</translation>
+        <translation>연결 중에는 API 구성을 다시 불러올 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="436"/>
         <source>Unlink this device</source>
-        <translation>解绑此设备</translation>
+        <translation>이 기기 연결 해제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="439"/>
         <source>Are you sure you want to unlink this device?</source>
-        <translation>确定要解绑此设备吗？</translation>
+        <translation>이 기기의 연결을 해제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="440"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
-        <translation>此操作会将该设备从您的订阅中解绑。您可以随时在设备的订阅设置中点按“重新加载 API 配置”重新连接。</translation>
+        <translation>이 작업은 기기를 구독에서 연결 해제합니다. 기기의 구독 설정에서 &quot;API 구성 다시 불러오기&quot;를 누르면 언제든 다시 연결할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="446"/>
         <source>Cannot unlink device during active connection</source>
-        <translation>存在活动连接时无法解绑设备</translation>
+        <translation>연결 중에는 기기 연결을 해제할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="474"/>
         <source>Remove from application</source>
-        <translation>从应用中移除</translation>
+        <translation>애플리케이션에서 제거</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="477"/>
         <source>Remove from application?</source>
-        <translation>要从应用中移除吗？</translation>
+        <translation>애플리케이션에서 제거하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="483"/>
         <source>Cannot remove server during active connection</source>
-        <translation>存在活动连接时无法移除服务器</translation>
+        <translation>연결 중에는 서버를 제거할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -3699,42 +3699,42 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="93"/>
         <source>Copy key</source>
-        <translation>复制密钥</translation>
+        <translation>키 복사</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="98"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="114"/>
         <source>Save key as a file</source>
-        <translation>将密钥保存为文件</translation>
+        <translation>키를 파일로 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="121"/>
         <source>Save AmneziaVPN config</source>
-        <translation>保存配置</translation>
+        <translation>AmneziaVPN 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="122"/>
         <source>Config files (*.vpn)</source>
-        <translation>配置文件 (*.vpn)</translation>
+        <translation>구성 파일 (*.vpn)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="133"/>
         <source>Config file saved</source>
-        <translation>配置文件已保存</translation>
+        <translation>구성 파일이 저장되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="150"/>
         <source>Show key text</source>
-        <translation>显示密钥文本</translation>
+        <translation>키 텍스트 표시</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="191"/>
         <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
-        <translation>要在 Amnezia 应用中读取二维码，请在主菜单中点按 + → “二维码”</translation>
+        <translation>Amnezia 앱에서 QR 코드를 읽으려면 기본 메뉴에서 +를 누른 다음 &apos;QR 코드&apos;를 누르세요</translation>
     </message>
 </context>
 <context>
@@ -3747,37 +3747,37 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="30"/>
         <source>Email</source>
-        <translation>电子邮件</translation>
+        <translation>이메일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="38"/>
         <source>Email Billing &amp; Orders</source>
-        <translation>账单与订单邮箱</translation>
+        <translation>결제 및 주문 이메일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="46"/>
         <source>Website</source>
-        <translation>官网</translation>
+        <translation>웹사이트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="81"/>
         <source>Support</source>
-        <translation>支持</translation>
+        <translation>지원</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="82"/>
         <source>Our technical support specialists are available to assist you at any time</source>
-        <translation>我们的技术支持专家随时为您提供帮助</translation>
+        <translation>기술 지원 담당자가 언제든 도와드립니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="110"/>
         <source>Support tag</source>
-        <translation>支持标签</translation>
+        <translation>지원 태그</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="120"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사되었습니다</translation>
     </message>
 </context>
 <context>
@@ -3785,62 +3785,62 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="27"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation>无法在活动连接期间更改分割隧道设置</translation>
+        <translation>연결된 상태에서는 분할 터널링 설정을 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="49"/>
         <source>Only the apps from the list should have access via VPN</source>
-        <translation>仅列表中的应用可通过 VPN 访问</translation>
+        <translation>목록의 앱만 VPN을 통해 접속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="56"/>
         <source>Apps from the list should not have access via VPN</source>
-        <translation>列表中的应用不应通过 VPN 访问</translation>
+        <translation>목록의 앱은 VPN을 통해 접속하지 않음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="87"/>
         <source>App split tunneling</source>
-        <translation>应用分流</translation>
+        <translation>앱 분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="112"/>
         <source>Mode</source>
-        <translation>规则</translation>
+        <translation>모드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="154"/>
         <source>Only &quot;Apps from the list should not have access via VPN&quot; mode is available on Windows</source>
-        <translation>在 Windows 上仅提供“列表中的应用不应通过 VPN 访问”模式</translation>
+        <translation>Windows에서는 &quot;목록의 앱은 VPN을 통해 접속하지 않음&quot; 모드만 사용할 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="200"/>
         <source>Remove </source>
-        <translation>移除 </translation>
+        <translation>삭제: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="201"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="202"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="245"/>
         <source>application name</source>
-        <translation>应用名称</translation>
+        <translation>애플리케이션 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="255"/>
         <source>Open executable file</source>
-        <translation>打开可执行文件</translation>
+        <translation>실행 파일 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="256"/>
         <source>Executable files (*.*)</source>
-        <translation>可执行文件 (*.*)</translation>
+        <translation>실행 파일 (*.*)</translation>
     </message>
 </context>
 <context>
@@ -3848,112 +3848,112 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="48"/>
         <source>Application</source>
-        <translation>应用</translation>
+        <translation>애플리케이션</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="66"/>
         <source>Allow application screenshots</source>
-        <translation>允许截屏</translation>
+        <translation>애플리케이션 스크린샷 허용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="87"/>
         <source>Enable notifications</source>
-        <translation>启用通知</translation>
+        <translation>알림 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="88"/>
         <source>Enable notifications to show the VPN state in the status bar</source>
-        <translation>启用通知以在状态栏中显示 VPN 状态</translation>
+        <translation>상태 표시줄에 VPN 상태를 표시하도록 알림을 사용합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="108"/>
         <source>Auto start</source>
-        <translation>自动运行</translation>
+        <translation>자동 시작</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="109"/>
         <source>Launch the application every time the device is starts</source>
-        <translation>每次设备启动时启动应用程序</translation>
+        <translation>기기가 시작될 때마다 애플리케이션을 실행합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
         <source>Auto connect</source>
-        <translation>自动连接</translation>
+        <translation>자동 연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="132"/>
         <source>Connect to VPN on app start</source>
-        <translation>应用开启时连接VPN</translation>
+        <translation>앱 시작 시 VPN에 연결합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="154"/>
         <source>Start minimized</source>
-        <translation>最小化</translation>
+        <translation>최소화 상태로 시작</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="155"/>
         <source>Launch application minimized (works with autostart option turned on)</source>
-        <translation>以最小化方式启动应用（需开启自动启动）</translation>
+        <translation>애플리케이션을 최소화 상태로 실행합니다(자동 시작 옵션이 켜져 있어야 함)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="180"/>
         <source>News Notification</source>
-        <translation>新闻通知</translation>
+        <translation>뉴스 알림</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="181"/>
         <source>Show a notification icon for unread news</source>
-        <translation>为未读新闻显示通知图标</translation>
+        <translation>읽지 않은 뉴스가 있으면 알림 아이콘을 표시합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="205"/>
         <source>Language</source>
-        <translation>语言</translation>
+        <translation>언어</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
         <source>Logging</source>
-        <translation>日志</translation>
+        <translation>로그 기록</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
         <source>Enabled</source>
-        <translation>开启</translation>
+        <translation>사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
         <source>Disabled</source>
-        <translation>禁用</translation>
+        <translation>사용 안 함</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="237"/>
         <source>Reset settings and remove all data from the application</source>
-        <translation>重置并清理应用的所有数据</translation>
+        <translation>설정을 초기화하고 애플리케이션의 모든 데이터 삭제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
         <source>Reset settings and remove all data from the application?</source>
-        <translation>重置并清理应用的所有数据？</translation>
+        <translation>설정을 초기화하고 애플리케이션의 모든 데이터를 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>所有配置恢复为默认值。服务器已安装的AmneziaVPN服务将被保留。</translation>
+        <translation>모든 설정이 기본값으로 초기화됩니다. 설치된 AmneziaVPN 서비스는 서버에 그대로 유지됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="245"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="249"/>
         <source>Cannot reset settings during active connection</source>
-        <translation>存在活动连接时无法重置设置</translation>
+        <translation>연결된 상태에서는 설정을 초기화할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -3961,78 +3961,78 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="26"/>
         <source>Settings restored from backup file</source>
-        <translation>从备份文件还原配置</translation>
+        <translation>백업 파일에서 설정을 복원했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="69"/>
         <source>Back up your configuration</source>
-        <translation>备份您的配置</translation>
+        <translation>구성 백업</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="70"/>
         <source>You can save your settings to a backup file to restore them the next time you install the application.</source>
-        <translation>您可以将配置信息备份到文件中，以便在下次安装应用软件时恢复配置</translation>
+        <translation>설정을 백업 파일에 저장하면 다음에 애플리케이션을 설치할 때 복원할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="88"/>
         <source>The backup will contain your passwords and private keys for all servers added to AmneziaVPN. Keep this information in a secure place.</source>
-        <translation>备份将包含您添加到 AmneziaVPN 的所有服务器的密码和私钥。请将这些信息保存在安全的地方。</translation>
+        <translation>백업에는 AmneziaVPN에 추가된 모든 서버의 비밀번호와 개인 키가 포함됩니다. 이 정보를 안전한 곳에 보관하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="102"/>
         <source>Make a backup</source>
-        <translation>进行备份</translation>
+        <translation>백업 만들기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="109"/>
         <source>Save backup file</source>
-        <translation>保存备份</translation>
+        <translation>백업 파일 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="110"/>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="148"/>
         <source>Backup files (*.backup)</source>
-        <translation>备份文件 (*.backup)</translation>
+        <translation>백업 파일 (*.backup)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="119"/>
         <source>Backup file saved</source>
-        <translation>备份文件已保存</translation>
+        <translation>백업 파일을 저장했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="141"/>
         <source>Restore from backup</source>
-        <translation>从备份还原</translation>
+        <translation>백업에서 복원</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="147"/>
         <source>Open backup file</source>
-        <translation>打开备份文件</translation>
+        <translation>백업 파일 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="162"/>
         <source>Import settings from a backup file?</source>
-        <translation>从备份文件导入设置？</translation>
+        <translation>백업 파일에서 설정을 가져오시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="163"/>
         <source>All current settings will be reset</source>
-        <translation>当前所有设置将重置</translation>
+        <translation>현재 설정이 모두 초기화됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="164"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="165"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="169"/>
         <source>Cannot restore backup settings during active connection</source>
-        <translation>存在活动连接时无法从备份恢复设置</translation>
+        <translation>연결된 상태에서는 백업 설정을 복원할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -4040,57 +4040,57 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="49"/>
         <source>Connection</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="65"/>
         <source>Use AmneziaDNS</source>
-        <translation>使用AmneziaDNS</translation>
+        <translation>AmneziaDNS 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="66"/>
         <source>If AmneziaDNS is installed on the server</source>
-        <translation>如果已在服务器安装AmneziaDNS</translation>
+        <translation>서버에 AmneziaDNS가 설치된 경우</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="83"/>
         <source>DNS servers</source>
-        <translation>DNS服务器</translation>
+        <translation>DNS 서버</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>当未使用或未安装AmneziaDNS时</translation>
+        <translation>AmneziaDNS를 사용하지 않거나 설치하지 않은 경우</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
         <source>Site-based split tunneling</source>
-        <translation>基于网站的隧道分离</translation>
+        <translation>사이트 기반 분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
-        <translation>配置想要通过VPN访问网站</translation>
+        <translation>VPN을 통해 접속할 사이트를 선택할 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="123"/>
         <source>App-based split tunneling</source>
-        <translation>基于应用的隧道分离</translation>
+        <translation>앱 기반 분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="124"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation>只允许在某些应用程序中使用 VPN</translation>
+        <translation>특정 앱에서만 VPN을 사용할 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="142"/>
         <source>KillSwitch</source>
-        <translation>KillSwitch</translation>
+        <translation>킬 스위치</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="143"/>
         <source>Blocks network connections without VPN</source>
-        <translation>阻止未经 VPN 的网络连接</translation>
+        <translation>VPN을 사용하지 않는 네트워크 연결을 차단합니다</translation>
     </message>
 </context>
 <context>
@@ -4098,67 +4098,67 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="46"/>
         <source>Default server does not support custom DNS</source>
-        <translation>默认服务器不支持自定义 DNS</translation>
+        <translation>기본 서버는 사용자 지정 DNS를 지원하지 않습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="59"/>
         <source>DNS servers</source>
-        <translation>DNS服务器</translation>
+        <translation>DNS 서버</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>如果未使用或未安装AmneziaDNS</translation>
+        <translation>AmneziaDNS를 사용하지 않거나 설치하지 않은 경우</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="84"/>
         <source>Primary DNS</source>
-        <translation>首选 DNS</translation>
+        <translation>기본 DNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="99"/>
         <source>Secondary DNS</source>
-        <translation>备用 DNS</translation>
+        <translation>보조 DNS</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="122"/>
         <source>Restore default</source>
-        <translation>恢复默认配置</translation>
+        <translation>기본값 복원</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="125"/>
         <source>Restore default DNS settings?</source>
-        <translation>是否恢复默认DNS配置？</translation>
+        <translation>기본 DNS 설정을 복원하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="126"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="127"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="134"/>
         <source>Settings have been reset</source>
-        <translation>已重置</translation>
+        <translation>설정이 초기화되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="149"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="153"/>
         <source>Primary DNS cannot be empty</source>
-        <translation>主 DNS 不能为空</translation>
+        <translation>기본 DNS는 비워 둘 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="165"/>
         <source>Settings saved</source>
-        <translation>配置已保存</translation>
+        <translation>설정을 저장했습니다</translation>
     </message>
 </context>
 <context>
@@ -4166,67 +4166,67 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="40"/>
         <source>KillSwitch</source>
-        <translation>KillSwitch</translation>
+        <translation>킬 스위치</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
         <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
-        <translation>启用后可确保网络流量通过安全的 VPN 隧道，避免连接中断时意外暴露您的 IP 和 DNS 查询</translation>
+        <translation>네트워크 트래픽이 안전한 VPN 터널을 통하도록 하여 연결이 끊겼을 때 IP 및 DNS 요청이 노출되는 것을 방지합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
         <source>KillSwitch settings cannot be changed during an active connection</source>
-        <translation>存在活动连接时无法更改 KillSwitch 设置</translation>
+        <translation>연결된 상태에서는 킬 스위치 설정을 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
         <source>Soft KillSwitch</source>
-        <translation>宽松 KillSwitch</translation>
+        <translation>소프트 킬 스위치</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
         <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
-        <translation>若 VPN 意外断开，将阻止互联网访问</translation>
+        <translation>VPN 연결이 예기치 않게 끊기면 인터넷 접속을 차단합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
         <source>Strict KillSwitch</source>
-        <translation>严格 KillSwitch</translation>
+        <translation>엄격한 킬 스위치</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
         <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
-        <translation>即使手动关闭 VPN 或 VPN 尚未启动，互联网连接也会被阻止</translation>
+        <translation>VPN을 수동으로 끄거나 아직 시작하지 않은 경우에도 인터넷 연결을 차단합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
         <source>Just a little heads-up</source>
-        <translation>温馨提示</translation>
+        <translation>잠깐 안내해 드릴게요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
         <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
-        <translation>若在启用严格 KillSwitch 期间 VPN 断开或掉线，互联网访问将被阻止。要恢复访问，请重新连接 VPN，或禁用/更改 KillSwitch。</translation>
+        <translation>엄격한 킬 스위치가 켜진 상태에서 VPN 연결이 끊기면 인터넷 접속이 차단됩니다. 다시 접속하려면 VPN을 재연결하거나 킬 스위치를 끄거나 변경하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="99"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="123"/>
         <source>DNS Exceptions</source>
-        <translation>DNS 例外</translation>
+        <translation>DNS 예외</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="124"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
-        <translation>KillSwitch 处于活动状态时，此处列出的 DNS 服务器仍可访问。</translation>
+        <translation>여기에 등록된 DNS 서버는 킬 스위치가 활성화되어도 접속할 수 있습니다.</translation>
     </message>
 </context>
 <context>
@@ -4234,80 +4234,80 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="44"/>
         <source>DNS Exceptions</source>
-        <translation>DNS 例外</translation>
+        <translation>DNS 예외</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="45"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active</source>
-        <translation>KillSwitch 处于活动状态时，此处列出的 DNS 服务器仍可访问</translation>
+        <translation>여기에 등록된 DNS 서버는 킬 스위치가 활성화되어도 접속할 수 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="105"/>
         <source>Delete </source>
-        <translation>删除 </translation>
+        <translation>삭제: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="106"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="107"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="137"/>
         <source>IPv4 address</source>
-        <translation>IPv4 地址</translation>
+        <translation>IPv4 주소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="167"/>
         <source>Import / Export addresses</source>
-        <translation>导入 / 导出地址</translation>
+        <translation>주소 가져오기/내보내기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="174"/>
         <source>Import</source>
-        <translation>导入</translation>
+        <translation>가져오기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="187"/>
         <source>Save address list</source>
-        <translation>保存地址列表</translation>
+        <translation>주소 목록 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="194"/>
         <source>Save addresses</source>
-        <translation>保存地址</translation>
+        <translation>주소 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="195"/>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="265"/>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="281"/>
         <source>Address files (*.json)</source>
-        <translation>地址文件 (*.json)</translation>
+        <translation>주소 파일 (*.json)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="254"/>
         <source>Import address list</source>
-        <translation>导入地址列表</translation>
+        <translation>주소 목록 가져오기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="261"/>
         <source>Replace address list</source>
-        <translation>替换地址列表</translation>
+        <translation>주소 목록 바꾸기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="264"/>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="280"/>
         <source>Open address file</source>
-        <translation>打开地址文件</translation>
+        <translation>주소 파일 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="277"/>
         <source>Add imported addresses to existing ones</source>
-        <translation>将导入的地址追加到现有地址</translation>
+        <translation>가져온 주소를 기존 목록에 추가</translation>
     </message>
 </context>
 <context>
@@ -4315,90 +4315,90 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="50"/>
         <source>Logging</source>
-        <translation>日志</translation>
+        <translation>로그 기록</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="51"/>
         <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
-        <translation>默认情况下，日志功能是禁用的。如果应用程序出现故障，则启用日志保存功能。</translation>
+        <translation>이 기능을 켜면 애플리케이션 로그가 자동으로 저장됩니다. 로그 기록은 기본적으로 꺼져 있습니다. 애플리케이션에 문제가 발생할 경우 로그 저장을 켜세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="63"/>
         <source>Enable logs</source>
-        <translation>启用日志</translation>
+        <translation>로그 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="80"/>
         <source>Clear logs</source>
-        <translation>清理日志</translation>
+        <translation>로그 지우기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="85"/>
         <source>Clear logs?</source>
-        <translation>清理日志？</translation>
+        <translation>로그를 지우시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="86"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="87"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="93"/>
         <source>Logs have been cleaned up</source>
-        <translation>日志已清理</translation>
+        <translation>로그를 정리했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="143"/>
         <source>Open logs folder</source>
-        <translation>打开日志文件夹</translation>
+        <translation>로그 폴더 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="157"/>
         <source>Export logs</source>
-        <translation>导出日志</translation>
+        <translation>로그 내보내기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="181"/>
         <source>Client logs</source>
-        <translation>客户端日志</translation>
+        <translation>클라이언트 로그</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
         <source>AmneziaVPN logs</source>
-        <translation>AmneziaVPN 日志</translation>
+        <translation>AmneziaVPN 로그</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="192"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="218"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="193"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="219"/>
         <source>Logs files (*.log)</source>
-        <translation>日志文件 (*.log)</translation>
+        <translation>로그 파일 (*.log)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="202"/>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="227"/>
         <source>Logs file saved</source>
-        <translation>日志文件已保存</translation>
+        <translation>로그 파일을 저장했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="210"/>
         <source>Service logs</source>
-        <translation>服务日志</translation>
+        <translation>서비스 로그</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
         <source>AmneziaVPN-service logs</source>
-        <translation>AmneziaVPN 服务日志</translation>
+        <translation>AmneziaVPN 서비스 로그</translation>
     </message>
 </context>
 <context>
@@ -4406,12 +4406,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="87"/>
         <source>Update</source>
-        <translation>更新</translation>
+        <translation>업데이트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="112"/>
         <source>Skip</source>
-        <translation>跳过</translation>
+        <translation>건너뛰기</translation>
     </message>
 </context>
 <context>
@@ -4419,7 +4419,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsNewsNotifications.qml" line="33"/>
         <source>News &amp; Notifications</source>
-        <translation>新闻与通知</translation>
+        <translation>뉴스 및 알림</translation>
     </message>
 </context>
 <context>
@@ -4427,37 +4427,37 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="28"/>
         <source>All installed containers have been added to the application</source>
-        <translation>所有已安装的容器，已被添加到应用软件</translation>
+        <translation>설치된 모든 컨테이너를 애플리케이션에 추가했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="30"/>
         <source>No new installed containers found</source>
-        <translation>未发现新安装的容器</translation>
+        <translation>새로 설치된 컨테이너를 찾지 못했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="98"/>
         <source>Check the server for previously installed Amnezia services</source>
-        <translation>检查服务器上，是否存在之前安装的 Amnezia 服务</translation>
+        <translation>서버에서 이전에 설치된 Amnezia 서비스 확인</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="99"/>
         <source>Add them to the application if they were not displayed</source>
-        <translation>如果存在且未显示，则添加到应用软件</translation>
+        <translation>표시되지 않은 서비스가 있으면 애플리케이션에 추가합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="112"/>
         <source>Reboot server</source>
-        <translation>重新启动服务器</translation>
+        <translation>서버 재부팅</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="116"/>
         <source>Do you want to reboot the server?</source>
-        <translation>您想重新启动服务器吗？</translation>
+        <translation>서버를 재부팅하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="117"/>
         <source>The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?</source>
-        <translation> 重新启动过程可能需要大约30秒。您确定要继续吗？</translation>
+        <translation>재부팅에는 약 30초가 걸릴 수 있습니다. 계속하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="118"/>
@@ -4465,7 +4465,7 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="178"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="207"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="119"/>
@@ -4473,67 +4473,67 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="179"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="208"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="123"/>
         <source>Cannot reboot server during active connection</source>
-        <translation>存在活动连接时无法重启服务器</translation>
+        <translation>연결된 상태에서는 서버를 재부팅할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="142"/>
         <source>Remove server from application</source>
-        <translation>移除本地服务器信息</translation>
+        <translation>애플리케이션에서 서버 삭제</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="146"/>
         <source>Do you want to remove the server from application?</source>
-        <translation>您想要从应用程序中移除服务器吗？</translation>
+        <translation>애플리케이션에서 서버를 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="147"/>
         <source>All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>所有已安装的 AmneziaVPN 服务仍将保留在服务器上。</translation>
+        <translation>설치된 모든 AmneziaVPN 서비스는 서버에 그대로 유지됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="153"/>
         <source>Cannot remove server during active connection</source>
-        <translation>存在活动连接时无法移除服务器</translation>
+        <translation>연결된 상태에서는 서버를 삭제할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="172"/>
         <source>Clear server from Amnezia software</source>
-        <translation>清理Amnezia中服务器信息</translation>
+        <translation>서버에서 Amnezia 소프트웨어 제거</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="176"/>
         <source>Do you want to clear server from Amnezia software?</source>
-        <translation>您要清除服务器上的Amnezia软件吗？</translation>
+        <translation>서버에서 Amnezia 소프트웨어를 제거하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="177"/>
         <source>All users whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>연결을 공유한 모든 사용자는 더 이상 접속할 수 없습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="183"/>
         <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation>存在活动连接时无法从服务器清除 Amnezia 软件</translation>
+        <translation>연결된 상태에서는 서버에서 Amnezia 소프트웨어를 제거할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="201"/>
         <source>Reset API config</source>
-        <translation>重置 API 配置</translation>
+        <translation>API 구성 초기화</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="205"/>
         <source>Do you want to reset API config?</source>
-        <translation>您想重置 API 配置吗？</translation>
+        <translation>API 구성을 초기화하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="212"/>
         <source>Cannot reset API config during active connection</source>
-        <translation>存在活动连接时无法重置 API 配置</translation>
+        <translation>연결된 상태에서는 API 구성을 초기화할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -4541,17 +4541,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="140"/>
         <source>Protocols</source>
-        <translation>协议</translation>
+        <translation>프로토콜</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="151"/>
         <source>Services</source>
-        <translation>服务</translation>
+        <translation>서비스</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerInfo.qml" line="160"/>
         <source>Management</source>
-        <translation>管理</translation>
+        <translation>관리</translation>
     </message>
 </context>
 <context>
@@ -4559,84 +4559,84 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="56"/>
         <source> settings</source>
-        <translation>配置</translation>
+        <translation> 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="57"/>
         <source>This protocol is no longer supported.</source>
-        <translation>此协议已不再受支持。</translation>
+        <translation>이 프로토콜은 더 이상 지원되지 않습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="71"/>
         <source>AmneziaWG 2.0 is outdated and does not include the latest security improvements, but it will continue to work. Moving to AmneziaWG 3.1 by deploying a new container on the server is recommended for stronger protocol security</source>
-        <translation>AmneziaWG 2.0 已过时，不包含最新的安全改进，但仍可继续使用。为获得更强的协议安全性，建议在服务器上部署新容器以迁移到 AmneziaWG 3.1</translation>
+        <translation>AmneziaWG 2.0은 오래되어 최신 보안 개선 사항이 포함되어 있지 않지만 계속 작동합니다. 더 강력한 프로토콜 보안을 위해 서버에 새 컨테이너를 배포하여 AmneziaWG 3.1로 이전하는 것을 권장합니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="90"/>
         <source> connection settings</source>
-        <translation> 连接设置</translation>
+        <translation> 연결 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="99"/>
         <source>Click the &quot;connect&quot; button to create a connection configuration</source>
-        <translation>点按“连接”按钮以创建连接配置</translation>
+        <translation>연결 구성을 만들려면 &quot;연결&quot; 버튼을 클릭하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="119"/>
         <source> server settings</source>
-        <translation> 服务器设置</translation>
+        <translation> 서버 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="151"/>
         <source>Clear profile</source>
-        <translation>清除配置</translation>
+        <translation>프로필 지우기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="154"/>
         <source>Clear %1 profile?</source>
-        <translation>要清除 %1 配置吗？</translation>
+        <translation>%1 프로필을 지우시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="155"/>
         <source>The connection configuration will be deleted for this device only</source>
-        <translation>连接配置将仅针对此设备删除</translation>
+        <translation>이 기기의 연결 구성만 삭제됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="156"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="201"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="157"/>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="202"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="161"/>
         <source>Unable to clear %1 profile while there is an active connection</source>
-        <translation>存在活动连接时无法清除 %1 配置</translation>
+        <translation>연결된 상태에서는 %1 프로필을 지울 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="195"/>
         <source>Remove </source>
-        <translation>移除</translation>
+        <translation>삭제: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="199"/>
         <source>Remove %1 from server?</source>
-        <translation>从服务器移除 %1 ?</translation>
+        <translation>서버에서 %1을(를) 삭제하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="200"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>与您共享连接的所有用户将无法再连接到该连接。</translation>
+        <translation>연결을 공유한 모든 사용자는 더 이상 접속할 수 없습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="207"/>
         <source>Cannot remove active container</source>
-        <translation>无法移除处于活动状态的容器</translation>
+        <translation>활성 컨테이너는 삭제할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -4644,7 +4644,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServersList.qml" line="38"/>
         <source>Servers</source>
-        <translation>服务器</translation>
+        <translation>서버</translation>
     </message>
 </context>
 <context>
@@ -4652,117 +4652,117 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="29"/>
         <source>Cannot change split tunneling settings during active connection</source>
-        <translation>无法在活动连接期间更改分割隧道设置</translation>
+        <translation>연결된 상태에서는 분할 터널링 설정을 변경할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="32"/>
         <source>Default server does not support split tunneling function</source>
-        <translation>默认服务器不支持分离隧道功能</translation>
+        <translation>기본 서버는 분할 터널링 기능을 지원하지 않습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="65"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
-        <translation>只有这里列出的网站将通过VPN访问</translation>
+        <translation>목록의 사이트만 VPN을 통해 접속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="70"/>
         <source>Addresses from the list should not be accessed via VPN</source>
-        <translation>不使用VPN访问</translation>
+        <translation>목록의 주소는 VPN을 통해 접속하지 않음</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="101"/>
         <source>Split tunneling</source>
-        <translation>隧道分离</translation>
+        <translation>분할 터널링</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="128"/>
         <source>Mode</source>
-        <translation>规则</translation>
+        <translation>모드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="210"/>
         <source>Remove </source>
-        <translation>移除 </translation>
+        <translation>삭제: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="211"/>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="361"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="212"/>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="362"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="262"/>
         <source>website or IP</source>
-        <translation>网站或IP</translation>
+        <translation>웹사이트 또는 IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="308"/>
         <source>Additional options</source>
-        <translation>其他选项</translation>
+        <translation>추가 옵션</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="315"/>
         <source>Import</source>
-        <translation>导入</translation>
+        <translation>가져오기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="328"/>
         <source>Save site list</source>
-        <translation>保存网址</translation>
+        <translation>사이트 목록 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="335"/>
         <source>Save sites</source>
-        <translation>保存网址</translation>
+        <translation>사이트 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="336"/>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="462"/>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="475"/>
         <source>Sites files (*.json)</source>
-        <translation>站点文件 (*.json)</translation>
+        <translation>사이트 파일 (*.json)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="356"/>
         <source>Clear site list</source>
-        <translation>清空站点列表</translation>
+        <translation>사이트 목록 지우기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="359"/>
         <source>Clear site list?</source>
-        <translation>要清空站点列表吗？</translation>
+        <translation>사이트 목록을 지우시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="360"/>
         <source>All sites will be removed from list.</source>
-        <translation>所有站点都将从列表中移除。</translation>
+        <translation>목록에서 모든 사이트가 삭제됩니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="424"/>
         <source>Import a list of sites</source>
-        <translation>导入网址列表</translation>
+        <translation>사이트 목록 가져오기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="459"/>
         <source>Replace site list</source>
-        <translation>替换网址列表</translation>
+        <translation>사이트 목록 바꾸기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="461"/>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="474"/>
         <source>Open sites file</source>
-        <translation>打开网址文件</translation>
+        <translation>사이트 파일 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="472"/>
         <source>Add imported sites to existing ones</source>
-        <translation>将导入的网址添加到现有网址中</translation>
+        <translation>가져온 사이트를 기존 목록에 추가</translation>
     </message>
 </context>
 <context>
@@ -4770,12 +4770,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml" line="74"/>
         <source>Free features</source>
-        <translation>免费功能</translation>
+        <translation>무료 기능</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml" line="125"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
 </context>
 <context>
@@ -4783,27 +4783,27 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="91"/>
         <source>Recommended</source>
-        <translation>推荐</translation>
+        <translation>추천</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="103"/>
         <source>Premium features</source>
-        <translation>Premium 功能</translation>
+        <translation>프리미엄 기능</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="132"/>
         <source>Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.</source>
-        <translation>确认时将从您的 Apple ID 扣费。除非在周期结束前至少 24 小时关闭自动续订，否则将自动续订。可在 Apple ID 设置中管理。</translation>
+        <translation>확인 시 Apple ID로 결제됩니다. 기간 종료 최소 24시간 전에 자동 갱신을 끄지 않으면 자동으로 갱신됩니다. Apple ID 설정에서 관리할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="169"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="171"/>
         <source>Subscribe — %1 for %2</source>
-        <translation>订阅 — %2 %1</translation>
+        <translation>구독 — %1에 %2</translation>
     </message>
 </context>
 <context>
@@ -4811,17 +4811,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
         <source>VPN by Amnezia</source>
-        <translation>Amnezia 提供的 VPN</translation>
+        <translation>Amnezia VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="53"/>
         <source>Choose a VPN service that suits your needs.</source>
-        <translation>选择适合您需求的 VPN 服务。</translation>
+        <translation>필요에 맞는 VPN 서비스를 선택하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="91"/>
         <source>Recommended</source>
-        <translation>推荐</translation>
+        <translation>추천</translation>
     </message>
 </context>
 <context>
@@ -4829,33 +4829,33 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="65"/>
         <source>Create an account</source>
-        <translation>创建账户</translation>
+        <translation>계정 만들기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="66"/>
         <source>To manage your subscription</source>
-        <translation>管理您的订阅</translation>
+        <translation>구독을 관리하려면</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="77"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="78"/>
         <source>Email</source>
-        <translation>电子邮件</translation>
+        <translation>이메일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="102"/>
         <source>We will create an account for your trial subscription and send important subscription updates to this email address</source>
-        <translation>我们将为您的试用订阅创建账户，并将重要的订阅更新发送到此电子邮件地址</translation>
+        <translation>체험 구독용 계정을 만들고 중요한 구독 업데이트를 이 이메일 주소로 보내드립니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="118"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="126"/>
         <source>Enter a valid email address</source>
-        <translation>请输入有效的电子邮件地址</translation>
+        <translation>올바른 이메일 주소를 입력하세요</translation>
     </message>
 </context>
 <context>
@@ -4863,142 +4863,142 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="50"/>
         <source>Connection</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="77"/>
         <source>Settings</source>
-        <translation>设置</translation>
+        <translation>설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="87"/>
         <source>Enable logs</source>
-        <translation>启用日志</translation>
+        <translation>로그 사용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="101"/>
         <source>Export client logs</source>
-        <translation>导出客户端日志</translation>
+        <translation>클라이언트 로그 내보내기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="111"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="112"/>
         <source>Logs files (*.log)</source>
-        <translation>日志文件 (*.log)</translation>
+        <translation>로그 파일 (*.log)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="121"/>
         <source>Logs file saved</source>
-        <translation>日志文件已保存</translation>
+        <translation>로그 파일이 저장되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="131"/>
         <source>Support tag</source>
-        <translation>支持标签</translation>
+        <translation>지원 태그</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="142"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="161"/>
         <source>Insert the key, add a configuration file or scan the QR-code</source>
-        <translation>插入密钥、添加配置文件或扫描二维码</translation>
+        <translation>키를 붙여넣거나 구성 파일을 추가하거나 QR 코드를 스캔하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="171"/>
         <source>Insert key</source>
-        <translation>插入密钥</translation>
+        <translation>키 붙여넣기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="172"/>
         <source>Insert</source>
-        <translation>插入</translation>
+        <translation>붙여넣기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="190"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="207"/>
         <source>Other connection options</source>
-        <translation>其他连接方式</translation>
+        <translation>기타 연결 옵션</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="228"/>
         <source>Recommended</source>
-        <translation>推荐</translation>
+        <translation>추천</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="260"/>
         <source>Site Amnezia</source>
-        <translation>Amnezia 网站</translation>
+        <translation>Amnezia 웹사이트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="284"/>
         <source>VPN by Amnezia</source>
-        <translation>Amnezia 提供的 VPN</translation>
+        <translation>Amnezia VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="285"/>
         <source>The easiest way to connect to the VPN</source>
-        <translation>连接 VPN 最简单的方式</translation>
+        <translation>VPN에 연결하는 가장 쉬운 방법</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="303"/>
         <source>Self-hosted VPN</source>
-        <translation>自建 VPN</translation>
+        <translation>자체 호스팅 VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="304"/>
         <source>Configure Amnezia VPN on your own server</source>
-        <translation>在您自己的服务器上配置 Amnezia VPN</translation>
+        <translation>자체 서버에 Amnezia VPN 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="316"/>
         <source>Restore from backup</source>
-        <translation>从备份还原</translation>
+        <translation>백업에서 복원</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="324"/>
         <source>Open backup file</source>
-        <translation>打开备份文件</translation>
+        <translation>백업 파일 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="325"/>
         <source>Backup files (*.backup)</source>
-        <translation>备份文件 (*.backup)</translation>
+        <translation>백업 파일 (*.backup)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="342"/>
         <source>File with connection settings</source>
-        <translation>包含连接配置的文件</translation>
+        <translation>연결 설정 파일</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="348"/>
         <source>Open config file</source>
-        <translation>打开配置文件</translation>
+        <translation>구성 파일 열기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="361"/>
         <source>QR code</source>
-        <translation>二维码</translation>
+        <translation>QR 코드</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="377"/>
         <source>Restore purchases</source>
-        <translation>恢复购买</translation>
+        <translation>구매 복원</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="392"/>
         <source>I have nothing</source>
-        <translation>我没有</translation>
+        <translation>아무것도 없습니다</translation>
     </message>
 </context>
 <context>
@@ -5006,64 +5006,64 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="48"/>
         <source>Configure your server</source>
-        <translation>配置服务器</translation>
+        <translation>서버 설정</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="224"/>
         <source>Password or SSH private key</source>
-        <translation>密码或 SSH 私钥</translation>
+        <translation>비밀번호 또는 SSH 개인 키</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="97"/>
         <source>SSH key requirements: supported key types are ED25519 and RSA in PEM format. Paste the private key, including the BEGIN/END lines. If your key doesn’t work, generate a compatible one</source>
-        <translation>SSH 密钥要求：支持的密钥类型为 PEM 格式的 ED25519 和 RSA。请粘贴私钥，包含 BEGIN/END 行。如果您的密钥不可用，请生成一个兼容的密钥</translation>
+        <translation>SSH 키 요구 사항: ED25519 및 PEM 형식의 RSA 키를 지원합니다. BEGIN/END 줄을 포함한 개인 키를 붙여넣으세요. 키가 작동하지 않으면 호환되는 키를 생성하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="112"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>您输入的所有数据将严格保密，不会与 Amnezia 或任何第三方共享或披露</translation>
+        <translation>입력한 모든 데이터는 엄격하게 기밀로 유지되며 Amnezia 또는 제3자에게 공유되거나 공개되지 않습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
         <source>How to run your VPN server</source>
-        <translation>如何运行您自己的 VPN 服务器</translation>
+        <translation>VPN 서버 운영 방법</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="156"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
-        <translation>在哪里获取连接数据，以及购买 VPS 的分步说明</translation>
+        <translation>연결 정보 확인 방법 및 VPS 구매 단계별 안내</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="176"/>
         <source>Ip address cannot be empty</source>
-        <translation>IP不能为空</translation>
+        <translation>IP 주소를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
-        <translation>按照这种格式输入 255.255.255.255:88</translation>
+        <translation>255.255.255.255:88 형식으로 주소를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="184"/>
         <source>Login cannot be empty</source>
-        <translation>账号不能为空</translation>
+        <translation>로그인을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="190"/>
         <source>Password/private key cannot be empty</source>
-        <translation>密码或私钥不能为空</translation>
+        <translation>비밀번호 또는 개인 키를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="206"/>
         <source>Server IP address [:port]</source>
-        <translation>服务器IP [:端口]</translation>
+        <translation>서버 IP 주소 [:포트]</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="207"/>
@@ -5073,7 +5073,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="215"/>
         <source>SSH Username</source>
-        <translation>SSH 用户名</translation>
+        <translation>SSH 사용자 이름</translation>
     </message>
 </context>
 <context>
@@ -5081,27 +5081,27 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="85"/>
         <source>Choose Installation Type</source>
-        <translation>选择安装类型</translation>
+        <translation>설치 유형 선택</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
         <source>Manual</source>
-        <translation>手动</translation>
+        <translation>수동</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="139"/>
         <source>Choose a VPN protocol</source>
-        <translation>选择 VPN 协议</translation>
+        <translation>VPN 프로토콜 선택</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="159"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="200"/>
         <source>Skip setup</source>
-        <translation>跳过设置</translation>
+        <translation>설정 건너뛰기</translation>
     </message>
 </context>
 <context>
@@ -5110,37 +5110,37 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="25"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
         <source>Usually it takes no more than 5 minutes</source>
-        <translation>通常不超过5分钟</translation>
+        <translation>일반적으로 5분 이내에 완료됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="57"/>
         <source>The server has already been added to the application</source>
-        <translation>服务器已添加到应用软件中</translation>
+        <translation>서버가 이미 애플리케이션에 추가되어 있습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
         <source>Amnezia has detected that your server is currently </source>
-        <translation>Amnezia 检测到您的服务器当前</translation>
+        <translation>Amnezia가 서버에서 현재 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
         <source>busy installing other software. Amnezia installation </source>
-        <translation>正安装其他软件。Amnezia安装</translation>
+        <translation>다른 소프트웨어가 설치 중임을 감지했습니다. Amnezia 설치는 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="65"/>
         <source>will pause until the server finishes installing other software</source>
-        <translation>将暂停，直到其他软件安装完成。</translation>
+        <translation>서버에서 다른 소프트웨어 설치가 완료될 때까지 일시 중지됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="104"/>
         <source>Installing</source>
-        <translation>安装中</translation>
+        <translation>설치 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="150"/>
         <source>Cancel installation</source>
-        <translation>取消安装</translation>
+        <translation>설치 취소</translation>
     </message>
 </context>
 <context>
@@ -5148,37 +5148,37 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="69"/>
         <source>Installing %1</source>
-        <translation>正在安装 %1</translation>
+        <translation>%1 설치 중</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="88"/>
         <source>More detailed</source>
-        <translation>更多细节</translation>
+        <translation>자세히</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="175"/>
         <source>Close</source>
-        <translation>关闭</translation>
+        <translation>닫기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="193"/>
         <source>Network protocol</source>
-        <translation>网络协议</translation>
+        <translation>네트워크 프로토콜</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="214"/>
         <source>Port</source>
-        <translation>端口</translation>
+        <translation>포트</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="235"/>
         <source>Install</source>
-        <translation>安装</translation>
+        <translation>설치</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="241"/>
         <source>The port must be in the range of 1 to 65535</source>
-        <translation>端口必须在 1 到 65535 之间</translation>
+        <translation>포트는 1에서 65535 사이여야 합니다</translation>
     </message>
 </context>
 <context>
@@ -5186,12 +5186,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="78"/>
         <source>VPN protocol</source>
-        <translation>VPN 协议</translation>
+        <translation>VPN 프로토콜</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="79"/>
         <source>Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.</source>
-        <translation>选择你认为优先级最高的一项。稍后，您可以安装其他协议和附加服务，例如 DNS 代理和 SFTP。</translation>
+        <translation>가장 우선하는 항목을 선택하세요. 나중에 DNS 프록시 및 SFTP와 같은 다른 프로토콜과 추가 서비스를 설치할 수 있습니다.</translation>
     </message>
 </context>
 <context>
@@ -5199,7 +5199,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardQrReader.qml" line="38"/>
         <source>Point the camera at the QR code and hold for a couple of seconds. </source>
-        <translation>将相机对准二维码并按住几秒钟</translation>
+        <translation>카메라를 QR 코드에 맞추고 몇 초간 유지하세요. </translation>
     </message>
 </context>
 <context>
@@ -5207,7 +5207,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="42"/>
         <source>Let&apos;s get started</source>
-        <translation>开始吧</translation>
+        <translation>시작하기</translation>
     </message>
 </context>
 <context>
@@ -5215,27 +5215,27 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="47"/>
         <source>Connection key</source>
-        <translation>连接授权码</translation>
+        <translation>연결 키</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="48"/>
         <source>A line that starts with vpn://...</source>
-        <translation>以 vpn://... 开始的行</translation>
+        <translation>vpn://...로 시작하는 문자열</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="66"/>
         <source>Key</source>
-        <translation>授权码</translation>
+        <translation>키</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="68"/>
         <source>Insert</source>
-        <translation>插入</translation>
+        <translation>붙여넣기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardTextKey.qml" line="89"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
 </context>
 <context>
@@ -5243,32 +5243,32 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="75"/>
         <source>New connection</source>
-        <translation>新连接</translation>
+        <translation>새 연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="115"/>
         <source>Collapse content</source>
-        <translation>折叠内容</translation>
+        <translation>내용 접기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="115"/>
         <source>Show content</source>
-        <translation>显示内容</translation>
+        <translation>내용 표시</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="132"/>
         <source>Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.</source>
-        <translation>启用 WireGuard 混淆。若您的网络提供商封锁了 WireGuard，此项可能有用。</translation>
+        <translation>WireGuard 난독화를 사용합니다. 제공업체에서 WireGuard를 차단한 경우 유용할 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="163"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>只使用您信任的来源提供的连接代码。公共来源的代码可能是为了拦截您的数据而创建的。</translation>
+        <translation>신뢰할 수 있는 출처의 연결 코드만 사용하세요. 공개 출처의 코드는 데이터를 가로채기 위해 만들어졌을 수 있습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="207"/>
         <source>Connect</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
 </context>
 <context>
@@ -5276,197 +5276,197 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="35"/>
         <source>Config revoked</source>
-        <translation>配置已撤销</translation>
+        <translation>구성이 폐기되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="51"/>
         <source>Save AmneziaVPN config</source>
-        <translation>保存配置</translation>
+        <translation>AmneziaVPN 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="58"/>
         <source>Save OpenVPN config</source>
-        <translation>保存OpenVPN配置</translation>
+        <translation>OpenVPN 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="65"/>
         <source>Save WireGuard config</source>
-        <translation>保存WireGuard配置</translation>
+        <translation>WireGuard 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="72"/>
         <source>Save AmneziaWG config</source>
-        <translation>保存 AmneziaWG 配置</translation>
+        <translation>AmneziaWG 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
         <source>Save XRay config</source>
-        <translation>保存 XRay 配置</translation>
+        <translation>XRay 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="88"/>
         <source>Connection to </source>
-        <translation>连接到</translation>
+        <translation>연결 대상: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="89"/>
         <source>File with connection settings to </source>
-        <translation>连接配置文件的内容为:</translation>
+        <translation>연결 설정 파일 대상: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="108"/>
         <source>For the AmneziaVPN app</source>
-        <translation>AmneziaVPN 应用</translation>
+        <translation>AmneziaVPN 앱용</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="113"/>
         <source>OpenVPN native format</source>
-        <translation>OpenVPN原生格式</translation>
+        <translation>OpenVPN 기본 형식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="118"/>
         <source>WireGuard native format</source>
-        <translation>WireGuard原生格式</translation>
+        <translation>WireGuard 기본 형식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="123"/>
         <source>AmneziaWG native format</source>
-        <translation>AmneziaWG 本地格式</translation>
+        <translation>AmneziaWG 기본 형식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="128"/>
         <source>XRay native format</source>
-        <translation>XRay 原生格式</translation>
+        <translation>XRay 기본 형식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="156"/>
         <source>Share VPN Access</source>
-        <translation>共享 VPN 访问</translation>
+        <translation>VPN 액세스 공유</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Share full access to the server and VPN</source>
-        <translation>共享服务器和VPN的完全访问权限</translation>
+        <translation>서버 및 VPN 전체 액세스 공유</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
         <source>Use for your own devices, or share with those you trust to manage the server.</source>
-        <translation>用于您自己的设备，或与您信任的人共享以管理服务器.</translation>
+        <translation>본인 기기에서 사용하거나 서버 관리를 맡길 수 있는 신뢰하는 사람과 공유하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="198"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="541"/>
         <source>Share</source>
-        <translation>共享</translation>
+        <translation>공유</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="233"/>
         <source>Connection</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="248"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="559"/>
         <source>Users</source>
-        <translation>用户</translation>
+        <translation>사용자</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="271"/>
         <source>Share VPN access without the ability to manage the server</source>
-        <translation>共享 VPN 访问，无需管理服务器</translation>
+        <translation>서버 관리 권한 없이 VPN 액세스 공유</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="282"/>
         <source>User name</source>
-        <translation>用户名</translation>
+        <translation>사용자 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="301"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="302"/>
         <source>Server</source>
-        <translation>服务器</translation>
+        <translation>서버</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="366"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="367"/>
         <source>Protocol</source>
-        <translation>协议</translation>
+        <translation>프로토콜</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="479"/>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="480"/>
         <source>Connection format</source>
-        <translation>连接格式</translation>
+        <translation>연결 형식</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="575"/>
         <source>Search</source>
-        <translation>搜索</translation>
+        <translation>검색</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="704"/>
         <source>Creation date: %1</source>
-        <translation>创建日期：%1</translation>
+        <translation>생성일: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="716"/>
         <source>Latest handshake: %1</source>
-        <translation>最近握手：%1</translation>
+        <translation>최근 핸드셰이크: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="728"/>
         <source>Data received: %1</source>
-        <translation>已接收数据：%1</translation>
+        <translation>수신 데이터: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="740"/>
         <source>Data sent: %1</source>
-        <translation>已发送数据：%1</translation>
+        <translation>송신 데이터: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="750"/>
         <source>Allowed IPs: %1</source>
-        <translation>允许的 IP：%1</translation>
+        <translation>허용된 IP: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="765"/>
         <source>Rename</source>
-        <translation>重新命名</translation>
+        <translation>이름 바꾸기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="790"/>
         <source>Client name</source>
-        <translation>客户名称</translation>
+        <translation>클라이언트 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="801"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="837"/>
         <source>Revoke</source>
-        <translation>撤销</translation>
+        <translation>폐기</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="840"/>
         <source>Revoke the config for a user - %1?</source>
-        <translation>撤销用户的配置- %1?</translation>
+        <translation>사용자 %1의 구성을 폐기하시겠습니까?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="841"/>
         <source>The user will no longer be able to connect to your server.</source>
-        <translation>该用户将无法再连接到您的服务器.</translation>
+        <translation>이 사용자는 더 이상 서버에 연결할 수 없습니다.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="842"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="843"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
 </context>
 <context>
@@ -5474,43 +5474,43 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="25"/>
         <source>Share</source>
-        <translation>共享</translation>
+        <translation>공유</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="26"/>
         <source>Copy</source>
-        <translation>拷贝</translation>
+        <translation>복사</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="30"/>
         <source>Save AmneziaVPN config</source>
-        <translation>保存配置</translation>
+        <translation>AmneziaVPN 구성 저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="150"/>
         <source>Copy config string</source>
-        <translation>复制配置字符串</translation>
+        <translation>구성 문자열 복사</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="168"/>
         <source>Show connection settings</source>
-        <translation>显示连接配置</translation>
+        <translation>연결 설정 표시</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="189"/>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="199"/>
         <source>Copied</source>
-        <translation>已拷贝</translation>
+        <translation>복사되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="326"/>
         <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
-        <translation>要在 Amnezia 应用中读取二维码，请在主菜单中点按 + → “二维码”</translation>
+        <translation>Amnezia 앱에서 QR 코드를 읽으려면 기본 메뉴에서 +를 누른 다음 &apos;QR 코드&apos;를 누르세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="342"/>
         <source>This config is too large for a QR code. Share the file or copy the connection settings instead.</source>
-        <translation>此配置过大，无法生成二维码。请改为共享文件或复制连接设置。</translation>
+        <translation>이 구성은 QR 코드로 담기에 너무 큽니다. 대신 파일을 공유하거나 연결 설정을 복사하세요.</translation>
     </message>
 </context>
 <context>
@@ -5518,45 +5518,45 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
         <source>Full access to the server and VPN</source>
-        <translation>对服务器和VPN的完全访问权限</translation>
+        <translation>서버 및 VPN 전체 액세스</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="67"/>
         <source>We recommend that you use full access to the server only for your own additional devices.
 </source>
-        <translation>我们建议您仅为自己的附加设备使用服务器的完全访问权限.
+        <translation>서버 전체 액세스는 본인의 추가 기기에서만 사용하는 것이 좋습니다.
 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="68"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation>如果您与其他人共享完全访问权限，他们可以从服务器中删除和添加协议和服务，这将导致VPN对所有用户的工作出现问题。 </translation>
+        <translation>다른 사람과 전체 액세스를 공유하면 해당 사용자가 서버에서 프로토콜과 서비스를 제거하거나 추가할 수 있어 모든 사용자의 VPN이 제대로 작동하지 않을 수 있습니다. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="87"/>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="88"/>
         <source>Server</source>
-        <translation>服务器</translation>
+        <translation>서버</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="115"/>
         <source>Accessing </source>
-        <translation>访问 </translation>
+        <translation>액세스 대상: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="116"/>
         <source>File with accessing settings to </source>
-        <translation>访问配置文件的内容为 </translation>
+        <translation>액세스 설정 파일 대상: </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="147"/>
         <source>Share</source>
-        <translation>共享</translation>
+        <translation>공유</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="155"/>
         <source>Access error!</source>
-        <translation>访问错误</translation>
+        <translation>액세스 오류!</translation>
     </message>
 </context>
 <context>
@@ -5564,17 +5564,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="207"/>
         <source>Logging was disabled after 14 days, log files were deleted</source>
-        <translation>日志记录已在 14 天后停用，日志文件已删除</translation>
+        <translation>14일 후 로깅이 비활성화되었으며 로그 파일이 삭제되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="211"/>
         <source>Settings restored from backup file</source>
-        <translation>从备份文件还原配置</translation>
+        <translation>백업 파일에서 설정을 복원했습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
-        <translation>日志记录已启用。请注意，14 天后将自动停用，且所有日志文件都会被删除。</translation>
+        <translation>로깅이 활성화되었습니다. 14일 후 자동으로 비활성화되며 모든 로그 파일이 삭제됩니다.</translation>
     </message>
 </context>
 <context>
@@ -5582,449 +5582,401 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Controls2/PopupType.qml" line="101"/>
         <source>Close</source>
-        <translation>关闭</translation>
+        <translation>닫기</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../core/protocols/protocolUtils.cpp" line="70"/>
-        <source>SFTP service</source>
-        <translation>SFTP 服务</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="190"/>
-        <location filename="../core/protocols/protocolUtils.cpp" line="71"/>
-        <source>SOCKS5 proxy server</source>
-        <translation>SOCKS5 代理服务器</translation>
-    </message>
-    <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
-        <source> (version 3.1)</source>
-        <translation>（版本 3.1）</translation>
-    </message>
-    <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
-        <source> (version 2)</source>
-        <translation>（版本 2）</translation>
-    </message>
-    <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
-        <source> (version 1.5)</source>
-        <translation>（版本 1.5）</translation>
-    </message>
-    <message>
         <location filename="../core/utils/errorStrings.cpp" line="11"/>
         <source>No error</source>
-        <translation>没有错误</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="12"/>
-        <source>Unknown error</source>
-        <translation>未知错误</translation>
+        <translation>오류 없음</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="13"/>
         <source>Function not implemented</source>
-        <translation>功能未实现</translation>
+        <translation>함수가 구현되지 않았습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="14"/>
         <source>Background service is not running</source>
-        <translation>后台服务未运行</translation>
+        <translation>백그라운드 서비스가 실행 중이 아닙니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="15"/>
         <source>The selected protocol is not supported on the current platform</source>
-        <translation>当前平台不支持所选协议</translation>
+        <translation>선택한 프로토콜은 현재 플랫폼에서 지원되지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="18"/>
         <source>Server check failed</source>
-        <translation>服务器检测失败</translation>
+        <translation>서버 확인에 실패했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="19"/>
         <source>Server port already used. Check for another software</source>
-        <translation>检测服务器该端口是否被其他软件被占用</translation>
+        <translation>서버 포트가 이미 사용 중입니다. 다른 소프트웨어가 사용하는지 확인하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="20"/>
         <source>Server error: Docker container missing</source>
-        <translation>服务器错误: Docker容器丢失</translation>
+        <translation>서버 오류: Docker 컨테이너가 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="21"/>
         <source>Server error: Docker failed</source>
-        <translation>服务器错误: Docker失败</translation>
+        <translation>서버 오류: Docker가 실패했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="22"/>
         <source>Installation canceled by user</source>
-        <translation>用户取消安装</translation>
+        <translation>사용자가 설치를 취소했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="23"/>
         <source>The user is not a member of the sudo group</source>
-        <translation>用户不是 sudo 组的成员</translation>
+        <translation>사용자가 sudo 그룹에 속해 있지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="24"/>
         <source>Server error: Package manager error</source>
-        <translation>服务器错误：包管理器错误</translation>
+        <translation>서버 오류: 패키지 관리자 오류</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="25"/>
         <source>The sudo package is not pre-installed on the server</source>
-        <translation>服务器上未预装 sudo 软件包</translation>
+        <translation>sudo 패키지가 서버에 사전 설치되어 있지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="26"/>
         <source>The server user&apos;s home directory is not accessible</source>
-        <translation>无法访问服务器用户的主目录</translation>
+        <translation>서버 사용자 홈 디렉터리에 접근할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="27"/>
         <source>Action not allowed in sudoers</source>
-        <translation>sudoers 中不允许此操作</translation>
+        <translation>sudoers에서 허용되지 않은 작업입니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="28"/>
         <source>The user&apos;s password is required</source>
-        <translation>需要用户密码</translation>
+        <translation>사용자 비밀번호가 필요합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="29"/>
         <source>Docker error: runc doesn&apos;t work on cgroups v2</source>
-        <translation>Docker 错误：runc 无法在 cgroups v2 上运行</translation>
+        <translation>Docker 오류: runc는 cgroups v2에서 작동하지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="30"/>
         <source>Server error: cgroup mountpoint does not exist</source>
-        <translation>服务器错误：cgroup 挂载点不存在</translation>
+        <translation>서버 오류: cgroup 마운트 지점이 존재하지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="31"/>
         <source>Docker error: The pull rate limit has been reached</source>
-        <translation>Docker 错误：已达到拉取速率限制</translation>
+        <translation>Docker 오류: pull 속도 제한에 도달했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="32"/>
         <source>Server error: Linux kernel is too old</source>
-        <translation>服务器错误：Linux 内核版本过旧</translation>
+        <translation>서버 오류: Linux 커널이 너무 오래되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="34"/>
         <source>Server error: invalid or unreadable XRay server configuration</source>
-        <translation>服务器错误：XRay 服务器配置无效或无法读取</translation>
+        <translation>서버 오류: XRay 서버 설정이 잘못되었거나 읽을 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="37"/>
         <source>Server error: XRay server has no VLESS clients</source>
-        <translation>服务器错误：XRay 服务器没有 VLESS 客户端</translation>
+        <translation>서버 오류: XRay 서버에 VLESS 클라이언트가 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="40"/>
         <source>Server error: failed to read XRay Reality keys from the server</source>
-        <translation>服务器错误：无法从服务器读取 XRay Reality 密钥</translation>
+        <translation>서버 오류: 서버에서 XRay Reality 키를 읽지 못했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="42"/>
         <source>Server error: The default container runtime available for installation on this server is not supported.
  Install Docker Engine on the server manually and try again.</source>
-        <translation>服务器错误：此服务器上可安装的默认容器运行时不受支持。
- 请在服务器上手动安装 Docker Engine 后重试。</translation>
+        <translation>서버 오류: 이 서버는 기본 컨테이너 런타임이 지원되지 않습니다.
+서버에 Docker Engine을 수동으로 설치한 후 다시 시도하세요.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="43"/>
         <source>Container runtime error: The container runtime service is not running.
  Check the container runtime service on the server, or wait about a minute and try again.</source>
-        <translation>容器运行时错误：容器运行时服务未运行。
- 请检查服务器上的容器运行时服务，或等待约一分钟后重试。</translation>
+        <translation>컨테이너 런타임 오류: 컨테이너 런타임 서비스가 실행 중이 아닙니다.
+서버의 컨테이너 런타임 서비스를 확인하거나 약 1분 후 다시 시도하세요.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="46"/>
         <source>SSH request was denied</source>
-        <translation>SSH请求被拒绝</translation>
+        <translation>SSH 요청이 거부되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="47"/>
         <source>SSH request was interrupted</source>
-        <translation>SSH请求中断</translation>
+        <translation>SSH 요청이 중단되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="48"/>
         <source>SSH internal error</source>
-        <translation>SSH内部错误</translation>
+        <translation>SSH 내부 오류</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="49"/>
         <source>Invalid private key or invalid passphrase entered</source>
-        <translation>输入的私钥或密码无效</translation>
+        <translation>잘못된 개인 키 또는 잘못된 비밀번호를 입력했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="50"/>
         <source>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</source>
-        <translation>不支持所选私钥格式，请使用 openssh ED25519 密钥类型或 PEM 密钥类型</translation>
+        <translation>선택한 개인 키 형식은 지원되지 않습니다. openssh ED25519 또는 PEM 키 형식을 사용하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="51"/>
         <source>Timeout connecting to server</source>
-        <translation>连接服务器超时</translation>
+        <translation>서버 연결 시간이 초과되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="54"/>
         <source>SCP error: Generic failure</source>
-        <translation>SCP 错误：一般性失败</translation>
+        <translation>SCP 오류: 일반 오류</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="70"/>
+        <source>The config does not contain any containers and credentials for connecting to the server</source>
+        <translation>설정에 서버 연결을 위한 컨테이너와 자격 증명이 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="71"/>
         <source>Backup files cannot be imported here. Use &apos;Restore from backup&apos; instead.</source>
-        <translation>无法在此处导入备份文件。请改用&quot;从备份恢复&quot;。</translation>
+        <translation>여기에서는 백업 파일을 가져올 수 없습니다. 대신 &quot;백업에서 복원&quot;을 사용하세요.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="72"/>
         <source>Backup file is corrupted or has invalid format</source>
-        <translation>备份文件已损坏或格式无效</translation>
+        <translation>백업 파일이 손상되었거나 형식이 잘못되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="73"/>
         <source>This legacy Amnezia subscription format is no longer supported</source>
-        <translation>此旧版 Amnezia 订阅格式已不再受支持</translation>
+        <translation>이전 Amnezia 구독 형식은 더 이상 지원되지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="74"/>
         <source>This protocol is no longer supported. Please select another protocol or remove this container from the server settings.</source>
-        <translation>此协议已不再受支持。请选择其他协议，或从服务器设置中移除此容器。</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="75"/>
-        <source>Unable to open config file</source>
-        <translation>无法打开配置文件</translation>
+        <translation>이 프로토콜은 더 이상 지원되지 않습니다. 다른 프로토콜을 선택하거나 서버 설정에서 이 컨테이너를 삭제하세요.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="76"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
-        <translation>VPN 协议尚未安装。
- 请先安装 VPN 容器</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="79"/>
-        <source>VPN connection error</source>
-        <translation>VPN 连接错误</translation>
+        <translation>VPN 프로토콜이 설치되지 않았습니다.
+먼저 VPN 컨테이너를 설치하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="82"/>
         <location filename="../core/utils/errorStrings.cpp" line="91"/>
         <source>Error when retrieving configuration from API</source>
-        <translation>从 API 检索配置时出错</translation>
+        <translation>API에서 설정을 가져오는 중 오류가 발생했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="83"/>
         <source>This config has already been added to the application</source>
-        <translation>该配置已添加到应用程序中</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="84"/>
-        <source>In the response from the server, an empty config was received</source>
-        <translation>服务器返回的响应中收到了空配置</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="85"/>
-        <source>SSL error occurred</source>
-        <translation>发生 SSL 错误</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="86"/>
-        <source>Server response timeout on api request</source>
-        <translation>API 请求的服务器响应超时</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="87"/>
-        <source>Missing AGW public key</source>
-        <translation>缺少 AGW 公钥</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="88"/>
-        <source>Failed to decrypt response payload</source>
-        <translation>解密响应内容失败</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="89"/>
-        <source>Missing list of available services</source>
-        <translation>缺少可用服务列表</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="90"/>
-        <source>The limit of allowed configurations per subscription has been exceeded</source>
-        <translation>已超出每个订阅允许的配置数量上限</translation>
+        <translation>이 설정은 이미 애플리케이션에 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="92"/>
         <source>A migration error has occurred. Please contact our technical support</source>
-        <translation>发生迁移错误。请联系我们的技术支持</translation>
+        <translation>마이그레이션 오류가 발생했습니다. 기술 지원팀에 문의하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Please update the application to use this feature</source>
-        <translation>请更新应用以使用此功能</translation>
+        <translation>이 기능을 사용하려면 애플리케이션을 업데이트하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
-        <translation>您的 Amnezia Premium 订阅已过期。
- 请查看您的电子邮件以获取续订说明。
- 如果您未收到邮件，请联系我们的支持团队。</translation>
+        <translation>Amnezia Premium 구독이 만료되었습니다.
+갱신 안내를 이메일에서 확인하세요.
+이메일을 받지 못했다면 지원팀에 문의하세요.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>Unable to process purchase</source>
-        <translation>无法处理购买</translation>
+        <translation>구매를 처리할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>No active subscription found</source>
-        <translation>未找到有效的订阅</translation>
+        <translation>구독을 찾을 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
-        <translation>未找到已购买的订阅。请先购买订阅</translation>
+        <translation>구매한 구독이 없습니다. 먼저 구독을 구매하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>This email address has already been used to activate a trial</source>
-        <translation>此电子邮件地址已用于激活试用</translation>
+        <translation>이 이메일 주소는 이미 체험판 활성화에 사용되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>CAPTCHA verification is required</source>
-        <translation>需要进行验证码验证</translation>
+        <translation>CAPTCHA 인증이 필요합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA was incorrect. Please try again</source>
-        <translation>验证码不正确。请重试</translation>
+        <translation>CAPTCHA가 올바르지 않습니다. 다시 시도하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>CAPTCHA refreshed. Please try again</source>
-        <translation>验证码已刷新。请重试</translation>
+        <translation>CAPTCHA가 새로고침 되었습니다. 다시 시도하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="102"/>
         <source>Too many requests. Please try again later</source>
-        <translation>请求过于频繁。请稍后重试</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="105"/>
-        <source>QFile error: The file could not be opened</source>
-        <translation>QFile 错误：无法打开该文件</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
-        <source>QFile error: An error occurred when reading from the file</source>
-        <translation>QFile 错误：读取文件时发生错误</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="107"/>
-        <source>QFile error: The file could not be accessed</source>
-        <translation>QFile 错误：无法访问该文件</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
-        <source>QFile error: An unspecified error occurred</source>
-        <translation>QFile 错误：发生未指定的错误</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="109"/>
-        <source>QFile error: A fatal error occurred</source>
-        <translation>QFile 错误：发生严重错误</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="110"/>
-        <source>QFile error: The operation was aborted</source>
-        <translation>QFile 错误：操作已中止</translation>
+        <translation>요청이 너무 많습니다. 나중에 다시 시도하세요</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="117"/>
         <source>ErrorCode: %1. </source>
-        <translation>错误代码: %1. </translation>
+        <translation>오류 코드: %1. </translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="57"/>
         <source>OpenVPN config missing</source>
-        <translation>OpenVPN配置丢失</translation>
+        <translation>OpenVPN 설정이 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="58"/>
         <source>OpenVPN management server error</source>
-        <translation>OpenVPN 管理服务器错误</translation>
+        <translation>OpenVPN 관리 서버 오류</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="61"/>
         <source>OpenVPN executable missing</source>
-        <translation>OpenVPN 可执行文件丢失</translation>
+        <translation>OpenVPN 실행 파일이 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="62"/>
         <source>Amnezia helper service error</source>
-        <translation>Amnezia 服务连接失败</translation>
+        <translation>Amnezia 보조 서비스 오류</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="63"/>
         <source>OpenSSL failed</source>
-        <translation>OpenSSL错误</translation>
+        <translation>OpenSSL 실행에 실패했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="66"/>
         <source>Can&apos;t connect: another VPN connection is active</source>
-        <translation>无法连接：另一个VPN连接处于活跃状态</translation>
+        <translation>연결할 수 없습니다: 다른 VPN 연결이 활성 상태입니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="67"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
-        <translation>无法设置 OpenVPN TAP 网络适配器</translation>
+        <translation>OpenVPN TAP 네트워크 어댑터를 설정할 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="68"/>
         <source>VPN pool error: no available addresses</source>
-        <translation>VPN 池错误：没有可用地址</translation>
+        <translation>VPN 풀 오류: 사용 가능한 주소가 없습니다</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="70"/>
-        <source>The config does not contain any containers and credentials for connecting to the server</source>
-        <translation>配置不包含任何用于连接服务器的容器和凭据</translation>
+        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <source>Unable to open config file</source>
+        <translation>설정 파일을 열 수 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="79"/>
+        <source>VPN connection error</source>
+        <translation>VPN 연결 오류</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <source>In the response from the server, an empty config was received</source>
+        <translation>서버 응답에서 빈 설정을 받았습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="85"/>
+        <source>SSL error occurred</source>
+        <translation>SSL 오류가 발생했습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="86"/>
+        <source>Server response timeout on api request</source>
+        <translation>API 요청에 대한 서버 응답 시간이 초과되었습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="87"/>
+        <source>Missing AGW public key</source>
+        <translation>AGW 공개 키가 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="88"/>
+        <source>Failed to decrypt response payload</source>
+        <translation>응답 페이로드를 복호화하지 못했습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="89"/>
+        <source>Missing list of available services</source>
+        <translation>사용 가능한 서비스 목록이 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="90"/>
+        <source>The limit of allowed configurations per subscription has been exceeded</source>
+        <translation>구독당 허용되는 설정 수 제한을 초과했습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="105"/>
+        <source>QFile error: The file could not be opened</source>
+        <translation>QFile 오류: 파일을 열 수 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <source>QFile error: An error occurred when reading from the file</source>
+        <translation>QFile 오류: 파일을 읽는 중 오류가 발생했습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="107"/>
+        <source>QFile error: The file could not be accessed</source>
+        <translation>QFile 오류: 파일에 접근할 수 없습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>QFile error: An unspecified error occurred</source>
+        <translation>QFile 오류: 지정되지 않은 오류가 발생했습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="109"/>
+        <source>QFile error: A fatal error occurred</source>
+        <translation>QFile 오류: 치명적인 오류가 발생했습니다</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="110"/>
+        <source>QFile error: The operation was aborted</source>
+        <translation>QFile 오류: 작업이 중단되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="114"/>
         <source>Internal error</source>
-        <translation>内部错误</translation>
+        <translation>내부 오류</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="73"/>
         <source>IPsec</source>
         <translation>IPsec</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="76"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="183"/>
-        <source>Website in Tor network</source>
-        <translation>在 Tor 网络中架设网站</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="77"/>
-        <source>AmneziaDNS</source>
-        <translation>AmneziaDNS</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="78"/>
-        <source>SFTP file sharing service</source>
-        <translation>SFTP文件共享服务</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
@@ -6039,67 +5991,93 @@ Create one from the current settings.</source>
         <translation>Telemt (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="88"/>
-        <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
-        <translation>OpenVPN 是最流行的 VPN 协议，具有灵活的配置选项。它使用自己的安全协议与 SSL/TLS 进行密钥交换。</translation>
-    </message>
-    <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="91"/>
         <location filename="../core/utils/containers/containerUtils.cpp" line="93"/>
         <source>This protocol is no longer supported.</source>
-        <translation>此协议已不再受支持。</translation>
+        <translation>이 프로토콜은 더 이상 지원되지 않습니다.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="107"/>
+        <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
+        <translation>IKEv2/IPsec - 현대적이고 안정적인 프로토콜로, 다른 프로토콜보다 조금 빠르며 신호 손실 후 연결을 복원합니다. 최신 Android 및 iOS 버전에서 기본적으로 지원됩니다.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="114"/>
+        <source>Create a file vault on your server to securely store and transfer files.</source>
+        <translation>파일을 안전하게 저장하고 전송할 수 있도록 서버에 파일 저장소를 만듭니다.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="117"/>
+        <source>Telegram MTProto proxy server</source>
+        <translation>Telegram MTProto 프록시 서버</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="119"/>
+        <source>Telegram MTProto proxy (Telemt, Rust)</source>
+        <translation>Telegram MTProto 프록시 (Telemt, Rust)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="184"/>
+        <source>DNS Service</source>
+        <translation>DNS 서비스</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="192"/>
         <source>Telegram MTProto proxy server. Allows Telegram clients to connect through your server using the MTProto protocol. Supports FakeTLS mode for bypassing DPI-based blocking.</source>
-        <translation>Telegram MTProto 代理服务器。允许 Telegram 客户端通过您的服务器使用 MTProto 协议连接。支持 FakeTLS 模式以绕过基于 DPI 的封锁。</translation>
+        <translation>Telegram MTProto 프록시 서버입니다. MTProto 프로토콜을 사용하여 Telegram 클라이언트가 서버를 통해 연결할 수 있습니다. DPI 기반 차단을 우회하기 위한 FakeTLS 모드를 지원합니다.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="197"/>
         <source>Telegram MTProto proxy powered by Telemt (Rust). Supports secure and TLS fronting modes with optional traffic masking.</source>
-        <translation>基于 Telemt (Rust) 的 Telegram MTProto 代理。支持安全模式和 TLS fronting 模式，并可选择进行流量伪装。</translation>
+        <translation>Telemt(Rust) 기반 Telegram MTProto 프록시입니다. 선택적 트래픽 마스킹과 보안 및 TLS 프론팅 모드를 지원합니다.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="329"/>
         <source>Automatic</source>
-        <translation>自动</translation>
+        <translation>자동</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="337"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
-        <translation>将安装 AmneziaWG 协议。它提供高连接速度，即使在最恶劣的网络环境下也能稳定运行。</translation>
+        <translation>AmneziaWG 프로토콜이 설치됩니다. 높은 연결 속도를 제공하며 가장 까다로운 네트워크 환경에서도 안정적인 작동을 보장합니다.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="78"/>
+        <source>SFTP file sharing service</source>
+        <translation>SFTP 파일 공유 서비스</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="76"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="183"/>
+        <source>Website in Tor network</source>
+        <translation>Tor 네트워크 웹사이트</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="77"/>
+        <source>AmneziaDNS</source>
+        <translation>AmneziaDNS</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="88"/>
+        <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
+        <translation>OpenVPN은 유연한 설정 옵션을 제공하는 가장 인기 있는 VPN 프로토콜입니다. 키 교환에 SSL/TLS를 사용하는 자체 보안 프로토콜을 사용합니다.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="95"/>
         <source>WireGuard - popular VPN protocol with high performance, high speed and low power consumption.</source>
-        <translation>WireGuard — 高性能、高速度、低功耗的热门 VPN 协议。</translation>
+        <translation>WireGuard - 높은 성능과 속도, 낮은 전력 소비를 제공하는 인기 있는 VPN 프로토콜입니다.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="98"/>
         <location filename="../core/utils/containers/containerUtils.cpp" line="101"/>
         <location filename="../ui/models/containersModel.cpp" line="41"/>
         <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
-        <translation>AmneziaWG 是 Amnezia 基于 WireGuard 开发的专用协议。它提供高连接速度，即使在最恶劣的网络环境下也能稳定运行。</translation>
+        <translation>AmneziaWG는 WireGuard를 기반으로 한 Amnezia의 특수 프로토콜입니다. 높은 연결 속도를 제공하며 가장 까다로운 네트워크 환경에서도 안정적인 작동을 보장합니다.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="104"/>
         <source>XRay with REALITY masks VPN traffic as web traffic and protects against active probing. It is highly resistant to detection and offers high speed.</source>
-        <translation>XRay 配合 REALITY 可将 VPN 流量伪装为网页流量，并防御主动探测。它极难被识别，同时提供很高的速度。</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="107"/>
-        <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2/IPsec — 现代稳定的协议，速度略快于其他协议，在信号丢失后可恢复连接。最新版本的 Android 和 iOS 均原生支持该协议。</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="117"/>
-        <source>Telegram MTProto proxy server</source>
-        <translation>Telegram MTProto 代理服务器</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="119"/>
-        <source>Telegram MTProto proxy (Telemt, Rust)</source>
-        <translation>Telegram MTProto 代理 (Telemt, Rust)</translation>
+        <translation>REALITY를 사용하는 XRay는 VPN 트래픽을 웹 트래픽으로 위장하고 능동 프로빙을 방어합니다. 탐지에 매우 강하며 높은 속도를 제공합니다.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="127"/>
@@ -6110,13 +6088,13 @@ Features:
 * Normal battery consumption on mobile devices
 * Flexible customization for various devices and OS
 * Operates over both TCP and UDP protocols</source>
-        <translation>OpenVPN 是最流行、最可靠的 VPN 协议之一。它采用 SSL/TLS 加密，支持种类繁多的设备和操作系统，并且由于其开源特性而不断得到社区的改进。它在速度与安全之间取得了良好的平衡，但很容易被 DPI 系统识别，因而容易被封锁。
+        <translation>OpenVPN은 가장 인기 있고 신뢰할 수 있는 VPN 프로토콜 중 하나입니다. SSL/TLS 암호화를 사용하고 다양한 장치와 운영 체제를 지원하며 오픈 소스 특성 덕분에 커뮤니티를 통해 지속적으로 개선됩니다. 속도와 보안의 균형이 좋지만 DPI 시스템에서 쉽게 식별되어 차단에 취약합니다.
 
-特性：
-* 在所有 AmneziaVPN 平台上均可使用
-* 移动设备上电量消耗一般
-* 可针对各种设备和操作系统灵活定制
-* 同时支持 TCP 和 UDP 协议</translation>
+특징:
+* 모든 AmneziaVPN 플랫폼에서 사용 가능
+* 모바일 장치에서 보통 수준의 배터리 소비
+* 다양한 장치와 OS를 위한 유연한 설정
+* TCP 및 UDP 프로토콜 모두에서 작동</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="138"/>
@@ -6128,14 +6106,14 @@ Features:
 * Minimal configuration required
 * Easily detected by DPI systems (susceptible to blocking)
 * Operates over UDP protocol</source>
-        <translation>WireGuard 是一款现代、精简的 VPN 协议，可在所有设备上提供稳定的连接和出色的性能。它采用固定的加密设置，相比 OpenVPN 延迟更低、数据传输速度更高。不过，由于数据包特征明显，WireGuard 很容易被 DPI 系统识别，因而容易被封锁。
+        <translation>WireGuard는 모든 장치에서 안정적인 연결과 뛰어난 성능을 제공하는 현대적이고 간결한 VPN 프로토콜입니다. 고정된 암호화 설정을 사용하여 OpenVPN보다 지연 시간이 짧고 데이터 전송 속도가 빠릅니다. 그러나 고유한 패킷 특성으로 인해 DPI 시스템에서 쉽게 식별되어 차단에 취약합니다.
 
-特性：
-* 在所有 AmneziaVPN 平台上均可使用
-* 移动设备上功耗低
-* 只需极少配置
-* 容易被 DPI 系统检测（容易被封锁）
-* 通过 UDP 协议运行</translation>
+특징:
+* 모든 AmneziaVPN 플랫폼에서 사용 가능
+* 모바일 장치에서 낮은 전력 소비
+* 최소한의 설정만 필요
+* DPI 시스템에서 쉽게 탐지됨(차단에 취약)
+* UDP 프로토콜에서 작동</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="148"/>
@@ -6149,16 +6127,16 @@ Features:
 * Minimal settings required
 * Undetectable by traffic analysis systems (DPI)
 * Operates over UDP protocol</source>
-        <translation>AmneziaWG 是基于 WireGuard 的现代 VPN 协议，将简化的架构与所有设备上的高性能结合在一起。它通过先进的混淆技术解决了 WireGuard 的主要弱点（容易被 DPI 系统检测），使 VPN 流量与普通互联网流量无法区分。
+        <translation>AmneziaWG는 WireGuard를 기반으로 한 현대적인 VPN 프로토콜로, 단순한 구조와 모든 장치에서의 높은 성능을 제공합니다. 고급 난독화 기술을 통해 WireGuard의 주요 취약점(DPI 시스템에서 쉽게 탐지되는 점)을 해결하여 VPN 트래픽을 일반 인터넷 트래픽과 구별할 수 없게 합니다.
 
-对于追求快速、隐蔽的 VPN 连接的用户，AmneziaWG 是极佳的选择。
+빠르고 은밀한 VPN 연결을 원하는 사용자에게 AmneziaWG는 탁월한 선택입니다.
 
-特性：
-* 在所有 AmneziaVPN 平台上均可使用
-* 移动设备上电量消耗低
-* 只需极少设置
-* 无法被流量分析系统（DPI）检测
-* 通过 UDP 协议运行</translation>
+특징:
+* 모든 AmneziaVPN 플랫폼에서 사용 가능
+* 모바일 장치에서 낮은 배터리 소비
+* 최소한의 설정만 필요
+* 트래픽 분석 시스템(DPI)에서 탐지되지 않음
+* UDP 프로토콜에서 작동</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="160"/>
@@ -6171,15 +6149,15 @@ Features:
 * Highly effective in heavily censored regions
 * Minimal battery consumption on devices
 * Operates over TCP protocol</source>
-        <translation>REALITY 是由 XRay 的开发者打造的创新协议，专门用于对抗高强度的互联网审查。REALITY 在 TLS 握手过程中识别审查系统，并在提供真实 TLS 证书的同时，将可疑流量无缝重定向到 google.com 等真实网站。这使得 VPN 流量无需特殊配置即可与普通网页流量混为一体、难以区分。
-与 VMess、VLESS 和 XTLS-Vision 等较早的协议不同，REALITY 内置了先进的&quot;敌我识别&quot;机制，可有效防御 DPI 及其他流量分析手段。
+        <translation>REALITY는 XRay 개발자가 개발한 혁신적인 프로토콜로, 높은 수준의 인터넷 검열에 대응하도록 특별히 설계되었습니다. REALITY는 TLS 핸드셰이크 중 검열 시스템을 식별하고 의심스러운 트래픽을 google.com과 같은 합법적인 웹사이트로 자연스럽게 전달하면서 실제 TLS 인증서를 제공합니다. 이를 통해 특별한 설정 없이 VPN 트래픽을 일반 웹 트래픽과 구별할 수 없게 만듭니다.
+VMess, VLESS, XTLS-Vision과 같은 기존 프로토콜과 달리 REALITY는 고급 내장 &quot;아군/적군&quot; 탐지 메커니즘을 사용하여 DPI 및 기타 트래픽 분석 방식으로부터 효과적으로 보호합니다.
 
-特性：
-* 可抵御主动探测和 DPI 检测
-* 伪装流量无需特殊配置
-* 在审查严格的地区效果极佳
-* 设备上电量消耗极低
-* 通过 TCP 协议运行</translation>
+특징:
+* 능동 프로빙 및 DPI 탐지에 강함
+* 트래픽 위장을 위한 특별한 설정이 필요 없음
+* 인터넷 검열이 심한 지역에서 매우 효과적
+* 장치에서 배터리 소비가 적음
+* TCP 프로토콜에서 작동</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="173"/>
@@ -6191,14 +6169,14 @@ Features:
 * Minimal configuration required
 * Detectable by DPI analysis systems(easily blocked)
 * Operates over UDP protocol(ports 500 and 4500)</source>
-        <translation>IKEv2 结合 IPSec 加密，是一种现代且可靠的 VPN 协议。在切换网络或设备时它能快速重新连接，因此非常适合网络环境多变的场景。虽然它提供了良好的安全性和速度，但很容易被 DPI 系统识别，也容易被封锁。
+        <translation>IPSec 암호화와 결합된 IKEv2는 현대적이고 안정적인 VPN 프로토콜입니다. 네트워크나 장치를 전환할 때 빠르게 다시 연결되므로 동적인 네트워크 환경에 적합합니다. 보안성과 속도는 좋지만 DPI 시스템에서 쉽게 식별되어 차단될 수 있습니다.
 
-特性：
-* 在 AmneziaVPN 中仅 Windows 平台可用
-* 移动设备上电量消耗低
-* 只需极少配置
-* 可被 DPI 分析系统检测（容易被封锁）
-* 通过 UDP 协议运行（端口 500 和 4500）</translation>
+특징:
+* Windows에서만 AmneziaVPN으로 사용 가능
+* 모바일 장치에서 낮은 배터리 소비
+* 최소한의 설정만 필요
+* DPI 분석 시스템에서 탐지됨(쉽게 차단 가능)
+* UDP 프로토콜(포트 500 및 4500)에서 작동</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
@@ -6210,165 +6188,187 @@ Features:
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>安装后，Amnezia 将创建一个
+        <translation>설치 후 Amnezia가 서버에
 
- 服务器上的文件存储。 您将能够使用它来访问它
- FileZilla 或其他 SFTP 客户端，以及将磁盘挂载到您的设备上进行访问
- 直接从您的设备.
+파일 저장소를 만듭니다. FileZilla 또는 다른 SFTP 클라이언트로
+접근할 수 있으며, 장치에 디스크를 마운트하여
+장치에서 직접 접근할 수도 있습니다.
 
-欲了解更详细的信息，您可以
-在支持部分找到它 &quot;创建SFTP文件存储.&quot; </translation>
-    </message>
-    <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="114"/>
-        <source>Create a file vault on your server to securely store and transfer files.</source>
-        <translation>在您的服务器上创建一个文件保险库，用于安全存储和传输文件。</translation>
+자세한 내용은 지원 섹션의
+&quot; SFTP 파일 저장소 만들기&quot;에서 확인할 수 있습니다. </translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="110"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
-        <translation>只需点击两次即可架设 WordPress 网站到 Tor 网络.</translation>
+        <translation>두 번의 클릭으로 Tor 네트워크에 WordPress 사이트를 배포하세요.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="112"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
-        <translation>将当前的 DNS 服务器替换为您自己的。这将提高您的隐私保护级别。</translation>
+        <translation>현재 DNS 서버를 자신의 서버로 교체하세요. 개인 정보 보호 수준이 향상됩니다.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="184"/>
-        <source>DNS Service</source>
-        <translation>DNS 服务</translation>
+        <location filename="../core/utils/errorStrings.cpp" line="12"/>
+        <source>Unknown error</source>
+        <translation>알 수 없는 오류</translation>
+    </message>
+    <message>
+        <location filename="../core/protocols/protocolUtils.cpp" line="70"/>
+        <source>SFTP service</source>
+        <translation>SFTP 서비스</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="190"/>
+        <location filename="../core/protocols/protocolUtils.cpp" line="71"/>
+        <source>SOCKS5 proxy server</source>
+        <translation>SOCKS5 프록시 서버</translation>
+    </message>
+    <message>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
+        <source> (version 3.1)</source>
+        <translation> (버전 3.1)</translation>
+    </message>
+    <message>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
+        <source> (version 2)</source>
+        <translation> (버전 2)</translation>
+    </message>
+    <message>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
+        <source> (version 1.5)</source>
+        <translation> (버전 1.5)</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess_new.cpp" line="57"/>
         <source>vmess:// url is invalid</source>
-        <translation>vmess:// 网址无效</translation>
+        <translation>vmess:// URL이 잘못되었습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess_new.cpp" line="82"/>
         <source>Invalid streamSettings protocol: </source>
-        <translation>无效的 streamSettings 协议：</translation>
+        <translation>잘못된 streamSettings 프로토콜: </translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess_new.cpp" line="148"/>
         <source>Unknown transport method: </source>
-        <translation>未知的传输方式：</translation>
+        <translation>알 수 없는 전송 방식: </translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess.cpp" line="130"/>
         <source>VMess string should start with &apos;vmess://&apos;</source>
-        <translation>VMess 字符串应以 &apos;vmess://&apos; 开头</translation>
+        <translation>VMess 문자열은 &quot;vmess://&quot;로 시작해야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess.cpp" line="137"/>
         <source>VMess string should be a valid base64 string</source>
-        <translation>VMess 字符串应为有效的 base64 字符串</translation>
+        <translation>VMess 문자열은 유효한 base64 문자열이어야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess.cpp" line="154"/>
         <source>JSON should not be empty</source>
-        <translation>JSON 不应为空</translation>
+        <translation>JSON은 비어 있으면 안 됩니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="45"/>
         <source>VLESS link should start with vless://</source>
-        <translation>VLESS 链接应以 vless:// 开头</translation>
+        <translation>VLESS 링크는 vless://로 시작해야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="53"/>
         <source>link parse failed: %1</source>
-        <translation>链接解析失败：%1</translation>
+        <translation>링크 구문 분석 실패: %1</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="61"/>
         <source>empty host</source>
-        <translation>主机为空</translation>
+        <translation>호스트가 비어 있습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="70"/>
         <source>missing port</source>
-        <translation>缺少端口</translation>
+        <translation>포트가 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="85"/>
         <source>missing uuid</source>
-        <translation>缺少 uuid</translation>
+        <translation>UUID가 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="54"/>
         <source>Invalid ssd link: json: field %1 must exist</source>
-        <translation>无效的 ssd 链接：json：字段 %1 必须存在</translation>
+        <translation>잘못된 ssd 링크: JSON 필드 %1이(가) 있어야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="61"/>
         <source>Invalid ssd link: json: field %1 must be valid port number</source>
-        <translation>无效的 ssd 链接：json：字段 %1 必须是有效的端口号</translation>
+        <translation>잘못된 ssd 링크: JSON 필드 %1은(는) 유효한 포트 번호여야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="68"/>
         <source>Invalid ssd link: json: field %1 must be of type &apos;string&apos;</source>
-        <translation>无效的 ssd 链接：json：字段 %1 的类型必须为 &apos;string&apos;</translation>
+        <translation>잘못된 ssd 링크: JSON 필드 %1의 형식은 &quot;string&quot;이어야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="75"/>
         <source>Invalid ssd link: json: field %1 must be an array</source>
-        <translation>无效的 ssd 链接：json：字段 %1 必须是数组</translation>
+        <translation>잘못된 ssd 링크: JSON 필드 %1은(는) 배열이어야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="82"/>
         <source>Skipping invalid ssd server: server must be an object</source>
-        <translation>跳过无效的 ssd 服务器：服务器必须是一个对象</translation>
+        <translation>잘못된 ssd 서버를 건너뜁니다: 서버는 객체여야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="88"/>
         <source>Skipping invalid ssd server: missing required field %1</source>
-        <translation>跳过无效的 ssd 服务器：缺少必填字段 %1</translation>
+        <translation>잘못된 ssd 서버를 건너뜁니다: 필수 필드 %1이(가) 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="95"/>
         <source>Skipping invalid ssd server: field %1 should be of type &apos;string&apos;</source>
-        <translation>跳过无效的 ssd 服务器：字段 %1 的类型应为 &apos;string&apos;</translation>
+        <translation>잘못된 ssd 서버를 건너뜁니다: 필드 %1의 형식은 &quot;string&quot;이어야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="104"/>
         <source>Invalid ssd link: should begin with ssd://</source>
-        <translation>无效的 ssd 链接：应以 ssd:// 开头</translation>
+        <translation>잘못된 ssd 링크: ssd://로 시작해야 합니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="114"/>
         <source>Invalid ssd link: base64 parse failed</source>
-        <translation>无效的 ssd 链接：base64 解析失败</translation>
+        <translation>잘못된 ssd 링크: base64 구문 분석에 실패했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="121"/>
         <source>Invalid ssd link: json parse failed</source>
-        <translation>无效的 ssd 链接：json 解析失败</translation>
+        <translation>잘못된 ssd 링크: JSON 구문 분석에 실패했습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="144"/>
         <source>Invalid ssd link: rc4-md5 encryption is not supported by v2ray-core</source>
-        <translation>无效的 ssd 链接：v2ray-core 不支持 rc4-md5 加密</translation>
+        <translation>잘못된 ssd 링크: rc4-md5 암호화는 v2ray-core에서 지원되지 않습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="51"/>
         <source>SS URI is too short</source>
-        <translation>SS URI 过短</translation>
+        <translation>SS URI가 너무 짧습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="74"/>
         <location filename="../core/utils/serialization/ss.cpp" line="109"/>
         <source>Can&apos;t find the colon separator between method and password</source>
-        <translation>找不到加密方式与密码之间的冒号分隔符</translation>
+        <translation>메서드와 비밀번호 사이의 콜론 구분자를 찾을 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="83"/>
         <source>Can&apos;t find the at separator between password and hostname</source>
-        <translation>找不到密码与主机名之间的 @ 分隔符</translation>
+        <translation>비밀번호와 호스트 이름 사이의 @ 구분자를 찾을 수 없습니다</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="92"/>
         <source>Can&apos;t find the colon separator between hostname and port</source>
-        <translation>找不到主机名与端口之间的冒号分隔符</translation>
+        <translation>호스트 이름과 포트 사이의 콜론 구분자를 찾을 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -6376,12 +6376,12 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Components/RenameServerDrawer.qml" line="30"/>
         <source>Server name</source>
-        <translation>服务器名</translation>
+        <translation>서버 이름</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/RenameServerDrawer.qml" line="41"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
 </context>
 <context>
@@ -6389,7 +6389,7 @@ For more detailed information, you can
     <message>
         <location filename="../core/repositories/secureServersRepository.cpp" line="212"/>
         <source>Server</source>
-        <translation>服务器</translation>
+        <translation>서버</translation>
     </message>
 </context>
 <context>
@@ -6397,7 +6397,7 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="48"/>
         <source>Choose language</source>
-        <translation>选择语言</translation>
+        <translation>언어 선택</translation>
     </message>
 </context>
 <context>
@@ -6405,17 +6405,17 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="70"/>
         <source>Subscription expired. Please renew</source>
-        <translation>订阅已过期，请续订</translation>
+        <translation>구독이 만료되었습니다. 갱신해 주세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="70"/>
         <source>Subscription expiring soon</source>
-        <translation>订阅即将到期</translation>
+        <translation>구독이 곧 만료됩니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="83"/>
         <source>Unable change server while there is an active connection</source>
-        <translation>已建立连接时无法更改服务器配置</translation>
+        <translation>연결이 활성화된 동안에는 서버를 변경할 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -6423,12 +6423,12 @@ For more detailed information, you can
     <message>
         <location filename="../ui/controllers/serversUiController.cpp" line="99"/>
         <source>Legacy API v1 configs are no longer supported. Remove this server to continue.</source>
-        <translation>旧版 API v1 配置已不再受支持。请移除此服务器以继续。</translation>
+        <translation>기존 API v1 설정은 더 이상 지원되지 않습니다. 계속하려면 이 서버를 삭제하세요.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/serversUiController.cpp" line="100"/>
         <source>Use the remove action to delete this legacy config.</source>
-        <translation>请使用移除操作删除此旧版配置。</translation>
+        <translation>삭제 작업을 사용하여 이 기존 설정을 삭제하세요.</translation>
     </message>
 </context>
 <context>
@@ -6437,13 +6437,13 @@ For more detailed information, you can
         <location filename="../core/controllers/api/servicesCatalogController.cpp" line="176"/>
         <source>%1/mo</source>
         <comment>IAP: price per month in plan subtitle</comment>
-        <translation>%1/月</translation>
+        <translation>%1/월</translation>
     </message>
     <message>
         <location filename="../core/controllers/api/servicesCatalogController.cpp" line="196"/>
         <source>from %1 per month</source>
         <comment>IAP: card footer minimum monthly price from StoreKit</comment>
-        <translation>每月 %1 起</translation>
+        <translation>월 %1부터</translation>
     </message>
 </context>
 <context>
@@ -6451,7 +6451,7 @@ For more detailed information, you can
     <message>
         <location filename="../ui/controllers/settingsUiController.cpp" line="183"/>
         <source>All settings have been reset to default values</source>
-        <translation>所配置恢复为默认值</translation>
+        <translation>모든 설정이 기본값으로 재설정되었습니다</translation>
     </message>
 </context>
 <context>
@@ -6459,22 +6459,22 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="46"/>
         <source> subscription has expired</source>
-        <translation> 订阅已过期</translation>
+        <translation> 구독이 만료되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="59"/>
         <source>Renew to continue using VPN</source>
-        <translation>续订以继续使用 VPN</translation>
+        <translation>VPN을 계속 사용하려면 갱신하세요</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="71"/>
         <source>Renew</source>
-        <translation>续订</translation>
+        <translation>갱신</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="95"/>
         <source>Support</source>
-        <translation>支持</translation>
+        <translation>지원</translation>
     </message>
 </context>
 <context>
@@ -6483,24 +6483,34 @@ For more detailed information, you can
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="218"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="268"/>
         <source>This subscription has already been added</source>
-        <translation>此订阅已添加</translation>
+        <translation>이 구독은 이미 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="225"/>
         <source>%1 has been added to the app</source>
-        <translation>%1 已添加到应用</translation>
+        <translation>%1이(가) 앱에 추가되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="275"/>
         <source>Subscription restored successfully</source>
-        <translation>订阅已成功恢复</translation>
+        <translation>구독이 성공적으로 복원되었습니다</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
+        <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
+        <translation>이 이메일 주소는 이미 체험판 활성화에 사용되었습니다. 서비스가 마음에 드나요? Premium으로 업그레이드하세요</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
+        <source>API config removed</source>
+        <translation>API 설정이 삭제되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="303"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="356"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="479"/>
         <source>%1 installed successfully.</source>
-        <translation>%1 安装成功。</translation>
+        <translation>%1이(가) 성공적으로 설치되었습니다.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="318"/>
@@ -6511,32 +6521,22 @@ For more detailed information, you can
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="514"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="607"/>
         <source>Enter the digits from the image to continue</source>
-        <translation>请输入图片中的数字以继续</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
-        <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
-        <translation>此电子邮件地址已用于激活试用。喜欢这项服务吗？升级到 Premium</translation>
+        <translation>계속하려면 이미지의 숫자를 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="532"/>
         <source>API config reloaded</source>
-        <translation>API 配置已重新加载</translation>
+        <translation>API 설정이 다시 로드되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="536"/>
         <source>Successfully changed the country of connection to %1</source>
-        <translation>已成功将连接国家/地区更改为 %1</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
-        <source>API config removed</source>
-        <translation>API 配置已移除</translation>
+        <translation>연결 국가가 %1(으)로 변경되었습니다</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="660"/>
         <source>Server &apos;%1&apos; was removed</source>
-        <translation>已移除服务器 &apos;%1&apos;</translation>
+        <translation>서버 %1이(가) 삭제되었습니다</translation>
     </message>
 </context>
 <context>
@@ -6545,31 +6545,31 @@ For more detailed information, you can
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="26"/>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="75"/>
         <source>Show</source>
-        <translation>显示</translation>
+        <translation>표시</translation>
     </message>
     <message>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="30"/>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="76"/>
         <source>Connect</source>
-        <translation>连接</translation>
+        <translation>연결</translation>
     </message>
     <message>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="31"/>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="77"/>
         <source>Disconnect</source>
-        <translation>断开</translation>
+        <translation>연결 해제</translation>
     </message>
     <message>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="35"/>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="78"/>
         <source>Visit Website</source>
-        <translation>官网</translation>
+        <translation>웹사이트 방문</translation>
     </message>
     <message>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="41"/>
         <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="79"/>
         <source>Quit</source>
-        <translation>退出</translation>
+        <translation>종료</translation>
     </message>
 </context>
 <context>
@@ -6577,7 +6577,7 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Components/TermsAndPrivacyText.qml" line="23"/>
         <source>By continuing, you agree to the &lt;a href=&quot;%1&quot; style=&quot;color: %3;&quot;&gt;Terms of Use&lt;/a&gt; and &lt;a href=&quot;%2&quot; style=&quot;color: %3;&quot;&gt;Privacy Policy&lt;/a&gt;</source>
-        <translation>继续即表示您同意&lt;a href=&quot;%1&quot; style=&quot;color: %3;&quot;&gt;使用条款&lt;/a&gt;和&lt;a href=&quot;%2&quot; style=&quot;color: %3;&quot;&gt;隐私政策&lt;/a&gt;</translation>
+        <translation>계속하면 &lt;a href=&quot;%1&quot; style=&quot;color: %3;&quot;&gt;이용 약관&lt;/a&gt; 및 &lt;a href=&quot;%2&quot; style=&quot;color: %3;&quot;&gt;개인정보 처리방침&lt;/a&gt;에 동의하는 것으로 간주됩니다</translation>
     </message>
 </context>
 <context>
@@ -6585,7 +6585,7 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Controls2/TextFieldWithHeaderType.qml" line="145"/>
         <source>The field can&apos;t be empty</source>
-        <translation>输入不能为空</translation>
+        <translation>필드를 비워 둘 수 없습니다</translation>
     </message>
 </context>
 <context>
@@ -6593,17 +6593,17 @@ For more detailed information, you can
     <message>
         <location filename="../ui/controllers/updateUiController.cpp" line="20"/>
         <source>New version released: %1</source>
-        <translation>已发布新版本：%1</translation>
+        <translation>새 버전이 출시되었습니다: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/updateUiController.cpp" line="23"/>
         <source>New version released: %1 (%2)</source>
-        <translation>已发布新版本：%1 (%2)</translation>
+        <translation>새 버전이 출시되었습니다: %1 (%2)</translation>
     </message>
     <message>
         <location filename="../ui/controllers/updateUiController.cpp" line="34"/>
         <source>Failed to load changelog text</source>
-        <translation>加载更新日志失败</translation>
+        <translation>변경 로그를 불러오지 못했습니다</translation>
     </message>
 </context>
 <context>
@@ -6619,42 +6619,42 @@ For more detailed information, you can
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="136"/>
         <source>Unknown</source>
-        <translation>未知</translation>
+        <translation>알 수 없음</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="137"/>
         <source>Disconnected</source>
-        <translation>连接已断开</translation>
+        <translation>연결 해제됨</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="138"/>
         <source>Preparing</source>
-        <translation>准备中</translation>
+        <translation>준비 중</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="139"/>
         <source>Connecting...</source>
-        <translation>连接中</translation>
+        <translation>연결 중...</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="140"/>
         <source>Connected</source>
-        <translation>已连接</translation>
+        <translation>연결됨</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="141"/>
         <source>Disconnecting...</source>
-        <translation>断开中</translation>
+        <translation>연결 해제 중...</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="142"/>
         <source>Reconnecting...</source>
-        <translation>重连中</translation>
+        <translation>다시 연결 중...</translation>
     </message>
     <message>
         <location filename="../core/protocols/vpnProtocol.cpp" line="143"/>
         <source>Error</source>
-        <translation>错误</translation>
+        <translation>오류</translation>
     </message>
 </context>
 <context>
@@ -6662,22 +6662,22 @@ For more detailed information, you can
     <message>
         <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="707"/>
         <source>Port must be in the range of 1 to 65535</source>
-        <translation>端口必须在 1 到 65535 之间</translation>
+        <translation>포트는 1에서 65535 사이여야 합니다</translation>
     </message>
     <message>
         <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="713"/>
         <source>SNI: enter a valid IP address or domain name</source>
-        <translation>SNI：请输入有效的 IP 地址或域名</translation>
+        <translation>SNI: 유효한 IP 주소 또는 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="719"/>
         <source>Host: enter a valid IP address or domain name</source>
-        <translation>主机：请输入有效的 IP 地址或域名</translation>
+        <translation>호스트: 유효한 IP 주소 또는 도메인 이름을 입력하세요</translation>
     </message>
     <message>
         <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="722"/>
         <source>Path must start with &quot;/&quot;</source>
-        <translation>路径必须以 &quot;/&quot; 开头</translation>
+        <translation>경로는 &quot;/&quot;로 시작해야 합니다</translation>
     </message>
 </context>
 <context>
@@ -6685,7 +6685,7 @@ For more detailed information, you can
     <message>
         <location filename="../ui/models/protocols/xrayConfigSnapshotsModel.cpp" line="153"/>
         <source>Invalid JSON format</source>
-        <translation>JSON 格式无效</translation>
+        <translation>잘못된 JSON 형식</translation>
     </message>
 </context>
 <context>
@@ -6693,39 +6693,39 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/main2.qml" line="279"/>
         <source>Private key passphrase</source>
-        <translation>私钥密码</translation>
+        <translation>개인 키 암호</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="300"/>
         <source>Save</source>
-        <translation>保存</translation>
+        <translation>저장</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="394"/>
         <source>This subscription format is no longer supported</source>
-        <translation>此订阅格式已不再受支持</translation>
+        <translation>이 구독 형식은 더 이상 지원되지 않습니다</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="395"/>
         <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
-        <translation>此旧版 Amnezia 订阅类型已无法在本应用版本中用于连接。
-请从应用中移除该服务器以继续。</translation>
+        <translation>이 애플리케이션 버전에서는 기존 Amnezia 구독 유형으로 더 이상 연결할 수 없습니다.
+계속하려면 앱에서 서버를 제거하세요.</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="396"/>
         <source>Continue</source>
-        <translation>继续</translation>
+        <translation>계속</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="397"/>
         <source>Cancel</source>
-        <translation>取消</translation>
+        <translation>취소</translation>
     </message>
     <message>
         <location filename="../ui/qml/main2.qml" line="401"/>
         <source>Cannot remove server during active connection</source>
-        <translation>存在活动连接时无法移除服务器</translation>
+        <translation>연결이 활성화된 동안에는 서버를 제거할 수 없습니다</translation>
     </message>
 </context>
 </TS>

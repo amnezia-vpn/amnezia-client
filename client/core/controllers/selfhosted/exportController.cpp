@@ -14,6 +14,7 @@
 #include "core/models/selfhosted/selfHostedAdminServerConfig.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocolConfig.h"
+#include "version.h"
 
 using namespace amnezia;
 
@@ -343,7 +344,7 @@ ExportController::ExportResult ExportController::generateXrayConfig(const QStrin
         // VlessServerObject doesn't have alpn field, so we embed in serverName if needed
     }
 
-    result.nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, "AmneziaVPN");
+    result.nativeConfigString = amnezia::serialization::vless::Serialize(vlessServer, APPLICATION_NAME);
 
     return result;
 }
