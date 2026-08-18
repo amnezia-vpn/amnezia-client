@@ -180,5 +180,6 @@
         </dict>
         </array>
 
+	${CLIENT_MACOS_EXTRA_PLIST_ENTRIES}
 </dict>
 </plist>

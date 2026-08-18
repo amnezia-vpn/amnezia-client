@@ -61,14 +61,14 @@ if(APPLE AND NOT IOS)
     endif()
 
     configure_file(
-        "${CMAKE_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
+        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/pf-templates/amn.400.allowPIA.conf.in"
         "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
         @ONLY
     )
 
     file(COPY_FILE
         "${CMAKE_CURRENT_BINARY_DIR}/amn.400.allowPIA.conf"
-        "${CMAKE_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
+        "${CMAKE_CURRENT_SOURCE_DIR}/deploy/data/macos/pf/amn.400.allowPIA.conf"
         ONLY_IF_DIFFERENT
     )
 endif()
