@@ -81,6 +81,8 @@ set(AMNEZIAVPN_TS_FILES
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_uk_UA.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ur_PK.ts
     ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_hi_IN.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_es_ES.ts
+    ${CMAKE_CURRENT_LIST_DIR}/translations/amneziavpn_ko_KR.ts
 )
 
 qt6_add_translations(${PROJECT}

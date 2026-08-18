@@ -218,12 +218,12 @@ Already installed containers were found on the server. All installed containers 
 <context>
     <name>IpSplitTunnelingController</name>
     <message>
-        <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="198"/>
+        <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="224"/>
         <source>Failed to parse JSON data: %1</source>
         <translation>Не удалось разобрать данные в формате JSON: %1</translation>
     </message>
     <message>
-        <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="203"/>
+        <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="229"/>
         <source>The JSON data is not an array</source>
         <translation>Данные в формате JSON не являются массивом</translation>
     </message>
@@ -311,70 +311,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/utils/notificationHandler.cpp" line="89"/>
         <source>Unsecured network detected: </source>
         <translation>Обнаружена незащищенная сеть: </translation>
-    </message>
-</context>
-<context>
-    <name>PageProtocolRaw</name>
-    <message>
-        <source>All users who you shared a connection with will no longer be able to connect to it.</source>
-        <translation type="obsolete">Все пользователи, с которыми вы поделились этим VPN-протоколом, больше не смогут к нему подключаться.</translation>
-    </message>
-</context>
-<context>
-    <name>PageServerContainers</name>
-    <message>
-        <source>Continue</source>
-        <translation type="obsolete">Продолжить</translation>
-    </message>
-</context>
-<context>
-    <name>QKeychain::DeletePasswordJobPrivate</name>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="104"/>
-        <source>Password entry not found</source>
-        <translation>Пароль не найден</translation>
-    </message>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="108"/>
-        <source>Could not decrypt data</source>
-        <translation>Не удалось расшифровать данные</translation>
-    </message>
-</context>
-<context>
-    <name>QKeychain::ReadPasswordJobPrivate</name>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="32"/>
-        <source>Password entry not found</source>
-        <translation>Пароль не найден</translation>
-    </message>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="36"/>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="139"/>
-        <source>Could not decrypt data</source>
-        <translation>Не удалось расшифровать данные</translation>
-    </message>
-</context>
-<context>
-    <name>QKeychain::WritePasswordJobPrivate</name>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="78"/>
-        <source>Credential size exceeds maximum size of %1</source>
-        <translation>Размер учетных данных превышает максимальный размер %1</translation>
-    </message>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="87"/>
-        <source>Credential key exceeds maximum size of %1</source>
-        <translation>Ключ учетных данных превышает максимальный размер %1</translation>
-    </message>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="92"/>
-        <source>Writing credentials failed: Win32 error code %1</source>
-        <translation>Не удалось записать учетные данные: код ошибки Win32 %1</translation>
-    </message>
-    <message>
-        <location filename="../3rd/qtkeychain/qtkeychain/keychain_win.cpp" line="162"/>
-        <source>Encryption failed</source>
-        <translation>Не удалось зашифровать</translation>
     </message>
 </context>
 <context>
@@ -872,11 +808,6 @@ Already installed containers were found on the server. All installed containers 
         <translation>XRay с REALITY маскирует VPN-трафик под веб-трафик. Обладает высокой устойчивостью к обнаружению и обеспечивает высокую скорость соединения.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="116"/>
-        <source></source>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="128"/>
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
@@ -1000,33 +931,6 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 найти в разделе поддержки &quot;Создание файлового хранилища SFTP.&quot; </translation>
     </message>
     <message>
-        <source>
-				AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard’s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
-
-				AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
-
-				Features:
-
-				* Available on all AmneziaVPN platforms
-				* Low battery consumption on mobile devices
-				* Minimal settings required
-				* Undetectable by traffic analysis systems (DPI)
-				* Operates over UDP protocol
-			</source>
-        <translation type="obsolete">
-				AmneziaWG — современный VPN-протокол на основе WireGuard, сочетающий простую архитектуру и высокую производительность на всех устройствах. Он устраняет основной недостаток WireGuard (лёгкое обнаружение трафика системами DPI) за счёт эффективного маскирования VPN-трафика под обычный интернет-трафик.
-
-				Таким образом, AmneziaWG идеально подойдёт тем, кто ищет быстрое и незаметное VPN-соединение.
-
-				Особенности:
-				* Доступен во всех версиях AmneziaVPN
-				* Низкое энергопотребление на мобильных устройствах
-				* Минимум настроек
-				* Незаметен для систем анализа трафика (DPI)
-				* Работает по протоколу UDP
-			</translation>
-    </message>
-    <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="110"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>Разверните сайт на WordPress в сети Tor в два клика.</translation>
@@ -1054,12 +958,17 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <translation>Прокси-сервер SOCKS5</translation>
     </message>
     <message>
-        <location filename="../core/protocols/protocolUtils.cpp" line="221"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
+        <source> (version 3.1)</source>
+        <translation> (версия 3.1)</translation>
+    </message>
+    <message>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
         <source> (version 2)</source>
         <translation> (версия 2)</translation>
     </message>
     <message>
-        <location filename="../core/protocols/protocolUtils.cpp" line="222"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
         <source> (version 1.5)</source>
         <translation> (версия 1.5)</translation>
     </message>
@@ -1206,12 +1115,12 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>ServersUiController</name>
     <message>
-        <location filename="../ui/controllers/serversUiController.cpp" line="96"/>
+        <location filename="../ui/controllers/serversUiController.cpp" line="99"/>
         <source>Legacy API v1 configs are no longer supported. Remove this server to continue.</source>
         <translation>Устаревшие конфигурации API v1 больше не поддерживаются. Удалите этот сервер чтобы продолжить.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/serversUiController.cpp" line="97"/>
+        <location filename="../ui/controllers/serversUiController.cpp" line="100"/>
         <source>Use the remove action to delete this legacy config.</source>
         <translation>Воспользуйтесь действием &quot;Удалить&quot; чтобы удалить эту устаревшую конфигурацию.</translation>
     </message>
@@ -1304,32 +1213,32 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>SystemTrayNotificationHandler</name>
     <message>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="28"/>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="62"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="26"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="75"/>
         <source>Show</source>
         <translation>Показать</translation>
     </message>
     <message>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="32"/>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="63"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="30"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="76"/>
         <source>Connect</source>
         <translation>Подключиться</translation>
     </message>
     <message>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="33"/>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="64"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="31"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="77"/>
         <source>Disconnect</source>
         <translation>Отключиться</translation>
     </message>
     <message>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="37"/>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="65"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="35"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="78"/>
         <source>Visit Website</source>
         <translation>Посетить сайт</translation>
     </message>
     <message>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="43"/>
-        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="66"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="41"/>
+        <location filename="../ui/utils/systemTrayNotificationHandler.cpp" line="79"/>
         <source>Quit</source>
         <translation>Закрыть</translation>
     </message>
@@ -1355,7 +1264,7 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>VpnConnection</name>
     <message>
-        <location filename="../vpnConnection.cpp" line="513"/>
+        <location filename="../vpnConnection.cpp" line="554"/>
         <source>Mbps</source>
         <translation>Мбит/с</translation>
     </message>
@@ -1363,42 +1272,42 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>VpnProtocol</name>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="135"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="136"/>
         <source>Unknown</source>
         <translation>Неизвестный</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="136"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="137"/>
         <source>Disconnected</source>
         <translation>Отключено</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="137"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="138"/>
         <source>Preparing</source>
         <translation>Подготовка</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="138"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="139"/>
         <source>Connecting...</source>
         <translation>Подключение...</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="139"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="140"/>
         <source>Connected</source>
         <translation>Подключено</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="140"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="141"/>
         <source>Disconnecting...</source>
         <translation>Отключение...</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="141"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="142"/>
         <source>Reconnecting...</source>
         <translation>Переподключение...</translation>
     </message>
     <message>
-        <location filename="../core/protocols/vpnProtocol.cpp" line="142"/>
+        <location filename="../core/protocols/vpnProtocol.cpp" line="143"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
@@ -1406,22 +1315,22 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
 <context>
     <name>XrayConfigModel</name>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="655"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="707"/>
         <source>Port must be in the range of 1 to 65535</source>
         <translation>Порт должен быть в диапазоне от 1 до 65535</translation>
     </message>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="661"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="713"/>
         <source>SNI: enter a valid IP address or domain name</source>
         <translation>SNI: введите действительный IP-адрес или доменное имя</translation>
     </message>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="667"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="719"/>
         <source>Host: enter a valid IP address or domain name</source>
         <translation>Хост: введите действительный IP-адрес или доменное имя</translation>
     </message>
     <message>
-        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="670"/>
+        <location filename="../ui/models/protocols/xrayConfigModel.cpp" line="722"/>
         <source>Path must start with &quot;/&quot;</source>
         <translation>Путь должен начинаться с &quot;/&quot;</translation>
     </message>
