@@ -6,14 +6,9 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
 #include "core/utils/containers/containerUtils.h"
-#include "logger.h"
 
 #include <QHostAddress>
 #include <QRegularExpression>
-
-namespace {
-    Logger logger("XrayConfigModel");
-}
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -272,8 +267,6 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
 void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig)
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
-    const bool templateFromPreSplitRecord = protocolConfig.clientTemplate.formatVersion == 0
-            || protocolConfig.needsTemplateMaterialization;
 
     beginResetModel();
 
@@ -298,14 +291,6 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
     endResetModel();
 
-    logger.info() << "XrayConfigModel: model loaded for container"
-                  << ContainerUtils::containerToString(container) << ", transport"
-                  << m_protocolConfig.serverConfig.transport << ", security"
-                  << m_protocolConfig.serverConfig.security << ", third-party"
-                  << (m_protocolConfig.serverConfig.isThirdPartyConfig ? "yes" : "no") << ", client template"
-                  << ((templateFromPreSplitRecord || protocolConfig.templateWasMaterialized)
-                              ? "materialized from pre-split record"
-                              : "read as-is");
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
@@ -323,7 +308,6 @@ amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
             !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
 
     if (serverSettingsChanged) {
-        logger.info() << "XrayConfigModel: server settings changed, dropping the cached client config";
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
@@ -342,9 +326,6 @@ bool XrayConfigModel::pendingChangeTouchesServer(const QString &pendingPort) con
 {
     const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
     const bool touchesServer = !pending.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
-    logger.debug() << "XrayConfigModel: save verdict, touches server" << (touchesServer ? "yes" : "no")
-                   << ", breaks issued configs"
-                   << (pending.breaksIssuedConfigs(m_originalProtocolConfig.serverConfig) ? "yes" : "no");
     return touchesServer;
 }
 
@@ -449,7 +430,6 @@ void XrayConfigModel::resetToDefaults()
     m_protocolConfig.clientTemplate.formatVersion = 1;
     endResetModel();
 
-    logger.info() << "XrayConfigModel: server settings and client template reset to defaults";
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
@@ -460,7 +440,6 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
                                        const amnezia::XrayClientTemplate &clientTemplate)
 {
     const bool wasUnsavedChanges = hasUnsavedChanges();
-    const bool templateRecovered = clientTemplate.formatVersion == 0;
 
     beginResetModel();
     m_protocolConfig.serverConfig = serverConfig;
@@ -475,10 +454,6 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
     m_protocolConfig.clearClientConfig();
     endResetModel();
 
-    logger.info() << "XrayConfigModel: snapshot applied, transport" << m_protocolConfig.serverConfig.transport
-                  << ", security" << m_protocolConfig.serverConfig.security << ", client template"
-                  << (templateRecovered ? "recovered from legacy server fields" : "carried by the snapshot")
-                  << ", cached client config dropped";
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();

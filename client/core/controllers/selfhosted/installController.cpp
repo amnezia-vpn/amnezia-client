@@ -702,7 +702,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
     outFiles.clear();
 
     if (container != DockerContainer::Xray) {
-        logger.debug() << "Xray key migration: skipped, container is not Xray";
         return ErrorCode::NoError;
     }
 
@@ -834,7 +833,6 @@ ErrorCode InstallController::restoreXrayStateIntoDataVolume(const ServerCredenti
                                                             const QMap<QString, QString> &files)
 {
     if (files.isEmpty()) {
-        logger.debug() << "Xray key migration: nothing to restore, no state was carried";
         return ErrorCode::NoError;
     }
 
