@@ -86,8 +86,8 @@ if(DEPLOY)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.AmneziaVPN"
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "dev macos.org.amnezia.AmneziaVPN"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "${CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER}"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "${CLIENT_MACOS_PROVISIONING_PROFILE_SPECIFIER_DEBUG}"
     )
 else()
     set_target_properties(${PROJECT} PROPERTIES
@@ -125,12 +125,12 @@ target_sources(${PROJECT} PRIVATE
 )
 
 set_source_files_properties(
-    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Images.xcassets
+    ${CLIENT_MACOS_MEDIA_ASSETS_PATH}
     PROPERTIES MACOSX_PACKAGE_LOCATION Resources
 )
 
 target_sources(${PROJECT} PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Images.xcassets
+    ${CLIENT_MACOS_MEDIA_ASSETS_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 

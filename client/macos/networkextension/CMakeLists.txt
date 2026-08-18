@@ -5,6 +5,11 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 add_executable(${CLIENT_MACOS_NE_TARGET_NAME})
 
 message("executable_path is: @executable_path/../../Frameworks")
+
+# The plist is consumed by Xcode directly, so branding variables have to be
+# substituted by CMake beforehand
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
+
 set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
     XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
     BUNDLE_EXTENSION appex
@@ -16,7 +21,7 @@ set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
 
     XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
 
-    XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
+    XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../../../Frameworks @loader_path/../../../../Frameworks"
 
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
@@ -28,8 +33,8 @@ if(DEPLOY)
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.amneziaVPN.NE"
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "dev macos.org.amnezia.amneziaVPN.NE"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "${CLIENT_MACOS_NE_PROVISIONING_PROFILE_SPECIFIER}"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "${CLIENT_MACOS_NE_PROVISIONING_PROFILE_SPECIFIER_DEBUG}"
     )
 else()
     set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
