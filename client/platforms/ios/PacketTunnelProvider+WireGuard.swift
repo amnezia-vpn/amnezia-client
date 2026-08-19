@@ -92,7 +92,7 @@ extension PacketTunnelProvider {
                 }
             }
         } catch {
-            wg_log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
+            wg_log(.error, message: "Can't parse WG config: \(String(describing: error))")
             errorNotifier.notify(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             completionHandler(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             return
