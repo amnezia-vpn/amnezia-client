@@ -117,7 +117,7 @@ PageType {
 
                 clickedFunction: function() {
                     var headerText = qsTr("Run network diagnostics?")
-                    var descriptionText = qsTr("This collects local network configuration (adapters, routes, DNS, firewall rules and similar) through the background service and saves it as a new Amnezia-network log file, named with the current date and time. It takes a few seconds and does not open any window.")
+                    var descriptionText = qsTr("This collects local network configuration (adapters, routes, DNS and similar) and saves it as a new Amnezia-network log file, named with the current date and time. It takes a few seconds and does not open any window.")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
 
@@ -204,14 +204,18 @@ PageType {
         }
     }
 
-    readonly property bool networkDiagnosticsAvailable: Qt.platform.os === "windows" || Qt.platform.os === "linux" || Qt.platform.os === "osx"
+    readonly property bool networkDiagnosticsAvailable: Qt.platform.os === "windows" || Qt.platform.os === "linux"
+            || Qt.platform.os === "osx" || Qt.platform.os === "android" || Qt.platform.os === "ios"
 
-    // Show service logs only if this is NOT a macOS build with
-    // Network-Extension (IsMacOsNeBuild is injected from C++ at run-time)
-    // or if this is NOT a mobile build
+    // Mobile platforms and macOS Network-Extension builds have no separate background
+    // service process, so there are no service logs to show. Network diagnostics on
+    // mobile is collected in-process (not via a service), so it's independent of that
+    // and only gated by networkDiagnosticsAvailable above.
     property list<QtObject> logTypes: {
-        if (IsMacOsNeBuild || GC.isMobile()) {
+        if (IsMacOsNeBuild) {
             return [clientLogs]
+        } else if (GC.isMobile()) {
+            return networkDiagnosticsAvailable ? [clientLogs, networkDiagnosticsLog] : [clientLogs]
         } else if (networkDiagnosticsAvailable) {
             return [clientLogs, serviceLogs, networkDiagnosticsLog]
         } else {

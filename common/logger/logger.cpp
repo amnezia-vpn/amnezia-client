@@ -17,6 +17,10 @@
     #include <core/utils/ipcClient.h>
 #endif
 
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+#endif
+
 #ifdef Q_OS_IOS
     #include "core/utils/swiftBridge.h"
 #endif
@@ -105,6 +109,32 @@ bool Logger::setServiceLogsEnabled(bool enabled)
     return true;
 }
 
+bool Logger::saveNetworkDiagnosticsResult(const QString &result)
+{
+    if (result.startsWith(QLatin1String("ERROR:"))) {
+        qWarning() << "Logger::runNetworkDiagnostics():" << result;
+        return false;
+    }
+
+    QDir().mkpath(userLogsDir());
+    const QString path = newNetworkDiagnosticsFilePath();
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Logger::runNetworkDiagnostics(): failed to open" << path;
+        return false;
+    }
+
+    QTextStream ts(&file);
+    ts << QString("===== Amnezia network diagnostics - %1 =====\n%2 (%3)\n%4 %5 %6\n\n")
+                  .arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd hh:mm:ss.zzz'Z'"),
+                       QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture(),
+                       APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
+    ts << result << "\n\n";
+
+    qDebug() << "Logger::runNetworkDiagnostics(): saved to" << path;
+    return true;
+}
+
 bool Logger::runNetworkDiagnostics()
 {
 #ifdef AMNEZIA_DESKTOP
@@ -116,34 +146,13 @@ bool Logger::runNetworkDiagnostics()
             qWarning() << "Logger::runNetworkDiagnostics(): IPC call timed out";
             return false;
         }
-
-        const QString result = reply.returnValue();
-        if (result.startsWith(QLatin1String("ERROR:"))) {
-            qWarning() << "Logger::runNetworkDiagnostics():" << result;
-            return false;
-        }
-
-        QDir().mkpath(userLogsDir());
-        const QString path = newNetworkDiagnosticsFilePath();
-        QFile file(path);
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            qWarning() << "Logger::runNetworkDiagnostics(): failed to open" << path;
-            return false;
-        }
-
-        QTextStream ts(&file);
-        ts << QString("===== Amnezia network diagnostics - %1 =====\n%2 (%3)\n%4 %5 %6\n\n")
-                      .arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd hh:mm:ss.zzz'Z'"),
-                           QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture(),
-                           APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
-        ts << result << "\n\n";
-
-        qDebug() << "Logger::runNetworkDiagnostics(): saved to" << path;
-        return true;
+        return saveNetworkDiagnosticsResult(reply.returnValue());
     }, []() {
         qWarning() << "Logger::runNetworkDiagnostics(): Service is not running";
         return false;
     });
+#elif defined(Q_OS_ANDROID)
+    return saveNetworkDiagnosticsResult(AndroidController::instance()->runNetworkDiagnostics());
 #else
     return false;
 #endif

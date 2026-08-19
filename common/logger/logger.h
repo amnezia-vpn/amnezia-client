@@ -105,6 +105,10 @@ private:
     Logger() = default;
 
     static QString userLogsDir();
+    // Validates a raw diagnostics result (rejects "ERROR: ..." strings) and, if valid,
+    // writes it to a new timestamped network-diagnostics log file with the standard header.
+    // Shared by every platform's runNetworkDiagnostics() backend.
+    static bool saveNetworkDiagnosticsResult(const QString &result);
 
     static QFile m_file;
     static QTextStream m_textStream;
