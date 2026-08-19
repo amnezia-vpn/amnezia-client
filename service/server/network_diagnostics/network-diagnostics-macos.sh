@@ -37,6 +37,8 @@ done
 OUT="$(pwd)/snapshot-${LABEL}"
 mkdir -p "$OUT"
 
+IS_ROOT=$([ "$(id -u)" -eq 0 ] && echo true || echo false)
+
 have() { command -v "$1" >/dev/null 2>&1; }
 
 # Runs block function $2, writes a timestamped header plus its output
@@ -45,14 +47,14 @@ save() {
     local name="$1" fn="$2" path
     path="$OUT/$name.txt"
     {
-        echo "=== $name === $(date -Iseconds 2>/dev/null || date)"
+        echo "=== $name === $(date -Iseconds 2>/dev/null || date)  (root=$IS_ROOT)"
         "$fn" 2>&1
     } > "$path"
     echo "  [ok] $name"
 }
 
 echo "Snapshot '$LABEL' -> $OUT"
-[ "$(id -u)" -eq 0 ] || echo "  [warn] not running as root — some data will be incomplete"
+[ "$IS_ROOT" = true ] || echo "  [warn] not running as root — some data will be incomplete"
 
 # --- 1. System ---------------------------------------------------------
 system_block() {
@@ -63,7 +65,7 @@ system_block() {
     uname -a
     hostname
     echo
-    echo "IsRoot: $([ "$(id -u)" -eq 0 ] && echo True || echo False)"
+    echo "IsRoot: $IS_ROOT"
 }
 save "system" system_block
 
@@ -78,6 +80,20 @@ adapters_block() {
     echo
     echo "--- networksetup -listallnetworkservices ---"
     have networksetup && networksetup -listallnetworkservices 2>&1
+
+    echo
+    echo "--- leftover tunnel-like interfaces with no active traffic ---"
+    echo "(utun/awg/wg present but status is not 'active', sign of a stuck previous session)"
+    for ifc in $(ifconfig -l 2>/dev/null); do
+        case "$ifc" in
+            utun*|awg*|wg*)
+                status=$(ifconfig "$ifc" 2>/dev/null | awk '/status:/{print $2}')
+                if [ -n "$status" ] && [ "$status" != "active" ]; then
+                    echo "$ifc: status=$status"
+                fi
+                ;;
+        esac
+    done
 }
 save "adapters" adapters_block
 
@@ -114,6 +130,15 @@ link_type_block() {
     echo
     echo "--- scutil --nwi (primary interface / reachability) ---"
     have scutil && scutil --nwi 2>&1
+
+    echo
+    echo "--- interface carrying the default route (determines the link type) ---"
+    dev=$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')
+    if [ -n "$dev" ]; then
+        echo "default route dev=$dev"
+    else
+        echo "no default route"
+    fi
 }
 save "link-type" link_type_block
 
@@ -131,7 +156,7 @@ drivers_block() {
 }
 save "drivers" drivers_block
 
-# --- 5. Routes ---------------------------------------------------------
+# --- 5. Routes + conflict analysis -------------------------------------
 routes_block() {
     echo "--- netstat -nr (IPv4 + IPv6 routing table) ---"
     netstat -nr
@@ -147,23 +172,73 @@ routes_block() {
     echo
     echo "--- interfaces: addresses ---"
     ifconfig -a | grep -E '^[a-z]|inet '
+
+    echo
+    echo "--- default route conflicts ---"
+    echo "macOS auto-creates a link-local (fe80::%ifc) IPv6 'default' entry per utun"
+    echo "interface regardless of VPN state — that's normal noise, not a conflict."
+    echo "Amnezia's AWG tunnel also often uses a split route (::/1 + 8000::/1) instead"
+    echo "of a literal ::/0 default, so only non-link-local default gateways are counted."
+    for fam in inet inet6; do
+        [ "$fam" = "inet" ] && label="IPv4" || label="IPv6"
+        count=$(netstat -nr -f "$fam" 2>/dev/null | awk '/^default/ && $2 !~ /^fe80:/' | wc -l | tr -d ' ')
+        echo "-- $label: $count non-link-local default route(s) --"
+        if [ "$count" -gt 1 ]; then
+            echo "!!! CONFLICT: multiple $label default routes present"
+            netstat -nr -f "$fam" 2>/dev/null | awk 'NR==1 || (/^default/ && $2 !~ /^fe80:/)'
+        fi
+    done
+
+    echo
+    echo "--- private subnet reachability vs tunnel ---"
+    echo "If a private subnet route prefers the tunnel, LAN (router, NAS, printer) becomes unreachable."
+    netstat -nr -f inet 2>/dev/null | grep -E '^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)'
 }
 save "routes" routes_block
 
 # --- 6. Actual routing stack resolution --------------------------------------
 # What you can't see in `netstat -nr`: where the packet will ACTUALLY go.
+# Also checks the route to the endpoint's own next-hop, since that's where a
+# routing loop through the tunnel would actually show up.
 route_resolution_block() {
     targets=("8.8.8.8" "1.1.1.1")
     if [ -n "$ENDPOINT" ]; then targets=("$ENDPOINT" "${targets[@]}"); fi
+
+    if [ -n "$ENDPOINT" ]; then
+        nexthop=$(route -n get "$ENDPOINT" 2>/dev/null | awk '/gateway:/{print $2}')
+        if [ -n "$nexthop" ]; then targets+=("$nexthop"); fi
+    fi
+
     for t in "${targets[@]}"; do
         echo "--- route -n get $t ---"
         route -n get "$t" 2>&1
         echo
     done
+
+    if [ -n "$ENDPOINT" ]; then
+        echo "--- endpoint reachability ---"
+        outdev=$(route -n get "$ENDPOINT" 2>/dev/null | awk '/interface:/{print $2}')
+        if [ -n "$outdev" ]; then
+            case "$outdev" in
+                utun*|awg*|wg*|ppp*|ipsec*)
+                    echo "!!! LOOP: traffic to server $ENDPOINT goes through the VIRTUAL/TUNNEL interface '$outdev'"
+                    ;;
+                *)
+                    echo "OK: traffic to server goes through the physical interface '$outdev'"
+                    ;;
+            esac
+        else
+            echo "Could not determine the interface."
+        fi
+
+        echo
+        echo "--- host route to endpoint (anti-loop guard) ---"
+        route -n get -host "$ENDPOINT" 2>&1
+    fi
 }
 save "route-resolution" route_resolution_block
 
-# --- 7. DNS -----------------------------------------------------------------
+# --- 7. DNS + leak risk assessment -------------------------------------------
 dns_block() {
     echo "--- scutil --dns (effective per-interface resolver config) ---"
     have scutil && scutil --dns 2>&1
@@ -178,6 +253,30 @@ dns_block() {
             echo "-- $svc --"
             networksetup -getdnsservers "$svc" 2>&1
         done < <(networksetup -listallnetworkservices 2>/dev/null | tail -n +2)
+    fi
+
+    echo
+    echo "--- DNS leak risk ---"
+    tundev=$(route -n get default 2>/dev/null | awk '/interface:/{print $2}')
+    echo "Default route goes through dev=$tundev"
+    if have scutil; then
+        # Each "resolver #N" block may carry an "if_index : N (ifc)" line and one or
+        # more "nameserver[N] : ..." lines, in either order; scan a whole block before
+        # deciding whether it counted as "has DNS on interface X".
+        withdns=$(scutil --dns 2>/dev/null | awk '
+            /^resolver #/ { ifc=""; hasdns=0 }
+            /if_index/ { line=$0; sub(/.*\(/, "", line); sub(/\).*/, "", line); ifc=line }
+            /nameserver\[[0-9]+\]/ { hasdns=1 }
+            /^$/ { if (ifc != "" && hasdns) print ifc }
+            END { if (ifc != "" && hasdns) print ifc }')
+        echo "Interfaces with DNS configured: $(echo "$withdns" | sort -u | grep -c .)"
+        other=$(echo "$withdns" | sort -u | grep -v "^${tundev}$" | grep -v '^$')
+        if [ -n "$other" ]; then
+            echo "!!! LEAK RISK: DNS is configured on more than just the active interface:"
+            echo "$other"
+        else
+            echo "No obvious risk."
+        fi
     fi
 }
 save "dns" dns_block
@@ -202,6 +301,26 @@ ipv6_localhost_block() {
     echo
     echo "--- hosts file ---"
     cat /etc/hosts
+
+    echo
+    echo "--- IPv6 leak risk ---"
+    echo "Sign: a default IPv6 route exists through the tunnel, but the tunnel only has"
+    echo "ULA (fc00::/7) or link-local addresses - no real IPv6 connectivity."
+    # macOS auto-creates a link-local (fe80::%ifc) 'default' entry per utun interface
+    # regardless of VPN state, and a split-tunnel VPN may install ::/1 instead of a
+    # literal ::/0 default — so skip link-local noise and accept either form.
+    tun6dev=$(netstat -nr -f inet6 2>/dev/null | awk '(/^default/ || /^::\/1/) && $2 !~ /^fe80:/{print $NF; exit}')
+    if [ -n "$tun6dev" ]; then
+        echo "IPv6 default route goes through dev=$tun6dev"
+        addrs=$(ifconfig "$tun6dev" 2>/dev/null | awk '/inet6/{print $2}')
+        echo "$addrs"
+        global=$(echo "$addrs" | grep -vE '^(fe80|fc|fd)')
+        if [ -z "$global" ]; then
+            echo "!!! Only ULA/link-local addresses - real IPv6 traffic will leak outside the tunnel."
+        fi
+    else
+        echo "No IPv6 default route - no IPv6 routing."
+    fi
 }
 save "ipv6-localhost" ipv6_localhost_block
 
@@ -228,26 +347,53 @@ proxy_block() {
 save "proxy" proxy_block
 
 # --- 10. VPN/antiDPI services and processes ----------------------------
+# Matched by exact process/label name rather than a broad substring, since a
+# substring match also pulls in unrelated software installed on the machine.
 services_processes_block() {
-    local pattern='amnezia|wireguard|wg-quick|openvpn|tap|mullvad|tailscale|zapret|nfqws|winws|xray|v2ray|clash|outline|hiddify|proton|nord|express'
+    local -a known_labels=(
+        org.amnezia.vpn.service com.wireguard.macos
+        net.openvpn.client mullvad-daemon
+        com.tailscale.ipn io.tailscale.ipn.macsys
+        com.nordvpn.osx ch.protonvpn.mac
+    )
+    local -a known_procs=(
+        AmneziaVPN amnezia-service wireguard-go wg-quick openvpn
+        mullvad-daemon tailscaled nfqws winws zapret goodbyedpi
+        byedpi ciadpi xray v2ray sing-box tun2socks
+    )
 
-    echo "--- launchctl list matching pattern ---"
-    have launchctl && launchctl list 2>/dev/null | grep -Ei "$pattern"
-    echo
-    echo "--- processes ---"
-    ps aux | grep -Ei "$pattern" | grep -v grep
-    echo
-    echo "--- listening TCP sockets (Xray inbounds) ---"
-    if have lsof; then
-        lsof -nP -iTCP -sTCP:LISTEN 2>&1
-    else
-        netstat -anp tcp 2>&1
+    echo "--- launchctl entries matching known exact labels ---"
+    if have launchctl; then
+        for label in "${known_labels[@]}"; do
+            launchctl list 2>/dev/null | awk -v l="$label" '$3==l'
+        done
     fi
     echo
-    echo "--- UDP endpoints (AmneziaWG) ---"
+    echo "--- processes matching known exact names ---"
+    for p in "${known_procs[@]}"; do
+        pgrep -l -x "$p" 2>/dev/null
+    done
+    echo
+    echo "--- listening TCP sockets belonging to those processes ---"
     if have lsof; then
+        for p in "${known_procs[@]}"; do
+            lsof -nP -iTCP -sTCP:LISTEN -c "$p" 2>/dev/null
+        done
+    fi
+    echo
+    echo "--- UDP endpoints belonging to those processes ---"
+    if have lsof; then
+        for p in "${known_procs[@]}"; do
+            lsof -nP -iUDP -c "$p" 2>/dev/null
+        done
+    fi
+    echo
+    echo "--- full listening socket list (unfiltered, for reference) ---"
+    if have lsof; then
+        lsof -nP -iTCP -sTCP:LISTEN 2>&1
         lsof -nP -iUDP 2>&1
     else
+        netstat -anp tcp 2>&1
         netstat -anp udp 2>&1
     fi
 }
