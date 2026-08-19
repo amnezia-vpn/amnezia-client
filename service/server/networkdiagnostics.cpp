@@ -13,7 +13,7 @@ const QString kSnapshotLabel = QStringLiteral("diagnostics");
 
 #if defined(Q_OS_WIN)
 const QStringList kSectionOrder = { "system",          "adapters",           "link-type",
-                                     "drivers-system",  "drivers-store",      "drivers-net-class",
+                                     "drivers-known",   "drivers-store",      "drivers-net-class",
                                      "routes",          "route-resolution",   "dns",
                                      "ipv6-localhost",  "proxy",              "services-processes",
                                      "firewall",        "wfp-filters" };
