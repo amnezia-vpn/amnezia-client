@@ -359,10 +359,6 @@ bool SubscriptionUiController::restoreServiceFromPlayMarket()
     }
 
     emit installServerFromApiFinished(tr("Subscription restored successfully."));
-    if (result.duplicateCount > 0) {
-        qInfo().noquote() << "[Billing] Skipped" << result.duplicateCount
-                          << "duplicate restored purchases for tokens already processed";
-    }
 #endif
     return true;
 }

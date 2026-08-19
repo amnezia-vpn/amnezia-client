@@ -1302,19 +1302,16 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun getCountryCode(): String {
-        Log.v(TAG, "Get country code")
         return blockingCall { billingRepository.getCountryCode() }
     }
 
     @Suppress("unused")
     fun getSubscriptionPlans(): String {
-        Log.v(TAG, "Get subscription plans")
         return blockingCall { billingRepository.getSubscriptionPlans() }
     }
 
     @Suppress("unused")
     fun purchaseSubscription(offerToken: String): String {
-        Log.v(TAG, "Purchase subscription")
         return blockingCall { billingRepository.purchaseSubscription(this@AmneziaActivity, offerToken) }
     }
 
@@ -1334,7 +1331,6 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun queryPurchases(): String {
-        Log.v(TAG, "Query purchases")
         return blockingCall { billingRepository.queryPurchases() }
     }
 

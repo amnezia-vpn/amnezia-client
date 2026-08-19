@@ -139,7 +139,6 @@ namespace
             quotesByProductId.insert(productId, quote);
         }
 
-        qInfo().noquote() << "[IAP] Built StoreKit quote map, quotes:" << quotesByProductId.size();
         return quotesByProductId;
     }
 #elif defined(Q_OS_ANDROID)
@@ -165,13 +164,9 @@ namespace
                        << plansResult.value("responseCode").toInt(-1);
             return quotesByProductId;
         }
-        qInfo() << "[Billing] Fetched subscription plans for price display";
 
         const QJsonArray products = plansResult.value("products").toArray();
 
-        // A base plan can have several offers (e.g. a plain listing plus a separate
-        // promotional free-trial offer). Scan all offers per basePlanId up front so a
-        // trial is found even when it isn't the first offer encountered below.
         QHash<QString, int> trialDaysByBasePlanId;
         for (const QJsonValue &productValue : products) {
             const QJsonArray offers = productValue.toObject().value("offers").toArray();
@@ -213,12 +208,9 @@ namespace
                 quote.displayPricePerMonth = regularPhase.value("displayPricePerMonth").toString();
                 quote.hasFreeTrial = trialDaysByBasePlanId.contains(basePlanId);
                 quote.trialDays = trialDaysByBasePlanId.value(basePlanId, 0);
-                qInfo().noquote() << "[Billing] Quote for" << basePlanId << "price:" << quote.displayPrice
-                                  << "hasFreeTrial:" << quote.hasFreeTrial << "trialDays:" << quote.trialDays;
                 quotesByProductId.insert(basePlanId, quote);
             }
         }
-        qInfo() << "[Billing] Built Google Play quote map, quotes:" << quotesByProductId.size();
         return quotesByProductId;
     }
 #endif
@@ -230,7 +222,6 @@ namespace
             return;
         }
 
-        int mergedPlanCount = 0;
         for (int serviceIndex = 0; serviceIndex < services.size(); ++serviceIndex) {
             QJsonObject serviceObject = services.at(serviceIndex).toObject();
             if (serviceObject.value(apiDefs::key::serviceType).toString() != serviceType::amneziaPremium) {
@@ -265,7 +256,6 @@ namespace
                 planObject.insert(configKey::priceLabel, quote.displayPrice);
                 planObject.insert(configKey::hasFreeTrial, quote.hasFreeTrial);
                 planObject.insert(configKey::trialDays, quote.trialDays);
-                ++mergedPlanCount;
 
                 const double months = quote.subscriptionBillingMonths;
                 if (!isTrialPlan && months > oneMonthThreshold && !quote.displayPricePerMonth.isEmpty()) {
@@ -298,7 +288,6 @@ namespace
             serviceObject.insert(configKey::serviceDescription, descriptionObject);
             services.replace(serviceIndex, serviceObject);
         }
-        qInfo().noquote() << "[Store] Merged store quotes into" << mergedPlanCount << "premium plan(s)";
         data.insert(apiDefs::key::services, services);
     }
 
@@ -363,8 +352,6 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 ErrorCode ServicesCatalogController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
 {
     QString gatewayEndpoint = m_appSettingsRepository->getGatewayEndpoint();
-    qWarning() << "[ServicesCatalog] request URL:" << endpoint.arg(gatewayEndpoint)
-              << "isDevEnv:" << m_appSettingsRepository->isDevGatewayEnv();
     GatewayController gatewayController(gatewayEndpoint, m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     return gatewayController.post(endpoint, apiPayload, responseBody);

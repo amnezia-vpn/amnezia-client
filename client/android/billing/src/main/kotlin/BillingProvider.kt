@@ -74,7 +74,6 @@ class BillingProvider(context: Context) : AutoCloseable {
     private var subscriptionPurchases = MutableStateFlow<Pair<BillingResult, List<Purchase>?>?>(null)
 
     private val purchasesUpdatedListeners = PurchasesUpdatedListener { billingResult, purchases ->
-        Log.v(TAG, "Purchases updated: $billingResult")
         subscriptionPurchases.value = billingResult to purchases
     }
 
@@ -88,12 +87,10 @@ class BillingProvider(context: Context) : AutoCloseable {
     private suspend fun connect() {
         if (billingClient.isReady) return
 
-        Log.v(TAG, "Billing client connection")
         val connection = CompletableDeferred<Unit>()
         withContext(Dispatchers.IO) {
             billingClient.startConnection(object : BillingClientStateListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
-                    Log.v(TAG, "Billing setup finished: $billingResult")
                     if (billingResult.isOk) {
                         connection.complete(Unit)
                     } else {
@@ -136,8 +133,6 @@ class BillingProvider(context: Context) : AutoCloseable {
     }
 
     suspend fun getSubscriptionPlans(): JSONObject {
-        Log.v(TAG, "Get subscription plans")
-
         val productDetailsList = getProductDetails()
         val resultJson = JSONObject().put("responseCode", ErrorCode.NoError)
         val productArray = JSONArray().also { resultJson.put("products", it) }
@@ -167,8 +162,6 @@ class BillingProvider(context: Context) : AutoCloseable {
                             }
                         }
                 }
-                val regularPhase = offerDetails.pricingPhases.pricingPhaseList.lastOrNull()
-                Log.v(TAG, "Offer ${offerDetails.basePlanId}: regular price = ${regularPhase?.formattedPrice}")
 
                 val trialPhase = offerDetails.pricingPhases.pricingPhaseList.firstOrNull()
                 val hasFreeTrial = trialPhase != null && trialPhase.priceAmountMicros == 0L
@@ -176,24 +169,12 @@ class BillingProvider(context: Context) : AutoCloseable {
                 if (hasFreeTrial) {
                     offer.put("trialDays", billingPeriodToDays(trialPhase!!.billingPeriod))
                 }
-
-                val phasesSummary = offerDetails.pricingPhases.pricingPhaseList.joinToString(", ") {
-                    "${it.billingPeriod}:${it.formattedPrice}"
-                }
-               /* Log.i(
-                    TAG,
-                    "Raw offer from Play: basePlanId=${offerDetails.basePlanId} offerId=${offerDetails.offerId} " +
-                        "offerToken=${offerDetails.offerToken} phases=[$phasesSummary] hasFreeTrial=$hasFreeTrial" +
-                        if (hasFreeTrial) " trialDays=${offer.getInt("trialDays")}" else ""
-                )*/
             }
         }
         return resultJson
     }
 
     private suspend fun getProductDetails(): List<ProductDetails>? {
-        Log.v(TAG, "Get product details")
-
         val productDetailsParams = Product.newBuilder()
             .setProductId(PRODUCT_ID)
             .setProductType(ProductType.SUBS)
@@ -207,8 +188,6 @@ class BillingProvider(context: Context) : AutoCloseable {
             billingClient.queryProductDetails(queryProductDetailsParams)
         }
 
-        Log.v(TAG, "Query product details result: ${result.billingResult}")
-
         if (!result.billingResult.isOk) {
             Log.e(TAG, "Failed to get product details: ${result.billingResult}")
             throw BillingException(result.billingResult)
@@ -218,8 +197,6 @@ class BillingProvider(context: Context) : AutoCloseable {
     }
 
     suspend fun getCustomerCountryCode(): JSONObject {
-        Log.v(TAG, "Get customer country code")
-
         val deferred = CompletableDeferred<String>()
         withContext(Dispatchers.IO) {
             billingClient.getBillingConfigAsync(GetBillingConfigParams.newBuilder().build(),
@@ -244,17 +221,13 @@ class BillingProvider(context: Context) : AutoCloseable {
         offerToken: String,
         oldPurchaseToken: String? = null
     ): JSONObject {
-        Log.v(TAG, "Purchase subscription")
         Log.v(TAG, "Offer token: $offerToken")
-        oldPurchaseToken?.let { Log.v(TAG, "Old purchase token: $it") }
 
         if (offerToken.isBlank()) throw BillingException("offerToken can not be empty")
 
         val productDetails = getProductDetails()?.let {
             it.filter { it.productId == PRODUCT_ID }
         }?.firstOrNull() ?: throw BillingException("Product details not found")
-
-        Log.v(TAG, "Filtered product details:\n$productDetails")
 
         val productDetail = BillingFlowParams.ProductDetailsParams.newBuilder()
             .setProductDetails(productDetails)
@@ -276,8 +249,6 @@ class BillingProvider(context: Context) : AutoCloseable {
             .setProductDetailsParamsList(listOf(productDetail))
             .apply { subscriptionUpdateParams?.let { setSubscriptionUpdateParams(it) } }
             .build())
-
-        Log.v(TAG, "Start billing flow result: $billingResult")
 
         if (billingResult.responseCode == BillingResponseCode.ITEM_ALREADY_OWNED) {
             Log.w(TAG, "Attempting to purchase already owned product")
@@ -303,20 +274,13 @@ class BillingProvider(context: Context) : AutoCloseable {
         val purchaseArray = JSONArray()
         purchases?.forEach { purchase ->
             Log.v(TAG, "processPurchases: purchaseToken=${purchase.purchaseToken} orderId=${purchase.orderId} state=${purchase.purchaseState}")
-            /* val purchaseJson = */ JSONObject().also { purchaseArray.put(it) }
+            JSONObject().also { purchaseArray.put(it) }
                 .put("purchaseToken", purchase.purchaseToken)
                 .put("purchaseTime", purchase.purchaseTime)
                 .put("purchaseState", purchase.purchaseState)
                 .put("isAcknowledged", purchase.isAcknowledged)
                 .put("isAutoRenewing", purchase.isAutoRenewing)
                 .put("orderId", purchase.orderId)
-                // .put("productIds", JSONArray(purchase.products))
-
-            /* purchase.pendingPurchaseUpdate?.let { purchaseUpdate ->
-                JSONObject()
-                    .put("purchaseToken", purchaseUpdate.purchaseToken)
-                    // .put("productIds", JSONArray(purchaseUpdate.products))
-            }.also { purchaseJson.put("pendingPurchaseUpdate", it) } */
         }
         return purchaseArray
     }
@@ -347,7 +311,6 @@ class BillingProvider(context: Context) : AutoCloseable {
     }
 
     suspend fun getPurchases(): JSONObject {
-        Log.v(TAG, "Get purchases")
         val purchases = queryPurchases()
         return JSONObject()
             .put("responseCode", ErrorCode.NoError)
@@ -355,7 +318,6 @@ class BillingProvider(context: Context) : AutoCloseable {
     }
 
     private suspend fun queryPurchases(): List<Purchase> {
-        Log.v(TAG, "Query purchases")
         val result = withContext(Dispatchers.IO) {
             billingClient.queryPurchasesAsync(
                 QueryPurchasesParams.newBuilder().setProductType(ProductType.SUBS).build()
@@ -367,7 +329,6 @@ class BillingProvider(context: Context) : AutoCloseable {
     }
 
     override fun close() {
-        Log.v(TAG, "Close billing client connection")
         billingClient.endConnection()
     }
 

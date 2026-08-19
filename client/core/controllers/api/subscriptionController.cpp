@@ -225,7 +225,6 @@ ErrorCode SubscriptionController::getSubscriptionInfo(const QString &userCountry
                                             purchaseToken };
 
     QJsonObject apiPayload = gatewayRequestData.toJsonObject();
-    qWarning() << "[Billing][getSubscriptionInfo] request:" << QJsonDocument(apiPayload).toJson(QJsonDocument::Compact);
     return executeRequest(QString("%1v1/get_subscription_info"), apiPayload, responseBody, false);
 }
 
@@ -338,7 +337,6 @@ ErrorCode SubscriptionController::importServiceFromMarket(const QString &userCou
     QByteArray responseBody;
     qWarning() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
     ErrorCode errorCode = executeRequest(QString("%1") + endpoint, apiPayload, responseBody, isTestPurchase);
-    qWarning() << "[Billing][importServiceFromMarket] errorCode:" << static_cast<int>(errorCode) << "response:" << responseBody;
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -880,8 +878,6 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     QObject::connect(&watcher, &QFutureWatcher<std::tuple<bool, QString, bool>>::finished, &waitLoop, &QEventLoop::quit);
 
     QFuture<std::tuple<bool, QString, bool>> future = QtConcurrent::run([androidController, productId]() {
-        // If the user already has an active "premium" subscription, upgrade/replace it with proration
-        // instead of stacking a second, independent purchase that Google Play would just queue behind it.
         QString oldPurchaseToken;
         QJsonObject existingPurchasesResult = androidController->queryPurchases();
         qInfo().noquote() << "[Billing] queryPurchases raw result:" << QJsonDocument(existingPurchasesResult).toJson(QJsonDocument::Compact);
@@ -1025,9 +1021,6 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
     QString restoreError;
     QEventLoop waitRestore;
 
-    qInfo().noquote() << "[IAP][processAppStoreRestore] Starting restore. userCountryCode=" << userCountryCode
-                      << "serviceType=" << serviceType << "serviceProtocol=" << serviceProtocol;
-
     IosController::Instance()->restorePurchases([&](bool success, const QList<QVariantMap> &transactions, const QString &errorString) {
         restoreSuccess = success;
         restoredTransactions = transactions;
@@ -1053,7 +1046,6 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
     }
 
     bool isTestPurchase = IosController::Instance()->isTestFlight();
-    qInfo().noquote() << "[IAP][processAppStoreRestore] isTestFlight=" << isTestPurchase;
     QSet<QString> processedTransactions;
 
     for (const QVariantMap &transaction : restoredTransactions) {
@@ -1071,7 +1063,6 @@ SubscriptionController::AppStoreRestoreResult SubscriptionController::processApp
 
         if (processedTransactions.contains(originalTransactionId)) {
             result.duplicateCount++;
-            qInfo().noquote() << "[IAP][processAppStoreRestore] Skipping duplicate originalTransactionId=" << originalTransactionId;
             continue;
         }
         processedTransactions.insert(originalTransactionId);

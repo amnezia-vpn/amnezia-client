@@ -219,8 +219,6 @@ PageType {
         implicitHeight: bottomBarColumn.implicitHeight + 24
 
         Rectangle {
-            // Squares off the bottom corners so only the top-left/top-right stay rounded,
-            // keeping the bar flush with the tab bar directly below it.
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
