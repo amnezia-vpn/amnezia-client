@@ -213,18 +213,12 @@ ErrorCode SubscriptionController::getSubscriptionInfo(const QString &userCountry
                                                        const QString &serviceProtocol, const QString &purchaseToken,
                                                        QByteArray &responseBody)
 {
-    GatewayRequestData gatewayRequestData { QSysInfo::productType(),
-                                            QString(APP_VERSION),
-                                            m_appSettingsRepository->getAppLanguage().name().split("_").first(),
-                                            m_appSettingsRepository->getInstallationUuid(true),
-                                            userCountryCode,
-                                            "",
-                                            serviceType,
-                                            serviceProtocol,
-                                            QJsonObject(),
-                                            purchaseToken };
-
-    QJsonObject apiPayload = gatewayRequestData.toJsonObject();
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                     .addField(apiDefs::key::serviceType, serviceType)
+                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
+                                     .addField(apiDefs::key::transactionId, purchaseToken)
+                                     .build();
     return executeRequest(QString("%1v1/get_subscription_info"), apiPayload, responseBody, false);
 }
 
