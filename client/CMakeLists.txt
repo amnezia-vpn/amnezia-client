@@ -154,15 +154,6 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/core/utils/swiftBridgeConfig.h
     @ONLY
 )
-# Swift can't consume a `-DGROUP_ID="value"` compile define (Swift -D flags are
-# presence-only), unlike the Objective-C++ sources that read GROUP_ID directly.
-# Generate a Swift constant instead so Log.swift can use the branded app group.
-set(CLIENT_GROUP_IDENTIFIER_SWIFT_FILE ${CMAKE_CURRENT_BINARY_DIR}/platforms/ios/GroupIdentifier.swift)
-configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/GroupIdentifier.swift.in
-    ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
-    @ONLY
-)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(${PROJECT} PRIVATE "MZ_DEBUG")
@@ -210,6 +201,13 @@ if(APPLE)
     if (BUILD_VPN_KEYCHAIN)
         set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--keychain ${BUILD_VPN_KEYCHAIN}")
     endif()
+
+    set(CLIENT_GROUP_IDENTIFIER_SWIFT_FILE ${CMAKE_CURRENT_BINARY_DIR}/platforms/ios/GroupIdentifier.swift)
+    configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/platforms/ios/GroupIdentifier.swift.in
+        ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
+        @ONLY
+    )
 endif()
 
 if(LINUX AND NOT ANDROID)
