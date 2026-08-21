@@ -174,12 +174,6 @@ bool WindowsTunnelService::start(const QString& configData) {
     return false;
   }
 
-  // Right after a system resume, Windows' device stack (whatever bus WinTun
-  // attaches its virtual adapter to) can still be re-enumerating for a
-  // couple of seconds. When that race is lost, the tunnel service exits
-  // almost immediately with service-specific error 3 ("Error while creating
-  // a WinTun device") instead of ever reaching SERVICE_RUNNING. That
-  // failure is transient, so retry a few times before giving up.
   constexpr int kMaxAttempts = 3;
   constexpr int kRetryDelayMsec = 2000;
   constexpr DWORD kWinTunCreationFailure = 3;
@@ -320,9 +314,6 @@ static bool waitForServiceStatus(SC_HANDLE service, DWORD expectedStatus) {
       return true;
     }
 
-    // A service that has already stopped will never transition to
-    // SERVICE_RUNNING on its own -- stop burning the rest of the poll
-    // budget once that's the case (it needs a fresh StartService() call).
     if (expectedStatus == SERVICE_RUNNING &&
         status.dwCurrentState == SERVICE_STOPPED) {
       return false;
