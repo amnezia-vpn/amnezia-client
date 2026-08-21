@@ -6,6 +6,7 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 #include <QProcess>
+#include <atomic>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -93,6 +94,8 @@ signals:
 
     void serverIsBusy(const bool isBusy);
     void cancelInstallationRequested();
+    void xrayServerUpgradeStarted(int containerIndex);
+    void xrayServerUpgradeFinished();
     void clientRevocationRequested(const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container);
     void clientAppendRequested(const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container);
 
@@ -131,6 +134,7 @@ private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     bool m_cancelInstallation = false;
+    std::atomic<bool> m_xrayConnectUpgradeStarted { false };
     
 #ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;

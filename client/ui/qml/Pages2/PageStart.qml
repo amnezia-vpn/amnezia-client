@@ -152,6 +152,19 @@ PageType {
             }
         }
 
+        function onXrayServerUpgradeStarted(containerIndex) {
+            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+            ServersUiController.setProcessedContainerIndex(containerIndex)
+            PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+        }
+
+        function onXrayServerUpgradeFinished() {
+            var currentPageName = tabBarStackView.currentItem.objectName
+            if (currentPageName === PageController.getPagePath(PageEnum.PageSetupWizardInstalling)) {
+                PageController.closePage()
+            }
+        }
+
         function onCachedProfileCleared(message) {
             PageController.showNotificationMessage(message)
         }

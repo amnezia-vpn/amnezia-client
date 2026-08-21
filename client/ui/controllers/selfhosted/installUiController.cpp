@@ -82,6 +82,8 @@ InstallUiController::InstallUiController(InstallController *installController,
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
     connect(m_installController, &InstallController::validationErrorOccurred, this, &InstallUiController::installationErrorOccurred);
+    connect(m_installController, &InstallController::xrayServerUpgradeStarted, this, &InstallUiController::xrayServerUpgradeStarted);
+    connect(m_installController, &InstallController::xrayServerUpgradeFinished, this, &InstallUiController::xrayServerUpgradeFinished);
 }
 
 InstallUiController::~InstallUiController()

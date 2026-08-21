@@ -50,6 +50,7 @@ namespace amnezia
         {
             constexpr char dataDir[] = "/opt/amnezia/xray";
             constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
+            constexpr char expectedServerXrayRelease[] = "v26.7.28";
             constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
             constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
             constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
@@ -79,9 +80,10 @@ namespace amnezia
             constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
 
             constexpr char defaultXhttpHost[] = "www.googletagmanager.com";
+            constexpr char defaultXhttpPath[] = "/";
             constexpr char defaultXhttpUplinkChunkSize[] = "0";
-            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1";
-            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "100";
+            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1000000";
+            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "1000000";
             constexpr char defaultXhttpScMinPostsIntervalMsMin[] = "100";
             constexpr char defaultXhttpScMinPostsIntervalMsMax[] = "800";
             constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";

@@ -130,6 +130,9 @@ signals:
     void serverIsBusy(const bool isBusy);
     void cancelInstallation();
 
+    void xrayServerUpgradeStarted(int containerIndex);
+    void xrayServerUpgradeFinished();
+
     void cachedProfileCleared(const QString &message);
     void apiConfigRemoved(const QString &message);
 

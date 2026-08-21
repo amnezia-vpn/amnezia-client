@@ -440,15 +440,6 @@ void XrayServerConfig::applyDefaults(bool fillFlowDefault)
         xhttp.uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
     }
 
-    if (xhttp.mode.compare(QLatin1String("Auto"), Qt::CaseInsensitive) == 0
-        || xhttp.mode.compare(QLatin1String("Packet-up"), Qt::CaseInsensitive) == 0) {
-        xhttp.mode = QString::fromLatin1(protocols::xray::defaultXhttpMode);
-    }
-    if (xhttp.uplinkDataPlacement.compare(QLatin1String("Header"), Qt::CaseInsensitive) == 0
-        || xhttp.uplinkDataPlacement.compare(QLatin1String("Cookie"), Qt::CaseInsensitive) == 0) {
-        xhttp.uplinkDataPlacement = QString::fromLatin1(protocols::xray::defaultXhttpUplinkDataPlacement);
-    }
-
     if (xhttp.xPadding.placement.isEmpty()) {
         xhttp.xPadding.placement = protocols::xray::defaultXPaddingPlacement;
     }
@@ -565,11 +556,7 @@ namespace xrayEffective
 
     QString xhttpModeSent(const XrayServerConfig &srv)
     {
-        QString mode = xhttpMode(srv.xhttp.mode);
-        if (mode == QLatin1String("auto") || mode == QLatin1String("packet-up")) {
-            mode = QStringLiteral("stream-one");
-        }
-        return mode;
+        return xhttpMode(srv.xhttp.mode);
     }
 } // namespace xrayEffective
 
@@ -640,17 +627,24 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side, const Xray
     if (transport == QLatin1String(px::transportXhttp)) {
         QJsonObject xo;
         xo[px::xhttpHost] = xhttp.host.isEmpty() ? QString::fromLatin1(px::defaultXhttpHost) : xhttp.host;
-        if (!xhttp.path.isEmpty())
-            xo[px::xhttpPath] = xhttp.path;
+        const QString pathEff = xhttp.path.trimmed().isEmpty()
+                ? QString::fromLatin1(px::defaultXhttpPath)
+                : xhttp.path;
+        xo[px::xhttpPath] = pathEff;
         const QString modeEff = xrayEffective::xhttpModeSent(*this);
         xo[px::xhttpMode] = modeEff;
 
         // No "Host" in headers: xray rejects it when the top-level "host" field is set.
         if (clientSide) {
-            const QString methodEff = clientTemplate.uplinkMethod.isEmpty()
+            QString methodEff = clientTemplate.uplinkMethod.isEmpty()
                     ? QString::fromLatin1(px::defaultXhttpUplinkMethod)
                     : clientTemplate.uplinkMethod;
-            xo[px::uplinkHttpMethod] = methodEff.toUpper();
+            methodEff = methodEff.toUpper();
+            if ((modeEff == QLatin1String("stream-one") || modeEff == QLatin1String("auto"))
+                && methodEff == QLatin1String("PUT")) {
+                methodEff = QString::fromLatin1(px::defaultXhttpUplinkMethod);
+            }
+            xo[px::uplinkHttpMethod] = methodEff;
         }
 
         xo[px::noGrpcHeader] = xhttp.disableGrpc;
@@ -684,9 +678,15 @@ QJsonObject XrayServerConfig::streamSettingsJson(XrayStreamSide side, const Xray
 
         if (!xhttp.scMaxBufferedPosts.isEmpty())
             xo[px::scMaxBufferedPosts] = xhttp.scMaxBufferedPosts.toLongLong();
-        xrayEffective::putRangeIfAny(xo, px::scMaxEachPostBytes, xhttp.scMaxEachPostBytesMin,
-                                     xhttp.scMaxEachPostBytesMax, px::defaultXhttpScMaxEachPostBytesMin,
-                                     px::defaultXhttpScMaxEachPostBytesMax);
+        QString scMaxEachMin = xhttp.scMaxEachPostBytesMin;
+        QString scMaxEachMax = xhttp.scMaxEachPostBytesMax;
+        if ((scMaxEachMin.isEmpty() && scMaxEachMax.isEmpty())
+            || (scMaxEachMin == QLatin1String("1") && scMaxEachMax == QLatin1String("100"))) {
+            scMaxEachMin = QString::fromLatin1(px::defaultXhttpScMaxEachPostBytesMin);
+            scMaxEachMax = QString::fromLatin1(px::defaultXhttpScMaxEachPostBytesMax);
+        }
+        xrayEffective::putRangeIfAny(xo, px::scMaxEachPostBytes, scMaxEachMin, scMaxEachMax,
+                                     px::defaultXhttpScMaxEachPostBytesMin, px::defaultXhttpScMaxEachPostBytesMax);
         if (clientSide) {
             xrayEffective::putRangeIfAny(xo, px::scMinPostsIntervalMs, clientTemplate.scMinPostsIntervalMsMin,
                                          clientTemplate.scMinPostsIntervalMsMax,

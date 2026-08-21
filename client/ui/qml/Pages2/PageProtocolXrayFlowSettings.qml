@@ -79,6 +79,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision-udp443"
+                descriptionText: qsTr("For apps that require QUIC. Browsers may stop loading.")
                 enabled: visionAllowed
                 checked: flow === "xtls-rprx-vision-udp443" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision-udp443"

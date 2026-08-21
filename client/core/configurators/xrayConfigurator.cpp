@@ -455,8 +455,6 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
             return {};
         }
         existing = XrayServerConfig::clientsFromServerInboundJson(doc.object());
-        logger.info() << "Xray collectServerClients: read outcome=ok, bytes=" << currentConfig.size()
-                      << "existingClients=" << existing.size();
     }
 
     QJsonArray clients =
@@ -464,21 +462,7 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
 
     if (!fallbackClientId.isEmpty()
         && XrayServerConfig::indexOfClient(clients, fallbackClientId) < 0) {
-        const bool listWasEmpty = clients.isEmpty();
         clients.append(XrayServerConfig::makeClientEntry(fallbackClientId, flowValue));
-        if (listWasEmpty) {
-            logger.info() << "Xray collectServerClients: fallbackSeed=used, no client list on server, seeding one client "
-                             "from the container uuid, flow="
-                          << (flowValue.isEmpty() ? "none" : "set");
-        } else {
-            logger.info() << "Xray collectServerClients: fallbackSeed=ensured, volume uuid was missing from a non-empty "
-                             "client list, carrying"
-                          << clients.size() << "clients, flow=" << (flowValue.isEmpty() ? "none" : "set");
-        }
-    } else {
-        logger.info() << "Xray collectServerClients: fallbackSeed=not-used, carrying" << clients.size()
-                      << "clients, skippedWithoutId=" << (existing.size() - clients.size())
-                      << "flow=" << (flowValue.isEmpty() ? "none" : "set");
     }
 
     return clients;
