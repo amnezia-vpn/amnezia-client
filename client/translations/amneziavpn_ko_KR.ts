@@ -590,27 +590,27 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="132"/>
         <source>I1 - First special junk packet</source>
-        <translation>I1 - 첫 번째 특수 정크 패킷</translation>
+        <translation>I1 - First special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="142"/>
         <source>I2 - Second special junk packet</source>
-        <translation>I2 - 두 번째 특수 정크 패킷</translation>
+        <translation>I2 - Second special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="152"/>
         <source>I3 - Third special junk packet</source>
-        <translation>I3 - 세 번째 특수 정크 패킷</translation>
+        <translation>I3 - Third special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="162"/>
         <source>I4 - Fourth special junk packet</source>
-        <translation>I4 - 네 번째 특수 정크 패킷</translation>
+        <translation>I4 - Fourth special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="172"/>
         <source>I5 - Fifth special junk packet</source>
-        <translation>I5 - 다섯 번째 특수 정크 패킷</translation>
+        <translation>I5 - Fifth special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="189"/>
@@ -620,32 +620,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="199"/>
         <source>ContentPaddingAddition - Content padding addition</source>
-        <translation>ContentPaddingAddition - 콘텐츠 패딩 추가</translation>
+        <translation>ContentPaddingAddition - Content padding addition</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="211"/>
         <source>RekeyAfterTime - Rekey after time</source>
-        <translation>RekeyAfterTime - 키 갱신 시간</translation>
+        <translation>RekeyAfterTime - Rekey after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="223"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - 키 갱신 시간 제한</translation>
+        <translation>RekeyTimeout - Rekey timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="235"/>
         <source>RejectAfterTime - Reject after time</source>
-        <translation>RejectAfterTime - 거부 시간</translation>
+        <translation>RejectAfterTime - Reject after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="247"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - 연결 유지 시간 제한</translation>
+        <translation>KeepaliveTimeout - Keepalive timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="259"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
-        <translation>MaxHandshakeAttempts - 최대 핸드셰이크 시도 횟수</translation>
+        <translation>MaxHandshakeAttempts - Max handshake attempts</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="276"/>
@@ -718,82 +718,82 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="131"/>
         <source>Jc - Junk packet count</source>
-        <translation>Jc - 정크 패킷 수</translation>
+        <translation>Jc - Junk packet count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="141"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation>Jmin - 정크 패킷 최소 크기</translation>
+        <translation>Jmin - Junk packet minimum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="151"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation>Jmax - 정크 패킷 최대 크기</translation>
+        <translation>Jmax - Junk packet maximum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="161"/>
         <source>S1 - Init packet junk size</source>
-        <translation>S1 - 초기 패킷 정크 크기</translation>
+        <translation>S1 - Init packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="171"/>
         <source>S2 - Response packet junk size</source>
-        <translation>S2 - 응답 패킷 정크 크기</translation>
+        <translation>S2 - Response packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="183"/>
         <source>S3 - Cookie reply packet junk size</source>
-        <translation>S3 - 쿠키 응답 패킷 정크 크기</translation>
+        <translation>S3 - Cookie reply packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="195"/>
         <source>S4 - Transport packet junk size</source>
-        <translation>S4 - 전송 패킷 정크 크기</translation>
+        <translation>S4 - Transport packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="207"/>
         <source>H1 - Init packet magic header</source>
-        <translation>H1 - 초기 패킷 매직 헤더</translation>
+        <translation>H1 - Init packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
         <source>H2 - Response packet magic header</source>
-        <translation>H2 - 응답 패킷 매직 헤더</translation>
+        <translation>H2 - Response packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="231"/>
         <source>H3 - Underload packet magic header</source>
-        <translation>H3 - 언더로드 패킷 매직 헤더</translation>
+        <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="243"/>
         <source>H4 - Transport packet magic header</source>
-        <translation>H4 - 전송 패킷 매직 헤더</translation>
+        <translation>H4 - Transport packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="253"/>
         <source>I1 - Special junk 1</source>
-        <translation>I1 - 특수 정크 1</translation>
+        <translation>I1 - Special junk 1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="263"/>
         <source>I2 - Special junk 2</source>
-        <translation>I2 - 특수 정크 2</translation>
+        <translation>I2 - Special junk 2</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="273"/>
         <source>I3 - Special junk 3</source>
-        <translation>I3 - 특수 정크 3</translation>
+        <translation>I3 - Special junk 3</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="283"/>
         <source>I4 - Special junk 4</source>
-        <translation>I4 - 특수 정크 4</translation>
+        <translation>I4 - Special junk 4</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="293"/>
         <source>I5 - Special junk 5</source>
-        <translation>I5 - 특수 정크 5</translation>
+        <translation>I5 - Special junk 5</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="310"/>
@@ -803,32 +803,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="326"/>
         <source>ContentPaddingAddition - Content padding addition</source>
-        <translation>ContentPaddingAddition - 콘텐츠 패딩 추가</translation>
+        <translation>ContentPaddingAddition - Content padding addition</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
         <source>RekeyAfterTime - Rekey after time</source>
-        <translation>RekeyAfterTime - 키 갱신 시간</translation>
+        <translation>RekeyAfterTime - Rekey after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="352"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - 키 갱신 시간 제한</translation>
+        <translation>RekeyTimeout - Rekey timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="365"/>
         <source>RejectAfterTime - Reject after time</source>
-        <translation>RejectAfterTime - 거부 시간</translation>
+        <translation>RejectAfterTime - Reject after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="378"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - 연결 유지 시간 제한</translation>
+        <translation>KeepaliveTimeout - Keepalive timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="391"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
-        <translation>MaxHandshakeAttempts - 최대 핸드셰이크 시도 횟수</translation>
+        <translation>MaxHandshakeAttempts - Max handshake attempts</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="408"/>

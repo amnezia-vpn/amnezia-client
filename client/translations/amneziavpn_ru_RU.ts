@@ -591,27 +591,27 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="132"/>
         <source>I1 - First special junk packet</source>
-        <translation>I1 - первый специальный мусорный пакет</translation>
+        <translation>I1 - First special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="142"/>
         <source>I2 - Second special junk packet</source>
-        <translation>I2 - второй специальный мусорный пакет</translation>
+        <translation>I2 - Second special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="152"/>
         <source>I3 - Third special junk packet</source>
-        <translation>I3 - третий специальный мусорный пакет</translation>
+        <translation>I3 - Third special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="162"/>
         <source>I4 - Fourth special junk packet</source>
-        <translation>I4 - четвёртый специальный мусорный пакет</translation>
+        <translation>I4 - Fourth special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="172"/>
         <source>I5 - Fifth special junk packet</source>
-        <translation>I5 - пятый специальный мусорный пакет</translation>
+        <translation>I5 - Fifth special junk packet</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="189"/>
@@ -621,32 +621,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="199"/>
         <source>ContentPaddingAddition - Content padding addition</source>
-        <translation>ContentPaddingAddition - добавление заполнения содержимого</translation>
+        <translation>ContentPaddingAddition - Content padding addition</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="211"/>
         <source>RekeyAfterTime - Rekey after time</source>
-        <translation>RekeyAfterTime - смена ключа по истечении времени</translation>
+        <translation>RekeyAfterTime - Rekey after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="223"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - тайм-аут смены ключа</translation>
+        <translation>RekeyTimeout - Rekey timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="235"/>
         <source>RejectAfterTime - Reject after time</source>
-        <translation>RejectAfterTime - отклонение по истечении времени</translation>
+        <translation>RejectAfterTime - Reject after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="247"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - тайм-аут keepalive</translation>
+        <translation>KeepaliveTimeout - Keepalive timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="259"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
-        <translation>MaxHandshakeAttempts - максимум попыток рукопожатия</translation>
+        <translation>MaxHandshakeAttempts - Max handshake attempts</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="276"/>
@@ -719,82 +719,82 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="131"/>
         <source>Jc - Junk packet count</source>
-        <translation>Jc - количество мусорных пакетов</translation>
+        <translation>Jc - Junk packet count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="141"/>
         <source>Jmin - Junk packet minimum size</source>
-        <translation>Jmin - минимальный размер мусорного пакета</translation>
+        <translation>Jmin - Junk packet minimum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="151"/>
         <source>Jmax - Junk packet maximum size</source>
-        <translation>Jmax - максимальный размер мусорного пакета</translation>
+        <translation>Jmax - Junk packet maximum size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="161"/>
         <source>S1 - Init packet junk size</source>
-        <translation>S1 - размер мусора в пакете инициализации</translation>
+        <translation>S1 - Init packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="171"/>
         <source>S2 - Response packet junk size</source>
-        <translation>S2 - размер мусора в пакете ответа</translation>
+        <translation>S2 - Response packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="183"/>
         <source>S3 - Cookie reply packet junk size</source>
-        <translation>S3 - размер мусора в пакете cookie reply</translation>
+        <translation>S3 - Cookie reply packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="195"/>
         <source>S4 - Transport packet junk size</source>
-        <translation>S4 - размер мусора в транспортном пакете</translation>
+        <translation>S4 - Transport packet junk size</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="207"/>
         <source>H1 - Init packet magic header</source>
-        <translation>H1 - магический заголовок пакета инициализации</translation>
+        <translation>H1 - Init packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
         <source>H2 - Response packet magic header</source>
-        <translation>H2 - магический заголовок пакета ответа</translation>
+        <translation>H2 - Response packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="231"/>
         <source>H3 - Underload packet magic header</source>
-        <translation>H3 - магический заголовок пакета underload</translation>
+        <translation>H3 - Underload packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="243"/>
         <source>H4 - Transport packet magic header</source>
-        <translation>H4 - магический заголовок транспортного пакета</translation>
+        <translation>H4 - Transport packet magic header</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="253"/>
         <source>I1 - Special junk 1</source>
-        <translation>I1 - специальный мусорный пакет 1</translation>
+        <translation>I1 - Special junk 1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="263"/>
         <source>I2 - Special junk 2</source>
-        <translation>I2 - специальный мусорный пакет 2</translation>
+        <translation>I2 - Special junk 2</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="273"/>
         <source>I3 - Special junk 3</source>
-        <translation>I3 - специальный мусорный пакет 3</translation>
+        <translation>I3 - Special junk 3</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="283"/>
         <source>I4 - Special junk 4</source>
-        <translation>I4 - специальный мусорный пакет 4</translation>
+        <translation>I4 - Special junk 4</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="293"/>
         <source>I5 - Special junk 5</source>
-        <translation>I5 - специальный мусорный пакет 5</translation>
+        <translation>I5 - Special junk 5</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="310"/>
@@ -804,32 +804,32 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="326"/>
         <source>ContentPaddingAddition - Content padding addition</source>
-        <translation>ContentPaddingAddition - добавление заполнения содержимого</translation>
+        <translation>ContentPaddingAddition - Content padding addition</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="339"/>
         <source>RekeyAfterTime - Rekey after time</source>
-        <translation>RekeyAfterTime - смена ключа по истечении времени</translation>
+        <translation>RekeyAfterTime - Rekey after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="352"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - тайм-аут смены ключа</translation>
+        <translation>RekeyTimeout - Rekey timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="365"/>
         <source>RejectAfterTime - Reject after time</source>
-        <translation>RejectAfterTime - отклонение по истечении времени</translation>
+        <translation>RejectAfterTime - Reject after time</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="378"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - тайм-аут keepalive</translation>
+        <translation>KeepaliveTimeout - Keepalive timeout</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="391"/>
         <source>MaxHandshakeAttempts - Max handshake attempts</source>
-        <translation>MaxHandshakeAttempts - максимум попыток рукопожатия</translation>
+        <translation>MaxHandshakeAttempts - Max handshake attempts</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="408"/>
