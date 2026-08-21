@@ -109,6 +109,8 @@ struct AwgProtocolConfig {
     QString serverProtocolVersion() const;
     QString clientProtocolVersion() const;
     static QString protocolVersionString(const QString &version);
+    // An "off" toggle behaves like a missing one and is kept out of the config files
+    static bool isToggleEnabled(const QString &value);
 
     bool hasClientConfig() const;
     void setClientConfig(const AwgClientConfig& config);

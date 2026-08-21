@@ -13,6 +13,14 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
+namespace
+{
+    QString awgToggleValue(bool enabled)
+    {
+        return enabled ? QString(protocols::awg::awgBoolOn) : QString();
+    }
+} // namespace
+
 AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -50,9 +58,11 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ClientRejectAfterTimeRole: m_protocolConfig.clientConfig->rejectAfterTime = strValue; break;
     case Roles::ClientKeepaliveTimeoutRole: m_protocolConfig.clientConfig->keepaliveTimeout = strValue; break;
     case Roles::ClientMaxHandshakeAttemptsRole: m_protocolConfig.clientConfig->maxHandshakeAttempts = strValue; break;
+    case Roles::ClientRandomTrailersRole:
+        m_protocolConfig.clientConfig->randomTrailers = awgToggleValue(value.toBool());
+        break;
     case Roles::ClientDisableCookiesRole:
-        m_protocolConfig.clientConfig->disableCookies =
-                value.toBool() ? QString(protocols::awg::awgBoolOn) : QString(protocols::awg::awgBoolOff);
+        m_protocolConfig.clientConfig->disableCookies = awgToggleValue(value.toBool());
         break;
     case Roles::ServerJunkPacketCountRole: m_protocolConfig.serverConfig.junkPacketCount = strValue; break;
     case Roles::ServerJunkPacketMinSizeRole: m_protocolConfig.serverConfig.junkPacketMinSize = strValue; break;
@@ -89,12 +99,10 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
         break;
     }
     case Roles::ServerRandomTrailersRole:
-        m_protocolConfig.serverConfig.randomTrailers =
-                value.toBool() ? QString(protocols::awg::awgBoolOn) : QString(protocols::awg::awgBoolOff);
+        m_protocolConfig.serverConfig.randomTrailers = awgToggleValue(value.toBool());
         break;
     case Roles::ServerDisableCookiesRole:
-        m_protocolConfig.serverConfig.disableCookies =
-                value.toBool() ? QString(protocols::awg::awgBoolOn) : QString(protocols::awg::awgBoolOff);
+        m_protocolConfig.serverConfig.disableCookies = awgToggleValue(value.toBool());
         break;
     default:
         return false;
