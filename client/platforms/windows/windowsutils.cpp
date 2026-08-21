@@ -32,10 +32,6 @@ QString WindowsUtils::getErrorMessage(quint32 code) {
   return result;
 }
 
-QString WindowsUtils::getErrorMessage() {
-  return getErrorMessage(GetLastError());
-}
-
 // A simple function to log windows error messages.
 void WindowsUtils::windowsLog(const QString& msg) {
   quint32 code = GetLastError();
