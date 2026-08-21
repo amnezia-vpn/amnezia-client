@@ -24,23 +24,6 @@
 namespace {
     Logger logger("XrayConfigurator");
 
-    QString normalizeXhttpMode(const QString &m) { return amnezia::xrayEffective::xhttpMode(m); }
-    QString normalizeSessionSeqPlacement(const QString &p) { return amnezia::xrayEffective::sessionSeqPlacement(p); }
-    QString normalizeUplinkDataPlacement(const QString &p) { return amnezia::xrayEffective::uplinkDataPlacement(p); }
-    QString normalizeXPaddingPlacement(const QString &p) { return amnezia::xrayEffective::xPaddingPlacement(p); }
-    QString normalizeXPaddingMethod(const QString &m) { return amnezia::xrayEffective::xPaddingMethod(m); }
-
-    QString makeRangeString(const QString &minV, const QString &maxV)
-    {
-        return amnezia::xrayEffective::range(minV, maxV);
-    }
-
-    void putIntRangeIfAny(QJsonObject &obj, const char *key, QString minV, QString maxV, const char *fallbackMin,
-                          const char *fallbackMax)
-    {
-        amnezia::xrayEffective::putRangeIfAny(obj, key, minV, maxV, fallbackMin, fallbackMax);
-    }
-
     QString effectiveClientFlow(const amnezia::XrayServerConfig &srv)
     {
         return amnezia::xrayEffective::clientFlow(srv);
@@ -73,6 +56,31 @@ namespace {
         if (changed) {
             pc.setNativeConfig(c);
         }
+    }
+
+    QString tlsFingerprintFromEnsureOutput(const QString &stdOut)
+    {
+        const QString prefix = QStringLiteral("amnezia_tls_fp=");
+        const auto lines = stdOut.split(QLatin1Char('\n'));
+        for (QString line : lines) {
+            line = line.trimmed();
+            if (!line.startsWith(prefix))
+                continue;
+            QString fp = line.mid(prefix.size());
+            fp.remove(QLatin1Char(':'));
+            fp.remove(QLatin1Char(' '));
+            fp = fp.toLower();
+            if (fp.size() != 64)
+                return {};
+            for (const QChar ch : fp) {
+                const ushort u = ch.unicode();
+                const bool hex = (u >= '0' && u <= '9') || (u >= 'a' && u <= 'f');
+                if (!hex)
+                    return {};
+            }
+            return fp;
+        }
+        return {};
     }
 } // namespace
 
@@ -191,29 +199,8 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
 
     QJsonObject serverConfig = doc.object();
     const QJsonObject originalConfig = serverConfig;
-    if (!serverConfig.contains(amnezia::protocols::xray::inbounds)) {
-        logger.error() << "Server config missing 'inbounds' field";
-        return ErrorCode::XrayServerConfigInvalid;
-    }
 
-    QJsonArray inbounds = serverConfig[amnezia::protocols::xray::inbounds].toArray();
-    if (inbounds.isEmpty()) {
-        logger.error() << "Server config has empty 'inbounds' array";
-        return ErrorCode::XrayServerConfigInvalid;
-    }
-
-    QJsonObject inbound = inbounds[0].toObject();
-    if (!inbound.contains(amnezia::protocols::xray::settings)) {
-        logger.error() << "Inbound missing 'settings' field";
-        return ErrorCode::XrayServerConfigInvalid;
-    }
-
-    QJsonObject settings = inbound[amnezia::protocols::xray::settings].toObject();
-    if (!settings.contains(amnezia::protocols::xray::clients)) {
-        settings[amnezia::protocols::xray::clients] = QJsonArray {};
-    }
-
-    QJsonArray clients = settings[amnezia::protocols::xray::clients].toArray();
+    QJsonArray clients = XrayServerConfig::clientsFromServerInboundJson(serverConfig);
     QString clientId;
 
     if (appendNewClient) {
@@ -226,36 +213,19 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
             ownClientId.clear();
         }
 
-        int existingIndex = -1;
-        if (adoptingOwnAccount && !ownClientId.isEmpty()) {
-            for (int i = 0; i < clients.size(); ++i) {
-                if (clients[i].toObject().value(amnezia::protocols::xray::id).toString() == ownClientId) {
-                    existingIndex = i;
-                    break;
-                }
-            }
-        }
+        const int existingIndex =
+                adoptingOwnAccount ? XrayServerConfig::indexOfClient(clients, ownClientId) : -1;
 
         if (existingIndex >= 0) {
             clientId = ownClientId;
-            QJsonObject clientEntry = clients[existingIndex].toObject();
-            if (flowValue.isEmpty()) {
-                clientEntry.remove(amnezia::protocols::xray::flow);
-            } else {
-                clientEntry[amnezia::protocols::xray::flow] = flowValue;
-            }
-            clients[existingIndex] = clientEntry;
+            clients[existingIndex] =
+                    XrayServerConfig::applyFlowToClient(clients[existingIndex].toObject(), flowValue);
             logger.info() << "Xray applyServerSettings: reusing the account from the key file, clients="
                           << clients.size();
         } else {
             const bool takeOverOwnAccount = adoptingOwnAccount && !ownClientId.isEmpty();
             clientId = takeOverOwnAccount ? ownClientId : QUuid::createUuid().toString(QUuid::WithoutBraces);
-            QJsonObject clientEntry;
-            clientEntry[amnezia::protocols::xray::id] = clientId;
-            if (!flowValue.isEmpty()) {
-                clientEntry[amnezia::protocols::xray::flow] = flowValue;
-            }
-            clients.append(clientEntry);
+            clients.append(XrayServerConfig::makeClientEntry(clientId, flowValue));
             logger.info() << "Xray applyServerSettings: added an account,"
                           << (takeOverOwnAccount ? "taken over from the key file" : "freshly minted for a new user")
                           << ", clients=" << clients.size();
@@ -265,28 +235,21 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
             logger.error() << "Server config has no VLESS clients";
             return ErrorCode::XrayServerNoVlessClients;
         }
-        clientId = clients[0].toObject()[amnezia::protocols::xray::id].toString();
+        clientId = XrayServerConfig::firstClientId(clients);
         if (clientId.isEmpty()) {
             logger.error() << "Server config VLESS client has empty id";
             return ErrorCode::XrayServerNoVlessClients;
         }
-        QJsonArray updatedClients;
-        for (const QJsonValue &v : clients) {
-            QJsonObject c = v.toObject();
-            if (flowValue.isEmpty()) {
-                c.remove(amnezia::protocols::xray::flow);
-            } else {
-                c[amnezia::protocols::xray::flow] = flowValue;
-            }
-            updatedClients.append(c);
-        }
-        clients = updatedClients;
+        clients = XrayServerConfig::applyFlowToClients(clients, flowValue);
     }
 
-    settings[amnezia::protocols::xray::clients] = clients;
-    inbound[amnezia::protocols::xray::settings] = settings;
-    inbounds[0] = inbound;
-    serverConfig[amnezia::protocols::xray::inbounds] = inbounds;
+    const XrayServerJsonStatus writeStatus =
+            XrayServerConfig::setClientsInServerInboundJson(serverConfig, clients);
+    if (writeStatus != XrayServerJsonStatus::Ok) {
+        logger.error() << "Xray applyServerSettings: server config has no place for the client list, status="
+                       << static_cast<int>(writeStatus);
+        return ErrorCode::XrayServerConfigInvalid;
+    }
 
     const QString listenPort = srv.port.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultPort)
                                                   : srv.port;
@@ -353,12 +316,6 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
         return ErrorCode::NoError;
     }
 
-    if (!isSecuritySupportedOnSelfHosted(srv)) {
-        logger.error() << "Xray writeServerConfigForSetup: refused, security is not supported for self-hosted, security="
-                       << srv.security << "transport=" << srv.transport;
-        return ErrorCode::XrayTlsNotSupported;
-    }
-
     ErrorCode errorCode = ErrorCode::NoError;
 
     QString clientId;
@@ -370,6 +327,15 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     }
 
     const QString securityEff = effectiveSecurity(srv);
+    QString tlsPin;
+    if (securityEff == QLatin1String("tls")) {
+        errorCode = ensureTlsCertificate(credentials, container, tlsPin);
+        if (errorCode != ErrorCode::NoError) {
+            logger.error() << "Xray writeServerConfigForSetup: TLS certificate is not on the server, error="
+                           << static_cast<int>(errorCode);
+            return errorCode;
+        }
+    }
 
     QString realityPrivateKey;
     QString realityPublicKey;
@@ -395,11 +361,18 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
 
     const QString portEff = srv.port.isEmpty() ? QString::fromLatin1(px::defaultPort) : srv.port;
 
-    const QJsonObject serverConfig =
-            buildServerConfigJson(srv, clients, clientId, realityPrivateKey, realityShortId);
+    if (securityEff != srv.security) {
+        logger.warning() << "Xray writeServerConfigForSetup: security downgraded for the server config, requested="
+                         << srv.security << "written=" << securityEff << "transport=" << srv.transport;
+    }
 
+    XrayServerInboundInputs inputs;
+    inputs.clients = clients;
+    inputs.realityPrivateKey = realityPrivateKey;
+    inputs.realityShortId = realityShortId;
 
-    const QString json = QString::fromUtf8(QJsonDocument(serverConfig).toJson());
+    const QJsonObject inboundJson = srv.toServerInboundJson(inputs);
+    const QString json = QString::fromUtf8(QJsonDocument(inboundJson).toJson());
     errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json,
                                                         QString::fromLatin1(px::serverConfigPath),
                                                         libssh::ScpOverwriteMode::ScpOverwriteExisting);
@@ -411,16 +384,16 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
 
     XrayProtocolConfig updated =
             buildClientProtocolConfig(credentials, container, srv, xrayCfg->clientTemplate, clientId, errorCode,
-                                      realityPublicKey, realityShortId);
+                                      realityPublicKey, realityShortId, tlsPin);
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Xray writeServerConfigForSetup: buildClientProtocolConfig failed, error="
                        << static_cast<int>(errorCode);
         return errorCode;
     }
-    updated.clientTemplate.serverFingerprint = srv.sharedBlockFingerprint();
     updated.clientTemplate.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    updated.clientTemplate.pendingServerUpload =
-            !uploadClientTemplate(credentials, container, updated.clientTemplate);
+    // Written to the volume so a second administrator device can adopt the client-side
+    // settings. Failure is not fatal: the settings already apply on this device.
+    uploadClientTemplate(credentials, container, updated.clientTemplate);
     containerConfig.protocolConfig = updated;
     return ErrorCode::NoError;
 }
@@ -481,38 +454,27 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
             outError = ErrorCode::XrayServerConfigInvalid;
             return {};
         }
-        const QJsonArray inbounds = doc.object().value(px::inbounds).toArray();
-        if (!inbounds.isEmpty()) {
-            existing = inbounds[0].toObject().value(px::settings).toObject().value(px::clients).toArray();
-        }
+        existing = XrayServerConfig::clientsFromServerInboundJson(doc.object());
         logger.info() << "Xray collectServerClients: read outcome=ok, bytes=" << currentConfig.size()
-                      << "inbounds=" << inbounds.size() << "existingClients=" << existing.size();
+                      << "existingClients=" << existing.size();
     }
 
-    QJsonArray clients;
-    for (const QJsonValue &value : existing) {
-        QJsonObject client = value.toObject();
-        if (client.value(px::id).toString().isEmpty()) {
-            continue;
-        }
-        if (flowValue.isEmpty()) {
-            client.remove(px::flow);
+    QJsonArray clients =
+            XrayServerConfig::applyFlowToClients(existing, flowValue, XrayClientListFilter::DropWithoutId);
+
+    if (!fallbackClientId.isEmpty()
+        && XrayServerConfig::indexOfClient(clients, fallbackClientId) < 0) {
+        const bool listWasEmpty = clients.isEmpty();
+        clients.append(XrayServerConfig::makeClientEntry(fallbackClientId, flowValue));
+        if (listWasEmpty) {
+            logger.info() << "Xray collectServerClients: fallbackSeed=used, no client list on server, seeding one client "
+                             "from the container uuid, flow="
+                          << (flowValue.isEmpty() ? "none" : "set");
         } else {
-            client[px::flow] = flowValue;
+            logger.info() << "Xray collectServerClients: fallbackSeed=ensured, volume uuid was missing from a non-empty "
+                             "client list, carrying"
+                          << clients.size() << "clients, flow=" << (flowValue.isEmpty() ? "none" : "set");
         }
-        clients.append(client);
-    }
-
-    if (clients.isEmpty() && !fallbackClientId.isEmpty()) {
-        QJsonObject fallback;
-        fallback[px::id] = fallbackClientId;
-        if (!flowValue.isEmpty()) {
-            fallback[px::flow] = flowValue;
-        }
-        clients.append(fallback);
-        logger.info() << "Xray collectServerClients: fallbackSeed=used, no client list on server, seeding one client "
-                         "from the container uuid, flow="
-                      << (flowValue.isEmpty() ? "none" : "set");
     } else {
         logger.info() << "Xray collectServerClients: fallbackSeed=not-used, carrying" << clients.size()
                       << "clients, skippedWithoutId=" << (existing.size() - clients.size())
@@ -522,52 +484,62 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
     return clients;
 }
 
-QJsonObject XrayConfigurator::buildServerConfigJson(const XrayServerConfig &srv, const QJsonArray &clients,
-                                                    const QString &streamClientId, const QString &realityPrivateKey,
-                                                    const QString &realityShortId) const
+bool XrayConfigurator::isSecuritySupportedOnSelfHosted(const XrayServerConfig &srv)
+{
+    Q_UNUSED(srv);
+    // TLS is issued in writeServerConfigForSetup (self-signed pems in the volume).
+    return true;
+}
+
+ErrorCode XrayConfigurator::ensureTlsCertificate(const ServerCredentials &credentials, DockerContainer container,
+                                                 QString &outFingerprint) const
 {
     namespace px = amnezia::protocols::xray;
 
-    Q_UNUSED(streamClientId);
-    const QString securityEff = effectiveSecurity(srv);
-    if (securityEff != srv.security) {
-        logger.warning() << "Xray buildServerConfigJson: security downgraded for the server config, requested="
-                         << srv.security << "written=" << securityEff << "transport=" << srv.transport;
+    outFingerprint.clear();
+
+    QString stdOut;
+    auto collect = [&stdOut](const QString &data, libssh::Client &) {
+        stdOut += data + QLatin1Char('\n');
+        return ErrorCode::NoError;
+    };
+
+    const QString certPath = QString::fromLatin1(px::tlsCertPath);
+    const QString keyPath = QString::fromLatin1(px::tlsKeyPath);
+    const QString script = QStringLiteral(
+            "has_key() { [ -f \"$1\" ] && [ -n \"$(tr -d '[:space:]' < \"$1\" 2>/dev/null)\" ]; }\n"
+            "CERT=%1\n"
+            "KEY=%2\n"
+            "if has_key \"$CERT\" && has_key \"$KEY\"; then echo amnezia_tls=present;\n"
+            "else\n"
+            "  openssl req -x509 -newkey rsa:2048 -nodes -days 3650 -subj \"/CN=amnezia-xray\" "
+            "-keyout \"$KEY\" -out \"$CERT\" || true\n"
+            "  if has_key \"$CERT\" && has_key \"$KEY\"; then echo amnezia_tls=created;\n"
+            "  else echo amnezia_tls=failed; exit 1; fi\n"
+            "fi\n"
+            "FP=$(openssl x509 -noout -fingerprint -sha256 -in \"$CERT\" 2>/dev/null "
+            "| sed 's/.*Fingerprint=//' | tr -d ':' | tr 'A-F' 'a-f')\n"
+            "if [ -z \"$FP\" ]; then echo amnezia_tls=failed; exit 1; fi\n"
+            "echo amnezia_tls_fp=$FP\n"
+            "exit 0\n")
+            .arg(certPath, keyPath);
+
+    const ErrorCode scriptError = m_sshSession->runContainerScript(credentials, container, script, collect, collect);
+    const bool present = stdOut.contains(QLatin1String("amnezia_tls=present"));
+    const bool created = stdOut.contains(QLatin1String("amnezia_tls=created"));
+    outFingerprint = tlsFingerprintFromEnsureOutput(stdOut);
+    if (scriptError != ErrorCode::NoError || (!present && !created) || outFingerprint.isEmpty()) {
+        logger.error() << "Xray ensureTlsCertificate: openssl failed, error=" << static_cast<int>(scriptError)
+                       << "out=" << stdOut.trimmed();
+        outFingerprint.clear();
+        return ErrorCode::XrayTlsNotSupported;
     }
-    QJsonObject streamSettings = srv.serverStreamSettings();
-    if (securityEff == QLatin1String("reality")) {
-        const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(px::defaultSite) : srv.site;
-        const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
-        QJsonObject rs;
-        rs[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
-        rs[QStringLiteral("privateKey")] = realityPrivateKey;
-        rs[px::serverNames] = QJsonArray { sniEff };
-        rs[QStringLiteral("shortIds")] = QJsonArray { realityShortId };
-        streamSettings[px::realitySettings] = rs;
+    if (created) {
+        logger.info() << "Xray ensureTlsCertificate: issued a self-signed certificate into the volume";
+    } else {
+        logger.info() << "Xray ensureTlsCertificate: using the existing certificate in the volume";
     }
-
-    QJsonObject settings;
-    settings[px::clients] = clients;
-    settings[QStringLiteral("decryption")] = QStringLiteral("none");
-
-    QJsonObject inbound;
-    inbound[px::port] = srv.port.isEmpty() ? QString(px::defaultPort).toInt() : srv.port.toInt();
-    inbound[QStringLiteral("protocol")] = QStringLiteral("vless");
-    inbound[px::settings] = settings;
-    inbound[px::streamSettings] = streamSettings;
-
-    QJsonObject serverConfig;
-    serverConfig[QStringLiteral("log")] = QJsonObject { { QStringLiteral("loglevel"), QStringLiteral("error") } };
-    serverConfig[px::inbounds] = QJsonArray { inbound };
-    serverConfig[px::outbounds] =
-            QJsonArray { QJsonObject { { QStringLiteral("protocol"), QStringLiteral("freedom") } } };
-
-    return serverConfig;
-}
-
-bool XrayConfigurator::isSecuritySupportedOnSelfHosted(const XrayServerConfig &srv)
-{
-    return effectiveSecurity(srv) != QLatin1String("tls");
+    return ErrorCode::NoError;
 }
 
 ErrorCode XrayConfigurator::uploadServerConfigAtomically(const ServerCredentials &credentials,
@@ -669,97 +641,6 @@ ErrorCode XrayConfigurator::uploadServerConfigAtomically(const ServerCredentials
                    << stdOut.simplified().left(200);
     return ErrorCode::XrayServerConfigInvalid;
 }
-
-ErrorCode XrayConfigurator::applyServerSettingsInPlace(const ServerCredentials &credentials, DockerContainer container,
-                                                       ContainerConfig &containerConfig, const DnsSettings &dnsSettings)
-{
-    Q_UNUSED(dnsSettings);
-    namespace px = amnezia::protocols::xray;
-
-    const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>();
-    if (!xrayCfg) {
-        logger.error() << "Xray applyServerSettingsInPlace: missing XrayProtocolConfig";
-        return ErrorCode::InternalError;
-    }
-
-    const XrayServerConfig &srv = xrayCfg->serverConfig;
-    if (srv.isThirdPartyConfig) {
-        return ErrorCode::NoError;
-    }
-
-    if (!isSecuritySupportedOnSelfHosted(srv)) {
-        logger.error() << "Xray applyServerSettingsInPlace: refused, security is not supported for self-hosted, security="
-                       << srv.security << "transport=" << srv.transport;
-        return ErrorCode::XrayTlsNotSupported;
-    }
-
-
-    ErrorCode errorCode = ErrorCode::NoError;
-
-    QString clientId;
-    errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::uuidPath), clientId);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray applyServerSettingsInPlace: could not read the container uuid, error="
-                       << static_cast<int>(errorCode);
-        return errorCode;
-    }
-
-    const QString securityEff = effectiveSecurity(srv);
-    QString realityPrivateKey;
-    QString realityPublicKey;
-    QString realityShortId;
-    if (securityEff == QLatin1String("reality")) {
-        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PrivateKeyPath), realityPrivateKey);
-        if (errorCode != ErrorCode::NoError)
-            return errorCode;
-        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PublicKeyPath), realityPublicKey);
-        if (errorCode != ErrorCode::NoError)
-            return errorCode;
-        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::shortidPath), realityShortId);
-        if (errorCode != ErrorCode::NoError)
-            return errorCode;
-    }
-
-    const QString flowValue = effectiveClientFlow(srv);
-    const QJsonArray updatedClients = collectServerClients(credentials, container, flowValue, clientId, errorCode);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray applyServerSettingsInPlace: refusing to write over an unreadable client list";
-        return errorCode;
-    }
-    if (updatedClients.isEmpty()) {
-        logger.error() << "Xray applyServerSettingsInPlace: no clients to write";
-        return ErrorCode::XrayServerNoVlessClients;
-    }
-
-    const QString streamClientId = updatedClients[0].toObject().value(px::id).toString();
-
-    const QString listenPort = srv.port.isEmpty() ? QString::fromLatin1(px::defaultPort) : srv.port;
-
-    const QJsonObject serverConfig =
-            buildServerConfigJson(srv, updatedClients, streamClientId, realityPrivateKey, realityShortId);
-
-    errorCode = uploadServerConfigAtomically(credentials, container, listenPort, serverConfig);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray applyServerSettingsInPlace: server config was not applied, error="
-                       << static_cast<int>(errorCode) << "port=" << listenPort;
-        return errorCode;
-    }
-
-    XrayProtocolConfig updated = buildClientProtocolConfig(credentials, container, srv, xrayCfg->clientTemplate, clientId,
-                                                           errorCode, realityPublicKey, realityShortId);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray applyServerSettingsInPlace: buildClientProtocolConfig failed, error="
-                       << static_cast<int>(errorCode);
-        return errorCode;
-    }
-    updated.clientTemplate.serverFingerprint = srv.sharedBlockFingerprint();
-    updated.clientTemplate.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    updated.clientTemplate.pendingServerUpload =
-            !uploadClientTemplate(credentials, container, updated.clientTemplate);
-    containerConfig.protocolConfig = updated;
-    return ErrorCode::NoError;
-}
-
 QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
                                                const ContainerConfig &containerConfig,
                                                const DnsSettings &dnsSettings,
@@ -783,7 +664,8 @@ bool XrayConfigurator::uploadClientTemplate(const ServerCredentials &credentials
 
     XrayClientTemplate stamped = clientTemplate;
     stamped.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    const QString json = QString::fromUtf8(QJsonDocument(stamped.toJson()).toJson());
+    const QJsonObject templateJson = stamped.toJson();
+    const QString json = QString::fromUtf8(QJsonDocument(templateJson).toJson());
     const ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(
             container, credentials, json, QString::fromLatin1(px::clientTemplatePath),
             libssh::ScpOverwriteMode::ScpOverwriteExisting);
@@ -823,96 +705,24 @@ XrayClientTemplate XrayConfigurator::readClientTemplate(const ServerCredentials 
     outFound = true;
     return tpl;
 }
-
-ErrorCode XrayConfigurator::rebuildClientConfigLocally(const ServerCredentials &credentials,
-                                                       ContainerConfig &containerConfig) const
-{
-    namespace px = amnezia::protocols::xray;
-
-    if (credentials.hostName.isEmpty()) {
-        logger.error() << "Xray rebuildClientConfigLocally: no host name, refusing to write an unusable config";
-        return ErrorCode::InternalError;
-    }
-
-    const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>();
-    if (!xrayCfg) {
-        logger.error() << "Xray rebuildClientConfigLocally: missing XrayProtocolConfig";
-        return ErrorCode::InternalError;
-    }
-    if (xrayCfg->serverConfig.isThirdPartyConfig) {
-        return ErrorCode::NoError;
-    }
-    if (!xrayCfg->hasClientConfig() || xrayCfg->clientConfig->nativeConfig.isEmpty()) {
-        logger.info() << "Xray rebuildClientConfigLocally: nothing stored yet, skipping";
-        return ErrorCode::NoError;
-    }
-
-    const XrayServerConfig &srv = xrayCfg->serverConfig;
-
-    const QJsonDocument doc = QJsonDocument::fromJson(xrayCfg->clientConfig->nativeConfig.toUtf8());
-    if (!doc.isObject()) {
-        logger.error() << "Xray rebuildClientConfigLocally: stored config is not valid JSON";
-        return ErrorCode::XrayServerConfigInvalid;
-    }
-
-    const QJsonArray outbounds = doc.object().value(px::outbounds).toArray();
-    if (outbounds.isEmpty()) {
-        logger.error() << "Xray rebuildClientConfigLocally: stored config has no outbounds";
-        return ErrorCode::XrayServerConfigInvalid;
-    }
-    const QJsonObject outbound = outbounds[0].toObject();
-    const QJsonObject reality = outbound.value(px::streamSettings).toObject().value(px::realitySettings).toObject();
-    const QString publicKey = reality.value(px::publicKey).toString();
-    const QString shortId = reality.value(px::shortId).toString();
-
-    QString clientId = xrayCfg->clientConfig->id;
-    if (clientId.isEmpty()) {
-        const QJsonArray vnext = outbound.value(px::settings).toObject().value(px::vnext).toArray();
-        if (!vnext.isEmpty()) {
-            const QJsonArray users = vnext[0].toObject().value(px::users).toArray();
-            if (!users.isEmpty()) {
-                clientId = users[0].toObject().value(px::id).toString();
-            }
-        }
-    }
-    if (clientId.isEmpty()) {
-        logger.error() << "Xray rebuildClientConfigLocally: no client id in the stored config";
-        return ErrorCode::XrayServerNoVlessClients;
-    }
-
-    if (effectiveSecurity(srv) == QLatin1String("reality") && (publicKey.isEmpty() || shortId.isEmpty())) {
-        logger.error() << "Xray rebuildClientConfigLocally: stored config carries no reality keys";
-        return ErrorCode::XrayRealityKeysReadFailed;
-    }
-
-    ErrorCode errorCode = ErrorCode::NoError;
-    XrayProtocolConfig updated =
-            buildClientProtocolConfig(credentials, DockerContainer::Xray, srv, xrayCfg->clientTemplate, clientId,
-                                      errorCode, publicKey, shortId);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray rebuildClientConfigLocally: buildClientProtocolConfig failed, error="
-                       << static_cast<int>(errorCode);
-        return errorCode;
-    }
-
-    containerConfig.protocolConfig = updated;
-    return ErrorCode::NoError;
-}
-
 XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCredentials &credentials,
                                                                DockerContainer container,
                                                                const XrayServerConfig &srv,
                                                                const XrayClientTemplate &tpl, const QString &clientId,
                                                                ErrorCode &errorCode,
                                                                const QString &prefetchedRealityPublicKey,
-                                                               const QString &prefetchedRealityShortId) const
+                                                               const QString &prefetchedRealityShortId,
+                                                               const QString &prefetchedTlsPin) const
 {
+    namespace px = amnezia::protocols::xray;
+
     QString xrayPublicKey = prefetchedRealityPublicKey;
     QString xrayShortId = prefetchedRealityShortId;
+    QString tlsPin = prefetchedTlsPin;
 
     const QString securityEff = effectiveSecurity(srv);
 
-    if (securityEff == QLatin1String("reality")) {
+    if (securityEff == QLatin1String(px::securityReality)) {
         if (xrayPublicKey.isEmpty() || xrayShortId.isEmpty()) {
             errorCode = readRealityKeyFiles(container, credentials, xrayPublicKey, xrayShortId);
             if (errorCode != ErrorCode::NoError) {
@@ -921,249 +731,45 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
         }
     }
 
-    QJsonObject userObj;
-    userObj[amnezia::protocols::xray::id] = clientId;
-    userObj[amnezia::protocols::xray::encryption] = QStringLiteral("none");
-    const QString flowValue = effectiveClientFlow(srv);
-    if (!flowValue.isEmpty()) {
-        userObj[amnezia::protocols::xray::flow] = flowValue;
+    if (securityEff == QLatin1String(px::securityTls) && !srv.isThirdPartyConfig) {
+        if (tlsPin.isEmpty()) {
+            errorCode = ensureTlsCertificate(credentials, container, tlsPin);
+            if (errorCode != ErrorCode::NoError) {
+                return {};
+            }
+        }
+        if (tlsPin.isEmpty()) {
+            logger.error() << "Xray buildClientProtocolConfig: TLS pin is empty after ensure";
+            errorCode = ErrorCode::XrayTlsNotSupported;
+            return {};
+        }
     }
 
-    QJsonObject vnextEntry;
-    vnextEntry[amnezia::protocols::xray::address] = credentials.hostName;
-    vnextEntry[amnezia::protocols::xray::port] =
-            srv.port.isEmpty() ? QString(amnezia::protocols::xray::defaultPort).toInt() : srv.port.toInt();
-    vnextEntry[amnezia::protocols::xray::users] = QJsonArray { userObj };
-
-    QJsonObject outboundSettings;
-    outboundSettings[amnezia::protocols::xray::vnext] = QJsonArray { vnextEntry };
-
-    QJsonObject outbound;
-    outbound[QStringLiteral("protocol")] = QStringLiteral("vless");
-    outbound[amnezia::protocols::xray::settings] = outboundSettings;
-
-    QJsonObject streamObj = buildStreamSettings(srv, tpl, clientId);
-    if (securityEff == QLatin1String("reality")) {
-        QJsonObject rs = streamObj[amnezia::protocols::xray::realitySettings].toObject();
-        rs[amnezia::protocols::xray::publicKey] = xrayPublicKey;
-        rs[amnezia::protocols::xray::shortId] = xrayShortId;
-        rs[amnezia::protocols::xray::spiderX] = QString();
-        streamObj[amnezia::protocols::xray::realitySettings] = rs;
+    if (securityEff != srv.security) {
+        logger.warning() << "Xray buildClientProtocolConfig: security downgraded for the client config, requested="
+                         << srv.security << "written=" << securityEff << "transport=" << srv.transport;
     }
-
-    outbound[amnezia::protocols::xray::streamSettings] = streamObj;
-
-    QJsonObject inboundObj;
-    inboundObj[QStringLiteral("listen")] = amnezia::protocols::xray::defaultLocalListenAddr;
-    inboundObj[amnezia::protocols::xray::port] = amnezia::protocols::xray::defaultLocalProxyPort;
-    inboundObj[QStringLiteral("protocol")] = QStringLiteral("socks");
-    inboundObj[amnezia::protocols::xray::settings] = QJsonObject { { QStringLiteral("udp"), true } };
-
-    QJsonObject clientJson;
-    clientJson[QStringLiteral("log")] = QJsonObject { { QStringLiteral("loglevel"), QStringLiteral("error") } };
-    clientJson[amnezia::protocols::xray::inbounds] = QJsonArray { inboundObj };
-    clientJson[amnezia::protocols::xray::outbounds] = QJsonArray { outbound };
-
-    const QString config = QString::fromUtf8(QJsonDocument(clientJson).toJson(QJsonDocument::Compact));
 
     XrayProtocolConfig protocolConfig;
     protocolConfig.serverConfig = srv;
     protocolConfig.clientTemplate = tpl;
 
+    XrayClientOutboundInputs inputs;
+    inputs.serverAddress = credentials.hostName;
+    inputs.clientId = clientId;
+    inputs.realityPublicKey = xrayPublicKey;
+    inputs.realityShortId = xrayShortId;
+    inputs.tlsPinnedPeerCertSha256 = tlsPin;
+
     XrayClientConfig clientConfig;
-    clientConfig.nativeConfig = config;
-    clientConfig.localPort = QString(amnezia::protocols::xray::defaultLocalProxyPort);
+    clientConfig.nativeConfig = QString::fromUtf8(
+            QJsonDocument(protocolConfig.toClientOutboundJson(inputs)).toJson(QJsonDocument::Compact));
+    clientConfig.localPort = QString::fromLatin1(px::defaultLocalProxyPort);
     clientConfig.id = clientId;
     clientConfig.templateFingerprint = tpl.contentFingerprint();
     protocolConfig.setClientConfig(clientConfig);
 
     return protocolConfig;
-}
-
-QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, const XrayClientTemplate &tpl,
-                                                  const QString &clientId) const
-{
-    QJsonObject streamSettings;
-    const auto &xhttp = srv.xhttp;
-    const auto &mkcp = srv.mkcp;
-    namespace px = amnezia::protocols::xray;
-
-    QString networkValue = QStringLiteral("tcp");
-    if (srv.transport == QLatin1String("xhttp"))
-        networkValue = QStringLiteral("xhttp");
-    else if (srv.transport == QLatin1String("mkcp"))
-        networkValue = QStringLiteral("kcp");
-    streamSettings[px::network] = networkValue;
-
-    const QString securityEff = effectiveSecurity(srv);
-    if (securityEff != srv.security) {
-        logger.warning() << "Xray buildStreamSettings: security downgraded for the client config, requested="
-                         << srv.security << "written=" << securityEff << "transport=" << srv.transport;
-    }
-    streamSettings[px::security] = securityEff;
-
-    if (securityEff == QLatin1String("tls")) {
-        QJsonObject tlsSettings;
-        const QString sniEff = srv.sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : srv.sni;
-        tlsSettings[px::serverName] = sniEff;
-        const QString alpnEff = srv.alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : srv.alpn;
-        QJsonArray alpnArray;
-        for (const QString &a : alpnEff.split(QLatin1Char(','))) {
-            QString t = a.trimmed();
-            if (t.isEmpty())
-                continue;
-            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
-                t = QStringLiteral("h2");
-            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
-                t = QStringLiteral("http/1.1");
-            alpnArray.append(t);
-        }
-        if (!alpnArray.isEmpty())
-            tlsSettings[QStringLiteral("alpn")] = alpnArray;
-        const QString fpEff = tpl.fingerprint.isEmpty() ? QString::fromLatin1(px::defaultFingerprint) : tpl.fingerprint;
-        tlsSettings[px::fingerprint] = fpEff;
-        streamSettings[QStringLiteral("tlsSettings")] = tlsSettings;
-    }
-
-    if (securityEff == QLatin1String("reality")) {
-        QJsonObject realSettings;
-        const QString fpEff = tpl.fingerprint.isEmpty() ? QString::fromLatin1(px::defaultFingerprint) : tpl.fingerprint;
-        realSettings[px::fingerprint] = fpEff;
-        const QString sniEff = srv.sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : srv.sni;
-        realSettings[px::serverName] = sniEff;
-        streamSettings[px::realitySettings] = realSettings;
-    }
-
-    // XHTTP — JSON must match Xray-core SplitHTTPConfig (flat xPadding fields, see transport_internet.go)
-    if (srv.transport == QLatin1String("xhttp")) {
-        QJsonObject xo;
-        const QString hostEff = xhttp.host.isEmpty() ? QString::fromLatin1(px::defaultXhttpHost) : xhttp.host;
-        xo[QStringLiteral("host")] = hostEff;
-        if (!xhttp.path.isEmpty())
-            xo[QStringLiteral("path")] = xhttp.path;
-        QString modeEff = normalizeXhttpMode(xhttp.mode);
-        if (modeEff == QLatin1String("auto") || modeEff == QLatin1String("packet-up")) {
-            modeEff = QStringLiteral("stream-one");
-        }
-        xo[QStringLiteral("mode")] = modeEff;
-
-        // No "Host" in headers: xray rejects it when the top-level "host" field is set.
-
-        const QString methodEff =
-                tpl.uplinkMethod.isEmpty() ? QString::fromLatin1(px::defaultXhttpUplinkMethod) : tpl.uplinkMethod;
-        xo[QStringLiteral("uplinkHTTPMethod")] = methodEff.toUpper();
-
-        xo[QStringLiteral("noGRPCHeader")] = xhttp.disableGrpc;
-        xo[QStringLiteral("noSSEHeader")] = xhttp.disableSse;
-
-        const QString sessPl = normalizeSessionSeqPlacement(xhttp.sessionPlacement);
-        if (!sessPl.isEmpty())
-            xo[QStringLiteral("sessionIDPlacement")] = sessPl;
-        const QString seqPl = normalizeSessionSeqPlacement(xhttp.seqPlacement);
-        if (!seqPl.isEmpty())
-            xo[QStringLiteral("seqPlacement")] = seqPl;
-        if (!xhttp.sessionKey.isEmpty())
-            xo[QStringLiteral("sessionIDKey")] = xhttp.sessionKey;
-        if (!xhttp.seqKey.isEmpty())
-            xo[QStringLiteral("seqKey")] = xhttp.seqKey;
-
-        const QString uDataPl = normalizeUplinkDataPlacement(xhttp.uplinkDataPlacement);
-        const bool uDataNeedsPacketUp =
-                uDataPl == QLatin1String("header") || uDataPl == QLatin1String("cookie");
-        if (!(uDataNeedsPacketUp && modeEff != QLatin1String("packet-up")))
-            xo[QStringLiteral("uplinkDataPlacement")] = uDataPl;
-        if (!xhttp.uplinkDataKey.isEmpty())
-            xo[QStringLiteral("uplinkDataKey")] = xhttp.uplinkDataKey;
-
-        const QString ucs = tpl.uplinkChunkSize.isEmpty() ? QString::fromLatin1(px::defaultXhttpUplinkChunkSize)
-                                                         : tpl.uplinkChunkSize;
-        if (!ucs.isEmpty() && ucs != QLatin1String("0")) {
-            xo[QStringLiteral("uplinkChunkSize")] = ucs.toInt();
-        }
-
-        if (!xhttp.scMaxBufferedPosts.isEmpty())
-            xo[QStringLiteral("scMaxBufferedPosts")] = xhttp.scMaxBufferedPosts.toLongLong();
-
-        putIntRangeIfAny(xo, "scMaxEachPostBytes", xhttp.scMaxEachPostBytesMin, xhttp.scMaxEachPostBytesMax,
-                         px::defaultXhttpScMaxEachPostBytesMin, px::defaultXhttpScMaxEachPostBytesMax);
-        putIntRangeIfAny(xo, "scMinPostsIntervalMs", tpl.scMinPostsIntervalMsMin, tpl.scMinPostsIntervalMsMax,
-                         px::defaultXhttpScMinPostsIntervalMsMin, px::defaultXhttpScMinPostsIntervalMsMax);
-        putIntRangeIfAny(xo, "scStreamUpServerSecs", xhttp.scStreamUpServerSecsMin, xhttp.scStreamUpServerSecsMax,
-                         px::defaultXhttpScStreamUpServerSecsMin, px::defaultXhttpScStreamUpServerSecsMax);
-
-        const auto &pad = xhttp.xPadding;
-        xo[QStringLiteral("xPaddingObfsMode")] = pad.obfsMode;
-        if (pad.obfsMode) {
-            if (!pad.bytesMin.isEmpty() || !pad.bytesMax.isEmpty()) {
-                const int fromV = pad.bytesMin.isEmpty()
-                        ? QString::fromLatin1(px::defaultXPaddingBytesMin).toInt()
-                        : pad.bytesMin.toInt();
-                int toV = pad.bytesMax.isEmpty()
-                        ? QString::fromLatin1(px::defaultXPaddingBytesMax).toInt()
-                        : pad.bytesMax.toInt();
-                if (toV < fromV)
-                    toV = fromV;
-                xo[QStringLiteral("xPaddingBytes")] = makeRangeString(QString::number(fromV), QString::number(toV));
-            }
-            xo[QStringLiteral("xPaddingKey")] =
-                    pad.key.isEmpty() ? QString::fromLatin1(px::defaultXPaddingKey) : pad.key;
-            xo[QStringLiteral("xPaddingHeader")] =
-                    pad.header.isEmpty() ? QString::fromLatin1(px::defaultXPaddingHeader) : pad.header;
-            xo[QStringLiteral("xPaddingPlacement")] = normalizeXPaddingPlacement(
-                    pad.placement.isEmpty() ? QString::fromLatin1(px::defaultXPaddingPlacement) : pad.placement);
-            xo[QStringLiteral("xPaddingMethod")] = normalizeXPaddingMethod(
-                    pad.method.isEmpty() ? QString::fromLatin1(px::defaultXPaddingMethod) : pad.method);
-        }
-
-        // xmux: Xray has no "enabled" flag; omit object when UI disables multiplex tuning.
-        if (tpl.xmux.enabled) {
-            QJsonObject mux;
-            auto addMuxRange = [&](const char *key, const QString &a, const QString &b) {
-                // omit empty / 0-0 ranges (xray may reject "0-0")
-                const bool aZero = a.isEmpty() || a == QLatin1String("0");
-                const bool bZero = b.isEmpty() || b == QLatin1String("0");
-                if (aZero && bZero)
-                    return;
-                const QString aV = a.isEmpty() ? QStringLiteral("0") : a;
-                const QString bV = b.isEmpty() ? QStringLiteral("0") : b;
-                mux[QString::fromUtf8(key)] = makeRangeString(aV, bV);
-            };
-            addMuxRange("maxConcurrency", tpl.xmux.maxConcurrencyMin, tpl.xmux.maxConcurrencyMax);
-            addMuxRange("maxConnections", tpl.xmux.maxConnectionsMin, tpl.xmux.maxConnectionsMax);
-            addMuxRange("cMaxReuseTimes", tpl.xmux.cMaxReuseTimesMin, tpl.xmux.cMaxReuseTimesMax);
-            addMuxRange("hMaxRequestTimes", tpl.xmux.hMaxRequestTimesMin, tpl.xmux.hMaxRequestTimesMax);
-            addMuxRange("hMaxReusableSecs", tpl.xmux.hMaxReusableSecsMin, tpl.xmux.hMaxReusableSecsMax);
-            if (!tpl.xmux.hKeepAlivePeriod.isEmpty())
-                mux[QStringLiteral("hKeepAlivePeriod")] = tpl.xmux.hKeepAlivePeriod.toLongLong();
-            if (!mux.isEmpty())
-                xo[QStringLiteral("xmux")] = mux;
-        }
-
-        streamSettings[QStringLiteral("xhttpSettings")] = xo;
-    }
-
-    if (srv.transport == QLatin1String("mkcp")) {
-        QJsonObject kcpObj;
-        const QString ttiEff = mkcp.tti.isEmpty() ? QString::fromLatin1(px::defaultMkcpTti) : mkcp.tti;
-        const QString mtuEff = mkcp.mtu.isEmpty() ? QString::fromLatin1(px::defaultMkcpMtu) : mkcp.mtu;
-        const QString upEff = mkcp.uplinkCapacity.isEmpty() ? QString::fromLatin1(px::defaultMkcpUplinkCapacity)
-                                                            : mkcp.uplinkCapacity;
-        const QString downEff = mkcp.downlinkCapacity.isEmpty() ? QString::fromLatin1(px::defaultMkcpDownlinkCapacity)
-                                                                : mkcp.downlinkCapacity;
-        const QString cwndEff = mkcp.cwndMultiplier.isEmpty() ? QString::fromLatin1(px::defaultMkcpCwndMultiplier)
-                                                              : mkcp.cwndMultiplier;
-        kcpObj[QStringLiteral("tti")] = ttiEff.toInt();
-        kcpObj[QStringLiteral("mtu")] = mtuEff.toInt();
-        kcpObj[QStringLiteral("uplinkCapacity")] = upEff.toInt();
-        kcpObj[QStringLiteral("downlinkCapacity")] = downEff.toInt();
-        kcpObj[QStringLiteral("cwndMultiplier")] = cwndEff.toInt();
-        if (!mkcp.maxSendingWindow.isEmpty() && mkcp.maxSendingWindow.toInt() >= mtuEff.toInt()) {
-            kcpObj[QStringLiteral("maxSendingWindow")] = mkcp.maxSendingWindow.toInt();
-        }
-        streamSettings[QStringLiteral("kcpSettings")] = kcpObj;
-    }
-
-    return streamSettings;
 }
 
 ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentials, DockerContainer container,

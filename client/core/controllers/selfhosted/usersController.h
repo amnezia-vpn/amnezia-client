@@ -66,6 +66,10 @@ private:
     ErrorCode getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
                              SshSession* sshSession, int &count, QJsonArray &clientsTable);
 
+    QString readXrayVolumeUuid(const DockerContainer container, const ServerCredentials &credentials,
+                               SshSession *sshSession) const;
+    int stripXrayVolumeUuidFromTable(QJsonArray &clientsTable, const QString &volumeUuid);
+
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
                      SshSession* sshSession, std::vector<WgShowData> &data);
 

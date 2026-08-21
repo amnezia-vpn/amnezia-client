@@ -137,6 +137,7 @@ public:
 
     Q_INVOKABLE bool pendingChangeTouchesServer(const QString &pendingPort) const;
     Q_INVOKABLE bool pendingChangeBreaksIssuedConfigs(const QString &pendingPort) const;
+    Q_INVOKABLE bool pendingChangeRequiresReinstall(const QString &pendingPort) const;
 
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig);

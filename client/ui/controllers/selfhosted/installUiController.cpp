@@ -314,8 +314,12 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
 
     if (asyncUpdate) {
         if (m_serverConfigUpdateInProgress) {
-            logger.warning() << "InstallUiController: server config save rejected for container"
-                             << ContainerUtils::containerToString(container) << ", an update is already running";
+            if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+                logger.warning() << "Xray save rejected, a save is already running";
+            } else {
+                logger.warning() << "InstallUiController: server config save rejected for container"
+                                 << ContainerUtils::containerToString(container) << ", an update is already running";
+            }
             return;
         }
         m_serverConfigUpdateInProgress = true;

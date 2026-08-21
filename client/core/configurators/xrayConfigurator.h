@@ -36,14 +36,6 @@ public:
                                                  amnezia::ContainerConfig &containerConfig,
                                                  const amnezia::DnsSettings &dnsSettings);
 
-    amnezia::ErrorCode applyServerSettingsInPlace(const amnezia::ServerCredentials &credentials,
-                                                  amnezia::DockerContainer container,
-                                                  amnezia::ContainerConfig &containerConfig,
-                                                  const amnezia::DnsSettings &dnsSettings);
-
-    amnezia::ErrorCode rebuildClientConfigLocally(const amnezia::ServerCredentials &credentials,
-                                                  amnezia::ContainerConfig &containerConfig) const;
-
     bool uploadClientTemplate(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
                               const amnezia::XrayClientTemplate &clientTemplate) const;
 
@@ -56,10 +48,6 @@ private:
     QJsonArray collectServerClients(const amnezia::ServerCredentials &credentials,
                                     amnezia::DockerContainer container, const QString &flowValue,
                                     const QString &fallbackClientId, amnezia::ErrorCode &outError) const;
-
-    QJsonObject buildServerConfigJson(const amnezia::XrayServerConfig &srv, const QJsonArray &clients,
-                                      const QString &streamClientId, const QString &realityPrivateKey,
-                                      const QString &realityShortId) const;
 
     amnezia::ErrorCode uploadServerConfigAtomically(const amnezia::ServerCredentials &credentials,
                                                     amnezia::DockerContainer container, const QString &listenPort,
@@ -83,15 +71,17 @@ private:
                                                           const QString &clientId,
                                                           amnezia::ErrorCode &errorCode,
                                                           const QString &prefetchedRealityPublicKey = {},
-                                                          const QString &prefetchedRealityShortId = {}) const;
+                                                          const QString &prefetchedRealityShortId = {},
+                                                          const QString &prefetchedTlsPin = {}) const;
 
     amnezia::ErrorCode readRealityKeyFiles(amnezia::DockerContainer container,
                                            const amnezia::ServerCredentials &credentials,
                                            QString &outPublicKey,
                                            QString &outShortId) const;
 
-    QJsonObject buildStreamSettings(const amnezia::XrayServerConfig &srv, const amnezia::XrayClientTemplate &tpl,
-                                    const QString &clientId) const;
+    amnezia::ErrorCode ensureTlsCertificate(const amnezia::ServerCredentials &credentials,
+                                            amnezia::DockerContainer container,
+                                            QString &outFingerprint) const;
 };
 
 #endif // XRAY_CONFIGURATOR_H

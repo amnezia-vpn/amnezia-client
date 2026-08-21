@@ -12,6 +12,7 @@
 
 #include "core/configurators/configuratorBase.h"
 #include "core/configurators/xrayConfigurator.h"
+#include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -58,6 +59,14 @@ using namespace ProtocolUtils;
 namespace
 {
     Logger logger("InstallController");
+
+    QString effectiveXrayPort(const XrayProtocolConfig *cfg)
+    {
+        if (!cfg || cfg->serverConfig.port.isEmpty()) {
+            return QString::fromLatin1(protocols::xray::defaultPort);
+        }
+        return cfg->serverConfig.port;
+    }
 
     bool dockerDaemonContainerMissing(const QString &out, const QString &containerDockerName)
     {
@@ -222,6 +231,16 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         if (!adminConfig.has_value()) {
             return ErrorCode::InternalError;
         }
+        if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+            if (const auto *xray = newConfig.getXrayProtocolConfig()) {
+                ServerCredentials credentials = adminConfig->credentials();
+                if (credentials.isValid()) {
+                    SshSession sshSession;
+                    XrayConfigurator xrayConfigurator(&sshSession);
+                    xrayConfigurator.uploadClientTemplate(credentials, container, xray->clientTemplate);
+                }
+            }
+        }
         if (container == DockerContainer::MtProxy) {
             ServerCredentials credentials = adminConfig->credentials();
             SshSession sshSession;
@@ -230,25 +249,6 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             ServerCredentials credentials = adminConfig->credentials();
             SshSession sshSession;
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
-        } else if (container == DockerContainer::Xray) {
-            XrayConfigurator localConfigurator(nullptr);
-            const ErrorCode rebuildError =
-                    localConfigurator.rebuildClientConfigLocally(adminConfig->credentials(), newConfig);
-            if (rebuildError != ErrorCode::NoError) {
-                return rebuildError;
-            }
-
-            if (const auto *xrayCfg = newConfig.protocolConfig.as<XrayProtocolConfig>()) {
-                if (!xrayCfg->serverConfig.isThirdPartyConfig) {
-                    SshSession templateSession;
-                    XrayConfigurator templateConfigurator(&templateSession);
-                    const bool uploaded = templateConfigurator.uploadClientTemplate(
-                            adminConfig->credentials(), container, xrayCfg->clientTemplate);
-                    if (auto *mutableXray = newConfig.protocolConfig.as<XrayProtocolConfig>()) {
-                        mutableXray->clientTemplate.pendingServerUpload = !uploaded;
-                    }
-                }
-            }
         }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
@@ -274,14 +274,11 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
                       << ": work level=full container recreate, reason=settings baked into the container changed"
                          " (for Xray the port)";
         if (container == DockerContainer::Xray) {
-            if (const auto *newXray = newConfig.getXrayProtocolConfig()) {
-                if (!XrayConfigurator::isSecuritySupportedOnSelfHosted(newXray->serverConfig)) {
-                    logger.error() << "Refusing reinstall, security is not supported for self-hosted XRay";
-                    return ErrorCode::XrayTlsNotSupported;
-                }
-            }
             errorCode = isServerPortBusy(credentials, container, newConfig, sshSession);
             if (errorCode != ErrorCode::NoError) {
+                if (errorCode == ErrorCode::ServerPortAlreadyAllocatedError) {
+                    logger.error() << "Xray reinstall refused, port busy, error=201";
+                }
                 return errorCode;
             }
         }
@@ -295,11 +292,17 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             }
         }
     } else if (container == DockerContainer::Xray) {
-        logger.info() << "updateServerConfig for" << ContainerUtils::containerToString(container)
-                      << ": work level=in-place server config rewrite, reason=settings other than the port changed";
+        logger.info() << "updateServerConfig for amnezia-xray : work level=in-place server.json,"
+                         " reason=server settings changed, port unchanged";
         DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
         XrayConfigurator xrayConfigurator(&sshSession);
-        errorCode = xrayConfigurator.applyServerSettingsInPlace(credentials, container, newConfig, dnsSettings);
+        errorCode = xrayConfigurator.writeServerConfigForSetup(credentials, container, newConfig, dnsSettings);
+        if (errorCode == ErrorCode::NoError) {
+            errorCode = sshSession.runScript(
+                    credentials,
+                    sshSession.replaceVars(QStringLiteral("sudo docker restart $CONTAINER_NAME"),
+                                           amnezia::genBaseVars(credentials, container, QString(), QString())));
+        }
     } else if (container != DockerContainer::SSXray) {
         logger.info() << "updateServerConfig for" << ContainerUtils::containerToString(container)
                       << ": work level=reconfigure and restart the existing container,"
@@ -322,8 +325,15 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         } else if (container == DockerContainer::Telemt) {
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
-        if (reinstallRequired && container != DockerContainer::Xray) {
-            clearCachedProfile(serverId, container);
+        if (reinstallRequired) {
+            // OpenVPN/WireGuard reinstall mints new client keys, so the old profile is revoked.
+            // Xray identity lives in the data volume; the uuid is unchanged. Revoking it here
+            // drops the admin from clients[] (seen after a port change with a shared account).
+            if (container == DockerContainer::Xray) {
+                logger.info() << "Xray container recreate: not revoking the volume uuid";
+            } else {
+                clearCachedProfile(serverId, container);
+            }
         }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
@@ -532,6 +542,11 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
 void InstallController::adminAppendRequested(const QString &serverId, DockerContainer container,
                                              const ContainerConfig &containerConfig, const QString &clientName)
 {
+    // Xray admin identity is the volume uuid; it must stay in server.json and must not
+    // appear in the Share Users list (revoking it emptied the inbound).
+    if (container == DockerContainer::Xray) {
+        return;
+    }
     if (ContainerUtils::containerService(container) == ServiceType::Other
         || !containerConfig.protocolConfig.hasClientConfig()) {
         return;
@@ -971,16 +986,13 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
 
         if (oldXrayConfig && newXrayConfig) {
-            XrayServerConfig oldSrv = oldXrayConfig->serverConfig;
-            XrayServerConfig newSrv = newXrayConfig->serverConfig;
-            oldSrv.applyDefaults();
-            newSrv.applyDefaults();
-            if (oldSrv.port != newSrv.port) {
-                logger.info() << "Xray reinstall required, port changed, oldPort=" << oldSrv.port
-                              << "newPort=" << newSrv.port;
+            const QString oldPort = effectiveXrayPort(oldXrayConfig);
+            const QString newPort = effectiveXrayPort(newXrayConfig);
+            if (oldPort != newPort) {
+                logger.info() << "Xray reinstall required, port changed" << oldPort << "->" << newPort;
                 return true;
             }
-            logger.info() << "Xray reinstall not required, port unchanged, port=" << oldSrv.port;
+            logger.info() << "Xray reinstall not required, port unchanged (" << newPort << ")";
         }
     }
 

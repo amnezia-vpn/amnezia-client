@@ -291,7 +291,6 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
     endResetModel();
 
-
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
     }
@@ -306,8 +305,14 @@ amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
 {
     const bool serverSettingsChanged =
             !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+    const bool clientTemplateChanged =
+            m_protocolConfig.clientTemplate.contentFingerprint()
+            != m_originalProtocolConfig.clientTemplate.contentFingerprint();
 
-    if (serverSettingsChanged) {
+    // A client-only edit (fingerprint, xmux and the rest of the template) no longer applies through a
+    // local rebuild. Like every other protocol, the cached client config is dropped here, and the normal
+    // mechanism rebuilds it through createConfig on the next connect, picking up the new template.
+    if (serverSettingsChanged || clientTemplateChanged) {
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
@@ -324,14 +329,21 @@ amnezia::XrayServerConfig XrayConfigModel::pendingServerConfig(const QString &pe
 
 bool XrayConfigModel::pendingChangeTouchesServer(const QString &pendingPort) const
 {
-    const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
-    const bool touchesServer = !pending.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
-    return touchesServer;
+    return !pendingServerConfig(pendingPort).hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
 }
 
 bool XrayConfigModel::pendingChangeBreaksIssuedConfigs(const QString &pendingPort) const
 {
     return pendingServerConfig(pendingPort).breaksIssuedConfigs(m_originalProtocolConfig.serverConfig);
+}
+
+bool XrayConfigModel::pendingChangeRequiresReinstall(const QString &pendingPort) const
+{
+    const auto effectivePort = [](const QString &port) -> QString {
+        return port.isEmpty() ? QString::fromLatin1(protocols::xray::defaultPort) : port;
+    };
+    const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
+    return effectivePort(pending.port) != effectivePort(m_originalProtocolConfig.serverConfig.port);
 }
 
 bool XrayConfigModel::isServerSettingsEqual() const

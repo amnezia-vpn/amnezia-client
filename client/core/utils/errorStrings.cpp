@@ -40,8 +40,8 @@ QString errorString(ErrorCode code) {
         errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
         break;
     case(ErrorCode::XrayTlsNotSupported):
-        errorMessage = QObject::tr("TLS is not available for a self-hosted XRay server: no certificate is issued for it, "
-                                   "so no client would be able to connect. Use Reality instead.");
+        errorMessage = QObject::tr("Server error: could not create a TLS certificate on the XRay server. "
+                                   "The previous settings were left unchanged. Try again, or use Reality.");
         break;
     case(ErrorCode::XrayServerConfigRejected):
         errorMessage = QObject::tr("Server error: XRay rejected the new configuration. "
