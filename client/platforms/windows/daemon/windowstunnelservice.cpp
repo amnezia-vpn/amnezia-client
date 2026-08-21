@@ -174,31 +174,54 @@ bool WindowsTunnelService::start(const QString& configData) {
     return false;
   }
 
-  if (!StartService(service, 0, nullptr)) {
-    WindowsUtils::windowsLog("Failed to start the service");
-    return false;
+  // Right after a system resume, Windows' device stack (whatever bus WinTun
+  // attaches its virtual adapter to) can still be re-enumerating for a
+  // couple of seconds. When that race is lost, the tunnel service exits
+  // almost immediately with service-specific error 3 ("Error while creating
+  // a WinTun device") instead of ever reaching SERVICE_RUNNING. That
+  // failure is transient, so retry a few times before giving up.
+  constexpr int kMaxAttempts = 3;
+  constexpr int kRetryDelayMsec = 2000;
+  constexpr DWORD kWinTunCreationFailure = 3;
+
+  for (int attempt = 1; attempt <= kMaxAttempts; ++attempt) {
+    if (!StartService(service, 0, nullptr)) {
+      WindowsUtils::windowsLog("Failed to start the service");
+      return false;
+    }
+
+    if (waitForServiceStatus(service, SERVICE_RUNNING)) {
+      logger.debug() << "The tunnel service is up and running";
+      guard.dismiss();
+      m_service = service;
+      m_timer.start(WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC);
+      return true;
+    }
+
+    SERVICE_STATUS status;
+    if (!QueryServiceStatus(service, &status)) {
+      WindowsUtils::windowsLog("Failed to retrieve the service status");
+      return false;
+    }
+
+    logger.debug() << "The tunnel service exited with status:"
+                   << status.dwWin32ExitCode << "-" << exitCodeToFailure(&status);
+
+    bool isWinTunRace =
+        status.dwWin32ExitCode == ERROR_SERVICE_SPECIFIC_ERROR &&
+        status.dwServiceSpecificExitCode == kWinTunCreationFailure;
+    if (!isWinTunRace || attempt == kMaxAttempts) {
+      logger.error() << "Failed to run the tunnel service";
+      emit backendFailure();
+      return false;
+    }
+
+    logger.warning() << QString("WinTun device creation failed (attempt %1 of %2), "
+                                 "retrying -- likely still settling after a system resume.")
+                             .arg(attempt).arg(kMaxAttempts);
+    Sleep(kRetryDelayMsec);
   }
 
-  if (waitForServiceStatus(service, SERVICE_RUNNING)) {
-    logger.debug() << "The tunnel service is up and running";
-    guard.dismiss();
-    m_service = service;
-    m_timer.start(WINDOWS_TUNNEL_MONITOR_TIMEOUT_MSEC);
-    return true;
-  }
-
-  logger.error() << "Failed to run the tunnel service";
-
-  SERVICE_STATUS status;
-  if (!QueryServiceStatus(service, &status)) {
-    WindowsUtils::windowsLog("Failed to retrieve the service status");
-    return false;
-  }
-
-  logger.debug() << "The tunnel service exited with status:"
-                 << status.dwWin32ExitCode << "-" << exitCodeToFailure(&status);
-
-  emit backendFailure();
   return false;
 }
 
@@ -295,6 +318,14 @@ static bool waitForServiceStatus(SC_HANDLE service, DWORD expectedStatus) {
 
     if (status.dwCurrentState == expectedStatus) {
       return true;
+    }
+
+    // A service that has already stopped will never transition to
+    // SERVICE_RUNNING on its own -- stop burning the rest of the poll
+    // budget once that's the case (it needs a fresh StartService() call).
+    if (expectedStatus == SERVICE_RUNNING &&
+        status.dwCurrentState == SERVICE_STOPPED) {
+      return false;
     }
 
     logger.warning() << "The service is not in the right status yet.";
