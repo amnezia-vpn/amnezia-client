@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
-#include <QMutex>
+#include <QRecursiveMutex>
 #include <QString>
 #include <QTextStream>
 
@@ -105,7 +105,10 @@ private:
 
     static QFile m_file;
     static QTextStream m_textStream;
-    static QMutex m_fileMutex;
+    // Recursive so a function that holds the lock for its whole body (e.g.
+    // clearLogs() calling init(), or init()'s qWarning() re-entering the
+    // logger via the message handler) can't deadlock itself.
+    static QRecursiveMutex m_fileMutex;
     static QString m_logFileName;
     static QString m_serviceLogFileName;
 
