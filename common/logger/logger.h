@@ -105,9 +105,6 @@ private:
 
     static QFile m_file;
     static QTextStream m_textStream;
-    // Recursive so a function that holds the lock for its whole body (e.g.
-    // clearLogs() calling init(), or init()'s qWarning() re-entering the
-    // logger via the message handler) can't deadlock itself.
     static QRecursiveMutex m_fileMutex;
     static QString m_logFileName;
     static QString m_serviceLogFileName;
