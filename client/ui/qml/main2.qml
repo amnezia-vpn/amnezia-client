@@ -16,31 +16,6 @@ Window  {
     id: root
     objectName: "mainWindow"
 
-    property bool controlsDisabled: false
-
-    Connections {
-        target: PageController
-        function onDisableControls(disabled) {
-            root.controlsDisabled = disabled
-        }
-    }
-
-    function clearStuckUiBlockIfNeeded(reason) {
-        if (busyIndicator.visible || root.controlsDisabled) {
-            console.warn("UI was still blocked (busyIndicator/disableControls) on", reason, "; clearing it")
-            busyIndicator.visible = false
-            PageController.disableControls(false)
-        }
-    }
-
-    Connections {
-        target: ConnectionController
-        function onSystemWoke() {
-            console.log("ConnectionController.systemWoke received")
-            root.clearStuckUiBlockIfNeeded("system wakeup")
-        }
-    }
-
     Connections {
         target: Qt.application
         function onStateChanged() {

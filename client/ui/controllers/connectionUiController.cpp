@@ -19,7 +19,6 @@ ConnectionUiController::ConnectionUiController(ConnectionController* connectionC
       m_serversController(serversController)
 {
     connect(m_connectionController, &ConnectionController::connectionStateChanged, this, &ConnectionUiController::onConnectionStateChanged);
-    connect(m_connectionController, &ConnectionController::systemWoke, this, &ConnectionUiController::systemWoke);
 
     connect(this, &ConnectionUiController::connectButtonClicked, this, &ConnectionUiController::toggleConnection, Qt::QueuedConnection);
 

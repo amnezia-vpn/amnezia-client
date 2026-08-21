@@ -383,9 +383,6 @@ void VpnConnection::createProtocolConnections()
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
         connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
         connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
-#if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::systemWoke, Qt::QueuedConnection);
-#endif
     });
 #endif
 }
