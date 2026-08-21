@@ -6,6 +6,7 @@
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QElapsedTimer>
 #include <QTimer>
 
 #include "core/protocols/vpnProtocol.h"
@@ -50,7 +51,6 @@ public:
 public slots:
     void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
-    void reconnectToVpn();
     void disconnectFromVpn();
 
     void onKillSwitchModeChanged(bool enabled);
@@ -70,6 +70,15 @@ signals:
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
+
+private slots:
+    void onProtocolConnectionStateChanged(Vpn::ConnectionState state);
+#ifdef AMNEZIA_DESKTOP
+    void onIpcWakeup();
+    void onIpcNetworkChanged();
+    void startReconnectAttempt();
+    void onReconnectWatchdogTimeout();
+#endif
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
@@ -98,6 +107,24 @@ private:
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
+
+#ifdef AMNEZIA_DESKTOP
+   // Auto-reconnect state machine (wakeup / network change). While it is
+   // active the UI is held in the Reconnecting state and stop()/start()
+   // attempts are retried with backoff until the protocol reports Connected
+   // or the user cancels via connect/disconnect.
+   void requestReconnect(const QString &trigger);
+   void scheduleReconnectRetry();
+   void cancelReconnect();
+   int reconnectRetryDelayMsec() const;
+
+   bool m_reconnectActive = false;          // machine engaged, UI shows Reconnecting
+   bool m_reconnectAttemptInFlight = false; // start() issued, waiting for the outcome
+   int m_reconnectAttempt = 0;              // attempts since the last trigger, drives backoff
+   QTimer m_reconnectRetryTimer{this};      // single-shot, schedules the next attempt
+   QTimer m_reconnectWatchdogTimer{this};   // single-shot, bounds a single attempt
+   QElapsedTimer m_reconnectAttemptAge;     // how long the in-flight attempt has been running
+#endif
 };
 
 #endif // VPNCONNECTION_H

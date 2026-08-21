@@ -89,6 +89,10 @@ protected:
     void startTimeoutTimer();
     void stopTimeoutTimer();
 
+    // Remembers the error for lastError() without forcing the Error connection
+    // state, unlike setLastError().
+    void recordLastError(ErrorCode lastError);
+
     Vpn::ConnectionState m_connectionState;
 
     QString m_routeGateway;
@@ -99,7 +103,7 @@ protected:
 
 private:
     QTimer* m_timeoutTimer;
-    ErrorCode m_lastError;
+    ErrorCode m_lastError = ErrorCode::NoError;
     quint64 m_receivedBytes;
     quint64 m_sentBytes;
 };

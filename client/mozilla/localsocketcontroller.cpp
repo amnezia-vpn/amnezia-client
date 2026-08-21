@@ -76,7 +76,16 @@ void LocalSocketController::errorOccurred(
   }
 
   qCritical() << "ControllerError";
-  disconnectInternal();
+
+  // The socket to the daemon is gone (daemon restart/crash or a failed
+  // connection attempt). Unlike a plain tunnel-down message we cannot talk to
+  // the daemon anymore, so remember that and let the next activate()/
+  // deactivate() re-establish the connection instead of writing into a dead
+  // socket forever.
+  m_daemonState = eDisconnected;
+  m_initializingRetry = 0;
+  m_initializingTimer.stop();
+  emit disconnected();
 }
 
 void LocalSocketController::disconnectInternal() {
@@ -122,7 +131,38 @@ void LocalSocketController::daemonConnected() {
   checkStatus();
 }
 
+bool LocalSocketController::isSocketAlive() const {
+  // ConnectingState counts as alive: on a fresh protocol activate() runs
+  // right after initialize(), before the connection (and the status
+  // handshake) completes — writes are buffered by the socket, and the daemon
+  // processes them once the connection is established.
+  const QLocalSocket::LocalSocketState state = m_socket->state();
+  return state == QLocalSocket::ConnectedState ||
+         state == QLocalSocket::ConnectingState;
+}
+
+void LocalSocketController::reconnectToDaemon() {
+  if (m_daemonState == eInitializing) {
+    // A connection attempt is already in progress.
+    return;
+  }
+  if (isSocketAlive()) {
+    return;
+  }
+
+  logger.warning() << "Daemon socket is not connected; reconnecting";
+  m_initializingRetry = 0;
+  initializeInternal();
+}
+
 void LocalSocketController::activate(const QJsonObject &rawConfig) {
+  if (!isSocketAlive()) {
+    logger.error() << "Cannot activate, daemon connection is not ready";
+    reconnectToDaemon();
+    emit disconnected();
+    return;
+  }
+
   QString protocolName = rawConfig.value("protocol").toString();
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
@@ -267,8 +307,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 void LocalSocketController::deactivate() {
   logger.debug() << "Deactivating";
 
-  if (m_daemonState != eReady) {
+  if (m_daemonState != eReady || !isSocketAlive()) {
     logger.debug() << "No disconnect, controller is not ready";
+    reconnectToDaemon();
     emit disconnected();
     return;
   }
@@ -334,7 +375,12 @@ void LocalSocketController::readData() {
   logger.debug() << "Reading";
 
   Q_ASSERT(m_socket);
-  Q_ASSERT(m_daemonState == eInitializing || m_daemonState == eReady);
+  if (m_daemonState != eInitializing && m_daemonState != eReady) {
+    // Stray data delivered around a socket teardown — nothing to do with it.
+    m_socket->readAll();
+    m_buffer.clear();
+    return;
+  }
   QByteArray input = m_socket->readAll();
   m_buffer.append(input);
 

@@ -39,6 +39,8 @@ class LocalSocketController final : public ControllerImpl {
  private:
   void initializeInternal();
   void disconnectInternal();
+  void reconnectToDaemon();
+  bool isSocketAlive() const;
 
   void daemonConnected();
   void errorOccurred(QLocalSocket::LocalSocketError socketError);

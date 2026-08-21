@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QDebug>
 #include <QFileInfo>
 #include <QProcess>
 #include <QTcpSocket>
@@ -60,13 +61,29 @@ void WireguardProtocol::stop()
 
 ErrorCode WireguardProtocol::startMzImpl()
 {
-    QString protocolName = m_rawConfig.value("protocol").toString();
-    QJsonObject vpnConfigData = m_rawConfig.value(protocolName + "_config_data").toObject();
-    vpnConfigData[configKey::hostName] = NetworkUtilities::getIPAddress(vpnConfigData.value(configKey::hostName).toString());
-    m_rawConfig.insert(protocolName + "_config_data", vpnConfigData);
-    m_rawConfig[configKey::hostName] = NetworkUtilities::getIPAddress(m_rawConfig[configKey::hostName].toString());
+    const QString protocolName = m_rawConfig.value("protocol").toString();
+    const QString configDataKey = protocolName + "_config_data";
+    QJsonObject vpnConfigData = m_rawConfig.value(configDataKey).toObject();
 
-    m_impl->activate(m_rawConfig);
+    const QString endpointHost = vpnConfigData.value(configKey::hostName).toString();
+    const QString endpointIp = NetworkUtilities::getIPAddress(endpointHost);
+    if (endpointIp.isEmpty()) {
+        qWarning() << "WireguardProtocol: unable to resolve the endpoint host, aborting this attempt";
+        recordLastError(ErrorCode::EndpointResolutionError);
+        return ErrorCode::EndpointResolutionError;
+    }
+
+    // Activate a resolved copy: m_rawConfig must keep the original hostname so
+    // a later attempt (e.g. reconnect after wakeup) re-resolves it from scratch
+    // instead of reusing a stale — or empty — address.
+    QJsonObject rawConfig = m_rawConfig;
+    vpnConfigData[configKey::hostName] = endpointIp;
+    rawConfig.insert(configDataKey, vpnConfigData);
+    if (rawConfig.value(configKey::hostName).toString() == endpointHost) {
+        rawConfig[configKey::hostName] = endpointIp;
+    }
+
+    m_impl->activate(rawConfig);
     return ErrorCode::NoError;
 }
 

@@ -36,6 +36,20 @@
 
 using namespace ProtocolUtils;
 
+#ifdef AMNEZIA_DESKTOP
+namespace {
+// A reconnect attempt that has not reached Connected within this time is
+// considered failed and is retried (some failures — e.g. a daemon-side
+// activation error — produce no client-visible event at all).
+constexpr int RECONNECT_ATTEMPT_TIMEOUT_MSEC = 30 * 1000;
+constexpr int RECONNECT_RETRY_BASE_MSEC = 1000;
+constexpr int RECONNECT_RETRY_MAX_MSEC = 60 * 1000;
+// A fresh trigger does not restart an attempt younger than this: such an
+// attempt was started under (almost) the same network conditions anyway.
+constexpr int RECONNECT_ATTEMPT_MIN_AGE_MSEC = 1000;
+}
+#endif
+
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
     : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this)
 {
@@ -43,6 +57,13 @@ VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureA
     m_checkTimer.setInterval(1000);
     connect(IosController::Instance(), &IosController::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(IosController::Instance(), &IosController::bytesChanged, this, &VpnConnection::onBytesChanged);
+#endif
+
+#ifdef AMNEZIA_DESKTOP
+    m_reconnectRetryTimer.setSingleShot(true);
+    connect(&m_reconnectRetryTimer, &QTimer::timeout, this, &VpnConnection::startReconnectAttempt);
+    m_reconnectWatchdogTimer.setSingleShot(true);
+    connect(&m_reconnectWatchdogTimer, &QTimer::timeout, this, &VpnConnection::onReconnectWatchdogTimeout);
 #endif
 }
 
@@ -336,8 +357,11 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     m_vpnConfiguration = vpnConfiguration;
 
 #ifdef AMNEZIA_DESKTOP
+    cancelReconnect();
     if (m_vpnProtocol) {
-        disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
+        // Detach every slot of ours (state, bytes, errors) so tearing the old
+        // protocol down doesn't inject events into the new connection flow.
+        m_vpnProtocol->disconnect(this);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
@@ -376,15 +400,18 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 void VpnConnection::createProtocolConnections()
 {
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
+    connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::onProtocolConnectionStateChanged);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::reconnectToVpn, Qt::QueuedConnection);
+        // The replica is thread-local and long-lived while this method runs on
+        // every connect — UniqueConnection keeps these from piling up.
+        const auto queuedUnique = static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection);
+        connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::onIpcNetworkChanged, queuedUnique);
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::onIpcWakeup, queuedUnique);
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX)
-        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::systemWoke, Qt::QueuedConnection);
+        connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::systemWoke, queuedUnique);
 #endif
     });
 #endif
@@ -552,29 +579,168 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
     return QString("%1 %2").arg(QString::number(mbps, 'f', 2)).arg(tr("Mbps")); // Mbit/s
 }
 
-void VpnConnection::reconnectToVpn() {
+#ifdef AMNEZIA_DESKTOP
+void VpnConnection::onIpcWakeup()
+{
+    requestReconnect(QStringLiteral("wakeup"));
+}
+
+void VpnConnection::onIpcNetworkChanged()
+{
+    requestReconnect(QStringLiteral("network change"));
+}
+
+void VpnConnection::requestReconnect(const QString &trigger)
+{
     if (m_vpnProtocol.isNull())
         return;
 
+    if (m_reconnectActive) {
+        // Conditions changed (e.g. the network actually came back after
+        // wakeup) — restart the backoff sequence and try again right away.
+        // An in-flight attempt that was started before this trigger is likely
+        // doomed (it raced the network coming up), so restart it too instead
+        // of waiting out its watchdog; a just-started attempt is left alone.
+        if (m_reconnectAttemptInFlight && m_reconnectAttemptAge.isValid()
+            && m_reconnectAttemptAge.elapsed() < RECONNECT_ATTEMPT_MIN_AGE_MSEC) {
+            qDebug() << "Reconnect: new trigger" << trigger << "ignored, current attempt has just started";
+            m_reconnectAttempt = 0;
+            return;
+        }
+
+        qDebug() << "Reconnect: new trigger" << trigger << "while already reconnecting, retrying immediately";
+        m_reconnectAttempt = 0;
+        m_reconnectAttemptInFlight = false;
+        m_reconnectRetryTimer.stop();
+        m_reconnectWatchdogTimer.stop();
+        startReconnectAttempt();
+        return;
+    }
+
     if (m_connectionState != Vpn::ConnectionState::Connected) {
-        qWarning() << QString("Reconnect triggered on %1 during inappropriate state: %2; ignoring slot")
+        qWarning() << QString("Reconnect triggered by %1 during inappropriate state: %2; ignoring")
+                              .arg(trigger)
                               .arg(QMetaEnum::fromType<Vpn::ConnectionState>().valueToKey(m_connectionState));
         return;
     }
 
-    qDebug() << "Reconnect triggered. Reconnecting to the server";
+    qDebug() << "Reconnect triggered by" << trigger << ". Reconnecting to the server";
 
+    m_reconnectActive = true;
+    m_reconnectAttempt = 0;
     setConnectionState(Vpn::ConnectionState::Reconnecting);
+    startReconnectAttempt();
+}
 
-    m_vpnProtocol->stop();
-    if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
-        setConnectionState(Vpn::ConnectionState::Error);
-        emit vpnProtocolError(err);
+void VpnConnection::startReconnectAttempt()
+{
+    if (!m_reconnectActive)
+        return;
+
+    if (m_vpnProtocol.isNull()) {
+        cancelReconnect();
+        return;
     }
+
+    ++m_reconnectAttempt;
+    qDebug() << "Reconnect: attempt" << m_reconnectAttempt;
+    m_reconnectAttemptAge.start();
+
+    // stop() may synchronously emit Disconnected; while the machine is active
+    // (and no attempt is in flight yet) onProtocolConnectionStateChanged
+    // suppresses it so the UI stays in Reconnecting.
+    m_vpnProtocol->stop();
+
+    m_reconnectAttemptInFlight = true;
+    if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
+        qWarning() << "Reconnect: attempt" << m_reconnectAttempt << "failed to start, error" << err;
+        scheduleReconnectRetry();
+        return;
+    }
+
+    // start() may have failed synchronously through a protocol event, in which
+    // case the retry is already scheduled and the watchdog must stay off.
+    if (m_reconnectAttemptInFlight) {
+        m_reconnectWatchdogTimer.start(RECONNECT_ATTEMPT_TIMEOUT_MSEC);
+    }
+}
+
+void VpnConnection::onReconnectWatchdogTimeout()
+{
+    if (!m_reconnectActive || !m_reconnectAttemptInFlight)
+        return;
+
+    qWarning() << "Reconnect: attempt" << m_reconnectAttempt << "did not reach the Connected state in time";
+    scheduleReconnectRetry();
+}
+
+void VpnConnection::scheduleReconnectRetry()
+{
+    m_reconnectWatchdogTimer.stop();
+    m_reconnectAttemptInFlight = false;
+
+    if (!m_reconnectActive)
+        return;
+
+    const int delay = reconnectRetryDelayMsec();
+    qDebug() << "Reconnect: next attempt in" << delay << "ms";
+    m_reconnectRetryTimer.start(delay);
+}
+
+void VpnConnection::cancelReconnect()
+{
+    m_reconnectActive = false;
+    m_reconnectAttemptInFlight = false;
+    m_reconnectRetryTimer.stop();
+    m_reconnectWatchdogTimer.stop();
+}
+
+int VpnConnection::reconnectRetryDelayMsec() const
+{
+    // 1s, 2s, 4s, ... capped at RECONNECT_RETRY_MAX_MSEC; a fresh trigger
+    // resets m_reconnectAttempt and thus the sequence.
+    const int exponent = qMin(m_reconnectAttempt > 0 ? m_reconnectAttempt - 1 : 0, 6);
+    return qMin(RECONNECT_RETRY_BASE_MSEC << exponent, RECONNECT_RETRY_MAX_MSEC);
+}
+#endif
+
+void VpnConnection::onProtocolConnectionStateChanged(Vpn::ConnectionState state)
+{
+#ifdef AMNEZIA_DESKTOP
+    if (m_reconnectActive) {
+        switch (state) {
+        case Vpn::ConnectionState::Connected:
+            qDebug() << "Reconnect: succeeded on attempt" << m_reconnectAttempt;
+            cancelReconnect();
+            break; // propagate below
+        case Vpn::ConnectionState::Disconnected:
+        case Vpn::ConnectionState::Error:
+            // Keep the between-attempts cleanup the old code used to run for
+            // a swallowed Disconnected (DNS flush, saved-routes cleanup), but
+            // hold the UI in Reconnecting and keep retrying.
+            onConnectionStateChanged(state);
+            if (m_reconnectAttemptInFlight) {
+                qWarning() << "Reconnect: attempt" << m_reconnectAttempt << "failed, protocol reported"
+                           << QMetaEnum::fromType<Vpn::ConnectionState>().valueToKey(state);
+                scheduleReconnectRetry();
+            }
+            return;
+        default:
+            // Transient states while retrying — keep showing Reconnecting.
+            return;
+        }
+    }
+#endif
+
+    setConnectionState(state);
 }
 
 void VpnConnection::disconnectFromVpn()
 {
+#ifdef AMNEZIA_DESKTOP
+    cancelReconnect();
+#endif
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
@@ -600,6 +766,13 @@ void VpnConnection::disconnectFromVpn()
                           });
 #endif
 
+#ifdef AMNEZIA_DESKTOP
+    // Drive the final state ourselves: a protocol that is already internally
+    // Disconnected (e.g. after failed reconnect attempts) will not emit
+    // another Disconnected, which used to leave the UI stuck in Disconnecting.
+    m_vpnProtocol->disconnect(this);
+#endif
+
     m_vpnProtocol->stop();
 
 #if !defined(Q_OS_ANDROID) && !defined(AMNEZIA_DESKTOP)
@@ -607,13 +780,22 @@ void VpnConnection::disconnectFromVpn()
 #endif
 
     m_vpnProtocol = nullptr;
+
+#ifdef AMNEZIA_DESKTOP
+    setConnectionState(Vpn::ConnectionState::Disconnected);
+#endif
 }
 
 void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
     onConnectionStateChanged(state);
 
+#ifndef AMNEZIA_DESKTOP
+    // On desktop the reconnect machine decides which protocol events are
+    // propagated (see onProtocolConnectionStateChanged); on mobile keep the
+    // historical behavior of hiding the stop() blip during a reconnect.
     if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
         return;
+#endif
 
     m_connectionState = state;
     emit connectionStateChanged(state);
