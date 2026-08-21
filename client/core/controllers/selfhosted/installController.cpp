@@ -502,35 +502,6 @@ ErrorCode InstallController::validateAndPrepareConfig(const QString &serverId)
         return ErrorCode::NoInstalledContainersError;
     }
 
-    if (kind == serverConfigUtils::ConfigType::SelfHostedAdmin && container == DockerContainer::Xray) {
-        auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
-        if (!adminConfig.has_value()) {
-            return ErrorCode::InternalError;
-        }
-        ServerCredentials credentials = adminConfig->credentials();
-        if (credentials.isValid()) {
-            SshSession sshSession;
-            const XrayBinaryProbeResult probe = probeXrayServerBinary(credentials, sshSession);
-            if (probe == XrayBinaryProbeResult::Mismatch) {
-                m_xrayConnectUpgradeStarted.store(true);
-                emit xrayServerUpgradeStarted(static_cast<int>(container));
-                const ErrorCode recreateError = setupContainer(credentials, container, containerConfig, true);
-                if (recreateError != ErrorCode::NoError) {
-                    logger.error() << "Xray version probe: source=connect recreate failed, error="
-                                   << static_cast<int>(recreateError);
-                    m_xrayConnectUpgradeStarted.store(false);
-                    return recreateError;
-                }
-                if (probeXrayServerBinary(credentials, sshSession) != XrayBinaryProbeResult::Match) {
-                    logger.error() << "Xray version probe: source=connect still mismatched after recreate";
-                }
-                adminConfig->updateContainerConfig(container, containerConfig);
-                m_serversRepository->editServer(serverId, adminConfig->toJson(),
-                                                serverConfigUtils::ConfigType::SelfHostedAdmin);
-            }
-        }
-    }
-
     if (containerConfig.protocolConfig.hasClientConfig()) {
         return ErrorCode::NoError;
     }
@@ -574,14 +545,9 @@ void InstallController::validateConfig(const QString &serverId)
         watcher->deleteLater();
 
         if (errorCode == ErrorCode::NoError) {
-            if (m_xrayConnectUpgradeStarted.exchange(false)) {
-                emit xrayServerUpgradeFinished();
-            }
             emit configValidated(true);
             return;
         }
-
-        m_xrayConnectUpgradeStarted.store(false);
 
         emit validationErrorOccurred(errorCode);
         emit configValidated(false);
