@@ -10,6 +10,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QMetaEnum>
+#include <QSet>
 #include <QTimer>
 
 #include "leakdetector.h"
@@ -132,9 +133,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   }
 
   // Configure routing for excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRoutes(config.m_excludedAddresses);
 
   // Add the peer to this interface.
   if (!wgutils()->updatePeer(config)) {
@@ -209,16 +208,33 @@ bool Daemon::parseStringList(const QJsonObject& obj, const QString& name,
   return true;
 }
 
-bool Daemon::addExclusionRoute(const IPAddress& prefix) {
-  if (m_excludedAddrSet.contains(prefix)) {
-    m_excludedAddrSet[prefix]++;
-    return true;
+bool Daemon::addExclusionRoutes(const QStringList& addresses) {
+  QHash<IPAddress, int> newPrefixes;
+  for (const QString& address : addresses) {
+    IPAddress prefix(address);
+    auto iterator = m_excludedAddrSet.find(prefix);
+    if (iterator != m_excludedAddrSet.end()) {
+      iterator.value()++;
+    } else {
+      newPrefixes[prefix]++;
+    }
   }
-  if (!wgutils()->addExclusionRoute(prefix)) {
-    return false;
+
+  const QList<IPAddress> addedPrefixes =
+      wgutils()->addExclusionRoutes(newPrefixes.keys());
+  const QSet<IPAddress> addedPrefixSet(addedPrefixes.begin(),
+                                      addedPrefixes.end());
+
+  bool result = true;
+  for (auto iterator = newPrefixes.constBegin();
+       iterator != newPrefixes.constEnd(); ++iterator) {
+    if (addedPrefixSet.contains(iterator.key())) {
+      m_excludedAddrSet[iterator.key()] = iterator.value();
+    } else {
+      result = false;
+    }
   }
-  m_excludedAddrSet[prefix] = 1;
-  return true;
+  return result;
 }
 
 bool Daemon::delExclusionRoute(const IPAddress& prefix) {
@@ -546,9 +562,7 @@ bool Daemon::switchServer(const InterfaceConfig& config) {
       m_connections.value(config.m_hopType).m_config;
 
   // Configure routing for new excluded addresses.
-  for (const QString& i : config.m_excludedAddresses) {
-    addExclusionRoute(IPAddress(i));
-  }
+  addExclusionRoutes(config.m_excludedAddresses);
 
   // Activate the new peer and its routes.
   if (!wgutils()->updatePeer(config)) {
