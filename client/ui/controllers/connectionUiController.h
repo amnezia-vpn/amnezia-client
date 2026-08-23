@@ -44,7 +44,6 @@ public slots:
 
 signals:
     void connectionStateChanged();
-    void systemWoke();
 
     void connectionErrorOccurred(ErrorCode errorCode);
 

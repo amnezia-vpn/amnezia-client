@@ -35,6 +35,11 @@ void VpnProtocol::setLastError(ErrorCode lastError)
     qCritical().noquote() << "VpnProtocol error, code" << m_lastError << errorString(m_lastError);
 }
 
+void VpnProtocol::recordLastError(ErrorCode lastError)
+{
+    m_lastError = lastError;
+}
+
 ErrorCode VpnProtocol::lastError() const
 {
     return m_lastError;
