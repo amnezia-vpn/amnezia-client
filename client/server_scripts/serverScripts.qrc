@@ -33,6 +33,10 @@
         <file>telemt/Dockerfile</file>
         <file>telemt/run_container.sh</file>
         <file>telemt/start.sh</file>
+        <file>tproxy/configure_container.sh</file>
+        <file>tproxy/Dockerfile</file>
+        <file>tproxy/run_container.sh</file>
+        <file>tproxy/start.sh</file>
         <file>openvpn/configure_container.sh</file>
         <file>openvpn/Dockerfile</file>
         <file>openvpn/run_container.sh</file>

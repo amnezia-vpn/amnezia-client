@@ -21,6 +21,7 @@
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/mtProxyProtocolConfig.h"
 #include "core/models/protocols/telemtProtocolConfig.h"
+#include "core/models/protocols/tProxyProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -41,6 +42,7 @@ QString amnezia::scriptFolder(amnezia::DockerContainer container)
     case DockerContainer::Socks5Proxy: return QLatin1String("socks5_proxy");
     case DockerContainer::MtProxy: return QLatin1String("mtproxy");
     case DockerContainer::Telemt: return QLatin1String("telemt");
+    case DockerContainer::TProxy: return QLatin1String("tproxy");
     default: return QString();
     }
 }
@@ -402,6 +404,43 @@ amnezia::ScriptVars amnezia::genTelemtVars(const ContainerConfig &containerConfi
     return vars;
 }
 
+amnezia::ScriptVars amnezia::genTProxyVars(const ContainerConfig &containerConfig)
+{
+    ScriptVars vars;
+
+    if (auto *tProxyConfig = containerConfig.getTProxyProtocolConfig()) {
+        const TProxyProtocolConfig &c = *tProxyConfig;
+        vars.append({{"$TPROXY_SECRET", c.secret}});
+        vars.append({{"$TPROXY_REGENERATE_SECRET",
+                      c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0")}});
+        vars.append({{"$TPROXY_HOSTNAME", c.hostname}});
+        vars.append({{"$TPROXY_ACME_EMAIL", c.acmeEmail}});
+        vars.append({{"$TPROXY_HTTPS_PORT",
+                      c.port.isEmpty() ? QString(protocols::tProxy::defaultPort) : c.port}});
+        vars.append({{"$TPROXY_HTTP_PORT",
+                      c.httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : c.httpPort}});
+        vars.append({{"$TPROXY_CARRIER_MODE",
+                      c.carrierMode.isEmpty() ? QString(protocols::tProxy::carrierModeHttps) : c.carrierMode}});
+        vars.append({{"$TPROXY_WORKERS",
+                      c.workers.isEmpty() ? QString(protocols::tProxy::defaultWorkers) : c.workers}});
+        qDebug().noquote() << "genTProxyVars"
+                           << "hostname=" << c.hostname
+                           << "email=" << c.acmeEmail
+                           << "httpsPort="
+                           << (c.port.isEmpty() ? QString(protocols::tProxy::defaultPort) : c.port)
+                           << "httpPort="
+                           << (c.httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : c.httpPort)
+                           << "carrier="
+                           << (c.carrierMode.isEmpty() ? QString(protocols::tProxy::carrierModeHttps) : c.carrierMode)
+                           << "workers="
+                           << (c.workers.isEmpty() ? QString(protocols::tProxy::defaultWorkers) : c.workers)
+                           << "regenerateSecret=" << (c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0"))
+                           << "secretLen=" << c.secret.length();
+    }
+
+    return vars;
+}
+
 amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer container, const ContainerConfig &containerConfig)
 {
     ScriptVars vars;
@@ -431,6 +470,9 @@ amnezia::ScriptVars amnezia::genProtocolVarsForContainer(DockerContainer contain
         break;
     case Proto::Telemt:
         vars.append(genTelemtVars(containerConfig));
+        break;
+    case Proto::TProxy:
+        vars.append(genTProxyVars(containerConfig));
         break;
     default:
         break;
