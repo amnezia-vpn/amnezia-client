@@ -77,11 +77,6 @@ void LocalSocketController::errorOccurred(
 
   qCritical() << "ControllerError";
 
-  // The socket to the daemon is gone (daemon restart/crash or a failed
-  // connection attempt). Unlike a plain tunnel-down message we cannot talk to
-  // the daemon anymore, so remember that and let the next activate()/
-  // deactivate() re-establish the connection instead of writing into a dead
-  // socket forever.
   m_daemonState = eDisconnected;
   m_initializingRetry = 0;
   m_initializingTimer.stop();
@@ -132,10 +127,6 @@ void LocalSocketController::daemonConnected() {
 }
 
 bool LocalSocketController::isSocketAlive() const {
-  // ConnectingState counts as alive: on a fresh protocol activate() runs
-  // right after initialize(), before the connection (and the status
-  // handshake) completes — writes are buffered by the socket, and the daemon
-  // processes them once the connection is established.
   const QLocalSocket::LocalSocketState state = m_socket->state();
   return state == QLocalSocket::ConnectedState ||
          state == QLocalSocket::ConnectingState;

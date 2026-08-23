@@ -38,14 +38,9 @@ using namespace ProtocolUtils;
 
 #ifdef AMNEZIA_DESKTOP
 namespace {
-// A reconnect attempt that has not reached Connected within this time is
-// considered failed and is retried (some failures — e.g. a daemon-side
-// activation error — produce no client-visible event at all).
 constexpr int RECONNECT_ATTEMPT_TIMEOUT_MSEC = 30 * 1000;
 constexpr int RECONNECT_RETRY_BASE_MSEC = 1000;
 constexpr int RECONNECT_RETRY_MAX_MSEC = 60 * 1000;
-// A fresh trigger does not restart an attempt younger than this: such an
-// attempt was started under (almost) the same network conditions anyway.
 constexpr int RECONNECT_ATTEMPT_MIN_AGE_MSEC = 1000;
 }
 #endif
@@ -405,8 +400,6 @@ void VpnConnection::createProtocolConnections()
 
 #ifdef AMNEZIA_DESKTOP
     IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> rep) {
-        // The replica is thread-local and long-lived while this method runs on
-        // every connect — UniqueConnection keeps these from piling up.
         const auto queuedUnique = static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection);
         connect(rep.data(), &IpcInterfaceReplica::networkChanged, this, &VpnConnection::onIpcNetworkChanged, queuedUnique);
         connect(rep.data(), &IpcInterfaceReplica::wakeup, this, &VpnConnection::onIpcWakeup, queuedUnique);
@@ -593,20 +586,6 @@ void VpnConnection::requestReconnect(const QString &trigger)
         return;
 
     if (m_reconnectActive) {
-        // Conditions changed (e.g. the network actually came back after
-        // wakeup) — restart the backoff sequence and try again right away.
-        // An in-flight attempt that was started before this trigger is likely
-        // doomed (it raced the network coming up), so restart it too instead
-        // of waiting out its watchdog; a just-started attempt is left alone.
-        //
-        // The age check applies regardless of whether the last attempt is
-        // still in flight or has already failed and is waiting on the retry
-        // timer: a failing attempt can complete in milliseconds (e.g. no
-        // gateway yet), and NetworkManager can keep emitting networkChanged/
-        // wakeup in a burst while it settles after wakeup. Gating only on
-        // "in flight" let every such trigger cancel the backoff timer and
-        // restart immediately, turning the intended 1s/2s/4s.. backoff into a
-        // tight retry loop for as long as the network kept flapping.
         if (m_reconnectAttemptAge.isValid()
             && m_reconnectAttemptAge.elapsed() < RECONNECT_ATTEMPT_MIN_AGE_MSEC) {
             qDebug() << "Reconnect: new trigger" << trigger << "ignored, last attempt started too recently";
@@ -652,9 +631,6 @@ void VpnConnection::startReconnectAttempt()
     qDebug() << "Reconnect: attempt" << m_reconnectAttempt;
     m_reconnectAttemptAge.start();
 
-    // stop() may synchronously emit Disconnected; while the machine is active
-    // (and no attempt is in flight yet) onProtocolConnectionStateChanged
-    // suppresses it so the UI stays in Reconnecting.
     m_vpnProtocol->setKeepFirewallOnNextStop(true);
     m_vpnProtocol->stop();
 
@@ -665,8 +641,6 @@ void VpnConnection::startReconnectAttempt()
         return;
     }
 
-    // start() may have failed synchronously through a protocol event, in which
-    // case the retry is already scheduled and the watchdog must stay off.
     if (m_reconnectAttemptInFlight) {
         m_reconnectWatchdogTimer.start(RECONNECT_ATTEMPT_TIMEOUT_MSEC);
     }
@@ -704,8 +678,6 @@ void VpnConnection::cancelReconnect()
 
 int VpnConnection::reconnectRetryDelayMsec() const
 {
-    // 1s, 2s, 4s, ... capped at RECONNECT_RETRY_MAX_MSEC; a fresh trigger
-    // resets m_reconnectAttempt and thus the sequence.
     const int exponent = qMin(m_reconnectAttempt > 0 ? m_reconnectAttempt - 1 : 0, 6);
     return qMin(RECONNECT_RETRY_BASE_MSEC << exponent, RECONNECT_RETRY_MAX_MSEC);
 }
@@ -774,9 +746,6 @@ void VpnConnection::disconnectFromVpn()
 #endif
 
 #ifdef AMNEZIA_DESKTOP
-    // Drive the final state ourselves: a protocol that is already internally
-    // Disconnected (e.g. after failed reconnect attempts) will not emit
-    // another Disconnected, which used to leave the UI stuck in Disconnecting.
     m_vpnProtocol->disconnect(this);
 #endif
 
@@ -797,9 +766,6 @@ void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
     onConnectionStateChanged(state);
 
 #ifndef AMNEZIA_DESKTOP
-    // On desktop the reconnect machine decides which protocol events are
-    // propagated (see onProtocolConnectionStateChanged); on mobile keep the
-    // historical behavior of hiding the stop() blip during a reconnect.
     if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
         return;
 #endif

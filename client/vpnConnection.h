@@ -107,10 +107,6 @@ private:
    void appendKillSwitchConfig();
 
 #ifdef AMNEZIA_DESKTOP
-   // Auto-reconnect state machine (wakeup / network change). While it is
-   // active the UI is held in the Reconnecting state and stop()/start()
-   // attempts are retried with backoff until the protocol reports Connected
-   // or the user cancels via connect/disconnect.
    void requestReconnect(const QString &trigger);
    void scheduleReconnectRetry();
    void cancelReconnect();
