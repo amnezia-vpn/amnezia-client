@@ -159,9 +159,13 @@ ErrorCode MtProxyInstaller::queryDiagnostics(SshSession &sshSession, const Serve
                                              MtProxyContainerDiagnostics &out)
 {
     out = { };
-    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+            || container == DockerContainer::TProxy) {
         const QString containerName = ContainerUtils::containerToString(container);
         const bool isTelemt = container == DockerContainer::Telemt;
+        const QString confFile = isTelemt ? QStringLiteral("/data/config.toml")
+                : (container == DockerContainer::TProxy ? QStringLiteral("/data/config.json")
+                                                        : QStringLiteral("/data/proxy-multi.conf"));
 
         const QString sportFilter = QString::number(listenPort);
         const QString peersCmd = QStringLiteral("sudo conntrack -L -p tcp --dport ") + sportFilter
@@ -172,8 +176,6 @@ ErrorCode MtProxyInstaller::queryDiagnostics(SshSession &sshSession, const Serve
                                                     "01])\\.|::1$|fe80:|f[cd][0-9a-f][0-9a-f]:)'");
         const QString clientsCmd =
                 QStringLiteral("CLIENTS=$(") + peersCmd + publicFilter + QStringLiteral(" | sort -u | grep -c .); ");
-        const QString confFile =
-                isTelemt ? QStringLiteral("/data/config.toml") : QStringLiteral("/data/proxy-multi.conf");
         const QString statsUrl = QString();
 
         const QString script = QStringLiteral("CN=") + containerName + QStringLiteral("; ")

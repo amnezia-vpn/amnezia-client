@@ -28,6 +28,7 @@ namespace amnezia
             Socks5Proxy,
             MtProxy,
             Telemt,
+            TProxy,
         };
         Q_ENUM_NS(DockerContainer)
     } // namespace ContainerEnumNS
