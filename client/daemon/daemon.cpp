@@ -468,7 +468,7 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   return true;
 }
 
-bool Daemon::deactivate(bool emitSignals) {
+bool Daemon::deactivate(bool emitSignals, bool keepFirewall) {
   Q_ASSERT(wgutils() != nullptr);
 
   // Deactivate the main interface.
@@ -507,7 +507,7 @@ bool Daemon::deactivate(bool emitSignals) {
 
   m_connections.clear();
   // Delete the interface
-  return wgutils()->deleteInterface();
+  return wgutils()->deleteInterface(keepFirewall);
 }
 
 QString Daemon::logs() {

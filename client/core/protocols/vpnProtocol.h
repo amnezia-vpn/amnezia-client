@@ -72,6 +72,8 @@ public:
 
     static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
 
+    void setKeepFirewallOnNextStop(bool keep) { m_keepFirewallOnStop = keep; }
+
 signals:
     void bytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void connectionStateChanged(Vpn::ConnectionState state);
@@ -93,6 +95,12 @@ protected:
     // state, unlike setLastError().
     void recordLastError(ErrorCode lastError);
 
+    bool takeKeepFirewallOnNextStop() {
+        bool keep = m_keepFirewallOnStop;
+        m_keepFirewallOnStop = false;
+        return keep;
+    }
+
     Vpn::ConnectionState m_connectionState;
 
     QString m_routeGateway;
@@ -104,6 +112,7 @@ protected:
 private:
     QTimer* m_timeoutTimer;
     ErrorCode m_lastError = ErrorCode::NoError;
+    bool m_keepFirewallOnStop = false;
     quint64 m_receivedBytes;
     quint64 m_sentBytes;
 };

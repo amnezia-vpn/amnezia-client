@@ -35,7 +35,7 @@ class WireguardUtils : public QObject {
   virtual bool interfaceExists() = 0;
   virtual QString interfaceName() { return WG_INTERFACE; }
   virtual bool addInterface(const InterfaceConfig& config) = 0;
-  virtual bool deleteInterface() = 0;
+  virtual bool deleteInterface(bool keepFirewall = false) = 0;
 
   virtual bool updatePeer(const InterfaceConfig& config) = 0;
   virtual bool deletePeer(const InterfaceConfig& config) = 0;

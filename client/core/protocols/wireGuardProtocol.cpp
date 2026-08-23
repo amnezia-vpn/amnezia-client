@@ -55,7 +55,7 @@ void WireguardProtocol::stop()
         return;
     }
     m_stopped = true;
-    stopMzImpl();
+    stopMzImpl(takeKeepFirewallOnNextStop());
     return;
 }
 
@@ -87,9 +87,9 @@ ErrorCode WireguardProtocol::startMzImpl()
     return ErrorCode::NoError;
 }
 
-ErrorCode WireguardProtocol::stopMzImpl()
+ErrorCode WireguardProtocol::stopMzImpl(bool keepFirewall)
 {
-    m_impl->deactivate();
+    m_impl->deactivate(keepFirewall);
     return ErrorCode::NoError;
 }
 

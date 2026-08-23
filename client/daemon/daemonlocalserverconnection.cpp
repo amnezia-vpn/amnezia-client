@@ -119,7 +119,7 @@ void DaemonLocalServerConnection::parseCommand(const QByteArray& data) {
   }
 
   if (type == "deactivate") {
-    Daemon::instance()->deactivate(true);
+    Daemon::instance()->deactivate(true, obj.value("keepFirewall").toBool(false));
     return;
   }
 

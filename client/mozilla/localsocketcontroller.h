@@ -26,7 +26,7 @@ class LocalSocketController final : public ControllerImpl {
 
   void activate(const QJsonObject& rawConfig) override;
 
-  void deactivate() override;
+  void deactivate(bool keepFirewall = false) override;
 
   void checkStatus() override;
 

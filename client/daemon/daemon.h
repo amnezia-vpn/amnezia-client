@@ -33,7 +33,7 @@ class Daemon : public QObject {
   static bool parseConfig(const QJsonObject& obj, InterfaceConfig& config);
 
   virtual bool activate(const InterfaceConfig& config);
-  virtual bool deactivate(bool emitSignals = true);
+  virtual bool deactivate(bool emitSignals = true, bool keepFirewall = false);
   virtual QJsonObject getStatus();
 
   // Callback before any Activating measure is done

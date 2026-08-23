@@ -655,6 +655,7 @@ void VpnConnection::startReconnectAttempt()
     // stop() may synchronously emit Disconnected; while the machine is active
     // (and no attempt is in flight yet) onProtocolConnectionStateChanged
     // suppresses it so the UI stays in Reconnecting.
+    m_vpnProtocol->setKeepFirewallOnNextStop(true);
     m_vpnProtocol->stop();
 
     m_reconnectAttemptInFlight = true;

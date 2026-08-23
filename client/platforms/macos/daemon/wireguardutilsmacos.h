@@ -24,7 +24,7 @@ class WireguardUtilsMacos final : public WireguardUtils {
   }
   QString interfaceName() override { return m_ifname; }
   bool addInterface(const InterfaceConfig& config) override;
-  bool deleteInterface() override;
+  bool deleteInterface(bool keepFirewall = false) override;
 
   bool updatePeer(const InterfaceConfig& config) override;
   bool deletePeer(const InterfaceConfig& config) override;

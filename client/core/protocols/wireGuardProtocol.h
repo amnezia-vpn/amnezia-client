@@ -23,7 +23,7 @@ public:
     void stop() override;
 
     ErrorCode startMzImpl();
-    ErrorCode stopMzImpl();
+    ErrorCode stopMzImpl(bool keepFirewall);
 
 private:
 

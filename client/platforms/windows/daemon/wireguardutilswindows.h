@@ -32,7 +32,7 @@ class WireguardUtilsWindows final : public WireguardUtils {
   }
   static const QString s_interfaceName() { return "AmneziaVPN"; }
   bool addInterface(const InterfaceConfig& config) override;
-  bool deleteInterface() override;
+  bool deleteInterface(bool keepFirewall = false) override;
 
   bool updatePeer(const InterfaceConfig& config) override;
   bool deletePeer(const InterfaceConfig& config) override;

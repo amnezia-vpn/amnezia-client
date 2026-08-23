@@ -197,7 +197,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   return (err == 0);
 }
 
-bool WireguardUtilsMacos::deleteInterface() {
+bool WireguardUtilsMacos::deleteInterface(bool keepFirewall) {
   if (m_rtmonitor) {
     delete m_rtmonitor;
     m_rtmonitor = nullptr;
@@ -219,7 +219,9 @@ bool WireguardUtilsMacos::deleteInterface() {
   QFile::remove(wgRuntimeDir.filePath(QString(WG_INTERFACE) + ".name"));
 
   // double-check + ensure our firewall is installed and enabled
-  KillSwitch::instance()->disableKillSwitch();
+  if (!keepFirewall) {
+      KillSwitch::instance()->disableKillSwitch();
+  }
 
   return true;
 }

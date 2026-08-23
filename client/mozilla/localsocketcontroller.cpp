@@ -304,7 +304,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   write(json);
 }
 
-void LocalSocketController::deactivate() {
+void LocalSocketController::deactivate(bool keepFirewall) {
   logger.debug() << "Deactivating";
 
   if (m_daemonState != eReady || !isSocketAlive()) {
@@ -316,6 +316,7 @@ void LocalSocketController::deactivate() {
 
   QJsonObject json;
   json.insert("type", "deactivate");
+  json.insert("keepFirewall", keepFirewall);
   write(json);
   emit disconnected();
 }
