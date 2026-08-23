@@ -598,9 +598,18 @@ void VpnConnection::requestReconnect(const QString &trigger)
         // An in-flight attempt that was started before this trigger is likely
         // doomed (it raced the network coming up), so restart it too instead
         // of waiting out its watchdog; a just-started attempt is left alone.
-        if (m_reconnectAttemptInFlight && m_reconnectAttemptAge.isValid()
+        //
+        // The age check applies regardless of whether the last attempt is
+        // still in flight or has already failed and is waiting on the retry
+        // timer: a failing attempt can complete in milliseconds (e.g. no
+        // gateway yet), and NetworkManager can keep emitting networkChanged/
+        // wakeup in a burst while it settles after wakeup. Gating only on
+        // "in flight" let every such trigger cancel the backoff timer and
+        // restart immediately, turning the intended 1s/2s/4s.. backoff into a
+        // tight retry loop for as long as the network kept flapping.
+        if (m_reconnectAttemptAge.isValid()
             && m_reconnectAttemptAge.elapsed() < RECONNECT_ATTEMPT_MIN_AGE_MSEC) {
-            qDebug() << "Reconnect: new trigger" << trigger << "ignored, current attempt has just started";
+            qDebug() << "Reconnect: new trigger" << trigger << "ignored, last attempt started too recently";
             m_reconnectAttempt = 0;
             return;
         }
