@@ -46,10 +46,16 @@ class Libagw(ConanFile):
     def _is_windows(self):
         return str(self.settings.os).startswith("Windows")
 
+    @property
+    def _is_android(self):
+        return str(self.settings.os) == "Android"
+
     def config_options(self):
-        # MSVC cannot link a Go c-archive (LNK1223: the gcc-generated .pdata
-        # contributions are rejected), so Windows gets a DLL plus an import lib.
-        self.package_type = "shared-library" if self._is_windows else "static-library"
+        # Windows: MSVC cannot link a Go c-archive (LNK1223 — it rejects the
+        # gcc-generated .pdata contributions), so it gets a DLL plus an import lib.
+        # Android: go has no c-archive buildmode there at all.
+        shared = self._is_windows or self._is_android
+        self.package_type = "shared-library" if shared else "static-library"
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -100,13 +106,15 @@ class Libagw(ConanFile):
         self._cflags = tc.cflags
         tc.generate(env)
 
-    def _go_build(self, output, buildmode, goarch, cflags, ldflags):
+    def _go_build(self, output, buildmode, goarch, cflags, ldflags, goldflags=""):
         env = Environment()
         env.define("GOARCH", goarch)
         env.define("CGO_CFLAGS", " ".join(cflags))
         env.define("CGO_LDFLAGS", " ".join(ldflags))
+        go_ldflags = " ".join(filter(None, ["-s -w", goldflags]))
         with env.vars(self).apply():
-            self.run(f'go build -buildmode={buildmode} -ldflags="-s -w" -o {shlex.quote(output)} ./archive')
+            self.run(f'go build -buildmode={buildmode} -ldflags="{go_ldflags}" '
+                     f'-o {shlex.quote(output)} ./archive')
 
     def build(self):
         with chdir(self, self.source_folder):
@@ -130,6 +138,11 @@ class Libagw(ConanFile):
                     with chdir(self, build_dir):
                         self.run("gendef agw.dll")
                         self.run("dlltool -d agw.def -l agw.lib -D agw.dll")
+                elif self._is_android:
+                    # Without an explicit soname the DT_NEEDED entry picks up the
+                    # full build path, which does not exist on the device.
+                    self._go_build(os.path.join(build_dir, "libagw.so"), "c-shared", goarch, cflags, ldflags,
+                                   goldflags="-extldflags=-Wl,-soname,libagw.so")
                 else:
                     self._go_build(os.path.join(build_dir, "libagw.a"), "c-archive", goarch, cflags, ldflags)
 
@@ -149,6 +162,7 @@ class Libagw(ConanFile):
         copy(self, "agw_types.h", src=headers, dst=os.path.join(self.package_folder, "include"), keep_path=False)
         copy(self, "libagw.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
              keep_path=False, excludes=["slices/*"])
+        copy(self, "libagw.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "agw.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "agw.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
@@ -158,7 +172,11 @@ class Libagw(ConanFile):
         if is_apple_os(self):
             # Go's crypto/x509 reads the system trust store.
             self.cpp_info.frameworks = ["CoreFoundation", "Security"]
-        elif str(self.settings.os) == "Android":
+        elif self._is_android:
             self.cpp_info.system_libs = ["log"]
+            # androiddeployqt only packs shared libraries it is told about.
+            self.cpp_info.set_property("cmake_extra_variables", {
+                "LIBAGW_LIBRARY_PATH": os.path.join(self.package_folder, "lib", "libagw.so")
+            })
         elif str(self.settings.os) == "Linux":
             self.cpp_info.system_libs = ["pthread"]
