@@ -423,19 +423,6 @@ amnezia::ScriptVars amnezia::genTProxyVars(const ContainerConfig &containerConfi
                       c.carrierMode.isEmpty() ? QString(protocols::tProxy::carrierModeHttps) : c.carrierMode}});
         vars.append({{"$TPROXY_WORKERS",
                       c.workers.isEmpty() ? QString(protocols::tProxy::defaultWorkers) : c.workers}});
-        qDebug().noquote() << "genTProxyVars"
-                           << "hostname=" << c.hostname
-                           << "email=" << c.acmeEmail
-                           << "httpsPort="
-                           << (c.port.isEmpty() ? QString(protocols::tProxy::defaultPort) : c.port)
-                           << "httpPort="
-                           << (c.httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : c.httpPort)
-                           << "carrier="
-                           << (c.carrierMode.isEmpty() ? QString(protocols::tProxy::carrierModeHttps) : c.carrierMode)
-                           << "workers="
-                           << (c.workers.isEmpty() ? QString(protocols::tProxy::defaultWorkers) : c.workers)
-                           << "regenerateSecret=" << (c.secret.isEmpty() ? QStringLiteral("1") : QStringLiteral("0"))
-                           << "secretLen=" << c.secret.length();
     }
 
     return vars;

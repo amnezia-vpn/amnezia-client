@@ -1,27 +1,15 @@
 #!/bin/sh
 
-echo "[*] Amnezia TProxy: configure script start"
-echo "[*] TPROXY_HOSTNAME=${TPROXY_HOSTNAME:-}"
-echo "[*] TPROXY_ACME_EMAIL=${TPROXY_ACME_EMAIL:-}"
-echo "[*] TPROXY_HTTPS_PORT=${TPROXY_HTTPS_PORT:-}"
-echo "[*] TPROXY_HTTP_PORT=${TPROXY_HTTP_PORT:-}"
-echo "[*] TPROXY_CARRIER_MODE=${TPROXY_CARRIER_MODE:-}"
-echo "[*] TPROXY_WORKERS=${TPROXY_WORKERS:-}"
-echo "[*] TPROXY_REGENERATE_SECRET=${TPROXY_REGENERATE_SECRET:-0}"
 mkdir -p /data/site /data/caddy
 
 if [ "$TPROXY_REGENERATE_SECRET" = "1" ]; then
     SECRET=$(openssl rand -hex 16)
-    echo "[*] Secret source: regenerate (fresh install)"
 elif [ -n "$TPROXY_SECRET" ]; then
     SECRET="$TPROXY_SECRET"
-    echo "[*] Secret source: TPROXY_SECRET env"
 elif [ -f /data/secret ]; then
     SECRET=$(cat /data/secret)
-    echo "[*] Secret source: /data/secret file"
 else
     SECRET=$(openssl rand -hex 16)
-    echo "[*] Secret source: new random"
 fi
 echo "$SECRET" | grep -qE '^[0-9a-fA-F]{32}$' || SECRET=$(openssl rand -hex 16)
 
@@ -101,26 +89,15 @@ EOF
 chmod 0400 /data/profiles.json
 
 curl -s --max-time 15 https://core.telegram.org/getProxySecret -o /data/proxy-secret
-if [ -s /data/proxy-secret ]; then
-    echo "[*] proxy-secret downloaded ($(wc -c < /data/proxy-secret | tr -d ' ') bytes)"
-else
+if [ ! -s /data/proxy-secret ]; then
     echo "[!] WARNING: proxy-secret download failed or empty"
 fi
 curl -s --max-time 15 https://core.telegram.org/getProxyConfig -o /data/proxy-multi.conf
-if [ -s /data/proxy-multi.conf ]; then
-    echo "[*] proxy-multi.conf downloaded ($(wc -c < /data/proxy-multi.conf | tr -d ' ') bytes)"
-else
+if [ ! -s /data/proxy-multi.conf ]; then
     echo "[!] WARNING: proxy-multi.conf download failed or empty"
 fi
 
-echo "[*] HTTP port:  ${HTTP_PORT} (host) -> 80 (container)"
-echo "[*] HTTPS port: ${HTTPS_PORT} (host) -> 443 (container)"
-echo "[*] Carrier:    ${CARRIER}"
-echo "[*] Workers:    ${WORKERS}"
-echo "[*] Site id:    ${SITE_ID}"
-
 if [ -n "$EMAIL" ] && [ -n "$HOST" ]; then
-    echo "[*] Caddy: ACME TLS for ${HOST}"
     cat > /data/Caddyfile << EOF
 {
 	email $EMAIL
@@ -147,7 +124,6 @@ $HOST {
 }
 EOF
 else
-    echo "[*] Caddy: HTTP-only fallback on container :80 (no ACME block)"
     cat > /data/Caddyfile << EOF
 {
 	auto_https off
@@ -159,7 +135,6 @@ else
 EOF
 fi
 
-echo "[*] TProxy configuration"
 echo "[*] Secret:    $SECRET"
 echo "[*] Hostname:  $HOST"
 if [ -n "$HOST" ]; then

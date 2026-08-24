@@ -89,14 +89,8 @@ InstallUiController::~InstallUiController()
 void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, const QString &serverId)
 {
     if (container == DockerContainer::TProxy && m_tProxyConfigModel) {
-        const QString hostname = m_tProxyConfigModel->getHostname();
-        const QString email = m_tProxyConfigModel->getAcmeEmail();
-        qDebug().noquote() << "InstallUiController::install TProxy"
-                           << "hostname=" << hostname
-                           << "email=" << email
-                           << "httpsPort=" << m_tProxyConfigModel->getPort()
-                           << "httpPort=" << m_tProxyConfigModel->getHttpPort();
-        m_installController->setTProxyInstallHints(hostname, email);
+        m_installController->setTProxyInstallHints(m_tProxyConfigModel->getHostname(),
+                                                   m_tProxyConfigModel->getAcmeEmail());
     }
 
     const bool isNewServer = serverId.isEmpty();
@@ -273,11 +267,6 @@ bool InstallUiController::buildContainerConfigFromModel(int containerIndex, int 
     }
     case Proto::TProxy: {
         containerConfig.protocolConfig = m_tProxyConfigModel->getProtocolConfig();
-        qDebug().noquote() << "InstallUiController::buildContainerConfigFromModel TProxy"
-                           << "hostname=" << m_tProxyConfigModel->getHostname()
-                           << "email=" << m_tProxyConfigModel->getAcmeEmail()
-                           << "httpsPort=" << m_tProxyConfigModel->getPort()
-                           << "httpPort=" << m_tProxyConfigModel->getHttpPort();
         break;
     }
 #ifdef Q_OS_WINDOWS
@@ -333,14 +322,6 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     if (asyncUpdate) {
         const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
                 || container == DockerContainer::TProxy;
-        if (container == DockerContainer::TProxy) {
-            if (const auto *tc = containerConfig.getTProxyProtocolConfig()) {
-                qDebug().noquote() << "InstallUiController::updateServerConfig TProxy async"
-                                   << "hostname=" << tc->hostname
-                                   << "httpsPort=" << containerConfig.protocolConfig.port()
-                                   << "httpPort=" << tc->httpPort;
-            }
-        }
         if (emitBusy)
             emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);

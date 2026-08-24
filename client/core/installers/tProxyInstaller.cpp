@@ -10,7 +10,6 @@
 #include <QJsonObject>
 #include <QJsonParseError>
 #include <QRegularExpression>
-#include <QDebug>
 
 #include <QtGlobal>
 
@@ -51,10 +50,6 @@ void TProxyInstaller::applyDockerPublishedPorts(const QString &dockerPsPortsLine
     if (httpMatch.hasMatch()) {
         config.httpPort = httpMatch.captured(1);
     }
-    qDebug().noquote() << "TProxyInstaller::applyDockerPublishedPorts"
-                       << "line=" << dockerPsPortsLine.trimmed()
-                       << "httpPort=" << config.httpPort
-                       << "httpsPort=" << config.port;
 }
 
 TProxyInstaller::TProxyInstaller(QObject *parent) : InstallerBase(parent) {}
@@ -66,19 +61,14 @@ ErrorCode TProxyInstaller::extractConfigFromContainer(DockerContainer container,
         return ErrorCode::NoError;
     }
 
-    qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer start";
-
     TProxyProtocolConfig *tc = config.getTProxyProtocolConfig();
     if (!tc) {
-        qDebug() << "TProxyInstaller::extractConfigFromContainer no TProxyProtocolConfig in config";
         return ErrorCode::NoError;
     }
 
     ErrorCode jsonErr = ErrorCode::NoError;
     const QByteArray jsonRaw =
             sshSession->getTextFileFromContainer(container, credentials, QString(kTProxyClientJsonPath), jsonErr);
-    qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer client json"
-                       << "err=" << jsonErr << "bytes=" << jsonRaw.size();
     if (jsonErr == ErrorCode::NoError && !jsonRaw.trimmed().isEmpty()) {
         QJsonParseError parseError;
         const QJsonDocument doc = QJsonDocument::fromJson(jsonRaw.trimmed(), &parseError);
@@ -89,11 +79,6 @@ ErrorCode TProxyInstaller::extractConfigFromContainer(DockerContainer container,
                 merged.insert(it.key(), it.value());
             }
             *tc = TProxyProtocolConfig::fromJson(merged);
-            qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer merged client json keys"
-                               << snap.keys();
-        } else {
-            qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer client json parse failed"
-                               << parseError.errorString();
         }
     }
 
@@ -101,21 +86,14 @@ ErrorCode TProxyInstaller::extractConfigFromContainer(DockerContainer container,
     ErrorCode secretErr = ErrorCode::NoError;
     const QByteArray secretRaw =
             sshSession->getTextFileFromContainer(container, credentials, QString(kTProxySecretPath), secretErr);
-    qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer secret file"
-                       << "err=" << secretErr << "bytes=" << secretRaw.size();
     const QString sec = QString::fromUtf8(secretRaw).trimmed();
     if (sec.length() == 32 && hex32.match(sec).hasMatch()) {
         tc->secret = sec;
-        qDebug() << "TProxyInstaller::extractConfigFromContainer secret applied";
-    } else if (!sec.isEmpty()) {
-        qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer secret invalid len=" << sec.length();
     }
 
     ErrorCode metaErr = ErrorCode::NoError;
     const QByteArray metaRaw =
             sshSession->getTextFileFromContainer(container, credentials, QString(kTProxyMetaPath), metaErr);
-    qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer meta"
-                       << "err=" << metaErr << "bytes=" << metaRaw.size();
     if (metaErr == ErrorCode::NoError && !metaRaw.trimmed().isEmpty()) {
         const QList<QByteArray> lines = metaRaw.split('\n');
         for (const QByteArray &rawLine : lines) {
@@ -140,19 +118,9 @@ ErrorCode TProxyInstaller::extractConfigFromContainer(DockerContainer container,
                 tc->port = val;
             }
         }
-        qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer from meta"
-                           << "hostname=" << tc->hostname
-                           << "email=" << tc->acmeEmail
-                           << "httpPort=" << tc->httpPort
-                           << "httpsPort=" << tc->port
-                           << "carrier=" << tc->carrierMode
-                           << "workers=" << tc->workers;
     }
 
     rebuildTProxyLinksIfNeeded(tc);
-
-    qDebug().noquote() << "TProxyInstaller::extractConfigFromContainer done"
-                       << "tgLink=" << tc->tgLink << "tmeLink=" << tc->tmeLink;
 
     return ErrorCode::NoError;
 }
@@ -162,20 +130,12 @@ void TProxyInstaller::uploadClientSettingsSnapshot(SshSession &sshSession, const
 {
     const TProxyProtocolConfig *tc = config.getTProxyProtocolConfig();
     if (!tc) {
-        qDebug() << "TProxyInstaller::uploadClientSettingsSnapshot skip: no config";
         return;
     }
     const QByteArray payload = QJsonDocument(tc->toJson()).toJson(QJsonDocument::Compact);
-    qDebug().noquote() << "TProxyInstaller::uploadClientSettingsSnapshot"
-                       << "bytes=" << payload.size()
-                       << "hostname=" << tc->hostname
-                       << "httpPort=" << tc->httpPort
-                       << "httpsPort=" << tc->port;
     const ErrorCode err = sshSession.uploadTextFileToContainer(container, credentials, QString::fromUtf8(payload),
                                                                QString(kTProxyClientJsonUploadPath));
     if (err != ErrorCode::NoError) {
         qWarning() << "TProxyInstaller::uploadClientSettingsSnapshot failed" << err;
-    } else {
-        qDebug() << "TProxyInstaller::uploadClientSettingsSnapshot ok";
     }
 }
