@@ -11,6 +11,7 @@ namespace configKey
 {
     constexpr char billingPeriod[] = "billing_period";
     constexpr char priceLabel[] = "price_label";
+    constexpr char priceAmount[] = "price_amount";
     constexpr char subtitle[] = "subtitle";
     constexpr char recommended[] = "recommended";
     constexpr char checkoutUrl[] = "checkout_url";
@@ -46,6 +47,8 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.billingPeriod;
     case PriceLabelRole:
         return plan.priceLabel;
+    case PriceAmountRole:
+        return plan.priceAmount;
     case SubtitleRole:
         return plan.subtitle;
     case RecommendedRole:
@@ -72,6 +75,7 @@ QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
     return {
         { BillingPeriodRole, "billingPeriod" },
         { PriceLabelRole, "priceLabel" },
+        { PriceAmountRole, "priceAmount" },
         { SubtitleRole, "subtitle" },
         { RecommendedRole, "recommended" },
         { CheckoutUrlRole, "checkoutUrl" },
@@ -96,6 +100,7 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         SubscriptionPlanItem subscriptionPlan;
         subscriptionPlan.billingPeriod = planObject.value(configKey::billingPeriod).toString();
         subscriptionPlan.priceLabel = planObject.value(configKey::priceLabel).toString();
+        subscriptionPlan.priceAmount = planObject.value(configKey::priceAmount).toDouble();
         subscriptionPlan.subtitle = planObject.value(configKey::subtitle).toString();
         subscriptionPlan.recommended = planObject.value(configKey::recommended).toBool();
         subscriptionPlan.checkoutUrl = planObject.value(configKey::checkoutUrl).toString();
@@ -148,4 +153,14 @@ bool ApiSubscriptionPlansModel::hasAnyFreeTrial() const
         }
     }
     return false;
+}
+
+int ApiSubscriptionPlansModel::rowForStoreProductId(const QString &storeProductId) const
+{
+    for (int planIndex = 0; planIndex < m_subscriptionPlans.size(); ++planIndex) {
+        if (m_subscriptionPlans.at(planIndex).storeProductId == storeProductId) {
+            return planIndex;
+        }
+    }
+    return -1;
 }

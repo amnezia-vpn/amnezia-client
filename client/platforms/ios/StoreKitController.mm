@@ -90,6 +90,25 @@ API_AVAILABLE(ios(15.0), macos(12.0))
     }];
 }
 
+- (void)fetchLocalEntitlementsWithCompletion:(void (^)(BOOL success,
+                                                       NSArray<NSDictionary *> *_Nullable entitlements,
+                                                       NSError *_Nullable error))completion API_AVAILABLE(ios(15.0), macos(12.0))
+{
+    [[StoreKit2Helper shared] fetchLocalEntitlementsWithCompletion:^(BOOL success,
+                                                                     NSArray<NSDictionary *> *entitlements,
+                                                                     NSError *error) {
+        if (success) {
+            qInfo().noquote() << "[IAP][StoreKit2] local currentEntitlements returned"
+                              << (int)(entitlements ? entitlements.count : 0) << "active entitlements";
+        } else {
+            qWarning().noquote() << "[IAP][StoreKit2] fetchLocalEntitlements failed:" << toQString(error.localizedDescription);
+        }
+        if (completion) {
+            completion(success, entitlements, error);
+        }
+    }];
+}
+
 - (void)fetchProductsWithIdentifiers:(NSSet<NSString *> *)productIdentifiers
                           completion:(void (^)(NSArray<NSDictionary *> *products,
                                                NSArray<NSString *> *invalidIdentifiers,

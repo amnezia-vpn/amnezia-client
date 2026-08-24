@@ -1092,6 +1092,50 @@ void IosController::restorePurchases(std::function<void(bool success,
     }
 }
 
+void IosController::fetchLocalEntitlements(std::function<void(bool success,
+                                                               const QList<QVariantMap> &transactions,
+                                                               const QString &errorString)> &&callback)
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        StoreKitController *controller = [StoreKitController sharedInstance];
+        __block auto cb = std::move(callback);
+        [controller fetchLocalEntitlementsWithCompletion:^(BOOL s,
+                                                            NSArray<NSDictionary *> * _Nullable entitlements,
+                                                            NSError * _Nullable error) {
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+            QList<QVariantMap> transactions;
+            for (NSDictionary *dict in entitlements ?: @[]) {
+                QVariantMap transaction;
+                NSString *transactionId = dict[@"transactionId"];
+                NSString *productId = dict[@"productId"];
+                NSString *originalTransactionId = dict[@"originalTransactionId"];
+
+                if (transactionId) {
+                    transaction.insert(QStringLiteral("transactionId"), QString::fromUtf8(transactionId.UTF8String));
+                }
+                if (productId) {
+                    transaction.insert(QStringLiteral("productId"), QString::fromUtf8(productId.UTF8String));
+                }
+                if (originalTransactionId) {
+                    transaction.insert(QStringLiteral("originalTransactionId"),
+                                       QString::fromUtf8(originalTransactionId.UTF8String));
+                }
+                transactions.push_back(transaction);
+            }
+            if (cb) {
+                cb(s, transactions, err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QList<QVariantMap>(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
 void IosController::fetchProducts(const QStringList &productIds,
                                   std::function<void(const QList<QVariantMap> &products,
                                                      const QStringList &invalidIds,

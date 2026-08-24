@@ -32,6 +32,7 @@ namespace
         constexpr char subscriptionPlans[] = "subscription_plans";
         constexpr char storeProductId[] = "store_product_id";
         constexpr char priceLabel[] = "price_label";
+        constexpr char priceAmount[] = "price_amount";
         constexpr char subtitle[] = "subtitle";
         constexpr char isTrial[] = "is_trial";
         constexpr char minPriceLabel[] = "min_price_label";
@@ -254,6 +255,7 @@ namespace
                 const bool isTrialPlan = planObject.value(configKey::isTrial).toBool();
                 const SubscriptionPlanQuote &quote = *quoteIterator;
                 planObject.insert(configKey::priceLabel, quote.displayPrice);
+                planObject.insert(configKey::priceAmount, quote.priceAmount);
                 planObject.insert(configKey::hasFreeTrial, quote.hasFreeTrial);
                 planObject.insert(configKey::trialDays, quote.trialDays);
 

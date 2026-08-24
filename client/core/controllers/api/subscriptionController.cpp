@@ -1230,6 +1230,75 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
 #endif
 }
 
+QStringList SubscriptionController::resolveActiveStoreProductIds()
+{
+    QStringList activeProductIds;
+
+#if defined(Q_OS_ANDROID)
+    auto androidController = AndroidController::instance();
+
+    QJsonObject purchasesResult;
+    {
+        QFutureWatcher<QJsonObject> queryWatcher;
+        QEventLoop queryLoop;
+        QObject::connect(&queryWatcher, &QFutureWatcher<QJsonObject>::finished, &queryLoop, &QEventLoop::quit);
+        QFuture<QJsonObject> queryFuture = QtConcurrent::run([androidController]() {
+            return androidController->queryPurchases();
+        });
+        queryWatcher.setFuture(queryFuture);
+        queryLoop.exec();
+        purchasesResult = queryWatcher.result();
+    }
+
+    if (purchasesResult.value("responseCode").toInt(-1) != 0) {
+        qWarning().noquote() << "[Billing][resolveActiveStoreProductIds] queryPurchases failed";
+        return activeProductIds;
+    }
+
+    const QJsonArray purchases = purchasesResult.value("purchases").toArray();
+    for (const QJsonValue &purchaseValue : purchases) {
+        const QJsonObject purchaseObj = purchaseValue.toObject();
+        if (purchaseObj.value("purchaseState").toInt() != 1) {
+            continue;
+        }
+        const QJsonArray productIds = purchaseObj.value("productIds").toArray();
+        for (const QJsonValue &productIdValue : productIds) {
+            const QString productId = productIdValue.toString();
+            if (!productId.isEmpty() && !activeProductIds.contains(productId)) {
+                activeProductIds.append(productId);
+            }
+        }
+    }
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool restoreSuccess = false;
+    QList<QVariantMap> transactions;
+    QString restoreError;
+    QEventLoop waitRestore;
+
+    IosController::Instance()->fetchLocalEntitlements([&](bool success, const QList<QVariantMap> &localTransactions, const QString &errorString) {
+        restoreSuccess = success;
+        transactions = localTransactions;
+        restoreError = errorString;
+        waitRestore.quit();
+    });
+    waitRestore.exec();
+
+    if (!restoreSuccess) {
+        qWarning().noquote() << "[Billing][resolveActiveStoreProductIds] fetchLocalEntitlements failed:" << restoreError;
+        return activeProductIds;
+    }
+
+    for (const QVariantMap &transaction : std::as_const(transactions)) {
+        const QString productId = transaction.value("productId").toString();
+        if (!productId.isEmpty() && !activeProductIds.contains(productId)) {
+            activeProductIds.append(productId);
+        }
+    }
+#endif
+
+    return activeProductIds;
+}
+
 ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonObject &accountInfo)
 {
     auto apiV2Opt = m_serversRepository->apiV2Config(serverId);

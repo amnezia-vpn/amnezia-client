@@ -28,6 +28,10 @@ API_AVAILABLE(ios(15.0), macos(12.0))
                                                  NSArray<NSDictionary *> *_Nullable restoredTransactions,
                                                  NSError *_Nullable error))completion;
 
+- (void)fetchLocalEntitlementsWithCompletion:(void (^)(BOOL success,
+                                                       NSArray<NSDictionary *> *_Nullable entitlements,
+                                                       NSError *_Nullable error))completion;
+
 // Fetch product information for a set of identifiers without initiating a purchase
 - (void)fetchProductsWithIdentifiers:(NSSet<NSString *> *)productIdentifiers
                           completion:(void (^)(NSArray<NSDictionary *> *products,

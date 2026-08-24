@@ -2,6 +2,7 @@
 #define SUBSCRIPTIONUICONTROLLER_H
 
 #include <QObject>
+#include <QVariantMap>
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
@@ -44,6 +45,7 @@ public slots:
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
+    QVariantMap currentActivePlanInfo();
     bool importPremiumFromAppStore(const QString &storeProductId);
     bool importPremiumFromPlayMarket(const QString &storeProductId);
     bool importFreeFromGateway();

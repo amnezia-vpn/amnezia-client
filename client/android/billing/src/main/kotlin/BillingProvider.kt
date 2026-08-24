@@ -281,6 +281,7 @@ class BillingProvider(context: Context) : AutoCloseable {
                 .put("isAcknowledged", purchase.isAcknowledged)
                 .put("isAutoRenewing", purchase.isAutoRenewing)
                 .put("orderId", purchase.orderId)
+                .put("productIds", JSONArray(purchase.products))
         }
         return purchaseArray
     }

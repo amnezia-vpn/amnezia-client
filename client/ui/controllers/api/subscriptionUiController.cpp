@@ -197,6 +197,31 @@ bool SubscriptionUiController::fillAvailableServices()
     return true;
 }
 
+QVariantMap SubscriptionUiController::currentActivePlanInfo()
+{
+    QVariantMap info;
+    info.insert(QStringLiteral("hasActivePlan"), false);
+
+    const QStringList activeProductIds = m_subscriptionController->resolveActiveStoreProductIds();
+    qInfo().noquote() << "[Billing][currentActivePlanInfo] active store product ids:" << activeProductIds;
+
+    for (const QString &productId : activeProductIds) {
+        const int row = m_apiSubscriptionPlansModel->rowForStoreProductId(productId);
+        if (row < 0) {
+            continue;
+        }
+        const QVariantMap plan = m_apiSubscriptionPlansModel->planAt(row);
+        info.insert(QStringLiteral("hasActivePlan"), true);
+        info.insert(QStringLiteral("storeProductId"), productId);
+        info.insert(QStringLiteral("priceAmount"), plan.value(QStringLiteral("priceAmount")));
+        info.insert(QStringLiteral("billingPeriod"), plan.value(QStringLiteral("billingPeriod")));
+        break;
+    }
+
+    qInfo().noquote() << "[Billing][currentActivePlanInfo] resolved to:" << info;
+    return info;
+}
+
 bool SubscriptionUiController::importPremiumFromAppStore(const QString &storeProductId)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)

@@ -22,6 +22,29 @@ PageType {
     readonly property var currentPlan: ApiSubscriptionPlansModel.planAt(selectedPlanIndex)
     readonly property bool anyPlanHasFreeTrial: ApiSubscriptionPlansModel.hasAnyFreeTrial()
 
+    function proceedWithPurchase(plan) {
+        if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
+            PageController.showBusyIndicator(true)
+            var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
+            SubscriptionUiController.importPremiumFromAppStore(storeId)
+            PageController.showBusyIndicator(false)
+            return
+        }
+        if (Qt.platform.os === "android") {
+            PageController.showBusyIndicator(true)
+            var androidStoreId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
+            SubscriptionUiController.importPremiumFromPlayMarket(androidStoreId)
+            PageController.showBusyIndicator(false)
+            return
+        }
+        if (plan.checkoutUrl) {
+            Qt.openUrlExternally(plan.checkoutUrl)
+            PageController.closePage()
+            PageController.closePage()
+            return
+        }
+    }
+
     function syncFromModel() {
         root.selectedPlanIndex = ApiSubscriptionPlansModel.recommendedRowIndex()
 
@@ -259,26 +282,35 @@ PageType {
                         PageController.goToPage(PageEnum.PageSetupWizardApiTrialEmail)
                         return
                     }
-                    if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
-                        PageController.showBusyIndicator(true)
-                        var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-                        SubscriptionUiController.importPremiumFromAppStore(storeId)
-                        PageController.showBusyIndicator(false)
+
+                    var active = SubscriptionUiController.currentActivePlanInfo()
+                    var planPrice = Number(plan.priceAmount)
+                    var activePrice = active ? Number(active.priceAmount) : 0
+
+                    if (active && active.hasActivePlan && planPrice > 0 && activePrice > 0) {
+                        var headerText
+                        var descriptionText
+                        if (planPrice > activePrice) {
+                            headerText = qsTr("Upgrade subscription?")
+                            descriptionText = qsTr("You're switching to a more expensive plan — %1/%2. The change applies immediately and replaces your current plan.")
+                                    .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                        } else if (planPrice < activePrice) {
+                            headerText = qsTr("Downgrade subscription?")
+                            descriptionText = qsTr("You're switching to a cheaper plan — %1/%2. The change applies immediately and replaces your current plan.")
+                                    .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                        } else {
+                            headerText = qsTr("Confirm subscription?")
+                            descriptionText = qsTr("You already have an active subscription. This will replace it with %1/%2.")
+                                    .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                        }
+
+                        showQuestionDrawer(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
+                            function() { root.proceedWithPurchase(plan) },
+                            function() {})
                         return
                     }
-                    if (Qt.platform.os === "android") {
-                        PageController.showBusyIndicator(true)
-                        var androidStoreId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-                        SubscriptionUiController.importPremiumFromPlayMarket(androidStoreId)
-                        PageController.showBusyIndicator(false)
-                        return
-                    }
-                    if (plan.checkoutUrl) {
-                        Qt.openUrlExternally(plan.checkoutUrl)
-                        PageController.closePage()
-                        PageController.closePage()
-                        return
-                    }
+
+                    root.proceedWithPurchase(plan)
                 }
             }
 

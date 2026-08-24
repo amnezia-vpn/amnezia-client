@@ -13,6 +13,7 @@ public:
     enum Roles {
         BillingPeriodRole = Qt::UserRole + 1,
         PriceLabelRole,
+        PriceAmountRole,
         SubtitleRole,
         RecommendedRole,
         CheckoutUrlRole,
@@ -36,12 +37,14 @@ public:
     Q_INVOKABLE QVariantMap planAt(int row) const;
     Q_INVOKABLE int recommendedRowIndex() const;
     Q_INVOKABLE bool hasAnyFreeTrial() const;
+    Q_INVOKABLE int rowForStoreProductId(const QString &storeProductId) const;
 
 private:
     struct SubscriptionPlanItem
     {
         QString billingPeriod;
         QString priceLabel;
+        double priceAmount = 0.0;
         QString subtitle;
         bool recommended = false;
         QString checkoutUrl;

@@ -126,6 +126,8 @@ public:
     PlayMarketRestoreResult processPlayMarketRestore(const QString &userCountryCode, const QString &serviceType,
                                                      const QString &serviceProtocol);
 
+    QStringList resolveActiveStoreProductIds();
+
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(const QString &serverId) const;

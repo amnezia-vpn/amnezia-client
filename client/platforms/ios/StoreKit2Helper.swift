@@ -23,33 +23,41 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
+    private func collectCurrentEntitlements() async -> [NSDictionary] {
+        var entitlements: [EntitlementInfo] = []
+        for await result in Transaction.currentEntitlements {
+            switch result {
+            case .verified(let transaction):
+                entitlements.append(EntitlementInfo(transactionId: transaction.id,
+                                                    originalTransactionId: transaction.originalID,
+                                                    productId: transaction.productID,
+                                                    purchaseDate: transaction.purchaseDate))
+            case .unverified(_, let error):
+                print("[IAP][StoreKit2] Unverified transaction skipped: \(error.localizedDescription)")
+            }
+        }
+        return entitlements.sorted { lhs, rhs in
+            if lhs.purchaseDate != rhs.purchaseDate {
+                return lhs.purchaseDate > rhs.purchaseDate
+            }
+            return lhs.transactionId > rhs.transactionId
+        }.map { $0.dictionary }
+    }
+
     public func fetchCurrentEntitlements(completion: @escaping (Bool, [NSDictionary]?, NSError?) -> Void) {
         Task { @MainActor in
             do {
                 try await AppStore.sync()
-
-                var entitlements: [EntitlementInfo] = []
-                for await result in Transaction.currentEntitlements {
-                    switch result {
-                    case .verified(let transaction):
-                        entitlements.append(EntitlementInfo(transactionId: transaction.id,
-                                                            originalTransactionId: transaction.originalID,
-                                                            productId: transaction.productID,
-                                                            purchaseDate: transaction.purchaseDate))
-                    case .unverified(_, let error):
-                        print("[IAP][StoreKit2] Unverified transaction skipped: \(error.localizedDescription)")
-                    }
-                }
-                let sortedEntitlements = entitlements.sorted { lhs, rhs in
-                    if lhs.purchaseDate != rhs.purchaseDate {
-                        return lhs.purchaseDate > rhs.purchaseDate
-                    }
-                    return lhs.transactionId > rhs.transactionId
-                }.map { $0.dictionary }
-                completion(true, sortedEntitlements, nil)
+                completion(true, await collectCurrentEntitlements(), nil)
             } catch {
                 completion(false, nil, error as NSError)
             }
+        }
+    }
+
+    public func fetchLocalEntitlements(completion: @escaping (Bool, [NSDictionary]?, NSError?) -> Void) {
+        Task { @MainActor in
+            completion(true, await collectCurrentEntitlements(), nil)
         }
     }
 

@@ -72,6 +72,10 @@ public:
                                              const QList<QVariantMap> &transactions,
                                              const QString &errorString)> &&callback);
 
+    void fetchLocalEntitlements(std::function<void(bool success,
+                                                    const QList<QVariantMap> &transactions,
+                                                    const QString &errorString)> &&callback);
+
     // Fetch product info for given product identifiers and return basic fields for logging
     void fetchProducts(const QStringList &productIds,
                        std::function<void(const QList<QVariantMap> &products,
