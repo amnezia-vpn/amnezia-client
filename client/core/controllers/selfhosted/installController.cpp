@@ -1106,7 +1106,8 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
 {
     config = generateConfig(container, port, transportProto);
     if (container == DockerContainer::TProxy) {
-        if (auto *tProxyConfig = config.getTProxyProtocolConfig()) {
+        auto *tProxyConfig = config.getTProxyProtocolConfig();
+        if (tProxyConfig) {
             if (!m_tproxyInstallHostname.isEmpty()) {
                 tProxyConfig->hostname = m_tproxyInstallHostname;
             }
@@ -1116,6 +1117,13 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
         }
         m_tproxyInstallHostname.clear();
         m_tproxyInstallEmail.clear();
+
+        // TProxy needs a hostname and ACME email before the first deploy (configure_container.sh
+        // exits 1 without them). Fail fast with a clear error instead of a confusing server-side
+        // failure if the install path is reached without them being supplied via setTProxyInstallHints().
+        if (!tProxyConfig || tProxyConfig->hostname.isEmpty() || tProxyConfig->acmeEmail.isEmpty()) {
+            return ErrorCode::InternalError;
+        }
     }
     return setupContainer(credentials, container, config, false);
 }

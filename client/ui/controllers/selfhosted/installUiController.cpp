@@ -2,7 +2,6 @@
 
 #include <QDesktopServices>
 #include <QDir>
-#include <QDebug>
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QRandomGenerator>
@@ -431,8 +430,7 @@ void InstallUiController::refreshContainerStatus(const QString &serverId, int co
 void InstallUiController::refreshContainerDiagnostics(const QString &serverId, int containerIndex, int port)
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
-            && container != DockerContainer::TProxy) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
         return;
     }
 

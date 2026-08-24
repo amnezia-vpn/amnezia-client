@@ -159,13 +159,11 @@ ErrorCode MtProxyInstaller::queryDiagnostics(SshSession &sshSession, const Serve
                                              MtProxyContainerDiagnostics &out)
 {
     out = { };
-    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
-            || container == DockerContainer::TProxy) {
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt) {
         const QString containerName = ContainerUtils::containerToString(container);
         const bool isTelemt = container == DockerContainer::Telemt;
-        const QString confFile = isTelemt ? QStringLiteral("/data/config.toml")
-                : (container == DockerContainer::TProxy ? QStringLiteral("/data/config.json")
-                                                        : QStringLiteral("/data/proxy-multi.conf"));
+        const QString confFile =
+                isTelemt ? QStringLiteral("/data/config.toml") : QStringLiteral("/data/proxy-multi.conf");
 
         const QString sportFilter = QString::number(listenPort);
         const QString peersCmd = QStringLiteral("sudo conntrack -L -p tcp --dport ") + sportFilter

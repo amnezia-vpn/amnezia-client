@@ -323,6 +323,11 @@ PageType {
                         var hasError = false
                         var portErr = qsTr("The port must be in the range of 1 to 65535")
 
+                        // Empty port means "use the default" (443), consistent with the settings page.
+                        var portValue = port.textField.text === ""
+                            ? TProxyConfigModel.defaultPort()
+                            : port.textField.text
+
                         if (!TProxyConfigModel.isValidHostname(host)) {
                             tproxyHostname.errorText = qsTr("Enter a lowercase DNS hostname")
                             hasError = true
@@ -331,7 +336,7 @@ PageType {
                             tproxyEmail.errorText = qsTr("Enter a valid email for the TLS certificate")
                             hasError = true
                         }
-                        if (port.textField.text === "" || !port.textField.acceptableInput) {
+                        if (port.textField.text !== "" && !port.textField.acceptableInput) {
                             port.errorText = portErr
                             hasError = true
                         }
@@ -339,9 +344,10 @@ PageType {
                             return
                         }
 
+                        port.textField.text = portValue
                         TProxyConfigModel.setHostname(host)
                         TProxyConfigModel.setAcmeEmail(email)
-                        TProxyConfigModel.setPort(port.textField.text)
+                        TProxyConfigModel.setPort(portValue)
                         TProxyConfigModel.setHttpPort(TProxyConfigModel.defaultHttpPort())
                     } else if (!port.textField.acceptableInput &&
                             ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
