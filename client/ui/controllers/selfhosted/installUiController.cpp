@@ -2,6 +2,7 @@
 
 #include <QDesktopServices>
 #include <QDir>
+#include <QDebug>
 #include <QEventLoop>
 #include <QJsonObject>
 #include <QRandomGenerator>
@@ -53,6 +54,7 @@ InstallUiController::InstallUiController(InstallController *installController,
                                          Socks5ProxyConfigModel *socks5ConfigModel,
                                          MtProxyConfigModel* mtConfigModel,
                                          TelemtConfigModel *telemtConfigModel,
+                                         TProxyConfigModel *tProxyConfigModel,
                                          ConnectionController *connectionController,
                                          QObject *parent)
     : QObject(parent),
@@ -73,6 +75,7 @@ InstallUiController::InstallUiController(InstallController *installController,
       m_socks5ConfigModel(socks5ConfigModel),
       m_mtProxyConfigModel(mtConfigModel),
       m_telemtConfigModel(telemtConfigModel),
+      m_tProxyConfigModel(tProxyConfigModel),
       m_connectionController(connectionController)
 {
     connect(m_installController, &InstallController::configValidated, this, &InstallUiController::configValidated);
@@ -85,6 +88,17 @@ InstallUiController::~InstallUiController()
 
 void InstallUiController::install(DockerContainer container, int port, TransportProto transportProto, const QString &serverId)
 {
+    if (container == DockerContainer::TProxy && m_tProxyConfigModel) {
+        const QString hostname = m_tProxyConfigModel->getHostname();
+        const QString email = m_tProxyConfigModel->getAcmeEmail();
+        qDebug().noquote() << "InstallUiController::install TProxy"
+                           << "hostname=" << hostname
+                           << "email=" << email
+                           << "httpsPort=" << m_tProxyConfigModel->getPort()
+                           << "httpPort=" << m_tProxyConfigModel->getHttpPort();
+        m_installController->setTProxyInstallHints(hostname, email);
+    }
+
     const bool isNewServer = serverId.isEmpty();
     
     ServerCredentials serverCredentials;
@@ -257,6 +271,15 @@ bool InstallUiController::buildContainerConfigFromModel(int containerIndex, int 
         containerConfig.protocolConfig = m_telemtConfigModel->getProtocolConfig();
         break;
     }
+    case Proto::TProxy: {
+        containerConfig.protocolConfig = m_tProxyConfigModel->getProtocolConfig();
+        qDebug().noquote() << "InstallUiController::buildContainerConfigFromModel TProxy"
+                           << "hostname=" << m_tProxyConfigModel->getHostname()
+                           << "email=" << m_tProxyConfigModel->getAcmeEmail()
+                           << "httpsPort=" << m_tProxyConfigModel->getPort()
+                           << "httpPort=" << m_tProxyConfigModel->getHttpPort();
+        break;
+    }
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: {
         containerConfig.protocolConfig = m_ikev2ConfigModel->getProtocolConfig();
@@ -304,10 +327,20 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
     ContainerConfig oldContainerConfig = m_serversController->getContainerConfig(serverId, container);
 
     const bool asyncUpdate = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+            || container == DockerContainer::TProxy
             || container == DockerContainer::Xray || container == DockerContainer::SSXray;
 
     if (asyncUpdate) {
-        const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
+        const bool emitBusy = container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+                || container == DockerContainer::TProxy;
+        if (container == DockerContainer::TProxy) {
+            if (const auto *tc = containerConfig.getTProxyProtocolConfig()) {
+                qDebug().noquote() << "InstallUiController::updateServerConfig TProxy async"
+                                   << "hostname=" << tc->hostname
+                                   << "httpsPort=" << containerConfig.protocolConfig.port()
+                                   << "httpPort=" << tc->httpPort;
+            }
+        }
         if (emitBusy)
             emit serverIsBusy(true);
         auto *watcher = new QFutureWatcher<ErrorCode>(this);
@@ -358,7 +391,8 @@ void InstallUiController::updateServerConfig(const QString &serverId, int contai
 void InstallUiController::setContainerEnabled(const QString &serverId, int containerIndex, bool enabled)
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
+            && container != DockerContainer::TProxy) {
         return;
     }
 
@@ -389,7 +423,8 @@ void InstallUiController::setContainerEnabled(const QString &serverId, int conta
 void InstallUiController::refreshContainerStatus(const QString &serverId, int containerIndex)
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
+            && container != DockerContainer::TProxy) {
         return;
     }
 
@@ -415,7 +450,8 @@ void InstallUiController::refreshContainerStatus(const QString &serverId, int co
 void InstallUiController::refreshContainerDiagnostics(const QString &serverId, int containerIndex, int port)
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
+            && container != DockerContainer::TProxy) {
         return;
     }
 
@@ -445,7 +481,8 @@ void InstallUiController::refreshContainerDiagnostics(const QString &serverId, i
 void InstallUiController::fetchContainerSecret(const QString &serverId, int containerIndex)
 {
     const DockerContainer container = static_cast<DockerContainer>(containerIndex);
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
+            && container != DockerContainer::TProxy) {
         return;
     }
 
@@ -711,6 +748,7 @@ void InstallUiController::updateProtocolConfigModel(const QString &serverId, int
     case Proto::Socks5Proxy: updateIfPresent(m_socks5ConfigModel, containerConfig.getSocks5ProxyProtocolConfig()); break;
     case Proto::MtProxy: updateIfPresent(m_mtProxyConfigModel, containerConfig.getMtProxyProtocolConfig()); break;
     case Proto::Telemt: updateIfPresent(m_telemtConfigModel, containerConfig.getTelemtProtocolConfig()); break;
+    case Proto::TProxy: updateIfPresent(m_tProxyConfigModel, containerConfig.getTProxyProtocolConfig()); break;
 #ifdef Q_OS_WINDOWS
     case Proto::Ikev2: updateIfPresent(m_ikev2ConfigModel, containerConfig.getIkev2ProtocolConfig()); break;
 #endif

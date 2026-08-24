@@ -216,6 +216,80 @@ PageType {
                 textField.validator: IntValidator { bottom: 1; top: 65535 }
             }
 
+            TextFieldWithHeaderType {
+                id: tproxyHostname
+
+                visible: isTProxy
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("Hostname")
+                textField.placeholderText: qsTr("proxy.example.com")
+                textField.onTextChanged: {
+                    var cur = tproxyHostname.textField.text
+                    var clean = TProxyConfigModel.sanitizeHostnameFieldText(cur)
+                    if (clean !== cur) {
+                        textField.text = clean
+                        textField.cursorPosition = clean.length
+                        return
+                    }
+                    if (TProxyConfigModel.isHostnameTypingIncomplete(cur)) {
+                        tproxyHostname.errorText = ""
+                        return
+                    }
+                    if (!TProxyConfigModel.isValidHostname(clean)) {
+                        tproxyHostname.errorText = qsTr("Use lowercase letters, digits, dots and hyphens")
+                        return
+                    }
+                    tproxyHostname.errorText = ""
+                }
+            }
+
+            TextFieldWithHeaderType {
+                id: tproxyEmail
+
+                visible: isTProxy
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+
+                headerText: qsTr("ACME email")
+                textField.placeholderText: qsTr("you@example.com")
+                textField.onTextChanged: {
+                    var cur = tproxyEmail.textField.text
+                    var clean = TProxyConfigModel.sanitizeAcmeEmailFieldText(cur)
+                    if (clean !== cur) {
+                        textField.text = clean
+                        textField.cursorPosition = clean.length
+                        return
+                    }
+                    if (TProxyConfigModel.isAcmeEmailTypingIncomplete(cur)) {
+                        tproxyEmail.errorText = ""
+                        return
+                    }
+                    if (!TProxyConfigModel.isValidAcmeEmail(clean)) {
+                        tproxyEmail.errorText = qsTr("Enter a valid email for the TLS certificate")
+                        return
+                    }
+                    tproxyEmail.errorText = ""
+                }
+            }
+
+            CaptionTextType {
+                visible: isTProxy
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.rightMargin: 16
+                Layout.leftMargin: 16
+                text: qsTr("Needs a DNS A record and free host ports for HTTP (ACME) and HTTPS. Classic Telegram MTProxy links will not work.")
+                color: AmneziaStyle.color.mutedGray
+                wrapMode: Text.WordWrap
+                font.pixelSize: 12
+            }
+
             Rectangle {
                 Layout.fillHeight: true
                 Layout.rightMargin: 16
@@ -235,7 +309,41 @@ PageType {
                 text: qsTr("Install")
 
                 clickedFunc: function() {
-                    if (!port.textField.acceptableInput &&
+                    if (isTProxy) {
+                        tproxyHostname.errorText = ""
+                        tproxyEmail.errorText = ""
+                        port.errorText = ""
+
+                        var host = TProxyConfigModel.sanitizeHostnameFieldText(tproxyHostname.textField.text)
+                        var email = TProxyConfigModel.sanitizeAcmeEmailFieldText(tproxyEmail.textField.text)
+                        tproxyHostname.textField.text = host
+                        tproxyEmail.textField.text = email
+                        port.textField.text = TProxyConfigModel.sanitizePortFieldText(port.textField.text)
+
+                        var hasError = false
+                        var portErr = qsTr("The port must be in the range of 1 to 65535")
+
+                        if (!TProxyConfigModel.isValidHostname(host)) {
+                            tproxyHostname.errorText = qsTr("Enter a lowercase DNS hostname")
+                            hasError = true
+                        }
+                        if (!TProxyConfigModel.isValidAcmeEmail(email)) {
+                            tproxyEmail.errorText = qsTr("Enter a valid email for the TLS certificate")
+                            hasError = true
+                        }
+                        if (port.textField.text === "" || !port.textField.acceptableInput) {
+                            port.errorText = portErr
+                            hasError = true
+                        }
+                        if (hasError) {
+                            return
+                        }
+
+                        TProxyConfigModel.setHostname(host)
+                        TProxyConfigModel.setAcmeEmail(email)
+                        TProxyConfigModel.setPort(port.textField.text)
+                        TProxyConfigModel.setHttpPort(TProxyConfigModel.defaultHttpPort())
+                    } else if (!port.textField.acceptableInput &&
                             ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&
                             ContainerProps.containerTypeToString(dockerContainer) !== "ikev2") {
                         port.errorText = qsTr("The port must be in the range of 1 to 65535")

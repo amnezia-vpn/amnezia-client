@@ -572,6 +572,8 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("MTProxy");
             } else if (container == DockerContainer::Telemt) {
                 servicesName.append("Telemt");
+            } else if (container == DockerContainer::TProxy) {
+                servicesName.append("TProxy");
             }
         }
     }
