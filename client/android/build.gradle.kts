@@ -154,9 +154,10 @@ android {
                 }
             }
 
-            tasks.named("bundle${name.replaceFirstChar { it.uppercase() }}") {
+            val variantName = name
+            tasks.named("bundle${variantName.replaceFirstChar { it.uppercase() }}") {
                 doLast {
-                    val srcDir = layout.buildDirectory.dir("outputs/bundle/ossRelease").get().asFile
+                    val srcDir = layout.buildDirectory.dir("outputs/bundle/$variantName").get().asFile
                     val dstDir = layout.buildDirectory.dir("outputs/bundle/$buildTypeName").get().asFile
                     dstDir.mkdirs()
                     srcDir.listFiles()?.filter { it.name.endsWith(".aab") }?.forEach { aab ->

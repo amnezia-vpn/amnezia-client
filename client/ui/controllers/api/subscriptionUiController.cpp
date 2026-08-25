@@ -205,13 +205,18 @@ QVariantMap SubscriptionUiController::currentActivePlanInfo()
     const QStringList activeProductIds = m_subscriptionController->resolveActiveStoreProductIds();
     qInfo().noquote() << "[Billing][currentActivePlanInfo] active store product ids:" << activeProductIds;
 
+    if (activeProductIds.isEmpty()) {
+        return info;
+    }
+
+    info.insert(QStringLiteral("hasActivePlan"), true);
+
     for (const QString &productId : activeProductIds) {
         const int row = m_apiSubscriptionPlansModel->rowForStoreProductId(productId);
         if (row < 0) {
             continue;
         }
         const QVariantMap plan = m_apiSubscriptionPlansModel->planAt(row);
-        info.insert(QStringLiteral("hasActivePlan"), true);
         info.insert(QStringLiteral("storeProductId"), productId);
         info.insert(QStringLiteral("priceAmount"), plan.value(QStringLiteral("priceAmount")));
         info.insert(QStringLiteral("billingPeriod"), plan.value(QStringLiteral("billingPeriod")));

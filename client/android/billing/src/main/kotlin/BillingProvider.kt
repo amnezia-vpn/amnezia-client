@@ -152,7 +152,7 @@ class BillingProvider(context: Context) : AutoCloseable {
                     JSONObject().also { pricingPhases.put(it) }
                         .put("billingCycleCount", phase.billingCycleCount)
                         .put("billingPeriod", phase.billingPeriod)
-                        .put("formatedPrice", phase.formattedPrice)
+                        .put("formattedPrice", phase.formattedPrice)
                         .put("priceAmountMicros", phase.priceAmountMicros)
                         .put("recurrenceMode", phase.recurrenceMode)
                         .put("subscriptionBillingMonths", billingMonths)
@@ -221,13 +221,12 @@ class BillingProvider(context: Context) : AutoCloseable {
         offerToken: String,
         oldPurchaseToken: String? = null
     ): JSONObject {
-        Log.v(TAG, "Offer token: $offerToken")
-
         if (offerToken.isBlank()) throw BillingException("offerToken can not be empty")
 
-        val productDetails = getProductDetails()?.let {
-            it.filter { it.productId == PRODUCT_ID }
-        }?.firstOrNull() ?: throw BillingException("Product details not found")
+        subscriptionPurchases.value = null
+
+        val productDetails = getProductDetails()?.firstOrNull { it.productId == PRODUCT_ID }
+            ?: throw BillingException("Product details not found")
 
         val productDetail = BillingFlowParams.ProductDetailsParams.newBuilder()
             .setProductDetails(productDetails)
@@ -245,10 +244,12 @@ class BillingProvider(context: Context) : AutoCloseable {
                 .build()
         }
 
-        val billingResult = billingClient.launchBillingFlow(activity, BillingFlowParams.newBuilder()
-            .setProductDetailsParamsList(listOf(productDetail))
-            .apply { subscriptionUpdateParams?.let { setSubscriptionUpdateParams(it) } }
-            .build())
+        val billingResult = withContext(Dispatchers.Main.immediate) {
+            billingClient.launchBillingFlow(activity, BillingFlowParams.newBuilder()
+                .setProductDetailsParamsList(listOf(productDetail))
+                .apply { subscriptionUpdateParams?.let { setSubscriptionUpdateParams(it) } }
+                .build())
+        }
 
         if (billingResult.responseCode == BillingResponseCode.ITEM_ALREADY_OWNED) {
             Log.w(TAG, "Attempting to purchase already owned product")
@@ -263,7 +264,7 @@ class BillingProvider(context: Context) : AutoCloseable {
         } else if (!billingResult.isOk) throw BillingException(billingResult)
 
         subscriptionPurchases.firstOrNull { it != null }?.let { (billingResult, purchases) ->
-            if (!billingResult.isOk) throw BillingException(billingResult)
+            if (!billingResult.isOk) throw BillingException(billingResult, retryable = false)
             return JSONObject()
                 .put("responseCode", ErrorCode.NoError)
                 .put("purchases", processPurchases(purchases))
@@ -273,7 +274,7 @@ class BillingProvider(context: Context) : AutoCloseable {
     private fun processPurchases(purchases: List<Purchase>?): JSONArray {
         val purchaseArray = JSONArray()
         purchases?.forEach { purchase ->
-            Log.v(TAG, "processPurchases: purchaseToken=${purchase.purchaseToken} orderId=${purchase.orderId} state=${purchase.purchaseState}")
+            Log.v(TAG, "processPurchases: orderId=${purchase.orderId} state=${purchase.purchaseState}")
             JSONObject().also { purchaseArray.put(it) }
                 .put("purchaseToken", purchase.purchaseToken)
                 .put("purchaseTime", purchase.purchaseTime)
@@ -287,7 +288,7 @@ class BillingProvider(context: Context) : AutoCloseable {
     }
 
     suspend fun acknowledge(purchaseToken: String): JSONObject {
-        Log.v(TAG, "Acknowledge purchase: $purchaseToken")
+        Log.v(TAG, "Acknowledge purchase")
 
         val result = withContext(Dispatchers.IO) {
             billingClient.acknowledgePurchase(

@@ -10,7 +10,6 @@
 #include <QSet>
 #include <QUuid>
 #include <QVariantMap>
-#include <tuple>
 
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/configurators/wireguardConfigurator.h"
@@ -36,13 +35,50 @@
     #include "core/utils/swiftBridge.h"
 #elif defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"
-    #include <QtConcurrent>
+    #include "platforms/android/android_utils.h"
 #endif
 
 using namespace amnezia;
 
 namespace
 {
+#if defined(Q_OS_ANDROID)
+constexpr int purchaseStatePurchased = 1;
+constexpr int purchaseStatePending = 2;
+
+ErrorCode billingErrorFromResponse(int responseCode)
+{
+    if (responseCode >= ErrorCode::BillingCanceled && responseCode <= ErrorCode::BillingNetworkError) {
+        return static_cast<ErrorCode>(responseCode);
+    }
+    return ErrorCode::ApiPurchaseError;
+}
+
+struct PlayPurchaseOutcome
+{
+    ErrorCode errorCode = ErrorCode::NoError;
+    QString purchaseToken;
+    bool isUpgrade = false;
+    bool isAcknowledged = false;
+};
+
+void acknowledgePlayPurchase(const QString &purchaseToken, bool isAcknowledged)
+{
+    if (isAcknowledged) {
+        return;
+    }
+    auto androidController = AndroidController::instance();
+    const QJsonObject ackResult = AndroidUtils::runOnWorkerThread([androidController, purchaseToken]() {
+        return androidController->acknowledgePurchase(purchaseToken);
+    });
+    if (ackResult.value("responseCode").toInt(-1) != 0) {
+        qWarning() << "[Billing] Acknowledge failed, responseCode:" << ackResult.value("responseCode").toInt(-1);
+    } else {
+        qInfo() << "[Billing] Purchase acknowledged successfully";
+    }
+}
+#endif
+
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
     if (apiConfig.subscriptionExpiredByServer) {
@@ -329,7 +365,7 @@ ErrorCode SubscriptionController::importServiceFromMarket(const QString &userCou
                                      .build();
 
     QByteArray responseBody;
-    qWarning() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
+    qInfo() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
     ErrorCode errorCode = executeRequest(QString("%1") + endpoint, apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
@@ -863,36 +899,31 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
 {
 #if defined(Q_OS_ANDROID)
     auto androidController = AndroidController::instance();
-    QString purchaseToken;
-    bool purchaseOk = false;
-    bool isUpgrade = false;
 
-    QFutureWatcher<std::tuple<bool, QString, bool>> watcher;
-    QEventLoop waitLoop;
-    QObject::connect(&watcher, &QFutureWatcher<std::tuple<bool, QString, bool>>::finished, &waitLoop, &QEventLoop::quit);
+    const PlayPurchaseOutcome outcome = AndroidUtils::runOnWorkerThread([androidController, productId]() {
+        PlayPurchaseOutcome outcome;
 
-    QFuture<std::tuple<bool, QString, bool>> future = QtConcurrent::run([androidController, productId]() {
         QString oldPurchaseToken;
         QJsonObject existingPurchasesResult = androidController->queryPurchases();
-        qInfo().noquote() << "[Billing] queryPurchases raw result:" << QJsonDocument(existingPurchasesResult).toJson(QJsonDocument::Compact);
         if (existingPurchasesResult.value("responseCode").toInt(-1) == 0) {
             const QJsonArray existingPurchases = existingPurchasesResult.value("purchases").toArray();
             for (const QJsonValue &purchaseValue : existingPurchases) {
                 const QJsonObject existingPurchase = purchaseValue.toObject();
-                if (existingPurchase.value("purchaseState").toInt(-1) == 1) { // PURCHASED
+                if (existingPurchase.value("purchaseState").toInt(-1) == purchaseStatePurchased) {
                     oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
                     qInfo() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
                     break;
                 }
             }
         }
-        const bool isUpgrade = !oldPurchaseToken.isEmpty();
+        outcome.isUpgrade = !oldPurchaseToken.isEmpty();
 
         QJsonObject plansResult = androidController->getSubscriptionPlans();
         int responseCode = plansResult.value("responseCode").toInt(-1);
         if (responseCode != 0) {
             qWarning() << "[Billing] Failed to get subscription plans, responseCode:" << responseCode;
-            return std::make_tuple(false, QString(), isUpgrade);
+            outcome.errorCode = billingErrorFromResponse(responseCode);
+            return outcome;
         }
         QJsonArray products = plansResult.value("products").toArray();
         QString offerToken;
@@ -924,7 +955,8 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         if (offerToken.isEmpty()) offerToken = fallbackOfferToken;
         if (offerToken.isEmpty()) {
             qWarning() << "[Billing] No offer token found for basePlanId:" << productId;
-            return std::make_tuple(false, QString(), isUpgrade);
+            outcome.errorCode = ErrorCode::SubscriptionUnavailable;
+            return outcome;
         }
         QJsonObject purchaseResult = oldPurchaseToken.isEmpty()
                 ? androidController->purchaseSubscription(offerToken)
@@ -932,56 +964,43 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
         responseCode = purchaseResult.value("responseCode").toInt(-1);
         if (responseCode != 0) {
             qWarning() << "[Billing] Purchase failed, responseCode:" << responseCode;
-            return std::make_tuple(false, QString(), isUpgrade);
+            outcome.errorCode = billingErrorFromResponse(responseCode);
+            return outcome;
         }
         QJsonArray purchases = purchaseResult.value("purchases").toArray();
         if (purchases.isEmpty()) {
             qWarning() << "[Billing] Purchase succeeded but no purchases returned";
-            return std::make_tuple(false, QString(), isUpgrade);
+            outcome.errorCode = ErrorCode::ApiPurchaseError;
+            return outcome;
         }
         QJsonObject purchase = purchases.at(0).toObject();
-        QString token = purchase.value("purchaseToken").toString();
-        bool isAcknowledged = purchase.value("isAcknowledged").toBool();
+        outcome.purchaseToken = purchase.value("purchaseToken").toString();
+        outcome.isAcknowledged = purchase.value("isAcknowledged").toBool();
         int purchaseState = purchase.value("purchaseState").toInt(-1);
-        qInfo() << "[Billing] Purchase success. purchaseToken:" << token << "isAcknowledged:" << isAcknowledged << "purchaseState:" << purchaseState;
-        // purchaseState 1 = PURCHASED, 0 = PENDING (user must confirm payment in Google Play)
-        if (purchaseState != 1) {
+        qInfo() << "[Billing] Purchase success. isAcknowledged:" << outcome.isAcknowledged << "purchaseState:" << purchaseState;
+        // purchaseState: 1 = PURCHASED, 2 = PENDING (user must confirm payment in Google Play), 0 = UNSPECIFIED
+        if (purchaseState == purchaseStatePending) {
             qWarning() << "[Billing] Purchase is in PENDING state, waiting for user to confirm payment";
-            return std::make_tuple(false, QStringLiteral("pending"), isUpgrade);
+            outcome.errorCode = ErrorCode::ApiPurchasePendingError;
+            return outcome;
         }
-        if (!isAcknowledged) {
-            QJsonObject ackResult = androidController->acknowledgePurchase(token);
-            if (ackResult.value("responseCode").toInt(-1) != 0) {
-                qWarning() << "[Billing] Acknowledge failed";
-            } else {
-                qInfo() << "[Billing] Purchase acknowledged successfully";
-            }
+        if (purchaseState != purchaseStatePurchased || outcome.purchaseToken.isEmpty()) {
+            outcome.errorCode = ErrorCode::ApiPurchaseError;
+            return outcome;
         }
-        return std::make_tuple(true, token, isUpgrade);
+        return outcome;
     });
 
-    watcher.setFuture(future);
-    waitLoop.exec();
-
-    std::tie(purchaseOk, purchaseToken, isUpgrade) = watcher.result();
-
-    if (!purchaseOk) {
-        if (purchaseToken == QStringLiteral("pending")) {
-            return ErrorCode::ApiPurchasePendingError;
-        }
-        return ErrorCode::ApiPurchaseError;
-    }
-    if (purchaseToken.isEmpty()) {
-        return ErrorCode::ApiPurchaseError;
+    if (outcome.errorCode != ErrorCode::NoError) {
+        return outcome.errorCode;
     }
 
     if (wasUpgrade) {
-        *wasUpgrade = isUpgrade;
+        *wasUpgrade = outcome.isUpgrade;
     }
 
     QByteArray checkResponse;
-    ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
-    qWarning() << "[Billing][processPlayMarketPurchase] getSubscriptionInfo errorCode:" << static_cast<int>(checkError) << "response:" << checkResponse;
+    ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken, checkResponse);
     if (checkError != ErrorCode::NoError) {
         qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
         return checkError;
@@ -992,9 +1011,15 @@ ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userC
     qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
 
     ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                     purchaseToken, isTestPurchase, duplicateServerIndex,
-                                     QStringLiteral("v1/subscriptions"));
+    ErrorCode importError = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                                    outcome.purchaseToken, isTestPurchase, duplicateServerIndex,
+                                                    QStringLiteral("v1/subscriptions"));
+
+    if (importError == ErrorCode::NoError || importError == ErrorCode::ApiConfigAlreadyAdded) {
+        acknowledgePlayPurchase(outcome.purchaseToken, outcome.isAcknowledged);
+    }
+
+    return importError;
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
@@ -1117,23 +1142,14 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
 #if defined(Q_OS_ANDROID)
     auto androidController = AndroidController::instance();
 
-    QJsonObject purchasesResult;
-    {
-        QFutureWatcher<QJsonObject> queryWatcher;
-        QEventLoop queryLoop;
-        QObject::connect(&queryWatcher, &QFutureWatcher<QJsonObject>::finished, &queryLoop, &QEventLoop::quit);
-        QFuture<QJsonObject> queryFuture = QtConcurrent::run([androidController]() {
-            return androidController->queryPurchases();
-        });
-        queryWatcher.setFuture(queryFuture);
-        queryLoop.exec();
-        purchasesResult = queryWatcher.result();
-    }
+    const QJsonObject purchasesResult = AndroidUtils::runOnWorkerThread([androidController]() {
+        return androidController->queryPurchases();
+    });
 
     int responseCode = purchasesResult.value("responseCode").toInt(-1);
     if (responseCode != 0) {
         qWarning().noquote() << "[Billing] queryPurchases failed, responseCode =" << responseCode;
-        result.errorCode = ErrorCode::ApiPurchaseError;
+        result.errorCode = billingErrorFromResponse(responseCode);
         return result;
     }
 
@@ -1154,35 +1170,21 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
             continue;
         }
 
+        if (purchaseObj.value("purchaseState").toInt(-1) != purchaseStatePurchased) {
+            qInfo().noquote() << "[Billing] Skipping purchase in state" << purchaseObj.value("purchaseState").toInt(-1);
+            continue;
+        }
+
         if (processedTokens.contains(purchaseToken)) {
             result.duplicateCount++;
             continue;
         }
         processedTokens.insert(purchaseToken);
 
-        qInfo().noquote() << "[Billing] Restoring subscription with purchaseToken =" << purchaseToken;
-
-        {
-            QFutureWatcher<QJsonObject> ackWatcher;
-            QEventLoop ackLoop;
-            QObject::connect(&ackWatcher, &QFutureWatcher<QJsonObject>::finished, &ackLoop, &QEventLoop::quit);
-            QFuture<QJsonObject> ackFuture = QtConcurrent::run([androidController, purchaseToken]() {
-                return androidController->acknowledgePurchase(purchaseToken);
-            });
-            ackWatcher.setFuture(ackFuture);
-            ackLoop.exec();
-            QJsonObject ackResult = ackWatcher.result();
-            int ackCode = ackResult.value("responseCode").toInt(-1);
-            if (ackCode != 0) {
-                qWarning().noquote() << "[Billing] acknowledgePurchase failed, responseCode =" << ackCode;
-            } else {
-                qInfo().noquote() << "[Billing] Purchase acknowledged successfully";
-            }
-        }
+        qInfo().noquote() << "[Billing] Restoring subscription";
 
         QByteArray checkResponse;
         ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
-        qWarning() << "[Billing][processPlayMarketRestore] getSubscriptionInfo errorCode:" << static_cast<int>(checkError) << "response:" << checkResponse;
         if (checkError != ErrorCode::NoError) {
             qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
             result.errorCode = checkError;
@@ -1205,19 +1207,22 @@ SubscriptionController::PlayMarketRestoreResult SubscriptionController::processP
             if (result.duplicateServerIndex < 0) {
                 result.duplicateServerIndex = currentDuplicateServerIndex;
             }
-            qInfo().noquote() << "[Billing] Skipping purchase" << purchaseToken
-                              << "because subscription config with the same vpn_key already exists";
+            qInfo().noquote() << "[Billing] Skipping purchase because subscription config with the same vpn_key already exists";
         } else if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[Billing] Failed to process restored subscription for purchaseToken =" << purchaseToken
-                                 << "errorCode =" << static_cast<int>(errorCode);
+            qWarning().noquote() << "[Billing] Failed to process restored subscription, errorCode =" << static_cast<int>(errorCode);
             result.errorCode = errorCode;
+            continue;
         } else {
             result.hasInstalledConfig = true;
         }
+
+        acknowledgePlayPurchase(purchaseToken, purchaseObj.value("isAcknowledged").toBool());
     }
 
-    if (!result.hasInstalledConfig) {
-        result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiNoPurchasesToRestore;
+    if (!result.hasInstalledConfig && !result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::NoError) {
+        result.errorCode = ErrorCode::ApiNoPurchasesToRestore;
+    } else if (!result.hasInstalledConfig && result.duplicateConfigAlreadyPresent) {
+        result.errorCode = ErrorCode::ApiConfigAlreadyAdded;
     }
 
     return result;
@@ -1237,18 +1242,9 @@ QStringList SubscriptionController::resolveActiveStoreProductIds()
 #if defined(Q_OS_ANDROID)
     auto androidController = AndroidController::instance();
 
-    QJsonObject purchasesResult;
-    {
-        QFutureWatcher<QJsonObject> queryWatcher;
-        QEventLoop queryLoop;
-        QObject::connect(&queryWatcher, &QFutureWatcher<QJsonObject>::finished, &queryLoop, &QEventLoop::quit);
-        QFuture<QJsonObject> queryFuture = QtConcurrent::run([androidController]() {
-            return androidController->queryPurchases();
-        });
-        queryWatcher.setFuture(queryFuture);
-        queryLoop.exec();
-        purchasesResult = queryWatcher.result();
-    }
+    const QJsonObject purchasesResult = AndroidUtils::runOnWorkerThread([androidController]() {
+        return androidController->queryPurchases();
+    });
 
     if (purchasesResult.value("responseCode").toInt(-1) != 0) {
         qWarning().noquote() << "[Billing][resolveActiveStoreProductIds] queryPurchases failed";
@@ -1258,7 +1254,7 @@ QStringList SubscriptionController::resolveActiveStoreProductIds()
     const QJsonArray purchases = purchasesResult.value("purchases").toArray();
     for (const QJsonValue &purchaseValue : purchases) {
         const QJsonObject purchaseObj = purchaseValue.toObject();
-        if (purchaseObj.value("purchaseState").toInt() != 1) {
+        if (purchaseObj.value("purchaseState").toInt() != purchaseStatePurchased) {
             continue;
         }
         const QJsonArray productIds = purchaseObj.value("productIds").toArray();

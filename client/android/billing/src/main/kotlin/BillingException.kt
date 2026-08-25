@@ -14,7 +14,7 @@ import org.amnezia.vpn.util.ErrorCode
 
 internal class BillingException(
     billingResult: BillingResult,
-    retryable: Boolean = false
+    retryable: Boolean? = null
 ) : Exception(billingResult.toString()) {
 
     constructor(msg: String) : this(BillingResult.newBuilder()
@@ -24,12 +24,12 @@ internal class BillingException(
 
     val errorCode: Int
     val isCanceled = billingResult.responseCode == USER_CANCELED
-    val isRetryable = retryable || billingResult.responseCode in setOf(
+    val isRetryable = retryable ?: (billingResult.responseCode in setOf(
         NETWORK_ERROR,
         SERVICE_DISCONNECTED,
         SERVICE_UNAVAILABLE,
         ERROR
-    )
+    ))
 
     init {
         when (billingResult.responseCode) {

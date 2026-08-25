@@ -21,19 +21,20 @@ PageType {
 
     readonly property var currentPlan: ApiSubscriptionPlansModel.planAt(selectedPlanIndex)
     readonly property bool anyPlanHasFreeTrial: ApiSubscriptionPlansModel.hasAnyFreeTrial()
+    readonly property bool storePurchaseAvailable: Qt.platform.os === "ios" || IsMacOsNeBuild
+                                                   || (Qt.platform.os === "android" && IsPlayBuild)
 
     function proceedWithPurchase(plan) {
+        var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
         if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
             PageController.showBusyIndicator(true)
-            var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
             SubscriptionUiController.importPremiumFromAppStore(storeId)
             PageController.showBusyIndicator(false)
             return
         }
-        if (Qt.platform.os === "android") {
+        if (Qt.platform.os === "android" && IsPlayBuild) {
             PageController.showBusyIndicator(true)
-            var androidStoreId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-            SubscriptionUiController.importPremiumFromPlayMarket(androidStoreId)
+            SubscriptionUiController.importPremiumFromPlayMarket(storeId)
             PageController.showBusyIndicator(false)
             return
         }
@@ -45,11 +46,16 @@ PageType {
         }
     }
 
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    }
+
     function syncFromModel() {
         root.selectedPlanIndex = ApiSubscriptionPlansModel.recommendedRowIndex()
 
-        var rawHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
-        root.premiumHeaderName = rawHeaderName.replace("Premium", "<span style=\"color: #950051;\">Premium</span>")
+        var rawHeaderName = escapeHtml(String(ApiServicesModel.getSelectedServiceData("name")))
+        root.premiumHeaderName = rawHeaderName.replace("Premium",
+                "<font color=\"" + AmneziaStyle.color.deepMagenta + "\">Premium</font>")
         root.premiumHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
     }
 
@@ -99,7 +105,7 @@ PageType {
                 LabelTextType {
                     id: trialBadgeLabel
                     anchors.centerIn: parent
-                    text: root.currentPlan ? qsTr("Try free for %1 days").arg(root.currentPlan.trialDays) : ""
+                    text: root.currentPlan ? qsTr("Try free for %n day(s)", "", Number(root.currentPlan.trialDays)) : ""
                     color: AmneziaStyle.color.midnightBlack
                     font.pixelSize: 11
                     font.weight: Font.Medium
@@ -113,7 +119,7 @@ PageType {
                 Layout.bottomMargin: 24
 
                 headerText: root.premiumHeaderName
-                headerTextFormat: Text.RichText
+                headerTextFormat: Text.StyledText
                 headerHorizontalAlignment: Text.AlignHCenter
                 descriptionText: root.premiumHeaderDescription
             }
@@ -268,7 +274,7 @@ PageType {
                         return qsTr("Continue")
                     }
                     if (plan.hasFreeTrial) {
-                        return qsTr("Start %1-day free trial").arg(plan.trialDays)
+                        return qsTr("Start %n-day free trial", "", Number(plan.trialDays))
                     }
                     return qsTr("Subscribe — %1 for %2").arg(String(plan.billingPeriod)).arg(String(plan.priceLabel))
                 }
@@ -283,31 +289,34 @@ PageType {
                         return
                     }
 
-                    var active = SubscriptionUiController.currentActivePlanInfo()
-                    var planPrice = Number(plan.priceAmount)
-                    var activePrice = active ? Number(active.priceAmount) : 0
+                    if (root.storePurchaseAvailable) {
+                        var active = SubscriptionUiController.currentActivePlanInfo()
+                        if (active && active.hasActivePlan) {
+                            var planPrice = Number(plan.priceAmount)
+                            var activePrice = Number(active.priceAmount)
+                            var pricesKnown = planPrice > 0 && activePrice > 0
 
-                    if (active && active.hasActivePlan && planPrice > 0 && activePrice > 0) {
-                        var headerText
-                        var descriptionText
-                        if (planPrice > activePrice) {
-                            headerText = qsTr("Upgrade subscription?")
-                            descriptionText = qsTr("You're switching to a more expensive plan — %1/%2. The change applies immediately and replaces your current plan.")
-                                    .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
-                        } else if (planPrice < activePrice) {
-                            headerText = qsTr("Downgrade subscription?")
-                            descriptionText = qsTr("You're switching to a cheaper plan — %1/%2. The change applies immediately and replaces your current plan.")
-                                    .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
-                        } else {
-                            headerText = qsTr("Confirm subscription?")
-                            descriptionText = qsTr("You already have an active subscription. This will replace it with %1/%2.")
-                                    .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            var headerText
+                            var descriptionText
+                            if (pricesKnown && planPrice > activePrice) {
+                                headerText = qsTr("Upgrade subscription?")
+                                descriptionText = qsTr("You're switching to a more expensive plan — %1/%2. The change applies immediately and replaces your current plan.")
+                                        .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            } else if (pricesKnown && planPrice < activePrice) {
+                                headerText = qsTr("Downgrade subscription?")
+                                descriptionText = qsTr("You're switching to a cheaper plan — %1/%2. The change applies immediately and replaces your current plan.")
+                                        .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            } else {
+                                headerText = qsTr("Confirm subscription?")
+                                descriptionText = qsTr("You already have an active subscription. This will replace it with %1/%2.")
+                                        .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            }
+
+                            showQuestionDrawer(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
+                                function() { root.proceedWithPurchase(plan) },
+                                function() {})
+                            return
                         }
-
-                        showQuestionDrawer(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
-                            function() { root.proceedWithPurchase(plan) },
-                            function() {})
-                        return
                     }
 
                     root.proceedWithPurchase(plan)
@@ -329,10 +338,10 @@ PageType {
                         return ""
                     }
                     if (plan.hasFreeTrial) {
-                        return qsTr("%1 days free, then %2/%3. Auto-renews until canceled. Cancel anytime in Settings.")
-                                .arg(plan.trialDays).arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                        return qsTr("%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.", "", Number(plan.trialDays))
+                                .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                     }
-                    return qsTr("%1/%2, auto-renewal. Cancel at anytime in the Settings.")
+                    return qsTr("%1/%2, auto-renewal. Cancel anytime in the Settings.")
                             .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                 }
             }

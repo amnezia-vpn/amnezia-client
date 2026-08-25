@@ -20,8 +20,7 @@
 #include "platforms/ios/ios_controller.h"
 #elif defined(Q_OS_ANDROID)
 #include "platforms/android/android_controller.h"
-#include <QFutureWatcher>
-#include <QtConcurrent>
+#include "platforms/android/android_utils.h"
 #endif
 
 namespace
@@ -148,17 +147,10 @@ namespace
         Q_UNUSED(productIds); // Google Play returns every offer for the app's single product in one call
 
         auto androidController = AndroidController::instance();
-        QFutureWatcher<QJsonObject> watcher;
-        QEventLoop waitLoop;
-        QObject::connect(&watcher, &QFutureWatcher<QJsonObject>::finished, &waitLoop, &QEventLoop::quit);
-
-        QFuture<QJsonObject> future = QtConcurrent::run([androidController]() {
+        const QJsonObject plansResult = AndroidUtils::runOnWorkerThread([androidController]() {
             return androidController->getSubscriptionPlans();
         });
-        watcher.setFuture(future);
-        waitLoop.exec();
 
-        QJsonObject plansResult = watcher.result();
         QHash<QString, SubscriptionPlanQuote> quotesByProductId;
         if (plansResult.value("responseCode").toInt(-1) != 0) {
             qWarning() << "[Billing] Failed to get subscription plans for price display, responseCode:"
@@ -200,7 +192,7 @@ namespace
                 const QJsonObject regularPhase = pricingPhases.last().toObject();
 
                 SubscriptionPlanQuote quote;
-                quote.displayPrice = regularPhase.value("formatedPrice").toString();
+                quote.displayPrice = regularPhase.value("formattedPrice").toString();
                 if (quote.displayPrice.isEmpty()) {
                     continue;
                 }
@@ -328,8 +320,6 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
-    qWarning() << "[ServicesCatalog] errorCode:" << static_cast<int>(errorCode)
-               << "response:" << QString::fromLocal8Bit(responseBody);
     if (errorCode == ErrorCode::NoError) {
         if (!responseBody.contains(apiDefs::key::services.data())) {
             errorCode = ErrorCode::ApiServicesMissingError;
@@ -353,8 +343,7 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
 ErrorCode ServicesCatalogController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody)
 {
-    QString gatewayEndpoint = m_appSettingsRepository->getGatewayEndpoint();
-    GatewayController gatewayController(gatewayEndpoint, m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
+    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }

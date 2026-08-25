@@ -356,11 +356,6 @@ bool AndroidController::isPlay()
     return callActivityMethod<jboolean>("isPlay", "()Z");
 }
 
-bool AndroidController::isTestPurchaseEnvironment()
-{
-    return callActivityMethod<jboolean>("isTestPurchaseEnvironment", "()Z");
-}
-
 QJsonObject AndroidController::getSubscriptionPlans()
 {
     QJniObject subscriptionPlans = callActivityMethod<jstring>("getSubscriptionPlans", "()Ljava/lang/String;");

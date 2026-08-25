@@ -1,6 +1,6 @@
 package org.amnezia.vpn.util
 
-// keep synchronized with client/core/defs.h error_code_ns::ErrorCode
+// keep synchronized with client/core/utils/errorCodes.h amnezia::ErrorCode
 object ErrorCode {
     const val NoError = 0
 
