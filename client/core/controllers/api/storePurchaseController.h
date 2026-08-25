@@ -49,6 +49,14 @@ public:
 
     QStringList resolveActiveStoreProductIds();
 
+    // Android counterpart of the iOS Transaction.updates listener: purchases that were
+    // paid but never acknowledged (validation failed earlier, or a PENDING purchase was
+    // completed outside the app). Call the cheap check first; the process method
+    // validates each purchase on the gateway and acknowledges it on success.
+    bool hasUnacknowledgedPlayPurchases();
+    bool processUnacknowledgedPlayPurchases(const QString &userCountryCode, const QString &serviceType,
+                                            const QString &serviceProtocol);
+
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
                              bool isTestPurchase = false);
@@ -62,6 +70,11 @@ private:
                                       const SubscriptionController::ProtocolData &protocolData,
                                       const QString &transactionId, bool isTestPurchase,
                                       int *duplicateServerIndex, const QString &endpoint);
+
+    // Defined for Android builds only
+    ErrorCode validateAndAcknowledgePlayPurchase(const QString &userCountryCode, const QString &serviceType,
+                                                 const QString &serviceProtocol, const QString &purchaseToken,
+                                                 bool isAcknowledged, int *duplicateServerIndex);
 
     SecureServersRepository *m_serversRepository;
     SecureAppSettingsRepository *m_appSettingsRepository;

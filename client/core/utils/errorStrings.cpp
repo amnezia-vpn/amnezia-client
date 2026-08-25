@@ -101,7 +101,7 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
     case (ErrorCode::ApiPurchasePendingError):
 #if defined(Q_OS_ANDROID)
-        errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Please complete the payment and then restore your subscription.");
+        errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.");
 #elif defined(Q_OS_IOS) || defined(MACOS_NE)
         errorMessage = QObject::tr("Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.");
 #else

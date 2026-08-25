@@ -147,6 +147,8 @@ private:
     QSet<QString> m_handledStoreUpdateTransactionIds;
     QQueue<QVariantMap> m_pendingStoreUpdates;
     bool m_storeUpdateInProgress = false;
+#elif defined(Q_OS_ANDROID)
+    void checkUnacknowledgedPlayPurchases();
 #endif
 
     QList<QString> getQrCodes();

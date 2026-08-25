@@ -62,6 +62,27 @@ void acknowledgePlayPurchase(const QString &purchaseToken, bool isAcknowledged)
         qInfo() << "[Billing] Purchase acknowledged successfully";
     }
 }
+
+QJsonArray queryPlayPurchases()
+{
+    auto androidController = AndroidController::instance();
+    const QJsonObject purchasesResult = AndroidUtils::runOnWorkerThread([androidController]() {
+        return androidController->queryPurchases();
+    });
+    if (purchasesResult.value("responseCode").toInt(-1) != 0) {
+        qWarning().noquote() << "[Billing] queryPurchases failed, responseCode ="
+                             << purchasesResult.value("responseCode").toInt(-1);
+        return {};
+    }
+    return purchasesResult.value("purchases").toArray();
+}
+
+bool isPaidButUnacknowledged(const QJsonObject &purchaseObj)
+{
+    return purchaseObj.value("purchaseState").toInt(-1) == purchaseStatePurchased
+            && !purchaseObj.value("isAcknowledged").toBool(true)
+            && !purchaseObj.value("purchaseToken").toString().isEmpty();
+}
 }
 #endif
 
@@ -561,24 +582,10 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processPlay
 
         qInfo().noquote() << "[Billing] Restoring subscription";
 
-        QByteArray checkResponse;
-        ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
-        if (checkError != ErrorCode::NoError) {
-            qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
-            result.errorCode = checkError;
-            continue;
-        }
-
-        QJsonObject checkObject = QJsonDocument::fromJson(checkResponse).object();
-        bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
-        qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
-
-        SubscriptionController::ProtocolData protocolData = SubscriptionController::generateProtocolData(serviceProtocol);
         int currentDuplicateServerIndex = -1;
-        ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                      purchaseToken, isTestPurchase,
-                                                      &currentDuplicateServerIndex,
-                                                      QStringLiteral("v1/restore_subscription"));
+        ErrorCode errorCode = validateAndAcknowledgePlayPurchase(userCountryCode, serviceType, serviceProtocol,
+                                                                 purchaseToken, purchaseObj.value("isAcknowledged").toBool(),
+                                                                 &currentDuplicateServerIndex);
 
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             result.duplicateConfigAlreadyPresent = true;
@@ -589,12 +596,9 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processPlay
         } else if (errorCode != ErrorCode::NoError) {
             qWarning().noquote() << "[Billing] Failed to process restored subscription, errorCode =" << static_cast<int>(errorCode);
             result.errorCode = errorCode;
-            continue;
         } else {
             result.hasInstalledConfig = true;
         }
-
-        acknowledgePlayPurchase(purchaseToken, purchaseObj.value("isAcknowledged").toBool());
     }
 
     if (!result.hasInstalledConfig && !result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::NoError) {
@@ -610,6 +614,89 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processPlay
     Q_UNUSED(serviceProtocol);
     result.errorCode = ErrorCode::ApiPurchaseError;
     return result;
+#endif
+}
+
+#if defined(Q_OS_ANDROID)
+ErrorCode StorePurchaseController::validateAndAcknowledgePlayPurchase(const QString &userCountryCode, const QString &serviceType,
+                                                                      const QString &serviceProtocol, const QString &purchaseToken,
+                                                                      bool isAcknowledged, int *duplicateServerIndex)
+{
+    QByteArray checkResponse;
+    ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
+    if (checkError != ErrorCode::NoError) {
+        qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
+        return checkError;
+    }
+
+    QJsonObject checkObject = QJsonDocument::fromJson(checkResponse).object();
+    bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
+    qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
+
+    SubscriptionController::ProtocolData protocolData = SubscriptionController::generateProtocolData(serviceProtocol);
+    ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                                  purchaseToken, isTestPurchase, duplicateServerIndex,
+                                                  QStringLiteral("v1/restore_subscription"));
+
+    // Acknowledge only after the gateway has accepted the purchase; otherwise it stays
+    // unacknowledged and is retried on the next startup check or manual restore
+    if (errorCode == ErrorCode::NoError || errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+        acknowledgePlayPurchase(purchaseToken, isAcknowledged);
+    }
+    return errorCode;
+}
+#endif
+
+bool StorePurchaseController::hasUnacknowledgedPlayPurchases()
+{
+#if defined(Q_OS_ANDROID)
+    const QJsonArray purchases = queryPlayPurchases();
+    for (const QJsonValue &purchaseValue : purchases) {
+        if (isPaidButUnacknowledged(purchaseValue.toObject())) {
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
+bool StorePurchaseController::processUnacknowledgedPlayPurchases(const QString &userCountryCode, const QString &serviceType,
+                                                                 const QString &serviceProtocol)
+{
+#if defined(Q_OS_ANDROID)
+    bool installedNewConfig = false;
+    QSet<QString> processedTokens;
+
+    const QJsonArray purchases = queryPlayPurchases();
+    for (const QJsonValue &purchaseValue : purchases) {
+        const QJsonObject purchaseObj = purchaseValue.toObject();
+        if (!isPaidButUnacknowledged(purchaseObj)) {
+            continue;
+        }
+
+        const QString purchaseToken = purchaseObj.value("purchaseToken").toString();
+        if (processedTokens.contains(purchaseToken)) {
+            continue;
+        }
+        processedTokens.insert(purchaseToken);
+
+        qInfo().noquote() << "[Billing] Found paid but unacknowledged purchase, validating";
+
+        ErrorCode errorCode = validateAndAcknowledgePlayPurchase(userCountryCode, serviceType, serviceProtocol,
+                                                                 purchaseToken, false, nullptr);
+        if (errorCode == ErrorCode::NoError) {
+            installedNewConfig = true;
+        } else if (errorCode != ErrorCode::ApiConfigAlreadyAdded) {
+            qWarning().noquote() << "[Billing] Purchase validation failed, errorCode =" << static_cast<int>(errorCode)
+                                 << "- will retry on next launch";
+        }
+    }
+    return installedNewConfig;
+#else
+    Q_UNUSED(userCountryCode);
+    Q_UNUSED(serviceType);
+    Q_UNUSED(serviceProtocol);
+    return false;
 #endif
 }
 

@@ -18,6 +18,8 @@
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
+#elif defined(Q_OS_ANDROID)
+    #include "platforms/android/android_controller.h"
 #endif
 
 namespace
@@ -77,6 +79,11 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
     connect(IosController::Instance(), &IosController::storeTransactionUpdated, this,
             &SubscriptionUiController::onStoreTransactionUpdated, Qt::QueuedConnection);
     IosController::Instance()->startStoreTransactionObserver();
+#elif defined(Q_OS_ANDROID)
+    // Counterpart of the iOS Transaction.updates listener: once the event loop is up,
+    // pick up purchases that were paid but never acknowledged (validation failed earlier
+    // or a PENDING purchase was completed outside the app)
+    QTimer::singleShot(0, this, [this]() { checkUnacknowledgedPlayPurchases(); });
 #endif
 }
 
@@ -353,6 +360,33 @@ void SubscriptionUiController::processStoreTransactionUpdate(const QVariantMap &
     }
 }
 
+#elif defined(Q_OS_ANDROID)
+void SubscriptionUiController::checkUnacknowledgedPlayPurchases()
+{
+    if (!AndroidController::instance()->isPlay()) {
+        return;
+    }
+
+    if (!m_storePurchaseController->hasUnacknowledgedPlayPurchases()) {
+        return;
+    }
+
+    qInfo().noquote() << "[Billing] Found unacknowledged purchases on startup, validating";
+
+    // Failures here are intentionally silent: the purchase stays unacknowledged
+    // and is retried on the next launch (or via manual restore)
+    if (!selectPremiumServiceQuietly()) {
+        qWarning().noquote() << "[Billing] Unable to select premium service for purchase validation, will retry on next launch";
+        return;
+    }
+
+    if (m_storePurchaseController->processUnacknowledgedPlayPurchases(
+            m_apiServicesModel->getCountryCode(),
+            m_apiServicesModel->getSelectedServiceType(),
+            m_apiServicesModel->getSelectedServiceProtocol())) {
+        emit installServerFromApiFinished(tr("Purchase confirmed. Subscription has been added to the app"));
+    }
+}
 #endif
 
 bool SubscriptionUiController::selectPremiumServiceQuietly()
