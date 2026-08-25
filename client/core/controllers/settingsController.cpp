@@ -351,16 +351,6 @@ void SettingsController::setAppLanguage(const QLocale &locale)
     m_appSettingsRepository->setAppLanguage(locale);
 }
 
-bool SettingsController::isPremV1MigrationReminderActive() const
-{
-    return m_appSettingsRepository->isPremV1MigrationReminderActive();
-}
-
-void SettingsController::disablePremV1MigrationReminder()
-{
-    m_appSettingsRepository->disablePremV1MigrationReminder();
-}
-
 QString SettingsController::nextAvailableServerName() const
 {
     return m_serversRepository->nextAvailableServerName();

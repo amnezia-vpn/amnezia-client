@@ -97,7 +97,6 @@ namespace amnezia
         ApiServicesMissingError = 1107,
         ApiConfigLimitError = 1108,
         ApiNotFoundError = 1109,
-        ApiMigrationError = 1110,
         ApiUpdateRequestError = 1111,
         ApiSubscriptionExpiredError = 1112,
         ApiPurchaseError = 1113,

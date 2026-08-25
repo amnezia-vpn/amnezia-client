@@ -79,12 +79,10 @@ private:
     static int unlinkChain(IPVersion ip, const QString& chain, const QString& parent, const QString& tableName = kFilterTable);
     static void installAnchor(IPVersion ip, const QString& anchor, const QStringList& rules, const QString& tableName = kFilterTable, const FilterCallbackFunc& enableFunc = {}, const FilterCallbackFunc& disableFunc = {});
     static void uninstallAnchor(IPVersion ip, const QString& anchor, const QString& tableName = kFilterTable);
-    static QStringList getDNSRules(const QStringList& servers);
-    static QStringList getAllowRule(const QStringList& servers);
-    static QStringList getBlockRule(const QStringList& servers);
     static void setupTrafficSplitting();
     static void teardownTrafficSplitting();
     static int execute(const QString& command, bool ignoreErrors = false);
+    static int executeIptables(const QString& program, const QStringList& args, bool ignoreErrors = false);
 private:
     // Chain names
     static QString kOutputChain, kRootChain, kPostRoutingChain, kPreRoutingChain;

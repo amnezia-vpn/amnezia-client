@@ -78,6 +78,8 @@ void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
     serverConfig.rejectAfterTime = protocols::awg::defaultRejectAfterTime;
     serverConfig.keepaliveTimeout = protocols::awg::defaultKeepaliveTimeout;
     serverConfig.maxHandshakeAttempts = protocols::awg::defaultMaxHandshakeAttempts;
+    serverConfig.randomTrailers = protocols::awg::defaultRandomTrailers;
+    serverConfig.disableCookies = protocols::awg::defaultDisableCookies;
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
@@ -144,6 +146,8 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         awgConfig->serverConfig.rejectAfterTime = serverConfigMap.value(configKey::rejectAfterTime);
         awgConfig->serverConfig.keepaliveTimeout = serverConfigMap.value(configKey::keepaliveTimeout);
         awgConfig->serverConfig.maxHandshakeAttempts = serverConfigMap.value(configKey::maxHandshakeAttempts);
+        awgConfig->serverConfig.randomTrailers = serverConfigMap.value(configKey::randomTrailers);
+        awgConfig->serverConfig.disableCookies = serverConfigMap.value(configKey::disableCookies);
 
         awgConfig->serverConfig.protocolVersion = awgConfig->serverProtocolVersion();
     }

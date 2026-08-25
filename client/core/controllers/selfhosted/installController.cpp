@@ -201,9 +201,6 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     SshSession sshSession;
 
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
-    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-        reinstallRequired = true;
-    }
     qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     ErrorCode errorCode = ErrorCode::NoError;
@@ -216,7 +213,7 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
                 awgConfig->serverConfig.protocolVersion = protocols::awg::awgV3;
             }
         }
-    } else {
+    } else if (container != DockerContainer::Xray && container != DockerContainer::SSXray) {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
             errorCode = startupContainerWorker(credentials, container, newConfig, sshSession);
