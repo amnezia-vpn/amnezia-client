@@ -293,16 +293,16 @@ PageType {
                             var headerText
                             var descriptionText
                             if (pricesKnown && planPrice > activePrice) {
-                                headerText = qsTr("Upgrade subscription?")
-                                descriptionText = qsTr("You're switching to a more expensive plan — %1/%2. The change applies immediately and replaces your current plan.")
+                                headerText = qsTr("Upgrade plan?")
+                                descriptionText = qsTr("The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation")
                                         .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                             } else if (pricesKnown && planPrice < activePrice) {
-                                headerText = qsTr("Downgrade subscription?")
-                                descriptionText = qsTr("You're switching to a cheaper plan — %1/%2. The change applies immediately and replaces your current plan.")
+                                headerText = qsTr("Downgrade plan?")
+                                descriptionText = qsTr("The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules")
                                         .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                             } else {
-                                headerText = qsTr("Confirm subscription?")
-                                descriptionText = qsTr("You already have an active subscription. This will replace it with %1/%2.")
+                                headerText = qsTr("Confirm subscription change?")
+                                descriptionText = qsTr("An active subscription already exists. The current plan will be replaced with the %1 / %2 plan")
                                         .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                             }
 
