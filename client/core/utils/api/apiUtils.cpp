@@ -8,6 +8,10 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#if defined(Q_OS_ANDROID)
+    #include "platforms/android/android_controller.h"
+#endif
+
 using namespace amnezia;
 
 namespace
@@ -60,7 +64,10 @@ QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSetti
 QString apiUtils::getDistributionChannel()
 {
 #if defined(Q_OS_ANDROID)
-    return {};
+    static const QString channel = AndroidController::instance()->isPlay()
+            ? QStringLiteral("googleplay")
+            : QString();
+    return channel;
 #elif defined(Q_OS_IOS) || defined(MACOS_NE)
     return QStringLiteral("appstore");
 #else

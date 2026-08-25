@@ -8,6 +8,12 @@ public class StoreKit2Helper: NSObject {
     public static let shared = StoreKit2Helper()
     private static let errorDomain = "StoreKit2Helper"
 
+    // Error codes surfaced to the native bridge; keep in sync with ios_controller.mm
+    public static let errorCodeCancelled = 1
+    public static let errorCodePending = 2
+
+    private var updatesTask: Task<Void, Never>?
+
     private struct EntitlementInfo {
         let transactionId: UInt64
         let originalTransactionId: UInt64
@@ -61,6 +67,9 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
+    // The transaction is intentionally NOT finished here: it must stay in the unfinished
+    // queue until the gateway validates the purchase and the config is delivered.
+    // Call finishTransaction(transactionId:) after successful validation.
     public func purchaseProduct(productIdentifier: String, completion: @escaping (Bool, String?, String?, String?, NSError?) -> Void) {
         Task {
             do {
@@ -75,7 +84,6 @@ public class StoreKit2Helper: NSObject {
                 case .success(let verification):
                     switch verification {
                     case .verified(let transaction):
-                        await transaction.finish()
                         completePurchase(completion: completion, success: true, transactionId: String(transaction.id),
                                          productId: transaction.productID, originalTransactionId: String(transaction.originalID), error: nil)
                     case .unverified(_, let error):
@@ -84,17 +92,65 @@ public class StoreKit2Helper: NSObject {
                     }
                 case .userCancelled:
                     completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
-                                     error: makeError(code: 1, description: "Purchase cancelled"))
+                                     error: makeError(code: Self.errorCodeCancelled, description: "Purchase cancelled"))
                 case .pending:
                     completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
-                                     error: makeError(code: 2, description: "Purchase pending"))
+                                     error: makeError(code: Self.errorCodePending, description: "Purchase pending"))
                 @unknown default:
                     completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
                                      error: makeError(code: 3, description: "Unknown purchase result"))
                 }
+            } catch StoreKitError.userCancelled {
+                completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
+                                 error: makeError(code: Self.errorCodeCancelled, description: "Purchase cancelled"))
             } catch {
                 completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
                                  error: error as NSError)
+            }
+        }
+    }
+
+    public func finishTransaction(transactionId: String, completion: @escaping (Bool) -> Void) {
+        Task {
+            for await result in Transaction.unfinished {
+                guard case .verified(let transaction) = result, String(transaction.id) == transactionId else {
+                    continue
+                }
+                await transaction.finish()
+                print("[IAP][StoreKit2] Finished transaction \(transactionId)")
+                DispatchQueue.main.async { completion(true) }
+                return
+            }
+            print("[IAP][StoreKit2] No unfinished transaction with id \(transactionId) to finish")
+            DispatchQueue.main.async { completion(false) }
+        }
+    }
+
+    public func startTransactionUpdatesListener(handler: @escaping (NSDictionary) -> Void) {
+        guard updatesTask == nil else { return }
+        updatesTask = Task {
+            var deliveredIds = Set<UInt64>()
+
+            func deliver(_ result: VerificationResult<Transaction>) {
+                switch result {
+                case .verified(let transaction):
+                    guard deliveredIds.insert(transaction.id).inserted else { return }
+                    let info = EntitlementInfo(transactionId: transaction.id,
+                                               originalTransactionId: transaction.originalID,
+                                               productId: transaction.productID,
+                                               purchaseDate: transaction.purchaseDate)
+                    print("[IAP][StoreKit2] Transaction update: id=\(transaction.id) product=\(transaction.productID)")
+                    DispatchQueue.main.async { handler(info.dictionary) }
+                case .unverified(_, let error):
+                    print("[IAP][StoreKit2] Unverified transaction update skipped: \(error.localizedDescription)")
+                }
+            }
+
+            for await result in Transaction.unfinished {
+                deliver(result)
+            }
+            for await result in Transaction.updates {
+                deliver(result)
             }
         }
     }

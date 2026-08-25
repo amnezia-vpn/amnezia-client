@@ -99,7 +99,15 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
     case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
     case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
-    case (ErrorCode::ApiPurchasePendingError): errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Please complete the payment and then restore your subscription."); break;
+    case (ErrorCode::ApiPurchasePendingError):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Please complete the payment and then restore your subscription.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.");
+#else
+        errorMessage = QObject::tr("Your payment is pending confirmation. Please complete the payment and then restore your subscription.");
+#endif
+        break;
     case (ErrorCode::ApiNoPurchasesToRestore):
 #if defined(Q_OS_ANDROID)
         errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Google account used for the purchase.");

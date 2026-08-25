@@ -18,7 +18,6 @@ public:
         RecommendedRole,
         CheckoutUrlRole,
         IsTrialRole,
-        ServiceProtocolRole,
         StoreProductIdRole,
         HasFreeTrialRole,
         TrialDaysRole
@@ -49,7 +48,6 @@ private:
         bool recommended = false;
         QString checkoutUrl;
         bool isTrial = false;
-        QString serviceProtocol;
         QString storeProductId;
         bool hasFreeTrial = false;
         int trialDays = 0;

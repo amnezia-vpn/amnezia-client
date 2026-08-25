@@ -4,8 +4,6 @@
 #include <QJsonObject>
 #include <QByteArray>
 #include <QFuture>
-#include <QList>
-#include <QVariantMap>
 
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
@@ -37,7 +35,7 @@ public:
     explicit SubscriptionController(SecureServersRepository* serversRepository,
                                      SecureAppSettingsRepository* appSettingsRepository);
 
-    ProtocolData generateProtocolData(const QString &protocol);
+    static ProtocolData generateProtocolData(const QString &protocol);
 
     static QString publicKeyForProtocol(const QString &protocol, const ProtocolData &protocolData);
 
@@ -46,16 +44,6 @@ public:
                                       CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
-
-    ErrorCode importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
-                                        const QString &serviceProtocol, const ProtocolData &protocolData,
-                                        const QString &transactionId, bool isTestPurchase,
-                                        int *duplicateServerIndex,
-                                        const QString &endpoint);
-
-    ErrorCode getSubscriptionInfo(const QString &userCountryCode, const QString &serviceType,
-                                  const QString &serviceProtocol, const QString &purchaseToken,
-                                  QByteArray &responseBody);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);
@@ -89,44 +77,10 @@ public:
     ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
     QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
 
-    struct AppStoreRestoreResult
-    {
-        bool hasInstalledConfig = false;
-        bool duplicateConfigAlreadyPresent = false;
-        int duplicateCount = 0;
-        int duplicateServerIndex = -1;
-        ErrorCode errorCode = ErrorCode::NoError;
-    };
-
-    struct PlayMarketRestoreResult
-    {
-        bool hasInstalledConfig = false;
-        bool duplicateConfigAlreadyPresent = false;
-        int duplicateCount = 0;
-        int duplicateServerIndex = -1;
-        ErrorCode errorCode = ErrorCode::NoError;
-    };
-
-    ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
-                                     const QString &serviceProtocol, const QString &productId,
-                                     int *duplicateServerIndex = nullptr);
-
-    ErrorCode processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
-                                        const QString &serviceProtocol, const QString &productId,
-                                        int *duplicateServerIndex = nullptr, bool *wasUpgrade = nullptr);
-
-    AppStoreRestoreResult processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
-                                                  const QString &serviceProtocol);
-
     ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
                                           const QString &serviceProtocol, const ProtocolData &protocolData,
                                           const QString &captchaId, const QString &captchaSolution,
                                           CaptchaInfo *retryCaptchaOut = nullptr);
-
-    PlayMarketRestoreResult processPlayMarketRestore(const QString &userCountryCode, const QString &serviceType,
-                                                     const QString &serviceProtocol);
-
-    QStringList resolveActiveStoreProductIds();
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
@@ -136,7 +90,11 @@ private:
                                                    const ProtocolData &protocolData, QJsonObject &serverConfigJson);
     ErrorCode applyUpdatedServiceConfig(const QString &serverId, const QString &serviceProtocol,
                                         const ProtocolData &protocolData, const QByteArray &responseBody);
-    void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType, 
+    ErrorCode applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,
+                                         const QString &serviceProtocol, const ProtocolData &protocolData,
+                                         const QByteArray &responseBody);
+    void markSubscriptionExpiredByServer(const QString &serverId, const ApiV2ServerConfig &apiV2);
+    void updateApiConfigInJson(QJsonObject &serverConfigJson, const QString &serviceType,
                                 const QString &serviceProtocol, const QString &userCountryCode,
                                 const QByteArray &apiResponseBody);
 

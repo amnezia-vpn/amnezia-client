@@ -16,7 +16,6 @@ namespace configKey
     constexpr char recommended[] = "recommended";
     constexpr char checkoutUrl[] = "checkout_url";
     constexpr char isTrial[] = "is_trial";
-    constexpr char serviceProtocol[] = "service_protocol";
     constexpr char storeProductId[] = "store_product_id";
     constexpr char hasFreeTrial[] = "has_free_trial";
     constexpr char trialDays[] = "trial_days";
@@ -57,8 +56,6 @@ QVariant ApiSubscriptionPlansModel::data(const QModelIndex &index, int role) con
         return plan.checkoutUrl;
     case IsTrialRole:
         return plan.isTrial;
-    case ServiceProtocolRole:
-        return plan.serviceProtocol;
     case StoreProductIdRole:
         return plan.storeProductId;
     case HasFreeTrialRole:
@@ -80,7 +77,6 @@ QHash<int, QByteArray> ApiSubscriptionPlansModel::roleNames() const
         { RecommendedRole, "recommended" },
         { CheckoutUrlRole, "checkoutUrl" },
         { IsTrialRole, "isTrial" },
-        { ServiceProtocolRole, "serviceProtocol" },
         { StoreProductIdRole, "storeProductId" },
         { HasFreeTrialRole, "hasFreeTrial" },
         { TrialDaysRole, "trialDays" },
@@ -105,7 +101,6 @@ void ApiSubscriptionPlansModel::updateModel(const QJsonArray &arr)
         subscriptionPlan.recommended = planObject.value(configKey::recommended).toBool();
         subscriptionPlan.checkoutUrl = planObject.value(configKey::checkoutUrl).toString();
         subscriptionPlan.isTrial = planObject.value(configKey::isTrial).toBool();
-        subscriptionPlan.serviceProtocol = planObject.value(configKey::serviceProtocol).toString();
         subscriptionPlan.storeProductId = planObject.value(configKey::storeProductId).toString();
         subscriptionPlan.hasFreeTrial = planObject.value(configKey::hasFreeTrial).toBool();
         subscriptionPlan.trialDays = planObject.value(configKey::trialDays).toInt();

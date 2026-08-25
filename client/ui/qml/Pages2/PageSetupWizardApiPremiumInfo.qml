@@ -26,15 +26,9 @@ PageType {
 
     function proceedWithPurchase(plan) {
         var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-        if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
+        if (root.storePurchaseAvailable) {
             PageController.showBusyIndicator(true)
-            SubscriptionUiController.importPremiumFromAppStore(storeId)
-            PageController.showBusyIndicator(false)
-            return
-        }
-        if (Qt.platform.os === "android" && IsPlayBuild) {
-            PageController.showBusyIndicator(true)
-            SubscriptionUiController.importPremiumFromPlayMarket(storeId)
+            SubscriptionUiController.importPremiumFromStore(storeId)
             PageController.showBusyIndicator(false)
             return
         }
