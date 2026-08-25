@@ -229,7 +229,7 @@ bool SubscriptionUiController::importPremiumFromStore(const QString &storeProduc
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol(),
         productId,
-        &duplicateServerIndex);
+        &duplicateServerIndex, &wasUpgrade);
 #elif defined(Q_OS_ANDROID)
     if (productId.isEmpty()) {
         productId = QStringLiteral("premium");

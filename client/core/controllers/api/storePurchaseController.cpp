@@ -192,9 +192,14 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
 
 ErrorCode StorePurchaseController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                                            const QString &serviceProtocol, const QString &productId,
-                                                           int *duplicateServerIndex)
+                                                           int *duplicateServerIndex, bool *wasUpgrade)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
+    const bool hadActivePlanBeforePurchase = !resolveActiveStoreProductIds().isEmpty();
+    if (wasUpgrade) {
+        *wasUpgrade = hadActivePlanBeforePurchase;
+    }
+
     bool purchaseOk = false;
     QString originalTransactionId;
     QString storeTransactionId;
@@ -248,6 +253,7 @@ ErrorCode StorePurchaseController::processAppStorePurchase(const QString &userCo
     Q_UNUSED(serviceProtocol);
     Q_UNUSED(productId);
     Q_UNUSED(duplicateServerIndex);
+    Q_UNUSED(wasUpgrade);
     return ErrorCode::ApiPurchaseError;
 #endif
 }

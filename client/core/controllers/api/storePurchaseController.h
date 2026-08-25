@@ -29,7 +29,7 @@ public:
 
     ErrorCode processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
                                       const QString &serviceProtocol, const QString &productId,
-                                      int *duplicateServerIndex = nullptr);
+                                      int *duplicateServerIndex = nullptr, bool *wasUpgrade = nullptr);
 
     ErrorCode processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
                                         const QString &serviceProtocol, const QString &productId,
