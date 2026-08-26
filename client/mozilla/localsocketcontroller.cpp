@@ -210,6 +210,21 @@ QJsonObject LocalSocketController::buildActivationConfig(const QJsonObject &rawC
   QString deviceIpv4Address;
   QString deviceIpv6Address;
   splitClientAddresses(wgConfig, deviceIpv4Address, deviceIpv6Address);
+
+  const QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
+  // A full-tunnel config must also capture IPv6 (::/0), even when the server has no IPv6,
+  // so native IPv6 cannot leak over the physical interface. The tunnel itself has to
+  // black-hole it: the killswitch firewall is opt-out on Linux/macOS and has no IPv6
+  // block at all on Windows, so neither can be relied on for this.
+  const bool isFullTunnel = plainAllowedIP.isEmpty()
+      ? (splitTunnelType == 0 || splitTunnelType == 2)
+      : plainAllowedIP.contains(QJsonValue("0.0.0.0/0"));
+  // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+  // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+  if (isFullTunnel && deviceIpv6Address.isEmpty()) {
+    deviceIpv6Address = QString("%1/%2").arg(amnezia::protocols::wireguard::dummyClientIpv6Address,
+                                             amnezia::protocols::wireguard::defaultClientIpv6Cidr);
+  }
   const bool hasTunnelIpv6 = !deviceIpv6Address.isEmpty();
   json.insert("deviceIpv4Address", deviceIpv4Address);
   json.insert("deviceIpv6Address", deviceIpv6Address);
@@ -246,13 +261,16 @@ QJsonObject LocalSocketController::buildActivationConfig(const QJsonObject &rawC
 
   QJsonArray jsAllowedIPAddesses;
 
-  QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
   QJsonArray defaultAllowedIP = hasTunnelIpv6 ? QJsonArray { "0.0.0.0/0", "::/0" } : QJsonArray { "0.0.0.0/0" };
 
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       appendRange(jsAllowedIPAddesses, v.toString(), hasTunnelIpv6);
+    }
+    // Keep the full tunnel closed over IPv6 even if the stored list only names 0.0.0.0/0.
+    if (isFullTunnel && !plainAllowedIP.contains(QJsonValue("::/0"))) {
+      appendRange(jsAllowedIPAddesses, QStringLiteral("::/0"), hasTunnelIpv6);
     }
   } else {
 
