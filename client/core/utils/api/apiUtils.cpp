@@ -64,10 +64,7 @@ QString apiUtils::getAppLanguageCode(const SecureAppSettingsRepository *appSetti
 QString apiUtils::getDistributionChannel()
 {
 #if defined(Q_OS_ANDROID)
-    static const QString channel = AndroidController::instance()->isPlay()
-            ? QStringLiteral("googleplay")
-            : QString();
-    return channel;
+    return AndroidController::instance()->isPlay() ? QStringLiteral("googleplay") : QString();
 #elif defined(Q_OS_IOS) || defined(MACOS_NE)
     return QStringLiteral("appstore");
 #else

@@ -2,6 +2,7 @@
 #define STOREPURCHASECONTROLLER_H
 
 #include <QByteArray>
+#include <QJsonArray>
 #include <QString>
 #include <QStringList>
 
@@ -51,11 +52,12 @@ public:
 
     // Android counterpart of the iOS Transaction.updates listener: purchases that were
     // paid but never acknowledged (validation failed earlier, or a PENDING purchase was
-    // completed outside the app). Call the cheap check first; the process method
-    // validates each purchase on the gateway and acknowledges it on success.
-    bool hasUnacknowledgedPlayPurchases();
-    bool processUnacknowledgedPlayPurchases(const QString &userCountryCode, const QString &serviceType,
-                                            const QString &serviceProtocol);
+    // completed outside the app). Query once with findUnacknowledgedPlayPurchases(), then
+    // pass the result to processUnacknowledgedPlayPurchases() to validate each purchase on
+    // the gateway and acknowledge it on success.
+    QJsonArray findUnacknowledgedPlayPurchases();
+    bool processUnacknowledgedPlayPurchases(const QJsonArray &purchases, const QString &userCountryCode,
+                                            const QString &serviceType, const QString &serviceProtocol);
 
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody,
@@ -72,9 +74,9 @@ private:
                                       int *duplicateServerIndex, const QString &endpoint);
 
     // Defined for Android builds only
-    ErrorCode validateAndAcknowledgePlayPurchase(const QString &userCountryCode, const QString &serviceType,
-                                                 const QString &serviceProtocol, const QString &purchaseToken,
-                                                 bool isAcknowledged, int *duplicateServerIndex);
+    ErrorCode finalizePlayPurchase(const QString &userCountryCode, const QString &serviceType,
+                                   const QString &serviceProtocol, const QString &purchaseToken,
+                                   bool isAcknowledged, int *duplicateServerIndex, const QString &endpoint);
 
     SecureServersRepository *m_serversRepository;
     SecureAppSettingsRepository *m_appSettingsRepository;

@@ -367,7 +367,8 @@ void SubscriptionUiController::checkUnacknowledgedPlayPurchases()
         return;
     }
 
-    if (!m_storePurchaseController->hasUnacknowledgedPlayPurchases()) {
+    const QJsonArray unacknowledgedPurchases = m_storePurchaseController->findUnacknowledgedPlayPurchases();
+    if (unacknowledgedPurchases.isEmpty()) {
         return;
     }
 
@@ -381,6 +382,7 @@ void SubscriptionUiController::checkUnacknowledgedPlayPurchases()
     }
 
     if (m_storePurchaseController->processUnacknowledgedPlayPurchases(
+            unacknowledgedPurchases,
             m_apiServicesModel->getCountryCode(),
             m_apiServicesModel->getSelectedServiceType(),
             m_apiServicesModel->getSelectedServiceProtocol())) {
