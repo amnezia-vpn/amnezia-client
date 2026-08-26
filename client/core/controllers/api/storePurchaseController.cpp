@@ -276,7 +276,7 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
                 const QJsonObject existingPurchase = purchaseValue.toObject();
                 if (existingPurchase.value("purchaseState").toInt(-1) == purchaseStatePurchased) {
                     oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
-                    qInfo() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
+                    qInfo().noquote() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one. oldPurchaseToken =" << oldPurchaseToken;
                     break;
                 }
             }
@@ -342,7 +342,8 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         outcome.purchaseToken = purchase.value("purchaseToken").toString();
         outcome.isAcknowledged = purchase.value("isAcknowledged").toBool();
         int purchaseState = purchase.value("purchaseState").toInt(-1);
-        qInfo() << "[Billing] Purchase success. isAcknowledged:" << outcome.isAcknowledged << "purchaseState:" << purchaseState;
+        qInfo().noquote() << "[Billing] Purchase success. purchaseToken =" << outcome.purchaseToken
+                          << "isAcknowledged:" << outcome.isAcknowledged << "purchaseState:" << purchaseState;
         // purchaseState: 1 = PURCHASED, 2 = PENDING (user must confirm payment in Google Play), 0 = UNSPECIFIED
         if (purchaseState == purchaseStatePending) {
             qWarning() << "[Billing] Purchase is in PENDING state, waiting for user to confirm payment";
@@ -702,6 +703,10 @@ QStringList StorePurchaseController::resolveActiveStoreProductIds()
     const QJsonArray purchases = purchasesResult.value("purchases").toArray();
     for (const QJsonValue &purchaseValue : purchases) {
         const QJsonObject purchaseObj = purchaseValue.toObject();
+        qInfo().noquote() << "[Billing][resolveActiveStoreProductIds] purchase found. purchaseToken ="
+                          << purchaseObj.value("purchaseToken").toString()
+                          << "purchaseState:" << purchaseObj.value("purchaseState").toInt()
+                          << "productIds:" << purchaseObj.value("productIds").toArray();
         if (purchaseObj.value("purchaseState").toInt() != purchaseStatePurchased) {
             continue;
         }
