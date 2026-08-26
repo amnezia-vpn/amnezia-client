@@ -365,6 +365,14 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         *wasUpgrade = outcome.isUpgrade;
     }
 
+    // Only remember this as the current plan if Play actually issued a new purchase token.
+    // If it's unchanged, the plan switch hasn't taken effect yet (e.g. a deferred downgrade) -
+    // keep whatever base plan id is already associated with that still-active token.
+    if (outcome.purchaseToken != m_lastPlayPurchaseToken) {
+        m_lastPlayPurchaseToken = outcome.purchaseToken;
+        m_lastPlayBasePlanId = productId;
+    }
+
     return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
                                 outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
 #else
@@ -703,13 +711,23 @@ QStringList StorePurchaseController::resolveActiveStoreProductIds()
     const QJsonArray purchases = purchasesResult.value("purchases").toArray();
     for (const QJsonValue &purchaseValue : purchases) {
         const QJsonObject purchaseObj = purchaseValue.toObject();
-        qInfo().noquote() << "[Billing][resolveActiveStoreProductIds] purchase found. purchaseToken ="
-                          << purchaseObj.value("purchaseToken").toString()
+        const QString purchaseToken = purchaseObj.value("purchaseToken").toString();
+        qInfo().noquote() << "[Billing][resolveActiveStoreProductIds] purchase found. purchaseToken =" << purchaseToken
                           << "purchaseState:" << purchaseObj.value("purchaseState").toInt()
                           << "productIds:" << purchaseObj.value("productIds").toArray();
         if (purchaseObj.value("purchaseState").toInt() != purchaseStatePurchased) {
             continue;
         }
+
+        // Play's Purchase object only carries the product id, not the base plan/offer that was
+        // actually bought; prefer the base plan id remembered from this session's own purchase.
+        if (!m_lastPlayBasePlanId.isEmpty() && !purchaseToken.isEmpty() && purchaseToken == m_lastPlayPurchaseToken) {
+            if (!activeProductIds.contains(m_lastPlayBasePlanId)) {
+                activeProductIds.append(m_lastPlayBasePlanId);
+            }
+            continue;
+        }
+
         const QJsonArray productIds = purchaseObj.value("productIds").toArray();
         for (const QJsonValue &productIdValue : productIds) {
             const QString productId = productIdValue.toString();
