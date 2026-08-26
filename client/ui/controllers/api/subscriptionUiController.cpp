@@ -80,9 +80,6 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
             &SubscriptionUiController::onStoreTransactionUpdated, Qt::QueuedConnection);
     IosController::Instance()->startStoreTransactionObserver();
 #elif defined(Q_OS_ANDROID)
-    // Counterpart of the iOS Transaction.updates listener: once the event loop is up,
-    // pick up purchases that were paid but never acknowledged (validation failed earlier
-    // or a PENDING purchase was completed outside the app)
     QTimer::singleShot(0, this, [this]() { checkUnacknowledgedPlayPurchases(); });
 #endif
 }

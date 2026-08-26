@@ -81,13 +81,6 @@ private:
     SecureServersRepository *m_serversRepository;
     SecureAppSettingsRepository *m_appSettingsRepository;
 
-    // Google Play's on-device Purchase object exposes only the product id, not which base
-    // plan/offer was purchased. Remembered in memory only (not persisted - this is purely a
-    // same-session cosmetic aid for the upgrade/downgrade purchase confirmation, and stale data
-    // surviving a restart or config backup restore would be worse than just not having it) and
-    // only overwritten when the purchase token actually changes, so a deferred plan change that
-    // keeps the previous token (if Play ever behaves that way, mirroring what we've seen on iOS)
-    // doesn't get mislabeled as the new, not-yet-effective plan.
     QString m_lastPlayPurchaseToken;
     QString m_lastPlayBasePlanId;
 };

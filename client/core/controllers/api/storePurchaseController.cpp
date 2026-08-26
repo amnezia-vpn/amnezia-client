@@ -365,9 +365,6 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         *wasUpgrade = outcome.isUpgrade;
     }
 
-    // Only remember this as the current plan if Play actually issued a new purchase token.
-    // If it's unchanged, the plan switch hasn't taken effect yet (e.g. a deferred downgrade) -
-    // keep whatever base plan id is already associated with that still-active token.
     if (outcome.purchaseToken != m_lastPlayPurchaseToken) {
         m_lastPlayPurchaseToken = outcome.purchaseToken;
         m_lastPlayBasePlanId = productId;
