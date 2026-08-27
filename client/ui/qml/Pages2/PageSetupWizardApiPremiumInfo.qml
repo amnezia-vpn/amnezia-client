@@ -99,7 +99,7 @@ PageType {
                 LabelTextType {
                     id: trialBadgeLabel
                     anchors.centerIn: parent
-                    text: root.currentPlan ? qsTr("Try free for %n day(s)", "", Number(root.currentPlan.trialDays)) : ""
+                    text: root.currentPlan ? qsTr("Try free for %1 days").arg(root.currentPlan.trialDays) : ""
                     color: AmneziaStyle.color.midnightBlack
                     font.pixelSize: 11
                     font.weight: Font.Medium
@@ -332,8 +332,8 @@ PageType {
                         return ""
                     }
                     if (plan.hasFreeTrial) {
-                        return qsTr("%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.", "", Number(plan.trialDays))
-                                .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                        return qsTr("%1 days free, then %2/%3. Auto-renews until canceled. Cancel anytime in Settings.")
+                                .arg(plan.trialDays).arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                     }
                     return qsTr("%1/%2, auto-renewal. Cancel anytime in the Settings.")
                             .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
