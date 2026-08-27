@@ -725,7 +725,6 @@ ErrorCode UsersController::revokeXray(const int row,
         }
     }
 
-
     settings[protocols::xray::clients] = clients;
     inbound[protocols::xray::settings] = settings;
     inbounds[0] = inbound;

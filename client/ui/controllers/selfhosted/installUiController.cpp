@@ -36,11 +36,6 @@
 #include "core/models/protocols/wireGuardProtocolConfig.h"
 #include "core/models/protocols/openVpnProtocolConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
-#include "logger.h"
-
-namespace {
-    Logger logger("InstallUiController");
-}
 
 InstallUiController::InstallUiController(InstallController *installController,
                                          ServersController *serversController,

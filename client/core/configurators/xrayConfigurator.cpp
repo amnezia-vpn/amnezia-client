@@ -274,7 +274,6 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
                                                       bool useAtomicApply)
 {
     Q_UNUSED(dnsSettings);
-    namespace px = amnezia::protocols::xray;
 
     const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>();
     if (!xrayCfg) {
@@ -290,7 +289,7 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     ErrorCode errorCode = ErrorCode::NoError;
 
     QString clientId;
-    errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::uuidPath), clientId);
+    errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(amnezia::protocols::xray::uuidPath), clientId);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -308,13 +307,13 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     QString realityPublicKey;
     QString realityShortId;
     if (securityEff == QLatin1String("reality")) {
-        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PrivateKeyPath), realityPrivateKey);
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(amnezia::protocols::xray::PrivateKeyPath), realityPrivateKey);
         if (errorCode != ErrorCode::NoError)
             return errorCode;
-        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PublicKeyPath), realityPublicKey);
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(amnezia::protocols::xray::PublicKeyPath), realityPublicKey);
         if (errorCode != ErrorCode::NoError)
             return errorCode;
-        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::shortidPath), realityShortId);
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(amnezia::protocols::xray::shortidPath), realityShortId);
         if (errorCode != ErrorCode::NoError)
             return errorCode;
     }
@@ -326,7 +325,7 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
         return errorCode;
     }
 
-    const QString portEff = srv.port.isEmpty() ? QString::fromLatin1(px::defaultPort) : srv.port;
+    const QString portEff = srv.port.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultPort) : srv.port;
 
 
     XrayServerInboundInputs inputs;
@@ -343,7 +342,7 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     } else {
         const QString json = QString::fromUtf8(QJsonDocument(inboundJson).toJson());
         errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json,
-                                                            QString::fromLatin1(px::serverConfigPath),
+                                                            QString::fromLatin1(amnezia::protocols::xray::serverConfigPath),
                                                             libssh::ScpOverwriteMode::ScpOverwriteExisting);
         if (errorCode != ErrorCode::NoError) {
             return errorCode;
@@ -371,10 +370,8 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
                                                    const QString &flowValue, const QString &fallbackClientId,
                                                    ErrorCode &outError) const
 {
-    namespace px = amnezia::protocols::xray;
-
     outError = ErrorCode::NoError;
-    const QString configPath = QString::fromLatin1(px::serverConfigPath);
+    const QString configPath = QString::fromLatin1(amnezia::protocols::xray::serverConfigPath);
 
     QString currentConfig;
     for (int attempt = 0; attempt < 3; ++attempt) {
@@ -432,8 +429,6 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
 ErrorCode XrayConfigurator::ensureTlsCertificate(const ServerCredentials &credentials, DockerContainer container,
                                                  QString &outFingerprint) const
 {
-    namespace px = amnezia::protocols::xray;
-
     outFingerprint.clear();
 
     QString stdOut;
@@ -442,8 +437,8 @@ ErrorCode XrayConfigurator::ensureTlsCertificate(const ServerCredentials &creden
         return ErrorCode::NoError;
     };
 
-    const QString certPath = QString::fromLatin1(px::tlsCertPath);
-    const QString keyPath = QString::fromLatin1(px::tlsKeyPath);
+    const QString certPath = QString::fromLatin1(amnezia::protocols::xray::tlsCertPath);
+    const QString keyPath = QString::fromLatin1(amnezia::protocols::xray::tlsKeyPath);
     const QString script = QStringLiteral(
             "has_key() { [ -f \"$1\" ] && [ -n \"$(tr -d '[:space:]' < \"$1\" 2>/dev/null)\" ]; }\n"
             "CERT=%1\n"
@@ -477,9 +472,7 @@ ErrorCode XrayConfigurator::uploadServerConfigAtomically(const ServerCredentials
                                                          DockerContainer container, const QString &listenPort,
                                                          const QJsonObject &serverConfig) const
 {
-    namespace px = amnezia::protocols::xray;
-
-    const QString livePath = QString::fromLatin1(px::serverConfigPath);
+    const QString livePath = QString::fromLatin1(amnezia::protocols::xray::serverConfigPath);
     const QString stagedPath = QStringLiteral("/opt/amnezia/xray/server.new.json");
 
     const QString json = QString::fromUtf8(QJsonDocument(serverConfig).toJson());
@@ -603,14 +596,12 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
 bool XrayConfigurator::uploadClientTemplate(const ServerCredentials &credentials, DockerContainer container,
                                             const XrayClientTemplate &clientTemplate) const
 {
-    namespace px = amnezia::protocols::xray;
-
     XrayClientTemplate stamped = clientTemplate;
     stamped.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
     const QJsonObject templateJson = stamped.toJson();
     const QString json = QString::fromUtf8(QJsonDocument(templateJson).toJson());
     const ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(
-            container, credentials, json, QString::fromLatin1(px::clientTemplatePath),
+            container, credentials, json, QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath),
             libssh::ScpOverwriteMode::ScpOverwriteExisting);
     if (errorCode != ErrorCode::NoError) {
         return false;
@@ -621,12 +612,10 @@ bool XrayConfigurator::uploadClientTemplate(const ServerCredentials &credentials
 XrayClientTemplate XrayConfigurator::readClientTemplate(const ServerCredentials &credentials,
                                                         DockerContainer container, bool &outFound) const
 {
-    namespace px = amnezia::protocols::xray;
-
     outFound = false;
     ErrorCode readError = ErrorCode::NoError;
     const QString content = QString::fromUtf8(m_sshSession->getTextFileFromContainer(
-            container, credentials, QString::fromLatin1(px::clientTemplatePath), readError));
+            container, credentials, QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath), readError));
     if (readError != ErrorCode::NoError || content.trimmed().isEmpty()) {
         return {};
     }
@@ -653,8 +642,6 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
                                                                const QString &prefetchedRealityShortId,
                                                                const QString &prefetchedTlsPin) const
 {
-    namespace px = amnezia::protocols::xray;
-
     QString xrayPublicKey = prefetchedRealityPublicKey;
     QString xrayShortId = prefetchedRealityShortId;
     QString tlsPin = prefetchedTlsPin;
@@ -662,7 +649,7 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     const QString securityEff = effectiveSecurity(srv);
 
 
-    if (securityEff == QLatin1String(px::securityReality)) {
+    if (securityEff == QLatin1String(amnezia::protocols::xray::securityReality)) {
         if (xrayPublicKey.isEmpty() || xrayShortId.isEmpty()) {
             errorCode = readRealityKeyFiles(container, credentials, xrayPublicKey, xrayShortId);
             if (errorCode != ErrorCode::NoError) {
@@ -671,7 +658,7 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
         }
     }
 
-    if (securityEff == QLatin1String(px::securityTls) && !srv.isThirdPartyConfig) {
+    if (securityEff == QLatin1String(amnezia::protocols::xray::securityTls) && !srv.isThirdPartyConfig) {
         if (tlsPin.isEmpty()) {
             errorCode = ensureTlsCertificate(credentials, container, tlsPin);
             if (errorCode != ErrorCode::NoError) {
@@ -699,7 +686,7 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     XrayClientConfig clientConfig;
     clientConfig.nativeConfig = QString::fromUtf8(
             QJsonDocument(protocolConfig.toClientOutboundJson(inputs)).toJson(QJsonDocument::Compact));
-    clientConfig.localPort = QString::fromLatin1(px::defaultLocalProxyPort);
+    clientConfig.localPort = QString::fromLatin1(amnezia::protocols::xray::defaultLocalProxyPort);
     clientConfig.id = clientId;
     clientConfig.templateFingerprint = tpl.contentFingerprint();
     protocolConfig.setClientConfig(clientConfig);

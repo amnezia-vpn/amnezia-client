@@ -775,8 +775,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
         return ErrorCode::NoError;
     }
 
-    namespace px = amnezia::protocols::xray;
-
     const amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, QString(), QString());
 
     QString stdOut;
@@ -797,7 +795,7 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
             "'{{range .Mounts}}{{if and (eq .Destination \"%1\") "
             "(eq .Name \"$CONTAINER_NAME-data\")}}yes{{end}}{{end}}' "
             "$CONTAINER_NAME 2>/dev/null | head -1)\"")
-                                 .arg(QString::fromLatin1(px::dataDir));
+                                 .arg(QString::fromLatin1(amnezia::protocols::xray::dataDir));
     ErrorCode errorCode = sshSession.runScript(credentials, SshSession::replaceVars(probe, vars), collect, collect);
     if (errorCode != ErrorCode::NoError) {
         return ErrorCode::XrayKeyMigrationFailed;
@@ -821,10 +819,10 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
     }
 
     const QStringList requiredPaths = {
-        QString::fromLatin1(px::PrivateKeyPath),
-        QString::fromLatin1(px::PublicKeyPath),
-        QString::fromLatin1(px::uuidPath),
-        QString::fromLatin1(px::shortidPath),
+        QString::fromLatin1(amnezia::protocols::xray::PrivateKeyPath),
+        QString::fromLatin1(amnezia::protocols::xray::PublicKeyPath),
+        QString::fromLatin1(amnezia::protocols::xray::uuidPath),
+        QString::fromLatin1(amnezia::protocols::xray::shortidPath),
     };
 
     for (const QString &path : requiredPaths) {
@@ -852,7 +850,7 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
     for (int attempt = 0; attempt < 3 && !configRead; ++attempt) {
         ErrorCode configError = ErrorCode::NoError;
         serverConfig = QString::fromUtf8(sshSession.getTextFileFromContainer(
-                container, credentials, QString::fromLatin1(px::serverConfigPath), configError));
+                container, credentials, QString::fromLatin1(amnezia::protocols::xray::serverConfigPath), configError));
         if (configError == ErrorCode::NoError && !serverConfig.trimmed().isEmpty()) {
             configRead = true;
             break;
@@ -864,13 +862,13 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
     if (!configRead) {
         return ErrorCode::XrayKeyMigrationFailed;
     }
-    outFiles.insert(QString::fromLatin1(px::serverConfigPath), serverConfig);
+    outFiles.insert(QString::fromLatin1(amnezia::protocols::xray::serverConfigPath), serverConfig);
 
     ErrorCode templateError = ErrorCode::NoError;
     const QString clientTemplate = QString::fromUtf8(sshSession.getTextFileFromContainer(
-            container, credentials, QString::fromLatin1(px::clientTemplatePath), templateError));
+            container, credentials, QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath), templateError));
     if (templateError == ErrorCode::NoError && !clientTemplate.trimmed().isEmpty()) {
-        outFiles.insert(QString::fromLatin1(px::clientTemplatePath), clientTemplate);
+        outFiles.insert(QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath), clientTemplate);
     }
 
     return ErrorCode::NoError;
