@@ -19,6 +19,17 @@ class AwgAndroid(ConanFile):
 
     _WINDOWS_GO_HOST_PLATFORM = "windows-amd64"
 
+    # Go used to build libwg-go on every platform (downloaded by the Makefile
+    # on Linux/macOS, provided by conan on Windows); must satisfy the `go`
+    # directives of tunnel/tools/libwg-go/go.mod and its dependencies,
+    # otherwise `go build` (with GOTOOLCHAIN=local) refuses to build.
+    _GO_VERSION = "1.25.0"
+    _GO_TARBALL_SHA256 = {
+        "darwin-amd64": "5bd60e823037062c2307c71e8111809865116714d6f6b410597cf5075dfd80ef",
+        "darwin-arm64": "544932844156d8172f7a28f77f2ac9c15a23046698b6243f633b0a0b00c0749c",
+        "linux-amd64": "2852af0cb20a13139b3448992e69b868e50ed0f8a1e5940ee1de9e19a123b613",
+    }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -33,7 +44,7 @@ class AwgAndroid(ConanFile):
         self.tool_requires("cmake/[>=3.4.1 <4]")
         if platform.system() == "Windows":
             self.tool_requires("ninja/[*]")
-            self.tool_requires("go/1.26.0")
+            self.tool_requires(f"go/{self._GO_VERSION}")
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
@@ -55,8 +66,10 @@ class AwgAndroid(ConanFile):
 
     def generate(self):
         venv = VirtualBuildEnv(self)
-        if platform.system() == "Windows":
-            venv.environment().define("GOTOOLCHAIN", "local")
+        # Never let `go` auto-download another toolchain: it would silently
+        # replace the runtime-patched Go prepared for this build, and with
+        # GOSUMDB=off the download cannot be verified and fails anyway.
+        venv.environment().define("GOTOOLCHAIN", "local")
         # sum.golang.org is sometimes unreachable from CI runners entirely
         # ("connection refused"); go.sum already pins the exact hashes we
         # need, so the extra public-transparency-log check isn't required.
@@ -71,6 +84,18 @@ class AwgAndroid(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        if platform.system() == 'Windows':
+            for rel_path in (
+                os.path.join("tunnel", "tools", "CMakeLists.txt"),
+                os.path.join("tunnel", "tools", "libwg-go", "Makefile"),
+            ):
+                abs_path = os.path.join(self.source_folder, rel_path)
+                content = load(self, abs_path)
+                if "\r\n" in content:
+                    save(self, abs_path, content.replace("\r\n", "\n"))
+
+        self._sync_makefile_go_version()
+
         if platform.system() == 'Darwin':
             replace_in_file(self,
                 os.path.join(self.source_folder, "tunnel", "tools", "libwg-go", "Makefile"),
@@ -93,27 +118,29 @@ class AwgAndroid(ConanFile):
                 'shasum -a 256 -c'
             )
         elif platform.system() == 'Windows':
-            for rel_path in (
-                os.path.join("tunnel", "tools", "CMakeLists.txt"),
-                os.path.join("tunnel", "tools", "libwg-go", "Makefile"),
-            ):
-                abs_path = os.path.join(self.source_folder, rel_path)
-                content = load(self, abs_path)
-                if "\r\n" in content:
-                    save(self, abs_path, content.replace("\r\n", "\n"))
-
             apply_conandata_patches(self)
             self._prepare_patched_go_for_windows()
 
-    def _prepare_patched_go_for_windows(self):
+    def _sync_makefile_go_version(self):
         makefile_path = os.path.join(self.source_folder, "tunnel", "tools", "libwg-go", "Makefile")
-        makefile_content = load(self, makefile_path)
-        version_match = re.search(r"^GO_VERSION\s*:=\s*(\S+)", makefile_content, re.MULTILINE)
-        if not version_match:
+        content = load(self, makefile_path)
+        content, n = re.subn(r"^GO_VERSION := \S+", f"GO_VERSION := {self._GO_VERSION}",
+                             content, count=1, flags=re.MULTILINE)
+        if n != 1:
             raise ConanException("Could not find GO_VERSION in libwg-go/Makefile; "
-                                  "upstream may have restructured it, patch needs updating")
-        go_version = version_match.group(1)
+                                  "upstream may have restructured it, recipe needs updating")
+        for go_platform, sha256 in self._GO_TARBALL_SHA256.items():
+            content, n = re.subn(rf"^GO_HASH_{go_platform} := \S+", f"GO_HASH_{go_platform} := {sha256}",
+                                 content, count=1, flags=re.MULTILINE)
+            if n != 1:
+                raise ConanException(f"Could not find GO_HASH_{go_platform} in libwg-go/Makefile; "
+                                      "upstream may have restructured it, recipe needs updating")
+        save(self, makefile_path, content)
 
+    def _prepare_patched_go_for_windows(self):
+        # _sync_makefile_go_version has pinned GO_VERSION in the Makefile to
+        # self._GO_VERSION, so the paths below match what make expects
+        go_version = self._GO_VERSION
         build_dir = os.path.join(self.build_folder, "generated-src")
         go_dir = os.path.join(build_dir, f"go-{go_version}")
         prepared_marker = os.path.join(go_dir, ".prepared")
@@ -135,46 +162,13 @@ class AwgAndroid(ConanFile):
             rmdir(self, go_dir)
         shutil.copytree(goroot, go_dir)
 
+        # the same command the Makefile runs on Linux/macOS after unpacking Go
         diff_path = os.path.join(self.source_folder, "tunnel", "tools", "libwg-go",
                                   "goruntime-boottime-over-monotonic.diff")
-        diff_content = load(self, diff_path)
-        android_archs = ("sys_linux_386.s", "sys_linux_amd64.s", "sys_linux_arm.s", "sys_linux_arm64.s")
-        sections = re.split(r"(?=^diff --git )", diff_content, flags=re.MULTILINE)
-        filtered_diff = "".join(s for s in sections if any(f"/{name} " in s.splitlines()[0] for name in android_archs) if s.startswith("diff --git"))
-
-        self._apply_runtime_patch_as_line_replacements(filtered_diff, go_dir)
+        self.run('patch -p1 -f -N -r- -d "{}" -i "{}"'.format(
+            Path(go_dir).as_posix(), Path(diff_path).as_posix()), env="conanbuild")
 
         save(self, prepared_marker, "")
-
-    def _apply_runtime_patch_as_line_replacements(self, diff_content, source_root):
-        sections = re.split(r"(?=^diff --git )", diff_content, flags=re.MULTILINE)
-        for section in sections:
-            if not section.startswith("diff --git "):
-                continue
-            rel_path = re.search(r"^\+\+\+ b/(\S+)", section, re.MULTILINE).group(1)
-            abs_path = os.path.join(source_root, rel_path)
-            content = load(self, abs_path)
-            lines = section.splitlines()
-            i = 0
-            while i < len(lines) - 1:
-                removed, added = lines[i], lines[i + 1]
-                if (removed.startswith("-") and not removed.startswith("---")
-                        and added.startswith("+") and not added.startswith("+++")):
-                    old, new = removed[1:], added[1:]
-                    if new in content:
-                        pass
-                    elif old in content:
-                        content = content.replace(old, new, 1)
-                    else:
-                        raise ConanException(
-                            f"goruntime-boottime-over-monotonic.diff: neither old nor new form of a "
-                            f"hunk line found in {rel_path}; upstream Go has changed this code, patch "
-                            f"needs updating\n  old: {old!r}\n  new: {new!r}"
-                        )
-                    i += 2
-                else:
-                    i += 1
-            save(self, abs_path, content)
 
     def build(self):
         self._patch_sources()
