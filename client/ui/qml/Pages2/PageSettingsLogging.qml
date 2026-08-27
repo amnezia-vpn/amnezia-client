@@ -287,12 +287,18 @@ PageType {
             SettingsController.openLogsFolder()
         }
         readonly property var exportLogsHandler: function() {
-            var timestamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss")
-            var fileName = SystemController.getFileName(qsTr("Save"),
-                                                    qsTr("Logs files (*.log)"),
-                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/Amnezia-network-" + timestamp,
-                                                    true,
-                                                    ".log")
+            var fileName = ""
+            if (GC.isMobile()) {
+                var timestamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss")
+                fileName = "Amnezia-network-" + timestamp + ".log"
+            } else {
+                var timestamp = Qt.formatDateTime(new Date(), "yyyy-MM-dd_HH-mm-ss")
+                fileName = SystemController.getFileName(qsTr("Save"),
+                                                        qsTr("Logs files (*.log)"),
+                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/Amnezia-network-" + timestamp,
+                                                        true,
+                                                        ".log")
+            }
             if (fileName !== "") {
                 PageController.showBusyIndicator(true)
                 SettingsController.exportNetworkDiagnosticsFile(fileName)
