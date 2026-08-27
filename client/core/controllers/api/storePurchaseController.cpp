@@ -470,8 +470,6 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processAppS
         }
     }
 
-    // Don't overwrite a genuine failure recorded for a different transaction just because
-    // another one in the same batch happened to be a duplicate.
     if (!result.hasInstalledConfig && result.errorCode == ErrorCode::NoError) {
         result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
     }
@@ -596,8 +594,6 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processPlay
         }
     }
 
-    // Don't overwrite a genuine failure recorded for a different purchase just because
-    // another one in the same batch happened to be a duplicate.
     if (!result.hasInstalledConfig && !result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::NoError) {
         result.errorCode = ErrorCode::ApiNoPurchasesToRestore;
     } else if (!result.hasInstalledConfig && result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::NoError) {
@@ -634,8 +630,6 @@ ErrorCode StorePurchaseController::finalizePlayPurchase(const QString &userCount
     ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                   purchaseToken, isTestPurchase, duplicateServerIndex, endpoint);
 
-    // Acknowledge only after the gateway has accepted the purchase; otherwise it stays
-    // unacknowledged and is retried on the next startup check or manual restore
     if (errorCode == ErrorCode::NoError || errorCode == ErrorCode::ApiConfigAlreadyAdded) {
         acknowledgePlayPurchase(purchaseToken, isAcknowledged);
     }
@@ -720,8 +714,6 @@ QStringList StorePurchaseController::resolveActiveStoreProductIds()
             continue;
         }
 
-        // Play's Purchase object only carries the product id, not the base plan/offer that was
-        // actually bought; prefer the base plan id remembered from this session's own purchase.
         if (!m_lastPlayBasePlanId.isEmpty() && !purchaseToken.isEmpty() && purchaseToken == m_lastPlayPurchaseToken) {
             if (!activeProductIds.contains(m_lastPlayBasePlanId)) {
                 activeProductIds.append(m_lastPlayBasePlanId);

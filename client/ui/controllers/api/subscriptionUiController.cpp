@@ -185,7 +185,6 @@ QVariantMap SubscriptionUiController::currentActivePlanInfo()
     info.insert(QStringLiteral("hasActivePlan"), false);
 
     const QStringList activeProductIds = m_storePurchaseController->resolveActiveStoreProductIds();
-    qInfo().noquote() << "[Billing][currentActivePlanInfo] active store product ids:" << activeProductIds;
 
     if (activeProductIds.isEmpty()) {
         return info;
@@ -205,7 +204,6 @@ QVariantMap SubscriptionUiController::currentActivePlanInfo()
         break;
     }
 
-    qInfo().noquote() << "[Billing][currentActivePlanInfo] resolved to:" << info;
     return info;
 }
 
@@ -285,9 +283,6 @@ bool SubscriptionUiController::restoreServiceFromStore()
 #endif
 
     if (!result.hasInstalledConfig) {
-        // Only treat this as the "nothing new, already added" case when that's genuinely the
-        // whole story - a real failure recorded for another transaction in the same batch
-        // must still surface, even if some other transaction was also a duplicate.
         if (result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             emit installServerFromApiFinished(tr("This subscription has already been added"), result.duplicateServerIndex);
             return true;
