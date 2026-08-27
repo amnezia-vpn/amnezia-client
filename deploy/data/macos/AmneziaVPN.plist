@@ -14,19 +14,5 @@
     <true/>
     <key>GroupName</key>
     <string>amnvpn</string>
-    <key>Sockets</key>
-	<dict>
-	    <key>Listeners</key>
-	    <dict>
-	        <key>SockServiceName</key>
-                <string>5959</string>
-	        <key>SockType</key>
-	        <string>stream</string>
-	        <key>SockFamily</key>
-	        <string>IPv4</string>
-	        <key>SockNodeName</key>
-	        <string>127.0.0.1</string>
-	    </dict>
-	</dict>
 </dict>
 </plist>
