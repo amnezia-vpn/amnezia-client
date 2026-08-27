@@ -103,16 +103,6 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
 
     const auto getStrValue = [](const auto str) { return str.mid(str.indexOf(":") + 1).trimmed(); };
 
-    const auto parts = stdOut.split('\n');
-    const auto peerList = parts.filter("peer:");
-    const auto latestHandshakeList = parts.filter("latest handshake:");
-    const auto transferredDataList = parts.filter("transfer:");
-    const auto allowedIpsList = parts.filter("allowed ips:");
-
-    if (allowedIpsList.isEmpty() || latestHandshakeList.isEmpty() || transferredDataList.isEmpty() || peerList.isEmpty()) {
-        return error;
-    }
-
     const auto changeHandshakeFormat = [](QString &latestHandshake) {
         const std::vector<std::pair<QString, QString>> replaceMap = { { " days", "d" },    { " hours", "h" }, { " minutes", "m" },
                                                                       { " seconds", "s" }, { " day", "d" },   { " hour", "h" },
@@ -123,20 +113,44 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
         }
     };
 
-    for (int i = 0; i < peerList.size() && i < transferredDataList.size() && i < latestHandshakeList.size() && i < allowedIpsList.size(); ++i) {
+    const auto lines = stdOut.split('\n');
+    WgShowData currentPeer;
+    bool hasPeer = false;
 
-        const auto transferredData = getStrValue(transferredDataList[i]).split(",");
-        auto latestHandshake = getStrValue(latestHandshakeList[i]);
-        auto serverBytesReceived = transferredData.front().trimmed();
-        auto serverBytesSent = transferredData.back().trimmed();
-        auto allowedIps = getStrValue(allowedIpsList[i]);
-
-        changeHandshakeFormat(latestHandshake);
-
-        serverBytesReceived.chop(QStringLiteral(" received").length());
-        serverBytesSent.chop(QStringLiteral(" sent").length());
-
-        data.push_back({ getStrValue(peerList[i]), latestHandshake, serverBytesSent, serverBytesReceived, allowedIps });
+    for (const QString &line : lines) {
+        if (line.startsWith("peer:")) {
+            if (hasPeer) {
+                data.push_back(currentPeer);
+            }
+            currentPeer = WgShowData();
+            currentPeer.clientId = getStrValue(line);
+            hasPeer = true;
+        } else if (hasPeer) {
+            if (line.trimmed().startsWith("latest handshake:")) {
+                auto latestHandshake = getStrValue(line);
+                changeHandshakeFormat(latestHandshake);
+                currentPeer.latestHandshake = latestHandshake;
+            } else if (line.trimmed().startsWith("transfer:")) {
+                const auto transferredData = getStrValue(line).split(",");
+                if (transferredData.size() == 2) {
+                    auto serverBytesReceived = transferredData.front().trimmed();
+                    auto serverBytesSent = transferredData.back().trimmed();
+                    if (serverBytesReceived.endsWith(" received")) {
+                        serverBytesReceived.chop(QStringLiteral(" received").length());
+                    }
+                    if (serverBytesSent.endsWith(" sent")) {
+                        serverBytesSent.chop(QStringLiteral(" sent").length());
+                    }
+                    currentPeer.dataReceived = serverBytesSent;
+                    currentPeer.dataSent = serverBytesReceived;
+                }
+            } else if (line.trimmed().startsWith("allowed ips:")) {
+                currentPeer.allowedIps = getStrValue(line);
+            }
+        }
+    }
+    if (hasPeer) {
+        data.push_back(currentPeer);
     }
 
     return error;
