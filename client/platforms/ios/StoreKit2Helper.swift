@@ -126,31 +126,36 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
+    @MainActor private var deliveredTransactionUpdateIds = Set<UInt64>()
+
+    @MainActor
+    private func deliverTransactionUpdate(_ result: VerificationResult<Transaction>, handler: @escaping (NSDictionary) -> Void) {
+        switch result {
+        case .verified(let transaction):
+            guard deliveredTransactionUpdateIds.insert(transaction.id).inserted else { return }
+            let info = EntitlementInfo(transactionId: transaction.id,
+                                       originalTransactionId: transaction.originalID,
+                                       productId: transaction.productID,
+                                       purchaseDate: transaction.purchaseDate)
+            print("[IAP][StoreKit2] Transaction update: id=\(transaction.id) product=\(transaction.productID)")
+            handler(info.dictionary)
+        case .unverified(_, let error):
+            print("[IAP][StoreKit2] Unverified transaction update skipped: \(error.localizedDescription)")
+        }
+    }
+
     public func startTransactionUpdatesListener(handler: @escaping (NSDictionary) -> Void) {
         guard updatesTask == nil else { return }
-        updatesTask = Task {
-            var deliveredIds = Set<UInt64>()
 
-            func deliver(_ result: VerificationResult<Transaction>) {
-                switch result {
-                case .verified(let transaction):
-                    guard deliveredIds.insert(transaction.id).inserted else { return }
-                    let info = EntitlementInfo(transactionId: transaction.id,
-                                               originalTransactionId: transaction.originalID,
-                                               productId: transaction.productID,
-                                               purchaseDate: transaction.purchaseDate)
-                    print("[IAP][StoreKit2] Transaction update: id=\(transaction.id) product=\(transaction.productID)")
-                    DispatchQueue.main.async { handler(info.dictionary) }
-                case .unverified(_, let error):
-                    print("[IAP][StoreKit2] Unverified transaction update skipped: \(error.localizedDescription)")
-                }
-            }
-
-            for await result in Transaction.unfinished {
-                deliver(result)
-            }
+        updatesTask = Task { @MainActor in
             for await result in Transaction.updates {
-                deliver(result)
+                self.deliverTransactionUpdate(result, handler: handler)
+            }
+        }
+
+        Task { @MainActor in
+            for await result in Transaction.unfinished {
+                self.deliverTransactionUpdate(result, handler: handler)
             }
         }
     }
