@@ -48,12 +48,10 @@ XrayInstaller::XrayInstaller(QObject *parent)
 ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
                                                      SshSession* sshSession, ContainerConfig &config)
 {
-    namespace px = amnezia::protocols::xray;
-
     ErrorCode errorCode = ErrorCode::NoError;
 
     QString currentConfig = sshSession->getTextFileFromContainer(
-            container, credentials, px::serverConfigPath, errorCode);
+            container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
 
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
