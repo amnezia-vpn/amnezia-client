@@ -380,11 +380,7 @@ PageType {
         property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild || IsPlayBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            if (Qt.platform.os === "android") {
-                SubscriptionUiController.restoreServiceFromPlayMarket()
-            } else {
-                SubscriptionUiController.restoreServiceFromAppStore()
-            }
+            SubscriptionUiController.restoreServiceFromStore()
             PageController.showBusyIndicator(false)
         }
     }

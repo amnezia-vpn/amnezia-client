@@ -2,15 +2,11 @@
 
 #include <QDebug>
 #include <QDateTime>
-#include <QEventLoop>
 #include <QFutureWatcher>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QPromise>
-#include <QSet>
 #include <QUuid>
-#include <QVariantMap>
-#include <tuple>
 
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/configurators/wireguardConfigurator.h"
@@ -32,11 +28,7 @@
 #include "core/models/api/apiConfig.h"
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include "platforms/ios/ios_controller.h"
     #include "core/utils/swiftBridge.h"
-#elif defined(Q_OS_ANDROID)
-    #include "platforms/android/android_controller.h"
-    #include <QtConcurrent>
 #endif
 
 using namespace amnezia;
@@ -209,19 +201,6 @@ ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const 
     return gatewayController.post(endpoint, apiPayload, responseBody);
 }
 
-ErrorCode SubscriptionController::getSubscriptionInfo(const QString &userCountryCode, const QString &serviceType,
-                                                       const QString &serviceProtocol, const QString &purchaseToken,
-                                                       QByteArray &responseBody)
-{
-    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
-                                     .addField(apiDefs::key::serviceType, serviceType)
-                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
-                                     .addField(apiDefs::key::transactionId, purchaseToken)
-                                     .build();
-    return executeRequest(QString("%1v1/get_subscription_info"), apiPayload, responseBody, false);
-}
-
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
                                                             CaptchaInfo &captchaInfo)
@@ -245,8 +224,15 @@ ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCo
         return errorCode;
     }
 
+    return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
+}
+
+ErrorCode SubscriptionController::applyImportedServiceConfig(const QString &userCountryCode, const QString &serviceType,
+                                                             const QString &serviceProtocol, const ProtocolData &protocolData,
+                                                             const QByteArray &responseBody)
+{
     QJsonObject serverConfigJson;
-    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
+    ErrorCode errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
     }
@@ -315,82 +301,6 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::importServiceFromMarket(const QString &userCountryCode, const QString &serviceType,
-                                                            const QString &serviceProtocol, const ProtocolData &protocolData,
-                                                            const QString &transactionId, bool isTestPurchase,
-                                                            int *duplicateServerIndex, const QString &endpoint)
-{
-    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
-                                     .addField(apiDefs::key::serviceType, serviceType)
-                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
-                                     .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, protocolData))
-                                     .addField(apiDefs::key::transactionId, transactionId)
-                                     .build();
-
-    QByteArray responseBody;
-    qWarning() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
-    ErrorCode errorCode = executeRequest(QString("%1") + endpoint, apiPayload, responseBody, isTestPurchase);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-
-    // Parse the subscription response
-    QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
-    QString key = responseObject.value(QStringLiteral("key")).toString();
-    if (key.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
-        return ErrorCode::ApiPurchaseError;
-    }
-
-    QString normalizedKey = key;
-    normalizedKey.replace(QStringLiteral("vpn://"), QString());
-
-    // Check if server with this VPN key already exists
-    for (int i = 0; i < m_serversRepository->serversCount(); ++i) {
-        const auto apiV2 = m_serversRepository->apiV2Config(m_serversRepository->serverIdAt(i));
-        QString existingVpnKey = apiV2.has_value() ? apiV2->vpnKey() : QString();
-        existingVpnKey.replace(QStringLiteral("vpn://"), QString());
-        if (!existingVpnKey.isEmpty() && existingVpnKey == normalizedKey) {
-            if (duplicateServerIndex) {
-                *duplicateServerIndex = i;
-            }
-            qInfo().noquote() << "[IAP] Subscription config with the same vpn_key already exists";
-            return ErrorCode::ApiConfigAlreadyAdded;
-        }
-    }
-
-    QByteArray configString = QByteArray::fromBase64(normalizedKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    QByteArray configUncompressed = qUncompress(configString);
-    if (!configUncompressed.isEmpty()) {
-        configString = configUncompressed;
-    }
-
-    if (configString.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response config payload is empty";
-        return ErrorCode::ApiPurchaseError;
-    }
-
-    QJsonObject configObject = QJsonDocument::fromJson(configString).object();
-
-    quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
-
-    if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
-        return ErrorCode::InternalError;
-    }
-
-    ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
-    ApiV2ServerConfig* apiV2 = &apiV2ServerConfig;
-    apiV2->apiConfig.vpnKey = normalizedKey;
-    apiV2->apiConfig.subscriptionExpiredByServer = false;
-    apiV2->crc = crc;
-
-    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
-                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
-
-    return ErrorCode::NoError;
-}
-
 ErrorCode SubscriptionController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                                            CaptchaInfo *captchaInfoOut, ProtocolData *usedProtocolDataOut)
 {
@@ -438,15 +348,20 @@ ErrorCode SubscriptionController::updateServiceFromGateway(const QString &server
             }
         }
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
-            ApiV2ServerConfig expiredApiV2 = *apiV2;
-            expiredApiV2.apiConfig.subscriptionExpiredByServer = true;
-            m_serversRepository->editServer(serverId, expiredApiV2.toJson(),
-                                           serverConfigUtils::configTypeFromJson(expiredApiV2.toJson()));
+            markSubscriptionExpiredByServer(serverId, *apiV2);
         }
         return errorCode;
     }
 
     return applyUpdatedServiceConfig(serverId, serviceProtocol, protocolData, responseBody);
+}
+
+void SubscriptionController::markSubscriptionExpiredByServer(const QString &serverId, const ApiV2ServerConfig &apiV2)
+{
+    ApiV2ServerConfig expiredApiV2 = apiV2;
+    expiredApiV2.apiConfig.subscriptionExpiredByServer = true;
+    m_serversRepository->editServer(serverId, expiredApiV2.toJson(),
+                                    serverConfigUtils::configTypeFromJson(expiredApiV2.toJson()));
 }
 
 ErrorCode SubscriptionController::applyUpdatedServiceConfig(const QString &serverId, const QString &serviceProtocol,
@@ -470,18 +385,17 @@ ErrorCode SubscriptionController::applyUpdatedServiceConfig(const QString &serve
     }
 
     ApiV2ServerConfig newApiV2Config = ApiV2ServerConfig::fromJson(serverConfigJson);
-    ApiV2ServerConfig* newApiV2 = &newApiV2Config;
 
-    newApiV2->apiConfig.vpnKey = apiV2->apiConfig.vpnKey;
-    newApiV2->apiConfig.subscriptionExpiredByServer = false;
+    newApiV2Config.apiConfig.vpnKey = apiV2->apiConfig.vpnKey;
+    newApiV2Config.apiConfig.subscriptionExpiredByServer = false;
 
-    newApiV2->authData = apiV2->authData;
-    newApiV2->crc = apiV2->crc;
+    newApiV2Config.authData = apiV2->authData;
+    newApiV2Config.crc = apiV2->crc;
 
     if (apiV2->nameOverriddenByUser) {
-        newApiV2->name = apiV2->name;
-        newApiV2->displayName = apiV2->displayName;
-        newApiV2->nameOverriddenByUser = true;
+        newApiV2Config.name = apiV2->name;
+        newApiV2Config.displayName = apiV2->displayName;
+        newApiV2Config.nameOverriddenByUser = true;
     }
 
     m_serversRepository->editServer(serverId, newApiV2Config.toJson(),
@@ -522,10 +436,7 @@ ErrorCode SubscriptionController::resolveUpdateServiceCaptcha(const QString &ser
             fillCaptchaInfoFromResponse(responseBody, *retryCaptchaOut);
         }
         if (errorCode == ErrorCode::ApiSubscriptionExpiredError && !apiV2->apiConfig.isInAppPurchase) {
-            ApiV2ServerConfig expiredApiV2 = *apiV2;
-            expiredApiV2.apiConfig.subscriptionExpiredByServer = true;
-            m_serversRepository->editServer(serverId, expiredApiV2.toJson(),
-                                           serverConfigUtils::configTypeFromJson(expiredApiV2.toJson()));
+            markSubscriptionExpiredByServer(serverId, *apiV2);
         }
         return errorCode;
     }
@@ -811,494 +722,6 @@ QStringList SubscriptionController::availableProtocols(const QString &serverId) 
     return protocols;
 }
 
-ErrorCode SubscriptionController::processAppStorePurchase(const QString &userCountryCode, const QString &serviceType,
-                                                          const QString &serviceProtocol, const QString &productId,
-                                                          int *duplicateServerIndex)
-{
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    bool purchaseOk = false;
-    QString originalTransactionId;
-    QString storeTransactionId;
-    QString storeProductId;
-    QString purchaseError;
-    QEventLoop waitPurchase;
-
-    IosController::Instance()->purchaseProduct(productId,
-                                               [&](bool success, const QString &txId, const QString &purchasedProductId,
-                                                   const QString &originalTxId, const QString &errorString) {
-                                                   purchaseOk = success;
-                                                   originalTransactionId = originalTxId;
-                                                   storeTransactionId = txId;
-                                                   storeProductId = purchasedProductId;
-                                                   purchaseError = errorString;
-                                                   waitPurchase.quit();
-                                               });
-    waitPurchase.exec();
-
-    if (!purchaseOk || originalTransactionId.isEmpty()) {
-        qDebug() << "IAP purchase failed:" << purchaseError;
-        return ErrorCode::ApiPurchaseError;
-    }
-    qInfo().noquote() << "[IAP] Purchase success. transactionId =" << storeTransactionId
-                      << "originalTransactionId =" << originalTransactionId << "productId =" << storeProductId;
-
-    bool isTestPurchase = IosController::Instance()->isTestFlight();
-
-    ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                     originalTransactionId, isTestPurchase, duplicateServerIndex,
-                                     QStringLiteral("v1/subscriptions"));
-#else
-    Q_UNUSED(userCountryCode);
-    Q_UNUSED(serviceType);
-    Q_UNUSED(serviceProtocol);
-    Q_UNUSED(productId);
-    return ErrorCode::ApiPurchaseError;
-#endif
-}
-
-ErrorCode SubscriptionController::processPlayMarketPurchase(const QString &userCountryCode, const QString &serviceType,
-                                                             const QString &serviceProtocol, const QString &productId,
-                                                             int *duplicateServerIndex, bool *wasUpgrade)
-{
-#if defined(Q_OS_ANDROID)
-    auto androidController = AndroidController::instance();
-    QString purchaseToken;
-    bool purchaseOk = false;
-    bool isUpgrade = false;
-
-    QFutureWatcher<std::tuple<bool, QString, bool>> watcher;
-    QEventLoop waitLoop;
-    QObject::connect(&watcher, &QFutureWatcher<std::tuple<bool, QString, bool>>::finished, &waitLoop, &QEventLoop::quit);
-
-    QFuture<std::tuple<bool, QString, bool>> future = QtConcurrent::run([androidController, productId]() {
-        QString oldPurchaseToken;
-        QJsonObject existingPurchasesResult = androidController->queryPurchases();
-        qInfo().noquote() << "[Billing] queryPurchases raw result:" << QJsonDocument(existingPurchasesResult).toJson(QJsonDocument::Compact);
-        if (existingPurchasesResult.value("responseCode").toInt(-1) == 0) {
-            const QJsonArray existingPurchases = existingPurchasesResult.value("purchases").toArray();
-            for (const QJsonValue &purchaseValue : existingPurchases) {
-                const QJsonObject existingPurchase = purchaseValue.toObject();
-                if (existingPurchase.value("purchaseState").toInt(-1) == 1) { // PURCHASED
-                    oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
-                    qInfo() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
-                    break;
-                }
-            }
-        }
-        const bool isUpgrade = !oldPurchaseToken.isEmpty();
-
-        QJsonObject plansResult = androidController->getSubscriptionPlans();
-        int responseCode = plansResult.value("responseCode").toInt(-1);
-        if (responseCode != 0) {
-            qWarning() << "[Billing] Failed to get subscription plans, responseCode:" << responseCode;
-            return std::make_tuple(false, QString(), isUpgrade);
-        }
-        QJsonArray products = plansResult.value("products").toArray();
-        QString offerToken;
-        QString fallbackOfferToken;
-        for (const QJsonValue &productValue : products) {
-            QJsonObject product = productValue.toObject();
-            QJsonArray offers = product.value("offers").toArray();
-            for (const QJsonValue &offerValue : offers) {
-                QJsonObject offer = offerValue.toObject();
-                if (offer.value("basePlanId").toString() != productId) continue;
-
-                const QString token = offer.value("offerToken").toString();
-                QJsonArray pricingPhases = offer.value("pricingPhases").toArray();
-                const bool hasFreeTrial = !pricingPhases.isEmpty()
-                        && pricingPhases.first().toObject().value("priceAmountMicros").toDouble() == 0;
-
-                if (hasFreeTrial && !oldPurchaseToken.isEmpty()) continue;
-
-                if (fallbackOfferToken.isEmpty()) fallbackOfferToken = token;
-
-                if (hasFreeTrial) {
-                    offerToken = token;
-                    qInfo() << "[Billing] Found free trial offer for basePlanId:" << productId;
-                    break;
-                }
-            }
-            if (!offerToken.isEmpty()) break;
-        }
-        if (offerToken.isEmpty()) offerToken = fallbackOfferToken;
-        if (offerToken.isEmpty()) {
-            qWarning() << "[Billing] No offer token found for basePlanId:" << productId;
-            return std::make_tuple(false, QString(), isUpgrade);
-        }
-        QJsonObject purchaseResult = oldPurchaseToken.isEmpty()
-                ? androidController->purchaseSubscription(offerToken)
-                : androidController->upgradeSubscription(offerToken, oldPurchaseToken);
-        responseCode = purchaseResult.value("responseCode").toInt(-1);
-        if (responseCode != 0) {
-            qWarning() << "[Billing] Purchase failed, responseCode:" << responseCode;
-            return std::make_tuple(false, QString(), isUpgrade);
-        }
-        QJsonArray purchases = purchaseResult.value("purchases").toArray();
-        if (purchases.isEmpty()) {
-            qWarning() << "[Billing] Purchase succeeded but no purchases returned";
-            return std::make_tuple(false, QString(), isUpgrade);
-        }
-        QJsonObject purchase = purchases.at(0).toObject();
-        QString token = purchase.value("purchaseToken").toString();
-        bool isAcknowledged = purchase.value("isAcknowledged").toBool();
-        int purchaseState = purchase.value("purchaseState").toInt(-1);
-        qInfo() << "[Billing] Purchase success. purchaseToken:" << token << "isAcknowledged:" << isAcknowledged << "purchaseState:" << purchaseState;
-        // purchaseState 1 = PURCHASED, 0 = PENDING (user must confirm payment in Google Play)
-        if (purchaseState != 1) {
-            qWarning() << "[Billing] Purchase is in PENDING state, waiting for user to confirm payment";
-            return std::make_tuple(false, QStringLiteral("pending"), isUpgrade);
-        }
-        if (!isAcknowledged) {
-            QJsonObject ackResult = androidController->acknowledgePurchase(token);
-            if (ackResult.value("responseCode").toInt(-1) != 0) {
-                qWarning() << "[Billing] Acknowledge failed";
-            } else {
-                qInfo() << "[Billing] Purchase acknowledged successfully";
-            }
-        }
-        return std::make_tuple(true, token, isUpgrade);
-    });
-
-    watcher.setFuture(future);
-    waitLoop.exec();
-
-    std::tie(purchaseOk, purchaseToken, isUpgrade) = watcher.result();
-
-    if (!purchaseOk) {
-        if (purchaseToken == QStringLiteral("pending")) {
-            return ErrorCode::ApiPurchasePendingError;
-        }
-        return ErrorCode::ApiPurchaseError;
-    }
-    if (purchaseToken.isEmpty()) {
-        return ErrorCode::ApiPurchaseError;
-    }
-
-    if (wasUpgrade) {
-        *wasUpgrade = isUpgrade;
-    }
-
-    QByteArray checkResponse;
-    ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
-    qWarning() << "[Billing][processPlayMarketPurchase] getSubscriptionInfo errorCode:" << static_cast<int>(checkError) << "response:" << checkResponse;
-    if (checkError != ErrorCode::NoError) {
-        qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
-        return checkError;
-    }
-
-    QJsonObject checkObject = QJsonDocument::fromJson(checkResponse).object();
-    bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
-    qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
-
-    ProtocolData protocolData = generateProtocolData(serviceProtocol);
-    return importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                     purchaseToken, isTestPurchase, duplicateServerIndex,
-                                     QStringLiteral("v1/subscriptions"));
-#else
-    Q_UNUSED(userCountryCode);
-    Q_UNUSED(serviceType);
-    Q_UNUSED(serviceProtocol);
-    Q_UNUSED(productId);
-    return ErrorCode::ApiPurchaseError;
-#endif
-}
-
-SubscriptionController::AppStoreRestoreResult SubscriptionController::processAppStoreRestore(const QString &userCountryCode, const QString &serviceType,
-                                                                                             const QString &serviceProtocol)
-{
-    AppStoreRestoreResult result;
-
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    bool restoreSuccess = false;
-    QList<QVariantMap> restoredTransactions;
-    QString restoreError;
-    QEventLoop waitRestore;
-
-    IosController::Instance()->restorePurchases([&](bool success, const QList<QVariantMap> &transactions, const QString &errorString) {
-        restoreSuccess = success;
-        restoredTransactions = transactions;
-        restoreError = errorString;
-        waitRestore.quit();
-    });
-    waitRestore.exec();
-
-    qInfo().noquote() << "[IAP][processAppStoreRestore] restorePurchases result: success=" << restoreSuccess
-                      << "transactions count=" << restoredTransactions.size()
-                      << "error=" << restoreError;
-
-    if (!restoreSuccess) {
-        qWarning().noquote() << "[IAP] Restore failed:" << restoreError;
-        result.errorCode = ErrorCode::ApiPurchaseError;
-        return result;
-    }
-
-    if (restoredTransactions.isEmpty()) {
-        qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
-        result.errorCode = ErrorCode::ApiNoPurchasedSubscriptionsError;
-        return result;
-    }
-
-    bool isTestPurchase = IosController::Instance()->isTestFlight();
-    QSet<QString> processedTransactions;
-
-    for (const QVariantMap &transaction : restoredTransactions) {
-        const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
-        const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
-        const QString transactionProductId = transaction.value(QStringLiteral("productId")).toString();
-
-        qInfo().noquote() << "[IAP][processAppStoreRestore] Processing transaction: transactionId=" << transactionId
-                          << "originalTransactionId=" << originalTransactionId << "productId=" << transactionProductId;
-
-        if (originalTransactionId.isEmpty()) {
-            qWarning().noquote() << "[IAP] Skipping restored transaction without originalTransactionId" << transactionId;
-            continue;
-        }
-
-        if (processedTransactions.contains(originalTransactionId)) {
-            result.duplicateCount++;
-            continue;
-        }
-        processedTransactions.insert(originalTransactionId);
-
-        qInfo().noquote() << "[IAP] Restoring subscription. transactionId =" << transactionId
-                          << "originalTransactionId =" << originalTransactionId << "productId =" << transactionProductId;
-
-        ProtocolData protocolData = generateProtocolData(serviceProtocol);
-        int currentDuplicateServerIndex = -1;
-        ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                        originalTransactionId, isTestPurchase,
-                                                        &currentDuplicateServerIndex,
-                                                        QStringLiteral("v1/restore_subscription"));
-
-        qInfo().noquote() << "[IAP][processAppStoreRestore] importServiceFromMarket errorCode=" << static_cast<int>(errorCode)
-                          << "for originalTransactionId=" << originalTransactionId;
-
-        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
-            result.duplicateConfigAlreadyPresent = true;
-            if (result.duplicateServerIndex < 0) {
-                result.duplicateServerIndex = currentDuplicateServerIndex;
-            }
-            qInfo().noquote() << "[IAP] Skipping restored transaction" << originalTransactionId
-                              << "because subscription config with the same vpn_key already exists";
-        } else if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[IAP] Failed to process restored subscription response for transaction" << originalTransactionId
-                                 << "errorCode=" << static_cast<int>(errorCode);
-            result.errorCode = errorCode;
-        } else {
-            result.hasInstalledConfig = true;
-        }
-    }
-
-    if (!result.hasInstalledConfig) {
-        result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
-    }
-
-    qInfo().noquote() << "[IAP][processAppStoreRestore] Done. hasInstalledConfig=" << result.hasInstalledConfig
-                      << "duplicateConfigAlreadyPresent=" << result.duplicateConfigAlreadyPresent
-                      << "duplicateCount=" << result.duplicateCount
-                      << "errorCode=" << static_cast<int>(result.errorCode);
-
-    return result;
-#else
-    Q_UNUSED(userCountryCode);
-    Q_UNUSED(serviceType);
-    Q_UNUSED(serviceProtocol);
-    result.errorCode = ErrorCode::ApiPurchaseError;
-    return result;
-#endif
-}
-
-SubscriptionController::PlayMarketRestoreResult SubscriptionController::processPlayMarketRestore(const QString &userCountryCode, const QString &serviceType,
-                                                                                                  const QString &serviceProtocol)
-{
-    PlayMarketRestoreResult result;
-
-#if defined(Q_OS_ANDROID)
-    auto androidController = AndroidController::instance();
-
-    QJsonObject purchasesResult;
-    {
-        QFutureWatcher<QJsonObject> queryWatcher;
-        QEventLoop queryLoop;
-        QObject::connect(&queryWatcher, &QFutureWatcher<QJsonObject>::finished, &queryLoop, &QEventLoop::quit);
-        QFuture<QJsonObject> queryFuture = QtConcurrent::run([androidController]() {
-            return androidController->queryPurchases();
-        });
-        queryWatcher.setFuture(queryFuture);
-        queryLoop.exec();
-        purchasesResult = queryWatcher.result();
-    }
-
-    int responseCode = purchasesResult.value("responseCode").toInt(-1);
-    if (responseCode != 0) {
-        qWarning().noquote() << "[Billing] queryPurchases failed, responseCode =" << responseCode;
-        result.errorCode = ErrorCode::ApiPurchaseError;
-        return result;
-    }
-
-    QJsonArray purchases = purchasesResult.value("purchases").toArray();
-    if (purchases.isEmpty()) {
-        qInfo().noquote() << "[Billing] Restore completed, but no purchases were found";
-        result.errorCode = ErrorCode::ApiNoPurchasesToRestore;
-        return result;
-    }
-
-    QSet<QString> processedTokens;
-    for (const QJsonValue &purchaseValue : std::as_const(purchases)) {
-        const QJsonObject purchaseObj = purchaseValue.toObject();
-        const QString purchaseToken = purchaseObj.value("purchaseToken").toString();
-
-        if (purchaseToken.isEmpty()) {
-            qWarning().noquote() << "[Billing] Skipping purchase without purchaseToken";
-            continue;
-        }
-
-        if (processedTokens.contains(purchaseToken)) {
-            result.duplicateCount++;
-            continue;
-        }
-        processedTokens.insert(purchaseToken);
-
-        qInfo().noquote() << "[Billing] Restoring subscription with purchaseToken =" << purchaseToken;
-
-        {
-            QFutureWatcher<QJsonObject> ackWatcher;
-            QEventLoop ackLoop;
-            QObject::connect(&ackWatcher, &QFutureWatcher<QJsonObject>::finished, &ackLoop, &QEventLoop::quit);
-            QFuture<QJsonObject> ackFuture = QtConcurrent::run([androidController, purchaseToken]() {
-                return androidController->acknowledgePurchase(purchaseToken);
-            });
-            ackWatcher.setFuture(ackFuture);
-            ackLoop.exec();
-            QJsonObject ackResult = ackWatcher.result();
-            int ackCode = ackResult.value("responseCode").toInt(-1);
-            if (ackCode != 0) {
-                qWarning().noquote() << "[Billing] acknowledgePurchase failed, responseCode =" << ackCode;
-            } else {
-                qInfo().noquote() << "[Billing] Purchase acknowledged successfully";
-            }
-        }
-
-        QByteArray checkResponse;
-        ErrorCode checkError = getSubscriptionInfo(userCountryCode, serviceType, serviceProtocol, purchaseToken, checkResponse);
-        qWarning() << "[Billing][processPlayMarketRestore] getSubscriptionInfo errorCode:" << static_cast<int>(checkError) << "response:" << checkResponse;
-        if (checkError != ErrorCode::NoError) {
-            qWarning().noquote() << "[Billing] Initial subscriptions check failed:" << static_cast<int>(checkError);
-            result.errorCode = checkError;
-            continue;
-        }
-
-        QJsonObject checkObject = QJsonDocument::fromJson(checkResponse).object();
-        bool isTestPurchase = checkObject.value(apiDefs::key::isTestPurchase).toBool(false);
-        qInfo().noquote() << "[Billing] Purchase isTestPurchase =" << isTestPurchase;
-
-        ProtocolData protocolData = generateProtocolData(serviceProtocol);
-        int currentDuplicateServerIndex = -1;
-        ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
-                                                        purchaseToken, isTestPurchase,
-                                                        &currentDuplicateServerIndex,
-                                                        QStringLiteral("v1/restore_subscription"));
-
-        if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
-            result.duplicateConfigAlreadyPresent = true;
-            if (result.duplicateServerIndex < 0) {
-                result.duplicateServerIndex = currentDuplicateServerIndex;
-            }
-            qInfo().noquote() << "[Billing] Skipping purchase" << purchaseToken
-                              << "because subscription config with the same vpn_key already exists";
-        } else if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[Billing] Failed to process restored subscription for purchaseToken =" << purchaseToken
-                                 << "errorCode =" << static_cast<int>(errorCode);
-            result.errorCode = errorCode;
-        } else {
-            result.hasInstalledConfig = true;
-        }
-    }
-
-    if (!result.hasInstalledConfig) {
-        result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiNoPurchasesToRestore;
-    }
-
-    return result;
-#else
-    Q_UNUSED(userCountryCode);
-    Q_UNUSED(serviceType);
-    Q_UNUSED(serviceProtocol);
-    result.errorCode = ErrorCode::ApiPurchaseError;
-    return result;
-#endif
-}
-
-QStringList SubscriptionController::resolveActiveStoreProductIds()
-{
-    QStringList activeProductIds;
-
-#if defined(Q_OS_ANDROID)
-    auto androidController = AndroidController::instance();
-
-    QJsonObject purchasesResult;
-    {
-        QFutureWatcher<QJsonObject> queryWatcher;
-        QEventLoop queryLoop;
-        QObject::connect(&queryWatcher, &QFutureWatcher<QJsonObject>::finished, &queryLoop, &QEventLoop::quit);
-        QFuture<QJsonObject> queryFuture = QtConcurrent::run([androidController]() {
-            return androidController->queryPurchases();
-        });
-        queryWatcher.setFuture(queryFuture);
-        queryLoop.exec();
-        purchasesResult = queryWatcher.result();
-    }
-
-    if (purchasesResult.value("responseCode").toInt(-1) != 0) {
-        qWarning().noquote() << "[Billing][resolveActiveStoreProductIds] queryPurchases failed";
-        return activeProductIds;
-    }
-
-    const QJsonArray purchases = purchasesResult.value("purchases").toArray();
-    for (const QJsonValue &purchaseValue : purchases) {
-        const QJsonObject purchaseObj = purchaseValue.toObject();
-        if (purchaseObj.value("purchaseState").toInt() != 1) {
-            continue;
-        }
-        const QJsonArray productIds = purchaseObj.value("productIds").toArray();
-        for (const QJsonValue &productIdValue : productIds) {
-            const QString productId = productIdValue.toString();
-            if (!productId.isEmpty() && !activeProductIds.contains(productId)) {
-                activeProductIds.append(productId);
-            }
-        }
-    }
-#elif defined(Q_OS_IOS) || defined(MACOS_NE)
-    bool restoreSuccess = false;
-    QList<QVariantMap> transactions;
-    QString restoreError;
-    QEventLoop waitRestore;
-
-    IosController::Instance()->fetchLocalEntitlements([&](bool success, const QList<QVariantMap> &localTransactions, const QString &errorString) {
-        restoreSuccess = success;
-        transactions = localTransactions;
-        restoreError = errorString;
-        waitRestore.quit();
-    });
-    waitRestore.exec();
-
-    if (!restoreSuccess) {
-        qWarning().noquote() << "[Billing][resolveActiveStoreProductIds] fetchLocalEntitlements failed:" << restoreError;
-        return activeProductIds;
-    }
-
-    for (const QVariantMap &transaction : std::as_const(transactions)) {
-        const QString productId = transaction.value("productId").toString();
-        if (!productId.isEmpty() && !activeProductIds.contains(productId)) {
-            activeProductIds.append(productId);
-        }
-    }
-#endif
-
-    return activeProductIds;
-}
-
 ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonObject &accountInfo)
 {
     auto apiV2Opt = m_serversRepository->apiV2Config(serverId);
@@ -1403,20 +826,5 @@ ErrorCode SubscriptionController::resolveImportServiceCaptcha(const QString &use
         return errorCode;
     }
 
-    QJsonObject serverConfigJson;
-    errorCode = extractServerConfigJsonFromResponse(responseBody, serviceProtocol, protocolData, serverConfigJson);
-    if (errorCode != ErrorCode::NoError) {
-        return errorCode;
-    }
-
-    updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
-
-    if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
-        return ErrorCode::InternalError;
-    }
-
-    ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(serverConfigJson);
-    m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
-                                   serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
-    return ErrorCode::NoError;
+    return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
 }

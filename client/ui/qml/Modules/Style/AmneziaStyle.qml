@@ -21,6 +21,7 @@ QtObject {
         readonly property color deepBrown: '#402102'
         readonly property color vibrantRed: '#EB5757'
         readonly property color vibrantGreen: '#3FBF6B'
+        readonly property color deepMagenta: '#950051'
         readonly property color darkCharcoal: '#261E1A'
         readonly property color pearlGray: '#EAEAEC'
 
