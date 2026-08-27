@@ -361,16 +361,6 @@ void SettingsController::setThemeMode(int mode)
     m_appSettingsRepository->setAppThemeMode(mode);
 }
 
-bool SettingsController::isPremV1MigrationReminderActive() const
-{
-    return m_appSettingsRepository->isPremV1MigrationReminderActive();
-}
-
-void SettingsController::disablePremV1MigrationReminder()
-{
-    m_appSettingsRepository->disablePremV1MigrationReminder();
-}
-
 QString SettingsController::nextAvailableServerName() const
 {
     return m_serversRepository->nextAvailableServerName();

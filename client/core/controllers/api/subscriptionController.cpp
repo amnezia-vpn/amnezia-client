@@ -32,7 +32,7 @@
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 using namespace amnezia;
@@ -364,8 +364,6 @@ ErrorCode SubscriptionController::importServiceFromAppStore(const QString &userC
     ApiV2ServerConfig apiV2ServerConfig = ApiV2ServerConfig::fromJson(configObject);
     ApiV2ServerConfig* apiV2 = &apiV2ServerConfig;
     apiV2->apiConfig.vpnKey = normalizedKey;
-    apiV2->apiConfig.isTestPurchase = isTestPurchase;
-    apiV2->apiConfig.isInAppPurchase = true;
     apiV2->apiConfig.subscriptionExpiredByServer = false;
     apiV2->crc = crc;
 
@@ -457,8 +455,6 @@ ErrorCode SubscriptionController::applyUpdatedServiceConfig(const QString &serve
     ApiV2ServerConfig* newApiV2 = &newApiV2Config;
 
     newApiV2->apiConfig.vpnKey = apiV2->apiConfig.vpnKey;
-    newApiV2->apiConfig.isTestPurchase = apiV2->apiConfig.isTestPurchase;
-    newApiV2->apiConfig.isInAppPurchase = apiV2->apiConfig.isInAppPurchase;
     newApiV2->apiConfig.subscriptionExpiredByServer = false;
 
     newApiV2->authData = apiV2->authData;
@@ -696,7 +692,7 @@ void SubscriptionController::removeApiConfig(const QString &serverId)
                                .arg(hostName)
                                .arg("");
 
-    AmneziaVPN::removeVPNC(vpncName.toStdString());
+    SWIFT_BRIDGE_NAMESPACE::removeVPNC(vpncName.toStdString());
 #endif
 
     apiV2->dns1.clear();
@@ -952,7 +948,8 @@ ErrorCode SubscriptionController::getAccountInfo(const QString &serverId, QJsonO
         return errorCode;
     }
 
-    accountInfo = QJsonDocument::fromJson(responseBody).object();
+    accountInfo = QJsonDocument::fromJson(responseBody).object();    
+
     return ErrorCode::NoError;
 }
 

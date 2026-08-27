@@ -9,7 +9,7 @@ import platform
 
 class AwgAndroid(ConanFile):
     name = "awg-android"
-    version = "3.0.1"
+    version = "3.1.20260814"
     settings = "os", "arch", "build_type", "compiler"
 
     def configure(self):

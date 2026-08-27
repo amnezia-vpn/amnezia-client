@@ -255,9 +255,8 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$SPECIAL_JUNK_4", config.specialJunk4 } });
         vars.append({ { "$SPECIAL_JUNK_5", config.specialJunk5 } });
 
-        const bool isAwg3 = config.protocolVersion == protocols::awg::awgV3;
-        vars.append({ { "$PERSISTENT_KEEPALIVE", isAwg3 ? QString(protocols::awg::defaultPersistentKeepAlive)
-                                                        : QString(protocols::wireguard::defaultPersistentKeepAlive) } });
+        vars.append({ { "$PERSISTENT_KEEPALIVE", config.hasAwg3Params() ? QString(protocols::awg::defaultPersistentKeepAlive)
+                                                                        : QString(protocols::wireguard::defaultPersistentKeepAlive) } });
 
         vars.append({ { "$HEADER_PROTECTION_KEY", config.headerProtectionKey } });
         vars.append({ { "$CONTENT_PADDING_ADDITION", config.contentPaddingAddition } });
@@ -266,6 +265,10 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$REJECT_AFTER_TIME", config.rejectAfterTime } });
         vars.append({ { "$KEEPALIVE_TIMEOUT", config.keepaliveTimeout } });
         vars.append({ { "$MAX_HANDSHAKE_ATTEMPTS", config.maxHandshakeAttempts } });
+        vars.append({ { "$RANDOM_TRAILERS", AwgProtocolConfig::isToggleEnabled(config.randomTrailers)
+                                                    ? config.randomTrailers : QString() } });
+        vars.append({ { "$DISABLE_COOKIES", AwgProtocolConfig::isToggleEnabled(config.disableCookies)
+                                                    ? config.disableCookies : QString() } });
     }
 
     return vars;
