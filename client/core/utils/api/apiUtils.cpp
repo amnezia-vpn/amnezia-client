@@ -76,9 +76,7 @@ QString apiUtils::getCountryFlagCode(const QString &serverCountryCodeL10n, const
     if (serverCountryCode.isEmpty()) {
         return {};
     }
-
-    QString result = serverCountryCode.section('-', 0, 0).toUpper();
-    return result;
+    return serverCountryCode.section('-', 0, 0).toUpper();
 }
 
 bool apiUtils::isSubscriptionExpired(const QString &subscriptionEndDate)
