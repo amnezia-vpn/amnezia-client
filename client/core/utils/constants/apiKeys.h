@@ -26,6 +26,7 @@ namespace apiDefs
         constexpr QLatin1String distribution("distribution");
         constexpr QLatin1String userCountryCode("user_country_code");
         constexpr QLatin1String serverCountryCode("server_country_code");
+        constexpr QLatin1String serverCountryCodeL10n("server_country_code_l10n");
         constexpr QLatin1String serverCountryName("server_country_name");
         constexpr QLatin1String appVersion("app_version");
         constexpr QLatin1String authData("auth_data");
