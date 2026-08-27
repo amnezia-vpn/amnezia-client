@@ -470,7 +470,9 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processAppS
         }
     }
 
-    if (!result.hasInstalledConfig) {
+    // Don't overwrite a genuine failure recorded for a different transaction just because
+    // another one in the same batch happened to be a duplicate.
+    if (!result.hasInstalledConfig && result.errorCode == ErrorCode::NoError) {
         result.errorCode = result.duplicateConfigAlreadyPresent ? ErrorCode::ApiConfigAlreadyAdded : ErrorCode::ApiPurchaseError;
     }
 
@@ -594,9 +596,11 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processPlay
         }
     }
 
+    // Don't overwrite a genuine failure recorded for a different purchase just because
+    // another one in the same batch happened to be a duplicate.
     if (!result.hasInstalledConfig && !result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::NoError) {
         result.errorCode = ErrorCode::ApiNoPurchasesToRestore;
-    } else if (!result.hasInstalledConfig && result.duplicateConfigAlreadyPresent) {
+    } else if (!result.hasInstalledConfig && result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::NoError) {
         result.errorCode = ErrorCode::ApiConfigAlreadyAdded;
     }
 

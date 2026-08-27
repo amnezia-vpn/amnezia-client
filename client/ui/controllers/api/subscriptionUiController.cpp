@@ -285,7 +285,10 @@ bool SubscriptionUiController::restoreServiceFromStore()
 #endif
 
     if (!result.hasInstalledConfig) {
-        if (result.duplicateConfigAlreadyPresent) {
+        // Only treat this as the "nothing new, already added" case when that's genuinely the
+        // whole story - a real failure recorded for another transaction in the same batch
+        // must still surface, even if some other transaction was also a duplicate.
+        if (result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             emit installServerFromApiFinished(tr("This subscription has already been added"), result.duplicateServerIndex);
             return true;
         }
