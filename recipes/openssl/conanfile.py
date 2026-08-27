@@ -560,6 +560,13 @@ class OpenSSLConan(ConanFile):
                         replace_in_file(self, mkinstallvars_pl, "$values{$k} = $v;", """$v->[0] =~ s|\\\\|/|g; $values{$k} = $v;""")
                     else:
                         replace_in_file(self, mkinstallvars_pl, "$ENV{$k} = $v;", """$v =~ s|\\\\|/|g; $ENV{$k} = $v;""")
+            if self.settings.os == "Android":
+                # Android shared libs are named libcrypto_3.so/libssl_3.so (no
+                # libcrypto.so symlink), so the `-lcrypto` in engine link lines
+                # resolves to the static archive; build the archives first,
+                # otherwise a parallel make can link engines against a
+                # half-assembled libcrypto.a (undefined ossl_* symbols).
+                self._run_make(targets=["libcrypto.a", "libssl.a"])
             self._run_make()
 
     def _make_install(self):
