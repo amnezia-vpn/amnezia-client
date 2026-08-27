@@ -81,7 +81,7 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
+        stdOut += data;
         return ErrorCode::NoError;
     };
 
@@ -118,20 +118,22 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
     bool hasPeer = false;
 
     for (const QString &line : lines) {
-        if (line.startsWith("peer:")) {
+        const QString trimmedLine = line.trimmed();
+
+        if (trimmedLine.startsWith("peer:")) {
             if (hasPeer) {
                 data.push_back(currentPeer);
             }
             currentPeer = WgShowData();
-            currentPeer.clientId = getStrValue(line);
+            currentPeer.clientId = getStrValue(trimmedLine);
             hasPeer = true;
         } else if (hasPeer) {
-            if (line.trimmed().startsWith("latest handshake:")) {
-                auto latestHandshake = getStrValue(line);
+            if (trimmedLine.startsWith("latest handshake:")) {
+                auto latestHandshake = getStrValue(trimmedLine);
                 changeHandshakeFormat(latestHandshake);
                 currentPeer.latestHandshake = latestHandshake;
-            } else if (line.trimmed().startsWith("transfer:")) {
-                const auto transferredData = getStrValue(line).split(",");
+            } else if (trimmedLine.startsWith("transfer:")) {
+                const auto transferredData = getStrValue(trimmedLine).split(",");
                 if (transferredData.size() == 2) {
                     auto serverBytesReceived = transferredData.front().trimmed();
                     auto serverBytesSent = transferredData.back().trimmed();
@@ -143,9 +145,12 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
                     }
                     currentPeer.dataReceived = serverBytesSent;
                     currentPeer.dataSent = serverBytesReceived;
+                } else {
+                    logger.warning() << QString("Unexpected %1 show transfer format, skipping traffic stats for the peer")
+                                                .arg(showBin);
                 }
-            } else if (line.trimmed().startsWith("allowed ips:")) {
-                currentPeer.allowedIps = getStrValue(line);
+            } else if (trimmedLine.startsWith("allowed ips:")) {
+                currentPeer.allowedIps = getStrValue(trimmedLine);
             }
         }
     }
