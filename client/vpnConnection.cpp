@@ -124,14 +124,6 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
     IpcClient::withInterface([&](QSharedPointer<IpcInterfaceReplica> iface) {
         switch (state) {
             case Vpn::ConnectionState::Connected: {
-                const auto protocol = m_vpnProtocol;
-                if (protocol.isNull()) {
-                    qWarning() << "onConnectionStateChanged: Connected but protocol already released; skipping route setup";
-                    break;
-                }
-                const QString vpnGateway = protocol->vpnGateway();
-                const QString routeGateway = protocol->routeGateway();
-
                 iface->resetIpStack();
 
                 auto flushDns = iface->flushDns();
@@ -146,27 +138,27 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
 #ifdef Q_OS_MACOS
                     if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                        iface->routeAddList(vpnGateway, QStringList() << dns1 << dns2);
+                        iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #else
-                    iface->routeAddList(vpnGateway, QStringList() << dns1 << dns2);
+                    iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 #endif
 
                     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
-                        iface->routeDeleteList(vpnGateway, QStringList() << "0.0.0.0");
+                        iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
                         RouteMode routeMode = m_appSettingsRepository->routeMode();
                         if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
-                            QTimer::singleShot(1000, protocol.data(),
-                                               [this, routeMode, vpnGateway]() { addSitesRoutes(vpnGateway, routeMode); });
+                            QTimer::singleShot(1000, m_vpnProtocol.data(),
+                                               [this, routeMode]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), routeMode); });
                         } else if (routeMode == amnezia::RouteMode::VpnAllExceptSites) {
-                            iface->routeAddList(vpnGateway, QStringList() << "0.0.0.0/1");
-                            iface->routeAddList(vpnGateway, QStringList() << "128.0.0.0/1");
+                            iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
+                            iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
 
-                            iface->routeAddList(routeGateway, QStringList() << remoteAddress());
+                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
 #ifdef Q_OS_MACOS
-                            iface->routeAddList(routeGateway, QStringList() << dns1 << dns2);
+                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << dns1 << dns2);
 #endif
-                            addSitesRoutes(routeGateway, routeMode);
+                            addSitesRoutes(m_vpnProtocol->routeGateway(), routeMode);
                         }
                     }
                 }
@@ -331,6 +323,14 @@ Vpn::ConnectionState VpnConnection::connectionState() const
 
 void VpnConnection::connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
+#ifdef AMNEZIA_DESKTOP
+    if (m_transitionInFlight) {
+        qWarning() << "connectToVpn: transition in flight, dropping request";
+        return;
+    }
+    m_transitionInFlight = true;
+#endif
+
     if (!m_appSettingsRepository || !m_serversRepository) {
         qCritical() << "VpnConnection::connectToVpn: repositories not initialized";
         setConnectionState(Vpn::ConnectionState::Error);
@@ -349,6 +349,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
+        disconnect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
@@ -567,8 +568,7 @@ QString VpnConnection::bytesPerSecToText(quint64 bytes)
 }
 
 void VpnConnection::reconnectToVpn() {
-    QSharedPointer<VpnProtocol> protocol = m_vpnProtocol;
-    if (protocol.isNull())
+    if (m_vpnProtocol.isNull())
         return;
 
     if (m_connectionState != Vpn::ConnectionState::Connected) {
@@ -577,18 +577,20 @@ void VpnConnection::reconnectToVpn() {
         return;
     }
 
+#ifdef AMNEZIA_DESKTOP
+    if (m_transitionInFlight) {
+        qWarning() << "reconnectToVpn: transition in flight, dropping request";
+        return;
+    }
+    m_transitionInFlight = true;
+#endif
+
     qDebug() << "Reconnect triggered. Reconnecting to the server";
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
 
-    protocol->stop();
-
-    if (m_vpnProtocol != protocol) {
-        qWarning() << "reconnectToVpn: protocol swapped/dropped during stop(), aborting restart";
-        return;
-    }
-
-    if (ErrorCode err = protocol->start(); err != ErrorCode::NoError) {
+    m_vpnProtocol->stop();
+    if (ErrorCode err = m_vpnProtocol->start(); err != ErrorCode::NoError) {
         setConnectionState(Vpn::ConnectionState::Error);
         emit vpnProtocolError(err);
     }
@@ -596,6 +598,14 @@ void VpnConnection::reconnectToVpn() {
 
 void VpnConnection::disconnectFromVpn()
 {
+#ifdef AMNEZIA_DESKTOP
+    if (m_transitionInFlight) {
+        qWarning() << "disconnectFromVpn: transition in flight, dropping request";
+        return;
+    }
+    m_transitionInFlight = true;
+#endif
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
@@ -635,6 +645,11 @@ void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
 
     if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
         return;
+
+#ifdef AMNEZIA_DESKTOP
+    if (state == Vpn::Connected || state == Vpn::Disconnected || state == Vpn::Error)
+        m_transitionInFlight = false;
+#endif
 
     m_connectionState = state;
     emit connectionStateChanged(state);
