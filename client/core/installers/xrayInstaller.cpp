@@ -18,6 +18,7 @@ namespace
 {
     Logger logger("XrayInstaller");
 
+    // Xray expects uTLS preset names (chrome, firefox, …). Old Amnezia/server templates used "Mozilla/5.0".
     QString describeServerJsonStatus(amnezia::XrayServerJsonStatus status)
     {
         switch (status) {
@@ -73,25 +74,17 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
     const amnezia::XrayServerJsonStatus status =
             XrayServerConfig::fromServerInboundJson(doc.object(), xrayConfig->serverConfig, tpl);
     if (status != amnezia::XrayServerJsonStatus::Ok) {
-        logger.error() << "Xray extractConfigFromContainer:" << describeServerJsonStatus(status);
         return ErrorCode::InternalError;
     }
 
-    logger.info() << "Xray extractConfigFromContainer: extracted server, port=" << xrayConfig->serverConfig.port
-                  << "transport=" << xrayConfig->serverConfig.transport
-                  << "security=" << xrayConfig->serverConfig.security << "site=" << xrayConfig->serverConfig.site
-                  << "sni=" << xrayConfig->serverConfig.sni;
 
+    // ── Security ──────────────────────────────────────────────────────
     {
         XrayConfigurator configurator(sshSession);
         bool found = false;
         const XrayClientTemplate stored = configurator.readClientTemplate(credentials, container, found);
         if (found) {
             tpl = stored;
-            logger.info() << "Xray extractConfigFromContainer: adopted the client template from the server,"
-                          << "fingerprint=" << tpl.fingerprint << "uplinkMethod=" << tpl.uplinkMethod;
-        } else {
-            logger.info() << "Xray extractConfigFromContainer: no client template on the server to adopt";
         }
     }
 

@@ -34,15 +34,14 @@ public:
     amnezia::ErrorCode writeServerConfigForSetup(const amnezia::ServerCredentials &credentials,
                                                  amnezia::DockerContainer container,
                                                  amnezia::ContainerConfig &containerConfig,
-                                                 const amnezia::DnsSettings &dnsSettings);
+                                                 const amnezia::DnsSettings &dnsSettings,
+                                                 bool useAtomicApply = false);
 
     bool uploadClientTemplate(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
                               const amnezia::XrayClientTemplate &clientTemplate) const;
 
     amnezia::XrayClientTemplate readClientTemplate(const amnezia::ServerCredentials &credentials,
                                                    amnezia::DockerContainer container, bool &outFound) const;
-
-    static bool isSecuritySupportedOnSelfHosted(const amnezia::XrayServerConfig &srv);
 
 private:
     QJsonArray collectServerClients(const amnezia::ServerCredentials &credentials,
@@ -53,6 +52,12 @@ private:
                                                     amnezia::DockerContainer container, const QString &listenPort,
                                                     const QJsonObject &serverConfig) const;
 
+    bool restartXrayContainer(const amnezia::ServerCredentials &credentials,
+                              amnezia::DockerContainer container) const;
+
+    bool xrayProcessIsUp(const amnezia::ServerCredentials &credentials,
+                         amnezia::DockerContainer container) const;
+
     amnezia::ErrorCode readContainerKeyFile(amnezia::DockerContainer container,
                                             const amnezia::ServerCredentials &credentials,
                                             const QString &path, QString &out) const;
@@ -60,9 +65,6 @@ private:
     QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
                                 const amnezia::DnsSettings &dnsSettings,
                                 amnezia::ErrorCode &errorCode);
-
-    amnezia::ErrorCode uploadServerConfigJson(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
-                                              const amnezia::DnsSettings &dnsSettings, const QJsonObject &serverConfig) const;
 
     amnezia::XrayProtocolConfig buildClientProtocolConfig(const amnezia::ServerCredentials &credentials,
                                                           amnezia::DockerContainer container,

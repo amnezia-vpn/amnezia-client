@@ -33,10 +33,10 @@ public:
                               QObject *parent = nullptr);
     ~InstallController();
 
-    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false);
+    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false, bool acceptXrayKeyLoss = false);
 
     // Updates server-side container settings (admin self-hosted only): reconfigures the container over SSH.
-    ErrorCode updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
+    ErrorCode updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig, bool acceptXrayKeyLoss = false);
 
     // Updates client-local settings only: rewrites the stored container config for any self-hosted/native server. No SSH.
     ErrorCode updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig);

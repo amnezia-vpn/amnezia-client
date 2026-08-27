@@ -61,10 +61,19 @@ QString errorString(ErrorCode code) {
                                    "Installing on top of it would reuse the old keys, so the configurations you "
                                    "expected to revoke would keep working. Check the server and try again.");
         break;
+    case(ErrorCode::XrayKeyGenerationFailed):
+        errorMessage = QObject::tr("Server error: XRay could not generate its keys on the server. "
+                                   "Check the server and try again.");
+        break;
     case(ErrorCode::XrayKeyMigrationFailed):
         errorMessage = QObject::tr("Server error: could not preserve the XRay keys stored on the server. "
                                    "The settings were not changed, so the existing configurations keep working. "
                                    "Check that the server is reachable and try again.");
+        break;
+    case(ErrorCode::XrayKeyMigrationNeedsConfirm):
+        errorMessage = QObject::tr("The old XRay container will not start, so its keys cannot be preserved. "
+                                   "Applying these settings will recreate it with new keys, and all existing "
+                                   "configurations will stop working.");
         break;
     case(ErrorCode::ServerContainerRuntimeNotSupported): errorMessage = QObject::tr("Server error: The default container runtime available for installation on this server is not supported.\n Install Docker Engine on the server manually and try again."); break;
     case(ErrorCode::ContainerRuntimeServiceNotRunning): errorMessage = QObject::tr("Container runtime error: The container runtime service is not running.\n Check the container runtime service on the server, or wait about a minute and try again."); break;

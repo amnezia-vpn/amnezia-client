@@ -61,6 +61,5 @@
         <file>xray/Dockerfile</file>
         <file>xray/run_container.sh</file>
         <file>xray/start.sh</file>
-        <file>xray/template.json</file>
     </qresource>
 </RCC>

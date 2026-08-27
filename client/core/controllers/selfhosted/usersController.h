@@ -64,11 +64,12 @@ private:
     ErrorCode getWireGuardClients(const DockerContainer container, const ServerCredentials &credentials,
                                   SshSession* sshSession, int &count, QJsonArray &clientsTable);
     ErrorCode getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                             SshSession* sshSession, int &count, QJsonArray &clientsTable);
+                             SshSession* sshSession, int &count, QJsonArray &clientsTable,
+                             const QString &volumeDefaultUuid);
 
     QString readXrayVolumeUuid(const DockerContainer container, const ServerCredentials &credentials,
                                SshSession *sshSession) const;
-    int stripXrayVolumeUuidFromTable(QJsonArray &clientsTable, const QString &volumeUuid);
+    static int stripXrayVolumeUuidFromTable(QJsonArray &clientsTable, const QString &volumeUuid);
 
     ErrorCode wgShow(const DockerContainer container, const ServerCredentials &credentials,
                      SshSession* sshSession, std::vector<WgShowData> &data);

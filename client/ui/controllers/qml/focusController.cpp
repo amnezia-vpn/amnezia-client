@@ -8,16 +8,6 @@
 
 namespace {
     Logger logger("FocusController");
-
-    QString rootObjectName(const QObject *object)
-    {
-        if (object == nullptr) {
-            return QStringLiteral("null");
-        }
-        const QString className = QString::fromLatin1(object->metaObject()->className());
-        const QString name = object->objectName();
-        return name.isEmpty() ? className : className + QLatin1Char('/') + name;
-    }
 }
 
 FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent)
@@ -86,7 +76,6 @@ void FocusController::setFocusOnDefaultItem()
 void FocusController::pushRootObject(QObject *object)
 {
     m_rootObjects.push(object);
-    logger.debug() << "pushRootObject:" << rootObjectName(object) << "depth=" << m_rootObjects.size();
     dropListView();
     // setFocusOnDefaultItem();
 }
@@ -94,29 +83,20 @@ void FocusController::pushRootObject(QObject *object)
 void FocusController::dropRootObject(QObject *object)
 {
     if (m_rootObjects.empty()) {
-        logger.warning() << "dropRootObject: the stack is already empty, this drop had no matching push, object="
-                         << rootObjectName(object);
         return;
     }
 
     if (m_rootObjects.top() == object) {
         m_rootObjects.pop();
-        logger.debug() << "dropRootObject:" << rootObjectName(object) << "depth=" << m_rootObjects.size();
         dropListView();
         setFocusOnDefaultItem();
     } else {
-        logger.warning() << "TRY TO DROP WRONG ROOT OBJECT: top=" << rootObjectName(m_rootObjects.top())
-                         << "SHOULD BE:" << rootObjectName(object) << "depth=" << m_rootObjects.size()
-                         << ", the stack is left as is and stays out of sync";
+        logger.warning() << "TRY TO DROP WRONG ROOT OBJECT: " << m_rootObjects.top() << " SHOULD BE: " << object;
     }
 }
 
 void FocusController::resetRootObject()
 {
-    if (!m_rootObjects.empty()) {
-        logger.debug() << "resetRootObject: dropping" << m_rootObjects.size() << "objects, top="
-                       << rootObjectName(m_rootObjects.top());
-    }
     m_rootObjects.clear();
 }
 

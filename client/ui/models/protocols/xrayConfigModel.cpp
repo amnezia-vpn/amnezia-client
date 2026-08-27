@@ -309,9 +309,6 @@ amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
             m_protocolConfig.clientTemplate.contentFingerprint()
             != m_originalProtocolConfig.clientTemplate.contentFingerprint();
 
-    // A client-only edit (fingerprint, xmux and the rest of the template) no longer applies through a
-    // local rebuild. Like every other protocol, the cached client config is dropped here, and the normal
-    // mechanism rebuilds it through createConfig on the next connect, picking up the new template.
     if (serverSettingsChanged || clientTemplateChanged) {
         m_protocolConfig.clearClientConfig();
     }
@@ -344,6 +341,29 @@ bool XrayConfigModel::pendingChangeRequiresReinstall(const QString &pendingPort)
     };
     const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
     return effectivePort(pending.port) != effectivePort(m_originalProtocolConfig.serverConfig.port);
+}
+
+QString XrayConfigModel::saveDescription(const QString &pendingPort) const
+{
+    const bool touchesServer = pendingChangeTouchesServer(pendingPort);
+    const bool breaksIssued = pendingChangeBreaksIssuedConfigs(pendingPort);
+    const bool requiresReinstall = pendingChangeRequiresReinstall(pendingPort);
+
+    if (requiresReinstall) {
+        if (breaksIssued) {
+            return tr("All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
+        } else {
+            return tr("The server will be recreated. This takes up to a minute, and connections that were already shared keep working.");
+        }
+    } else if (touchesServer) {
+        if (breaksIssued) {
+            return tr("The server configuration will be updated. All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
+        } else {
+            return tr("The server configuration will be updated. The container will not be recreated.");
+        }
+    } else {
+        return tr("The server will not be changed now. The new settings apply the next time you connect.");
+    }
 }
 
 bool XrayConfigModel::isServerSettingsEqual() const
@@ -523,6 +543,7 @@ QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
 {
+    // Matches splithttp uplink payload placement (packet-up / advanced)
     return { "Body", "Auto" };
 }
 

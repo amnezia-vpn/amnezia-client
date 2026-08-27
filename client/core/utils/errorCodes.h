@@ -46,6 +46,8 @@ namespace amnezia
         XrayServerConfigRolledBack = 223,
         XrayServerNotServing = 224,
         ServerDataVolumeNotRemoved = 225,
+        XrayKeyGenerationFailed = 226,
+        XrayKeyMigrationNeedsConfirm = 227,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,

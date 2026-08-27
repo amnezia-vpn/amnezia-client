@@ -97,30 +97,6 @@ amnezia::ProtocolConfig XrayConfigurator::processConfigWithLocalSettings(const a
     return protocolConfig;
 }
 
-ErrorCode XrayConfigurator::uploadServerConfigJson(const ServerCredentials &credentials, DockerContainer container,
-                                                    const DnsSettings &dnsSettings, const QJsonObject &serverConfig) const
-{
-    const QString updatedConfig = QJsonDocument(serverConfig).toJson();
-    ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(
-            container, credentials, updatedConfig, amnezia::protocols::xray::serverConfigPath,
-            libssh::ScpOverwriteMode::ScpOverwriteExisting);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Failed to upload updated config";
-        return errorCode;
-    }
-
-    const QString restartScript = QStringLiteral("sudo docker restart $CONTAINER_NAME");
-    errorCode = m_sshSession->runScript(
-            credentials,
-            m_sshSession->replaceVars(restartScript,
-                                      amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns,
-                                                           dnsSettings.secondaryDns)));
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Failed to restart container";
-    }
-    return errorCode;
-}
-
 ErrorCode XrayConfigurator::readRealityKeyFiles(const DockerContainer container, const ServerCredentials &credentials,
                                                 QString &outPublicKey, QString &outShortId) const
 {
@@ -165,6 +141,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
 
     const XrayServerConfig &srv = xrayCfg->serverConfig;
     if (srv.isThirdPartyConfig) {
+        logger.info() << "Xray applyServerSettings: skipped (third-party/native profile)";
         if (outClientId && xrayCfg->hasClientConfig()) {
             *outClientId = xrayCfg->clientConfig->id;
         }
@@ -190,6 +167,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
                        << static_cast<int>(errorCode) << "path=" << amnezia::protocols::xray::serverConfigPath;
         return errorCode;
     }
+    logger.info() << "Xray applyServerSettings: read server config, bytes=" << currentConfig.size();
 
     QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
     if (doc.isNull() || !doc.isObject()) {
@@ -220,15 +198,10 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
             clientId = ownClientId;
             clients[existingIndex] =
                     XrayServerConfig::applyFlowToClient(clients[existingIndex].toObject(), flowValue);
-            logger.info() << "Xray applyServerSettings: reusing the account from the key file, clients="
-                          << clients.size();
         } else {
             const bool takeOverOwnAccount = adoptingOwnAccount && !ownClientId.isEmpty();
             clientId = takeOverOwnAccount ? ownClientId : QUuid::createUuid().toString(QUuid::WithoutBraces);
             clients.append(XrayServerConfig::makeClientEntry(clientId, flowValue));
-            logger.info() << "Xray applyServerSettings: added an account,"
-                          << (takeOverOwnAccount ? "taken over from the key file" : "freshly minted for a new user")
-                          << ", clients=" << clients.size();
         }
     } else {
         if (clients.isEmpty()) {
@@ -246,23 +219,18 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     const XrayServerJsonStatus writeStatus =
             XrayServerConfig::setClientsInServerInboundJson(serverConfig, clients);
     if (writeStatus != XrayServerJsonStatus::Ok) {
-        logger.error() << "Xray applyServerSettings: server config has no place for the client list, status="
-                       << static_cast<int>(writeStatus);
         return ErrorCode::XrayServerConfigInvalid;
     }
 
     const QString listenPort = srv.port.isEmpty() ? QString::fromLatin1(amnezia::protocols::xray::defaultPort)
                                                   : srv.port;
-    if (serverConfig == originalConfig) {
-        logger.info() << "Xray applyServerSettings: server config already matches, no rewrite and no restart,"
-                      << "clients=" << clients.size();
-    } else {
+    if (serverConfig != originalConfig) {
         errorCode = uploadServerConfigAtomically(credentials, container, listenPort, serverConfig);
         if (errorCode != ErrorCode::NoError) {
-            logger.error() << "Xray applyServerSettings: apply failed, error=" << static_cast<int>(errorCode);
             return errorCode;
         }
     }
+    logger.info() << "Xray applyServerSettings: server config uploaded and container restarted";
 
     if (outClientId) {
         *outClientId = clientId;
@@ -277,6 +245,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
         return errorCode;
     }
     containerConfig.protocolConfig = updated;
+    logger.info() << "Xray applyServerSettings: done, clientId=" << clientId;
     return ErrorCode::NoError;
 }
 
@@ -301,7 +270,8 @@ ErrorCode XrayConfigurator::readContainerKeyFile(DockerContainer container, cons
 }
 
 ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &credentials, DockerContainer container,
-                                                      ContainerConfig &containerConfig, const DnsSettings &dnsSettings)
+                                                      ContainerConfig &containerConfig, const DnsSettings &dnsSettings,
+                                                      bool useAtomicApply)
 {
     Q_UNUSED(dnsSettings);
     namespace px = amnezia::protocols::xray;
@@ -313,6 +283,7 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     }
     const XrayServerConfig &srv = xrayCfg->serverConfig;
     if (srv.isThirdPartyConfig) {
+        logger.info() << "Xray writeServerConfigForSetup: skipped (third-party/native profile)";
         return ErrorCode::NoError;
     }
 
@@ -321,8 +292,6 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     QString clientId;
     errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::uuidPath), clientId);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray writeServerConfigForSetup: could not read the container uuid, error="
-                       << static_cast<int>(errorCode);
         return errorCode;
     }
 
@@ -331,8 +300,6 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     if (securityEff == QLatin1String("tls")) {
         errorCode = ensureTlsCertificate(credentials, container, tlsPin);
         if (errorCode != ErrorCode::NoError) {
-            logger.error() << "Xray writeServerConfigForSetup: TLS certificate is not on the server, error="
-                           << static_cast<int>(errorCode);
             return errorCode;
         }
     }
@@ -355,16 +322,12 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     const QString flowValue = effectiveClientFlow(srv);
     const QJsonArray clients = collectServerClients(credentials, container, flowValue, clientId, errorCode);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray writeServerConfigForSetup: refusing to write over an unreadable client list";
+        logger.error() << "Xray writeServerConfigForSetup: upload failed, error=" << static_cast<int>(errorCode);
         return errorCode;
     }
 
     const QString portEff = srv.port.isEmpty() ? QString::fromLatin1(px::defaultPort) : srv.port;
 
-    if (securityEff != srv.security) {
-        logger.warning() << "Xray writeServerConfigForSetup: security downgraded for the server config, requested="
-                         << srv.security << "written=" << securityEff << "transport=" << srv.transport;
-    }
 
     XrayServerInboundInputs inputs;
     inputs.clients = clients;
@@ -372,14 +335,19 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     inputs.realityShortId = realityShortId;
 
     const QJsonObject inboundJson = srv.toServerInboundJson(inputs);
-    const QString json = QString::fromUtf8(QJsonDocument(inboundJson).toJson());
-    errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json,
-                                                        QString::fromLatin1(px::serverConfigPath),
-                                                        libssh::ScpOverwriteMode::ScpOverwriteExisting);
-    if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray writeServerConfigForSetup: upload failed, error=" << static_cast<int>(errorCode)
-                       << "port=" << portEff;
-        return errorCode;
+    if (useAtomicApply) {
+        errorCode = uploadServerConfigAtomically(credentials, container, portEff, inboundJson);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
+        }
+    } else {
+        const QString json = QString::fromUtf8(QJsonDocument(inboundJson).toJson());
+        errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json,
+                                                            QString::fromLatin1(px::serverConfigPath),
+                                                            libssh::ScpOverwriteMode::ScpOverwriteExisting);
+        if (errorCode != ErrorCode::NoError) {
+            return errorCode;
+        }
     }
 
     XrayProtocolConfig updated =
@@ -391,10 +359,11 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
         return errorCode;
     }
     updated.clientTemplate.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    // Written to the volume so a second administrator device can adopt the client-side
-    // settings. Failure is not fatal: the settings already apply on this device.
-    uploadClientTemplate(credentials, container, updated.clientTemplate);
+    if (!uploadClientTemplate(credentials, container, updated.clientTemplate)) {
+        logger.warning() << "Xray writeServerConfigForSetup: uploadClientTemplate failed; server template may be stale";
+    }
     containerConfig.protocolConfig = updated;
+    logger.info() << "Xray writeServerConfigForSetup: done, clientId=" << clientId;
     return ErrorCode::NoError;
 }
 
@@ -433,24 +402,16 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
         const ErrorCode probeError = m_sshSession->runContainerScript(credentials, container, probe, collect, collect);
 
         if (probeError != ErrorCode::NoError || !probeOut.contains(QLatin1String("amnezia_config="))) {
-            logger.error() << "Xray collectServerClients: read outcome=unknown, cannot tell whether a server config "
-                              "exists, probeError="
-                           << static_cast<int>(probeError);
             outError = ErrorCode::XrayServerConfigInvalid;
             return {};
         }
         if (probeOut.contains(QLatin1String("amnezia_config=present"))) {
-            logger.error() << "Xray collectServerClients: read outcome=unreadable, server config exists but could not "
-                              "be read, aborting so the existing client list is not lost";
             outError = ErrorCode::XrayServerConfigInvalid;
             return {};
         }
     } else {
         const QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
         if (!doc.isObject()) {
-            logger.error() << "Xray collectServerClients: read outcome=unparseable, server config is not valid JSON, "
-                              "bytes="
-                           << currentConfig.size();
             outError = ErrorCode::XrayServerConfigInvalid;
             return {};
         }
@@ -466,13 +427,6 @@ QJsonArray XrayConfigurator::collectServerClients(const ServerCredentials &crede
     }
 
     return clients;
-}
-
-bool XrayConfigurator::isSecuritySupportedOnSelfHosted(const XrayServerConfig &srv)
-{
-    Q_UNUSED(srv);
-    // TLS is issued in writeServerConfigForSetup (self-signed pems in the volume).
-    return true;
 }
 
 ErrorCode XrayConfigurator::ensureTlsCertificate(const ServerCredentials &credentials, DockerContainer container,
@@ -513,15 +467,8 @@ ErrorCode XrayConfigurator::ensureTlsCertificate(const ServerCredentials &creden
     const bool created = stdOut.contains(QLatin1String("amnezia_tls=created"));
     outFingerprint = tlsFingerprintFromEnsureOutput(stdOut);
     if (scriptError != ErrorCode::NoError || (!present && !created) || outFingerprint.isEmpty()) {
-        logger.error() << "Xray ensureTlsCertificate: openssl failed, error=" << static_cast<int>(scriptError)
-                       << "out=" << stdOut.trimmed();
         outFingerprint.clear();
         return ErrorCode::XrayTlsNotSupported;
-    }
-    if (created) {
-        logger.info() << "Xray ensureTlsCertificate: issued a self-signed certificate into the volume";
-    } else {
-        logger.info() << "Xray ensureTlsCertificate: using the existing certificate in the volume";
     }
     return ErrorCode::NoError;
 }
@@ -539,91 +486,103 @@ ErrorCode XrayConfigurator::uploadServerConfigAtomically(const ServerCredentials
     ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json, stagedPath,
                                                                   libssh::ScpOverwriteMode::ScpOverwriteExisting);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray atomic apply: failed to stage config, error=" << static_cast<int>(errorCode);
         return errorCode;
     }
 
-    const QString script = QStringLiteral(
+    const QString swapScript = QStringLiteral(
             "LIVE=%1\n"
             "STAGED=%2\n"
-            "PORT=%3\n"
             "BACKUP=\"$LIVE.bak\"\n"
             "if [ ! -s \"$STAGED\" ]; then echo \"amnezia_apply=missing\"; exit 0; fi\n"
             "if ! xray -test -format json -config \"$STAGED\" > /tmp/xray_test.log 2>&1; then\n"
             "  echo \"amnezia_apply=invalid\"\n"
-            "  cat /tmp/xray_test.log\n"
             "  rm -f \"$STAGED\"\n"
             "  exit 0\n"
             "fi\n"
-            "serving() {\n"
-            "  netstat -lntup 2>/dev/null | grep -E \"[:.]$PORT[[:space:]]\" | grep -q xray\n"
-            "}\n"
             "if [ -f \"$LIVE\" ]; then cp \"$LIVE\" \"$BACKUP\"; fi\n"
             "mv \"$STAGED\" \"$LIVE\"\n"
-            "killall -KILL xray 2>/dev/null\n"
-            "sleep 1\n"
-            "(xray -config \"$LIVE\" > /dev/null 2>&1 &)\n"
-            "sleep 3\n"
-            "if serving; then\n"
-            "  rm -f \"$BACKUP\"\n"
-            "  echo \"amnezia_apply=applied\"\n"
-            "  exit 0\n"
-            "fi\n"
-            "if [ -f \"$BACKUP\" ]; then\n"
-            "  cp \"$BACKUP\" \"$LIVE\"\n"
-            "  killall -KILL xray 2>/dev/null\n"
-            "  sleep 1\n"
-            "  (xray -config \"$LIVE\" > /dev/null 2>&1 &)\n"
-            "  sleep 3\n"
-            "  if serving; then echo \"amnezia_apply=rolled_back\"; else echo \"amnezia_apply=rollback_failed\"; fi\n"
-            "  exit 0\n"
-            "fi\n"
-            "echo \"amnezia_apply=rollback_failed\"\n")
-                                   .arg(livePath, stagedPath, listenPort);
+            "echo \"amnezia_apply=swapped\"\n")
+                                       .arg(livePath, stagedPath);
 
-    QString stdOut;
-    auto collect = [&stdOut](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
+    QString swapOut;
+    auto collectSwap = [&swapOut](const QString &data, libssh::Client &) {
+        swapOut += data + "\n";
         return ErrorCode::NoError;
     };
-
-    errorCode = m_sshSession->runContainerScript(credentials, container, script, collect, collect);
+    errorCode = m_sshSession->runContainerScript(credentials, container, swapScript, collectSwap, collectSwap);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray atomic apply: script failed, error=" << static_cast<int>(errorCode);
         return errorCode;
     }
+    if (swapOut.contains(QLatin1String("amnezia_apply=missing"))) {
+        return ErrorCode::XrayServerConfigRejected;
+    }
+    if (swapOut.contains(QLatin1String("amnezia_apply=invalid"))) {
+        return ErrorCode::XrayServerConfigRejected;
+    }
+    if (!swapOut.contains(QLatin1String("amnezia_apply=swapped"))) {
+        return ErrorCode::XrayServerConfigInvalid;
+    }
 
-    if (stdOut.contains(QLatin1String("amnezia_apply=applied"))) {
-        logger.info() << "Xray atomic apply: outcome=applied, new config is live and serving on port=" << listenPort;
+    if (restartXrayContainer(credentials, container) && xrayProcessIsUp(credentials, container)) {
+        m_sshSession->runContainerScript(credentials, container,
+                                         QStringLiteral("rm -f %1.bak").arg(livePath));
         return ErrorCode::NoError;
     }
-    if (stdOut.contains(QLatin1String("amnezia_apply=missing"))) {
-        logger.error() << "Xray atomic apply: outcome=staged-file-missing, staged config was not on the server, "
-                          "live config untouched, port="
-                       << listenPort;
-        return ErrorCode::XrayServerConfigRejected;
-    }
-    if (stdOut.contains(QLatin1String("amnezia_apply=invalid"))) {
-        logger.error() << "Xray atomic apply: outcome=rejected, xray -test refused the config, live config untouched, "
-                          "port="
-                       << listenPort << "testOutputBytes=" << stdOut.size() << "(output withheld, may contain keys)";
-        return ErrorCode::XrayServerConfigRejected;
-    }
-    if (stdOut.contains(QLatin1String("amnezia_apply=rolled_back"))) {
-        logger.error() << "Xray atomic apply: outcome=rolled-back, new config did not serve on port=" << listenPort
-                       << ", previous config restored and serving";
-        return ErrorCode::XrayServerConfigRolledBack;
-    }
-    if (stdOut.contains(QLatin1String("amnezia_apply=rollback_failed"))) {
-        logger.error() << "Xray atomic apply: outcome=ROLLBACK-FAILED, nothing is serving on port=" << listenPort
-                       << ", the xray container is down and the previous config could not be brought back";
+
+    const QString restoreScript = QStringLiteral(
+            "LIVE=%1\n"
+            "BACKUP=\"$LIVE.bak\"\n"
+            "if [ -f \"$BACKUP\" ]; then cp \"$BACKUP\" \"$LIVE\"; echo amnezia_restore=done; "
+            "else echo amnezia_restore=nobackup; fi\n")
+                                       .arg(livePath);
+    QString restoreOut;
+    auto collectRestore = [&restoreOut](const QString &data, libssh::Client &) {
+        restoreOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+    m_sshSession->runContainerScript(credentials, container, restoreScript, collectRestore, collectRestore);
+    if (!restoreOut.contains(QLatin1String("amnezia_restore=done"))) {
         return ErrorCode::XrayServerNotServing;
     }
+    if (restartXrayContainer(credentials, container) && xrayProcessIsUp(credentials, container)) {
+        return ErrorCode::XrayServerConfigRolledBack;
+    }
+    return ErrorCode::XrayServerNotServing;
+}
 
-    logger.error() << "Xray atomic apply: outcome=unrecognised, no marker in script output, port=" << listenPort
-                   << "outputBytes=" << stdOut.size() << "output="
-                   << stdOut.simplified().left(200);
-    return ErrorCode::XrayServerConfigInvalid;
+bool XrayConfigurator::restartXrayContainer(const ServerCredentials &credentials, DockerContainer container) const
+{
+    const ErrorCode errorCode = m_sshSession->runScript(
+            credentials,
+            SshSession::replaceVars(QStringLiteral("sudo docker restart $CONTAINER_NAME"),
+                                    amnezia::genBaseVars(credentials, container, QString(), QString())));
+    if (errorCode != ErrorCode::NoError) {
+        return false;
+    }
+    return true;
+}
+
+bool XrayConfigurator::xrayProcessIsUp(const ServerCredentials &credentials, DockerContainer container) const
+{
+    const QString script = QStringLiteral(
+            "for i in 1 2 3 4 5 6; do\n"
+            "  if pgrep xray >/dev/null 2>&1 || ps 2>/dev/null | grep -v grep | grep -q \"[x]ray\"; then\n"
+            "    echo amnezia_serving=yes\n"
+            "    exit 0\n"
+            "  fi\n"
+            "  sleep 1\n"
+            "done\n"
+            "echo amnezia_serving=no\n");
+    QString out;
+    auto collect = [&out](const QString &data, libssh::Client &) {
+        out += data + "\n";
+        return ErrorCode::NoError;
+    };
+    const ErrorCode errorCode = m_sshSession->runContainerScript(credentials, container, script, collect, collect);
+    if (errorCode != ErrorCode::NoError) {
+        return false;
+    }
+    return out.contains(QLatin1String("amnezia_serving=yes"));
 }
 QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
                                                const ContainerConfig &containerConfig,
@@ -654,8 +613,6 @@ bool XrayConfigurator::uploadClientTemplate(const ServerCredentials &credentials
             container, credentials, json, QString::fromLatin1(px::clientTemplatePath),
             libssh::ScpOverwriteMode::ScpOverwriteExisting);
     if (errorCode != ErrorCode::NoError) {
-        logger.warning() << "Xray uploadClientTemplate: failed, error=" << static_cast<int>(errorCode)
-                         << ", this device is now ahead of the template stored on the server";
         return false;
     }
     return true;
@@ -676,13 +633,11 @@ XrayClientTemplate XrayConfigurator::readClientTemplate(const ServerCredentials 
 
     const QJsonDocument doc = QJsonDocument::fromJson(content.toUtf8());
     if (!doc.isObject()) {
-        logger.warning() << "Xray readClientTemplate: template on the server is not valid json";
         return {};
     }
 
     XrayClientTemplate tpl = XrayClientTemplate::fromJson(doc.object());
     if (tpl.formatVersion == 0) {
-        logger.warning() << "Xray readClientTemplate: template on the server has no format version, ignoring it";
         return {};
     }
 
@@ -706,6 +661,7 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
 
     const QString securityEff = effectiveSecurity(srv);
 
+
     if (securityEff == QLatin1String(px::securityReality)) {
         if (xrayPublicKey.isEmpty() || xrayShortId.isEmpty()) {
             errorCode = readRealityKeyFiles(container, credentials, xrayPublicKey, xrayShortId);
@@ -723,16 +679,11 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
             }
         }
         if (tlsPin.isEmpty()) {
-            logger.error() << "Xray buildClientProtocolConfig: TLS pin is empty after ensure";
             errorCode = ErrorCode::XrayTlsNotSupported;
             return {};
         }
     }
 
-    if (securityEff != srv.security) {
-        logger.warning() << "Xray buildClientProtocolConfig: security downgraded for the client config, requested="
-                         << srv.security << "written=" << securityEff << "transport=" << srv.transport;
-    }
 
     XrayProtocolConfig protocolConfig;
     protocolConfig.serverConfig = srv;

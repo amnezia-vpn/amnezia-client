@@ -64,7 +64,8 @@ public slots:
 
     void scanServerForInstalledContainers(const QString &serverId);
 
-    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
+    void updateServerConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true,
+                            bool acceptXrayKeyLoss = false);
     void updateClientConfig(const QString &serverId, int containerIndex, int protocolIndex, bool closePage = true);
 
     void removeServer(const QString &serverId);
@@ -121,6 +122,8 @@ signals:
 
     void installationErrorOccurred(ErrorCode errorCode);
     void wrongInstallationUser(const QString &message);
+
+    void xrayKeyMigrationNeedsConfirm(const QString &message);
 
     void serverAlreadyExists(int serverIndex);
 

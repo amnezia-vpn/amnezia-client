@@ -200,10 +200,6 @@ GatewayController::DecryptionResult GatewayController::tryDecryptResponseBody(co
         result.isDecryptionSuccessful = false;
     }
 
-    qDebug() << "tryDecryptResponseBody: inputBytes=" << encryptedResponseBody.size() << "keyBytes=" << key.size()
-             << "ivBytes=" << iv.size() << "saltBytes=" << salt.size() << "replyError=" << replyError
-             << "decrypted=" << result.isDecryptionSuccessful << "outputBytes=" << decrypted.size();
-
     return result;
 }
 
@@ -486,9 +482,7 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
             apiErrorMessage = jsonObj.value(QStringLiteral("message")).toString().trimmed();
         }
     } else {
-        qDebug() << "failed to decrypt the data, bypassing the proxy: replyError=" << replyError
-                 << "bodyBytes=" << responseBody.size()
-                 << "(an empty body looks the same here as a wrong key, compare with tryDecryptResponseBody above)";
+        qDebug() << "failed to decrypt the data";
         return true;
     }
 
@@ -502,7 +496,6 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
         return true;
     } 
     if (apiHttpStatus == httpStatusCodeRequestTimeout) {
-        qDebug() << "keeping the proxy: apiHttpStatus=" << apiHttpStatus;
         return false;
     }
     if (apiHttpStatus == httpStatusCodeNotFound) {
@@ -524,24 +517,18 @@ bool GatewayController::shouldBypassProxy(const QNetworkReply::NetworkError &rep
         }
     } 
     if (apiHttpStatus == httpStatusCodeConflict) {
-        qDebug() << "keeping the proxy: apiHttpStatus=" << apiHttpStatus;
         return false;
     } 
     if (apiHttpStatus == httpStatusCodePaymentRequired) {
-        qDebug() << "keeping the proxy: apiHttpStatus=" << apiHttpStatus;
         return false;
     } 
     if (apiHttpStatus == httpStatusCodeUnprocessableEntity) {
-        const bool bypass = apiErrorMessage != unprocessableSubscriptionMessage;
-        qDebug() << "apiHttpStatus=" << apiHttpStatus << "bypass=" << bypass
-                 << "(decided by the api message, which is not printed)";
-        return bypass;
+        return apiErrorMessage != unprocessableSubscriptionMessage;
     } 
     if (replyError != QNetworkReply::NetworkError::NoError) {
-        qDebug() << "bypassing the proxy on a reply error:" << replyError << "apiHttpStatus=" << apiHttpStatus;
+        qDebug() << replyError;
         return true;
     }
-    qDebug() << "keeping the proxy: nothing matched, apiHttpStatus=" << apiHttpStatus << "replyError=" << replyError;
     return false;
 }
 

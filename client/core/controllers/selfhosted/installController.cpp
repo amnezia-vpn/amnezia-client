@@ -121,7 +121,7 @@ namespace
 
     bool xrayServerBinaryMismatchesExpected(const ServerCredentials &credentials, SshSession &sshSession)
     {
-        return probeXrayServerBinary(credentials, sshSession) != XrayBinaryProbeResult::Match;
+        return probeXrayServerBinary(credentials, sshSession) == XrayBinaryProbeResult::Mismatch;
     }
 
     bool dockerDaemonContainerMissing(const QString &out, const QString &containerDockerName)
@@ -184,7 +184,7 @@ InstallController::~InstallController()
 }
 
 ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,
-                                            bool isUpdate)
+                                            bool isUpdate, bool acceptXrayKeyLoss)
 {
     qDebug().noquote() << "InstallController::setupContainer" << ContainerUtils::containerToString(container);
     SshSession sshSession;
@@ -216,9 +216,11 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
 
     QMap<QString, QString> xrayStateToMigrate;
     if (isUpdate) {
-        e = readXrayStateBeforeVolumeMigration(credentials, container, sshSession, xrayStateToMigrate);
-        if (e)
-            return e;
+        if (!acceptXrayKeyLoss) {
+            e = readXrayStateBeforeVolumeMigration(credentials, container, sshSession, xrayStateToMigrate);
+            if (e)
+                return e;
+        }
     }
 
     const amnezia::ScriptVars removeContainerVars =
@@ -229,13 +231,18 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
         removeOut += data + "\n";
         return ErrorCode::NoError;
     };
-    sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume),
-                         collectRemoveOut, collectRemoveOut);
+    const ErrorCode removeError =
+            sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume),
+                                 collectRemoveOut, collectRemoveOut);
     qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
-    if (removeDataVolume && dataVolumeSurvivedRemoval(removeOut)) {
-        logger.error() << "Data volume survived removal, refusing to install on top of it, output=" << removeOut;
-        return ErrorCode::ServerDataVolumeNotRemoved;
+    if (removeDataVolume) {
+        if (removeError != ErrorCode::NoError) {
+            return ErrorCode::ServerDataVolumeNotRemoved;
+        }
+        if (dataVolumeSurvivedRemoval(removeOut)) {
+            return ErrorCode::ServerDataVolumeNotRemoved;
+        }
     }
 
     qDebug().noquote() << "buildContainerWorker start";
@@ -274,7 +281,7 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
 }
 
 ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig,
-                                                ContainerConfig &newConfig)
+                                                ContainerConfig &newConfig, bool acceptXrayKeyLoss)
 {
     const bool serverSettingsChanged = isUpdateDockerContainerRequired(container, oldConfig, newConfig);
 
@@ -304,12 +311,16 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
         }
     }
 
+
     if (!serverSettingsChanged && !reinstallRequired) {
         if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
             if (const auto *xray = newConfig.getXrayProtocolConfig()) {
                 if (credentials.isValid()) {
                     XrayConfigurator xrayConfigurator(&sshSession);
-                    xrayConfigurator.uploadClientTemplate(credentials, container, xray->clientTemplate);
+                    if (!xrayConfigurator.uploadClientTemplate(credentials, container, xray->clientTemplate)) {
+                        logger.warning() << "updateServerConfig: uploadClientTemplate failed; the server template "
+                                            "may be stale for other admin devices";
+                    }
                 }
             }
         }
@@ -335,25 +346,12 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             if (oldPort != newPort) {
                 errorCode = isServerPortBusy(credentials, container, newConfig, sshSession);
                 if (errorCode != ErrorCode::NoError) {
-                    if (errorCode == ErrorCode::ServerPortAlreadyAllocatedError) {
-                        logger.error() << "Xray reinstall refused, port busy, error=201";
-                    }
                     return errorCode;
                 }
             }
         }
 
-        errorCode = setupContainer(credentials, container, newConfig, true);
-        if (container == DockerContainer::Xray) {
-            if (errorCode == ErrorCode::NoError) {
-                if (xrayServerBinaryMismatchesExpected(credentials, sshSession)) {
-                    logger.error() << "Xray version probe: still mismatched after recreate";
-                }
-            } else {
-                logger.error() << "Xray version probe: recreate failed, error="
-                               << static_cast<int>(errorCode);
-            }
-        }
+        errorCode = setupContainer(credentials, container, newConfig, true, acceptXrayKeyLoss);
 
         // Reinstall pulls the latest container image, so the server runs the latest protocol version
         if (errorCode == ErrorCode::NoError && container == DockerContainer::Awg2) {
@@ -364,13 +362,8 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     } else if (container == DockerContainer::Xray) {
         DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
         XrayConfigurator xrayConfigurator(&sshSession);
-        errorCode = xrayConfigurator.writeServerConfigForSetup(credentials, container, newConfig, dnsSettings);
-        if (errorCode == ErrorCode::NoError) {
-            errorCode = sshSession.runScript(
-                    credentials,
-                    sshSession.replaceVars(QStringLiteral("sudo docker restart $CONTAINER_NAME"),
-                                           amnezia::genBaseVars(credentials, container, QString(), QString())));
-        }
+        errorCode = xrayConfigurator.writeServerConfigForSetup(credentials, container, newConfig, dnsSettings,
+                                                               true);
     } else if (container != DockerContainer::SSXray) {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
@@ -391,9 +384,6 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
         if (reinstallRequired) {
-            // OpenVPN/WireGuard reinstall mints new client keys, so the old profile is revoked.
-            // Xray identity lives in the data volume; the uuid is unchanged. Revoking it here
-            // drops the admin from clients[] (seen after a port change with a shared account).
             if (container != DockerContainer::Xray) {
                 clearCachedProfile(serverId, container);
             }
@@ -605,8 +595,6 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
 void InstallController::adminAppendRequested(const QString &serverId, DockerContainer container,
                                              const ContainerConfig &containerConfig, const QString &clientName)
 {
-    // Xray admin identity is the volume uuid; it must stay in server.json and must not
-    // appear in the Share Users list (revoking it emptied the inbound).
     if (container == DockerContainer::Xray) {
         return;
     }
@@ -739,6 +727,10 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
         return ErrorCode::ServerContainerMissingError;
     }
 
+    if (stdOut.contains(QLatin1String("amnezia_xray_keygen=failed"))) {
+        return ErrorCode::XrayKeyGenerationFailed;
+    }
+
     updateContainerConfigAfterInstallation(container, config, stdOut);
 
     if (container == DockerContainer::MtProxy) {
@@ -794,7 +786,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
     };
 
     const QString probe = QStringLiteral(
-            "echo \"amnezia_volume=$(sudo docker volume ls -q -f name=^$CONTAINER_NAME-data$ | head -1)\"\n"
             "echo \"amnezia_container=$(sudo docker ps -a -q -f name=^$CONTAINER_NAME$ | head -1)\"\n"
             "if [ -n \"$(sudo docker ps -a -q -f name=^$CONTAINER_NAME$ | head -1)\" ] && "
             "[ -z \"$(sudo docker ps -q -f name=^$CONTAINER_NAME$ | head -1)\" ]; then\n"
@@ -809,7 +800,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
                                  .arg(QString::fromLatin1(px::dataDir));
     ErrorCode errorCode = sshSession.runScript(credentials, SshSession::replaceVars(probe, vars), collect, collect);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "Xray key migration: could not probe server state";
         return ErrorCode::XrayKeyMigrationFailed;
     }
 
@@ -827,8 +817,7 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
         return ErrorCode::NoError;
     }
     if (!containerRunning) {
-        logger.error() << "Xray key migration: container will not start, cannot read the keys out of it";
-        return ErrorCode::XrayKeyMigrationFailed;
+        return ErrorCode::XrayKeyMigrationNeedsConfirm;
     }
 
     const QStringList requiredPaths = {
@@ -853,7 +842,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
             }
         }
         if (!read) {
-            logger.error() << "Xray key migration: failed to read" << path << ", aborting before container removal";
             return ErrorCode::XrayKeyMigrationFailed;
         }
         outFiles.insert(path, content);
@@ -874,7 +862,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
         }
     }
     if (!configRead) {
-        logger.error() << "Xray key migration: server config unreadable, aborting before container removal";
         return ErrorCode::XrayKeyMigrationFailed;
     }
     outFiles.insert(QString::fromLatin1(px::serverConfigPath), serverConfig);
@@ -901,7 +888,6 @@ ErrorCode InstallController::restoreXrayStateIntoDataVolume(const ServerCredenti
         const ErrorCode errorCode = sshSession.uploadTextFileToContainer(
                 container, credentials, it.value(), it.key(), libssh::ScpOverwriteMode::ScpOverwriteExisting);
         if (errorCode != ErrorCode::NoError) {
-            logger.error() << "Xray key migration: failed to write back" << it.key();
             return ErrorCode::XrayKeyMigrationFailed;
         }
     }
@@ -1338,7 +1324,6 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
             collectRemoveOut);
 
     if (errorCode == ErrorCode::NoError && removeDataVolume && dataVolumeSurvivedRemoval(removeOut)) {
-        logger.error() << "Data volume survived protocol removal, output=" << removeOut;
         errorCode = ErrorCode::ServerDataVolumeNotRemoved;
     }
 

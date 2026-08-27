@@ -72,7 +72,6 @@ QString amnezia::scriptName(ProtocolScriptType type)
     case ProtocolScriptType::openvpn_template: return QLatin1String("template.ovpn");
     case ProtocolScriptType::wireguard_template: return QLatin1String("template.conf");
     case ProtocolScriptType::awg_template: return QLatin1String("template.conf");
-    case ProtocolScriptType::xray_template: return QLatin1String("template.json");
     default: return QString();
     }
 }

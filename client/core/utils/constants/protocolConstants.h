@@ -127,7 +127,6 @@ namespace amnezia
             constexpr char user[] = "user";
             constexpr char pass[] = "pass";
 
-            // Envelope of a server.json / client.json document.
             constexpr char logBlock[] = "log";
             constexpr char logLevel[] = "loglevel";
             constexpr char logLevelError[] = "error";
@@ -140,7 +139,6 @@ namespace amnezia
             constexpr char listen[] = "listen";
             constexpr char udp[] = "udp";
 
-            // streamSettings blocks.
             constexpr char tlsSettings[] = "tlsSettings";
             constexpr char xhttpSettings[] = "xhttpSettings";
             constexpr char kcpSettings[] = "kcpSettings";
@@ -151,12 +149,10 @@ namespace amnezia
             constexpr char allowInsecure[] = "allowInsecure";
             constexpr char pinnedPeerCertSha256[] = "pinnedPeerCertSha256";
 
-            // realitySettings, server side only.
             constexpr char dest[] = "dest";
             constexpr char privateKey[] = "privateKey";
             constexpr char shortIds[] = "shortIds";
 
-            // xhttpSettings fields, Xray-core SplitHTTPConfig.
             constexpr char xhttpHost[] = "host";
             constexpr char xhttpPath[] = "path";
             constexpr char xhttpMode[] = "mode";
@@ -181,7 +177,6 @@ namespace amnezia
             constexpr char xPaddingPlacement[] = "xPaddingPlacement";
             constexpr char xPaddingMethod[] = "xPaddingMethod";
 
-            // xmux, client side only.
             constexpr char xmux[] = "xmux";
             constexpr char xmuxMaxConcurrency[] = "maxConcurrency";
             constexpr char xmuxMaxConnections[] = "maxConnections";
@@ -190,7 +185,6 @@ namespace amnezia
             constexpr char xmuxHMaxReusableSecs[] = "hMaxReusableSecs";
             constexpr char xmuxHKeepAlivePeriod[] = "hKeepAlivePeriod";
 
-            // kcpSettings fields.
             constexpr char kcpTti[] = "tti";
             constexpr char kcpMtu[] = "mtu";
             constexpr char kcpUplinkCapacity[] = "uplinkCapacity";
@@ -198,7 +192,6 @@ namespace amnezia
             constexpr char kcpCwndMultiplier[] = "cwndMultiplier";
             constexpr char kcpMaxSendingWindow[] = "maxSendingWindow";
 
-            // Aliases written by older builds, read only.
             constexpr char legacyXhttpMethod[] = "method";
             constexpr char legacySessionPlacement[] = "sessionPlacement";
             constexpr char legacyScSessionPlacement[] = "scSessionPlacement";
@@ -210,7 +203,6 @@ namespace amnezia
             constexpr char legacyRangeFrom[] = "from";
             constexpr char legacyRangeTo[] = "to";
 
-            // Transport / security values as they appear in xray json.
             constexpr char networkTcp[] = "tcp";
             constexpr char networkXhttp[] = "xhttp";
             constexpr char networkKcp[] = "kcp";

@@ -63,7 +63,6 @@ QString UsersController::readXrayVolumeUuid(const DockerContainer container, con
     const QString uuid = QString::fromUtf8(sshSession->getTextFileFromContainer(
             container, credentials, QString::fromLatin1(amnezia::protocols::xray::uuidPath), error));
     if (error != ErrorCode::NoError) {
-        logger.warning() << "readXrayVolumeUuid: failed, error=" << static_cast<int>(error);
         return {};
     }
     return uuid.trimmed();
@@ -258,7 +257,8 @@ ErrorCode UsersController::getWireGuardClients(const DockerContainer container, 
 }
 
 ErrorCode UsersController::getXrayClients(const DockerContainer container, const ServerCredentials& credentials,
-                                                     SshSession* sshSession, int &count, QJsonArray &clientsTable)
+                                                     SshSession* sshSession, int &count, QJsonArray &clientsTable,
+                                                     const QString &volumeDefaultUuid)
 {
     ErrorCode error = ErrorCode::NoError;
 
@@ -293,7 +293,7 @@ ErrorCode UsersController::getXrayClients(const DockerContainer container, const
     }
 
     const QJsonArray clients = settings[protocols::xray::clients].toArray();
-    const QString xrayDefaultUuid = readXrayVolumeUuid(container, credentials, sshSession);
+    const QString xrayDefaultUuid = volumeDefaultUuid;
     for (const auto &clientValue : clients) {
         const QJsonObject clientObj = clientValue.toObject();
         if (!clientObj.contains(protocols::xray::id)) {
@@ -324,14 +324,10 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
     SshSession sshSession;
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
-        logger.error() << "updateClients: no admin config for this server, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
     ServerCredentials credentials = adminConfig->credentials();
     if (!credentials.isValid()) {
-        logger.error() << "updateClients: credentials are not valid, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
 
@@ -344,19 +340,17 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
 
     const QByteArray clientsTableString = sshSession.getTextFileFromContainer(container, credentials, clientsTableFile, error);
     if (error != ErrorCode::NoError) {
-        logger.error() << "updateClients: failed to read the clientsTable file, error=" << static_cast<int>(error)
-                       << "container=" << ContainerUtils::containerTypeToString(container);
+        logger.error() << "Failed to get the clientsTable file from the server";
         emit clientsUpdated(QJsonArray());
         return error;
     }
 
     m_clientsTable = QJsonDocument::fromJson(clientsTableString).array();
 
+    const QString xrayVolumeUuid =
+            (container == DockerContainer::Xray) ? readXrayVolumeUuid(container, credentials, &sshSession) : QString();
+
     if (m_clientsTable.isEmpty()) {
-        logger.info() << "updateClients: the clientsTable is empty, rebuilding it from the server, readBytes="
-                      << clientsTableString.size()
-                      << (clientsTableString.trimmed().isEmpty() ? ", the file was empty"
-                                                                 : ", the file had content but did not parse as an array");
         migration(clientsTableString, m_clientsTable);
 
         int count = 0;
@@ -366,11 +360,9 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
         } else if (container == DockerContainer::WireGuard || ContainerUtils::isAwgContainer(container)) {
             error = getWireGuardClients(container, credentials, &sshSession, count, m_clientsTable);
         } else if (container == DockerContainer::Xray) {
-            error = getXrayClients(container, credentials, &sshSession, count, m_clientsTable);
+            error = getXrayClients(container, credentials, &sshSession, count, m_clientsTable, xrayVolumeUuid);
         }
         if (error != ErrorCode::NoError) {
-            logger.error() << "updateClients: failed to rebuild the client list from the server, error="
-                           << static_cast<int>(error) << "container=" << ContainerUtils::containerTypeToString(container);
             emit clientsUpdated(QJsonArray());
             return error;
         }
@@ -379,28 +371,17 @@ ErrorCode UsersController::updateClients(const QString &serverId, const DockerCo
         if (clientsTableString != newClientsTableString) {
             error = sshSession.uploadTextFileToContainer(container, credentials, newClientsTableString, clientsTableFile);
             if (error != ErrorCode::NoError) {
-                logger.error() << "updateClients: failed to write back the rebuilt clientsTable, error="
-                               << static_cast<int>(error) << "container=" << ContainerUtils::containerTypeToString(container)
-                               << "rows=" << m_clientsTable.size();
-                logger.warning() << "updateClients: the app now holds a client list the server does not have;"
-                                 << "this error is returned but every caller discards it";
+                logger.error() << "Failed to upload the clientsTable file to the server";
             }
         }
     }
 
     if (container == DockerContainer::Xray) {
-        const QString volumeUuid = readXrayVolumeUuid(container, credentials, &sshSession);
-        const int stripped = stripXrayVolumeUuidFromTable(m_clientsTable, volumeUuid);
+        const int stripped = stripXrayVolumeUuidFromTable(m_clientsTable, xrayVolumeUuid);
         if (stripped > 0) {
-            logger.info() << "updateClients: removed the volume uuid from the user list, rows="
-                          << stripped;
             const QByteArray strippedTable = QJsonDocument(m_clientsTable).toJson();
             const ErrorCode writeError =
                     sshSession.uploadTextFileToContainer(container, credentials, strippedTable, clientsTableFile);
-            if (writeError != ErrorCode::NoError) {
-                logger.error() << "updateClients: failed to write the user list without the volume uuid, error="
-                               << static_cast<int>(writeError);
-            }
         }
     }
 
@@ -451,28 +432,21 @@ ErrorCode UsersController::appendClient(const QString &serverId, const QString &
     SshSession sshSession;
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
-        logger.error() << "appendClient: no admin config for this server, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
     ServerCredentials credentials = adminConfig->credentials();
     if (!credentials.isValid()) {
-        logger.error() << "appendClient: credentials are not valid, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
 
     error = updateClients(serverId, container);
     if (error != ErrorCode::NoError) {
-        logger.error() << "appendClient: could not read the current client list, error=" << static_cast<int>(error)
-                       << ", the new account will not appear in the user list";
         return error;
     }
 
     if (container == DockerContainer::Xray) {
         const QString volumeUuid = readXrayVolumeUuid(container, credentials, &sshSession);
         if (!volumeUuid.isEmpty() && clientId == volumeUuid) {
-            logger.info() << "appendClient: skipped the volume uuid, it is not listed in Share Users";
             return ErrorCode::NoError;
         }
     }
@@ -502,11 +476,7 @@ ErrorCode UsersController::appendClient(const QString &serverId, const QString &
 
     error = sshSession.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
-        logger.error() << "appendClient: failed to upload the clientsTable, error=" << static_cast<int>(error)
-                       << "container=" << ContainerUtils::containerTypeToString(container)
-                       << "rows=" << m_clientsTable.size();
-        logger.warning() << "appendClient: the account exists on the server but is missing from the user list;"
-                         << "the caller discards this error, so nothing is reported to the user";
+        logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
     }
 
@@ -553,9 +523,7 @@ ErrorCode UsersController::renameClient(const QString &serverId, const int row, 
 
     ErrorCode error = sshSession.uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
-        logger.error() << "renameClient: failed to upload the clientsTable, error=" << static_cast<int>(error)
-                       << "container=" << ContainerUtils::containerTypeToString(container)
-                       << "rows=" << m_clientsTable.size();
+        logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
     }
 
@@ -600,9 +568,7 @@ ErrorCode UsersController::revokeOpenVpn(const int row, const DockerContainer co
     clientsTableFile = clientsTableFile.arg(ContainerUtils::containerTypeToString(DockerContainer::OpenVpn));
     error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
-        logger.error() << "revokeOpenVpn: failed to upload the clientsTable, error=" << static_cast<int>(error)
-                       << "container=" << ContainerUtils::containerTypeToString(container)
-                       << "rows=" << clientsTable.size();
+        logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
     }
 
@@ -662,9 +628,7 @@ ErrorCode UsersController::revokeWireGuard(const int row, const DockerContainer 
     }
     error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
-        logger.error() << "revokeWireGuard: failed to upload the clientsTable, error=" << static_cast<int>(error)
-                       << "container=" << ContainerUtils::containerTypeToString(container)
-                       << "rows=" << clientsTable.size();
+        logger.error() << "Failed to upload the clientsTable file to the server";
         return error;
     }
 
@@ -702,16 +666,11 @@ ErrorCode UsersController::revokeXray(const int row,
 
     const QString volumeUuid = readXrayVolumeUuid(container, credentials, sshSession);
     if (!volumeUuid.isEmpty() && clientId == volumeUuid) {
-        logger.info() << "revokeXray: refused, this is the volume uuid";
         clientsTable.removeAt(row);
         const QByteArray clientsTableString = QJsonDocument(clientsTable).toJson();
         const QString clientsTableFile = QString("/opt/amnezia/%1/clientsTable")
                                                  .arg(ContainerUtils::containerTypeToString(container));
         error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
-        if (error != ErrorCode::NoError) {
-            logger.error() << "revokeXray: refused the volume uuid but failed to drop it from the user list, error="
-                           << static_cast<int>(error);
-        }
         return ErrorCode::NoError;
     }
 
@@ -766,9 +725,6 @@ ErrorCode UsersController::revokeXray(const int row,
         }
     }
 
-    if (clients.isEmpty()) {
-        logger.warning() << "revokeXray: inbound left with zero clients";
-    }
 
     settings[protocols::xray::clients] = clients;
     inbound[protocols::xray::settings] = settings;
@@ -794,11 +750,7 @@ ErrorCode UsersController::revokeXray(const int row,
 
     error = sshSession->uploadTextFileToContainer(container, credentials, clientsTableString, clientsTableFile);
     if (error != ErrorCode::NoError) {
-        logger.error() << "revokeXray: failed to upload the clientsTable, error=" << static_cast<int>(error)
-                       << "container=" << ContainerUtils::containerTypeToString(container)
-                       << "rows=" << clientsTable.size();
-        logger.warning() << "revokeXray: the account is gone from the server config but still listed in the user table;"
-                         << "this error is then overwritten by the container restart below and never reaches the caller";
+        logger.error() << "Failed to upload the clientsTable file";
     }
 
     QString restartScript = QString("sudo docker restart $CONTAINER_NAME");
@@ -817,22 +769,16 @@ ErrorCode UsersController::revokeXray(const int row,
 ErrorCode UsersController::revokeClient(const QString &serverId, const int index, const DockerContainer container)
 {
     if (index < 0 || index >= m_clientsTable.size()) {
-        logger.error() << "revokeClient: row" << index << "is outside the client table of" << m_clientsTable.size()
-                       << "rows, container=" << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
 
     SshSession sshSession;
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
-        logger.error() << "revokeClient: no admin config for this server, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
     ServerCredentials credentials = adminConfig->credentials();
     if (!credentials.isValid()) {
-        logger.error() << "revokeClient: credentials are not valid, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
 
@@ -888,22 +834,16 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const Container
     SshSession sshSession;
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
     if (!adminConfig.has_value()) {
-        logger.error() << "revokeClient by config: no admin config for this server, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
     ServerCredentials credentials = adminConfig->credentials();
     if (!credentials.isValid()) {
-        logger.error() << "revokeClient by config: credentials are not valid, container="
-                       << ContainerUtils::containerTypeToString(container);
         return ErrorCode::InternalError;
     }
 
     ErrorCode errorCode = ErrorCode::NoError;
     errorCode = updateClients(serverId, container);
     if (errorCode != ErrorCode::NoError) {
-        logger.error() << "revokeClient by config: could not read the current client list, error="
-                       << static_cast<int>(errorCode);
         return errorCode;
     }
 
@@ -929,9 +869,6 @@ ErrorCode UsersController::revokeClient(const QString &serverId, const Container
 
     int row = clientIndexById(clientId, m_clientsTable);
     if (row < 0) {
-        logger.warning() << "revokeClient by config: this account is not in the client table of"
-                         << m_clientsTable.size() << "rows, nothing was revoked and success is reported,"
-                         << "container=" << ContainerUtils::containerTypeToString(container);
         return errorCode;
     }
 

@@ -123,15 +123,6 @@ void XrayConfigSnapshotsModel::createFromCurrent(const amnezia::XrayServerConfig
     persistAll();
 }
 
-amnezia::XrayServerConfig XrayConfigSnapshotsModel::applyConfig(int index) const
-{
-    if (index < 0 || index >= m_configs.size()) {
-        return amnezia::XrayServerConfig {};
-    }
-
-    return m_configs.at(index).serverConfig;
-}
-
 void XrayConfigSnapshotsModel::removeConfig(int index)
 {
     if (index < 0 || index >= m_configs.size()) {
