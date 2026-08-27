@@ -1,0 +1,37 @@
+From 1b2c3d4e5f60718293a4b5c6d7e8f9001a2b3c4d Mon Sep 17 00:00:00 2001
+Date: Thu, 27 Aug 2026 16:57:59 +0300
+Subject: [PATCH] windows: pin GO_PLATFORM, build elf-cleaner with msys2 gcc
+
+uname under msys2 reports msys_nt-* instead of windows, so GO_PLATFORM
+computed by the Makefile is pinned from the outside. elf-cleaner is
+built with gcc from msys2 (there is no `cc` shim on Windows); msys2 gcc
+targets the POSIX emulation layer, so the mmap-based elf-cleaner code
+works unchanged.
+---
+ tunnel/tools/CMakeLists.txt | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/tunnel/tools/CMakeLists.txt b/tunnel/tools/CMakeLists.txt
+index 8557c5ab..0e2a08b5 100644
+--- a/tunnel/tools/CMakeLists.txt
++++ b/tunnel/tools/CMakeLists.txt
+@@ -30,13 +30,14 @@
+     TARGET=${CMAKE_C_COMPILER_TARGET}
+     DESTDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+     BUILDDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../generated-src
++    GO_PLATFORM=windows-amd64
+ )
+ 
+ # Strip unwanted ELF sections to prevent DT_FLAGS_1 warnings on old Android versions
+ file(GLOB ELF_CLEANER_SOURCES elf-cleaner/*.c elf-cleaner/*.cpp)
+-add_custom_target(elf-cleaner COMMENT "Building elf-cleaner" VERBATIM COMMAND cc
++add_custom_target(elf-cleaner COMMENT "Building elf-cleaner" VERBATIM COMMAND gcc
+         -O2 -DPACKAGE_NAME="elf-cleaner" -DPACKAGE_VERSION="" -DCOPYRIGHT=""
+-        -o "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner" ${ELF_CLEANER_SOURCES}
++        -o "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner.exe" ${ELF_CLEANER_SOURCES} -lstdc++
+ )
+ add_custom_command(TARGET libwg.so POST_BUILD VERBATIM COMMAND "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner"
+         --api-level "${ANDROID_NATIVE_API_LEVEL}" "$<TARGET_FILE:libwg.so>")
+-- 
+2.44.0.windows.1
+

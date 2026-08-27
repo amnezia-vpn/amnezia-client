@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
 from conan.tools.build import build_jobs
-from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir, save
+from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
@@ -10,6 +10,7 @@ from conan.tools.scm import Version
 
 import fnmatch
 import os
+import re
 import textwrap
 
 required_conan_version = ">=1.57.0"
@@ -510,6 +511,33 @@ class OpenSSLConan(ConanFile):
             return self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
         return "perl"
 
+    def _patch_makefile_long_link_lines(self):
+        makefile_path = os.path.join(self.source_folder, "Makefile")
+        content = load(self, makefile_path)
+
+        pattern = re.compile(
+            r"^\t\$\(CC\) (?P<flags>[^\n]*?) -Wl,-soname=(?P<name>\S+) \\\n"
+            r"\t\t-o (?P=name) -Wl,--version-script=(?P<ldscript>\S+) \\\n"
+            r"(?P<rest>(?:\t\t[^\n]*\\\n)*\t\t[^\n]*\n)",
+            re.MULTILINE,
+        )
+
+        def build_replacement(m):
+            name = m.group("name")
+            flags = m.group("flags")
+            ldscript = m.group("ldscript")
+            rest = m.group("rest").rstrip("\n")
+            rsp = f"{name}.rsp"
+            return (
+                f"\t$(file >{rsp},{rest})\n"
+                f"\t$(CC) {flags} -Wl,-soname={name} "
+                f"-o {name} -Wl,--version-script={ldscript} @{rsp}\n"
+            )
+
+        new_content, count = pattern.subn(build_replacement, content)
+        if count:
+            save(self, makefile_path, new_content)
+
     def _make(self):
         with chdir(self, self.source_folder):
             args = " ".join(self._configure_args)
@@ -518,6 +546,8 @@ class OpenSSLConan(ConanFile):
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
             self.run(f"{self._perl} ./Configure {args}", env="conanbuild")
+            if self.settings.os == "Android" and self.settings_build.os == "Windows":
+                self._patch_makefile_long_link_lines()
             if self._use_nmake:
                 # When `--prefix=/`, the scripts derive `\` without escaping, which
                 # causes issues on Windows
@@ -530,6 +560,16 @@ class OpenSSLConan(ConanFile):
                         replace_in_file(self, mkinstallvars_pl, "$values{$k} = $v;", """$v->[0] =~ s|\\\\|/|g; $values{$k} = $v;""")
                     else:
                         replace_in_file(self, mkinstallvars_pl, "$ENV{$k} = $v;", """$v =~ s|\\\\|/|g; $ENV{$k} = $v;""")
+            if self.settings.os == "Android":
+                # Android shared libs are named libcrypto_3.so/libssl_3.so (no
+                # libcrypto.so symlink), so the `-lcrypto` in engine link lines
+                # resolves to the static archive; build the archives first,
+                # otherwise a parallel make can link engines against a
+                # half-assembled libcrypto.a (undefined ossl_* symbols).
+                # The bare .a file targets don't pull in build_generated (the
+                # mandatory generated headers), so run it explicitly first.
+                self._run_make(targets=["build_generated"])
+                self._run_make(targets=["libcrypto.a", "libssl.a"])
             self._run_make()
 
     def _make_install(self):

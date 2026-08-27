@@ -1,10 +1,13 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Git
 from conan.errors import ConanInvalidConfiguration
 
 import os
+import shutil
+from pathlib import Path
 
 class OpenvpnPtAndroid(ConanFile):
     name = "openvpn-pt-android"
@@ -28,6 +31,10 @@ class OpenvpnPtAndroid(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} only supports Android, got {self.settings.os}")
 
     def source(self):
+        if os.path.isdir(self.source_folder):
+            for entry in os.listdir(self.source_folder):
+                path = os.path.join(self.source_folder, entry)
+                shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
         git = Git(self)
         git.clone(
             url="https://github.com/amnezia-vpn/openvpn-pt-android.git",
@@ -36,6 +43,13 @@ class OpenvpnPtAndroid(ConanFile):
         )
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        # sum.golang.org is sometimes unreachable from CI runners entirely
+        # ("connection refused"); go.sum already pins the exact hashes we
+        # need, so the extra public-transparency-log check isn't required.
+        venv.environment().define("GOSUMDB", "off")
+        venv.generate()
+
         tc = CMakeToolchain(self)
         tc.generate()
 
@@ -53,5 +67,5 @@ class OpenvpnPtAndroid(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpn-pt-android")
         self.cpp_info.libs = [ "ovpn3", "ovpnutil", "rsapss" ]
         self.cpp_info.set_property("cmake_extra_variables", {
-            "OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH": os.path.join(self.package_folder, "lib", "libck-ovpn-plugin.so")
+            "OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH": Path(self.package_folder, "lib", "libck-ovpn-plugin.so").as_posix()
         })
