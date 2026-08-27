@@ -566,6 +566,9 @@ class OpenSSLConan(ConanFile):
                 # resolves to the static archive; build the archives first,
                 # otherwise a parallel make can link engines against a
                 # half-assembled libcrypto.a (undefined ossl_* symbols).
+                # The bare .a file targets don't pull in build_generated (the
+                # mandatory generated headers), so run it explicitly first.
+                self._run_make(targets=["build_generated"])
                 self._run_make(targets=["libcrypto.a", "libssl.a"])
             self._run_make()
 
