@@ -78,7 +78,6 @@ QString apiUtils::getCountryFlagCode(const QString &serverCountryCodeL10n, const
     }
 
     QString result = serverCountryCode.section('-', 0, 0).toUpper();
-    qDebug() << "flag:" << serverCountryCodeL10n << serverCountryCode << "->" << result;
     return result;
 }
 
