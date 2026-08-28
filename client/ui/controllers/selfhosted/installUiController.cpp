@@ -613,6 +613,28 @@ bool InstallUiController::checkSshConnection()
     return true;
 }
 
+bool InstallUiController::checkServerCredentials(const QString &serverId, const QString &userName, int port,
+                                                 const QString &password)
+{
+    ServerCredentials credentials = m_serversController->getServerCredentials(serverId);
+    if (credentials.hostName.isEmpty()) {
+        return false;
+    }
+
+    credentials.userName = userName;
+    credentials.port = port;
+    if (!password.isEmpty()) {
+        credentials.secretData = password;
+    }
+
+    if (!credentials.isValid()) {
+        return false;
+    }
+
+    m_processedServerCredentials = credentials;
+    return checkSshConnection();
+}
+
 void InstallUiController::setEncryptedPassphrase(QString passphrase)
 {
     m_privateKeyPassphrase = passphrase;

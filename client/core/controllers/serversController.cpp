@@ -83,6 +83,30 @@ bool ServersController::renameServer(const QString &serverId, const QString &nam
     }
 }
 
+bool ServersController::updateServerCredentials(const QString &serverId, const QString &userName, int port,
+                                                const QString &password)
+{
+    // Only a self hosted server the user administers keeps SSH credentials;
+    // every other kind is driven by a config and has nothing to update.
+    if (m_serversRepository->serverKind(serverId) != serverConfigUtils::ConfigType::SelfHostedAdmin) {
+        return false;
+    }
+
+    auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+    if (!cfg.has_value() || userName.isEmpty() || port <= 0) {
+        return false;
+    }
+
+    cfg->userName = userName;
+    cfg->port = port;
+    if (!password.isEmpty()) {
+        cfg->password = password;
+    }
+
+    m_serversRepository->editServer(serverId, cfg->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
+    return true;
+}
+
 void ServersController::removeServer(const QString &serverId)
 {
     m_serversRepository->removeServer(serverId);

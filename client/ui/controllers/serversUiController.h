@@ -53,6 +53,13 @@ public slots:
 
     void editServerName(const QString &serverId, const QString &name);
 
+    // SSH credentials of a self hosted server. The stored password is never
+    // handed back to QML, it can only be replaced.
+    bool serverHasCredentials(const QString &serverId) const;
+    QString serverUserName(const QString &serverId) const;
+    int serverSshPort(const QString &serverId) const;
+    void editServerCredentials(const QString &serverId, const QString &userName, int port, const QString &password);
+
     void setDefaultServer(const QString &serverId);
     void setDefaultServerAtIndex(int index);
 

@@ -84,6 +84,11 @@ public slots:
 
     bool checkSshConnection();
 
+    // Tries a stored server with a different user name, port or password before
+    // any of it is saved. An empty password reuses the stored one, so the port
+    // can be fixed without retyping the secret.
+    bool checkServerCredentials(const QString &serverId, const QString &userName, int port, const QString &password);
+
     void setEncryptedPassphrase(QString passphrase);
 
     void addEmptyServer();

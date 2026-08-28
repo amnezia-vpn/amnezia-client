@@ -103,6 +103,46 @@ void ServersUiController::editServerName(const QString &serverId, const QString 
     updateModel();
 }
 
+bool ServersUiController::serverHasCredentials(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return false;
+    }
+    return m_serversController->getServerCredentials(serverId).isValid();
+}
+
+QString ServersUiController::serverUserName(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return {};
+    }
+    return m_serversController->getServerCredentials(serverId).userName;
+}
+
+int ServersUiController::serverSshPort(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return 0;
+    }
+    return m_serversController->getServerCredentials(serverId).port;
+}
+
+void ServersUiController::editServerCredentials(const QString &serverId, const QString &userName, int port,
+                                                const QString &password)
+{
+    if (serverId.isEmpty()) {
+        return;
+    }
+
+    if (!m_serversController->updateServerCredentials(serverId, userName, port, password)) {
+        emit errorOccurred(tr("This server has no stored credentials to update."));
+        return;
+    }
+
+    updateModel();
+    emit finished(tr("Credentials updated"));
+}
+
 void ServersUiController::setDefaultServer(const QString &serverId)
 {
     if (serverId.isEmpty()) {
