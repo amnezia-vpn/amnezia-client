@@ -37,6 +37,10 @@ public:
 
     // Server management
     bool renameServer(const QString &serverId, const QString &name);
+    // An empty password keeps the stored one, so the caller can change just the
+    // user name or the port without ever handling the secret.
+    bool updateServerCredentials(const QString &serverId, const QString &userName, int port,
+                                 const QString &password);
     void removeServer(const QString &serverId);
     void setDefaultServer(const QString &serverId);
 

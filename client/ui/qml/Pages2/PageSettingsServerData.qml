@@ -84,12 +84,26 @@ PageType {
     }
 
     property list<QtObject> serverActions: [
+        credentials,
         check,
         reboot,
         remove,
         clear,
         reset,
     ]
+
+    QtObject {
+        id: credentials
+
+        property bool isVisible: root.isServerWithWriteAccess
+                                 && ServersUiController.serverHasCredentials(ServersUiController.processedServerId)
+        readonly property string title: qsTr("SSH connection")
+        readonly property string description: qsTr("User name, port and password the application uses to manage this server")
+        readonly property var tColor: AmneziaStyle.color.paleGray
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsServerCredentials)
+        }
+    }
 
     QtObject {
         id: check
