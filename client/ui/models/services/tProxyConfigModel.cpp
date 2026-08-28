@@ -334,7 +334,9 @@ QString TProxyConfigModel::sanitizeAcmeEmailFieldText(const QString &input) cons
 {
     QString out;
     for (const QChar c : input.trimmed()) {
-        if (c.isLetterOrNumber() || c == QLatin1Char('.') || c == QLatin1Char('_') || c == QLatin1Char('+')
+        const ushort u = c.unicode();
+        const bool asciiAlnum = (u >= 'a' && u <= 'z') || (u >= 'A' && u <= 'Z') || (u >= '0' && u <= '9');
+        if (asciiAlnum || c == QLatin1Char('.') || c == QLatin1Char('_') || c == QLatin1Char('+')
             || c == QLatin1Char('-') || c == QLatin1Char('@')) {
             out.append(c);
         }
