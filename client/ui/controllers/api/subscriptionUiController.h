@@ -88,6 +88,7 @@ signals:
     void renewalLinkReceived(const QString &url);
 
     void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
+    void backgroundPurchaseCompleted(const QString &message);
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
@@ -139,6 +140,7 @@ private:
     void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);
 
     bool selectPremiumServiceQuietly();
+    void applyDefaultServerAfterInstall(int preferredDefaultServerIndex);
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     void onStoreTransactionUpdated(const QVariantMap &transaction);

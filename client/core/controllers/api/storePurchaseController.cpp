@@ -276,7 +276,7 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
                 const QJsonObject existingPurchase = purchaseValue.toObject();
                 if (existingPurchase.value("purchaseState").toInt(-1) == purchaseStatePurchased) {
                     oldPurchaseToken = existingPurchase.value("purchaseToken").toString();
-                    qInfo().noquote() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one. oldPurchaseToken =" << oldPurchaseToken;
+                    qInfo().noquote() << "[Billing] Found existing active subscription, will upgrade instead of purchasing a new one";
                     break;
                 }
             }
@@ -342,8 +342,8 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         outcome.purchaseToken = purchase.value("purchaseToken").toString();
         outcome.isAcknowledged = purchase.value("isAcknowledged").toBool();
         int purchaseState = purchase.value("purchaseState").toInt(-1);
-        qInfo().noquote() << "[Billing] Purchase success. purchaseToken =" << outcome.purchaseToken
-                          << "isAcknowledged:" << outcome.isAcknowledged << "purchaseState:" << purchaseState;
+        qInfo().noquote() << "[Billing] Purchase success. isAcknowledged:" << outcome.isAcknowledged
+                          << "purchaseState:" << purchaseState;
         // purchaseState: 1 = PURCHASED, 2 = PENDING (user must confirm payment in Google Play), 0 = UNSPECIFIED
         if (purchaseState == purchaseStatePending) {
             qWarning() << "[Billing] Purchase is in PENDING state, waiting for user to confirm payment";
@@ -415,7 +415,7 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processAppS
 
     if (restoredTransactions.isEmpty()) {
         qInfo().noquote() << "[IAP] Restore completed, but no transactions were returned";
-        result.errorCode = ErrorCode::ApiNoPurchasedSubscriptionsError;
+        result.errorCode = ErrorCode::ApiNoPurchasesToRestore;
         return result;
     }
 
@@ -707,7 +707,7 @@ QStringList StorePurchaseController::resolveActiveStoreProductIds()
     for (const QJsonValue &purchaseValue : purchases) {
         const QJsonObject purchaseObj = purchaseValue.toObject();
         const QString purchaseToken = purchaseObj.value("purchaseToken").toString();
-        qInfo().noquote() << "[Billing][resolveActiveStoreProductIds] purchase found. purchaseToken =" << purchaseToken
+        qInfo().noquote() << "[Billing][resolveActiveStoreProductIds] purchase found."
                           << "purchaseState:" << purchaseObj.value("purchaseState").toInt()
                           << "productIds:" << purchaseObj.value("productIds").toArray();
         if (purchaseObj.value("purchaseState").toInt() != purchaseStatePurchased) {

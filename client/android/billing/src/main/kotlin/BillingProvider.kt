@@ -274,7 +274,7 @@ class BillingProvider(context: Context) : AutoCloseable {
     private fun processPurchases(purchases: List<Purchase>?): JSONArray {
         val purchaseArray = JSONArray()
         purchases?.forEach { purchase ->
-            Log.v(TAG, "processPurchases: purchaseToken=${purchase.purchaseToken} orderId=${purchase.orderId} state=${purchase.purchaseState} products=${purchase.products}")
+            Log.v(TAG, "processPurchases: orderId=${purchase.orderId} state=${purchase.purchaseState} products=${purchase.products}")
             JSONObject().also { purchaseArray.put(it) }
                 .put("purchaseToken", purchase.purchaseToken)
                 .put("purchaseTime", purchase.purchaseTime)

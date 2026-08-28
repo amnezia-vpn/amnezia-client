@@ -62,17 +62,12 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
 
     connect(this, &SubscriptionUiController::installServerFromApiFinished, this,
             [this](const QString &, int preferredDefaultServerIndex) {
-        if (m_connectionController->isConnected()) {
-            return;
-        }
+        applyDefaultServerAfterInstall(preferredDefaultServerIndex);
+    });
 
-        const int selectedServerIndex = preferredDefaultServerIndex >= 0
-                ? preferredDefaultServerIndex
-                : (m_serversController->getServersCount() - 1);
-        const QString serverId = m_serversController->getServerId(selectedServerIndex);
-        if (!serverId.isEmpty()) {
-            m_serversController->setDefaultServer(serverId);
-        }
+    connect(this, &SubscriptionUiController::backgroundPurchaseCompleted, this,
+            [this](const QString &) {
+        applyDefaultServerAfterInstall(-1);
     });
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
@@ -345,7 +340,7 @@ void SubscriptionUiController::processStoreTransactionUpdate(const QVariantMap &
 
     if (errorCode == ErrorCode::NoError) {
         m_handledStoreUpdateTransactionIds.insert(transactionId);
-        emit installServerFromApiFinished(tr("Purchase confirmed. Subscription has been added to the app"));
+        emit backgroundPurchaseCompleted(tr("Purchase confirmed. Subscription has been added to the app"));
     } else if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
         m_handledStoreUpdateTransactionIds.insert(transactionId);
         qInfo().noquote() << "[IAP] Transaction update for already added subscription, transaction finished";
@@ -381,10 +376,25 @@ void SubscriptionUiController::checkUnacknowledgedPlayPurchases()
             m_apiServicesModel->getCountryCode(),
             m_apiServicesModel->getSelectedServiceType(),
             m_apiServicesModel->getSelectedServiceProtocol())) {
-        emit installServerFromApiFinished(tr("Purchase confirmed. Subscription has been added to the app"));
+        emit backgroundPurchaseCompleted(tr("Purchase confirmed. Subscription has been added to the app"));
     }
 }
 #endif
+
+void SubscriptionUiController::applyDefaultServerAfterInstall(int preferredDefaultServerIndex)
+{
+    if (m_connectionController->isConnected()) {
+        return;
+    }
+
+    const int selectedServerIndex = preferredDefaultServerIndex >= 0
+            ? preferredDefaultServerIndex
+            : (m_serversController->getServersCount() - 1);
+    const QString serverId = m_serversController->getServerId(selectedServerIndex);
+    if (!serverId.isEmpty()) {
+        m_serversController->setDefaultServer(serverId);
+    }
+}
 
 bool SubscriptionUiController::selectPremiumServiceQuietly()
 {
