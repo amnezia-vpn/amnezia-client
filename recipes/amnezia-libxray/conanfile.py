@@ -45,13 +45,8 @@ class AmneziaLibxray(ConanFile):
             if len(ndk_path.parts) > 2:
                 sdk_path = ndk_path.parents[1]
                 env.define("ANDROID_HOME", str(sdk_path))
-        # proxy.golang.org resets the HTTP/2 stream mid-download often enough
-        # in CI to fail the build ("stream error ... INTERNAL_ERROR"); go's
-        # module fetches work fine over HTTP/1.1, so force that instead.
         env.define("GODEBUG", "http2client=0")
-        # sum.golang.org is sometimes unreachable from CI runners entirely
-        # ("connection refused"); go.sum already pins the exact hashes we
-        # need, so the extra public-transparency-log check isn't required.
+        env.define("GOPROXY", "https://proxy.golang.org|direct")
         env.define("GOSUMDB", "off")
         env.vars(self).save_script("conan_provide_androidhome")
 
