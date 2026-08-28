@@ -336,6 +336,7 @@ void SubscriptionUiController::processStoreTransactionUpdate(const QVariantMap &
         m_apiServicesModel->getSelectedServiceProtocol(),
         originalTransactionId,
         transactionId,
+        transaction.value(QStringLiteral("environment")).toString(),
         &duplicateServerIndex);
 
     if (errorCode == ErrorCode::NoError) {

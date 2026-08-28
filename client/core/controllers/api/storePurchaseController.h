@@ -46,7 +46,8 @@ public:
     // (Ask to Buy approval, interrupted purchase, renewal) and finishes it on success
     ErrorCode processAppStoreTransactionUpdate(const QString &userCountryCode, const QString &serviceType,
                                                const QString &serviceProtocol, const QString &originalTransactionId,
-                                               const QString &transactionId, int *duplicateServerIndex = nullptr);
+                                               const QString &transactionId, const QString &storeEnvironment,
+                                               int *duplicateServerIndex = nullptr);
 
     QStringList resolveActiveStoreProductIds();
 
