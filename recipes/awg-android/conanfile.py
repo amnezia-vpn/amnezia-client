@@ -53,16 +53,21 @@ class AwgAndroid(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} v{self.version} does not support {self.settings.os}")
 
     def source(self):
-        if os.path.isdir(self.source_folder):
-            for entry in os.listdir(self.source_folder):
-                path = os.path.join(self.source_folder, entry)
-                shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
+        for entry in os.listdir(self.source_folder):
+            if entry == "patches":
+                continue
+            path = os.path.join(self.source_folder, entry)
+            shutil.rmtree(path) if os.path.isdir(path) else os.remove(path)
         git = Git(self)
         git.clone(
             url="https://github.com/amnezia-vpn/amneziawg-android.git",
-            target=".",
+            target="checkout",
             args=["--recurse-submodules", "--branch", f"v{self.version}"]
         )
+        checkout_dir = os.path.join(self.source_folder, "checkout")
+        for entry in os.listdir(checkout_dir):
+            shutil.move(os.path.join(checkout_dir, entry), os.path.join(self.source_folder, entry))
+        os.rmdir(checkout_dir)
 
     def generate(self):
         venv = VirtualBuildEnv(self)

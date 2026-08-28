@@ -7,15 +7,26 @@ computed by the Makefile is pinned from the outside. elf-cleaner is
 built with gcc from msys2 (there is no `cc` shim on Windows); msys2 gcc
 targets the POSIX emulation layer, so the mmap-based elf-cleaner code
 works unchanged.
+
+The -DPACKAGE_NAME="..." defines cannot be passed on the command line:
+ninja quotes the embedded quotes as \" and the msys2 (cygwin) argv
+re-parser then collapses everything after the first \" into one
+argument ("gcc: fatal error: no input files"). The defines live in
+config-windows.h instead, pulled in with -include via a path relative
+to the working directory, because the cygwin preprocessor does not
+understand absolute C:/ paths in -include. The header also defines
+_GNU_SOURCE so newlib exposes asprintf().
 ---
- tunnel/tools/CMakeLists.txt | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ tunnel/tools/CMakeLists.txt              |  13 +++++++------
+ tunnel/tools/elf-cleaner/config-windows.h | 10 ++++++++++
+ 2 files changed, 17 insertions(+), 6 deletions(-)
+ create mode 100644 tunnel/tools/elf-cleaner/config-windows.h
 
 diff --git a/tunnel/tools/CMakeLists.txt b/tunnel/tools/CMakeLists.txt
 index 8557c5ab..0e2a08b5 100644
 --- a/tunnel/tools/CMakeLists.txt
 +++ b/tunnel/tools/CMakeLists.txt
-@@ -30,13 +30,14 @@
+@@ -30,17 +30,18 @@
      TARGET=${CMAKE_C_COMPILER_TARGET}
      DESTDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
      BUILDDIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../generated-src
@@ -25,13 +36,36 @@ index 8557c5ab..0e2a08b5 100644
  # Strip unwanted ELF sections to prevent DT_FLAGS_1 warnings on old Android versions
  file(GLOB ELF_CLEANER_SOURCES elf-cleaner/*.c elf-cleaner/*.cpp)
 -add_custom_target(elf-cleaner COMMENT "Building elf-cleaner" VERBATIM COMMAND cc
-+add_custom_target(elf-cleaner COMMENT "Building elf-cleaner" VERBATIM COMMAND gcc
-         -O2 -DPACKAGE_NAME="elf-cleaner" -DPACKAGE_VERSION="" -DCOPYRIGHT=""
+-        -O2 -DPACKAGE_NAME="elf-cleaner" -DPACKAGE_VERSION="" -DCOPYRIGHT=""
 -        -o "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner" ${ELF_CLEANER_SOURCES}
++add_custom_target(elf-cleaner COMMENT "Building elf-cleaner" VERBATIM WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" COMMAND gcc
++        -O2 -include elf-cleaner/config-windows.h
 +        -o "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner.exe" ${ELF_CLEANER_SOURCES} -lstdc++
  )
- add_custom_command(TARGET libwg.so POST_BUILD VERBATIM COMMAND "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner"
+-add_custom_command(TARGET libwg.so POST_BUILD VERBATIM COMMAND "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner"
++add_custom_command(TARGET libwg.so POST_BUILD VERBATIM COMMAND "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner.exe"
          --api-level "${ANDROID_NATIVE_API_LEVEL}" "$<TARGET_FILE:libwg.so>")
--- 
+ add_dependencies(libwg.so elf-cleaner)
+-add_custom_command(TARGET libwg-quick.so POST_BUILD VERBATIM COMMAND "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner"
++add_custom_command(TARGET libwg-quick.so POST_BUILD VERBATIM COMMAND "${CMAKE_CURRENT_BINARY_DIR}/elf-cleaner.exe"
+         --api-level "${ANDROID_NATIVE_API_LEVEL}" "$<TARGET_FILE:libwg-quick.so>")
+ add_dependencies(libwg-quick.so elf-cleaner)
+diff --git a/tunnel/tools/elf-cleaner/config-windows.h b/tunnel/tools/elf-cleaner/config-windows.h
+new file mode 100644
+index 0000000..9c1d0aa
+--- /dev/null
++++ b/tunnel/tools/elf-cleaner/config-windows.h
+@@ -0,0 +1,10 @@
++#ifndef ELF_CLEANER_CONFIG_WINDOWS_H
++#define ELF_CLEANER_CONFIG_WINDOWS_H
++/* msys2 gcc: make newlib expose asprintf() also in C++ mode */
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE 1
++#endif
++#define PACKAGE_NAME "elf-cleaner"
++#define PACKAGE_VERSION ""
++#define COPYRIGHT ""
++#endif
+--
 2.44.0.windows.1
 
