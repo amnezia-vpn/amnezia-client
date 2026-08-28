@@ -72,8 +72,14 @@ QString apiUtils::getDistributionChannel()
 #endif
 }
 
-QString apiUtils::getCountryFlagCode(const QString &serverCountryCode)
+QString apiUtils::getCountryFlagCode(const QString &serverCountryCodeL10n, const QString &serverCountryCode)
 {
+    if (!serverCountryCodeL10n.isEmpty()) {
+        return serverCountryCodeL10n.toUpper();
+    }
+    if (serverCountryCode.isEmpty()) {
+        return {};
+    }
     return serverCountryCode.section('-', 0, 0).toUpper();
 }
 
