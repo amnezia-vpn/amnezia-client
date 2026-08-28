@@ -74,6 +74,7 @@ public:
                                             const QString &transactionId,
                                             const QString &purchasedProductId,
                                             const QString &originalTransactionId,
+                                            const QString &storeEnvironment,
                                             const QString &errorString,
                                             StorePurchaseFailure failureReason)> &&callback);
 

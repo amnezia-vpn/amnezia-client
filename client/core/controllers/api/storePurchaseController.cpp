@@ -25,6 +25,19 @@
 
 using namespace amnezia;
 
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+namespace
+{
+bool isTestPurchaseEnvironment(const QString &storeEnvironment)
+{
+    if (storeEnvironment.isEmpty()) {
+        return IosController::Instance()->isTestFlight();
+    }
+    return storeEnvironment.compare(QStringLiteral("production"), Qt::CaseInsensitive) != 0;
+}
+}
+#endif
+
 #if defined(Q_OS_ANDROID)
 namespace
 {
@@ -204,18 +217,21 @@ ErrorCode StorePurchaseController::processAppStorePurchase(const QString &userCo
     QString originalTransactionId;
     QString storeTransactionId;
     QString storeProductId;
+    QString storeEnvironment;
     QString purchaseError;
     IosController::StorePurchaseFailure failureReason = IosController::StorePurchaseFailure::Other;
     QEventLoop waitPurchase;
 
     IosController::Instance()->purchaseProduct(productId,
                                                [&](bool success, const QString &txId, const QString &purchasedProductId,
-                                                   const QString &originalTxId, const QString &errorString,
+                                                   const QString &originalTxId, const QString &environment,
+                                                   const QString &errorString,
                                                    IosController::StorePurchaseFailure reason) {
                                                    purchaseOk = success;
                                                    originalTransactionId = originalTxId;
                                                    storeTransactionId = txId;
                                                    storeProductId = purchasedProductId;
+                                                   storeEnvironment = environment;
                                                    purchaseError = errorString;
                                                    failureReason = reason;
                                                    waitPurchase.quit();
@@ -233,7 +249,7 @@ ErrorCode StorePurchaseController::processAppStorePurchase(const QString &userCo
     qInfo().noquote() << "[IAP] Purchase success. transactionId =" << storeTransactionId
                       << "originalTransactionId =" << originalTransactionId << "productId =" << storeProductId;
 
-    bool isTestPurchase = IosController::Instance()->isTestFlight();
+    bool isTestPurchase = isTestPurchaseEnvironment(storeEnvironment);
 
     SubscriptionController::ProtocolData protocolData = SubscriptionController::generateProtocolData(serviceProtocol);
     ErrorCode importError = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
@@ -419,13 +435,13 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processAppS
         return result;
     }
 
-    bool isTestPurchase = IosController::Instance()->isTestFlight();
     QSet<QString> processedTransactions;
 
     for (const QVariantMap &transaction : restoredTransactions) {
         const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
         const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
         const QString transactionProductId = transaction.value(QStringLiteral("productId")).toString();
+        const bool isTestPurchase = isTestPurchaseEnvironment(transaction.value(QStringLiteral("environment")).toString());
 
         qInfo().noquote() << "[IAP][processAppStoreRestore] Processing transaction: transactionId=" << transactionId
                           << "originalTransactionId=" << originalTransactionId << "productId=" << transactionProductId;
@@ -491,7 +507,8 @@ StorePurchaseController::StoreRestoreResult StorePurchaseController::processAppS
 
 ErrorCode StorePurchaseController::processAppStoreTransactionUpdate(const QString &userCountryCode, const QString &serviceType,
                                                                     const QString &serviceProtocol, const QString &originalTransactionId,
-                                                                    const QString &transactionId, int *duplicateServerIndex)
+                                                                    const QString &transactionId, const QString &storeEnvironment,
+                                                                    int *duplicateServerIndex)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     if (originalTransactionId.isEmpty()) {
@@ -499,9 +516,9 @@ ErrorCode StorePurchaseController::processAppStoreTransactionUpdate(const QStrin
     }
 
     qInfo().noquote() << "[IAP] Processing transaction update. transactionId =" << transactionId
-                      << "originalTransactionId =" << originalTransactionId;
+                      << "originalTransactionId =" << originalTransactionId << "environment =" << storeEnvironment;
 
-    bool isTestPurchase = IosController::Instance()->isTestFlight();
+    bool isTestPurchase = isTestPurchaseEnvironment(storeEnvironment);
     SubscriptionController::ProtocolData protocolData = SubscriptionController::generateProtocolData(serviceProtocol);
     ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                   originalTransactionId, isTestPurchase, duplicateServerIndex,
@@ -520,6 +537,7 @@ ErrorCode StorePurchaseController::processAppStoreTransactionUpdate(const QStrin
     Q_UNUSED(serviceProtocol);
     Q_UNUSED(originalTransactionId);
     Q_UNUSED(transactionId);
+    Q_UNUSED(storeEnvironment);
     Q_UNUSED(duplicateServerIndex);
     return ErrorCode::ApiPurchaseError;
 #endif

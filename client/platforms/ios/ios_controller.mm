@@ -1030,7 +1030,7 @@ IosController::StorePurchaseFailure storePurchaseFailureFromError(NSError *error
 QVariantMap toTransactionMap(NSDictionary *dict)
 {
     QVariantMap transaction;
-    for (NSString *key in @[@"transactionId", @"originalTransactionId", @"productId"]) {
+    for (NSString *key in @[@"transactionId", @"originalTransactionId", @"productId", @"environment"]) {
         NSString *value = dict[key];
         if (value) {
             transaction.insert(QString::fromUtf8(key.UTF8String), QString::fromUtf8(value.UTF8String));
@@ -1054,6 +1054,7 @@ void IosController::purchaseProduct(const QString &productId,
                                                       const QString &transactionId,
                                                       const QString &purchasedProductId,
                                                       const QString &originalTransactionId,
+                                                      const QString &storeEnvironment,
                                                       const QString &errorString,
                                                       StorePurchaseFailure failureReason)> &&callback)
 {
@@ -1065,25 +1066,27 @@ void IosController::purchaseProduct(const QString &productId,
                                                                          NSString * _Nullable transactionId,
                                                                          NSString * _Nullable prodId,
                                                                          NSString * _Nullable originalTxId,
+                                                                         NSString * _Nullable environment,
                                                                          NSError * _Nullable error) {
             const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
             const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
             const QString origTxId = QString::fromUtf8((originalTxId ?: @"").UTF8String);
+            const QString env  = QString::fromUtf8((environment  ?: @"").UTF8String);
             const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
             const StorePurchaseFailure failureReason = s ? StorePurchaseFailure::Other
                                                          : storePurchaseFailureFromError(error);
 
             qInfo().noquote() << "[IAP][IosController] purchase completion" << "success=" << s
                               << "transactionId=" << txId << "originalTransactionId=" << origTxId
-                              << "productId=" << pId << "error=" << err;
+                              << "productId=" << pId << "environment=" << env << "error=" << err;
 
             if (cb) {
-                cb(s, txId, pId, origTxId, err, failureReason);
+                cb(s, txId, pId, origTxId, env, err, failureReason);
             }
         }];
     } else {
         if (callback) {
-            callback(false, QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later",
+            callback(false, QString(), QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later",
                      StorePurchaseFailure::Other);
         }
     }

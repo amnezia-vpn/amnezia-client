@@ -324,7 +324,7 @@ PageType {
                 color: AmneziaStyle.color.mutedGray
                 font.pixelSize: 12
 
-                visible: !!root.currentPlan
+                visible: !!root.currentPlan && root.storePurchaseAvailable
 
                 text: {
                     var plan = root.currentPlan
