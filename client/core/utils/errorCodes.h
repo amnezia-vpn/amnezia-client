@@ -107,6 +107,8 @@ namespace amnezia
         ApiCaptchaInvalidError = 1118,
         ApiCaptchaRefreshError = 1119,
         ApiRateLimitError = 1120,
+        ApiNoPurchasesToRestore = 1121,
+        ApiPurchasePendingError = 1122,
 
         // QFile errors
         OpenError = 1200,
@@ -114,7 +116,16 @@ namespace amnezia
         PermissionsError = 1202,
         UnspecifiedError = 1203,
         FatalError = 1204,
-        AbortError = 1205
+        AbortError = 1205,
+
+        // Billing errors
+        BillingCanceled = 1300,
+        BillingError = 1301,
+        BillingGooglePlayError = 1302,
+        BillingUnavailable = 1303,
+        SubscriptionAlreadyOwned = 1304,
+        SubscriptionUnavailable = 1305,
+        BillingNetworkError = 1306,
       };
       Q_ENUM_NS(ErrorCode)
     }

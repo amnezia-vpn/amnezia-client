@@ -55,6 +55,12 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
+    bool isPlay();
+    QJsonObject getSubscriptionPlans();
+    QJsonObject purchaseSubscription(const QString &offerToken);
+    QJsonObject upgradeSubscription(const QString &offerToken, const QString &oldPurchaseToken);
+    QJsonObject acknowledgePurchase(const QString &purchaseToken);
+    QJsonObject queryPurchases();
 
     void showUpdateCover();
     void hideUpdateCover();

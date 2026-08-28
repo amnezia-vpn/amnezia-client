@@ -99,6 +99,24 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
     case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
     case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiPurchasePendingError):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.");
+#else
+        errorMessage = QObject::tr("Your payment is pending confirmation. Please complete the payment and then restore your subscription.");
+#endif
+        break;
+    case (ErrorCode::ApiNoPurchasesToRestore):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Google account used for the purchase.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Apple ID used for the purchase.");
+#else
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same account used for the purchase.");
+#endif
+        break;
 
     // QFile errors
     case(ErrorCode::OpenError): errorMessage = QObject::tr("QFile error: The file could not be opened"); break;
@@ -107,6 +125,15 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::UnspecifiedError): errorMessage =  QObject::tr("QFile error: An unspecified error occurred"); break;
     case(ErrorCode::FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
     case(ErrorCode::AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
+
+    // Billing errors
+    case(ErrorCode::BillingCanceled): errorMessage = QObject::tr("Transaction was canceled by the user"); break;
+    case(ErrorCode::BillingError): errorMessage = QObject::tr("Billing error"); break;
+    case(ErrorCode::BillingGooglePlayError): errorMessage = QObject::tr("Internal Google Play error, please try again later"); break;
+    case(ErrorCode::BillingUnavailable): errorMessage = QObject::tr("Billing is unavailable, please try again later"); break;
+    case(ErrorCode::SubscriptionAlreadyOwned): errorMessage = QObject::tr("You already own this subscription"); break;
+    case(ErrorCode::SubscriptionUnavailable): errorMessage = QObject::tr("The requested subscription is not available for purchase"); break;
+    case(ErrorCode::BillingNetworkError): errorMessage = QObject::tr("A network error occurred during the operation, please check the Internet connection"); break;
 
     case(ErrorCode::InternalError):
     default:
