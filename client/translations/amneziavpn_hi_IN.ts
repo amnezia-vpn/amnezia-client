@@ -433,8 +433,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of AmneziaVPN is available.</source>
-        <translation>AmneziaVPN का एक नया संस्करण उपलब्ध है।</translation>
+        <source>A new version of %1 is available.</source>
+        <translation>%1 का एक नया संस्करण उपलब्ध है।</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
@@ -507,7 +507,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="60"/>
         <source>Gateway endpoint</source>
-        <translation>गेटवे एंडपॉइंट</translation>
+        <translation>Gateway endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
@@ -522,7 +522,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
-        <translation>डेव गेटवे परिवेश</translation>
+        <translation>Dev gateway environment</translation>
     </message>
 </context>
 <context>
@@ -535,7 +535,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="149"/>
         <source>Dev gateway enabled</source>
-        <translation>डेव गेटवे सक्षम</translation>
+        <translation>Dev gateway enabled</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="191"/>
@@ -1383,7 +1383,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="116"/>
         <source>Valid range: 1–65535.</source>
-        <translation>मान्य रेंज: 1–65535.</translation>
+        <translation>Valid range: 1–65535.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="161"/>
@@ -1603,7 +1603,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="126"/>
         <source>Transmission time interval (ms). Valid range: 10–100.</source>
-        <translation>संप्रेषण समय अंतराल (ms)। मान्य रेंज: 10–100.</translation>
+        <translation>Transmission time interval (ms). Valid range: 10–100.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="145"/>
@@ -1613,7 +1613,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="146"/>
         <source>Uplink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>अपलिंक क्षमता (MB/s)। अधिकतम: 2147483647.</translation>
+        <translation>Uplink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="165"/>
@@ -1623,7 +1623,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="166"/>
         <source>Downlink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>डाउनलिंक क्षमता (MB/s)। अधिकतम: 2147483647.</translation>
+        <translation>Downlink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="185"/>
@@ -1633,7 +1633,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="186"/>
         <source>Read buffer size (MB). Range: 1–2147483647.</source>
-        <translation>रीड बफ़र आकार (MB)। रेंज: 1–2147483647.</translation>
+        <translation>Read buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="205"/>
@@ -1643,7 +1643,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="206"/>
         <source>Write buffer size (MB). Range: 1–2147483647.</source>
-        <translation>राइट बफ़र आकार (MB)। रेंज: 1–2147483647.</translation>
+        <translation>Write buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="224"/>
@@ -1762,7 +1762,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="616"/>
         <source>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</source>
-        <translation>अपलिंक चंक आकार (बाइट)। अधिकतम: 2147483647. 0 = बंद.</translation>
+        <translation>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="635"/>
@@ -1772,7 +1772,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="636"/>
         <source>Max buffered POSTs. Range: 0–2147483647.</source>
-        <translation>अधिकतम बफ़र किए गए POST। रेंज: 0–2147483647.</translation>
+        <translation>Max buffered POSTs. Range: 0–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="655"/>
@@ -1999,7 +1999,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="201"/>
         <source>HTTP keep-alive period. Integer, may be negative.</source>
-        <translation>HTTP keep-alive अवधि। पूर्णांक, ऋणात्मक भी हो सकता है।</translation>
+        <translation>HTTP keep-alive period. Integer, may be negative.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="233"/>
@@ -2208,7 +2208,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>सीक्रेट</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="802"/>
@@ -2254,7 +2254,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>बेस सीक्रेट</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="936"/>
@@ -2264,7 +2264,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>नया सीक्रेट जेनरेट करें?</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="955"/>
@@ -2364,7 +2364,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>FakeTLS डोमेन</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1237"/>
@@ -2391,7 +2391,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>अतिरिक्त सीक्रेट</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1315"/>
@@ -2401,12 +2401,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>अतिरिक्त सीक्रेट जोड़ें</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1531"/>
         <source>Worker mode</source>
-        <translation>वर्कर मोड</translation>
+        <translation>Worker mode</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1548"/>
@@ -2426,12 +2426,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1581"/>
         <source>Workers count</source>
-        <translation>वर्कर संख्या</translation>
+        <translation>Workers count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1640"/>
         <source>Server is behind NAT / Docker bridge</source>
-        <translation>सर्वर NAT / Docker ब्रिज के पीछे है</translation>
+        <translation>Server is behind NAT / Docker bridge</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1641"/>
@@ -2505,7 +2505,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1842"/>
         <source>Stats endpoint</source>
-        <translation>स्टैट्स एंडपॉइंट</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
@@ -2822,7 +2822,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>सीक्रेट</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="802"/>
@@ -2868,7 +2868,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>बेस सीक्रेट</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="936"/>
@@ -2878,7 +2878,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>नया सीक्रेट जेनरेट करें?</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="955"/>
@@ -2978,7 +2978,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>FakeTLS डोमेन</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1237"/>
@@ -3005,7 +3005,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>अतिरिक्त सीक्रेट</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1315"/>
@@ -3015,7 +3015,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>अतिरिक्त सीक्रेट जोड़ें</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
@@ -3087,7 +3087,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1699"/>
         <source>Stats endpoint</source>
-        <translation>स्टैट्स एंडपॉइंट</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
@@ -4181,7 +4181,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
         <source>Soft KillSwitch</source>
-        <translation>सॉफ़्ट KillSwitch</translation>
+        <translation>Soft KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
@@ -4191,7 +4191,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
         <source>Strict KillSwitch</source>
-        <translation>स्ट्रिक्ट KillSwitch</translation>
+        <translation>Strict KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
@@ -4780,30 +4780,100 @@ Create one from the current settings.</source>
 </context>
 <context>
     <name>PageSetupWizardApiPremiumInfo</name>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="102"/>
+        <source>Try free for %n day(s)</source>
+        <translation>
+            <numerusform>%n दिन मुफ़्त आज़माएँ</numerusform>
+            <numerusform>%n दिन मुफ़्त आज़माएँ</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="140"/>
         <source>Recommended</source>
         <translation>अनुशंसित</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="167"/>
+        <source>Change plan</source>
+        <translation>प्लान बदलें</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="180"/>
         <source>Premium features</source>
         <translation>Premium सुविधाएँ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="209"/>
         <source>Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.</source>
         <translation>पुष्टि पर आपके Apple ID से शुल्क लिया जाएगा। अवधि समाप्त होने से कम से कम 24 घंटे पहले स्वतः नवीनीकरण बंद न करने पर यह स्वतः नवीनीकृत होता है। Apple ID सेटिंग्स में प्रबंधित करें।</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
         <source>Continue</source>
         <translation>जारी रखना</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="271"/>
+        <source>Start %n-day free trial</source>
+        <translation>
+            <numerusform>%n दिन का मुफ़्त ट्रायल शुरू करें</numerusform>
+            <numerusform>%n दिन का मुफ़्त ट्रायल शुरू करें</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="273"/>
         <source>Subscribe — %1 for %2</source>
         <translation>सदस्यता लें — %2 के लिए %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="296"/>
+        <source>Upgrade plan?</source>
+        <translation>प्लान अपग्रेड करें?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="297"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation</source>
+        <translation>वर्तमान प्लान को %1 / %2 प्लान से बदल दिया जाएगा। पुष्टि के तुरंत बाद परिवर्तन लागू होगा</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="300"/>
+        <source>Downgrade plan?</source>
+        <translation>प्लान डाउनग्रेड करें?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="301"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules</source>
+        <translation>वर्तमान प्लान को %1 / %2 प्लान से बदल दिया जाएगा। स्टोर अपने बिलिंग नियमों के अनुसार परिवर्तन लागू करेगा</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="304"/>
+        <source>Confirm subscription change?</source>
+        <translation>सदस्यता परिवर्तन की पुष्टि करें?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="305"/>
+        <source>An active subscription already exists. The current plan will be replaced with the %1 / %2 plan</source>
+        <translation>एक सक्रिय सदस्यता पहले से मौजूद है। वर्तमान प्लान को %1 / %2 प्लान से बदल दिया जाएगा</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
+        <source>Cancel</source>
+        <translation>रद्द करना</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="335"/>
+        <source>%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.</source>
+        <translation>
+            <numerusform>%n दिन मुफ़्त, फिर %1/%2। रद्द करने तक स्वतः नवीनीकरण। कभी भी सेटिंग्स में रद्द करें।</numerusform>
+            <numerusform>%n दिन मुफ़्त, फिर %1/%2। रद्द करने तक स्वतः नवीनीकरण। कभी भी सेटिंग्स में रद्द करें।</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="338"/>
+        <source>%1/%2, auto-renewal. Cancel anytime in the Settings.</source>
+        <translation>%1/%2, स्वतः नवीनीकरण। आप कभी भी सेटिंग्स में रद्द कर सकते हैं।</translation>
     </message>
 </context>
 <context>
@@ -5843,16 +5913,11 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="92"/>
-        <source>A migration error has occurred. Please contact our technical support</source>
-        <translation>माइग्रेशन त्रुटि उत्पन्न हुई। कृपया हमारी तकनीकी सहायता से संपर्क करें</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Please update the application to use this feature</source>
         <translation>इस सुविधा का उपयोग करने के लिए कृपया एप्लिकेशन को अपडेट करें</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -5861,47 +5926,47 @@ Create one from the current settings.</source>
  यदि आपको ईमेल नहीं मिला है, तो कृपया हमारी सहायता टीम से संपर्क करें।</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Unable to process purchase</source>
         <translation>खरीद प्रक्रिया पूरी नहीं हो सकी</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>No active subscription found</source>
         <translation>कोई सक्रिय सदस्यता नहीं मिली</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>कोई खरीदी गई सदस्यता नहीं मिली। कृपया पहले एक सदस्यता खरीदें</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>इस ईमेल पते का उपयोग पहले ही ट्रायल सक्रिय करने के लिए किया जा चुका है</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>CAPTCHA verification is required</source>
         <translation>CAPTCHA सत्यापन आवश्यक है</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>CAPTCHA ग़लत था। कृपया पुनः प्रयास करें</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA रिफ़्रेश किया गया। कृपया पुनः प्रयास करें</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="102"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>Too many requests. Please try again later</source>
         <translation>बहुत अधिक अनुरोध। कृपया बाद में पुनः प्रयास करें</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="143"/>
         <source>ErrorCode: %1. </source>
         <translation>त्रुटि कोड: %1. </translation>
     </message>
@@ -5956,37 +6021,102 @@ Create one from the current settings.</source>
         <translation>कॉन्फ़िगरेशन में सर्वर से कनेक्ट करने के लिए कोई कंटेनर और क्रेडेंशियल नहीं है</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="105"/>
+        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
+        <translation>आपका भुगतान Google Play में पुष्टि की प्रतीक्षा में है। भुगतान पूरा होने पर, अगली बार ऐप शुरू करने पर सदस्यता स्वतः जुड़ जाएगी।</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
+        <translation>आपका भुगतान पुष्टि की प्रतीक्षा में है। स्वीकृत होते ही सदस्यता स्वतः जुड़ जाएगी।</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
+        <translation>आपका भुगतान पुष्टि की प्रतीक्षा में है। कृपया भुगतान पूरा करें और फिर अपनी सदस्यता पुनर्स्थापित करें।</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
+        <translation>पुनर्स्थापित करने के लिए कोई खरीदारी नहीं। यदि आपकी सदस्यता सक्रिय है, तो सुनिश्चित करें कि आप उसी Google खाते से साइन इन हैं जिससे खरीदारी की गई थी।</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
+        <translation>पुनर्स्थापित करने के लिए कोई खरीदारी नहीं। यदि आपकी सदस्यता सक्रिय है, तो सुनिश्चित करें कि आप उसी Apple ID से साइन इन हैं जिससे खरीदारी की गई थी।</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
+        <translation>पुनर्स्थापित करने के लिए कोई खरीदारी नहीं। यदि आपकी सदस्यता सक्रिय है, तो सुनिश्चित करें कि आप उसी खाते से साइन इन हैं जिससे खरीदारी की गई थी।</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="122"/>
         <source>QFile error: The file could not be opened</source>
         <translation>Qफ़ाइल त्रुटि: फ़ाइल खोली नहीं जा सकी</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="123"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>Qफ़ाइल त्रुटि: फ़ाइल से पढ़ते समय एक त्रुटि उत्पन्न हुई</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="107"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>Qफ़ाइल त्रुटि: फ़ाइल तक नहीं पहुंचा जा सका</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>Qफ़ाइल त्रुटि: एक अनिर्दिष्ट त्रुटि उत्पन्न हुई</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="109"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>Qफ़ाइल त्रुटि: एक घातक त्रुटि उत्पन्न हुई</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="110"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: The operation was aborted</source>
         <translation>Qफ़ाइल त्रुटि: ऑपरेशन निरस्त कर दिया गया था</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="114"/>
+        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <source>Transaction was canceled by the user</source>
+        <translation>उपयोगकर्ता ने लेनदेन रद्द कर दिया</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <source>Billing error</source>
+        <translation>बिलिंग त्रुटि</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <source>Internal Google Play error, please try again later</source>
+        <translation>Google Play में आंतरिक त्रुटि, कृपया बाद में पुनः प्रयास करें</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <source>Billing is unavailable, please try again later</source>
+        <translation>बिलिंग उपलब्ध नहीं है, कृपया बाद में पुनः प्रयास करें</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <source>You already own this subscription</source>
+        <translation>यह सदस्यता पहले से आपके पास है</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <source>The requested subscription is not available for purchase</source>
+        <translation>अनुरोधित सदस्यता खरीद के लिए उपलब्ध नहीं है</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <source>A network error occurred during the operation, please check the Internet connection</source>
+        <translation>कार्रवाई के दौरान नेटवर्क त्रुटि हुई, कृपया इंटरनेट कनेक्शन जाँचें</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="140"/>
         <source>Internal error</source>
         <translation>आंतरिक त्रुटि</translation>
     </message>
@@ -6356,17 +6486,17 @@ For more detailed information, you can
         <translation>होस्टनाम और पोर्ट के बीच कोलन विभाजक नहीं मिल सका</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="436"/>
         <source> (version 3.1)</source>
         <translation> (संस्करण 3.1)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="437"/>
         <source> (version 2)</source>
         <translation> (संस्करण 2)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="438"/>
         <source> (version 1.5)</source>
         <translation> (संस्करण 1.5)</translation>
     </message>
@@ -6434,13 +6564,13 @@ For more detailed information, you can
 <context>
     <name>ServicesCatalogController</name>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="176"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="258"/>
         <source>%1/mo</source>
         <comment>IAP: price per month in plan subtitle</comment>
         <translation>%1/माह</translation>
     </message>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="196"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="278"/>
         <source>from %1 per month</source>
         <comment>IAP: card footer minimum monthly price from StoreKit</comment>
         <translation>%1 प्रति माह से</translation>
@@ -6480,61 +6610,72 @@ For more detailed information, you can
 <context>
     <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="218"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="268"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="241"/>
+        <source>Your subscription has been upgraded</source>
+        <translation>आपकी सदस्यता अपग्रेड हो गई</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="242"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="282"/>
         <source>This subscription has already been added</source>
         <translation>यह सदस्यता पहले ही जोड़ी जा चुकी है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="225"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="254"/>
         <source>%1 has been added to the app</source>
         <translation>%1 को ऐप में जोड़ दिया गया है</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="275"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="289"/>
         <source>Subscription restored successfully</source>
         <translation>सदस्यता सफलतापूर्वक पुनर्स्थापित की गई</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="303"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="356"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="479"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <source>Purchase confirmed. Subscription has been added to the app</source>
+        <translation>खरीदारी की पुष्टि हुई। सदस्यता ऐप में जोड़ दी गई</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
         <source>%1 installed successfully.</source>
         <translation>%1 सफलतापूर्वक स्थापित हुआ।</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="318"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="364"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="391"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="422"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="514"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
         <source>Enter the digits from the image to continue</source>
         <translation>जारी रखने के लिए छवि में दिए अंक दर्ज करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>इस ईमेल पते का उपयोग पहले ही ट्रायल सक्रिय करने के लिए किया जा चुका है। सेवा पसंद आई? Premium में अपग्रेड करें</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="532"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
         <source>API config reloaded</source>
         <translation>API कॉन्फ़िगरेशन पुनः लोड किया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>कनेक्शन का देश सफलतापूर्वक %1 में बदल दिया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
         <source>API config removed</source>
         <translation>API कॉन्फ़िगरेशन हटा दिया गया</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="660"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>सर्वर &apos;%1&apos; रीबूट किया गया था</translation>
     </message>

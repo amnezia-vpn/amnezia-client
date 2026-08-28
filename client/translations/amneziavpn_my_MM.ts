@@ -433,8 +433,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of AmneziaVPN is available.</source>
-        <translation>AmneziaVPN ဗားရှင်းအသစ် ရရှိနိုင်ပါသည်။</translation>
+        <source>A new version of %1 is available.</source>
+        <translation>%1 ဗားရှင်းအသစ် ရရှိနိုင်ပါသည်။</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
@@ -507,7 +507,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="60"/>
         <source>Gateway endpoint</source>
-        <translation>Gateway အဆုံးမှတ်</translation>
+        <translation>Gateway endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
@@ -522,7 +522,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
-        <translation>Dev gateway ပတ်ဝန်းကျင်</translation>
+        <translation>Dev gateway environment</translation>
     </message>
 </context>
 <context>
@@ -535,7 +535,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="149"/>
         <source>Dev gateway enabled</source>
-        <translation>Dev gateway ဖွင့်ထားသည်</translation>
+        <translation>Dev gateway enabled</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="191"/>
@@ -1383,7 +1383,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="116"/>
         <source>Valid range: 1–65535.</source>
-        <translation>တိကျသော အပိုင်းအခြား: 1–65535။</translation>
+        <translation>Valid range: 1–65535.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="161"/>
@@ -1603,7 +1603,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="126"/>
         <source>Transmission time interval (ms). Valid range: 10–100.</source>
-        <translation>ပို့လွှတ်မှု အချိန်အကွာအဝေး (ms)။ တိကျသော အပိုင်းအခြား: 10–100။</translation>
+        <translation>Transmission time interval (ms). Valid range: 10–100.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="145"/>
@@ -1613,7 +1613,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="146"/>
         <source>Uplink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>Uplink စွမ်းရည် (MB/s)။ အမြင့်ဆုံး: 2147483647။</translation>
+        <translation>Uplink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="165"/>
@@ -1623,7 +1623,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="166"/>
         <source>Downlink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>Downlink စွမ်းရည် (MB/s)။ အမြင့်ဆုံး: 2147483647။</translation>
+        <translation>Downlink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="185"/>
@@ -1633,7 +1633,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="186"/>
         <source>Read buffer size (MB). Range: 1–2147483647.</source>
-        <translation>ဖတ်ရန် buffer အရွယ်အစား (MB)။ အပိုင်းအခြား: 1–2147483647။</translation>
+        <translation>Read buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="205"/>
@@ -1643,7 +1643,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="206"/>
         <source>Write buffer size (MB). Range: 1–2147483647.</source>
-        <translation>ရေးရန် buffer အရွယ်အစား (MB)။ အပိုင်းအခြား: 1–2147483647။</translation>
+        <translation>Write buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="224"/>
@@ -1762,7 +1762,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="616"/>
         <source>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</source>
-        <translation>Uplink chunk အရွယ်အစား (bytes)။ အမြင့်ဆုံး: 2147483647။ 0 = ပိတ်။</translation>
+        <translation>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="635"/>
@@ -1772,7 +1772,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="636"/>
         <source>Max buffered POSTs. Range: 0–2147483647.</source>
-        <translation>Buffer တွင်ထားနိုင်သော POST အမြင့်ဆုံး။ အပိုင်းအခြား: 0–2147483647။</translation>
+        <translation>Max buffered POSTs. Range: 0–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="655"/>
@@ -1999,7 +1999,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="201"/>
         <source>HTTP keep-alive period. Integer, may be negative.</source>
-        <translation>HTTP keep-alive ကာလ။ ကိန်းပြည့်ဖြစ်ပြီး အနုတ်လည်း ဖြစ်နိုင်ပါသည်။</translation>
+        <translation>HTTP keep-alive period. Integer, may be negative.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="233"/>
@@ -2208,7 +2208,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>လှျို့ဝှက်ကုဒ်</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="802"/>
@@ -2254,7 +2254,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>အခြေခံ လှျို့ဝှက်ကုဒ်</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="936"/>
@@ -2264,7 +2264,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>လှျို့ဝှက်ကုဒ်အသစ် ဖန်တီးမလား။</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="955"/>
@@ -2364,7 +2364,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>FakeTLS ဒိုမိန်း</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1237"/>
@@ -2391,7 +2391,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>ထပ်ဆောင်း လှျို့ဝှက်ကုဒ်များ</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1315"/>
@@ -2401,12 +2401,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>ထပ်ဆောင်း လှျို့ဝှက်ကုဒ် ထည့်မည်</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1531"/>
         <source>Worker mode</source>
-        <translation>Worker စနစ်</translation>
+        <translation>Worker mode</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1548"/>
@@ -2426,12 +2426,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1581"/>
         <source>Workers count</source>
-        <translation>Worker အရေအတွက်</translation>
+        <translation>Workers count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1640"/>
         <source>Server is behind NAT / Docker bridge</source>
-        <translation>ဆာဗာသည် NAT / Docker bridge နောက်တွင် ရှိပါသည်</translation>
+        <translation>Server is behind NAT / Docker bridge</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1641"/>
@@ -2505,7 +2505,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1842"/>
         <source>Stats endpoint</source>
-        <translation>စာရင်းအင်း endpoint</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
@@ -2822,7 +2822,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>လှျို့ဝှက်ကုဒ်</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="802"/>
@@ -2868,7 +2868,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>အခြေခံ လှျို့ဝှက်ကုဒ်</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="936"/>
@@ -2878,7 +2878,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>လှျို့ဝှက်ကုဒ်အသစ် ဖန်တီးမလား။</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="955"/>
@@ -2978,7 +2978,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>FakeTLS ဒိုမိန်း</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1237"/>
@@ -3005,7 +3005,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>ထပ်ဆောင်း လှျို့ဝှက်ကုဒ်များ</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1315"/>
@@ -3015,7 +3015,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>ထပ်ဆောင်း လှျို့ဝှက်ကုဒ် ထည့်မည်</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
@@ -3087,7 +3087,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1699"/>
         <source>Stats endpoint</source>
-        <translation>စာရင်းအင်း endpoint</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
@@ -4181,7 +4181,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
         <source>Soft KillSwitch</source>
-        <translation>ပြေပြေလည်လည် KillSwitch</translation>
+        <translation>Soft KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
@@ -4191,7 +4191,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
         <source>Strict KillSwitch</source>
-        <translation>တင်းကျပ် KillSwitch</translation>
+        <translation>Strict KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
@@ -4780,30 +4780,97 @@ Create one from the current settings.</source>
 </context>
 <context>
     <name>PageSetupWizardApiPremiumInfo</name>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="102"/>
+        <source>Try free for %n day(s)</source>
+        <translation>
+            <numerusform>%n ရက် အခမဲ့ စမ်းသုံးပါ</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="140"/>
         <source>Recommended</source>
         <translation>အကြံပြုထားသည်</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="167"/>
+        <source>Change plan</source>
+        <translation>အစီအစဉ် ပြောင်းမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="180"/>
         <source>Premium features</source>
         <translation>Premium လုပ်ဆောင်ချက်များ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="209"/>
         <source>Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.</source>
         <translation>အတည်ပြုသည့်အခါ သင့် Apple ID မှ ကောက်ခံပါမည်။ ကာလကုန်ဆုံးမည့် အနည်းဆုံး ၂၄ နာရီအလိုတွင် အလိုအလျောက် သက်တမ်းတိုးမှုကို ပိတ်ခြင်းမရှိပါက အလိုအလျောက် သက်တမ်းတိုးပါမည်။ Apple ID ဆက်တင်များတွင် စီမံပါ။</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
         <source>Continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်မည်</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="271"/>
+        <source>Start %n-day free trial</source>
+        <translation>
+            <numerusform>%n ရက် အခမဲ့ စမ်းသုံးမှု စတင်မည်</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="273"/>
         <source>Subscribe — %1 for %2</source>
         <translation>အသင်းဝင်မည် — %2 အတွက် %1</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="296"/>
+        <source>Upgrade plan?</source>
+        <translation>အစီအစဉ်ကို အဆင့်မြှင့်မလား။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="297"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation</source>
+        <translation>လက်ရှိအစီအစဉ်ကို %1 / %2 အစီအစဉ်ဖြင့် အစားထိုးပါမည်။ အတည်ပြုပြီးသည်နှင့် ချက်ချင်း အကျိုးသက်ရောက်ပါမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="300"/>
+        <source>Downgrade plan?</source>
+        <translation>အစီအစဉ်ကို အဆင့်လျှော့မလား။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="301"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules</source>
+        <translation>လက်ရှိအစီအစဉ်ကို %1 / %2 အစီအစဉ်ဖြင့် အစားထိုးပါမည်။ စတိုးသည် ၎င်း၏ ငွေတောင်းခံစည်းမျဉ်းအရ ပြောင်းလဲမှုကို အသုံးပြုပါမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="304"/>
+        <source>Confirm subscription change?</source>
+        <translation>အသင်းဝင်မှု ပြောင်းလဲမှုကို အတည်ပြုမလား။</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="305"/>
+        <source>An active subscription already exists. The current plan will be replaced with the %1 / %2 plan</source>
+        <translation>အသုံးပြုနေသော အသင်းဝင်မှု ရှိပြီးဖြစ်ပါသည်။ လက်ရှိအစီအစဉ်ကို %1 / %2 အစီအစဉ်ဖြင့် အစားထိုးပါမည်</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
+        <source>Cancel</source>
+        <translation>ပယ်ဖျက်မည်</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="335"/>
+        <source>%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.</source>
+        <translation>
+            <numerusform>%n ရက် အခမဲ့၊ ထို့နောက် %1/%2။ ပယ်ဖျက်သည်အထိ အလိုအလျောက် သက်တမ်းတိုးပါမည်။ ဆက်တင်များတွင် အချိန်မရွေး ပယ်ဖျက်နိုင်ပါသည်။</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="338"/>
+        <source>%1/%2, auto-renewal. Cancel anytime in the Settings.</source>
+        <translation>%1/%2၊ အလိုအလျောက် သက်တမ်းတိုးမှု။ ဆက်တင်များတွင် အချိန်မရွေး ပယ်ဖျက်နိုင်ပါသည်။</translation>
     </message>
 </context>
 <context>
@@ -5749,16 +5816,11 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="92"/>
-        <source>A migration error has occurred. Please contact our technical support</source>
-        <translation>ဒေတာပြောင်းရွှေ့မှု မှားယွင်းမှု ဖြစ်ပွားခဲ့သည်။ ကျွန်ုပ်တို့၏ နည်းပညာပိုင်းဆိုင်ရာ ကူညီရေးအဖွဲ့ကို ဆက်သွယ်ပါ</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Please update the application to use this feature</source>
         <translation>ဤလုပ်ဆောင်ချက်ကို အသုံးပြုရန် အပလီကေးရှင်းကို အပ်ဒိတ်လုပ်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -5767,47 +5829,47 @@ Create one from the current settings.</source>
  အီးမေးလ် မရရှိပါက ကျွန်ုပ်တို့၏ ကူညီရေးအဖွဲ့ကို ဆက်သွယ်ပါ။</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Unable to process purchase</source>
         <translation>ဝယ်ယူမှုကို လုပ်ဆောင်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>No active subscription found</source>
         <translation>အသုံးပြုနေသော အသင်းဝင်မှု ရှာမတွေ့ပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>ဝယ်ယူထားသော အသင်းဝင်မှု ရှာမတွေ့ပါ။ ကျေးဇူးပြု၍ အသင်းဝင်မှုကို ဦးစွာဝယ်ယူပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>ဤအီးမေးလ်လိပ်စာကို အစမ်းသုံးမှု အသုံးပြုရန်အတွက် ယခင်တွင် အသုံးပြုထားပြီးဖြစ်ပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>CAPTCHA verification is required</source>
         <translation>CAPTCHA အတည်ပြုမှု လိုအပ်ပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>CAPTCHA မမှန်ကန်ပါ။ ကျေးဇူးပြု၍ ထပ်မံစမ်းကြည့်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA ကို ပြန်လည်စတင်ပြီးပါပြီ။ ကျေးဇူးပြု၍ ထပ်မံစမ်းကြည့်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="102"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>Too many requests. Please try again later</source>
         <translation>တောင်းဆိုမှု အလွန်များနေပါသည်။ ကျေးဇူးပြု၍ နောက်မှ ထပ်မံစမ်းကြည့်ပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="143"/>
         <source>ErrorCode: %1. </source>
         <translation>မှားယွင်းမှုကုတ်: %1. </translation>
     </message>
@@ -5944,37 +6006,102 @@ Create one from the current settings.</source>
         <translation>အသင်းဝင်မှုတစ်ခုအတွက် ခွင့်ပြုသည့် စီစဉ်သတ်မှတ်မှု ကန့်သတ်ချက် ကျော်လွန်သွားပါသည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="105"/>
+        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
+        <translation>သင့်ငွေပေးချေမှုသည် Google Play တွင် အတည်ပြုရန် စောင့်ဆိုင်းနေပါသည်။ ငွေပေးချေမှု ပြီးဆုံးသည်နှင့် နောက်တစ်ကြိမ် အပလီကေးရှင်းဖွင့်ချိန်တွင် အသင်းဝင်မှုကို အလိုအလျောက် ထည့်သွင်းပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
+        <translation>သင့်ငွေပေးချေမှုသည် အတည်ပြုရန် စောင့်ဆိုင်းနေပါသည်။ ခွင့်ပြုပြီးသည်နှင့် အသင်းဝင်မှုကို အလိုအလျောက် ထည့်သွင်းပါမည်။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
+        <translation>သင့်ငွေပေးချေမှုသည် အတည်ပြုရန် စောင့်ဆိုင်းနေပါသည်။ ငွေပေးချေမှုကို ပြီးမြောက်စေပြီး အသင်းဝင်မှုကို ပြန်လည်ရယူပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
+        <translation>ပြန်လည်ရယူရန် ဝယ်ယူမှု မရှိပါ။ အသုံးပြုနေသော အသင်းဝင်မှုရှိပါက ဝယ်ယူရာတွင် အသုံးပြုခဲ့သည့် Google အကောင့်ဖြင့် ဝင်ရောက်ထားကြောင်း စစ်ဆေးပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
+        <translation>ပြန်လည်ရယူရန် ဝယ်ယူမှု မရှိပါ။ အသုံးပြုနေသော အသင်းဝင်မှုရှိပါက ဝယ်ယူရာတွင် အသုံးပြုခဲ့သည့် Apple ID ဖြင့် ဝင်ရောက်ထားကြောင်း စစ်ဆေးပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
+        <translation>ပြန်လည်ရယူရန် ဝယ်ယူမှု မရှိပါ။ အသုံးပြုနေသော အသင်းဝင်မှုရှိပါက ဝယ်ယူရာတွင် အသုံးပြုခဲ့သည့် အကောင့်ဖြင့် ဝင်ရောက်ထားကြောင်း စစ်ဆေးပါ။</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="122"/>
         <source>QFile error: The file could not be opened</source>
         <translation>QFile မှားယွင်းမှု: ဖိုင်ကို ဖွင့်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="123"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>QFile မှားယွင်းမှု: ဖိုင်ကိုဖတ်နေစဥ်အတွင်း မှားယွင်းမှုဖြစ်သွားသည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="107"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>QFile မှားယွင်းမှု: ဖိုင်ကို ဝင်၍မရပါ</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>QFile မှားယွင်းမှု: သတ်မှတ်မထားသော မှားယွင်းမှုတစ်ခု ဖြစ်ပွားခဲ့သည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="109"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>QFile မှားယွင်းမှု: ကြီးမားသော မှားယွင်းမှုတစ်ခု ဖြစ်ပွားခဲ့သည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="110"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: The operation was aborted</source>
         <translation>QFile မှားယွင်းမှု: လုပ်ငန်းစဥ်ကို ဖျက်သိမ်းလိုက်ရသည်</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="114"/>
+        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <source>Transaction was canceled by the user</source>
+        <translation>အရောင်းအဝယ်ကို အသုံးပြုသူက ပယ်ဖျက်လိုက်ပါသည်</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <source>Billing error</source>
+        <translation>ငွေတောင်းခံမှု မှားယွင်းမှု</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <source>Internal Google Play error, please try again later</source>
+        <translation>Google Play အတွင်းပိုင်း မှားယွင်းမှု၊ နောက်မှ ထပ်စမ်းကြည့်ပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <source>Billing is unavailable, please try again later</source>
+        <translation>ငွေတောင်းခံမှု ဝန်ဆောင်မှု မရရှိနိုင်ပါ၊ နောက်မှ ထပ်စမ်းကြည့်ပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <source>You already own this subscription</source>
+        <translation>ဤအသင်းဝင်မှုကို သင် ပိုင်ဆိုင်ပြီးဖြစ်ပါသည်</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <source>The requested subscription is not available for purchase</source>
+        <translation>တောင်းဆိုထားသော အသင်းဝင်မှုကို ဝယ်ယူ၍မရပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <source>A network error occurred during the operation, please check the Internet connection</source>
+        <translation>လုပ်ဆောင်နေစဉ် ကွန်ရက် မှားယွင်းမှု ဖြစ်ပွားခဲ့သည်၊ အင်တာနက် ချိတ်ဆက်မှုကို စစ်ဆေးပါ</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="140"/>
         <source>Internal error</source>
         <translation>စက်တွင်းဖြစ်သော မှားယွင်းမှု</translation>
     </message>
@@ -6356,17 +6483,17 @@ For more detailed information, you can
         <translation>Hostname နှင့် port ကြားရှိ colon separator ကို ရှာမတွေ့ပါ</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="436"/>
         <source> (version 3.1)</source>
         <translation> (ဗားရှင်း 3.1)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="437"/>
         <source> (version 2)</source>
         <translation> (ဗားရှင်း 2)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="438"/>
         <source> (version 1.5)</source>
         <translation> (ဗားရှင်း 1.5)</translation>
     </message>
@@ -6434,13 +6561,13 @@ For more detailed information, you can
 <context>
     <name>ServicesCatalogController</name>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="176"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="258"/>
         <source>%1/mo</source>
         <comment>IAP: price per month in plan subtitle</comment>
         <translation>%1/လ</translation>
     </message>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="196"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="278"/>
         <source>from %1 per month</source>
         <comment>IAP: card footer minimum monthly price from StoreKit</comment>
         <translation>လစဉ် %1 မှ စတင်</translation>
@@ -6480,61 +6607,72 @@ For more detailed information, you can
 <context>
     <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="218"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="268"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="241"/>
+        <source>Your subscription has been upgraded</source>
+        <translation>သင့်အသင်းဝင်မှုကို အဆင့်မြှင့်ပြီးပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="242"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="282"/>
         <source>This subscription has already been added</source>
         <translation>ဤအသင်းဝင်မှုကို ထည့်သွင်းထားပြီးဖြစ်ပါသည်</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="225"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="254"/>
         <source>%1 has been added to the app</source>
         <translation>%1 ကို အပလီကေးရှင်းသို့ ထည့်သွင်းပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="275"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="289"/>
         <source>Subscription restored successfully</source>
         <translation>အသင်းဝင်မှုကို ပြန်လည်ရရှိပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="303"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="356"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="479"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <source>Purchase confirmed. Subscription has been added to the app</source>
+        <translation>ဝယ်ယူမှုကို အတည်ပြုပြီးပါပြီ။ အသင်းဝင်မှုကို အပလီကေးရှင်းသို့ ထည့်သွင်းပြီးပါပြီ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
         <source>%1 installed successfully.</source>
         <translation>%1 ခုကို အောင်မြင်စွာ ထည့်သွင်းပြီးပါပြီ.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="318"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="364"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="391"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="422"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="514"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
         <source>Enter the digits from the image to continue</source>
         <translation>ဆက်လက်လုပ်ဆောင်ရန် ပုံတွင်ပါသော ဂဏန်းများကို ထည့်သွင်းပါ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>ဤအီးမေးလ်လိပ်စာကို အစမ်းသုံးမှု အသုံးပြုရန်အတွက် ယခင်တွင် အသုံးပြုထားပြီးဖြစ်ပါသည်။ ဆားဗစ်ကို သဘောကျပါသလား။ Premium သို့ အဆင့်မြှင့်ပါ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="532"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
         <source>API config reloaded</source>
         <translation>API config ကို ပြန်လည်စတင်လိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>ချိတ်ဆက်မှုနိုင်ငံကို %1 သို့ အောင်မြင်စွာ ပြောင်းလဲလိုက်ပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
         <source>API config removed</source>
         <translation>API စီစဉ်သတ်မှတ်မှုကို ဖယ်ရှားပြီးပါပြီ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="660"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>ဆာဗာ &apos;%1&apos; ကို ဖယ်ရှားခဲ့သည်။</translation>
     </message>

@@ -433,8 +433,8 @@ Se han encontrado contenedores ya instalados en el servidor. Todos ellos se han 
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of AmneziaVPN is available.</source>
-        <translation>Hay una nueva versión de AmneziaVPN disponible.</translation>
+        <source>A new version of %1 is available.</source>
+        <translation>Hay una nueva versión de %1 disponible.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
@@ -507,7 +507,7 @@ Se han encontrado contenedores ya instalados en el servidor. Todos ellos se han 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="60"/>
         <source>Gateway endpoint</source>
-        <translation>Punto de acceso del gateway</translation>
+        <translation>Gateway endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
@@ -522,7 +522,7 @@ Se han encontrado contenedores ya instalados en el servidor. Todos ellos se han 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
-        <translation>Entorno de gateway de desarrollo</translation>
+        <translation>Dev gateway environment</translation>
     </message>
 </context>
 <context>
@@ -535,7 +535,7 @@ Se han encontrado contenedores ya instalados en el servidor. Todos ellos se han 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="149"/>
         <source>Dev gateway enabled</source>
-        <translation>Gateway de desarrollo habilitado</translation>
+        <translation>Dev gateway enabled</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="191"/>
@@ -1383,7 +1383,7 @@ Se han encontrado contenedores ya instalados en el servidor. Todos ellos se han 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="116"/>
         <source>Valid range: 1–65535.</source>
-        <translation>Intervalo válido: 1–65535.</translation>
+        <translation>Valid range: 1–65535.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="161"/>
@@ -1603,7 +1603,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="126"/>
         <source>Transmission time interval (ms). Valid range: 10–100.</source>
-        <translation>Intervalo de transmisión (ms). Intervalo válido: 10–100.</translation>
+        <translation>Transmission time interval (ms). Valid range: 10–100.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="145"/>
@@ -1613,7 +1613,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="146"/>
         <source>Uplink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>Capacidad de subida (MB/s). Máximo: 2147483647.</translation>
+        <translation>Uplink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="165"/>
@@ -1623,7 +1623,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="166"/>
         <source>Downlink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>Capacidad de bajada (MB/s). Máximo: 2147483647.</translation>
+        <translation>Downlink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="185"/>
@@ -1633,7 +1633,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="186"/>
         <source>Read buffer size (MB). Range: 1–2147483647.</source>
-        <translation>Tamaño del búfer de lectura (MB). Intervalo: 1–2147483647.</translation>
+        <translation>Read buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="205"/>
@@ -1643,7 +1643,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="206"/>
         <source>Write buffer size (MB). Range: 1–2147483647.</source>
-        <translation>Tamaño del búfer de escritura (MB). Intervalo: 1–2147483647.</translation>
+        <translation>Write buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="224"/>
@@ -1762,7 +1762,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="616"/>
         <source>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</source>
-        <translation>Tamaño de bloque de subida en bytes. Máximo: 2147483647. 0 = desactivado.</translation>
+        <translation>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="635"/>
@@ -1772,7 +1772,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="636"/>
         <source>Max buffered POSTs. Range: 0–2147483647.</source>
-        <translation>Máximo de POST en búfer. Intervalo: 0–2147483647.</translation>
+        <translation>Max buffered POSTs. Range: 0–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="655"/>
@@ -1999,7 +1999,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="201"/>
         <source>HTTP keep-alive period. Integer, may be negative.</source>
-        <translation>Periodo de keep-alive de HTTP. Número entero, puede ser negativo.</translation>
+        <translation>HTTP keep-alive period. Integer, may be negative.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="233"/>
@@ -2208,7 +2208,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>Secreto</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="802"/>
@@ -2254,7 +2254,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>Secreto base</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="936"/>
@@ -2264,7 +2264,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>¿Generar un secreto nuevo?</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="955"/>
@@ -2364,7 +2364,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>Dominio de FakeTLS</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1237"/>
@@ -2391,7 +2391,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>Secretos adicionales</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1315"/>
@@ -2401,12 +2401,12 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>Añadir un secreto adicional</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1531"/>
         <source>Worker mode</source>
-        <translation>Modo de workers</translation>
+        <translation>Worker mode</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1548"/>
@@ -2426,12 +2426,12 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1581"/>
         <source>Workers count</source>
-        <translation>Número de workers</translation>
+        <translation>Workers count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1640"/>
         <source>Server is behind NAT / Docker bridge</source>
-        <translation>El servidor está detrás de NAT / puente de Docker</translation>
+        <translation>Server is behind NAT / Docker bridge</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1641"/>
@@ -2505,7 +2505,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1842"/>
         <source>Stats endpoint</source>
-        <translation>Endpoint de estadísticas</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
@@ -2822,7 +2822,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>Secreto</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="802"/>
@@ -2868,7 +2868,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>Secreto base</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="936"/>
@@ -2878,7 +2878,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>¿Generar un secreto nuevo?</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="955"/>
@@ -2978,7 +2978,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>Dominio de FakeTLS</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1237"/>
@@ -3005,7 +3005,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>Secretos adicionales</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1315"/>
@@ -3015,7 +3015,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>Añadir un secreto adicional</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
@@ -3087,7 +3087,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1699"/>
         <source>Stats endpoint</source>
-        <translation>Endpoint de estadísticas</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
@@ -4181,7 +4181,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
         <source>Soft KillSwitch</source>
-        <translation>KillSwitch suave</translation>
+        <translation>Soft KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
@@ -4191,7 +4191,7 @@ Cree una a partir de los ajustes actuales.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
         <source>Strict KillSwitch</source>
-        <translation>KillSwitch estricto</translation>
+        <translation>Strict KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
@@ -4780,30 +4780,100 @@ Cree una a partir de los ajustes actuales.</translation>
 </context>
 <context>
     <name>PageSetupWizardApiPremiumInfo</name>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="102"/>
+        <source>Try free for %n day(s)</source>
+        <translation>
+            <numerusform>Pruebe gratis %n día</numerusform>
+            <numerusform>Pruebe gratis %n días</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="140"/>
         <source>Recommended</source>
         <translation>Recomendado</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="167"/>
+        <source>Change plan</source>
+        <translation>Cambiar de plan</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="180"/>
         <source>Premium features</source>
         <translation>Funciones Premium</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="209"/>
         <source>Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.</source>
         <translation>Se cargará a su Apple ID al confirmar. Se renueva automáticamente salvo que desactive la renovación automática al menos 24 horas antes del final del periodo. Gestiónelo en los ajustes de Apple ID.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
         <source>Continue</source>
         <translation>Continuar</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="271"/>
+        <source>Start %n-day free trial</source>
+        <translation>
+            <numerusform>Empezar la prueba gratuita de %n día</numerusform>
+            <numerusform>Empezar la prueba gratuita de %n días</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="273"/>
         <source>Subscribe — %1 for %2</source>
         <translation>Suscribirse — %1 por %2</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="296"/>
+        <source>Upgrade plan?</source>
+        <translation>¿Mejorar el plan?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="297"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation</source>
+        <translation>El plan actual se sustituirá por el plan %1 / %2. El cambio se aplicará inmediatamente tras la confirmación</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="300"/>
+        <source>Downgrade plan?</source>
+        <translation>¿Reducir el plan?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="301"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules</source>
+        <translation>El plan actual se sustituirá por el plan %1 / %2. La tienda aplicará el cambio según sus normas de facturación</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="304"/>
+        <source>Confirm subscription change?</source>
+        <translation>¿Confirmar el cambio de suscripción?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="305"/>
+        <source>An active subscription already exists. The current plan will be replaced with the %1 / %2 plan</source>
+        <translation>Ya existe una suscripción activa. El plan actual se sustituirá por el plan %1 / %2</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
+        <source>Cancel</source>
+        <translation>Cancelar</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="335"/>
+        <source>%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.</source>
+        <translation>
+            <numerusform>%n día gratis, luego %1/%2. Se renueva automáticamente hasta que se cancele. Puede cancelar en cualquier momento en los ajustes.</numerusform>
+            <numerusform>%n días gratis, luego %1/%2. Se renueva automáticamente hasta que se cancele. Puede cancelar en cualquier momento en los ajustes.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="338"/>
+        <source>%1/%2, auto-renewal. Cancel anytime in the Settings.</source>
+        <translation>%1/%2, renovación automática. Puede cancelarla en cualquier momento en los ajustes.</translation>
     </message>
 </context>
 <context>
@@ -5791,16 +5861,11 @@ Cree una a partir de los ajustes actuales.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="92"/>
-        <source>A migration error has occurred. Please contact our technical support</source>
-        <translation>Se ha producido un error de migración. Por favor, contacte con nuestro soporte técnico</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Please update the application to use this feature</source>
         <translation>Actualiza la aplicación para utilizar esta función</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -5809,47 +5874,47 @@ Cree una a partir de los ajustes actuales.</translation>
  Si no ha recibido ningún correo, póngase en contacto con nuestro soporte.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Unable to process purchase</source>
         <translation>No se pudo procesar la compra</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>No active subscription found</source>
         <translation>No se ha encontrado ninguna suscripción activa</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>No se han encontrado suscripciones compradas. Adquiera primero una suscripción</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>Esta dirección de correo electrónico ya se ha utilizado para activar una prueba</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>CAPTCHA verification is required</source>
         <translation>Se requiere la verificación CAPTCHA</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>El CAPTCHA es incorrecto. Inténtelo de nuevo</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA actualizado. Inténtelo de nuevo</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="102"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>Too many requests. Please try again later</source>
         <translation>Demasiadas solicitudes. Inténtelo de nuevo más tarde</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="143"/>
         <source>ErrorCode: %1. </source>
         <translation>Código de error: %1. </translation>
     </message>
@@ -5939,37 +6004,102 @@ Cree una a partir de los ajustes actuales.</translation>
         <translation>Se ha superado el límite de configuraciones permitidas por suscripción</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="105"/>
+        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
+        <translation>Su pago está pendiente de confirmación en Google Play. Cuando se complete, la suscripción se añadirá automáticamente al iniciar la aplicación la próxima vez.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
+        <translation>Su pago está pendiente de confirmación. Cuando se apruebe, la suscripción se añadirá automáticamente.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
+        <translation>Su pago está pendiente de confirmación. Complete el pago y luego restaure su suscripción.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
+        <translation>No hay compras que restaurar. Si tiene una suscripción activa, asegúrese de haber iniciado sesión con la misma cuenta de Google usada en la compra.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
+        <translation>No hay compras que restaurar. Si tiene una suscripción activa, asegúrese de haber iniciado sesión con el mismo Apple ID usado en la compra.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
+        <translation>No hay compras que restaurar. Si tiene una suscripción activa, asegúrese de haber iniciado sesión con la misma cuenta usada en la compra.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="122"/>
         <source>QFile error: The file could not be opened</source>
         <translation>Error de QFile: no se pudo abrir el archivo</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="123"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>Error de QFile: ocurrió un error al leer el archivo</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="107"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>Error de QFile: no se pudo acceder al archivo</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>Error de QFile: ocurrió un error no especificado</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="109"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>Error de QFile: ocurrió un error fatal</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="110"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: The operation was aborted</source>
         <translation>Error de QFile: la operación fue abortada</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="114"/>
+        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <source>Transaction was canceled by the user</source>
+        <translation>El usuario canceló la transacción</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <source>Billing error</source>
+        <translation>Error de facturación</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <source>Internal Google Play error, please try again later</source>
+        <translation>Error interno de Google Play, inténtelo de nuevo más tarde</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <source>Billing is unavailable, please try again later</source>
+        <translation>La facturación no está disponible, inténtelo de nuevo más tarde</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <source>You already own this subscription</source>
+        <translation>Ya tiene esta suscripción</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <source>The requested subscription is not available for purchase</source>
+        <translation>La suscripción solicitada no está disponible para la compra</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <source>A network error occurred during the operation, please check the Internet connection</source>
+        <translation>Se produjo un error de red durante la operación, compruebe la conexión a internet</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="140"/>
         <source>Internal error</source>
         <translation>Error interno</translation>
     </message>
@@ -6356,17 +6486,17 @@ Para obtener información más detallada, puede consultarla
         <translation>No se puede encontrar el separador &apos;:&apos; entre el nombre del host y el puerto</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="436"/>
         <source> (version 3.1)</source>
         <translation> (versión 3.1)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="437"/>
         <source> (version 2)</source>
         <translation> (versión 2)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="438"/>
         <source> (version 1.5)</source>
         <translation> (versión 1.5)</translation>
     </message>
@@ -6434,13 +6564,13 @@ Para obtener información más detallada, puede consultarla
 <context>
     <name>ServicesCatalogController</name>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="176"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="258"/>
         <source>%1/mo</source>
         <comment>IAP: price per month in plan subtitle</comment>
         <translation>%1/mes</translation>
     </message>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="196"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="278"/>
         <source>from %1 per month</source>
         <comment>IAP: card footer minimum monthly price from StoreKit</comment>
         <translation>desde %1 al mes</translation>
@@ -6480,61 +6610,72 @@ Para obtener información más detallada, puede consultarla
 <context>
     <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="218"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="268"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="241"/>
+        <source>Your subscription has been upgraded</source>
+        <translation>Su suscripción se ha mejorado</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="242"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="282"/>
         <source>This subscription has already been added</source>
         <translation>Esta suscripción ya ha sido añadida</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="225"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="254"/>
         <source>%1 has been added to the app</source>
         <translation>%1 se ha añadido a la aplicación</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="275"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="289"/>
         <source>Subscription restored successfully</source>
         <translation>Suscripción restaurada correctamente</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="303"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="356"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="479"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <source>Purchase confirmed. Subscription has been added to the app</source>
+        <translation>Compra confirmada. La suscripción se ha añadido a la aplicación</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
         <source>%1 installed successfully.</source>
         <translation>%1 instalado correctamente.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="318"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="364"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="391"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="422"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="514"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
         <source>Enter the digits from the image to continue</source>
         <translation>Introduzca los dígitos de la imagen para continuar</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>Esta dirección de correo electrónico ya se ha utilizado para activar una prueba. ¿Le gusta el servicio? Cambie a Premium</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="532"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
         <source>API config reloaded</source>
         <translation>Configuración de API recargada</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Se ha cambiado correctamente el país de conexión a %1</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
         <source>API config removed</source>
         <translation>Configuración de API eliminada</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="660"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>El servidor &apos;%1&apos; ha sido borrado</translation>
     </message>
