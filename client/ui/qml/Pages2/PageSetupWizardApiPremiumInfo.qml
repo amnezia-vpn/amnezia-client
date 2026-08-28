@@ -17,13 +17,39 @@ PageType {
     property int selectedPlanIndex: 0
     property string premiumHeaderName: ""
     property string premiumHeaderDescription: ""
+    property bool plansExpanded: false
 
     readonly property var currentPlan: ApiSubscriptionPlansModel.planAt(selectedPlanIndex)
+    readonly property bool anyPlanHasFreeTrial: ApiSubscriptionPlansModel.hasAnyFreeTrial()
+    readonly property bool storePurchaseAvailable: Qt.platform.os === "ios" || IsMacOsNeBuild
+                                                   || (Qt.platform.os === "android" && IsPlayBuild)
+
+    function proceedWithPurchase(plan) {
+        var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
+        if (root.storePurchaseAvailable) {
+            PageController.showBusyIndicator(true)
+            SubscriptionUiController.importPremiumFromStore(storeId)
+            PageController.showBusyIndicator(false)
+            return
+        }
+        if (plan.checkoutUrl) {
+            Qt.openUrlExternally(plan.checkoutUrl)
+            PageController.closePage()
+            PageController.closePage()
+            return
+        }
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    }
 
     function syncFromModel() {
         root.selectedPlanIndex = ApiSubscriptionPlansModel.recommendedRowIndex()
 
-        root.premiumHeaderName = String(ApiServicesModel.getSelectedServiceData("name"))
+        var rawHeaderName = escapeHtml(String(ApiServicesModel.getSelectedServiceData("name")))
+        root.premiumHeaderName = rawHeaderName.replace("Premium",
+                "<font color=\"" + AmneziaStyle.color.deepMagenta + "\">Premium</font>")
         root.premiumHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
     }
 
@@ -48,7 +74,7 @@ PageType {
         id: flick
 
         anchors.top: backButton.bottom
-        anchors.bottom: continueButton.top
+        anchors.bottom: bottomBar.top
         anchors.left: parent.left
         anchors.right: parent.right
 
@@ -60,14 +86,35 @@ PageType {
             width: flick.width
             spacing: 0
 
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 8
+                Layout.bottomMargin: 12
+                visible: !!root.currentPlan && !!root.currentPlan.hasFreeTrial
+                radius: 10
+                color: AmneziaStyle.color.vibrantGreen
+                implicitHeight: trialBadgeLabel.implicitHeight + 8
+                implicitWidth: trialBadgeLabel.implicitWidth + 16
+
+                LabelTextType {
+                    id: trialBadgeLabel
+                    anchors.centerIn: parent
+                    text: root.currentPlan ? qsTr("Try free for %n day(s)", "", Number(root.currentPlan.trialDays)) : ""
+                    color: AmneziaStyle.color.midnightBlack
+                    font.pixelSize: 11
+                    font.weight: Font.Medium
+                }
+            }
+
             BaseHeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
                 headerText: root.premiumHeaderName
+                headerTextFormat: Text.StyledText
+                headerHorizontalAlignment: Text.AlignHCenter
                 descriptionText: root.premiumHeaderDescription
             }
 
@@ -83,6 +130,8 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.bottomMargin: index === ApiSubscriptionPlansModel.rowCount() - 1 ? 24 : 12
 
+                    visible: !root.anyPlanHasFreeTrial || root.plansExpanded || index === root.selectedPlanIndex
+
                     selected: root.selectedPlanIndex === index
                     billingPeriod: String(model.billingPeriod)
                     priceLabel: String(model.priceLabel)
@@ -90,7 +139,35 @@ PageType {
                     showRecommendedBadge: !!model.recommended
                     recommendedText: qsTr("Recommended")
 
-                    onSelectRequested: root.selectedPlanIndex = index
+                    onSelectRequested: {
+                        root.selectedPlanIndex = index
+                        root.plansExpanded = false
+                    }
+                }
+            }
+
+            BasicButtonType {
+                id: changePlanButton
+
+                implicitHeight: 25
+
+                Layout.alignment: Qt.AlignRight
+                Layout.topMargin: -(root.selectedPlanIndex === ApiSubscriptionPlansModel.rowCount() - 1 ? 24 : 12) + 6
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 24
+                visible: root.anyPlanHasFreeTrial && !root.plansExpanded && ApiSubscriptionPlansModel.rowCount() > 1
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
+                borderFocusedWidth: 0
+
+                text: qsTr("Change plan")
+
+                clickedFunc: function() {
+                    root.plansExpanded = true
                 }
             }
 
@@ -119,7 +196,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
-                visible: Qt.platform.os === "ios" || IsMacOsNeBuild
+                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && !(root.currentPlan && root.currentPlan.hasFreeTrial)
                 spacing: 16
 
                 ParagraphTextType {
@@ -152,46 +229,115 @@ PageType {
         }
     }
 
-    BasicButtonType {
-        id: continueButton
+    Rectangle {
+        id: bottomBar
 
         z: 2
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        text: {
-            var plan = root.currentPlan
-            if (!plan) {
-                return qsTr("Continue")
-            }
-            return qsTr("Subscribe — %1 for %2").arg(String(plan.billingPeriod)).arg(String(plan.priceLabel))
+        radius: 16
+        color: AmneziaStyle.color.onyxBlack
+        implicitHeight: bottomBarColumn.implicitHeight + 24
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: parent.radius
+            color: parent.color
         }
 
-        clickedFunc: function() {
-            var plan = root.currentPlan
-            if (!plan) {
-                return
+        ColumnLayout {
+            id: bottomBarColumn
+
+            anchors.fill: parent
+            anchors.margins: 16
+            anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+            spacing: 8
+
+            BasicButtonType {
+                id: continueButton
+
+                Layout.fillWidth: true
+
+                text: {
+                    var plan = root.currentPlan
+                    if (!plan) {
+                        return qsTr("Continue")
+                    }
+                    if (plan.hasFreeTrial) {
+                        return qsTr("Start %n-day free trial", "", Number(plan.trialDays))
+                    }
+                    return qsTr("Subscribe — %1 for %2").arg(String(plan.billingPeriod)).arg(String(plan.priceLabel))
+                }
+
+                clickedFunc: function() {
+                    var plan = root.currentPlan
+                    if (!plan) {
+                        return
+                    }
+                    if (plan.isTrial) {
+                        PageController.goToPage(PageEnum.PageSetupWizardApiTrialEmail)
+                        return
+                    }
+
+                    if (root.storePurchaseAvailable) {
+                        var active = SubscriptionUiController.currentActivePlanInfo()
+                        if (active && active.hasActivePlan) {
+                            var planPrice = Number(plan.priceAmount)
+                            var activePrice = Number(active.priceAmount)
+                            var pricesKnown = planPrice > 0 && activePrice > 0
+
+                            var headerText
+                            var descriptionText
+                            if (pricesKnown && planPrice > activePrice) {
+                                headerText = qsTr("Upgrade plan?")
+                                descriptionText = qsTr("The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation")
+                                        .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            } else if (pricesKnown && planPrice < activePrice) {
+                                headerText = qsTr("Downgrade plan?")
+                                descriptionText = qsTr("The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules")
+                                        .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            } else {
+                                headerText = qsTr("Confirm subscription change?")
+                                descriptionText = qsTr("An active subscription already exists. The current plan will be replaced with the %1 / %2 plan")
+                                        .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                            }
+
+                            showQuestionDrawer(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
+                                function() { root.proceedWithPurchase(plan) },
+                                function() {})
+                            return
+                        }
+                    }
+
+                    root.proceedWithPurchase(plan)
+                }
             }
-            if (plan.isTrial) {
-                PageController.goToPage(PageEnum.PageSetupWizardApiTrialEmail)
-                return
-            }
-            if (Qt.platform.os === "ios" || IsMacOsNeBuild) {
-                PageController.showBusyIndicator(true)
-                var storeId = plan.storeProductId !== undefined ? String(plan.storeProductId) : ""
-                SubscriptionUiController.importPremiumFromAppStore(storeId)
-                PageController.showBusyIndicator(false)
-                return
-            }
-            if (plan.checkoutUrl) {
-                Qt.openUrlExternally(plan.checkoutUrl)
-                PageController.closePage()
-                PageController.closePage()
-                return
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignHCenter
+                textFormat: Text.PlainText
+                color: AmneziaStyle.color.mutedGray
+                font.pixelSize: 12
+
+                visible: !!root.currentPlan
+
+                text: {
+                    var plan = root.currentPlan
+                    if (!plan) {
+                        return ""
+                    }
+                    if (plan.hasFreeTrial) {
+                        return qsTr("%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.", "", Number(plan.trialDays))
+                                .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                    }
+                    return qsTr("%1/%2, auto-renewal. Cancel anytime in the Settings.")
+                            .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
+                }
             }
         }
     }

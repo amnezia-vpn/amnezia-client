@@ -8,6 +8,12 @@ public class StoreKit2Helper: NSObject {
     public static let shared = StoreKit2Helper()
     private static let errorDomain = "StoreKit2Helper"
 
+    // Error codes surfaced to the native bridge; keep in sync with ios_controller.mm
+    public static let errorCodeCancelled = 1
+    public static let errorCodePending = 2
+
+    private var updatesTask: Task<Void, Never>?
+
     private struct EntitlementInfo {
         let transactionId: UInt64
         let originalTransactionId: UInt64
@@ -23,36 +29,47 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
+    private func collectCurrentEntitlements() async -> [NSDictionary] {
+        var entitlements: [EntitlementInfo] = []
+        for await result in Transaction.currentEntitlements {
+            switch result {
+            case .verified(let transaction):
+                entitlements.append(EntitlementInfo(transactionId: transaction.id,
+                                                    originalTransactionId: transaction.originalID,
+                                                    productId: transaction.productID,
+                                                    purchaseDate: transaction.purchaseDate))
+            case .unverified(_, let error):
+                print("[IAP][StoreKit2] Unverified transaction skipped: \(error.localizedDescription)")
+            }
+        }
+        return entitlements.sorted { lhs, rhs in
+            if lhs.purchaseDate != rhs.purchaseDate {
+                return lhs.purchaseDate > rhs.purchaseDate
+            }
+            return lhs.transactionId > rhs.transactionId
+        }.map { $0.dictionary }
+    }
+
     public func fetchCurrentEntitlements(completion: @escaping (Bool, [NSDictionary]?, NSError?) -> Void) {
         Task { @MainActor in
             do {
                 try await AppStore.sync()
-
-                var entitlements: [EntitlementInfo] = []
-                for await result in Transaction.currentEntitlements {
-                    switch result {
-                    case .verified(let transaction):
-                        entitlements.append(EntitlementInfo(transactionId: transaction.id,
-                                                            originalTransactionId: transaction.originalID,
-                                                            productId: transaction.productID,
-                                                            purchaseDate: transaction.purchaseDate))
-                    case .unverified(_, let error):
-                        print("[IAP][StoreKit2] Unverified transaction skipped: \(error.localizedDescription)")
-                    }
-                }
-                let sortedEntitlements = entitlements.sorted { lhs, rhs in
-                    if lhs.purchaseDate != rhs.purchaseDate {
-                        return lhs.purchaseDate > rhs.purchaseDate
-                    }
-                    return lhs.transactionId > rhs.transactionId
-                }.map { $0.dictionary }
-                completion(true, sortedEntitlements, nil)
+                completion(true, await collectCurrentEntitlements(), nil)
             } catch {
                 completion(false, nil, error as NSError)
             }
         }
     }
 
+    public func fetchLocalEntitlements(completion: @escaping (Bool, [NSDictionary]?, NSError?) -> Void) {
+        Task { @MainActor in
+            completion(true, await collectCurrentEntitlements(), nil)
+        }
+    }
+
+    // The transaction is intentionally NOT finished here: it must stay in the unfinished
+    // queue until the gateway validates the purchase and the config is delivered.
+    // Call finishTransaction(transactionId:) after successful validation.
     public func purchaseProduct(productIdentifier: String, completion: @escaping (Bool, String?, String?, String?, NSError?) -> Void) {
         Task {
             do {
@@ -67,7 +84,6 @@ public class StoreKit2Helper: NSObject {
                 case .success(let verification):
                     switch verification {
                     case .verified(let transaction):
-                        await transaction.finish()
                         completePurchase(completion: completion, success: true, transactionId: String(transaction.id),
                                          productId: transaction.productID, originalTransactionId: String(transaction.originalID), error: nil)
                     case .unverified(_, let error):
@@ -76,17 +92,70 @@ public class StoreKit2Helper: NSObject {
                     }
                 case .userCancelled:
                     completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
-                                     error: makeError(code: 1, description: "Purchase cancelled"))
+                                     error: makeError(code: Self.errorCodeCancelled, description: "Purchase cancelled"))
                 case .pending:
                     completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
-                                     error: makeError(code: 2, description: "Purchase pending"))
+                                     error: makeError(code: Self.errorCodePending, description: "Purchase pending"))
                 @unknown default:
                     completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
                                      error: makeError(code: 3, description: "Unknown purchase result"))
                 }
+            } catch StoreKitError.userCancelled {
+                completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
+                                 error: makeError(code: Self.errorCodeCancelled, description: "Purchase cancelled"))
             } catch {
                 completePurchase(completion: completion, success: false, transactionId: nil, productId: nil, originalTransactionId: nil,
                                  error: error as NSError)
+            }
+        }
+    }
+
+    public func finishTransaction(transactionId: String, completion: @escaping (Bool) -> Void) {
+        Task {
+            for await result in Transaction.unfinished {
+                guard case .verified(let transaction) = result, String(transaction.id) == transactionId else {
+                    continue
+                }
+                await transaction.finish()
+                print("[IAP][StoreKit2] Finished transaction \(transactionId)")
+                DispatchQueue.main.async { completion(true) }
+                return
+            }
+            print("[IAP][StoreKit2] No unfinished transaction with id \(transactionId) to finish")
+            DispatchQueue.main.async { completion(false) }
+        }
+    }
+
+    @MainActor private var deliveredTransactionUpdateIds = Set<UInt64>()
+
+    @MainActor
+    private func deliverTransactionUpdate(_ result: VerificationResult<Transaction>, handler: @escaping (NSDictionary) -> Void) {
+        switch result {
+        case .verified(let transaction):
+            guard deliveredTransactionUpdateIds.insert(transaction.id).inserted else { return }
+            let info = EntitlementInfo(transactionId: transaction.id,
+                                       originalTransactionId: transaction.originalID,
+                                       productId: transaction.productID,
+                                       purchaseDate: transaction.purchaseDate)
+            print("[IAP][StoreKit2] Transaction update: id=\(transaction.id) product=\(transaction.productID)")
+            handler(info.dictionary)
+        case .unverified(_, let error):
+            print("[IAP][StoreKit2] Unverified transaction update skipped: \(error.localizedDescription)")
+        }
+    }
+
+    public func startTransactionUpdatesListener(handler: @escaping (NSDictionary) -> Void) {
+        guard updatesTask == nil else { return }
+
+        updatesTask = Task { @MainActor in
+            for await result in Transaction.updates {
+                self.deliverTransactionUpdate(result, handler: handler)
+            }
+        }
+
+        Task { @MainActor in
+            for await result in Transaction.unfinished {
+                self.deliverTransactionUpdate(result, handler: handler)
             }
         }
     }
@@ -115,7 +184,10 @@ public class StoreKit2Helper: NSObject {
         Task {
             do {
                 let products = try await Product.products(for: identifiers)
-                let productDicts = products.map { product in productDictionary(for: product) }
+                var productDicts: [NSDictionary] = []
+                for product in products {
+                    productDicts.append(await productDictionary(for: product))
+                }
                 let fetchedIds = Set(products.map { $0.id })
                 let invalidIdentifiers = identifiers.filter { !fetchedIds.contains($0) }
                 DispatchQueue.main.async { completion(productDicts, Array(invalidIdentifiers), nil) }
@@ -140,7 +212,35 @@ public class StoreKit2Helper: NSObject {
         }
     }
 
-    private func productDictionary(for product: Product) -> NSDictionary {
+    private func introOfferPaymentModeString(_ mode: Product.SubscriptionOffer.PaymentMode) -> String {
+        switch mode {
+        case .freeTrial:
+            return "freeTrial"
+        case .payAsYouGo:
+            return "payAsYouGo"
+        case .payUpFront:
+            return "payUpFront"
+        default:
+            return "unknown"
+        }
+    }
+
+    private func introOfferTrialDays(_ period: Product.SubscriptionPeriod) -> Int {
+        switch period.unit {
+        case .day:
+            return period.value
+        case .week:
+            return period.value * 7
+        case .month:
+            return period.value * 30
+        case .year:
+            return period.value * 365
+        @unknown default:
+            return period.value
+        }
+    }
+
+    private func productDictionary(for product: Product) async -> NSDictionary {
         let currencyCode = storefrontCurrencyCode(for: product)
         var productData: [String: Any] = [
             "productId": product.id,
@@ -156,6 +256,16 @@ public class StoreKit2Helper: NSObject {
             productData["subscriptionBillingMonths"] = billingMonths
             if let perMonthPrice = displayPricePerMonth(for: product, billingMonths: billingMonths, currencyCode: currencyCode) {
                 productData["displayPricePerMonth"] = perMonthPrice
+            }
+
+            if let introOffer = subscription.introductoryOffer, await subscription.isEligibleForIntroOffer {
+                if introOffer.paymentMode == .freeTrial {
+                    productData["hasFreeTrial"] = true
+                    productData["trialDays"] = introOfferTrialDays(introOffer.period)
+                } else {
+                    productData["introOfferDisplayPrice"] = introOffer.displayPrice
+                    productData["introOfferPaymentMode"] = introOfferPaymentModeString(introOffer.paymentMode)
+                }
             }
         }
         return productData as NSDictionary

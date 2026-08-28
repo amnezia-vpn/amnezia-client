@@ -30,6 +30,10 @@
 #ifdef Q_OS_IOS
     #include "platforms/ios/ioscontextmenu.h"
 #endif
+
+#ifdef Q_OS_ANDROID
+#include "platforms/android/android_controller.h"
+#endif
          
 
 bool AmneziaApplication::m_forceQuit = false;
@@ -145,6 +149,12 @@ void AmneziaApplication::init()
 
 #ifdef Q_OS_IOS
     m_engine->rootContext()->setContextProperty("IosContextMenu", new IosContextMenu(this));
+#endif
+
+#ifdef Q_OS_ANDROID
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", AndroidController::instance()->isPlay());
+#else
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", false);
 #endif
 
     m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));

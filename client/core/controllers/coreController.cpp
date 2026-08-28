@@ -157,6 +157,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
+    m_storePurchaseController = new StorePurchaseController(m_serversRepository, m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
@@ -224,6 +225,7 @@ void CoreController::initControllers()
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
     m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController,
+                                                              m_storePurchaseController,
                                                               m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_apiAccountInfoModel,
                                                               m_apiCountryModel, m_apiDevicesModel, m_settingsController,
                                                               m_connectionController, this);
