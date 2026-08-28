@@ -19,14 +19,6 @@ namespace amnezia
 
 namespace
 {
-    // A toggle set to "off" behaves exactly like a missing one, so it is not an AWG 3 marker
-    bool isAwgToggleEnabled(const QString &value)
-    {
-        const QString trimmedValue = value.trimmed();
-        return !trimmedValue.isEmpty()
-                && trimmedValue.compare(QLatin1String(protocols::awg::awgBoolOff), Qt::CaseInsensitive) != 0;
-    }
-
     template <typename T>
     bool hasAwg3Markers(const T &config)
     {
@@ -40,7 +32,8 @@ namespace
             return true;
         }
 
-        return isAwgToggleEnabled(config.randomTrailers) || isAwgToggleEnabled(config.disableCookies);
+        return AwgProtocolConfig::isToggleEnabled(config.randomTrailers)
+                || AwgProtocolConfig::isToggleEnabled(config.disableCookies);
     }
 
     template <typename T>
@@ -429,6 +422,13 @@ QString AwgProtocolConfig::serverProtocolVersion() const
 QString AwgProtocolConfig::clientProtocolVersion() const
 {
     return clientConfig.has_value() ? awgVersionOf(clientConfig.value()) : QString();
+}
+
+bool AwgProtocolConfig::isToggleEnabled(const QString &value)
+{
+    const QString trimmedValue = value.trimmed();
+    return !trimmedValue.isEmpty()
+            && trimmedValue.compare(QLatin1String(protocols::awg::awgBoolOff), Qt::CaseInsensitive) != 0;
 }
 
 QString AwgProtocolConfig::protocolVersionString(const QString &version)

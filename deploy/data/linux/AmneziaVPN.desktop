@@ -8,3 +8,4 @@ Exec=AmneziaVPN
 Icon=/usr/share/pixmaps/AmneziaVPN.png
 Categories=Network;Qt;Security;
 Terminal=false
+StartupWMClass=AmneziaVPN
