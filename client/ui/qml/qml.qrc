@@ -118,6 +118,7 @@
         <file>Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>Pages2/PageProtocolWireGuardClientSettings.qml</file>
         <file>Pages2/PageSetupWizardApiFreeInfo.qml</file>
+        <file>Pages2/PageSetupWizardDnsttSettings.qml</file>
         <file>Pages2/PageSetupWizardApiPremiumInfo.qml</file>
         <file>Pages2/PageSetupWizardApiTrialEmail.qml</file>
         <file>Pages2/PageSetupWizardApiServicesList.qml</file>

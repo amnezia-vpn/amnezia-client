@@ -60,6 +60,7 @@ namespace PageLoader
         PageSetupWizardQrReader,
         PageSetupWizardApiServicesList,
         PageSetupWizardApiFreeInfo,
+        PageSetupWizardDnsttSettings,
 
         PageProtocolOpenVpnSettings,
         PageProtocolXraySettings,

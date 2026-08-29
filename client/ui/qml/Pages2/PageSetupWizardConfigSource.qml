@@ -271,12 +271,26 @@ PageType {
     property list<QtObject> variants: [
         amneziaVpn,
         selfHostVpn,
+        dnsttSetup,
         backupRestore,
         fileOpen,
         qrScan,
         restorePurchases,
         siteLink
     ]
+
+    QtObject {
+        id: dnsttSetup
+
+        property bool featuredAmneziaConnection: false
+        property string title: qsTr("DNSTT (DNS Tunnel)")
+        property string description: qsTr("Manual connection via DoH/DoT/UDP with split tunneling")
+        property string imageSource: "qrc:/images/controls/server.svg"
+        property bool isVisible: Qt.platform.os === "android"
+        property var handler: function() {
+            PageController.goToPage(PageEnum.PageSetupWizardDnsttSettings)
+        }
+    }
     
     QtObject {
         id: amneziaVpn

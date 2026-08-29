@@ -20,6 +20,9 @@ FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent)
       m_lvfc { nullptr }
 {
     QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url) {
+        if (!object) {
+            return;
+        }
         QQuickItem *newDefaultFocusItem = object->findChild<QQuickItem *>("defaultFocusItem");
         if (newDefaultFocusItem && m_defaultFocusItem != newDefaultFocusItem) {
             m_defaultFocusItem = newDefaultFocusItem;
