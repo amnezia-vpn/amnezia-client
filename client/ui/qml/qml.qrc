@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/ui/qml">
+        <file>Components/UpdateSupportDrawer.qml</file>
         <file>Components/AdLabel.qml</file>
         <file>Components/ConnectButton.qml</file>
         <file>Components/ConnectionTypeSelectionDrawer.qml</file>
@@ -7,7 +8,6 @@
         <file>Components/HomeContainersListView.qml</file>
         <file>Components/HomeSplitTunnelingDrawer.qml</file>
         <file>Components/InstalledAppsDrawer.qml</file>
-        <file>Components/ChangelogDrawer.qml</file>
         <file>Components/QuestionDrawer.qml</file>
         <file>Components/SelectLanguageDrawer.qml</file>
         <file>Components/ServersListView.qml</file>
@@ -26,6 +26,9 @@
         <file>Controls2/BusyIndicatorType.qml</file>
         <file>Controls2/CaptchaDialogType.qml</file>
         <file>Controls2/CardType.qml</file>
+        <file>Controls2/ChangelogSectionType.qml</file>
+        <file>Controls2/BackdropBlurType.qml</file>
+        <file>Controls2/TagBadgeType.qml</file>
         <file>Controls2/CardWithIconsType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>
         <file>Controls2/ContextMenuType.qml</file>
@@ -54,6 +57,13 @@
         <file>Controls2/TextAreaType.qml</file>
         <file>Controls2/TextAreaWithFooterType.qml</file>
         <file>Controls2/TextFieldWithHeaderType.qml</file>
+        <file>Controls2/TextTypes/AppCaptionTextType.qml</file>
+        <file>Controls2/TextTypes/AppDisplayTextType.qml</file>
+        <file>Controls2/TextTypes/AppH1TextType.qml</file>
+        <file>Controls2/TextTypes/AppH3EmphasizedTextType.qml</file>
+        <file>Controls2/TextTypes/AppH3TextType.qml</file>
+        <file>Controls2/TextTypes/AppSmallTextType.qml</file>
+        <file>Controls2/TextTypes/AppTextType.qml</file>
         <file>Controls2/TextTypes/ButtonTextType.qml</file>
         <file>Controls2/TextTypes/CaptionTextType.qml</file>
         <file>Controls2/TextTypes/Header1TextType.qml</file>
@@ -115,6 +125,7 @@
         <file>Pages2/PageSettingsSplitTunneling.qml</file>
         <file>Pages2/PageSettingsNewsNotifications.qml</file>
         <file>Pages2/PageSettingsNewsDetail.qml</file>
+        <file>Pages2/PageUpdate.qml</file>
         <file>Pages2/PageProtocolAwgClientSettings.qml</file>
         <file>Pages2/PageProtocolWireGuardClientSettings.qml</file>
         <file>Pages2/PageSetupWizardApiFreeInfo.qml</file>

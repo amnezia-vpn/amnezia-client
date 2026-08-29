@@ -96,6 +96,7 @@ public:
 
     PageController* pageController() const;
     void setQmlRoot();
+    void checkForAppUpdates();
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);

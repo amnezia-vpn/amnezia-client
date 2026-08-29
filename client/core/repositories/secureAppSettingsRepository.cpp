@@ -385,6 +385,16 @@ void SecureAppSettingsRepository::setNewsNotifications(bool enabled)
     setValue("Conf/newsNotifications", enabled);
 }
 
+bool SecureAppSettingsRepository::isAutoUpdateCheckEnabled() const
+{
+    return value("Conf/autoUpdateCheck", true).toBool();
+}
+
+void SecureAppSettingsRepository::setAutoUpdateCheckEnabled(bool enabled)
+{
+    setValue("Conf/autoUpdateCheck", enabled);
+}
+
 bool SecureAppSettingsRepository::isSaveLogs() const
 {
     return value("Conf/saveLogs", false).toBool();

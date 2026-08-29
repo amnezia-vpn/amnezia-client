@@ -14,6 +14,18 @@ import "../Components"
 PageType {
     id: root
 
+    Connections {
+        target: UpdateController
+
+        function onUpdateNotFound() {
+            PageController.showNotificationMessage(qsTr("You have the latest version of AmneziaVPN"))
+        }
+
+        function onUpdateCheckFailed() {
+            PageController.showNotificationMessage(qsTr("Failed to check for updates"))
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -138,18 +150,22 @@ PageType {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 8
                 Layout.bottomMargin: 16
-                implicitHeight: 32
+                implicitHeight: 48
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
+                defaultColor: AmneziaStyle.color.surfaceBase
+                hoveredColor: AmneziaStyle.color.surfaceHovered
+                pressedColor: AmneziaStyle.color.surfacePressed
+                disabledColor: AmneziaStyle.color.surfaceBase
+                textColor: AmneziaStyle.color.surfaceInverse
+                borderWidth: 1
+                borderColor: AmneziaStyle.color.borderSoft
 
-                text: qsTr("Check for updates")
+                enabled: !UpdateController.isCheckRunning
+
+                text: UpdateController.isCheckRunning ? qsTr("Checking...") : qsTr("Check for updates")
 
                 clickedFunc: function() {
-                    Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
+                    UpdateController.checkForUpdates()
                 }
             }
 

@@ -81,6 +81,17 @@ namespace apiDefs
 
         constexpr QLatin1String configs("configs");
 
+        constexpr QLatin1String updateAvailable("update_available");
+        constexpr QLatin1String updateVersion("version");
+        constexpr QLatin1String releaseDate("release_date");
+        constexpr QLatin1String updateTags("tags");
+        constexpr QLatin1String updateDescription("description");
+        constexpr QLatin1String newFeatures("new_features");
+        constexpr QLatin1String improvements("improvements");
+        constexpr QLatin1String bugFixes("bug_fixes");
+        constexpr QLatin1String downloadBaseUrl("download_base_url");
+        constexpr QLatin1String releasePageUrl("release_page_url");
+
         constexpr QLatin1String publicKeyInfo("public_key");
         constexpr QLatin1String publicKey("public_key");
         constexpr QLatin1String expiresAt("expires_at");

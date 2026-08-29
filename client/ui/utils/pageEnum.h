@@ -88,6 +88,8 @@ namespace PageLoader
         PageProtocolXrayXPaddingBytesSettings,
 
         PageSettingsLanguage,
+
+        PageUpdate,
     };
     Q_ENUM_NS(PageEnum)
 
