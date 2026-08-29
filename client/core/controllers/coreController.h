@@ -11,6 +11,7 @@
 
 #include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/controllers/api/apiNewsUiController.h"
+#include "ui/controllers/appearanceController.h"
 #include "ui/controllers/appSplitTunnelingUiController.h"
 #include "ui/controllers/allowedDnsUiController.h"
 #include "ui/controllers/connectionUiController.h"
@@ -175,6 +176,7 @@ private:
     AppSplitTunnelingUiController* m_appSplitTunnelingUiController;
     AllowedDnsUiController* m_allowedDnsUiController;
     LanguageUiController* m_languageUiController;
+    AppearanceController* m_appearanceController;
     UpdateUiController* m_updateUiController;
 
     SubscriptionUiController* m_subscriptionUiController;

@@ -3956,6 +3956,26 @@ Create one from the current settings.</source>
         <source>Cannot reset settings during active connection</source>
         <translation>Невозможно сбросить настройки во время активного соединения</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <source>Color theme</source>
+        <translation>Цветовая тема</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>System</source>
+        <translation>Системная</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>Dark</source>
+        <translation>Тёмная</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -6537,6 +6557,29 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="48"/>
         <source>Choose language</source>
         <translation>Выберите язык</translation>
+    </message>
+</context>
+<context>
+    <name>SelectThemeDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="47"/>
+        <source>Color theme</source>
+        <translation>Цветовая тема</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="62"/>
+        <source>System</source>
+        <translation>Системная</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="63"/>
+        <source>Light</source>
+        <translation>Светлая</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="64"/>
+        <source>Dark</source>
+        <translation>Тёмная</translation>
     </message>
 </context>
 <context>

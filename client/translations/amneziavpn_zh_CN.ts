@@ -3955,6 +3955,26 @@ Create one from the current settings.</source>
         <source>Cannot reset settings during active connection</source>
         <translation>存在活动连接时无法重置设置</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <source>Color theme</source>
+        <translation>颜色主题</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>System</source>
+        <translation>系统</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>Light</source>
+        <translation>浅色</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>Dark</source>
+        <translation>深色</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -6525,6 +6545,29 @@ For more detailed information, you can
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="48"/>
         <source>Choose language</source>
         <translation>选择语言</translation>
+    </message>
+</context>
+<context>
+    <name>SelectThemeDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="47"/>
+        <source>Color theme</source>
+        <translation>颜色主题</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="62"/>
+        <source>System</source>
+        <translation>系统</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="63"/>
+        <source>Light</source>
+        <translation>浅色</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="64"/>
+        <source>Dark</source>
+        <translation>深色</translation>
     </message>
 </context>
 <context>

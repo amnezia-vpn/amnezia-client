@@ -63,6 +63,7 @@ PageType {
                 LabelWithButtonType {
                     Layout.fillWidth: true
                     leftImageSource: read ? "" : "qrc:/images/controls/unread-dot.svg"
+                    leftImageColor: "" // keep the apricot unread dot's original color
                     isSmallLeftImage: !read
                     text: title
                     descriptionText: Qt.formatDateTime(timestamp, "dd.MM.yyyy HH:mm")

@@ -103,11 +103,11 @@ PageType {
                 Layout.topMargin: 8
                 Layout.bottomMargin: 16
                 visible: root.isUpdateItem
-                defaultColor: "transparent"
-                hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                disabledColor: "#878B91"
-                textColor: "#D7D8DB"
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.paleGray
                 borderWidth: 1
                 text: qsTr("Skip")
 

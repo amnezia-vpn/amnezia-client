@@ -3955,6 +3955,26 @@ Create one from the current settings.</source>
         <source>Cannot reset settings during active connection</source>
         <translation>نمی‌توان تنظیمات را در حین اتصال فعال بازنشانی کرد.</translation>
     </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <source>Color theme</source>
+        <translation>تم رنگی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>System</source>
+        <translation>سیستم</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>Light</source>
+        <translation>روشن</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <source>Dark</source>
+        <translation>تیره</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsBackup</name>
@@ -6525,6 +6545,29 @@ For more detailed information, you can
         <location filename="../ui/qml/Components/SelectLanguageDrawer.qml" line="48"/>
         <source>Choose language</source>
         <translation>انتخاب زبان</translation>
+    </message>
+</context>
+<context>
+    <name>SelectThemeDrawer</name>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="47"/>
+        <source>Color theme</source>
+        <translation>تم رنگی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="62"/>
+        <source>System</source>
+        <translation>سیستم</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="63"/>
+        <source>Light</source>
+        <translation>روشن</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/SelectThemeDrawer.qml" line="64"/>
+        <source>Dark</source>
+        <translation>تیره</translation>
     </message>
 </context>
 <context>

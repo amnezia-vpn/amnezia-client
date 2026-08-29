@@ -351,6 +351,16 @@ void SettingsController::setAppLanguage(const QLocale &locale)
     m_appSettingsRepository->setAppLanguage(locale);
 }
 
+int SettingsController::getThemeMode() const
+{
+    return m_appSettingsRepository->getAppThemeMode();
+}
+
+void SettingsController::setThemeMode(int mode)
+{
+    m_appSettingsRepository->setAppThemeMode(mode);
+}
+
 QString SettingsController::nextAvailableServerName() const
 {
     return m_serversRepository->nextAvailableServerName();

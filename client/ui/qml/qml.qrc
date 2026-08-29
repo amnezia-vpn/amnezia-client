@@ -10,6 +10,7 @@
         <file>Components/ChangelogDrawer.qml</file>
         <file>Components/QuestionDrawer.qml</file>
         <file>Components/SelectLanguageDrawer.qml</file>
+        <file>Components/SelectThemeDrawer.qml</file>
         <file>Components/ServersListView.qml</file>
         <file>Components/SettingsContainersListView.qml</file>
         <file>Components/BenefitRow.qml</file>
