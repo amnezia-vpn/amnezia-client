@@ -19,6 +19,7 @@ struct XrayConfigSnapshot
     QString displayName; // auto-generated: "XHTTP TLS Reality", "RAW Reality", etc.
     QDateTime createdAt;
     amnezia::XrayServerConfig serverConfig;
+    amnezia::XrayClientTemplate clientTemplate;
 
     QJsonObject toJson() const;
     static XrayConfigSnapshot fromJson(const QJsonObject &json);
@@ -44,8 +45,8 @@ public:
 public slots:
     void reload();
 
-    Q_INVOKABLE void createFromCurrent(const amnezia::XrayServerConfig &serverConfig);
-    Q_INVOKABLE amnezia::XrayServerConfig applyConfig(int index) const;
+    Q_INVOKABLE void createFromCurrent(const amnezia::XrayServerConfig &serverConfig,
+                                       const amnezia::XrayClientTemplate &clientTemplate = {});
     Q_INVOKABLE void removeConfig(int index);
 
     Q_INVOKABLE QString exportToJson(int index) const;

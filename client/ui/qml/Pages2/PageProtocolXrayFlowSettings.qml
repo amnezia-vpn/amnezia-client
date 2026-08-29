@@ -79,6 +79,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision-udp443"
+                descriptionText: qsTr("For apps that require QUIC. Browsers may stop loading.")
                 enabled: visionAllowed
                 checked: flow === "xtls-rprx-vision-udp443" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision-udp443"
@@ -118,7 +119,7 @@ PageType {
         text: qsTr("Save")
         clickedFunc: function () {
             var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {

@@ -39,6 +39,42 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::XrayRealityKeysReadFailed):
         errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
         break;
+    case(ErrorCode::XrayTlsNotSupported):
+        errorMessage = QObject::tr("Server error: could not create a TLS certificate on the XRay server. "
+                                   "The previous settings were left unchanged. Try again, or use Reality.");
+        break;
+    case(ErrorCode::XrayServerConfigRejected):
+        errorMessage = QObject::tr("Server error: XRay rejected the new configuration. "
+                                   "Nothing was changed, the server keeps running with the previous settings.");
+        break;
+    case(ErrorCode::XrayServerConfigRolledBack):
+        errorMessage = QObject::tr("Server error: XRay did not start with the new configuration. "
+                                   "The previous settings were restored and the server is running again.");
+        break;
+    case(ErrorCode::XrayServerNotServing):
+        errorMessage = QObject::tr("Server error: XRay is not accepting connections and the previous configuration "
+                                   "could not be restored. The server needs attention: check it over SSH, "
+                                   "or reinstall the protocol.");
+        break;
+    case(ErrorCode::ServerDataVolumeNotRemoved):
+        errorMessage = QObject::tr("Server error: the previous data volume could not be removed. "
+                                   "Installing on top of it would reuse the old keys, so the configurations you "
+                                   "expected to revoke would keep working. Check the server and try again.");
+        break;
+    case(ErrorCode::XrayKeyGenerationFailed):
+        errorMessage = QObject::tr("Server error: XRay could not generate its keys on the server. "
+                                   "Check the server and try again.");
+        break;
+    case(ErrorCode::XrayKeyMigrationFailed):
+        errorMessage = QObject::tr("Server error: could not preserve the XRay keys stored on the server. "
+                                   "The settings were not changed, so the existing configurations keep working. "
+                                   "Check that the server is reachable and try again.");
+        break;
+    case(ErrorCode::XrayKeyMigrationNeedsConfirm):
+        errorMessage = QObject::tr("The old XRay container will not start, so its keys cannot be preserved. "
+                                   "Applying these settings will recreate it with new keys, and all existing "
+                                   "configurations will stop working.");
+        break;
     case(ErrorCode::ServerContainerRuntimeNotSupported): errorMessage = QObject::tr("Server error: The default container runtime available for installation on this server is not supported.\n Install Docker Engine on the server manually and try again."); break;
     case(ErrorCode::ContainerRuntimeServiceNotRunning): errorMessage = QObject::tr("Container runtime error: The container runtime service is not running.\n Check the container runtime service on the server, or wait about a minute and try again."); break;
 

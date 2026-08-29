@@ -48,11 +48,16 @@ namespace amnezia
 
         namespace xray
         {
+            constexpr char dataDir[] = "/opt/amnezia/xray";
             constexpr char serverConfigPath[] = "/opt/amnezia/xray/server.json";
+            constexpr char expectedServerXrayRelease[] = "v26.7.28";
             constexpr char uuidPath[] = "/opt/amnezia/xray/xray_uuid.key";
             constexpr char PublicKeyPath[] = "/opt/amnezia/xray/xray_public.key";
             constexpr char PrivateKeyPath[] = "/opt/amnezia/xray/xray_private.key";
             constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
+            constexpr char tlsCertPath[] = "/opt/amnezia/xray/tls_cert.pem";
+            constexpr char tlsKeyPath[] = "/opt/amnezia/xray/tls_key.pem";
+            constexpr char clientTemplatePath[] = "/opt/amnezia/xray/template.json";
             constexpr char defaultSite[] = "www.googletagmanager.com";
 
             constexpr char defaultPort[] = "443";
@@ -67,7 +72,7 @@ namespace amnezia
             constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "h2";
 
-            constexpr char defaultXhttpMode[] = "Auto";
+            constexpr char defaultXhttpMode[] = "Stream-one";
             constexpr char defaultXhttpUplinkMethod[] = "POST";
             constexpr char defaultXhttpSessionPlacement[] = "Path";
             constexpr char defaultXhttpSessionKey[] = "";
@@ -75,9 +80,10 @@ namespace amnezia
             constexpr char defaultXhttpUplinkDataPlacement[] = "Body";
 
             constexpr char defaultXhttpHost[] = "www.googletagmanager.com";
+            constexpr char defaultXhttpPath[] = "/";
             constexpr char defaultXhttpUplinkChunkSize[] = "0";
-            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1";
-            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "100";
+            constexpr char defaultXhttpScMaxEachPostBytesMin[] = "1000000";
+            constexpr char defaultXhttpScMaxEachPostBytesMax[] = "1000000";
             constexpr char defaultXhttpScMinPostsIntervalMsMin[] = "100";
             constexpr char defaultXhttpScMinPostsIntervalMsMax[] = "800";
             constexpr char defaultXhttpScStreamUpServerSecsMin[] = "1";
@@ -93,8 +99,8 @@ namespace amnezia
             constexpr char defaultMkcpTti[] = "50";
             constexpr char defaultMkcpUplinkCapacity[] = "5";
             constexpr char defaultMkcpDownlinkCapacity[] = "20";
-            constexpr char defaultMkcpReadBufferSize[] = "2";
-            constexpr char defaultMkcpWriteBufferSize[] = "2";
+            constexpr char defaultMkcpMtu[] = "1350";
+            constexpr char defaultMkcpCwndMultiplier[] = "1";
 
             constexpr char outbounds[] = "outbounds";
             constexpr char inbounds[] = "inbounds";
@@ -120,6 +126,92 @@ namespace amnezia
             constexpr char spiderX[] = "spiderX";
             constexpr char user[] = "user";
             constexpr char pass[] = "pass";
+
+            constexpr char logBlock[] = "log";
+            constexpr char logLevel[] = "loglevel";
+            constexpr char logLevelError[] = "error";
+            constexpr char protocol[] = "protocol";
+            constexpr char protocolVless[] = "vless";
+            constexpr char protocolFreedom[] = "freedom";
+            constexpr char protocolSocks[] = "socks";
+            constexpr char decryption[] = "decryption";
+            constexpr char decryptionNone[] = "none";
+            constexpr char listen[] = "listen";
+            constexpr char udp[] = "udp";
+
+            constexpr char tlsSettings[] = "tlsSettings";
+            constexpr char xhttpSettings[] = "xhttpSettings";
+            constexpr char kcpSettings[] = "kcpSettings";
+            constexpr char alpn[] = "alpn";
+            constexpr char certificates[] = "certificates";
+            constexpr char certificateFile[] = "certificateFile";
+            constexpr char keyFile[] = "keyFile";
+            constexpr char allowInsecure[] = "allowInsecure";
+            constexpr char pinnedPeerCertSha256[] = "pinnedPeerCertSha256";
+
+            constexpr char dest[] = "dest";
+            constexpr char privateKey[] = "privateKey";
+            constexpr char shortIds[] = "shortIds";
+
+            constexpr char xhttpHost[] = "host";
+            constexpr char xhttpPath[] = "path";
+            constexpr char xhttpMode[] = "mode";
+            constexpr char noGrpcHeader[] = "noGRPCHeader";
+            constexpr char noSseHeader[] = "noSSEHeader";
+            constexpr char sessionIdPlacement[] = "sessionIDPlacement";
+            constexpr char sessionIdKey[] = "sessionIDKey";
+            constexpr char seqPlacement[] = "seqPlacement";
+            constexpr char seqKey[] = "seqKey";
+            constexpr char uplinkDataPlacement[] = "uplinkDataPlacement";
+            constexpr char uplinkDataKey[] = "uplinkDataKey";
+            constexpr char uplinkHttpMethod[] = "uplinkHTTPMethod";
+            constexpr char uplinkChunkSize[] = "uplinkChunkSize";
+            constexpr char scMaxBufferedPosts[] = "scMaxBufferedPosts";
+            constexpr char scMaxEachPostBytes[] = "scMaxEachPostBytes";
+            constexpr char scMinPostsIntervalMs[] = "scMinPostsIntervalMs";
+            constexpr char scStreamUpServerSecs[] = "scStreamUpServerSecs";
+            constexpr char xPaddingObfsMode[] = "xPaddingObfsMode";
+            constexpr char xPaddingBytes[] = "xPaddingBytes";
+            constexpr char xPaddingKey[] = "xPaddingKey";
+            constexpr char xPaddingHeader[] = "xPaddingHeader";
+            constexpr char xPaddingPlacement[] = "xPaddingPlacement";
+            constexpr char xPaddingMethod[] = "xPaddingMethod";
+
+            constexpr char xmux[] = "xmux";
+            constexpr char xmuxMaxConcurrency[] = "maxConcurrency";
+            constexpr char xmuxMaxConnections[] = "maxConnections";
+            constexpr char xmuxCMaxReuseTimes[] = "cMaxReuseTimes";
+            constexpr char xmuxHMaxRequestTimes[] = "hMaxRequestTimes";
+            constexpr char xmuxHMaxReusableSecs[] = "hMaxReusableSecs";
+            constexpr char xmuxHKeepAlivePeriod[] = "hKeepAlivePeriod";
+
+            constexpr char kcpTti[] = "tti";
+            constexpr char kcpMtu[] = "mtu";
+            constexpr char kcpUplinkCapacity[] = "uplinkCapacity";
+            constexpr char kcpDownlinkCapacity[] = "downlinkCapacity";
+            constexpr char kcpCwndMultiplier[] = "cwndMultiplier";
+            constexpr char kcpMaxSendingWindow[] = "maxSendingWindow";
+
+            constexpr char legacyXhttpMethod[] = "method";
+            constexpr char legacySessionPlacement[] = "sessionPlacement";
+            constexpr char legacyScSessionPlacement[] = "scSessionPlacement";
+            constexpr char legacyScSeqPlacement[] = "scSeqPlacement";
+            constexpr char legacyScUplinkDataPlacement[] = "scUplinkDataPlacement";
+            constexpr char legacySessionKey[] = "sessionKey";
+            constexpr char legacyUplinkChunkSize[] = "xhttpUplinkChunkSize";
+            constexpr char legacyXPaddingBlock[] = "xPadding";
+            constexpr char legacyRangeFrom[] = "from";
+            constexpr char legacyRangeTo[] = "to";
+
+            constexpr char networkTcp[] = "tcp";
+            constexpr char networkXhttp[] = "xhttp";
+            constexpr char networkKcp[] = "kcp";
+            constexpr char transportRaw[] = "raw";
+            constexpr char transportXhttp[] = "xhttp";
+            constexpr char transportMkcp[] = "mkcp";
+            constexpr char securityNone[] = "none";
+            constexpr char securityTls[] = "tls";
+            constexpr char securityReality[] = "reality";
         }
 
         namespace cloak

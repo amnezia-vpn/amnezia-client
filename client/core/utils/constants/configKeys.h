@@ -214,11 +214,11 @@ namespace amnezia
 
         // Transport — mKCP
         constexpr QLatin1String mkcpTti("mkcp_tti");
+        constexpr QLatin1String mkcpMtu("mkcp_mtu");
         constexpr QLatin1String mkcpUplinkCapacity("mkcp_uplink_capacity");
         constexpr QLatin1String mkcpDownlinkCapacity("mkcp_downlink_capacity");
-        constexpr QLatin1String mkcpReadBufferSize("mkcp_read_buffer_size");
-        constexpr QLatin1String mkcpWriteBufferSize("mkcp_write_buffer_size");
-        constexpr QLatin1String mkcpCongestion("mkcp_congestion"); // bool
+        constexpr QLatin1String mkcpCwndMultiplier("mkcp_cwnd_multiplier");
+        constexpr QLatin1String mkcpMaxSendingWindow("mkcp_max_sending_window");
 
         // xPadding
         constexpr QLatin1String xPaddingBytesMin("xpadding_bytes_min");
