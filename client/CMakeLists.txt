@@ -16,6 +16,12 @@ set(PACKAGES
     Core5Compat Concurrent LinguistTools
 )
 
+if(ANDROID)
+    # Qt5Compat.GraphicalEffects pulls in Qt6ShaderTools at runtime, and the
+    # Android Qt distribution does not deploy it unless it is linked.
+    set(PACKAGES ${PACKAGES} ShaderTools)
+endif()
+
 execute_process(
   WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
   COMMAND git rev-parse --short HEAD
@@ -49,6 +55,10 @@ set(LIBS ${LIBS}
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
 )
+
+if(ANDROID)
+    set(LIBS ${LIBS} Qt6::ShaderTools)
+endif()
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)

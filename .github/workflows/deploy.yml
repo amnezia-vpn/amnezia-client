@@ -862,6 +862,12 @@ jobs:
       with:
         packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
 
+    - name: 'Setup Go'
+      # Required by client/cmake/android.cmake to build libdnstt.so (DNSTT).
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.26'
+
     - name: 'Setup python'
       uses: actions/setup-python@v6
       with:
