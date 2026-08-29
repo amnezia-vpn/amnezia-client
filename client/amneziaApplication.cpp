@@ -103,6 +103,12 @@ void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
 
+    QObject::connect(m_engine, &QQmlApplicationEngine::warnings, [](const QList<QQmlError> &warnings) {
+        for (const auto &w : warnings) {
+            qWarning() << "QML Warning/Error:" << w.toString();
+        }
+    });
+
     const QUrl url(QStringLiteral(APP_QML_ENTRYPOINT));
     QObject::connect(
         m_engine, &QQmlApplicationEngine::objectCreated, this,
