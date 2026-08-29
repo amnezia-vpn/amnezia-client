@@ -917,35 +917,47 @@ class AmneziaActivity : QtActivity() {
                         }
                     }
                     `package` = systemPickerPackage
+                    if (resolveActivity(packageManager) == null) {
+                        `package` = null
+                    }
                 }
             } else {
                 Intent(this@AmneziaActivity, TvFilePicker::class.java)
             }
 
-            try {
-                startActivityForResult(intent, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
-                    onAny = {
-                        if (isOnTv() && it?.hasExtra("activityNotFound") == true) {
-                            showNoFileBrowserAlertDialog()
+            val resultHandler = ActivityResultHandler(
+                onAny = {
+                    if (isOnTv() && it?.hasExtra("activityNotFound") == true) {
+                        showNoFileBrowserAlertDialog()
+                    }
+                    val uri = it?.data?.let { u ->
+                        if (u.scheme == "content") {
+                            try { grantUriPermission(packageName, u, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
                         }
-                        val uri = it?.data?.let { u ->
-                            if (u.scheme == "content") {
-                                try { grantUriPermission(packageName, u, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
-                            }
-                            u
-                        }?.toString() ?: ""
-                        Log.v(TAG, "Open file: $uri")
-                        if (uri.isNotEmpty()) {
-                            pendingOpenFileUri = uri
-                        } else {
-                            mainScope.launch {
-                                qtInitialized.await()
-                                QtAndroidController.onFileOpened(uri)
-                            }
+                        u
+                    }?.toString() ?: ""
+                    Log.v(TAG, "Open file: $uri")
+                    if (uri.isNotEmpty()) {
+                        pendingOpenFileUri = uri
+                    } else {
+                        mainScope.launch {
+                            qtInitialized.await()
+                            QtAndroidController.onFileOpened(uri)
                         }
                     }
-                ))
+                }
+            )
+
+            try {
+                startActivityForResult(intent, OPEN_FILE_ACTION_CODE, resultHandler)
             } catch (_: ActivityNotFoundException) {
+                if (intent.`package` != null) {
+                    intent.`package` = null
+                    try {
+                        startActivityForResult(intent, OPEN_FILE_ACTION_CODE, resultHandler)
+                        return@launch
+                    } catch (_: ActivityNotFoundException) {}
+                }
                 showNoFileBrowserAlertDialog()
                 mainScope.launch {
                     qtInitialized.await()
