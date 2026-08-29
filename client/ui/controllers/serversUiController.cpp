@@ -209,7 +209,7 @@ QString ServersUiController::getDefaultServerImagePathCollapsed() const
     if (!description.isApiV2) {
         return "";
     }
-    const QString flagCode = apiUtils::getCountryFlagCode(description.apiServerCountryCode);
+    const QString flagCode = apiUtils::getCountryFlagCode(description.apiServerCountryCodeL10n, description.apiServerCountryCode);
     if (flagCode.isEmpty()) {
         return "";
     }

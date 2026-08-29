@@ -81,7 +81,7 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
     ErrorCode error = ErrorCode::NoError;
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
+        stdOut += data;
         return ErrorCode::NoError;
     };
 
@@ -103,16 +103,6 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
 
     const auto getStrValue = [](const auto str) { return str.mid(str.indexOf(":") + 1).trimmed(); };
 
-    const auto parts = stdOut.split('\n');
-    const auto peerList = parts.filter("peer:");
-    const auto latestHandshakeList = parts.filter("latest handshake:");
-    const auto transferredDataList = parts.filter("transfer:");
-    const auto allowedIpsList = parts.filter("allowed ips:");
-
-    if (allowedIpsList.isEmpty() || latestHandshakeList.isEmpty() || transferredDataList.isEmpty() || peerList.isEmpty()) {
-        return error;
-    }
-
     const auto changeHandshakeFormat = [](QString &latestHandshake) {
         const std::vector<std::pair<QString, QString>> replaceMap = { { " days", "d" },    { " hours", "h" }, { " minutes", "m" },
                                                                       { " seconds", "s" }, { " day", "d" },   { " hour", "h" },
@@ -123,20 +113,49 @@ ErrorCode UsersController::wgShow(const DockerContainer container, const ServerC
         }
     };
 
-    for (int i = 0; i < peerList.size() && i < transferredDataList.size() && i < latestHandshakeList.size() && i < allowedIpsList.size(); ++i) {
+    const auto lines = stdOut.split('\n');
+    WgShowData currentPeer;
+    bool hasPeer = false;
 
-        const auto transferredData = getStrValue(transferredDataList[i]).split(",");
-        auto latestHandshake = getStrValue(latestHandshakeList[i]);
-        auto serverBytesReceived = transferredData.front().trimmed();
-        auto serverBytesSent = transferredData.back().trimmed();
-        auto allowedIps = getStrValue(allowedIpsList[i]);
+    for (const QString &line : lines) {
+        const QString trimmedLine = line.trimmed();
 
-        changeHandshakeFormat(latestHandshake);
-
-        serverBytesReceived.chop(QStringLiteral(" received").length());
-        serverBytesSent.chop(QStringLiteral(" sent").length());
-
-        data.push_back({ getStrValue(peerList[i]), latestHandshake, serverBytesSent, serverBytesReceived, allowedIps });
+        if (trimmedLine.startsWith("peer:")) {
+            if (hasPeer) {
+                data.push_back(currentPeer);
+            }
+            currentPeer = WgShowData();
+            currentPeer.clientId = getStrValue(trimmedLine);
+            hasPeer = true;
+        } else if (hasPeer) {
+            if (trimmedLine.startsWith("latest handshake:")) {
+                auto latestHandshake = getStrValue(trimmedLine);
+                changeHandshakeFormat(latestHandshake);
+                currentPeer.latestHandshake = latestHandshake;
+            } else if (trimmedLine.startsWith("transfer:")) {
+                const auto transferredData = getStrValue(trimmedLine).split(",");
+                if (transferredData.size() == 2) {
+                    auto serverBytesReceived = transferredData.front().trimmed();
+                    auto serverBytesSent = transferredData.back().trimmed();
+                    if (serverBytesReceived.endsWith(" received")) {
+                        serverBytesReceived.chop(QStringLiteral(" received").length());
+                    }
+                    if (serverBytesSent.endsWith(" sent")) {
+                        serverBytesSent.chop(QStringLiteral(" sent").length());
+                    }
+                    currentPeer.dataReceived = serverBytesSent;
+                    currentPeer.dataSent = serverBytesReceived;
+                } else {
+                    logger.warning() << QString("Unexpected %1 show transfer format, skipping traffic stats for the peer")
+                                                .arg(showBin);
+                }
+            } else if (trimmedLine.startsWith("allowed ips:")) {
+                currentPeer.allowedIps = getStrValue(trimmedLine);
+            }
+        }
+    }
+    if (hasPeer) {
+        data.push_back(currentPeer);
     }
 
     return error;

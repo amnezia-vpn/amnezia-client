@@ -350,6 +350,52 @@ void AndroidController::sendTouch(float x, float y)
     callActivityMethod("sendTouch", "(FF)V", x, y);
 }
 
+
+bool AndroidController::isPlay()
+{
+    return callActivityMethod<jboolean>("isPlay", "()Z");
+}
+
+QJsonObject AndroidController::getSubscriptionPlans()
+{
+    QJniObject subscriptionPlans = callActivityMethod<jstring>("getSubscriptionPlans", "()Ljava/lang/String;");
+    QJsonObject json = QJsonDocument::fromJson(subscriptionPlans.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::purchaseSubscription(const QString &offerToken)
+{
+    QJniObject result = callActivityMethod<jstring, jstring>("purchaseSubscription", "(Ljava/lang/String;)Ljava/lang/String;",
+                                                    QJniObject::fromString(offerToken).object<jstring>());
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::upgradeSubscription(const QString &offerToken, const QString &oldPurchaseToken)
+{
+    QJniObject result = callActivityMethod<jstring, jstring, jstring>("upgradeSubscription",
+                                                                      "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+                                                                      QJniObject::fromString(offerToken).object<jstring>(),
+                                                                      QJniObject::fromString(oldPurchaseToken).object<jstring>());
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::acknowledgePurchase(const QString &purchaseToken)
+{
+    QJniObject result = callActivityMethod<jstring, jstring>("acknowledgePurchase", "(Ljava/lang/String;)Ljava/lang/String;",
+                                                             QJniObject::fromString(purchaseToken).object<jstring>());
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::queryPurchases()
+{
+    QJniObject result = callActivityMethod<jstring>("queryPurchases", "()Ljava/lang/String;");
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
 // Moving log processing to the Android side
 jclass AndroidController::log;
 jmethodID AndroidController::logDebug;

@@ -53,6 +53,7 @@ private:
     {
         QString countryName;
         QString countryCode;
+        QString countryCodeL10n;
     };
 
     QVector<CountryInfo> m_countries;

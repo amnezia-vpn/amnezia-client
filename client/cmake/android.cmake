@@ -3,6 +3,10 @@ message("Client android ${CMAKE_ANDROID_ARCH_ABI} build")
 if(NOT DEFINED APP_ANDROID_MIN_SDK)
     set(APP_ANDROID_MIN_SDK 28)
 endif()
+
+# Option to build Play variant (with Google Play Billing) instead of OSS
+# When ON, adds target android_play_apk: cmake --build . --target android_play_apk
+option(ANDROID_BUILD_PLAY "Add android_play_apk target for Google Play Billing build" OFF)
 set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK}" CACHE STRING
     "The minimum API level supported by the application or library" FORCE)
 
@@ -151,3 +155,45 @@ if(APP_ANDROID_MAX_SDK)
 endif()
 
 set_property(TARGET ${PROJECT} PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR ${APP_ANDROID_PACKAGE_SOURCE_DIR})
+
+if(QT_USE_TARGET_ANDROID_BUILD_DIR)
+    set(_android_build_dir "${CMAKE_CURRENT_BINARY_DIR}/android-build-${PROJECT}")
+else()
+    set(_android_build_dir "${CMAKE_CURRENT_BINARY_DIR}/android-build")
+endif()
+
+add_custom_target(android_gradle_clean
+    COMMAND ./gradlew clean
+    WORKING_DIRECTORY "${_android_build_dir}"
+    COMMENT "Cleaning Android Gradle build cache"
+)
+
+# Always-available debug target: build Play Debug APK and copy to standard output path
+# so Qt Creator's deploy step picks it up automatically
+add_custom_target(android_play_debug_install
+    COMMAND ./gradlew assemblePlayDebug
+    COMMAND sh -c "cp build/outputs/apk/play/debug/*.apk build/outputs/apk/android-build-${PROJECT}-debug.apk"
+    WORKING_DIRECTORY "${_android_build_dir}"
+    COMMENT "Building Android Play Debug APK and copying to deploy path"
+    DEPENDS ${PROJECT}
+)
+
+if(ANDROID_BUILD_PLAY)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(_gradle_suffix "Debug")
+    else()
+        set(_gradle_suffix "Release")
+    endif()
+    add_custom_target(android_play_apk
+        COMMAND ./gradlew assemblePlay${_gradle_suffix}
+        WORKING_DIRECTORY "${_android_build_dir}"
+        COMMENT "Building Android Play APK (assemblePlay${_gradle_suffix})"
+        DEPENDS ${PROJECT}
+    )
+    add_custom_target(android_play_aab
+        COMMAND ./gradlew bundlePlay${_gradle_suffix}
+        WORKING_DIRECTORY "${_android_build_dir}"
+        COMMENT "Building Android Play AAB (bundlePlay${_gradle_suffix})"
+        DEPENDS ${PROJECT}
+    )
+endif()

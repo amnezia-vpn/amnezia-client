@@ -86,10 +86,6 @@ class Xray : Protocol() {
         ensureInboundAuth(xrayJsonConfig)
         val xrayConfig = parseConfig(config, xrayJsonConfig)
 
-        (xrayJsonConfig.optJSONObject("log") ?: JSONObject().also { xrayJsonConfig.put("log", it) })
-            .put("loglevel", "warning")
-            .put("access", "none") // disable access log
-
         var xrayJsonConfigString = xrayJsonConfig.toString()
         config.getString("hostName").let { hostName ->
             val ipAddress = parseInetAddress(hostName).ip
