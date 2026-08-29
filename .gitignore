@@ -146,3 +146,11 @@ macos-with-sign-build.sh
 DeveloperIdApplicationCertificate.p12
 DeveloperIdInstallerCertificate.p12
 
+# libdnstt.so is generated from client/3rd/dnstt by the Android CMake build
+client/android/libs/
+client/3rd/dnstt/libdnstt.h
+
+# Local build/tooling logs
+aqtinstall.log
+dnstt-log.txt
+deploy/*.log
