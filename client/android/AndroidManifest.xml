@@ -38,6 +38,7 @@
         android:fullBackupContent="@xml/backup_content"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:hasFragileUserData="false"
+        android:extractNativeLibs="true"
         tools:targetApi="s">
 
         <activity
@@ -181,6 +182,19 @@
         <service
             android:name=".XrayService"
             android:process=":amneziaXrayService"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="systemExempted"
+            android:exported="false"
+            tools:ignore="ForegroundServicePermission">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".DnsttService"
+            android:process=":amneziaDnsttService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:foregroundServiceType="systemExempted"
             android:exported="false"

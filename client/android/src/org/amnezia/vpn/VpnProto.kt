@@ -49,6 +49,14 @@ enum class VpnProto(
         XrayService::class.java
     ) {
         override fun createProtocol(): Protocol = Xray.instance
+    },
+
+    DNSTT(
+        "Dnstt",
+        "org.amnezia.vpn:amneziaDnsttService",
+        DnsttService::class.java
+    ) {
+        override fun createProtocol(): Protocol = org.amnezia.vpn.protocol.dnstt.Dnstt.instance
     };
 
     private var _protocol: Protocol? = null
