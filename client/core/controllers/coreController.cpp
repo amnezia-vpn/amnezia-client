@@ -113,6 +113,9 @@ void CoreController::initModels()
     m_telemtConfigModel = new TelemtConfigModel(this);
     setQmlContextProperty("TelemtConfigModel", m_telemtConfigModel);
 
+    m_dnsttConfigModel = new DnsttConfigModel(this);
+    setQmlContextProperty("DnsttConfigModel", m_dnsttConfigModel);
+
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
 

@@ -20,6 +20,7 @@ namespace amnezia
             Ipsec,
             Xray,
             SSXray,
+            Dnstt,
 
             // non-vpn
             TorWebSite,

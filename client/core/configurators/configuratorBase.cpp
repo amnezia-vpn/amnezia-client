@@ -5,6 +5,7 @@
 #include "core/configurators/openVpnConfigurator.h"
 #include "core/configurators/wireguardConfigurator.h"
 #include "core/configurators/xrayConfigurator.h"
+#include "core/configurators/dnsttConfigurator.h"
 
 using namespace amnezia;
 
@@ -23,6 +24,7 @@ QScopedPointer<ConfiguratorBase> ConfiguratorBase::create(Proto protocol,
     case Proto::Ikev2: return QScopedPointer<ConfiguratorBase>(new Ikev2Configurator(sshSession));
     case Proto::Xray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(sshSession));
     case Proto::SSXray: return QScopedPointer<ConfiguratorBase>(new XrayConfigurator(sshSession));
+    case Proto::Dnstt: return QScopedPointer<ConfiguratorBase>(new DnsttConfigurator(sshSession));
     default: return QScopedPointer<ConfiguratorBase>();
     }
 }

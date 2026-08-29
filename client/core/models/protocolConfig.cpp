@@ -11,6 +11,7 @@
 #include "core/models/protocols/dnsProtocolConfig.h"
 #include "core/models/protocols/mtProxyProtocolConfig.h"
 #include "core/models/protocols/telemtProtocolConfig.h"
+#include "core/models/protocols/dnsttProtocolConfig.h"
 
 namespace amnezia
 {
@@ -44,6 +45,8 @@ Proto ProtocolConfig::type() const
             return Proto::MtProxy;
         } else if constexpr (std::is_same_v<T, TelemtProtocolConfig>) {
             return Proto::Telemt;
+        } else if constexpr (std::is_same_v<T, DnsttProtocolConfig>) {
+            return Proto::Dnstt;
         }
         return Proto::Unknown;
     }, data);
@@ -117,6 +120,8 @@ bool ProtocolConfig::hasClientConfig() const
                       std::is_same_v<T, XrayProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.hasClientConfig();
+        } else if constexpr (std::is_same_v<T, DnsttProtocolConfig>) {
+            return arg.isValid();
         }
         return false;
     }, data);
@@ -175,6 +180,10 @@ QJsonObject ProtocolConfig::getClientConfigJson() const
             if (arg.hasClientConfig()) {
                 return arg.clientConfig->toJson();
             }
+        } else if constexpr (std::is_same_v<T, DnsttProtocolConfig>) {
+            // DNSTT has no separate client config: the imported fields are
+            // themselves what the Android layer consumes.
+            return arg.toClientJson();
         }
         return QJsonObject();
     }, data);
@@ -279,6 +288,8 @@ bool ProtocolConfig::isThirdPartyConfig() const
                       std::is_same_v<T, XrayProtocolConfig> ||
                       std::is_same_v<T, Ikev2ProtocolConfig>) {
             return arg.serverConfig.isThirdPartyConfig;
+        } else if constexpr (std::is_same_v<T, DnsttProtocolConfig>) {
+            return arg.isThirdPartyConfig;
         }
         return false;
     }, data);
@@ -317,6 +328,8 @@ ProtocolConfig ProtocolConfig::fromJson(const QJsonObject& json, Proto type)
         return ProtocolConfig{MtProxyProtocolConfig::fromJson(json)};
     case Proto::Telemt:
         return ProtocolConfig{TelemtProtocolConfig::fromJson(json)};
+    case Proto::Dnstt:
+        return ProtocolConfig{DnsttProtocolConfig::fromJson(json)};
     default:
         return ProtocolConfig{AwgProtocolConfig{}};
     }

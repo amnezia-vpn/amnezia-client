@@ -11,6 +11,7 @@
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
 #include <QUrl>
+#include <QUrlQuery>
 #include <algorithm>
 
 #include "core/utils/containerEnum.h"
@@ -27,6 +28,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/qrCodeUtils.h"
+#include "core/models/protocols/dnsttProtocolConfig.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -155,6 +157,15 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
         if (!servers.isEmpty()) {
             result.config = extractXrayConfig(servers.first().first, configType);
         }
+        if (!result.config.empty()) {
+            result.configType = configType;
+            return result;
+        }
+    }
+
+    if (config.startsWith("dnstt://")) {
+        configType = ConfigTypes::Dnstt;
+        result.config = extractDnsttConfig(config);
         if (!result.config.empty()) {
             result.configType = configType;
             return result;
@@ -760,3 +771,43 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
     }
 }
 
+QJsonObject ImportController::extractDnsttConfig(const QString &data) const
+{
+    const QUrl url(data);
+    if (!url.isValid()) {
+        qDebug() << "DNSTT link is not a valid URL";
+        return QJsonObject();
+    }
+
+    const QUrlQuery query(url.query());
+
+    DnsttProtocolConfig dnsttConfig;
+    dnsttConfig.publicKey = url.userName();
+    dnsttConfig.domain = url.host();
+    dnsttConfig.resolvers = query.queryItemValue("resolvers", QUrl::FullyDecoded);
+    if (dnsttConfig.resolvers.isEmpty()) {
+        dnsttConfig.resolvers = query.queryItemValue("resolver", QUrl::FullyDecoded);
+    }
+    dnsttConfig.bootstrapIp = query.queryItemValue("bootstrap", QUrl::FullyDecoded);
+
+    QString error;
+    if (!dnsttConfig.isValid(&error)) {
+        qDebug() << "DNSTT link rejected:" << error;
+        return QJsonObject();
+    }
+
+    QJsonObject dnsttContainer;
+    dnsttContainer.insert(configKey::container, QJsonValue(ContainerUtils::containerToString(DockerContainer::Dnstt)));
+    dnsttContainer.insert(ProtocolUtils::protoToString(Proto::Dnstt), dnsttConfig.toJson());
+
+    QJsonArray containers;
+    containers.push_back(dnsttContainer);
+
+    QJsonObject serverConfig;
+    serverConfig[configKey::containers] = containers;
+    serverConfig[configKey::defaultContainer] = ContainerUtils::containerToString(DockerContainer::Dnstt);
+    serverConfig[configKey::description] = m_serversRepository->nextAvailableServerName();
+    serverConfig[configKey::hostName] = dnsttConfig.domain.trimmed();
+
+    return serverConfig;
+}

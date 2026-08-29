@@ -163,5 +163,15 @@ const DnsProtocolConfig* ContainerConfig::getDnsProtocolConfig() const
     return protocolConfig.as<DnsProtocolConfig>();
 }
 
+DnsttProtocolConfig* ContainerConfig::getDnsttProtocolConfig()
+{
+    return protocolConfig.as<DnsttProtocolConfig>();
+}
+
+const DnsttProtocolConfig* ContainerConfig::getDnsttProtocolConfig() const
+{
+    return protocolConfig.as<DnsttProtocolConfig>();
+}
+
 } // namespace amnezia
 

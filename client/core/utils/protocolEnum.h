@@ -25,6 +25,7 @@ namespace amnezia
             Ikev2,
             Xray,
             SSXray,
+            Dnstt,
 
             // non-vpn
             TorWebSite,

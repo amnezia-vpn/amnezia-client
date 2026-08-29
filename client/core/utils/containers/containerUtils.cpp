@@ -79,6 +79,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
              { DockerContainer::MtProxy, QObject::tr("MTProxy (Telegram)") },
              { DockerContainer::Telemt, QObject::tr("Telemt (Telegram)") },
+             { DockerContainer::Dnstt, "DNSTT" },
     };
 }
 
@@ -117,6 +118,8 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
                QObject::tr("Telegram MTProto proxy server") },
              { DockerContainer::Telemt,
                QObject::tr("Telegram MTProto proxy (Telemt, Rust)") },
+             { DockerContainer::Dnstt,
+                QObject::tr("DNS tunnel with Noise NK encryption and DoH/DoT transport") },
     };
 }
 
@@ -196,6 +199,17 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
         { DockerContainer::Telemt,
           QObject::tr("Telegram MTProto proxy powered by Telemt (Rust). "
                       "Supports secure and TLS fronting modes with optional traffic masking.") },
+        { DockerContainer::Dnstt,
+          QObject::tr("DNSTT tunnels traffic inside DNS queries sent to a public resolver over "
+                      "DoH, DoT or plain UDP, which lets it pass networks where only DNS resolves. "
+                      "The session is encrypted with Noise NK.\n"
+                      "\nFeatures:\n"
+                      "* Works where all other traffic is blocked but DNS still answers\n"
+                      "* Carries TCP only: UDP applications such as QUIC, VoIP and games are not "
+                      "supported, and DNS itself is relayed over TCP\n"
+                      "* Low throughput, typically 100-500 Kbps, because every byte is encoded "
+                      "into DNS names\n"
+                      "* Requires a dnstt-server that forwards streams to a SOCKS5 proxy") },
     };
 }
 
@@ -227,6 +241,7 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
     case DockerContainer::MtProxy: return Proto::MtProxy;
     case DockerContainer::Telemt: return Proto::Telemt;
+    case DockerContainer::Dnstt: return Proto::Dnstt;
     default: return Proto::Unknown;
     }
 }
@@ -243,7 +258,9 @@ QString ContainerUtils::containerTypeToProtocolString(DockerContainer c)
 bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
 {
 #ifdef Q_OS_WINDOWS
-    return true;
+    // DNSTT is imported on Android only: there is no server-side container to
+    // install, so it must not appear in the self-hosted wizard.
+    return c != DockerContainer::Dnstt;
 
 #elif defined(Q_OS_IOS)
     // Standard iOS build (without Network Extension limitations)
@@ -280,6 +297,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     switch (c) {
     case DockerContainer::WireGuard: return true;
     case DockerContainer::Ipsec: return false;
+    case DockerContainer::Dnstt: return false;
     default: return true;
     }
 
@@ -293,12 +311,14 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::SSXray: return true;
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
+    case DockerContainer::Dnstt: return true;
     default: return false;
     }
 
 #elif defined(Q_OS_LINUX)
     switch (c) {
     case DockerContainer::Ipsec: return false;
+    case DockerContainer::Dnstt: return false;
     default: return true;
     }
 

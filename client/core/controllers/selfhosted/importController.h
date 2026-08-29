@@ -21,6 +21,7 @@ namespace
         Awg,
         Xray,
         ShadowSocks,
+        Dnstt,
         Backup,
         Invalid
     };
@@ -76,6 +77,7 @@ private:
     QJsonObject extractOpenVpnConfig(const QString &data) const;
     QJsonObject extractWireGuardConfig(const QString &data, ConfigTypes &configType) const;
     QJsonObject extractXrayConfig(const QString &data, ConfigTypes configType, const QString &description = "") const;
+    QJsonObject extractDnsttConfig(const QString &data) const;
     void checkForMaliciousStrings(const QJsonObject &serverConfig, QString &warningText) const;
     void processAmneziaConfig(QJsonObject &config) const;
 
