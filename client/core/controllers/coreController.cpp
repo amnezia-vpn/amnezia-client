@@ -399,7 +399,7 @@ QJsonObject CoreController::handleCliControlRequest(const CliControl::Request &r
     if (!request.isValid()) {
         return cliError(request, request.error.isEmpty() ? QStringLiteral("invalid_request") : request.error);
     }
-    if (!m_serversController || !m_connectionController) {
+    if (!m_serversController || !m_connectionController || !m_connectionUiController) {
         return cliError(request, QStringLiteral("not_ready"));
     }
 
@@ -431,12 +431,9 @@ QJsonObject CoreController::handleCliControlRequest(const CliControl::Request &r
             return cliError(connectRequest, QStringLiteral("connection_not_supported"), static_cast<int>(supported));
         }
         m_serversController->setDefaultServer(serverId);
-        const ErrorCode opened = m_connectionController->openConnection(serverId);
-        if (opened != ErrorCode::NoError) {
-            return cliError(connectRequest, QStringLiteral("connect_failed"), static_cast<int>(opened));
-        }
+        m_connectionUiController->toggleConnection();
         QJsonObject result = status(connectRequest);
-        result.insert(QStringLiteral("state"), QStringLiteral("connecting"));
+        result.insert(QStringLiteral("state"), QStringLiteral("preparing"));
         result.insert(QStringLiteral("serverId"), serverId);
         return result;
     };
@@ -466,7 +463,7 @@ QJsonObject CoreController::handleCliControlRequest(const CliControl::Request &r
         return connectToServer(request);
     case CliControl::Command::Disconnect: {
         if (currentState() == Vpn::ConnectionState::Disconnected) return status(request);
-        m_connectionController->closeConnection();
+        m_connectionUiController->closeConnection();
         QJsonObject result = status(request);
         result.insert(QStringLiteral("state"), QStringLiteral("disconnecting"));
         return result;
@@ -475,7 +472,7 @@ QJsonObject CoreController::handleCliControlRequest(const CliControl::Request &r
         const Vpn::ConnectionState state = currentState();
         if (state == Vpn::ConnectionState::Connected || state == Vpn::ConnectionState::Connecting
             || state == Vpn::ConnectionState::Preparing || state == Vpn::ConnectionState::Reconnecting) {
-            m_connectionController->closeConnection();
+            m_connectionUiController->closeConnection();
             QJsonObject result = status(request);
             result.insert(QStringLiteral("state"), QStringLiteral("disconnecting"));
             return result;
