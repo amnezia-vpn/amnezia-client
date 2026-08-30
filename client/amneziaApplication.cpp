@@ -5,11 +5,14 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMimeData>
+#include <QJsonDocument>
+#include <QJsonParseError>
 #include <QQuickItem>
 #include <QQuickStyle>
 #include <QResource>
 #include <QStandardPaths>
 #include <QTextDocument>
+#include <QTextStream>
 #include <QTimer>
 #include <QTranslator>
 #include <QEvent>
@@ -41,8 +44,12 @@ bool AmneziaApplication::m_forceQuit = false;
 AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_CLASS(argc, argv),
       m_optAutostart({QStringLiteral("a"), QStringLiteral("autostart")}, QStringLiteral("System autostart")),
       m_optCleanup  ({QStringLiteral("c"), QStringLiteral("cleanup")}, QStringLiteral("Cleanup logs")),
-      m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by index on startup"), QStringLiteral("index")),
-      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data"))
+      m_optConnect  ({QStringLiteral("connect")}, QStringLiteral("Connect to server by stable ID (a legacy zero-based index is also accepted)"), QStringLiteral("server")),
+      m_optImport   ({QStringLiteral("import")}, QStringLiteral("Import configuration from data string"), QStringLiteral("data")),
+      m_optStatus   ({QStringLiteral("status")}, QStringLiteral("Print connection status as JSON")),
+      m_optListServers({QStringLiteral("list-servers")}, QStringLiteral("Print configured servers as JSON")),
+      m_optDisconnect({QStringLiteral("disconnect")}, QStringLiteral("Disconnect the active VPN connection")),
+      m_optToggle   ({QStringLiteral("toggle")}, QStringLiteral("Toggle the default VPN connection"))
 {
     setDesktopFileName(QStringLiteral(APPLICATION_NAME));
     setQuitOnLastWindowClosed(false);
@@ -207,17 +214,6 @@ void AmneziaApplication::init()
     });
 #endif
 
-    if (m_parser.isSet(m_optConnect)) {
-        bool ok = false;
-        int idx = m_parser.value(m_optConnect).toInt(&ok);
-        if (ok) {
-            QTimer::singleShot(0, this, [this, idx]() {
-                if (m_coreController) {
-                    m_coreController->openConnectionByIndex(idx);
-                }
-            });
-        }
-    }
 }
 
 void AmneziaApplication::registerTypes()
@@ -268,6 +264,10 @@ bool AmneziaApplication::parseCommands()
     m_parser.addOption(m_optCleanup);
     m_parser.addOption(m_optConnect);
     m_parser.addOption(m_optImport);
+    m_parser.addOption(m_optStatus);
+    m_parser.addOption(m_optListServers);
+    m_parser.addOption(m_optDisconnect);
+    m_parser.addOption(m_optToggle);
     
     m_parser.process(*this);
 
@@ -281,20 +281,151 @@ bool AmneziaApplication::parseCommands()
 }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-void AmneziaApplication::startLocalServer() {
+std::optional<int> AmneziaApplication::forwardToRunningInstance()
+{
+    QLocalSocket socket;
+    socket.connectToServer(QStringLiteral(APP_INSTANCE_NAME));
+    if (!socket.waitForConnected(500)) {
+        return std::nullopt;
+    }
+
+    const CliControl::Request request = CliControl::requestFromArguments(arguments());
+    socket.write(CliControl::toJsonLine(CliControl::requestToJson(request)));
+    if (!socket.waitForBytesWritten(1000) || !socket.waitForReadyRead(3000)) {
+        writeCliResponse(QJsonObject {
+            { QStringLiteral("version"), 1 },
+            { QStringLiteral("ok"), false },
+            { QStringLiteral("command"), CliControl::commandName(request.command) },
+            { QStringLiteral("error"), QStringLiteral("control_response_timeout") }
+        });
+        return 2;
+    }
+
+    QByteArray responseData = socket.readAll();
+    while (!responseData.contains('\n') && socket.waitForReadyRead(100)) {
+        responseData.append(socket.readAll());
+    }
+    QJsonParseError parseError;
+    const QJsonObject response = QJsonDocument::fromJson(responseData.trimmed(), &parseError).object();
+    if (parseError.error != QJsonParseError::NoError || response.isEmpty()) {
+        writeCliResponse(QJsonObject {
+            { QStringLiteral("version"), 1 },
+            { QStringLiteral("ok"), false },
+            { QStringLiteral("command"), CliControl::commandName(request.command) },
+            { QStringLiteral("error"), QStringLiteral("invalid_control_response") }
+        });
+        return 2;
+    }
+    if (request.isControlCommand()) {
+        writeCliResponse(response);
+    }
+    return response.value(QStringLiteral("ok")).toBool() ? 0 : 2;
+}
+
+std::optional<int> AmneziaApplication::handleControlCommandWithoutRunningInstance()
+{
+    const CliControl::Request request = CliControl::requestFromArguments(arguments());
+    if (!request.isControlCommand()) {
+        return std::nullopt;
+    }
+    if (!request.isValid()) {
+        writeCliResponse(QJsonObject {
+            { QStringLiteral("version"), 1 },
+            { QStringLiteral("ok"), false },
+            { QStringLiteral("command"), CliControl::commandName(request.command) },
+            { QStringLiteral("error"), request.error }
+        });
+        return 2;
+    }
+    if (request.command == CliControl::Command::Connect || request.command == CliControl::Command::Toggle) {
+        return std::nullopt;
+    }
+
+    const bool isStatus = request.command == CliControl::Command::Status;
+    const bool isDisconnect = request.command == CliControl::Command::Disconnect;
+    writeCliResponse(QJsonObject {
+        { QStringLiteral("version"), 1 },
+        { QStringLiteral("ok"), isStatus || isDisconnect },
+        { QStringLiteral("command"), CliControl::commandName(request.command) },
+        { QStringLiteral("state"), QStringLiteral("stopped") },
+        { QStringLiteral("serverId"), QString() },
+        { QStringLiteral("error"), (isStatus || isDisconnect) ? QString() : QStringLiteral("client_not_running") }
+    });
+    return (isStatus || isDisconnect) ? 0 : 3;
+}
+
+void AmneziaApplication::executeStartupControlCommand()
+{
+    const CliControl::Request request = CliControl::requestFromArguments(arguments());
+    if (request.isControlCommand() && m_coreController) {
+        writeCliResponse(m_coreController->handleCliControlRequest(request));
+    }
+}
+
+void AmneziaApplication::writeCliResponse(const QJsonObject &response) const
+{
+    QTextStream output(stdout);
+    output << QString::fromUtf8(QJsonDocument(response).toJson(QJsonDocument::Compact)) << Qt::endl;
+    output.flush();
+}
+
+void AmneziaApplication::processControlConnection(QLocalSocket *socket)
+{
+    if (!socket || socket->property("cliControlProcessed").toBool() || !socket->canReadLine()) {
+        return;
+    }
+    socket->setProperty("cliControlProcessed", true);
+
+    const QByteArray requestData = socket->readLine().trimmed();
+    QJsonParseError parseError;
+    const QJsonObject requestJson = QJsonDocument::fromJson(requestData, &parseError).object();
+    QJsonObject response;
+    if (parseError.error != QJsonParseError::NoError || requestJson.isEmpty()) {
+        response = QJsonObject {
+            { QStringLiteral("version"), 1 },
+            { QStringLiteral("ok"), false },
+            { QStringLiteral("error"), QStringLiteral("invalid_json") }
+        };
+    } else if (!m_coreController) {
+        response = QJsonObject {
+            { QStringLiteral("version"), 1 },
+            { QStringLiteral("ok"), false },
+            { QStringLiteral("error"), QStringLiteral("not_ready") }
+        };
+    } else {
+        response = m_coreController->handleCliControlRequest(CliControl::requestFromJson(requestJson));
+    }
+
+    socket->write(CliControl::toJsonLine(response));
+    socket->flush();
+    socket->waitForBytesWritten(1000);
+    socket->disconnectFromServer();
+    socket->deleteLater();
+}
+
+bool AmneziaApplication::startLocalServer() {
     const QString serverName(APP_INSTANCE_NAME);
     QLocalServer::removeServer(serverName);
 
-    QLocalServer *server = new QLocalServer(this);
-    server->listen(serverName);
+    m_localServer = new QLocalServer(this);
+    m_localServer->setSocketOptions(QLocalServer::UserAccessOption);
+    if (!m_localServer->listen(serverName)) {
+        qCritical() << "Unable to start application control server:" << m_localServer->errorString();
+        return false;
+    }
 
-    QObject::connect(server, &QLocalServer::newConnection, this, [server, this]() {
-        if (server) {
-            QLocalSocket *clientConnection = server->nextPendingConnection();
-            clientConnection->deleteLater();
+    QObject::connect(m_localServer, &QLocalServer::newConnection, this, [this]() {
+        while (m_localServer && m_localServer->hasPendingConnections()) {
+            QLocalSocket *socket = m_localServer->nextPendingConnection();
+            QObject::connect(socket, &QLocalSocket::readyRead, this, [this, socket]() {
+                processControlConnection(socket);
+            });
+            if (socket->bytesAvailable() > 0) {
+                processControlConnection(socket);
+            }
         }
-        emit m_coreController->pageController()->raiseMainWindow(); //TODO
     });
+    return true;
 }
 #endif
 

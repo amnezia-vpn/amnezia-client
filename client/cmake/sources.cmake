@@ -2,6 +2,7 @@ set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 
 set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/migrations.h
+    ${CLIENT_ROOT_DIR}/core/utils/cliControlProtocol.h
     ${CLIENT_ROOT_DIR}/../ipc/ipc.h
     ${CLIENT_ROOT_DIR}/amneziaApplication.h
     ${CLIENT_ROOT_DIR}/core/utils/errorCodes.h
@@ -96,6 +97,7 @@ endif()
 
 set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/migrations.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/cliControlProtocol.cpp
     ${CLIENT_ROOT_DIR}/amneziaApplication.cpp
     ${CLIENT_ROOT_DIR}/core/utils/errorStrings.cpp
     ${CLIENT_ROOT_DIR}/core/utils/containers/containerUtils.cpp

@@ -286,6 +286,22 @@ install(SCRIPT ${QT_DEPLOY_SCRIPT}
     COMPONENT AmneziaVPN
 )
 
+option(AMNEZIA_BUILD_CLI_CONTROL_TESTS "Build CLI control protocol tests" OFF)
+if(AMNEZIA_BUILD_CLI_CONTROL_TESTS)
+    include(CTest)
+    qt_add_executable(cli-control-protocol-test
+        tests/cliControlProtocolTest.cpp
+        core/utils/cliControlProtocol.cpp
+        core/utils/cliControlProtocol.h
+    )
+    target_include_directories(cli-control-protocol-test PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+    target_link_libraries(cli-control-protocol-test PRIVATE Qt6::Core)
+    if(APPLE)
+        set_target_properties(cli-control-protocol-test PROPERTIES OSX_ARCHITECTURES "${CMAKE_HOST_SYSTEM_PROCESSOR}")
+    endif()
+    add_test(NAME cli-control-protocol COMMAND cli-control-protocol-test)
+endif()
+
 if (APPLE AND NOT IOS AND NOT MACOS_NE)
     list(APPEND OVPN_SCRIPTS "${CMAKE_SOURCE_DIR}/deploy/data/macos/update-resolv-conf.sh")
     set_target_properties(${PROJECT} PROPERTIES

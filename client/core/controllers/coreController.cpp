@@ -1,6 +1,7 @@
 #include "coreController.h"
 
 #include <QDirIterator>
+#include <QJsonArray>
 #include <QTranslator>
 #include <QTimer>
 
@@ -16,6 +17,39 @@
     #include "core/utils/installedAppsImageProvider.h"
     #include "platforms/android/android_controller.h"
 #endif
+
+namespace {
+
+QString cliConnectionStateName(Vpn::ConnectionState state)
+{
+    switch (state) {
+    case Vpn::ConnectionState::Unknown: return QStringLiteral("unknown");
+    case Vpn::ConnectionState::Disconnected: return QStringLiteral("disconnected");
+    case Vpn::ConnectionState::Preparing: return QStringLiteral("preparing");
+    case Vpn::ConnectionState::Connecting: return QStringLiteral("connecting");
+    case Vpn::ConnectionState::Connected: return QStringLiteral("connected");
+    case Vpn::ConnectionState::Disconnecting: return QStringLiteral("disconnecting");
+    case Vpn::ConnectionState::Reconnecting: return QStringLiteral("reconnecting");
+    case Vpn::ConnectionState::Error: return QStringLiteral("error");
+    }
+    return QStringLiteral("unknown");
+}
+
+QJsonObject cliError(const CliControl::Request &request, const QString &error, int errorCode = 0)
+{
+    QJsonObject result {
+        { QStringLiteral("version"), 1 },
+        { QStringLiteral("ok"), false },
+        { QStringLiteral("command"), CliControl::commandName(request.command) },
+        { QStringLiteral("error"), error }
+    };
+    if (errorCode != 0) {
+        result.insert(QStringLiteral("errorCode"), errorCode);
+    }
+    return result;
+}
+
+} // namespace
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
@@ -358,6 +392,102 @@ void CoreController::openConnectionByIndex(int serverIndex)
         m_serversController->setDefaultServer(serverId);
     }
     m_connectionUiController->toggleConnection();
+}
+
+QJsonObject CoreController::handleCliControlRequest(const CliControl::Request &request)
+{
+    if (!request.isValid()) {
+        return cliError(request, request.error.isEmpty() ? QStringLiteral("invalid_request") : request.error);
+    }
+    if (!m_serversController || !m_connectionController) {
+        return cliError(request, QStringLiteral("not_ready"));
+    }
+
+    const auto currentState = [this]() { return m_connectionController->connectionState(); };
+    const auto status = [this, &currentState](const CliControl::Request &statusRequest) {
+        return QJsonObject {
+            { QStringLiteral("version"), 1 },
+            { QStringLiteral("ok"), true },
+            { QStringLiteral("command"), CliControl::commandName(statusRequest.command) },
+            { QStringLiteral("state"), cliConnectionStateName(currentState()) },
+            { QStringLiteral("serverId"), m_serversController->getDefaultServerId() }
+        };
+    };
+    const auto resolveServerId = [this](const QString &value) {
+        if (m_serversController->indexOfServerId(value) >= 0) {
+            return value;
+        }
+        bool isIndex = false;
+        const int index = value.toInt(&isIndex);
+        return isIndex ? m_serversController->getServerId(index) : QString();
+    };
+    const auto connectToServer = [this, &status, &resolveServerId](const CliControl::Request &connectRequest) {
+        const QString serverId = resolveServerId(connectRequest.serverId);
+        if (serverId.isEmpty()) {
+            return cliError(connectRequest, QStringLiteral("server_not_found"));
+        }
+        const ErrorCode supported = m_connectionController->isConnectionSupported(serverId);
+        if (supported != ErrorCode::NoError) {
+            return cliError(connectRequest, QStringLiteral("connection_not_supported"), static_cast<int>(supported));
+        }
+        m_serversController->setDefaultServer(serverId);
+        const ErrorCode opened = m_connectionController->openConnection(serverId);
+        if (opened != ErrorCode::NoError) {
+            return cliError(connectRequest, QStringLiteral("connect_failed"), static_cast<int>(opened));
+        }
+        QJsonObject result = status(connectRequest);
+        result.insert(QStringLiteral("state"), QStringLiteral("connecting"));
+        result.insert(QStringLiteral("serverId"), serverId);
+        return result;
+    };
+
+    switch (request.command) {
+    case CliControl::Command::Raise:
+        if (m_pageController) emit m_pageController->raiseMainWindow();
+        return status(request);
+    case CliControl::Command::Status:
+        return status(request);
+    case CliControl::Command::ListServers: {
+        QJsonArray servers;
+        const QString defaultServerId = m_serversController->getDefaultServerId();
+        for (int index = 0; index < m_serversController->getServersCount(); ++index) {
+            const QString serverId = m_serversController->getServerId(index);
+            servers.append(QJsonObject {
+                { QStringLiteral("id"), serverId },
+                { QStringLiteral("name"), m_serversController->notificationDisplayName(serverId) },
+                { QStringLiteral("default"), serverId == defaultServerId }
+            });
+        }
+        QJsonObject result = status(request);
+        result.insert(QStringLiteral("servers"), servers);
+        return result;
+    }
+    case CliControl::Command::Connect:
+        return connectToServer(request);
+    case CliControl::Command::Disconnect: {
+        if (currentState() == Vpn::ConnectionState::Disconnected) return status(request);
+        m_connectionController->closeConnection();
+        QJsonObject result = status(request);
+        result.insert(QStringLiteral("state"), QStringLiteral("disconnecting"));
+        return result;
+    }
+    case CliControl::Command::Toggle: {
+        const Vpn::ConnectionState state = currentState();
+        if (state == Vpn::ConnectionState::Connected || state == Vpn::ConnectionState::Connecting
+            || state == Vpn::ConnectionState::Preparing || state == Vpn::ConnectionState::Reconnecting) {
+            m_connectionController->closeConnection();
+            QJsonObject result = status(request);
+            result.insert(QStringLiteral("state"), QStringLiteral("disconnecting"));
+            return result;
+        }
+        CliControl::Request connectRequest = request;
+        connectRequest.serverId = request.serverId.isEmpty() ? m_serversController->getDefaultServerId() : request.serverId;
+        return connectToServer(connectRequest);
+    }
+    case CliControl::Command::Invalid:
+        return cliError(request, QStringLiteral("invalid_request"));
+    }
+    return cliError(request, QStringLiteral("invalid_request"));
 }
 
 void CoreController::importConfigFromData(const QString &data)
