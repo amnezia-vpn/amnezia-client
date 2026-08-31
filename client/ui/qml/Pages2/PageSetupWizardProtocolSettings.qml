@@ -206,6 +206,7 @@ PageType {
             TextFieldWithHeaderType {
                 id: port
 
+                visible: !isTProxy
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
@@ -284,8 +285,8 @@ PageType {
                 Layout.topMargin: 8
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-                text: qsTr("Needs a DNS A record and free host ports for HTTP (ACME) and HTTPS. Classic Telegram MTProxy links will not work.")
-                color: AmneziaStyle.color.mutedGray
+                text: qsTr("Needs a DNS A record and free, internet-reachable ports 443 (HTTPS) and 80 (ACME). If either port is busy or blocked, the proxy will not work. Classic Telegram MTProxy links will not work.")
+                color: AmneziaStyle.color.goldenApricot
                 wrapMode: Text.WordWrap
                 font.pixelSize: 12
             }
@@ -312,21 +313,13 @@ PageType {
                     if (isTProxy) {
                         tproxyHostname.errorText = ""
                         tproxyEmail.errorText = ""
-                        port.errorText = ""
 
                         var host = TProxyConfigModel.sanitizeHostnameFieldText(tproxyHostname.textField.text)
                         var email = TProxyConfigModel.sanitizeAcmeEmailFieldText(tproxyEmail.textField.text)
                         tproxyHostname.textField.text = host
                         tproxyEmail.textField.text = email
-                        port.textField.text = TProxyConfigModel.sanitizePortFieldText(port.textField.text)
 
                         var hasError = false
-                        var portErr = qsTr("The port must be in the range of 1 to 65535")
-
-                        // Empty port means "use the default" (443), consistent with the settings page.
-                        var portValue = port.textField.text === ""
-                            ? TProxyConfigModel.defaultPort()
-                            : port.textField.text
 
                         if (!TProxyConfigModel.isValidHostname(host)) {
                             tproxyHostname.errorText = qsTr("Enter a lowercase DNS hostname")
@@ -336,18 +329,14 @@ PageType {
                             tproxyEmail.errorText = qsTr("Enter a valid email for the TLS certificate")
                             hasError = true
                         }
-                        if (port.textField.text !== "" && !port.textField.acceptableInput) {
-                            port.errorText = portErr
-                            hasError = true
-                        }
                         if (hasError) {
                             return
                         }
 
-                        port.textField.text = portValue
+                        port.textField.text = TProxyConfigModel.defaultPort()
                         TProxyConfigModel.setHostname(host)
                         TProxyConfigModel.setAcmeEmail(email)
-                        TProxyConfigModel.setPort(portValue)
+                        TProxyConfigModel.setPort(TProxyConfigModel.defaultPort())
                         TProxyConfigModel.setHttpPort(TProxyConfigModel.defaultHttpPort())
                     } else if (!port.textField.acceptableInput &&
                             ContainerProps.containerTypeToString(dockerContainer) !== "torwebsite" &&

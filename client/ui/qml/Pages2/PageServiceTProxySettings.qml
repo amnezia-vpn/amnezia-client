@@ -773,51 +773,6 @@ PageType {
                     font.pixelSize: 12
                 }
 
-                TextFieldWithHeaderType {
-                    id: httpsPortTextField
-                    enabled: fieldsEditable
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.bottomMargin: 8
-                    headerText: qsTr("HTTPS port")
-                    textField.placeholderText: TProxyConfigModel.defaultPort()
-                    textField.maximumLength: 5
-                    textField.inputMethodHints: Qt.ImhDigitsOnly
-                    textField.validator: IntValidator { bottom: 1; top: 65535 }
-                    Component.onCompleted: {
-                        var savedPort = port
-                        textField.text = (savedPort === TProxyConfigModel.defaultPort()) ? "" : savedPort
-                    }
-                    textField.onTextChanged: {
-                        var cur = httpsPortTextField.textField.text
-                        var clean = TProxyConfigModel.sanitizePortFieldText(cur)
-                        if (clean !== cur) {
-                            textField.text = clean
-                            textField.cursorPosition = clean.length
-                        }
-                    }
-                    textField.onEditingFinished: {
-                        textField.text = TProxyConfigModel.sanitizePortFieldText(textField.text)
-                        if (textField.text !== "" && !httpsPortTextField.textField.acceptableInput) {
-                            httpsPortTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
-                        } else {
-                            httpsPortTextField.errorText = ""
-                        }
-                    }
-                }
-
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
-                    text: qsTr("Host ports are mapped to 80 and 443 inside the container. Include the HTTPS port in the Telegram WEB proxy link. Port 80 must stay reachable from the internet for the ACME (Let's Encrypt) certificate.")
-                    color: AmneziaStyle.color.mutedGray
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 12
-                }
-
                 CaptionTextType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
@@ -907,23 +862,15 @@ PageType {
                     clickedFunc: function () {
                         hostnameTextField.errorText = ""
                         emailTextField.errorText = ""
-                        httpsPortTextField.errorText = ""
 
                         var h = TProxyConfigModel.sanitizeHostnameFieldText(hostnameTextField.textField.text)
                         var e = TProxyConfigModel.sanitizeAcmeEmailFieldText(emailTextField.textField.text)
                         hostnameTextField.textField.text = h
                         emailTextField.textField.text = e
-                        httpsPortTextField.textField.text =
-                            TProxyConfigModel.sanitizePortFieldText(httpsPortTextField.textField.text)
 
                         var hasError = false
-                        var portErr = qsTr("The port must be in the range of 1 to 65535")
 
-                        var httpsPortValue = httpsPortTextField.textField.text === ""
-                            ? TProxyConfigModel.defaultPort()
-                            : httpsPortTextField.textField.text
-                        // HTTP port (ACME) is fixed to the default (80): Let's Encrypt HTTP-01
-                        // always hits :80, so it is not user-editable here.
+                        var httpsPortValue = TProxyConfigModel.defaultPort()
                         var httpPortValue = TProxyConfigModel.defaultHttpPort()
 
                         if (!TProxyConfigModel.isValidHostname(h)) {
@@ -933,11 +880,6 @@ PageType {
                         }
                         if (!TProxyConfigModel.isValidAcmeEmail(e)) {
                             emailTextField.errorText = qsTr("Enter a valid email for the TLS certificate")
-                            hasError = true
-                        }
-                        if (httpsPortTextField.textField.text !== ""
-                                && !httpsPortTextField.textField.acceptableInput) {
-                            httpsPortTextField.errorText = portErr
                             hasError = true
                         }
                         if (hasError) {
