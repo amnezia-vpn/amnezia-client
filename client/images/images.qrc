@@ -6,6 +6,10 @@
         <file>amneziaBigLogo.png</file>
         <file>AmneziaVPN.png</file>
         <file>controls/alert-circle.svg</file>
+        <file>update/updateHeroDark.jpg</file>
+        <file>update/plus-circle.svg</file>
+        <file>update/arrow-up-circle.svg</file>
+        <file>update/wrench.svg</file>
         <file>controls/amnezia.svg</file>
         <file>controls/app.svg</file>
         <file>controls/archive-restore.svg</file>
@@ -32,6 +36,7 @@
         <file>controls/gauge.svg</file>
         <file>controls/globe-2.svg</file>
         <file>controls/github.svg</file>
+        <file>controls/headphones.svg</file>
         <file>controls/help-circle.svg</file>
         <file>controls/history.svg</file>
         <file>controls/home.svg</file>

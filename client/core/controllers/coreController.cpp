@@ -293,9 +293,14 @@ void CoreController::initSignalHandlers()
         m_apiNewsUiController->fetchNews(false);
     }
 
-    #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-        m_updateController->checkForUpdates();
-    #endif    
+}
+
+void CoreController::checkForAppUpdates()
+{
+    if (!m_appSettingsRepository->isAutoUpdateCheckEnabled()) {
+        return;
+    }
+    m_updateController->checkForUpdates();
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
