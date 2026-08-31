@@ -22,7 +22,6 @@
 #include "logger.h"
 #include "platforms/windows/daemon/windowsfirewall.h"
 #include "platforms/windows/daemon/windowssplittunnel.h"
-#include "platforms/windows/daemon/windowssplittunnelcontracts.h"
 #include "windowsfirewall.h"
 
 #include "core/utils/networkUtilities.h"
@@ -54,9 +53,15 @@ WindowsDaemon::~WindowsDaemon() {
 void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAdapterIndex) {
   // Before creating the interface we need to check which adapter
   // routes to the server endpoint
+  m_serverEndpoint = QHostAddress(config.m_serverIpv4AddrIn);
+  if (m_serverEndpoint.isNull()) {
+    m_serverEndpoint = QHostAddress(config.m_serverIpv6AddrIn);
+  }
   if (inetAdapterIndex == 0) {
-      auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
-      m_inetAdapterIndex = NetworkUtilities::AdapterIndexTo(serveraddr);
+      m_inetAdapterIndex =
+          m_serverEndpoint.protocol() == QAbstractSocket::IPv4Protocol
+              ? NetworkUtilities::AdapterIndexTo(m_serverEndpoint)
+              : -1;
   } else {
       m_inetAdapterIndex = inetAdapterIndex;
   }
@@ -72,7 +77,8 @@ void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
     }
 
   if (config.m_vpnDisabledApps.length() > 0) {
-      if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex)) {
+      if (!m_splitTunnelManager->start(m_serverEndpoint, m_inetAdapterIndex,
+                                       vpnAdapterIndex)) {
           logger.error() << "Failed to start split tunnel";
           emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
           return;
@@ -82,7 +88,7 @@ void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
           emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
           return;
       }
-      if (!m_splitTunnelManager->isRunning()) {
+      if (!m_splitTunnelManager->isOperational()) {
           logger.error() << "Split tunnel did not reach running state";
           emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
       }
@@ -112,7 +118,7 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     prepareActivation(config);
   }
   if (config.m_vpnDisabledApps.length() > 0) {
-    if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
+    if (!m_splitTunnelManager->start(m_serverEndpoint, m_inetAdapterIndex)) {
       logger.error() << "Split tunnel start failed";
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
       return false;
@@ -123,7 +129,7 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
       return false;
     };
     // Now the driver should be running (State == 4)
-    if (!m_splitTunnelManager->isRunning()) {
+    if (!m_splitTunnelManager->isOperational()) {
       logger.error() << "Split tunnel did not reach running state";
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
       return false;
