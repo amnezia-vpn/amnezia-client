@@ -71,6 +71,7 @@ QMap<Proto, QString> ProtocolUtils::protocolHumanNames()
              { Proto::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
              { Proto::MtProxy, QObject::tr("MTProxy (Telegram)") },
              { Proto::Telemt, QObject::tr("Telemt (Telegram)") },
+             { Proto::TProxy, QObject::tr("TProxy (Telegram WEB)") },
     };
 }
 
@@ -97,6 +98,7 @@ ServiceType ProtocolUtils::protocolService(Proto p)
     case Proto::Socks5Proxy: return ServiceType::Other;
     case Proto::MtProxy: return ServiceType::Other;
     case Proto::Telemt: return ServiceType::Other;
+    case Proto::TProxy: return ServiceType::Other;
     default: return ServiceType::Other;
     }
 }
@@ -111,6 +113,7 @@ int ProtocolUtils::getPortForInstall(Proto p)
         return QRandomGenerator::global()->bounded(30000, 50000);
     case MtProxy:
     case Telemt:
+    case TProxy:
     default:
         return defaultPort(p);
     }
@@ -132,6 +135,7 @@ int ProtocolUtils::defaultPort(Proto p)
     case Proto::Socks5Proxy: return 38080;
     case Proto::MtProxy: return QString(protocols::mtProxy::defaultPort).toInt();
     case Proto::Telemt: return QString(protocols::telemt::defaultPort).toInt();
+    case Proto::TProxy: return QString(protocols::tProxy::defaultPort).toInt();
     default: return -1;
     }
 }
@@ -152,6 +156,7 @@ bool ProtocolUtils::defaultPortChangeable(Proto p)
     case Proto::Socks5Proxy: return true;
     case Proto::MtProxy: return true;
     case Proto::Telemt: return true;
+    case Proto::TProxy: return true;
     default: return false;
     }
 }
@@ -174,6 +179,7 @@ TransportProto ProtocolUtils::defaultTransportProto(Proto p)
     case Proto::Socks5Proxy: return TransportProto::Tcp;
     case Proto::MtProxy: return TransportProto::Tcp;
     case Proto::Telemt: return TransportProto::Tcp;
+    case Proto::TProxy: return TransportProto::Tcp;
     default: return TransportProto::Udp;
     }
 }
@@ -195,6 +201,7 @@ bool ProtocolUtils::defaultTransportProtoChangeable(Proto p)
     case Proto::Socks5Proxy: return false;
     case Proto::MtProxy: return false;
     case Proto::Telemt: return false;
+    case Proto::TProxy: return false;
     default: return false;
     }
 }

@@ -54,6 +54,9 @@ ListViewType {
                     } else if (isTelemt) {
                         TelemtConfigModel.updateModel(config)
                         PageController.goToPage(PageEnum.PageServiceTelemtSettings, false)
+                    } else if (isTProxy) {
+                        TProxyConfigModel.updateModel(config)
+                        PageController.goToPage(PageEnum.PageServiceTProxySettings, false)
                     } else {
                         InstallController.updateProtocols(ServersUiController.processedServerId, containerIndex)
                         PageController.goToPage(PageEnum.PageSettingsServerProtocol)
