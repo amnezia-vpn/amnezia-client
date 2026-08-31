@@ -22,6 +22,7 @@
 
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QMetaObject>
 #include <QNetworkInterface>
 #include <QScopeGuard>
 #include <QUrl>
@@ -127,6 +128,7 @@ constexpr static const auto MV_SERVICE_NAME = L"MullvadVPN";
 
 namespace {
 Logger logger("WindowsSplitTunnel");
+constexpr int AddressRefreshRetryIntervalMs = 1000;
 
 ProcessInfo getProcessInfo(HANDLE process, const PROCESSENTRY32W& processMeta) {
   ProcessInfo pi;
@@ -162,6 +164,11 @@ QString normalizeExecutablePath(const QString& path) {
 }
 
 }  // namespace
+
+struct WindowsSplitTunnel::NotificationContext {
+  SRWLOCK lock = SRWLOCK_INIT;
+  WindowsSplitTunnel* target = nullptr;
+};
 
 std::unique_ptr<WindowsSplitTunnel> WindowsSplitTunnel::create(
     WindowsFirewall* fw) {
@@ -279,13 +286,32 @@ bool WindowsSplitTunnel::initDriver(HANDLE driverIO) {
   return true;
 }
 
-WindowsSplitTunnel::WindowsSplitTunnel(HANDLE driverIO) : m_driver(driverIO) {
+WindowsSplitTunnel::WindowsSplitTunnel(HANDLE driverIO)
+    : QObject(nullptr), m_driver(driverIO), m_addressRefreshTimer(this) {
   logger.debug() << "Connected to the Driver";
+
+  m_addressRefreshTimer.setSingleShot(true);
+  m_addressRefreshTimer.setInterval(250);
+  connect(&m_addressRefreshTimer, &QTimer::timeout, this, [this]() {
+    const bool refreshSucceeded =
+        !m_addressMonitoringActive || registerIPConfiguration(false);
+    if (!refreshSucceeded) {
+      logger.error() << "Failed to refresh split-tunnel network addresses";
+      if (m_addressMonitoringActive && m_addressRefreshRetryAttempts < 3) {
+        ++m_addressRefreshRetryAttempts;
+        m_addressRefreshTimer.start(AddressRefreshRetryIntervalMs);
+      }
+      return;
+    }
+    m_addressRefreshRetryAttempts = 0;
+  });
 
   Q_ASSERT(getState() == STATE_INITIALIZED);
 }
 
 WindowsSplitTunnel::~WindowsSplitTunnel() {
+  m_addressMonitoringActive = false;
+  stopAddressMonitoring();
   CloseHandle(m_driver);
   uninstallDriver();
 }
@@ -325,6 +351,15 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   logger.debug() << "Starting SplitTunnel";
   DWORD bytesReturned;
 
+  m_addressMonitoringActive = false;
+  stopAddressMonitoring();
+  m_inetAdapterIndex = inetAdapterIndex;
+  m_vpnAdapterIndex = vpnAdapterIndex;
+  auto failedStart = qScopeGuard([this]() {
+    m_addressMonitoringActive = false;
+    stopAddressMonitoring();
+  });
+
   if (getState() == STATE_STARTED) {
     logger.debug() << "Driver needs Init Call";
     DWORD bytesReturned;
@@ -334,6 +369,7 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
       logger.error() << "Driver init failed. Error:" << GetLastError();
       return false;
     }
+    m_lastIPConfiguration.clear();
   }
 
   // Process Info (what is running already)
@@ -361,24 +397,23 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
   }
   logger.debug() << "Driver is  ready || new State:" << stateString();
 
-  auto config = generateIPConfiguration(inetAdapterIndex, vpnAdapterIndex);
-  if (config.empty()) {
-    logger.error() << "Network configuration blob is empty. Internet adapter:"
-                   << inetAdapterIndex << "VPN adapter:" << vpnAdapterIndex;
+  if (!startAddressMonitoring()) {
     return false;
   }
-  auto ok = DeviceIoControl(m_driver, IOCTL_REGISTER_IP_ADDRESSES, &config[0],
-                            (DWORD)config.size(), nullptr, 0, &bytesReturned,
-                            nullptr);
-  if (!ok) {
-    logger.error() << "Failed to set Network Config. Error:" << GetLastError();
+  if (!registerIPConfiguration(true)) {
+    logger.error() << "Failed to register initial split-tunnel addresses";
     return false;
   }
-  logger.debug() << "New Network Config Applied || new State:" << stateString();
+  m_addressMonitoringActive = true;
+  failedStart.dismiss();
   return true;
 }
 
 void WindowsSplitTunnel::stop() {
+  m_addressMonitoringActive = false;
+  stopAddressMonitoring();
+  m_lastIPConfiguration.clear();
+
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_CLEAR_CONFIGURATION, nullptr, 0,
                             nullptr, 0, &bytesReturned, nullptr);
@@ -530,6 +565,144 @@ bool WindowsSplitTunnel::getAddress(int adapterIndex, IN_ADDR* out_ipv4,
     logger.debug() << "Ipv6 Conversation error" << WSAGetLastError();
   }
   return true;
+}
+
+bool WindowsSplitTunnel::registerIPConfiguration(bool force) {
+  auto config =
+      generateIPConfiguration(m_inetAdapterIndex, m_vpnAdapterIndex);
+  if (config.empty()) {
+    logger.error() << "Network configuration blob is empty. Internet adapter:"
+                   << m_inetAdapterIndex << "VPN adapter:"
+                   << m_vpnAdapterIndex;
+    return false;
+  }
+  if (!force && config == m_lastIPConfiguration) {
+    return true;
+  }
+
+  DWORD bytesReturned = 0;
+  const auto ok = DeviceIoControl(
+      m_driver, IOCTL_REGISTER_IP_ADDRESSES, config.data(),
+      static_cast<DWORD>(config.size()), nullptr, 0, &bytesReturned, nullptr);
+  if (!ok) {
+    logger.error() << "Failed to set Network Config. Error:" << GetLastError();
+    return false;
+  }
+  m_lastIPConfiguration = std::move(config);
+  logger.debug() << "New Network Config Applied || new State:" << stateString();
+  return true;
+}
+
+bool WindowsSplitTunnel::startAddressMonitoring() {
+  if (m_notificationContext != nullptr) {
+    return true;
+  }
+
+  auto context = std::make_unique<NotificationContext>();
+  context->target = this;
+  m_notificationContext = context.release();
+
+  DWORD result = NotifyRouteChange2(AF_UNSPEC, routeChangeCallback,
+                                    m_notificationContext, FALSE,
+                                    &m_routeChangeHandle);
+  if (result == NO_ERROR) {
+    result = NotifyUnicastIpAddressChange(
+        AF_UNSPEC, addressChangeCallback, m_notificationContext, FALSE,
+        &m_addressChangeHandle);
+  }
+  if (result == NO_ERROR) {
+    result = NotifyIpInterfaceChange(AF_UNSPEC, interfaceChangeCallback,
+                                     m_notificationContext, FALSE,
+                                     &m_interfaceChangeHandle);
+  }
+  if (result != NO_ERROR) {
+    logger.error() << "Failed to monitor network address changes:" << result;
+    stopAddressMonitoring();
+    return false;
+  }
+  return true;
+}
+
+void WindowsSplitTunnel::stopAddressMonitoring() {
+  m_addressRefreshTimer.stop();
+  m_addressRefreshRetryAttempts = 0;
+
+  NotificationContext* context = m_notificationContext;
+  if (context != nullptr) {
+    AcquireSRWLockExclusive(&context->lock);
+    context->target = nullptr;
+    ReleaseSRWLockExclusive(&context->lock);
+  }
+
+  bool allCancelled = true;
+  auto cancel = [&allCancelled](HANDLE& handle) {
+    if (handle == nullptr) {
+      return;
+    }
+    const DWORD result = CancelMibChangeNotify2(handle);
+    if (result != NO_ERROR) {
+      logger.error() << "Failed to cancel network change notification:"
+                     << result;
+      allCancelled = false;
+    }
+    handle = nullptr;
+  };
+  cancel(m_interfaceChangeHandle);
+  cancel(m_addressChangeHandle);
+  cancel(m_routeChangeHandle);
+
+  m_notificationContext = nullptr;
+  if (allCancelled) {
+    delete context;
+  } else if (context != nullptr) {
+    logger.error()
+        << "Retaining disabled network callback context after cancel failure";
+  }
+}
+
+void WindowsSplitTunnel::scheduleAddressRefresh() {
+  QMetaObject::invokeMethod(
+      this,
+      [this]() {
+        m_addressRefreshRetryAttempts = 0;
+        if (m_addressMonitoringActive && !m_addressRefreshTimer.isActive()) {
+          m_addressRefreshTimer.start();
+        }
+      },
+      Qt::QueuedConnection);
+}
+
+void WindowsSplitTunnel::dispatchAddressRefresh(PVOID context) {
+  auto notification = static_cast<NotificationContext*>(context);
+  if (notification == nullptr) {
+    return;
+  }
+  AcquireSRWLockShared(&notification->lock);
+  if (notification->target != nullptr) {
+    notification->target->scheduleAddressRefresh();
+  }
+  ReleaseSRWLockShared(&notification->lock);
+}
+
+void CALLBACK WindowsSplitTunnel::routeChangeCallback(
+    PVOID context, PMIB_IPFORWARD_ROW2 row, MIB_NOTIFICATION_TYPE type) {
+  Q_UNUSED(row);
+  Q_UNUSED(type);
+  dispatchAddressRefresh(context);
+}
+
+void CALLBACK WindowsSplitTunnel::addressChangeCallback(
+    PVOID context, PMIB_UNICASTIPADDRESS_ROW row, MIB_NOTIFICATION_TYPE type) {
+  Q_UNUSED(row);
+  Q_UNUSED(type);
+  dispatchAddressRefresh(context);
+}
+
+void CALLBACK WindowsSplitTunnel::interfaceChangeCallback(
+    PVOID context, PMIB_IPINTERFACE_ROW row, MIB_NOTIFICATION_TYPE type) {
+  Q_UNUSED(row);
+  Q_UNUSED(type);
+  dispatchAddressRefresh(context);
 }
 
 std::vector<uint8_t> WindowsSplitTunnel::generateProcessBlob() {

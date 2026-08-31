@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "platforms/windows/daemon/windowsfirewall.h"
 #include "platforms/windows/daemon/windowssplittunnel.h"
+#include "platforms/windows/daemon/windowssplittunnelcontracts.h"
 #include "windowsfirewall.h"
 
 #include "core/utils/networkUtilities.h"
@@ -106,6 +107,9 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
   if (op == Down) {
     m_splitTunnelManager->stop();
     return true;
+  }
+  if (op == Switch) {
+    prepareActivation(config);
   }
   if (config.m_vpnDisabledApps.length() > 0) {
     if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
