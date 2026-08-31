@@ -790,6 +790,12 @@ QStringList SubscriptionController::availableProtocols(const QString &serverId) 
         }
         break;
     }
+
+    if (apiV2->isFree()) {
+        protocols.push_back("awg");
+        protocols.push_back("vless");
+    }
+
     return protocols;
 }
 
