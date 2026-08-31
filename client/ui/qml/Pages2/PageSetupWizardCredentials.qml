@@ -147,6 +147,8 @@ PageType {
             CardWithIconsType {
                 id: hostLink
 
+                visible: (Qt.platform.os === "linux" || Qt.platform.os === "windows" || Qt.platform.os === "osx")
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
