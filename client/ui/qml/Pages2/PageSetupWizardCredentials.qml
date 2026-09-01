@@ -65,14 +65,17 @@ PageType {
                 headerText: title
                 textField.echoMode: hideContent ? TextInput.Password : TextInput.Normal
                 textField.placeholderText: placeholderContent
-                textField.text: textField.text
 
-                rightButtonClickedOnEnter: true
+                rightButtonClickedOnEnter: false
 
                 clickedFunc: function () {
-                    clickedHandler()
-                    buttonImageSource = textField.text !== "" ? imageSource : ""
+                    if (clickedHandler) {
+                        clickedHandler()
+                        buttonImageSource = textField.text !== "" ? imageSource : ""
+                    }
                 }
+
+                textField.onAccepted: root.submit()
 
                 textField.onFocusChanged: {
                     textField.text = textField.text.replace(/^\s+|\s+$/g, '')
@@ -112,25 +115,7 @@ PageType {
                 text: qsTr("Continue")
 
                 clickedFunc: function() {
-                    if (!root.isCredentialsFilled()) {
-                        return
-                    }
-
-                    var _hostname = listView.itemAtIndex(vars.hostnameIndex).children[0].textField.text
-                    var _username = listView.itemAtIndex(vars.usernameIndex).children[0].textField.text
-                    var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0].textField.text
-
-                    InstallController.setProcessedServerCredentials(_hostname, _username, _secretData)
-                    ServersUiController.setProcessedServerId("")
-
-                    PageController.showBusyIndicator(true)
-                    var isConnectionOpened = InstallController.checkSshConnection()
-                    PageController.showBusyIndicator(false)
-                    if (!isConnectionOpened) {
-                        return
-                    }
-
-                    PageController.goToPage(PageEnum.PageSetupWizardEasy)
+                    root.submit()
                 }
             }
 
@@ -166,6 +151,28 @@ PageType {
                 Keys.onReturnPressed: this.clicked()
             }
         }
+    }
+
+    function submit() {
+        if (!root.isCredentialsFilled()) {
+            return
+        }
+
+        var _hostname = listView.itemAtIndex(vars.hostnameIndex).children[0].textField.text
+        var _username = listView.itemAtIndex(vars.usernameIndex).children[0].textField.text
+        var _secretData = listView.itemAtIndex(vars.secretDataIndex).children[0].textField.text
+
+        InstallController.setProcessedServerCredentials(_hostname, _username, _secretData)
+        ServersUiController.setProcessedServerId("")
+
+        PageController.showBusyIndicator(true)
+        var isConnectionOpened = InstallController.checkSshConnection()
+        PageController.showBusyIndicator(false)
+        if (!isConnectionOpened) {
+            return
+        }
+
+        PageController.goToPage(PageEnum.PageSetupWizardEasy)
     }
 
     function isCredentialsFilled() {
