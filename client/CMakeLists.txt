@@ -40,6 +40,10 @@ if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(PACKAGES ${PACKAGES} Widgets)
 endif()
 
+if(LINUX AND NOT ANDROID)
+    list(APPEND PACKAGES QuickTemplates2 QmlModels OpenGL)
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 find_package(OpenSSL REQUIRED)
 
@@ -56,6 +60,23 @@ endif()
 
 qt_standard_project_setup()
 qt_add_executable(${PROJECT} MANUAL_FINALIZATION)
+
+if(LINUX AND NOT ANDROID)
+    target_link_options(${PROJECT} PRIVATE "-Wl,--no-as-needed")
+    target_link_options(${PROJECT} PRIVATE "LINKER:--disable-new-dtags")
+    set_target_properties(${PROJECT} PROPERTIES
+        BUILD_RPATH "\$ORIGIN/../lib"
+        INSTALL_RPATH "\$ORIGIN/../lib"
+        INSTALL_RPATH_USE_LINK_PATH FALSE
+    )
+    set_property(TARGET ${PROJECT} PROPERTY BUILD_WITH_INSTALL_RPATH TRUE)
+
+    target_link_libraries(${PROJECT} PRIVATE
+        Qt6::QuickTemplates2
+        Qt6::QmlModels
+        Qt6::OpenGL
+    )
+endif()
 target_include_directories(${PROJECT} PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
@@ -227,6 +248,17 @@ endif()
 list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
 
 target_link_libraries(${PROJECT} PRIVATE ${LIBS})
+
+if(LINUX AND NOT ANDROID)
+    target_link_libraries(${PROJECT} PRIVATE
+        "-Wl,--push-state,--no-as-needed"
+        Qt6::QuickTemplates2
+        Qt6::QmlModels
+        Qt6::OpenGL
+        "-Wl,--pop-state"
+    )
+endif()
+
 target_compile_definitions(${PROJECT} PRIVATE "MZ_$<UPPER_CASE:${MZ_PLATFORM_NAME}>")
 
 target_sources(${PROJECT} PRIVATE ${SOURCES} ${HEADERS} ${RESOURCES} ${QRC} ${I18NQRC})
