@@ -84,7 +84,11 @@ PageType {
             }
 
             PageController.showBusyIndicator(false)
-            
+
+            if (!ExportController.config || ExportController.config.length === 0) {
+                return
+            }
+
             var headerText = qsTr("Connection to ") + serverSelector.text
             var configContentHeaderText = qsTr("File with connection settings to ") + serverSelector.text
             PageController.goToShareConnectionPage(headerText, configContentHeaderText, configCaption, configExtension, configFileName)
