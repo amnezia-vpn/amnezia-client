@@ -31,6 +31,41 @@ ImportUiController::ImportUiController(ImportController* importController, QObje
     connect(m_importController, &ImportController::restoreAppConfig, this, &ImportUiController::restoreAppConfig);
 }
 
+bool ImportUiController::importLink(const QUrl &url)
+{
+    auto result = m_importController->importLink(url);
+
+    if (result.errorCode != ErrorCode::NoError) {
+        emit importErrorOccurred(result.errorCode, false);
+        return false;
+    }
+
+    m_config = result.config;
+    m_configFileName = result.configFileName;
+    m_maliciousWarningText = result.maliciousWarningText;
+    m_isNativeWireGuardConfig = result.isNativeWireGuardConfig;
+
+    return true;
+}
+
+bool ImportUiController::editServerConfigWithData(const QString &serverId, QString data)
+{
+    auto result = m_importController->editServerConfigWithData(serverId, data, m_config);
+
+    if (result.errorCode != ErrorCode::NoError) {
+        emit importErrorOccurred(result.errorCode, false);
+        return false;
+    }
+
+    m_config = result.config;
+    m_configFileName = result.configFileName;
+    m_maliciousWarningText = result.maliciousWarningText;
+    m_isNativeWireGuardConfig = result.isNativeWireGuardConfig;
+
+    return true;
+}
+
+
 bool ImportUiController::extractConfigFromFile(const QString &fileName)
 {
     QString data;

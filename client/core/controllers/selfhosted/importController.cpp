@@ -11,6 +11,9 @@
 #include <QRegularExpressionMatch>
 #include <QRegularExpressionMatchIterator>
 #include <QUrl>
+#include <QUrlQuery>
+#include <QEventLoop>
+#include <QTimer>
 #include <algorithm>
 
 #include "core/utils/containerEnum.h"
@@ -375,6 +378,229 @@ int ImportController::qrChunksReceived() const
 int ImportController::qrChunksTotal() const
 {
     return m_totalQrCodeChunksCount;
+}
+
+ImportController::ImportResult ImportController::importLink(const QUrl &url)
+{
+    ImportResult result;
+
+    if (!url.isValid()) {
+        qWarning() << "Invalid URL:" << url;
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QNetworkAccessManager manager;
+
+    QNetworkRequest request(url);
+    request.setRawHeader("User-Agent", "v2rayN/7.10");
+    request.setRawHeader("Accept", "*/*");
+    request.setRawHeader("Accept-Encoding", "identity");
+    request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+
+    QNetworkReply *reply = manager.get(request);
+
+    QEventLoop loop;
+    QTimer timer;
+
+    timer.setSingleShot(true);
+
+    bool timedOut = false;
+
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    QObject::connect(&timer, &QTimer::timeout, &loop, [&]() {
+        timedOut = true;
+        reply->abort();
+        loop.quit();
+    });
+
+    timer.start(10000);
+    loop.exec();
+
+    if (timedOut) {
+        qWarning() << "Request timed out";
+        reply->deleteLater();
+
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    int status = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    qDebug() << "HttpStatusCode:" << status;
+    qDebug() << "Reason:" << reply->attribute(QNetworkRequest::HttpReasonPhraseAttribute);
+
+    QByteArray data = reply->readAll();
+    reply->deleteLater();
+
+    if (data.isEmpty()) {
+        qWarning() << "Empty response";
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QByteArray decoded;
+    QString text = QString::fromUtf8(data).trimmed();
+
+    if (text.startsWith("<!DOCTYPE") || text.startsWith("<html")) {
+        result.errorCode = ErrorCode::UnknownError;
+        return result;
+    }
+
+    bool looksLikeSubscription = text.contains("vmess://") || text.contains("vless://") || text.contains("trojan://")
+            || text.contains("ss://") || text.contains("ssd://");
+
+    if (!looksLikeSubscription) {
+        QByteArray decoded = QByteArray::fromBase64(data);
+        QString decodedText = QString::fromUtf8(decoded).trimmed();
+
+        bool looksLikeSubscription2 = decodedText.contains("vmess://") || decodedText.contains("vless://")
+                || decodedText.contains("trojan://") || decodedText.contains("ss://") || decodedText.contains("ssd://");
+
+        if (looksLikeSubscription2)
+            text = decodedText;
+    }
+
+    if (isValidBase64(data)) {
+        decoded = QByteArray::fromBase64(data);
+        text = QString::fromUtf8(decoded).trimmed();
+    } else {
+        data.replace('\r', "");
+        text = QString::fromUtf8(data).trimmed();
+    }
+
+    if (text.isEmpty()) {
+        qWarning() << "Decoded text is empty";
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QStringList configs = text.split('\n', Qt::SkipEmptyParts);
+
+    QJsonArray configStrings;
+    QJsonArray configNames;
+
+    for (const QString &cfg : configs) {
+
+        bool supported = true;
+
+        if (!(cfg.startsWith("vless://") || cfg.startsWith("vmess://") || cfg.startsWith("trojan://")
+              || cfg.startsWith("ss://") || cfg.startsWith("ssd://"))) {
+            supported = false;
+            qWarning() << "Unknown protocol:" << cfg.left(20);
+            continue;
+        }
+
+        QUrl url(cfg);
+        QUrlQuery query(url);
+
+        QString name = QUrl::fromPercentEncoding(url.fragment().toUtf8());
+
+        name.isEmpty() ? name = "Unnamed" : name = "[" + name.contains(" /") ? name.replace(" /", "]") : "]";
+
+        if (!name.contains("v2ray") && supported) {
+            configStrings.append(cfg);
+            configNames.append(name);
+        } else {
+            qWarning() << "Config unsupported";
+        }
+    }
+
+    if (configStrings.isEmpty()) {
+        qWarning() << "No valid configs found";
+        result.errorCode = ErrorCode::ImportInvalidConfigError;
+        return result;
+    }
+
+    QString firstConfig = configStrings.first().toString();
+    result = extractConfigFromData(firstConfig);
+
+    QJsonObject serverConfig;
+
+    for (auto it = result.config.begin(); it != result.config.end(); ++it) {
+        serverConfig.insert(it.key(), it.value());
+    }
+
+    serverConfig.insert(configKey::description, m_serversRepository->nextAvailableServerName());
+    serverConfig[configKey::xraySubscriptionLink] = url.toString();
+    serverConfig[configKey::xraySubscriptionConfig] = configStrings;
+    serverConfig[configKey::xraySubscriptionConfigName] = configNames;
+    serverConfig[configKey::xraySubscriptionConfigCurrent] = 0;
+
+    result.config = serverConfig;
+
+    return result;
+}
+
+ImportController::ImportResult ImportController::editServerConfigWithData(const QString &serverId, QString data, const QJsonObject &uiConfig)
+{
+    ImportResult result = extractConfigFromData(data);
+
+    if (result.errorCode != ErrorCode::NoError)
+        return result;
+
+    QJsonObject editedConfig = result.config;
+
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    switch (kind) {
+    case serverConfigUtils::ConfigType::XRaySubscription: {
+        auto cfg = m_serversRepository->xraySubscriptionConfig(serverId);
+        if (!cfg.has_value()) {
+            result.errorCode = ErrorCode::ImportInvalidConfigError;
+            break;
+        }
+
+        QJsonObject currentConfig = cfg->toJson();
+
+        for (auto it = uiConfig.begin(); it != uiConfig.end(); ++it) {
+            editedConfig.insert(it.key(), it.value());
+        }
+
+        editedConfig.insert(configKey::description, currentConfig.value(configKey::description));
+        editedConfig.insert(configKey::xraySubscriptionLink, currentConfig.value(configKey::xraySubscriptionLink));
+        editedConfig.insert(configKey::xraySubscriptionConfig, currentConfig.value(configKey::xraySubscriptionConfig));
+        editedConfig.insert(configKey::xraySubscriptionConfigName,
+                            currentConfig.value(configKey::xraySubscriptionConfigName));
+        editedConfig.insert(configKey::xraySubscriptionConfigCurrent,
+                            currentConfig.value(configKey::xraySubscriptionConfigCurrent));
+
+        m_serversRepository->editServer(serverId, editedConfig, kind);
+
+        break;
+    }
+    case serverConfigUtils::ConfigType::Invalid:
+    default: result.errorCode = ErrorCode::ImportInvalidConfigError;
+    }
+
+    result.config = editedConfig;
+
+    return result;
+}
+
+bool ImportController::isValidBase64(const QByteArray &input)
+{
+    QByteArray data = input;
+    data = data.trimmed();
+
+    if (data.isEmpty())
+        return false;
+
+    static QRegularExpression base64Regex("^[A-Za-z0-9+/=_\\r\\n-]+$");
+
+    if (!base64Regex.match(QString::fromLatin1(data)).hasMatch())
+        return false;
+
+    data.replace("\r", "");
+    data.replace("\n", "");
+
+    if (data.size() % 4 != 0)
+        return false;
+
+    QByteArray decoded = QByteArray::fromBase64(data, QByteArray::Base64UrlEncoding);
+
+    if (decoded.isEmpty())
+        decoded = QByteArray::fromBase64(data);
+
+    return !decoded.isEmpty();
 }
 
 void ImportController::importConfig(const QJsonObject &config)

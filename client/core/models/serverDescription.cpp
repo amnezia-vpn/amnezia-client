@@ -134,6 +134,20 @@ ServerDescription buildServerDescription(const NativeServerConfig &server, bool 
     return row;
 }
 
+ServerDescription buildServerDescription(const XRaySubscriptionConfig &server, bool isAmneziaDnsEnabled)
+{
+    ServerDescription row = buildBaseDescription(server);
+    row.hasWriteAccess = false;
+    row.isXRaySubscription = true;
+
+    row.serverName = server.displayName;
+    row.baseDescription = getBaseDescription(server.containers, isAmneziaDnsEnabled, row.hasWriteAccess, row.primaryDnsIsAmnezia);
+
+    row.expandedServerDescription = row.baseDescription + server.configName.at(server.currentConfig).toString();
+    row.collapsedServerDescription = row.baseDescription + server.configName.at(server.currentConfig).toString();
+    return row;
+}
+
 ServerDescription buildServerDescription(const LegacyApiServerConfig &server, bool /*isAmneziaDnsEnabled*/)
 {
     ServerDescription row = buildBaseDescription(server);
