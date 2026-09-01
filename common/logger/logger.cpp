@@ -153,6 +153,8 @@ bool Logger::runNetworkDiagnostics()
     });
 #elif defined(Q_OS_ANDROID)
     return saveNetworkDiagnosticsResult(AndroidController::instance()->runNetworkDiagnostics());
+#elif defined(Q_OS_IOS)
+    return saveNetworkDiagnosticsResult(QString::fromStdString(AmneziaVPN::swiftRunNetworkDiagnostics()));
 #else
     return false;
 #endif
