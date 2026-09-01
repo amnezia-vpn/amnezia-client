@@ -86,6 +86,7 @@ PageType {
     property list<QtObject> serverActions: [
         check,
         reboot,
+        deviceCountObject,
         remove,
         clear,
         reset,
@@ -132,6 +133,22 @@ PageType {
             }
 
             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
+
+    QtObject {
+        id: deviceCountObject
+
+        property bool isVisible: ServersModel.getProcessedServerData("isServerFromTelegramApi")
+        readonly property string title: qsTr("Active Connections")
+        readonly property string description: qsTr("Manage currently connected devices: " + ApiAccountInfoModel.data("connectedDevices"))
+        readonly property var tColor: AmneziaStyle.color.lightGray
+        readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
+        readonly property bool isRichText: false
+        readonly property var clickedHandler: function() {
+            // ApiSettingsController.updateApiCountryModel()
+            // ApiSettingsController.updateApiDevicesModel()
+            PageController.goToPage(PageEnum.PageSettingsApiDevices)
         }
     }
 
