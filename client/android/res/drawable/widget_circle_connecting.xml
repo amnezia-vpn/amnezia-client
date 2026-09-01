@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Border ring -->
+    <item>
+        <shape android:shape="oval">
+            <stroke android:width="2dp" android:color="#FF5C6BC0" />
+            <solid android:color="@android:color/transparent" />
+            <size android:width="64dp" android:height="64dp" />
+        </shape>
+    </item>
+    <!-- Inner filled circle -->
+    <item android:left="6dp" android:top="6dp" android:right="6dp" android:bottom="6dp">
+        <shape android:shape="oval">
+            <solid android:color="#FF5C6BC0" />
+            <size android:width="48dp" android:height="48dp" />
+        </shape>
+    </item>
+</layer-list>
