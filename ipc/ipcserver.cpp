@@ -28,6 +28,42 @@ IpcServer::IpcServer(QObject *parent) : IpcInterfaceSource(parent)
     connect(&m_pingHelper, &PingHelper::connectionLose, this, &IpcServer::connectionLose);
 }
 
+IpcServer::~IpcServer()
+{
+}
+
+void IpcServer::resetServiceState()
+{
+    qDebug() << "IpcServer::resetServiceState — tearing down active VPN state";
+
+    Xray::getInstance().stopXray();
+
+    for (auto it = m_processes.cbegin(); it != m_processes.cend(); ++it) {
+        const ProcessDescriptor &pd = it.value();
+        if (!pd.ipcProcess)
+            continue;
+        pd.ipcProcess->terminate();
+        if (!pd.ipcProcess->waitForFinished(1000)) {
+            pd.ipcProcess->kill();
+            pd.ipcProcess->waitForFinished(1000);
+        }
+        pd.ipcProcess->close();
+    }
+    m_processes.clear();
+
+    Utils::killProcessByName(Utils::tun2socksPath());
+    Utils::killProcessByName(Utils::openVpnExecPath());
+
+    KillSwitch::instance()->disableKillSwitch();
+
+    Router::restoreResolvers();
+    Router::clearSavedRoutes();
+    Router::StartRoutingIpv6();
+    Router::flushDns();
+
+    m_pingHelper.stop();
+}
+
 int IpcServer::createPrivilegedProcess()
 {
 #ifdef MZ_DEBUG
