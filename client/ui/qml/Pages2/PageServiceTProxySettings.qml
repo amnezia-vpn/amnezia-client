@@ -339,7 +339,7 @@ PageType {
                     var host = effectiveHost()
                     if (host === "" || secret === "")
                         return ""
-                    return "https://t.me/webproxy?server=" + host + "&secret=" + secret
+                    return "https://telegram.me/webproxy?server=" + host + "&secret=" + secret
                 }
 
                 function displayTgLink() {
