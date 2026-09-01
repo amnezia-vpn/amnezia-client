@@ -223,7 +223,7 @@ bool WindowsRouteMonitor::updateExclusionRoute(MIB_IPFORWARD_ROW2* data,
 
   // Update the routing table entry.
   data->InterfaceLuid.Value = bestLuid;
-  memcpy(&data->NextHop, &nexthop, sizeof(SOCKADDR_INET));
+  data->NextHop = nexthop;
   if (data->InterfaceLuid.Value != 0) {
     DWORD result = CreateIpForwardEntry2(data);
     if (result == ERROR_OBJECT_ALREADY_EXISTS) {
@@ -234,7 +234,7 @@ bool WindowsRouteMonitor::updateExclusionRoute(MIB_IPFORWARD_ROW2* data,
     if (result != NO_ERROR) {
       logger.error() << "Failed to update route:" << result;
       data->InterfaceLuid.Value = 0;
-      memset(&data->NextHop, 0, sizeof(SOCKADDR_INET));
+      data->NextHop = {};
       data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
       return false;
     }
@@ -457,9 +457,14 @@ bool WindowsRouteMonitor::addExclusionRoutes(
     MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
     InitializeIpForwardEntry(data);
     if (protocol == QAbstractSocket::IPv6Protocol) {
-      Q_IPV6ADDR buffer = address.toIPv6Address();
-      memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buffer,
-             sizeof(buffer));
+      const Q_IPV6ADDR buffer = address.toIPv6Address();
+      static_assert(
+          sizeof(buffer.c) ==
+          sizeof(data->DestinationPrefix.Prefix.Ipv6.sin6_addr.s6_addr));
+      for (int index = 0; index < static_cast<int>(sizeof(buffer.c)); ++index) {
+        data->DestinationPrefix.Prefix.Ipv6.sin6_addr.s6_addr[index] =
+            buffer[index];
+      }
       data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
     } else {
       quint32 buffer = address.toIPv4Address();
