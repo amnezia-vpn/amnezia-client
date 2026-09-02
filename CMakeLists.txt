@@ -74,6 +74,14 @@ if(APPLE AND NOT IOS)
 endif()
 
 
+execute_process(
+  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+  COMMAND git rev-parse --short HEAD
+  OUTPUT_VARIABLE GIT_COMMIT_HASH
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
+
 add_subdirectory(client)
 
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
