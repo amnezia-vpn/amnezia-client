@@ -23,6 +23,7 @@
 
 #ifdef Q_OS_IOS
     #include "core/utils/swiftBridge.h"
+    #include "platforms/ios/ios_network_diagnostics.h"
 #endif
 
 QFile Logger::m_file;
@@ -154,7 +155,8 @@ bool Logger::runNetworkDiagnostics()
 #elif defined(Q_OS_ANDROID)
     return saveNetworkDiagnosticsResult(AndroidController::instance()->runNetworkDiagnostics());
 #elif defined(Q_OS_IOS)
-    return saveNetworkDiagnosticsResult(QString::fromStdString(AmneziaVPN::swiftRunNetworkDiagnostics()));
+    return saveNetworkDiagnosticsResult(QString::fromStdString(
+            AmneziaVPN::swiftRunNetworkDiagnostics(iosDnsServersDiagnostics().toStdString())));
 #else
     return false;
 #endif
