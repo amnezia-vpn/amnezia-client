@@ -206,7 +206,7 @@ PageType {
         readonly property string description: qsTr("To discuss features")
         readonly property string imageSource: "qrc:/images/controls/telegram.svg"
         readonly property var handler: function() {
-            Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
+            Qt.openUrlExternally(qsTr("https://telegram.me/amnezia_vpn_en"))
         }
     }
 
