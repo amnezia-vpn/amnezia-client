@@ -190,7 +190,6 @@ namespace amnezia
             constexpr int initPacketJunkSizeMax = 150;
             constexpr int responsePacketJunkSizeMax = 150;
             constexpr int cookieReplyPacketJunkSizeMax = 64;
-            constexpr int defaultTransportPacketJunkSize = 12;
 
             constexpr char defaultInitPacketMagicHeader[] = "1";
             constexpr char defaultResponsePacketMagicHeader[] = "2";
@@ -201,6 +200,7 @@ namespace amnezia
             constexpr char defaultSpecialJunk3[] = "";
             constexpr char defaultSpecialJunk4[] = "";
             constexpr char defaultSpecialJunk5[] = "";
+            constexpr char defaultPadding[] = "12";
 
             constexpr char awgV1_5[] = "1.5";
             constexpr char awgV2[] = "2";
