@@ -63,7 +63,11 @@ namespace amnezia
             constexpr char defaultSecurity[] = "reality";
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
-            constexpr char defaultFingerprint[] = "chrome";
+            // The Xray bindings bundled with AmneziaVPN 5.0.0.5 can establish a
+            // REALITY connection with the chrome fingerprint while silently
+            // blackholing payload traffic. Firefox is interoperable with the
+            // same REALITY servers and is the safe compatibility default.
+            constexpr char defaultFingerprint[] = "firefox";
             constexpr char defaultSni[] = "www.googletagmanager.com";
             constexpr char defaultAlpn[] = "h2";
 
