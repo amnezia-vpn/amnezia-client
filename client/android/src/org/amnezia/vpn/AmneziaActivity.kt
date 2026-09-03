@@ -7,12 +7,16 @@ import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.Intent.EXTRA_MIME_TYPES
 import android.content.Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.net.ConnectivityManager
+import android.net.LinkProperties
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.net.VpnService
 import android.os.Build
@@ -44,6 +48,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.io.File
 import java.io.IOException
+import java.net.NetworkInterface
+import java.util.Collections
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
@@ -904,6 +910,114 @@ class AmneziaActivity : QtActivity() {
             }
             ""
         }
+    }
+
+    // Counterpart to the desktop shell-script diagnostics (networkdiagnostics.cpp): Android's
+    // app sandbox has no way to shell out to system network tools, so this collects the
+    // closest equivalent through public framework APIs instead. Output uses the same
+    // "=== section ===" heading style as the desktop scripts so Logger::runNetworkDiagnostics()
+    // can save it without any format-specific handling on the C++ side.
+    @Suppress("unused")
+    fun runNetworkDiagnostics(): String {
+        Log.v(TAG, "Run network diagnostics")
+        val out = StringBuilder()
+
+        fun section(name: String, block: () -> Unit) {
+            out.append("=== ").append(name).append(" ===\n")
+            try {
+                block()
+            } catch (e: Exception) {
+                out.append("ERROR: ").append(e.toString()).append('\n')
+            }
+            out.append('\n')
+        }
+
+        section("system") {
+            out.append("Android: ").append(Build.VERSION.RELEASE)
+                .append(" (SDK ").append(Build.VERSION.SDK_INT).append(")\n")
+            out.append("Device: ").append(Build.MANUFACTURER).append(' ').append(Build.MODEL).append('\n')
+        }
+
+        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+
+        section("link-type") {
+            if (connectivityManager == null) {
+                out.append("ConnectivityManager unavailable\n")
+                return@section
+            }
+            val activeNetwork = connectivityManager.activeNetwork
+            val caps = activeNetwork?.let { connectivityManager.getNetworkCapabilities(it) }
+            if (activeNetwork == null || caps == null) {
+                out.append("type=none (no active network)\n")
+                return@section
+            }
+            val type = when {
+                caps.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> "vpn-tunnel"
+                caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "wifi"
+                caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "cellular"
+                caps.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> "ethernet"
+                else -> "other"
+            }
+            out.append("type=").append(type).append('\n')
+            out.append("validated=").append(caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)).append('\n')
+            out.append("internet=").append(caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)).append('\n')
+            out.append("metered=").append(!caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)).append('\n')
+        }
+
+        section("adapters") {
+            val interfaces = try {
+                Collections.list(NetworkInterface.getNetworkInterfaces())
+            } catch (e: Exception) {
+                out.append("Failed to enumerate interfaces: ").append(e.toString()).append('\n')
+                emptyList()
+            }
+            for (ni in interfaces) {
+                out.append(ni.name)
+                    .append(": up=").append(ni.isUp)
+                    .append(" loopback=").append(ni.isLoopback)
+                    .append(" mtu=").append(runCatching { ni.mtu }.getOrDefault(-1))
+                    .append('\n')
+                for (addr in ni.inetAddresses) {
+                    out.append("  addr: ").append(addr.hostAddress).append('\n')
+                }
+            }
+        }
+
+        section("routes") {
+            if (connectivityManager == null) {
+                out.append("ConnectivityManager unavailable\n")
+                return@section
+            }
+            val activeNetwork = connectivityManager.activeNetwork
+            val linkProperties: LinkProperties? = activeNetwork?.let { connectivityManager.getLinkProperties(it) }
+            if (linkProperties == null) {
+                out.append("no active network\n")
+                return@section
+            }
+            out.append("interfaceName=").append(linkProperties.interfaceName ?: "unknown").append('\n')
+            for (route in linkProperties.routes) {
+                out.append(route.toString()).append('\n')
+            }
+        }
+
+        section("dns") {
+            if (connectivityManager == null) {
+                out.append("ConnectivityManager unavailable\n")
+                return@section
+            }
+            val activeNetwork = connectivityManager.activeNetwork
+            val linkProperties: LinkProperties? = activeNetwork?.let { connectivityManager.getLinkProperties(it) }
+            val dnsServers = linkProperties?.dnsServers ?: emptyList()
+            if (dnsServers.isEmpty()) {
+                out.append("no DNS servers reported\n")
+            } else {
+                for (dns in dnsServers) {
+                    out.append(dns.hostAddress).append('\n')
+                }
+            }
+        }
+
+        return out.toString()
     }
 
     @Suppress("unused")
