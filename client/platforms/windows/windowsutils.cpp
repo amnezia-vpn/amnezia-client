@@ -27,20 +27,16 @@ QString WindowsUtils::getErrorMessage(quint32 code) {
       nullptr, code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
       (LPSTR)&messageBuffer, 0, nullptr);
 
-  std::string message(messageBuffer, size);
-  QString result(message.c_str());
+  QString result = QString::fromLocal8Bit(messageBuffer, static_cast<int>(size)).trimmed();
   LocalFree(messageBuffer);
   return result;
 }
 
-QString WindowsUtils::getErrorMessage() {
-  return getErrorMessage(GetLastError());
-}
-
 // A simple function to log windows error messages.
 void WindowsUtils::windowsLog(const QString& msg) {
-  QString errmsg = getErrorMessage();
-  logger.error() << msg << "-" << errmsg;
+  quint32 code = GetLastError();
+  QString errmsg = getErrorMessage(code);
+  logger.error() << msg << "-" << errmsg << QString("(code %1)").arg(code);
 }
 
 // Static
