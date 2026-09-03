@@ -14,6 +14,8 @@
 #include <QHash>
 #include <QMap>
 #include <QObject>
+#include <QSet>
+#include <QTimer>
 
 #include "ipaddress.h"
 
@@ -27,6 +29,7 @@ class WindowsRouteMonitor final : public QObject {
   void setDetaultRouteCapture(bool enable);
 
   bool addExclusionRoute(const IPAddress& prefix);
+  int addExclusionRoutes(const QList<IPAddress>& prefixes);
   bool deleteExclusionRoute(const IPAddress& prefix);
   void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 
@@ -34,6 +37,7 @@ class WindowsRouteMonitor final : public QObject {
 
  public slots:
   void routeChanged();
+  void scheduleRouteChanged();
 
  private:
   bool isRouteExcluded(const IP_ADDRESS_PREFIX* dest) const;
@@ -54,9 +58,12 @@ class WindowsRouteMonitor final : public QObject {
   // Default route cloning
   bool m_defaultRouteCapture = false;
   QHash<IPAddress, MIB_IPFORWARD_ROW2*> m_clonedRoutes;
+  QSet<IPAddress> m_captureBlacklist;
 
   const quint64 m_luid = 0;
   HANDLE m_routeHandle = INVALID_HANDLE_VALUE;
+
+  QTimer m_routeChangedDebounce;
 };
 
 #endif /* WINDOWSROUTEMONITOR_H */
