@@ -169,14 +169,16 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
-    resolvers.append(QHostAddress(config.m_primaryDnsServer));
+    if (!config.m_primaryDnsServer.isEmpty()) {
+      resolvers.append(QHostAddress(config.m_primaryDnsServer));
+    }
     if (!config.m_secondaryDnsServer.isEmpty()) {
         resolvers.append(QHostAddress(config.m_secondaryDnsServer));
     }
 
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
+    if (!config.m_serverIpv6Gateway.isEmpty() && config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
     }
 
@@ -269,15 +271,15 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
 
   config.m_deviceIpv4Address = obj.value("deviceIpv4Address").toString();
   config.m_deviceIpv6Address = obj.value("deviceIpv6Address").toString();
-  if (config.m_deviceIpv4Address.isNull() &&
-      config.m_deviceIpv6Address.isNull()) {
+  if (config.m_deviceIpv4Address.isEmpty() &&
+      config.m_deviceIpv6Address.isEmpty()) {
     logger.warning() << "no device addresses found in jsonConfig input";
     return false;
   }
   config.m_serverIpv4AddrIn = obj.value("serverIpv4AddrIn").toString();
   config.m_serverIpv6AddrIn = obj.value("serverIpv6AddrIn").toString();
-  if (config.m_serverIpv4AddrIn.isNull() &&
-      config.m_serverIpv6AddrIn.isNull()) {
+  if (config.m_serverIpv4AddrIn.isEmpty() &&
+      config.m_serverIpv6AddrIn.isEmpty()) {
     logger.error() << "no server addresses found in jsonConfig input";
     return false;
   }

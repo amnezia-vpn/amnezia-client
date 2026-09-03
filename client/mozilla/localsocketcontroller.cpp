@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include <QCoreApplication>
+#include <QAbstractSocket>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
@@ -38,6 +39,74 @@ constexpr int CONNECTION_RETRY_TIMER_MSEC = 500;
 
 namespace {
 Logger logger("LocalSocketController");
+
+QString stripPrefixLength(const QString &address) {
+  QString result = address.trimmed().section("/", 0, 0).trimmed();
+  if (result.startsWith("[") && result.endsWith("]")) {
+    result = result.mid(1, result.size() - 2);
+  }
+  return result;
+}
+
+QStringList splitConfigValues(const QString &value) {
+  QStringList result;
+  const QStringList parts = value.split(",", Qt::SkipEmptyParts);
+  for (const QString &part : parts) {
+    const QString trimmed = part.trimmed();
+    if (!trimmed.isEmpty()) {
+      result << trimmed;
+    }
+  }
+  return result;
+}
+
+int prefixLengthForAddress(const QString &address, bool isIpv6) {
+  if (address.contains("/")) {
+    bool ok = false;
+    const int prefix = address.section("/", 1, 1).toInt(&ok);
+    if (ok) {
+      return prefix;
+    }
+  }
+  return isIpv6 ? 128 : 32;
+}
+
+void appendRange(QJsonArray &ranges, const QString &ipRange, bool allowIpv6) {
+  const QString trimmed = ipRange.trimmed();
+  if (trimmed.isEmpty()) {
+    return;
+  }
+
+  const QHostAddress address(stripPrefixLength(trimmed));
+  if (address.isNull()) {
+    return;
+  }
+
+  const bool isIpv6 = address.protocol() == QAbstractSocket::IPv6Protocol;
+  if (isIpv6 && !allowIpv6) {
+    return;
+  }
+
+  QJsonObject range;
+  range.insert("address", address.toString());
+  range.insert("range", prefixLengthForAddress(trimmed, isIpv6));
+  range.insert("isIpv6", isIpv6);
+  ranges.append(range);
+}
+
+void splitClientAddresses(const QJsonObject &wgConfig, QString &ipv4Address, QString &ipv6Address) {
+  QStringList addresses = splitConfigValues(wgConfig.value(amnezia::configKey::clientIp).toString());
+  addresses += splitConfigValues(wgConfig.value(amnezia::configKey::clientIpv6).toString());
+
+  for (const QString &address : addresses) {
+    const QHostAddress hostAddress(stripPrefixLength(address));
+    if (hostAddress.protocol() == QAbstractSocket::IPv4Protocol && ipv4Address.isEmpty()) {
+      ipv4Address = address;
+    } else if (hostAddress.protocol() == QAbstractSocket::IPv6Protocol && ipv6Address.isEmpty()) {
+      ipv6Address = address;
+    }
+  }
+}
 }
 
 LocalSocketController::LocalSocketController() {
@@ -122,7 +191,7 @@ void LocalSocketController::daemonConnected() {
   checkStatus();
 }
 
-void LocalSocketController::activate(const QJsonObject &rawConfig) {
+QJsonObject LocalSocketController::buildActivationConfig(const QJsonObject &rawConfig) {
   QString protocolName = rawConfig.value("protocol").toString();
 
   int splitTunnelType = rawConfig.value("splitTunnelType").toInt();
@@ -138,27 +207,44 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("type", "activate");
   //  json.insert("hopindex", QJsonValue((double)hop.m_hopindex));
   json.insert("privateKey", wgConfig.value(amnezia::configKey::clientPrivKey));
-  json.insert("deviceIpv4Address", wgConfig.value(amnezia::configKey::clientIp));
-  m_deviceIpv4 = wgConfig.value(amnezia::configKey::clientIp).toString();
+  QString deviceIpv4Address;
+  QString deviceIpv6Address;
+  splitClientAddresses(wgConfig, deviceIpv4Address, deviceIpv6Address);
 
-  // set up IPv6 unique-local-address, ULA, with "fd00::/8" prefix, not globally routable.
-  // this will be default IPv6 gateway, OS recognizes that IPv6 link is local and switches to IPv4.
-  // Otherwise some OSes (Linux) try IPv6 forever and hang.
-  // https://en.wikipedia.org/wiki/Unique_local_address (RFC 4193)
-  // https://man7.org/linux/man-pages/man5/gai.conf.5.html
-
-  // simply "dead::1" is globally-routable, don't use it
-  json.insert("deviceIpv6Address", "fd58:baa6:dead::1");
+  const QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
+  // A full-tunnel config must also capture IPv6 (::/0), even when the server has no IPv6,
+  // so native IPv6 cannot leak over the physical interface. The tunnel itself has to
+  // black-hole it: the killswitch firewall is opt-out on Linux/macOS and has no IPv6
+  // block at all on Windows, so neither can be relied on for this.
+  const bool isFullTunnel = plainAllowedIP.isEmpty()
+      ? (splitTunnelType == 0 || splitTunnelType == 2)
+      : plainAllowedIP.contains(QJsonValue("0.0.0.0/0"));
+  // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+  // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+  if (isFullTunnel && deviceIpv6Address.isEmpty()) {
+    deviceIpv6Address = QString("%1/%2").arg(amnezia::protocols::wireguard::dummyClientIpv6Address,
+                                             amnezia::protocols::wireguard::defaultClientIpv6Cidr);
+  }
+  const bool hasTunnelIpv6 = !deviceIpv6Address.isEmpty();
+  json.insert("deviceIpv4Address", deviceIpv4Address);
+  json.insert("deviceIpv6Address", deviceIpv6Address);
 
   json.insert("serverPublicKey", wgConfig.value(amnezia::configKey::serverPubKey));
   json.insert("serverPskKey", wgConfig.value(amnezia::configKey::pskKey));
-  json.insert("serverIpv4AddrIn", wgConfig.value(amnezia::configKey::hostName));
-  //  json.insert("serverIpv6AddrIn", QJsonValue(hop.m_server.ipv6AddrIn()));
+  const QString hostName = wgConfig.value(amnezia::configKey::hostName).toString();
+  const QHostAddress hostAddress(hostName);
+  if (hostAddress.protocol() == QAbstractSocket::IPv6Protocol) {
+    json.insert("serverIpv4AddrIn", QString());
+    json.insert("serverIpv6AddrIn", hostName);
+  } else {
+    json.insert("serverIpv4AddrIn", hostName);
+    json.insert("serverIpv6AddrIn", QString());
+  }
   json.insert("deviceMTU", wgConfig.value(amnezia::configKey::mtu));
 
   json.insert("serverPort", wgConfig.value(amnezia::configKey::port).toInt());
-  json.insert("serverIpv4Gateway", wgConfig.value(amnezia::configKey::hostName));
-  //  json.insert("serverIpv6Gateway", QJsonValue(hop.m_server.ipv6Gateway()));
+  json.insert("serverIpv4Gateway", hostAddress.protocol() == QAbstractSocket::IPv6Protocol ? QString() : hostName);
+  json.insert("serverIpv6Gateway", hostAddress.protocol() == QAbstractSocket::IPv6Protocol ? hostName : QString());
 
   if (wgConfig.contains(amnezia::configKey::persistentKeepAlive)) {
     json.insert("persistentKeepalive",
@@ -175,26 +261,16 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   QJsonArray jsAllowedIPAddesses;
 
-  QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
-  QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
+  QJsonArray defaultAllowedIP = hasTunnelIpv6 ? QJsonArray { "0.0.0.0/0", "::/0" } : QJsonArray { "0.0.0.0/0" };
 
   if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
-      QString ipRange = v.toString();
-      if (ipRange.split('/').size() > 1){
-          QJsonObject range;
-          range.insert("address", ipRange.split('/')[0]);
-          range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      } else {
-          QJsonObject range;
-          range.insert("address",ipRange);
-          range.insert("range", 32);
-          range.insert("isIpv6", false);
-          jsAllowedIPAddesses.append(range);
-      }
+      appendRange(jsAllowedIPAddesses, v.toString(), hasTunnelIpv6);
+    }
+    // Keep the full tunnel closed over IPv6 even if the stored list only names 0.0.0.0/0.
+    if (isFullTunnel && !plainAllowedIP.contains(QJsonValue("::/0"))) {
+      appendRange(jsAllowedIPAddesses, QStringLiteral("::/0"), hasTunnelIpv6);
     }
   } else {
 
@@ -206,29 +282,18 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
           range_ipv4.insert("isIpv6", false);
           jsAllowedIPAddesses.append(range_ipv4);
 
-          QJsonObject range_ipv6;
-          range_ipv6.insert("address", "::");
-          range_ipv6.insert("range", 0);
-          range_ipv6.insert("isIpv6", true);
-          jsAllowedIPAddesses.append(range_ipv6);
+          if (hasTunnelIpv6) {
+              QJsonObject range_ipv6;
+              range_ipv6.insert("address", "::");
+              range_ipv6.insert("range", 0);
+              range_ipv6.insert("isIpv6", true);
+              jsAllowedIPAddesses.append(range_ipv6);
+          }
       }
 
       if (splitTunnelType == 1) {
           for (auto v : splitTunnelSites) {
-              QString ipRange = v.toString();
-              if (ipRange.split('/').size() > 1){
-                  QJsonObject range;
-                  range.insert("address", ipRange.split('/')[0]);
-                  range.insert("range", atoi(ipRange.split('/')[1].toLocal8Bit()));
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              } else {
-                  QJsonObject range;
-                  range.insert("address",ipRange);
-                  range.insert("range", 32);
-                  range.insert("isIpv6", false);
-                  jsAllowedIPAddesses.append(range);
-              }
+              appendRange(jsAllowedIPAddesses, v.toString(), hasTunnelIpv6);
           }
       }
   }
@@ -236,11 +301,16 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("allowedIPAddressRanges", jsAllowedIPAddesses);
 
   QJsonArray jsExcludedAddresses;
-  jsExcludedAddresses.append(wgConfig.value(amnezia::configKey::hostName));
+  if (!hostAddress.isNull()) {
+    jsExcludedAddresses.append(hostName);
+  }
   if (splitTunnelType == 2) {
     for (auto v : splitTunnelSites) {
           QString ipRange = v.toString();
-          jsExcludedAddresses.append(ipRange);
+          const QHostAddress address(stripPrefixLength(ipRange));
+          if (!address.isNull() && (address.protocol() != QAbstractSocket::IPv6Protocol || hasTunnelIpv6)) {
+            jsExcludedAddresses.append(ipRange);
+          }
       }
   }
 
@@ -261,6 +331,12 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
     }
   }
 
+  return json;
+}
+
+void LocalSocketController::activate(const QJsonObject &rawConfig) {
+  QJsonObject json = buildActivationConfig(rawConfig);
+  m_deviceIpv4 = json.value("deviceIpv4Address").toString();
   write(json);
 }
 

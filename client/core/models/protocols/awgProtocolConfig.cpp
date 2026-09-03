@@ -84,6 +84,12 @@ QJsonObject AwgServerConfig::toJson() const
     if (!subnetCidr.isEmpty()) {
         obj[configKey::subnetCidr] = subnetCidr;
     }
+    if (!subnetIpv6Address.isEmpty()) {
+        obj[configKey::subnetIpv6Address] = subnetIpv6Address;
+    }
+    if (!subnetIpv6Cidr.isEmpty()) {
+        obj[configKey::subnetIpv6Cidr] = subnetIpv6Cidr;
+    }
     
     if (!junkPacketCount.isEmpty()) {
         obj[configKey::junkPacketCount] = junkPacketCount;
@@ -170,6 +176,8 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.protocolVersion = json.value(configKey::protocolVersion).toString();
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
     config.subnetCidr = json.value(configKey::subnetCidr).toString();
+    config.subnetIpv6Address = json.value(configKey::subnetIpv6Address).toString();
+    config.subnetIpv6Cidr = json.value(configKey::subnetIpv6Cidr).toString();
     
     config.junkPacketCount = json.value(configKey::junkPacketCount).toString();
     config.junkPacketMinSize = json.value(configKey::junkPacketMinSize).toString();
@@ -220,6 +228,9 @@ QJsonObject AwgClientConfig::toJson() const
     }
     if (!clientIp.isEmpty()) {
         obj[configKey::clientIp] = clientIp;
+    }
+    if (!clientIpv6.isEmpty()) {
+        obj[configKey::clientIpv6] = clientIpv6;
     }
     if (!clientPrivateKey.isEmpty()) {
         obj[configKey::clientPrivKey] = clientPrivateKey;
@@ -341,6 +352,7 @@ AwgClientConfig AwgClientConfig::fromJson(const QJsonObject& json)
     config.hostName = json.value(configKey::hostName).toString();
     config.port = json.value(configKey::port).toInt(0);
     config.clientIp = json.value(configKey::clientIp).toString();
+    config.clientIpv6 = json.value(configKey::clientIpv6).toString();
     config.clientPrivateKey = json.value(configKey::clientPrivKey).toString();
     config.clientPublicKey = json.value(configKey::clientPubKey).toString();
     config.serverPublicKey = json.value(configKey::serverPubKey).toString();
@@ -456,7 +468,8 @@ void AwgProtocolConfig::clearClientConfig()
 
 bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
 {
-    if (subnetAddress != other.subnetAddress || port != other.port || 
+    if (subnetAddress != other.subnetAddress || subnetIpv6Address != other.subnetIpv6Address ||
+        subnetIpv6Cidr != other.subnetIpv6Cidr || port != other.port ||
         junkPacketCount != other.junkPacketCount ||
         junkPacketMinSize != other.junkPacketMinSize || junkPacketMaxSize != other.junkPacketMaxSize ||
         initPacketJunkSize != other.initPacketJunkSize || responsePacketJunkSize != other.responsePacketJunkSize ||
@@ -511,4 +524,3 @@ bool AwgProtocolConfig::isPacketSizeEqual(int s1, int s2, int s3, int s4)
 }
 
 } // namespace amnezia
-

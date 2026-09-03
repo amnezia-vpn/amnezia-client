@@ -54,7 +54,13 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
   // Before creating the interface we need to check which adapter
   // routes to the server endpoint
   if (inetAdapterIndex == 0) {
-      auto serveraddr = QHostAddress(config.m_serverIpv4AddrIn);
+      const QString endpoint = !config.m_serverIpv4AddrIn.isEmpty()
+          ? config.m_serverIpv4AddrIn
+          : config.m_serverIpv6AddrIn;
+      auto serveraddr = QHostAddress(endpoint);
+      if (serveraddr.isNull()) {
+          serveraddr = QHostAddress(NetworkUtilities::getIPAddress(endpoint));
+      }
       m_inetAdapterIndex = NetworkUtilities::AdapterIndexTo(serveraddr);
   } else {
       m_inetAdapterIndex = inetAdapterIndex;

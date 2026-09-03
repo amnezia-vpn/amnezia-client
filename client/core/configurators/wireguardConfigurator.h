@@ -23,6 +23,7 @@ public:
         QString clientPrivKey; // client private key
         QString clientPubKey;  // client public key
         QString clientIP;      // internal client IP address
+        QString clientIPv6;    // internal client IPv6 address
         QString serverPubKey;  // tls-auth key
         QString pskKey;        // preshared key
         QString host;          // host ip
@@ -43,6 +44,7 @@ public:
 
 private:
     QList<QHostAddress> getIpsFromConf(const QString &input);
+    bool hasServerIpv6Egress(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container);
     ConnectionData prepareWireguardConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
                                           const amnezia::WireGuardServerConfig* serverConfig,
                                           const amnezia::AwgServerConfig* awgServerConfig,

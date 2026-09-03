@@ -1,6 +1,7 @@
 #include "wireguardConfigurator.h"
 
 #include <QDebug>
+#include <QAbstractSocket>
 #include <QJsonDocument>
 #include <QProcess>
 #include <QRegularExpression>
@@ -29,6 +30,57 @@
 #include <QJsonArray>
 
 using namespace amnezia;
+
+namespace
+{
+
+QString stripPrefixLength(const QString &address)
+{
+    return address.trimmed().section("/", 0, 0).trimmed();
+}
+
+QString withPrefixLength(const QString &address, const QString &prefixLength)
+{
+    if (address.contains("/")) {
+        return address.trimmed();
+    }
+    return QString("%1/%2").arg(address.trimmed(), prefixLength);
+}
+
+QString formatEndpointHost(const QString &host)
+{
+    const QHostAddress hostAddress(host);
+    if (hostAddress.protocol() == QAbstractSocket::IPv6Protocol) {
+        return QString("[%1]").arg(host);
+    }
+    return host;
+}
+
+QHostAddress nextIpv6Address(const QHostAddress &address)
+{
+    Q_IPV6ADDR bytes = address.toIPv6Address();
+    for (int i = 15; i >= 0; --i) {
+        ++bytes[i];
+        if (bytes[i] != 0) {
+            return QHostAddress(bytes);
+        }
+    }
+    // All-0xFF wrapped around to ::; the subnet is exhausted, so report no address.
+    return QHostAddress();
+}
+
+QList<QHostAddress> filterAddressesByFamily(const QList<QHostAddress> &addresses, QAbstractSocket::NetworkLayerProtocol family)
+{
+    QList<QHostAddress> result;
+    for (const QHostAddress &address : addresses) {
+        if (address.protocol() == family) {
+            result << address;
+        }
+    }
+    return result;
+}
+
+}
 
 WireguardConfigurator::WireguardConfigurator(SshSession* sshSession, bool isAwg,
                                              QObject *parent)
@@ -79,23 +131,55 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::genClientKeys()
 
 QList<QHostAddress> WireguardConfigurator::getIpsFromConf(const QString &input)
 {
-    QRegularExpression regex("AllowedIPs = (\\d+\\.\\d+\\.\\d+\\.\\d+)");
+    QRegularExpression regex("AllowedIPs\\s*=\\s*([^\\r\\n]+)");
     QRegularExpressionMatchIterator matchIterator = regex.globalMatch(input);
 
     QList<QHostAddress> ips;
 
     while (matchIterator.hasNext()) {
         QRegularExpressionMatch match = matchIterator.next();
-        const QString address_string { match.captured(1) };
-        const QHostAddress address { address_string };
-        if (address.isNull()) {
-            qWarning() << "Couldn't recognize the ip address: " << address_string;
-        } else {
-            ips << address;
+        const QStringList allowedIps = match.captured(1).split(",", Qt::SkipEmptyParts);
+        for (const QString &allowedIp : allowedIps) {
+            const QString addressString = stripPrefixLength(allowedIp);
+            const QHostAddress address { addressString };
+            if (address.isNull()) {
+                qWarning() << "Couldn't recognize the ip address: " << addressString;
+            } else {
+                ips << address;
+            }
         }
     }
 
     return ips;
+}
+
+bool WireguardConfigurator::hasServerIpv6Egress(const ServerCredentials &credentials, DockerContainer container)
+{
+    QString stdOut;
+    auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
+        stdOut += data + "\n";
+        return ErrorCode::NoError;
+    };
+
+    constexpr char probeServer[] = "2001:4860:4860::8888"; // Google Public DNS (IPv6)
+    constexpr char probeName[] = "google.com";
+    constexpr int probeTimeoutSec = 3;
+
+    const QString probeScript =
+        QString("timeout %1 nslookup %2 %3 >/dev/null 2>&1 && echo AMNEZIA_IPV6_OK || true")
+            .arg(QString::number(probeTimeoutSec), probeName, probeServer);
+
+    const auto errorCode = m_sshSession->runContainerScript(credentials, container, probeScript, cbReadStdOut);
+    if (errorCode != ErrorCode::NoError) {
+        qWarning() << "Unable to probe IPv6 egress in container, generating IPv4-only client config";
+        return false;
+    }
+
+    const bool hasIpv6Egress = stdOut.contains("AMNEZIA_IPV6_OK");
+    if (!hasIpv6Egress) {
+        qInfo() << "Container IPv6 egress is unavailable, generating IPv4-only WG/AWG client config";
+    }
+    return hasIpv6Egress;
 }
 
 WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardConfig(const ServerCredentials &credentials,
@@ -136,7 +220,9 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     if (errorCode != ErrorCode::NoError) {
         return connData;
     }
-    auto ips = getIpsFromConf(stdOut);
+    const auto ips = getIpsFromConf(stdOut);
+    const auto ipv4Addresses = filterAddressesByFamily(ips, QAbstractSocket::IPv4Protocol);
+    const auto ipv6Addresses = filterAddressesByFamily(ips, QAbstractSocket::IPv6Protocol);
 
     QHostAddress nextIp = [&] {
         QHostAddress result;
@@ -147,10 +233,10 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
         } else if (awgServerConfig && !awgServerConfig->subnetAddress.isEmpty()) {
             subnetAddress = awgServerConfig->subnetAddress;
         }
-        if (ips.empty()) {
+        if (ipv4Addresses.empty()) {
             lastIp.setAddress(subnetAddress);
         } else {
-            lastIp = ips.last();
+            lastIp = ipv4Addresses.last();
         }
         quint8 lastOctet = static_cast<quint8>(lastIp.toIPv4Address());
         switch (lastOctet) {
@@ -163,6 +249,28 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     }();
 
     connData.clientIP = nextIp.toString();
+
+    if (hasServerIpv6Egress(credentials, container)) {
+        QHostAddress lastIpv6;
+        QString subnetIpv6Address = m_isAwg ? protocols::awg::defaultSubnetIpv6Address
+                                            : protocols::wireguard::defaultSubnetIpv6Address;
+        if (serverConfig && !serverConfig->subnetIpv6Address.isEmpty()) {
+            subnetIpv6Address = serverConfig->subnetIpv6Address;
+        } else if (awgServerConfig && !awgServerConfig->subnetIpv6Address.isEmpty()) {
+            subnetIpv6Address = awgServerConfig->subnetIpv6Address;
+        }
+
+        if (ipv6Addresses.empty()) {
+            lastIpv6.setAddress(stripPrefixLength(subnetIpv6Address));
+        } else {
+            lastIpv6 = ipv6Addresses.last();
+        }
+
+        const QHostAddress nextIpv6 = nextIpv6Address(lastIpv6);
+        if (!nextIpv6.isNull()) {
+            connData.clientIPv6 = nextIpv6.toString();
+        }
+    }
 
     // Get keys
     connData.serverPubKey =
@@ -180,11 +288,16 @@ WireguardConfigurator::ConnectionData WireguardConfigurator::prepareWireguardCon
     }
 
     // Add client to config
+    QStringList peerAllowedIps { withPrefixLength(connData.clientIP, "32") };
+    if (!connData.clientIPv6.isEmpty()) {
+        peerAllowedIps << withPrefixLength(connData.clientIPv6, protocols::wireguard::defaultClientIpv6Cidr);
+    }
+
     QString configPart = QString("[Peer]\n"
                                  "PublicKey = %1\n"
                                  "PresharedKey = %2\n"
-                                 "AllowedIPs = %3/32\n\n")
-                                 .arg(connData.clientPubKey, connData.pskKey, connData.clientIP);
+                                 "AllowedIPs = %3\n\n")
+                                 .arg(connData.clientPubKey, connData.pskKey, peerAllowedIps.join(", "));
 
     errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, configPart, configPath,
                                                               libssh::ScpOverwriteMode::ScpAppendToExisting);
@@ -245,8 +358,23 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
         return WireGuardProtocolConfig{};
     }
 
+    const QStringList clientAddresses = [&] {
+        QStringList addresses { withPrefixLength(connData.clientIP, "32") };
+        if (!connData.clientIPv6.isEmpty()) {
+            addresses << withPrefixLength(connData.clientIPv6, protocols::wireguard::defaultClientIpv6Cidr);
+        }
+        return addresses;
+    }();
+    QStringList allowedIps { "0.0.0.0/0" };
+    if (!connData.clientIPv6.isEmpty()) {
+        allowedIps << "::/0";
+    }
+
     config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", connData.clientPrivKey);
+    config.replace("$WIREGUARD_CLIENT_ADDRESS", clientAddresses.join(", "));
     config.replace("$WIREGUARD_CLIENT_IP", connData.clientIP);
+    config.replace("$WIREGUARD_ALLOWED_IPS", allowedIps.join(", "));
+    config.replace("$WIREGUARD_ENDPOINT_HOST", formatEndpointHost(connData.host));
     config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
     config.replace("$WIREGUARD_PSK", connData.pskKey);
 
@@ -267,12 +395,13 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     clientConfig.hostName = connData.host;
     clientConfig.port = connData.port.toInt();
     clientConfig.clientIp = connData.clientIP;
+    clientConfig.clientIpv6 = connData.clientIPv6;
     clientConfig.clientPrivateKey = connData.clientPrivKey;
     clientConfig.clientPublicKey = connData.clientPubKey;
     clientConfig.serverPublicKey = connData.serverPubKey;
     clientConfig.presharedKey = connData.pskKey;
     clientConfig.clientId = connData.clientPubKey;
-    clientConfig.allowedIps = QStringList { "0.0.0.0/0", "::/0" };
+    clientConfig.allowedIps = allowedIps;
     const bool useKeepAliveRange = awgServerConfig && awgServerConfig->hasAwg3Params();
     clientConfig.persistentKeepAlive = useKeepAliveRange ? protocols::awg::defaultPersistentKeepAlive
                                                          : protocols::wireguard::defaultPersistentKeepAlive;

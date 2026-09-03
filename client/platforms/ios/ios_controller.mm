@@ -577,26 +577,71 @@ bool IosController::setupWireGuard()
 
     wgConfig.insert(configKey::hostName, config[configKey::hostName]);
     wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
+    QStringList clientAddresses;
+    for (const QString &address : config.value(configKey::clientIp).toString().split(",", Qt::SkipEmptyParts)) {
+        clientAddresses << address.trimmed();
+    }
+    for (const QString &address : config.value(configKey::clientIpv6).toString().split(",", Qt::SkipEmptyParts)) {
+        const QString trimmedAddress = address.trimmed();
+        if (!clientAddresses.contains(trimmedAddress)) {
+            clientAddresses << trimmedAddress;
+        }
+    }
+
+    // Determine the routes (AllowedIPs). A full-tunnel config must also capture IPv6 (::/0),
+    // even when the server has no IPv6, so native IPv6 cannot leak over the cellular/Wi-Fi
+    // interface. Custom split/partial route sets are honored verbatim.
+    QJsonArray allowedIps;
+    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
+        allowedIps = config[configKey::allowedIps].toArray();
+    } else {
+        allowedIps = QJsonArray { "0.0.0.0/0" };
+    }
+    const bool isFullTunnel = allowedIps.contains("0.0.0.0/0");
+    if (isFullTunnel && !allowedIps.contains("::/0")) {
+        allowedIps.append("::/0");
+    }
+
+    bool hasRealClientIpv6 = false;
+    for (const QString &address : clientAddresses) {
+        if (address.contains(":")) {
+            hasRealClientIpv6 = true;
+            break;
+        }
+    }
+    // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+    // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+    if (isFullTunnel && !hasRealClientIpv6) {
+        clientAddresses << QString("%1/%2").arg(protocols::wireguard::dummyClientIpv6Address,
+                                                protocols::wireguard::defaultClientIpv6Cidr);
+    }
+    const bool hasClientIpv6 = isFullTunnel || hasRealClientIpv6;
+
+    wgConfig.insert(configKey::clientIp, clientAddresses.join(", "));
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
     wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
     wgConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
 
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    QJsonArray splitTunnelSites;
+    const QJsonArray rawSplitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
+    for(int index = 0; index < rawSplitTunnelSites.count(); index++) {
+        const QString site = rawSplitTunnelSites[index].toString().remove(" ");
+        if (hasClientIpv6 || !site.contains(":")) {
+            splitTunnelSites.append(site);
+        }
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
+    QJsonArray filteredAllowedIps;
+    for (const QJsonValue &value : allowedIps) {
+        const QString route = value.toString();
+        if (hasClientIpv6 || !route.contains(":")) {
+            filteredAllowedIps.append(route);
+        }
     }
+    wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
@@ -667,26 +712,71 @@ bool IosController::setupAwg()
 
     wgConfig.insert(configKey::hostName, config[configKey::hostName]);
     wgConfig.insert(configKey::port, config[configKey::port]);
-    wgConfig.insert(configKey::clientIp, config[configKey::clientIp]);
+    QStringList clientAddresses;
+    for (const QString &address : config.value(configKey::clientIp).toString().split(",", Qt::SkipEmptyParts)) {
+        clientAddresses << address.trimmed();
+    }
+    for (const QString &address : config.value(configKey::clientIpv6).toString().split(",", Qt::SkipEmptyParts)) {
+        const QString trimmedAddress = address.trimmed();
+        if (!clientAddresses.contains(trimmedAddress)) {
+            clientAddresses << trimmedAddress;
+        }
+    }
+
+    // Determine the routes (AllowedIPs). A full-tunnel config must also capture IPv6 (::/0),
+    // even when the server has no IPv6, so native IPv6 cannot leak over the cellular/Wi-Fi
+    // interface. Custom split/partial route sets are honored verbatim.
+    QJsonArray allowedIps;
+    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
+        allowedIps = config[configKey::allowedIps].toArray();
+    } else {
+        allowedIps = QJsonArray { "0.0.0.0/0" };
+    }
+    const bool isFullTunnel = allowedIps.contains("0.0.0.0/0");
+    if (isFullTunnel && !allowedIps.contains("::/0")) {
+        allowedIps.append("::/0");
+    }
+
+    bool hasRealClientIpv6 = false;
+    for (const QString &address : clientAddresses) {
+        if (address.contains(":")) {
+            hasRealClientIpv6 = true;
+            break;
+        }
+    }
+    // For a full-tunnel config with no server-assigned IPv6, attach a non-routable ULA so the
+    // ::/0 route installs and IPv6 is black-holed in the tunnel instead of leaking.
+    if (isFullTunnel && !hasRealClientIpv6) {
+        clientAddresses << QString("%1/%2").arg(protocols::wireguard::dummyClientIpv6Address,
+                                                protocols::wireguard::defaultClientIpv6Cidr);
+    }
+    const bool hasClientIpv6 = isFullTunnel || hasRealClientIpv6;
+
+    wgConfig.insert(configKey::clientIp, clientAddresses.join(", "));
     wgConfig.insert(configKey::clientPrivKey, config[configKey::clientPrivKey]);
     wgConfig.insert(configKey::serverPubKey, config[configKey::serverPubKey]);
     wgConfig.insert(configKey::pskKey, config[configKey::pskKey]);
     wgConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
 
-    QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
-
-    for(int index = 0; index < splitTunnelSites.count(); index++) {
-        splitTunnelSites[index] = splitTunnelSites[index].toString().remove(" ");
+    QJsonArray splitTunnelSites;
+    const QJsonArray rawSplitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
+    for(int index = 0; index < rawSplitTunnelSites.count(); index++) {
+        const QString site = rawSplitTunnelSites[index].toString().remove(" ");
+        if (hasClientIpv6 || !site.contains(":")) {
+            splitTunnelSites.append(site);
+        }
     }
 
     wgConfig.insert(configKey::splitTunnelSites, splitTunnelSites);
 
-    if (config.contains(configKey::allowedIps) && config[configKey::allowedIps].isArray()) {
-        wgConfig.insert(configKey::allowedIps, config[configKey::allowedIps]);
-    } else {
-        QJsonArray allowed_ips { "0.0.0.0/0", "::/0" };
-        wgConfig.insert(configKey::allowedIps, allowed_ips);
+    QJsonArray filteredAllowedIps;
+    for (const QJsonValue &value : allowedIps) {
+        const QString route = value.toString();
+        if (hasClientIpv6 || !route.contains(":")) {
+            filteredAllowedIps.append(route);
+        }
     }
+    wgConfig.insert(configKey::allowedIps, filteredAllowedIps);
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
