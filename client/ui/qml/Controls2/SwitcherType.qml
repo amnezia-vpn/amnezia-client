@@ -20,9 +20,6 @@ Switch {
     property string defaultIndicatorColor: AmneziaStyle.color.transparent
     property string checkedDisabledIndicatorColor: AmneziaStyle.color.deepBrown
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
     property string checkedIndicatorBorderColor: AmneziaStyle.color.richBrown
     property string defaultIndicatorBorderColor: AmneziaStyle.color.charcoalGray
     property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.deepBrown
@@ -64,10 +61,28 @@ Switch {
     hoverEnabled: enabled ? true : false
     focusPolicy: Qt.TabFocus
 
+    // this row's content sits tight against the control's own edges, unlike the
+    // list rows, so the focus outline would run right along the label; add the
+    // missing air on top of whatever padding the style already applies
+    topPadding: padding + AmneziaStyle.focus.contentPadding / 2
+    bottomPadding: padding + AmneziaStyle.focus.contentPadding / 2
+
+    // the switch itself is small; outline the whole row instead
+    background: Rectangle {
+        color: AmneziaStyle.color.transparent
+
+        FocusIndicatorType {
+            control: root
+            baseRadius: 12
+            active: root.activeFocus && AmneziaStyle.focus.isOnTv
+        }
+    }
+
     indicator: Rectangle {
         id: switcher
 
         anchors.right: parent.right
+        anchors.rightMargin: AmneziaStyle.focus.contentPadding
         anchors.verticalCenter: parent.verticalCenter
 
         implicitWidth: 52
@@ -77,8 +92,10 @@ Switch {
         color: root.checked ? (root.enabled ? root.checkedIndicatorColor : root.checkedDisabledIndicatorColor)
                             : root.defaultIndicatorColor
 
-        border.color: root.activeFocus ? root.borderFocusedColor : (root.checked ? (root.enabled ? root.checkedIndicatorBorderColor : root.checkedDisabledIndicatorBorderColor)
-                            : root.defaultIndicatorBorderColor)
+        border.color: (root.activeFocus && !AmneziaStyle.focus.isOnTv)
+                            ? AmneziaStyle.focus.borderColor
+                            : (root.checked ? (root.enabled ? root.checkedIndicatorBorderColor : root.checkedDisabledIndicatorBorderColor)
+                                            : root.defaultIndicatorBorderColor)
 
         Behavior on color {
             PropertyAnimation { duration: 200 }
@@ -121,6 +138,7 @@ Switch {
 
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
+        anchors.leftMargin: AmneziaStyle.focus.contentPadding
 
         ListItemTitleType {
             Layout.fillWidth: true
