@@ -323,6 +323,14 @@ Vpn::ConnectionState VpnConnection::connectionState() const
 
 void VpnConnection::connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration)
 {
+#ifdef AMNEZIA_DESKTOP
+    if (m_transitionInFlight) {
+        qWarning() << "connectToVpn: transition in flight, dropping request";
+        return;
+    }
+    m_transitionInFlight = true;
+#endif
+
     if (!m_appSettingsRepository || !m_serversRepository) {
         qCritical() << "VpnConnection::connectToVpn: repositories not initialized";
         setConnectionState(Vpn::ConnectionState::Error);
@@ -341,6 +349,7 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
+        disconnect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
@@ -351,7 +360,11 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
     appendSplitTunnelingConfig();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    m_vpnProtocol.reset(VpnProtocol::factory(container, m_vpnConfiguration));
+    m_vpnProtocol = QSharedPointer<VpnProtocol>(VpnProtocol::factory(container, m_vpnConfiguration),
+                                                [](VpnProtocol *p) {
+                                                    if (p)
+                                                        p->deleteLater();
+                                                });
     if (!m_vpnProtocol) {
         setConnectionState(Vpn::ConnectionState::Error);
         return;
@@ -564,6 +577,14 @@ void VpnConnection::reconnectToVpn() {
         return;
     }
 
+#ifdef AMNEZIA_DESKTOP
+    if (m_transitionInFlight) {
+        qWarning() << "reconnectToVpn: transition in flight, dropping request";
+        return;
+    }
+    m_transitionInFlight = true;
+#endif
+
     qDebug() << "Reconnect triggered. Reconnecting to the server";
 
     setConnectionState(Vpn::ConnectionState::Reconnecting);
@@ -577,6 +598,14 @@ void VpnConnection::reconnectToVpn() {
 
 void VpnConnection::disconnectFromVpn()
 {
+#ifdef AMNEZIA_DESKTOP
+    if (m_transitionInFlight) {
+        qWarning() << "disconnectFromVpn: transition in flight, dropping request";
+        return;
+    }
+    m_transitionInFlight = true;
+#endif
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     // iOS/macOS NE use IosController directly; m_vpnProtocol is not set there.
     IosController::Instance()->disconnectVpn();
@@ -616,6 +645,11 @@ void VpnConnection::setConnectionState(Vpn::ConnectionState state) {
 
     if (state == Vpn::Disconnected && m_connectionState == Vpn::Reconnecting)
         return;
+
+#ifdef AMNEZIA_DESKTOP
+    if (state == Vpn::Connected || state == Vpn::Disconnected || state == Vpn::Error)
+        m_transitionInFlight = false;
+#endif
 
     m_connectionState = state;
     emit connectionStateChanged(state);
