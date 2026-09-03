@@ -147,7 +147,7 @@ PageType {
             CardWithIconsType {
                 id: hostLink
 
-                visible: (Qt.platform.os === "linux" || Qt.platform.os === "windows" || Qt.platform.os === "osx")
+                visible: GC.isDesktop() && !IsMacOsNeBuild
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
