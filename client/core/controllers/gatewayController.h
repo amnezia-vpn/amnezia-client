@@ -1,23 +1,24 @@
 #ifndef GATEWAYCONTROLLER_H
 #define GATEWAYCONTROLLER_H
 
+#include <QByteArray>
 #include <QFuture>
-#include <QNetworkReply>
+#include <QJsonObject>
 #include <QObject>
 #include <QPair>
-#include <QPromise>
-#include <QSharedPointer>
+#include <QString>
 
 #include "core/utils/errorCodes.h"
-#include "core/utils/routeModes.h"
-#include "core/utils/commonStructs.h"
 
-#ifdef Q_OS_IOS
-    #include "platforms/ios/ios_controller.h"
-#endif
+#include "agw.h"
 
 class SecureAppSettingsRepository;
 
+// Thin Qt facade over the libagw transport: the envelope crypto, HTTP and
+// proxy failover live in the Go library; this class
+// keeps the historical GatewayController API for the existing call sites and
+// wires the host-side concerns (killswitch exceptions, iOS inet access, state
+// persistence) into the library callbacks.
 class GatewayController : public QObject
 {
     Q_OBJECT
@@ -26,51 +27,31 @@ public:
     explicit GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
                                const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
                                QObject *parent = nullptr);
+    ~GatewayController() override;
 
+    // Blocks like the old implementation did: pumps a local event loop
+    // (ExcludeUserInputEvents) until the request completes, so UI-thread
+    // callers keep their behaviour.
     amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+
+    // Runs the request on a worker thread. The controller must outlive the
+    // returned future (call sites hold it in a QSharedPointer).
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
+    // Internal: invoked from the library's on_before_request callback,
+    // marshalled to this object's thread. Public only for the C trampoline.
+    void handleBeforeRequest(const QString &host);
+
 private:
-    struct EncryptedRequestData
-    {
-        QNetworkRequest request;
-        QByteArray requestBody;
-        QByteArray key;
-        QByteArray iv;
-        QByteArray salt;
-        amnezia::ErrorCode errorCode;
-    };
+    QPair<amnezia::ErrorCode, QByteArray> executePost(const QString &endpoint, const QJsonObject &apiPayload);
+    void persistState();
 
-    struct DecryptionResult
-    {
-        QByteArray decryptedBody;
-        bool isDecryptionSuccessful;
-    };
-
-    EncryptedRequestData prepareRequest(const QString &endpoint, const QJsonObject &apiPayload);
-    DecryptionResult tryDecryptResponseBody(const QByteArray &encryptedResponseBody, QNetworkReply::NetworkError replyError,
-                                            const QByteArray &key, const QByteArray &iv, const QByteArray &salt);
-
-    QStringList getProxyUrls(const QString &serviceType, const QString &userCountryCode);
-    bool shouldBypassProxy(const QNetworkReply::NetworkError &replyError, const QByteArray &decryptedResponseBody, bool isDecryptionSuccessful);
-    void bypassProxy(const QString &endpoint, const QString &serviceType, const QString &userCountryCode,
-                     std::function<QNetworkReply *(const QString &url)> requestFunction,
-                     std::function<bool(QNetworkReply *reply, const QList<QSslError> &sslErrors)> replyProcessingFunction);
-
-    void getProxyUrlsAsync(const QStringList proxyStorageUrls, const int currentProxyStorageIndex,
-                           const QString &proxyUrlsCacheKey, std::function<void(const QStringList &)> onComplete);
-    void getProxyUrlAsync(const QStringList proxyUrls, const int currentProxyIndex, std::function<void(const QString &)> onComplete);
-    void bypassProxyAsync(
-            const QString &endpoint, const QString &proxyUrl, EncryptedRequestData encRequestData,
-            std::function<void(const QByteArray &, bool, const QList<QSslError> &, QNetworkReply::NetworkError, const QString &, int)> onComplete);
-
-    int m_requestTimeoutMsecs;
-    QString m_gatewayEndpoint;
-    bool m_isDevEnvironment = false;
     bool m_isStrictKillSwitchEnabled = false;
     SecureAppSettingsRepository *m_appSettingsRepository = nullptr;
 
-    inline static QString m_proxyUrl;
+    agw_client_handle m_client = 0;
+    bool m_publicKeyMissing = false;
+    QByteArray m_lastPersistedState;
 };
 
 #endif // GATEWAYCONTROLLER_H
