@@ -15,8 +15,216 @@ import "../Config"
 
 PageType {
     id: root
+    objectName: "pageSetupWizardEasy"
 
     property bool isEasySetup: true
+    property bool isRestoreFromBackup: false
+    property string backupFilePath: ""
+    property string restoreHostname: ""
+    property string restoreUsername: ""
+    property string restoreSecretData: ""
+    property bool waitingForServerToAdd: false
+    
+    // For installing containers from backup
+    property var containersToInstall: []
+    property int currentContainerIndex: 0
+    property bool isInstallingContainers: false
+    
+    // Connections for ServersBackupController
+    Connections {
+        target: ServersBackupController
+        
+        function onReadyForRestore(backupFilePath, hostname, username, secretData, serverIp, fileName) {
+            console.log("onReadyForRestore received from C++")
+            console.log("  backupFilePath:", backupFilePath)
+            console.log("  hostname:", hostname)
+            console.log("  serverIp:", serverIp)
+            console.log("  fileName:", fileName)
+            
+            // Scan backup to determine containers (C++ already did this, but needed for QML)
+            var foundContainers = ServersBackupController.scanBackupForContainers(backupFilePath)
+            console.log("Found containers:", foundContainers)
+            
+            if (foundContainers.length === 0) {
+                PageController.showErrorMessage(qsTr("No containers found in backup file"))
+                root.isRestoreFromBackup = false
+                return
+            }
+            
+            root.containersToInstall = foundContainers
+            root.currentContainerIndex = 0
+            
+            // Now add empty server with these credentials
+            InstallController.setProcessedServerCredentials(hostname, username, secretData)
+            
+            // Set waiting flag
+            root.waitingForServerToAdd = true
+            
+            console.log("Backup scanned, adding server...")
+            // Add server (asynchronously)
+            InstallController.addEmptyServer()
+            
+            // Further execution will happen in onInstallServerFinished
+        }
+    }
+    
+    // Connections for tracking server addition
+    Connections {
+        target: InstallController
+        
+        function onInstallServerFinished(finishedMessage) {
+            if (root.waitingForServerToAdd && root.isRestoreFromBackup && root.backupFilePath.length > 0) {
+                console.log("Server added successfully, now installing containers from backup...")
+                root.waitingForServerToAdd = false
+
+                // Start installing containers
+                root.isInstallingContainers = true
+                installNextContainer()
+            }
+        }
+        
+        function onInstallContainerFinished(finishedMessage, isServiceInstall) {
+            if (root.isInstallingContainers) {
+                console.log("Container installed:", finishedMessage)
+                
+                // Move to next container
+                root.currentContainerIndex++
+                
+                if (root.currentContainerIndex < root.containersToInstall.length) {
+                    // Install next container
+                    installNextContainer()
+                } else {
+                    // All containers installed, now do restore
+                    console.log("All containers installed, starting restore...")
+                    root.isInstallingContainers = false
+                    
+                    // IMPORTANT: Turn off busy indicator before navigation
+                    PageController.showBusyIndicator(false)
+                    
+                    // Start navigation to restore mode selection page
+                    navigationTimer.start()
+                }
+            }
+        }
+    }
+    
+    // Function to install next container from list
+    function installNextContainer() {
+        if (root.currentContainerIndex >= root.containersToInstall.length) {
+            return
+        }
+        
+        var containerName = root.containersToInstall[root.currentContainerIndex]
+        console.log("Installing container:", containerName, "(", root.currentContainerIndex + 1, "/", root.containersToInstall.length, ")")
+        
+        // Convert container name to DockerContainer enum
+        var dockerContainer = ContainerProps.containerFromString(containerName)
+        
+        if (dockerContainer === 0) { // None
+            console.log("Unknown container:", containerName, "skipping...")
+            root.currentContainerIndex++
+            installNextContainer()
+            return
+        }
+        
+        // Get default settings for container
+        var defaultProtocol = ContainerProps.defaultProtocol(dockerContainer)
+        var defaultPort = InstallController.getPortForInstall(defaultProtocol)
+        var defaultTransport = InstallController.defaultTransportProto(defaultProtocol)
+
+        // Set server index
+        var serverIdx = ServersModel.getServersCount() - 1
+        ServersModel.processedIndex = serverIdx
+        var serverId = ServersUiController.getServerId(serverIdx)
+
+        // Show loading indicator with message
+        PageController.showBusyIndicator(true)
+        PageController.showNotificationMessage(qsTr("Installing %1 (%2/%3)...")
+            .arg(containerName)
+            .arg(root.currentContainerIndex + 1)
+            .arg(root.containersToInstall.length))
+
+        // Ensure credentials are set
+        InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
+
+        // Install container
+        console.log("Installing container:", containerName, "serverId:", serverId)
+        ContainersModel.setProcessedContainerIndex(dockerContainer)
+        InstallController.install(dockerContainer, defaultPort, defaultTransport, serverId)
+    }
+    
+    // Timer for navigating to restore mode selection page after file selection
+    Timer {
+        id: navigationTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            if (root.backupFilePath.length > 0 && root.isRestoreFromBackup) {
+                console.log("Navigation timer triggered, going to restore mode page")
+                console.log("Credentials available:", root.restoreHostname, root.restoreUsername, root.restoreSecretData.length > 0 ? "***" : "EMPTY")
+                
+                // Get filename
+                var fileName = SystemController.getFileNameFromPath(root.backupFilePath)
+                if (!fileName || fileName === undefined || fileName.length === 0) {
+                    var fallbackName = root.backupFilePath.split('/').pop()
+                    fileName = (fallbackName && fallbackName.length > 0) ? fallbackName : qsTr("backup.tgz")
+                }
+                fileName = String(fileName)
+                
+                // Extract IP address from filename
+                var serverIp = ""
+                var ipMatch = fileName.match(/^([\d_]+)\s*-/)
+                if (ipMatch && ipMatch.length > 1) {
+                    serverIp = ipMatch[1].replace(/_/g, ".")
+                }
+                if (!serverIp || serverIp.length === 0) {
+                    serverIp = root.restoreHostname
+                }
+                
+                var serverName = root.restoreHostname
+                if (!serverName || serverName.length === 0) {
+                    serverName = qsTr("RestoredServer")
+                }
+                
+                // Navigate to installation page
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling)
+                
+                // Immediately find StackView and navigate to restore page
+                // Server already added, as we waited for onInstallServerFinished
+                Qt.callLater(function() {
+                    var pagePath = "qrc:/ui/qml/Pages2/PageSettingsServerRestoreMode.qml"
+
+                    // Traverse upward from root to find the containing StackView.
+                    // StackView has both `push` function and `depth` property.
+                    // This avoids a recursive downward search that causes stack overflow
+                    // on iOS when the component tree is large (many VPN managers).
+                    var stackView = root.parent
+                    while (stackView) {
+                        if (typeof stackView.push === "function" && stackView.hasOwnProperty("depth")) {
+                            break
+                        }
+                        stackView = stackView.parent
+                    }
+
+                    if (stackView) {
+                        console.log("Found StackView, pushing restore mode page")
+                        stackView.push(pagePath, {
+                            "backupFilePath": root.backupFilePath,
+                            "backupFileName": fileName,
+                            "serverName": "",
+                            "serverIp": serverIp,
+                            "isFromSetupWizard": true,
+                            "wizardHostname": root.restoreHostname,
+                            "wizardUsername": root.restoreUsername,
+                            "wizardSecretData": root.restoreSecretData
+                        })
+                    } else {
+                        console.error("Could not find StackView")
+                    }
+                })
+            }
+        }
+    }
 
     SortFilterProxyModel {
         id: proxyContainersModel
@@ -143,6 +351,83 @@ PageType {
                 onClicked: function() {
                     isEasySetup = false
                     checked = true
+                }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
+            }
+
+            DividerType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+            }
+
+            CardType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("Restore from backup")
+                bodyText: qsTr("Restoration of VPN protocols, services, all server settings and users")
+
+                ButtonGroup.group: buttonGroup
+
+                onClicked: function() {
+                    
+                    var filter = GC.isMobile() ? "*.gz *.tgz *.tar.gz" : "Backup files (*.tar.gz *.backup *.tgz *.gz)"
+                    var localPath = SystemController.getFileName(
+                        qsTr("Select Backup to Restore"), 
+                        filter,
+                        "",
+                        false,
+                        ""
+                    )
+                    
+                    console.log("Selected file path:", localPath)
+                    
+                    if (!localPath || localPath.length === 0) {
+                        console.log("No file selected")
+                        return
+                    }
+                    
+                    // Save backup file path
+                    root.backupFilePath = localPath
+                    root.isRestoreFromBackup = true
+                    
+                    // Get credentials from PageSetupWizardCredentials via StackView search
+                    var credentialsPage = null
+                    var item = root
+                    
+                    // Find StackView
+                    while (item && !item.hasOwnProperty("depth")) {
+                        item = item.parent
+                    }
+                    
+                    // If found StackView, search for PageSetupWizardCredentials in its history
+                    if (item && item.depth > 0) {
+                        for (var i = 0; i < item.depth; i++) {
+                            var page = item.get(i)
+                            if (page && page.hasOwnProperty("savedHostname")) {
+                                credentialsPage = page
+                                break
+                            }
+                        }
+                    }
+                    
+                    if (credentialsPage && credentialsPage.savedHostname.length > 0) {
+                        root.restoreHostname = credentialsPage.savedHostname
+                        root.restoreUsername = credentialsPage.savedUsername
+                        root.restoreSecretData = credentialsPage.savedSecretData
+                        console.log("Got credentials from PageSetupWizardCredentials:", root.restoreHostname, root.restoreUsername)
+                        
+                        // Call C++ method to prepare restore
+                        // It will scan backup and send readyForRestore signal
+                        ServersBackupController.prepareRestoreFromBackup(localPath, root.restoreHostname, root.restoreUsername, root.restoreSecretData)
+                    } else {
+                        console.log("WARNING: No credentials found")
+                        return
+                    }
                 }
 
                 Keys.onEnterPressed: this.clicked()

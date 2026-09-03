@@ -4446,7 +4446,17 @@ Create one from the current settings.</source>
         <translation>Добавить их в приложение, если они не отображаются</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="112"/>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="126"/>
+        <source>Backup</source>
+        <translation>Резервное копирование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="127"/>
+        <source>Local copy of VPN protocols, services, all server settings and users</source>
+        <translation>Локальная копия VPN-протоколов, сервисов, всех настроек сервера и пользователей</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="124"/>
         <source>Reboot server</source>
         <translation>Перезагрузить сервер</translation>
     </message>
@@ -5176,6 +5186,34 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="200"/>
         <source>Skip setup</source>
         <translation>Пропустить настройку</translation>
+    </message>
+    <message>
+        <source>No containers found in backup file</source>
+        <translation>В файле резервной копии не найдено контейнеров</translation>
+    </message>
+    <message>
+        <source>Installing %1 (%2/%3)...</source>
+        <translation>Устанавливается %1 (%2/%3)...</translation>
+    </message>
+    <message>
+        <source>backup.tgz</source>
+        <translation>backup.tgz</translation>
+    </message>
+    <message>
+        <source>RestoredServer</source>
+        <translation>Восстановленный сервер</translation>
+    </message>
+    <message>
+        <source>Restore from backup</source>
+        <translation>Восстановить из резервной копии</translation>
+    </message>
+    <message>
+        <source>Restoration of VPN protocols, services, all server settings and users</source>
+        <translation>Восстановление VPN-протоколов, сервисов, всех настроек сервера и пользователей</translation>
+    </message>
+    <message>
+        <source>Select Backup to Restore</source>
+        <translation>Выберите файл резервной копии</translation>
     </message>
 </context>
 <context>
@@ -6836,6 +6874,131 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
         <location filename="../ui/models/protocols/xrayConfigSnapshotsModel.cpp" line="153"/>
         <source>Invalid JSON format</source>
         <translation>Неверный формат JSON</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerBackup</name>
+    <message>
+        <source>Backup</source>
+        <translation>Резервное копирование</translation>
+    </message>
+    <message>
+        <source>Local copy of VPN protocols, services, all server settings and users.</source>
+        <translation>Локальная копия VPN-протоколов, сервисов, всех настроек сервера и пользователей.</translation>
+    </message>
+    <message>
+        <source>More about backups</source>
+        <translation>Подробнее о резервных копиях</translation>
+    </message>
+    <message>
+        <source>Create backup</source>
+        <translation>Создать резервную копию</translation>
+    </message>
+    <message>
+        <source>Restore from backup</source>
+        <translation>Восстановить из резервной копии</translation>
+    </message>
+    <message>
+        <source>Create backup and download to device?</source>
+        <translation>Создать резервную копию и скачать на устройство?</translation>
+    </message>
+    <message>
+        <source>Backup will be created on server and automatically downloaded to your device</source>
+        <translation>Резервная копия будет создана на сервере и автоматически скачана на ваше устройство</translation>
+    </message>
+    <message>
+        <source>Create server configuration backup?</source>
+        <translation>Создать резервную копию конфигурации сервера?</translation>
+    </message>
+    <message>
+        <source>This will create a backup of your server containers configuration on the server</source>
+        <translation>На сервере будет создана резервная копия конфигурации контейнеров</translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation>Создать</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+    <message>
+        <source>Select Backup to Restore</source>
+        <translation>Выберите файл резервной копии</translation>
+    </message>
+    <message>
+        <source>Backup files (*.tar.gz *.backup *.tgz *.gz)</source>
+        <translation>Файлы резервных копий (*.tar.gz *.backup *.tgz *.gz)</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Сервер</translation>
+    </message>
+    <message>
+        <source>Backup created successfully: %1</source>
+        <translation>Резервная копия успешно создана: %1</translation>
+    </message>
+    <message>
+        <source>Backup downloaded successfully!\n\nSaved to:\n%1</source>
+        <translation>Резервная копия успешно скачана!\n\nСохранена в:\n%1</translation>
+    </message>
+    <message>
+        <source>Backup error: %1</source>
+        <translation>Ошибка резервного копирования: %1</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerRestoreMode</name>
+    <message>
+        <source>%1 on %2</source>
+        <translation>%1 на %2</translation>
+    </message>
+    <message>
+        <source>Restore from backup</source>
+        <translation>Восстановление из резервной копии</translation>
+    </message>
+    <message>
+        <source>Add data from backup</source>
+        <translation>Добавить данные из резервной копии</translation>
+    </message>
+    <message>
+        <source>If the same protocols are already installed on the server, they will be updated. Created users and access will be saved</source>
+        <translation>Если на сервере уже установлены такие же протоколы, они будут обновлены. Созданные пользователи и доступы сохранятся</translation>
+    </message>
+    <message>
+        <source>Replace</source>
+        <translation>Заменить</translation>
+    </message>
+    <message>
+        <source>All installed protocols, users and their access will not be saved</source>
+        <translation>Все установленные протоколы, пользователи и их доступы не будут сохранены</translation>
+    </message>
+    <message>
+        <source>Backup restore error: %1</source>
+        <translation>Ошибка восстановления из резервной копии: %1</translation>
+    </message>
+    <message>
+        <source>Server</source>
+        <translation>Сервер</translation>
+    </message>
+</context>
+<context>
+    <name>PageSettingsServerBackupRestored</name>
+    <message>
+        <source>%1 on &quot;%2&quot;</source>
+        <translation>%1 на &quot;%2&quot;</translation>
+    </message>
+    <message>
+        <source>Backup restored</source>
+        <translation>Резервная копия восстановлена</translation>
+    </message>
+    <message>
+        <source>To home</source>
+        <translation>На главную</translation>
+    </message>
+    <message>
+        <source>To server settings</source>
+        <translation>К настройкам сервера</translation>
     </message>
 </context>
 <context>
