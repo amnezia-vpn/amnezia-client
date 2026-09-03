@@ -87,6 +87,15 @@ QString LanguageUiController::getCurrentDocsUrl(const QString &path) const
     return QString("https://docs.amnezia.org") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
 }
 
+QString LanguageUiController::getCurrentHostUrl(const QString &path) const
+{
+    auto locale = m_settingsController->getAppLanguage();
+    if (locale.language() == QLocale::Russian) {
+        return "https://storage.googleapis.com/amnezia/host" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
+    }
+    return QString("https://amnezia.host") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
+}
+
 QString LanguageUiController::getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language) const
 {
     QString strLanguage("");
