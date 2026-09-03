@@ -51,6 +51,17 @@ int main(int argc, char *argv[])
     qputenv("ANDROID_OPENSSL_SUFFIX", "_3");
 #endif
 
+#ifdef Q_OS_WIN
+    // Qt's D3D11 RHI creates a flip-model swapchain (DXGI_SWAP_EFFECT_FLIP_DISCARD) by default.
+    // NVIDIA treats flip presentation as fullscreen-like, so G-Sync in windowed mode and
+    // ShadowPlay react to the client window. Fall back to the blit-model swapchain, which DWM
+    // composites as an ordinary window. Rendering and QtQuick effects are unaffected.
+    // Only set it when the user has not overridden it from the outside.
+    if (!qEnvironmentVariableIsSet("QT_D3D_NO_FLIP")) {
+        qputenv("QT_D3D_NO_FLIP", "1");
+    }
+#endif
+
     AmneziaApplication app(argc, argv);
     OsSignalHandler::setup();
 
