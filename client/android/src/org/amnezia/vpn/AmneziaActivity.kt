@@ -82,8 +82,6 @@ private const val SAVE_FILE_RESULT_FAILED = 2
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
-private const val KEY_PENDING_SAVE_FILE_RESULT = "pending_save_file_result"
-private const val KEY_AWAITING_SAVE_FILE_RESULT = "awaiting_save_file_result"
 
 class AmneziaActivity : QtActivity() {
 
@@ -215,12 +213,6 @@ class AmneziaActivity : QtActivity() {
         )
         pendingOpenFileUri = savedInstanceState?.getString(KEY_PENDING_OPEN_FILE_URI)
         openFileDeliveryScheduled = false
-        awaitingSaveFileResult = savedInstanceState?.getBoolean(KEY_AWAITING_SAVE_FILE_RESULT) ?: false
-        pendingSaveFileResult = if (savedInstanceState?.containsKey(KEY_PENDING_SAVE_FILE_RESULT) == true) {
-            savedInstanceState.getInt(KEY_PENDING_SAVE_FILE_RESULT)
-        } else {
-            null
-        }
         saveFileDeliveryScheduled = false
         registerBroadcastReceivers()
         intent?.let(::processIntent)
@@ -231,10 +223,6 @@ class AmneziaActivity : QtActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
-        if (awaitingSaveFileResult) {
-            outState.putBoolean(KEY_AWAITING_SAVE_FILE_RESULT, true)
-        }
-        pendingSaveFileResult?.let { outState.putInt(KEY_PENDING_SAVE_FILE_RESULT, it) }
     }
 
     private fun loadLibs() {
