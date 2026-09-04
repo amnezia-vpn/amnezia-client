@@ -74,9 +74,16 @@ private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 
+// keep in sync with SystemController::SaveFileResult on the Qt side
+private const val SAVE_FILE_RESULT_SAVED = 0
+private const val SAVE_FILE_RESULT_CANCELLED = 1
+private const val SAVE_FILE_RESULT_FAILED = 2
+
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
+private const val KEY_PENDING_SAVE_FILE_RESULT = "pending_save_file_result"
+private const val KEY_AWAITING_SAVE_FILE_RESULT = "awaiting_save_file_result"
 
 class AmneziaActivity : QtActivity() {
 
@@ -99,6 +106,10 @@ class AmneziaActivity : QtActivity() {
     private val resumeHandler = Handler(Looper.getMainLooper())
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
+    private var pendingSaveFileData: String? = null
+    private var awaitingSaveFileResult = false
+    private var pendingSaveFileResult: Int? = null
+    private var saveFileDeliveryScheduled = false
 
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
@@ -204,6 +215,13 @@ class AmneziaActivity : QtActivity() {
         )
         pendingOpenFileUri = savedInstanceState?.getString(KEY_PENDING_OPEN_FILE_URI)
         openFileDeliveryScheduled = false
+        awaitingSaveFileResult = savedInstanceState?.getBoolean(KEY_AWAITING_SAVE_FILE_RESULT) ?: false
+        pendingSaveFileResult = if (savedInstanceState?.containsKey(KEY_PENDING_SAVE_FILE_RESULT) == true) {
+            savedInstanceState.getInt(KEY_PENDING_SAVE_FILE_RESULT)
+        } else {
+            null
+        }
+        saveFileDeliveryScheduled = false
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
@@ -213,6 +231,10 @@ class AmneziaActivity : QtActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         pendingOpenFileUri?.let { outState.putString(KEY_PENDING_OPEN_FILE_URI, it) }
+        if (awaitingSaveFileResult) {
+            outState.putBoolean(KEY_AWAITING_SAVE_FILE_RESULT, true)
+        }
+        pendingSaveFileResult?.let { outState.putInt(KEY_PENDING_SAVE_FILE_RESULT, it) }
     }
 
     private fun loadLibs() {
@@ -282,6 +304,7 @@ class AmneziaActivity : QtActivity() {
         // Cancel all pending operations when activity stops
         resumeHandler.removeCallbacksAndMessages(null)
         openFileDeliveryScheduled = false
+        saveFileDeliveryScheduled = false
         Log.d(TAG, "Stop Amnezia activity")
         doUnbindService()
         mainScope.launch {
@@ -365,6 +388,7 @@ class AmneziaActivity : QtActivity() {
         // Cancel all pending operations when activity pauses
         resumeHandler.removeCallbacksAndMessages(null)
         openFileDeliveryScheduled = false
+        saveFileDeliveryScheduled = false
         Log.d(TAG, "Pause Amnezia activity")
     }
 
@@ -389,6 +413,15 @@ class AmneziaActivity : QtActivity() {
                     }
                 }
             }, OPEN_FILE_AFTER_RESUME_DELAY_MS)
+        }
+
+        if (pendingSaveFileResult != null && !saveFileDeliveryScheduled) {
+            Log.d(TAG, "[saveFile] onResume: pending result=${saveFileResultToString(pendingSaveFileResult!!)}, " +
+                    "scheduling Qt delivery")
+            scheduleSaveFileResultDelivery()
+        } else {
+            Log.d(TAG, "[saveFile] onResume: pending=${pendingSaveFileResult?.let { saveFileResultToString(it) } ?: "none"}, " +
+                    "deliveryScheduled=$saveFileDeliveryScheduled, awaitingSave=$awaitingSaveFileResult")
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
@@ -491,7 +524,18 @@ class AmneziaActivity : QtActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "Process activity result, code: ${actionCodeToString(requestCode)}, " +
-                "resultCode: $resultCode, data: $data")
+                "resultCode: $resultCode, data: $data, awaitingSave=$awaitingSaveFileResult")
+        if (requestCode == CREATE_FILE_ACTION_CODE && awaitingSaveFileResult) {
+            Log.d(TAG, "[saveFile] onActivityResult: routing to handleSaveFileActivityResult, " +
+                    "hasData=${pendingSaveFileData != null}, hasHandler=${actionResultHandlers.containsKey(requestCode)}")
+            actionResultHandlers.remove(requestCode)
+            handleSaveFileActivityResult(resultCode, data)
+            return
+        }
+        if (requestCode == CREATE_FILE_ACTION_CODE) {
+            Log.w(TAG, "[saveFile] onActivityResult: CREATE_FILE but awaitingSaveFileResult=false, " +
+                    "falling through to handler/super")
+        }
         actionResultHandlers[requestCode]?.let { handler ->
             when (resultCode) {
                 RESULT_OK -> handler.onSuccess(data)
@@ -499,7 +543,10 @@ class AmneziaActivity : QtActivity() {
             }
             handler.onAny(data)
             actionResultHandlers.remove(requestCode)
-        } ?: super.onActivityResult(requestCode, resultCode, data)
+        } ?: run {
+            Log.d(TAG, "[saveFile] onActivityResult: no handler for ${actionCodeToString(requestCode)}, calling super")
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     private fun startActivityForResult(intent: Intent, requestCode: Int, handler: ActivityResultHandler) {
@@ -732,34 +779,111 @@ class AmneziaActivity : QtActivity() {
 
     @Suppress("unused")
     fun saveFile(fileName: String, data: String) {
-        Log.d(TAG, "Save file $fileName")
+        Log.d(TAG, "[saveFile] saveFile called: name=$fileName, bytes=${data.length}, " +
+                "resumed=$isActivityResumed, awaiting=$awaitingSaveFileResult")
+        pendingSaveFileData = data
+        awaitingSaveFileResult = true
         mainScope.launch {
-            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "text/*"
                 putExtra(Intent.EXTRA_TITLE, fileName)
-            }.also {
-                try {
-                    startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
-                        onSuccess = {
-                            it?.data?.let { uri ->
-                                Log.v(TAG, "Save file to $uri")
-                                try {
-                                    contentResolver.openOutputStream(uri)?.use { os ->
-                                        os.bufferedWriter().use { it.write(data) }
-                                    }
-                                } catch (e: IOException) {
-                                    Log.e(TAG, "Failed to save file $uri: $e")
-                                    // todo: send error to Qt
-                                }
-                            }
-                        }
-                    ))
-                } catch (_: ActivityNotFoundException) {
-                    Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
-                }
+            }
+            try {
+                Log.d(TAG, "[saveFile] launching CREATE_DOCUMENT picker")
+                @Suppress("DEPRECATION")
+                super.startActivityForResult(intent, CREATE_FILE_ACTION_CODE)
+            } catch (_: ActivityNotFoundException) {
+                Log.w(TAG, "[saveFile] CREATE_DOCUMENT not available on this device")
+                pendingSaveFileData = null
+                awaitingSaveFileResult = false
+                Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
+                reportFileSaved(SAVE_FILE_RESULT_FAILED)
             }
         }
+    }
+
+    private fun handleSaveFileActivityResult(resultCode: Int, data: Intent?) {
+        Log.d(TAG, "[saveFile] handleSaveFileActivityResult: resultCode=$resultCode " +
+                "(RESULT_OK=$RESULT_OK), uri=${data?.data}, hasPendingData=${pendingSaveFileData != null}")
+        awaitingSaveFileResult = false
+        val fileData = pendingSaveFileData
+        pendingSaveFileData = null
+
+        if (resultCode == RESULT_OK) {
+            val uri = data?.data
+            if (uri == null || fileData == null) {
+                Log.w(TAG, "[saveFile] success path but missing uri or data, reporting FAILED")
+                reportFileSaved(SAVE_FILE_RESULT_FAILED)
+            } else {
+                Log.d(TAG, "[saveFile] writing ${fileData.length} bytes to $uri")
+                try {
+                    contentResolver.openOutputStream(uri)?.use { os ->
+                        os.bufferedWriter().use { it.write(fileData) }
+                    }
+                    reportFileSaved(SAVE_FILE_RESULT_SAVED)
+                } catch (e: IOException) {
+                    Log.e(TAG, "[saveFile] write failed for $uri: $e")
+                    reportFileSaved(SAVE_FILE_RESULT_FAILED)
+                }
+            }
+        } else {
+            Log.d(TAG, "[saveFile] user cancelled or picker failed, reporting CANCELLED")
+            reportFileSaved(SAVE_FILE_RESULT_CANCELLED)
+        }
+    }
+
+    private fun reportFileSaved(result: Int) {
+        Log.d(TAG, "[saveFile] reportFileSaved: ${saveFileResultToString(result)}, " +
+                "isActivityResumed=$isActivityResumed, qtReady=${qtInitialized.isCompleted}")
+        pendingSaveFileResult = result
+        if (isActivityResumed) {
+            scheduleSaveFileResultDelivery()
+        } else {
+            Log.d(TAG, "[saveFile] activity not resumed yet, Qt delivery deferred to onResume")
+        }
+    }
+
+    private fun scheduleSaveFileResultDelivery() {
+        if (pendingSaveFileResult == null) {
+            Log.d(TAG, "[saveFile] scheduleSaveFileResultDelivery: skipped, no pending result")
+            return
+        }
+        if (saveFileDeliveryScheduled) {
+            Log.d(TAG, "[saveFile] scheduleSaveFileResultDelivery: skipped, already scheduled")
+            return
+        }
+        val resultToDeliver = pendingSaveFileResult!!
+        Log.d(TAG, "[saveFile] scheduleSaveFileResultDelivery: scheduling ${saveFileResultToString(resultToDeliver)} " +
+                "in ${OPEN_FILE_AFTER_RESUME_DELAY_MS}ms")
+        saveFileDeliveryScheduled = true
+        resumeHandler.postDelayed({
+            if (!isFinishing && !isDestroyed) {
+                val result = pendingSaveFileResult
+                pendingSaveFileResult = null
+                saveFileDeliveryScheduled = false
+                if (result != null) {
+                    Log.d(TAG, "[saveFile] delivering result ${saveFileResultToString(result)} to Qt via JNI")
+                    mainScope.launch {
+                        qtInitialized.await()
+                        Log.d(TAG, "[saveFile] Qt ready, calling onFileSaved($result)")
+                        QtAndroidController.onFileSaved(result)
+                    }
+                } else {
+                    Log.w(TAG, "[saveFile] delivery runnable: pending result was cleared before delivery")
+                }
+            } else {
+                Log.w(TAG, "[saveFile] delivery runnable: activity finishing/destroyed, result kept for later")
+                saveFileDeliveryScheduled = false
+            }
+        }, OPEN_FILE_AFTER_RESUME_DELAY_MS)
+    }
+
+    private fun saveFileResultToString(result: Int): String = when (result) {
+        SAVE_FILE_RESULT_SAVED -> "SAVED"
+        SAVE_FILE_RESULT_CANCELLED -> "CANCELLED"
+        SAVE_FILE_RESULT_FAILED -> "FAILED"
+        else -> "UNKNOWN($result)"
     }
 
     @Suppress("unused")

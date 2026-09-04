@@ -97,6 +97,7 @@ bool AndroidController::initialize()
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
+        {"onFileSaved", "(I)V", reinterpret_cast<void *>(onFileSaved)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
@@ -154,11 +155,56 @@ void AndroidController::resetLastServer(int serverIndex)
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
 }
 
-void AndroidController::saveFile(const QString &fileName, const QString &data)
+SystemController::SaveFileResult AndroidController::saveFile(const QString &fileName, const QString &data)
 {
+    // keep in sync with SAVE_FILE_RESULT_* in AmneziaActivity.kt
+    int result = 2;
+    bool received = false;
+
+    QEventLoop wait;
+    const QMetaObject::Connection fileSavedConnection = connect(this, &AndroidController::fileSaved, this,
+            [&result, &received, &wait](int saveResult) {
+                qDebug() << "[saveFile] AndroidController: fileSaved signal received, code:" << saveResult;
+                result = saveResult;
+                received = true;
+                wait.quit();
+            });
+
+    qDebug() << "[saveFile] AndroidController::saveFile: opening picker for" << fileName << "size:" << data.size();
     callActivityMethod("saveFile", "(Ljava/lang/String;Ljava/lang/String;)V",
                        QJniObject::fromString(fileName).object<jstring>(),
                        QJniObject::fromString(data).object<jstring>());
+
+    int waitRound = 0;
+    while (!received) {
+        ++waitRound;
+        qDebug() << "[saveFile] AndroidController::saveFile: wait round" << waitRound;
+        wait.exec();
+        if (received) {
+            break;
+        }
+
+        qDebug() << "[saveFile] AndroidController::saveFile: event loop exited without result, waiting for activityResumed";
+        QEventLoop resumeWait;
+        const QMetaObject::Connection resumeConnection = connect(this, &AndroidController::activityResumed, &resumeWait,
+                                                               &QEventLoop::quit,
+                                                               static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
+        resumeWait.exec();
+        disconnect(resumeConnection);
+        qDebug() << "[saveFile] AndroidController::saveFile: activityResumed received, resuming wait";
+    }
+
+    disconnect(fileSavedConnection);
+
+    SystemController::SaveFileResult mapped = SystemController::SaveFileResult::Failed;
+    switch (result) {
+    case 0: mapped = SystemController::SaveFileResult::Saved; break;
+    case 1: mapped = SystemController::SaveFileResult::Cancelled; break;
+    default: mapped = SystemController::SaveFileResult::Failed; break;
+    }
+    qDebug() << "[saveFile] AndroidController::saveFile: done, raw code:" << result
+             << "mapped:" << static_cast<int>(mapped);
+    return mapped;
 }
 
 QString AndroidController::openFile(const QString &filter)
@@ -561,6 +607,17 @@ void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->fileOpened(AndroidUtils::convertJString(env, uri));
+}
+
+// static
+void AndroidController::onFileSaved(JNIEnv *env, jobject thiz, jint result)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    qDebug() << "[saveFile] AndroidController::onFileSaved: JNI callback, code:" << static_cast<int>(result);
+    emit AndroidController::instance()->fileSaved(static_cast<int>(result));
+    qDebug() << "[saveFile] AndroidController::onFileSaved: fileSaved signal emitted";
 }
 
 // static

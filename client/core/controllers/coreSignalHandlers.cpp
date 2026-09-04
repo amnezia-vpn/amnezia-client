@@ -1,5 +1,6 @@
 #include "coreSignalHandlers.h"
 
+#include <QDebug>
 #include <QTimer>
 #include <QtConcurrent>
 
@@ -23,6 +24,7 @@
 #include "ui/controllers/importUiController.h"
 #include "ui/controllers/api/subscriptionUiController.h"
 #include "ui/controllers/updateUiController.h"
+#include "ui/controllers/systemController.h"
 #include "ui/models/serversModel.h"
 #include "core/controllers/serversController.h"
 #include "core/controllers/ipSplitTunnelingController.h"
@@ -100,6 +102,13 @@ void CoreSignalHandlers::initErrorMessagesHandler()
 
     connect(m_coreController->m_settingsUiController, &SettingsUiController::errorOccurred, m_coreController->m_pageController,
             qOverload<ErrorCode>(&PageController::showErrorMessage));
+
+    // any save/share dialog dismissed by the user, on every platform
+    connect(m_coreController->m_systemController, &SystemController::saveCancelledByUser, m_coreController->m_pageController,
+            [this]() {
+                qDebug() << "[saveFile] CoreSignalHandlers: saveCancelledByUser -> showNotificationMessage";
+                emit m_coreController->m_pageController->showNotificationMessage(tr("Cancelled by user"));
+            });
 }
 
 void CoreSignalHandlers::initSettingsSplitTunnelingHandler()

@@ -109,13 +109,22 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverId, const
     }
 
     QString nativeConfig;
+    qDebug() << "exportNativeConfig: requesting a new config from the gateway, country:" << serverCountryCode;
     ErrorCode errorCode = m_subscriptionController->exportNativeConfig(serverId, serverCountryCode, nativeConfig);
     if (errorCode != ErrorCode::NoError) {
+        qWarning() << "exportNativeConfig: the gateway request failed with" << errorCode;
         emit errorOccurred(errorCode);
         return false;
     }
+    // at this point the gateway has already rotated the key: the previously issued config is dead
+    // and the new private key only lives inside nativeConfig
+    qDebug() << "exportNativeConfig: the gateway issued a new config, size:" << nativeConfig.size()
+             << "- the previous one is now revoked";
 
     const bool saved = SystemController::saveFile(fileName, nativeConfig);
+    qDebug() << "[saveFile] exportNativeConfig: saveFile returned" << saved << "for" << fileName;
+    qDebug() << "exportNativeConfig: saved:" << saved << "- refreshing the account info regardless,"
+             << "the config is issued server side either way";
     getAccountInfo(serverId, true);
     return saved;
 }
