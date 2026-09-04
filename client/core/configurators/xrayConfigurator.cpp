@@ -237,7 +237,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     }
 
     XrayProtocolConfig updated =
-            buildClientProtocolConfig(credentials, container, srv, xrayCfg->clientTemplate, clientId, errorCode,
+            buildClientProtocolConfig(credentials, container, srv, clientId, errorCode,
                                       realityPublicKey, realityShortId);
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Xray applyServerSettings: buildClientProtocolConfig failed, error="
@@ -350,16 +350,12 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     }
 
     XrayProtocolConfig updated =
-            buildClientProtocolConfig(credentials, container, srv, xrayCfg->clientTemplate, clientId, errorCode,
+            buildClientProtocolConfig(credentials, container, srv, clientId, errorCode,
                                       realityPublicKey, realityShortId, tlsPin);
     if (errorCode != ErrorCode::NoError) {
         logger.error() << "Xray writeServerConfigForSetup: buildClientProtocolConfig failed, error="
                        << static_cast<int>(errorCode);
         return errorCode;
-    }
-    updated.clientTemplate.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    if (!uploadClientTemplate(credentials, container, updated.clientTemplate)) {
-        logger.warning() << "Xray writeServerConfigForSetup: uploadClientTemplate failed; server template may be stale";
     }
     containerConfig.protocolConfig = updated;
     logger.info() << "Xray writeServerConfigForSetup: done, clientId=" << clientId;
@@ -593,50 +589,10 @@ QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentia
     return clientId;
 }
 
-bool XrayConfigurator::uploadClientTemplate(const ServerCredentials &credentials, DockerContainer container,
-                                            const XrayClientTemplate &clientTemplate) const
-{
-    XrayClientTemplate stamped = clientTemplate;
-    stamped.updatedAt = QDateTime::currentDateTimeUtc().toString(Qt::ISODate);
-    const QJsonObject templateJson = stamped.toJson();
-    const QString json = QString::fromUtf8(QJsonDocument(templateJson).toJson());
-    const ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(
-            container, credentials, json, QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath),
-            libssh::ScpOverwriteMode::ScpOverwriteExisting);
-    if (errorCode != ErrorCode::NoError) {
-        return false;
-    }
-    return true;
-}
-
-XrayClientTemplate XrayConfigurator::readClientTemplate(const ServerCredentials &credentials,
-                                                        DockerContainer container, bool &outFound) const
-{
-    outFound = false;
-    ErrorCode readError = ErrorCode::NoError;
-    const QString content = QString::fromUtf8(m_sshSession->getTextFileFromContainer(
-            container, credentials, QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath), readError));
-    if (readError != ErrorCode::NoError || content.trimmed().isEmpty()) {
-        return {};
-    }
-
-    const QJsonDocument doc = QJsonDocument::fromJson(content.toUtf8());
-    if (!doc.isObject()) {
-        return {};
-    }
-
-    XrayClientTemplate tpl = XrayClientTemplate::fromJson(doc.object());
-    if (tpl.formatVersion == 0) {
-        return {};
-    }
-
-    outFound = true;
-    return tpl;
-}
 XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCredentials &credentials,
                                                                DockerContainer container,
                                                                const XrayServerConfig &srv,
-                                                               const XrayClientTemplate &tpl, const QString &clientId,
+                                                               const QString &clientId,
                                                                ErrorCode &errorCode,
                                                                const QString &prefetchedRealityPublicKey,
                                                                const QString &prefetchedRealityShortId,
@@ -674,7 +630,6 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
 
     XrayProtocolConfig protocolConfig;
     protocolConfig.serverConfig = srv;
-    protocolConfig.clientTemplate = tpl;
 
     XrayClientOutboundInputs inputs;
     inputs.serverAddress = credentials.hostName;
@@ -688,7 +643,6 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
             QJsonDocument(protocolConfig.toClientOutboundJson(inputs)).toJson(QJsonDocument::Compact));
     clientConfig.localPort = QString::fromLatin1(amnezia::protocols::xray::defaultLocalProxyPort);
     clientConfig.id = clientId;
-    clientConfig.templateFingerprint = tpl.contentFingerprint();
     protocolConfig.setClientConfig(clientConfig);
 
     return protocolConfig;
@@ -707,10 +661,8 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
     }
 
     const XrayServerConfig *serverConfig = nullptr;
-    XrayClientTemplate clientTemplate;
     if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
         serverConfig = &xrayCfg->serverConfig;
-        clientTemplate = xrayCfg->clientTemplate;
     }
 
     if (!serverConfig) {
@@ -730,5 +682,5 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
         return XrayProtocolConfig{};
     }
 
-    return buildClientProtocolConfig(credentials, container, srv, clientTemplate, xrayClientId, errorCode);
+    return buildClientProtocolConfig(credentials, container, srv, xrayClientId, errorCode);
 }

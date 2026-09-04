@@ -13,7 +13,6 @@ QJsonObject XrayConfigSnapshot::toJson() const
     obj["displayName"] = displayName;
     obj["createdAt"] = createdAt.toString(Qt::ISODate);
     obj["serverConfig"] = serverConfig.toJson();
-    obj["clientTemplate"] = clientTemplate.toJson();
     return obj;
 }
 
@@ -24,11 +23,6 @@ XrayConfigSnapshot XrayConfigSnapshot::fromJson(const QJsonObject &json)
     s.displayName = json.value("displayName").toString();
     s.createdAt = QDateTime::fromString(json.value("createdAt").toString(), Qt::ISODate);
     s.serverConfig = amnezia::XrayServerConfig::fromJson(json.value("serverConfig").toObject());
-    if (json.contains("clientTemplate")) {
-        s.clientTemplate = amnezia::XrayClientTemplate::fromJson(json.value("clientTemplate").toObject());
-    } else {
-        s.clientTemplate.materializeFromLegacy(json.value("serverConfig").toObject());
-    }
     return s;
 }
 
@@ -106,15 +100,13 @@ void XrayConfigSnapshotsModel::reload()
     endResetModel();
 }
 
-void XrayConfigSnapshotsModel::createFromCurrent(const amnezia::XrayServerConfig &serverConfig,
-                                                 const amnezia::XrayClientTemplate &clientTemplate)
+void XrayConfigSnapshotsModel::createFromCurrent(const amnezia::XrayServerConfig &serverConfig)
 {
     XrayConfigSnapshot snapshot;
     snapshot.id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     snapshot.displayName = buildDisplayName(serverConfig);
     snapshot.createdAt = QDateTime::currentDateTime();
     snapshot.serverConfig = serverConfig;
-    snapshot.clientTemplate = clientTemplate;
 
     beginInsertRows(QModelIndex(), m_configs.size(), m_configs.size());
     m_configs.append(snapshot);
@@ -200,7 +192,7 @@ void XrayConfigSnapshotsModel::createFromCurrentModel()
         return;
     }
     const amnezia::XrayProtocolConfig current = m_xrayConfigModel->getProtocolConfig();
-    createFromCurrent(current.serverConfig, current.clientTemplate);
+    createFromCurrent(current.serverConfig);
 }
 
 void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
@@ -215,5 +207,5 @@ void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
     if (snapshot.serverConfig.port.isEmpty()) {
         return;
     }
-    m_xrayConfigModel->applyServerConfig(snapshot.serverConfig, snapshot.clientTemplate);
+    m_xrayConfigModel->applyServerConfig(snapshot.serverConfig);
 }

@@ -57,7 +57,6 @@ namespace amnezia
             constexpr char shortidPath[] = "/opt/amnezia/xray/xray_short_id.key";
             constexpr char tlsCertPath[] = "/opt/amnezia/xray/tls_cert.pem";
             constexpr char tlsKeyPath[] = "/opt/amnezia/xray/tls_key.pem";
-            constexpr char clientTemplatePath[] = "/opt/amnezia/xray/template.json";
             constexpr char defaultSite[] = "www.googletagmanager.com";
 
             constexpr char defaultPort[] = "443";

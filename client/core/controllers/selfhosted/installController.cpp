@@ -313,17 +313,6 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
 
 
     if (!serverSettingsChanged && !reinstallRequired) {
-        if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-            if (const auto *xray = newConfig.getXrayProtocolConfig()) {
-                if (credentials.isValid()) {
-                    XrayConfigurator xrayConfigurator(&sshSession);
-                    if (!xrayConfigurator.uploadClientTemplate(credentials, container, xray->clientTemplate)) {
-                        logger.warning() << "updateServerConfig: uploadClientTemplate failed; the server template "
-                                            "may be stale for other admin devices";
-                    }
-                }
-            }
-        }
         if (container == DockerContainer::MtProxy) {
             MtProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         } else if (container == DockerContainer::Telemt) {
@@ -863,13 +852,6 @@ ErrorCode InstallController::readXrayStateBeforeVolumeMigration(const ServerCred
         return ErrorCode::XrayKeyMigrationFailed;
     }
     outFiles.insert(QString::fromLatin1(amnezia::protocols::xray::serverConfigPath), serverConfig);
-
-    ErrorCode templateError = ErrorCode::NoError;
-    const QString clientTemplate = QString::fromUtf8(sshSession.getTextFileFromContainer(
-            container, credentials, QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath), templateError));
-    if (templateError == ErrorCode::NoError && !clientTemplate.trimmed().isEmpty()) {
-        outFiles.insert(QString::fromLatin1(amnezia::protocols::xray::clientTemplatePath), clientTemplate);
-    }
 
     return ErrorCode::NoError;
 }

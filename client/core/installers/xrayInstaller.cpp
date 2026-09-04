@@ -68,22 +68,10 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         return ErrorCode::InternalError;
     }
 
-    XrayClientTemplate &tpl = xrayConfig->clientTemplate;
     const amnezia::XrayServerJsonStatus status =
-            XrayServerConfig::fromServerInboundJson(doc.object(), xrayConfig->serverConfig, tpl);
+            XrayServerConfig::fromServerInboundJson(doc.object(), xrayConfig->serverConfig);
     if (status != amnezia::XrayServerJsonStatus::Ok) {
         return ErrorCode::InternalError;
-    }
-
-
-    // ── Security ──────────────────────────────────────────────────────
-    {
-        XrayConfigurator configurator(sshSession);
-        bool found = false;
-        const XrayClientTemplate stored = configurator.readClientTemplate(credentials, container, found);
-        if (found) {
-            tpl = stored;
-        }
     }
 
     return ErrorCode::NoError;

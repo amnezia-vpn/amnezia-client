@@ -149,8 +149,7 @@ public slots:
     bool isServerSettingsEqual() const;
     bool hasUnsavedChanges() const;
     void resetToDefaults();
-    void applyServerConfig(const amnezia::XrayServerConfig &serverConfig,
-                           const amnezia::XrayClientTemplate &clientTemplate);
+    void applyServerConfig(const amnezia::XrayServerConfig &serverConfig);
 
 signals:
     void hasUnsavedChangesChanged();

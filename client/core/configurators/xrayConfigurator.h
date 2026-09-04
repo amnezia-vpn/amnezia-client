@@ -37,12 +37,6 @@ public:
                                                  const amnezia::DnsSettings &dnsSettings,
                                                  bool useAtomicApply = false);
 
-    bool uploadClientTemplate(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
-                              const amnezia::XrayClientTemplate &clientTemplate) const;
-
-    amnezia::XrayClientTemplate readClientTemplate(const amnezia::ServerCredentials &credentials,
-                                                   amnezia::DockerContainer container, bool &outFound) const;
-
 private:
     QJsonArray collectServerClients(const amnezia::ServerCredentials &credentials,
                                     amnezia::DockerContainer container, const QString &flowValue,
@@ -69,7 +63,6 @@ private:
     amnezia::XrayProtocolConfig buildClientProtocolConfig(const amnezia::ServerCredentials &credentials,
                                                           amnezia::DockerContainer container,
                                                           const amnezia::XrayServerConfig &srv,
-                                                          const amnezia::XrayClientTemplate &tpl,
                                                           const QString &clientId,
                                                           amnezia::ErrorCode &errorCode,
                                                           const QString &prefetchedRealityPublicKey = {},
