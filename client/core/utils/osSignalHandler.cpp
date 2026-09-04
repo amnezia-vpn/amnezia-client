@@ -68,6 +68,18 @@ namespace
 
         pthread_sigmask(SIG_BLOCK, &set, nullptr);
 
+        // The mask set above is inherited by every process forked afterwards and
+        // survives exec. A child that cannot receive SIGTERM breaks any library
+        // that stops a helper process with kill() followed by a blocking
+        // waitpid() -- libssh does exactly that for its ProxyCommand helper --
+        // and the caller then hangs forever. Restore the default mask in the
+        // child side of fork() so spawned processes remain killable.
+        pthread_atfork(nullptr, nullptr, [] {
+            sigset_t empty;
+            sigemptyset(&empty);
+            sigprocmask(SIG_SETMASK, &empty, nullptr);
+        });
+
         signalFd = signalfd(-1, &set, SFD_NONBLOCK | SFD_CLOEXEC);
         if (signalFd < 0)
             return;
