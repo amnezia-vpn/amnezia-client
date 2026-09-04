@@ -8,6 +8,7 @@
 
 #include "leakdetector.h"
 #include "logger.h"
+#include "windowsroutecapturepolicy.h"
 
 namespace {
 Logger logger("WindowsRouteMonitor");
@@ -259,9 +260,12 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family) {
   PMIB_IPFORWARD_TABLE2 table;
   DWORD error = GetIpForwardTable2(family, &table);
   if (error != NO_ERROR) {
-    updateCapturedRoutes(family, table);
-    FreeMibTable(table);
+    logger.error() << "Failed to fetch routing table:" << error;
+    return;
   }
+
+  updateCapturedRoutes(family, table);
+  FreeMibTable(table);
 }
 
 void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
@@ -272,23 +276,12 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
 
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
-    // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
+    bool routeExcluded = isRouteExcluded(&row->DestinationPrefix);
+    if (!WindowsRouteCapturePolicy::shouldCaptureRoute(
+            row, m_luid, routeExcluded, EXCLUSION_ROUTE_METRIC)) {
       continue;
     }
-    // Ignore the default route
-    if (row->DestinationPrefix.PrefixLength == 0) {
-      continue;
-    }
-    // Ignore routes of our own creation.
-    if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
-        (row->Metric == EXCLUSION_ROUTE_METRIC)) {
-      continue;
-    }
-    // Ignore routes which should be excluded.
-    if (isRouteExcluded(&row->DestinationPrefix)) {
-      continue;
-    }
+
     QHostAddress destination = prefixToAddress(&row->DestinationPrefix);
     if (destination.isLoopback() || destination.isBroadcast() ||
         destination.isLinkLocal() || destination.isMulticast()) {
@@ -424,11 +417,11 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
     return false;
   }
   updateInterfaceMetrics(family);
-  updateCapturedRoutes(family, table);
   updateExclusionRoute(data, table);
+  m_exclusionRoutes[prefix] = data;
+  updateCapturedRoutes(family, table);
   FreeMibTable(table);
 
-  m_exclusionRoutes[prefix] = data;
   return true;
 }
 
