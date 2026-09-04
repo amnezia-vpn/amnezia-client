@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
 #include <QTranslator>
 #include <QTimer>
@@ -39,11 +40,40 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     }
     initLogging();
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    initLocalProxy();
+#endif
+
     m_translator = new QTranslator(this);
     if (m_appSettingsRepository) {
         updateTranslator(m_appSettingsRepository->getAppLanguage());
     }
 }
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+void CoreController::initLocalProxy()
+{
+    m_proxyServer.reset(new ProxyServer(m_serversRepository, m_appSettingsRepository, this));
+
+    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, m_proxyServer.data(),
+            &ProxyServer::applySettings);
+    connect(m_serversRepository, &SecureServersRepository::serverEdited, m_proxyServer.data(), &ProxyServer::onServerEdited);
+    connect(m_serversRepository, &SecureServersRepository::serverRemoved, m_proxyServer.data(),
+            [this](const QString &serverId, int) { m_proxyServer->onServerRemoved(serverId); });
+
+    connect(m_proxyServer.data(), &ProxyServer::startFailed, m_settingsController, &SettingsController::localProxyStartFailed);
+    connect(m_connectionController, &ConnectionController::localProxyStoppedBecauseVpnTurnedOn, m_pageController,
+            &PageController::showNotificationMessage);
+
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this]() {
+        if (m_appSettingsRepository && m_appSettingsRepository->isLocalProxyHttpEnabled()) {
+            m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+        }
+    });
+
+    m_proxyServer->applySettings();
+}
+#endif
 
 void CoreController::setQmlContextProperty(const QString &name, QObject *value)
 {
