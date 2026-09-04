@@ -21,6 +21,7 @@ Item {
 
     property string buttonImageSource
     property string rightImageSource
+    property string rightButtonAccessibleName: root.text
     property string leftImageSource
     property string rightWarningImageSource
     property string rightWarningImageColor: AmneziaStyle.color.goldenApricot
@@ -46,6 +47,9 @@ Item {
     property bool hideDescription: true
 
     property bool isFocusable: !(eyeImage.visible || rightImage.visible) // TODO: this component already has focusable items
+
+    Accessible.name: root.descriptionText !== "" ? qsTr("%1, %2").arg(root.text).arg(root.descriptionText) : root.text
+    Accessible.role: Accessible.Button
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
@@ -264,6 +268,7 @@ Item {
             hoverEnabled: true
             image: buttonImageSource
             imageColor: rightImageColor
+            accessibleName: hideDescription ? qsTr("Show %1").arg(root.text) : qsTr("Hide %1").arg(root.text)
 
             Layout.alignment: Qt.AlignRight
 
@@ -301,6 +306,7 @@ Item {
             image: rightImageSource
             imageColor: rightImageColor
             visible: rightImageSource ? true : false
+            accessibleName: root.rightButtonAccessibleName
 
             Layout.alignment: Qt.AlignRight
 

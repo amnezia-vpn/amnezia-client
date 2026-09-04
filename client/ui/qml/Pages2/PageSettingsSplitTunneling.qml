@@ -205,6 +205,7 @@ PageType {
                 descriptionText: ip
                 rightImageSource: "qrc:/images/controls/trash.svg"
                 rightImageColor: AmneziaStyle.color.paleGray
+                rightButtonAccessibleName: qsTr("Remove %1").arg(url)
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove ") + url + "?"
@@ -259,8 +260,10 @@ PageType {
                 Layout.fillWidth: true
                 rightButtonClickedOnEnter: true
 
+                headerText: qsTr("Website or IP")
                 textField.placeholderText: qsTr("website or IP")
                 buttonImageSource: "qrc:/images/controls/plus.svg"
+                buttonAccessibleName: qsTr("Add site")
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
@@ -277,6 +280,7 @@ PageType {
 
                 image: "qrc:/images/controls/more-vertical.svg"
                 imageColor: AmneziaStyle.color.paleGray
+                accessibleName: qsTr("Additional options")
 
                 onClicked: function () {
                     moreActionsDrawer.openTriggered()
@@ -314,6 +318,7 @@ PageType {
 
                 text: qsTr("Import")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                rightButtonAccessibleName: qsTr("Import site list")
 
                 clickedFunction: function() {
                     importSitesDrawer.openTriggered()

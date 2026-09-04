@@ -56,6 +56,10 @@ ListViewType {
 
             property bool isFocusable: true
 
+            Accessible.name: name
+            Accessible.role: Accessible.RadioButton
+            Accessible.description: checked ? qsTr("Selected") : ""
+
             Keys.onTabPressed: {
                 FocusController.nextKeyTabItem()
             }
@@ -155,6 +159,10 @@ ListViewType {
         }
 
         Keys.onEnterPressed: {
+            radioButton.clicked()
+        }
+
+        Keys.onSpacePressed: {
             radioButton.clicked()
         }
     }
