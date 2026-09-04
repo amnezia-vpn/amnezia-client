@@ -1,6 +1,5 @@
 #include "coreSignalHandlers.h"
 
-#include <QDebug>
 #include <QTimer>
 #include <QtConcurrent>
 
@@ -106,7 +105,6 @@ void CoreSignalHandlers::initErrorMessagesHandler()
     // any save/share dialog dismissed by the user, on every platform
     connect(m_coreController->m_systemController, &SystemController::saveCancelledByUser, m_coreController->m_pageController,
             [this]() {
-                qDebug() << "[saveFile] CoreSignalHandlers: saveCancelledByUser -> showNotificationMessage";
                 emit m_coreController->m_pageController->showNotificationMessage(tr("Cancelled by user"));
             });
 }

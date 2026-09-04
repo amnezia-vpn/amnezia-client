@@ -122,7 +122,6 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverId, const
              << "- the previous one is now revoked";
 
     const bool saved = SystemController::saveFile(fileName, nativeConfig);
-    qDebug() << "[saveFile] exportNativeConfig: saveFile returned" << saved << "for" << fileName;
     qDebug() << "exportNativeConfig: saved:" << saved << "- refreshing the account info regardless,"
              << "the config is issued server side either way";
     getAccountInfo(serverId, true);

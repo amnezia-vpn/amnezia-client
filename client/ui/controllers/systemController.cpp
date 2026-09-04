@@ -52,19 +52,16 @@ SystemController::~SystemController()
 void SystemController::notifySaveCancelled()
 {
     if (s_instance) {
-        qDebug() << "[saveFile] SystemController::notifySaveCancelled: emitting saveCancelledByUser";
         emit s_instance->saveCancelledByUser();
     } else {
-        qWarning() << "[saveFile] SystemController::notifySaveCancelled: no SystemController instance";
+        qWarning() << "SystemController::saveFile: cancelled, but there is no SystemController instance to notify";
     }
 }
 
 SystemController::SaveFileResult SystemController::saveFileEx(const QString &fileName, const QString &data)
 {
 #if defined Q_OS_ANDROID
-    qDebug() << "SystemController::saveFile: android, name:" << fileName << "size:" << data.size();
     const SaveFileResult result = AndroidController::instance()->saveFile(fileName, data);
-    qDebug() << "SystemController::saveFile: android result:" << saveFileResultToString(result);
     return result;
 #else
     return saveFileEx(fileName, data.toUtf8());
@@ -74,9 +71,7 @@ SystemController::SaveFileResult SystemController::saveFileEx(const QString &fil
 SystemController::SaveFileResult SystemController::saveFileEx(const QString &fileName, const QByteArray &data)
 {
 #if defined Q_OS_ANDROID
-    qDebug() << "SystemController::saveFile: android, name:" << fileName << "size:" << data.size();
     const SaveFileResult androidResult = AndroidController::instance()->saveFile(fileName, QString::fromUtf8(data));
-    qDebug() << "SystemController::saveFile: android result:" << saveFileResultToString(androidResult);
     return androidResult;
 #endif
 
@@ -151,28 +146,20 @@ SystemController::SaveFileResult SystemController::saveFileEx(const QString &fil
 
 bool SystemController::saveFile(const QString &fileName, const QString &data)
 {
-    qDebug() << "[saveFile] SystemController::saveFile: start, name:" << fileName << "size:" << data.size();
     const SaveFileResult result = saveFileEx(fileName, data);
-    const bool saved = result == SaveFileResult::Saved;
-    qDebug() << "[saveFile] SystemController::saveFile:" << fileName << "->" << saveFileResultToString(result)
-             << "returning" << saved;
     if (result == SaveFileResult::Cancelled) {
         notifySaveCancelled();
     }
-    return saved;
+    return result == SaveFileResult::Saved;
 }
 
 bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
 {
-    qDebug() << "[saveFile] SystemController::saveFile: start, name:" << fileName << "size:" << data.size();
     const SaveFileResult result = saveFileEx(fileName, data);
-    const bool saved = result == SaveFileResult::Saved;
-    qDebug() << "[saveFile] SystemController::saveFile:" << fileName << "->" << saveFileResultToString(result)
-             << "returning" << saved;
     if (result == SaveFileResult::Cancelled) {
         notifySaveCancelled();
     }
-    return saved;
+    return result == SaveFileResult::Saved;
 }
 
 bool SystemController::readFile(const QString &fileName, QByteArray &data)
