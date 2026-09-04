@@ -8,6 +8,10 @@
 #include "version.h"
 #include "ui/utils/qAutoStart.h"
 #include "logger.h"
+#include "core/local-proxy/localProxyDefs.h"
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    #include "core/local-proxy/portAvailabilityHelper.h"
+#endif
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
@@ -38,6 +42,9 @@ SettingsController::SettingsController(SecureServersRepository* serversRepositor
 {
     m_appVersion = QString("%1 (%2, %3)").arg(QString(APP_VERSION), __DATE__, GIT_COMMIT_HASH);
     m_isDevModeEnabled = m_appSettingsRepository->isDevGatewayEnv();
+
+    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, this,
+            &SettingsController::localProxySettingsUpdated);
 }
 
 void SettingsController::toggleAmneziaDns(bool enable)
@@ -366,3 +373,103 @@ QString SettingsController::nextAvailableServerName() const
     return m_serversRepository->nextAvailableServerName();
 }
 
+bool SettingsController::isLocalProxySupported() const
+{
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    return false;
+#else
+    return true;
+#endif
+}
+
+bool SettingsController::isLocalProxyHttpEnabled() const
+{
+    return m_appSettingsRepository->isLocalProxyHttpEnabled();
+}
+
+int SettingsController::localProxyPort() const
+{
+    return m_appSettingsRepository->localProxyPort();
+}
+
+QString SettingsController::localProxyOwnerId() const
+{
+    return m_appSettingsRepository->localProxyOwnerId();
+}
+
+bool SettingsController::isLocalProxyPortUserDefined() const
+{
+    return m_appSettingsRepository->isLocalProxyPortUserDefined();
+}
+
+bool SettingsController::setLocalProxyPort(int port)
+{
+    if (port < amnezia::localProxy::proxyPortMin || port > amnezia::localProxy::proxyPortMax) {
+        return false;
+    }
+
+    if (m_appSettingsRepository->localProxyPort() != static_cast<quint16>(port)) {
+        m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(port));
+    }
+    m_appSettingsRepository->setLocalProxyPortUserDefined(true);
+    return true;
+}
+
+bool SettingsController::isLocalProxyPortBusy(int port) const
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    return !PortAvailabilityHelper::isPortAvailable(port);
+#else
+    Q_UNUSED(port);
+    return false;
+#endif
+}
+
+int SettingsController::findFirstAvailableLocalProxyPort(int startPort) const
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    const auto port = PortAvailabilityHelper::findFirstAvailablePort(startPort, amnezia::localProxy::proxyPortMax);
+    return port ? *port : -1;
+#else
+    Q_UNUSED(startPort);
+    return -1;
+#endif
+}
+
+bool SettingsController::enableLocalProxy(const QString &ownerId, int port)
+{
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+    Q_UNUSED(ownerId);
+    Q_UNUSED(port);
+    return false;
+#else
+    if (port < amnezia::localProxy::proxyPortMin || port > amnezia::localProxy::proxyPortMax || ownerId.isEmpty()) {
+        return false;
+    }
+
+    if (m_appSettingsRepository->isLocalProxyHttpEnabled() && m_appSettingsRepository->localProxyOwnerId() != ownerId) {
+        return false;
+    }
+
+    if (!PortAvailabilityHelper::isPortAvailable(port)
+        && (m_appSettingsRepository->isLocalProxyPortUserDefined() || port != amnezia::localProxy::defaultProxyPort)) {
+        return false;
+    }
+
+    if (m_appSettingsRepository->localProxyPort() != static_cast<quint16>(port)) {
+        m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(port));
+    }
+
+    m_appSettingsRepository->setLocalProxyOwnerId(ownerId);
+    m_appSettingsRepository->setLocalProxyHttpEnabled(true);
+
+    return true;
+#endif
+}
+
+void SettingsController::disableLocalProxy()
+{
+    if (m_appSettingsRepository->isLocalProxyHttpEnabled()) {
+        m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+    }
+}
