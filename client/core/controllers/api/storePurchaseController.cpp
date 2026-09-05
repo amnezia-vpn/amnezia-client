@@ -386,8 +386,10 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         m_lastPlayBasePlanId = productId;
     }
 
-    return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
-                                outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
+    qWarning().noquote() << "[Billing][TEST] Skipping v1/subscriptions on purpose, purchase stays unacknowledged:" << outcome.purchaseToken;
+    return ErrorCode::ApiPurchaseError;
+    //return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
+                           //     outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
