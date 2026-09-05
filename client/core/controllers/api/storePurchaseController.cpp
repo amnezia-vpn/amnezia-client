@@ -386,8 +386,10 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         m_lastPlayBasePlanId = productId;
     }
 
-    return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
-                                outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
+    qWarning().noquote() << "[Billing][TEST] Skipping v1/subscriptions on purpose, purchase stays unacknowledged:" << outcome.purchaseToken;
+    return ErrorCode::ApiPurchaseError;
+    //return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
+                           //     outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
@@ -689,6 +691,14 @@ bool StorePurchaseController::processUnacknowledgedPlayPurchases(const QJsonArra
 
         ErrorCode errorCode = finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol,
                                                    purchaseToken, false, nullptr, QStringLiteral("v1/restore_subscription"));
+        if (errorCode == ErrorCode::ApiNotFoundError) {
+            // The gateway has no record of this purchase - the registration call at purchase
+            // time likely never completed. Register it now instead of looking it up again.
+            qInfo().noquote() << "[Billing] Gateway has no record of this purchase, registering it instead of restoring";
+            errorCode = finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol,
+                                             purchaseToken, false, nullptr, QStringLiteral("v1/subscriptions"));
+        }
+
         if (errorCode == ErrorCode::NoError) {
             installedNewConfig = true;
         } else if (errorCode != ErrorCode::ApiConfigAlreadyAdded) {
