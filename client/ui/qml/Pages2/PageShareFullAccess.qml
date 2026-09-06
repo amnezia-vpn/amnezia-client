@@ -159,7 +159,11 @@ PageType {
                     }
 
                     PageController.showBusyIndicator(false)
-                    
+
+                    if (!ExportController.config || ExportController.config.length === 0) {
+                        return
+                    }
+
                     PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "amnezia_config")
                 }
             }
