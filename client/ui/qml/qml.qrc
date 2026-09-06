@@ -36,6 +36,7 @@
         <file>Controls2/DrawerType2.qml</file>
         <file>Controls2/DropDownType.qml</file>
         <file>Controls2/FlickableType.qml</file>
+        <file>Controls2/FocusIndicatorType.qml</file>
         <file>Controls2/Header2Type.qml</file>
         <file>Controls2/BaseHeaderType.qml</file>
         <file>Controls2/HeaderTypeWithButton.qml</file>

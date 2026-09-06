@@ -25,7 +25,6 @@ CheckBox {
     property string checkedBorderColor: AmneziaStyle.color.goldenApricot
     property string checkedBorderDisabledColor: AmneziaStyle.color.deepBrown
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
 
     property string checkedImageColor: AmneziaStyle.color.goldenApricot
     property string pressedImageColor: AmneziaStyle.color.burntOrange
@@ -65,9 +64,13 @@ CheckBox {
 
     background: Rectangle {
         color: AmneziaStyle.color.transparent
-        border.color: root.focus ? borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: 1
         radius: 16
+
+        FocusIndicatorType {
+            control: root
+            baseRadius: 16
+            active: root.focus
+        }
     }
 
     indicator: Rectangle {

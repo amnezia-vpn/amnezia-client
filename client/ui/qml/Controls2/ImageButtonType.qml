@@ -20,15 +20,14 @@ Button {
     property alias backgroundColor: background.color
     property alias backgroundRadius: background.radius
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
     hoverEnabled: true
 
     icon.source: image
     icon.color: root.enabled ? imageColor : disableImageColor
 
     property bool isFocusable: true
+    // Off when an enclosing control draws the focus indicator for the whole row
+    property bool showFocusIndicator: true
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
@@ -65,8 +64,6 @@ Button {
         id: background
 
         anchors.fill: parent
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         color: {
             if (root.enabled) {
@@ -81,8 +78,11 @@ Button {
         Behavior on color {
             PropertyAnimation { duration: 200 }
         }
-        Behavior on border.color {
-            PropertyAnimation { duration: 200 }
+
+        FocusIndicatorType {
+            control: root
+            baseRadius: background.radius
+            active: root.activeFocus && root.showFocusIndicator
         }
     }
 

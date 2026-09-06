@@ -18,9 +18,7 @@ Button {
     property string textColor: AmneziaStyle.color.midnightBlack
 
     property string borderColor: AmneziaStyle.color.paleGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderWidth: 0
-    property int borderFocusedWidth: 1
 
     property string leftImageSource
     property string rightImageSource
@@ -67,20 +65,23 @@ Button {
         id: focusBorder
 
         color: AmneziaStyle.color.transparent
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
         anchors.fill: parent
 
         radius: 16
 
+        FocusIndicatorType {
+            control: root
+            baseRadius: focusBorder.radius
+        }
+
         Rectangle {
             id: background
 
             anchors.fill: focusBorder
-            anchors.margins: root.activeFocus ? 2 : 0
+            anchors.margins: root.activeFocus ? AmneziaStyle.focus.backgroundInset : 0
 
-            radius: root.activeFocus ? 14 : 16
+            radius: 16 - anchors.margins
             color: {
                 if (root.enabled) {
                     if (root.pressed) {
