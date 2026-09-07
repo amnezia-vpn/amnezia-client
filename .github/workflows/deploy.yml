@@ -88,7 +88,7 @@ jobs:
         host: 'linux'
         target: 'desktop'
         arch: 'linux_gcc_64'
-        modules: 'qtremoteobjects qt5compat qtshadertools'
+        modules: 'qtremoteobjects qt5compat qtshadertools qtwayland'
         dir: ${{ runner.temp }}
         setup-python: 'true'
         tools: 'tools_ifw'
@@ -106,7 +106,7 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Install system packages'
-      run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
+      run: sudo apt-get install libxkbcommon-x11-0 libxkbcommon-dev libwayland-dev libsecret-1-dev
 
     - name: 'Get sources'
       uses: actions/checkout@v4
