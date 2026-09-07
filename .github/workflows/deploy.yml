@@ -106,7 +106,7 @@ jobs:
       run: pip install "conan==2.28.0"
 
     - name: 'Install system packages'
-      run: sudo apt-get install libxkbcommon-x11-0 libxkbcommon-dev libwayland-dev libsecret-1-dev
+      run: sudo apt-get update && sudo apt-get install -y libxkbcommon-x11-0 libxkbcommon-dev libwayland-dev libsecret-1-dev
 
     - name: 'Get sources'
       uses: actions/checkout@v4
