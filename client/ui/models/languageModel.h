@@ -2,7 +2,9 @@
 #define LANGUAGEMODEL_H
 
 #include <QAbstractListModel>
+#include <QLocale>
 #include <QQmlEngine>
+#include <QVector>
 
 namespace LanguageSettings
 {
@@ -21,6 +23,22 @@ namespace LanguageSettings
         Korean
     };
     Q_ENUM_NS(AvailableLanguageEnum)
+
+    struct LanguageEntry
+    {
+        AvailableLanguageEnum language;
+        QLocale::Language locale;
+        const char *nativeName;
+    };
+
+    // Single source of truth for the supported languages. Entries must stay in
+    // AvailableLanguageEnum order: the model exposes them as rows, and QML selects
+    // a row by the enum value.
+    const QVector<LanguageEntry> &availableLanguages();
+
+    AvailableLanguageEnum localeToLanguage(const QLocale &locale);
+    QLocale languageToLocale(const AvailableLanguageEnum language);
+    QString nativeLanguageName(const AvailableLanguageEnum language);
 
     static void declareQmlAvailableLanguageEnum()
     {
@@ -54,8 +72,6 @@ protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
-    QString getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language);
-
     QVector<LanguageModelData> m_availableLanguages;
 };
 

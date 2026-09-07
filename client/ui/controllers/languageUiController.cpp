@@ -12,27 +12,13 @@ void LanguageUiController::onAppLanguageChanged(const QLocale &locale)
 
 void LanguageUiController::changeLanguage(const LanguageSettings::AvailableLanguageEnum language)
 {
-    QLocale locale = languageEnumToLocale(language);
+    QLocale locale = LanguageSettings::languageToLocale(language);
     m_settingsController->setAppLanguage(locale);
 }
 
 int LanguageUiController::getCurrentLanguageIndex() const
 {
-    auto locale = m_settingsController->getAppLanguage();
-    switch (locale.language()) {
-    case QLocale::English: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
-    case QLocale::Russian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Russian); break;
-    case QLocale::Chinese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::China_cn); break;
-    case QLocale::Ukrainian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Ukrainian); break;
-    case QLocale::Persian: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Persian); break;
-    case QLocale::Arabic: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Arabic); break;
-    case QLocale::Burmese: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Burmese); break;
-    case QLocale::Urdu: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Urdu); break;
-    case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
-    case QLocale::Korean: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Korean); break;
-    case QLocale::Spanish: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Spanish); break;
-    default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
-    }
+    return static_cast<int>(LanguageSettings::localeToLanguage(m_settingsController->getAppLanguage()));
 }
 
 int LanguageUiController::getLineHeightAppend() const
@@ -47,26 +33,12 @@ int LanguageUiController::getLineHeightAppend() const
 QString LanguageUiController::getCurrentLanguageName() const
 {
     int index = getCurrentLanguageIndex();
-    return getLocalLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(index));
+    return LanguageSettings::nativeLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(index));
 }
 
 LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageEnum() const
 {
-    QLocale locale = QLocale::system();
-    switch (locale.language()) {
-    case QLocale::Russian: return LanguageSettings::AvailableLanguageEnum::Russian;
-    case QLocale::Chinese: return LanguageSettings::AvailableLanguageEnum::China_cn;
-    case QLocale::Ukrainian: return LanguageSettings::AvailableLanguageEnum::Ukrainian;
-    case QLocale::Persian: return LanguageSettings::AvailableLanguageEnum::Persian;
-    case QLocale::Arabic: return LanguageSettings::AvailableLanguageEnum::Arabic;
-    case QLocale::Burmese: return LanguageSettings::AvailableLanguageEnum::Burmese;
-    case QLocale::Urdu: return LanguageSettings::AvailableLanguageEnum::Urdu;
-    case QLocale::Hindi: return LanguageSettings::AvailableLanguageEnum::Hindi;
-    case QLocale::Korean: return LanguageSettings::AvailableLanguageEnum::Korean;
-    case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
-    case QLocale::Spanish: return LanguageSettings::AvailableLanguageEnum::Spanish;
-    default: return LanguageSettings::AvailableLanguageEnum::English;
-    }
+    return LanguageSettings::localeToLanguage(QLocale::system());
 }
 
 QString LanguageUiController::getCurrentSiteUrl(const QString &path) const
@@ -94,43 +66,4 @@ QString LanguageUiController::getCurrentHostUrl(const QString &path) const
         return "https://storage.googleapis.com/amnezia/host" + (path.isEmpty() ? "" : (QString("?m-path=/%1").arg(path)));
     }
     return QString("https://amnezia.host") + (path.isEmpty() ? "" : (QString("/%1").arg(path)));
-}
-
-QString LanguageUiController::getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language) const
-{
-    QString strLanguage("");
-    switch (language) {
-    case LanguageSettings::AvailableLanguageEnum::English: strLanguage = "English"; break;
-    case LanguageSettings::AvailableLanguageEnum::Russian: strLanguage = "Русский"; break;
-    case LanguageSettings::AvailableLanguageEnum::Ukrainian: strLanguage = "Українська"; break;
-    case LanguageSettings::AvailableLanguageEnum::China_cn: strLanguage = "\347\256\200\344\275\223\344\270\255\346\226\207"; break;
-    case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
-    case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
-    case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
-    case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
-    case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
-    case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
-    case LanguageSettings::AvailableLanguageEnum::Spanish: strLanguage = "Español"; break;
-    default: break;
-    }
-
-    return strLanguage;
-}
-
-QLocale LanguageUiController::languageEnumToLocale(const LanguageSettings::AvailableLanguageEnum language) const
-{
-    switch (language) {
-    case LanguageSettings::AvailableLanguageEnum::English: return QLocale::English;
-    case LanguageSettings::AvailableLanguageEnum::Russian: return QLocale::Russian;
-    case LanguageSettings::AvailableLanguageEnum::China_cn: return QLocale::Chinese;
-    case LanguageSettings::AvailableLanguageEnum::Ukrainian: return QLocale::Ukrainian;
-    case LanguageSettings::AvailableLanguageEnum::Persian: return QLocale::Persian;
-    case LanguageSettings::AvailableLanguageEnum::Arabic: return QLocale::Arabic;
-    case LanguageSettings::AvailableLanguageEnum::Burmese: return QLocale::Burmese;
-    case LanguageSettings::AvailableLanguageEnum::Urdu: return QLocale::Urdu;
-    case LanguageSettings::AvailableLanguageEnum::Hindi: return QLocale::Hindi;
-    case LanguageSettings::AvailableLanguageEnum::Korean: return QLocale::Korean;
-    case LanguageSettings::AvailableLanguageEnum::Spanish: return QLocale::Spanish;
-    default: return QLocale::English;
-    }
 }
