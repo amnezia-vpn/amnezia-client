@@ -140,6 +140,23 @@ void ServersUiController::updateModel()
     QVector<ServerDescription> descriptions =
         m_serversController->buildServerDescriptions(m_settingsController->isAmneziaDnsEnabled());
 
+    if (m_settingsController->isSystemDnsEnabled()) {
+        const QString dnsLabel = QStringLiteral("Amnezia DNS | ");
+        for (ServerDescription& description : descriptions) {
+            if (!ContainerUtils::isAwgContainer(description.defaultContainer)
+                    && description.defaultContainer != DockerContainer::WireGuard) {
+                continue;
+            }
+            description.primaryDnsIsAmnezia = false;
+            for (QString* text : { &description.baseDescription, &description.expandedServerDescription,
+                                   &description.collapsedServerDescription }) {
+                if (text->startsWith(dnsLabel)) {
+                    text->remove(0, dnsLabel.size());
+                }
+            }
+        }
+    }
+
     const QString defaultServerId = m_serversController->getDefaultServerId();
     const bool hadServersFromGatewayBefore = descriptionsHaveGatewayServers(m_orderedServerDescriptions);
     const bool hasServersFromGatewayNow = descriptionsHaveGatewayServers(descriptions);

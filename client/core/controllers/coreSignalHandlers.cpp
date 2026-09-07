@@ -254,6 +254,7 @@ void CoreSignalHandlers::initAutoConnectHandler()
 void CoreSignalHandlers::initAmneziaDnsToggledHandler()
 {
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::useAmneziaDnsChanged, m_coreController->m_serversUiController, &ServersUiController::updateModel);
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::useSystemDnsChanged, m_coreController->m_serversUiController, &ServersUiController::updateModel);
 }
 
 void CoreSignalHandlers::initServersModelUpdateHandler()

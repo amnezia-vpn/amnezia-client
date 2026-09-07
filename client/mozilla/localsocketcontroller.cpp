@@ -249,6 +249,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("vpnDisabledApps", splitTunnelApps);
 
   json.insert("allowedDnsServers", allowedDns);
+  json.insert(amnezia::configKey::useSystemDns, rawConfig.value(amnezia::configKey::useSystemDns).toBool());
 
   json.insert(amnezia::configKey::killSwitchOption, rawConfig.value(amnezia::configKey::killSwitchOption));
 

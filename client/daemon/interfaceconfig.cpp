@@ -58,6 +58,7 @@ QJsonObject InterfaceConfig::toJson() const {
     jsAllowedDnsServers.append(QJsonValue(i));
   }
   json.insert("allowedDnsServers", jsAllowedDnsServers);
+  json.insert("useSystemDns", m_useSystemDns);
 
   QJsonArray disabledApps;
   for (const QString& i : m_vpnDisabledApps) {
@@ -104,7 +105,7 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     out << "MTU = " << m_deviceMTU << "\n";
   }
 
-  if (!m_primaryDnsServer.isEmpty()) {
+  if (!m_useSystemDns && !m_primaryDnsServer.isEmpty()) {
     QStringList dnsServers;
     dnsServers.append(m_primaryDnsServer);
     if (!m_secondaryDnsServer.isEmpty()) {

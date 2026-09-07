@@ -12,6 +12,7 @@
 
 #include <QProcess>
 #include <QTextStream>
+#include <vector>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -38,6 +39,58 @@ DnsUtilsWindows::~DnsUtilsWindows() {
   MZ_COUNT_DTOR(DnsUtilsWindows);
   restoreResolvers();
   logger.debug() << "DnsUtilsWindows destroyed.";
+}
+
+QStringList DnsUtilsWindows::systemResolvers() const {
+  ULONG size = 16 * 1024;
+  std::vector<unsigned char> buffer(size);
+  ULONG result = ERROR_BUFFER_OVERFLOW;
+  for (int attempt = 0; attempt < 3 && result == ERROR_BUFFER_OVERFLOW; ++attempt) {
+    buffer.resize(size);
+    result = GetAdaptersAddresses(AF_UNSPEC,
+        GAA_FLAG_SKIP_UNICAST | GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST,
+        nullptr, reinterpret_cast<IP_ADAPTER_ADDRESSES*>(buffer.data()), &size);
+  }
+  if (result != NO_ERROR) {
+    logger.error() << "Cannot read system DNS:" << result;
+    return {};
+  }
+
+  QStringList resolvers;
+  const auto* adapters = reinterpret_cast<const IP_ADAPTER_ADDRESSES*>(buffer.data());
+  for (const auto* adapter = adapters; adapter; adapter = adapter->Next) {
+    // The loopback adapter can advertise obsolete fec0:: DNS placeholders.
+    // Real loopback resolvers are listed on the connected network adapters.
+    if (adapter->OperStatus != IfOperStatusUp || adapter->IfType == IF_TYPE_SOFTWARE_LOOPBACK) {
+      continue;
+    }
+    for (const auto* dns = adapter->FirstDnsServerAddress; dns; dns = dns->Next) {
+      const auto* socketAddress = dns->Address.lpSockaddr;
+      if (!socketAddress) {
+        continue;
+      }
+      QHostAddress address;
+      if (socketAddress->sa_family == AF_INET
+          && dns->Address.iSockaddrLength >= sizeof(sockaddr_in)) {
+        const auto* v4 = reinterpret_cast<const sockaddr_in*>(socketAddress);
+        address.setAddress(ntohl(v4->sin_addr.s_addr));
+      } else if (socketAddress->sa_family == AF_INET6
+                 && dns->Address.iSockaddrLength >= sizeof(sockaddr_in6)) {
+        const auto* v6 = reinterpret_cast<const sockaddr_in6*>(socketAddress);
+        address.setAddress(reinterpret_cast<const quint8*>(&v6->sin6_addr));
+        if (v6->sin6_scope_id) {
+          address.setScopeId(QString::number(v6->sin6_scope_id));
+        }
+      }
+      if (!address.isNull() && !address.isMulticast() && !address.isBroadcast()
+          && address != QHostAddress(QHostAddress::AnyIPv4)
+          && address != QHostAddress(QHostAddress::AnyIPv6)) {
+        resolvers.append(address.toString());
+      }
+    }
+  }
+  resolvers.removeDuplicates();
+  return resolvers;
 }
 
 bool DnsUtilsWindows::updateResolvers(const QString& ifname,

@@ -22,6 +22,7 @@ class DnsUtilsWindows final : public DnsUtils {
   bool updateResolvers(const QString& ifname,
                        const QList<QHostAddress>& resolvers) override;
   bool restoreResolvers() override;
+  QStringList systemResolvers() const override;
 
  private:
   quint64 m_luid = 0;

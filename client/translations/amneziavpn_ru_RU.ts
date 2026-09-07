@@ -4039,6 +4039,14 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsConnection</name>
     <message>
+        <source>Use system DNS</source>
+        <translation>Использовать системный DNS</translation>
+    </message>
+    <message>
+        <source>AmneziaWG and WireGuard only. Keep the operating system DNS settings. DNS requests may leave the VPN, even with Kill Switch enabled. Reconnect to apply.</source>
+        <translation>Только AmneziaWG и WireGuard. Сохраняет настройки DNS операционной системы. DNS-запросы могут идти вне VPN, даже при включённом Kill Switch. Для применения переподключитесь.</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="49"/>
         <source>Connection</source>
         <translation>Соединение</translation>

@@ -27,6 +27,9 @@ public:
     QLocale getAppLanguage() const;
     void setAppLanguage(QLocale locale);
 
+    bool useSystemDns() const;
+    void setUseSystemDns(bool enabled);
+
     bool useAmneziaDns() const;
     void setUseAmneziaDns(bool enabled);
     QStringList getAllowedDnsServers() const;
@@ -101,6 +104,7 @@ public:
     void setXraySavedConfigs(const QByteArray &data);
 
 signals:
+    void useSystemDnsChanged(bool enabled);
     void appLanguageChanged(QLocale locale);
     void allowedDnsServersChanged(const QStringList &servers);
     void sitesChanged(RouteMode mode);
@@ -126,4 +130,3 @@ private:
 };
 
 #endif // SECUREAPPSETTINGSREPOSITORY_H
-
