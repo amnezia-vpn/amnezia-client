@@ -145,6 +145,8 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
     qInfo() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
     ErrorCode errorCode = executeRequest(QString("%1") + endpoint, apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
+        qWarning().noquote() << "[IAP] Request" << endpoint << "failed, errorCode =" << static_cast<int>(errorCode)
+                             << "response:" << QString::fromUtf8(responseBody.left(512));
         return errorCode;
     }
 
@@ -152,7 +154,8 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
     QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
     QString key = responseObject.value(QStringLiteral("key")).toString();
     if (key.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
+        qWarning().noquote() << "[IAP] Subscription response does not contain a key field, response:"
+                             << QString::fromUtf8(responseBody.left(512));
         return ErrorCode::ApiPurchaseError;
     }
 
@@ -388,8 +391,9 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
 
     qWarning().noquote() << "[Billing][TEST] Skipping v1/subscriptions on purpose, purchase stays unacknowledged:" << outcome.purchaseToken;
     return ErrorCode::ApiPurchaseError;
-    //return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
-                           //     outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
+
+    /*return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
+                                outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));*/
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
@@ -691,9 +695,7 @@ bool StorePurchaseController::processUnacknowledgedPlayPurchases(const QJsonArra
 
         ErrorCode errorCode = finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol,
                                                    purchaseToken, false, nullptr, QStringLiteral("v1/restore_subscription"));
-        if (errorCode == ErrorCode::ApiNotFoundError) {
-            // The gateway has no record of this purchase - the registration call at purchase
-            // time likely never completed. Register it now instead of looking it up again.
+        if (errorCode == ErrorCode::ApiNotFoundError || errorCode == ErrorCode::ApiConfigDownloadError) {
             qInfo().noquote() << "[Billing] Gateway has no record of this purchase, registering it instead of restoring";
             errorCode = finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol,
                                              purchaseToken, false, nullptr, QStringLiteral("v1/subscriptions"));
