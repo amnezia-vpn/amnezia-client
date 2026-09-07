@@ -57,7 +57,7 @@ DrawerType2 {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
+                    Qt.openUrlExternally(qsTr("https://telegram.me/amnezia_vpn_en"))
                 }
             }
 

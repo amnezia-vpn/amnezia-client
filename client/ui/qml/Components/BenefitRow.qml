@@ -57,7 +57,7 @@ RowLayout {
                 anchors.fill: bodyLabel
                 visible: root.bodyClickable
                 cursorShape: Qt.PointingHandCursor
-                onClicked: Qt.openUrlExternally("https://t.me/" + root.bodyText)
+                onClicked: Qt.openUrlExternally("https://telegram.me/" + root.bodyText)
             }
         }
     }

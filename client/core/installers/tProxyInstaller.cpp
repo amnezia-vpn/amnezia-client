@@ -33,7 +33,7 @@ namespace {
             tc->tgLink = QStringLiteral("tg://webproxy?server=%1&secret=%2").arg(host, sec);
         }
         if (tc->tmeLink.isEmpty()) {
-            tc->tmeLink = QStringLiteral("https://t.me/webproxy?server=%1&secret=%2").arg(host, sec);
+            tc->tmeLink = QStringLiteral("https://telegram.me/webproxy?server=%1&secret=%2").arg(host, sec);
         }
     }
 }
