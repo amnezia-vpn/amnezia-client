@@ -5640,7 +5640,7 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
-        <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
         <translation>မှတ်တမ်းတင်မှု ဖွင့်ထားပါသည်။ ၁၄ ရက်အကြာတွင် အလိုအလျောက် ပိတ်သွားမည်ဖြစ်ပြီး မှတ်တမ်းဖိုင်အားလုံး ဖျက်မည်ကို သတိပြုပါ။</translation>
     </message>
 </context>
