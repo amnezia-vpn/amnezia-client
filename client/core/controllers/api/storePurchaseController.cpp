@@ -529,9 +529,13 @@ ErrorCode StorePurchaseController::processAppStoreTransactionUpdate(const QStrin
     ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                   originalTransactionId, isTestPurchase, duplicateServerIndex,
                                                   QStringLiteral("v1/restore_subscription"));
+    if (errorCode == ErrorCode::ApiNotFoundError || errorCode == ErrorCode::ApiConfigDownloadError) {
+        qInfo().noquote() << "[IAP] Gateway has no record of this purchase, registering it instead of restoring";
+        errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                            originalTransactionId, isTestPurchase, duplicateServerIndex,
+                                            QStringLiteral("v1/subscriptions"));
+    }
 
-    // On validation failure the transaction is left unfinished so it is redelivered
-    // by the Transaction.updates listener on the next app launch
     if (errorCode == ErrorCode::NoError || errorCode == ErrorCode::ApiConfigAlreadyAdded) {
         IosController::Instance()->finishStoreTransaction(transactionId);
     }
