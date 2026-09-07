@@ -2,8 +2,10 @@
 #define NATIVESERVERCONFIG_H
 
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QMap>
 #include <QPair>
+#include <optional>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"

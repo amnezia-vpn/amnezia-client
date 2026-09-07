@@ -304,6 +304,27 @@ bool ServersUiController::isServerFromApi(const QString &serverId) const
     return serverDescriptionById(serverId).isServerFromGatewayApi;
 }
 
+bool ServersUiController::isDefaultServerContainXRayConfigs() const
+{
+    const QString defaultServerId = m_serversController->getDefaultServerId();
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == defaultServerId) {
+            return description.isXRaySubscription;
+        }
+    }
+    return false;
+}
+
+bool ServersUiController::isServerContainXRayConfigs(const QString &serverId) const
+{
+    for (const auto &description : m_orderedServerDescriptions) {
+        if (description.serverId == serverId) {
+            return description.isXRaySubscription;
+        }
+    }
+    return false;
+}
+
 bool ServersUiController::isServerCountrySelectionAvailable(const QString &serverId) const
 {
     return serverDescriptionById(serverId).isCountrySelectionAvailable;
@@ -528,6 +549,35 @@ int ServersUiController::getServerIndexById(const QString &serverId) const
 int ServersUiController::getServersCount() const
 {
     return m_orderedServerDescriptions.size();
+}
+
+void ServersUiController::setCurrentConfigIndex(const int index)
+{
+    m_serversController->setCurrentConfigIndex(m_processedServerId, index);
+}
+
+int ServersUiController::getCurrentConfigIndex() const
+{
+    return m_serversController->getCurrentConfigIndex(m_processedServerId);
+}
+
+QString ServersUiController::getConfigString(const int index) const
+{
+    return m_serversController->getConfigString(m_processedServerId, index);
+}
+
+QString ServersUiController::getConfigName(const int index) const
+{
+    return m_serversController->getConfigName(m_processedServerId, index);
+}
+QString ServersUiController::getConfigName(const QString &serverId, const int index) const
+{
+    return m_serversController->getConfigName(serverId, index);
+}
+
+QJsonArray ServersUiController::getConfigNames() const
+{
+    return m_serversController->getConfigNames(m_processedServerId);
 }
 
 void ServersUiController::updateContainersModel()
