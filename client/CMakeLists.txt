@@ -313,3 +313,9 @@ if(OVPN_SCRIPTS)
             WORLD_READ WORLD_EXECUTE
     )
 endif()
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+add_subdirectory(tests)

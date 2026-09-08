@@ -4,9 +4,46 @@ on:
   push:
     branches:
       - '**'
+#  pull_request:
+#  workflow_dispatch:
+#    inputs:
+#      test_filter:
+#        description: 'CTest -R filter (leave empty to run all tests)'
+#        required: false
+#        default: 'OpenSSLLibraryTest'
+
+# Self-hosted server tests (SelfHostedServerSetup, MultipleExports) install and
+# remove docker containers on a single shared VPS: two workflow runs executing
+# simultaneously corrupt each other's state (error 202, "No such container").
+# Queue runs instead of running them in parallel; do not cancel the active one.
+concurrency:
+  group: vps-tests
+  cancel-in-progress: false
 
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
+  QTEST_FUNCTION_TIMEOUT: 7200000
+  SELF_HOSTED_ADMIN_EXPORT_ROUND_TRIP_VPN_KEY: ${{ secrets.SELF_HOSTED_ADMIN_EXPORT_ROUND_TRIP_VPN_KEY }}
+  THIRD_PARTY_AWG_VPN_KEY: ${{ secrets.THIRD_PARTY_AWG_VPN_KEY }}
+  THIRD_PARTY_WIRE_GUARD_VPN_KEY: ${{ secrets.THIRD_PARTY_WIRE_GUARD_VPN_KEY }}
+  THIRD_PARTY_XRAY_VPN_KEY: ${{ secrets.THIRD_PARTY_XRAY_VPN_KEY }}
+  THIRD_PARTY_OPEN_VPN_KEY: ${{ secrets.THIRD_PARTY_OPEN_VPN_KEY }}
+  THIRD_PARTY_CLOAK_VPN_KEY: ${{ secrets.THIRD_PARTY_CLOAK_VPN_KEY }}
+  THIRD_PARTY_SS_VPN_KEY: ${{ secrets.THIRD_PARTY_SS_VPN_KEY }}
+  THIRD_PARTY_IKEV_VPN_KEY: ${{ secrets.THIRD_PARTY_IKEV_VPN_KEY }}
+  THIRD_PARTY_PREMIUM_VPN_KEY: ${{ secrets.THIRD_PARTY_PREMIUM_VPN_KEY }}
+  THIRD_PARTY_VMESS_NEW_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_NEW_IMPORT_DATA }}
+  THIRD_PARTY_VMESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_IMPORT_DATA }}
+  THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
+  THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
+  THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
+  THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+  SELF_HOSTED_SERVER_HOST_NAME: ${{ secrets.SELF_HOSTED_SERVER_HOST_NAME }}
+  SELF_HOSTED_SERVER_USER_NAME: ${{ secrets.SELF_HOSTED_SERVER_USER_NAME }}
+  SELF_HOSTED_SERVER_PASSWORD: ${{ secrets.SELF_HOSTED_SERVER_PASSWORD }}
+  SELF_HOSTED_SERVER_SSH_PORT: ${{ secrets.SELF_HOSTED_SERVER_SSH_PORT }}
+  DNS_LIST_PATH: ${{ github.workspace }}/tests/data/dns_list.json
+  IP_LIST_PATH: ${{ github.workspace }}/tests/data/ip_list.json
 
 jobs:
   Detect-Changes:
@@ -1002,4 +1039,465 @@ jobs:
         run: | 
           echo "Pull request:" >> $GITHUB_STEP_SUMMARY
           echo "[[#${{ fromJSON(steps.pull_request.outputs.data)[0].number }}] ${{ fromJSON(steps.pull_request.outputs.data)[0].title }}](${{ fromJSON(steps.pull_request.outputs.data)[0].html_url }})" >> $GITHUB_STEP_SUMMARY
+
+# ------------------------------------------------------
+
+  test-linux:
+    name: Test Linux (${{ matrix.filter }})
+    needs: Build-Linux-Ubuntu
+
+    strategy:
+      fail-fast: false
+      matrix:
+        filter:
+          - MultipleImportsTest
+          - ServerEditTest
+          - DefaultServerChangeTest
+          - ServerEdgeCasesTest
+          - SignalOrderTest
+          - ServersModelSyncTest
+          - ServerRenameTest
+          - SettingsSignalsTest
+          - UiServersModelAndControllerTest
+          - XraySerializationTest
+          - UiLanguageModelAndControllerTest
+          - UiIpModelAndControllerTest
+          - UiAppSTModelAndControllerTest
+          - UiAllowedDnsModelAndControllerTest
+          - BackupExportImportTest
+          - ConnectionTest
+          - OpenSSLLibraryTest
+
+    runs-on: ubuntu-22.04
+
+    env:
+      QT_VERSION: 6.10.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 10
+
+      - name: Decode backup file
+        if: matrix.filter == 'BackupExportImportTest'
+        shell: pwsh
+        run: |
+          $backup = Join-Path $env:RUNNER_TEMP "test.backup"
+          $bytes = [Convert]::FromBase64String("${{ secrets.BACKUP_FILE_BASE64 }}")
+          [IO.File]::WriteAllBytes($backup, $bytes)
+          "BACKUP_PATH=$backup" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: qtremoteobjects qt5compat qtshadertools
+          dir: ${{ runner.temp }}
+          set-env: true
+          aqtversion: '==3.3.0'
+          py7zrversion: '==0.22.*'
+          extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxkbcommon-x11-0 \
+            libsecret-1-dev
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build
+          path: build
+
+      - name: Restore executable permissions
+        run: |
+          find build/tests \
+            -maxdepth 1 \
+            -type f \
+            -name "test_*" \
+            -exec chmod +x {} \;
+
+      - name: Run tests
+        shell: bash
+        run: |
+          QT_ROOT="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
+
+          export LD_LIBRARY_PATH="$QT_ROOT/lib:${LD_LIBRARY_PATH:-}"
+          export QT_QPA_PLATFORM=offscreen
+
+          ctest \
+            --test-dir build/tests \
+            --output-on-failure \
+            -VV \
+            -R "^${{ matrix.filter }}$"
+
+# ------------------------------------------------------
+
+  test-windows:
+    name: Test Windows (${{ matrix.filter }})
+    needs: Build-Windows
+
+    strategy:
+      fail-fast: false
+      matrix:
+        filter:
+          - MultipleImportsTest
+          - ServerEditTest
+          - DefaultServerChangeTest
+          - ServerEdgeCasesTest
+          - SignalOrderTest
+          - ServersModelSyncTest
+          - ServerRenameTest
+          - SettingsSignalsTest
+          - UiServersModelAndControllerTest
+          - XraySerializationTest
+          - UiLanguageModelAndControllerTest
+          - UiIpModelAndControllerTest
+          - UiAppSTModelAndControllerTest
+          - UiAllowedDnsModelAndControllerTest
+          - BackupExportImportTest
+          - ConnectionTest
+          - OpenSSLLibraryTest
+
+    runs-on: windows-latest
+
+    env:
+      QT_VERSION: 6.10.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 10
+
+      - name: Decode backup file
+        if: matrix.filter == 'BackupExportImportTest'
+        shell: pwsh
+        run: |
+          $backup = Join-Path $env:RUNNER_TEMP "test.backup"
+          $bytes = [Convert]::FromBase64String("${{ secrets.BACKUP_FILE_BASE64 }}")
+          [IO.File]::WriteAllBytes($backup, $bytes)
+          "BACKUP_PATH=$backup" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: windows
+          target: desktop
+          arch: win64_msvc2022_64
+          modules: qtremoteobjects qt5compat qtshadertools
+          dir: ${{ runner.temp }}
+          set-env: true
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Run tests
+        shell: cmd
+        run: |
+          rem Without an attached console (GitHub runner), QTest sends its output to
+          rem OutputDebugString instead of stdout, so ctest captures nothing.
+          set QT_FORCE_STDERR_LOGGING=1
+
+          set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
+          set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
+
+          ctest --test-dir build\tests ^
+                --output-on-failure ^
+                -VV ^
+                -R "${{ matrix.filter }}"
+
+# ------------------------------------------------------
+
+  test-macos:
+    name: Test macOS (${{ matrix.filter }})
+    needs: Build-MacOS
+
+    strategy:
+      fail-fast: false
+      matrix:
+        filter:
+          - MultipleImportsTest
+          - ServerEditTest
+          - DefaultServerChangeTest
+          - ServerEdgeCasesTest
+          - SignalOrderTest
+          - ServersModelSyncTest
+          - ServerRenameTest
+          - SettingsSignalsTest
+          - UiServersModelAndControllerTest
+          - XraySerializationTest
+          - UiLanguageModelAndControllerTest
+          - UiIpModelAndControllerTest
+          - UiAppSTModelAndControllerTest
+          - UiAllowedDnsModelAndControllerTest
+          - BackupExportImportTest
+          - ConnectionTest
+          - OpenSSLLibraryTest
+
+    runs-on: macos-15
+
+    env:
+      QT_VERSION: 6.10.1
+
+    steps:
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26.3.0"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+          fetch-depth: 10
+
+      - name: Decode backup file
+        if: matrix.filter == 'BackupExportImportTest'
+        shell: pwsh
+        run: |
+          $backup = Join-Path $env:RUNNER_TEMP "test.backup"
+          $bytes = [Convert]::FromBase64String("${{ secrets.BACKUP_FILE_BASE64 }}")
+          [IO.File]::WriteAllBytes($backup, $bytes)
+          "BACKUP_PATH=$backup" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: mac
+          target: desktop
+          arch: clang_64
+          modules: qtremoteobjects qt5compat qtshadertools
+          dir: ${{ runner.temp }}
+          set-env: true
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install Conan
+        run: pip install "conan==2.28.0"
+
+      - name: Install dependencies
+        run: |
+          brew update
+          brew install cmake ninja
+
+      - name: Restore executable permissions
+        run: |
+          find build/tests \
+            -maxdepth 1 \
+            -type f \
+            -name "test_*" \
+            -exec chmod +x {} \;
+
+      - name: Run tests
+        shell: bash
+        run: |
+          QT_ROOT="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
+
+          export DYLD_LIBRARY_PATH="$PWD/build/openssl:$QT_ROOT/lib:${DYLD_LIBRARY_PATH:-}"
+          export QT_QPA_PLATFORM=offscreen
+
+          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH"
+
+          if [ -d "build/openssl" ]; then
+            ls -la build/openssl
+          fi
+
+          ctest \
+            --test-dir build/tests \
+            --output-on-failure \
+            -VV \
+            -R "^${{ matrix.filter }}$"
+
+# ------------------------------------------------------
+
+  test-android:
+    runs-on: android-runner
+
+    env:
+      ANDROID_PLATFORM: android-28
+      NDK_VERSION: 27.0.11718014
+      QT_VERSION: 6.10.1
+      QT_MODULES: 'qtremoteobjects qt5compat qtshadertools'
+
+    steps:
+      - name: 'Get sources'
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 10
+
+      - name: 'Decode backup file'
+        run: |
+          echo "${{ secrets.BACKUP_FILE_BASE64 }}" | base64 --decode > /tmp/test.backup
+          echo "BACKUP_PATH=/tmp/test.backup" >> $GITHUB_ENV
+
+
+      - name: 'Install desktop Qt'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'linux'
+          target: 'desktop'
+          arch: 'linux_gcc_64'
+          modules: ${{ env.QT_MODULES }}
+          dir: ${{ runner.temp }}
+          py7zrversion: '==0.22.*'
+          extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: 'Install android_x86_64 Qt'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: 'linux'
+          target: 'android'
+          arch: 'android_x86_64'
+          modules: ${{ env.QT_MODULES }}
+          dir: ${{ runner.temp }}
+          py7zrversion: '==0.22.*'
+          extra: '--base ${{ env.QT_MIRROR }}'
+
+      - name: 'Setup Java'
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 'Setup Android SDK'
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platforms;${{ env.ANDROID_PLATFORM }} ndk;${{ env.NDK_VERSION }}"
+
+      - name: 'Setup python'
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: 'Install conan'
+        run: pip install "conan==2.28.0"
+
+      # Uncomment to sign APK with release keystore (requires secrets):
+      # - name: 'Decode keystore'
+      #   env:
+      #     KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+      #   run: echo $KEYSTORE_BASE64 | base64 --decode > android.keystore
+
+      - name: 'Configure (Android x86_64)'
+        env:
+          QT_ANDROID: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/android_x86_64
+          QT_HOST: ${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64
+          CMAKE_ANDROID_NDK: ${{ env.ANDROID_HOME }}/ndk/${{ env.NDK_VERSION }}
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_TOOLCHAIN_FILE=$QT_ANDROID/lib/cmake/Qt6/qt.toolchain.cmake \
+            -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \
+            -DCMAKE_ANDROID_NDK=$CMAKE_ANDROID_NDK \
+            -DQT_HOST_PATH=$QT_HOST \
+            -DANDROID_SDK_ROOT=$ANDROID_HOME
+
+      - name: 'Build Android tests'
+        # env:
+        #   QT_ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/android.keystore
+        #   QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_ALIAS }}
+        #   QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_RELEASE_KEYSTORE_KEY_PASS }}
+        run: |
+          cmake --build build --target test_android_openssl_make_apk
+          cmake --build build --target test_android_restore_backup_make_apk
+
+      - name: 'Write Android test runner script'
+        run: |
+          cat > ci_run_android_tests.sh << 'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          ADB=$(which adb)
+
+          echo ">>> Waiting for package manager to be ready..."
+          "$ADB" shell 'while ! pm list packages > /dev/null 2>&1; do sleep 2; done'
+          echo ">>> Package manager ready."
+
+          run_test() {
+            local target="$1"
+            local apk="build/tests/android-build/${target}.apk"
+            local pkg_name="org.qtproject.example.${target}"
+            local activity="${pkg_name}/org.qtproject.qt.android.bindings.QtActivity"
+
+            echo ">>> Installing ${target} APK..."
+            timeout 120 "$ADB" install -r "$apk"
+
+            "$ADB" shell "run-as $pkg_name sh -c 'mkdir -p files && : > files/stdout.txt'" 2>/dev/null || true
+            "$ADB" shell "run-as $pkg_name sh -c 'rm -f files/qtest_last_exit_code'" 2>/dev/null || true
+
+            echo ">>> Launching ${target}..."
+            "$ADB" shell am start -n "$activity"
+
+            echo ">>> Waiting for test to finish (up to 120s)..."
+            local elapsed=0 exit_code=""
+            while [[ $elapsed -lt 120 ]]; do
+              sleep 2
+              elapsed=$((elapsed + 2))
+              exit_code=$("$ADB" shell \
+                "run-as $pkg_name cat files/qtest_last_exit_code 2>/dev/null" \
+                | tr -d '[:space:]' || true)
+              [[ -n "$exit_code" ]] && break
+            done
+
+            local stdout_content
+            stdout_content=$("$ADB" shell \
+              "run-as $pkg_name cat files/stdout.txt 2>/dev/null" || true)
+            if [[ -n "$stdout_content" ]]; then
+              echo ">>> Test output:"
+              echo "$stdout_content"
+            fi
+
+            if [[ -z "$exit_code" ]]; then
+              echo ">>> TIMEOUT: ${target} did not complete within 120s."
+              exit 1
+            elif [[ "$exit_code" != "0" ]]; then
+              echo ">>> ${target} FAILED (exit code: $exit_code)"
+              exit 1
+            else
+              echo ">>> ${target} PASSED"
+            fi
+          }
+
+          run_test test_android_openssl
+          run_test test_android_restore_backup
+          EOF
+          chmod +x ci_run_android_tests.sh
+
+      - name: 'Run Android tests on emulator'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 28
+          arch: x86_64
+          emulator-options: -no-snapshot -no-window -no-audio -no-boot-anim -accel on
+          disable-animations: true
+          script: bash ci_run_android_tests.sh
 
