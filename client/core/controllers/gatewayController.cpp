@@ -11,6 +11,7 @@
 
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/constants/apiKeys.h"
+#include "core/utils/api/apiUtils.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
@@ -171,7 +172,20 @@ QPair<amnezia::ErrorCode, QByteArray> GatewayController::executePost(const QStri
     // is not assumed to be thread-safe.
     QMetaObject::invokeMethod(this, [this]() { persistState(); }, Qt::QueuedConnection);
 
-    return qMakePair(code == AGW_OK ? amnezia::ErrorCode::NoError : static_cast<amnezia::ErrorCode>(code), responseBody);
+    return qMakePair(mapResultCode(code, responseBody), responseBody);
+}
+
+amnezia::ErrorCode GatewayController::mapResultCode(const int code, const QByteArray &responseBody)
+{
+    switch (code) {
+    case AGW_OK: return apiUtils::checkApiResponseErrors(responseBody);
+    case AGW_CANCELLED:
+    case AGW_ERR_TIMEOUT: return amnezia::ErrorCode::ApiConfigTimeoutError;
+    case AGW_ERR_SSL: return amnezia::ErrorCode::ApiConfigSslError;
+    case AGW_ERR_CONFIG: return amnezia::ErrorCode::ApiMissingAgwPublicKey;
+    case AGW_ERR_DECRYPT: return amnezia::ErrorCode::ApiConfigDecryptionError;
+    default: return amnezia::ErrorCode::ApiConfigDownloadError;
+    }
 }
 
 void GatewayController::handleBeforeRequest(const QString &host)

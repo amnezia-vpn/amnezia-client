@@ -44,6 +44,7 @@ public:
 
 private:
     QPair<amnezia::ErrorCode, QByteArray> executePost(const QString &endpoint, const QJsonObject &apiPayload);
+    static amnezia::ErrorCode mapResultCode(const int code, const QByteArray &responseBody);
     void persistState();
 
     bool m_isStrictKillSwitchEnabled = false;
