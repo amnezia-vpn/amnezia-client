@@ -14,6 +14,8 @@ class AmneziaVPN(ConanFile):
     def requirements(self):
         os = str(self.settings.os)
 
+        self.requires("libagw/1.0.0")
+
         has_ne = os == "iOS" or (os == "Macos" and self.options.macos_ne)
         has_service = os == "Windows" or os == "Linux" or (os == "Macos" and not has_ne)
 

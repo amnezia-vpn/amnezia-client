@@ -171,6 +171,9 @@ ErrorCode SubscriptionController::extractServerConfigJsonFromResponse(const QByt
     }
 
     serverConfigJson = QJsonDocument::fromJson(configStr.toUtf8()).object();
+
+    qDebug() << serverConfigJson;
+
     return ErrorCode::NoError;
 }
 
