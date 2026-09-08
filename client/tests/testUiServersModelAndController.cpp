@@ -74,7 +74,7 @@ private:
         awgConfig[configKey::initPacketJunkSize] = protocols::awg::initPacketJunkSizeMax;
         awgConfig[configKey::responsePacketJunkSize] = protocols::awg::responsePacketJunkSizeMax;
         awgConfig[configKey::cookieReplyPacketJunkSize] = protocols::awg::cookieReplyPacketJunkSizeMax;
-        awgConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultTransportPacketJunkSize;
+        awgConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultPadding;
         awgConfig[configKey::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
         awgConfig[configKey::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;
         awgConfig[configKey::underloadPacketMagicHeader] = protocols::awg::defaultUnderloadPacketMagicHeader;
