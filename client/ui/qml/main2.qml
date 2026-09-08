@@ -145,9 +145,6 @@ Window  {
             PageController.disableControls(visible)
         }
 
-        function onShowChangelogDrawer() {
-            changelogDrawer.openTriggered()
-        }
     }
 
     Connections {
@@ -445,13 +442,4 @@ Window  {
         onRejected: SystemController.fileDialogClosed(false)
     }
 
-    Item {
-        anchors.fill: parent
-
-        ChangelogDrawer {
-            id: changelogDrawer
-
-            anchors.fill: parent
-        }
-    }
 }

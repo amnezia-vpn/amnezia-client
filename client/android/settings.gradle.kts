@@ -30,6 +30,7 @@ rootProject.buildFileName = "build.gradle.kts"
 
 include(":qt")
 include(":utils")
+include(":billing")
 include(":protocolApi")
 include(":wireguard")
 include(":awg")

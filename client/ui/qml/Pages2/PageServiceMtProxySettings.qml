@@ -516,7 +516,7 @@ PageType {
                     }
 
                     function tmeLink() {
-                        return "https://t.me/proxy?server=" + effectiveHost() + "&port=" + port + "&secret=" + activeSecret()
+                        return "https://telegram.me/proxy?server=" + effectiveHost() + "&port=" + port + "&secret=" + activeSecret()
                     }
 
                     function tgLink() {
@@ -844,7 +844,7 @@ PageType {
                     }
 
                     function mtProxyTmeLinkForAdditional(baseHex) {
-                        return "https://t.me/proxy?server=" + mtProxyEffectiveHostForLinks() + "&port=" + port + "&secret=" + mtProxyActiveSecretForBaseHex(baseHex)
+                        return "https://telegram.me/proxy?server=" + mtProxyEffectiveHostForLinks() + "&port=" + port + "&secret=" + mtProxyActiveSecretForBaseHex(baseHex)
                     }
 
                     function mtProxyTgLinkForAdditional(baseHex) {
@@ -1160,7 +1160,7 @@ PageType {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Qt.openUrlExternally("https://t.me/MTProxyBot")
+                                onClicked: Qt.openUrlExternally("https://telegram.me/MTProxyBot")
                             }
                         }
                     }

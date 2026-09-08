@@ -77,6 +77,7 @@ QVariant ContainersModel::data(const QModelIndex &index, int role) const
     case IsSocks5ProxyRole: return container == DockerContainer::Socks5Proxy;
     case IsMtProxyRole: return container == DockerContainer::MtProxy;
     case IsTelemtRole: return container == DockerContainer::Telemt;
+    case IsTProxyRole: return container == DockerContainer::TProxy;
     case InstallPageOrderRole: return ContainerUtils::installPageOrder(container);
     }
 
@@ -191,5 +192,6 @@ QHash<int, QByteArray> ContainersModel::roleNames() const
     roles[IsSocks5ProxyRole] = "isSocks5Proxy";
     roles[IsMtProxyRole] = "isMtProxy";
     roles[IsTelemtRole] = "isTelemt";
+    roles[IsTProxyRole] = "isTProxy";
     return roles;
 }

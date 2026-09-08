@@ -377,10 +377,10 @@ PageType {
         property string title: qsTr("Restore purchases")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/refresh-cw.svg"
-        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
+        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild || IsPlayBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            SubscriptionUiController.restoreServiceFromAppStore()
+            SubscriptionUiController.restoreServiceFromStore()
             PageController.showBusyIndicator(false)
         }
     }

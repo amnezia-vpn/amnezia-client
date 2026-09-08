@@ -1,72 +1,80 @@
 #include "updateUiController.h"
 
+#include <QDate>
+#include <QLocale>
+
 UpdateUiController::UpdateUiController(UpdateController* updateController, QObject *parent)
     : QObject(parent), m_updateController(updateController)
 {
     if (m_updateController) {
         connect(m_updateController, &UpdateController::updateFound, this, &UpdateUiController::updateFound);
+        connect(m_updateController, &UpdateController::updateNotFound, this, &UpdateUiController::updateNotFound);
+        connect(m_updateController, &UpdateController::updateCheckFailed, this, &UpdateUiController::updateCheckFailed);
+        connect(m_updateController, &UpdateController::updateStateChanged, this, &UpdateUiController::updateStateChanged);
+        connect(m_updateController, &UpdateController::updateCheckRunningChanged, this, &UpdateUiController::isCheckRunningChanged);
     }
 }
 
-QString UpdateUiController::getHeaderText() const
+QString UpdateUiController::getVersion() const
+{
+    return m_updateController ? m_updateController->getVersion() : QString();
+}
+
+QString UpdateUiController::getReleaseInfoText() const
 {
     if (!m_updateController) {
         return QString();
     }
 
     const QString version = m_updateController->getVersion();
-    const QString releaseDate = m_updateController->getReleaseDate();
-    if (releaseDate.trimmed().isEmpty()) {
-        return tr("New version released: %1").arg(version);
+    const QDate releaseDate = QDate::fromString(m_updateController->getReleaseDate(), Qt::ISODate);
+    if (!releaseDate.isValid()) {
+        return version;
     }
 
-    return tr("New version released: %1 (%2)").arg(version, releaseDate);
+    const QString dateText = QLocale().toString(releaseDate, QStringLiteral("d MMM"));
+    return QStringLiteral("%1 · %2").arg(dateText, version);
 }
 
-QString UpdateUiController::getChangelogText() const
+QString UpdateUiController::getDescription() const
 {
-    if (!m_updateController) {
-        return QString();
-    }
-
-    const QString rawChangelog = m_updateController->getRawChangelogText();
-    if (rawChangelog.isEmpty()) {
-        return tr("Failed to load changelog text");
-    }
-
-    QStringList lines = rawChangelog.split("\n");
-    QStringList filteredChangeLogText;
-    bool add = false;
-    QString osSection;
-
-#ifdef Q_OS_WINDOWS
-    osSection = "### Windows";
-#elif defined(Q_OS_MACOS)
-    osSection = "### macOS";
-#elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-    osSection = "### Linux";
-#endif
-
-    for (const QString &line : lines) {
-        if (line.startsWith("### General")) {
-            add = true;
-        } else if (line.startsWith("### ") && line != osSection) {
-            add = false;
-        } else if (line == osSection) {
-            add = true;
-        }
-
-        if (add) {
-            filteredChangeLogText.append(line);
-        }
-    }
-
-    return filteredChangeLogText.join("\n");
+    return m_updateController ? m_updateController->getDescription() : QString();
 }
 
-QString UpdateUiController::getVersion() const
+QStringList UpdateUiController::getTags() const
 {
-    return m_updateController ? m_updateController->getVersion() : QString();
+    return m_updateController ? m_updateController->getTags() : QStringList();
+}
+
+QStringList UpdateUiController::getNewFeatures() const
+{
+    return m_updateController ? m_updateController->getNewFeatures() : QStringList();
+}
+
+QStringList UpdateUiController::getImprovements() const
+{
+    return m_updateController ? m_updateController->getImprovements() : QStringList();
+}
+
+QStringList UpdateUiController::getBugFixes() const
+{
+    return m_updateController ? m_updateController->getBugFixes() : QStringList();
+}
+
+int UpdateUiController::getUpdateState() const
+{
+    return m_updateController ? static_cast<int>(m_updateController->getUpdateState())
+                              : static_cast<int>(UpdateState::State::Idle);
+}
+
+bool UpdateUiController::isStoreUpdate() const
+{
+    return m_updateController ? m_updateController->isStoreUpdate() : false;
+}
+
+bool UpdateUiController::isCheckRunning() const
+{
+    return m_updateController ? m_updateController->isUpdateCheckRunning() : false;
 }
 
 void UpdateUiController::checkForUpdates()
@@ -76,9 +84,23 @@ void UpdateUiController::checkForUpdates()
     }
 }
 
-void UpdateUiController::runInstaller()
+void UpdateUiController::update()
 {
     if (m_updateController) {
-        m_updateController->runInstaller();
+        m_updateController->startUpdate();
+    }
+}
+
+void UpdateUiController::install()
+{
+    if (m_updateController) {
+        m_updateController->installUpdate();
+    }
+}
+
+void UpdateUiController::retry()
+{
+    if (m_updateController) {
+        m_updateController->startUpdate();
     }
 }

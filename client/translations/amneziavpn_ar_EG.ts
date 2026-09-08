@@ -434,8 +434,8 @@ Already installed containers were found on the server. All installed containers 
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of AmneziaVPN is available.</source>
-        <translation>يوجد إصدار جديد من AmneziaVPN متاح.</translation>
+        <source>A new version of %1 is available.</source>
+        <translation>يتوفر إصدار جديد من %1.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
@@ -508,7 +508,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="60"/>
         <source>Gateway endpoint</source>
-        <translation>نقطة نهاية البوابة</translation>
+        <translation>Gateway endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
@@ -523,7 +523,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="99"/>
         <source>Dev gateway environment</source>
-        <translation>بيئة بوابة المطوّر</translation>
+        <translation>Dev gateway environment</translation>
     </message>
 </context>
 <context>
@@ -536,7 +536,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="149"/>
         <source>Dev gateway enabled</source>
-        <translation>تم تشغيل بوابة المطوّر</translation>
+        <translation>Dev gateway enabled</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="191"/>
@@ -1384,7 +1384,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="116"/>
         <source>Valid range: 1–65535.</source>
-        <translation>النطاق الصالح: 1–65535.</translation>
+        <translation>Valid range: 1–65535.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="161"/>
@@ -1604,7 +1604,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="126"/>
         <source>Transmission time interval (ms). Valid range: 10–100.</source>
-        <translation>الفاصل الزمني للإرسال (مللي ثانية). النطاق الصالح: 10–100.</translation>
+        <translation>Transmission time interval (ms). Valid range: 10–100.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="145"/>
@@ -1614,7 +1614,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="146"/>
         <source>Uplink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>سعة الإرسال (ميغابايت/ث). الحد الأقصى: 2147483647.</translation>
+        <translation>Uplink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="165"/>
@@ -1624,7 +1624,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="166"/>
         <source>Downlink capacity (MB/s). Maximum: 2147483647.</source>
-        <translation>سعة الاستقبال (ميغابايت/ث). الحد الأقصى: 2147483647.</translation>
+        <translation>Downlink capacity (MB/s). Maximum: 2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="185"/>
@@ -1634,7 +1634,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="186"/>
         <source>Read buffer size (MB). Range: 1–2147483647.</source>
-        <translation>حجم ذاكرة القراءة (ميغابايت). النطاق: 1–2147483647.</translation>
+        <translation>Read buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="205"/>
@@ -1644,7 +1644,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="206"/>
         <source>Write buffer size (MB). Range: 1–2147483647.</source>
-        <translation>حجم ذاكرة الكتابة (ميغابايت). النطاق: 1–2147483647.</translation>
+        <translation>Write buffer size (MB). Range: 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="224"/>
@@ -1763,7 +1763,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="616"/>
         <source>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</source>
-        <translation>حجم أجزاء الإرسال بالبايت. الحد الأقصى: 2147483647. القيمة 0 تعني التعطيل.</translation>
+        <translation>Uplink chunk size in bytes. Maximum: 2147483647. 0 = off.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="635"/>
@@ -1773,7 +1773,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="636"/>
         <source>Max buffered POSTs. Range: 0–2147483647.</source>
-        <translation>أقصى عدد لطلبات POST المخزنة. النطاق: 0–2147483647.</translation>
+        <translation>Max buffered POSTs. Range: 0–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="655"/>
@@ -2000,7 +2000,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="201"/>
         <source>HTTP keep-alive period. Integer, may be negative.</source>
-        <translation>مدة إبقاء اتصال HTTP. عدد صحيح، ويمكن أن يكون سالبًا.</translation>
+        <translation>HTTP keep-alive period. Integer, may be negative.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="233"/>
@@ -2209,7 +2209,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>المفتاح السري</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="802"/>
@@ -2255,7 +2255,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>المفتاح السري الأساسي</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="936"/>
@@ -2265,7 +2265,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>توليد مفتاح سري جديد؟</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="955"/>
@@ -2365,7 +2365,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>نطاق FakeTLS</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1237"/>
@@ -2392,7 +2392,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>مفاتيح سرية إضافية</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1315"/>
@@ -2402,12 +2402,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>إضافة مفتاح سري إضافي</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1531"/>
         <source>Worker mode</source>
-        <translation>وضع العمليات</translation>
+        <translation>Worker mode</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1548"/>
@@ -2427,12 +2427,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1581"/>
         <source>Workers count</source>
-        <translation>عدد العمليات</translation>
+        <translation>Workers count</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1640"/>
         <source>Server is behind NAT / Docker bridge</source>
-        <translation>الخادم يعمل خلف NAT / جسر Docker</translation>
+        <translation>Server is behind NAT / Docker bridge</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1641"/>
@@ -2506,7 +2506,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1842"/>
         <source>Stats endpoint</source>
-        <translation>نقطة نهاية الإحصائيات</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
@@ -2823,7 +2823,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="770"/>
         <source>Secret</source>
-        <translation>المفتاح السري</translation>
+        <translation>Secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="802"/>
@@ -2869,7 +2869,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="925"/>
         <source>Base secret</source>
-        <translation>المفتاح السري الأساسي</translation>
+        <translation>Base secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="936"/>
@@ -2879,7 +2879,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="954"/>
         <source>Generate new secret?</source>
-        <translation>توليد مفتاح سري جديد؟</translation>
+        <translation>Generate new secret?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="955"/>
@@ -2979,7 +2979,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1222"/>
         <source>FakeTLS domain</source>
-        <translation>نطاق FakeTLS</translation>
+        <translation>FakeTLS domain</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1237"/>
@@ -3006,7 +3006,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1307"/>
         <source>Additional secrets</source>
-        <translation>مفاتيح سرية إضافية</translation>
+        <translation>Additional secrets</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1315"/>
@@ -3016,7 +3016,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1516"/>
         <source>Add additional secret</source>
-        <translation>إضافة مفتاح سري إضافي</translation>
+        <translation>Add additional secret</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
@@ -3088,7 +3088,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1699"/>
         <source>Stats endpoint</source>
-        <translation>نقطة نهاية الإحصائيات</translation>
+        <translation>Stats endpoint</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
@@ -4182,7 +4182,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="68"/>
         <source>Soft KillSwitch</source>
-        <translation>KillSwitch مرن</translation>
+        <translation>Soft KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
@@ -4192,7 +4192,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
         <source>Strict KillSwitch</source>
-        <translation>KillSwitch صارم</translation>
+        <translation>Strict KillSwitch</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
@@ -4781,30 +4781,112 @@ Create one from the current settings.</source>
 </context>
 <context>
     <name>PageSetupWizardApiPremiumInfo</name>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="102"/>
+        <source>Try free for %n day(s)</source>
+        <translation>
+            <numerusform>جرّب مجانًا</numerusform>
+            <numerusform>جرّب مجانًا ليوم واحد</numerusform>
+            <numerusform>جرّب مجانًا ليومين</numerusform>
+            <numerusform>جرّب مجانًا لـ %n أيام</numerusform>
+            <numerusform>جرّب مجانًا لـ %n يومًا</numerusform>
+            <numerusform>جرّب مجانًا لـ %n يوم</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="91"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="140"/>
         <source>Recommended</source>
         <translation>موصى به</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="103"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="167"/>
+        <source>Change plan</source>
+        <translation>تغيير الخطة</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="180"/>
         <source>Premium features</source>
         <translation>ميزات Premium</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="132"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="209"/>
         <source>Charged to your Apple ID at confirmation. Renews automatically unless auto-renew is turned off at least 24 hours before period end. Manage in Apple ID settings.</source>
         <translation>يُخصم المبلغ من حساب Apple ID عند التأكيد. ويُجدَّد تلقائيًا إلا إذا أُوقف التجديد التلقائي قبل 24 ساعة على الأقل من نهاية الفترة. يمكنك إدارته في إعدادات Apple ID.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="169"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="268"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
         <source>Continue</source>
         <translation>واصل</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="271"/>
+        <source>Start %n-day free trial</source>
+        <translation>
+            <numerusform>ابدأ الفترة التجريبية المجانية</numerusform>
+            <numerusform>ابدأ فترة تجريبية مجانية ليوم واحد</numerusform>
+            <numerusform>ابدأ فترة تجريبية مجانية ليومين</numerusform>
+            <numerusform>ابدأ فترة تجريبية مجانية لـ %n أيام</numerusform>
+            <numerusform>ابدأ فترة تجريبية مجانية لـ %n يومًا</numerusform>
+            <numerusform>ابدأ فترة تجريبية مجانية لـ %n يوم</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="171"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="273"/>
         <source>Subscribe — %1 for %2</source>
         <translation>اشترك — %1 لمدة %2</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="296"/>
+        <source>Upgrade plan?</source>
+        <translation>ترقية الخطة؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="297"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation</source>
+        <translation>سيتم استبدال الخطة الحالية بخطة %1 / %2. وسيسري التغيير فور التأكيد</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="300"/>
+        <source>Downgrade plan?</source>
+        <translation>خفض الخطة؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="301"/>
+        <source>The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules</source>
+        <translation>سيتم استبدال الخطة الحالية بخطة %1 / %2. وسيطبّق المتجر التغيير وفق قواعد الفوترة الخاصة به</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="304"/>
+        <source>Confirm subscription change?</source>
+        <translation>تأكيد تغيير الاشتراك؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="305"/>
+        <source>An active subscription already exists. The current plan will be replaced with the %1 / %2 plan</source>
+        <translation>يوجد اشتراك نشط بالفعل. سيتم استبدال الخطة الحالية بخطة %1 / %2</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
+        <source>Cancel</source>
+        <translation>إلغاء</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="335"/>
+        <source>%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.</source>
+        <translation>
+            <numerusform>مجانًا، ثم %1/%2. يتجدد تلقائيًا حتى الإلغاء. يمكنك الإلغاء في أي وقت من الإعدادات.</numerusform>
+            <numerusform>يوم واحد مجانًا، ثم %1/%2. يتجدد تلقائيًا حتى الإلغاء. يمكنك الإلغاء في أي وقت من الإعدادات.</numerusform>
+            <numerusform>يومان مجانًا، ثم %1/%2. يتجدد تلقائيًا حتى الإلغاء. يمكنك الإلغاء في أي وقت من الإعدادات.</numerusform>
+            <numerusform>%n أيام مجانًا، ثم %1/%2. يتجدد تلقائيًا حتى الإلغاء. يمكنك الإلغاء في أي وقت من الإعدادات.</numerusform>
+            <numerusform>%n يومًا مجانًا، ثم %1/%2. يتجدد تلقائيًا حتى الإلغاء. يمكنك الإلغاء في أي وقت من الإعدادات.</numerusform>
+            <numerusform>%n يوم مجانًا، ثم %1/%2. يتجدد تلقائيًا حتى الإلغاء. يمكنك الإلغاء في أي وقت من الإعدادات.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="338"/>
+        <source>%1/%2, auto-renewal. Cancel anytime in the Settings.</source>
+        <translation>%1/%2، تجديد تلقائي. يمكنك الإلغاء في أي وقت من الإعدادات.</translation>
     </message>
 </context>
 <context>
@@ -5762,16 +5844,11 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="92"/>
-        <source>A migration error has occurred. Please contact our technical support</source>
-        <translation>حدث خطأ أثناء الترحيل. يرجى التواصل مع الدعم الفني</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Please update the application to use this feature</source>
         <translation>يرجى تحديث التطبيق لاستخدام هذه الميزة</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -5780,47 +5857,47 @@ Create one from the current settings.</source>
  إذا لم تستلم رسالة، يرجى التواصل مع الدعم.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Unable to process purchase</source>
         <translation>غير قادر على معالجة عملية الشراء</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>No active subscription found</source>
         <translation>لم يتم العثور على اشتراك نشط</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>لم يتم العثور على اشتراكات مشتراة. يرجى شراء اشتراك أولاً</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>تم استخدام عنوان البريد الإلكتروني هذا بالفعل لتنشيط فترة تجريبية</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>CAPTCHA verification is required</source>
         <translation>التحقق من CAPTCHA مطلوب</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>كان CAPTCHA غير صحيح. يرجى المحاولة مرة أخرى</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>تم تحديث CAPTCHA. يرجى المحاولة مرة أخرى</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="102"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>Too many requests. Please try again later</source>
         <translation>عدد كبير جدًا من الطلبات. يرجى المحاولة لاحقًا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="143"/>
         <source>ErrorCode: %1. </source>
         <translation>رمز الخطأ: %1. </translation>
     </message>
@@ -5957,37 +6034,102 @@ Create one from the current settings.</source>
         <translation>تم تجاوز الحد المسموح به من التكوينات لكل اشتراك</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="105"/>
+        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
+        <translation>دفعتك بانتظار التأكيد في Google Play. بمجرد اكتمال الدفع، سيُضاف الاشتراك تلقائيًا عند تشغيل التطبيق في المرة القادمة.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
+        <translation>دفعتك بانتظار التأكيد. بمجرد الموافقة عليها، سيُضاف الاشتراك تلقائيًا.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
+        <translation>دفعتك بانتظار التأكيد. يرجى إتمام الدفع ثم استعادة اشتراكك.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
+        <translation>لا توجد مشتريات لاستعادتها. إذا كان لديك اشتراك نشط، فتأكد من تسجيل الدخول بحساب Google نفسه المستخدم في الشراء.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
+        <translation>لا توجد مشتريات لاستعادتها. إذا كان لديك اشتراك نشط، فتأكد من تسجيل الدخول بمعرّف Apple ID نفسه المستخدم في الشراء.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
+        <translation>لا توجد مشتريات لاستعادتها. إذا كان لديك اشتراك نشط، فتأكد من تسجيل الدخول بالحساب نفسه المستخدم في الشراء.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="122"/>
         <source>QFile error: The file could not be opened</source>
         <translation>خطأ QFile: لا يمكن فتح الملف</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="123"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>خطأ QFile: ظهر خطأ اثناء القراءه من الملف</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="107"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>خطأ QFile: لا يمكن الوصول للملف</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>خطأ QFile: ظهر خطأ غير محدد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="109"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>خطأ QFile: حدث خطأ فادح</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="110"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: The operation was aborted</source>
         <translation>خطأ QFile: تم إحباط العملية</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="114"/>
+        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <source>Transaction was canceled by the user</source>
+        <translation>تم إلغاء المعاملة من قبل المستخدم</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <source>Billing error</source>
+        <translation>خطأ في الفوترة</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <source>Internal Google Play error, please try again later</source>
+        <translation>خطأ داخلي في Google Play، يرجى المحاولة لاحقًا</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <source>Billing is unavailable, please try again later</source>
+        <translation>خدمة الفوترة غير متاحة، يرجى المحاولة لاحقًا</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <source>You already own this subscription</source>
+        <translation>أنت تمتلك هذا الاشتراك بالفعل</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <source>The requested subscription is not available for purchase</source>
+        <translation>الاشتراك المطلوب غير متاح للشراء</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <source>A network error occurred during the operation, please check the Internet connection</source>
+        <translation>حدث خطأ في الشبكة أثناء العملية، يرجى التحقق من اتصال الإنترنت</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="140"/>
         <source>Internal error</source>
         <translation>خطأ داخلي</translation>
     </message>
@@ -6357,17 +6499,17 @@ For more detailed information, you can
         <translation>لا يمكن العثور على فاصل النقطتين بين اسم المستضيف و المنفذ</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="417"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="436"/>
         <source> (version 3.1)</source>
         <translation> (الإصدار 3.1)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="418"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="437"/>
         <source> (version 2)</source>
         <translation> (الإصدار 2)</translation>
     </message>
     <message>
-        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="419"/>
+        <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="438"/>
         <source> (version 1.5)</source>
         <translation> (الإصدار 1.5)</translation>
     </message>
@@ -6435,13 +6577,13 @@ For more detailed information, you can
 <context>
     <name>ServicesCatalogController</name>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="176"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="258"/>
         <source>%1/mo</source>
         <comment>IAP: price per month in plan subtitle</comment>
         <translation>%1/شهر</translation>
     </message>
     <message>
-        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="196"/>
+        <location filename="../core/controllers/api/servicesCatalogController.cpp" line="278"/>
         <source>from %1 per month</source>
         <comment>IAP: card footer minimum monthly price from StoreKit</comment>
         <translation>من %1 شهريًا</translation>
@@ -6481,61 +6623,72 @@ For more detailed information, you can
 <context>
     <name>SubscriptionUiController</name>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="218"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="268"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="241"/>
+        <source>Your subscription has been upgraded</source>
+        <translation>تمت ترقية اشتراكك</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="242"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="282"/>
         <source>This subscription has already been added</source>
         <translation>تمت إضافة هذا الاشتراك بالفعل</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="225"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="254"/>
         <source>%1 has been added to the app</source>
         <translation>تمت إضافة %1 إلى التطبيق</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="275"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="289"/>
         <source>Subscription restored successfully</source>
         <translation>تم استعادة الاشتراك بنجاح</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="303"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="356"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="479"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <source>Purchase confirmed. Subscription has been added to the app</source>
+        <translation>تم تأكيد الشراء. وأُضيف الاشتراك إلى التطبيق</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
         <source>%1 installed successfully.</source>
         <translation>تم تحميل %1 بنجاح</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="318"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="364"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="391"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="422"/>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="514"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
         <source>Enter the digits from the image to continue</source>
         <translation>أدخل الأرقام الموجودة في الصورة للمتابعة</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="472"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>تم استخدام عنوان البريد الإلكتروني هذا بالفعل لتنشيط فترة تجريبية. هل أعجبتك الخدمة؟ قم بالترقية إلى Premium</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="532"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
         <source>API config reloaded</source>
         <translation>تمت إعادة تحميل تكوين API</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>تم تغيير بلد الاتصال بنجاح إلى %1</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="651"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
         <source>API config removed</source>
         <translation>تم حذف تكوين API</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="660"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>تمت إزالة الخادم &apos;%1&apos;</translation>
     </message>

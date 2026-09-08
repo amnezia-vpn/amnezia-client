@@ -18,10 +18,10 @@ namespace apiUtils
     QString getAppLanguageCode(const SecureAppSettingsRepository *appSettingsRepository);
     QString getDistributionChannel();
 
-    // The gateway may report a country code with a region suffix, e.g. "us-west", while flag
-    // resources are named after the ISO 3166-1 alpha-2 code alone. Returns the part before the dash
-    // in upper case.
-    QString getCountryFlagCode(const QString &serverCountryCode);
+    // Flag lookup: prefer serverCountryCodeL10n (ISO code from Stack); fall back to serverCountryCode
+    // for old stacks. Routing code may contain region/pool suffixes — strip at most one dash segment
+    // on fallback only. Returns upper-case ISO 3166-1 alpha-2 when possible.
+    QString getCountryFlagCode(const QString &serverCountryCodeL10n, const QString &serverCountryCode);
 
     bool isSubscriptionExpired(const QString &subscriptionEndDate);
 

@@ -166,6 +166,7 @@ ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool /
     row.isCountrySelectionAvailable = !server.apiConfig.availableCountries.isEmpty();
     row.apiAvailableCountries = server.apiConfig.availableCountries;
     row.apiServerCountryCode = server.apiConfig.serverCountryCode;
+    row.apiServerCountryCodeL10n = server.apiConfig.serverCountryCodeL10n;
 
     row.isAdVisible = server.apiConfig.serviceInfo.isAdVisible;
     row.adHeader = server.apiConfig.serviceInfo.adHeader;

@@ -209,7 +209,7 @@ QString ServersUiController::getDefaultServerImagePathCollapsed() const
     if (!description.isApiV2) {
         return "";
     }
-    const QString flagCode = apiUtils::getCountryFlagCode(description.apiServerCountryCode);
+    const QString flagCode = apiUtils::getCountryFlagCode(description.apiServerCountryCodeL10n, description.apiServerCountryCode);
     if (flagCode.isEmpty()) {
         return "";
     }
@@ -572,6 +572,8 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("MTProxy");
             } else if (container == DockerContainer::Telemt) {
                 servicesName.append("Telemt");
+            } else if (container == DockerContainer::TProxy) {
+                servicesName.append("TProxy");
             }
         }
     }

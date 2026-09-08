@@ -18,6 +18,7 @@
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
 
+#include "core/controllers/updateController.h"
 #include "core/protocols/qmlRegisterProtocols.h"
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
@@ -29,6 +30,10 @@
 #include "platforms/ios/QRCodeReaderBase.h"
 #ifdef Q_OS_IOS
     #include "platforms/ios/ioscontextmenu.h"
+#endif
+
+#ifdef Q_OS_ANDROID
+#include "platforms/android/android_controller.h"
 #endif
          
 
@@ -147,14 +152,17 @@ void AmneziaApplication::init()
     m_engine->rootContext()->setContextProperty("IosContextMenu", new IosContextMenu(this));
 #endif
 
+#ifdef Q_OS_ANDROID
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", AndroidController::instance()->isPlay());
+#else
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", false);
+#endif
+
     m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
-
-    m_marketplaceUpdateController.reset(new MarketplaceUpdateController());
-    m_marketplaceUpdateController->start();
 
     m_engine->addImportPath(QStringLiteral(APP_QML_IMPORT_PATH));
 
@@ -170,6 +178,8 @@ void AmneziaApplication::init()
     m_engine->load(url);
 
     m_coreController->setQmlRoot();
+
+    m_coreController->checkForAppUpdates();
 
 #ifdef Q_OS_WIN //TODO
     if (m_parser.isSet(m_optAutostart))
@@ -239,6 +249,7 @@ void AmneziaApplication::registerTypes()
     amnezia::declareQmlProtocolEnum();
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
+    UpdateState::declareQmlUpdateStateEnum();
 }
 
 void AmneziaApplication::loadFonts()

@@ -7,7 +7,6 @@
 #include <QSet>
 #include <QString>
 #include <QVector>
-#include <optional>
 
 struct NewsItem
 {
@@ -15,7 +14,6 @@ struct NewsItem
     QString title;
     QString content;
     QDateTime timestamp;
-    bool isUpdate = false;
 };
 
 class NewsModel : public QAbstractListModel
@@ -28,12 +26,10 @@ public:
         ContentRole,
         TimestampRole,
         IsReadRole,
-        IsProcessedRole,
-        IsUpdateRole
+        IsProcessedRole
     };
     explicit NewsModel(class SecureAppSettingsRepository* appSettingsRepository, QObject *parent = nullptr);
     Q_INVOKABLE void markAsRead(int index);
-    Q_INVOKABLE void markUpdateAsSkipped();
 
     Q_PROPERTY(int processedIndex READ processedIndex WRITE setProcessedIndex NOTIFY processedIndexChanged)
     Q_PROPERTY(bool hasUnread READ hasUnread NOTIFY hasUnreadChanged)
@@ -41,7 +37,6 @@ public:
     void setProcessedIndex(int index);
 
     void setNewsList(const QJsonArray &items);
-    void setUpdateNotification(const QString &id, const QString &title, const QString &content);
     bool hasUnread() const;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -55,7 +50,6 @@ signals:
 private:
     QVector<NewsItem> m_items;
     QVector<NewsItem> m_apiItems;
-    std::optional<NewsItem> m_updateItem;
     int m_processedIndex = -1;
     class SecureAppSettingsRepository* m_appSettingsRepository;
     QSet<QString> m_readIds;

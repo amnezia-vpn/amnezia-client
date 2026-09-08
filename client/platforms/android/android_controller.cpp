@@ -154,28 +154,6 @@ void AndroidController::resetLastServer(int serverIndex)
     callActivityMethod("resetLastServer", "(I)V", serverIndex);
 }
 
-void AndroidController::showUpdateCover()
-{
-    callActivityMethod("showUpdateCover", "()V");
-}
-
-void AndroidController::hideUpdateCover()
-{
-    callActivityMethod("hideUpdateCover", "()V");
-}
-
-void AndroidController::showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
-                                        const QString &skipTitle, const QString &storeUrl)
-{
-    callActivityMethod("showUpdatePrompt",
-                       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
-                       QJniObject::fromString(title).object<jstring>(),
-                       QJniObject::fromString(message).object<jstring>(),
-                       QJniObject::fromString(updateTitle).object<jstring>(),
-                       QJniObject::fromString(skipTitle).object<jstring>(),
-                       QJniObject::fromString(storeUrl).object<jstring>());
-}
-
 void AndroidController::saveFile(const QString &fileName, const QString &data)
 {
     callActivityMethod("saveFile", "(Ljava/lang/String;Ljava/lang/String;)V",
@@ -348,6 +326,52 @@ bool AndroidController::requestAuthentication()
 void AndroidController::sendTouch(float x, float y)
 {
     callActivityMethod("sendTouch", "(FF)V", x, y);
+}
+
+
+bool AndroidController::isPlay()
+{
+    return callActivityMethod<jboolean>("isPlay", "()Z");
+}
+
+QJsonObject AndroidController::getSubscriptionPlans()
+{
+    QJniObject subscriptionPlans = callActivityMethod<jstring>("getSubscriptionPlans", "()Ljava/lang/String;");
+    QJsonObject json = QJsonDocument::fromJson(subscriptionPlans.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::purchaseSubscription(const QString &offerToken)
+{
+    QJniObject result = callActivityMethod<jstring, jstring>("purchaseSubscription", "(Ljava/lang/String;)Ljava/lang/String;",
+                                                    QJniObject::fromString(offerToken).object<jstring>());
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::upgradeSubscription(const QString &offerToken, const QString &oldPurchaseToken)
+{
+    QJniObject result = callActivityMethod<jstring, jstring, jstring>("upgradeSubscription",
+                                                                      "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+                                                                      QJniObject::fromString(offerToken).object<jstring>(),
+                                                                      QJniObject::fromString(oldPurchaseToken).object<jstring>());
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::acknowledgePurchase(const QString &purchaseToken)
+{
+    QJniObject result = callActivityMethod<jstring, jstring>("acknowledgePurchase", "(Ljava/lang/String;)Ljava/lang/String;",
+                                                             QJniObject::fromString(purchaseToken).object<jstring>());
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
+}
+
+QJsonObject AndroidController::queryPurchases()
+{
+    QJniObject result = callActivityMethod<jstring>("queryPurchases", "()Ljava/lang/String;");
+    QJsonObject json = QJsonDocument::fromJson(result.toString().toUtf8()).object();
+    return json;
 }
 
 // Moving log processing to the Android side

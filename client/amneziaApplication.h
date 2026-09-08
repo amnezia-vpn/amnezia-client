@@ -15,7 +15,6 @@
 
 #include "core/controllers/coreController.h"
 #include "secureQSettings.h"
-#include "ui/controllers/marketplaceUpdateController.h"
 #include "vpnConnection.h"
 #include "ui/models/containerProps.h"
 #include "ui/models/protocolProps.h"
@@ -57,7 +56,6 @@ private:
     SecureQSettings* m_settings;
 
     QScopedPointer<CoreController> m_coreController;
-    QScopedPointer<MarketplaceUpdateController> m_marketplaceUpdateController;
 
     QSharedPointer<ContainerProps> m_containerProps;
     QSharedPointer<ProtocolProps> m_protocolProps;

@@ -1,19 +1,24 @@
 #include "updateController.h"
 
-#include <QNetworkReply>
-#include <QVersionNumber>
-#include <QUrl>
+#include <QDesktopServices>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkReply>
 #include <QTimer>
+#include <QUrl>
 
 #include "amneziaApplication.h"
 #include "logger.h"
-#include "version.h"
 #include "core/controllers/gatewayController.h"
 #include "core/utils/api/gatewayPayloadBuilder.h"
+#include "core/utils/appUiConfig.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
+
+#if defined(Q_OS_ANDROID)
+    #include "platforms/android/android_controller.h"
+#endif
 
 namespace
 {
@@ -29,6 +34,18 @@ namespace
     const QLatin1String kInstallerRemoteFileNamePattern("AmneziaVPN_%1_linux_x64.run");
     const QString kInstallerLocalPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/AmneziaVPN.run";
 #endif
+
+    QStringList stringListFromJsonValue(const QJsonValue &value)
+    {
+        QStringList result;
+        for (const QJsonValue &item : value.toArray()) {
+            const QString text = item.toString();
+            if (!text.isEmpty()) {
+                result.append(text);
+            }
+        }
+        return result;
+    }
 }
 
 UpdateController::UpdateController(SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
@@ -36,9 +53,9 @@ UpdateController::UpdateController(SecureAppSettingsRepository* appSettingsRepos
 {
 }
 
-QString UpdateController::getRawChangelogText() const
+QString UpdateController::getVersion() const
 {
-    return m_changelogText;
+    return m_version;
 }
 
 QString UpdateController::getReleaseDate() const
@@ -46,9 +63,68 @@ QString UpdateController::getReleaseDate() const
     return m_releaseDate;
 }
 
-QString UpdateController::getVersion() const
+QString UpdateController::getDescription() const
 {
-    return m_version;
+    return m_description;
+}
+
+QStringList UpdateController::getTags() const
+{
+    return m_tags;
+}
+
+QStringList UpdateController::getNewFeatures() const
+{
+    return m_newFeatures;
+}
+
+QStringList UpdateController::getImprovements() const
+{
+    return m_improvements;
+}
+
+QStringList UpdateController::getBugFixes() const
+{
+    return m_bugFixes;
+}
+
+UpdateState::State UpdateController::getUpdateState() const
+{
+    return m_updateState;
+}
+
+bool UpdateController::isStoreUpdate() const
+{
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    return true;
+#elif defined(Q_OS_ANDROID)
+    return AndroidController::instance()->isPlay();
+#else
+    return false;
+#endif
+}
+
+void UpdateController::setUpdateState(UpdateState::State state)
+{
+    if (m_updateState == state) {
+        return;
+    }
+    m_updateState = state;
+    emit updateStateChanged();
+}
+
+bool UpdateController::isUpdateCheckRunning() const
+{
+    return m_updateCheckRunning;
+}
+
+void UpdateController::setUpdateCheckRunning(bool running)
+{
+    if (m_updateCheckRunning == running) {
+        return;
+    }
+    m_updateCheckRunning = running;
+    emit updateCheckRunningChanged();
 }
 
 void UpdateController::checkForUpdates()
@@ -56,205 +132,177 @@ void UpdateController::checkForUpdates()
     if (m_updateCheckRunning || !m_appSettingsRepository) {
         return;
     }
-    m_updateCheckRunning = true;
+    setUpdateCheckRunning(true);
 
-    fetchGatewayUrl();
-}
-
-void UpdateController::finishUpdateCheck()
-{
-    m_updateCheckRunning = false;
-}
-
-void UpdateController::doGetAsync(const QString &endpoint, std::function<void(bool, QByteArray)> onDone)
-{
-    QString fullUrl = m_baseUrl + endpoint;
-    
-    QNetworkRequest req;
-    req.setTransferTimeout(7000);
-    req.setUrl(QUrl(fullUrl));
-
-    QNetworkReply *reply = amnApp->networkManager()->get(req);
-    setupNetworkErrorHandling(reply, endpoint);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply, endpoint, onDone]() {
-        const bool ok = (reply->error() == QNetworkReply::NoError);
-        QByteArray data;
-        if (ok) {
-            data = reply->readAll();
-        } else {
-            handleNetworkError(reply, endpoint);
-        }
-        reply->deleteLater();
-        onDone(ok, data);
-    });
-}
-
-void UpdateController::fetchGatewayUrl()
-{
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(),
                                                                        m_appSettingsRepository->isDevGatewayEnv(),
                                                                        7000,
                                                                        m_appSettingsRepository->isStrictKillSwitchEnabled(),
                                                                        m_appSettingsRepository);
 
-    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::cliVersion, QString(APP_VERSION))
-                                     .build();
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository).build();
 
     // Workaround: wait before contacting gateway to avoid rate limit triggered by other requests (news etc.)
     QTimer::singleShot(1000, this, [this, gatewayController, apiPayload]() {
-        gatewayController->postAsync(QStringLiteral("%1v1/updater_endpoint"), apiPayload)
+        gatewayController->postAsync(QStringLiteral("%1v1/app_update"), apiPayload)
             .then(this, [this, gatewayController](QPair<ErrorCode, QByteArray> result) {
+                setUpdateCheckRunning(false);
+
                 auto [err, gatewayResponse] = result;
                 if (err != ErrorCode::NoError) {
                     logger.error() << "Gateway request failed, error code:" << static_cast<int>(err);
-                    finishUpdateCheck();
+                    emit updateCheckFailed();
                     return;
                 }
 
                 QJsonObject gatewayData = QJsonDocument::fromJson(gatewayResponse).object();
-
-                QString baseUrl = gatewayData.value("url").toString();
-                if (baseUrl.endsWith('/')) {
-                    baseUrl.chop(1);
+                if (!gatewayData.value(apiDefs::key::updateAvailable).toBool()) {
+                    logger.info() << "No application update available";
+                    emit updateNotFound();
+                    return;
                 }
-                m_baseUrl = baseUrl;
 
-                fetchVersionInfo();
+                m_version = gatewayData.value(apiDefs::key::updateVersion).toString();
+                m_releaseDate = gatewayData.value(apiDefs::key::releaseDate).toString();
+                m_description = gatewayData.value(apiDefs::key::updateDescription).toString();
+                m_tags = stringListFromJsonValue(gatewayData.value(apiDefs::key::updateTags));
+                m_newFeatures = stringListFromJsonValue(gatewayData.value(apiDefs::key::newFeatures));
+                m_improvements = stringListFromJsonValue(gatewayData.value(apiDefs::key::improvements));
+                m_bugFixes = stringListFromJsonValue(gatewayData.value(apiDefs::key::bugFixes));
+                m_downloadBaseUrl = gatewayData.value(apiDefs::key::downloadBaseUrl).toString();
+                if (m_downloadBaseUrl.endsWith('/')) {
+                    m_downloadBaseUrl.chop(1);
+                }
+                m_releasePageUrl = gatewayData.value(apiDefs::key::releasePageUrl).toString();
+
+                if (m_version.isEmpty()) {
+                    logger.error() << "Update response has no version, ignoring";
+                    emit updateCheckFailed();
+                    return;
+                }
+
+                logger.info() << "Application update available:" << m_version;
+                setUpdateState(UpdateState::State::Idle);
+                emit updateFound();
             });
     });
 }
 
-void UpdateController::fetchVersionInfo()
+void UpdateController::openStorePage() const
 {
-    doGetAsync("/VERSION", [this](bool ok, QByteArray data) {
-        if (!ok) {
-            finishUpdateCheck();
-            return;
-        }
-        m_version = QString::fromUtf8(data).trimmed();
-        
-        if (!isNewVersionAvailable()) {
-            finishUpdateCheck();
-            return;
-        }
-        fetchChangelog();
-    });
+#if defined(Q_OS_IOS)
+    QDesktopServices::openUrl(QUrl(QLatin1String(APP_IOS_STORE_URL_FALLBACK)));
+#elif defined(MACOS_NE)
+    QDesktopServices::openUrl(QUrl(QStringLiteral("https://apps.apple.com/app/id1600529900")));
+#elif defined(Q_OS_ANDROID)
+    QDesktopServices::openUrl(
+            QUrl(QStringLiteral("https://play.google.com/store/apps/details?id=%1").arg(QLatin1String(APP_ANDROID_PACKAGE))));
+#endif
 }
 
-void UpdateController::fetchChangelog()
+void UpdateController::startUpdate()
 {
-    doGetAsync("/CHANGELOG", [this](bool ok, QByteArray data) {
-        if (!ok) {
-            m_changelogText.clear();
-        } else {
-            m_changelogText = QString::fromUtf8(data);
-        }
-        fetchReleaseDate();
-    });
-}
+    if (isStoreUpdate()) {
+        openStorePage();
+        return;
+    }
 
-void UpdateController::fetchReleaseDate()
-{
-    doGetAsync("/RELEASE_DATE", [this](bool ok, QByteArray data) {
-        if (ok) {
-            m_releaseDate = QString::fromUtf8(data).trimmed();
-        } else {
-            m_releaseDate = QString();
-        }
-
-        m_downloadUrl = composeDownloadUrl();
-        emit updateFound();
-        finishUpdateCheck();
-    });
-}
-
-bool UpdateController::isNewVersionAvailable() const
-{
-    auto currentVersion = QVersionNumber::fromString(QString(APP_VERSION));
-    auto newVersion = QVersionNumber::fromString(m_version);
-    return newVersion > currentVersion;
-}
-
-void UpdateController::setupNetworkErrorHandling(QNetworkReply* reply, const QString& operation)
-{
-    QObject::connect(reply, &QNetworkReply::errorOccurred, [reply, operation](QNetworkReply::NetworkError error) {
-        logger.error() << QString("Network error occurred while fetching %1: %2 %3")
-                          .arg(operation, reply->errorString(), QString::number(error));
-    });
-
-    QObject::connect(reply, &QNetworkReply::sslErrors, [operation](const QList<QSslError> &errors) {
-        QStringList errorStrings;
-        for (const QSslError &err : errors) {
-            errorStrings << err.errorString();
-        }
-        logger.error() << QString("SSL errors while fetching %1: %2").arg(operation, errorStrings.join("; "));
-    });
-}
-
-void UpdateController::handleNetworkError(QNetworkReply* reply, const QString& operation)
-{
-    logger.error() << "Network error code:" << QString::number(static_cast<int>(reply->error()));
-    logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+#if defined(Q_OS_ANDROID)
+    // GitHub build on Android: open the release page in a browser, the system downloads the APK.
+    if (m_releasePageUrl.isEmpty()) {
+        logger.error() << "Release page URL is empty";
+        setUpdateState(UpdateState::State::DownloadError);
+        return;
+    }
+    QDesktopServices::openUrl(QUrl(m_releasePageUrl));
+#elif !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    downloadInstaller();
+#endif
 }
 
 QString UpdateController::composeDownloadUrl() const
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    if (m_downloadBaseUrl.isEmpty() || m_version.isEmpty()) {
+        return QString();
+    }
     const QString fileName = QString(kInstallerRemoteFileNamePattern).arg(m_version);
-    return m_baseUrl + "/" + fileName;
+    return m_downloadBaseUrl + "/" + fileName;
 #else
     return QString();
 #endif
 }
 
-void UpdateController::runInstaller()
+void UpdateController::downloadInstaller()
 {
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (m_downloadUrl.isEmpty()) {
-        logger.error() << "Download URL is empty";
+    if (m_updateState == UpdateState::State::Downloading) {
         return;
     }
 
+    const QString downloadUrl = composeDownloadUrl();
+    if (downloadUrl.isEmpty()) {
+        logger.error() << "Download URL is empty";
+        setUpdateState(UpdateState::State::DownloadError);
+        return;
+    }
+
+    setUpdateState(UpdateState::State::Downloading);
+
     QNetworkRequest request;
     request.setTransferTimeout(30000);
-    request.setUrl(m_downloadUrl);
+    request.setUrl(QUrl(downloadUrl));
 
     QNetworkReply *reply = amnApp->networkManager()->get(request);
 
-    QObject::connect(reply, &QNetworkReply::finished, [this, reply]() {
-        if (reply->error() == QNetworkReply::NoError) {
-            QFile file(kInstallerLocalPath);
-            if (!file.open(QIODevice::WriteOnly)) {
-                logger.error() << "Failed to open installer file for writing:" << kInstallerLocalPath << "Error:" << file.errorString();
-                reply->deleteLater();
-                return;
-            }
+    QObject::connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
 
-            if (file.write(reply->readAll()) == -1) {
-                logger.error() << "Failed to write installer data to file:" << kInstallerLocalPath << "Error:" << file.errorString();
-                file.close();
-                reply->deleteLater();
-                return;
-            }
-
-            file.close();
-
-    #if defined(Q_OS_WINDOWS)
-            runWindowsInstaller(kInstallerLocalPath);
-    #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
-            runMacInstaller(kInstallerLocalPath);
-    #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
-            runLinuxInstaller(kInstallerLocalPath);
-    #endif
-        } else {
+        if (reply->error() != QNetworkReply::NoError) {
             logger.error() << "Installer download failed, network error:" << static_cast<int>(reply->error())
                            << reply->errorString();
             logger.error() << "HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+            setUpdateState(UpdateState::State::DownloadError);
+            return;
         }
-        reply->deleteLater();
+
+        QFile file(kInstallerLocalPath);
+        if (!file.open(QIODevice::WriteOnly)) {
+            logger.error() << "Failed to open installer file for writing:" << kInstallerLocalPath
+                           << "Error:" << file.errorString();
+            setUpdateState(UpdateState::State::DownloadError);
+            return;
+        }
+
+        if (file.write(reply->readAll()) == -1) {
+            logger.error() << "Failed to write installer data to file:" << kInstallerLocalPath
+                           << "Error:" << file.errorString();
+            file.close();
+            setUpdateState(UpdateState::State::DownloadError);
+            return;
+        }
+
+        file.close();
+        setUpdateState(UpdateState::State::ReadyToInstall);
     });
+#endif
+}
+
+void UpdateController::installUpdate()
+{
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    if (m_updateState != UpdateState::State::ReadyToInstall) {
+        logger.error() << "Installer is not downloaded yet";
+        return;
+    }
+
+    #if defined(Q_OS_WINDOWS)
+    runWindowsInstaller(kInstallerLocalPath);
+    #elif defined(Q_OS_MACOS) && !defined(MACOS_NE)
+    runMacInstaller(kInstallerLocalPath);
+    #elif defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
+    runLinuxInstaller(kInstallerLocalPath);
+    #endif
 #endif
 }
 
