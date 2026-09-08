@@ -145,8 +145,7 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
     qInfo() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
     ErrorCode errorCode = executeRequest(QString("%1") + endpoint, apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
-        qWarning().noquote() << "[IAP] Request" << endpoint << "failed, errorCode =" << static_cast<int>(errorCode)
-                             << "response:" << QString::fromUtf8(responseBody.left(512));
+        qWarning().noquote() << "[IAP] Request" << endpoint << "failed, errorCode =" << static_cast<int>(errorCode);
         return errorCode;
     }
 
@@ -154,8 +153,7 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
     QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
     QString key = responseObject.value(QStringLiteral("key")).toString();
     if (key.isEmpty()) {
-        qWarning().noquote() << "[IAP] Subscription response does not contain a key field, response:"
-                             << QString::fromUtf8(responseBody.left(512));
+        qWarning().noquote() << "[IAP] Subscription response does not contain a key field";
         return ErrorCode::ApiPurchaseError;
     }
 
@@ -389,11 +387,8 @@ ErrorCode StorePurchaseController::processPlayMarketPurchase(const QString &user
         m_lastPlayBasePlanId = productId;
     }
 
-    qWarning().noquote() << "[Billing][TEST] Skipping v1/subscriptions on purpose, purchase stays unacknowledged:" << outcome.purchaseToken;
-    return ErrorCode::ApiPurchaseError;
-
-    /*return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
-                                outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));*/
+    return finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol, outcome.purchaseToken,
+                                outcome.isAcknowledged, duplicateServerIndex, QStringLiteral("v1/subscriptions"));
 #else
     Q_UNUSED(userCountryCode);
     Q_UNUSED(serviceType);
