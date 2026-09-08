@@ -18,8 +18,8 @@ struct XrayXPaddingConfig {
     bool    obfsMode = true;            // xPaddingObfsMode
     QString key;                        // xPaddingKey
     QString header;                     // xPaddingHeader
-    QString placement = protocols::xray::defaultXPaddingPlacement; // xPaddingPlacement: Cookie|Header|Query|Body
-    QString method = protocols::xray::defaultXPaddingMethod;       // xPaddingMethod: Repeat-x|Random|Zero
+    QString placement;                  // xPaddingPlacement: Cookie|Header|Query|Query in header
+    QString method;                     // xPaddingMethod: Repeat-x|Tokenish
 
     QJsonObject toJson() const;
     static XrayXPaddingConfig fromJson(const QJsonObject &json);
@@ -47,33 +47,33 @@ struct XrayXmuxConfig {
 
 // ── XHTTP transport ───────────────────────────────────────────────────────────
 struct XrayXhttpConfig {
-    QString mode             = protocols::xray::defaultXhttpMode;  // Auto|Packet-up|Stream-up|Stream-one
-    QString host             = protocols::xray::defaultXhttpHost;
+    QString mode;
+    QString host;
     QString path;
     bool    disableGrpc      = true;
     bool    disableSse       = true;
 
     // Session & Sequence
-    QString sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
-    QString sessionKey       = protocols::xray::defaultXhttpSessionKey;
-    QString seqPlacement     = protocols::xray::defaultXhttpSeqPlacement;
+    QString sessionPlacement;
+    QString sessionKey;
+    QString seqPlacement;
     QString seqKey;
-    QString uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
+    QString uplinkDataPlacement;
     QString uplinkDataKey;
 
     // Traffic Shaping
-    QString uplinkMethod    = protocols::xray::defaultXhttpUplinkMethod;
-    QString uplinkChunkSize = protocols::xray::defaultXhttpUplinkChunkSize;
-    QString scMinPostsIntervalMsMin = protocols::xray::defaultXhttpScMinPostsIntervalMsMin;
-    QString scMinPostsIntervalMsMax = protocols::xray::defaultXhttpScMinPostsIntervalMsMax;
+    QString uplinkMethod;
+    QString uplinkChunkSize;
+    QString scMinPostsIntervalMsMin;
+    QString scMinPostsIntervalMsMax;
 
     XrayXmuxConfig xmux;
 
     QString scMaxBufferedPosts;
-    QString scMaxEachPostBytesMin = protocols::xray::defaultXhttpScMaxEachPostBytesMin;
-    QString scMaxEachPostBytesMax = protocols::xray::defaultXhttpScMaxEachPostBytesMax;
-    QString scStreamUpServerSecsMin = protocols::xray::defaultXhttpScStreamUpServerSecsMin;
-    QString scStreamUpServerSecsMax = protocols::xray::defaultXhttpScStreamUpServerSecsMax;
+    QString scMaxEachPostBytesMin;
+    QString scMaxEachPostBytesMax;
+    QString scStreamUpServerSecsMin;
+    QString scStreamUpServerSecsMax;
 
     XrayXPaddingConfig xPadding;
 
@@ -126,6 +126,8 @@ struct XrayServerConfig {
     QString subnetAddress;
     QString site;
     bool isThirdPartyConfig = false;
+
+    int settingsVersion = 0;
 
     QString security;
     QString flow;
@@ -189,12 +191,16 @@ namespace xrayEffective
     QString xhttpModeSent(const XrayServerConfig &srv);
 }
 
+QString sanitizeNativeConfig(const QString &nativeConfig);
+
 struct XrayClientOutboundInputs {
     QString serverAddress;
     QString clientId;
     QString realityPublicKey;
     QString realityShortId;
     QString tlsPinnedPeerCertSha256;
+
+    static std::optional<XrayClientOutboundInputs> fromClientNativeJson(const QJsonObject &nativeJson);
 };
 
 // ── Client config (generated, not edited by user) ─────────────────────────────
@@ -229,6 +235,8 @@ struct XrayProtocolConfig {
     bool fromClientOutboundJson(const QJsonObject &nativeJson);
 
     bool hydrateServerConfigFromClientNative();
+
+    bool regenerateClientConfigFromNative();
 
 };
 

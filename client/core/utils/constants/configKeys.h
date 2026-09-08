@@ -176,6 +176,8 @@ namespace amnezia
 
         // ── Xray-specific keys ────────────────────────────────────────
 
+        constexpr QLatin1String xraySettingsVersion("xray_settings_version");
+
         // Security
         constexpr QLatin1String xraySecurity("xray_security");       // none | tls | reality
         constexpr QLatin1String xrayFlow("xray_flow");               // "" | xtls-rprx-vision | xtls-rprx-vision-udp443

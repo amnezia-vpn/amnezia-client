@@ -49,8 +49,15 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::PortRole: srv.port = str;
         break;
-    case Roles::TransportRole: srv.transport = str;
+    case Roles::TransportRole: {
+        const bool becameXhttp = srv.transport != str
+                && str == QLatin1String(protocols::xray::transportXhttp);
+        srv.transport = str;
+        if (becameXhttp) {
+            srv.applyDefaults(false);
+        }
         break;
+    }
     case Roles::SecurityRole: srv.security = str;
         break;
     case Roles::FlowRole: srv.flow = str;
@@ -277,12 +284,6 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
     if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
         applyDefaultsToServerConfig(m_protocolConfig.serverConfig, false);
-        if (m_protocolConfig.serverConfig.fingerprint.isEmpty()) {
-            m_protocolConfig.serverConfig.fingerprint = protocols::xray::defaultFingerprint;
-        }
-        if (m_protocolConfig.serverConfig.xhttp.uplinkMethod.isEmpty()) {
-            m_protocolConfig.serverConfig.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
-        }
     }
 
     m_originalProtocolConfig = m_protocolConfig;
@@ -301,9 +302,16 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
 {
-    const bool anySettingsChanged =
-            m_protocolConfig.serverConfig.toJson() != m_originalProtocolConfig.serverConfig.toJson();
-    if (anySettingsChanged) {
+    if (!m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig)) {
+        m_protocolConfig.clearClientConfig();
+        return m_protocolConfig;
+    }
+
+    if (m_protocolConfig.serverConfig.toJson() == m_originalProtocolConfig.serverConfig.toJson()) {
+        return m_protocolConfig;
+    }
+
+    if (!m_protocolConfig.regenerateClientConfigFromNative()) {
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
@@ -450,7 +458,7 @@ void XrayConfigModel::resetToDefaults()
 
     beginResetModel();
     m_protocolConfig.serverConfig = amnezia::XrayServerConfig{};
-    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig, true);
     endResetModel();
 
 
@@ -468,8 +476,6 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
     if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
         m_protocolConfig.serverConfig.applyDefaults(false);
     }
-    // Clear client config since server settings changed
-    m_protocolConfig.clearClientConfig();
     endResetModel();
 
 
@@ -529,7 +535,6 @@ QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
 {
-    // Matches splithttp uplink payload placement (packet-up / advanced)
     return { "Body", "Auto" };
 }
 

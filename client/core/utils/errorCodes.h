@@ -37,7 +37,7 @@ namespace amnezia
         ServerLinuxKernelTooOld = 214,
         XrayServerConfigInvalid = 215,
         XrayServerNoVlessClients = 216,
-        XrayRealityKeysReadFailed = 217,
+        XrayKeysReadFailed = 217,
         ServerContainerRuntimeNotSupported = 218,
         ContainerRuntimeServiceNotRunning = 219,
         XrayKeyMigrationFailed = 220,

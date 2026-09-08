@@ -36,7 +36,7 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::XrayServerNoVlessClients):
         errorMessage = QObject::tr("Server error: XRay server has no VLESS clients");
         break;
-    case(ErrorCode::XrayRealityKeysReadFailed):
+    case(ErrorCode::XrayKeysReadFailed):
         errorMessage = QObject::tr("Server error: failed to read XRay Reality keys from the server");
         break;
     case(ErrorCode::XrayTlsNotSupported):

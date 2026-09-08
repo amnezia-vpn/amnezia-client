@@ -279,14 +279,6 @@ PageType {
                             modeDropDown.text = selectedText
                             modeDropDown.closeTriggered()
                         }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpMode) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
                     }
                     Connections {
                         target: XrayConfigModel
@@ -373,14 +365,6 @@ PageType {
                             uplinkMethodDropDown.text = selectedText
                             uplinkMethodDropDown.closeTriggered()
                         }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpUplinkMethod) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
                     }
                     Connections {
                         target: XrayConfigModel
@@ -454,14 +438,6 @@ PageType {
                             sessionPlacementDropDown.text = selectedText
                             sessionPlacementDropDown.closeTriggered()
                         }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpSessionPlacement) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
                     }
                     Connections {
                         target: XrayConfigModel
@@ -516,14 +492,6 @@ PageType {
                             seqPlacementDropDown.text = selectedText
                             seqPlacementDropDown.closeTriggered()
                         }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpSeqPlacement) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
-                        }
                     }
                     Connections {
                         target: XrayConfigModel
@@ -577,14 +545,6 @@ PageType {
                             xhttpUplinkDataPlacement = selectedText
                             uplinkDataPlacementDropDown.text = selectedText
                             uplinkDataPlacementDropDown.closeTriggered()
-                        }
-                        Component.onCompleted: {
-                            for (var i = 0; i < model.count; i++) {
-                                if (model.get(i).name === xhttpUplinkDataPlacement) {
-                                    selectedIndex = i;
-                                    break
-                                }
-                            }
                         }
                     }
                     Connections {
@@ -650,7 +610,7 @@ PageType {
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("scMaxBufferedPosts")
-                    hintText: qsTr("Max buffered POSTs. Range: 0–2147483647.")
+                    hintText: qsTr("Max buffered POSTs. Range: 0–2147483647. Leave empty to let Xray decide.")
                     textField.text: xhttpScMaxBufferedPosts
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }

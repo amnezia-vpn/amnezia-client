@@ -88,7 +88,6 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             srv.sni = protocols::xray::defaultSni;
             srv.alpn = protocols::xray::defaultAlpn;
             srv.fingerprint = protocols::xray::defaultFingerprint;
-            srv.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
             config.protocolConfig = xrayConfig;
             break;
         }

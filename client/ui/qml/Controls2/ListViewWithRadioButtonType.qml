@@ -27,6 +27,27 @@ ListViewType {
     width: rootWidth
     height: root.contentItem.height
 
+    function indexOfValue(value) {
+        if (value === "" || !root.model) {
+            return -1
+        }
+        for (var i = 0; i < root.model.count; i++) {
+            if (root.model.get(i).name === value) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    function syncSelectionToCurrentValue() {
+        if (root.currentValue !== "") {
+            root.selectedIndex = root.indexOfValue(root.currentValue)
+        }
+    }
+
+    onCurrentValueChanged: root.syncSelectionToCurrentValue()
+    onCountChanged: root.syncSelectionToCurrentValue()
+
     ButtonGroup {
         id: buttonGroup
     }
@@ -133,7 +154,7 @@ ListViewType {
             }
 
             ButtonGroup.group: buttonGroup
-            checked: root.currentValue !== "" ? (name === root.currentValue) : (root.selectedIndex === index)
+            checked: root.selectedIndex === index
 
             onClicked: {
                 root.selectedIndex = index

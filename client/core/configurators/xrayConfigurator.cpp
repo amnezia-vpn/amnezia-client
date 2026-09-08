@@ -37,24 +37,10 @@ namespace {
     // Desktop applies this in XrayProtocol::start(); iOS/Android pass JSON straight to libxray — same fixes here.
     void sanitizeXrayNativeConfig(amnezia::ProtocolConfig &pc)
     {
-        QString c = pc.nativeConfig();
-        if (c.isEmpty()) {
-            return;
-        }
-        bool changed = false;
-        if (c.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
-            c.replace(QLatin1String("Mozilla/5.0"), QString::fromLatin1(amnezia::protocols::xray::defaultFingerprint),
-                      Qt::CaseInsensitive);
-            changed = true;
-        }
-        const QString legacyListen = QString::fromLatin1(amnezia::protocols::xray::defaultLocalAddr);
-        const QString listenOk = QString::fromLatin1(amnezia::protocols::xray::defaultLocalListenAddr);
-        if (c.contains(legacyListen)) {
-            c.replace(legacyListen, listenOk);
-            changed = true;
-        }
-        if (changed) {
-            pc.setNativeConfig(c);
+        const QString before = pc.nativeConfig();
+        const QString after = amnezia::sanitizeNativeConfig(before);
+        if (after != before) {
+            pc.setNativeConfig(after);
         }
     }
 
@@ -112,12 +98,17 @@ ErrorCode XrayConfigurator::readRealityKeyFiles(const DockerContainer container,
             if (fileError == ErrorCode::NoError && !out.isEmpty()) {
                 return ErrorCode::NoError;
             }
+            if (fileError != ErrorCode::NoError) {
+                logger.error() << "Xray readRealityKeyFiles: ssh failed path=" << path
+                               << "error=" << static_cast<int>(fileError);
+                return fileError;
+            }
             if (attempt < 2) {
                 QThread::msleep(500);
             }
         }
-        logger.error() << "Xray readRealityKeyFiles: failed path=" << path;
-        return ErrorCode::XrayRealityKeysReadFailed;
+        logger.error() << "Xray readRealityKeyFiles: key file empty path=" << path;
+        return ErrorCode::XrayKeysReadFailed;
     };
 
     ErrorCode errorCode = readKeyFile(QString::fromLatin1(amnezia::protocols::xray::PublicKeyPath), outPublicKey);
@@ -261,12 +252,17 @@ ErrorCode XrayConfigurator::readContainerKeyFile(DockerContainer container, cons
         if (fileError == ErrorCode::NoError && !out.isEmpty()) {
             return ErrorCode::NoError;
         }
+        if (fileError != ErrorCode::NoError) {
+            logger.error() << "Xray readContainerKeyFile: ssh failed path=" << path
+                           << "error=" << static_cast<int>(fileError);
+            return fileError;
+        }
         if (attempt < 2) {
             QThread::msleep(500);
         }
     }
-    logger.error() << "Xray readContainerKeyFile: failed path=" << path;
-    return ErrorCode::XrayRealityKeysReadFailed;
+    logger.error() << "Xray readContainerKeyFile: key file empty path=" << path;
+    return ErrorCode::XrayKeysReadFailed;
 }
 
 ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &credentials, DockerContainer container,
@@ -639,8 +635,8 @@ XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCrede
     inputs.tlsPinnedPeerCertSha256 = tlsPin;
 
     XrayClientConfig clientConfig;
-    clientConfig.nativeConfig = QString::fromUtf8(
-            QJsonDocument(protocolConfig.toClientOutboundJson(inputs)).toJson(QJsonDocument::Compact));
+    const QJsonObject clientOutbound = protocolConfig.toClientOutboundJson(inputs);
+    clientConfig.nativeConfig = QString::fromUtf8(QJsonDocument(clientOutbound).toJson(QJsonDocument::Compact));
     clientConfig.localPort = QString::fromLatin1(amnezia::protocols::xray::defaultLocalProxyPort);
     clientConfig.id = clientId;
     protocolConfig.setClientConfig(clientConfig);

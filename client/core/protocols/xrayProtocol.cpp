@@ -1,5 +1,6 @@
 #include "xrayProtocol.h"
 
+#include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -87,22 +88,7 @@ ErrorCode XrayProtocol::start()
         return ErrorCode::XrayExecutableCrashed;
     }
 
-    // Fix fingerprint: old configs may contain "Mozilla/5.0" which xray-core rejects.
-    // Replace with the correct default at runtime so stale stored configs still work.
-    if (xrayConfigStr.contains("Mozilla/5.0", Qt::CaseInsensitive)) {
-        xrayConfigStr.replace("Mozilla/5.0", amnezia::protocols::xray::defaultFingerprint,
-                              Qt::CaseInsensitive);
-        qDebug() << "XrayProtocol: patched legacy fingerprint to"
-                 << amnezia::protocols::xray::defaultFingerprint;
-    }
-
-    // Fix inbound listen address: old configs may use "10.33.0.2" which doesn't exist
-    // until TUN is created. xray must listen on 127.0.0.1 so tun2socks can connect.
-    if (xrayConfigStr.contains(amnezia::protocols::xray::defaultLocalAddr)) {
-        xrayConfigStr.replace(amnezia::protocols::xray::defaultLocalAddr,
-                              amnezia::protocols::xray::defaultLocalListenAddr);
-        qDebug() << "XrayProtocol: patched legacy inbound listen address to 127.0.0.1";
-    }
+    xrayConfigStr = amnezia::sanitizeNativeConfig(xrayConfigStr);
 
     return IpcClient::withInterface(
             [&](QSharedPointer<IpcInterfaceReplica> iface) {

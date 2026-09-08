@@ -136,14 +136,6 @@ PageType {
                         placementDropDown.text = selectedText
                         placementDropDown.closeTriggered()
                     }
-                    Component.onCompleted: {
-                        for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).name === xPaddingPlacement) {
-                                selectedIndex = i;
-                                break
-                            }
-                        }
-                    }
                 }
                 Connections {
                     target: XrayConfigModel
@@ -180,14 +172,6 @@ PageType {
                         xPaddingMethod = selectedText
                         methodDropDown.text = selectedText
                         methodDropDown.closeTriggered()
-                    }
-                    Component.onCompleted: {
-                        for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).name === xPaddingMethod) {
-                                selectedIndex = i;
-                                break
-                            }
-                        }
                     }
                 }
                 Connections {

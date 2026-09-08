@@ -64,6 +64,8 @@ namespace amnezia
             constexpr char defaultLocalAddr[] = "10.33.0.2";
             constexpr char defaultLocalListenAddr[] = "127.0.0.1";
 
+            constexpr int settingsVersionCurrent = 2;
+
             constexpr char defaultSecurity[] = "reality";
             constexpr char defaultFlow[] = "xtls-rprx-vision";
             constexpr char defaultTransport[] = "raw";
@@ -105,6 +107,9 @@ namespace amnezia
             constexpr char inbounds[] = "inbounds";
             constexpr char settings[] = "settings";
             constexpr char streamSettings[] = "streamSettings";
+            constexpr char tag[] = "tag";
+            constexpr char sockopt[] = "sockopt";
+            constexpr char dialerProxy[] = "dialerProxy";
             constexpr char vnext[] = "vnext";
             constexpr char users[] = "users";
             constexpr char servers[] = "servers";

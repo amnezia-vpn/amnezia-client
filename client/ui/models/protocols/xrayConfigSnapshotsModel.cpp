@@ -191,8 +191,7 @@ void XrayConfigSnapshotsModel::createFromCurrentModel()
     if (!m_xrayConfigModel) {
         return;
     }
-    const amnezia::XrayProtocolConfig current = m_xrayConfigModel->getProtocolConfig();
-    createFromCurrent(current.serverConfig);
+    createFromCurrent(m_xrayConfigModel->pendingServerConfig(QString()));
 }
 
 void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
