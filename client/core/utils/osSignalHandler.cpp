@@ -1,10 +1,7 @@
 #include "osSignalHandler.h"
 
 #include <QCoreApplication>
-#include <QMetaObject>
 #include <QSocketNotifier>
-
-#include "../amneziaApplication.h"
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     #include <pthread.h>
@@ -17,43 +14,10 @@
     #include <unistd.h>
 #endif
 
-#ifdef Q_OS_WIN
-    #include <QAbstractNativeEventFilter>
-
-    #include <windows.h>
-#endif
-
 namespace
 {
 
     static bool initialized = false;
-
-#ifdef Q_OS_WIN
-    class WindowsCloseFilter : public QAbstractNativeEventFilter
-    {
-    public:
-        bool nativeEventFilter(const QByteArray &eventType, void *message, qintptr *result) override
-        {
-            MSG *msg = static_cast<MSG *>(message);
-
-            switch (msg->message) {
-            case WM_CLOSE: {
-                const HWND active = GetActiveWindow();
-                const HWND self = msg->hwnd;
-                if (active != self) {
-                    AmneziaApplication *app = qobject_cast<AmneziaApplication *>(QCoreApplication::instance());
-                    if (app) {
-                        QMetaObject::invokeMethod(app, "forceQuit", Qt::QueuedConnection);
-                    }
-                }
-            }
-            }
-            return false;
-        };
-    };
-
-    static WindowsCloseFilter *windowsFilter = nullptr;
-#endif
 
 #if defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)
     static int signalFd = -1;
@@ -159,14 +123,6 @@ namespace
             signalPipe[1] = -1;
         }
 #endif
-
-#ifdef Q_OS_WIN
-        if (windowsFilter) {
-            QCoreApplication::instance()->removeNativeEventFilter(windowsFilter);
-            delete windowsFilter;
-            windowsFilter = nullptr;
-        }
-#endif
     }
 }
 
@@ -183,11 +139,6 @@ void OsSignalHandler::setup()
 
 #if (defined(Q_OS_LINUX) && !defined(Q_OS_ANDROID)) || defined(Q_OS_MACOS)
     setupUnixSignalHandler();
-#endif
-
-#ifdef Q_OS_WIN
-    windowsFilter = new WindowsCloseFilter();
-    QCoreApplication::instance()->installNativeEventFilter(windowsFilter);
 #endif
 
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, [] { cleanupUnixSignalHandler(); });
