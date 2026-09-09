@@ -583,6 +583,18 @@ jobs:
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
 
+    - name: 'Inspect test runtime dependencies'
+      shell: bash
+      run: |
+        echo "=== tests ==="
+        find deploy/build/client/tests -maxdepth 2 -type f -print
+
+        echo "=== OpenSSL candidates ==="
+        find deploy/build -name 'libssl*.dylib' -o -name 'libcrypto*.dylib'
+
+        echo "=== test_server_rename dependencies ==="
+        otool -L deploy/build/client/tests/test_server_rename
+
     - name: 'Upload macOS test build'
       uses: actions/upload-artifact@v7
       with:
@@ -1233,10 +1245,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir deploy\build\client\tests ^
-                --output-on-failure ^
-                -VV ^
-                -R "${{ matrix.filter }}"
+          ctest --test-dir deploy\build\client\tests -C Debug -R "${{ matrix.filter }}" --output-on-failure
 
 # ------------------------------------------------------
 
