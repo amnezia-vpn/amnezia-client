@@ -58,3 +58,5 @@ endif()
 if(NOT CLIENT_NOTIFICATION_IDENTIFIER)
     set(CLIENT_NOTIFICATION_IDENTIFIER "${CLIENT_TS_PREFIX}" CACHE STRING "Local notification request identifier")
 endif()
+
+set(CLIENT_ENABLE_APP_UPDATES ON CACHE BOOL "Enable the application updater")

@@ -129,6 +129,10 @@ void UpdateController::setUpdateCheckRunning(bool running)
 
 void UpdateController::checkForUpdates()
 {
+#if !CLIENT_ENABLE_APP_UPDATES
+    return;
+#endif
+
     if (m_updateCheckRunning || !m_appSettingsRepository) {
         return;
     }
