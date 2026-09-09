@@ -1,0 +1,28 @@
+name: Mirroring to Codeberg and Gitlab
+
+on:
+  push:
+   branches:
+      - '*'
+   tags:
+      - '*'
+jobs:
+  codeberg_mirror:
+   runs-on: ubuntu-latest
+   steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+         fetch-depth: 0
+
+      - name: Mirror to Codeberg
+        run: |
+          CODEBERG_URL="https://${{ secrets.CODEBERG_TOKEN }}@codeberg.org/av-amn/amnezia-client.git"
+          git push --prune --force "$CODEBERG_URL" "refs/remotes/origin/*:refs/heads/*"
+          git push --prune --force "$CODEBERG_URL" "refs/tags/*:refs/tags/*"
+      - name: Mirror to Gitlab
+        run: |
+          GITLAB_URL="https://av-amn:${{ secrets.GITLAB_TOKEN }}gitlab.com/amnezia-group1/amnezia-project.git"
+          git push --prune --force "$GITLAB_URL" "refs/remotes/origin/*:refs/heads/*" -o ci.skip
+          git push --prune --force "$GITLAB_URL" "refs/tags/*:refs/tags/*" -o ci.skip
+
