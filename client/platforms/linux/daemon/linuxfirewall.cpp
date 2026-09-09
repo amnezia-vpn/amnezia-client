@@ -486,8 +486,6 @@ int LinuxFirewall::execute(const QString &command, bool ignoreErrors)
     auto err = p.readAllStandardError().trimmed();
     if ((exitCode != 0 || !err.isEmpty()) && !ignoreErrors)
         logger.warning()  << "(" << exitCode << ") $ " << command;
-    else if (false)
-        logger.debug() << "(" << exitCode << ") $ " << command;
     if (!out.isEmpty())
         logger.info() << out;
     if (!err.isEmpty())
