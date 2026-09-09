@@ -1,11 +1,43 @@
 #include "languageModel.h"
 
+namespace LanguageSettings
+{
+    AvailableLanguageEnum localeToLanguage(const QLocale &locale)
+    {
+        for (const auto &entry : availableLanguages) {
+            if (entry.locale == locale.language()) {
+                return entry.language;
+            }
+        }
+        return AvailableLanguageEnum::English;
+    }
+
+    QLocale languageToLocale(const AvailableLanguageEnum language)
+    {
+        for (const auto &entry : availableLanguages) {
+            if (entry.language == language) {
+                return entry.locale;
+            }
+        }
+        return QLocale::English;
+    }
+
+    QString nativeLanguageName(const AvailableLanguageEnum language)
+    {
+        for (const auto &entry : availableLanguages) {
+            if (entry.language == language) {
+                return QString::fromUtf8(entry.nativeName);
+            }
+        }
+        return {};
+    }
+}
+
 LanguageModel::LanguageModel(QObject *parent) : QAbstractListModel(parent)
 {
-    QMetaEnum metaEnum = QMetaEnum::fromType<LanguageSettings::AvailableLanguageEnum>();
-    for (int i = 0; i < metaEnum.keyCount(); i++) {
-        m_availableLanguages.push_back(LanguageModelData { getLocalLanguageName(static_cast<LanguageSettings::AvailableLanguageEnum>(i)),
-                                                           static_cast<LanguageSettings::AvailableLanguageEnum>(i) });
+    for (const auto &entry : LanguageSettings::availableLanguages) {
+        m_availableLanguages.push_back(
+                LanguageModelData { LanguageSettings::nativeLanguageName(entry.language), entry.language });
     }
 }
 
@@ -33,25 +65,4 @@ QHash<int, QByteArray> LanguageModel::roleNames() const
     roles[NameRole] = "languageName";
     roles[IndexRole] = "languageIndex";
     return roles;
-}
-
-QString LanguageModel::getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language)
-{
-    QString strLanguage("");
-    switch (language) {
-    case LanguageSettings::AvailableLanguageEnum::English: strLanguage = "English"; break;
-    case LanguageSettings::AvailableLanguageEnum::Russian: strLanguage = "Русский"; break;
-    case LanguageSettings::AvailableLanguageEnum::Ukrainian: strLanguage = "Українська"; break;
-    case LanguageSettings::AvailableLanguageEnum::China_cn: strLanguage = "\347\256\200\344\275\223\344\270\255\346\226\207"; break;
-    case LanguageSettings::AvailableLanguageEnum::Persian: strLanguage = "فارسی"; break;
-    case LanguageSettings::AvailableLanguageEnum::Arabic: strLanguage = "العربية"; break;
-    case LanguageSettings::AvailableLanguageEnum::Burmese: strLanguage = "မြန်မာဘာသာ"; break;
-    case LanguageSettings::AvailableLanguageEnum::Urdu: strLanguage = "اُرْدُوْ"; break;
-    case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
-    case LanguageSettings::AvailableLanguageEnum::Spanish: strLanguage = "Español"; break;
-    case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
-    default: break;
-    }
-
-    return strLanguage;
 }

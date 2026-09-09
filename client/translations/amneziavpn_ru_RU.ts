@@ -5647,7 +5647,7 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
-        <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
         <translation>Логирование включено. Обратите внимание, что через 14 дней оно будет автоматически отключено, а все файлы логов будут удалены.</translation>
     </message>
 </context>

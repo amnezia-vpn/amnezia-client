@@ -36,9 +36,6 @@ signals:
     void translationsUpdated();
 
 private:
-    QString getLocalLanguageName(const LanguageSettings::AvailableLanguageEnum language) const;
-    QLocale languageEnumToLocale(const LanguageSettings::AvailableLanguageEnum language) const;
-
     SettingsController* m_settingsController;
     LanguageModel* m_languageModel;
 };

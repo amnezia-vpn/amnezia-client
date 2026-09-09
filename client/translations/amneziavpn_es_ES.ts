@@ -5643,7 +5643,7 @@ Cree una a partir de los ajustes actuales.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
-        <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
+        <source>Logging is enabled. Note that logs will be automatically disabled after 14 days, and all log files will be deleted.</source>
         <translation>El registro está habilitado. Ten en cuenta que los registros se desactivarán automáticamente después de 14 días y todos los archivos de registro serán eliminados.</translation>
     </message>
 </context>
