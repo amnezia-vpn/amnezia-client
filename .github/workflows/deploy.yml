@@ -4,13 +4,6 @@ on:
   push:
     branches:
       - '**'
-#  pull_request:
-#  workflow_dispatch:
-#    inputs:
-#      test_filter:
-#        description: 'CTest -R filter (leave empty to run all tests)'
-#        required: false
-#        default: 'OpenSSLLibraryTest'
 
 # Self-hosted server tests (SelfHostedServerSetup, MultipleExports) install and
 # remove docker containers on a single shared VPS: two workflow runs executing
@@ -157,6 +150,13 @@ jobs:
         QT_INSTALL_DIR: ${{ runner.temp }}
       run: deploy/build.sh --generator Ninja --installer all
 
+    - name: 'Upload Linux test build'
+      uses: actions/upload-artifact@v7
+      with:
+        name: linux-build
+        path: build
+        retention-days: 7
+
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
@@ -282,6 +282,13 @@ jobs:
       run: |
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
+
+    - name: 'Upload Windows test build'
+      uses: actions/upload-artifact@v7
+      with:
+        name: windows-build
+        path: build
+        retention-days: 7
 
     - name: 'Upload WIX installer artifact'
       uses: actions/upload-artifact@v7
@@ -575,6 +582,13 @@ jobs:
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
+
+    - name: 'Upload macOS test build'
+      uses: actions/upload-artifact@v7
+      with:
+        name: macos-build
+        path: build
+        retention-days: 7
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
