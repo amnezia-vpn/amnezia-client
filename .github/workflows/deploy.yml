@@ -157,6 +157,26 @@ jobs:
         path: build
         retention-days: 7
 
+    - name: 'Inspect build directories'
+      shell: bash
+      run: |
+        echo "=== Repository root ==="
+        find . -maxdepth 2 -type d | sort
+
+        echo "=== build ==="
+        if [ -d build ]; then
+          find build -maxdepth 4 -type f | sort
+        else
+          echo "build does not exist"
+        fi
+
+        echo "=== deploy/build ==="
+        if [ -d deploy/build ]; then
+          find deploy/build -maxdepth 4 -type f | sort
+        else
+          echo "deploy/build does not exist"
+        fi
+
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
       with:
@@ -282,6 +302,26 @@ jobs:
       run: |
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
+
+    - name: 'Inspect build directories'
+      shell: powershell
+      run: |
+        Write-Host "=== Repository root ==="
+        Get-ChildItem -Force
+
+        Write-Host "=== deploy/build ==="
+        if (Test-Path deploy/build) {
+          Get-ChildItem deploy/build -Recurse -Force | Select-Object FullName
+        } else {
+          Write-Host "deploy/build does not exist"
+        }
+
+        Write-Host "=== build ==="
+        if (Test-Path build) {
+          Get-ChildItem build -Recurse -Force | Select-Object FullName
+        } else {
+          Write-Host "build does not exist"
+        }
 
     - name: 'Upload Windows test build'
       uses: actions/upload-artifact@v7
@@ -582,6 +622,26 @@ jobs:
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
+
+    - name: 'Inspect build directories'
+      shell: bash
+      run: |
+        echo "=== Repository root ==="
+        find . -maxdepth 2 -type d | sort
+
+        echo "=== build ==="
+        if [ -d build ]; then
+          find build -maxdepth 4 -type f | sort
+        else
+          echo "build does not exist"
+        fi
+
+        echo "=== deploy/build ==="
+        if [ -d deploy/build ]; then
+          find deploy/build -maxdepth 4 -type f | sort
+        else
+          echo "deploy/build does not exist"
+        fi
 
     - name: 'Upload macOS test build'
       uses: actions/upload-artifact@v7
