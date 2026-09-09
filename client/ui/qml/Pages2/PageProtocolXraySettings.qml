@@ -42,9 +42,6 @@ PageType {
     Connections {
         target: InstallController
 
-        // Lives here rather than on PageStart because it is xray-specific. Every xray settings page
-        // that saves is pushed on top of this one, and StackView keeps the pages below alive, so the
-        // handler is still connected whichever of them started the update.
         function onXrayKeyMigrationNeedsConfirm(message) {
             PageController.showBusyIndicator(false)
             showQuestionDrawer(
