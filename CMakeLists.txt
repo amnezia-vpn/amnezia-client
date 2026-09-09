@@ -20,6 +20,8 @@ project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         HOMEPAGE_URL "https://amnezia.org/"
 )
 
+include(CTest)
+
 # trigger conan to kick off `conan install` globally
 find_package(OpenSSL REQUIRED)
 if (PREBUILTS_ONLY)
@@ -75,6 +77,10 @@ endif()
 
 
 add_subdirectory(client)
+
+if(BUILD_TESTING AND NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
+    add_subdirectory(tests)
+endif()
 
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(service)
