@@ -154,7 +154,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: linux-build
-        path: build/client/tests
+        path: deploy/build/client/tests
         retention-days: 7
 
     - name: 'Upload installer artifact'
@@ -287,7 +287,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: windows-build
-        path: build/client/tests
+        path: deploy/build/client/tests
         retention-days: 7
 
     - name: 'Upload WIX installer artifact'
@@ -587,7 +587,7 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: macos-build
-        path: build/client/tests
+        path: deploy/build/client/tests
         retention-days: 7
 
     - name: 'Upload installer artifact'
@@ -1128,11 +1128,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-build
-          path: build/client/tests
+          path: deploy/build/client/tests
 
       - name: Restore executable permissions
         run: |
-          find build/tests \
+          find deploy/build/client/tests \
             -maxdepth 1 \
             -type f \
             -name "test_*" \
@@ -1147,7 +1147,7 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
 
           ctest \
-            --test-dir build/client/tests \
+            --test-dir deploy/build/client/tests \
             --output-on-failure \
             -VV \
             -R "^${{ matrix.filter }}$"
@@ -1205,7 +1205,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-build
-          path: build/client/tests
+          path: deploy/build/client/tests
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -1233,7 +1233,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir build\client\tests ^
+          ctest --test-dir deploy\build\client\tests ^
                 --output-on-failure ^
                 -VV ^
                 -R "${{ matrix.filter }}"
@@ -1296,7 +1296,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: macos-build
-          path: build/client/tests
+          path: deploy/build/client/tests
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -1324,7 +1324,7 @@ jobs:
 
       - name: Restore executable permissions
         run: |
-          find build/client/tests \
+          find deploy/build/client/tests \
             -maxdepth 1 \
             -type f \
             -name "test_*" \
@@ -1345,7 +1345,7 @@ jobs:
           fi
 
           ctest \
-            --test-dir build/client/tests \
+            --test-dir deploy/build/client/tests \
             --output-on-failure \
             -VV \
             -R "^${{ matrix.filter }}$"
