@@ -4,7 +4,6 @@ import QtQuick.Layouts
 import QtQuick.Shapes
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import Style 1.0
 
 import "./"
@@ -144,21 +143,6 @@ PageType {
 
         function onWrongInstallationUser(message) {
             onInstallationErrorOccurred(message)
-        }
-
-        function onXrayKeyMigrationNeedsConfirm(message) {
-            PageController.showBusyIndicator(false)
-            showQuestionDrawer(
-                qsTr("Recreate XRay with new keys?"),
-                message,
-                qsTr("Continue"),
-                qsTr("Cancel"),
-                function() {
-                    InstallController.updateServerConfig(ServersUiController.processedServerId,
-                                                         ServersUiController.processedContainerIndex,
-                                                         ProtocolEnum.Xray, true, true)
-                },
-                function() {})
         }
 
         function onUpdateContainerFinished(message, closePage) {
