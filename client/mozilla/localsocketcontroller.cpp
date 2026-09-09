@@ -177,8 +177,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
 
   QJsonArray plainAllowedIP = wgConfig.value(amnezia::configKey::allowedIps).toArray();
   QJsonArray defaultAllowedIP = { "0.0.0.0/0", "::/0" };
+  const bool useOnlyForwardSites = splitTunnelType == 1 && plainAllowedIP.contains("0.0.0.0/0");
 
-  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty()) {
+  if (plainAllowedIP != defaultAllowedIP && !plainAllowedIP.isEmpty() && !useOnlyForwardSites) {
     // Use AllowedIP list from WG config because of higher priority
     for (auto v : plainAllowedIP) {
       QString ipRange = v.toString();
