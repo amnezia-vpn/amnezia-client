@@ -154,28 +154,8 @@ jobs:
       uses: actions/upload-artifact@v7
       with:
         name: linux-build
-        path: build
+        path: build/client/tests
         retention-days: 7
-
-    - name: 'Inspect build directories'
-      shell: bash
-      run: |
-        echo "=== Repository root ==="
-        find . -maxdepth 2 -type d | sort
-
-        echo "=== build ==="
-        if [ -d build ]; then
-          find build -maxdepth 4 -type f | sort
-        else
-          echo "build does not exist"
-        fi
-
-        echo "=== deploy/build ==="
-        if [ -d deploy/build ]; then
-          find deploy/build -maxdepth 4 -type f | sort
-        else
-          echo "deploy/build does not exist"
-        fi
 
     - name: 'Upload installer artifact'
       uses: actions/upload-artifact@v7
@@ -303,31 +283,11 @@ jobs:
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
 
-    - name: 'Inspect build directories'
-      shell: powershell
-      run: |
-        Write-Host "=== Repository root ==="
-        Get-ChildItem -Force
-
-        Write-Host "=== deploy/build ==="
-        if (Test-Path deploy/build) {
-          Get-ChildItem deploy/build -Recurse -Force | Select-Object FullName
-        } else {
-          Write-Host "deploy/build does not exist"
-        }
-
-        Write-Host "=== build ==="
-        if (Test-Path build) {
-          Get-ChildItem build -Recurse -Force | Select-Object FullName
-        } else {
-          Write-Host "build does not exist"
-        }
-
     - name: 'Upload Windows test build'
       uses: actions/upload-artifact@v7
       with:
         name: windows-build
-        path: build
+        path: build/client/tests
         retention-days: 7
 
     - name: 'Upload WIX installer artifact'
@@ -623,31 +583,11 @@ jobs:
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
 
-    - name: 'Inspect build directories'
-      shell: bash
-      run: |
-        echo "=== Repository root ==="
-        find . -maxdepth 2 -type d | sort
-
-        echo "=== build ==="
-        if [ -d build ]; then
-          find build -maxdepth 4 -type f | sort
-        else
-          echo "build does not exist"
-        fi
-
-        echo "=== deploy/build ==="
-        if [ -d deploy/build ]; then
-          find deploy/build -maxdepth 4 -type f | sort
-        else
-          echo "deploy/build does not exist"
-        fi
-
     - name: 'Upload macOS test build'
       uses: actions/upload-artifact@v7
       with:
         name: macos-build
-        path: build
+        path: build/client/tests
         retention-days: 7
 
     - name: 'Upload installer artifact'
@@ -1188,7 +1128,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: linux-build
-          path: build
+          path: build/client/tests
 
       - name: Restore executable permissions
         run: |
@@ -1207,7 +1147,7 @@ jobs:
           export QT_QPA_PLATFORM=offscreen
 
           ctest \
-            --test-dir build/tests \
+            --test-dir build/client/tests \
             --output-on-failure \
             -VV \
             -R "^${{ matrix.filter }}$"
@@ -1265,6 +1205,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-build
+          path: build/client/tests
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -1292,7 +1233,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir build\tests ^
+          ctest --test-dir build\client\tests ^
                 --output-on-failure ^
                 -VV ^
                 -R "${{ matrix.filter }}"
@@ -1355,6 +1296,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: macos-build
+          path: build/client/tests
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -1382,7 +1324,7 @@ jobs:
 
       - name: Restore executable permissions
         run: |
-          find build/tests \
+          find build/client/tests \
             -maxdepth 1 \
             -type f \
             -name "test_*" \
@@ -1403,7 +1345,7 @@ jobs:
           fi
 
           ctest \
-            --test-dir build/tests \
+            --test-dir build/client/tests \
             --output-on-failure \
             -VV \
             -R "^${{ matrix.filter }}$"
