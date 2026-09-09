@@ -283,6 +283,12 @@ jobs:
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
 
+    - name: 'Inspect Windows build tree'
+      shell: powershell
+      run: |
+        Get-ChildItem deploy/build -Recurse -Filter "test_server_rename.exe" |
+          Select-Object -ExpandProperty FullName
+
     - name: 'Upload Windows test build'
       uses: actions/upload-artifact@v7
       with:
@@ -583,6 +589,26 @@ jobs:
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
 
+    - name: 'Prepare macOS test runtime'
+      shell: bash
+      run: |
+        FRAMEWORKS_DIR=$(find deploy/build/_CPack_Packages \
+          -type d \
+          -path '*/AmneziaVPN.app/Contents/Frameworks' \
+          -print -quit)
+
+        echo "Frameworks directory: $FRAMEWORKS_DIR"
+
+        mkdir -p deploy/build/client/tests/openssl
+
+        cp "$FRAMEWORKS_DIR/libssl.3.dylib" \
+           deploy/build/client/tests/openssl/
+
+        cp "$FRAMEWORKS_DIR/libcrypto.3.dylib" \
+           deploy/build/client/tests/openssl/
+
+        ls -la deploy/build/client/tests/openssl
+
     - name: 'Upload macOS test build'
       uses: actions/upload-artifact@v7
       with:
@@ -596,24 +622,6 @@ jobs:
         path: deploy/build/AmneziaVPN_*_macos_x64.pkg
         archive: false
         retention-days: 7
-
-    - name: 'Prepare macOS test runtime'
-      shell: bash
-      run: |
-        FRAMEWORKS_DIR=$(find deploy/build/_CPack_Packages \
-          -path '*/AmneziaVPN.app/Contents/Frameworks' \
-          -type d \
-          -print -quit)
-
-        echo "Frameworks: $FRAMEWORKS_DIR"
-
-        mkdir -p deploy/build/client/tests/openssl
-
-        cp "$FRAMEWORKS_DIR/libssl.3.dylib" \
-           deploy/build/client/tests/openssl/
-
-        cp "$FRAMEWORKS_DIR/libcrypto.3.dylib" \
-           deploy/build/client/tests/openssl/
 
 # ------------------------------------------------------
 
@@ -1241,11 +1249,6 @@ jobs:
         with:
           arch: x64
 
-      - name: 'Check test executable'
-        shell: cmd
-        run: |
-          dir /s /b deploy\build\client\tests\test_server_rename.exe
-
       - name: Run tests
         shell: cmd
         run: |
@@ -1256,7 +1259,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir deploy\build\client\tests -R "${{ matrix.filter }}" --output-on-failure
+          ctest --test-dir deploy\build\client\tests -C Release -R "${{ matrix.filter }}" --output-on-failure
 
 # ------------------------------------------------------
 
@@ -1353,22 +1356,15 @@ jobs:
       - name: Run tests
         shell: bash
         run: |
-          QT_ROOT="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/macos"
+          QT_ROOT="$RUNNER_TEMP/Qt/$QT_VERSION/macos"
 
-          export DYLD_LIBRARY_PATH="$PWD/build/openssl:$QT_ROOT/lib:${DYLD_LIBRARY_PATH:-}"
+          export DYLD_LIBRARY_PATH="$PWD/deploy/build/client/tests/openssl:$QT_ROOT/lib:$DYLD_LIBRARY_PATH"
+
           export QT_QPA_PLATFORM=offscreen
 
-          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH"
-
-          if [ -d "build/openssl" ]; then
-            ls -la build/openssl
-          fi
-
-          ctest \
-            --test-dir deploy/build/client/tests \
-            --output-on-failure \
-            -VV \
-            -R "^${{ matrix.filter }}$"
+          ctest --test-dir deploy/build/client/tests \
+              -R "${{ matrix.filter }}" \
+              --output-on-failure
 
 # ------------------------------------------------------
 
