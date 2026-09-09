@@ -7,9 +7,13 @@
 #include <errno.h>
 #include <net/route.h>
 
+#include <algorithm>
+
+#include <QAbstractSocket>
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
+#include <QHostAddress>
 #include <QLocalSocket>
 #include <QTimer>
 
@@ -182,6 +186,12 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
       if (!config.m_secondaryDnsServer.isEmpty()) {
           params.dnsServers.append(config.m_secondaryDnsServer);
       }
+      const bool hasIpv6TunnelRoute = std::any_of(config.m_allowedIPAddressRanges.begin(),
+                                                  config.m_allowedIPAddressRanges.end(),
+                                                  [](const IPAddress &ip) {
+        return ip.type() == QAbstractSocket::IPv6Protocol;
+      });
+      params.blockIPv6 = config.m_deviceIpv6Address.isEmpty() || !hasIpv6TunnelRoute;
 
       if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
           params.blockAll = true;
@@ -248,9 +258,9 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   if (!config.m_serverPskKey.isNull()) {
     out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   }
-  if (!config.m_serverIpv4AddrIn.isNull()) {
+  if (!config.m_serverIpv4AddrIn.isEmpty()) {
     out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-  } else if (!config.m_serverIpv6AddrIn.isNull()) {
+  } else if (!config.m_serverIpv6AddrIn.isEmpty()) {
     out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
   } else {
     logger.warning() << "Failed to create peer with no endpoints";
@@ -269,8 +279,12 @@ bool WireguardUtilsMacos::updatePeer(const InterfaceConfig& config) {
   // Exclude the server address, except for multihop exit servers.
   if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
       (m_rtmonitor != nullptr)) {
-    m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    if (!QHostAddress(config.m_serverIpv4AddrIn).isNull()) {
+      m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+    }
+    if (!QHostAddress(config.m_serverIpv6AddrIn).isNull()) {
+      m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    }
   }
 
   int err = uapiErrno(uapiCommand(message));
@@ -287,8 +301,12 @@ bool WireguardUtilsMacos::deletePeer(const InterfaceConfig& config) {
   // Clear exclustion routes for this peer.
   if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
       (m_rtmonitor != nullptr)) {
-    m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    if (!QHostAddress(config.m_serverIpv4AddrIn).isNull()) {
+      m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+    }
+    if (!QHostAddress(config.m_serverIpv6AddrIn).isNull()) {
+      m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    }
   }
 
   QString message;
@@ -514,7 +532,7 @@ void WireguardUtilsMacos::applyFirewallRules(FirewallParams& params)
                                 QStringLiteral("blocknets"), params.blockAddrs);
 
   MacOSFirewall::setAnchorEnabled(QStringLiteral("200.allowVPN"), true);
-  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
+  MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), params.blockIPv6);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("290.allowDHCP"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
   MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);

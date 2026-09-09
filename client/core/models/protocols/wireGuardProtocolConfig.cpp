@@ -32,6 +32,12 @@ QJsonObject WireGuardServerConfig::toJson() const
     if (!subnetCidr.isEmpty()) {
         obj[configKey::subnetCidr] = subnetCidr;
     }
+    if (!subnetIpv6Address.isEmpty()) {
+        obj[configKey::subnetIpv6Address] = subnetIpv6Address;
+    }
+    if (!subnetIpv6Cidr.isEmpty()) {
+        obj[configKey::subnetIpv6Cidr] = subnetIpv6Cidr;
+    }
     
     if (isThirdPartyConfig) {
         obj[configKey::isThirdPartyConfig] = isThirdPartyConfig;
@@ -49,6 +55,8 @@ WireGuardServerConfig WireGuardServerConfig::fromJson(const QJsonObject& json)
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
     config.subnetMask = json.value(configKey::subnetMask).toString();
     config.subnetCidr = json.value(configKey::subnetCidr).toString();
+    config.subnetIpv6Address = json.value(configKey::subnetIpv6Address).toString();
+    config.subnetIpv6Cidr = json.value(configKey::subnetIpv6Cidr).toString();
     
     config.isThirdPartyConfig = json.value(configKey::isThirdPartyConfig).toBool(false);
     
@@ -57,7 +65,8 @@ WireGuardServerConfig WireGuardServerConfig::fromJson(const QJsonObject& json)
 
 bool WireGuardServerConfig::hasEqualServerSettings(const WireGuardServerConfig& other) const
 {
-    return subnetAddress == other.subnetAddress && port == other.port;
+    return subnetAddress == other.subnetAddress && subnetIpv6Address == other.subnetIpv6Address &&
+           subnetIpv6Cidr == other.subnetIpv6Cidr && port == other.port;
 }
 
 QJsonObject WireGuardClientConfig::toJson() const
@@ -75,6 +84,9 @@ QJsonObject WireGuardClientConfig::toJson() const
     }
     if (!clientIp.isEmpty()) {
         obj[configKey::clientIp] = clientIp;
+    }
+    if (!clientIpv6.isEmpty()) {
+        obj[configKey::clientIpv6] = clientIpv6;
     }
     if (!clientPrivateKey.isEmpty()) {
         obj[configKey::clientPrivKey] = clientPrivateKey;
@@ -127,6 +139,7 @@ WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
     config.hostName = json.value(configKey::hostName).toString();
     config.port = json.value(configKey::port).toInt(0);
     config.clientIp = json.value(configKey::clientIp).toString();
+    config.clientIpv6 = json.value(configKey::clientIpv6).toString();
     config.clientPrivateKey = json.value(configKey::clientPrivKey).toString();
     config.clientPublicKey = json.value(configKey::clientPubKey).toString();
     config.serverPublicKey = json.value(configKey::serverPubKey).toString();
@@ -197,4 +210,3 @@ void WireGuardProtocolConfig::clearClientConfig()
 }
 
 } // namespace amnezia
-

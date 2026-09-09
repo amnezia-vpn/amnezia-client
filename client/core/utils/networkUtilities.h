@@ -18,6 +18,7 @@ public:
     static bool checkIpSubnetFormat(const QString &ip);
     static bool checkIpv6Enabled();
     static QPair<QString, QNetworkInterface> getGatewayAndIface();
+    static QPair<QString, QNetworkInterface> getIpv6GatewayAndIface();
     // Returns the Interface Index that could Route to dst
     static int AdapterIndexTo(const QHostAddress& dst);
 

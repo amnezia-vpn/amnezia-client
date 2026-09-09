@@ -231,8 +231,25 @@ bool ServersUiController::isDefaultServerDefaultContainerHasSplitTunneling() con
         auto hasSplitTunnelingFromAllowedIps = [](const QStringList& allowedIps, const QString& nativeConfig) -> bool {
             bool hasSplitTunneling = !allowedIps.isEmpty() && !allowedIps.contains("0.0.0.0/0");
             if (!hasSplitTunneling && !nativeConfig.isEmpty()) {
-                hasSplitTunneling = nativeConfig.contains("AllowedIPs") 
-                    && !nativeConfig.contains("AllowedIPs = 0.0.0.0/0, ::/0");
+                const QStringList nativeConfigLines = nativeConfig.split("\n");
+                for (const QString &line : nativeConfigLines) {
+                    if (!line.trimmed().startsWith("AllowedIPs")) {
+                        continue;
+                    }
+                    const QStringList parts = line.split("=");
+                    if (parts.size() < 2) {
+                        continue;
+                    }
+                    const QStringList routes = parts.at(1).split(",", Qt::SkipEmptyParts);
+                    for (const QString &route : routes) {
+                        const QString trimmedRoute = route.trimmed();
+                        if (trimmedRoute != "0.0.0.0/0" && trimmedRoute != "::/0") {
+                            hasSplitTunneling = true;
+                            break;
+                        }
+                    }
+                    break;
+                }
             }
             return hasSplitTunneling;
         };
@@ -590,4 +607,3 @@ bool ServersUiController::listHasServersFromGatewayApi() const
 {
     return descriptionsHaveGatewayServers(m_orderedServerDescriptions);
 }
-

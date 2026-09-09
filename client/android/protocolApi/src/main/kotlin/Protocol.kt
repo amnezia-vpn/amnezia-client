@@ -63,6 +63,7 @@ abstract class Protocol {
 
         for (i in 0 until splitTunnelSites.length()) {
             val address = InetNetwork.parse(splitTunnelSites.getString(i))
+            if (address.isIpv6 && addresses.none { it.isIpv6 }) continue
             addressHandlerFunc(address)
         }
     }

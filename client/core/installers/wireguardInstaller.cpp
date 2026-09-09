@@ -9,8 +9,32 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/selfhosted/sshSession.h"
 
+#include <QAbstractSocket>
+#include <QHostAddress>
+
 using namespace amnezia;
 using namespace ProtocolUtils;
+
+namespace
+{
+void parseInterfaceAddresses(const QString &addressValue, WireGuardServerConfig &serverConfig)
+{
+    const QStringList addresses = addressValue.split(",", Qt::SkipEmptyParts);
+    for (const QString &addressWithPrefix : addresses) {
+        const QString trimmed = addressWithPrefix.trimmed();
+        const QString address = trimmed.section("/", 0, 0).trimmed();
+        const QString prefix = trimmed.section("/", 1, 1).trimmed();
+        const QHostAddress hostAddress(address);
+        if (hostAddress.protocol() == QAbstractSocket::IPv4Protocol) {
+            serverConfig.subnetAddress = address;
+            serverConfig.subnetCidr = prefix;
+        } else if (hostAddress.protocol() == QAbstractSocket::IPv6Protocol) {
+            serverConfig.subnetIpv6Address = address;
+            serverConfig.subnetIpv6Cidr = prefix;
+        }
+    }
+}
+}
 
 WireguardInstaller::WireguardInstaller(QObject *parent)
     : InstallerBase(parent)
@@ -43,9 +67,8 @@ ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer contain
     }
 
     if (auto* wgConfig = config.getWireGuardProtocolConfig()) {
-        wgConfig->serverConfig.subnetAddress = serverConfigMap.value("Address").remove("/24");
+        parseInterfaceAddresses(serverConfigMap.value("Address"), wgConfig->serverConfig);
     }
     
     return ErrorCode::NoError;
 }
-

@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include <QHostAddress>
+#include <QAbstractSocket>
 #include <QScopeGuard>
 
 #include "daemon/wireguardutils.h"
@@ -18,6 +19,13 @@
 
 namespace {
 Logger logger("IPUtilsLinux");
+
+QPair<QHostAddress, int> parseInterfaceAddress(const QString &value, int defaultPrefixLength) {
+  if (value.contains("/")) {
+    return QHostAddress::parseSubnet(value);
+  }
+  return { QHostAddress(value), defaultPrefixLength };
+}
 }
 
 IPUtilsLinux::IPUtilsLinux(QObject* parent) : IPUtils(parent) {
@@ -31,8 +39,13 @@ IPUtilsLinux::~IPUtilsLinux() {
 }
 
 bool IPUtilsLinux::addInterfaceIPs(const InterfaceConfig& config) {
-  bool ret = addIP4AddressToDevice(config);
-  addIP6AddressToDevice(config);
+  bool ret = true;
+  if (!config.m_deviceIpv4Address.isEmpty()) {
+    ret = addIP4AddressToDevice(config) && ret;
+  }
+  if (!config.m_deviceIpv6Address.isEmpty()) {
+    ret = addIP6AddressToDevice(config) && ret;
+  }
   return ret;
 }
 
@@ -81,7 +94,11 @@ bool IPUtilsLinux::addIP4AddressToDevice(const InterfaceConfig& config) {
 
   // Get the device address to add to interface
   QPair<QHostAddress, int> parsedAddr =
-      QHostAddress::parseSubnet(config.m_deviceIpv4Address);
+      parseInterfaceAddress(config.m_deviceIpv4Address, 32);
+  if (parsedAddr.first.protocol() != QAbstractSocket::IPv4Protocol) {
+    logger.error() << "Invalid IPv4 device address:" << config.m_deviceIpv4Address;
+    return false;
+  }
   QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
   char* deviceAddr = _deviceAddr.data();
   inet_pton(AF_INET, deviceAddr, &ifrAddr->sin_addr);
@@ -107,11 +124,15 @@ bool IPUtilsLinux::addIP4AddressToDevice(const InterfaceConfig& config) {
 bool IPUtilsLinux::addIP6AddressToDevice(const InterfaceConfig& config) {
   // Set up the ifr and the companion ifr6
   struct in6_ifreq ifr6;
-  ifr6.prefixlen = 64;
 
   // Get the device address to add to ifr6 interface
   QPair<QHostAddress, int> parsedAddr =
-      QHostAddress::parseSubnet(config.m_deviceIpv6Address);
+      parseInterfaceAddress(config.m_deviceIpv6Address, 128);
+  if (parsedAddr.first.protocol() != QAbstractSocket::IPv6Protocol) {
+    logger.error() << "Invalid IPv6 device address:" << config.m_deviceIpv6Address;
+    return false;
+  }
+  ifr6.prefixlen = parsedAddr.second >= 0 ? parsedAddr.second : 128;
   QByteArray _deviceAddr = parsedAddr.first.toString().toLocal8Bit();
   char* deviceAddr = _deviceAddr.data();
   inet_pton(AF_INET6, deviceAddr, &ifr6.addr);

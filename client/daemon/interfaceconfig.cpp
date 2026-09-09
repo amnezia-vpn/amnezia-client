@@ -88,10 +88,10 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   out << "PrivateKey = " << m_privateKey << "\n";
 
   QStringList addresses;
-  if (!m_deviceIpv4Address.isNull()) {
+  if (!m_deviceIpv4Address.isEmpty()) {
     addresses.append(m_deviceIpv4Address);
   }
-  if (!m_deviceIpv6Address.isNull()) {
+  if (!m_deviceIpv6Address.isEmpty()) {
     addresses.append(m_deviceIpv6Address);
   }
   if (addresses.isEmpty()) {
@@ -112,7 +112,7 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
     }
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (m_primaryDnsServer == m_serverIpv4Gateway) {
+    if (!m_serverIpv6Gateway.isEmpty() && m_primaryDnsServer == m_serverIpv4Gateway) {
       dnsServers.append(m_serverIpv6Gateway);
     }
     out << "DNS = " << dnsServers.join(", ") << "\n";
@@ -193,14 +193,11 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
 
   out << "\n[Peer]\n";
   out << "PublicKey = " << m_serverPublicKey << "\n";
-  out << "Endpoint = " << m_serverIpv4AddrIn.toUtf8() << ":" << m_serverPort
-      << "\n";
-
-  /* In theory, we should use the ipv6 endpoint, but wireguard doesn't seem
-   * to be happy if there are 2 endpoints.
-  out << "Endpoint = [" << config.m_serverIpv6AddrIn << "]:"
-      << config.m_serverPort << "\n";
-  */
+  if (!m_serverIpv4AddrIn.isEmpty()) {
+    out << "Endpoint = " << m_serverIpv4AddrIn << ":" << m_serverPort << "\n";
+  } else if (!m_serverIpv6AddrIn.isEmpty()) {
+    out << "Endpoint = [" << m_serverIpv6AddrIn << "]:" << m_serverPort << "\n";
+  }
   QStringList ranges;
   for (const IPAddress& ip : m_allowedIPAddressRanges) {
     ranges.append(ip.toString());
