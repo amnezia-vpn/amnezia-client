@@ -283,17 +283,13 @@ jobs:
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
 
-    - name: 'Inspect Windows build tree'
-      shell: powershell
-      run: |
-        Get-ChildItem deploy/build -Recurse -Filter "test_server_rename.exe" |
-          Select-Object -ExpandProperty FullName
-
     - name: 'Upload Windows test build'
       uses: actions/upload-artifact@v7
       with:
         name: windows-build
-        path: deploy/build/client/tests
+        path: |
+          deploy/build/client/tests
+          deploy/build/client/Release
         retention-days: 7
 
     - name: 'Upload WIX installer artifact'
@@ -1231,7 +1227,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-build
-          path: deploy/build/client/tests
+          path: deploy/build/client
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -1360,7 +1356,7 @@ jobs:
 
           export DYLD_LIBRARY_PATH="$PWD/deploy/build/client/tests/openssl:$QT_ROOT/lib:$DYLD_LIBRARY_PATH"
 
-          export QT_QPA_PLATFORM=offscreen
+          # export QT_QPA_PLATFORM=offscreen
 
           ctest --test-dir deploy/build/client/tests \
               -R "${{ matrix.filter }}" \
