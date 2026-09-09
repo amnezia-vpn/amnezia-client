@@ -583,18 +583,6 @@ jobs:
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
 
-    - name: 'Inspect test runtime dependencies'
-      shell: bash
-      run: |
-        echo "=== tests ==="
-        find deploy/build/client/tests -maxdepth 2 -type f -print
-
-        echo "=== OpenSSL candidates ==="
-        find deploy/build -name 'libssl*.dylib' -o -name 'libcrypto*.dylib'
-
-        echo "=== test_server_rename dependencies ==="
-        otool -L deploy/build/client/tests/test_server_rename
-
     - name: 'Upload macOS test build'
       uses: actions/upload-artifact@v7
       with:
@@ -608,6 +596,24 @@ jobs:
         path: deploy/build/AmneziaVPN_*_macos_x64.pkg
         archive: false
         retention-days: 7
+
+    - name: 'Prepare macOS test runtime'
+      shell: bash
+      run: |
+        FRAMEWORKS_DIR=$(find deploy/build/_CPack_Packages \
+          -path '*/AmneziaVPN.app/Contents/Frameworks' \
+          -type d \
+          -print -quit)
+
+        echo "Frameworks: $FRAMEWORKS_DIR"
+
+        mkdir -p deploy/build/client/tests/openssl
+
+        cp "$FRAMEWORKS_DIR/libssl.3.dylib" \
+           deploy/build/client/tests/openssl/
+
+        cp "$FRAMEWORKS_DIR/libcrypto.3.dylib" \
+           deploy/build/client/tests/openssl/
 
 # ------------------------------------------------------
 
@@ -1235,6 +1241,11 @@ jobs:
         with:
           arch: x64
 
+      - name: 'Check test executable'
+        shell: cmd
+        run: |
+          dir /s /b deploy\build\client\tests\test_server_rename.exe
+
       - name: Run tests
         shell: cmd
         run: |
@@ -1245,7 +1256,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir deploy\build\client\tests -C Debug -R "${{ matrix.filter }}" --output-on-failure
+          ctest --test-dir deploy\build\client\tests -R "${{ matrix.filter }}" --output-on-failure
 
 # ------------------------------------------------------
 
