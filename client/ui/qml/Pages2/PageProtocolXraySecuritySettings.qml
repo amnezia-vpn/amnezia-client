@@ -131,6 +131,14 @@ PageType {
                             tlsAlpnDropDown.text = selectedText
                             tlsAlpnDropDown.closeTriggered()
                         }
+                        Component.onCompleted: {
+                            for (var i = 0; i < model.count; i++) {
+                                if (model.get(i).name === alpn) {
+                                    selectedIndex = i;
+                                    break
+                                }
+                            }
+                        }
                     }
                     Connections {
                         target: XrayConfigModel
@@ -167,6 +175,14 @@ PageType {
                             fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
                             tlsFingerprintDropDown.closeTriggered()
+                        }
+                        Component.onCompleted: {
+                            for (var i = 0; i < model.count; i++) {
+                                if (model.get(i).name === fingerprint) {
+                                    selectedIndex = i;
+                                    break
+                                }
+                            }
                         }
                     }
                     Connections {
@@ -231,6 +247,14 @@ PageType {
                             fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText
                             realityFingerprintDropDown.closeTriggered()
+                        }
+                        Component.onCompleted: {
+                            for (var i = 0; i < model.count; i++) {
+                                if (model.get(i).name === fingerprint) {
+                                    selectedIndex = i;
+                                    break
+                                }
+                            }
                         }
                     }
                     Connections {
