@@ -20,49 +20,114 @@
     #include <CoreFoundation/CoreFoundation.h>
 #endif
 
+namespace
+{
+    const char *saveFileResultToString(SystemController::SaveFileResult result)
+    {
+        switch (result) {
+        case SystemController::SaveFileResult::Saved: return "Saved";
+        case SystemController::SaveFileResult::Cancelled: return "Cancelled";
+        case SystemController::SaveFileResult::Unknown: return "Unknown";
+        case SystemController::SaveFileResult::Failed: return "Failed";
+        }
+        return "?";
+    }
+}
+
+SystemController *SystemController::s_instance = nullptr;
+
 SystemController::SystemController(QObject *parent)
     : QObject(parent)
 {
+    s_instance = this;
 }
 
-bool SystemController::saveFile(const QString &fileName, const QString &data)
+SystemController::~SystemController()
+{
+    if (s_instance == this) {
+        s_instance = nullptr;
+    }
+}
+
+void SystemController::notifySaveCancelled()
+{
+    if (s_instance) {
+        emit s_instance->saveCancelledByUser();
+    } else {
+        qWarning() << "SystemController::saveFile: cancelled, but there is no SystemController instance to notify";
+    }
+}
+
+SystemController::SaveFileResult SystemController::saveFileEx(const QString &fileName, const QString &data)
 {
 #if defined Q_OS_ANDROID
-    AndroidController::instance()->saveFile(fileName, data);
-    return true;
+    const SaveFileResult result = AndroidController::instance()->saveFile(fileName, data);
+    return result;
+#else
+    return saveFileEx(fileName, data.toUtf8());
 #endif
-    return saveFile(fileName, data.toUtf8());
 }
 
-bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
+SystemController::SaveFileResult SystemController::saveFileEx(const QString &fileName, const QByteArray &data)
 {
 #if defined Q_OS_ANDROID
-    AndroidController::instance()->saveFile(fileName, QString::fromUtf8(data));
-    return true;
+    const SaveFileResult androidResult = AndroidController::instance()->saveFile(fileName, QString::fromUtf8(data));
+    return androidResult;
 #endif
 
 #ifdef Q_OS_IOS
-    QUrl fileUrl = QDir::tempPath() + "/" + fileName;
-    QFile file(fileUrl.toString());
+    const QString filePath = QDir::tempPath() + "/" + fileName;
+    QFile file(filePath);
+    qDebug() << "SystemController::saveFile: ios, staging" << data.size() << "bytes in" << filePath;
 #else
     QFile file(fileName);
+    qDebug() << "SystemController::saveFile: desktop, writing" << data.size() << "bytes to" << fileName;
 #endif
 
     if (!file.open(QIODevice::WriteOnly)) {
         qWarning() << "SystemController::saveFile: cannot open" << fileName;
-        return false;
+        return SaveFileResult::Failed;
     }
     if (file.write(data) != data.size()) {
         qWarning() << "SystemController::saveFile: write failed" << fileName;
         file.close();
-        return false;
+        return SaveFileResult::Failed;
     }
     file.close();
 
 #ifdef Q_OS_IOS
     QStringList filesToSend;
-    filesToSend.append(fileUrl.toString());
-    return IosController::Instance()->shareText(filesToSend);
+    filesToSend.append(filePath);
+
+    IosController::ShareResult shareResult;
+    qDebug() << "SystemController::saveFile: ios, presenting the share sheet for" << fileName;
+    IosController::Instance()->shareText(filesToSend, &shareResult);
+    qDebug() << "SystemController::saveFile: ios share sheet closed, completed:" << shareResult.completed
+             << "activityType:" << (shareResult.activityType.isEmpty() ? QStringLiteral("<none>") : shareResult.activityType)
+             << "error:" << (shareResult.errorString.isEmpty() ? QStringLiteral("<none>") : shareResult.errorString);
+
+    // the temporary copy carries the config (and its private key), do not leave it behind
+    if (!QFile::remove(filePath)) {
+        qWarning() << "SystemController::saveFile: could not remove the temporary copy" << filePath;
+    }
+
+    if (shareResult.completed) {
+        return SaveFileResult::Saved;
+    }
+    // an empty activityType means no activity was ever started, i.e. the user closed the share sheet
+    if (shareResult.activityType.isEmpty()) {
+        if (!shareResult.errorString.isEmpty()) {
+            qWarning() << "SystemController::saveFile: cannot present the share sheet:" << shareResult.errorString;
+            return SaveFileResult::Failed;
+        }
+        qDebug() << "SystemController::saveFile: ios, the user dismissed the share sheet without picking a destination";
+        return SaveFileResult::Cancelled;
+    }
+    // a destination was picked but reported no success; some third-party share extensions
+    // report this even after a successful send, so do not claim either outcome
+    qWarning() << "SystemController::saveFile: share did not report success for" << shareResult.activityType
+               << shareResult.errorString;
+    return SaveFileResult::Unknown;
 #else
     QFileInfo fi(fileName);
 
@@ -75,8 +140,26 @@ bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
 #ifndef MACOS_NE
     QDesktopServices::openUrl(url);
 #endif
-    return true;
+    return SaveFileResult::Saved;
 #endif
+}
+
+bool SystemController::saveFile(const QString &fileName, const QString &data)
+{
+    const SaveFileResult result = saveFileEx(fileName, data);
+    if (result == SaveFileResult::Cancelled) {
+        notifySaveCancelled();
+    }
+    return result == SaveFileResult::Saved;
+}
+
+bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
+{
+    const SaveFileResult result = saveFileEx(fileName, data);
+    if (result == SaveFileResult::Cancelled) {
+        notifySaveCancelled();
+    }
+    return result == SaveFileResult::Saved;
 }
 
 bool SystemController::readFile(const QString &fileName, QByteArray &data)
@@ -156,10 +239,15 @@ QString SystemController::getFileName(const QString &acceptLabel, const QString 
     QObject::disconnect(this, &SystemController::fileDialogClosed, nullptr, nullptr);
 
     if (!isFileDialogAccepted) {
+        qDebug() << "SystemController::getFileName: dialog cancelled by the user, isSaveMode:" << isSaveMode;
+        if (isSaveMode) {
+            notifySaveCancelled();
+        }
         return "";
     }
 
     fileName = mainFileDialog->property("selectedFile").toString();
+    qDebug() << "SystemController::getFileName: picked" << fileName << "isSaveMode:" << isSaveMode;
     return QUrl(fileName).toLocalFile();
 }
 

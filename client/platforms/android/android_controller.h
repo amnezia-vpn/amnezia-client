@@ -5,6 +5,7 @@
 #include <QPixmap>
 
 #include "core/protocols/vpnProtocol.h"
+#include "ui/controllers/systemController.h"
 
 using namespace amnezia;
 
@@ -32,7 +33,7 @@ public:
     ErrorCode start(const QJsonObject &vpnConfig);
     void stop();
     void resetLastServer(int serverIndex);
-    void saveFile(const QString &fileName, const QString &data);
+    SystemController::SaveFileResult saveFile(const QString &fileName, const QString &data);
     QString openFile(const QString &filter);
     int getFd(const QString &fileName);
     void closeFd();
@@ -75,6 +76,7 @@ signals:
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
+    void fileSaved(int result);
     void configImported(QString config);
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state);
@@ -109,6 +111,7 @@ private:
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static void onFileSaved(JNIEnv *env, jobject thiz, jint result);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
     static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);
