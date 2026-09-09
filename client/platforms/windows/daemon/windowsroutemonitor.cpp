@@ -19,8 +19,12 @@ Logger logger("WindowsRouteMonitor");
 // way to other routing entries.
 constexpr const ULONG EXCLUSION_ROUTE_METRIC = 0x5e72;
 
+// Coalesce bursts of NotifyRouteChange2 callbacks into a single rescan so that
+// exclusion install / tunnel bring-up does not starve the daemon event loop.
+constexpr int ROUTE_CHANGE_DEBOUNCE_MSEC = 50;
+
 // Called by the kernel on route changes - perform some basic filtering and
-// invoke the routeChanged slot to do the real work.
+// schedule a coalesced rescan on the Qt thread.
 static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
                                 MIB_NOTIFICATION_TYPE type) {
   WindowsRouteMonitor* monitor = (WindowsRouteMonitor*)context;
@@ -35,8 +39,8 @@ static void routeChangeCallback(PVOID context, PMIB_IPFORWARD_ROW2 row,
     return;
   }
 
-  // Invoke the route changed signal to do the real work in Qt.
-  QMetaObject::invokeMethod(monitor, "routeChanged", Qt::QueuedConnection);
+  QMetaObject::invokeMethod(monitor, "scheduleRouteChanged",
+                            Qt::QueuedConnection);
 }
 
 // Perform prefix matching comparison on IP addresses in host order.
@@ -62,6 +66,11 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
     : QObject(parent), m_luid(luid) {
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
+
+  m_routeChangedDebounce.setSingleShot(true);
+  m_routeChangedDebounce.setInterval(ROUTE_CHANGE_DEBOUNCE_MSEC);
+  connect(&m_routeChangedDebounce, &QTimer::timeout, this,
+          &WindowsRouteMonitor::routeChanged);
 
   NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
 }
@@ -303,6 +312,9 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
       data->Age++;
       continue;
     }
+    if (m_captureBlacklist.contains(prefix)) {
+      continue;
+    }
     logger.debug() << "Capturing route to" << prefix.toString();
 
     // Clone the route and direct it into the VPN tunnel.
@@ -328,6 +340,11 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     if (result != NO_ERROR) {
       logger.error() << "Failed to update route:" << result;
       delete data;
+      // Pin prefixes owned by someone else (e.g. Wintun's subnet-broadcast
+      // /32 entries) so we don't retry them on every notification.
+      if (result == ERROR_OBJECT_ALREADY_EXISTS) {
+        m_captureBlacklist.insert(prefix);
+      }
     } else {
       m_clonedRoutes.insert(prefix, data);
       data->Age++;
@@ -432,6 +449,103 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
   return true;
 }
 
+int WindowsRouteMonitor::addExclusionRoutes(const QList<IPAddress>& prefixes) {
+  if (prefixes.isEmpty()) {
+    return 0;
+  }
+
+  // Group by address family so the routing-table snapshot and
+  // updateCapturedRoutes() run once per family instead of once per prefix
+  QVector<QPair<IPAddress, MIB_IPFORWARD_ROW2*>> pendingV4;
+  QVector<QPair<IPAddress, MIB_IPFORWARD_ROW2*>> pendingV6;
+  pendingV4.reserve(prefixes.size());
+  pendingV6.reserve(prefixes.size());
+
+  for (const IPAddress& prefix : prefixes) {
+    const QHostAddress addr = prefix.address();
+    if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
+        addr.isMulticast()) {
+      continue;
+    }
+    if (m_exclusionRoutes.contains(prefix)) {
+      continue;
+    }
+
+    MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
+    InitializeIpForwardEntry(data);
+    if (addr.protocol() == QAbstractSocket::IPv6Protocol) {
+      Q_IPV6ADDR buf = addr.toIPv6Address();
+      memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buf, sizeof(buf));
+      data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
+    } else {
+      quint32 buf = addr.toIPv4Address();
+      data->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(buf);
+      data->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
+    }
+    data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
+
+    data->ValidLifetime = 0xffffffff;
+    data->PreferredLifetime = 0xffffffff;
+    data->Metric = EXCLUSION_ROUTE_METRIC;
+    data->Protocol = MIB_IPPROTO_NETMGMT;
+    data->Loopback = false;
+    data->AutoconfigureAddress = false;
+    data->Publish = false;
+    data->Immortal = false;
+    data->Age = 0;
+
+    if (data->DestinationPrefix.Prefix.si_family == AF_INET6) {
+      pendingV6.append(qMakePair(prefix, data));
+    } else {
+      pendingV4.append(qMakePair(prefix, data));
+    }
+    // Register up-front so the single updateCapturedRoutes() pass below
+    // sees the full exclusion set via isRouteExcluded().
+    m_exclusionRoutes[prefix] = data;
+  }
+
+  int added = 0;
+
+  auto processFamily =
+      [&](int family,
+          const QVector<QPair<IPAddress, MIB_IPFORWARD_ROW2*>>& pending) {
+        if (pending.isEmpty()) {
+          return;
+        }
+
+        logger.debug() << "Batch exclusion install:" << pending.size()
+                       << (family == AF_INET6 ? "IPv6" : "IPv4") << "routes";
+
+        PMIB_IPFORWARD_TABLE2 table = nullptr;
+        DWORD result = GetIpForwardTable2(family, &table);
+        if (result != NO_ERROR) {
+          logger.error() << "Failed to fetch routing table:" << result;
+          for (const auto& item : pending) {
+            MIB_IPFORWARD_ROW2* row = m_exclusionRoutes.take(item.first);
+            if (row != nullptr) {
+              delete row;
+            }
+          }
+          return;
+        }
+
+        updateInterfaceMetrics(family);
+        for (const auto& item : pending) {
+          updateExclusionRoute(item.second, table);
+          ++added;
+        }
+        updateCapturedRoutes(family, table);
+
+        FreeMibTable(table);
+      };
+
+  processFamily(AF_INET, pendingV4);
+  processFamily(AF_INET6, pendingV6);
+
+  return added;
+}
+
 bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
   logger.debug() << "Deleting exclusion route for"
                  << prefix.address().toString();
@@ -476,7 +590,14 @@ void WindowsRouteMonitor::setDetaultRouteCapture(bool enable) {
   // Flush any captured routes when disabling the feature.
   if (!m_defaultRouteCapture) {
     flushRouteTable(m_clonedRoutes);
+    m_captureBlacklist.clear();
     return;
+  }
+}
+
+void WindowsRouteMonitor::scheduleRouteChanged() {
+  if (!m_routeChangedDebounce.isActive()) {
+    m_routeChangedDebounce.start();
   }
 }
 
