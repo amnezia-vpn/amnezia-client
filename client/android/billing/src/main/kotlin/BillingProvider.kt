@@ -149,6 +149,9 @@ class BillingProvider(context: Context) : AutoCloseable {
                 val pricingPhases = JSONArray().also { offer.put("pricingPhases", it) }
                 offerDetails.pricingPhases.pricingPhaseList.forEach { phase ->
                     val billingMonths = billingPeriodToMonths(phase.billingPeriod)
+                    val perMonth = displayPricePerMonth(phase.priceAmountMicros, phase.priceCurrencyCode, billingMonths)
+                    Log.d(TAG, "[Billing][TEST] basePlanId=${offerDetails.basePlanId} billingPeriod=${phase.billingPeriod} " +
+                        "billingMonths=$billingMonths currencyCode=${phase.priceCurrencyCode} displayPricePerMonth=$perMonth")
                     JSONObject().also { pricingPhases.put(it) }
                         .put("billingCycleCount", phase.billingCycleCount)
                         .put("billingPeriod", phase.billingPeriod)
@@ -157,7 +160,7 @@ class BillingProvider(context: Context) : AutoCloseable {
                         .put("recurrenceMode", phase.recurrenceMode)
                         .put("subscriptionBillingMonths", billingMonths)
                         .apply {
-                            displayPricePerMonth(phase.priceAmountMicros, phase.priceCurrencyCode, billingMonths)?.let {
+                            perMonth?.let {
                                 put("displayPricePerMonth", it)
                             }
                         }
