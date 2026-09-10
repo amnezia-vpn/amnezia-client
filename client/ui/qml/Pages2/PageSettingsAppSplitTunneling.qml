@@ -195,6 +195,7 @@ PageType {
                 text: appPath
                 rightImageSource: "qrc:/images/controls/trash.svg"
                 rightImageColor: AmneziaStyle.color.paleGray
+                rightButtonAccessibleName: qsTr("Remove %1").arg(appPath)
 
                 clickedFunction: function() {
                     var headerText = qsTr("Remove ") + appPath + "?"
@@ -242,8 +243,10 @@ PageType {
 
                 Layout.fillWidth: true
 
+                headerText: qsTr("Application")
                 textField.placeholderText: qsTr("application name")
                 buttonImageSource: "qrc:/images/controls/plus.svg"
+                buttonAccessibleName: qsTr("Add application")
 
                 rightButtonClickedOnEnter: true
 

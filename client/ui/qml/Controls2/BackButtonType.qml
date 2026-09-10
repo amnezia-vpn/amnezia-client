@@ -25,6 +25,7 @@ FocusScope {
             id: backButton
             image: backButtonImage
             imageColor: AmneziaStyle.color.paleGray
+            accessibleName: qsTr("Back")
 
             implicitWidth: 40
             implicitHeight: 40

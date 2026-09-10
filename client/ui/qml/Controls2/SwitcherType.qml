@@ -35,7 +35,13 @@ Switch {
     property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
     property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
 
+    property string accessibleName: text
+
     property bool isFocusable: true
+
+    Accessible.name: accessibleName
+    Accessible.role: Accessible.CheckBox
+    Accessible.description: checked ? qsTr("Enabled") : qsTr("Disabled")
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
