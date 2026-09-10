@@ -28,6 +28,7 @@ class WindowsNetworkWatcher final : public NetworkWatcherImpl {
   // to inform about network changes.
   HANDLE m_wlanHandle = nullptr;
   QString m_lastBSSID;
+  bool m_suspended = false;
 };
 
 #endif  // WINDOWSNETWORKWATCHER_H

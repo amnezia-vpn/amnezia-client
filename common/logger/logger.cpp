@@ -22,6 +22,7 @@
 
 QFile Logger::m_file;
 QTextStream Logger::m_textStream;
+QRecursiveMutex Logger::m_fileMutex;
 QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
 QString Logger::m_serviceLogFileName = QString("%1.log").arg(SERVICE_NAME);
 
@@ -68,6 +69,7 @@ bool Logger::init(bool isServiceLogger)
         return false;
     }
 
+    QMutexLocker locker(&m_fileMutex);
     m_file.setFileName(appDir.filePath(logFileName));
     if (!m_file.open(QIODevice::Append)) {
         qWarning() << "Cannot open log file:" << logFileName;
@@ -84,6 +86,7 @@ bool Logger::init(bool isServiceLogger)
 
 void Logger::deInit()
 {
+    QMutexLocker locker(&m_fileMutex);
     m_textStream.setDevice(nullptr);
     m_file.close();
 }
@@ -137,9 +140,11 @@ QString Logger::serviceLogsFilePath()
 
 QString Logger::getLogFile()
 {
+    QMutexLocker locker(&m_fileMutex);
     if (m_file.isOpen()) {
         m_file.flush();
     }
+
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
@@ -154,9 +159,11 @@ QString Logger::getLogFile()
 
 QString Logger::getServiceLogFile()
 {
+    QMutexLocker locker(&m_fileMutex);
     if (m_file.isOpen()) {
         m_file.flush();
     }
+
     QFile file(serviceLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
@@ -184,6 +191,8 @@ bool Logger::openLogsFolder(bool isServiceLogger)
 
 void Logger::clearLogs(bool isServiceLogger)
 {
+    QMutexLocker locker(&m_fileMutex);
+
     bool isLogActive = m_file.isOpen();
     m_file.close();
 
@@ -243,9 +252,12 @@ Logger::LogStreamer::~LogStreamer()
                                     .arg(QDateTime::currentDateTimeUtc().toString("[yyyy-MM-dd hh:mm:ss.zzzZ]"),
                                          logLevelString, APPLICATION_NAME, m_logger->className(), m_data->m_buffer.trimmed());
 
-    if (m_file.isOpen()) {
-        QTextStream logToFile(&m_file);
-        logToFile << message << Qt::endl << Qt::flush;
+    {
+        QMutexLocker locker(&m_fileMutex);
+        if (m_file.isOpen()) {
+            QTextStream logToFile(&m_file);
+            logToFile << message << Qt::endl << Qt::flush;
+        }
     }
 
     QTextStream logToOutput((m_logLevel == LogLevel::Error) ? stderr : stdout);

@@ -160,7 +160,7 @@ void WindowsPingSender::sendPing(const QHostAddress& dest, quint16 sequence) {
 
   DWORD status = GetLastError();
   if (status != ERROR_IO_PENDING) {
-    QString errmsg = WindowsUtils::getErrorMessage();
+    QString errmsg = WindowsUtils::getErrorMessage(status);
     logger.error() << "failed to start Code: " << status
                    << " Message: " << errmsg
                    << " dest:" << logger.sensitive(dest.toString());
@@ -178,7 +178,7 @@ void WindowsPingSender::pingEventReady() {
     if (error == IP_REQ_TIMED_OUT) {
       return;
     }
-    QString errmsg = WindowsUtils::getErrorMessage();
+    QString errmsg = WindowsUtils::getErrorMessage(error);
     emit criticalPingError();
     logger.error() << "No ping reply. Code: " << error
                    << " Message: " << errmsg;
