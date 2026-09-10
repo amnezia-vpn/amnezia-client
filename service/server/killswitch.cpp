@@ -34,6 +34,7 @@ static bool isValidIpOrCidr(const QString &value) {
 #ifdef Q_OS_WIN
     #include "../client/platforms/windows/daemon/windowsfirewall.h"
     #include "../client/platforms/windows/daemon/windowsdaemon.h"
+    #include "../client/platforms/windows/daemon/windowsroutemonitor.h"
 #endif
 
 #ifdef Q_OS_LINUX
@@ -97,7 +98,46 @@ bool KillSwitch::isStrictKillSwitchEnabled()
     return m_appSettigns->value("Conf/strictKillSwitchEnabled", false).toBool();
 }
 
+#ifdef Q_OS_WIN
+void KillSwitch::setupTunnelRouteMonitor(int vpnAdapterIndex, const QString &serverAddress)
+{
+    teardownTunnelRouteMonitor();
+
+    NET_LUID luid;
+    DWORD res = ConvertInterfaceIndexToLuid(static_cast<NET_IFINDEX>(vpnAdapterIndex), &luid);
+    if (res != NO_ERROR) {
+        qWarning() << "KillSwitch: failed to resolve luid for adapter index" << vpnAdapterIndex
+                   << ", error:" << res;
+        return;
+    }
+
+    m_tunnelRouteMonitor = new WindowsRouteMonitor(luid.Value, this);
+
+    if (!serverAddress.isEmpty() && !m_tunnelRouteMonitor->addExclusionRoute(IPAddress(serverAddress))) {
+        qWarning() << "KillSwitch: failed to add an exclusion route for" << serverAddress;
+    }
+}
+
+void KillSwitch::teardownTunnelRouteMonitor()
+{
+    if (m_tunnelRouteMonitor == nullptr) {
+        return;
+    }
+
+    delete m_tunnelRouteMonitor;
+    m_tunnelRouteMonitor = nullptr;
+}
+#endif
+
 bool KillSwitch::disableKillSwitch() {
+#ifdef Q_OS_WIN
+    teardownTunnelRouteMonitor();
+
+    if (Daemon *daemon = WindowsDaemon::instance()) {
+        daemon->activateSplitTunnel(InterfaceConfig());
+    }
+#endif
+
 #ifdef Q_OS_LINUX
     if (isStrictKillSwitchEnabled()) {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
@@ -291,17 +331,20 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         WindowsFirewall::create(this)->enablePeerTraffic(config);
     }
 
+    if (configStr.value("tunnelDefaultRoute").toBool()) {
+        setupTunnelRouteMonitor(vpnAdapterIndex, config.m_serverIpv4AddrIn);
+    }
+
     WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
-    WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
+    return WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
 #endif
     return true;
 }
 
 bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex) {
 #ifdef Q_OS_WIN
-    if (configStr.value("splitTunnelType").toInt() != 0) {
-        WindowsFirewall::create(this)->allowAllTraffic();
-    }
+    Q_UNUSED(configStr)
+    WindowsFirewall::create(this)->allowAllTraffic();
     return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
 #endif
 

@@ -5,6 +5,7 @@
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/errorCodes.h"
+#include "core/utils/errorStrings.h"
 #include "core/utils/routeModes.h"
 #include "core/controllers/coreController.h"
 #include "core/repositories/secureServersRepository.h"
@@ -93,6 +94,10 @@ void CoreSignalHandlers::initErrorMessagesHandler()
     connect(m_coreController->m_connectionUiController, &ConnectionUiController::connectionErrorOccurred, this, [this](ErrorCode errorCode) {
         emit m_coreController->m_pageController->showErrorMessage(errorCode);
         m_coreController->m_connectionController->setConnectionState(Vpn::ConnectionState::Disconnected);
+    });
+
+    connect(m_coreController->m_connectionUiController, &ConnectionUiController::connectionWarningOccurred, this, [this](ErrorCode errorCode) {
+        emit m_coreController->m_pageController->showNotificationMessage(errorString(errorCode));
     });
 
     connect(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred, m_coreController->m_pageController,

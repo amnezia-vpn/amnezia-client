@@ -382,6 +382,11 @@ bool ContainerUtils::isAwgContainer(DockerContainer container)
     return container == DockerContainer::Awg || container == DockerContainer::Awg2;
 }
 
+bool ContainerUtils::isXrayContainer(DockerContainer container)
+{
+    return container == DockerContainer::Xray || container == DockerContainer::SSXray;
+}
+
 bool ContainerUtils::isUnsupportedContainer(DockerContainer container)
 {
     return container == DockerContainer::Cloak || container == DockerContainer::ShadowSocks;

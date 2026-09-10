@@ -350,6 +350,8 @@ if(WIN32)
     list(APPEND CONAN_BINS $<TARGET_FILE:zx2c4::wintun>)
 
     list(APPEND CONAN_BINS $<TARGET_FILE:OpenSSL::SSL> $<TARGET_FILE:OpenSSL::Crypto>)
+
+    list(APPEND CONAN_BINS $<TARGET_FILE:amnezia::xray-bindings>)
 else()
     find_package(awg-go REQUIRED)
     list(APPEND CONAN_EXECS $<TARGET_FILE:amnezia::awg-go>)
@@ -464,9 +466,10 @@ if (WIN32)
     )
 
     find_package(win-split-tunnel REQUIRED)
+    file(GLOB WIN_SPLIT_TUNNEL_FILES "${WIN_SPLIT_TUNNEL_BIN}/*")
     add_custom_command(TARGET ${PROJECT} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${WIN_SPLIT_TUNNEL_BIN}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${WIN_SPLIT_TUNNEL_FILES}
             "$<TARGET_FILE_DIR:${PROJECT}>"
     )
     install(DIRECTORY "${WIN_SPLIT_TUNNEL_BIN}/"

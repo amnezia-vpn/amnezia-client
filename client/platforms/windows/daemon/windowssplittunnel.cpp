@@ -379,6 +379,10 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex) {
 }
 
 void WindowsSplitTunnel::stop() {
+  if (getState() != STATE_RUNNING) {
+    return;
+  }
+
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_CLEAR_CONFIGURATION, nullptr, 0,
                             nullptr, 0, &bytesReturned, nullptr);
@@ -507,27 +511,35 @@ bool WindowsSplitTunnel::getAddress(int adapterIndex, IN_ADDR* out_ipv4,
   logger.debug() << "Getting adapter info for:" << target.humanReadableName();
 
   auto get = [&target](QAbstractSocket::NetworkLayerProtocol protocol) {
-    for (auto address : target.addressEntries()) {
-      if (address.ip().protocol() != protocol) {
+    for (const QNetworkAddressEntry& entry : target.addressEntries()) {
+      const QHostAddress address = entry.ip();
+      if (address.protocol() != protocol) {
         continue;
       }
-      return address.ip().toString().toStdWString();
+      if (address.isNull() || address.isLoopback() || address.isLinkLocal() ||
+          address.isBroadcast() || address.isMulticast()) {
+        continue;
+      }
+      return address.toString().split('%').first().toStdWString();
     }
     return std::wstring{};
   };
   auto ipv4 = get(QAbstractSocket::IPv4Protocol);
   auto ipv6 = get(QAbstractSocket::IPv6Protocol);
 
-  if (InetPtonW(AF_INET, ipv4.c_str(), out_ipv4) != 1) {
-    logger.debug() << "Ipv4 Conversation error" << WSAGetLastError();
+  if (ipv4.empty()) {
+    logger.error() << "No routable IPv4 address on adapter" << adapterIndex;
     return false;
   }
-  if (ipv6.empty()) {
-    std::memset(out_ipv6, 0x00, sizeof(IN6_ADDR));
-    return true;
+  if (InetPtonW(AF_INET, ipv4.c_str(), out_ipv4) != 1) {
+    logger.error() << "Ipv4 conversion error" << WSAGetLastError();
+    return false;
   }
-  if (InetPtonW(AF_INET6, ipv6.c_str(), out_ipv6) != 1) {
-    logger.debug() << "Ipv6 Conversation error" << WSAGetLastError();
+
+  std::memset(out_ipv6, 0x00, sizeof(IN6_ADDR));
+  if (!ipv6.empty() && InetPtonW(AF_INET6, ipv6.c_str(), out_ipv6) != 1) {
+    logger.error() << "Ipv6 conversion error" << WSAGetLastError();
+    std::memset(out_ipv6, 0x00, sizeof(IN6_ADDR));
   }
   return true;
 }

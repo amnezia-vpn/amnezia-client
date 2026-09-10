@@ -46,6 +46,7 @@ signals:
     void connectionStateChanged();
 
     void connectionErrorOccurred(ErrorCode errorCode);
+    void connectionWarningOccurred(ErrorCode errorCode);
 
     void connectButtonClicked();
     void preparingConfig();
