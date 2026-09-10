@@ -66,8 +66,6 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::OpenVpnAdaptersInUseError): errorMessage = QObject::tr("Can't connect: another VPN connection is active"); break;
     case (ErrorCode::OpenVpnTapAdapterError): errorMessage = QObject::tr("Can't setup OpenVPN TAP network adapter"); break;
     case (ErrorCode::AddressPoolError): errorMessage = QObject::tr("VPN pool error: no available addresses"); break;
-    case (ErrorCode::SplitTunnelStartError): errorMessage = QObject::tr("App split tunneling is not active: the split tunneling driver could not be configured. The VPN is connected, but the apps you selected are not excluded from it."); break;
-    case (ErrorCode::SplitTunnelAdapterIndexError): errorMessage = QObject::tr("App split tunneling is not active: the network adapters could not be identified. The VPN is connected, but the apps you selected are not excluded from it."); break;
 
     case (ErrorCode::ImportInvalidConfigError): errorMessage = QObject::tr("The config does not contain any containers and credentials for connecting to the server"); break;
     case (ErrorCode::ImportBackupFileUseRestoreInstead): errorMessage = QObject::tr("Backup files cannot be imported here. Use 'Restore from backup' instead."); break;

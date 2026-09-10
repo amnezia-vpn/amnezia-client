@@ -6,10 +6,6 @@
 
 #include "secureQSettings.h"
 
-#ifdef Q_OS_WIN
-class WindowsRouteMonitor;
-#endif
-
 class KillSwitch : public QObject
 {
     Q_OBJECT
@@ -30,12 +26,6 @@ private:
     QStringList m_allowedRanges;
     QSharedPointer<SecureQSettings> m_appSettigns;
 
-#ifdef Q_OS_WIN
-    void setupTunnelRouteMonitor(int vpnAdapterIndex, const QString &serverAddress);
-    void teardownTunnelRouteMonitor();
-
-    WindowsRouteMonitor *m_tunnelRouteMonitor = nullptr;
-#endif
 };
 
 #endif // KILLSWITCH_H

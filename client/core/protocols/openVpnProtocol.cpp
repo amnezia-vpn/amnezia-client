@@ -1,6 +1,5 @@
 #include <QCoreApplication>
 #include <QFileInfo>
-#include <QJsonArray>
 #include <QProcess>
 #include <QRandomGenerator>
 #include <QTcpServer>
@@ -381,13 +380,7 @@ void OpenVpnProtocol::updateVpnGateway(const QString &line)
                                 m_configData.insert("vpnGateway", m_vpnGateway);
                                 m_configData.insert("vpnServer",
                                                     NetworkUtilities::getIPAddress(m_configData.value(amnezia::configKey::hostName).toString()));
-                                auto enablePeerTraffic = iface->enablePeerTraffic(m_configData);
-                                if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
-                                    qCritical() << "Failed to enable peer traffic";
-                                    if (!m_configData.value(configKey::splitTunnelApps).toArray().isEmpty()) {
-                                        emit protocolWarning(ErrorCode::SplitTunnelStartError);
-                                    }
-                                }
+                                iface->enablePeerTraffic(m_configData);
                             }
                         }
                     }

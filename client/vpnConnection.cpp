@@ -136,44 +136,32 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
-                    const RouteMode routeMode =
-                            static_cast<RouteMode>(m_vpnConfiguration.value(configKey::splitTunnelType).toInt());
-
 #ifdef Q_OS_WIN
+                    const RouteMode effectiveRouteMode =
+                            static_cast<RouteMode>(m_vpnConfiguration.value(configKey::splitTunnelType).toInt());
                     const bool isXray = ContainerUtils::isXrayContainer(container);
 
-                    if (!isXray || routeMode != amnezia::RouteMode::VpnAllSites) {
+                    if (!isXray || effectiveRouteMode != amnezia::RouteMode::VpnAllSites) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #elif defined(Q_OS_MACOS)
-                    if (routeMode != amnezia::RouteMode::VpnAllExceptSites) {
+                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() ||
+                        m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #else
                     iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
 #endif
 
-                    if (routeMode != amnezia::RouteMode::VpnAllSites) {
-                        iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/0");
+                    if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
+                        iface->routeDeleteList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0");
+                        RouteMode routeMode = m_appSettingsRepository->routeMode();
                         if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                             QTimer::singleShot(1000, m_vpnProtocol.data(),
                                                [this, routeMode]() { addSitesRoutes(m_vpnProtocol->vpnGateway(), routeMode); });
                         } else if (routeMode == amnezia::RouteMode::VpnAllExceptSites) {
-#ifdef Q_OS_WIN
-                            if (isXray) {
-                                auto routeAddDefault =
-                                        iface->routeAddDefault(m_vpnProtocol->tunnelInterfaceName());
-                                if (!routeAddDefault.waitForFinished() || !routeAddDefault.returnValue()) {
-                                    qCritical() << "Failed to set the default route for TUN";
-                                }
-                            } else {
-                                iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
-                                iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
-                            }
-#else
                             iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "0.0.0.0/1");
                             iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << "128.0.0.0/1");
-#endif
 
                             iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
 #ifdef Q_OS_MACOS
@@ -363,7 +351,6 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 #ifdef AMNEZIA_DESKTOP
     if (m_vpnProtocol) {
         disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-        disconnect(m_vpnProtocol.data(), &VpnProtocol::protocolWarning, this, &VpnConnection::vpnProtocolWarning);
         m_vpnProtocol->stop();
         m_vpnProtocol.reset();
     }
@@ -402,7 +389,6 @@ void VpnConnection::connectToVpn(const QString &serverId, DockerContainer contai
 void VpnConnection::createProtocolConnections()
 {
     connect(m_vpnProtocol.data(), &VpnProtocol::protocolError, this, &VpnConnection::vpnProtocolError);
-    connect(m_vpnProtocol.data(), &VpnProtocol::protocolWarning, this, &VpnConnection::vpnProtocolWarning);
     connect(m_vpnProtocol.data(), &VpnProtocol::connectionStateChanged, this, &VpnConnection::setConnectionState);
     connect(m_vpnProtocol.data(), SIGNAL(bytesChanged(quint64, quint64)), this, SLOT(onBytesChanged(quint64, quint64)));
 

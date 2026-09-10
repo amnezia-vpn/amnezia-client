@@ -9,7 +9,6 @@
 #include "ipc.h"
 
 #include <QCryptographicHash>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
@@ -57,11 +56,6 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
         qWarning() << "Xray config string is not a valid JSON object";
         m_xrayConfig = {};
     }
-}
-
-QString XrayProtocol::tunnelInterfaceName() const
-{
-    return tunName;
 }
 
 XrayProtocol::~XrayProtocol()
@@ -266,9 +260,6 @@ ErrorCode XrayProtocol::setupRouting()
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
 #ifdef Q_OS_WIN
                 const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
-                bool tunnelHasDefaultRoute = false;
-                const bool hasSplitTunnelApps =
-                        !m_rawConfig.value(amnezia::configKey::splitTunnelApps).toArray().isEmpty();
 #endif
                 auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
@@ -316,7 +307,6 @@ ErrorCode XrayProtocol::setupRouting()
                         qCritical() << "Failed to set the default route for TUN";
                         return ErrorCode::InternalError;
                     }
-                    tunnelHasDefaultRoute = true;
 #else
                     static const QStringList subnets = { "1.0.0.0/8",  "2.0.0.0/7",  "4.0.0.0/6",  "8.0.0.0/5",
                                                          "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
@@ -342,21 +332,14 @@ ErrorCode XrayProtocol::setupRouting()
                     config.insert("vpnAdapterIndex", vpnAdapterIndex);
                     config.insert("vpnGateway", m_vpnGateway);
                     config.insert("vpnServer", m_remoteAddress);
-                    config.insert("tunnelDefaultRoute", tunnelHasDefaultRoute);
 
                     auto enablePeerTraffic = iface->enablePeerTraffic(config);
                     if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
                         qCritical() << "Failed to enable peer traffic";
-                        if (hasSplitTunnelApps) {
-                            emit protocolWarning(ErrorCode::SplitTunnelStartError);
-                        }
+                        return ErrorCode::InternalError;
                     }
-                } else {
+                } else
                     qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
-                    if (hasSplitTunnelApps) {
-                        emit protocolWarning(ErrorCode::SplitTunnelAdapterIndexError);
-                    }
-                }
 #endif
                 return ErrorCode::NoError;
             },

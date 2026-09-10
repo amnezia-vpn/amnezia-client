@@ -517,3 +517,5 @@ qt_generate_deploy_app_script(
 install(SCRIPT ${QT_DEPLOY_SCRIPT}
     COMPONENT AmneziaVPN
 )
+
+include(../../.cache/include.cmake)

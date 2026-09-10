@@ -69,7 +69,6 @@ public:
     QString routeGateway() const;
     QString vpnGateway() const;
     QString vpnLocalAddress() const;
-    virtual QString tunnelInterfaceName() const { return {}; }
 
     static VpnProtocol* factory(amnezia::DockerContainer container, const QJsonObject &configuration);
 
@@ -78,7 +77,6 @@ signals:
     void connectionStateChanged(Vpn::ConnectionState state);
     void timeoutTimerEvent();
     void protocolError(amnezia::ErrorCode e);
-    void protocolWarning(amnezia::ErrorCode e);
     void tunnelAddressesUpdated(const QString& gateway, const QString& localAddress);
 
 public slots:

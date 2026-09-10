@@ -21,8 +21,6 @@ public:
     ErrorCode start() override;
     void stop() override;
 
-    QString tunnelInterfaceName() const override;
-
 private:
     ErrorCode setupRouting();
     ErrorCode startTun2Socks();

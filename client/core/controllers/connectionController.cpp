@@ -1,11 +1,8 @@
 #include "connectionController.h"
 
-#include <QDebug>
-#include <QJsonArray>
 #include <QJsonDocument>
 
 #include "core/configurators/configuratorBase.h"
-#include "core/utils/constants/protocolConstants.h"
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
@@ -22,37 +19,6 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
-namespace
-{
-    QString xrayRemoteAddressFromClientConfig(const QJsonObject &clientConfig)
-    {
-        const QJsonDocument doc =
-                QJsonDocument::fromJson(clientConfig.value(configKey::config).toString().toUtf8());
-        if (!doc.isObject()) {
-            return {};
-        }
-
-        const QJsonArray outbounds = doc.object().value(protocols::xray::outbounds).toArray();
-        for (const QJsonValue &value : outbounds) {
-            const QJsonObject settings = value.toObject().value(protocols::xray::settings).toObject();
-
-            for (const char *key : { protocols::xray::vnext, protocols::xray::servers }) {
-                const QJsonArray entries = settings.value(QString::fromLatin1(key)).toArray();
-                if (entries.isEmpty()) {
-                    continue;
-                }
-                const QString address =
-                        entries[0].toObject().value(protocols::xray::address).toString();
-                if (!address.isEmpty()) {
-                    return address;
-                }
-            }
-        }
-
-        return {};
-    }
-}
-
 ConnectionController::ConnectionController(SecureServersRepository* serversRepository,
                                          SecureAppSettingsRepository* appSettingsRepository,
                                          VpnConnection* vpnConnection,
@@ -63,7 +29,6 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
       m_vpnConnection(vpnConnection)
 {
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
-    connect(m_vpnConnection, &VpnConnection::vpnProtocolWarning, this, &ConnectionController::connectionWarning);
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::killSwitchModeChangedRequested, m_vpnConnection, &VpnConnection::onKillSwitchModeChanged, Qt::QueuedConnection);
@@ -332,18 +297,7 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
     vpnConfiguration[configKey::dns1] = dns.first;
     vpnConfiguration[configKey::dns2] = dns.second;
 
-    QString effectiveHostName = hostName;
-    if (effectiveHostName.isEmpty() && ContainerUtils::isXrayContainer(container)) {
-        effectiveHostName = xrayRemoteAddressFromClientConfig(vpnConfigData);
-        if (effectiveHostName.isEmpty()) {
-            qWarning() << "No hostName in the server config and none in the xray outbound;"
-                       << "the route and firewall exclusions for the server will be missing";
-        } else {
-            qWarning() << "No hostName in the server config, recovered it from the xray outbound";
-        }
-    }
-
-    vpnConfiguration[configKey::hostName] = effectiveHostName;
+    vpnConfiguration[configKey::hostName] = hostName;
     vpnConfiguration[configKey::description] = description;
     vpnConfiguration[configKey::configVersion] = configVersion;
 

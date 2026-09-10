@@ -12,6 +12,7 @@
 LONG (NTAPI * NtSuspendProcess)(HANDLE ProcessHandle) = NULL;
 LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;
 
+//#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #define STATUS_SUCCESS ((LONG)0x00000000L)
 
 QList<QString> RouterWin::kIpv6Subnets = { "fc00::/7", "2000::/4", "3000::/4" };
