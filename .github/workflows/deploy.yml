@@ -1452,11 +1452,6 @@ jobs:
           cmake --build build --target test_android_openssl_make_apk
           cmake --build build --target test_android_restore_backup_make_apk
 
-      - name: 'List Android test APKs'
-        run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          find build -type f \( -name '*.apk' -o -name '*.aab' \) -print
-
       - name: 'Write Android test runner script'
         run: |
           cat > ci_run_android_tests.sh << 'EOF'
@@ -1471,7 +1466,7 @@ jobs:
 
           run_test() {
             local target="$1"
-            local apk="build/tests/android-build/${target}.apk" # line to change
+            local apk="build/client/tests/android-build/${target}.apk"
             local pkg_name="org.qtproject.example.${target}"
             local activity="${pkg_name}/org.qtproject.qt.android.bindings.QtActivity"
 
