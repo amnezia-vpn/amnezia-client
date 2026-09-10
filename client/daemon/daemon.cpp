@@ -386,7 +386,6 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "vpnDisabledApps", config.m_vpnDisabledApps)) {
     return false;
   }
-  config.m_appSplitTunnelType = obj.value("appSplitTunnelType").toInt(0);
   if (!parseStringList(obj, "allowedDnsServers", config.m_allowedDnsServers)) {
     return false;
   }

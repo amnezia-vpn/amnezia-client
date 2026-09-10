@@ -43,8 +43,6 @@ namespace amnezia
     {
         bool isSitesSplitTunnelingEnabled;
         RouteMode routeMode;
-        bool isAppsSplitTunnelingEnabled;
-        AppsRouteMode appsRouteMode;
     };
 
     struct ConnectionSettings
