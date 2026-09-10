@@ -98,6 +98,12 @@ bool KillSwitch::isStrictKillSwitchEnabled()
 }
 
 bool KillSwitch::disableKillSwitch() {
+#ifdef Q_OS_WIN
+    if (Daemon *daemon = WindowsDaemon::instance()) {
+        daemon->activateSplitTunnel(InterfaceConfig());
+    }
+#endif
+
 #ifdef Q_OS_LINUX
     if (isStrictKillSwitchEnabled()) {
         LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
@@ -272,6 +278,8 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         }
     }
 
+    config.m_appSplitTunnelType =
+            configStr.value(amnezia::configKey::appSplitTunnelType).toInt();
     for (const QJsonValue &i : configStr.value(amnezia::configKey::splitTunnelApps).toArray()) {
         if (!i.isString()) {
             break;
@@ -286,23 +294,28 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
         config.m_allowedDnsServers.append(dns.toString());
     }
 
-    // killSwitch toggle
-    if (QVariant(configStr.value(amnezia::configKey::killSwitchOption).toString()).toBool()) {
-        WindowsFirewall::create(this)->enablePeerTraffic(config);
+    const bool killSwitchEnabled =
+            QVariant(configStr.value(amnezia::configKey::killSwitchOption).toString()).toBool();
+
+    if (killSwitchEnabled) {
+        if (!WindowsFirewall::create(this)->enablePeerTraffic(config)) {
+            return false;
+        }
     }
 
     WindowsDaemon::instance()->prepareActivation(config, inetAdapterIndex);
-    WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
+    return WindowsDaemon::instance()->activateSplitTunnel(config, vpnAdapterIndex);
 #endif
     return true;
 }
 
 bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIndex) {
 #ifdef Q_OS_WIN
-    if (configStr.value("splitTunnelType").toInt() != 0) {
-        WindowsFirewall::create(this)->allowAllTraffic();
-    }
-    return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex);
+    WindowsFirewall::create(this)->allowAllTraffic();
+    const bool includeOnly =
+            configStr.value(amnezia::configKey::appSplitTunnelType).toInt() == 1
+            && !configStr.value(amnezia::configKey::splitTunnelApps).toArray().isEmpty();
+    return WindowsFirewall::create(this)->enableInterface(vpnAdapterIndex, !includeOnly);
 #endif
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)

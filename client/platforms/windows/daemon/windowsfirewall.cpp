@@ -173,7 +173,7 @@ bool WindowsFirewall::initSublayer() {
                         L"DNS filters for split tunneling");
 }
 
-bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
+bool WindowsFirewall::enableInterface(int vpnAdapterIndex, bool blockDns) {
 // Checks if the FW_Rule was enabled succesfully,
 // disables the whole killswitch and returns false if not.
 #define FW_OK(rule)                                                       \
@@ -196,7 +196,6 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
     }                                                                     \
   }
 
-  logger.info() << "Enabling Killswitch Using Adapter:" << vpnAdapterIndex;
   if (vpnAdapterIndex < 0)
   {
     IPAddress allv4("0.0.0.0/0");
@@ -216,11 +215,12 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
   FW_OK(allowHyperVTraffic(MAX_WEIGHT, "Allow Hyper-V Traffic"));
   FW_OK(allowTrafficForAppOnAll(getCurrentPath(), MAX_WEIGHT,
                                 "Allow all for AmneziaVPN.exe"));
-  FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
+  if (blockDns) {
+    FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
+  }
   FW_OK(allowLoopbackTraffic(MED_WEIGHT,
                              "Allow Loopback traffic on device %1"));
 
-  logger.debug() << "Killswitch on! Rules:" << m_activeRules.length();
   return true;
 #undef FW_OK
 }
@@ -287,6 +287,8 @@ bool WindowsFirewall::allowTrafficRange(const QStringList& ranges) {
 
 
 bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
+  const bool includeOnly =
+      config.m_appSplitTunnelType == 1 && !config.m_vpnDisabledApps.isEmpty();
   // Start the firewall transaction
   auto result = FwpmTransactionBegin(m_sessionHandle, NULL);
   if (result != ERROR_SUCCESS) {
@@ -301,9 +303,11 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
   // Build the firewall rules for this peer.
   logger.info() << "Enabling traffic for peer"
                 << config.m_serverPublicKey;
-  if (!blockTrafficTo(config.m_allowedIPAddressRanges, LOW_WEIGHT,
-                      "Block Internet", config.m_serverPublicKey)) {
-    return false;
+  if (!includeOnly) {
+    if (!blockTrafficTo(config.m_allowedIPAddressRanges, LOW_WEIGHT,
+                        "Block Internet", config.m_serverPublicKey)) {
+      return false;
+    }
   }
   if (!config.m_primaryDnsServer.isEmpty()) {
     if (!allowTrafficTo(QHostAddress(config.m_primaryDnsServer), 53, HIGH_WEIGHT,
@@ -431,7 +435,6 @@ bool WindowsFirewall::allowAllTraffic() {
     }
     m_peerRules.clear();
     m_activeRules.clear();
-    logger.debug() << "Firewall Disabled!";
     return true;
 }
 

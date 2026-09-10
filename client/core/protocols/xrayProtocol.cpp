@@ -9,6 +9,7 @@
 #include "ipc.h"
 
 #include <QCryptographicHash>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
@@ -260,6 +261,12 @@ ErrorCode XrayProtocol::setupRouting()
             [this](QSharedPointer<IpcInterfaceReplica> iface) -> ErrorCode {
 #ifdef Q_OS_WIN
                 const int inetAdapterIndex = NetworkUtilities::AdapterIndexTo(QHostAddress(m_remoteAddress));
+                const bool hasSplitTunnelApps =
+                        !m_rawConfig.value(amnezia::configKey::splitTunnelApps).toArray().isEmpty();
+                const bool includeOnlyApps =
+                        hasSplitTunnelApps &&
+                        m_rawConfig.value(amnezia::configKey::appSplitTunnelType).toInt() ==
+                                static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps);
 #endif
                 auto createTun = iface->createTun(tunName, amnezia::protocols::xray::defaultLocalAddr);
                 if (!createTun.waitForFinished() || !createTun.returnValue()) {
@@ -302,7 +309,12 @@ ErrorCode XrayProtocol::setupRouting()
 
                 if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
 #ifdef Q_OS_WIN
-                    auto routeAddDefault = iface->routeAddDefault(tunName);
+                    static constexpr int kExcludeAppsMetric = 1;
+                    static constexpr int kIncludeAppsMetric = 5000;
+                    const int interfaceMetric =
+                            includeOnlyApps ? kIncludeAppsMetric : kExcludeAppsMetric;
+                    auto routeAddDefault = iface->routeAddDefault(
+                            tunName, interfaceMetric);
                     if (!routeAddDefault.waitForFinished() || !routeAddDefault.returnValue()) {
                         qCritical() << "Failed to set the default route for TUN";
                         return ErrorCode::InternalError;
@@ -336,10 +348,16 @@ ErrorCode XrayProtocol::setupRouting()
                     auto enablePeerTraffic = iface->enablePeerTraffic(config);
                     if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
                         qCritical() << "Failed to enable peer traffic";
-                        return ErrorCode::InternalError;
+                        if (includeOnlyApps) {
+                            return ErrorCode::SplitTunnelStartError;
+                        }
                     }
-                } else
+                } else {
                     qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
+                    if (includeOnlyApps) {
+                        return ErrorCode::SplitTunnelAdapterIndexError;
+                    }
+                }
 #endif
                 return ErrorCode::NoError;
             },

@@ -38,7 +38,7 @@ public:
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     int routeDeleteList(const QString &gw, const QStringList &ips);
-    bool routeAddDefault(const QString &dev);
+    bool routeAddDefault(const QString &dev, int interfaceMetric);
     bool routeDeleteDefault(const QString &dev);
     bool flushDns();
     void resetIpStack();

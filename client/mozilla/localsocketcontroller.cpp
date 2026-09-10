@@ -206,11 +206,13 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
           range_ipv4.insert("isIpv6", false);
           jsAllowedIPAddesses.append(range_ipv4);
 
-          QJsonObject range_ipv6;
-          range_ipv6.insert("address", "::");
-          range_ipv6.insert("range", 0);
-          range_ipv6.insert("isIpv6", true);
-          jsAllowedIPAddesses.append(range_ipv6);
+          if (appSplitTunnelType != 1) {
+              QJsonObject range_ipv6;
+              range_ipv6.insert("address", "::");
+              range_ipv6.insert("range", 0);
+              range_ipv6.insert("isIpv6", true);
+              jsAllowedIPAddesses.append(range_ipv6);
+          }
       }
 
       if (splitTunnelType == 1) {
@@ -247,6 +249,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("excludedAddresses", jsExcludedAddresses);
 
   json.insert("vpnDisabledApps", splitTunnelApps);
+  json.insert(amnezia::configKey::appSplitTunnelType, appSplitTunnelType);
 
   json.insert("allowedDnsServers", allowedDns);
 

@@ -89,6 +89,9 @@ QList<WireguardUtils::PeerStatus> WireguardUtilsWindows::getPeerStatus() {
 }
 
 bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
+  m_includeOnlyApps =
+      config.m_appSplitTunnelType == 1 && !config.m_vpnDisabledApps.isEmpty();
+
   QStringList addresses;
   for (const IPAddress& ip : config.m_allowedIPAddressRanges) {
     addresses.append(ip.toString());
@@ -131,7 +134,7 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
     NET_IFINDEX ifindex;
     ConvertInterfaceLuidToIndex(&luid, &ifindex);
     m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
+    m_firewall->enableInterface(ifindex, !m_includeOnlyApps);
   }
 
   logger.debug() << "Registration completed";
@@ -145,10 +148,14 @@ bool WireguardUtilsWindows::deleteInterface() {
 
   m_firewall->disableKillSwitch();
   m_tunnel.stop();
+  m_includeOnlyApps = false;
   return true;
 }
 
 bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
+  m_includeOnlyApps =
+      config.m_appSplitTunnelType == 1 && !config.m_vpnDisabledApps.isEmpty();
+
   QByteArray publicKey =
       QByteArray::fromBase64(qPrintable(config.m_serverPublicKey));
   QByteArray pskKey =
@@ -156,7 +163,10 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall for this peer.
-    m_firewall->enablePeerTraffic(config);
+    if (!m_firewall->enablePeerTraffic(config)) {
+      logger.error() << "Failed to enable firewall rules for peer";
+      return false;
+    }
   }
   logger.debug() << "Configuring peer" << publicKey.toHex()
                  << "via" << config.m_serverIpv4AddrIn;
@@ -245,7 +255,7 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
   // Set the rest of the flags for a static route.
   entry->ValidLifetime = 0xffffffff;
   entry->PreferredLifetime = 0xffffffff;
-  entry->Metric = 0;
+  entry->Metric = m_includeOnlyApps && prefix.prefixLength() == 0 ? 5000 : 0;
   entry->Protocol = MIB_IPPROTO_NETMGMT;
   entry->Loopback = false;
   entry->AutoconfigureAddress = false;
@@ -255,7 +265,9 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
 }
 
 bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
+  const ULONG routeMetric =
+      m_includeOnlyApps && prefix.prefixLength() == 0 ? 5000 : 0;
+  if (m_routeMonitor && prefix.prefixLength() == 0 && !m_includeOnlyApps) {
     // If we are setting up a default route, instruct the route monitor to
     // capture traffic to all non-excluded destinations
     m_routeMonitor->setDetaultRouteCapture(true);
@@ -268,7 +280,7 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
   // Install the route
   DWORD result = CreateIpForwardEntry2(&entry);
   if (result == ERROR_OBJECT_ALREADY_EXISTS) {
-    return true;
+    result = SetIpForwardEntry2(&entry);
   }
 
   // Case for ipv6 route with disabled ipv6

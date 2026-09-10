@@ -54,6 +54,7 @@ class WireguardUtilsWindows final : public WireguardUtils {
   void buildMibForwardRow(const IPAddress& prefix, void* row);
 
   quint64 m_luid = 0;
+  bool m_includeOnlyApps = false;
   WindowsTunnelService m_tunnel;
   QPointer<WindowsRouteMonitor> m_routeMonitor;
   QPointer<WindowsFirewall> m_firewall;

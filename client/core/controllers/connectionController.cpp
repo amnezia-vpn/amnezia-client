@@ -274,7 +274,12 @@ QJsonObject ConnectionController::createConnectionConfiguration(const QPair<QStr
         isApiConfig,
         {
             m_appSettingsRepository->isSitesSplitTunnelingEnabled(),
-            m_appSettingsRepository->routeMode()
+            m_appSettingsRepository->routeMode(),
+            m_appSettingsRepository->isAppsSplitTunnelingEnabled() &&
+                    !m_appSettingsRepository->isStrictKillSwitchEnabled() &&
+                    !m_appSettingsRepository->vpnApps(
+                            m_appSettingsRepository->appsRouteMode()).isEmpty(),
+            m_appSettingsRepository->appsRouteMode()
         }
     };
 
