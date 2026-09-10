@@ -9,6 +9,7 @@
 #include "ipc.h"
 
 #include <QCryptographicHash>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
@@ -80,6 +81,32 @@ ErrorCode XrayProtocol::start()
     m_socksUser = creds.username;
     m_socksPassword = creds.password;
     m_socksPort = creds.port;
+
+    // Compatibility workaround for amnezia-xray-bindings 1.3.0: REALITY with
+    // the chrome uTLS fingerprint may connect successfully but blackhole all
+    // payload traffic. Normalize existing/imported profiles at runtime too.
+    QJsonArray outbounds = m_xrayConfig.value(amnezia::protocols::xray::outbounds).toArray();
+    for (qsizetype i = 0; i < outbounds.size(); ++i) {
+        QJsonObject outbound = outbounds.at(i).toObject();
+        QJsonObject stream = outbound.value(amnezia::protocols::xray::streamSettings).toObject();
+        if (stream.value(amnezia::protocols::xray::security).toString() != QLatin1String("reality"))
+            continue;
+
+        QJsonObject reality = stream.value(amnezia::protocols::xray::realitySettings).toObject();
+        if (reality.value(amnezia::protocols::xray::fingerprint).toString()
+                .compare(QLatin1String("chrome"), Qt::CaseInsensitive) != 0) {
+            continue;
+        }
+
+        reality[amnezia::protocols::xray::fingerprint] =
+                QString::fromLatin1(amnezia::protocols::xray::defaultFingerprint);
+        stream[amnezia::protocols::xray::realitySettings] = reality;
+        outbound[amnezia::protocols::xray::streamSettings] = stream;
+        outbounds[i] = outbound;
+        qWarning() << "XrayProtocol: replaced incompatible REALITY chrome fingerprint with"
+                   << amnezia::protocols::xray::defaultFingerprint;
+    }
+    m_xrayConfig[amnezia::protocols::xray::outbounds] = outbounds;
 
     QString xrayConfigStr = QJsonDocument(m_xrayConfig).toJson(QJsonDocument::Compact);
     if (xrayConfigStr.isEmpty()) {
