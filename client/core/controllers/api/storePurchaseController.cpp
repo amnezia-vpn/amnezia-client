@@ -145,6 +145,7 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
     qInfo() << "[Billing][importServiceFromMarket] endpoint:" << endpoint << "isTestPurchase:" << isTestPurchase;
     ErrorCode errorCode = executeRequest(QString("%1") + endpoint, apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
+        qWarning().noquote() << "[IAP] Request" << endpoint << "failed, errorCode =" << static_cast<int>(errorCode);
         return errorCode;
     }
 
@@ -523,9 +524,13 @@ ErrorCode StorePurchaseController::processAppStoreTransactionUpdate(const QStrin
     ErrorCode errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
                                                   originalTransactionId, isTestPurchase, duplicateServerIndex,
                                                   QStringLiteral("v1/restore_subscription"));
+    if (errorCode == ErrorCode::ApiNotFoundError || errorCode == ErrorCode::ApiConfigDownloadError) {
+        qInfo().noquote() << "[IAP] Gateway has no record of this purchase, registering it instead of restoring";
+        errorCode = importServiceFromMarket(userCountryCode, serviceType, serviceProtocol, protocolData,
+                                            originalTransactionId, isTestPurchase, duplicateServerIndex,
+                                            QStringLiteral("v1/subscriptions"));
+    }
 
-    // On validation failure the transaction is left unfinished so it is redelivered
-    // by the Transaction.updates listener on the next app launch
     if (errorCode == ErrorCode::NoError || errorCode == ErrorCode::ApiConfigAlreadyAdded) {
         IosController::Instance()->finishStoreTransaction(transactionId);
     }
@@ -689,6 +694,12 @@ bool StorePurchaseController::processUnacknowledgedPlayPurchases(const QJsonArra
 
         ErrorCode errorCode = finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol,
                                                    purchaseToken, false, nullptr, QStringLiteral("v1/restore_subscription"));
+        if (errorCode == ErrorCode::ApiNotFoundError || errorCode == ErrorCode::ApiConfigDownloadError) {
+            qInfo().noquote() << "[Billing] Gateway has no record of this purchase, registering it instead of restoring";
+            errorCode = finalizePlayPurchase(userCountryCode, serviceType, serviceProtocol,
+                                             purchaseToken, false, nullptr, QStringLiteral("v1/subscriptions"));
+        }
+
         if (errorCode == ErrorCode::NoError) {
             installedNewConfig = true;
         } else if (errorCode != ErrorCode::ApiConfigAlreadyAdded) {
