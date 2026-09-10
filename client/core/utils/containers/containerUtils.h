@@ -45,8 +45,6 @@ namespace amnezia
 
         bool isAwgContainer(DockerContainer container);
 
-        bool isXrayContainer(DockerContainer container);
-
         bool isUnsupportedContainer(DockerContainer container);
 
         QJsonObject getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig);

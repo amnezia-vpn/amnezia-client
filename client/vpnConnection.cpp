@@ -139,7 +139,8 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 #ifdef Q_OS_WIN
                     const RouteMode effectiveRouteMode =
                             static_cast<RouteMode>(m_vpnConfiguration.value(configKey::splitTunnelType).toInt());
-                    const bool isXray = ContainerUtils::isXrayContainer(container);
+                    const bool isXray = container == DockerContainer::Xray
+                            || container == DockerContainer::SSXray;
 
                     if (!isXray || effectiveRouteMode != amnezia::RouteMode::VpnAllSites) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
