@@ -27,7 +27,9 @@ class WindowsRouteMonitor final : public QObject {
   void setDetaultRouteCapture(bool enable);
 
   bool addExclusionRoute(const IPAddress& prefix);
+  bool addExclusionRouteList(const QList<IPAddress>& prefixes);
   bool deleteExclusionRoute(const IPAddress& prefix);
+  bool deleteExclusionRouteList(const QList<IPAddress>& prefixes);
   void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 
   quint64 getLuid() const { return m_luid; }
