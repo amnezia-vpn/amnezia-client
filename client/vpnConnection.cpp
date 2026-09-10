@@ -145,8 +145,7 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #elif defined(Q_OS_MACOS)
-                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() ||
-                        m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
+                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #else

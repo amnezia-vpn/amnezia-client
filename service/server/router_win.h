@@ -15,7 +15,6 @@
 #include <WS2tcpip.h>
 
 #include <iphlpapi.h>
-//#include <IcmpAPI.h>
 #include <stdio.h>
 #include <stdlib.h>
 
