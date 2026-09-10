@@ -12,7 +12,7 @@
 LONG (NTAPI * NtSuspendProcess)(HANDLE ProcessHandle) = NULL;
 LONG (NTAPI * NtResumeProcess)(HANDLE ProcessHandle)  = NULL;
 
-#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#define STATUS_SUCCESS ((LONG)0x00000000L)
 
 QList<QString> RouterWin::kIpv6Subnets = { "fc00::/7", "2000::/4", "3000::/4" };
 
@@ -149,8 +149,117 @@ int RouterWin::routeAddList(const QString &gw, const QStringList &ips)
     return success_count;
 }
 
+bool RouterWin::buildDefaultRow(const QString &dev, MIB_IPFORWARD_ROW2 *entry)
+{
+    NET_LUID luid;
+    DWORD res = ConvertInterfaceAliasToLuid(reinterpret_cast<const wchar_t *>(dev.utf16()), &luid);
+    if (res != NO_ERROR) {
+        qWarning() << "RouterWin: failed to resolve luid for" << dev << ", error:" << res;
+        return false;
+    }
+
+    InitializeIpForwardEntry(entry);
+
+    entry->InterfaceLuid = luid;
+    entry->DestinationPrefix.Prefix.si_family = AF_INET;
+    entry->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
+    entry->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = INADDR_ANY;
+    entry->DestinationPrefix.PrefixLength = 0;
+
+    entry->NextHop.si_family = AF_INET;
+    entry->NextHop.Ipv4.sin_family = AF_INET;
+    entry->NextHop.Ipv4.sin_addr.s_addr = INADDR_ANY;
+
+    entry->ValidLifetime = 0xffffffff;
+    entry->PreferredLifetime = 0xffffffff;
+    entry->Metric = 0;
+    entry->Protocol = MIB_IPPROTO_NETMGMT;
+    entry->Loopback = false;
+    entry->AutoconfigureAddress = false;
+    entry->Publish = false;
+    entry->Immortal = false;
+    entry->Age = 0;
+
+    return true;
+}
+
+static constexpr ULONG kTunnelInterfaceMetric = 1;
+
+static bool setInterfaceMetric(const NET_LUID &luid, ULONG metric)
+{
+    MIB_IPINTERFACE_ROW iface;
+    InitializeIpInterfaceEntry(&iface);
+    iface.Family = AF_INET;
+    iface.InterfaceLuid = luid;
+
+    DWORD res = GetIpInterfaceEntry(&iface);
+    if (res != NO_ERROR) {
+        qWarning() << "RouterWin: GetIpInterfaceEntry failed, error:" << res;
+        return false;
+    }
+
+    iface.UseAutomaticMetric = FALSE;
+    iface.Metric = metric;
+    iface.SitePrefixLength = 0;
+
+    res = SetIpInterfaceEntry(&iface);
+    if (res != NO_ERROR) {
+        qWarning() << "RouterWin: SetIpInterfaceEntry failed, error:" << res;
+        return false;
+    }
+
+    return true;
+}
+
+bool RouterWin::routeAddDefault(const QString &dev)
+{
+    MIB_IPFORWARD_ROW2 entry;
+    if (!buildDefaultRow(dev, &entry)) {
+        return false;
+    }
+
+    if (!setInterfaceMetric(entry.InterfaceLuid, kTunnelInterfaceMetric)) {
+        qCritical() << "RouterWin::routeAddDefault: refusing to install a default route on" << dev
+                    << "without a deterministic interface metric";
+        return false;
+    }
+
+    DWORD res = CreateIpForwardEntry2(&entry);
+    if (res != NO_ERROR && res != ERROR_OBJECT_ALREADY_EXISTS) {
+        qCritical() << "RouterWin::routeAddDefault: failed for" << dev << ", error:" << res;
+        return false;
+    }
+
+    m_defaultRoutes.insert(dev, entry);
+
+    return true;
+}
+
+bool RouterWin::routeDeleteDefault(const QString &dev)
+{
+    MIB_IPFORWARD_ROW2 entry;
+    if (m_defaultRoutes.contains(dev)) {
+        entry = m_defaultRoutes.take(dev);
+    } else if (!buildDefaultRow(dev, &entry)) {
+        return true;
+    }
+
+    DWORD res = DeleteIpForwardEntry2(&entry);
+    if (res != NO_ERROR && res != ERROR_NOT_FOUND) {
+        qCritical() << "RouterWin::routeDeleteDefault: failed for" << dev << ", error:" << res;
+        return false;
+    }
+
+    return true;
+}
+
 bool RouterWin::clearSavedRoutes()
 {
+    const QStringList defaultRouteDevices = m_defaultRoutes.keys();
+    for (const QString &dev : defaultRouteDevices) {
+        routeDeleteDefault(dev);
+    }
+
     if (m_ipForwardRows.isEmpty()) return true;
 
     qDebug() << "RouterWin::clearSavedRoutes forward rows size:" << m_ipForwardRows.size();
