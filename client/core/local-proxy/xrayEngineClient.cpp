@@ -15,11 +15,12 @@ XrayEngineClient::~XrayEngineClient()
 
 bool XrayEngineClient::start(const QString &configJson)
 {
-    if (m_isRunning) {
+    if (isRunning()) {
         return true;
     }
 
     m_lastError.clear();
+    m_token = 0;
 
     if (configJson.trimmed().isEmpty()) {
         m_lastError = QStringLiteral("Config content is empty");
@@ -27,32 +28,35 @@ bool XrayEngineClient::start(const QString &configJson)
         return false;
     }
 
-    const bool started = IpcClient::withInterface(
-            [&](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStart = iface->xrayStart(configJson);
-                return xrayStart.waitForFinished() && xrayStart.returnValue();
+    const qint64 token = IpcClient::withInterface(
+            [&](QSharedPointer<IpcInterfaceReplica> iface) -> qint64 {
+                auto xrayStart = iface->xrayStartOwned(configJson);
+                if (!xrayStart.waitForFinished()) {
+                    return 0;
+                }
+                return xrayStart.returnValue();
             },
-            []() { return false; });
+            []() -> qint64 { return 0; });
 
-    if (!started) {
+    if (token == 0) {
         m_lastError = kIpcUnavailableError;
         qCWarning(lcLocalProxy) << "Failed to start Xray via IPC";
         return false;
     }
 
-    m_isRunning = true;
+    m_token = token;
     return true;
 }
 
 bool XrayEngineClient::stop()
 {
-    if (!m_isRunning) {
+    if (m_token == 0) {
         return true;
     }
 
     const bool stopped = IpcClient::withInterface(
-            [](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStop = iface->xrayStop();
+            [this](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto xrayStop = iface->xrayStopOwned(m_token);
                 return xrayStop.waitForFinished() && xrayStop.returnValue();
             },
             []() { return false; });
@@ -63,13 +67,22 @@ bool XrayEngineClient::stop()
         return false;
     }
 
-    m_isRunning = false;
+    m_token = 0;
     return true;
 }
 
 bool XrayEngineClient::isRunning() const
 {
-    return m_isRunning;
+    if (m_token == 0) {
+        return false;
+    }
+
+    return IpcClient::withInterface(
+            [this](QSharedPointer<IpcInterfaceReplica> iface) {
+                auto currentToken = iface->xrayCurrentToken();
+                return currentToken.waitForFinished() && currentToken.returnValue() == m_token;
+            },
+            []() { return false; });
 }
 
 QString XrayEngineClient::lastError() const
