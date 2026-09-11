@@ -111,7 +111,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: (Qt.platform.os === "android") && root.pageEnabled
+            enabled: root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -121,6 +121,16 @@ PageType {
                 selectedIndex: getRouteModesModelIndex()
 
                 clickedFunction: function() {
+                    if (Qt.platform.os === "windows"
+                            && root.routeModesModel[selectedIndex].type === routeMode.onlyForwardApps
+                            && SettingsController.strictKillSwitchEnabled) {
+                        PageController.showNotificationMessage(
+                                    qsTr("This mode is not available while Strict KillSwitch is enabled"))
+                        selectedIndex = getRouteModesModelIndex()
+                        selector.text = root.routeModesModel[selectedIndex].name
+                        selector.closeTriggered()
+                        return
+                    }
                     selector.text = selectedText
                     selector.closeTriggered()
                     if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
@@ -151,10 +161,12 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
+            textString: qsTr("Site-based split tunneling is ignored when only listed apps use the VPN")
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
-            visible: (Qt.platform.os === "windows") && root.pageEnabled
+            visible: (Qt.platform.os === "windows")
+                     && root.pageEnabled
+                     && AppSplitTunnelingController.routeMode === routeMode.onlyForwardApps
         }
     }
 

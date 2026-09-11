@@ -64,6 +64,7 @@ QJsonObject InterfaceConfig::toJson() const {
     disabledApps.append(QJsonValue(i));
   }
   json.insert("vpnDisabledApps", disabledApps);
+  json.insert("appSplitTunnelType", m_appSplitTunnelType);
 
   return json;
 }
