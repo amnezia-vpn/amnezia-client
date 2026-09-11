@@ -62,6 +62,8 @@ public:
     QJsonObject acknowledgePurchase(const QString &purchaseToken);
     QJsonObject queryPurchases();
 
+    QString runNetworkDiagnostics();
+
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
 

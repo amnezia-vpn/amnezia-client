@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QMetaEnum>
 #include <QStandardPaths>
+#include <QSysInfo>
 #include <QUrl>
 
 #include "core/utils/utilities.h"
@@ -16,8 +17,13 @@
     #include <core/utils/ipcClient.h>
 #endif
 
+#ifdef Q_OS_ANDROID
+    #include "platforms/android/android_controller.h"
+#endif
+
 #ifdef Q_OS_IOS
     #include "core/utils/swiftBridge.h"
+    #include "platforms/ios/ios_network_diagnostics.h"
 #endif
 
 QFile Logger::m_file;
@@ -104,6 +110,58 @@ bool Logger::setServiceLogsEnabled(bool enabled)
     return true;
 }
 
+bool Logger::saveNetworkDiagnosticsResult(const QString &result)
+{
+    if (result.startsWith(QLatin1String("ERROR:"))) {
+        qWarning() << "Logger::runNetworkDiagnostics():" << result;
+        return false;
+    }
+
+    QDir().mkpath(userLogsDir());
+    const QString path = newNetworkDiagnosticsFilePath();
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        qWarning() << "Logger::runNetworkDiagnostics(): failed to open" << path;
+        return false;
+    }
+
+    QTextStream ts(&file);
+    ts << QString("===== Amnezia network diagnostics - %1 =====\n%2 (%3)\n%4 %5 %6\n\n")
+                  .arg(QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd hh:mm:ss.zzz'Z'"),
+                       QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture(),
+                       APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
+    ts << result << "\n\n";
+
+    qDebug() << "Logger::runNetworkDiagnostics(): saved to" << path;
+    return true;
+}
+
+bool Logger::runNetworkDiagnostics()
+{
+#ifdef AMNEZIA_DESKTOP
+    return IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+        QRemoteObjectPendingReply<QString> reply = iface->runNetworkDiagnostics();
+        // Must exceed the service-side script timeout (30s, networkdiagnostics.cpp)
+        // plus margin for the IPC round-trip.
+        if (!reply.waitForFinished(35000)) {
+            qWarning() << "Logger::runNetworkDiagnostics(): IPC call timed out";
+            return false;
+        }
+        return saveNetworkDiagnosticsResult(reply.returnValue());
+    }, []() {
+        qWarning() << "Logger::runNetworkDiagnostics(): Service is not running";
+        return false;
+    });
+#elif defined(Q_OS_ANDROID)
+    return saveNetworkDiagnosticsResult(AndroidController::instance()->runNetworkDiagnostics());
+#elif defined(Q_OS_IOS)
+    return saveNetworkDiagnosticsResult(QString::fromStdString(
+            AmneziaVPN::swiftRunNetworkDiagnostics(iosDnsServersDiagnostics().toStdString())));
+#else
+    return false;
+#endif
+}
+
 QString Logger::userLogsDir()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/log";
@@ -133,6 +191,24 @@ QString Logger::userLogsFilePath()
 QString Logger::serviceLogsFilePath()
 {
     return systemLogDir() + QDir::separator() + m_serviceLogFileName;
+}
+
+QString Logger::newNetworkDiagnosticsFilePath()
+{
+    const QString timestamp = QDateTime::currentDateTime().toString("yyyy-MM-dd_HH-mm-ss");
+    return userLogsDir() + QDir::separator() + QStringLiteral("Amnezia-network-%1.log").arg(timestamp);
+}
+
+QString Logger::latestNetworkDiagnosticsFilePath()
+{
+    QDir dir(userLogsDir());
+    // "yyyy-MM-dd_HH-mm-ss" sorts lexicographically in chronological order,
+    // so the last entry in a name-sorted listing is the most recent run.
+    const QStringList files = dir.entryList({ QStringLiteral("Amnezia-network-*.log") }, QDir::Files, QDir::Name);
+    if (files.isEmpty()) {
+        return QString();
+    }
+    return dir.filePath(files.last());
 }
 
 QString Logger::getLogFile()
@@ -167,6 +243,17 @@ QString Logger::getServiceLogFile()
 #else
     return qtLog;
 #endif
+}
+
+QString Logger::getNetworkDiagnosticsFile()
+{
+    const QString path = latestNetworkDiagnosticsFilePath();
+    if (path.isEmpty()) {
+        return QString();
+    }
+    QFile file(path);
+    file.open(QIODevice::ReadOnly);
+    return QString::fromUtf8(file.readAll());
 }
 
 bool Logger::openLogsFolder(bool isServiceLogger)

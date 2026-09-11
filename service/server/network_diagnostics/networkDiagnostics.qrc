@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/network_diagnostics">
+        <file>network-diagnostics-linux.sh</file>
+        <file>network-diagnostics-macos.sh</file>
+        <file>network-diagnostics-windows.ps1</file>
+    </qresource>
+</RCC>
