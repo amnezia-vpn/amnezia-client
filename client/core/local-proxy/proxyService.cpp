@@ -38,9 +38,7 @@ bool ProxyService::startXray()
 
 bool ProxyService::stopXray()
 {
-    if (!m_engine.isRunning()) {
-        return true;
-    }
+    const bool wasRunning = m_engine.isRunning();
 
     if (!m_engine.stop()) {
         qCWarning(lcLocalProxy) << "Failed to stop Xray:" << m_engine.lastError();
@@ -48,8 +46,10 @@ bool ProxyService::stopXray()
     }
 
     m_cachedConfig = QJsonObject();
-    qCInfo(lcLocalProxy) << "Xray stopped";
-    emit xrayStatusChanged(false);
+    if (wasRunning) {
+        qCInfo(lcLocalProxy) << "Xray stopped";
+        emit xrayStatusChanged(false);
+    }
     return true;
 }
 

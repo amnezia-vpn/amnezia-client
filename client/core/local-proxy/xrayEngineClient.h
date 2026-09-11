@@ -14,7 +14,9 @@ public:
     QString lastError() const;
 
 private:
-    bool m_isRunning = false;
+    // Owner token of the shared xray engine (see Xray::start in the service).
+    // 0 means this client doesn't own a running engine.
+    qint64 m_token = 0;
     QString m_lastError;
 };
 

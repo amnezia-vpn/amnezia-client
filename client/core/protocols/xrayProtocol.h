@@ -38,6 +38,10 @@ private:
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;
     static constexpr int tun2socksRetryDelayMs = 400;
+
+    // Owner token of the shared xray engine; a late stop with a stale token
+    // won't kill an engine restarted by another consumer (e.g. the local proxy).
+    qint64 m_xrayToken = 0;
 };
 
 #endif // XRAYPROTOCOL_H
