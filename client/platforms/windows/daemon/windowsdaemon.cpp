@@ -26,6 +26,7 @@
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/routeModes.h"
+#include "../windowscommons.h"
 
 namespace {
 Logger logger("WindowsDaemon");
@@ -117,7 +118,14 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     return true;
   }
   if (config.m_vpnDisabledApps.length() > 0) {
-    if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
+    const bool includeOnly =
+        config.m_appSplitTunnelType ==
+        static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps);
+    int vpnAdapterIndex = WindowsCommons::VPNAdapterIndex();
+    if (vpnAdapterIndex < 0) {
+      vpnAdapterIndex = 0;
+    }
+    if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex, includeOnly)) {
       logger.error() << "Split tunnel start failed";
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
       return false;

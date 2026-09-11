@@ -29,6 +29,7 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/routeModes.h"
 
 // How many times do we try to reconnect.
 constexpr int MAX_CONNECTION_RETRY = 10;
@@ -199,6 +200,9 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   } else {
 
     // Use APP split tunnel
+      const bool includeOnlyApps =
+              appSplitTunnelType == static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps)
+              && !splitTunnelApps.isEmpty();
       if (splitTunnelType == 0 || splitTunnelType == 2) {
           QJsonObject range_ipv4;
           range_ipv4.insert("address", "0.0.0.0");
@@ -206,11 +210,13 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
           range_ipv4.insert("isIpv6", false);
           jsAllowedIPAddesses.append(range_ipv4);
 
-          QJsonObject range_ipv6;
-          range_ipv6.insert("address", "::");
-          range_ipv6.insert("range", 0);
-          range_ipv6.insert("isIpv6", true);
-          jsAllowedIPAddesses.append(range_ipv6);
+          if (!includeOnlyApps) {
+              QJsonObject range_ipv6;
+              range_ipv6.insert("address", "::");
+              range_ipv6.insert("range", 0);
+              range_ipv6.insert("isIpv6", true);
+              jsAllowedIPAddesses.append(range_ipv6);
+          }
       }
 
       if (splitTunnelType == 1) {
@@ -247,6 +253,7 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
   json.insert("excludedAddresses", jsExcludedAddresses);
 
   json.insert("vpnDisabledApps", splitTunnelApps);
+  json.insert(amnezia::configKey::appSplitTunnelType, appSplitTunnelType);
 
   json.insert("allowedDnsServers", allowedDns);
 
