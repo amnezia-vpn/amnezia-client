@@ -1514,6 +1514,15 @@ jobs:
           EOF
           chmod +x ci_run_android_tests.sh
 
+      - name: 'Verify Android test files'
+        run: |
+          echo "Runner script:"
+          grep 'local apk=' ci_run_android_tests.sh
+
+          echo
+          echo "APKs:"
+          find build -type f -name '*.apk' -print
+
       - name: 'Run Android tests on emulator'
         uses: reactivecircus/android-emulator-runner@v2
         with:
