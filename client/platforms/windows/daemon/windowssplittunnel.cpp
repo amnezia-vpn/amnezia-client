@@ -315,6 +315,7 @@ bool WindowsSplitTunnel::excludeApps(const QStringList& appPaths) {
     logger.error() << "Failed to set Config err code " << err;
     return false;
   }
+  logger.debug() << "New Configuration applied: " << stateString();
   return true;
 }
 
@@ -322,6 +323,7 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex,
                                bool invertTunnelInternet) {
   // To Start we need to send 2 things:
   // Network info (what is vpn what is network)
+  logger.debug() << "Starting SplitTunnel";
   DWORD bytesReturned;
 
   if (getState() == STATE_STARTED) {
@@ -374,15 +376,11 @@ bool WindowsSplitTunnel::start(int inetAdapterIndex, int vpnAdapterIndex,
     logger.error() << "Failed to set Network Config. Error:" << GetLastError();
     return false;
   }
+  logger.debug() << "New Network Config Applied || new State:" << stateString();
   return true;
 }
 
 void WindowsSplitTunnel::stop() {
-  const DRIVER_STATE state = getState();
-  if (state != STATE_RUNNING) {
-    return;
-  }
-
   DWORD bytesReturned;
   auto ok = DeviceIoControl(m_driver, IOCTL_CLEAR_CONFIGURATION, nullptr, 0,
                             nullptr, 0, &bytesReturned, nullptr);
@@ -390,6 +388,7 @@ void WindowsSplitTunnel::stop() {
     logger.error() << "Stopping Split tunnel not successfull";
     return;
   }
+  logger.debug() << "Stopping Split tunnel successfull";
 }
 
 bool WindowsSplitTunnel::resetDriver(HANDLE driverIO) {

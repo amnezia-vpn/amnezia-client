@@ -307,14 +307,30 @@ ErrorCode XrayProtocol::setupRouting()
                         qWarning() << "Failed to get vpnAdapterIndex. Killswitch disabled";
                 }
 
+#ifdef Q_OS_WIN
+                if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
+                    QJsonObject config = m_rawConfig;
+                    config.insert("inetAdapterIndex", inetAdapterIndex);
+                    config.insert("vpnAdapterIndex", vpnAdapterIndex);
+                    config.insert("vpnGateway", m_vpnGateway);
+                    config.insert("vpnServer", m_remoteAddress);
+
+                    auto enablePeerTraffic = iface->enablePeerTraffic(config);
+                    if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
+                        qCritical() << "Failed to enable peer traffic";
+                        return ErrorCode::InternalError;
+                    }
+                } else {
+                    qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
+                    if (includeOnlyApps) {
+                        return ErrorCode::InternalError;
+                    }
+                }
+#endif
+
                 if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
 #ifdef Q_OS_WIN
-                    static constexpr int kExcludeAppsMetric = 1;
-                    static constexpr int kIncludeAppsMetric = 5000;
-                    const int interfaceMetric =
-                            includeOnlyApps ? kIncludeAppsMetric : kExcludeAppsMetric;
-                    auto routeAddDefault = iface->routeAddDefault(
-                            tunName, interfaceMetric);
+                    auto routeAddDefault = iface->routeAddDefault(tunName);
                     if (!routeAddDefault.waitForFinished() || !routeAddDefault.returnValue()) {
                         qCritical() << "Failed to set the default route for TUN";
                         return ErrorCode::InternalError;
@@ -336,29 +352,6 @@ ErrorCode XrayProtocol::setupRouting()
                     qCritical() << "Failed to disable IPv6 routing";
                     return ErrorCode::InternalError;
                 }
-
-#ifdef Q_OS_WIN
-                if (inetAdapterIndex != -1 && vpnAdapterIndex != -1) {
-                    QJsonObject config = m_rawConfig;
-                    config.insert("inetAdapterIndex", inetAdapterIndex);
-                    config.insert("vpnAdapterIndex", vpnAdapterIndex);
-                    config.insert("vpnGateway", m_vpnGateway);
-                    config.insert("vpnServer", m_remoteAddress);
-
-                    auto enablePeerTraffic = iface->enablePeerTraffic(config);
-                    if (!enablePeerTraffic.waitForFinished() || !enablePeerTraffic.returnValue()) {
-                        qCritical() << "Failed to enable peer traffic";
-                        if (includeOnlyApps) {
-                            return ErrorCode::SplitTunnelStartError;
-                        }
-                    }
-                } else {
-                    qWarning() << "Failed to get adapter indexes. Split-tunneling disabled";
-                    if (includeOnlyApps) {
-                        return ErrorCode::SplitTunnelAdapterIndexError;
-                    }
-                }
-#endif
                 return ErrorCode::NoError;
             },
             []() { return ErrorCode::AmneziaServiceConnectionFailed; });

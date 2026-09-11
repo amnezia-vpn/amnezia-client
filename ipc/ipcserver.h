@@ -22,7 +22,7 @@ public:
     virtual int routeAddList(const QString &gw, const QStringList &ips) override;
     virtual bool clearSavedRoutes() override;
     virtual bool routeDeleteList(const QString &gw, const QStringList &ips) override;
-    virtual bool routeAddDefault(const QString &dev, int interfaceMetric) override;
+    virtual bool routeAddDefault(const QString &dev) override;
     virtual bool routeDeleteDefault(const QString &dev) override;
     virtual bool flushDns() override;
     virtual void resetIpStack() override;

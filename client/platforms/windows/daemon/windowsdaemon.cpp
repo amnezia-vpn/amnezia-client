@@ -100,9 +100,6 @@ bool WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAd
 }
 
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
-  const bool includeOnly =
-      config.m_appSplitTunnelType ==
-      static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps);
   if (!m_splitTunnelManager) {
     if (config.m_vpnDisabledApps.length() > 0) {
       // The Client has sent us a list of disabled apps, but we failed
@@ -120,7 +117,7 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     return true;
   }
   if (config.m_vpnDisabledApps.length() > 0) {
-    if (!m_splitTunnelManager->start(m_inetAdapterIndex, 0, includeOnly)) {
+    if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
       logger.error() << "Split tunnel start failed";
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
       return false;

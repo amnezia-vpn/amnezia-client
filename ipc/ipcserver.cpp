@@ -91,13 +91,13 @@ bool IpcServer::routeDeleteList(const QString &gw, const QStringList &ips)
     return Router::routeDeleteList(gw, ips);
 }
 
-bool IpcServer::routeAddDefault(const QString &dev, int interfaceMetric)
+bool IpcServer::routeAddDefault(const QString &dev)
 {
 #ifdef MZ_DEBUG
     qDebug() << "IpcServer::routeAddDefault";
 #endif
 
-    return Router::routeAddDefault(dev, interfaceMetric);
+    return Router::routeAddDefault(dev);
 }
 
 bool IpcServer::routeDeleteDefault(const QString &dev)

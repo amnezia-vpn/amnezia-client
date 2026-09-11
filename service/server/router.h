@@ -19,7 +19,7 @@ public:
     static int routeAddList(const QString &gw, const QStringList &ips);
     static bool clearSavedRoutes();
     static int routeDeleteList(const QString &gw, const QStringList &ips);
-    static bool routeAddDefault(const QString &dev, int interfaceMetric);
+    static bool routeAddDefault(const QString &dev);
     static bool routeDeleteDefault(const QString &dev);
     static bool flushDns();
     static void resetIpStack();

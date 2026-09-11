@@ -196,6 +196,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex, bool blockDns) {
     }                                                                     \
   }
 
+  logger.info() << "Enabling Killswitch Using Adapter:" << vpnAdapterIndex;
   if (vpnAdapterIndex < 0)
   {
     IPAddress allv4("0.0.0.0/0");
@@ -221,6 +222,7 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex, bool blockDns) {
   FW_OK(allowLoopbackTraffic(MED_WEIGHT,
                              "Allow Loopback traffic on device %1"));
 
+  logger.debug() << "Killswitch on! Rules:" << m_activeRules.length();
   return true;
 #undef FW_OK
 }
@@ -435,6 +437,7 @@ bool WindowsFirewall::allowAllTraffic() {
     }
     m_peerRules.clear();
     m_activeRules.clear();
+    logger.debug() << "Firewall Disabled!";
     return true;
 }
 

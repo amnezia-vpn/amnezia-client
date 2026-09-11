@@ -42,13 +42,12 @@ int Router::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 }
 
-bool Router::routeAddDefault(const QString &dev, int interfaceMetric)
+bool Router::routeAddDefault(const QString &dev)
 {
 #ifdef Q_OS_WIN
-    return RouterWin::Instance().routeAddDefault(dev, interfaceMetric);
+    return RouterWin::Instance().routeAddDefault(dev);
 #else
     Q_UNUSED(dev)
-    Q_UNUSED(interfaceMetric)
     return false;
 #endif
 }

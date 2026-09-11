@@ -183,6 +183,13 @@ bool RouterWin::buildDefaultRow(const QString &dev, MIB_IPFORWARD_ROW2 *entry)
     return true;
 }
 
+static constexpr ULONG kTunnelInterfaceMetric = 1;
+
+void RouterWin::setDefaultRouteInterfaceMetric(ULONG metric)
+{
+    m_defaultRouteInterfaceMetric = metric == 0 ? kTunnelInterfaceMetric : metric;
+}
+
 static bool setInterfaceMetric(const NET_LUID &luid, ULONG metric)
 {
     MIB_IPINTERFACE_ROW iface;
@@ -209,19 +216,14 @@ static bool setInterfaceMetric(const NET_LUID &luid, ULONG metric)
     return true;
 }
 
-bool RouterWin::routeAddDefault(const QString &dev, int interfaceMetric)
+bool RouterWin::routeAddDefault(const QString &dev)
 {
-    if (interfaceMetric <= 0) {
-        qCritical() << "RouterWin::routeAddDefault: invalid interface metric:" << interfaceMetric;
-        return false;
-    }
-
     MIB_IPFORWARD_ROW2 entry;
     if (!buildDefaultRow(dev, &entry)) {
         return false;
     }
 
-    if (!setInterfaceMetric(entry.InterfaceLuid, static_cast<ULONG>(interfaceMetric))) {
+    if (!setInterfaceMetric(entry.InterfaceLuid, m_defaultRouteInterfaceMetric)) {
         qCritical() << "RouterWin::routeAddDefault: refusing to install a default route on" << dev
                     << "without a deterministic interface metric";
         return false;
