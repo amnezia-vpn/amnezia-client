@@ -257,6 +257,10 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family) {
     return;
   }
 
+  // Keep the connected-interface view fresh when this overload is used
+  // outside routeChanged()/addExclusionRoute().
+  updateInterfaceMetrics(family);
+
   PMIB_IPFORWARD_TABLE2 table;
   DWORD error = GetIpForwardTable2(family, &table);
   if (error != NO_ERROR) {
@@ -274,11 +278,40 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     return;
   }
 
+  // Build a prefix index once per reconciliation pass. Only LOCAL, on-link
+  // routes on currently connected non-VPN interfaces are admitted. Membership
+  // checks are then bounded by the address width (33 IPv4 / 129 IPv6 prefix
+  // lengths) instead of scanning the full routing table for every candidate.
+  WindowsRouteCapturePolicy::ConnectedPrefixIndex connectedPrefixes;
+  for (ULONG i = 0; i < table->NumEntries; i++) {
+    MIB_IPFORWARD_ROW2* row = &table->Table[i];
+    if (!WindowsRouteCapturePolicy::isConnectedLocalRoute(row, m_luid)) {
+      continue;
+    }
+
+    if (row->DestinationPrefix.Prefix.si_family == AF_INET) {
+      if (!m_interfaceMetricsIpv4.contains(row->InterfaceLuid.Value)) {
+        continue;
+      }
+    } else if (row->DestinationPrefix.Prefix.si_family == AF_INET6) {
+      if (!m_interfaceMetricsIpv6.contains(row->InterfaceLuid.Value)) {
+        continue;
+      }
+    } else {
+      continue;
+    }
+
+    connectedPrefixes.add(&row->DestinationPrefix);
+  }
+
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
     bool routeExcluded = isRouteExcluded(&row->DestinationPrefix);
+    bool destinationOnConnectedNetwork =
+        connectedPrefixes.contains(&row->DestinationPrefix);
     if (!WindowsRouteCapturePolicy::shouldCaptureRoute(
-            row, m_luid, routeExcluded, EXCLUSION_ROUTE_METRIC)) {
+            row, m_luid, routeExcluded, destinationOnConnectedNetwork,
+            EXCLUSION_ROUTE_METRIC)) {
       continue;
     }
 
