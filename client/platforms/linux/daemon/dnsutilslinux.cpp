@@ -4,6 +4,8 @@
 
 #include "dnsutilslinux.h"
 
+#include <cerrno>
+#include <cstring>
 #include <net/if.h>
 
 #include <QDBusVariant>
@@ -29,6 +31,11 @@ DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
   QDBusConnection conn = QDBusConnection::systemBus();
   m_resolver = new QDBusInterface(DBUS_RESOLVE_SERVICE, DBUS_RESOLVE_PATH,
                                   DBUS_RESOLVE_MANAGER, conn, this);
+  if (!m_resolver->isValid()) {
+    logger.error() << "Failed to create D-Bus interface to systemd-resolved:"
+                   << m_resolver->lastError().name()
+                   << m_resolver->lastError().message();
+  }
 }
 
 DnsUtilsLinux::~DnsUtilsLinux() {
@@ -54,7 +61,8 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
                                     const QList<QHostAddress>& resolvers) {
   m_ifindex = if_nametoindex(qPrintable(ifname));
   if (m_ifindex <= 0) {
-    logger.error() << "Unable to resolve ifindex for" << ifname;
+    logger.error() << "Unable to resolve ifindex for" << ifname << ":"
+                   << strerror(errno);
     return false;
   }
 
@@ -90,7 +98,8 @@ bool DnsUtilsLinux::restoreResolvers() {
 void DnsUtilsLinux::dnsCallCompleted(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<> reply = *call;
   if (reply.isError()) {
-    logger.error() << "Error received from the DBus service";
+    logger.error() << "Error received from the DBus service:"
+                   << reply.error().name() << reply.error().message();
   }
   delete call;
 }
@@ -175,7 +184,8 @@ void DnsUtilsLinux::updateLinkDomains() {
 void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   QDBusPendingReply<QVariant> reply = *call;
   if (reply.isError()) {
-    logger.error() << "Error retrieving the DNS  domains from the DBus service";
+    logger.error() << "Error retrieving the DNS domains from the DBus service:"
+                   << reply.error().name() << reply.error().message();
     delete call;
     return;
   }

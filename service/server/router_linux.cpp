@@ -170,8 +170,22 @@ bool RouterLinux::flushDns()
         qDebug() << "Restarting nscd.service";
         p.start("systemctl", { "restart", "nscd" });
     } else if (isServiceActive("systemd-resolved.service")) {
-        qDebug() << "Restarting systemd-resolved.service";
-        p.start("systemctl", { "restart", "systemd-resolved" });
+        qDebug() << "Flushing systemd-resolved caches";
+        p.start("resolvectl", { "flush-caches" });
+        p.waitForStarted();
+        // Use a short timeout — resolvectl can hang for ~25s if systemd-resolved
+        // is busy processing DNS config changes we just made via DBus.
+        // A failed cache flush is harmless (stale cache entries will expire naturally).
+        // Do NOT fall back to restarting systemd-resolved, as that destroys the
+        // per-link DNS configuration we just set up on the VPN interface.
+        if (!p.waitForFinished(5000)) {
+            qWarning() << "resolvectl flush-caches timed out after 5s, killing process";
+            p.kill();
+            p.waitForFinished(1000);
+        } else if (p.exitCode() != 0) {
+            qWarning() << "resolvectl flush-caches failed with exit code" << p.exitCode()
+                       << "output:" << p.readAll();
+        }
     } else {
         qDebug() << "No suitable DNS manager found.";
         return false;
@@ -182,7 +196,7 @@ bool RouterLinux::flushDns()
     if (output.isEmpty())
         qDebug().noquote() << "Flush dns completed";
     else
-        qDebug().noquote() << "OUTPUT systemctl restart nscd/systemd-resolved: " + output;
+        qDebug().noquote() << "OUTPUT flush dns: " + output;
 
     return true;
 }
