@@ -55,11 +55,12 @@ public:
     void requestNotificationPermission();
     bool requestAuthentication();
     void sendTouch(float x, float y);
-
-    void showUpdateCover();
-    void hideUpdateCover();
-    void showUpdatePrompt(const QString &title, const QString &message, const QString &updateTitle,
-                          const QString &skipTitle, const QString &storeUrl);
+    bool isPlay();
+    QJsonObject getSubscriptionPlans();
+    QJsonObject purchaseSubscription(const QString &offerToken);
+    QJsonObject upgradeSubscription(const QString &offerToken, const QString &oldPurchaseToken);
+    QJsonObject acknowledgePurchase(const QString &purchaseToken);
+    QJsonObject queryPurchases();
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);

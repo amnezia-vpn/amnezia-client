@@ -10,6 +10,10 @@ sudo iptables -C FORWARD -i docker0 ! -o docker0 -j ACCEPT || sudo iptables -A F
 sudo iptables -C FORWARD -i docker0 -o docker0 -j ACCEPT || sudo iptables -A FORWARD -i docker0 -o docker0 -j ACCEPT
 
 # Tuning network
+# Telegram proxies (mtproxy/telemt/tproxy) each open hundreds of middle-proxy
+# connections; the default nf_conntrack_max (often 8192) overflows and new
+# connections get dropped, so raise it.
+sudo sysctl -w net.netfilter.nf_conntrack_max=262144 2>/dev/null || true; \
 sudo sysctl fs.file-max=51200; \
 sudo sysctl net.core.rmem_max=67108864; \
 sudo sysctl net.core.wmem_max=67108864; \

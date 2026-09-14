@@ -118,6 +118,9 @@ QJsonObject ApiConfig::toJson() const
     if (!serverCountryCode.isEmpty()) {
         obj[apiDefs::key::serverCountryCode] = serverCountryCode;
     }
+    if (!serverCountryCodeL10n.isEmpty()) {
+        obj[apiDefs::key::serverCountryCodeL10n] = serverCountryCodeL10n;
+    }
     if (!serverCountryName.isEmpty()) {
         obj[apiDefs::key::serverCountryName] = serverCountryName;
     }
@@ -181,6 +184,7 @@ ApiConfig ApiConfig::fromJson(const QJsonObject& json)
     config.serviceProtocol = json.value(QLatin1String("service_protocol")).toString();
     config.userCountryCode = json.value(QLatin1String("user_country_code")).toString();
     config.serverCountryCode = json.value(apiDefs::key::serverCountryCode).toString();
+    config.serverCountryCodeL10n = json.value(apiDefs::key::serverCountryCodeL10n).toString();
     config.serverCountryName = json.value(apiDefs::key::serverCountryName).toString();
     config.vpnKey = json.value(apiDefs::key::vpnKey).toString();
     

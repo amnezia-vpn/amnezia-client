@@ -79,6 +79,7 @@ QMap<DockerContainer, QString> ContainerUtils::containerHumanNames()
              { DockerContainer::Socks5Proxy, QObject::tr("SOCKS5 proxy server") },
              { DockerContainer::MtProxy, QObject::tr("MTProxy (Telegram)") },
              { DockerContainer::Telemt, QObject::tr("Telemt (Telegram)") },
+             { DockerContainer::TProxy, QObject::tr("TProxy (Telegram WEB)") },
     };
 }
 
@@ -117,6 +118,8 @@ QMap<DockerContainer, QString> ContainerUtils::containerDescriptions()
                QObject::tr("Telegram MTProto proxy server") },
              { DockerContainer::Telemt,
                QObject::tr("Telegram MTProto proxy (Telemt, Rust)") },
+             { DockerContainer::TProxy,
+               QObject::tr("Telegram WEB proxy (tproxy-server)") },
     };
 }
 
@@ -196,6 +199,10 @@ QMap<DockerContainer, QString> ContainerUtils::containerDetailedDescriptions()
         { DockerContainer::Telemt,
           QObject::tr("Telegram MTProto proxy powered by Telemt (Rust). "
                       "Supports secure and TLS fronting modes with optional traffic masking.") },
+        { DockerContainer::TProxy,
+          QObject::tr("Telegram WEB proxy. Clients connect over HTTPS to a hostname; "
+                      "the server relays traffic to official MTProxy. Requires a domain, "
+                      "ports 80 and 443, and a WEB-capable Telegram app.") },
     };
 }
 
@@ -227,6 +234,7 @@ Proto ContainerUtils::defaultProtocol(DockerContainer c)
     case DockerContainer::Socks5Proxy: return Proto::Socks5Proxy;
     case DockerContainer::MtProxy: return Proto::MtProxy;
     case DockerContainer::Telemt: return Proto::Telemt;
+    case DockerContainer::TProxy: return Proto::TProxy;
     default: return Proto::Unknown;
     }
 }
@@ -256,6 +264,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::SSXray: return true;
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
+    case DockerContainer::TProxy: return true;
     default:
         return false;
     }
@@ -273,6 +282,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::SSXray: return true;
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
+    case DockerContainer::TProxy: return true;
     default:
         return false;
     }
@@ -293,6 +303,7 @@ bool ContainerUtils::isSupportedByCurrentPlatform(DockerContainer c)
     case DockerContainer::SSXray: return true;
     case DockerContainer::MtProxy: return true;
     case DockerContainer::Telemt: return true;
+    case DockerContainer::TProxy: return true;
     default: return false;
     }
 
@@ -361,6 +372,7 @@ bool ContainerUtils::isShareable(DockerContainer container)
     case DockerContainer::Socks5Proxy: return false;
     case DockerContainer::MtProxy: return false;
     case DockerContainer::Telemt: return false;
+    case DockerContainer::TProxy: return false;
     default: return true;
     }
 }
@@ -396,6 +408,7 @@ int ContainerUtils::installPageOrder(DockerContainer container)
     case DockerContainer::SSXray: return 8;
     case DockerContainer::MtProxy:
     case DockerContainer::Telemt:
+    case DockerContainer::TProxy:
         return 20;
     default: return 0;
     }

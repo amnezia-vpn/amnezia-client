@@ -36,6 +36,8 @@ QtObject {
         readonly property color richBrown: '#633303'
         readonly property color deepBrown: '#402102'
         readonly property color vibrantRed: '#EB5757'
+        readonly property color vibrantGreen: '#3FBF6B'
+        readonly property color deepMagenta: '#950051'
         readonly property color darkCharcoal: '#261E1A'
         readonly property color pearlGray: '#EAEAEC'
 
@@ -73,6 +75,21 @@ QtObject {
         readonly property color translucentOnyxBlack: Qt.rgba(28/255, 29/255, 33/255, 0.13)
 
         readonly property string goldenApricotString: '#FBB26A'
+
+        readonly property color backgroundBase: '#101012'
+        readonly property color surfaceBase: '#18181B'
+        readonly property color surfaceHovered: '#232327'
+        readonly property color surfacePressed: '#2C2D30'
+        readonly property color surfaceInverse: '#E4E4E7'
+        readonly property color surfaceInverseHovered: '#D4D4D8'
+        readonly property color surfaceInversePressed: '#A1A1AA'
+        readonly property color textPrimary: '#FAFAFA'
+        readonly property color textTertiary: '#A1A1AA'
+        readonly property color textInverted: '#09090B'
+        readonly property color textStaticWhite: '#FFFFFF'
+        readonly property color borderSoft: '#3F3F46'
+        readonly property color accentSuccess: '#4ADE80'
+        readonly property color accentWarning: '#EAB308'
     }
 
     readonly property QtObject lightColor: QtObject {
@@ -95,6 +112,8 @@ QtObject {
         readonly property color richBrown: '#633303'
         readonly property color deepBrown: '#402102'
         readonly property color vibrantRed: '#EB5757'
+        readonly property color vibrantGreen: '#3FBF6B'
+        readonly property color deepMagenta: '#950051'
         readonly property color darkCharcoal: '#E3E4E7'       // subtle "in progress" ring
         readonly property color pearlGray: '#2C2D30'          // near-foreground text
 
@@ -138,5 +157,20 @@ QtObject {
 
         // Deeper apricot than dark mode's #FBB26A — the pale tone is too low-contrast on white.
         readonly property string goldenApricotString: '#E38E41'
+
+        readonly property color backgroundBase: midnightBlack
+        readonly property color surfaceBase: onyxBlack
+        readonly property color surfaceHovered: slateGray
+        readonly property color surfacePressed: charcoalGray
+        readonly property color surfaceInverse: paleGray
+        readonly property color surfaceInverseHovered: lightGray
+        readonly property color surfaceInversePressed: mutedGray
+        readonly property color textPrimary: paleGray
+        readonly property color textTertiary: mutedGray
+        readonly property color textInverted: midnightBlack
+        readonly property color textStaticWhite: '#FFFFFF'
+        readonly property color borderSoft: charcoalGray
+        readonly property color accentSuccess: '#16803C'
+        readonly property color accentWarning: '#946800'
     }
 }

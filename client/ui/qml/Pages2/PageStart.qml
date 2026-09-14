@@ -251,6 +251,10 @@ PageType {
             PageController.showNotificationMessage(message)
         }
 
+        function onBackgroundPurchaseCompleted(message) {
+            PageController.showNotificationMessage(message)
+        }
+
         function onChangeApiCountryFinished(message) {
             PageController.goToPageHome()
             PageController.showNotificationMessage(message)

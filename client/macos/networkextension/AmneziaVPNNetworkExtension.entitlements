@@ -6,12 +6,7 @@
 	<true/>
 	<key>com.apple.developer.networking.networkextension</key>
 	<array>
-		<string>dns-settings</string>
-		<string>relay</string>
 		<string>packet-tunnel-provider</string>
-		<string>content-filter-provider</string>
-		<string>dns-proxy</string>
-		<string>app-proxy-provider</string>
 	</array>
 	<key>com.apple.developer.networking.vpn.api</key>
 	<array>

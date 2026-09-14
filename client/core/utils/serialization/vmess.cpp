@@ -170,7 +170,7 @@ QJsonObject Deserialize(const QString &vmessStr, QString *alias, QString *errMes
     //   - It can be empty, if so,           if the key is not in the JSON, or the value is empty,  report an error.
     //   - Else if it contains one thing.    if the key is not in the JSON, or the value is empty,  use that one.
     //   - Else if it contains many things,  when the key IS in the JSON but not within the THINGS, use the first in the THINGS
-    //   - Else -------------------------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  use the JSON value
+    //   - Else -------------------------------------------- use the JSON value
     //
 #define __vmess_checker__func(key, values)                                                                                                               \
     {                                                                                                                                                    \

@@ -21,7 +21,7 @@ PageType {
 
         readonly property string title: qsTr("Telegram")
         readonly property string description: "@" + ApiAccountInfoModel.getTelegramBotLink()
-        readonly property string link: "https://t.me/" + ApiAccountInfoModel.getTelegramBotLink()
+        readonly property string link: "https://telegram.me/" + ApiAccountInfoModel.getTelegramBotLink()
     }
 
     QtObject {

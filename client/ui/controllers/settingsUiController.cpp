@@ -240,6 +240,16 @@ void SettingsUiController::toggleNewsNotificationsEnabled(bool enable)
     m_settingsController->toggleNewsNotificationsEnabled(enable);
 }
 
+bool SettingsUiController::isAutoUpdateCheckEnabled()
+{
+    return m_settingsController->isAutoUpdateCheckEnabled();
+}
+
+void SettingsUiController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_settingsController->toggleAutoUpdateCheckEnabled(enable);
+}
+
 bool SettingsUiController::isCameraPresent()
 {
 #if defined Q_OS_IOS
