@@ -27,6 +27,9 @@ public:
     QLocale getAppLanguage() const;
     void setAppLanguage(QLocale locale);
 
+    int getAppThemeMode() const;
+    void setAppThemeMode(int mode);
+
     bool useAmneziaDns() const;
     void setUseAmneziaDns(bool enabled);
     QStringList getAllowedDnsServers() const;

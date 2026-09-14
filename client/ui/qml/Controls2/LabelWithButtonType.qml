@@ -40,7 +40,10 @@ Item {
     property int borderFocusedWidth: 1
 
     property string rightImageColor: AmneziaStyle.color.paleGray
-    property string leftImageColor: ""
+    // Tint the leading icon with the theme's primary icon color so the monochrome
+    // controls/*.svg glyphs (baked as light gray) stay visible in light mode. Pass
+    // leftImageColor: "" to keep an icon's original colors (e.g. flags, accent badges).
+    property string leftImageColor: AmneziaStyle.color.paleGray
 
     property bool descriptionOnTop: false
     property bool hideDescription: true

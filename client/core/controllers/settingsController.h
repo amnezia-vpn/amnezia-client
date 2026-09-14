@@ -89,6 +89,9 @@ public:
     QLocale getAppLanguage() const;
     void setAppLanguage(const QLocale &locale);
 
+    int getThemeMode() const;
+    void setThemeMode(int mode);
+
 signals:
     void siteSplitTunnelingRouteModeChanged(RouteMode mode);
     void siteSplitTunnelingToggled(bool enabled);

@@ -183,11 +183,11 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: #FBB26A;\">WinFsp</a>"
-                readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: #FBB26A;\">SSHFS-Win</a>"
+                readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: " + AmneziaStyle.color.goldenApricotString + ";\">WinFsp</a>"
+                readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: " + AmneziaStyle.color.goldenApricotString + ";\">SSHFS-Win</a>"
 
-                readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">macFUSE</a>"
-                readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">SSHFS</a>"
+                readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: " + AmneziaStyle.color.goldenApricotString + ";\">macFUSE</a>"
+                readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: " + AmneziaStyle.color.goldenApricotString + ";\">SSHFS</a>"
 
                 onLinkActivated: function(link) {
                     Qt.openUrlExternally(link)

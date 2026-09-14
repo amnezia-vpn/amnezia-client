@@ -75,6 +75,7 @@ PageType {
                 descriptionColor: AmneziaStyle.color.vibrantRed
 
                 leftImageSource: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
+                leftImageColor: "" // keep the flag's original colors
                 rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
 
                 clickedFunction: function() {
