@@ -55,6 +55,14 @@ private:
         clientConfig[configKey::specialJunk3] = protocols::awg::defaultSpecialJunk3;
         clientConfig[configKey::specialJunk4] = protocols::awg::defaultSpecialJunk4;
         clientConfig[configKey::specialJunk5] = protocols::awg::defaultSpecialJunk5;
+        clientConfig[configKey::initPacketJunkSize] = QString::number(protocols::awg::initPacketJunkSizeMax);
+        clientConfig[configKey::responsePacketJunkSize] = QString::number(protocols::awg::responsePacketJunkSizeMax);
+        clientConfig[configKey::cookieReplyPacketJunkSize] = QString::number(protocols::awg::cookieReplyPacketJunkSizeMax);
+        clientConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultPadding;
+        clientConfig[configKey::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
+        clientConfig[configKey::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;
+        clientConfig[configKey::underloadPacketMagicHeader] = protocols::awg::defaultUnderloadPacketMagicHeader;
+        clientConfig[configKey::transportPacketMagicHeader] = protocols::awg::defaultTransportPacketMagicHeader;
         clientConfig[configKey::clientPrivKey] = "test_client_private_key";
         clientConfig[configKey::clientPubKey] = "test_client_public_key";
         clientConfig[configKey::serverPubKey] = "test_server_public_key";
@@ -71,9 +79,9 @@ private:
         awgConfig[configKey::junkPacketCount] = protocols::awg::defaultJunkPacketCount;
         awgConfig[configKey::junkPacketMinSize] = protocols::awg::defaultJunkPacketMinSize;
         awgConfig[configKey::junkPacketMaxSize] = protocols::awg::defaultJunkPacketMaxSize;
-        awgConfig[configKey::initPacketJunkSize] = protocols::awg::initPacketJunkSizeMax;
-        awgConfig[configKey::responsePacketJunkSize] = protocols::awg::responsePacketJunkSizeMax;
-        awgConfig[configKey::cookieReplyPacketJunkSize] = protocols::awg::cookieReplyPacketJunkSizeMax;
+        awgConfig[configKey::initPacketJunkSize] = QString::number(protocols::awg::initPacketJunkSizeMax);
+        awgConfig[configKey::responsePacketJunkSize] = QString::number(protocols::awg::responsePacketJunkSizeMax);
+        awgConfig[configKey::cookieReplyPacketJunkSize] = QString::number(protocols::awg::cookieReplyPacketJunkSizeMax);
         awgConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultPadding;
         awgConfig[configKey::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
         awgConfig[configKey::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;

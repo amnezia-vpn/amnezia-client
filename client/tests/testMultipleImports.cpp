@@ -41,11 +41,11 @@ private:
 
         const auto description = serverDescriptionAt(m_coreController->m_serversRepository, expected-1);
         QVERIFY2(description.has_value(), "Server config should exist");
-        if (*description == expectedDescription) qWarning() << "Server description should match";
+        if (*description != expectedDescription) qWarning() << "Server description should match";
 
         if (m_coreController->m_serversModel) {
             QString modelDesc = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(expected-1, 0), ServersModel::NameRole).toString();
-            if (modelDesc == expectedDescription) qWarning() << "Server description in model should match";
+            if (modelDesc != expectedDescription) qWarning() << "Server description in model should match";
         }
     }
 
@@ -145,8 +145,8 @@ private slots:
         const auto description0 = serverDescriptionAt(m_coreController->m_serversRepository, 0);
         const auto description1 = serverDescriptionAt(m_coreController->m_serversRepository, 1);
         QVERIFY2(description0.has_value() && description1.has_value(), "Server configs should exist");
-        if (*description0 == "AWG Server") qWarning() << "First server description should match";
-        if (*description1 == "Xray Server") qWarning() << "Second server description should match";
+        if (*description0 != "AWG Server") qWarning() << "First server description should match";
+        if (*description1 != "Xray Server") qWarning() << "Second server description should match";
 
         defaultServerChangedSpy.clear();
         serverRemovedSpy.clear();
@@ -165,7 +165,7 @@ private slots:
         if (m_coreController->m_serversModel) {
             QVERIFY2(m_coreController->m_serversModel->rowCount() == 1, "After removing first server, model row count should be 1");
             QString modelDesc = m_coreController->m_serversModel->data(m_coreController->m_serversModel->index(0, 0), ServersModel::NameRole).toString();
-            if (modelDesc == "Xray Server") qWarning() << "Remaining server description in model should match";
+            if (modelDesc != "Xray Server") qWarning() << "Remaining server description in model should match";
         }
 
         defaultServerChangedSpy.clear();
