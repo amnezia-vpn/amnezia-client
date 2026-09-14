@@ -6,9 +6,13 @@
 
 #include <errno.h>
 
+#include <algorithm>
+
+#include <QAbstractSocket>
 #include <QByteArray>
 #include <QDir>
 #include <QFile>
+#include <QHostAddress>
 #include <QLocalSocket>
 #include <QTimer>
 #include <QThread>
@@ -184,6 +188,12 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
             if (!config.m_secondaryDnsServer.isEmpty()) {
                 params.dnsServers.append(config.m_secondaryDnsServer);
             }
+            const bool hasIpv6TunnelRoute = std::any_of(config.m_allowedIPAddressRanges.begin(),
+                                                        config.m_allowedIPAddressRanges.end(),
+                                                        [](const IPAddress &ip) {
+                return ip.type() == QAbstractSocket::IPv6Protocol;
+            });
+            params.blockIPv6 = config.m_deviceIpv6Address.isEmpty() || !hasIpv6TunnelRoute;
             if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
                 params.blockAll = true;
                 if (config.m_excludedAddresses.size()) {
@@ -248,9 +258,9 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     if (!config.m_serverPskKey.isNull()) {
         out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
     }
-    if (!config.m_serverIpv4AddrIn.isNull()) {
+    if (!config.m_serverIpv4AddrIn.isEmpty()) {
         out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-    } else if (!config.m_serverIpv6AddrIn.isNull()) {
+    } else if (!config.m_serverIpv6AddrIn.isEmpty()) {
         out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
     } else {
         logger.warning() << "Failed to create peer with no endpoints";
@@ -269,8 +279,12 @@ bool WireguardUtilsLinux::updatePeer(const InterfaceConfig& config) {
     // Exclude the server address, except for multihop exit servers.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        if (!QHostAddress(config.m_serverIpv4AddrIn).isNull()) {
+            m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        }
+        if (!QHostAddress(config.m_serverIpv6AddrIn).isNull()) {
+            m_rtmonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        }
     }
 
     int err = uapiErrno(uapiCommand(message));
@@ -287,8 +301,12 @@ bool WireguardUtilsLinux::deletePeer(const InterfaceConfig& config) {
     // Clear exclustion routes for this peer.
     if ((config.m_hopType != InterfaceConfig::MultiHopExit) &&
         (m_rtmonitor != nullptr)) {
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-        m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        if (!QHostAddress(config.m_serverIpv4AddrIn).isNull()) {
+            m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+        }
+        if (!QHostAddress(config.m_serverIpv6AddrIn).isNull()) {
+            m_rtmonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+        }
     }
 
     QString message;
@@ -370,7 +388,7 @@ bool WireguardUtilsLinux::deleteRoutePrefix(const IPAddress& prefix) {
         return false;
     }
     if (prefix.prefixLength() > 0) {
-        return m_rtmonitor->insertRoute(prefix);
+        return m_rtmonitor->deleteRoute(prefix);
     }
 
     // Ensure that we do not replace the default route.
@@ -503,16 +521,16 @@ void WireguardUtilsLinux::applyFirewallRules(FirewallParams& params)
 
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("000.allowLoopback"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("100.blockAll"), params.blockAll);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("110.allowNets"), params.allowNets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("110.allowNets"), params.allowNets);
     LinuxFirewall::updateAllowNets(params.allowAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("120.blockNets"), params.blockNets);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("120.blockNets"), params.blockNets);
     LinuxFirewall::updateBlockNets(params.blockAddrs);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("200.allowVPN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("200.allowVPN"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv6, QStringLiteral("250.blockIPv6"), params.blockIPv6);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("290.allowDHCP"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("300.allowLAN"), true);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("310.blockDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("310.blockDNS"), true);
     LinuxFirewall::updateDNSServers(params.dnsServers);
-    LinuxFirewall::setAnchorEnabled(LinuxFirewall::IPv4, QStringLiteral("320.allowDNS"), true);
+    LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("320.allowDNS"), true);
     LinuxFirewall::setAnchorEnabled(LinuxFirewall::Both, QStringLiteral("400.allowPIA"), true);
 }

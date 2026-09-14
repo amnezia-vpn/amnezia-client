@@ -1,6 +1,7 @@
 #include "networkUtilities.h"
 #include <QtNetwork/qnetworkinterface.h>
 #include <cstddef>
+#include <cstring>
 
 #ifdef Q_OS_WIN
     #include <windows.h>
@@ -23,6 +24,7 @@
     #include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <unistd.h>
+    #include <QFile>
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     #include <sys/param.h>
@@ -159,19 +161,29 @@ bool NetworkUtilities::checkIPv4Format(const QString &ip)
 
 bool NetworkUtilities::checkIpSubnetFormat(const QString &ip)
 {
-    if (!ip.contains("/"))
-        return checkIPv4Format(ip);
+    QString normalized = ip.trimmed();
+    if (normalized.startsWith("[") && normalized.endsWith("]")) {
+        normalized = normalized.mid(1, normalized.size() - 2);
+    }
 
-    QStringList parts = ip.split("/");
-    if (parts.size() != 2)
-        return false;
+    if (!normalized.contains("/")) {
+        const QHostAddress address(normalized);
+        return address.protocol() == QAbstractSocket::IPv4Protocol ||
+               address.protocol() == QAbstractSocket::IPv6Protocol;
+    }
 
-    bool ok;
-    int subnet = parts.at(1).toInt(&ok);
-    if (subnet >= 0 && subnet <= 32 && ok)
-        return checkIPv4Format(parts.at(0));
-    else
+    const auto subnet = QHostAddress::parseSubnet(normalized);
+    if (subnet.first.isNull()) {
         return false;
+    }
+
+    if (subnet.first.protocol() == QAbstractSocket::IPv4Protocol) {
+        return subnet.second >= 0 && subnet.second <= 32;
+    }
+    if (subnet.first.protocol() == QAbstractSocket::IPv6Protocol) {
+        return subnet.second >= 0 && subnet.second <= 128;
+    }
+    return false;
 }
 
 // static
@@ -179,6 +191,29 @@ int NetworkUtilities::AdapterIndexTo(const QHostAddress& dst) {
 #ifdef Q_OS_WIN
     qDebug() << "Getting Current Internet Adapter that routes to"
              << dst.toString();
+    if (dst.protocol() == QAbstractSocket::IPv6Protocol) {
+        SOCKADDR_INET destination {};
+        destination.si_family = AF_INET6;
+        const Q_IPV6ADDR ipv6 = dst.toIPv6Address();
+        static_assert(sizeof(destination.Ipv6.sin6_addr.s6_addr) == sizeof(ipv6),
+                      "IPv6 address buffers must have matching sizes");
+        for (size_t i = 0; i < sizeof(ipv6); ++i) {
+            destination.Ipv6.sin6_addr.s6_addr[i] = ipv6[i];
+        }
+
+        MIB_IPFORWARD_ROW2 routeInfo {};
+        auto result = GetBestRoute2(nullptr, 0, nullptr, &destination, 0, &routeInfo, nullptr);
+        if (result != NO_ERROR) {
+            return -1;
+        }
+        auto adapter = QNetworkInterface::interfaceFromIndex(routeInfo.InterfaceIndex);
+        qDebug() << "Internet Adapter:" << adapter.name();
+        return routeInfo.InterfaceIndex;
+    }
+    if (dst.protocol() != QAbstractSocket::IPv4Protocol) {
+        return -1;
+    }
+
     quint32 ipBigEndian;
     quint32 ip = dst.toIPv4Address();
     qToBigEndian(ip, &ipBigEndian);
@@ -502,5 +537,66 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
     }
 
     return { gateway, QNetworkInterface::interfaceFromIndex(index) };
+#endif
+}
+
+QPair<QString, QNetworkInterface> NetworkUtilities::getIpv6GatewayAndIface()
+{
+#ifdef Q_OS_LINUX
+    // Parse /proc/net/ipv6_route for the default route (::/0) gateway.
+    // Columns: dest(32hex) destPrefix(2hex) src(32hex) srcPrefix(2hex)
+    //          nextHop(32hex) metric refcnt use flags(8hex) iface
+    QFile routeFile("/proc/net/ipv6_route");
+    if (!routeFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return {};
+    }
+
+    constexpr quint32 RTF_UP = 0x0001;
+    constexpr quint32 RTF_GATEWAY = 0x0002;
+    const QString zeroAddr(32, '0');
+
+    // Note: QFile::atEnd() can't be used here — procfs files report size 0,
+    // so atEnd() is true immediately. readLine() returns empty only at real EOF.
+    for (QByteArray rawLine = routeFile.readLine(); !rawLine.isEmpty();
+         rawLine = routeFile.readLine()) {
+        const QString line = QString::fromLatin1(rawLine);
+        const QStringList fields = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+        if (fields.size() < 10) {
+            continue;
+        }
+
+        // Default route: all-zero destination with a /0 prefix length.
+        if (fields.at(1) != "00" || fields.at(0) != zeroAddr) {
+            continue;
+        }
+
+        bool flagsOk = false;
+        const quint32 flags = fields.at(8).toUInt(&flagsOk, 16);
+        if (!flagsOk || !(flags & RTF_UP) || !(flags & RTF_GATEWAY)) {
+            continue;
+        }
+
+        const QString nextHopHex = fields.at(4);
+        if (nextHopHex.size() != 32 || nextHopHex == zeroAddr) {
+            continue;
+        }
+
+        Q_IPV6ADDR raw;
+        bool byteOk = true;
+        for (int i = 0; i < 16 && byteOk; ++i) {
+            raw[i] = static_cast<quint8>(nextHopHex.mid(i * 2, 2).toUInt(&byteOk, 16));
+        }
+        if (!byteOk) {
+            continue;
+        }
+
+        const QString gateway = QHostAddress(raw).toString();
+        const QString ifaceName = fields.at(9).trimmed();
+        qDebug() << "IPv6 gateway" << gateway << "for interface" << ifaceName;
+        return { gateway, QNetworkInterface::interfaceFromName(ifaceName) };
+    }
+    return {};
+#else
+    return {};
 #endif
 }

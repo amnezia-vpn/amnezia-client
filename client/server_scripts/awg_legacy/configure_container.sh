@@ -12,7 +12,7 @@ echo $WIREGUARD_PSK > /opt/amnezia/awg/wireguard_psk.key
 cat > /opt/amnezia/awg/wg0.conf <<EOF
 [Interface]
 PrivateKey = $WIREGUARD_SERVER_PRIVATE_KEY
-Address = $AWG_SUBNET_IP/$WIREGUARD_SUBNET_CIDR
+Address = $AWG_SUBNET_IP/$WIREGUARD_SUBNET_CIDR, $AWG_SUBNET_IPV6/$WIREGUARD_SUBNET_IPV6_CIDR
 ListenPort = $AWG_SERVER_PORT
 Jc = $JUNK_PACKET_COUNT
 Jmin = $JUNK_PACKET_MIN_SIZE

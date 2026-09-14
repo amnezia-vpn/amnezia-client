@@ -1,7 +1,9 @@
 #include "importController.h"
 
 #include <QDataStream>
+#include <QAbstractSocket>
 #include <QDebug>
+#include <QHostAddress>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -33,6 +35,77 @@ using namespace ProtocolUtils;
 
 namespace
 {
+    QString stripPrefixLength(const QString &address)
+    {
+        return address.trimmed().section("/", 0, 0).trimmed();
+    }
+
+    QStringList splitConfigValues(const QString &value)
+    {
+        QStringList result;
+        const QStringList parts = value.split(",", Qt::SkipEmptyParts);
+        for (const QString &part : parts) {
+            const QString trimmed = part.trimmed();
+            if (!trimmed.isEmpty()) {
+                result << trimmed;
+            }
+        }
+        return result;
+    }
+
+    bool parseWireGuardEndpoint(const QString &endpoint, QString &hostName, QString &port)
+    {
+        const QString trimmedEndpoint = endpoint.trimmed();
+        if (trimmedEndpoint.isEmpty()) {
+            return false;
+        }
+
+        if (trimmedEndpoint.startsWith("[")) {
+            const int closingBracketIndex = trimmedEndpoint.indexOf("]");
+            if (closingBracketIndex <= 1) {
+                return false;
+            }
+
+            hostName = trimmedEndpoint.mid(1, closingBracketIndex - 1);
+            const QString rest = trimmedEndpoint.mid(closingBracketIndex + 1);
+            if (rest.startsWith(":")) {
+                port = rest.mid(1);
+            }
+            return !hostName.isEmpty();
+        }
+
+        const int lastColonIndex = trimmedEndpoint.lastIndexOf(":");
+        if (lastColonIndex > 0) {
+            const QString possibleHost = trimmedEndpoint.left(lastColonIndex);
+            const QString possiblePort = trimmedEndpoint.mid(lastColonIndex + 1);
+            bool isPort = false;
+            possiblePort.toUShort(&isPort);
+            const QHostAddress possibleAddress(possibleHost);
+            if (isPort && (trimmedEndpoint.count(":") == 1 || possibleAddress.protocol() == QAbstractSocket::IPv6Protocol)) {
+                hostName = possibleHost;
+                port = possiblePort;
+                return true;
+            }
+        }
+
+        const QUrl url = QUrl::fromUserInput(trimmedEndpoint);
+        if (!url.host().isEmpty()) {
+            hostName = url.host();
+            if (url.port() != -1) {
+                port = QString::number(url.port());
+            }
+            return true;
+        }
+
+        const QHostAddress address(trimmedEndpoint);
+        if (!address.isNull()) {
+            hostName = trimmedEndpoint;
+            return true;
+        }
+
+        return false;
+    }
+
     ConfigTypes checkConfigFormat(const QString &config)
     {
         const QString openVpnConfigPatternCli = "client";
@@ -522,19 +595,14 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     QJsonObject lastConfig;
     lastConfig[configKey::config] = data;
 
-    auto url { QUrl::fromUserInput(configMap.value(protocols::wireguard::Endpoint)) };
     QString hostName;
     QString port;
-    if (!url.host().isEmpty()) {
-        hostName = url.host();
-    } else {
+    if (!parseWireGuardEndpoint(configMap.value(protocols::wireguard::Endpoint), hostName, port)) {
         qDebug() << "Key parameter" << protocols::wireguard::Endpoint << "is missing or has an invalid format";
         return QJsonObject();
     }
 
-    if (url.port() != -1) {
-        port = QString::number(url.port());
-    } else {
+    if (port.isEmpty()) {
         port = protocols::wireguard::defaultPort;
     }
 
@@ -545,7 +613,15 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
             && !configMap.value(protocols::wireguard::Address).isEmpty()
             && !configMap.value(protocols::wireguard::PublicKey).isEmpty()) {
         lastConfig[configKey::clientPrivKey] = configMap.value(protocols::wireguard::PrivateKey);
-        lastConfig[configKey::clientIp] = configMap.value(protocols::wireguard::Address);
+        const QStringList addresses = splitConfigValues(configMap.value(protocols::wireguard::Address));
+        for (const QString &address : addresses) {
+            const QHostAddress hostAddress(stripPrefixLength(address));
+            if (hostAddress.protocol() == QAbstractSocket::IPv4Protocol && !lastConfig.contains(configKey::clientIp)) {
+                lastConfig[configKey::clientIp] = address;
+            } else if (hostAddress.protocol() == QAbstractSocket::IPv6Protocol && !lastConfig.contains(configKey::clientIpv6)) {
+                lastConfig[configKey::clientIpv6] = address;
+            }
+        }
 
         if (!configMap.value(protocols::wireguard::PresharedKey).isEmpty()) {
             lastConfig[configKey::pskKey] = configMap.value(protocols::wireguard::PresharedKey);
@@ -567,8 +643,15 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         lastConfig[configKey::persistentKeepAlive] = configMap.value(protocols::wireguard::PersistentKeepalive);
     }
 
-    const QStringList allowedIps = configMap.value(protocols::wireguard::AllowedIPs).split(
-            QRegularExpression("\\s*,\\s*"), Qt::SkipEmptyParts);
+    const QStringList dnsServers = splitConfigValues(configMap.value(protocols::wireguard::DNS));
+    if (!dnsServers.isEmpty()) {
+        lastConfig[configKey::dns1] = dnsServers.value(0);
+    }
+    if (dnsServers.size() > 1) {
+        lastConfig[configKey::dns2] = dnsServers.value(1);
+    }
+
+    const QStringList allowedIps = splitConfigValues(configMap.value(protocols::wireguard::AllowedIPs));
     QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIps);
 
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
@@ -618,13 +701,11 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     config[configKey::defaultContainer] = containerName;
     config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
-    const static QRegularExpression dnsRegExp(
-            "DNS = "
-            "(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
-    QRegularExpressionMatch dnsMatch = dnsRegExp.match(data);
-    if (dnsMatch.hasMatch()) {
-        config[configKey::dns1] = dnsMatch.captured(1);
-        config[configKey::dns2] = dnsMatch.captured(2);
+    if (!dnsServers.isEmpty()) {
+        config[configKey::dns1] = dnsServers.value(0);
+    }
+    if (dnsServers.size() > 1) {
+        config[configKey::dns2] = dnsServers.value(1);
     }
 
     config[configKey::hostName] = hostName;
@@ -759,4 +840,3 @@ void ImportController::processAmneziaConfig(QJsonObject &config) const
         }
     }
 }
-

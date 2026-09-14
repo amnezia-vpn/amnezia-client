@@ -19,9 +19,9 @@ extension PacketTunnelProvider {
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
-            if tunnelConfiguration.peers.first!.allowedIPs
-                .map({ $0.stringRepresentation })
-                .joined(separator: ", ") == "0.0.0.0/0, ::/0" {
+            let defaultAllowedIPs = Set(["0.0.0.0/0", "::/0"])
+            let configuredAllowedIPs = Set(tunnelConfiguration.peers.first!.allowedIPs.map({ $0.stringRepresentation }))
+            if !configuredAllowedIPs.isEmpty && configuredAllowedIPs.isSubset(of: defaultAllowedIPs) {
                 if wgConfig.splitTunnelType == 1 {
                     for index in tunnelConfiguration.peers.indices {
                         tunnelConfiguration.peers[index].allowedIPs.removeAll()
