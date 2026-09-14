@@ -498,6 +498,24 @@ jobs:
         cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
         cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
 
+    - name: 'Decode Developer ID provisioning profiles'
+      env:
+        MAC_PKG_APP_PROVISIONING_PROFILE: ${{ secrets.MAC_PKG_APP_PROVISIONING_PROFILE }}
+        MAC_PKG_NE_PROVISIONING_PROFILE: ${{ secrets.MAC_PKG_NE_PROVISIONING_PROFILE }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [[ -z "${MAC_PKG_APP_PROVISIONING_PROFILE}" || -z "${MAC_PKG_NE_PROVISIONING_PROFILE}" ]]; then
+          echo "Need GitHub secrets MAC_PKG_APP_PROVISIONING_PROFILE and MAC_PKG_NE_PROVISIONING_PROFILE"
+          echo "(Developer ID profiles for org.amnezia.AmneziaVPN and org.amnezia.AmneziaVPN.network-extension)."
+          echo "Do not reuse MAC_APP_PROVISIONING_PROFILE / MAC_NE_PROVISIONING_PROFILE (App Store job)."
+          exit 1
+        fi
+        echo "${MAC_PKG_APP_PROVISIONING_PROFILE}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
+        echo "${MAC_PKG_NE_PROVISIONING_PROFILE}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
+        test -s "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
+        test -s "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
+
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
       with:
@@ -533,6 +551,8 @@ jobs:
         CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
         CODESIGN_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-path }}
         CODESIGN_INSTALLER_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-path }}
+        CODESIGN_APP_PROVISION_PROFILE: ${{ runner.temp }}/macos-pkg-app.provisionprofile
+        CODESIGN_ST_PROVISION_PROFILE: ${{ runner.temp }}/macos-pkg-ne.provisionprofile
         NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}

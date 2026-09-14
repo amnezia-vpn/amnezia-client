@@ -11,6 +11,7 @@
 #include "core/utils/serverConfigUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnConnection.h"
+#include <QDebug>
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/settingsUiController.h"
@@ -51,6 +52,10 @@
     #include "core/utils/swiftBridge.h"
 #endif
 
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
+    #include "platforms/macos/splittunnel/macosSplitTunnelManager.h"
+#endif
+
 CoreSignalHandlers::CoreSignalHandlers(CoreController* coreController, QObject* parent)
     : QObject(parent),
       m_coreController(coreController)
@@ -86,6 +91,7 @@ void CoreSignalHandlers::initAllHandlers()
     initIosSettingsHandler();
     initNotificationHandler();
     initUpdateFoundHandler();
+    initMacosSplitTunnelHandler();
 }
 
 void CoreSignalHandlers::initErrorMessagesHandler()
@@ -442,5 +448,57 @@ void CoreSignalHandlers::initUpdateFoundHandler()
     connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {
         emit m_coreController->m_pageController->goToPage(PageLoader::PageEnum::PageUpdate);
     });
+}
+
+void CoreSignalHandlers::initMacosSplitTunnelHandler()
+{
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
+    auto reconcile = [this]() {
+        auto *st = m_coreController->m_appSplitTunnelingController;
+        QString vpnServer;
+        const QString serverId = m_coreController->m_serversController->getDefaultServerId();
+        if (!serverId.isEmpty()) {
+            vpnServer = m_coreController->m_serversController->getServerCredentials(serverId).hostName;
+        }
+        qDebug() << "macosSplitTunnel reconcile connected="
+                 << m_coreController->m_connectionController->isConnected()
+                 << "enabled=" << st->isSplitTunnelingEnabled()
+                 << "mode=" << static_cast<int>(st->getRouteMode())
+                 << "apps=" << st->getApps().size()
+                 << "vpnServer=" << vpnServer;
+        MacOSSplitTunnelManager::instance()->reconcile(
+            m_coreController->m_connectionController->isConnected(),
+            st->isSplitTunnelingEnabled(),
+            st->getRouteMode(),
+            st->getApps(),
+            vpnServer);
+    };
+
+    connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, this,
+            [reconcile](Vpn::ConnectionState state) {
+                qDebug() << "macosSplitTunnel connectionStateChanged" << static_cast<int>(state);
+                reconcile();
+            });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged, this,
+            [this, reconcile](bool enabled) {
+                qDebug() << "macosSplitTunnel appsSplitTunnelingEnabledChanged" << enabled;
+                if (enabled) {
+                    MacOSSplitTunnelManager::instance()->activateExtension();
+                }
+                reconcile();
+            });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged, this,
+            [reconcile](AppsRouteMode mode) {
+                qDebug() << "macosSplitTunnel appsChanged mode=" << static_cast<int>(mode);
+                reconcile();
+            });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsRouteModeChanged, this,
+            [reconcile](AppsRouteMode mode) {
+                qDebug() << "macosSplitTunnel appsRouteModeChanged mode=" << static_cast<int>(mode);
+                reconcile();
+            });
+#else
+    (void)this;
+#endif
 }
 

@@ -12,7 +12,7 @@ import "../Config"
 PageType {
     id: root
 
-    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
+    property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android" || (Qt.platform.os === "osx" && !IsMacOsNeBuild)
 
     BackButtonType {
         id: backButton

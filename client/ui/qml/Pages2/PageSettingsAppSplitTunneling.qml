@@ -23,6 +23,9 @@ PageType {
     property bool pageEnabled
 
     Component.onCompleted: {
+        if (root.isMacosAppSplitTunnel && AppSplitTunnelingController.routeMode !== routeMode.allExceptApps) {
+            AppSplitTunnelingController.routeMode = routeMode.allExceptApps
+        }
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
@@ -38,10 +41,11 @@ PageType {
         property int allExceptApps: 2
     }
 
-    property list<QtObject> routeModesModel: [
-        onlyForwardApps,
-        allExceptApps
-    ]
+    property bool isMacosAppSplitTunnel: Qt.platform.os === "osx" && !IsMacOsNeBuild
+
+    property list<QtObject> routeModesModel: (Qt.platform.os === "windows" || isMacosAppSplitTunnel)
+        ? [allExceptApps]
+        : [onlyForwardApps, allExceptApps]
 
     QtObject {
         id: onlyForwardApps
@@ -59,6 +63,9 @@ PageType {
 
     function getRouteModesModelIndex() {
         var currentRouteMode = AppSplitTunnelingController.routeMode
+        if (Qt.platform.os === "windows" || root.isMacosAppSplitTunnel) {
+            return 0
+        }
         if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptApps === currentRouteMode) {
@@ -155,6 +162,18 @@ PageType {
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
             visible: (Qt.platform.os === "windows") && root.pageEnabled
+        }
+
+        WarningType {
+            Layout.fillWidth: true
+            Layout.topMargin: 8
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            textString: qsTr("Only exclude mode is available on macOS. Safari and other WebKit apps cannot be excluded — their traffic comes from com.apple.WebKit.Networking.")
+            iconPath: "qrc:/images/controls/alert-circle.svg"
+
+            visible: root.isMacosAppSplitTunnel && root.pageEnabled
         }
     }
 
@@ -259,6 +278,11 @@ PageType {
                         }
                     } else if (Qt.platform.os === "android"){
                         installedAppDrawer.openTriggered()
+                    } else if (root.isMacosAppSplitTunnel) {
+                        var macosApp = AppSplitTunnelingController.pickMacosApp()
+                        if (macosApp !== "") {
+                            AppSplitTunnelingController.addApp(macosApp)
+                        }
                     }
 
                     PageController.showBusyIndicator(false)

@@ -34,6 +34,10 @@ public slots:
 
     void updateModel();
 
+#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
+    QString pickMacosApp();
+#endif
+
 signals:
     void routeModeChanged();
     void isSplitTunnelingEnabledChanged();

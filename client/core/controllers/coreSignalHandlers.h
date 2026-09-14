@@ -41,6 +41,7 @@ private:
     void initIosSettingsHandler();
     void initNotificationHandler();
     void initUpdateFoundHandler();
+    void initMacosSplitTunnelHandler();
 
     CoreController* m_coreController;
 };

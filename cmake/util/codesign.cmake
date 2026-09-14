@@ -13,6 +13,10 @@ function(codesign_sign_files files signature keychain)
         --sign "${signature}"
     )
 
+    if(ARGC GREATER 3 AND ARGV3)
+        list(APPEND args --entitlements "${ARGV3}")
+    endif()
+
     if(keychain)
         list(APPEND args --keychain "${keychain}")
     endif()
