@@ -8,10 +8,16 @@ inputs:
     description: Base64-encoded provisioning profile
     required: true
 
+outputs:
+  path:
+    description: Installed provisioning profile path
+    value: ${{ steps.install.outputs.path }}
+
 runs:
   using: composite
   steps:
     - name: Setup provisioning profile
+      id: install
       shell: bash
       run: |
         PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
@@ -27,5 +33,6 @@ runs:
         fi
 
         mkdir -p "$PROFILES_DIR"
-        mv "$TEMP_FILE" "$PROFILES_DIR/$PROFILE_UUID.mobileprovision"
-        echo "Installed profile: $PROFILE_UUID"
+        PROFILE_PATH="$PROFILES_DIR/$PROFILE_UUID.mobileprovision"
+        mv "$TEMP_FILE" "$PROFILE_PATH"
+        echo "path=$PROFILE_PATH" >> "$GITHUB_OUTPUT"

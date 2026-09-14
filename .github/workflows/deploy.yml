@@ -498,32 +498,15 @@ jobs:
         cert-base64: ${{ secrets.MAC_INSTALLER_SIGNER_CERT }}
         cert-password: ${{ secrets.MAC_INSTALL_CERT_PW }}
 
-    - name: 'Decode Developer ID provisioning profiles'
-      env:
-        MAC_PKG_APP_PROVISIONING_PROFILE: ${{ secrets.MAC_PKG_APP_PROVISIONING_PROFILE }}
-        MAC_PKG_NE_PROVISIONING_PROFILE: ${{ secrets.MAC_PKG_NE_PROVISIONING_PROFILE }}
-        MAC_APP_PROVISIONING_PROFILE: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
-        MAC_NE_PROVISIONING_PROFILE: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
-      shell: bash
-      run: |
-        set -euo pipefail
-        app_b64="${MAC_PKG_APP_PROVISIONING_PROFILE:-}"
-        ne_b64="${MAC_PKG_NE_PROVISIONING_PROFILE:-}"
-        if [[ -n "${app_b64}" && -n "${ne_b64}" ]]; then
-          echo "Using MAC_PKG_* Developer ID provisioning profiles"
-        else
-          app_b64="${MAC_APP_PROVISIONING_PROFILE:-}"
-          ne_b64="${MAC_NE_PROVISIONING_PROFILE:-}"
-          echo "MAC_PKG_* unset; falling back to MAC_APP_PROVISIONING_PROFILE / MAC_NE_PROVISIONING_PROFILE"
-        fi
-        if [[ -z "${app_b64}" || -z "${ne_b64}" ]]; then
-          echo "Need provisioning profile secrets for the host and network-extension App IDs."
-          exit 1
-        fi
-        echo "${app_b64}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
-        echo "${ne_b64}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
-        test -s "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
-        test -s "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
+    - uses: ./.github/actions/apple-setup-provisioning-profile
+      id: pkg-app-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.MAC_PKG_APP_PROVISIONING_PROFILE }}
+
+    - uses: ./.github/actions/apple-setup-provisioning-profile
+      id: pkg-st-profile
+      with:
+        provisioning_profile_base64: ${{ secrets.MAC_PKG_ST_PROVISIONING_PROFILE }}
 
     - name: 'Setup xcode'
       uses: maxim-lobanov/setup-xcode@v1
@@ -560,8 +543,8 @@ jobs:
         CODESIGN_INSTALLER_SIGNATURE: ${{ secrets.MAC_INSTALLER_SIGNER_ID }}
         CODESIGN_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-path }}
         CODESIGN_INSTALLER_KEYCHAIN: ${{ steps.setup-keychain.outputs.keychain-path }}
-        CODESIGN_APP_PROVISION_PROFILE: ${{ runner.temp }}/macos-pkg-app.provisionprofile
-        CODESIGN_ST_PROVISION_PROFILE: ${{ runner.temp }}/macos-pkg-ne.provisionprofile
+        CODESIGN_APP_PROVISION_PROFILE: ${{ steps.pkg-app-profile.outputs.path }}
+        CODESIGN_ST_PROVISION_PROFILE: ${{ steps.pkg-st-profile.outputs.path }}
         NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}

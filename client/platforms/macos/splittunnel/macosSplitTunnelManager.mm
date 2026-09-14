@@ -20,7 +20,7 @@ NSString *ProviderBundleId()
 #ifdef CLIENT_MACOS_ST_BUNDLE_ID
     return @CLIENT_MACOS_ST_BUNDLE_ID;
 #else
-    return @"org.amnezia.AmneziaVPN.network-extension";
+    return @"org.amnezia.AmneziaVPN.split-tunnel";
 #endif
 }
 

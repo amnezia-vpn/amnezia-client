@@ -12,7 +12,11 @@
     static os_log_t logger;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        logger = os_log_create("org.amnezia.AmneziaVPN.network-extension", "proxy");
+#ifdef CLIENT_MACOS_ST_BUNDLE_ID
+        logger = os_log_create(CLIENT_MACOS_ST_BUNDLE_ID, "proxy");
+#else
+        logger = os_log_create("org.amnezia.AmneziaVPN.split-tunnel", "proxy");
+#endif
     });
     return logger;
 }

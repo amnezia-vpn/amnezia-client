@@ -68,6 +68,9 @@ target_link_libraries(${PROJECT} PRIVATE
 )
 
 target_include_directories(${PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(${PROJECT} PRIVATE
+    "CLIENT_MACOS_ST_BUNDLE_ID=\"${CLIENT_MACOS_ST_BUNDLE_ID}\""
+)
 
 install(DIRECTORY "$<TARGET_BUNDLE_DIR:${PROJECT}>/"
     DESTINATION "${CMAKE_INSTALL_BINDIR}/${CLIENT_APPLICATION_NAME}.app/Contents/Library/SystemExtensions/${PROJECT}.systemextension"

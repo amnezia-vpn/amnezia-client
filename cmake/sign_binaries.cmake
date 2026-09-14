@@ -71,7 +71,7 @@ if(APPLE)
             message(FATAL_ERROR "Set CODESIGN_APP_PROVISION_PROFILE to the host Developer ID provisioning profile")
         endif()
         if(NOT CODESIGN_ST_PROVISION_PROFILE OR NOT EXISTS "${CODESIGN_ST_PROVISION_PROFILE}")
-            message(FATAL_ERROR "Set CODESIGN_ST_PROVISION_PROFILE to the network-extension Developer ID provisioning profile")
+            message(FATAL_ERROR "Set CODESIGN_ST_PROVISION_PROFILE to the split-tunnel Developer ID provisioning profile")
         endif()
 
         execute_process(
