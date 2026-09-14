@@ -314,8 +314,6 @@ if(OVPN_SCRIPTS)
     )
 endif()
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
-add_subdirectory(tests)
+if(AMNEZIA_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
