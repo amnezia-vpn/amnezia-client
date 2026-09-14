@@ -52,6 +52,107 @@ constexpr uint8_t MED_WEIGHT = 7;
 constexpr uint8_t HIGH_WEIGHT = 13;
 constexpr uint8_t MAX_WEIGHT = 15;
 
+QHostAddress networkAddress(const QHostAddress& address, int prefixLength) {
+  if (address.protocol() == QAbstractSocket::IPv4Protocol) {
+    if (prefixLength < 0 || prefixLength > 32) {
+      return QHostAddress();
+    }
+    quint32 value = address.toIPv4Address();
+    quint32 mask = 0;
+    if (prefixLength > 0) {
+      mask = 0xffffffffu << (32 - prefixLength);
+    }
+    return QHostAddress(value & mask);
+  }
+
+  if (address.protocol() == QAbstractSocket::IPv6Protocol) {
+    if (prefixLength < 0 || prefixLength > 128) {
+      return QHostAddress();
+    }
+    Q_IPV6ADDR value = address.toIPv6Address();
+    const int fullBytes = prefixLength / 8;
+    const int partialBits = prefixLength % 8;
+    if (partialBits != 0) {
+      value[fullBytes] &= static_cast<quint8>(0xffu << (8 - partialBits));
+    }
+    const int zeroFrom = fullBytes + (partialBits != 0 ? 1 : 0);
+    if (zeroFrom < 16) {
+      memset(value.c + zeroFrom, 0, 16 - zeroFrom);
+    }
+    return QHostAddress(value);
+  }
+
+  return QHostAddress();
+}
+
+bool isLanPrefix(const QHostAddress& network, int prefixLength) {
+  if (network.protocol() == QAbstractSocket::IPv4Protocol) {
+    const quint32 value = network.toIPv4Address();
+
+    // Only bypass ranges which are both actually connected and local-use.
+    // Requiring the connected prefix to fit entirely inside one of these
+    // ranges avoids turning a broad/misconfigured interface prefix into a
+    // Kill Switch exception.
+    return (prefixLength >= 8 && (value & 0xff000000u) == 0x0a000000u) ||
+           (prefixLength >= 12 && (value & 0xfff00000u) == 0xac100000u) ||
+           (prefixLength >= 16 && (value & 0xffff0000u) == 0xc0a80000u) ||
+           (prefixLength >= 16 && (value & 0xffff0000u) == 0xa9fe0000u);
+  }
+
+  if (network.protocol() == QAbstractSocket::IPv6Protocol) {
+    const Q_IPV6ADDR value = network.toIPv6Address();
+    const bool uniqueLocal =
+        prefixLength >= 7 && (value[0] & 0xfeu) == 0xfcu;
+    const bool linkLocal = prefixLength >= 10 && value[0] == 0xfeu &&
+                           (value[1] & 0xc0u) == 0x80u;
+    return uniqueLocal || linkLocal;
+  }
+
+  return false;
+}
+
+QList<IPAddress> connectedLanRanges(int vpnAdapterIndex) {
+  QList<IPAddress> ranges;
+
+  for (const QNetworkInterface& iface : QNetworkInterface::allInterfaces()) {
+    if (iface.index() == vpnAdapterIndex ||
+        iface.type() == QNetworkInterface::Loopback) {
+      continue;
+    }
+
+    const auto flags = iface.flags();
+    if (!flags.testFlag(QNetworkInterface::IsUp) ||
+        !flags.testFlag(QNetworkInterface::IsRunning)) {
+      continue;
+    }
+
+    for (const QNetworkAddressEntry& entry : iface.addressEntries()) {
+      const QHostAddress ip = entry.ip();
+      const int prefixLength = entry.prefixLength();
+      const int maxPrefixLength =
+          ip.protocol() == QAbstractSocket::IPv4Protocol
+              ? 32
+              : (ip.protocol() == QAbstractSocket::IPv6Protocol ? 128 : -1);
+      if (maxPrefixLength < 0 || prefixLength <= 0 ||
+          prefixLength > maxPrefixLength) {
+        continue;
+      }
+
+      const QHostAddress network = networkAddress(ip, prefixLength);
+      if (network.isNull() || !isLanPrefix(network, prefixLength)) {
+        continue;
+      }
+
+      const IPAddress range(network, prefixLength);
+      if (!ranges.contains(range)) {
+        ranges.append(range);
+      }
+    }
+  }
+
+  return ranges;
+}
+
 bool ensureSublayer(HANDLE wfp, const GUID& key, const wchar_t* name,
                     const wchar_t* description) {
   FWPM_SUBLAYER0* maybeLayer = nullptr;
@@ -110,7 +211,7 @@ WindowsFirewall* WindowsFirewall::create(QObject* parent) {
   DWORD result = ERROR_SUCCESS;
   // Use dynamic sessions for efficiency and safety:
   //  -> Filtering policy objects are deleted even when the application crashes/
-  //  deamon goes down
+  // deamon goes down
   FWPM_SESSION0 session;
   memset(&session, 0, sizeof(session));
   session.flags = FWPM_SESSION_FLAG_DYNAMIC;
@@ -219,6 +320,24 @@ bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
   FW_OK(blockTrafficOnPort(53, MED_WEIGHT, "Block all DNS"));
   FW_OK(allowLoopbackTraffic(MED_WEIGHT,
                              "Allow Loopback traffic on device %1"));
+
+  // The ordinary Kill Switch should prevent Internet leaks without cutting
+  // off LAN access. Use only the local-use prefixes which are actually
+  // configured on currently active non-VPN interfaces. The permit filters use
+  // LOW_WEIGHT + 1, so they beat peer/full-tunnel blocks at LOW_WEIGHT while
+  // the strict Kill Switch block at MED_WEIGHT still wins.
+  if (vpnAdapterIndex >= 0) {
+    const QList<IPAddress> lanRanges = connectedLanRanges(vpnAdapterIndex);
+    if (!lanRanges.isEmpty()) {
+      for (const IPAddress& range : lanRanges) {
+        logger.debug() << "Allowing connected LAN range through Kill Switch:"
+                       << range.toString();
+      }
+      if (!enableLanBypass(lanRanges)) {
+        return false;
+      }
+    }
+  }
 
   logger.debug() << "Killswitch on! Rules:" << m_activeRules.length();
   return true;
