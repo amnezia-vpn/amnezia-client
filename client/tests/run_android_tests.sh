@@ -8,23 +8,24 @@
 #                       Apple Silicon have OpenGL emulation bugs that crash Qt apps.
 #
 # Prerequisites:
-#   - Qt for Android x86_64 (or arm64-v8a for devices) installed via Qt Maintenance Tool
-#   - Android SDK + NDK available via Android Studio
+#   - QT_ROOT points to a Qt installation with desktop + Android kits (e.g. ~/Qt/6.10.1)
+#   - ANDROID_HOME (or ANDROID_SDK_ROOT) points to an Android SDK with NDK $NDK_VERSION
+#   - cmake, ninja, adb, python3 in PATH
 #   - `adb devices` shows at least one device/emulator
 #   - Conan 2 installed  (pip install "conan==2.28.0")
 #
-# Usage:
-#   bash run_android_tests.sh                         # x86_64 emulator (default)
-#   bash run_android_tests.sh --abi arm64-v8a         # physical ARM device
-#   bash run_android_tests.sh --test openssl          # only openssl test
-#   bash run_android_tests.sh --test restore_backup   # only restore-backup test
-#   bash run_android_tests.sh --wait-boot             # wait for emulator to boot first
+# Usage (from the repository root):
+#   bash client/tests/run_android_tests.sh                         # x86_64 emulator (default)
+#   bash client/tests/run_android_tests.sh --abi arm64-v8a         # physical ARM device
+#   bash client/tests/run_android_tests.sh --test openssl          # only openssl test
+#   bash client/tests/run_android_tests.sh --test restore_backup   # only restore-backup test
+#   bash client/tests/run_android_tests.sh --wait-boot             # wait for emulator to boot first
 
 set -euo pipefail
 
 # ── Configurable defaults ──────────────────────────────────────────────────────
-QT_ROOT="${QT_ROOT:-/Users/nickpc/Qt/6.10.1}"
-ANDROID_SDK="${ANDROID_HOME:-/Users/nickpc/Library/Android/sdk}"
+QT_ROOT="${QT_ROOT:?set QT_ROOT to your Qt installation, e.g. ~/Qt/6.10.1}"
+ANDROID_SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:?set ANDROID_HOME to your Android SDK}}"
 NDK_VERSION="${NDK_VERSION:-27.3.13750724}"
 ANDROID_PLATFORM="${ANDROID_PLATFORM:-android-28}"
 # x86_64: recommended for emulators (HVF/Rosetta hardware acceleration works, no GL crashes)
@@ -67,7 +68,11 @@ case "$ABI" in
 esac
 
 QT_ANDROID="$QT_ROOT/$QT_ARCH_DIR"
-QT_HOST="$QT_ROOT/macos"
+case "$(uname -s)" in
+  Darwin) QT_HOST="$QT_ROOT/macos"  ;;
+  Linux)  QT_HOST="$QT_ROOT/gcc_64" ;;
+  *) echo "Unsupported host: $(uname -s)"; exit 1 ;;
+esac
 NDK_PATH="$ANDROID_SDK/ndk/$NDK_VERSION"
 
 echo "=== Android test runner (local) ==="
@@ -96,43 +101,32 @@ echo ""
 
 adb devices | grep -qE "device$|emulator" || {
   echo "ERROR: No Android device/emulator connected."
-  echo "  Run:  bash run_android_tests.sh --list-devices"
-  echo "  Then: bash run_android_tests.sh --device <serial>"
+  echo "  Run:  bash client/tests/run_android_tests.sh --list-devices"
+  echo "  Then: bash client/tests/run_android_tests.sh --device <serial>"
   exit 1
 }
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+cd "$REPO_ROOT"
 
-# ── Locate cmake ──────────────────────────────────────────────────────────────
-if ! command -v cmake &>/dev/null; then
-  QT_CMAKE="/Users/nickpc/Qt/Tools/CMake/CMake.app/Contents/bin"
-  if [[ -x "$QT_CMAKE/cmake" ]]; then
-    export PATH="$QT_CMAKE:$PATH"
-    echo ">>> Using Qt-bundled cmake: $QT_CMAKE/cmake"
-  else
-    echo "ERROR: cmake not found. Install it or add it to PATH."
-    exit 1
-  fi
-fi
+command -v cmake >/dev/null || { echo "ERROR: cmake not found in PATH"; exit 1; }
+command -v ninja >/dev/null || { echo "ERROR: ninja not found in PATH"; exit 1; }
 
-# ── Locate ninja ──────────────────────────────────────────────────────────────
-if ! command -v ninja &>/dev/null; then
-  QT_NINJA="/Users/nickpc/Qt/Tools/Ninja"
-  if [[ -x "$QT_NINJA/ninja" ]]; then
-    export PATH="$QT_NINJA:$PATH"
-    echo ">>> Using Qt-bundled ninja: $QT_NINJA/ninja"
-  else
-    echo "ERROR: ninja not found. Install it (brew install ninja) or add it to PATH."
-    exit 1
+# Detect the NDK host tag from what's present in the NDK
+# (Apple Silicon Macs have only darwin-x86_64 in NDK ≤27, not darwin-aarch64)
+NDK_HOST_TAG=""
+for candidate in darwin-x86_64 darwin-aarch64 linux-x86_64; do
+  if [[ -d "$NDK_PATH/toolchains/llvm/prebuilt/$candidate" ]]; then
+    NDK_HOST_TAG="$candidate"
+    break
   fi
-fi
+done
+[[ -n "$NDK_HOST_TAG" ]] || { echo "ERROR: Cannot detect NDK host tag in $NDK_PATH/toolchains/llvm/prebuilt/"; exit 1; }
+echo ">>> NDK host tag: $NDK_HOST_TAG"
 
 # ── Add NDK toolchain to PATH (provides clang / clang++) ─────────────────────
-NDK_TOOLCHAIN="$NDK_PATH/toolchains/llvm/prebuilt/darwin-x86_64/bin"
-if [[ -d "$NDK_TOOLCHAIN" ]]; then
-  export PATH="$NDK_TOOLCHAIN:$PATH"
-fi
+export PATH="$NDK_PATH/toolchains/llvm/prebuilt/$NDK_HOST_TAG/bin:$PATH"
 
 # ── Required env vars for androiddeployqt ────────────────────────────────────
 export ANDROID_NDK_ROOT="$NDK_PATH"
@@ -161,18 +155,6 @@ echo ">>> JAVA_HOME: $JAVA_HOME"
 QT_TOOLCHAIN="$QT_ANDROID/lib/cmake/Qt6/qt.toolchain.cmake"
 [[ -f "$QT_TOOLCHAIN" ]] || { echo "ERROR: Qt toolchain not found: $QT_TOOLCHAIN"; exit 1; }
 
-# Detect the actual NDK host tag from what's present in the NDK
-# (Apple Silicon Macs have only darwin-x86_64 in NDK ≤27, not darwin-aarch64)
-NDK_HOST_TAG=""
-for candidate in darwin-x86_64 darwin-aarch64 linux-x86_64; do
-  if [[ -d "$NDK_PATH/toolchains/llvm/prebuilt/$candidate" ]]; then
-    NDK_HOST_TAG="$candidate"
-    break
-  fi
-done
-[[ -n "$NDK_HOST_TAG" ]] || { echo "ERROR: Cannot detect NDK host tag in $NDK_PATH/toolchains/llvm/prebuilt/"; exit 1; }
-echo ">>> NDK host tag: $NDK_HOST_TAG"
-
 # ABI → sysroot triple mapping for libc++_shared.so
 case "$ABI" in
   arm64-v8a)   SYSROOT_TRIPLE="aarch64-linux-android" ;;
@@ -193,10 +175,11 @@ cmake -S . -B "$BUILD_DIR" -G Ninja \
   -DCMAKE_ANDROID_NDK_TOOLCHAIN_HOST_TAG="$NDK_HOST_TAG" \
   -DQT_HOST_PATH="$QT_HOST" \
   -DQt6_DIR="$QT_ANDROID/lib/cmake/Qt6" \
-  -DCMAKE_PREFIX_PATH="$QT_ANDROID"
+  -DCMAKE_PREFIX_PATH="$QT_ANDROID" \
+  -DAMNEZIA_BUILD_TESTS=ON
 
 # Patch deployment settings JSONs: cmake may leave ndk-host empty on Apple Silicon
-for json_file in "$BUILD_DIR"/tests/android-*-deployment-settings.json; do
+for json_file in "$BUILD_DIR"/client/tests/android-*-deployment-settings.json; do
   [[ -f "$json_file" ]] || continue
   python3 - "$json_file" "$NDK_HOST_TAG" "$STD_CXX_PATH" <<'PYEOF'
 import sys, json
@@ -221,7 +204,7 @@ ADB_BIN=$(which adb)
 
 run_test() {
   local target="$1"
-  local apk_dir="$BUILD_DIR/tests/android-build"
+  local apk_dir="$BUILD_DIR/client/tests/android-build"
   local apk="$apk_dir/${target}.apk"
   local pkg_name="org.qtproject.example.${target}"
   local activity="${pkg_name}/org.qtproject.qt.android.bindings.QtActivity"
