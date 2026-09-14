@@ -35,7 +35,6 @@ class WinSplitTunnel(ConanFile):
             )
 
     def _prebuilt_files(self):
-        # Mullvad binaries per target triple (ff0e3746 pin in URL below).
         by_arch = {
             "x86_64": [
                 ("mullvad-split-tunnel.cat", "9bbd10b95a2cf2226b266a52077300c280f7782def69ebbeb892bb60505d9a5f"),

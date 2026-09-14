@@ -16,10 +16,6 @@ class Openvpn(ConanFile):
     def _is_windows(self):
         return str(self.settings.os).startswith("Windows")
 
-    @property
-    def _is_windows_arm64(self):
-        return self._is_windows and str(self.settings.arch) == "armv8"
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "*applink.c", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -41,10 +37,7 @@ class Openvpn(ConanFile):
             self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
-        # OpenSSL 3.x ASM on Windows/ARM64 needs clang-cl (VS "C++ Clang tools").
-        # Without it, nmake fails on *.asm; pure C build is fine for the client.
-        openssl_opts = {"no_asm": True} if self._is_windows_arm64 else {}
-        self.requires("openssl/3.6.2", visible=False, options=openssl_opts)
+        self.requires("openssl/3.6.2", visible=False)
         self.requires("lz4/1.10.0", visible=False)
         self.requires("lzo/2.10", visible=False)
         if self.settings.os == "Linux":
@@ -59,7 +52,7 @@ class Openvpn(ConanFile):
         )
 
     def _patch_sources(self):
-        replace_in_file(self, 
+        replace_in_file(self,
             os.path.join(self.source_folder, "CMakeLists.txt"),
             "/Qspectre",
             ""
@@ -80,10 +73,9 @@ class Openvpn(ConanFile):
             tc.extra_cxxflags = [ f"-I{tap_include_path}", f"-I{applink_include_path}" ]
             tc.cache_variables["BUILD_TESTING"] = False
             tc.cache_variables["ENABLE_PKCS11"] = False
-            if self._is_windows_arm64:
-                # Upstream defaults USE_WERROR=ON -> /WX on MSVC; the ARM64 toolchain
-                # emits warnings from OpenVPN / deps that would break the build.
-                tc.cache_variables["USE_WERROR"] = False
+            # Upstream defaults USE_WERROR=ON (/WX with MSVC), which trips on
+            # warnings from newer toolchains (notably the ARM64 MSVC headers).
+            tc.cache_variables["USE_WERROR"] = False
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()

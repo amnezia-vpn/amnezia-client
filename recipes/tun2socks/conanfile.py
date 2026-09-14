@@ -48,7 +48,7 @@ class Tun2Socks(ConanFile):
 
     @property
     def _is_windows_arm64(self):
-        return self._is_windows and self._archs == ["armv8"]
+        return self._is_windows and str(self.settings.arch) == "armv8"
 
     @property
     def _binary_name_ext(self):
@@ -71,9 +71,8 @@ class Tun2Socks(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        # Windows ARM64: upstream Makefile is pure Go (CGO_ENABLED=0), and neither
-        # msys2 nor mingw-builds ship arm64 binaries - build go directly instead.
         if self._is_windows and not self._is_windows_arm64:
+            # ARM64: no MSYS2/MinGW builds available; the Makefile is bypassed in build().
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -108,13 +107,7 @@ class Tun2Socks(ConanFile):
 
     def build(self):
         if self._is_windows_arm64:
-            out_path = os.path.join(self.build_folder, self._binary_name_ext)
-            with chdir(self, self.source_folder):
-                self.run(
-                    f'set "GOOS={self._goos}"&& set "GOARCH={self._arch_map[self._archs[0]]}"&& '
-                    f'set "CGO_ENABLED=0"&& set "GO111MODULE=on"&& '
-                    f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .'
-                )
+            self._build_windows_arm64()
             return
 
         with chdir(self, self.source_folder):
@@ -134,8 +127,9 @@ class Tun2Socks(ConanFile):
                 env.define("CGO_CFLAGS", " ".join(cflags))
                 with env.vars(self).apply():
                     at = Autotools(self)
+                    make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                     at.make("tun2socks", args=[
-                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                        f"BUILD_DIR={make_build_dir}"
                     ])
                     if self._is_windows:
                         os.rename(
@@ -152,6 +146,18 @@ class Tun2Socks(ConanFile):
                 shlex.quote(output),
                 shlex.join(binaries)
             ))
+
+    def _build_windows_arm64(self):
+        out_path = os.path.join(self.build_folder, self._binary_name_ext)
+        goarch = self._arch_map.get(self._archs[0])
+        env = Environment()
+        env.define("GOOS", self._goos)
+        env.define("GOARCH", goarch)
+        env.define("CGO_ENABLED", "0")
+        env.define("GOTELEMETRY", "off")
+        with env.vars(self).apply():
+            with chdir(self, self.source_folder):
+                self.run(f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .')
 
     def package(self):
         copy(self, self._binary_name_ext, src=self.build_folder, dst=self.package_folder)

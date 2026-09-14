@@ -431,7 +431,6 @@ function(detect_host_profile output_file)
         string(APPEND profile "build_type=${build_type}\n")
     endif()
 
-    # OpenSSL ASM on Windows/ARM64 needs clang-cl; disable ASM when building from CMake-Conan.
     if(os STREQUAL "Windows" AND arch STREQUAL "armv8")
         string(APPEND profile "\n[options]\n")
         string(APPEND profile "openssl/*:no_asm=True\n")

@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 import os
@@ -45,8 +45,6 @@ class LibSSHRecipe(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self.settings.os == "Windows" and str(self.settings.arch) == "armv8":
-            self.options["openssl/*"].no_asm = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -102,7 +100,17 @@ class LibSSHRecipe(ConanFile):
         deps.set_property("mbedtls", "cmake_extra_variables", {"MBEDTLS_FOUND": "TRUE"})
         deps.generate()
 
+    def _patch_sources(self):
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "get_directory_property(hasParent PARENT_DIRECTORY)",
+            "set(hasParent TRUE)",
+            strict=False,
+        )
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

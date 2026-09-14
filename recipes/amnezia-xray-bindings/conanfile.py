@@ -62,17 +62,13 @@ class AmneziaXrayBindings(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if self._is_windows and not self._windows_arm64:
-            # mingw-builds is being used on Windows
             del self.settings.compiler
-        # Windows ARM64 keeps the compiler setting so vcvars can expose cl/lib to CGO
 
     def layout(self):
         basic_layout(self)
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        # Windows ARM64 builds with llvm-mingw + MSVC lib.exe (see windows_cgo.py);
-        # msys2 / mingw-builds have no arm64 packages.
         if self._is_windows and not self._windows_arm64:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -94,21 +90,25 @@ class AmneziaXrayBindings(ConanFile):
         get(self, f"https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/refs/tags/v{self.version}.zip",
             sha256="8977896bba99f1a3bad61d734b2929ec3d01c3ca0e206ee8ce5eb013d38ab118", strip_root=True)
 
-    def generate(self):
-        if self._windows_arm64:
-            # Go on PATH; the CGO toolchain is set up in build().
-            VirtualBuildEnv(self).generate()
-            return
-
-        tc = AutotoolsToolchain(self)
-        tc.apple_arch_flag = None
-        env = tc.environment()
+    def _define_go_env(self, env):
         env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
         env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
         env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
         env.define("GOOS", self._goos)
         if self._is_windows:
             env.define("OS", "windows")
+        return env
+
+    def generate(self):
+        if self._windows_arm64:
+            VirtualBuildEnv(self).generate()
+            go_env = self._define_go_env(Environment())
+            go_env.vars(self, scope="build").save_script("conan_go_env")
+            return
+
+        tc = AutotoolsToolchain(self)
+        tc.apple_arch_flag = None
+        env = self._define_go_env(tc.environment())
         self._ldflags = tc.ldflags
         self._cflags = tc.cflags
         tc.generate(env)
@@ -133,10 +133,11 @@ class AmneziaXrayBindings(ConanFile):
                 env.define("ARCH", goarch)
                 env.define("CGO_CFLAGS", " ".join(cflags))
                 env.define("CGO_LDFLAGS", " ".join(ldflags))
+                make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                 with env.vars(self).apply():
                     at = Autotools(self)
                     at.make(args=[
-                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                        f"BUILD_DIR={make_build_dir}"
                     ])
 
             if is_apple_os(self) and self._is_multiarch:
@@ -152,17 +153,10 @@ class AmneziaXrayBindings(ConanFile):
                 copy(self, "*.h", os.path.join(self.build_folder, self._archs[0]), self.build_folder)
 
     def _build_windows_arm64(self):
-        """c-shared DLL via llvm-mingw CGO + an MSVC import library for the app."""
         dll_name = "amnezia_xray.dll"
         dll_path = os.path.join(self.build_folder, dll_name)
-        run_llvm_mingw_go_build(
-            self, self.source_folder, dll_path, self._arch_map[self._archs[0]]
-        )
+        run_llvm_mingw_go_build(self, self.source_folder, dll_path, self._arch_map["armv8"])
         ensure_msvc_import_lib(self, self.build_folder, dll_name, "amnezia_xray")
-
-        def_path = os.path.join(self.build_folder, "amnezia_xray.def")
-        if os.path.isfile(def_path):
-            os.remove(def_path)
 
     def _rename_header(self):
         if not self._is_windows:

@@ -18,10 +18,12 @@ from windows_cgo import is_windows_arm64, run_llvm_mingw_go_build
 class AwgWindows(ConanFile):
     name = "awg-windows"
     version = "3.1.20260814"
-    # compiler/build_type are only needed for the Windows ARM64 (llvm-mingw/MSVC) path,
-    # they are dropped again in configure() for every other arch.
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "os", "arch"
     exports = "windows_cgo.py"
+
+    @property
+    def _windows_arm64(self):
+        return is_windows_arm64(self)
 
     @property
     def _goarm(self):
@@ -53,17 +55,8 @@ class AwgWindows(ConanFile):
             "arm64ec": "arm64"
         }.get(str(self.settings.arch))
 
-    @property
-    def _windows_arm64(self):
-        return is_windows_arm64(self)
-
     def layout(self):
         basic_layout(self)
-
-    def configure(self):
-        if not self._windows_arm64:
-            self.settings.rm_safe("compiler")
-            self.settings.rm_safe("build_type")
 
     def validate(self):
         if not str(self.settings.os).startswith("Windows"):
@@ -77,6 +70,7 @@ class AwgWindows(ConanFile):
 
     def build_requirements(self):
         if not self._windows_arm64:
+            # mingw-builds has no Windows ARM64 binaries; llvm-mingw is used instead.
             self.tool_requires("mingw-builds/15.1.0")
         self.tool_requires("go/1.26.0")
 
@@ -89,7 +83,6 @@ class AwgWindows(ConanFile):
 
     def generate(self):
         if self._windows_arm64:
-            # llvm-mingw CGO toolchain is set up in build(); only Go has to be on PATH.
             VirtualBuildEnv(self).generate()
             return
 
