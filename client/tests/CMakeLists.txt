@@ -194,35 +194,51 @@ if(NOT ANDROID)
         test_common
     )
 
-    if(WIN32)
-        # libcrypto-3-x64.dll is a hard import of this binary.
-        # Without copying Conan's DLL here, Windows loads the first match in PATH
-        # (MySQL, Git, PHP...) which differs from the Conan version we compiled against,
-        # causing testRuntimeVersionMatchesCompileTime and testWindowsNoDllHijack to fail.
-        foreach(_ssl_tgt OpenSSL::Crypto OpenSSL::SSL)
-            if(NOT TARGET "${_ssl_tgt}")
-                continue()
-            endif()
-            set(_ssl_dll "")
-            foreach(_prop IMPORTED_LOCATION IMPORTED_LOCATION_RELEASE IMPORTED_LOCATION_DEBUG
-                          IMPORTED_LOCATION_MINSIZEREL IMPORTED_LOCATION_RELWITHDEBINFO
-                          IMPORTED_LOCATION_NOCONFIG)
-                get_target_property(_candidate "${_ssl_tgt}" "${_prop}")
-                if(_candidate AND NOT _candidate MATCHES "-NOTFOUND" AND _candidate MATCHES "\\.dll$")
-                    set(_ssl_dll "${_candidate}")
-                    break()
-                endif()
-            endforeach()
-            if(_ssl_dll)
-                add_custom_command(TARGET test_openssl_library POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        "${_ssl_dll}" "$<TARGET_FILE_DIR:test_openssl_library>"
-                )
-            else()
-                message(STATUS "No .dll found for ${_ssl_tgt} (IMPORTED_LOCATION may point to .lib) — skipping copy")
+    # Tests run from a bare artifact directory on CI, so the OpenSSL runtime we
+    # compiled against must sit next to the binary (PATH / LD_LIBRARY_PATH /
+    # DYLD_LIBRARY_PATH point there). Otherwise the loader picks up the system
+    # library and the version checks in testOpenSSLLibrary fail.
+    foreach(_ssl_tgt OpenSSL::Crypto OpenSSL::SSL)
+        if(NOT TARGET "${_ssl_tgt}")
+            continue()
+        endif()
+        set(_ssl_loc "")
+        foreach(_prop IMPORTED_LOCATION IMPORTED_LOCATION_RELEASE IMPORTED_LOCATION_DEBUG
+                      IMPORTED_LOCATION_MINSIZEREL IMPORTED_LOCATION_RELWITHDEBINFO
+                      IMPORTED_LOCATION_NOCONFIG)
+            get_target_property(_candidate "${_ssl_tgt}" "${_prop}")
+            if(_candidate AND NOT _candidate MATCHES "-NOTFOUND")
+                set(_ssl_loc "${_candidate}")
+                break()
             endif()
         endforeach()
-    endif()
+        if(NOT _ssl_loc)
+            continue()
+        endif()
+        set(_ssl_files "")
+        if(WIN32)
+            if(_ssl_loc MATCHES "\\.dll$")
+                set(_ssl_files "${_ssl_loc}")
+            endif()
+        else()
+            get_filename_component(_ssl_dir "${_ssl_loc}" DIRECTORY)
+            get_filename_component(_ssl_name "${_ssl_loc}" NAME)
+            string(REGEX REPLACE "\\..*$" "" _ssl_stem "${_ssl_name}")
+            file(GLOB _ssl_files
+                "${_ssl_dir}/${_ssl_stem}.so*"
+                "${_ssl_dir}/${_ssl_stem}.dylib"
+                "${_ssl_dir}/${_ssl_stem}.*.dylib")
+        endif()
+        if(NOT _ssl_files)
+            message(STATUS "No shared runtime found for ${_ssl_tgt} (${_ssl_loc}) - skipping copy")
+        endif()
+        foreach(_ssl_file ${_ssl_files})
+            add_custom_command(TARGET test_openssl_library POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${_ssl_file}" "$<TARGET_FILE_DIR:test_openssl_library>"
+            )
+        endforeach()
+    endforeach()
 endif() # NOT ANDROID
 
 if(ANDROID)
