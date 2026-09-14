@@ -9,7 +9,6 @@
 
 #if defined(Q_OS_MACOS) && !defined(MACOS_NE)
     #include "platforms/macos/splittunnel/macosAppInfo.h"
-    #include "platforms/macos/splittunnel/macosSplitTunnelManager.h"
 #endif
 
 namespace {
@@ -63,6 +62,7 @@ void AppSplitTunnelingUiController::removeApp(const int index)
 {
     auto modelIndex = m_appSplitTunnelingModel->index(index);
     auto appPath = m_appSplitTunnelingModel->data(modelIndex, AppSplitTunnelingModel::Roles::AppPathRole).toString();
+    logger.info() << "removeApp index=" << index << "path=" << appPath;
     m_appSplitTunnelingController->removeApp(index);
 
     QFileInfo fileInfo(appPath);
@@ -74,22 +74,27 @@ void AppSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
     logger.debug() << "toggleSplitTunneling" << enabled
                    << "routeMode=" << static_cast<int>(m_appSplitTunnelingController->getRouteMode())
                    << "apps=" << m_appSplitTunnelingController->getApps().size();
-    m_appSplitTunnelingController->toggleSplitTunneling(enabled);
 #if defined(Q_OS_MACOS) && !defined(MACOS_NE)
-    if (enabled) {
-        if (m_appSplitTunnelingController->getRouteMode() != amnezia::AppsRouteMode::VpnAllExceptApps) {
-            m_appSplitTunnelingController->setRouteMode(amnezia::AppsRouteMode::VpnAllExceptApps);
-            emit routeModeChanged();
-        }
-        logger.debug() << "toggle on: activateExtension";
-        MacOSSplitTunnelManager::instance()->activateExtension();
+    // Only the exclude mode is implemented on macOS; pin it before the feature
+    // flag flips, so the reconcile triggered by the flag already sees it.
+    if (enabled && m_appSplitTunnelingController->getRouteMode() != amnezia::AppsRouteMode::VpnAllExceptApps) {
+        logger.info() << "macOS supports exclude mode only, forcing route mode from"
+                      << static_cast<int>(m_appSplitTunnelingController->getRouteMode())
+                      << "to VpnAllExceptApps";
+        m_appSplitTunnelingController->setRouteMode(amnezia::AppsRouteMode::VpnAllExceptApps);
+        emit routeModeChanged();
     }
 #endif
+    // The system extension is activated / torn down by CoreSignalHandlers, which
+    // listens on SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged.
+    m_appSplitTunnelingController->toggleSplitTunneling(enabled);
     emit isSplitTunnelingEnabledChanged();
 }
 
 void AppSplitTunnelingUiController::setRouteMode(int routeMode)
 {
+    logger.info() << "setRouteMode" << routeMode
+                  << "(was" << static_cast<int>(m_appSplitTunnelingController->getRouteMode()) << ")";
     m_appSplitTunnelingController->setRouteMode(static_cast<amnezia::AppsRouteMode>(routeMode));
     emit routeModeChanged();
 }
@@ -106,7 +111,9 @@ bool AppSplitTunnelingUiController::isSplitTunnelingEnabled() const
 
 void AppSplitTunnelingUiController::updateModel()
 {
-    m_appSplitTunnelingModel->updateModel(m_appSplitTunnelingController->getApps());
+    const auto apps = m_appSplitTunnelingController->getApps();
+    logger.debug() << "updateModel apps=" << apps.size();
+    m_appSplitTunnelingModel->updateModel(apps);
 }
 
 #if defined(Q_OS_MACOS) && !defined(MACOS_NE)

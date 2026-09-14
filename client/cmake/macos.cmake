@@ -36,9 +36,26 @@ get_filename_component(MACOSX_BUNDLE_ICON_FILE "${CLIENT_MACOS_APP_ICNS_PATH}" N
 set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 set(SOURCES ${SOURCES} ${ICON_FILE})
 
+# CMake only substitutes MACOSX_BUNDLE_* into MACOSX_BUNDLE_INFO_PLIST, so
+# ${MACOSX_DEPLOYMENT_TARGET} used to expand to an empty <string/>. Pre-configure
+# the template with @ONLY (which leaves ${...} alone) and drop the key entirely
+# when no deployment target is pinned.
+if(CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(AMN_MACOS_MIN_VERSION_ENTRY
+        "\t<key>LSMinimumSystemVersion</key>\n\t<string>${CMAKE_OSX_DEPLOYMENT_TARGET}</string>\n")
+else()
+    set(AMN_MACOS_MIN_VERSION_ENTRY "")
+    message(STATUS "CMAKE_OSX_DEPLOYMENT_TARGET is not set: the app bundle will not declare LSMinimumSystemVersion")
+endif()
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Info-developerid.plist.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Info-developerid.plist.in
+    @ONLY
+)
+
 set_target_properties(${PROJECT} PROPERTIES
     MACOSX_BUNDLE TRUE
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Info-developerid.plist.in
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/Info-developerid.plist.in
     MACOSX_BUNDLE_SHORT_VERSION_STRING "${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR}.${CMAKE_PROJECT_VERSION_PATCH}"
     MACOSX_BUNDLE_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
     MACOSX_BUNDLE_GUI_IDENTIFIER "${BUILD_OSX_APP_IDENTIFIER}"

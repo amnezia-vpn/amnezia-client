@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 
-enable_language(OBJC)
-enable_language(OBJCXX)
-
 set(PROJECT "AmneziaVPNSplitTunnel")
+
 project(${PROJECT})
 
 configure_file(

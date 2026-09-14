@@ -55,24 +55,36 @@ bool AppSplitTunnelingController::addApp(const amnezia::InstalledAppInfo &appInf
 void AppSplitTunnelingController::removeApp(int index)
 {
     if (index < 0 || index >= m_apps.size()) {
+        logger.error() << "removeApp: index" << index << "is out of range (size=" << m_apps.size() << ")";
         return;
     }
 
+    const auto removed = m_apps.at(index);
+    logger.info() << "removeApp index=" << index
+                  << "name=" << removed.appName
+                  << "bundleId=" << removed.packageName
+                  << "path=" << removed.appPath;
     m_apps.removeAt(index);
     m_appSettingsRepository->setVpnApps(m_currentRouteMode, m_apps);
+    logApps("after removeApp", m_apps);
 }
 
 void AppSplitTunnelingController::clearAppsList()
 {
+    logger.info() << "clearAppsList: dropping" << m_apps.size() << "apps for route mode"
+                  << static_cast<int>(m_currentRouteMode);
     m_apps.clear();
     m_appSettingsRepository->setVpnApps(m_currentRouteMode, m_apps);
 }
 
 void AppSplitTunnelingController::setRouteMode(AppsRouteMode routeMode)
 {
+    logger.info() << "setRouteMode" << static_cast<int>(m_currentRouteMode) << "->" << static_cast<int>(routeMode);
     m_currentRouteMode = routeMode;
+    // Each route mode keeps its own app list, so the list changes with the mode.
     m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
     m_appSettingsRepository->setAppsRouteMode(routeMode);
+    logApps("after setRouteMode", m_apps);
 }
 
 void AppSplitTunnelingController::toggleSplitTunneling(bool enabled)

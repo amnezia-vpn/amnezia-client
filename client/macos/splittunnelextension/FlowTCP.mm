@@ -4,12 +4,18 @@
 #import <os/log.h>
 
 @interface FlowTCP ()
-@property (nonatomic) NEAppProxyTCPFlow *flow;
-@property (nonatomic) nw_connection_t connection;
-@property (nonatomic) BOOL closed;
+@property (atomic) NEAppProxyTCPFlow *flow;
+@property (atomic) nw_connection_t connection;
+@property (atomic) BOOL closed;
+@property (atomic) uint64_t flowId;
+@property (atomic) uint64_t bytesOut;
+@property (atomic) uint64_t bytesIn;
+@property (atomic) BOOL flowEofSeen;
 @end
 
-static NSMutableSet<FlowTCP *> *TCPSessions(void)
+/*! Registry keeping sessions alive while they are running.
+ *  MUST only be touched on STUtils.stateQueue. */
+static NSMutableSet<FlowTCP *> *TCPSessionsLocked(void)
 {
     static NSMutableSet<FlowTCP *> *sessions;
     static dispatch_once_t once;
@@ -21,27 +27,42 @@ static NSMutableSet<FlowTCP *> *TCPSessions(void)
 
 @implementation FlowTCP
 
-+ (void)handleFlow:(NEAppProxyTCPFlow *)flow interface:(nw_interface_t)interface
++ (void)handleFlow:(NEAppProxyTCPFlow *)flow interface:(nw_interface_t)interface flowId:(uint64_t)flowId
 {
     FlowTCP *session = [[FlowTCP alloc] init];
     session.flow = flow;
-    [TCPSessions() addObject:session];
+    session.flowId = flowId;
+
+    dispatch_sync([STUtils stateQueue], ^{
+        [TCPSessionsLocked() addObject:session];
+        STLogDebug("tcp[%{public}llu]: registered, %{public}lu live tcp sessions",
+                   flowId, (unsigned long)TCPSessionsLocked().count);
+    });
+
     [session startWithInterface:interface];
 }
 
 - (void)startWithInterface:(nw_interface_t)interface
 {
+    const uint64_t fid = self.flowId;
     nw_endpoint_t remote = [self copyRemoteEndpoint];
     if (remote == NULL) {
-        os_log_error(STUtils.log, "tcp: missing remote endpoint");
-        [self.flow closeReadWithError:nil];
-        [self.flow closeWriteWithError:nil];
+        STLogError("tcp[%{public}llu]: missing or unusable remote endpoint, dropping flow", fid);
+        [self closeWithError:nil stage:@"no-remote"];
         return;
     }
+
+    STLogInfo("tcp[%{public}llu]: connecting to %{public}s:%{public}u via %{public}s",
+              fid,
+              nw_endpoint_get_hostname(remote) ?: "?",
+              (unsigned)nw_endpoint_get_port(remote),
+              interface != NULL ? (nw_interface_get_name(interface) ?: "?") : "(default)");
 
     nw_parameters_t params = nw_parameters_create_secure_tcp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
     if (interface != NULL) {
         nw_parameters_require_interface(params, interface);
+    } else {
+        STLogError("tcp[%{public}llu]: no interface pinned - the bypass may leak back into the tunnel", fid);
     }
 
     self.connection = nw_connection_create(remote, params);
@@ -53,10 +74,11 @@ static NSMutableSet<FlowTCP *> *TCPSessions(void)
             return;
         }
         if (error != nil) {
-            os_log_error(STUtils.log, "tcp: open flow failed: %{public}@", error);
-            [strongSelf closeWithError:error];
+            STLogError("tcp[%{public}llu]: open flow failed: %{public}@", fid, error);
+            [strongSelf closeWithError:error stage:@"open-flow"];
             return;
         }
+        STLogDebug("tcp[%{public}llu]: flow opened", fid);
         [strongSelf startConnection];
     };
 
@@ -77,6 +99,8 @@ static NSMutableSet<FlowTCP *> *TCPSessions(void)
     NWEndpoint *endpoint = self.flow.remoteEndpoint;
 #pragma clang diagnostic pop
     if (![endpoint isKindOfClass:[NWHostEndpoint class]]) {
+        STLogError("tcp[%{public}llu]: remote endpoint is %{public}@, expected NWHostEndpoint",
+                   self.flowId, [endpoint class]);
         return NULL;
     }
     NWHostEndpoint *host = (NWHostEndpoint *)endpoint;
@@ -85,6 +109,7 @@ static NSMutableSet<FlowTCP *> *TCPSessions(void)
 
 - (void)startConnection
 {
+    const uint64_t fid = self.flowId;
     __weak FlowTCP *weakSelf = self;
     nw_connection_set_queue(self.connection, dispatch_get_main_queue());
     nw_connection_set_state_changed_handler(self.connection, ^(nw_connection_state_t state, nw_error_t error) {
@@ -92,58 +117,92 @@ static NSMutableSet<FlowTCP *> *TCPSessions(void)
         if (strongSelf == nil) {
             return;
         }
+        NSError *nsError = [STUtils errorFromNWError:error];
+        STLogDebug("tcp[%{public}llu]: connection state=%{public}s error=%{public}@",
+                   fid, [STUtils connectionStateName:state], nsError ?: @"nil");
         if (state == nw_connection_state_ready) {
+            STLogInfo("tcp[%{public}llu]: connection ready, starting relay", fid);
             [strongSelf copyFlowToConnection];
             [strongSelf copyConnectionToFlow];
-        } else if (state == nw_connection_state_failed || state == nw_connection_state_cancelled) {
-            NSError *nsError = nil;
-            if (error != NULL) {
-                nsError = CFBridgingRelease(nw_error_copy_cf_error(error));
-            }
-            [strongSelf closeWithError:nsError];
+        } else if (state == nw_connection_state_failed) {
+            STLogError("tcp[%{public}llu]: connection failed: %{public}@", fid, nsError ?: @"nil");
+            [strongSelf closeWithError:nsError stage:@"conn-failed"];
+        } else if (state == nw_connection_state_cancelled) {
+            [strongSelf closeWithError:nsError stage:@"conn-cancelled"];
         }
     });
     nw_connection_start(self.connection);
 }
 
+#pragma mark - app -> remote
+
 - (void)copyFlowToConnection
 {
+    const uint64_t fid = self.flowId;
     __weak FlowTCP *weakSelf = self;
     [self.flow readDataWithCompletionHandler:^(NSData *data, NSError *error) {
         FlowTCP *strongSelf = weakSelf;
         if (strongSelf == nil || strongSelf.closed) {
             return;
         }
-        if (error != nil || data == nil) {
-            [strongSelf closeWithError:error];
+        if (error != nil) {
+            STLogError("tcp[%{public}llu]: flow read failed: %{public}@", fid, error);
+            [strongSelf closeWithError:error stage:@"flow-read"];
             return;
         }
-        if (data.length == 0) {
-            nw_connection_send(strongSelf.connection, NULL, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true,
-                               ^(nw_error_t sendError) {
-                                   (void)sendError;
-                               });
-            [strongSelf closeWithError:nil];
+        if (data == nil) {
+            STLogDebug("tcp[%{public}llu]: flow read returned nil", fid);
+            [strongSelf closeWithError:nil stage:@"flow-read-nil"];
             return;
         }
 
-        dispatch_data_t payload = dispatch_data_create(data.bytes, data.length, dispatch_get_main_queue(), DISPATCH_DATA_DESTRUCTOR_DEFAULT);
-        nw_connection_send(strongSelf.connection, payload, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true, ^(nw_error_t sendError) {
-            FlowTCP *inner = weakSelf;
-            if (inner == nil) {
-                return;
-            }
-            if (sendError != NULL) {
-                [inner closeWithError:CFBridgingRelease(nw_error_copy_cf_error(sendError))];
-                return;
-            }
-            [inner copyFlowToConnection];
-        });
+        if (data.length == 0) {
+            // The app half-closed its side. Propagate a real FIN with the final
+            // message context and keep reading the response until the remote is
+            // done - do NOT cancel the connection here.
+            strongSelf.flowEofSeen = YES;
+            STLogInfo("tcp[%{public}llu]: app half-closed after %{public}llu bytes out, sending FIN",
+                      fid, strongSelf.bytesOut);
+            nw_connection_send(strongSelf.connection, NULL, NW_CONNECTION_FINAL_MESSAGE_CONTEXT, true,
+                               ^(nw_error_t sendError) {
+                                   NSError *nsError = [STUtils errorFromNWError:sendError];
+                                   if (nsError != nil) {
+                                       STLogError("tcp[%{public}llu]: FIN send failed: %{public}@", fid, nsError);
+                                   } else {
+                                       STLogDebug("tcp[%{public}llu]: FIN sent", fid);
+                                   }
+                               });
+            return;
+        }
+
+        strongSelf.bytesOut = strongSelf.bytesOut + data.length;
+        STLogDebug("tcp[%{public}llu]: app -> remote %{public}lu bytes (total %{public}llu)",
+                   fid, (unsigned long)data.length, strongSelf.bytesOut);
+
+        dispatch_data_t payload = dispatch_data_create(data.bytes, data.length, dispatch_get_main_queue(),
+                                                       DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+        nw_connection_send(strongSelf.connection, payload, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true,
+                           ^(nw_error_t sendError) {
+                               FlowTCP *inner = weakSelf;
+                               if (inner == nil || inner.closed) {
+                                   return;
+                               }
+                               NSError *nsError = [STUtils errorFromNWError:sendError];
+                               if (nsError != nil) {
+                                   STLogError("tcp[%{public}llu]: remote send failed: %{public}@", fid, nsError);
+                                   [inner closeWithError:nsError stage:@"remote-send"];
+                                   return;
+                               }
+                               [inner copyFlowToConnection];
+                           });
     }];
 }
 
+#pragma mark - remote -> app
+
 - (void)copyConnectionToFlow
 {
+    const uint64_t fid = self.flowId;
     __weak FlowTCP *weakSelf = self;
     nw_connection_receive(self.connection, 1, UINT32_MAX,
                           ^(dispatch_data_t content, nw_content_context_t context, bool isComplete, nw_error_t error) {
@@ -152,53 +211,78 @@ static NSMutableSet<FlowTCP *> *TCPSessions(void)
                               if (strongSelf == nil || strongSelf.closed) {
                                   return;
                               }
-                              if (error != NULL) {
-                                  [strongSelf closeWithError:CFBridgingRelease(nw_error_copy_cf_error(error))];
+                              NSError *nsError = [STUtils errorFromNWError:error];
+                              if (nsError != nil) {
+                                  STLogError("tcp[%{public}llu]: remote receive failed: %{public}@", fid, nsError);
+                                  [strongSelf closeWithError:nsError stage:@"remote-receive"];
                                   return;
                               }
 
                               NSData *data = [STUtils dataFromDispatchData:content];
-
                               if (data.length > 0) {
+                                  strongSelf.bytesIn = strongSelf.bytesIn + data.length;
+                                  STLogDebug("tcp[%{public}llu]: remote -> app %{public}lu bytes (total %{public}llu, complete=%{public}d)",
+                                             fid, (unsigned long)data.length, strongSelf.bytesIn, (int)isComplete);
                                   [strongSelf.flow writeData:data withCompletionHandler:^(NSError *writeError) {
                                       FlowTCP *inner = weakSelf;
-                                      if (inner == nil) {
+                                      if (inner == nil || inner.closed) {
                                           return;
                                       }
                                       if (writeError != nil) {
-                                          [inner closeWithError:writeError];
+                                          STLogError("tcp[%{public}llu]: flow write failed: %{public}@", fid, writeError);
+                                          [inner closeWithError:writeError stage:@"flow-write"];
                                           return;
                                       }
-                                      if (!isComplete) {
-                                          [inner copyConnectionToFlow];
+                                      if (isComplete) {
+                                          STLogInfo("tcp[%{public}llu]: remote finished the stream", fid);
+                                          [inner closeWithError:nil stage:@"remote-eof"];
                                       } else {
-                                          [inner closeWithError:nil];
+                                          [inner copyConnectionToFlow];
                                       }
                                   }];
                                   return;
                               }
 
                               if (isComplete) {
-                                  [strongSelf closeWithError:nil];
+                                  STLogInfo("tcp[%{public}llu]: remote finished the stream (no trailing data)", fid);
+                                  [strongSelf closeWithError:nil stage:@"remote-eof-empty"];
                                   return;
                               }
                               [strongSelf copyConnectionToFlow];
                           });
 }
 
-- (void)closeWithError:(NSError *)error
+#pragma mark - teardown
+
+- (void)closeWithError:(NSError *)error stage:(NSString *)stage
 {
-    if (self.closed) {
-        return;
+    // Keep ourselves alive: removing from the registry may drop the last reference.
+    FlowTCP *keepAlive = self;
+    @synchronized(keepAlive) {
+        if (keepAlive.closed) {
+            return;
+        }
+        keepAlive.closed = YES;
     }
-    self.closed = YES;
-    [self.flow closeReadWithError:error];
-    [self.flow closeWriteWithError:error];
-    if (self.connection != NULL) {
-        nw_connection_cancel(self.connection);
-        self.connection = NULL;
+
+    STLogInfo("tcp[%{public}llu]: closing at %{public}@ out=%{public}llu in=%{public}llu eofSeen=%{public}d error=%{public}@",
+              keepAlive.flowId, stage ?: @"?", keepAlive.bytesOut, keepAlive.bytesIn,
+              (int)keepAlive.flowEofSeen, error ?: @"nil");
+
+    [keepAlive.flow closeReadWithError:error];
+    [keepAlive.flow closeWriteWithError:error];
+
+    nw_connection_t connection = keepAlive.connection;
+    if (connection != NULL) {
+        nw_connection_cancel(connection);
+        keepAlive.connection = NULL;
     }
-    [TCPSessions() removeObject:self];
+
+    dispatch_async([STUtils stateQueue], ^{
+        [TCPSessionsLocked() removeObject:keepAlive];
+        STLogDebug("tcp[%{public}llu]: unregistered, %{public}lu live tcp sessions",
+                   keepAlive.flowId, (unsigned long)TCPSessionsLocked().count);
+    });
 }
 
 @end

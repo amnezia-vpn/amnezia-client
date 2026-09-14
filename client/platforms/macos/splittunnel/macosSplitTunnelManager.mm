@@ -7,10 +7,10 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMetaObject>
+#include <QThread>
 
 #include "logger.h"
-
-#include <QDebug>
 
 namespace {
 Logger logger("MacOSSplitTunnelManager");
@@ -24,72 +24,21 @@ NSString *ProviderBundleId()
 #endif
 }
 
+QString QStr(NSString *value)
+{
+    return value != nil ? QString::fromNSString(value) : QStringLiteral("(nil)");
+}
+
 QString ErrorDump(NSError *error)
 {
     if (error == nil) {
         return QStringLiteral("nil");
     }
     return QStringLiteral("%1 code=%2 desc=%3 userInfo=%4")
-        .arg(QString::fromNSString(error.domain))
+        .arg(QStr(error.domain))
         .arg(error.code)
-        .arg(QString::fromNSString(error.localizedDescription))
-        .arg(QString::fromNSString(error.userInfo.description));
-}
-
-void LogApps(const char *where, const QVector<amnezia::InstalledAppInfo> &apps)
-{
-    logger.debug() << where << "count=" << apps.size();
-    qDebug() << "MacOSSplitTunnel" << where << "count=" << apps.size();
-    for (int i = 0; i < apps.size(); ++i) {
-        const auto &app = apps.at(i);
-        logger.debug() << where << i
-                       << "name=" << app.appName
-                       << "bundleId=" << app.packageName
-                       << "path=" << app.appPath;
-        qDebug() << "MacOSSplitTunnel" << where << i
-                 << "name=" << app.appName
-                 << "bundleId=" << app.packageName
-                 << "path=" << app.appPath;
-    }
-}
-
-void LogHostBundle()
-{
-    NSBundle *bundle = [NSBundle mainBundle];
-    logger.debug() << "mainBundle=" << QString::fromNSString(bundle.bundlePath)
-                   << "id=" << QString::fromNSString(bundle.bundleIdentifier);
-    logger.debug() << "NSSystemExtensionUsageDescription="
-                   << QString::fromNSString([bundle objectForInfoDictionaryKey:@"NSSystemExtensionUsageDescription"]);
-
-    NSString *sysexPath = [bundle.bundlePath
-        stringByAppendingPathComponent:@"Contents/Library/SystemExtensions/AmneziaVPNSplitTunnel.systemextension"];
-    const bool exists = [[NSFileManager defaultManager] fileExistsAtPath:sysexPath];
-    logger.debug() << "sysexPath=" << QString::fromNSString(sysexPath) << "exists=" << exists;
-    if (exists) {
-        NSBundle *sysex = [NSBundle bundleWithPath:sysexPath];
-        logger.debug() << "sysexId=" << QString::fromNSString(sysex.bundleIdentifier)
-                       << "version=" << QString::fromNSString(sysex.infoDictionary[@"CFBundleVersion"]);
-    }
-}
-
-NSDictionary *OptionsDictionary(const QByteArray &json)
-{
-    if (json.isEmpty()) {
-        logger.debug() << "OptionsDictionary empty json";
-        return @{};
-    }
-    NSData *data = [NSData dataWithBytes:json.constData() length:static_cast<NSUInteger>(json.size())];
-    NSError *error = nil;
-    id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-    if (error != nil) {
-        logger.error() << "OptionsDictionary json parse failed:" << ErrorDump(error);
-        return @{};
-    }
-    if (![object isKindOfClass:[NSDictionary class]]) {
-        logger.error() << "OptionsDictionary json is not a dict";
-        return @{};
-    }
-    return object;
+        .arg(QStr(error.localizedDescription))
+        .arg(QStr(error.userInfo.description));
 }
 
 const char *VpnStatusName(NEVPNStatus status)
@@ -104,10 +53,79 @@ const char *VpnStatusName(NEVPNStatus status)
     default: return "Unknown";
     }
 }
+
+const char *RequestResultName(OSSystemExtensionRequestResult result)
+{
+    switch (result) {
+    case OSSystemExtensionRequestCompleted: return "completed";
+    case OSSystemExtensionRequestWillCompleteAfterReboot: return "willCompleteAfterReboot";
+    default: return "unknown";
+    }
+}
+
+void LogApps(const char *where, const QVector<amnezia::InstalledAppInfo> &apps)
+{
+    logger.debug() << where << "apps count=" << apps.size();
+    for (int i = 0; i < apps.size(); ++i) {
+        const auto &app = apps.at(i);
+        logger.debug() << where << "  [" << i << "]"
+                       << "name=" << app.appName
+                       << "bundleId=" << app.packageName
+                       << "path=" << app.appPath;
+    }
+}
+
+void LogHostBundle()
+{
+    NSBundle *bundle = [NSBundle mainBundle];
+    logger.debug() << "host bundle path=" << QStr(bundle.bundlePath) << "id=" << QStr(bundle.bundleIdentifier);
+    logger.debug() << "host NSSystemExtensionUsageDescription="
+                   << QStr([bundle objectForInfoDictionaryKey:@"NSSystemExtensionUsageDescription"]);
+
+    NSString *sysexDir = [bundle.bundlePath stringByAppendingPathComponent:@"Contents/Library/SystemExtensions"];
+    NSArray<NSString *> *entries = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:sysexDir error:nil];
+    if (entries == nil) {
+        logger.error() << "host has no Contents/Library/SystemExtensions directory at" << QStr(sysexDir)
+                       << "- activation will fail with 'extension not found'";
+        return;
+    }
+    logger.debug() << "SystemExtensions dir=" << QStr(sysexDir) << "entries=" << entries.count;
+    for (NSString *entry in entries) {
+        NSString *path = [sysexDir stringByAppendingPathComponent:entry];
+        NSBundle *sysex = [NSBundle bundleWithPath:path];
+        logger.debug() << "  sysex" << QStr(entry)
+                       << "id=" << QStr(sysex.bundleIdentifier)
+                       << "version=" << QStr(sysex.infoDictionary[@"CFBundleVersion"])
+                       << "shortVersion=" << QStr(sysex.infoDictionary[@"CFBundleShortVersionString"]);
+    }
+}
+
+NSDictionary *OptionsDictionary(const QByteArray &json)
+{
+    if (json.isEmpty()) {
+        logger.error() << "OptionsDictionary: empty json";
+        return @{};
+    }
+    NSData *data = [NSData dataWithBytes:json.constData() length:static_cast<NSUInteger>(json.size())];
+    NSError *error = nil;
+    id object = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    if (error != nil) {
+        logger.error() << "OptionsDictionary: json parse failed:" << ErrorDump(error);
+        return @{};
+    }
+    if (![object isKindOfClass:[NSDictionary class]]) {
+        logger.error() << "OptionsDictionary: json is not a dictionary";
+        return @{};
+    }
+    return object;
+}
 } // namespace
 
+#pragma mark - OSSystemExtensionRequest delegate
+
 @interface AmneziaSTExtensionDelegate : NSObject <OSSystemExtensionRequestDelegate>
-@property (nonatomic, copy) void (^finished)(BOOL ok, NSString *message, BOOL needsApproval);
+@property (nonatomic, copy) void (^onNeedsApproval)(void);
+@property (nonatomic, copy) void (^onFinished)(BOOL ok, NSString *message);
 @end
 
 @implementation AmneziaSTExtensionDelegate
@@ -116,45 +134,48 @@ const char *VpnStatusName(NEVPNStatus status)
                   actionForReplacingExtension:(OSSystemExtensionProperties *)existing
                                 withExtension:(OSSystemExtensionProperties *)ext
 {
-    logger.debug() << "sysex replace existing=" << QString::fromNSString(existing.bundleIdentifier)
-                   << QString::fromNSString(existing.bundleVersion) << "->"
-                   << QString::fromNSString(ext.bundleIdentifier)
-                   << QString::fromNSString(ext.bundleVersion);
     (void)request;
+    logger.info() << "sysex: replacing" << QStr(existing.bundleIdentifier) << "v" << QStr(existing.bundleVersion)
+                  << "with" << QStr(ext.bundleIdentifier) << "v" << QStr(ext.bundleVersion);
     return OSSystemExtensionReplacementActionReplace;
 }
 
 - (void)requestNeedsUserApproval:(OSSystemExtensionRequest *)request
 {
     (void)request;
-    logger.debug() << "sysex needs user approval";
-    if (self.finished) {
-        self.finished(NO, @"needsApproval", YES);
+    logger.info() << "sysex: waiting for user approval in System Settings";
+    if (self.onNeedsApproval) {
+        self.onNeedsApproval();
     }
 }
 
 - (void)request:(OSSystemExtensionRequest *)request didFailWithError:(NSError *)error
 {
     (void)request;
-                logger.error() << "sysex request failed:" << ErrorDump(error);
-    qWarning() << "MacOSSplitTunnel sysex request failed:" << ErrorDump(error);
-    if (self.finished) {
-        self.finished(NO, error.localizedDescription, NO);
+    logger.error() << "sysex: request failed:" << ErrorDump(error);
+    if (self.onFinished) {
+        self.onFinished(NO, error.localizedDescription);
     }
 }
 
 - (void)request:(OSSystemExtensionRequest *)request didFinishWithResult:(OSSystemExtensionRequestResult)result
 {
     (void)request;
-    logger.debug() << "sysex request finished result=" << static_cast<int>(result);
-    if (self.finished) {
-        self.finished(YES, nil, NO);
+    logger.info() << "sysex: request finished result=" << RequestResultName(result) << "(" << (int)result << ")";
+    if (result == OSSystemExtensionRequestWillCompleteAfterReboot) {
+        logger.info() << "sysex: the extension will only become active after a reboot";
+    }
+    if (self.onFinished) {
+        self.onFinished(YES, nil);
     }
 }
 
 @end
 
-static AmneziaSTExtensionDelegate *g_extensionDelegate = nil;
+static AmneziaSTExtensionDelegate *g_activationDelegate = nil;
+static AmneziaSTExtensionDelegate *g_deactivationDelegate = nil;
+
+#pragma mark - MacOSSplitTunnelManager
 
 MacOSSplitTunnelManager *MacOSSplitTunnelManager::instance()
 {
@@ -164,9 +185,27 @@ MacOSSplitTunnelManager *MacOSSplitTunnelManager::instance()
 
 MacOSSplitTunnelManager::MacOSSplitTunnelManager(QObject *parent) : QObject(parent)
 {
+    logger.info() << "created, provider bundle id =" << QStr(ProviderBundleId());
 }
 
-QByteArray MacOSSplitTunnelManager::optionsJson(const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer) const
+void MacOSSplitTunnelManager::postError(const QString &message)
+{
+    logger.error() << "reporting error to UI:" << message;
+    QMetaObject::invokeMethod(this, [this, message]() { emit errorOccurred(message); }, Qt::QueuedConnection);
+}
+
+void MacOSSplitTunnelManager::postNeedsApproval()
+{
+    QMetaObject::invokeMethod(this, [this]() { emit needsUserApproval(); }, Qt::QueuedConnection);
+}
+
+void MacOSSplitTunnelManager::postActivated()
+{
+    QMetaObject::invokeMethod(this, [this]() { emit extensionActivated(); }, Qt::QueuedConnection);
+}
+
+QByteArray MacOSSplitTunnelManager::optionsJson(const QVector<amnezia::InstalledAppInfo> &apps,
+                                                const QString &vpnServer) const
 {
     QJsonArray appsJson;
     for (const auto &app : apps) {
@@ -177,50 +216,96 @@ QByteArray MacOSSplitTunnelManager::optionsJson(const QVector<amnezia::Installed
     }
 
     QJsonObject root;
+    // Only the exclude mode is implemented; the extension refuses to claim any
+    // flow for any other value instead of silently excluding.
     root.insert(QStringLiteral("mode"), QStringLiteral("except"));
     root.insert(QStringLiteral("apps"), appsJson);
     root.insert(QStringLiteral("vpnServer"), vpnServer);
     const QByteArray json = QJsonDocument(root).toJson(QJsonDocument::Compact);
-    logger.debug() << "optionsJson=" << QString::fromUtf8(json);
+    logger.debug() << "options json =" << QString::fromUtf8(json);
     return json;
 }
 
 void MacOSSplitTunnelManager::activateExtension()
 {
     if (@available(macOS 11.0, *)) {
-        logger.debug() << "activateExtension requested already=" << m_activationRequested
-                       << "provider=" << QString::fromNSString(ProviderBundleId());
-        qDebug() << "MacOSSplitTunnel activateExtension already=" << m_activationRequested
-                 << "provider=" << QString::fromNSString(ProviderBundleId());
+        logger.info() << "activateExtension: requested=" << m_activationRequested
+                      << "activated=" << m_extensionActivated
+                      << "provider=" << QStr(ProviderBundleId());
         LogHostBundle();
+
         if (m_activationRequested) {
-            logger.debug() << "activateExtension skipped: already requested";
+            logger.debug() << "activateExtension: a request is already in flight or completed";
             return;
         }
         m_activationRequested = true;
 
-        g_extensionDelegate = [[AmneziaSTExtensionDelegate alloc] init];
-        g_extensionDelegate.finished = ^(BOOL ok, NSString *message, BOOL needsApproval) {
-            if (needsApproval) {
-                logger.debug() << "System extension needs user approval";
-                emit needsUserApproval();
-                return;
-            }
-            if (!ok) {
-                logger.error() << "System extension activation failed:" << QString::fromNSString(message);
-                qWarning() << "MacOSSplitTunnel activation failed:" << QString::fromNSString(message);
-                emit errorOccurred(QString::fromNSString(message));
-                m_activationRequested = false;
+        g_activationDelegate = [[AmneziaSTExtensionDelegate alloc] init];
+        g_activationDelegate.onNeedsApproval = ^{
+            this->postNeedsApproval();
+        };
+        g_activationDelegate.onFinished = ^(BOOL ok, NSString *message) {
+            if (ok) {
+                QMetaObject::invokeMethod(this, [this]() { onExtensionActivated(); }, Qt::QueuedConnection);
             } else {
-                logger.debug() << "System extension activated";
+                this->m_activationRequested = false;
+                this->postError(QStr(message));
             }
         };
 
         OSSystemExtensionRequest *request =
-            [OSSystemExtensionRequest activationRequestForExtension:ProviderBundleId() queue:dispatch_get_main_queue()];
-        request.delegate = g_extensionDelegate;
-        logger.debug() << "submit OSSystemExtensionRequest" << QString::fromNSString(ProviderBundleId());
+            [OSSystemExtensionRequest activationRequestForExtension:ProviderBundleId()
+                                                              queue:dispatch_get_main_queue()];
+        request.delegate = g_activationDelegate;
+        logger.info() << "activateExtension: submitting activation request";
         [[OSSystemExtensionManager sharedManager] submitRequest:request];
+    } else {
+        logger.error() << "activateExtension: macOS 11.0 or newer is required";
+        postError(tr("Split tunneling requires macOS 11 or newer"));
+    }
+}
+
+void MacOSSplitTunnelManager::onExtensionActivated()
+{
+    m_extensionActivated = true;
+    logger.info() << "extension is registered; desired.valid=" << m_desired.valid
+                  << "desired.shouldRun=" << m_desired.shouldRun;
+    postActivated();
+
+    // A first-run activation completes long after reconcile() asked for the
+    // proxy. Start it now, otherwise nothing happens until the user toggles
+    // something or reconnects.
+    if (m_desired.valid && m_desired.shouldRun) {
+        logger.info() << "starting the proxy that was pending on approval";
+        startProxy(m_desired.apps, m_desired.vpnServer);
+    }
+}
+
+void MacOSSplitTunnelManager::deactivateExtension()
+{
+    if (@available(macOS 11.0, *)) {
+        logger.info() << "deactivateExtension: submitting deactivation request for" << QStr(ProviderBundleId());
+
+        g_deactivationDelegate = [[AmneziaSTExtensionDelegate alloc] init];
+        g_deactivationDelegate.onNeedsApproval = ^{
+            logger.info() << "deactivateExtension: waiting for user approval";
+        };
+        g_deactivationDelegate.onFinished = ^(BOOL ok, NSString *message) {
+            if (ok) {
+                logger.info() << "deactivateExtension: done";
+            } else {
+                logger.error() << "deactivateExtension failed:" << QStr(message);
+            }
+        };
+
+        OSSystemExtensionRequest *request =
+            [OSSystemExtensionRequest deactivationRequestForExtension:ProviderBundleId()
+                                                                queue:dispatch_get_main_queue()];
+        request.delegate = g_deactivationDelegate;
+        [[OSSystemExtensionManager sharedManager] submitRequest:request];
+
+        m_activationRequested = false;
+        m_extensionActivated = false;
     }
 }
 
@@ -229,28 +314,57 @@ void MacOSSplitTunnelManager::reconcile(bool vpnConnected, bool splitTunnelEnabl
 {
     const bool exceptMode = mode == amnezia::AppsRouteMode::VpnAllExceptApps;
     const bool shouldRun = vpnConnected && splitTunnelEnabled && exceptMode && !apps.isEmpty();
-    logger.debug() << "reconcile vpnConnected=" << vpnConnected
-                   << "splitEnabled=" << splitTunnelEnabled
-                   << "mode=" << static_cast<int>(mode)
-                   << "exceptMode=" << exceptMode
-                   << "appsEmpty=" << apps.isEmpty()
-                   << "vpnServer=" << vpnServer
-                   << "shouldRun=" << shouldRun;
-    qDebug() << "MacOSSplitTunnel reconcile vpnConnected=" << vpnConnected
-             << "splitEnabled=" << splitTunnelEnabled
-             << "mode=" << static_cast<int>(mode)
-             << "exceptMode=" << exceptMode
-             << "appsEmpty=" << apps.isEmpty()
-             << "vpnServer=" << vpnServer
-             << "shouldRun=" << shouldRun;
+
+    logger.info() << "reconcile: vpnConnected=" << vpnConnected
+                  << "splitEnabled=" << splitTunnelEnabled
+                  << "mode=" << static_cast<int>(mode) << "(exceptMode=" << exceptMode << ")"
+                  << "appsEmpty=" << apps.isEmpty()
+                  << "vpnServer=" << (vpnServer.isEmpty() ? QStringLiteral("(empty)") : vpnServer)
+                  << "extensionActivated=" << m_extensionActivated
+                  << "=> shouldRun=" << shouldRun;
     LogApps("reconcile", apps);
-    if (shouldRun) {
-        activateExtension();
-        startProxy(apps, vpnServer);
-    } else {
-        logger.debug() << "reconcile: stopProxy";
-        stopProxy();
+
+    if (splitTunnelEnabled && !exceptMode) {
+        logger.error() << "reconcile: app split tunneling is on but the route mode is" << static_cast<int>(mode)
+                       << "- only VpnAllExceptApps is supported on macOS, the proxy stays off";
     }
+    if (splitTunnelEnabled && exceptMode && apps.isEmpty()) {
+        logger.info() << "reconcile: the app list is empty, nothing to exclude";
+    }
+    if (shouldRun && vpnServer.isEmpty()) {
+        logger.error() << "reconcile: vpnServer is empty - the VPN endpoint will not be excluded from the "
+                          "proxy rules (expected for API configs, where credentials are not stored)";
+    }
+
+    m_desired.valid = true;
+    m_desired.shouldRun = shouldRun;
+    m_desired.apps = apps;
+    m_desired.vpnServer = vpnServer;
+
+    if (!shouldRun) {
+        stopProxy();
+        return;
+    }
+
+    activateExtension();
+
+    if (!m_extensionActivated) {
+        logger.info() << "reconcile: extension is not registered yet, the proxy will start once it is";
+        return;
+    }
+
+    startProxy(apps, vpnServer);
+}
+
+void MacOSSplitTunnelManager::disableFeature()
+{
+    logger.info() << "disableFeature: stopping the proxy, removing the configuration and unregistering "
+                     "the extension";
+    m_desired = DesiredState {};
+    m_appliedOptions.clear();
+    stopProxy();
+    removeConfiguration();
+    deactivateExtension();
 }
 
 void MacOSSplitTunnelManager::startProxy(const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer)
@@ -259,39 +373,73 @@ void MacOSSplitTunnelManager::startProxy(const QVector<amnezia::InstalledAppInfo
         const QByteArray json = optionsJson(apps, vpnServer);
         NSDictionary *options = OptionsDictionary(json);
         NSString *bundleId = ProviderBundleId();
-        logger.debug() << "startProxy provider=" << QString::fromNSString(bundleId)
-                       << "optionsKeys=" << QString::fromNSString(options.allKeys.description);
+        NSData *messageData = [NSData dataWithBytes:json.constData() length:static_cast<NSUInteger>(json.size())];
+        const QByteArray previousOptions = m_appliedOptions;
+        m_appliedOptions = json;
 
-        [NETransparentProxyManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETransparentProxyManager *> *managers, NSError *loadError) {
+        logger.info() << "startProxy: provider=" << QStr(bundleId) << "apps=" << apps.size()
+                      << "optionsChanged=" << (previousOptions != json);
+
+        [NETransparentProxyManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETransparentProxyManager *> *managers,
+                                                                                NSError *loadError) {
             if (loadError != nil) {
-                logger.error() << "loadAllFromPreferences failed:" << ErrorDump(loadError);
-                emit errorOccurred(QString::fromNSString(loadError.localizedDescription));
+                logger.error() << "startProxy: loadAllFromPreferences failed:" << ErrorDump(loadError);
+                this->postError(QStr(loadError.localizedDescription));
                 return;
             }
 
-            logger.debug() << "loadAllFromPreferences count=" << (managers != nil ? (int)managers.count : 0);
+            logger.debug() << "startProxy: found" << (managers != nil ? (int)managers.count : 0) << "NE configurations";
             NETransparentProxyManager *manager = nil;
             int index = 0;
             for (NETransparentProxyManager *item in managers) {
                 NETunnelProviderProtocol *proto = (NETunnelProviderProtocol *)item.protocolConfiguration;
-                const QString protoId = [proto isKindOfClass:[NETunnelProviderProtocol class]]
-                    ? QString::fromNSString(proto.providerBundleIdentifier)
-                    : QStringLiteral("<not-tunnel-proto>");
-                logger.debug() << "existing manager" << index++
+                const bool isTunnelProto = [proto isKindOfClass:[NETunnelProviderProtocol class]];
+                logger.debug() << "  [" << index++ << "]"
                                << "enabled=" << item.enabled
                                << "status=" << VpnStatusName(item.connection.status)
-                               << "provider=" << protoId
-                               << "desc=" << QString::fromNSString(item.localizedDescription);
-                if ([proto isKindOfClass:[NETunnelProviderProtocol class]]
-                    && [proto.providerBundleIdentifier isEqualToString:bundleId]) {
+                               << "provider=" << (isTunnelProto ? QStr(proto.providerBundleIdentifier)
+                                                                : QStringLiteral("<not-tunnel-proto>"))
+                               << "desc=" << QStr(item.localizedDescription);
+                if (isTunnelProto && [proto.providerBundleIdentifier isEqualToString:bundleId]) {
                     manager = item;
                 }
             }
+
             if (manager == nil) {
-                logger.debug() << "creating new NETransparentProxyManager";
+                logger.info() << "startProxy: creating a new NETransparentProxyManager";
                 manager = [[NETransparentProxyManager alloc] init];
             } else {
-                logger.debug() << "reusing existing NETransparentProxyManager";
+                logger.debug() << "startProxy: reusing the existing NETransparentProxyManager";
+            }
+
+            const NEVPNStatus statusBefore = manager.connection.status;
+
+            // Already running: push the new app list through a provider message
+            // instead of restarting the tunnel.
+            if (statusBefore == NEVPNStatusConnected && previousOptions == json) {
+                logger.info() << "startProxy: proxy is already running with the same options, nothing to do";
+                return;
+            }
+            if (statusBefore == NEVPNStatusConnected) {
+                logger.info() << "startProxy: proxy is running, pushing the new options as a provider message";
+                NETunnelProviderSession *session = (NETunnelProviderSession *)manager.connection;
+                if ([session isKindOfClass:[NETunnelProviderSession class]]) {
+                    NSError *sendError = nil;
+                    const BOOL sent = [session sendProviderMessage:messageData
+                                                       returnError:&sendError
+                                                   responseHandler:^(NSData *response) {
+                                                       logger.debug() << "startProxy: provider replied"
+                                                                      << (response != nil ? (int)response.length : -1)
+                                                                      << "bytes";
+                                                   }];
+                    if (sent) {
+                        return;
+                    }
+                    logger.error() << "startProxy: sendProviderMessage failed, restarting the proxy:"
+                                   << ErrorDump(sendError);
+                } else {
+                    logger.error() << "startProxy: connection is not an NETunnelProviderSession, restarting";
+                }
             }
 
             NETunnelProviderProtocol *protocol = [[NETunnelProviderProtocol alloc] init];
@@ -305,38 +453,43 @@ void MacOSSplitTunnelManager::startProxy(const QVector<amnezia::InstalledAppInfo
 
             [manager saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
                 if (saveError != nil) {
-                    logger.error() << "saveToPreferences failed:" << ErrorDump(saveError);
-                    qWarning() << "MacOSSplitTunnel saveToPreferences failed:" << ErrorDump(saveError);
-                    emit errorOccurred(QString::fromNSString(saveError.localizedDescription));
+                    logger.error() << "startProxy: saveToPreferences failed:" << ErrorDump(saveError);
+                    this->postError(QStr(saveError.localizedDescription));
                     return;
                 }
-                logger.debug() << "saveToPreferences ok";
+                logger.debug() << "startProxy: saveToPreferences ok";
 
+                // Reload so the connection object refers to the saved configuration.
                 [manager loadFromPreferencesWithCompletionHandler:^(NSError *reloadError) {
                     if (reloadError != nil) {
-                        logger.error() << "reload preferences failed:" << ErrorDump(reloadError);
-                        emit errorOccurred(QString::fromNSString(reloadError.localizedDescription));
+                        logger.error() << "startProxy: reload failed:" << ErrorDump(reloadError);
+                        this->postError(QStr(reloadError.localizedDescription));
                         return;
                     }
-                    logger.debug() << "reload preferences ok status=" << VpnStatusName(manager.connection.status);
+                    logger.debug() << "startProxy: reload ok, status=" << VpnStatusName(manager.connection.status);
+
+                    if (manager.connection.status == NEVPNStatusConnected
+                        || manager.connection.status == NEVPNStatusConnecting) {
+                        logger.info() << "startProxy: already"
+                                      << VpnStatusName(manager.connection.status) << ", not starting again";
+                        return;
+                    }
 
                     NSError *startError = nil;
-                    BOOL started = [manager.connection startVPNTunnelWithOptions:options andReturnError:&startError];
-                    logger.debug() << "startVPNTunnel started=" << started
-                                   << "status=" << VpnStatusName(manager.connection.status)
-                                   << "error=" << ErrorDump(startError);
-                    qDebug() << "MacOSSplitTunnel startVPNTunnel started=" << started
-                             << "status=" << VpnStatusName(manager.connection.status)
-                             << "error=" << ErrorDump(startError);
+                    const BOOL started = [manager.connection startVPNTunnelWithOptions:options
+                                                                        andReturnError:&startError];
+                    logger.info() << "startProxy: startVPNTunnel started=" << started
+                                  << "status=" << VpnStatusName(manager.connection.status)
+                                  << "error=" << ErrorDump(startError);
                     if (!started) {
-                        logger.error() << "startVPNTunnel failed:" << ErrorDump(startError);
-                        qWarning() << "MacOSSplitTunnel startVPNTunnel failed:" << ErrorDump(startError);
-                        emit errorOccurred(startError != nil ? QString::fromNSString(startError.localizedDescription)
-                                                             : QStringLiteral("startVPNTunnel returned NO"));
+                        this->postError(startError != nil ? QStr(startError.localizedDescription)
+                                                          : QStringLiteral("startVPNTunnel returned NO"));
                     }
                 }];
             }];
         }];
+    } else {
+        logger.error() << "startProxy: macOS 11.0 or newer is required";
     }
 }
 
@@ -344,19 +497,56 @@ void MacOSSplitTunnelManager::stopProxy()
 {
     if (@available(macOS 11.0, *)) {
         NSString *bundleId = ProviderBundleId();
-        logger.debug() << "stopProxy provider=" << QString::fromNSString(bundleId);
-        [NETransparentProxyManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETransparentProxyManager *> *managers, NSError *loadError) {
+        logger.info() << "stopProxy: provider=" << QStr(bundleId);
+        m_appliedOptions.clear();
+
+        [NETransparentProxyManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETransparentProxyManager *> *managers,
+                                                                                NSError *loadError) {
             if (loadError != nil) {
-                logger.error() << "stopProxy loadAllFromPreferences failed:" << ErrorDump(loadError);
+                logger.error() << "stopProxy: loadAllFromPreferences failed:" << ErrorDump(loadError);
                 return;
             }
+            int stopped = 0;
             for (NETransparentProxyManager *item in managers) {
                 NETunnelProviderProtocol *proto = (NETunnelProviderProtocol *)item.protocolConfiguration;
                 if ([proto isKindOfClass:[NETunnelProviderProtocol class]]
                     && [proto.providerBundleIdentifier isEqualToString:bundleId]) {
-                    logger.debug() << "stopVPNTunnel status=" << VpnStatusName(item.connection.status);
+                    logger.info() << "stopProxy: stopping tunnel, status was"
+                                  << VpnStatusName(item.connection.status);
                     [item.connection stopVPNTunnel];
+                    ++stopped;
                 }
+            }
+            logger.debug() << "stopProxy: stopped" << stopped << "configuration(s)";
+        }];
+    }
+}
+
+void MacOSSplitTunnelManager::removeConfiguration()
+{
+    if (@available(macOS 11.0, *)) {
+        NSString *bundleId = ProviderBundleId();
+        logger.info() << "removeConfiguration: provider=" << QStr(bundleId);
+
+        [NETransparentProxyManager loadAllFromPreferencesWithCompletionHandler:^(NSArray<NETransparentProxyManager *> *managers,
+                                                                                NSError *loadError) {
+            if (loadError != nil) {
+                logger.error() << "removeConfiguration: loadAllFromPreferences failed:" << ErrorDump(loadError);
+                return;
+            }
+            for (NETransparentProxyManager *item in managers) {
+                NETunnelProviderProtocol *proto = (NETunnelProviderProtocol *)item.protocolConfiguration;
+                if (![proto isKindOfClass:[NETunnelProviderProtocol class]]
+                    || ![proto.providerBundleIdentifier isEqualToString:bundleId]) {
+                    continue;
+                }
+                [item removeFromPreferencesWithCompletionHandler:^(NSError *removeError) {
+                    if (removeError != nil) {
+                        logger.error() << "removeConfiguration failed:" << ErrorDump(removeError);
+                    } else {
+                        logger.info() << "removeConfiguration: removed";
+                    }
+                }];
             }
         }];
     }

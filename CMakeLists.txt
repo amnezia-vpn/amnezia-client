@@ -3,6 +3,11 @@ cmake_minimum_required(VERSION 3.25.0 FATAL_ERROR)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(APPLE AND NOT IOS AND NOT MACOS_NE)
+    enable_language(OBJC)
+    enable_language(OBJCXX)
+endif()
+
 set(PROJECT AmneziaVPN)
 if(NOT AMNEZIAVPN_VERSION)
     set(AMNEZIAVPN_VERSION 5.0.2.2 CACHE STRING "Client app version")

@@ -34,6 +34,29 @@ if launchctl list "${APP_NAME}-service" &> /dev/null; then
 fi
 sudo rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
 
+# ---------------- Split-tunnel system extension ------------------------------
+# Must run while the bundle is still on disk: systemextensionsctl resolves the
+# extension through its host app.
+ST_BUNDLE_ID="org.amnezia.AmneziaVPN.split-tunnel"
+ST_TEAM_ID="X7UJ388FXK"
+
+if command -v systemextensionsctl >/dev/null 2>&1; then
+    if systemextensionsctl list 2>/dev/null | grep -q "$ST_BUNDLE_ID"; then
+        echo "Removing split-tunnel system extension $ST_BUNDLE_ID"
+        if ! sudo systemextensionsctl uninstall "$ST_TEAM_ID" "$ST_BUNDLE_ID"; then
+            echo "Could not remove the system extension automatically."
+            echo "Remove it manually in System Settings > General > Login Items & Extensions > Network Extensions."
+        fi
+    else
+        echo "No split-tunnel system extension registered"
+    fi
+fi
+
+# The "AmneziaVPN Split Tunnel" entry in System Settings > Network belongs to
+# the NetworkExtension preferences and can only be removed by the app itself
+# (it does so when app split tunneling is switched off). If one is left over,
+# remove it from System Settings > Network.
+
 # Remove the entire application bundle
 sudo rm -rf "$APP_PATH"
 

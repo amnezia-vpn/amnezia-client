@@ -6,7 +6,9 @@
 
 @interface FlowUDP : NSObject
 
-+ (void)handleFlow:(NEAppProxyUDPFlow *)flow interface:(nw_interface_t)interface;
+/*! Takes ownership of `flow` and proxies its datagrams out of `interface`.
+ *  `flowId` only correlates log lines. */
++ (void)handleFlow:(NEAppProxyUDPFlow *)flow interface:(nw_interface_t)interface flowId:(uint64_t)flowId;
 
 @end
 

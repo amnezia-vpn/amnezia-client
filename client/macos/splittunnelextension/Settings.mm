@@ -1,6 +1,10 @@
 #import "Settings.h"
 #import "Utils.h"
 
+@interface STSettings ()
+@property (atomic, copy, readwrite) NSString *vpnServer;
+@end
+
 @implementation STSettings
 
 - (instancetype)init
@@ -13,35 +17,57 @@
     return self;
 }
 
-- (void)applyDictionary:(NSDictionary *)dict
+- (BOOL)applyDictionary:(NSDictionary *)dict source:(NSString *)source
 {
-    os_log(STUtils.log, "applyDictionary keys=%{public}@", dict.allKeys ?: @[]);
+    NSString *where = source.length > 0 ? source : @"?";
+
     if (![dict isKindOfClass:[NSDictionary class]]) {
-        os_log_error(STUtils.log, "applyDictionary: not a dict (%{public}@)", [dict class]);
-        return;
+        STLogError("settings[%{public}@]: payload is not a dictionary (%{public}@)", where, [dict class]);
+        return NO;
     }
 
-    NSString *mode = dict[@"mode"];
-    os_log(STUtils.log, "applyDictionary mode=%{public}@", mode ?: @"(nil)");
+    STLogInfo("settings[%{public}@]: applying keys=%{public}@", where, dict.allKeys ?: @[]);
 
-    NSString *server = dict[@"vpnServer"];
+    const STRouteMode mode = STRouteModeFromString(dict[@"mode"]);
+    self.policy.mode = mode;
+    STLogInfo("settings[%{public}@]: mode raw=%{public}@ parsed=%{public}s",
+              where, dict[@"mode"] ?: @"(nil)", STRouteModeName(mode));
+    if (mode == STRouteModeUnknown) {
+        STLogError("settings[%{public}@]: unknown mode, the provider will not claim any flow", where);
+    } else if (mode == STRouteModeOnly) {
+        STLogError("settings[%{public}@]: include mode is not implemented, the provider will not claim any flow", where);
+    }
+
+    id server = dict[@"vpnServer"];
     if ([server isKindOfClass:[NSString class]]) {
-        _vpnServer = [server copy];
-        os_log(STUtils.log, "applyDictionary vpnServer=%{public}@", _vpnServer);
+        self.vpnServer = [server copy];
+        STLogInfo("settings[%{public}@]: vpnServer=%{public}@ (ipv4=%{public}d ipv6=%{public}d)",
+                  where, self.vpnServer,
+                  (int)[STUtils isIPv4Address:self.vpnServer], (int)[STUtils isIPv6Address:self.vpnServer]);
+        if (self.vpnServer.length == 0) {
+            STLogError("settings[%{public}@]: vpnServer is empty - the VPN endpoint will not be excluded "
+                       "from the proxy rules", where);
+        } else if (![STUtils isIPv4Address:self.vpnServer] && ![STUtils isIPv6Address:self.vpnServer]) {
+            STLogError("settings[%{public}@]: vpnServer %{public}@ is not a literal IP address - no exclude "
+                       "rule will be generated for it", where, self.vpnServer);
+        }
+    } else if (server != nil) {
+        STLogError("settings[%{public}@]: vpnServer is not a string (%{public}@)", where, [server class]);
     }
 
-    NSArray *apps = dict[@"apps"];
+    id apps = dict[@"apps"];
     if (![apps isKindOfClass:[NSArray class]]) {
-        os_log_error(STUtils.log, "applyDictionary: apps missing or not array (%{public}@)", [apps class]);
-        return;
+        STLogError("settings[%{public}@]: apps missing or not an array (%{public}@)", where, [apps class]);
+        return NO;
     }
 
-    os_log(STUtils.log, "applyDictionary apps count=%{public}lu", (unsigned long)apps.count);
+    STLogInfo("settings[%{public}@]: apps count=%{public}lu", where, (unsigned long)[apps count]);
     NSMutableArray<STAppEntry *> *entries = [NSMutableArray array];
     NSUInteger i = 0;
-    for (id item in apps) {
+    for (id item in (NSArray *)apps) {
         if (![item isKindOfClass:[NSDictionary class]]) {
-            os_log_error(STUtils.log, "applyDictionary apps[%{public}lu] not dict", (unsigned long)i);
+            STLogError("settings[%{public}@]: apps[%{public}lu] is not a dictionary (%{public}@)",
+                       where, (unsigned long)i, [item class]);
             ++i;
             continue;
         }
@@ -54,18 +80,24 @@
         if ([path isKindOfClass:[NSString class]]) {
             entry.path = path;
         }
-        os_log(STUtils.log, "applyDictionary apps[%{public}lu] bundleId=%{public}@ path=%{public}@",
-               (unsigned long)i, entry.bundleId ?: @"", entry.path ?: @"");
+        STLogInfo("settings[%{public}@]: apps[%{public}lu] bundleId=%{public}@ path=%{public}@",
+                  where, (unsigned long)i, entry.bundleId ?: @"", entry.path ?: @"");
         if (entry.bundleId.length > 0 || entry.path.length > 0) {
             [entries addObject:entry];
+        } else {
+            STLogError("settings[%{public}@]: apps[%{public}lu] has neither bundleId nor path, skipped",
+                       where, (unsigned long)i);
         }
         ++i;
     }
     [self.policy replaceApps:entries];
+    return YES;
 }
 
 - (NENetworkRule *)ruleForHost:(NSString *)host prefix:(NSUInteger)prefix
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     NWHostEndpoint *endpoint = [NWHostEndpoint endpointWithHostname:host port:@"0"];
     return [[NENetworkRule alloc] initWithRemoteNetwork:endpoint
                                            remotePrefix:prefix
@@ -73,25 +105,42 @@
                                             localPrefix:0
                                                protocol:NENetworkRuleProtocolAny
                                               direction:NETrafficDirectionOutbound];
+#pragma clang diagnostic pop
 }
 
 - (NSArray<NENetworkRule *> *)excludedNetworkRules
 {
-    NSMutableArray<NENetworkRule *> *rules = [NSMutableArray arrayWithArray:@[
-        [self ruleForHost:@"127.0.0.0" prefix:8],
-        [self ruleForHost:@"10.0.0.0" prefix:8],
-        [self ruleForHost:@"172.16.0.0" prefix:12],
-        [self ruleForHost:@"192.168.0.0" prefix:16],
-        [self ruleForHost:@"169.254.0.0" prefix:16],
-        [self ruleForHost:@"::1" prefix:128],
-        [self ruleForHost:@"fc00::" prefix:7],
-        [self ruleForHost:@"fe80::" prefix:10],
-    ]];
+    NSArray<NSArray *> *specs = @[
+        @[ @"127.0.0.0", @8 ],
+        @[ @"10.0.0.0", @8 ],
+        @[ @"172.16.0.0", @12 ],
+        @[ @"192.168.0.0", @16 ],
+        @[ @"169.254.0.0", @16 ],
+        @[ @"::1", @128 ],
+        @[ @"fc00::", @7 ],
+        @[ @"fe80::", @10 ],
+    ];
 
-    if ([STUtils isIPv4Address:self.vpnServer]) {
-        [rules addObject:[self ruleForHost:self.vpnServer prefix:32]];
+    NSMutableArray<NENetworkRule *> *rules = [NSMutableArray array];
+    for (NSArray *spec in specs) {
+        NSString *host = spec[0];
+        NSUInteger prefix = [spec[1] unsignedIntegerValue];
+        [rules addObject:[self ruleForHost:host prefix:prefix]];
+        STLogInfo("settings: exclude rule %{public}@/%{public}lu", host, (unsigned long)prefix);
     }
 
+    NSString *server = self.vpnServer;
+    if ([STUtils isIPv4Address:server]) {
+        [rules addObject:[self ruleForHost:server prefix:32]];
+        STLogInfo("settings: exclude rule %{public}@/32 (vpn server, ipv4)", server);
+    } else if ([STUtils isIPv6Address:server]) {
+        [rules addObject:[self ruleForHost:server prefix:128]];
+        STLogInfo("settings: exclude rule %{public}@/128 (vpn server, ipv6)", server);
+    } else {
+        STLogError("settings: no exclude rule for the VPN server (value=%{public}@)", server ?: @"");
+    }
+
+    STLogInfo("settings: %{public}lu exclude rules total", (unsigned long)rules.count);
     return rules;
 }
 

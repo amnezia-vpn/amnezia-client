@@ -6,7 +6,9 @@
 
 @interface FlowTCP : NSObject
 
-+ (void)handleFlow:(NEAppProxyTCPFlow *)flow interface:(nw_interface_t)interface;
+/*! Takes ownership of `flow` and proxies it out of `interface`.
+ *  `flowId` only correlates log lines. */
++ (void)handleFlow:(NEAppProxyTCPFlow *)flow interface:(nw_interface_t)interface flowId:(uint64_t)flowId;
 
 @end
 

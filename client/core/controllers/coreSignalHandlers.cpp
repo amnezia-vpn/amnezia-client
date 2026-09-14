@@ -11,7 +11,7 @@
 #include "core/utils/serverConfigUtils.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "vpnConnection.h"
-#include <QDebug>
+#include "logger.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/connectionUiController.h"
 #include "ui/controllers/settingsUiController.h"
@@ -55,6 +55,10 @@
 #if defined(Q_OS_MACOS) && !defined(MACOS_NE)
     #include "platforms/macos/splittunnel/macosSplitTunnelManager.h"
 #endif
+
+namespace {
+Logger logger("CoreSignalHandlers");
+}
 
 CoreSignalHandlers::CoreSignalHandlers(CoreController* coreController, QObject* parent)
     : QObject(parent),
@@ -453,52 +457,91 @@ void CoreSignalHandlers::initUpdateFoundHandler()
 void CoreSignalHandlers::initMacosSplitTunnelHandler()
 {
 #if defined(Q_OS_MACOS) && !defined(MACOS_NE)
-    auto reconcile = [this]() {
+    auto *manager = MacOSSplitTunnelManager::instance();
+
+    auto reconcile = [this, manager](const char *trigger) {
         auto *st = m_coreController->m_appSplitTunnelingController;
         QString vpnServer;
         const QString serverId = m_coreController->m_serversController->getDefaultServerId();
-        if (!serverId.isEmpty()) {
+        if (serverId.isEmpty()) {
+            logger.debug() << "macos split tunnel [" << trigger << "]: no default server id";
+        } else {
             vpnServer = m_coreController->m_serversController->getServerCredentials(serverId).hostName;
+            if (vpnServer.isEmpty()) {
+                logger.debug() << "macos split tunnel [" << trigger
+                               << "]: no stored host name for server" << serverId
+                               << "(expected for API configs)";
+            }
         }
-        qDebug() << "macosSplitTunnel reconcile connected="
-                 << m_coreController->m_connectionController->isConnected()
-                 << "enabled=" << st->isSplitTunnelingEnabled()
-                 << "mode=" << static_cast<int>(st->getRouteMode())
-                 << "apps=" << st->getApps().size()
-                 << "vpnServer=" << vpnServer;
-        MacOSSplitTunnelManager::instance()->reconcile(
-            m_coreController->m_connectionController->isConnected(),
-            st->isSplitTunnelingEnabled(),
-            st->getRouteMode(),
-            st->getApps(),
-            vpnServer);
+
+        logger.info() << "macos split tunnel [" << trigger << "]:"
+                      << "connected=" << m_coreController->m_connectionController->isConnected()
+                      << "enabled=" << st->isSplitTunnelingEnabled()
+                      << "mode=" << static_cast<int>(st->getRouteMode())
+                      << "apps=" << st->getApps().size()
+                      << "vpnServer=" << (vpnServer.isEmpty() ? QStringLiteral("(empty)") : vpnServer);
+
+        manager->reconcile(m_coreController->m_connectionController->isConnected(),
+                           st->isSplitTunnelingEnabled(),
+                           st->getRouteMode(),
+                           st->getApps(),
+                           vpnServer);
     };
+
+    // Surface the extension state to the user: without this a first run just
+    // silently does nothing until the extension is approved.
+    connect(manager, &MacOSSplitTunnelManager::needsUserApproval, this, [this]() {
+        logger.info() << "macos split tunnel: asking the user to approve the system extension";
+        emit m_coreController->m_pageController->showNotificationMessage(
+            tr("Allow the AmneziaVPN system extension in System Settings > General > "
+               "Login Items & Extensions > Network Extensions, then reconnect the VPN"));
+    });
+
+    connect(manager, &MacOSSplitTunnelManager::extensionActivated, this, [this]() {
+        logger.info() << "macos split tunnel: system extension activated";
+        emit m_coreController->m_pageController->showNotificationMessage(
+            tr("App split tunneling is ready"));
+    });
+
+    connect(manager, &MacOSSplitTunnelManager::errorOccurred, this, [this](const QString &message) {
+        logger.error() << "macos split tunnel error:" << message;
+        emit m_coreController->m_pageController->showErrorMessage(
+            tr("App split tunneling: %1").arg(message));
+    });
 
     connect(m_coreController->m_connectionController, &ConnectionController::connectionStateChanged, this,
             [reconcile](Vpn::ConnectionState state) {
-                qDebug() << "macosSplitTunnel connectionStateChanged" << static_cast<int>(state);
-                reconcile();
+                logger.debug() << "macos split tunnel: connection state ->" << static_cast<int>(state);
+                reconcile("connectionStateChanged");
             });
+
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged, this,
-            [this, reconcile](bool enabled) {
-                qDebug() << "macosSplitTunnel appsSplitTunnelingEnabledChanged" << enabled;
+            [reconcile, manager](bool enabled) {
+                logger.info() << "macos split tunnel: feature toggled ->" << enabled;
                 if (enabled) {
-                    MacOSSplitTunnelManager::instance()->activateExtension();
+                    // Ask for approval right away, while the user is in the settings page.
+                    manager->activateExtension();
+                    reconcile("appsSplitTunnelingEnabledChanged");
+                } else {
+                    // Leave nothing behind in System Settings when the user opts out.
+                    manager->disableFeature();
                 }
-                reconcile();
             });
+
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsChanged, this,
             [reconcile](AppsRouteMode mode) {
-                qDebug() << "macosSplitTunnel appsChanged mode=" << static_cast<int>(mode);
-                reconcile();
+                logger.debug() << "macos split tunnel: app list changed, mode=" << static_cast<int>(mode);
+                reconcile("appsChanged");
             });
+
     connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::appsRouteModeChanged, this,
             [reconcile](AppsRouteMode mode) {
-                qDebug() << "macosSplitTunnel appsRouteModeChanged mode=" << static_cast<int>(mode);
-                reconcile();
+                logger.debug() << "macos split tunnel: route mode changed ->" << static_cast<int>(mode);
+                reconcile("appsRouteModeChanged");
             });
+
+    logger.info() << "macos split tunnel handler installed";
 #else
     (void)this;
 #endif
 }
-

@@ -426,7 +426,7 @@ bool KillSwitch::enableKillSwitch(const QJsonObject &configStr, int vpnAdapterIn
 
     MacOSFirewall::setAnchorEnabled(QStringLiteral("310.blockDNS"), true);
     MacOSFirewall::setAnchorTable(QStringLiteral("310.blockDNS"), true, QStringLiteral("dnsaddr"), dnsServers);
-    MacOSFirewall::setAnchorEnabled(QStringLiteral("150.allowExcludedApps"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("320.allowExcludedApps"), true);
     MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), true);
 #endif
     return true;

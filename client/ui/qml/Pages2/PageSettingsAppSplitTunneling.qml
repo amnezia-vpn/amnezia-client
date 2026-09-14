@@ -43,7 +43,10 @@ PageType {
 
     property bool isMacosAppSplitTunnel: Qt.platform.os === "osx" && !IsMacOsNeBuild
 
-    property list<QtObject> routeModesModel: (Qt.platform.os === "windows" || isMacosAppSplitTunnel)
+    // macOS only implements the exclude mode, so the picker has a single entry
+    // there. Windows keeps the original two-entry model (its picker has always
+    // been disabled, and narrowing it would change which stored app list is used).
+    property list<QtObject> routeModesModel: isMacosAppSplitTunnel
         ? [allExceptApps]
         : [onlyForwardApps, allExceptApps]
 
@@ -63,7 +66,7 @@ PageType {
 
     function getRouteModesModelIndex() {
         var currentRouteMode = AppSplitTunnelingController.routeMode
-        if (Qt.platform.os === "windows" || root.isMacosAppSplitTunnel) {
+        if (root.isMacosAppSplitTunnel) {
             return 0
         }
         if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
