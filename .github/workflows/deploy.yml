@@ -502,17 +502,26 @@ jobs:
       env:
         MAC_PKG_APP_PROVISIONING_PROFILE: ${{ secrets.MAC_PKG_APP_PROVISIONING_PROFILE }}
         MAC_PKG_NE_PROVISIONING_PROFILE: ${{ secrets.MAC_PKG_NE_PROVISIONING_PROFILE }}
+        MAC_APP_PROVISIONING_PROFILE: ${{ secrets.MAC_APP_PROVISIONING_PROFILE }}
+        MAC_NE_PROVISIONING_PROFILE: ${{ secrets.MAC_NE_PROVISIONING_PROFILE }}
       shell: bash
       run: |
         set -euo pipefail
-        if [[ -z "${MAC_PKG_APP_PROVISIONING_PROFILE}" || -z "${MAC_PKG_NE_PROVISIONING_PROFILE}" ]]; then
-          echo "Need GitHub secrets MAC_PKG_APP_PROVISIONING_PROFILE and MAC_PKG_NE_PROVISIONING_PROFILE"
-          echo "(Developer ID profiles for org.amnezia.AmneziaVPN and org.amnezia.AmneziaVPN.network-extension)."
-          echo "Do not reuse MAC_APP_PROVISIONING_PROFILE / MAC_NE_PROVISIONING_PROFILE (App Store job)."
+        app_b64="${MAC_PKG_APP_PROVISIONING_PROFILE:-}"
+        ne_b64="${MAC_PKG_NE_PROVISIONING_PROFILE:-}"
+        if [[ -n "${app_b64}" && -n "${ne_b64}" ]]; then
+          echo "Using MAC_PKG_* Developer ID provisioning profiles"
+        else
+          app_b64="${MAC_APP_PROVISIONING_PROFILE:-}"
+          ne_b64="${MAC_NE_PROVISIONING_PROFILE:-}"
+          echo "MAC_PKG_* unset; falling back to MAC_APP_PROVISIONING_PROFILE / MAC_NE_PROVISIONING_PROFILE"
+        fi
+        if [[ -z "${app_b64}" || -z "${ne_b64}" ]]; then
+          echo "Need provisioning profile secrets for the host and network-extension App IDs."
           exit 1
         fi
-        echo "${MAC_PKG_APP_PROVISIONING_PROFILE}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
-        echo "${MAC_PKG_NE_PROVISIONING_PROFILE}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
+        echo "${app_b64}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
+        echo "${ne_b64}" | base64 --decode > "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
         test -s "${RUNNER_TEMP}/macos-pkg-app.provisionprofile"
         test -s "${RUNNER_TEMP}/macos-pkg-ne.provisionprofile"
 
