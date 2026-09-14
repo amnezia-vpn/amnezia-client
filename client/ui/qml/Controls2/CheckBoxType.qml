@@ -36,6 +36,10 @@ CheckBox {
 
     property bool isFocusable: true
 
+    Accessible.name: descriptionText !== "" ? qsTr("%1, %2").arg(text).arg(descriptionText) : text
+    Accessible.role: Accessible.CheckBox
+    Accessible.description: checked ? qsTr("Checked") : qsTr("Not checked")
+
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
     }
@@ -61,7 +65,7 @@ CheckBox {
     }
 
     hoverEnabled: enabled ? true : false
-    focusPolicy: Qt.NoFocus
+    focusPolicy: Qt.StrongFocus
 
     background: Rectangle {
         color: AmneziaStyle.color.transparent

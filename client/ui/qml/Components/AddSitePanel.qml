@@ -47,8 +47,10 @@ Item {
             Layout.fillWidth: true
             rightButtonClickedOnEnter: true
 
+            headerText: root.placeholderText
             textField.placeholderText: root.placeholderText
             buttonImageSource: "qrc:/images/controls/plus.svg"
+            buttonAccessibleName: qsTr("Add")
 
             clickedFunc: function() {
                 root.addClicked(textField.text)
@@ -63,6 +65,7 @@ Item {
 
             image: "qrc:/images/controls/more-vertical.svg"
             imageColor: AmneziaStyle.color.paleGray
+            accessibleName: qsTr("Additional options")
 
             onClicked: root.moreClicked()
 

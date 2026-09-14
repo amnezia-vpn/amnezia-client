@@ -7,6 +7,7 @@ BaseHeaderType {
     id: root
 
     property string actionButtonImage
+    property string actionButtonAccessibleName: root.headerText
     property var actionButtonFunction
     property alias actionButton: headerActionButton
 
@@ -21,6 +22,7 @@ BaseHeaderType {
         Layout.alignment: Qt.AlignRight
         image: root.actionButtonImage
         imageColor: AmneziaStyle.color.paleGray
+        accessibleName: root.actionButtonAccessibleName
         visible: image ? true : false
 
         onClicked: {

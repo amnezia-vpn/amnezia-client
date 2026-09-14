@@ -363,6 +363,7 @@ PageType {
 
             isSelected: tabBar.currentIndex === 0
             image: "qrc:/images/controls/home.svg"
+            accessibleName: qsTr("Home")
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
@@ -391,6 +392,7 @@ PageType {
 
             isSelected: tabBar.currentIndex === 1
             image: "qrc:/images/controls/share-2.svg"
+            accessibleName: qsTr("Share")
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
                 tabBar.currentIndex = 1
@@ -403,6 +405,7 @@ PageType {
 
             isSelected: tabBar.currentIndex === 2
             image: (ServersUiController.hasServersFromGatewayApi && NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()) ? "qrc:/images/controls/settings-news.svg" : "qrc:/images/controls/settings.svg"
+            accessibleName: qsTr("Settings")
             Binding {
                 target: settingsTabButton
                 property: "defaultColor"
@@ -421,6 +424,7 @@ PageType {
 
             isSelected: tabBar.currentIndex === 3
             image: "qrc:/images/controls/plus.svg"
+            accessibleName: qsTr("Add server")
             clickedFunc: function () {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardConfigSource)
                 tabBar.currentIndex = 3
