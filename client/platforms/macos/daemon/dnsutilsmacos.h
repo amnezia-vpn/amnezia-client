@@ -24,6 +24,7 @@ class DnsUtilsMacos final : public DnsUtils {
   bool updateResolvers(const QString& ifname,
                        const QList<QHostAddress>& resolvers) override;
   bool restoreResolvers() override;
+  QStringList systemResolvers() const override;
 
  private:
   void backupResolvers();

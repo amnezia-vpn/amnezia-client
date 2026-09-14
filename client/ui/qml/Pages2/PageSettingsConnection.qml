@@ -57,7 +57,18 @@ PageType {
             width: listView.width
 
             SwitcherType {
+                Layout.fillWidth: true
+                Layout.margins: 16
+                visible: SettingsController.systemDnsSupported
+                text: qsTr("Use system DNS")
+                descriptionText: qsTr("AmneziaWG and WireGuard only. Keep the operating system DNS settings. DNS requests may leave the VPN, even with Kill Switch enabled. Reconnect to apply.")
+                checked: SettingsController.systemDnsEnabled
+                onToggled: SettingsController.systemDnsEnabled = checked
+            }
+
+            SwitcherType {
                 id: amneziaDnsSwitch
+                enabled: !SettingsController.systemDnsEnabled
 
                 Layout.fillWidth: true
                 Layout.margins: 16
@@ -77,6 +88,7 @@ PageType {
 
             LabelWithButtonType {
                 id: dnsServersButton
+                enabled: !SettingsController.systemDnsEnabled
 
                 Layout.fillWidth: true
 

@@ -150,6 +150,7 @@ namespace amnezia
         constexpr QLatin1String splitTunnelApps("splitTunnelApps");
         constexpr QLatin1String appSplitTunnelType("appSplitTunnelType");
 
+        constexpr QLatin1String useSystemDns("useSystemDns");
         constexpr QLatin1String allowedDnsServers("allowedDnsServers");
 
         constexpr QLatin1String killSwitchOption("killSwitchOption");

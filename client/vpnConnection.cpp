@@ -486,7 +486,8 @@ void VpnConnection::appendSplitTunnelingConfig()
 
             if (sitesJsonArray.isEmpty()) {
                 routeMode = amnezia::RouteMode::VpnAllSites;
-            } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
+            } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites
+                       && !m_vpnConfiguration.value(configKey::useSystemDns).toBool()) {
                 // Allow traffic to Amnezia DNS
                 sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns1).toString());
                 sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns2).toString());

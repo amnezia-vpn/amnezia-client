@@ -25,6 +25,10 @@ class DnsUtils : public QObject {
     return false;
   };
 
+  // Returns the current system resolvers without changing their configuration.
+  // An empty result means this mode cannot be activated safely.
+  virtual QStringList systemResolvers() const { return {}; }
+
   virtual bool restoreResolvers() {
     qFatal("Have you forgotten to implement DnsUtils::restoreResolvers?");
     return false;

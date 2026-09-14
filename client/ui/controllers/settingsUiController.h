@@ -17,6 +17,8 @@ public:
                                  ServersController* serversController,
                                  QObject *parent = nullptr);
 
+    Q_PROPERTY(bool systemDnsSupported READ isSystemDnsSupported CONSTANT)
+    Q_PROPERTY(bool systemDnsEnabled READ isSystemDnsEnabled WRITE toggleSystemDns NOTIFY systemDnsChanged)
     Q_PROPERTY(QString primaryDns READ getPrimaryDns WRITE setPrimaryDns NOTIFY primaryDnsChanged)
     Q_PROPERTY(QString secondaryDns READ getSecondaryDns WRITE setSecondaryDns NOTIFY secondaryDnsChanged)
     Q_PROPERTY(bool isLoggingEnabled READ isLoggingEnabled WRITE toggleLogging NOTIFY loggingStateChanged)
@@ -33,6 +35,10 @@ public:
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
 
 public slots:
+    bool isSystemDnsSupported() const;
+    bool isSystemDnsEnabled() const;
+    void toggleSystemDns(bool enable);
+
     void toggleAmneziaDns(bool enable);
     bool isAmneziaDnsEnabled();
 
@@ -105,6 +111,7 @@ public slots:
     void disableHomeAdLabel();
 
 signals:
+    void systemDnsChanged();
     void primaryDnsChanged();
     void secondaryDnsChanged();
     void loggingStateChanged();
