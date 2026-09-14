@@ -34,7 +34,12 @@ public:
     ~InstallController();
 
     ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false);
-    ErrorCode updateContainer(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
+
+    // Updates server-side container settings (admin self-hosted only): reconfigures the container over SSH.
+    ErrorCode updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
+
+    // Updates client-local settings only: rewrites the stored container config for any self-hosted/native server. No SSH.
+    ErrorCode updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig);
 
     ErrorCode rebootServer(const QString &serverId);
     ErrorCode removeAllContainers(const QString &serverId);
@@ -50,6 +55,8 @@ public:
 
     QString fetchDockerContainerSecret(const QString &serverId, DockerContainer container);
 
+    void setTProxyInstallHints(const QString &hostname, const QString &email);
+
     ContainerConfig generateConfig(DockerContainer container, int port, TransportProto transportProto);
     ErrorCode getAlreadyInstalledContainers(const ServerCredentials &credentials, QMap<DockerContainer, ContainerConfig> &installedContainers, SshSession &sshSession);
     
@@ -64,7 +71,8 @@ public:
     
     bool isUpdateDockerContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
     
-    ErrorCode checkSshConnection(const ServerCredentials &credentials, QString &output, std::function<QString()> passphraseCallback = nullptr);
+    ErrorCode checkSshConnection(ServerCredentials &credentials, QString &output,
+                                 std::function<QString()> passphraseCallback = nullptr);
     
     bool isServerAlreadyExists(const ServerCredentials &credentials, int &existingServerIndex);
     
@@ -120,6 +128,8 @@ private:
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;
     bool m_cancelInstallation = false;
+    QString m_tproxyInstallHostname;
+    QString m_tproxyInstallEmail;
     
 #ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;

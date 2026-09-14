@@ -45,6 +45,8 @@ namespace amnezia
 
         bool isAwgContainer(DockerContainer container);
 
+        bool isUnsupportedContainer(DockerContainer container);
+
         QJsonObject getProtocolConfigFromContainer(const Proto protocol, const QJsonObject &containerConfig);
 
         int installPageOrder(DockerContainer container);

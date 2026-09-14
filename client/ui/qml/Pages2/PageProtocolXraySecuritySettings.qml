@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool editDirty: false
+
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -37,6 +39,9 @@ PageType {
             width: listView.width
             spacing: 0
 
+            // REALITY is not supported with the mKCP transport (xray refuses reality+mkcp).
+            readonly property bool realityAllowed: transport !== "mkcp"
+
             BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -51,7 +56,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("None")
-                checked: security === "none"
+                checked: security === "none" || (security === "reality" && !realityAllowed)
                 onClicked: security = "none"
             }
 
@@ -75,8 +80,19 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Reality")
-                checked: security === "reality"
+                enabled: realityAllowed
+                checked: security === "reality" && realityAllowed
                 onClicked: security = "reality"
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                visible: !realityAllowed
+                color: AmneziaStyle.color.goldenApricot
+                text: qsTr("REALITY is not supported with the mKCP transport. Use None or TLS.")
             }
 
             DividerType {
@@ -90,6 +106,7 @@ PageType {
 
                 DropDownType {
                     id: tlsAlpnDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 16
                     Layout.leftMargin: 16
@@ -100,6 +117,7 @@ PageType {
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
+                        currentValue: alpn
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.alpnOptions()
@@ -133,6 +151,7 @@ PageType {
 
                 DropDownType {
                     id: tlsFingerprintDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 8
                     Layout.leftMargin: 16
@@ -151,6 +170,7 @@ PageType {
                                 }
                             }
                         }
+                        currentValue: fingerprint
                         clickedFunction: function () {
                             fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
@@ -175,26 +195,35 @@ PageType {
                 }
 
                 TextFieldWithHeaderType {
+                    id: sniFieldTls
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
+                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== sni)
                     textField.onEditingFinished: {
-                        if (textField.text !== sni) sni = textField.text
+                        var v = textField.text.trim()
+                        if (v !== sni) sni = v
+                        else if (textField.text !== v) textField.text = v
+                        sniFieldTls.errorText = XrayConfigModel.isValidSni(v) ? "" : qsTr("Enter a valid IP address or domain name")
+                        root.editDirty = false
                     }
                 }
             }
 
             // ── Reality fields ────────────────────────────────────────
             ColumnLayout {
-                visible: security === "reality"
+                visible: security === "reality" && realityAllowed
                 Layout.fillWidth: true
                 spacing: 0
 
                 DropDownType {
                     id: realityFingerprintDropDown
+                    fitContent: true
                     Layout.fillWidth: true
                     Layout.topMargin: 16
                     Layout.leftMargin: 16
@@ -213,6 +242,7 @@ PageType {
                                 }
                             }
                         }
+                        currentValue: fingerprint
                         clickedFunction: function () {
                             fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText
@@ -237,14 +267,22 @@ PageType {
                 }
 
                 TextFieldWithHeaderType {
+                    id: sniFieldReality
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
+                    placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9.*_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== sni)
                     textField.onEditingFinished: {
-                        if (textField.text !== sni) sni = textField.text
+                        var v = textField.text.trim()
+                        if (v !== sni) sni = v
+                        else if (textField.text !== v) textField.text = v
+                        sniFieldReality.errorText = XrayConfigModel.isValidSni(v) ? "" : qsTr("Enter a valid IP address or domain name")
+                        root.editDirty = false
                     }
                 }
             }
@@ -265,21 +303,26 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
+            var errs = XrayConfigModel.validationErrors()
+            if (errs.length > 0) {
+                PageController.showErrorMessage(errs.join("\n"))
+                return
+            }
             var headerText = qsTr("Save settings?")
             var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {
-                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
             var noButtonFunction = function () {
                 if (typeof GC !== "undefined" && !GC.isMobile()) {

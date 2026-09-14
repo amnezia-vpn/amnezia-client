@@ -2,15 +2,29 @@ from conan import ConanFile
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, chdir
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.apple import XCRun
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.apple import is_apple_os
+from conan.tools.apple.apple import _to_apple_arch
 
 import os
+import shlex
+
 
 class Tun2Socks(ConanFile):
     name = "tun2socks"
     version = "2.6.0"
     package_type = "application"
     settings = "os", "arch"
+
+    _binary_name = "tun2socks"
+
+    _arch_map = {
+        "x86": "386",
+        "x86_64": "amd64",
+        "armv8": "arm64"
+    }
 
     @property
     def _goos(self):
@@ -21,33 +35,49 @@ class Tun2Socks(ConanFile):
         }.get(str(self.settings.os))
 
     @property
-    def _goarch(self):
-        return {
-            "x86": "386",
-            "x86_64": "amd64",
-            "armv8": "arm64"
-        }.get(str(self.settings.arch))
+    def _archs(self):
+        return str(self.settings.arch).split("|")
+    
+    @property
+    def _is_multiarch(self):
+        return len(self._archs) > 1
 
     @property
     def _is_windows(self):
         return str(self.settings.get_safe("os")).startswith("Windows")
 
     @property
-    def _ext(self):
-        return ".exe" if self._is_windows else ""
+    def _is_windows_arm64(self):
+        return self._is_windows and self._archs == ["armv8"]
+
+    @property
+    def _binary_name_ext(self):
+        ext = ".exe" if self._is_windows else ""
+        return f"{self._binary_name}{ext}"
 
     def layout(self):
         basic_layout(self)
 
     def validate(self):
-        if not self._goos or not self._goarch:
+        if not self._goos or not all(arch in self._arch_map for arch in self._archs):
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
             )
+        
+        if self._is_multiarch and not is_apple_os(self):
+            raise ConanInvalidConfiguration(
+                f"{self.name} v{self.version} does not support multiarch builds"
+            )
 
     def build_requirements(self):
-        # Upstream Makefile: CGO_ENABLED=0 — pure Go; no MSYS2 / MinGW / make on Windows.
         self.tool_requires("go/1.26.0")
+        # Windows ARM64: upstream Makefile is pure Go (CGO_ENABLED=0), and neither
+        # msys2 nor mingw-builds ship arm64 binaries - build go directly instead.
+        if self._is_windows and not self._is_windows_arm64:
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+            self.tool_requires("mingw-builds/15.1.0")
 
     def requirements(self):
         if self._is_windows:
@@ -59,35 +89,74 @@ class Tun2Socks(ConanFile):
         )
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
+        if self._is_windows_arm64:
+            VirtualBuildEnv(self).generate()
+            return
+
+        tc = AutotoolsToolchain(self)
+        tc.apple_arch_flag = None
+        env = tc.environment()
+        env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
+        env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
+        env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
+        env.define("GOTELEMETRY", "off")
+        env.define("LDFLAGS", "")
+        env.define("GOOS", self._goos)
+        self._ldflags = tc.ldflags
+        self._cflags = tc.cflags
+        tc.generate(env)
 
     def build(self):
-        # Makefile default: BUILD_DIR=build, CGO_ENABLED=0, target tun2socks -> build/tun2socks(.exe)
-        out_dir = os.path.join(self.source_folder, "build")
-        os.makedirs(out_dir, exist_ok=True)
-        out_name = f"tun2socks{self._ext}"
-        out_path = os.path.join(out_dir, out_name)
-        goos = self._goos
-        goarch = self._goarch
+        if self._is_windows_arm64:
+            out_path = os.path.join(self.build_folder, self._binary_name_ext)
+            with chdir(self, self.source_folder):
+                self.run(
+                    f'set "GOOS={self._goos}"&& set "GOARCH={self._arch_map[self._archs[0]]}"&& '
+                    f'set "CGO_ENABLED=0"&& set "GO111MODULE=on"&& '
+                    f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .'
+                )
+            return
+
         with chdir(self, self.source_folder):
-            if self._is_windows:
-                self.run(
-                    f'set "GOOS={goos}"&& set "GOARCH={goarch}"&& set "CGO_ENABLED=0"&& set "GO111MODULE=on"&& '
-                    f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .',
-                    env="conanbuild",
-                )
-            else:
-                self.run(
-                    f'GOOS={goos} GOARCH={goarch} CGO_ENABLED=0 GO111MODULE=on '
-                    f'go build -trimpath -ldflags="-w -s -buildid=" -o "{out_path}" .',
-                    env="conanbuild",
-                )
+            for arch in self._archs:
+                build_dir = os.path.join(self.build_folder, arch) if self._is_multiarch else self.build_folder
+                goarch = self._arch_map.get(arch)
+
+                ldflags = self._ldflags
+                cflags = self._cflags
+                if is_apple_os(self):
+                    ldflags.append(f"-arch {_to_apple_arch(arch)}")
+                    cflags.append(f"-arch {_to_apple_arch(arch)}")
+
+                env = Environment()
+                env.define("GOARCH", goarch)
+                env.define("CGO_LDFLAGS", " ".join(ldflags))
+                env.define("CGO_CFLAGS", " ".join(cflags))
+                with env.vars(self).apply():
+                    at = Autotools(self)
+                    at.make("tun2socks", args=[
+                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                    ])
+                    if self._is_windows:
+                        os.rename(
+                            os.path.join(build_dir, self._binary_name),
+                            os.path.join(build_dir, self._binary_name_ext)
+                        )
+
+        if self._is_multiarch:
+            lipo = XCRun(self).find('lipo')
+            output = os.path.join(self.build_folder, self._binary_name_ext)
+            binaries = [os.path.join(self.build_folder, arch, self._binary_name_ext) for arch in self._archs]
+            self.run("{} -create -output {} {}".format(
+                shlex.quote(lipo),
+                shlex.quote(output),
+                shlex.join(binaries)
+            ))
 
     def package(self):
-        out_dir = os.path.join(self.source_folder, "build")
-        copy(self, f"tun2socks{self._ext}", src=out_dir, dst=self.package_folder)
+        copy(self, self._binary_name_ext, src=self.build_folder, dst=self.package_folder)
 
     def package_info(self):
         self.cpp_info.exe = True
-        self.cpp_info.location = os.path.join(self.package_folder, f"tun2socks{self._ext}")
+        self.cpp_info.location = os.path.join(self.package_folder, self._binary_name_ext)
         self.cpp_info.set_property("cmake_target_name", "xjasonlyu::tun2socks")

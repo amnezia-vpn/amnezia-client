@@ -18,6 +18,7 @@
         <file>dns/Dockerfile</file>
         <file>dns/run_container.sh</file>
         <file>install_docker.sh</file>
+        <file>install_conntrack.sh</file>
         <file>ipsec/configure_container.sh</file>
         <file>ipsec/Dockerfile</file>
         <file>ipsec/mobileconfig.plist</file>
@@ -32,6 +33,10 @@
         <file>telemt/Dockerfile</file>
         <file>telemt/run_container.sh</file>
         <file>telemt/start.sh</file>
+        <file>tproxy/configure_container.sh</file>
+        <file>tproxy/Dockerfile</file>
+        <file>tproxy/run_container.sh</file>
+        <file>tproxy/start.sh</file>
         <file>openvpn/configure_container.sh</file>
         <file>openvpn/Dockerfile</file>
         <file>openvpn/run_container.sh</file>

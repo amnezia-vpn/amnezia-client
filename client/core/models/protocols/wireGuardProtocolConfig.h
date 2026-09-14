@@ -2,6 +2,7 @@
 #define WIREGUARDPROTOCOLCONFIG_H
 
 #include <QJsonObject>
+#include <QMap>
 #include <QString>
 #include <QStringList>
 #include <optional>
@@ -36,8 +37,10 @@ struct WireGuardClientConfig {
     QStringList allowedIps;
     QString persistentKeepAlive;
     QString mtu;
+
+    QMap<QString, QString> awgParams;
     bool isObfuscationEnabled = false;
-    
+
     QJsonObject toJson() const;
     static WireGuardClientConfig fromJson(const QJsonObject& json);
 };

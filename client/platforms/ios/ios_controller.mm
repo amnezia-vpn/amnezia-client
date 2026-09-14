@@ -10,7 +10,7 @@
 
 #include "../core/protocols/vpnProtocol.h"
 #import "ios_controller_wrapper.h"
-#import "StoreKitController.h"
+#import "core/utils/swiftBridge.h"
 
 const char* Action::start = "start";
 const char* Action::restart = "restart";
@@ -145,9 +145,6 @@ IosController::IosController() : QObject()
 {
     s_instance = this;
     m_iosControllerWrapper = [[IosControllerWrapper alloc] initWithCppController:this];
-
-    // Initialize StoreKitController early to start observing the payment queue
-    [StoreKitController sharedInstance];
 
     [[NSNotificationCenter defaultCenter]
         removeObserver: (__bridge NSObject *)m_iosControllerWrapper];
@@ -552,6 +549,18 @@ bool IosController::setupOpenVPN()
     return startOpenVPN(openVPNConfigStr);
 }
 
+static void insertNonEmptyAwgParams(QJsonObject &wgConfig, const QJsonObject &config)
+{
+    const QStringList awgProtocolKeys = configKey::awgProtocolKeys();
+
+    for (const QString &key : awgProtocolKeys) {
+        const QJsonValue value = config.value(key);
+        if (value.isString() && !value.toString().isEmpty()) {
+            wgConfig.insert(key, value);
+        }
+    }
+}
+
 bool IosController::setupWireGuard()
 {
     QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
@@ -591,25 +600,9 @@ bool IosController::setupWireGuard()
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
-    } else {
-        wgConfig.insert(configKey::persistentKeepAlive, "25");
     }
 
-    if (config.contains(configKey::isObfuscationEnabled) && config.value(configKey::isObfuscationEnabled).toBool()) {
-        wgConfig.insert(configKey::initPacketMagicHeader, config[configKey::initPacketMagicHeader]);
-        wgConfig.insert(configKey::responsePacketMagicHeader, config[configKey::responsePacketMagicHeader]);
-        wgConfig.insert(configKey::underloadPacketMagicHeader, config[configKey::underloadPacketMagicHeader]);
-        wgConfig.insert(configKey::transportPacketMagicHeader, config[configKey::transportPacketMagicHeader]);
-
-        wgConfig.insert(configKey::initPacketJunkSize, config[configKey::initPacketJunkSize]);
-        wgConfig.insert(configKey::responsePacketJunkSize, config[configKey::responsePacketJunkSize]);
-        wgConfig.insert(configKey::cookieReplyPacketJunkSize, config[configKey::cookieReplyPacketJunkSize]);
-        wgConfig.insert(configKey::transportPacketJunkSize, config[configKey::transportPacketJunkSize]);
-
-        wgConfig.insert(configKey::junkPacketCount, config[configKey::junkPacketCount]);
-        wgConfig.insert(configKey::junkPacketMinSize, config[configKey::junkPacketMinSize]);
-        wgConfig.insert(configKey::junkPacketMaxSize, config[configKey::junkPacketMaxSize]);
-    }
+    insertNonEmptyAwgParams(wgConfig, config);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -697,29 +690,9 @@ bool IosController::setupAwg()
 
     if (config.contains(configKey::persistentKeepAlive)) {
         wgConfig.insert(configKey::persistentKeepAlive, config[configKey::persistentKeepAlive]);
-    } else {
-        wgConfig.insert(configKey::persistentKeepAlive, "25");
     }
 
-    wgConfig.insert(configKey::initPacketMagicHeader, config[configKey::initPacketMagicHeader]);
-    wgConfig.insert(configKey::responsePacketMagicHeader, config[configKey::responsePacketMagicHeader]);
-    wgConfig.insert(configKey::underloadPacketMagicHeader, config[configKey::underloadPacketMagicHeader]);
-    wgConfig.insert(configKey::transportPacketMagicHeader, config[configKey::transportPacketMagicHeader]);
-
-    wgConfig.insert(configKey::initPacketJunkSize, config[configKey::initPacketJunkSize]);
-    wgConfig.insert(configKey::responsePacketJunkSize, config[configKey::responsePacketJunkSize]);
-    wgConfig.insert(configKey::cookieReplyPacketJunkSize, config[configKey::cookieReplyPacketJunkSize]);
-    wgConfig.insert(configKey::transportPacketJunkSize, config[configKey::transportPacketJunkSize]);
-
-    wgConfig.insert(configKey::junkPacketCount, config[configKey::junkPacketCount]);
-    wgConfig.insert(configKey::junkPacketMinSize, config[configKey::junkPacketMinSize]);
-    wgConfig.insert(configKey::junkPacketMaxSize, config[configKey::junkPacketMaxSize]);
-
-    wgConfig.insert(configKey::specialJunk1, config[configKey::specialJunk1]);
-    wgConfig.insert(configKey::specialJunk2, config[configKey::specialJunk2]);
-    wgConfig.insert(configKey::specialJunk3, config[configKey::specialJunk3]);
-    wgConfig.insert(configKey::specialJunk4, config[configKey::specialJunk4]);
-    wgConfig.insert(configKey::specialJunk5, config[configKey::specialJunk5]);
+    insertNonEmptyAwgParams(wgConfig, config);
 
     QJsonDocument wgConfigDoc(wgConfig);
     QString wgConfigDocStr(wgConfigDoc.toJson(QJsonDocument::Compact));
@@ -1036,39 +1009,113 @@ QString IosController::openFile() {
     return filePath;
 }
 
+namespace
+{
+// Keep in sync with StoreKit2Helper.errorCodeCancelled / errorCodePending
+constexpr int storeKitErrorCodeCancelled = 1;
+constexpr int storeKitErrorCodePending = 2;
+
+IosController::StorePurchaseFailure storePurchaseFailureFromError(NSError *error)
+{
+    if (!error || ![error.domain isEqualToString:@"StoreKit2Helper"]) {
+        return IosController::StorePurchaseFailure::Other;
+    }
+    switch (error.code) {
+    case storeKitErrorCodeCancelled: return IosController::StorePurchaseFailure::Cancelled;
+    case storeKitErrorCodePending: return IosController::StorePurchaseFailure::Pending;
+    default: return IosController::StorePurchaseFailure::Other;
+    }
+}
+
+QVariantMap toTransactionMap(NSDictionary *dict)
+{
+    QVariantMap transaction;
+    for (NSString *key in @[@"transactionId", @"originalTransactionId", @"productId", @"environment"]) {
+        NSString *value = dict[key];
+        if (value) {
+            transaction.insert(QString::fromUtf8(key.UTF8String), QString::fromUtf8(value.UTF8String));
+        }
+    }
+    return transaction;
+}
+
+QList<QVariantMap> toTransactionList(NSArray<NSDictionary *> *transactions)
+{
+    QList<QVariantMap> list;
+    for (NSDictionary *dict in transactions ?: @[]) {
+        list.push_back(toTransactionMap(dict));
+    }
+    return list;
+}
+}
+
 void IosController::purchaseProduct(const QString &productId,
                                    std::function<void(bool success,
                                                       const QString &transactionId,
                                                       const QString &purchasedProductId,
                                                       const QString &originalTransactionId,
-                                                      const QString &errorString)> &&callback)
+                                                      const QString &storeEnvironment,
+                                                      const QString &errorString,
+                                                      StorePurchaseFailure failureReason)> &&callback)
 {
     qInfo().noquote() << "[IAP][IosController] purchaseProduct called" << productId;
     if (@available(iOS 15.0, macOS 12.0, *)) {
-        StoreKitController *controller = [StoreKitController sharedInstance];
         __block auto cb = std::move(callback);
-        [controller purchaseProduct:productId.toNSString() completion:^(BOOL s,
-                                                                        NSString * _Nullable transactionId,
-                                                                        NSString * _Nullable prodId,
-                                                                        NSString * _Nullable originalTxId,
-                                                                        NSError * _Nullable error) {
+        [[StoreKit2Helper shared] purchaseProductWithProductIdentifier:productId.toNSString()
+                                                            completion:^(BOOL s,
+                                                                         NSString * _Nullable transactionId,
+                                                                         NSString * _Nullable prodId,
+                                                                         NSString * _Nullable originalTxId,
+                                                                         NSString * _Nullable environment,
+                                                                         NSError * _Nullable error) {
             const QString txId = QString::fromUtf8((transactionId ?: @"").UTF8String);
             const QString pId  = QString::fromUtf8((prodId        ?: @"").UTF8String);
             const QString origTxId = QString::fromUtf8((originalTxId ?: @"").UTF8String);
+            const QString env  = QString::fromUtf8((environment  ?: @"").UTF8String);
             const QString err  = QString::fromUtf8((error.localizedDescription ?: @"").UTF8String);
+            const StorePurchaseFailure failureReason = s ? StorePurchaseFailure::Other
+                                                         : storePurchaseFailureFromError(error);
 
             qInfo().noquote() << "[IAP][IosController] purchase completion" << "success=" << s
                               << "transactionId=" << txId << "originalTransactionId=" << origTxId
-                              << "productId=" << pId << "error=" << err;
+                              << "productId=" << pId << "environment=" << env << "error=" << err;
 
             if (cb) {
-                cb(s, txId, pId, origTxId, err);
+                cb(s, txId, pId, origTxId, env, err, failureReason);
             }
         }];
     } else {
         if (callback) {
-            callback(false, QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later");
+            callback(false, QString(), QString(), QString(), QString(), "StoreKit 2 requires iOS 15.0 or later",
+                     StorePurchaseFailure::Other);
         }
+    }
+}
+
+void IosController::finishStoreTransaction(const QString &transactionId)
+{
+    if (transactionId.isEmpty()) {
+        return;
+    }
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        qInfo().noquote() << "[IAP][IosController] Finishing transaction" << transactionId;
+        [[StoreKit2Helper shared] finishTransactionWithTransactionId:transactionId.toNSString()
+                                                          completion:^(BOOL finished) {
+            if (!finished) {
+                qWarning().noquote() << "[IAP][IosController] Transaction was not found in the unfinished queue";
+            }
+        }];
+    }
+}
+
+void IosController::startStoreTransactionObserver()
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        qInfo().noquote() << "[IAP][IosController] Starting transaction updates listener";
+        [[StoreKit2Helper shared] startTransactionUpdatesListenerWithHandler:^(NSDictionary *transaction) {
+            // Handler runs on the main GCD queue which shares the Qt main thread's run loop
+            emit storeTransactionUpdated(toTransactionMap(transaction));
+        }];
     }
 }
 
@@ -1077,36 +1124,46 @@ void IosController::restorePurchases(std::function<void(bool success,
                                                        const QString &errorString)> &&callback)
 {
     if (@available(iOS 15.0, macOS 12.0, *)) {
-        StoreKitController *controller = [StoreKitController sharedInstance];
         __block auto cb = std::move(callback);
-        [controller restorePurchasesWithCompletion:^(BOOL s,
-                                                     NSArray<NSDictionary *> * _Nullable restoredTransactions,
-                                                     NSError * _Nullable error) {
+        [[StoreKit2Helper shared] fetchCurrentEntitlementsWithCompletion:^(BOOL s,
+                                                                           NSArray<NSDictionary *> * _Nullable restoredTransactions,
+                                                                           NSError * _Nullable error) {
             QString err;
             if (error) {
                 err = QString::fromUtf8(error.localizedDescription.UTF8String);
             }
-            QList<QVariantMap> transactions;
-            for (NSDictionary *dict in restoredTransactions ?: @[]) {
-                QVariantMap transaction;
-                NSString *transactionId = dict[@"transactionId"];
-                NSString *productId = dict[@"productId"];
-                NSString *originalTransactionId = dict[@"originalTransactionId"];
-
-                if (transactionId) {
-                    transaction.insert(QStringLiteral("transactionId"), QString::fromUtf8(transactionId.UTF8String));
-                }
-                if (productId) {
-                    transaction.insert(QStringLiteral("productId"), QString::fromUtf8(productId.UTF8String));
-                }
-                if (originalTransactionId) {
-                    transaction.insert(QStringLiteral("originalTransactionId"),
-                                       QString::fromUtf8(originalTransactionId.UTF8String));
-                }
-                transactions.push_back(transaction);
+            if (s) {
+                qInfo().noquote() << "[IAP][IosController] currentEntitlements returned"
+                                  << (int)(restoredTransactions ? restoredTransactions.count : 0) << "active entitlements";
+            } else {
+                qWarning().noquote() << "[IAP][IosController] fetchCurrentEntitlements failed:" << err;
             }
             if (cb) {
-                cb(s, transactions, err);
+                cb(s, toTransactionList(restoredTransactions), err);
+            }
+        }];
+    } else {
+        if (callback) {
+            callback(false, QList<QVariantMap>(), "StoreKit 2 requires iOS 15.0 or later");
+        }
+    }
+}
+
+void IosController::fetchLocalEntitlements(std::function<void(bool success,
+                                                               const QList<QVariantMap> &transactions,
+                                                               const QString &errorString)> &&callback)
+{
+    if (@available(iOS 15.0, macOS 12.0, *)) {
+        __block auto cb = std::move(callback);
+        [[StoreKit2Helper shared] fetchLocalEntitlementsWithCompletion:^(BOOL s,
+                                                                         NSArray<NSDictionary *> * _Nullable entitlements,
+                                                                         NSError * _Nullable error) {
+            QString err;
+            if (error) {
+                err = QString::fromUtf8(error.localizedDescription.UTF8String);
+            }
+            if (cb) {
+                cb(s, toTransactionList(entitlements), err);
             }
         }];
     } else {
@@ -1122,17 +1179,16 @@ void IosController::fetchProducts(const QStringList &productIds,
                                                      const QString &errorString)> &&callback)
 {
     if (@available(iOS 15.0, macOS 12.0, *)) {
-        StoreKitController *controller = [StoreKitController sharedInstance];
         NSMutableSet<NSString *> *ids = [NSMutableSet setWithCapacity:productIds.size()];
         for (const auto &pid : productIds) {
             [ids addObject:pid.toNSString()];
         }
         __block auto cb = std::move(callback);
 
-        [controller fetchProductsWithIdentifiers:ids
-                                      completion:^(NSArray<NSDictionary *> * _Nonnull products,
-                                                   NSArray<NSString *> * _Nonnull invalidIdentifiers,
-                                                   NSError * _Nullable error) {
+        [[StoreKit2Helper shared] fetchProductsWithIdentifiers:ids
+                                                    completion:^(NSArray<NSDictionary *> * _Nonnull products,
+                                                                 NSArray<NSString *> * _Nonnull invalidIdentifiers,
+                                                                 NSError * _Nullable error) {
             QList<QVariantMap> outProducts;
             for (NSDictionary *productInfo in products) {
                 QVariantMap productData;
@@ -1152,6 +1208,18 @@ void IosController::fetchProducts(const QStringList &productIds,
                 }
                 if (productInfo[@"displayPricePerMonth"]) {
                     productData["displayPricePerMonth"] = QString::fromUtf8([productInfo[@"displayPricePerMonth"] UTF8String]);
+                }
+                if (productInfo[@"introOfferDisplayPrice"]) {
+                    productData["introOfferDisplayPrice"] = QString::fromUtf8([productInfo[@"introOfferDisplayPrice"] UTF8String]);
+                }
+                if (productInfo[@"introOfferPaymentMode"]) {
+                    productData["introOfferPaymentMode"] = QString::fromUtf8([productInfo[@"introOfferPaymentMode"] UTF8String]);
+                }
+                if (productInfo[@"hasFreeTrial"]) {
+                    productData["hasFreeTrial"] = [productInfo[@"hasFreeTrial"] boolValue];
+                }
+                if (productInfo[@"trialDays"]) {
+                    productData["trialDays"] = [productInfo[@"trialDays"] intValue];
                 }
                 outProducts.push_back(productData);
             }
@@ -1200,3 +1268,4 @@ bool IosController::isTestFlight() {
     NSURL *receiptURL = [[NSBundle mainBundle] appStoreReceiptURL];
     return receiptURL && [[receiptURL lastPathComponent] isEqualToString:@"sandboxReceipt"];
 }
+

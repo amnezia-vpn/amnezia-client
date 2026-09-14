@@ -3,7 +3,7 @@ from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, chdir
 from conan.tools.gnu import AutotoolsToolchain
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 
 import os
 import sys
@@ -17,7 +17,9 @@ from windows_cgo import is_windows_arm64, run_llvm_mingw_go_build
 
 class AwgWindows(ConanFile):
     name = "awg-windows"
-    version = "0.1.8"
+    version = "3.1.20260814"
+    # compiler/build_type are only needed for the Windows ARM64 (llvm-mingw/MSVC) path,
+    # they are dropped again in configure() for every other arch.
     settings = "os", "arch", "compiler", "build_type"
     exports = "windows_cgo.py"
 
@@ -83,19 +85,13 @@ class AwgWindows(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amneziawg-windows/archive/refs/tags/v{self.version}.zip",
-            sha256="1de472832b332515c96cdf14ea887edde42ed7ad173675280c51baa9a3ef62f2", strip_root=True)
+            sha256="d941861e3c0fada70b6b66b08aad4c77098d612aa11dd41b8ad70dd8afa6c61b", strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
         if self._windows_arm64:
+            # llvm-mingw CGO toolchain is set up in build(); only Go has to be on PATH.
+            VirtualBuildEnv(self).generate()
             return
-
-        env = Environment()
-        env.define("GOOS", "windows")
-        if self._goarm:
-            env.define("GOARM", self._goarm)
-        env.define("GOARCH", self._goarch)
-        env.define("CGO_ENABLED", "1")
 
         tc = AutotoolsToolchain(self)
         tc.extra_cflags = [
@@ -110,10 +106,15 @@ class AwgWindows(ConanFile):
             "-Wl,--export-all-symbols",
             "-Wl,--high-entropy-va"
         ]
+        env = tc.environment()
+        env.define("GOOS", "windows")
+        if self._goarm:
+            env.define("GOARM", self._goarm)
+        env.define("GOARCH", self._goarch)
+        env.define("CGO_ENABLED", "1")
         env.define("CGO_LDFLAGS", tc.ldflags)
         env.define("CGO_CFLAGS", tc.cflags)
-
-        env.vars(self, scope="build").save_script("conanbuild")
+        tc.generate(env)
 
     def build(self):
         out_dll = os.path.join(self.build_folder, "tunnel.dll")
@@ -129,11 +130,7 @@ class AwgWindows(ConanFile):
             return
 
         with chdir(self, self.source_folder):
-            self.run(
-                f'go build -buildmode c-shared -ldflags="-w -s" -trimpath -v '
-                f'-o "{out_dll}"',
-                env="conanbuild",
-            )
+            self.run(f'go build -buildmode c-shared -ldflags="-w -s" -trimpath -v -o "{out_dll}"')
 
     def package(self):
         copy(self, "tunnel.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))

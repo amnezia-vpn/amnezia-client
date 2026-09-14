@@ -48,6 +48,7 @@ signals:
     void appendClientRequested(const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container);
     void updateClientsRequested(const QString &serverId, DockerContainer container);
     void revokeClientRequested(const QString &serverId, int row, DockerContainer container);
+    void revokeFinished(ErrorCode errorCode);
     void renameClientRequested(const QString &serverId, int row, const QString &clientName, DockerContainer container);
 
 public slots:
@@ -68,7 +69,6 @@ private:
 
     QString generateVpnUrl(const QByteArray &compressedConfig);
     QList<QString> generateQrCodesFromConfig(const QByteArray &data);
-    QString generateSingleQrCode(const QByteArray &data);
 
     SecureServersRepository* m_serversRepository;
     SecureAppSettingsRepository* m_appSettingsRepository;

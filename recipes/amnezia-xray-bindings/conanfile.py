@@ -3,9 +3,12 @@ from conan.tools.files import get, copy, collect_libs, chdir, rename
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.apple import XCRun, is_apple_os
+from conan.tools.apple.apple import _to_apple_arch
+from conan.tools.env import Environment, VirtualBuildEnv
 
 import os
+import shlex
 import sys
 
 _recipe_dir = os.path.dirname(os.path.abspath(__file__))
@@ -17,9 +20,15 @@ from windows_cgo import ensure_msvc_import_lib, is_windows_arm64, run_llvm_mingw
 
 class AmneziaXrayBindings(ConanFile):
     name = "amnezia-xray-bindings"
-    version = "1.1.0"
+    version = "1.4.0"
     settings = "os", "arch", "compiler"
     exports = "windows_cgo.py"
+
+    _arch_map = {
+        "x86": "386",
+        "x86_64": "amd64",
+        "armv8": "arm64"
+    }
 
     @property
     def _goos(self):
@@ -31,12 +40,12 @@ class AmneziaXrayBindings(ConanFile):
         }.get(str(self.settings.os))
 
     @property
-    def _goarch(self):
-        return {
-            "x86": "386",
-            "x86_64": "amd64",
-            "armv8": "arm64"
-        }.get(str(self.settings.arch))
+    def _archs(self):
+        return str(self.settings.arch).split("|")
+
+    @property
+    def _is_multiarch(self):
+        return len(self._archs) > 1
 
     @property
     def _is_windows(self):
@@ -52,135 +61,123 @@ class AmneziaXrayBindings(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        # Keep compiler settings on Windows ARM64 so VCVars can expose cl/link to CGO.
-        if self._is_windows and str(self.settings.arch) != "armv8":
+        if self._is_windows and not self._windows_arm64:
+            # mingw-builds is being used on Windows
             del self.settings.compiler
+        # Windows ARM64 keeps the compiler setting so vcvars can expose cl/lib to CGO
 
     def layout(self):
         basic_layout(self)
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
+        # Windows ARM64 builds with llvm-mingw + MSVC lib.exe (see windows_cgo.py);
+        # msys2 / mingw-builds have no arm64 packages.
         if self._is_windows and not self._windows_arm64:
-            # x86/x64: MinGW gendef + dlltool for import libraries.
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
             self.tool_requires("mingw-builds/15.1.0")
 
     def validate(self):
-        if not self._goos or not self._goarch:
+        if not self._goos or not all(arch in self._arch_map for arch in self._archs):
             raise ConanInvalidConfiguration(
                 f"{self.name} v{self.version} does not support {self.settings.os} {self.settings.arch}"
             )
 
+        if self._is_multiarch and not is_apple_os(self):
+            raise ConanInvalidConfiguration(
+                f"{self.name} v{self.version} does not support multiarch builds"
+            )
+
     def source(self):
-        get(self, "https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/v1.1.0.zip",
-            sha256="6ea768ec7002cedd422a39aea17704b888acaf794432aa5937cfc92fb6d80eb5", strip_root=True)
+        get(self, f"https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/refs/tags/v{self.version}.zip",
+            sha256="8977896bba99f1a3bad61d734b2929ec3d01c3ca0e206ee8ce5eb013d38ab118", strip_root=True)
 
     def generate(self):
-        # Go + (MinGW or MSVC) on PATH for all Windows/Linux variants.
-        VirtualBuildEnv(self).generate()
-
-        if self._is_windows and self._windows_arm64:
-            # MSVC CGO: activate vcvars only in build() (see run_msvc_go_build).
+        if self._windows_arm64:
+            # Go on PATH; the CGO toolchain is set up in build().
+            VirtualBuildEnv(self).generate()
             return
 
         tc = AutotoolsToolchain(self)
-        if not self._is_windows:
-            tc.make_args = [
-                "LIB_ARC=libamnezia_xray.a"
-            ]
+        tc.apple_arch_flag = None
         env = tc.environment()
-        env.define("ARCH", self._goarch)
-        env.define("GOARCH", self._goarch)
+        env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
+        env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
+        env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
         env.define("GOOS", self._goos)
         if self._is_windows:
             env.define("OS", "windows")
-            env.define("CGO_ENABLED", "1")
-            env.define("CGO_LDFLAGS", tc.ldflags)
-            env.define("CGO_CFLAGS", tc.cflags)
-        else:
-            env.define("CGO_LDFLAGS", tc.ldflags)
-            env.define("CGO_CFLAGS", tc.cflags)
+        self._ldflags = tc.ldflags
+        self._cflags = tc.cflags
         tc.generate(env)
 
     def build(self):
-        if self._is_windows:
-            self._build_windows_native()
-            return
-        with chdir(self, self.source_folder):
-            autotools = Autotools(self)
-            autotools.make()
-
-    @property
-    def _windows_artifact_dir(self):
-        """Keep Windows outputs under build_folder (not source_folder/llvm-mingw tree)."""
-        return os.path.join(self.build_folder, "build")
-
-    def _build_windows_native(self):
-        """
-        Windows: c-shared DLL. x86_64 uses MinGW gendef + dlltool; ARM64 uses llvm-mingw CGO.
-        """
-        src = self.source_folder
-        bdir = self._windows_artifact_dir
-        os.makedirs(bdir, exist_ok=True)
-        dll_name = "amnezia_xray.dll"
-        dll_path = os.path.join(bdir, dll_name)
-
         if self._windows_arm64:
-            run_llvm_mingw_go_build(self, src, dll_path, self._goarch)
-            ensure_msvc_import_lib(self, bdir, dll_name, "amnezia_xray")
-        else:
-            self.run(
-                f'cd /d "{src}" && go build -ldflags=-w -o "{dll_path}" -buildmode=c-shared .',
-                env="conanbuild",
-            )
-        if not self._windows_arm64:
-            self.run(
-                f'cd /d "{bdir}" && gendef {dll_name}',
-                env="conanbuild",
-            )
-            self.run(
-                f'cd /d "{bdir}" && dlltool -d amnezia_xray.def -l amnezia_xray.lib -D {dll_name}',
-                env="conanbuild",
-            )
+            self._build_windows_arm64()
+            return
 
-        def_path = os.path.join(bdir, "amnezia_xray.def")
-        try:
-            if os.path.isfile(def_path):
-                os.remove(def_path)
-        except OSError:
-            pass
+        with chdir(self, self.source_folder):
+            for arch in self._archs:
+                build_dir = os.path.join(self.build_folder, arch) if self._is_multiarch else self.build_folder
+                goarch = self._arch_map.get(arch)
+
+                cflags = list(self._cflags)
+                ldflags = list(self._ldflags)
+                if is_apple_os(self):
+                    cflags.append(f"-arch {_to_apple_arch(arch)}")
+                    ldflags.append(f"-arch {_to_apple_arch(arch)}")
+
+                env = Environment()
+                env.define("ARCH", goarch)
+                env.define("CGO_CFLAGS", " ".join(cflags))
+                env.define("CGO_LDFLAGS", " ".join(ldflags))
+                with env.vars(self).apply():
+                    at = Autotools(self)
+                    at.make(args=[
+                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                    ])
+
+            if is_apple_os(self) and self._is_multiarch:
+                lipo = XCRun(self).find('lipo')
+                archives = [os.path.join(self.build_folder, arch, "amnezia_xray.a") for arch in self._archs]
+                output = os.path.join(self.build_folder, "amnezia_xray.a")
+                self.run("{} -create -output {} {}".format(
+                    shlex.quote(lipo),
+                    shlex.quote(output),
+                    shlex.join(archives)
+                ))
+
+                copy(self, "*.h", os.path.join(self.build_folder, self._archs[0]), self.build_folder)
+
+    def _build_windows_arm64(self):
+        """c-shared DLL via llvm-mingw CGO + an MSVC import library for the app."""
+        dll_name = "amnezia_xray.dll"
+        dll_path = os.path.join(self.build_folder, dll_name)
+        run_llvm_mingw_go_build(
+            self, self.source_folder, dll_path, self._arch_map[self._archs[0]]
+        )
+        ensure_msvc_import_lib(self, self.build_folder, dll_name, "amnezia_xray")
+
+        def_path = os.path.join(self.build_folder, "amnezia_xray.def")
+        if os.path.isfile(def_path):
+            os.remove(def_path)
 
     def _rename_header(self):
         if not self._is_windows:
-            rename(self, os.path.join(self.package_folder, "include", "libamnezia_xray.h"),
-                   os.path.join(self.package_folder, "include", "amnezia_xray.h"))
-
-    def _rename_libs(self):
-        lib_dir = os.path.join(self.package_folder, "lib")
-        for fname in os.listdir(lib_dir):
-            if not fname.startswith("lib"):
-                src = os.path.join(lib_dir, fname)
-                dst = os.path.join(lib_dir, "lib" + fname)
-                os.rename(src, dst)
+            rename(self,
+                os.path.join(self.package_folder, "lib", "amnezia_xray.a"),
+                os.path.join(self.package_folder, "lib", "libamnezia_xray.a")
+            )
 
     def package(self):
-        if self._is_windows:
-            art = self._windows_artifact_dir
-        else:
-            art = os.path.join(self.build_folder, "build")
-            if not os.path.isdir(art):
-                art = self.build_folder
-        copy(self, "*.h", src=art, dst=os.path.join(self.package_folder, "include"), keep_path=False)
-        copy(self, "*.a", src=art, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.lib", src=art, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.dll", src=art, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "amnezia_xray.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
+        copy(self, "amnezia_xray.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "amnezia_xray.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "amnezia_xray.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         self._rename_header()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::xray-bindings")
-        if self._is_windows:
-            self.cpp_info.libs = ["amnezia_xray"]
-            self.cpp_info.libdirs = ["lib"]
-            self.cpp_info.bindirs = ["bin"]
-        else:
-            self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)

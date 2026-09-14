@@ -4,8 +4,10 @@
 echo "[*] Amnezia Telemt: configure script start"
 mkdir -p /data/tlsfront
 
-# Secret: substituted $TELEMT_SECRET -> saved file -> openssl (same rules as MTProxy configure)
-if [ -n "$TELEMT_SECRET" ]; then
+# Secret: regenerate (fresh install) -> env var -> saved file -> openssl
+if [ "$TELEMT_REGENERATE_SECRET" = "1" ]; then
+    SECRET=$(openssl rand -hex 16)
+elif [ -n "$TELEMT_SECRET" ]; then
     SECRET="$TELEMT_SECRET"
 elif [ -f /data/secret ]; then
     SECRET=$(cat /data/secret)
@@ -25,6 +27,9 @@ rm -f /data/config.toml
     echo "log_level = \"normal\""
     if [ -n "$TELEMT_TAG" ]; then
         echo "ad_tag = \"$TELEMT_TAG\""
+    fi
+    if [ -n "$TELEMT_MIDDLE_PROXY_NAT_IP" ]; then
+        echo "middle_proxy_nat_ip = \"$TELEMT_MIDDLE_PROXY_NAT_IP\""
     fi
     echo ""
     echo "[general.modes]"
@@ -59,6 +64,12 @@ rm -f /data/config.toml
     echo ""
     echo "[access.users]"
     echo "$TELEMT_USER_NAME = \"$SECRET\""
+    i=1
+    for EXTRA in $(echo "$TELEMT_ADDITIONAL_SECRETS" | tr ',' ' '); do
+        echo "$EXTRA" | grep -qE '^[0-9a-fA-F]{32}$' || continue
+        echo "extra_$i = \"$EXTRA\""
+        i=$((i + 1))
+    done
 } > /data/config.toml
 
 echo "$SECRET" > /data/secret

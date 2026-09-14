@@ -73,7 +73,7 @@ PageType {
                 Layout.rightMargin: 16
 
                 text: qsTr("Host")
-                descriptionText: ServersModel.getProcessedServerData("hostName")
+                descriptionText: ServersUiController.serverHostName(ServersUiController.processedServerId)
 
                 descriptionOnTop: true
 
@@ -173,7 +173,7 @@ PageType {
 
                 clickedFunc: function() {
                     PageController.showBusyIndicator(true)
-                    InstallController.mountSftpDrive(ServersUiController.getServerId(ServersUiController.processedServerIndex), port, password, username)
+                    InstallController.mountSftpDrive(ServersUiController.processedServerId, port, password, username)
                     PageController.showBusyIndicator(false)
                 }
             }

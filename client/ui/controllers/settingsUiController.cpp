@@ -17,17 +17,15 @@
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 SettingsUiController::SettingsUiController(SettingsController* settingsController,
                                          ServersController* serversController,
-                                         LanguageUiController* languageUiController,
                                          QObject *parent)
     : QObject(parent),
       m_settingsController(settingsController),
-      m_serversController(serversController),
-      m_languageUiController(languageUiController)
+      m_serversController(serversController)
 {
 #ifdef Q_OS_ANDROID
     connect(AndroidController::instance(), &AndroidController::notificationStateChanged, this, &SettingsUiController::onNotificationStateChanged);
@@ -83,7 +81,7 @@ void SettingsUiController::toggleLogging(bool enable)
 {
     m_settingsController->toggleLogging(enable);
 #if defined(Q_OS_IOS)
-    AmneziaVPN::toggleLogging(enable);
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
 #endif
     if (enable == true) {
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
@@ -157,13 +155,14 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
 {
     ErrorCode errorCode = m_settingsController->restoreAppConfigFromData(data);
     if (errorCode == ErrorCode::NoError) {
-        emit appLanguageChanged(
-                static_cast<LanguageSettings::AvailableLanguageEnum>(m_languageUiController->getCurrentLanguageIndex()));
+        emit appLanguageChanged();
 
         bool amneziaDnsEnabled = m_settingsController->isAmneziaDnsEnabled();
         emit amneziaDnsToggled(amneziaDnsEnabled);
 
         emit restoreBackupFinished();
+        emit autoStartChanged();
+        emit startMinimizedChanged();
     } else {
         emit errorOccurred(errorCode);
     }
@@ -177,12 +176,14 @@ QString SettingsUiController::getAppVersion()
 void SettingsUiController::clearSettings()
 {
     m_settingsController->clearSettings();
+    emit autoStartChanged();
+    emit startMinimizedChanged();
     emit resetLanguageToSystem();
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    AmneziaVPN::clearSettings();
+    SWIFT_BRIDGE_NAMESPACE::clearSettings();
 #endif
 }
 
@@ -204,6 +205,8 @@ bool SettingsUiController::isAutoStartEnabled()
 void SettingsUiController::toggleAutoStart(bool enable)
 {
     m_settingsController->toggleAutoStart(enable);
+    emit autoStartChanged();
+    emit startMinimizedChanged();
 }
 
 bool SettingsUiController::isStartMinimizedEnabled()
@@ -235,6 +238,16 @@ bool SettingsUiController::isNewsNotificationsEnabled()
 void SettingsUiController::toggleNewsNotificationsEnabled(bool enable)
 {
     m_settingsController->toggleNewsNotificationsEnabled(enable);
+}
+
+bool SettingsUiController::isAutoUpdateCheckEnabled()
+{
+    return m_settingsController->isAutoUpdateCheckEnabled();
+}
+
+void SettingsUiController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_settingsController->toggleAutoUpdateCheckEnabled(enable);
 }
 
 bool SettingsUiController::isCameraPresent()

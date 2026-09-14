@@ -1,8 +1,10 @@
 #ifndef APIV2SERVERCONFIG_H
 #define APIV2SERVERCONFIG_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QMap>
+#include <QPair>
 
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -27,6 +29,7 @@ struct ApiV2ServerConfig {
     DockerContainer defaultContainer;
     QString dns1;
     QString dns2;
+    QJsonArray sendPayload;
     
     QString name;
     bool nameOverriddenByUser = false;
@@ -43,6 +46,9 @@ struct ApiV2ServerConfig {
     bool isExternalPremium() const;
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;
+
+    QPair<QString, QString> getDnsPair(const QString &primaryDns, const QString &secondaryDns) const;
+
     QJsonObject toJson() const;
     static ApiV2ServerConfig fromJson(const QJsonObject& json);
 };

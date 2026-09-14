@@ -36,6 +36,7 @@
 #include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
+#include "core/controllers/api/storePurchaseController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/selfhosted/installController.h"
@@ -73,6 +74,7 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/services/mtProxyConfigModel.h"
 #include "ui/models/services/telemtConfigModel.h"
+#include "ui/models/services/tProxyConfigModel.h"
 
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
@@ -82,40 +84,20 @@
 #endif
 
 class CoreSignalHandlers;
-class TestMultipleImports;
-class TestAdminSelfHostedExport;
-class TestServerEdit;
-class TestDefaultServerChange;
-class TestServerEdgeCases;
-class TestSignalOrder;
-class TestServersModelSync;
-class TestComplexOperations;
-class TestSettingsSignals;
-class TestUiServersModelAndController;
-class TestSelfHostedServerSetup;
 
 class CoreController : public QObject
 {
     Q_OBJECT
     friend class CoreSignalHandlers;
-    friend class TestMultipleImports;
-    friend class TestAdminSelfHostedExport;
-    friend class TestServerEdit;
-    friend class TestDefaultServerChange;
-    friend class TestServerEdgeCases;
-    friend class TestSignalOrder;
-    friend class TestServersModelSync;
-    friend class TestComplexOperations;
-    friend class TestSettingsSignals;
-    friend class TestUiServersModelAndController;
-    friend class TestSelfHostedServerSetup;
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
-                            QQmlApplicationEngine *engine, QObject *parent = nullptr);
+                            QQmlApplicationEngine *engine, QObject *parent = nullptr,
+                            bool skipPlatformControllerInit = false);
 
     PageController* pageController() const;
     void setQmlRoot();
+    void checkForAppUpdates();
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
@@ -124,6 +106,36 @@ public:
 signals:
     void translationsUpdated();
     void websiteUrlChanged(const QString &newUrl);
+
+protected:
+    SecureServersRepository* serversRepositoryProtected() const { return m_serversRepository; }
+    SecureAppSettingsRepository* appSettingsRepositoryProtected() const { return m_appSettingsRepository; }
+    ServersModel* serversModelProtected() const { return m_serversModel; }
+    ContainersModel* containersModelProtected() const { return m_containersModel; }
+    ApiServicesModel* apiServicesModelProtected() const { return m_apiServicesModel; }
+    NewsModel* newsModelProtected() const { return m_newsModel; }
+    AllowedDnsModel* allowedDnsModelProtected() const { return m_allowedDnsModel; }
+    AppSplitTunnelingModel* appSplitTunnelingModelProtected() const { return m_appSplitTunnelingModel; }
+    IpSplitTunnelingModel* ipSplitTunnelingModelProtected() const { return m_ipSplitTunnelingModel; }
+    LanguageModel* languageModelProtected() const { return m_languageModel; }
+    ConnectionUiController* connectionUiControllerProtected() const { return m_connectionUiController; }
+    InstallUiController* installUiControllerProtected() const { return m_installUiController; }
+    ImportController* importCoreControllerProtected() const { return m_importCoreController; }
+    ExportController* exportControllerProtected() const { return m_exportController; }
+    InstallController* installControllerProtected() const { return m_installController; }
+    ServersController* serversControllerProtected() const { return m_serversController; }
+    SettingsUiController* settingsUiControllerProtected() const { return m_settingsUiController; }
+    SettingsController* settingsControllerProtected() const { return m_settingsController; }
+    AllowedDnsUiController* allowedDnsUiControllerProtected() const { return m_allowedDnsUiController; }
+    AllowedDnsController* allowedDnsControllerProtected() const { return m_allowedDnsController; }
+    LanguageUiController* languageUiControllerProtected() const { return m_languageUiController; }
+    IpSplitTunnelingController* ipSplitTunnelingControllerProtected() const { return m_ipSplitTunnelingController; }
+    IpSplitTunnelingUiController* ipSplitTunnelingUiControllerProtected() const { return m_ipSplitTunnelingUiController; }
+    AppSplitTunnelingController* appSplitTunnelingControllerProtected() const { return m_appSplitTunnelingController; }
+    AppSplitTunnelingUiController* appSplitTunnelingUiControllerProtected() const { return m_appSplitTunnelingUiController; }
+    ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
+    ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
+    ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
 
 private:
     void initRepositories();
@@ -179,6 +191,7 @@ private:
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    StorePurchaseController* m_storePurchaseController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
     InstallController* m_installController;
@@ -217,6 +230,7 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    TProxyConfigModel* m_tProxyConfigModel;
 
     CoreSignalHandlers* m_signalHandlers;
 };

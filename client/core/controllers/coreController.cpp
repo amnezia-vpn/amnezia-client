@@ -10,6 +10,7 @@
 #include "core/controllers/coreSignalHandlers.h"
 #include "logger.h"
 #include "secureQSettings.h"
+#include "core/utils/appUiConfig.h"
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"
@@ -18,11 +19,12 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
-                               QQmlApplicationEngine *engine, QObject *parent)
+                               QQmlApplicationEngine *engine, QObject *parent,
+                               bool skipPlatformControllerInit)
     : QObject(parent), m_vpnConnection(vpnConnection), m_settings(settings), m_engine(engine)
 {
     initRepositories();
@@ -31,8 +33,10 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     initControllers();
     initSignalHandlers();
 
-    initAndroidController();
-    initAppleController();
+    if (!skipPlatformControllerInit) {
+        initAndroidController();
+        initAppleController();
+    }
     initLogging();
 
     m_translator = new QTranslator(this);
@@ -109,6 +113,9 @@ void CoreController::initModels()
     m_telemtConfigModel = new TelemtConfigModel(this);
     setQmlContextProperty("TelemtConfigModel", m_telemtConfigModel);
 
+    m_tProxyConfigModel = new TProxyConfigModel(this);
+    setQmlContextProperty("TProxyConfigModel", m_tProxyConfigModel);
+
     m_clientManagementModel = new ClientManagementModel(this);
     setQmlContextProperty("ClientManagementModel", m_clientManagementModel);
 
@@ -153,6 +160,7 @@ void CoreController::initCoreControllers()
     m_allowedDnsController = new AllowedDnsController(m_appSettingsRepository);
     m_servicesCatalogController = new ServicesCatalogController(m_appSettingsRepository);
     m_subscriptionController = new SubscriptionController(m_serversRepository, m_appSettingsRepository);
+    m_storePurchaseController = new StorePurchaseController(m_serversRepository, m_appSettingsRepository);
     m_newsController = new NewsController(m_appSettingsRepository, m_serversRepository);
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
@@ -178,7 +186,9 @@ void CoreController::initControllers()
 #ifdef Q_OS_WINDOWS
                                                      m_ikev2ConfigModel,
 #endif
-                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel, this);
+                                                     m_sftpConfigModel, m_socks5ConfigModel, m_mtProxyConfigModel, m_telemtConfigModel,
+                                                     m_tProxyConfigModel,
+                                                     m_connectionController, this);
     setQmlContextProperty("InstallController", m_installUiController);
 
     m_importController = new ImportUiController(m_importCoreController, this);
@@ -190,7 +200,7 @@ void CoreController::initControllers()
     m_languageUiController = new LanguageUiController(m_settingsController, m_languageModel, this);
     setQmlContextProperty("LanguageUiController", m_languageUiController);
 
-    m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, m_languageUiController, this);
+    m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
 
     m_pageController = new PageController(m_serversController, m_settingsController, this);
@@ -212,15 +222,17 @@ void CoreController::initControllers()
     setQmlContextProperty("SystemController", m_systemController);
 
     m_networkReachabilityController = new NetworkReachabilityController(this);
-    m_engine->rootContext()->setContextProperty("NetworkReachabilityController", m_networkReachabilityController);
-    m_engine->rootContext()->setContextProperty("NetworkReachability", m_networkReachabilityController);
+    setQmlContextProperty("NetworkReachabilityController", m_networkReachabilityController);
+    setQmlContextProperty("NetworkReachability", m_networkReachabilityController);
 
     m_servicesCatalogUiController = new ServicesCatalogUiController(m_servicesCatalogController, m_apiServicesModel, this);
     setQmlContextProperty("ServicesCatalogUiController", m_servicesCatalogUiController);
 
     m_subscriptionUiController = new SubscriptionUiController(m_serversController, m_apiServicesModel, m_servicesCatalogController, m_subscriptionController,
+                                                              m_storePurchaseController,
                                                               m_apiSubscriptionPlansModel, m_apiBenefitsModel, m_apiAccountInfoModel,
-                                                              m_apiCountryModel, m_apiDevicesModel, m_settingsController, this);
+                                                              m_apiCountryModel, m_apiDevicesModel, m_settingsController,
+                                                              m_connectionController, this);
     setQmlContextProperty("SubscriptionUiController", m_subscriptionUiController);
 
     m_apiNewsUiController = new ApiNewsUiController(m_newsModel, m_newsController, this);
@@ -253,7 +265,7 @@ void CoreController::initAppleController()
 {
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
-    QTimer::singleShot(0, this, [this]() { AmneziaVPN::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
+    QTimer::singleShot(0, this, [this]() { SWIFT_BRIDGE_NAMESPACE::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
 #endif
 }
 
@@ -280,6 +292,15 @@ void CoreController::initSignalHandlers()
     if (m_serversUiController->hasServersFromGatewayApi()) {
         m_apiNewsUiController->fetchNews(false);
     }
+
+}
+
+void CoreController::checkForAppUpdates()
+{
+    if (!m_appSettingsRepository->isAutoUpdateCheckEnabled()) {
+        return;
+    }
+    m_updateController->checkForUpdates();
 }
 
 void CoreController::updateTranslator(const QLocale &locale)
@@ -289,15 +310,15 @@ void CoreController::updateTranslator(const QLocale &locale)
     }
 
     QStringList availableTranslations;
-    QDirIterator it(":/translations", QStringList("amneziavpn_*.qm"), QDir::Files);
+    QDirIterator it(":/translations", QStringList(APP_TS_PREFIX "_*.qm"), QDir::Files);
     while (it.hasNext()) {
         availableTranslations << it.next();
     }
 
     // This code allow to load translation for the language only, without country code
     const QString lang = locale.name().split("_").first();
-    const QString translationFilePrefix = QString(":/translations/amneziavpn_") + lang;
-    QString strFileName = QString(":/translations/amneziavpn_%1.qm").arg(locale.name());
+    const QString translationFilePrefix = QString(":/translations/" APP_TS_PREFIX "_") + lang;
+    QString strFileName = QString(":/translations/" APP_TS_PREFIX "_%1.qm").arg(locale.name());
     for (const QString &translation : availableTranslations) {
         if (translation.contains(translationFilePrefix)) {
             strFileName = translation;
@@ -308,7 +329,7 @@ void CoreController::updateTranslator(const QLocale &locale)
     if (m_translator->load(strFileName)) {
         QCoreApplication::installTranslator(m_translator);
     } else {
-        if (m_translator->load(QString(":/translations/amneziavpn_en.qm"))) {
+        if (m_translator->load(QString(":/translations/" APP_TS_PREFIX "_en.qm"))) {
             QCoreApplication::installTranslator(m_translator);
         }
     }
@@ -341,9 +362,6 @@ void CoreController::openConnectionByIndex(int serverIndex)
         m_serversUiController ? m_serversUiController->getServerId(serverIndex) : QString();
     if (serverId.isEmpty()) {
         return;
-    }
-    if (m_serversModel) {
-        m_serversModel->setProcessedServerIndex(serverIndex);
     }
     if (m_serversController) {
         m_serversController->setDefaultServer(serverId);

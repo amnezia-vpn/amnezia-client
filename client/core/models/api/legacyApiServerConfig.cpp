@@ -23,9 +23,7 @@ LegacyApiServerConfig LegacyApiServerConfig::fromJson(const QJsonObject &json)
 {
     LegacyApiServerConfig config;
 
-    config.name = json.value(configKey::name).toString();
     config.description = json.value(configKey::description).toString();
-    config.displayName = json.value(configKey::displayName).toString();
     config.hostName = json.value(configKey::hostName).toString();
 
     config.crc = json.value(configKey::crc).toInt(0);

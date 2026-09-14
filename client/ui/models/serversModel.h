@@ -14,39 +14,22 @@ public:
     enum Roles {
         NameRole = Qt::UserRole + 1,
         ServerDescriptionRole,
-        CollapsedServerDescriptionRole,
-        ExpandedServerDescriptionRole,
         HostNameRole,
+        ServerIdRole,
 
-        CredentialsRole,
         CredentialsLoginRole,
 
         IsDefaultRole,
-        IsCurrentlyProcessedRole,
 
         HasWriteAccessRole,
-
-        ContainsAmneziaDnsRole,
 
         DefaultContainerRole,
 
         HasInstalledContainers,
 
-        IsServerFromTelegramApiRole,
         IsServerFromGatewayApiRole,
-        ApiConfigRole,
-        IsCountrySelectionAvailableRole,
-        ApiAvailableCountriesRole,
-        ApiServerCountryCodeRole,
-        IsAdVisibleRole,
-        AdHeaderRole,
-        AdDescriptionRole,
-        AdEndpointRole,
-        IsRenewalAvailableRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
-
-        HasAmneziaDns
     };
 
     ServersModel(QObject *parent = nullptr);
@@ -56,52 +39,19 @@ public:
     QVariant data(const int index, int role = Qt::DisplayRole) const;
 
 public slots:
-    const int getDefaultServerIndex();
-    bool isDefaultServerCurrentlyProcessed();
-    bool isDefaultServerFromApi();
-
-    bool isProcessedServerHasWriteAccess();
-    bool isDefaultServerHasWriteAccess();
-    bool hasServerWithWriteAccess();
-
-    const int getServersCount();
-
-    void setProcessedServerIndex(const int index);
-
-    const ServerCredentials getProcessedServerCredentials();
-    QVariant getProcessedServerData(const QString &roleString);
-
-    QVariant getDefaultServerData(const QString roleString);
-
-    bool isServerFromApi(const int serverIndex);
-
-    void updateModel(const QVector<amnezia::ServerDescription> &descriptions, int defaultServerIndex);
+    void updateModel(const QVector<amnezia::ServerDescription> &descriptions,
+                     const QString &defaultServerId);
+    void setDefaultServerId(const QString &serverId);
 
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
-signals:
-    void processedServerIndexChanged(const int index);
-    void processedServerChanged();
-
-    void defaultServerIndexChanged(const int index);
-    void defaultServerNameChanged();
-    void defaultServerDescriptionChanged();
-
-    void defaultServerDefaultContainerChanged(const int containerIndex);
-
-    void updateApiCountryModel();
-    void updateApiServicesModel();
-
 private:
     ServerCredentials serverCredentials(int index) const;
 
-    bool serverHasInstalledContainers(const int serverIndex) const;
-
     QVector<amnezia::ServerDescription> m_descriptions;
 
-    int m_defaultServerIndex = -1;
-    int m_processedServerIndex = -1;
+    QString m_defaultServerId;
 };
 
 #endif // SERVERSMODEL_H

@@ -1,0 +1,24 @@
+From 0531cd00cd580524ec21a663442264136dbd368f Mon Sep 17 00:00:00 2001
+From: NickVs2015 <nv@amnezia.org>
+Date: Thu, 23 Jul 2026 11:23:07 +0300
+Subject: [PATCH] fix: add 16kb page size support for android build
+
+---
+ build.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/build.sh b/build.sh
+index 7969505..02c5b73 100755
+--- a/build.sh
++++ b/build.sh
+@@ -28,7 +28,7 @@ build_android() {
+     rm -fr assets
+     mkdir -p assets/geo
+     mv dat/* assets/geo
+-    gomobile bind -target android -androidapi 24 -javapkg=org.amnezia.vpn.protocol.xray -o libxray.aar -ldflags="-w -s -buildid= -checklinkname=0" -trimpath
++    gomobile bind -target android -androidapi 24 -javapkg=org.amnezia.vpn.protocol.xray -o libxray.aar -ldflags="-w -s -buildid= -checklinkname=0 -extldflags=-Wl,-z,max-page-size=16384" -trimpath
+ }
+
+ download_geo() {
+--
+2.50.1 (Apple Git-155)

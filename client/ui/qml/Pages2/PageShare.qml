@@ -43,7 +43,7 @@ PageType {
             var configFileName
 
             var containerIndex = ServersUiController.processedContainerIndex
-            var serverId = ServersUiController.getServerId(ServersUiController.processedServerIndex)
+            var serverId = ServersUiController.processedServerId
 
             switch (type) {
             case PageShare.ConfigType.AmneziaConnection: {
@@ -91,6 +91,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
+            PageController.showBusyIndicator(false)
             PageController.showErrorMessage(error)
         }
     }
@@ -249,7 +250,7 @@ PageType {
                         onClicked: {
                             accessTypeSelector.currentIndex = 1
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                            ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -332,8 +333,10 @@ PageType {
                     }
 
                     Component.onCompleted: {
-                        if (ServersModel.isDefaultServerHasWriteAccess() && ServersModel.getDefaultServerData("hasInstalledContainers")) {
-                            serverSelectorListView.selectedIndex = proxyServersModel.mapFromSource(ServersUiController.defaultServerIndex)
+                        if (ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId)
+                            && ServersUiController.serverHasInstalledContainers(ServersUiController.defaultServerId)) {
+                            serverSelectorListView.selectedIndex =
+                                proxyServersModel.mapFromSource(ServersUiController.getServerIndexById(ServersUiController.defaultServerId))
                         } else {
                             serverSelectorListView.selectedIndex = 0
                         }
@@ -344,7 +347,7 @@ PageType {
 
                     function handler() {
                         serverSelector.text = selectedText
-                        ServersUiController.setProcessedServerIndex(proxyServersModel.mapToSource(selectedIndex))
+                        ServersUiController.setProcessedServerId(ServersUiController.getServerId(proxyServersModel.mapToSource(selectedIndex)))
                     }
                 }
             }
@@ -380,6 +383,10 @@ PageType {
                             ValueFilter {
                                 roleName: "isShareable"
                                 value: true
+                            },
+                            ValueFilter {
+                                roleName: "isUnsupportedContainer"
+                                value: false
                             }
                         ]
                     }
@@ -394,9 +401,19 @@ PageType {
                         target: serverSelector
 
                         function onServerSelectorIndexChanged() {
-                            var defaultContainer = proxyContainersModel.mapFromSource(ServersModel.getProcessedServerData("defaultContainer"))
+                            if (!proxyContainersModel.count) {
+                                root.shareButtonEnabled = false
+                                return
+                            }
+
+                            var defaultContainer = proxyContainersModel.mapFromSource(
+                                        ServersUiController.serverDefaultContainer(ServersUiController.processedServerId))
+                            if (defaultContainer < 0) {
+                                defaultContainer = 0
+                            }
+
                             containerSelectorListView.selectedIndex = defaultContainer
-                            containerSelectorListView.positionViewAtIndex(selectedIndex, ListView.Beginning)
+                            containerSelectorListView.positionViewAtIndex(defaultContainer, ListView.Beginning)
                             containerSelectorListView.triggerCurrentItem()
                         }
                     }
@@ -417,7 +434,7 @@ PageType {
 
                         if (accessTypeSelector.currentIndex === 1) {
                             PageController.showBusyIndicator(true)
-                            ExportController.updateClientManagementModel(ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                            ExportController.updateClientManagementModel(ServersUiController.processedServerId,
                                                                          ServersUiController.processedContainerIndex)
                             PageController.showBusyIndicator(false)
                         }
@@ -592,7 +609,7 @@ PageType {
             ListView {
                 id: clientsListView
                 Layout.fillWidth: true
-                Layout.preferredHeight: childrenRect.height
+                Layout.preferredHeight: contentHeight
 
                 visible: accessTypeSelector.currentIndex === 1
 
@@ -793,7 +810,7 @@ PageType {
                                                         PageController.showBusyIndicator(true)
                                                         ExportController.renameClient(proxyClientManagementModel.mapToSource(index),
                                                                                           clientNameEditor.textField.text,
-                                                                                          ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                                                                                          ServersUiController.processedServerId,
                                                                                           ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
@@ -829,17 +846,16 @@ PageType {
                                             clientInfoDrawer.closeTriggered()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
-                                                                              ServersUiController.getServerId(ServersUiController.processedServerIndex),
+                                                                              ServersUiController.processedServerId,
                                                                               ServersUiController.processedContainerIndex)
                                         }
                                         var noButtonFunction = function() {
                                         }
 
-                                        var isActiveConfigForCurrentClient = ServersModel.isDefaultServerCurrentlyProcessed()
-                                                && ServersModel.getDefaultServerData("defaultContainer") === ContainersModel.getProcessedContainerIndex()
-
-                                        if ((ConnectionController.isConnectionInProgress || ConnectionController.isConnected)
-                                                && isActiveConfigForCurrentClient) {
+                                        if (ConnectionController.isRevokeBlockedDuringActiveConnection(
+                                                ServersUiController.processedServerId,
+                                                ServersUiController.processedContainerIndex,
+                                                clientId)) {
                                             PageController.showNotificationMessage("Unable to revoke current config during active connection")
                                         } else {
                                             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

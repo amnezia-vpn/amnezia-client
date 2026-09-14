@@ -133,6 +133,16 @@ const TelemtProtocolConfig* ContainerConfig::getTelemtProtocolConfig() const
     return protocolConfig.as<TelemtProtocolConfig>();
 }
 
+TProxyProtocolConfig* ContainerConfig::getTProxyProtocolConfig()
+{
+    return protocolConfig.as<TProxyProtocolConfig>();
+}
+
+const TProxyProtocolConfig* ContainerConfig::getTProxyProtocolConfig() const
+{
+    return protocolConfig.as<TProxyProtocolConfig>();
+}
+
 Ikev2ProtocolConfig* ContainerConfig::getIkev2ProtocolConfig()
 {
     return protocolConfig.as<Ikev2ProtocolConfig>();

@@ -32,7 +32,7 @@ PageType {
         Connections {
             target: ServersUiController
 
-            function onProcessedServerIndexChanged() {
+            function onProcessedServerIdChanged() {
                 settingsContainersListView.updateContainersModelFilters()
             }
         }

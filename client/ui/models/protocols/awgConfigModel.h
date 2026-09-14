@@ -26,6 +26,15 @@ public:
         ClientSpecialJunk3Role,
         ClientSpecialJunk4Role,
         ClientSpecialJunk5Role,
+        ClientContentPaddingAdditionRole,
+        ClientRekeyAfterTimeRole,
+        ClientRekeyTimeoutRole,
+        ClientRejectAfterTimeRole,
+        ClientKeepaliveTimeoutRole,
+        ClientMaxHandshakeAttemptsRole,
+        ClientHeaderProtectionEnabledRole,
+        ClientRandomTrailersRole,
+        ClientDisableCookiesRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,
@@ -45,7 +54,18 @@ public:
         ServerSpecialJunk4Role,
         ServerSpecialJunk5Role,
 
-        IsAwg2Role
+        ServerContentPaddingAdditionRole,
+        ServerRekeyAfterTimeRole,
+        ServerRekeyTimeoutRole,
+        ServerRejectAfterTimeRole,
+        ServerKeepaliveTimeoutRole,
+        ServerMaxHandshakeAttemptsRole,
+        ServerHeaderProtectionEnabledRole,
+        ServerRandomTrailersRole,
+        ServerDisableCookiesRole,
+
+        IsAwg2Role,
+        IsAwg3Role
     };
 
     explicit AwgConfigModel(QObject *parent = nullptr);
@@ -71,6 +91,7 @@ private:
     amnezia::AwgProtocolConfig m_protocolConfig;
     amnezia::AwgProtocolConfig m_originalProtocolConfig;
     
+    QString serverProtocolVersion() const;
     void applyDefaultsToServerConfig(amnezia::AwgServerConfig& config);
     void applyDefaultsToClientConfig(amnezia::AwgClientConfig& config);
 };

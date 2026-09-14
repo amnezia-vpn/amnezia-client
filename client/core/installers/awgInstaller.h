@@ -14,7 +14,7 @@ public:
                                          SshSession* serverController, amnezia::ContainerConfig &config) override;
 
 private:
-    void generateAwgParameters(amnezia::AwgServerConfig &serverConfig, bool isAwg2 = false);
+    void generateAwgParameters(amnezia::AwgServerConfig &serverConfig);
 };
 
 #endif // AWGINSTALLER_H

@@ -10,6 +10,8 @@ deploy/build_64/*
 winbuild*.bat
 .cache/
 .vscode/
+.venv/
+.cursor*
 
 
 # Qt-es

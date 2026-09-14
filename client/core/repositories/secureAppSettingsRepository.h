@@ -38,11 +38,15 @@ public:
 
     RouteMode routeMode() const;
     void setRouteMode(RouteMode mode);
-    bool addVpnSite(RouteMode mode, const QString &site, const QString &ip = "");
-    void addVpnSites(RouteMode mode, const QMap<QString, QString> &sites);
+    bool addVpnSite(RouteMode mode, const QString &site, const QStringList &ips = {});
+    void addVpnSites(RouteMode mode, const QMap<QString, QStringList> &sites);
     void removeVpnSite(RouteMode mode, const QString &site);
     void removeAllVpnSites(RouteMode mode);
     QVariantMap vpnSites(RouteMode mode) const;
+
+    // Normalizes a stored vpn site value into a list of IPs.
+    // Supports both the legacy format (a single IP string) and the current one (a list of IPs).
+    static QStringList siteIpList(const QVariant &value);
     bool isSitesSplitTunnelingEnabled() const;
     void setSitesSplitTunnelingEnabled(bool enabled);
 
@@ -59,7 +63,9 @@ public:
     void setDevGatewayEndpoint();
     bool isDevGatewayEnv(bool isTestPurchase = false) const;
     void toggleDevGatewayEnv(bool enabled);
-    
+    QByteArray readGatewayProxyUrls(const QString &cacheKey) const;
+    void writeGatewayProxyUrls(const QString &cacheKey, const QByteArray &proxyUrlsEncrypted);
+
     bool isKillSwitchEnabled() const;
     void setKillSwitchEnabled(bool enabled);
     bool isStrictKillSwitchEnabled() const;
@@ -73,6 +79,9 @@ public:
     void setScreenshotsEnabled(bool enabled);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
+
+    bool isAutoUpdateCheckEnabled() const;
+    void setAutoUpdateCheckEnabled(bool enabled);
     bool isSaveLogs() const;
     void setSaveLogs(bool enabled);
     QDateTime getLogEnableDate() const;
@@ -84,13 +93,9 @@ public:
 
     bool isHomeAdLabelVisible() const;
     void disableHomeAdLabel();
-    bool isPremV1MigrationReminderActive() const;
-    void disablePremV1MigrationReminder();
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &cfg);
     void clearSettings();
-
-    QString nextAvailableServerName() const;
 
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);

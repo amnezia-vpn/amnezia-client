@@ -1,0 +1,2 @@
+patches:
+  - patch_file: "patches/0001-add-16kb-page-support-amnezia-libxray.patch"

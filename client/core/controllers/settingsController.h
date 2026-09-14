@@ -59,6 +59,9 @@ public:
     bool isNewsNotificationsEnabled() const;
     void toggleNewsNotificationsEnabled(bool enable);
 
+    bool isAutoUpdateCheckEnabled() const;
+    void toggleAutoUpdateCheckEnabled(bool enable);
+
     bool isKillSwitchEnabled() const;
     void toggleKillSwitch(bool enable);
 
@@ -68,9 +71,6 @@ public:
     QString getInstallationUuid(bool createIfNotExists = true) const;
 
     void enableDevMode();
-    
-    bool isPremV1MigrationReminderActive() const;
-    void disablePremV1MigrationReminder();
     
     QString nextAvailableServerName() const;
     bool isDevModeEnabled() const;

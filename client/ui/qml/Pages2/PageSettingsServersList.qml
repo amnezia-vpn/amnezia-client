@@ -70,6 +70,11 @@ PageType {
 
                     text: name
 
+                    leftImageSource: ServersUiController.serverHasOutdatedAwgContainer(serverId) ? "qrc:/images/controls/alert-circle.svg" : ""
+                    leftImageColor: AmneziaStyle.color.goldenApricot
+                    isSmallLeftImage: true
+                    isLeftImageHoverEnabled: false
+
                     descriptionText: {
                         var servicesNameString = ""
                         var servicesName = ServersUiController.getAllInstalledServicesName(index)
@@ -77,7 +82,7 @@ PageType {
                             servicesNameString += servicesName[i] + " · "
                         }
 
-                        if (ServersModel.isServerFromApi(index)) {
+                        if (ServersUiController.isServerFromApi(serverId)) {
                             return servicesNameString + serverDescription
                         } else {
                             return servicesNameString + hostName
@@ -86,11 +91,11 @@ PageType {
                     rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                     clickedFunction: function() {
-                        ServersUiController.setProcessedServerIndex(index)
+                        ServersUiController.setProcessedServerId(serverId)
 
-                        if (ServersModel.getProcessedServerData("isServerFromGatewayApi")) {
+                        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
                             PageController.showBusyIndicator(true)
-                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.getServerId(ServersUiController.processedServerIndex), false)
+                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
                             PageController.showBusyIndicator(false)
                             if (!result) {
                                 return

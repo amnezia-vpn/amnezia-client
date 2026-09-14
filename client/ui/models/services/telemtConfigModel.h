@@ -88,6 +88,8 @@ public slots:
 
     Q_INVOKABLE void removeAdditionalSecret(int idx);
 
+    Q_INVOKABLE QVariantList additionalSecretsList() const;
+
     Q_INVOKABLE QString generateQrCode(const QString &text);
 
     Q_INVOKABLE void setEnabled(bool enabled);
@@ -116,11 +118,43 @@ public slots:
 
     Q_INVOKABLE QString workersModeManual() const;
 
+    Q_INVOKABLE bool isValidPublicHost(const QString &host) const;
+
+    Q_INVOKABLE bool isPublicHostInputAllowed(const QString &text) const;
+
+    Q_INVOKABLE bool isPublicHostTypingIncomplete(const QString &text) const;
+
+    Q_INVOKABLE bool isValidMtProxyTag(const QString &tag) const;
+
+    Q_INVOKABLE bool isMtProxyTagTypingIncomplete(const QString &text) const;
+
+    Q_INVOKABLE int mtProxyBotTagHexLength() const;
+
+    Q_INVOKABLE bool isValidFakeTlsDomain(const QString &domain) const;
+
+    Q_INVOKABLE bool isFakeTlsDomainTypingIncomplete(const QString &text) const;
+
+    Q_INVOKABLE bool isFakeTlsDomainInputAllowed(const QString &text) const;
+
+    Q_INVOKABLE QString sanitizeFakeTlsDomainFieldText(const QString &input) const;
+
+    Q_INVOKABLE QString sanitizePublicHostFieldText(const QString &input) const;
+
+    Q_INVOKABLE QString sanitizePortFieldText(const QString &input) const;
+
+    Q_INVOKABLE QString sanitizeMtProxyTagFieldText(const QString &input) const;
+
+    Q_INVOKABLE QString sanitizeOptionalIpv4FieldText(const QString &input) const;
+
+    Q_INVOKABLE bool isValidOptionalIpv4(const QString &ip) const;
+
 protected:
     QHash<int, QByteArray> roleNames() const override;
 
 private:
     static void applyDefaults(amnezia::TelemtProtocolConfig &c);
+
+    QString normalizeFakeTlsDomainInput(const QString &input) const;
 
     amnezia::DockerContainer m_container = amnezia::DockerContainer::None;
     QJsonObject m_fullConfig;

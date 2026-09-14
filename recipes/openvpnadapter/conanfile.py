@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Git
 from conan.internal.model.pkg_type import PackageType
 from conan.tools.files import chdir
+from conan.tools.apple import XCRun
 
 import os
 import shutil
@@ -49,7 +50,10 @@ class OpenVPNAdapter(ConanFile):
 
     def build(self):
         with chdir(self, self.source_folder):
-            self.run("xcrun xcodebuild"
+            xcrun = XCRun(self)
+
+            xcodebuild = xcrun.find("xcodebuild")
+            self.run(f"{xcodebuild}"
                 " -project OpenVPNAdapter.xcodeproj"
                 " -scheme OpenVPNAdapter"
                 " -configuration Release"
@@ -57,8 +61,18 @@ class OpenVPNAdapter(ConanFile):
                 f" -sdk {self._sdk}"
                 f' "CONFIGURATION_BUILD_DIR={self.build_folder}"'
                 f' "BUILT_PRODUCTS_DIR={self.build_folder}"'
+                " MACH_O_TYPE=staticlib"
                 " BUILD_LIBRARY_FOR_DISTRIBUTION=YES"
                 " CODE_SIGNING_ALLOWED=NO"
+            )
+
+            openvpnadapter = os.path.join(self.build_folder, "OpenVPNAdapter.framework", "OpenVPNAdapter")
+            self.run(f"{xcrun.libtool} -static -o"
+                     f" {openvpnadapter}"
+                     f" {openvpnadapter}"
+                     f' {os.path.join(self.build_folder, "OpenVPNClient.framework", "OpenVPNClient")}'
+                     f' {os.path.join(self.build_folder, "LZ4.framework", "LZ4")}'
+                     f' {os.path.join(self.build_folder, "mbedTLS.framework", "mbedTLS")}'
             )
 
     def package(self):
@@ -70,3 +84,4 @@ class OpenVPNAdapter(ConanFile):
         self.cpp_info.type = PackageType.STATIC
         self.cpp_info.package_framework = True
         self.cpp_info.location = os.path.join(self.package_folder, "OpenVPNAdapter.framework")
+        self.cpp_info.frameworks = ["SystemConfiguration"]

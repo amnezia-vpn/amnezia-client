@@ -64,7 +64,11 @@ QString getProtocolName(DockerContainer defaultContainer, const QMap<DockerConta
         const auto it = containers.constFind(defaultContainer);
         if (it != containers.cend()) {
             if (const AwgProtocolConfig *awg = it->getAwgProtocolConfig()) {
-                protocolVersion = ProtocolUtils::getProtocolVersionString(awg->toJson());
+                QString version = awg->clientProtocolVersion();
+                if (version.isEmpty()) {
+                    version = awg->serverProtocolVersion();
+                }
+                protocolVersion = AwgProtocolConfig::protocolVersionString(version);
                 if (defaultContainer == DockerContainer::Awg && !awg->serverConfig.isThirdPartyConfig) {
                     containerName = QStringLiteral("AmneziaWG Legacy");
                 }
@@ -162,6 +166,7 @@ ServerDescription buildServerDescription(const ApiV2ServerConfig &server, bool /
     row.isCountrySelectionAvailable = !server.apiConfig.availableCountries.isEmpty();
     row.apiAvailableCountries = server.apiConfig.availableCountries;
     row.apiServerCountryCode = server.apiConfig.serverCountryCode;
+    row.apiServerCountryCodeL10n = server.apiConfig.serverCountryCodeL10n;
 
     row.isAdVisible = server.apiConfig.serviceInfo.isAdVisible;
     row.adHeader = server.apiConfig.serviceInfo.adHeader;

@@ -39,33 +39,44 @@ QString OpenVpnProtocol::defaultConfigPath()
     return p;
 }
 
-void OpenVpnProtocol::stop()
+void OpenVpnProtocol::cleanupResources()
 {
-    qDebug() << "OpenVpnProtocol::stop()";
-    setConnectionState(Vpn::ConnectionState::Disconnecting);
-
-    // TODO: need refactoring
-    // sendTermSignal() will even return true while server connected ???
-    if ((m_connectionState == Vpn::ConnectionState::Preparing) || (m_connectionState == Vpn::ConnectionState::Connecting)
-        || (m_connectionState == Vpn::ConnectionState::Connected)
-        || (m_connectionState == Vpn::ConnectionState::Reconnecting)) {
+    if (m_openVpnProcess || openVpnProcessIsRunning()) {
         if (!sendTermSignal()) {
             killOpenVpnProcess();
         }
         QThread::msleep(10);
-        m_managementServer.stop();
     }
+    m_managementServer.stop();
 
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         QRemoteObjectPendingReply<bool> reply = iface->disableKillSwitch();
         if (!reply.waitForFinished(1000) && !reply.returnValue()) {
-            qWarning() << "OpenVpnProtocol::stop(): Failed to disable killswitch";
+            qWarning() << "OpenVpnProtocol::cleanupResources(): Failed to disable killswitch";
         }
     });
 #endif
+}
 
-    setConnectionState(Vpn::ConnectionState::Disconnected);
+void OpenVpnProtocol::stop()
+{
+    qDebug() << "OpenVpnProtocol::stop()";
+
+    const bool wasActive = m_connectionState == Vpn::ConnectionState::Preparing
+            || m_connectionState == Vpn::ConnectionState::Connecting
+            || m_connectionState == Vpn::ConnectionState::Connected
+            || m_connectionState == Vpn::ConnectionState::Reconnecting;
+
+    if (wasActive) {
+        setConnectionState(Vpn::ConnectionState::Disconnecting);
+    }
+
+    cleanupResources();
+
+    if (wasActive || m_connectionState == Vpn::ConnectionState::Disconnecting) {
+        setConnectionState(Vpn::ConnectionState::Disconnected);
+    }
 }
 
 ErrorCode OpenVpnProtocol::prepare()
@@ -168,7 +179,7 @@ void OpenVpnProtocol::updateRouteGateway(QString line)
 
 ErrorCode OpenVpnProtocol::start()
 {
-    OpenVpnProtocol::stop();
+    cleanupResources();
 
     if (!QFileInfo::exists(configPath())) {
         setLastError(ErrorCode::OpenVpnConfigMissing);
@@ -208,6 +219,18 @@ ErrorCode OpenVpnProtocol::start()
         qDebug() << "Set VPN route gateway" << m_routeGateway;
     } else {
         qWarning() << "Unable to set VPN route gateway, output:\n" << s;
+    }
+#endif
+
+#ifdef Q_OS_WIN
+    // In "all except sites" mode the config uses redirect-gateway !ipv4, so OpenVPN
+    // never reports net_route_v4_best_gw and m_routeGateway would stay empty
+    const QString winGateway = NetworkUtilities::getGatewayAndIface().first;
+    if (!winGateway.isEmpty()) {
+        m_routeGateway = winGateway;
+        qDebug() << "Set VPN route gateway" << m_routeGateway;
+    } else {
+        qWarning() << "Unable to detect physical default gateway";
     }
 #endif
 

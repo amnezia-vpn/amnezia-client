@@ -51,11 +51,11 @@ Rectangle {
     }
 
     Keys.onEnterPressed: {
-        Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
+        Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
     }
 
     Keys.onReturnPressed: {
-        Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
+        Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
     }
 
     RowLayout {
@@ -144,7 +144,7 @@ Rectangle {
 
         onClicked: function() {
             root.forceActiveFocus()
-            Qt.openUrlExternally(ServersModel.getDefaultServerData("adEndpoint"))
+            Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
         }
     }
 }
