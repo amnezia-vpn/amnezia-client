@@ -53,24 +53,6 @@ PageType {
             width: listView.width
 
             LabelWithButtonType {
-                id: vpnProtocolButton
-
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("VPN protocol")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsServerProtocols)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
                 id: localProxyButton
 
                 Layout.fillWidth: true
