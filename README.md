@@ -97,12 +97,43 @@ Want to contribute? Welcome!
   - Core module for targeting platform (Desktop/Android/iOS)
   - Qt 5 Compatibility module
   - Qt Remote Objects
+  - Qt Shader Tools - required at runtime by `Qt5Compat.GraphicalEffects`
 * [`Conan`](https://conan.io/downloads) package manager
   - On MacOS is enough just to use `homebrew` or install it in `.venv` in project root
   - Other systems must have it in `PATH`
 * (Optional) Installer dependencies:
   - [Windows/Linux] [`Qt Installer Framework`](https://www.qt.io/download-open-source)
   - [Windows] [`WIX toolset`](https://github.com/wixtoolset/wix/releases)
+
+### Building on Linux ARM64
+
+The Linux desktop client builds natively on `aarch64`. Conan builds every
+dependency from source for `armv8`, so no prebuilt ARM binaries are needed.
+
+Qt does not ship ARM64 desktop packages through the online installer, but they
+are published and `aqtinstall` can fetch them. Note that Qt installs them into a
+`gcc_arm64` directory rather than `gcc_64`:
+
+```bash
+pip install aqtinstall
+aqt install-qt linux_arm64 desktop 6.10.1 linux_gcc_arm64 \
+    -m qt5compat qtremoteobjects qtshadertools -O ~/Qt
+```
+
+Then build as usual - `deploy/build.sh` detects the host architecture and picks
+the matching Qt directory:
+
+```bash
+deploy/build.sh
+```
+
+On memory-constrained boards, limit the parallelism of both Conan and the build
+to avoid the compiler being OOM-killed mid-build:
+
+```bash
+echo 'tools.build:jobs=3' >> ~/.conan2/global.conf
+JOBS=3 deploy/build.sh
+```
 
 ### Building the project using scripts
 

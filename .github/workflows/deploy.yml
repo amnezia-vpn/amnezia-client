@@ -136,6 +136,73 @@ jobs:
 
 # ------------------------------------------------------
 
+  Build-Linux-Ubuntu-Arm64:
+    runs-on: ubuntu-22.04-arm
+
+    env:
+      QT_VERSION: 6.10.1
+      PROD_AGW_PUBLIC_KEY: ${{ secrets.PROD_AGW_PUBLIC_KEY }}
+      PROD_S3_ENDPOINT: ${{ secrets.PROD_S3_ENDPOINT }}
+      FALLBACK_S3_ENDPOINT: ${{ secrets.FALLBACK_S3_ENDPOINT }}
+      DEV_AGW_PUBLIC_KEY: ${{ secrets.DEV_AGW_PUBLIC_KEY }}
+      DEV_AGW_ENDPOINT: ${{ secrets.DEV_AGW_ENDPOINT }}
+      DEV_S3_ENDPOINT: ${{ secrets.DEV_S3_ENDPOINT }}
+      FREE_V2_ENDPOINT: ${{ secrets.FREE_V2_ENDPOINT }}
+      PREM_V1_ENDPOINT: ${{ secrets.PREM_V1_ENDPOINT }}
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+        fetch-depth: 10
+
+    - name: 'Setup python'
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.14
+
+    # install-qt-action does not expose the linux_arm64 host, so aqt is
+    # driven directly. Qt unpacks this into <dir>/Qt/<version>/gcc_arm64
+    - name: 'Install Qt'
+      run: |
+        pip install "aqtinstall==3.3.0" "py7zr==0.22.*"
+        aqt install-qt linux_arm64 desktop "${QT_VERSION}" linux_gcc_arm64 \
+          -m qtremoteobjects qt5compat qtshadertools \
+          -O "${{ runner.temp }}/Qt" --base "${{ env.QT_MIRROR }}"
+
+    - name: 'Install conan'
+      run: pip install "conan==2.28.0"
+
+    - name: 'Install system packages'
+      run: sudo apt-get install libxkbcommon-x11-0 libsecret-1-dev
+
+    # there are no arm64 prebuilts on the amnezia remote, so conan builds every
+    # dependency from source. cache them to keep subsequent runs cheap
+    - name: 'Cache conan packages'
+      uses: actions/cache@v4
+      with:
+        path: ~/.conan2
+        key: conan-linux-arm64-${{ hashFiles('conanfile.py', 'recipes/**/conanfile.py', 'recipes/**/conandata.yml') }}
+        restore-keys: conan-linux-arm64-
+
+    - name: 'Build project'
+      shell: bash
+      env:
+        QT_INSTALL_DIR: ${{ runner.temp }}
+      run: deploy/build.sh --generator Ninja
+
+    - name: 'Upload client artifact'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN_linux_arm64
+        path: |
+          deploy/build/client/AmneziaVPN
+          deploy/build/service/server/AmneziaVPN-service
+        retention-days: 7
+
+# ------------------------------------------------------
+
   Bake-Prebuilts-Windows:
     runs-on: windows-latest
     needs: Detect-Changes
