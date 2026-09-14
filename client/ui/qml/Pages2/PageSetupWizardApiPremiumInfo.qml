@@ -196,7 +196,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild) && !(root.currentPlan && root.currentPlan.hasFreeTrial)
+                visible: Qt.platform.os === "ios" || IsMacOsNeBuild
                 spacing: 16
 
                 ParagraphTextType {
