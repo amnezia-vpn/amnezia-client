@@ -143,10 +143,6 @@ ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
             newConfigData.value("Conf/appsSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
     emit appSplitTunnelingRouteModeChanged(static_cast<AppsRouteMode>(appSplitTunnelingRouteMode));
 
-    #if defined(Q_OS_WINDOWS)
-        emit appSplitTunnelingRouteModeChanged(AppsRouteMode::VpnAllExceptApps);
-    #endif
-
     if (newConfigData.contains("AppPlatform")) {
             if (newConfigData.value("AppPlatform").toString() != getPlatform()) {
                 emit appSplitTunnelingClearAppsList();

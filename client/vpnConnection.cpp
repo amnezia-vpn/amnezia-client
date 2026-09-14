@@ -141,8 +141,12 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                             static_cast<RouteMode>(m_vpnConfiguration.value(configKey::splitTunnelType).toInt());
                     const bool isXray = container == DockerContainer::Xray
                             || container == DockerContainer::SSXray;
+                    const bool includeOnlyApps =
+                            m_vpnConfiguration.value(configKey::appSplitTunnelType).toInt() ==
+                            static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps);
 
-                    if (!isXray || effectiveRouteMode != amnezia::RouteMode::VpnAllSites) {
+                    if (!isXray || effectiveRouteMode != amnezia::RouteMode::VpnAllSites
+                            || includeOnlyApps) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
 #elif defined(Q_OS_MACOS)
@@ -503,9 +507,6 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
     }
 
-    m_vpnConfiguration.insert(configKey::splitTunnelType, routeMode);
-    m_vpnConfiguration.insert(configKey::splitTunnelSites, sitesJsonArray);
-
     amnezia::AppsRouteMode appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
     QJsonArray appsJsonArray;
     if (m_appSettingsRepository->isAppsSplitTunnelingEnabled()) {
@@ -521,6 +522,20 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
     }
 
+#ifdef Q_OS_WIN
+    if (appsRouteMode == amnezia::AppsRouteMode::VpnOnlyForwardApps &&
+        m_appSettingsRepository->isStrictKillSwitchEnabled()) {
+        appsRouteMode = amnezia::AppsRouteMode::VpnAllApps;
+        appsJsonArray = QJsonArray();
+    }
+    if (appsRouteMode == amnezia::AppsRouteMode::VpnOnlyForwardApps) {
+        routeMode = amnezia::RouteMode::VpnAllSites;
+        sitesJsonArray = QJsonArray();
+    }
+#endif
+
+    m_vpnConfiguration.insert(configKey::splitTunnelType, routeMode);
+    m_vpnConfiguration.insert(configKey::splitTunnelSites, sitesJsonArray);
     m_vpnConfiguration.insert(configKey::appSplitTunnelType, appsRouteMode);
     m_vpnConfiguration.insert(configKey::splitTunnelApps, appsJsonArray);
 

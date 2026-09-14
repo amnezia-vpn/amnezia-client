@@ -40,6 +40,7 @@ public:
     int routeDeleteList(const QString &gw, const QStringList &ips);
     bool routeAddDefault(const QString &dev);
     bool routeDeleteDefault(const QString &dev);
+    void setDefaultRouteInterfaceMetric(ULONG metric);
     bool flushDns();
     void resetIpStack();
 
@@ -70,6 +71,7 @@ private:
     RouterWin() {m_dnsUtil = new DnsUtilsWindows(this);}
     QMultiMap<QString, MIB_IPFORWARDROW> m_ipForwardRows;
     QMap<QString, MIB_IPFORWARD_ROW2> m_defaultRoutes;
+    ULONG m_defaultRouteInterfaceMetric = 1;
     bool m_suspended = false;
     DnsUtilsWindows *m_dnsUtil; 
 };

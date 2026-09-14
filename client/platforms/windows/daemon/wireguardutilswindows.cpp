@@ -15,11 +15,43 @@
 #include "leakdetector.h"
 #include "logger.h"
 #include "windowsfirewall.h"
+#include "core/utils/routeModes.h"
 
 #pragma comment(lib, "iphlpapi.lib")
 
 namespace {
 Logger logger("WireguardUtilsWindows");
+
+static constexpr ULONG kIncludeAppsInterfaceMetric = 5000;
+
+static bool setInterfaceMetric(quint64 luidValue, ULONG metric)
+{
+  NET_LUID luid;
+  luid.Value = luidValue;
+
+  MIB_IPINTERFACE_ROW iface;
+  InitializeIpInterfaceEntry(&iface);
+  iface.Family = AF_INET;
+  iface.InterfaceLuid = luid;
+
+  DWORD res = GetIpInterfaceEntry(&iface);
+  if (res != NO_ERROR) {
+    logger.error() << "GetIpInterfaceEntry failed, error:" << res;
+    return false;
+  }
+
+  iface.UseAutomaticMetric = FALSE;
+  iface.Metric = metric;
+  iface.SitePrefixLength = 0;
+
+  res = SetIpInterfaceEntry(&iface);
+  if (res != NO_ERROR) {
+    logger.error() << "SetIpInterfaceEntry failed, error:" << res;
+    return false;
+  }
+
+  return true;
+}
 };  // namespace
 
 std::unique_ptr<WireguardUtilsWindows> WireguardUtilsWindows::create(
@@ -125,13 +157,17 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
   }
   m_luid = luid.Value;
   m_routeMonitor = new WindowsRouteMonitor(luid.Value, this);
+  m_includeOnlyApps =
+      config.m_appSplitTunnelType ==
+          static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps) &&
+      !config.m_vpnDisabledApps.isEmpty();
 
   if (config.m_killSwitchEnabled) {
     // Enable the windows firewall
     NET_IFINDEX ifindex;
     ConvertInterfaceLuidToIndex(&luid, &ifindex);
     m_firewall->allowAllTraffic();
-    m_firewall->enableInterface(ifindex);
+    m_firewall->enableInterface(ifindex, !m_includeOnlyApps);
   }
 
   logger.debug() << "Registration completed";
@@ -143,6 +179,7 @@ bool WireguardUtilsWindows::deleteInterface() {
     m_routeMonitor->deleteLater();
   }
 
+  m_includeOnlyApps = false;
   m_firewall->disableKillSwitch();
   m_tunnel.stop();
   return true;
@@ -255,7 +292,15 @@ void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
 }
 
 bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
+  if (m_includeOnlyApps && prefix.prefixLength() == 0) {
+    if (prefix.type() == QAbstractSocket::IPv6Protocol) {
+      return true;
+    }
+    if (!setInterfaceMetric(m_luid, kIncludeAppsInterfaceMetric)) {
+      logger.error() << "Refusing to install a default route without include metric";
+      return false;
+    }
+  } else if (m_routeMonitor && (prefix.prefixLength() == 0)) {
     // If we are setting up a default route, instruct the route monitor to
     // capture traffic to all non-excluded destinations
     m_routeMonitor->setDetaultRouteCapture(true);
@@ -286,7 +331,11 @@ bool WireguardUtilsWindows::updateRoutePrefix(const IPAddress& prefix) {
 }
 
 bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
-  if (m_routeMonitor && (prefix.prefixLength() == 0)) {
+  if (m_includeOnlyApps && prefix.prefixLength() == 0 &&
+      prefix.type() == QAbstractSocket::IPv6Protocol) {
+    return true;
+  }
+  if (m_routeMonitor && (prefix.prefixLength() == 0) && !m_includeOnlyApps) {
     // Deactivate the route capture feature.
     m_routeMonitor->setDetaultRouteCapture(false);
   }
