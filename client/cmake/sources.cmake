@@ -260,6 +260,13 @@ set(SOURCES ${SOURCES}
     ${UI_CONTROLLERS_CPP}
 )
 
+if(NOT ANDROID AND NOT IOS)
+    file(GLOB LOCAL_PROXY_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/local-proxy/*.h)
+    file(GLOB LOCAL_PROXY_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/local-proxy/*.cpp)
+    list(APPEND HEADERS ${LOCAL_PROXY_H})
+    list(APPEND SOURCES ${LOCAL_PROXY_CPP})
+endif()
+
 if(WIN32)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h

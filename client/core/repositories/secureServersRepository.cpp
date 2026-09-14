@@ -309,6 +309,15 @@ serverConfigUtils::ConfigType SecureServersRepository::serverKind(const QString 
     return serverConfigUtils::configTypeFromJson(withoutStorageServerId(it.value()));
 }
 
+std::optional<QJsonObject> SecureServersRepository::serverJsonById(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    return it.value();
+}
+
 std::optional<SelfHostedAdminServerConfig> SecureServersRepository::selfHostedAdminConfig(const QString &serverId) const
 {
     const auto it = m_serverJsonById.constFind(serverId);
