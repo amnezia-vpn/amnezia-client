@@ -5,16 +5,24 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import XCRun, is_apple_os
 from conan.tools.apple.apple import _to_apple_arch
-from conan.tools.env import Environment
+from conan.tools.env import Environment, VirtualBuildEnv
 
 import os
 import shlex
+import sys
+
+_recipe_dir = os.path.dirname(os.path.abspath(__file__))
+if _recipe_dir not in sys.path:
+    sys.path.insert(0, _recipe_dir)
+
+from windows_cgo import ensure_import_lib, is_windows_arm64, run_llvm_mingw_go_build
 
 
 class AmneziaXrayBindings(ConanFile):
     name = "amnezia-xray-bindings"
     version = "1.4.0"
     settings = "os", "arch", "compiler"
+    exports = "windows_cgo.py"
 
     _arch_map = {
         "x86": "386",
@@ -43,6 +51,10 @@ class AmneziaXrayBindings(ConanFile):
     def _is_windows(self):
         return str(self.settings.os).startswith("Windows")
 
+    @property
+    def _windows_arm64(self):
+        return is_windows_arm64(self)
+
     def config_options(self):
         self.package_type = "shared-library" if self._is_windows else "static-library"
 
@@ -50,7 +62,7 @@ class AmneziaXrayBindings(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if self._is_windows:
-            # mingw-builds is being used on Windows
+            # mingw-builds / llvm-mingw is being used on Windows
             del self.settings.compiler
 
     def layout(self):
@@ -58,7 +70,7 @@ class AmneziaXrayBindings(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("go/1.26.0")
-        if self._is_windows:
+        if self._is_windows and not self._windows_arm64:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -79,21 +91,34 @@ class AmneziaXrayBindings(ConanFile):
         get(self, f"https://github.com/amnezia-vpn/amnezia-xray-bindings/archive/refs/tags/v{self.version}.zip",
             sha256="8977896bba99f1a3bad61d734b2929ec3d01c3ca0e206ee8ce5eb013d38ab118", strip_root=True)
 
-    def generate(self):
-        tc = AutotoolsToolchain(self)
-        tc.apple_arch_flag = None
-        env = tc.environment()
+    def _define_go_env(self, env):
         env.define("GOPATH", os.path.join(self.build_folder, "gopath"))
         env.define("GOMODCACHE", os.path.join(self.build_folder, "gopath", "pkg", "mod"))
         env.define("GOCACHE", os.path.join(self.build_folder, "gocache"))
         env.define("GOOS", self._goos)
         if self._is_windows:
             env.define("OS", "windows")
+        return env
+
+    def generate(self):
+        if self._windows_arm64:
+            VirtualBuildEnv(self).generate()
+            go_env = self._define_go_env(Environment())
+            go_env.vars(self, scope="build").save_script("conan_go_env")
+            return
+
+        tc = AutotoolsToolchain(self)
+        tc.apple_arch_flag = None
+        env = self._define_go_env(tc.environment())
         self._ldflags = tc.ldflags
         self._cflags = tc.cflags
         tc.generate(env)
 
     def build(self):
+        if self._windows_arm64:
+            self._build_windows_arm64()
+            return
+
         with chdir(self, self.source_folder):
             for arch in self._archs:
                 build_dir = os.path.join(self.build_folder, arch) if self._is_multiarch else self.build_folder
@@ -109,10 +134,11 @@ class AmneziaXrayBindings(ConanFile):
                 env.define("ARCH", goarch)
                 env.define("CGO_CFLAGS", " ".join(cflags))
                 env.define("CGO_LDFLAGS", " ".join(ldflags))
+                make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                 with env.vars(self).apply():
                     at = Autotools(self)
                     at.make(args=[
-                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                        f"BUILD_DIR={make_build_dir}"
                     ])
 
             if is_apple_os(self) and self._is_multiarch:
@@ -126,6 +152,17 @@ class AmneziaXrayBindings(ConanFile):
                 ))
 
                 copy(self, "*.h", os.path.join(self.build_folder, self._archs[0]), self.build_folder)
+
+    def _build_windows_arm64(self):
+        dll_path = os.path.join(self.build_folder, "amnezia_xray.dll")
+        # The linker writes the .def that ensure_import_lib() turns into a .lib;
+        # give it a forward-slash path so nothing eats the separators.
+        def_path = os.path.join(self.build_folder, "amnezia_xray.def").replace(os.sep, "/")
+        run_llvm_mingw_go_build(
+            self, self.source_folder, dll_path, self._arch_map["armv8"],
+            extra_args=f'-buildmode=c-shared -ldflags="-w -extldflags=-Wl,--output-def,{def_path}"',
+        )
+        ensure_import_lib(self, self.build_folder, "amnezia_xray")
 
     def _rename_header(self):
         if not self._is_windows:

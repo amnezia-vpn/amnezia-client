@@ -11,6 +11,10 @@ class AmneziaVPN(ConanFile):
         "macos_ne": False
     }
 
+    def configure(self):
+        if str(self.settings.os) == "Windows" and str(self.settings.arch) == "armv8":
+            self.options["openssl/*"].no_asm = True
+
     def requirements(self):
         os = str(self.settings.os)
 

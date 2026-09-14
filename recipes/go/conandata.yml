@@ -49,3 +49,6 @@ sources:
       x86_64:
         url: "https://go.dev/dl/go1.26.0.windows-amd64.zip"
         sha256: "9bbe0fc64236b2b51f6255c05c4232532b8ecc0e6d2e00950bd3021d8a4d07d4"
+      armv8:
+        url: "https://go.dev/dl/go1.26.0.windows-arm64.zip"
+        sha256: "73bdbb9f64aa152758024485c5243a1098182bb741fcc603b6fb664ee5e0fe35"
