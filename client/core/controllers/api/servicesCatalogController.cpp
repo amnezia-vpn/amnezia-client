@@ -320,6 +320,7 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/services"), apiPayload, responseBody);
+    qInfo().noquote() << "[ServicesCatalog] errorCode:" << static_cast<int>(errorCode) << "response:" << responseBody;
     if (errorCode == ErrorCode::NoError) {
         if (!responseBody.contains(apiDefs::key::services.data())) {
             errorCode = ErrorCode::ApiServicesMissingError;
