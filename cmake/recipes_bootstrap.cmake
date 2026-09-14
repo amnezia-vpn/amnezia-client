@@ -8,10 +8,6 @@ file(GLOB_RECURSE LOCAL_RECIPES "${CMAKE_SOURCE_DIR}/recipes/*/conanfile.py")
 list(REMOVE_ITEM LOCAL_RECIPES "${CMAKE_SOURCE_DIR}/recipes/go/conanfile.py")
 foreach(RECIPE ${LOCAL_RECIPES})
     get_filename_component(RECIPE_DIR ${RECIPE} DIRECTORY)
-    get_filename_component(RECIPE_NAME ${RECIPE_DIR} NAME)
-    if(RECIPE_NAME MATCHES "^[-_]")
-        continue()
-    endif()
     execute_process(
         COMMAND ${CONAN_COMMAND} export ${RECIPE_DIR}
     )

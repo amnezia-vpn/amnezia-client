@@ -15,7 +15,7 @@ _recipe_dir = os.path.dirname(os.path.abspath(__file__))
 if _recipe_dir not in sys.path:
     sys.path.insert(0, _recipe_dir)
 
-from windows_cgo import ensure_msvc_import_lib, is_windows_arm64, run_llvm_mingw_go_build
+from windows_cgo import ensure_import_lib, is_windows_arm64, run_llvm_mingw_go_build
 
 
 class AmneziaXrayBindings(ConanFile):
@@ -61,7 +61,8 @@ class AmneziaXrayBindings(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        if self._is_windows and not self._windows_arm64:
+        if self._is_windows:
+            # mingw-builds / llvm-mingw is being used on Windows
             del self.settings.compiler
 
     def layout(self):
@@ -153,10 +154,15 @@ class AmneziaXrayBindings(ConanFile):
                 copy(self, "*.h", os.path.join(self.build_folder, self._archs[0]), self.build_folder)
 
     def _build_windows_arm64(self):
-        dll_name = "amnezia_xray.dll"
-        dll_path = os.path.join(self.build_folder, dll_name)
-        run_llvm_mingw_go_build(self, self.source_folder, dll_path, self._arch_map["armv8"])
-        ensure_msvc_import_lib(self, self.build_folder, dll_name, "amnezia_xray")
+        dll_path = os.path.join(self.build_folder, "amnezia_xray.dll")
+        # The linker writes the .def that ensure_import_lib() turns into a .lib;
+        # give it a forward-slash path so nothing eats the separators.
+        def_path = os.path.join(self.build_folder, "amnezia_xray.def").replace(os.sep, "/")
+        run_llvm_mingw_go_build(
+            self, self.source_folder, dll_path, self._arch_map["armv8"],
+            extra_args=f'-buildmode=c-shared -ldflags="-w -extldflags=-Wl,--output-def,{def_path}"',
+        )
+        ensure_import_lib(self, self.build_folder, "amnezia_xray")
 
     def _rename_header(self):
         if not self._is_windows:

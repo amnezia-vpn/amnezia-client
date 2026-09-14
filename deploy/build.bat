@@ -24,12 +24,14 @@ if /i "%ARCH%" == "amd64" (
     if /i "%PROCESSOR_ARCHITECTURE%" == "x86"   set "_vcvars_arg=x86_amd64"
     if /i "%PROCESSOR_ARCHITECTURE%" == "ARM64" set "_vcvars_arg=arm64_x64"
     set "_qt_postfix_arg=64"
+    set "_cmake_arch=-A x64"
 )
 if /i "%ARCH%" == "arm64" (
     if /i "%PROCESSOR_ARCHITECTURE%" == "AMD64" set "_vcvars_arg=amd64_arm64"
     if /i "%PROCESSOR_ARCHITECTURE%" == "x86"   set "_vcvars_arg=x86_arm64"
     if /i "%PROCESSOR_ARCHITECTURE%" == "ARM64" set "_vcvars_arg=arm64"
     set "_qt_postfix_arg=arm64"
+    set "_cmake_arch=-A ARM64"
 )
 if not defined _vcvars_arg  (
     echo ERROR: Unsupported architecture "%ARCH%"
@@ -96,11 +98,6 @@ if exist "%VCVARS_PATH%" (
 )
 
 :: build project and installers
-if /i "%_qt_postfix_arg%" == "arm64" (
-    set "_cmake_arch=-A ARM64"
-) else (
-    set "_cmake_arch=-A x64"
-)
 @echo on
 cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release %_cmake_arch% "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true" || goto :fail
 cmake --build "%BUILD_DIR%" --config Release -- /m  || goto :fail
