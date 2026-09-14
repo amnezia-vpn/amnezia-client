@@ -5,38 +5,8 @@ on:
     branches:
       - '**'
 
-# Self-hosted server tests (SelfHostedServerSetup, MultipleExports) install and
-# remove docker containers on a single shared VPS: two workflow runs executing
-# simultaneously corrupt each other's state (error 202, "No such container").
-# Queue runs instead of running them in parallel; do not cancel the active one.
-concurrency:
-  group: vps-tests
-  cancel-in-progress: false
-
 env:
   QT_MIRROR: https://mirrors.ocf.berkeley.edu/qt/ # https://download.qt.io/static/mirrorlist/
-  QTEST_FUNCTION_TIMEOUT: 7200000
-  SELF_HOSTED_ADMIN_EXPORT_ROUND_TRIP_VPN_KEY: ${{ secrets.SELF_HOSTED_ADMIN_EXPORT_ROUND_TRIP_VPN_KEY }}
-  THIRD_PARTY_AWG_VPN_KEY: ${{ secrets.THIRD_PARTY_AWG_VPN_KEY }}
-  THIRD_PARTY_WIRE_GUARD_VPN_KEY: ${{ secrets.THIRD_PARTY_WIRE_GUARD_VPN_KEY }}
-  THIRD_PARTY_XRAY_VPN_KEY: ${{ secrets.THIRD_PARTY_XRAY_VPN_KEY }}
-  THIRD_PARTY_OPEN_VPN_KEY: ${{ secrets.THIRD_PARTY_OPEN_VPN_KEY }}
-  THIRD_PARTY_CLOAK_VPN_KEY: ${{ secrets.THIRD_PARTY_CLOAK_VPN_KEY }}
-  THIRD_PARTY_SS_VPN_KEY: ${{ secrets.THIRD_PARTY_SS_VPN_KEY }}
-  THIRD_PARTY_IKEV_VPN_KEY: ${{ secrets.THIRD_PARTY_IKEV_VPN_KEY }}
-  THIRD_PARTY_PREMIUM_VPN_KEY: ${{ secrets.THIRD_PARTY_PREMIUM_VPN_KEY }}
-  THIRD_PARTY_VMESS_NEW_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_NEW_IMPORT_DATA }}
-  THIRD_PARTY_VMESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_IMPORT_DATA }}
-  THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
-  THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
-  THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
-  THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
-  SELF_HOSTED_SERVER_HOST_NAME: ${{ secrets.SELF_HOSTED_SERVER_HOST_NAME }}
-  SELF_HOSTED_SERVER_USER_NAME: ${{ secrets.SELF_HOSTED_SERVER_USER_NAME }}
-  SELF_HOSTED_SERVER_PASSWORD: ${{ secrets.SELF_HOSTED_SERVER_PASSWORD }}
-  SELF_HOSTED_SERVER_SSH_PORT: ${{ secrets.SELF_HOSTED_SERVER_SSH_PORT }}
-  DNS_LIST_PATH: ${{ github.workspace }}/tests/data/dns_list.json
-  IP_LIST_PATH: ${{ github.workspace }}/tests/data/ip_list.json
 
 jobs:
   Detect-Changes:
@@ -148,6 +118,7 @@ jobs:
       shell: bash
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
+        AMNEZIA_BUILD_TESTS: ON
       run: deploy/build.sh --generator Ninja --installer all
 
     - name: 'Upload Linux test build'
@@ -279,6 +250,7 @@ jobs:
       shell: cmd
       env:
         QT_INSTALL_DIR: ${{ runner.temp }}
+        AMNEZIA_BUILD_TESTS: ON
       run: |
         set WIX_ROOT_PATH="${{ env.USERPROFILE }}\.dotnet\tools"
         deploy\build.bat --installer all
@@ -582,28 +554,9 @@ jobs:
         NOTARYTOOL_TEAM_ID: ${{ secrets.MAC_TEAM_ID }}
         NOTARYTOOL_EMAIL: ${{ secrets.APPLE_DEV_EMAIL }}
         NOTARYTOOL_PASSWORD: ${{ secrets.APPLE_DEV_PASSWORD }}
+        AMNEZIA_BUILD_TESTS: ON
       shell: bash
       run: deploy/build.sh --generator Ninja --installer all
-
-    - name: 'Prepare macOS test runtime'
-      shell: bash
-      run: |
-        FRAMEWORKS_DIR=$(find deploy/build/_CPack_Packages \
-          -type d \
-          -path '*/AmneziaVPN.app/Contents/Frameworks' \
-          -print -quit)
-
-        echo "Frameworks directory: $FRAMEWORKS_DIR"
-
-        mkdir -p deploy/build/client/tests/openssl
-
-        cp "$FRAMEWORKS_DIR/libssl.3.dylib" \
-           deploy/build/client/tests/openssl/
-
-        cp "$FRAMEWORKS_DIR/libcrypto.3.dylib" \
-           deploy/build/client/tests/openssl/
-
-        ls -la deploy/build/client/tests/openssl
 
     - name: 'Upload macOS test build'
       uses: actions/upload-artifact@v7
@@ -1108,6 +1061,23 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      QTEST_FUNCTION_TIMEOUT: 7200000
+      DNS_LIST_PATH: ${{ github.workspace }}/client/tests/data/dns_list.json
+      IP_LIST_PATH: ${{ github.workspace }}/client/tests/data/ip_list.json
+      THIRD_PARTY_AWG_VPN_KEY: ${{ secrets.THIRD_PARTY_AWG_VPN_KEY }}
+      THIRD_PARTY_WIRE_GUARD_VPN_KEY: ${{ secrets.THIRD_PARTY_WIRE_GUARD_VPN_KEY }}
+      THIRD_PARTY_XRAY_VPN_KEY: ${{ secrets.THIRD_PARTY_XRAY_VPN_KEY }}
+      THIRD_PARTY_OPEN_VPN_KEY: ${{ secrets.THIRD_PARTY_OPEN_VPN_KEY }}
+      THIRD_PARTY_CLOAK_VPN_KEY: ${{ secrets.THIRD_PARTY_CLOAK_VPN_KEY }}
+      THIRD_PARTY_SS_VPN_KEY: ${{ secrets.THIRD_PARTY_SS_VPN_KEY }}
+      THIRD_PARTY_IKEV_VPN_KEY: ${{ secrets.THIRD_PARTY_IKEV_VPN_KEY }}
+      THIRD_PARTY_PREMIUM_VPN_KEY: ${{ secrets.THIRD_PARTY_PREMIUM_VPN_KEY }}
+      THIRD_PARTY_VMESS_NEW_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_NEW_IMPORT_DATA }}
+      THIRD_PARTY_VMESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_IMPORT_DATA }}
+      THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
+      THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
 
     steps:
       - name: Checkout
@@ -1118,12 +1088,10 @@ jobs:
 
       - name: Decode backup file
         if: matrix.filter == 'BackupExportImportTest'
-        shell: pwsh
+        shell: bash
         run: |
-          $backup = Join-Path $env:RUNNER_TEMP "test.backup"
-          $bytes = [Convert]::FromBase64String("${{ secrets.BACKUP_FILE_BASE64 }}")
-          [IO.File]::WriteAllBytes($backup, $bytes)
-          "BACKUP_PATH=$backup" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          echo "${{ secrets.BACKUP_FILE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/test.backup"
+          echo "BACKUP_PATH=$RUNNER_TEMP/test.backup" >> "$GITHUB_ENV"
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v3
@@ -1165,7 +1133,7 @@ jobs:
         run: |
           QT_ROOT="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
 
-          export LD_LIBRARY_PATH="$QT_ROOT/lib:${LD_LIBRARY_PATH:-}"
+          export LD_LIBRARY_PATH="$PWD/deploy/build/client/tests:$QT_ROOT/lib:${LD_LIBRARY_PATH:-}"
           export QT_QPA_PLATFORM=offscreen
 
           ctest --test-dir deploy/build/client/tests --output-on-failure -VV -R "^${{ matrix.filter }}$"
@@ -1202,6 +1170,23 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      QTEST_FUNCTION_TIMEOUT: 7200000
+      DNS_LIST_PATH: ${{ github.workspace }}/client/tests/data/dns_list.json
+      IP_LIST_PATH: ${{ github.workspace }}/client/tests/data/ip_list.json
+      THIRD_PARTY_AWG_VPN_KEY: ${{ secrets.THIRD_PARTY_AWG_VPN_KEY }}
+      THIRD_PARTY_WIRE_GUARD_VPN_KEY: ${{ secrets.THIRD_PARTY_WIRE_GUARD_VPN_KEY }}
+      THIRD_PARTY_XRAY_VPN_KEY: ${{ secrets.THIRD_PARTY_XRAY_VPN_KEY }}
+      THIRD_PARTY_OPEN_VPN_KEY: ${{ secrets.THIRD_PARTY_OPEN_VPN_KEY }}
+      THIRD_PARTY_CLOAK_VPN_KEY: ${{ secrets.THIRD_PARTY_CLOAK_VPN_KEY }}
+      THIRD_PARTY_SS_VPN_KEY: ${{ secrets.THIRD_PARTY_SS_VPN_KEY }}
+      THIRD_PARTY_IKEV_VPN_KEY: ${{ secrets.THIRD_PARTY_IKEV_VPN_KEY }}
+      THIRD_PARTY_PREMIUM_VPN_KEY: ${{ secrets.THIRD_PARTY_PREMIUM_VPN_KEY }}
+      THIRD_PARTY_VMESS_NEW_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_NEW_IMPORT_DATA }}
+      THIRD_PARTY_VMESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_IMPORT_DATA }}
+      THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
+      THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
 
     steps:
       - name: Checkout
@@ -1285,6 +1270,23 @@ jobs:
 
     env:
       QT_VERSION: 6.10.1
+      QTEST_FUNCTION_TIMEOUT: 7200000
+      DNS_LIST_PATH: ${{ github.workspace }}/client/tests/data/dns_list.json
+      IP_LIST_PATH: ${{ github.workspace }}/client/tests/data/ip_list.json
+      THIRD_PARTY_AWG_VPN_KEY: ${{ secrets.THIRD_PARTY_AWG_VPN_KEY }}
+      THIRD_PARTY_WIRE_GUARD_VPN_KEY: ${{ secrets.THIRD_PARTY_WIRE_GUARD_VPN_KEY }}
+      THIRD_PARTY_XRAY_VPN_KEY: ${{ secrets.THIRD_PARTY_XRAY_VPN_KEY }}
+      THIRD_PARTY_OPEN_VPN_KEY: ${{ secrets.THIRD_PARTY_OPEN_VPN_KEY }}
+      THIRD_PARTY_CLOAK_VPN_KEY: ${{ secrets.THIRD_PARTY_CLOAK_VPN_KEY }}
+      THIRD_PARTY_SS_VPN_KEY: ${{ secrets.THIRD_PARTY_SS_VPN_KEY }}
+      THIRD_PARTY_IKEV_VPN_KEY: ${{ secrets.THIRD_PARTY_IKEV_VPN_KEY }}
+      THIRD_PARTY_PREMIUM_VPN_KEY: ${{ secrets.THIRD_PARTY_PREMIUM_VPN_KEY }}
+      THIRD_PARTY_VMESS_NEW_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_NEW_IMPORT_DATA }}
+      THIRD_PARTY_VMESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VMESS_IMPORT_DATA }}
+      THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
+      THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
 
     steps:
       - name: Setup Xcode
@@ -1300,12 +1302,10 @@ jobs:
 
       - name: Decode backup file
         if: matrix.filter == 'BackupExportImportTest'
-        shell: pwsh
+        shell: bash
         run: |
-          $backup = Join-Path $env:RUNNER_TEMP "test.backup"
-          $bytes = [Convert]::FromBase64String("${{ secrets.BACKUP_FILE_BASE64 }}")
-          [IO.File]::WriteAllBytes($backup, $bytes)
-          "BACKUP_PATH=$backup" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          echo "${{ secrets.BACKUP_FILE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/test.backup"
+          echo "BACKUP_PATH=$RUNNER_TEMP/test.backup" >> "$GITHUB_ENV"
 
       - name: Download build
         uses: actions/download-artifact@v4
@@ -1324,19 +1324,6 @@ jobs:
           dir: ${{ runner.temp }}
           set-env: true
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-
-      - name: Install Conan
-        run: pip install "conan==2.28.0"
-
-      - name: Install dependencies
-        run: |
-          brew update
-          brew install cmake ninja
-
       - name: Restore executable permissions
         run: |
           find deploy/build/client/tests \
@@ -1350,9 +1337,7 @@ jobs:
         run: |
           QT_ROOT="$RUNNER_TEMP/Qt/$QT_VERSION/macos"
 
-          export DYLD_LIBRARY_PATH="$PWD/deploy/build/client/tests/openssl:$QT_ROOT/lib:$DYLD_LIBRARY_PATH"
-
-          # export QT_QPA_PLATFORM=offscreen
+          export DYLD_LIBRARY_PATH="$PWD/deploy/build/client/tests:$QT_ROOT/lib:${DYLD_LIBRARY_PATH:-}"
 
           ctest --test-dir deploy/build/client/tests -R "${{ matrix.filter }}" --output-on-failure
 
@@ -1441,7 +1426,8 @@ jobs:
             -DANDROID_PLATFORM=${{ env.ANDROID_PLATFORM }} \
             -DCMAKE_ANDROID_NDK=$CMAKE_ANDROID_NDK \
             -DQT_HOST_PATH=$QT_HOST \
-            -DANDROID_SDK_ROOT=$ANDROID_HOME
+            -DANDROID_SDK_ROOT=$ANDROID_HOME \
+            -DAMNEZIA_BUILD_TESTS=ON
 
       - name: 'Build Android tests'
         # env:
@@ -1513,15 +1499,6 @@ jobs:
           run_test test_android_restore_backup
           EOF
           chmod +x ci_run_android_tests.sh
-
-      - name: 'Verify Android test files'
-        run: |
-          echo "Runner script:"
-          grep 'local apk=' ci_run_android_tests.sh
-
-          echo
-          echo "APKs:"
-          find build -type f -name '*.apk' -print
 
       - name: 'Run Android tests on emulator'
         uses: reactivecircus/android-emulator-runner@v2
