@@ -63,6 +63,30 @@ WindowsRouteMonitor::WindowsRouteMonitor(quint64 luid, QObject* parent)
   MZ_COUNT_CTOR(WindowsRouteMonitor);
   logger.debug() << "WindowsRouteMonitor created.";
 
+  // Purge orphans from a previous run: if the daemon died without
+  // removing its exclusion routes, they stay in the table and blackhole
+  // matching traffic (including the handshake to the VPN server itself)
+  // until reboot. The NETMGMT + EXCLUSION_ROUTE_METRIC pair is produced
+  // only by this code, so the cleanup cannot touch foreign routes.
+  PMIB_IPFORWARD_TABLE2 table;
+  if (GetIpForwardTable2(AF_UNSPEC, &table) == NO_ERROR) {
+    ULONG stale = 0;
+    for (ULONG i = 0; i < table->NumEntries; i++) {
+      MIB_IPFORWARD_ROW2* row = &table->Table[i];
+      if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
+          (row->Metric == EXCLUSION_ROUTE_METRIC)) {
+        if (DeleteIpForwardEntry2(row) == NO_ERROR) {
+          stale++;
+        }
+      }
+    }
+    FreeMibTable(table);
+    if (stale) {
+      logger.warning() << "Removed" << stale
+                       << "stale exclusion route(s) from a previous run";
+    }
+  }
+
   NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE, &m_routeHandle);
 }
 
@@ -366,69 +390,148 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
 }
 
 bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Adding exclusion route for" << prefix.toString();
+  return addExclusionRouteList(QList<IPAddress>{prefix});
+}
 
-  // Silently ignore non-routeable addresses.
-  QHostAddress addr = prefix.address();
-  if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
-      addr.isMulticast()) {
+// Batched variant: the routing table snapshot, interface metrics and captured
+// route refresh are done once per address family instead of once per prefix.
+// The per-prefix variant used to refetch and rescan the whole system routing
+// table for every entry, which is O(n^2) and takes many minutes for large
+// split-tunneling lists (~8-9k prefixes).
+bool WindowsRouteMonitor::addExclusionRouteList(const QList<IPAddress>& prefixes) {
+  logger.debug() << "Adding" << prefixes.count() << "exclusion route(s)";
+
+  // Mute our own echo: while we are bulk-editing routes ourselves, every
+  // change wakes routeChanged() with a full table rescan (the callback
+  // filter cannot drop these notifications - their rows carry unreliable
+  // fields). The unsubscribe/resubscribe pair is the same calls the
+  // constructor and destructor already use.
+  if (m_routeHandle != INVALID_HANDLE_VALUE) {
+    CancelMibChangeNotify2(m_routeHandle);
+    m_routeHandle = INVALID_HANDLE_VALUE;
+  }
+
+  PMIB_IPFORWARD_TABLE2 tables[2] = {nullptr, nullptr};  // [0]=IPv4, [1]=IPv6
+  bool ok = true;
+
+  for (const IPAddress& prefix : prefixes) {
+    // Silently ignore non-routeable addresses.
+    QHostAddress addr = prefix.address();
+    if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
+        addr.isMulticast()) {
+      continue;
+    }
+
+    if (m_exclusionRoutes.contains(prefix)) {
+      logger.warning() << "Exclusion route already exists";
+      ok = false;
+      continue;
+    }
+
+    int family;
+    int slot;
+    if (addr.protocol() == QAbstractSocket::IPv6Protocol) {
+      family = AF_INET6;
+      slot = 1;
+    } else {
+      family = AF_INET;
+      slot = 0;
+    }
+
+    // Fetch the routing table snapshot once per address family.
+    if (tables[slot] == nullptr) {
+      DWORD result = GetIpForwardTable2(family, &tables[slot]);
+      if (result != NO_ERROR) {
+        logger.error() << "Failed to fetch routing table:" << result;
+        ok = false;
+        continue;
+      }
+      updateInterfaceMetrics(family);
+      updateCapturedRoutes(family, tables[slot]);
+    }
+
+    // Allocate and initialize the MIB routing table row.
+    MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
+    InitializeIpForwardEntry(data);
+    if (addr.protocol() == QAbstractSocket::IPv6Protocol) {
+      Q_IPV6ADDR buf = addr.toIPv6Address();
+
+      memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buf, sizeof(buf));
+      data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
+      data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    } else {
+      quint32 buf = addr.toIPv4Address();
+
+      data->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(buf);
+      data->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
+      data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    }
+    data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
+
+    // Set the rest of the flags for a static route.
+    data->ValidLifetime = 0xffffffff;
+    data->PreferredLifetime = 0xffffffff;
+    data->Metric = EXCLUSION_ROUTE_METRIC;
+    data->Protocol = MIB_IPPROTO_NETMGMT;
+    data->Loopback = false;
+    data->AutoconfigureAddress = false;
+    data->Publish = false;
+    data->Immortal = false;
+    data->Age = 0;
+
+    updateExclusionRoute(data, tables[slot]);
+
+    m_exclusionRoutes[prefix] = data;
+  }
+
+  for (PMIB_IPFORWARD_TABLE2 table : tables) {
+    if (table != nullptr) {
+      FreeMibTable(table);
+    }
+  }
+
+  // A single manual rescan covers everything that may have changed while
+  // we were deaf (including a real network change mid-install);
+  // routeChanged() restores the subscription when it finishes.
+  routeChanged();
+  logger.debug() << "Exclusion batch done, ok =" << ok;
+  return ok;
+}
+
+bool WindowsRouteMonitor::deleteExclusionRouteList(
+    const QList<IPAddress>& prefixes) {
+  // An empty list is a no-op, matching zero iterations of the
+  // single-prefix path: the GUI sends a second deactivate after the
+  // tunnel is already torn down, and touching the subscription or
+  // triggering a rescan in that state is unsafe.
+  if (prefixes.isEmpty()) {
     return true;
   }
+  logger.debug() << "Deleting" << prefixes.count() << "exclusion route(s)";
 
-  if (m_exclusionRoutes.contains(prefix)) {
-    logger.warning() << "Exclusion route already exists";
-    return false;
+  if (m_routeHandle != INVALID_HANDLE_VALUE) {
+    CancelMibChangeNotify2(m_routeHandle);
+    m_routeHandle = INVALID_HANDLE_VALUE;
   }
 
-  // Allocate and initialize the MIB routing table row.
-  MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
-  InitializeIpForwardEntry(data);
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    Q_IPV6ADDR buf = prefix.address().toIPv6Address();
-
-    memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buf, sizeof(buf));
-    data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
-    data->DestinationPrefix.PrefixLength = prefix.prefixLength();
-  } else {
-    quint32 buf = prefix.address().toIPv4Address();
-
-    data->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(buf);
-    data->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
-    data->DestinationPrefix.PrefixLength = prefix.prefixLength();
-  }
-  data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
-
-  // Set the rest of the flags for a static route.
-  data->ValidLifetime = 0xffffffff;
-  data->PreferredLifetime = 0xffffffff;
-  data->Metric = EXCLUSION_ROUTE_METRIC;
-  data->Protocol = MIB_IPPROTO_NETMGMT;
-  data->Loopback = false;
-  data->AutoconfigureAddress = false;
-  data->Publish = false;
-  data->Immortal = false;
-  data->Age = 0;
-
-  PMIB_IPFORWARD_TABLE2 table;
-  int family;
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    family = AF_INET6;
-  } else {
-    family = AF_INET;
-  }
-
-  DWORD result = GetIpForwardTable2(family, &table);
-  if (result != NO_ERROR) {
-    logger.error() << "Failed to fetch routing table:" << result;
+  for (const IPAddress& prefix : prefixes) {
+    MIB_IPFORWARD_ROW2* data = m_exclusionRoutes.take(prefix);
+    if (data == nullptr) {
+      continue;
+    }
+    DWORD result = DeleteIpForwardEntry2(data);
+    if ((result != ERROR_NOT_FOUND) && (result != NO_ERROR)) {
+      logger.error() << "Failed to delete route to" << prefix.toString()
+                     << "result:" << result;
+    }
     delete data;
-    return false;
   }
-  updateInterfaceMetrics(family);
-  updateCapturedRoutes(family, table);
-  updateExclusionRoute(data, table);
-  FreeMibTable(table);
 
-  m_exclusionRoutes[prefix] = data;
+  // Captured routes are refreshed once for the whole list rather than
+  // per prefix (the single-prefix deleteExclusionRoute refetches the full
+  // table on every removal); routeChanged() restores the subscription.
+  routeChanged();
+  logger.debug() << "Exclusion delete batch done";
   return true;
 }
 
@@ -483,10 +586,21 @@ void WindowsRouteMonitor::setDetaultRouteCapture(bool enable) {
 void WindowsRouteMonitor::routeChanged() {
   logger.debug() << "Routes changed";
 
+  // The rescan itself rewrites routes (captured clones, flapping
+  // next-hops) - without muting, each of its own edits wakes the next
+  // rescan, which with a large exclusion list becomes an endless loop
+  // for the lifetime of the connection.
+  if (m_routeHandle != INVALID_HANDLE_VALUE) {
+    CancelMibChangeNotify2(m_routeHandle);
+    m_routeHandle = INVALID_HANDLE_VALUE;
+  }
+
   PMIB_IPFORWARD_TABLE2 table;
   DWORD result = GetIpForwardTable2(AF_UNSPEC, &table);
   if (result != NO_ERROR) {
     logger.error() << "Failed to fetch routing table:" << result;
+    NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE,
+                       &m_routeHandle);
     return;
   }
 
@@ -497,4 +611,6 @@ void WindowsRouteMonitor::routeChanged() {
   }
 
   FreeMibTable(table);
+  NotifyRouteChange2(AF_INET, routeChangeCallback, this, FALSE,
+                     &m_routeHandle);
 }
