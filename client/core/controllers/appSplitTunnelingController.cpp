@@ -43,12 +43,6 @@ void AppSplitTunnelingController::clearAppsList()
 
 void AppSplitTunnelingController::setRouteMode(AppsRouteMode routeMode)
 {
-#ifdef Q_OS_WIN
-    if (routeMode == AppsRouteMode::VpnOnlyForwardApps &&
-        m_appSettingsRepository->isStrictKillSwitchEnabled()) {
-        return;
-    }
-#endif
     m_currentRouteMode = routeMode;
     m_apps = m_appSettingsRepository->vpnApps(m_currentRouteMode);
     m_appSettingsRepository->setAppsRouteMode(routeMode);
@@ -73,3 +67,4 @@ QVector<amnezia::InstalledAppInfo> AppSplitTunnelingController::getApps() const
 {
     return m_apps;
 }
+

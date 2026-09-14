@@ -121,16 +121,6 @@ PageType {
                 selectedIndex: getRouteModesModelIndex()
 
                 clickedFunction: function() {
-                    if (Qt.platform.os === "windows"
-                            && root.routeModesModel[selectedIndex].type === routeMode.onlyForwardApps
-                            && SettingsController.strictKillSwitchEnabled) {
-                        PageController.showNotificationMessage(
-                                    qsTr("This mode is not available while Strict KillSwitch is enabled"))
-                        selectedIndex = getRouteModesModelIndex()
-                        selector.text = root.routeModesModel[selectedIndex].name
-                        selector.closeTriggered()
-                        return
-                    }
                     selector.text = selectedText
                     selector.closeTriggered()
                     if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
