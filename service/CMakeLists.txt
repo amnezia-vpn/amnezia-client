@@ -9,3 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT IOS AND NOT ANDROID AND NOT MACOS_NE)
     add_subdirectory(server)
 endif()
+
+if(WIN32 AND BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
