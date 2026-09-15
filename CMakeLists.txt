@@ -20,6 +20,8 @@ project(${PROJECT} VERSION ${AMNEZIAVPN_VERSION}
         HOMEPAGE_URL "https://amnezia.org/"
 )
 
+option(AMNEZIA_BUILD_TESTS "Build test executables" OFF)
+
 # trigger conan to kick off `conan install` globally
 find_package(OpenSSL REQUIRED)
 if (PREBUILTS_ONLY)
