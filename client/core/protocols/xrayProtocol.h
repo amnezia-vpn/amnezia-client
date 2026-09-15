@@ -35,6 +35,7 @@ private:
     int m_socksPort = 10808;
 
     QSharedPointer<IpcProcessInterfaceReplica> m_tun2socksProcess;
+    bool m_stopping = false;
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;
     static constexpr int tun2socksRetryDelayMs = 400;
