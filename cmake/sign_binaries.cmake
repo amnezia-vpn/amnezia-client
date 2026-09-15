@@ -9,14 +9,11 @@ if(NOT DEFINED CODESIGN_KEYCHAIN)
 endif()
 
 if(WIN32)
-    file(GLOB_RECURSE BINARIES
-        "${CPACK_TEMPORARY_DIRECTORY}/*.dll"
-        "${CPACK_TEMPORARY_DIRECTORY}/*.exe"
-    )
-
-    if(BINARIES AND SIGNTOOL_SUBJECT_NAME)
+	set(AMNEZIA_PACKAGE_DIR "${CPACK_TEMPORARY_DIRECTORY}/packages/AmneziaVPN/data")
+    if(SIGNTOOL_SUBJECT_NAME)
         include(${CMAKE_CURRENT_LIST_DIR}/util/signtool.cmake)
-        signtool_sign_files("${BINARIES}" "${SIGNTOOL_SUBJECT_NAME}")
+        signtool_sign_files("${AMNEZIA_PACKAGE_DIR}/*.exe" "${SIGNTOOL_SUBJECT_NAME}")
+		signtool_sign_files("${AMNEZIA_PACKAGE_DIR}/*.dll" "${SIGNTOOL_SUBJECT_NAME}")
     endif()
 endif()
 
