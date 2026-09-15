@@ -54,6 +54,8 @@ private slots:
         if (!isEnvValueConfigured(backup)) {
             QSKIP("Set BACKUP_PATH");
         }
+        QVERIFY2(QFileInfo(backup).size() > 0,
+                 "BACKUP_PATH file is empty - is the BACKUP_FILE_BASE64 secret configured?");
 
         QSignalSpy errorOccurredSpy(m_coreController->m_settingsUiController, &SettingsUiController::errorOccurred);
 

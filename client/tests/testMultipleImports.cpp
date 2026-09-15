@@ -184,19 +184,11 @@ private slots:
     }
 
     void testListImports() {
-        QString dnsListPath = getEnvValue("DNS_LIST_PATH");
-        QString ipListPath = getEnvValue("IP_LIST_PATH");
+        const QString dnsListPath = QFINDTESTDATA("data/dns_list.json");
+        const QString ipListPath = QFINDTESTDATA("data/ip_list.json");
 
-        logEnvValueState("DNS_LIST_PATH");
-        logEnvValueState("IP_LIST_PATH");
-        qInfo() << "DNS_LIST_PATH file exists:" << QFile::exists(dnsListPath)
-                << "size:" << QFileInfo(dnsListPath).size();
-        qInfo() << "IP_LIST_PATH file exists:" << QFile::exists(ipListPath)
-                << "size:" << QFileInfo(ipListPath).size();
-
-        if (!isEnvValueConfigured(dnsListPath) || !isEnvValueConfigured(ipListPath)) {
-            QSKIP("set DNS_LIST_PATH and IP_LIST_PATH");
-        }
+        QVERIFY2(!dnsListPath.isEmpty(), "data/dns_list.json not found");
+        QVERIFY2(!ipListPath.isEmpty(), "data/ip_list.json not found");
 
         QSignalSpy dnsErrorOccurredSpy(m_coreController->m_allowedDnsUiController, &AllowedDnsUiController::errorOccurred);
         QSignalSpy dnsFinishedSpy(m_coreController->m_allowedDnsUiController, &AllowedDnsUiController::finished);
