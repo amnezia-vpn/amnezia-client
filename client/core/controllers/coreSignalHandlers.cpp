@@ -497,10 +497,18 @@ void CoreSignalHandlers::initMacosSplitTunnelHandler()
                "Login Items & Extensions > Network Extensions, then reconnect the VPN"));
     });
 
-    connect(manager, &MacOSSplitTunnelManager::extensionActivated, this, [this]() {
-        logger.info() << "macos split tunnel: system extension activated";
+    connect(manager, &MacOSSplitTunnelManager::extensionActivated, this, []() {
+        logger.info() << "macos split tunnel: system extension registered";
+    });
+
+    connect(manager, &MacOSSplitTunnelManager::proxyStarted, this, [this]() {
+        logger.info() << "macos split tunnel: proxy is running, listed apps now bypass the tunnel";
         emit m_coreController->m_pageController->showNotificationMessage(
-            tr("App split tunneling is ready"));
+            tr("App split tunneling is active"));
+    });
+
+    connect(manager, &MacOSSplitTunnelManager::proxyStopped, this, []() {
+        logger.info() << "macos split tunnel: proxy stopped";
     });
 
     connect(manager, &MacOSSplitTunnelManager::errorOccurred, this, [this](const QString &message) {

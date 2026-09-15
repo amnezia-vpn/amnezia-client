@@ -37,7 +37,7 @@ sudo rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
 # ---------------- Split-tunnel system extension ------------------------------
 # Must run while the bundle is still on disk: systemextensionsctl resolves the
 # extension through its host app.
-ST_BUNDLE_ID="org.amnezia.AmneziaVPN.split-tunnel"
+ST_BUNDLE_ID="org.amnezia.AmneziaVPN.network-extension"
 ST_TEAM_ID="X7UJ388FXK"
 
 if command -v systemextensionsctl >/dev/null 2>&1; then

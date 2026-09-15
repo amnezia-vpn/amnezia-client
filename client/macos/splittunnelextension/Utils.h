@@ -12,9 +12,9 @@
  *                Always recorded.
  *   STLogDebug - per-read/per-datagram chatter. Recorded only when debug logging
  *                is enabled for this subsystem:
- *                  sudo log config --mode "level:debug" --subsystem org.amnezia.AmneziaVPN.split-tunnel
+ *                  sudo log config --mode "level:debug" --subsystem org.amnezia.AmneziaVPN.network-extension
  *                Stream with:
- *                  log stream --predicate 'subsystem == "org.amnezia.AmneziaVPN.split-tunnel"' --level debug
+ *                  log stream --predicate 'subsystem == "org.amnezia.AmneziaVPN.network-extension"' --level debug
  */
 #define STLogInfo(fmt, ...)  os_log(STUtils.log, fmt, ##__VA_ARGS__)
 #define STLogDebug(fmt, ...) os_log_debug(STUtils.log, fmt, ##__VA_ARGS__)

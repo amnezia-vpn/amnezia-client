@@ -16,7 +16,7 @@
 #ifdef CLIENT_MACOS_ST_BUNDLE_ID
         logger = os_log_create(CLIENT_MACOS_ST_BUNDLE_ID, "proxy");
 #else
-        logger = os_log_create("org.amnezia.AmneziaVPN.split-tunnel", "proxy");
+        logger = os_log_create("org.amnezia.AmneziaVPN.network-extension", "proxy");
 #endif
     });
     return logger;

@@ -11,7 +11,12 @@ if(NOT CLIENT_MACOS_ST_TARGET_NAME)
     set(CLIENT_MACOS_ST_TARGET_NAME "${CLIENT_APPLICATION_NAME}SplitTunnel" CACHE STRING "macOS app split-tunnel system extension target name")
 endif()
 if(NOT CLIENT_MACOS_ST_BUNDLE_SUFFIX)
-    set(CLIENT_MACOS_ST_BUNDLE_SUFFIX "split-tunnel" CACHE STRING "Bundle id suffix for the macOS split-tunnel system extension")
+    # TEMPORARY: reuses the App ID of the App Store packet-tunnel appex, because
+    # org.amnezia.AmneziaVPN.split-tunnel has not been created in the developer
+    # portal yet. The two never ship together (appex only when MACOS_NE=TRUE,
+    # this system extension only when MACOS_NE=OFF), so they do not collide on
+    # disk. Switch back to "split-tunnel" once the App ID and its profiles exist.
+    set(CLIENT_MACOS_ST_BUNDLE_SUFFIX "network-extension" CACHE STRING "Bundle id suffix for the macOS split-tunnel system extension")
 endif()
 if(NOT CLIENT_MACOS_ST_BUNDLE_VERSION)
     # Bump on every change to the extension, otherwise sysextd keeps the copy it

@@ -59,7 +59,7 @@ if(APPLE)
 
     if (CODESIGN_SIGNATURE)
         if(NOT sysexts)
-            message(FATAL_ERROR "macOS package is missing AmneziaVPNSplitTunnel.systemextension")
+            message(FATAL_ERROR "macOS package is missing the split-tunnel .systemextension bundle")
         endif()
         if(NOT EXISTS "${CPACK_AMNEZIA_MACOS_APP_ENTITLEMENTS}")
             message(FATAL_ERROR "Host entitlements file is missing: ${CPACK_AMNEZIA_MACOS_APP_ENTITLEMENTS}")

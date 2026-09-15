@@ -99,11 +99,15 @@ message("OSX_SDK_PATH is: ${OSX_SDK_PATH}")
 add_subdirectory(macos/splittunnelextension)
 
 add_dependencies(${PROJECT} ${CLIENT_MACOS_ST_TARGET_NAME})
+# Wipe the whole directory rather than just the current bundle name: renaming the
+# extension (its bundle name follows CFBundleIdentifier) would otherwise leave the
+# previous bundle behind, and two bundles claiming the same identifier make
+# sysextd fail with OSSystemExtensionErrorDuplicateExtensionIdentifer.
 add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E rm -rf
+        "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT}>/Library/SystemExtensions"
     COMMAND ${CMAKE_COMMAND} -E make_directory
         "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT}>/Library/SystemExtensions"
-    COMMAND ${CMAKE_COMMAND} -E rm -rf
-        "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT}>/Library/SystemExtensions/$<TARGET_FILE_NAME:${CLIENT_MACOS_ST_TARGET_NAME}>.systemextension"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "$<TARGET_BUNDLE_DIR:${CLIENT_MACOS_ST_TARGET_NAME}>"
         "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT}>/Library/SystemExtensions/$<TARGET_FILE_NAME:${CLIENT_MACOS_ST_TARGET_NAME}>.systemextension"

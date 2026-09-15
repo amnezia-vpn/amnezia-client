@@ -11,7 +11,7 @@
 
 /*!
  * Drives the macOS split-tunnel system extension:
- *   - registers/unregisters AmneziaVPNSplitTunnel.systemextension,
+ *   - registers/unregisters the extension,
  *   - owns the NETransparentProxyManager configuration,
  *   - starts/stops the transparent proxy and pushes the app list into it.
  *
@@ -21,6 +21,16 @@
  * Threading: the public methods must be called from the Qt main thread.
  * NetworkExtension completion handlers can run on arbitrary queues, so every
  * signal is re-posted to this object's thread before being emitted.
+ *
+ * State machine. reconcile() is the only entry point that decides anything; it
+ * is idempotent, so callers may fire it on every connection state change:
+ *
+ *   desired (shouldRun) x actual (m_proxyStatus) -> action
+ *     true,  not running        -> activate extension (once), then startProxy
+ *     true,  running, same opts -> nothing
+ *     true,  running, new opts  -> sendProviderMessage
+ *     false, running            -> stopProxy
+ *     false, not running        -> nothing
  */
 class MacOSSplitTunnelManager : public QObject
 {
@@ -32,16 +42,14 @@ public:
     /*! Submits an activation request if one has not been submitted yet. */
     void activateExtension();
 
-    /*! Brings the proxy in line with the desired state. Safe to call often. */
+    /*! Brings the proxy in line with the desired state. Cheap and idempotent. */
     void reconcile(bool vpnConnected, bool splitTunnelEnabled, amnezia::AppsRouteMode mode,
                    const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer);
 
     /*! Stops the proxy, removes the saved NE configuration and unregisters the
-     *  system extension. Call when the user switches app split tunneling off,
-     *  so nothing is left behind in System Settings. */
+     *  extension - in that order, each step waiting for the previous one. Call
+     *  when the user switches app split tunneling off. */
     void disableFeature();
-
-    void stopProxy();
 
 signals:
     /*! macOS is waiting for the user to approve the extension in
@@ -49,6 +57,9 @@ signals:
     void needsUserApproval();
     /*! The extension was approved and registered. */
     void extensionActivated();
+    /*! The transparent proxy actually reached the running state. */
+    void proxyStarted();
+    void proxyStopped();
     void errorOccurred(const QString &message);
 
 private:
@@ -62,8 +73,9 @@ private:
         QString vpnServer;
     };
 
-    void startProxy(const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer);
-    void removeConfiguration();
+    void startProxy();
+    void stopProxy();
+    void removeConfiguration(void (^completion)(void));
     void deactivateExtension();
     QByteArray optionsJson(const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer) const;
 
@@ -72,12 +84,18 @@ private:
     void postNeedsApproval();
     void postActivated();
 
-    /*! Called from the OSSystemExtensionRequest delegate once the extension is
-     *  registered, so a first-run activation actually starts the proxy. */
     void onExtensionActivated();
+    /*! Called from the NEVPNStatusDidChangeNotification observer. */
+    void onProxyStatusChanged(int status);
 
     bool m_activationRequested = false;
     bool m_extensionActivated = false;
+    /*! Mirrors NEVPNStatus; -1 until the configuration has been loaded once. */
+    int m_proxyStatus = -1;
+    bool m_tearingDown = false;
+    /*! Logged once per session instead of on every reconcile. */
+    bool m_warnedAboutEmptyServer = false;
+
     DesiredState m_desired;
     QByteArray m_appliedOptions;
 };
