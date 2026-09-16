@@ -1,5 +1,6 @@
 find_program(CONAN_COMMAND "conan" REQUIRED
     HINTS
+		"${CMAKE_SOURCE_DIR}/.venv/Scripts"
         "${CMAKE_SOURCE_DIR}/.venv/bin"
         "/opt/homebrew/bin"
 )

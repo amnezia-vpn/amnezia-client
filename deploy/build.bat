@@ -10,6 +10,8 @@ if /i "%~1" == "-i"             set "ARG_BUILD_INSTALLERS=!ARG_BUILD_INSTALLERS!
 if /i "%~1" == "--installer"    set "ARG_BUILD_INSTALLERS=!ARG_BUILD_INSTALLERS! %~2" & shift
 if /i "%~1" == "-arch"          set "ARCH=%~2" & shift
 if /i "%~1" == "--architecture" set "ARCH=%~2" & shift
+if /i "%~1" == "--sign-cloud"   set "SIGNTOOL_SUBJECT_NAME=%~2" & shift
+if /i "%~1" == "--sign-phys"    set "SIGNTOOL_SUBJECT_NAME=%~2" & set "SIGNTOOL_CERT_HAS_UI=true" & shift
 shift
 goto :parse_args
 :done_args
