@@ -1,10 +1,6 @@
 find_program(SIGNTOOL_COMMAND signtool REQUIRED)
 
-function(signtool_sign_files PACKAGE_FILES SUBJECT_NAME)
-    if(NOT SUBJECT_NAME)
-        set(SUBJECT_NAME "Privacy Technologies OU")
-    endif()
-
+function(signtool_sign_files PACKAGE_FILES SUBJECT_NAME CERT_HAS_UI)
     if(PACKAGE_FILES)
         set(args sign
             /n ${SUBJECT_NAME}
@@ -22,12 +18,24 @@ function(signtool_sign_files PACKAGE_FILES SUBJECT_NAME)
 		list(JOIN cmd " " cmd_str)
 		message(STATUS "${cmd_str}")
 
-		execute_process(
-			COMMAND cmd /c start "" /wait ${cmd}
-			RESULT_VARIABLE result
-		)
-		if(NOT result EQUAL 0)
-			message(FATAL_ERROR "signtool failed with code ${result}")
+		if (CERT_HAS_UI)
+			execute_process(
+				COMMAND cmd /c start "" /wait ${cmd}
+				RESULT_VARIABLE result
+			)
+			if(NOT result EQUAL 0)
+				message(FATAL_ERROR "signtool failed with code ${result}")
+			endif()
+		else()
+			execute_process(
+                COMMAND ${cmd}
+                RESULT_VARIABLE result
+                ERROR_VARIABLE error
+            )
+			if(NOT result EQUAL 0)
+				string(REPLACE "\n" "\n  " error "  ${error}")
+				message(FATAL_ERROR "signtool failed:\n${error}")
+			endif()
 		endif()
     endif()
 endfunction()
