@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QJsonObject>
+#include <QSharedPointer>
 #include <QtQml/qqml.h>
 
 #include "core/utils/errorCodes.h"
@@ -44,7 +45,7 @@ namespace Vpn
     }
 }
 
-class VpnProtocol : public QObject
+class VpnProtocol : public QObject, public QEnableSharedFromThis<VpnProtocol>
 {
     Q_OBJECT
 
