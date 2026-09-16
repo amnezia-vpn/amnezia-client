@@ -7,6 +7,7 @@ class PortAvailabilityHelper
 {
 public:
     static bool isPortAvailable(int port);
+    static bool waitForPort(int port, int timeoutMs);
     static std::optional<int> findFirstAvailablePort(int startPort, int endPort);
 };
 

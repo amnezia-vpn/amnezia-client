@@ -1,7 +1,6 @@
 #ifndef PROXYSERVICE_H
 #define PROXYSERVICE_H
 
-#include <QJsonObject>
 #include <QObject>
 
 #include "proxyConfigManager.h"
@@ -18,19 +17,19 @@ public:
     ProxyService(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
                  QObject *parent = nullptr);
 
-    QJsonObject config() const;
     bool startXray();
     bool stopXray();
     bool restartXray();
     bool isXrayRunning() const;
+    int activePort() const;
 
 signals:
-    void xrayStatusChanged(bool running);
+    void xrayStatusChanged(bool running, int port);
 
 private:
     ProxyConfigManager m_configManager;
     XrayEngineClient m_engine;
-    QJsonObject m_cachedConfig;
+    int m_activePort = 0;
 };
 
 #endif // PROXYSERVICE_H

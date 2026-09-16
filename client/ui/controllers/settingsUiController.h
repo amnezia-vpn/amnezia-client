@@ -35,6 +35,7 @@ public:
     Q_PROPERTY(bool isLocalProxyHttpEnabled READ isLocalProxyHttpEnabled NOTIFY localProxySettingsUpdated)
     Q_PROPERTY(int localProxyPort READ localProxyPort WRITE setLocalProxyPort NOTIFY localProxySettingsUpdated)
     Q_PROPERTY(QString localProxyOwnerId READ localProxyOwnerId NOTIFY localProxySettingsUpdated)
+    Q_PROPERTY(int localProxyActivePort READ localProxyActivePort NOTIFY localProxySettingsUpdated)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -118,6 +119,7 @@ public slots:
     int findFirstAvailableLocalProxyPort(int startPort) const;
     bool enableLocalProxy(const QString &ownerId, int port);
     void disableLocalProxy();
+    int localProxyActivePort() const;
 
 signals:
     void primaryDnsChanged();

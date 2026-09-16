@@ -27,6 +27,7 @@ public slots:
 
 signals:
     void startFailed(const QString &message);
+    void activePortChanged(int port);
 
 private:
     bool start(quint16 apiPort);

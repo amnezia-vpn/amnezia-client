@@ -451,8 +451,7 @@ bool SettingsController::enableLocalProxy(const QString &ownerId, int port)
         return false;
     }
 
-    if (!PortAvailabilityHelper::isPortAvailable(port)
-        && (m_appSettingsRepository->isLocalProxyPortUserDefined() || port != amnezia::localProxy::defaultProxyPort)) {
+    if (!PortAvailabilityHelper::isPortAvailable(port) && m_appSettingsRepository->isLocalProxyPortUserDefined()) {
         return false;
     }
 
@@ -472,4 +471,18 @@ void SettingsController::disableLocalProxy()
     if (m_appSettingsRepository->isLocalProxyHttpEnabled()) {
         m_appSettingsRepository->setLocalProxyHttpEnabled(false);
     }
+}
+
+int SettingsController::localProxyActivePort() const
+{
+    return m_localProxyActivePort;
+}
+
+void SettingsController::setLocalProxyActivePort(int port)
+{
+    if (m_localProxyActivePort == port) {
+        return;
+    }
+    m_localProxyActivePort = port;
+    emit localProxySettingsUpdated();
 }

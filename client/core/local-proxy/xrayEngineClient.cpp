@@ -1,7 +1,8 @@
 #include "xrayEngineClient.h"
 
 #include "core/utils/ipcClient.h"
-#include "localProxyDefs.h"
+
+#include <QDebug>
 
 namespace
 {
@@ -24,7 +25,7 @@ bool XrayEngineClient::start(const QString &configJson)
 
     if (configJson.trimmed().isEmpty()) {
         m_lastError = QStringLiteral("Config content is empty");
-        qCWarning(lcLocalProxy) << m_lastError;
+        qWarning() << m_lastError;
         return false;
     }
 
@@ -40,7 +41,7 @@ bool XrayEngineClient::start(const QString &configJson)
 
     if (token == 0) {
         m_lastError = kIpcUnavailableError;
-        qCWarning(lcLocalProxy) << "Failed to start Xray via IPC";
+        qWarning() << "Failed to start Xray via IPC";
         return false;
     }
 
@@ -63,7 +64,7 @@ bool XrayEngineClient::stop()
 
     if (!stopped) {
         m_lastError = kIpcUnavailableError;
-        qCWarning(lcLocalProxy) << "Failed to stop Xray via IPC";
+        qWarning() << "Failed to stop Xray via IPC";
         return false;
     }
 
