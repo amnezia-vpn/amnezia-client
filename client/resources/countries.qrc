@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/countries">
+        <file alias="regions.json">countries/regions.json</file>
+    </qresource>
+</RCC>

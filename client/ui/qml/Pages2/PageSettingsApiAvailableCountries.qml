@@ -30,6 +30,17 @@ PageType {
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
+    function openServerInfo() {
+        PageController.showBusyIndicator(true)
+        let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+        PageController.showBusyIndicator(false)
+        if (!result) {
+            return
+        }
+
+        PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+    }
+
     function selectConnectionCountry(countryIndex, countryCode, countryName) {
         if (countryIndex === ApiCountryModel.currentIndex) {
             return
@@ -42,6 +53,9 @@ PageType {
 
     Component.onCompleted: {
         root.updateSubscriptionState()
+
+        ApiCountryListModel.clearSearch()
+        ApiCountryListModel.expandCurrentSection()
     }
 
     Connections {
@@ -89,29 +103,221 @@ PageType {
     ListViewType {
         id: menuContent
 
-        anchors.fill: parent
+        anchors.top: topBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
-        model: ApiCountryModel
+        model: ApiCountryListModel
 
-        currentIndex: ApiCountryModel.currentIndex
+        visible: ApiCountryListModel.hasResults
+
+        interactive: menuContent.contentHeight > menuContent.height
 
         ButtonGroup {
             id: containersRadioButtonGroup
         }
 
-        header: ColumnLayout {
+        footer: Item {
             width: menuContent.width
+            height: 16
+        }
+
+        delegate: Item {
+            id: rowItem
+
+            required property string rowType
+            required property string sectionKey
+            required property bool isCurrent
+            required property int sourceIndex
+            required property string countryName
+            required property string sourceCountryName
+            required property string countryCode
+            required property string countryImageCode
+
+            width: menuContent.width
+
+            implicitHeight: rowItem.rowType === "section" ? 60 : 72
+            height: implicitHeight
+
+            CountrySectionHeader {
+                id: sectionHeader
+
+                listModel: ApiCountryListModel
+                width: rowItem.width
+                visible: rowItem.rowType === "section"
+
+                sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+            }
+
+            ColumnLayout {
+                id: countryRow
+
+                width: rowItem.width
+                height: rowItem.height
+                visible: rowItem.rowType === "country"
+                spacing: 0
+
+                RowLayout {
+                    VerticalRadioButton {
+                        id: containerRadioButton
+
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+
+                        text: rowItem.countryName
+
+                        ButtonGroup.group: containersRadioButtonGroup
+
+                        imageSource: "qrc:/images/controls/download.svg"
+
+                        checked: rowItem.isCurrent
+                        checkable: !ConnectionController.isConnected
+                                   && !ConnectionController.isConnectionInProgress
+
+                        onClicked: {
+                            if (ConnectionController.isConnectionInProgress) {
+                                PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
+                                return
+                            }
+                            if (ConnectionController.isConnected) {
+                                PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
+                                return
+                            }
+
+                            root.selectConnectionCountry(rowItem.sourceIndex, rowItem.countryCode, rowItem.sourceCountryName)
+                        }
+
+                        Keys.onEnterPressed: {
+                            if (checkable) {
+                                checked = true
+                            }
+                            containerRadioButton.clicked()
+                        }
+                        Keys.onReturnPressed: {
+                            if (checkable) {
+                                checked = true
+                            }
+                            containerRadioButton.clicked()
+                        }
+                    }
+
+                    Image {
+                        Layout.rightMargin: 16
+                        Layout.alignment: Qt.AlignRight
+
+                        source: rowItem.countryImageCode !== ""
+                                ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
+                                : ""
+                    }
+                }
+
+                DividerType {
+                    Layout.fillWidth: true
+                }
+            }
+        }
+    }
+
+    CountrySectionHeader {
+        id: stickyHeader
+
+        listModel: ApiCountryListModel
+
+        anchors.top: topBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        readonly property int topRow: menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 1)
+
+        isPinnedOverlay: true
+        sectionKey: stickyHeader.topRow >= 0 ? ApiCountryListModel.sectionKeyAtRow(stickyHeader.topRow) : ""
+
+        visible: ApiCountryListModel.isGrouped
+                 && menuContent.visible
+                 && menuContent.contentHeight > menuContent.height
+                 && menuContent.contentY > menuContent.originY
+                 && stickyHeader.sectionKey !== ""
+    }
+
+    CountriesEmptyState {
+        anchors.top: topBar.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
+
+        visible: !ApiCountryListModel.hasResults
+
+        isSearchResult: ApiCountryListModel.isSearchActive
+
+        onShowAllRequested: searchField.clear()
+    }
+
+    Rectangle {
+        id: topBar
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        color: AmneziaStyle.color.midnightBlack
+
+        implicitHeight: topBarContent.implicitHeight
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+
+        ColumnLayout {
+            id: topBarContent
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
 
             spacing: 4
 
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
+            Item {
+                id: navigationRow
 
+                Layout.fillWidth: true
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
+                Layout.preferredHeight: backButton.implicitHeight
+
+                BackButtonType {
+                    id: backButton
+                    objectName: "backButton"
+
+                    anchors.left: parent.left
+                    anchors.right: settingsButton.left
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                ImageButtonType {
+                    id: settingsButton
+                    objectName: "settingsButton"
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: 16
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    implicitWidth: 40
+                    implicitHeight: 40
+
+                    hoverEnabled: true
+                    image: "qrc:/images/controls/settings.svg"
+                    imageColor: AmneziaStyle.color.paleGray
+
+                    onClicked: root.openServerInfo()
+                    Keys.onEnterPressed: root.openServerInfo()
+                    Keys.onReturnPressed: root.openServerInfo()
+                }
             }
 
-            HeaderTypeWithButton {
+            BaseHeaderType {
                 id: headerContent
                 objectName: "headerContent"
 
@@ -120,20 +326,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
 
-                actionButtonImage: "qrc:/images/controls/settings.svg"
-
-                headerText: root.processedServer.name
-
-                actionButtonFunction: function() {
-                    PageController.showBusyIndicator(true)
-                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                    PageController.showBusyIndicator(false)
-                    if (!result) {
-                        return
-                    }
-
-                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                }
+                headerText: root.processedServer ? root.processedServer.name : ""
             }
 
             ParagraphTextType {
@@ -175,73 +368,81 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
-                Layout.bottomMargin: 8
 
-                text: qsTr("Location for connection")
+                text: qsTr("Countries")
                 color: AmneziaStyle.color.mutedGray
             }
-        }
-
-        delegate: ColumnLayout {
-            id: content
-
-            width: menuContent.width
-            height: content.implicitHeight
 
             RowLayout {
-                VerticalRadioButton {
-                    id: containerRadioButton
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                spacing: 8
+
+                CountrySearchField {
+                    id: searchField
 
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
 
-                    text: countryName
-
-                    ButtonGroup.group: containersRadioButtonGroup
-
-                    imageSource: "qrc:/images/controls/download.svg"
-
-                    checked: index === ApiCountryModel.currentIndex
-                    checkable: !ConnectionController.isConnected
-
-                    onClicked: {
-                        if (ConnectionController.isConnectionInProgress) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
-                            return
-                        }
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-                            return
-                        }
-
-                        root.selectConnectionCountry(index, countryCode, countryName)
-                    }
-
-                    Keys.onEnterPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                    Keys.onReturnPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
+                    onTextChanged: ApiCountryListModel.searchText = searchField.text
                 }
 
-                Image {
-                    Layout.rightMargin: 32
-                    Layout.alignment: Qt.AlignRight
+                ImageButtonType {
+                    objectName: "sortButton"
 
-                    source: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
+                    implicitWidth: 64
+                    implicitHeight: 64
+
+                    hoverEnabled: true
+                    image: "qrc:/images/controls/sort-desc.svg"
+                    imageColor: AmneziaStyle.color.paleGray
+
+                    onClicked: sortDrawer.openTriggered()
+                    Keys.onEnterPressed: sortDrawer.openTriggered()
+                    Keys.onReturnPressed: sortDrawer.openTriggered()
                 }
             }
 
-            DividerType {
+            CountryFilterTabs {
+                id: filterTabs
+
+                listModel: ApiCountryListModel
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+            }
+
+            WarningType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                backGroundColor: AmneziaStyle.color.surfaceBase
+
+                textString: qsTr("Connecting through these countries bypasses allowlist restrictions")
+
+                iconPath: "qrc:/images/controls/info.svg"
+
+                visible: ApiCountryListModel.tabFilter === 1
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
             }
         }
+    }
+
+    SortCountriesDrawer {
+        id: sortDrawer
+
+        listModel: ApiCountryListModel
+
+        anchors.fill: parent
     }
 }

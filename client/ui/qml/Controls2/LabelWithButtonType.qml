@@ -21,6 +21,9 @@ Item {
 
     property string buttonImageSource
     property string rightImageSource
+    property string secondaryImageSource
+    property var secondaryClickedFunction
+    readonly property bool hasSecondaryAction: root.secondaryImageSource !== ""
     property string leftImageSource
     property string rightWarningImageSource
     property string rightWarningImageColor: AmneziaStyle.color.goldenApricot
@@ -78,7 +81,10 @@ Item {
         id: mouseArea
 
         anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
+
+        enabled: !root.hasSecondaryAction
+
+        cursorShape: root.hasSecondaryAction ? Qt.ArrowCursor : Qt.PointingHandCursor
         hoverEnabled: root.enabled
 
         onEntered: {
@@ -191,7 +197,6 @@ Item {
                 }
             }
 
-
             CaptionTextType {
                 id: description
 
@@ -292,12 +297,47 @@ Item {
         }
 
         ImageButtonType {
+            id: secondaryImage
+
+            implicitWidth: 40
+            implicitHeight: 40
+
+            hoverEnabled: true
+            image: root.secondaryImageSource
+            imageColor: root.rightImageColor
+            visible: root.secondaryImageSource !== ""
+
+            Layout.alignment: Qt.AlignRight
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 12
+                color: secondaryImage.pressed ? secondaryImage.pressedColor
+                                              : secondaryImage.hovered ? secondaryImage.hoveredColor
+                                                                       : secondaryImage.defaultColor
+
+                Behavior on color {
+                    PropertyAnimation { duration: 200 }
+                }
+            }
+
+            onClicked: {
+                if (root.secondaryClickedFunction && typeof root.secondaryClickedFunction === "function") {
+                    root.secondaryClickedFunction()
+                }
+            }
+
+            Keys.onEnterPressed: secondaryImage.clicked()
+            Keys.onReturnPressed: secondaryImage.clicked()
+        }
+
+        ImageButtonType {
             id: rightImage
 
             implicitWidth: 40
             implicitHeight: 40
 
-            hoverEnabled: false
+            hoverEnabled: root.hasSecondaryAction
             image: rightImageSource
             imageColor: rightImageColor
             visible: rightImageSource ? true : false
@@ -308,7 +348,11 @@ Item {
                 id: rightImageBackground
                 anchors.fill: parent
                 radius: 12
-                color: AmneziaStyle.color.transparent
+                color: root.hasSecondaryAction
+                       ? (rightImage.pressed ? rightImage.pressedColor
+                          : rightImage.hovered ? rightImage.hoveredColor
+                                               : rightImage.defaultColor)
+                       : AmneziaStyle.color.transparent
 
                 Behavior on color {
                     PropertyAnimation { duration: 200 }
@@ -329,7 +373,6 @@ Item {
 
         border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
-
 
         Behavior on color {
             PropertyAnimation { duration: 200 }

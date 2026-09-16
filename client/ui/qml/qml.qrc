@@ -4,6 +4,11 @@
         <file>Components/AdLabel.qml</file>
         <file>Components/ConnectButton.qml</file>
         <file>Components/ConnectionTypeSelectionDrawer.qml</file>
+        <file>Components/CountrySearchField.qml</file>
+        <file>Components/CountryFilterTabs.qml</file>
+        <file>Components/CountrySectionHeader.qml</file>
+        <file>Components/CountriesEmptyState.qml</file>
+        <file>Components/SortCountriesDrawer.qml</file>
         <file>Components/GamepadLoader.qml</file>
         <file>Components/HomeContainersListView.qml</file>
         <file>Components/HomeSplitTunnelingDrawer.qml</file>
@@ -20,6 +25,7 @@
         <file>Components/TransportProtoSelector.qml</file>
         <file>Components/AddSitePanel.qml</file>
         <file>Config/GlobalConfig.qml</file>
+        <file>Config/CountryRegionNames.qml</file>
         <file>Config/qmldir</file>
         <file>Controls2/BackButtonType.qml</file>
         <file>Controls2/BasicButtonType.qml</file>
@@ -158,4 +164,3 @@
         <file>Components/SmartScroll.qml</file>
     </qresource>
 </RCC>
-
