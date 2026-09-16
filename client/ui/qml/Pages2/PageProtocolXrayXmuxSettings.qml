@@ -232,8 +232,9 @@ PageType {
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
+            saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {

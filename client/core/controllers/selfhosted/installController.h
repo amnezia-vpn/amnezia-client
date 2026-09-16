@@ -33,10 +33,10 @@ public:
                               QObject *parent = nullptr);
     ~InstallController();
 
-    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false);
+    ErrorCode setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, bool isUpdate = false, bool acceptXrayKeyLoss = false);
 
     // Updates server-side container settings (admin self-hosted only): reconfigures the container over SSH.
-    ErrorCode updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig);
+    ErrorCode updateServerConfig(const QString &serverId, DockerContainer container, const ContainerConfig &oldConfig, ContainerConfig &newConfig, bool acceptXrayKeyLoss = false);
 
     // Updates client-local settings only: rewrites the stored container config for any self-hosted/native server. No SSH.
     ErrorCode updateClientConfig(const QString &serverId, DockerContainer container, ContainerConfig &newConfig);
@@ -106,6 +106,11 @@ private:
     ErrorCode configureContainerWorker(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config, SshSession &sshSession);
     ErrorCode startupContainerWorker(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
 
+    ErrorCode readXrayStateBeforeVolumeMigration(const ServerCredentials &credentials, DockerContainer container,
+                                                 SshSession &sshSession, QMap<QString, QString> &outFiles);
+    ErrorCode restoreXrayStateIntoDataVolume(const ServerCredentials &credentials, DockerContainer container,
+                                             SshSession &sshSession, const QMap<QString, QString> &files);
+
     ErrorCode isServerPortBusy(const ServerCredentials &credentials, DockerContainer container, const ContainerConfig &config, SshSession &sshSession);
     ErrorCode isUserInSudo(const ServerCredentials &credentials, SshSession &sshSession);
     ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, SshSession &sshSession);
@@ -130,7 +135,7 @@ private:
     bool m_cancelInstallation = false;
     QString m_tproxyInstallHostname;
     QString m_tproxyInstallEmail;
-    
+
 #ifndef Q_OS_IOS
     QList<QSharedPointer<QProcess>> m_sftpMountProcesses;
 #endif

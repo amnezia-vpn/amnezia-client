@@ -182,16 +182,42 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
-                    headerText: qsTr("readBufferSize")
-                    hintText: qsTr("Read buffer size (MB). Range: 1–2147483647.")
-                    placeholderText: XrayConfigModel.mkcpDefaultReadBufferSize()
-                    textField.text: mkcpReadBufferSize
+                    headerText: qsTr("mtu")
+                    hintText: qsTr("Maximum packet size in bytes. Range: 576–1460.")
+                    placeholderText: XrayConfigModel.mkcpDefaultMtu()
+                    textField.text: mkcpMtu
+                    textField.maximumLength: 4
+                    textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpMtu)
+                    textField.onEditingFinished: {
+                        var v = root.clampInt(textField.text, 576, 1460)
+                        if (v !== mkcpMtu) mkcpMtu = v
+                        else if (textField.text !== v) textField.text = v
+                        if (mkcpMaxSendingWindow !== "") {
+                            var floorNow = parseInt(v !== "" ? v : XrayConfigModel.mkcpDefaultMtu(), 10)
+                            if (parseInt(mkcpMaxSendingWindow, 10) < floorNow) {
+                                mkcpMaxSendingWindow = String(floorNow)
+                            }
+                        }
+                        root.editDirty = false
+                    }
+                }
+
+                TextFieldWithHeaderType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 8
+                    headerText: qsTr("cwndMultiplier")
+                    hintText: qsTr("Congestion window multiplier. Minimum: 1.")
+                    placeholderText: XrayConfigModel.mkcpDefaultCwndMultiplier()
+                    textField.text: mkcpCwndMultiplier
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpReadBufferSize)
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpCwndMultiplier)
                     textField.onEditingFinished: {
                         var v = root.clampInt(textField.text, 1, 2147483647)
-                        if (v !== mkcpReadBufferSize) mkcpReadBufferSize = v
+                        if (v !== mkcpCwndMultiplier) mkcpCwndMultiplier = v
                         else if (textField.text !== v) textField.text = v
                         root.editDirty = false
                     }
@@ -202,28 +228,19 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.topMargin: 8
-                    headerText: qsTr("writeBufferSize")
-                    hintText: qsTr("Write buffer size (MB). Range: 1–2147483647.")
-                    placeholderText: XrayConfigModel.mkcpDefaultWriteBufferSize()
-                    textField.text: mkcpWriteBufferSize
+                    headerText: qsTr("maxSendingWindow")
+                    hintText: qsTr("Send window in bytes. Must not be smaller than mtu. Leave empty to let Xray decide.")
+                    textField.text: mkcpMaxSendingWindow
                     textField.maximumLength: 10
                     textField.validator: RegularExpressionValidator { regularExpression: /^\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpWriteBufferSize)
+                    textField.onTextEdited: root.editDirty = (textField.text !== mkcpMaxSendingWindow)
                     textField.onEditingFinished: {
-                        var v = root.clampInt(textField.text, 1, 2147483647)
-                        if (v !== mkcpWriteBufferSize) mkcpWriteBufferSize = v
+                        var mtuFloor = parseInt(mkcpMtu !== "" ? mkcpMtu : XrayConfigModel.mkcpDefaultMtu(), 10)
+                        var v = root.clampInt(textField.text, mtuFloor, 2147483647)
+                        if (v !== mkcpMaxSendingWindow) mkcpMaxSendingWindow = v
                         else if (textField.text !== v) textField.text = v
                         root.editDirty = false
                     }
-                }
-
-                SwitcherType {
-                    Layout.fillWidth: true
-                    Layout.margins: 16
-                    Layout.topMargin: 8
-                    text: qsTr("Congestion")
-                    checked: mkcpCongestion
-                    onToggled: mkcpCongestion = checked
                 }
             }
 
@@ -542,7 +559,7 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     text: xhttpUplinkDataPlacement
-                    descriptionText: qsTr("Header/Cookie apply only in Packet-up mode")
+                    descriptionText: qsTr("Where the uploaded data is carried in the request")
                     headerText: qsTr("UplinkDataPlacement")
                     drawerParent: root
                     listView: ListViewWithRadioButtonType {
@@ -769,13 +786,14 @@ PageType {
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
+            saveButton.forceActiveFocus()
             var errs = XrayConfigModel.validationErrors()
             if (errs.length > 0) {
                 PageController.showErrorMessage(errs.join("\n"))
                 return
             }
             var headerText = qsTr("Save settings?")
-            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {

@@ -37,9 +37,17 @@ namespace amnezia
         ServerLinuxKernelTooOld = 214,
         XrayServerConfigInvalid = 215,
         XrayServerNoVlessClients = 216,
-        XrayRealityKeysReadFailed = 217,
+        XrayKeysReadFailed = 217,
         ServerContainerRuntimeNotSupported = 218,
         ContainerRuntimeServiceNotRunning = 219,
+        XrayKeyMigrationFailed = 220,
+        XrayTlsNotSupported = 221,
+        XrayServerConfigRejected = 222,
+        XrayServerConfigRolledBack = 223,
+        XrayServerNotServing = 224,
+        ServerDataVolumeNotRemoved = 225,
+        XrayKeyGenerationFailed = 226,
+        XrayKeyMigrationNeedsConfirm = 227,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
