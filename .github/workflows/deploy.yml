@@ -522,7 +522,7 @@ jobs:
         xcode-version: '26.3.0'
 
     - name: 'Install Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
         host: 'mac'
@@ -818,7 +818,7 @@ jobs:
         submodules: 'true'
 
     - name: 'Install desktop Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -830,7 +830,7 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86_64 Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -842,7 +842,7 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_x86 Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -854,7 +854,7 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_armv7 Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
@@ -866,7 +866,7 @@ jobs:
         extra: '--base ${{ env.QT_MIRROR }}'
 
     - name: 'Install android_arm64_v8a Qt'
-      uses: jurplel/install-qt-action@v4
+      uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
         host: 'linux'
