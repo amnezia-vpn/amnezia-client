@@ -11,7 +11,7 @@ from pathlib import Path
 
 class AmneziaLibxray(ConanFile):
     name = "amnezia-libxray"
-    version = "1.0.2"
+    version = "1.0.3"
     settings = "os", "arch", "compiler"
 
     def export_sources(self):
@@ -33,7 +33,7 @@ class AmneziaLibxray(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amnezia-libxray/archive/refs/tags/v{self.version}.zip",
-            sha256="a434a84574b021c4bcd52d9edc906e5ec03eaaab98c192f683f84294b3e4e79c", strip_root=True
+            sha256="3b1194c2a76e73913fdae49983c40a219c45a164ebdae72ef1297469348de730", strip_root=True
         )
 
     def generate(self):
@@ -54,12 +54,15 @@ class AmneziaLibxray(ConanFile):
 
     def build(self):
         self._patch_sources()
-        self.run("./build.sh android")
+        if self.settings_build.os == "Windows":
+            self.run("bash build.sh android")
+        else:
+            self.run("./build.sh android")
 
     def package(self):
         copy(self, "libxray.aar", src=self.build_folder, dst=os.path.join(self.package_folder, "aar"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_extra_variables", {
-            "AMNEZIA_LIBXRAY_PATH": os.path.join(self.package_folder, "aar", "libxray.aar"),
+            "AMNEZIA_LIBXRAY_PATH": Path(self.package_folder, "aar", "libxray.aar").as_posix(),
         })

@@ -3,13 +3,6 @@ package org.amnezia.vpn
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.Dialog
-import android.graphics.Typeface
-import android.graphics.drawable.GradientDrawable
-import android.view.Gravity
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
@@ -63,7 +56,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import org.amnezia.vpn.protocol.getStatistics
 import org.amnezia.vpn.protocol.getStatus
 import org.amnezia.vpn.qt.QtAndroidController
@@ -97,6 +89,7 @@ class AmneziaActivity : QtActivity() {
     private var notificationStateReceiver: BroadcastReceiver? = null
     private lateinit var vpnServiceMessenger: IpcMessenger
     private var pfd: ParcelFileDescriptor? = null
+    private lateinit var billingRepository: BillingRepository
 
     private val actionResultHandlers = mutableMapOf<Int, ActivityResultHandler>()
     private val permissionRequestHandlers = mutableMapOf<Int, PermissionRequestHandler>()
@@ -107,7 +100,6 @@ class AmneziaActivity : QtActivity() {
     private var pendingOpenFileUri: String? = null
     private var openFileDeliveryScheduled = false
 
-    private var updateCoverDialog: Dialog? = null
 
     private val vpnServiceEventHandler: Handler by lazy(NONE) {
         object : Handler(Looper.getMainLooper()) {
@@ -215,6 +207,7 @@ class AmneziaActivity : QtActivity() {
         registerBroadcastReceivers()
         intent?.let(::processIntent)
         runBlocking { vpnProto = proto.await() }
+        billingRepository = BillingPaymentRepository(applicationContext)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -494,116 +487,6 @@ class AmneziaActivity : QtActivity() {
         notificationStateReceiver = null
         mainScope.cancel()
         super.onDestroy()
-    }
-
-    fun showUpdateCover() {
-        runOnUiThread {
-            if (isFinishing || isDestroyed || updateCoverDialog != null) return@runOnUiThread
-            val dialog = Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-            dialog.setCancelable(false)
-            val root = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setBackgroundColor(0xFF0E0E11.toInt())
-            }
-            dialog.setContentView(root)
-            dialog.show()
-            updateCoverDialog = dialog
-        }
-    }
-
-    fun hideUpdateCover() {
-        runOnUiThread {
-            updateCoverDialog?.dismiss()
-            updateCoverDialog = null
-        }
-    }
-
-    fun showUpdatePrompt(title: String, message: String, updateTitle: String, skipTitle: String, storeUrl: String) {
-        runOnUiThread {
-            if (isFinishing || isDestroyed) return@runOnUiThread
-
-            val dialog = updateCoverDialog ?: Dialog(this, android.R.style.Theme_Black_NoTitleBar_Fullscreen).also {
-                it.setCancelable(false)
-                it.show()
-                updateCoverDialog = it
-            }
-
-            val density = resources.displayMetrics.density
-            fun dp(value: Int) = (value * density).toInt()
-
-            val root = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setBackgroundColor(0xFF0E0E11.toInt())
-                setPadding(dp(32), dp(32), dp(32), dp(32))
-            }
-
-            val titleView = TextView(this).apply {
-                text = title
-                textSize = 22f
-                setTextColor(0xFFFFFFFF.toInt())
-                gravity = Gravity.CENTER
-                typeface = Typeface.create(typeface, Typeface.BOLD)
-            }
-
-            val messageView = TextView(this).apply {
-                text = message
-                textSize = 16f
-                setTextColor(0xFFC7C8CB.toInt())
-                gravity = Gravity.CENTER
-                setPadding(0, dp(16), 0, dp(28))
-            }
-
-            val updateButton = Button(this).apply {
-                text = updateTitle
-                isAllCaps = false
-                textSize = 17f
-                setTextColor(0xFF0E0E11.toInt())
-                stateListAnimator = null
-                background = GradientDrawable().apply {
-                    cornerRadius = dp(12).toFloat()
-                    setColor(0xFFFBB26A.toInt())
-                }
-                setOnClickListener {
-                    try {
-                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(storeUrl)))
-                    } catch (e: ActivityNotFoundException) {
-                        Log.w(TAG, "open store failed: ${e.message}")
-                    }
-                    hideUpdateCover()
-                }
-            }
-
-            val skipButton = Button(this).apply {
-                text = skipTitle
-                isAllCaps = false
-                textSize = 17f
-                setTextColor(0xFFD7D8DB.toInt())
-                stateListAnimator = null
-                background = GradientDrawable().apply {
-                    cornerRadius = dp(12).toFloat()
-                    setColor(0x00000000)
-                    setStroke(dp(1), 0xFF2C2D30.toInt())
-                }
-                setOnClickListener { hideUpdateCover() }
-            }
-
-            val updateParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
-            ).apply { topMargin = dp(8) }
-
-            val skipParams = LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(52)
-            ).apply { topMargin = dp(12) }
-
-            root.addView(titleView)
-            root.addView(messageView)
-            root.addView(updateButton, updateParams)
-            root.addView(skipButton, skipParams)
-
-            dialog.setContentView(root)
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -916,35 +799,47 @@ class AmneziaActivity : QtActivity() {
                         }
                     }
                     `package` = systemPickerPackage
+                    if (resolveActivity(packageManager) == null) {
+                        `package` = null
+                    }
                 }
             } else {
                 Intent(this@AmneziaActivity, TvFilePicker::class.java)
             }
 
-            try {
-                startActivityForResult(intent, OPEN_FILE_ACTION_CODE, ActivityResultHandler(
-                    onAny = {
-                        if (isOnTv() && it?.hasExtra("activityNotFound") == true) {
-                            showNoFileBrowserAlertDialog()
+            val resultHandler = ActivityResultHandler(
+                onAny = {
+                    if (isOnTv() && it?.hasExtra("activityNotFound") == true) {
+                        showNoFileBrowserAlertDialog()
+                    }
+                    val uri = it?.data?.let { u ->
+                        if (u.scheme == "content") {
+                            try { grantUriPermission(packageName, u, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
                         }
-                        val uri = it?.data?.let { u ->
-                            if (u.scheme == "content") {
-                                try { grantUriPermission(packageName, u, Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_: Exception) {}
-                            }
-                            u
-                        }?.toString() ?: ""
-                        Log.v(TAG, "Open file: $uri")
-                        if (uri.isNotEmpty()) {
-                            pendingOpenFileUri = uri
-                        } else {
-                            mainScope.launch {
-                                qtInitialized.await()
-                                QtAndroidController.onFileOpened(uri)
-                            }
+                        u
+                    }?.toString() ?: ""
+                    Log.v(TAG, "Open file: $uri")
+                    if (uri.isNotEmpty()) {
+                        pendingOpenFileUri = uri
+                    } else {
+                        mainScope.launch {
+                            qtInitialized.await()
+                            QtAndroidController.onFileOpened(uri)
                         }
                     }
-                ))
+                }
+            )
+
+            try {
+                startActivityForResult(intent, OPEN_FILE_ACTION_CODE, resultHandler)
             } catch (_: ActivityNotFoundException) {
+                if (intent.`package` != null) {
+                    intent.`package` = null
+                    try {
+                        startActivityForResult(intent, OPEN_FILE_ACTION_CODE, resultHandler)
+                        return@launch
+                    } catch (_: ActivityNotFoundException) {}
+                }
                 showNoFileBrowserAlertDialog()
                 mainScope.launch {
                     qtInitialized.await()
@@ -1118,15 +1013,9 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun getAppList(): String {
         Log.v(TAG, "Get app list")
-        var appList = ""
-        runBlocking {
-            mainScope.launch {
-                withContext(Dispatchers.IO) {
-                    appList = AppListProvider.getAppList(packageManager, packageName)
-                }
-            }.join()
+        return blockingCall(Dispatchers.IO) {
+            AppListProvider.getAppList(packageManager, packageName)
         }
-        return appList
     }
 
     @Suppress("unused")
@@ -1295,11 +1184,48 @@ class AmneziaActivity : QtActivity() {
         return super.dispatchTrackballEvent(ev)
     }
 
+    @Suppress("unused")
+    fun isPlay(): Boolean = BuildConfig.FLAVOR == "play"
+
+    @Suppress("unused")
+    fun getCountryCode(): String {
+        return blockingCall { billingRepository.getCountryCode() }
+    }
+
+    @Suppress("unused")
+    fun getSubscriptionPlans(): String {
+        return blockingCall { billingRepository.getSubscriptionPlans() }
+    }
+
+    @Suppress("unused")
+    fun purchaseSubscription(offerToken: String): String {
+        return blockingCall { billingRepository.purchaseSubscription(this@AmneziaActivity, offerToken) }
+    }
+
+    @Suppress("unused")
+    fun upgradeSubscription(offerToken: String, oldPurchaseToken: String): String {
+        Log.v(TAG, "Upgrade subscription")
+        return blockingCall {
+            billingRepository.upgradeSubscription(this@AmneziaActivity, offerToken, oldPurchaseToken)
+        }
+    }
+
+    @Suppress("unused")
+    fun acknowledgePurchase(purchaseToken: String): String {
+        Log.v(TAG, "Acknowledge purchase")
+        return blockingCall { billingRepository.acknowledge(purchaseToken) }
+    }
+
+    @Suppress("unused")
+    fun queryPurchases(): String {
+        return blockingCall { billingRepository.queryPurchases() }
+    }
+
     /**
      * Utils methods
      */
     private fun <T> blockingCall(
-        context: CoroutineContext = Dispatchers.Main.immediate,
+        context: CoroutineContext = Dispatchers.Default,
         block: suspend () -> T
     ) = runBlocking {
         mainScope.async(context) { block() }.await()

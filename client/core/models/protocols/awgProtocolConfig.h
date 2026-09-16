@@ -109,6 +109,7 @@ struct AwgProtocolConfig {
     QString serverProtocolVersion() const;
     QString clientProtocolVersion() const;
     static QString protocolVersionString(const QString &version);
+    static bool isToggleEnabled(const QString &value);
 
     bool hasClientConfig() const;
     void setClientConfig(const AwgClientConfig& config);

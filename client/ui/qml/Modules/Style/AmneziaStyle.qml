@@ -20,6 +20,8 @@ QtObject {
         readonly property color richBrown: '#633303'
         readonly property color deepBrown: '#402102'
         readonly property color vibrantRed: '#EB5757'
+        readonly property color vibrantGreen: '#3FBF6B'
+        readonly property color deepMagenta: '#950051'
         readonly property color darkCharcoal: '#261E1A'
         readonly property color pearlGray: '#EAEAEC'
 
@@ -35,5 +37,20 @@ QtObject {
         readonly property color translucentOnyxBlack: Qt.rgba(28/255, 29/255, 33/255, 0.13)
 
         readonly property string goldenApricotString: '#FBB26A'
+
+        readonly property color backgroundBase: '#101012'
+        readonly property color surfaceBase: '#18181B'
+        readonly property color surfaceHovered: '#232327'
+        readonly property color surfacePressed: '#2C2D30'
+        readonly property color surfaceInverse: '#E4E4E7'
+        readonly property color surfaceInverseHovered: '#D4D4D8'
+        readonly property color surfaceInversePressed: '#A1A1AA'
+        readonly property color textPrimary: '#FAFAFA'
+        readonly property color textTertiary: '#A1A1AA'
+        readonly property color textInverted: '#09090B'
+        readonly property color textStaticWhite: '#FFFFFF'
+        readonly property color borderSoft: '#3F3F46'
+        readonly property color accentSuccess: '#4ADE80'
+        readonly property color accentWarning: '#EAB308'
     }
 }

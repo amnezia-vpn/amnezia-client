@@ -42,7 +42,7 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
         return countryInfo.countryName;
     }
     case CountryImageCodeRole: {
-        return apiUtils::getCountryFlagCode(countryInfo.countryCode);
+        return apiUtils::getCountryFlagCode(countryInfo.countryCodeL10n, countryInfo.countryCode);
     }
     case IsIssuedRole: {
         return isIssued;
@@ -66,6 +66,7 @@ void ApiCountryModel::updateModel(const QJsonArray &countries, const QString &cu
 
         countryInfo.countryName = countryObject.value(apiDefs::key::serverCountryName).toString();
         countryInfo.countryCode = countryObject.value(apiDefs::key::serverCountryCode).toString();
+        countryInfo.countryCodeL10n = countryObject.value(apiDefs::key::serverCountryCodeL10n).toString();
 
         if (countryInfo.countryCode == currentCountryCode) {
             m_currentIndex = i;

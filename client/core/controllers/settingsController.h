@@ -59,6 +59,9 @@ public:
     bool isNewsNotificationsEnabled() const;
     void toggleNewsNotificationsEnabled(bool enable);
 
+    bool isAutoUpdateCheckEnabled() const;
+    void toggleAutoUpdateCheckEnabled(bool enable);
+
     bool isKillSwitchEnabled() const;
     void toggleKillSwitch(bool enable);
 

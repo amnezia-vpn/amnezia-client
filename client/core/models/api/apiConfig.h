@@ -19,6 +19,7 @@ struct ApiConfig
     QString serviceProtocol;
     QString userCountryCode;
     QString serverCountryCode;
+    QString serverCountryCodeL10n;
     QString serverCountryName;
     QString vpnKey;
     
