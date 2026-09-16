@@ -126,10 +126,6 @@ QVariant ApiCountryListModel::data(const QModelIndex &index, int role) const
         return row.isSectionHeader ? QStringLiteral("section") : QStringLiteral("country");
     case SectionKeyRole:
         return row.sectionKey;
-    case SectionTitleCountRole:
-        return sectionCount(row.sectionKey);
-    case IsSectionCollapsedRole:
-        return isSectionCollapsed(row.sectionKey);
     }
 
     if (row.locationIndex < 0 || row.locationIndex >= m_locations.size()) {
@@ -183,8 +179,6 @@ QHash<int, QByteArray> ApiCountryListModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[RowTypeRole] = "rowType";
     roles[SectionKeyRole] = "sectionKey";
-    roles[SectionTitleCountRole] = "sectionTitleCount";
-    roles[IsSectionCollapsedRole] = "isSectionCollapsed";
     roles[SourceIndexRole] = "sourceIndex";
     roles[CountryNameRole] = "countryName";
     roles[SourceCountryNameRole] = "sourceCountryName";
@@ -249,11 +243,6 @@ void ApiCountryListModel::setTabFilter(int filter)
     rebuild();
 }
 
-bool ApiCountryListModel::hasAllowlistLocations() const
-{
-    return std::any_of(m_locations.cbegin(), m_locations.cend(),
-                       [](const Location &location) { return location.isAllowlist; });
-}
 
 bool ApiCountryListModel::isSearchActive() const
 {
@@ -359,8 +348,6 @@ void ApiCountryListModel::setSectionCollapsed(const QString &sectionKey, bool co
         endInsertRows();
     }
 
-    const QModelIndex header = index(headerRow);
-    emit dataChanged(header, header, { IsSectionCollapsedRole, SectionTitleCountRole });
     notifyCollapsedChanged();
     emit layoutRebuilt();
 }

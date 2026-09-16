@@ -19,13 +19,11 @@ class ApiCountryListModel : public QAbstractListModel
 
 public:
     enum Roles {
-        RowTypeRole = Qt::UserRole + 1, //!< "section" or "country"
+        RowTypeRole = Qt::UserRole + 1,
         SectionKeyRole,
-        SectionTitleCountRole,          //!< locations in the section, shown while it is collapsed
-        IsSectionCollapsedRole,
         SourceIndexRole,
-        CountryNameRole,       //!< what the row shows
-        SourceCountryNameRole, //!< what the gateway called it, needed when switching location
+        CountryNameRole,
+        SourceCountryNameRole,
         CountryCodeRole,
         CountryImageCodeRole,
         IsCurrentRole,
@@ -54,7 +52,6 @@ public:
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
     Q_PROPERTY(int sortMode READ sortMode WRITE setSortMode NOTIFY sortModeChanged)
     Q_PROPERTY(int tabFilter READ tabFilter WRITE setTabFilter NOTIFY tabFilterChanged)
-    Q_PROPERTY(bool hasAllowlistLocations READ hasAllowlistLocations NOTIFY layoutRebuilt)
     Q_PROPERTY(bool isSearchActive READ isSearchActive NOTIFY searchTextChanged)
     Q_PROPERTY(bool hasResults READ hasResults NOTIFY layoutRebuilt)
     Q_PROPERTY(bool isGrouped READ isGrouped NOTIFY sortModeChanged)
@@ -68,7 +65,6 @@ public:
 
     int tabFilter() const;
     void setTabFilter(int filter);
-    bool hasAllowlistLocations() const;
 
     bool isSearchActive() const;
     bool hasResults() const;
@@ -98,9 +94,9 @@ protected:
 private:
     struct SearchIndex
     {
-        QStringList exact;  //!< aliases and the ISO code, tight form
-        QStringList spaced; //!< names and city, spaces kept for word-prefix matching
-        QStringList tight;  //!< every field without spaces, for substring matching
+        QStringList exact;
+        QStringList spaced;
+        QStringList tight;
     };
 
     struct Location
@@ -121,7 +117,7 @@ private:
     struct Row
     {
         bool isSectionHeader = false;
-        int locationIndex = -1; //!< -1 on a header row
+        int locationIndex = -1;
         QString sectionKey;
     };
 
@@ -141,8 +137,8 @@ private:
     QVector<Location> m_locations;
     QVector<Row> m_rows;
     QHash<QString, int> m_sectionCounts;
-    QHash<QString, QVector<int>> m_sectionOrder; //!< location indexes per section, in display order
-    QHash<QString, bool> m_collapsedSections; //!< session only, deliberately not persisted
+    QHash<QString, QVector<int>> m_sectionOrder;
+    QHash<QString, bool> m_collapsedSections;
 
     QString m_searchText;
     int m_sortMode = ByRegion;
@@ -150,4 +146,4 @@ private:
     int m_collapsedRevision = 0;
 };
 
-#endif // APICOUNTRYLISTMODEL_H
+#endif

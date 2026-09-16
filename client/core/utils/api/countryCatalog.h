@@ -14,13 +14,13 @@ namespace countryCatalog
 
     struct Entry
     {
-        QString code;        //!< catalog key: ISO code ("GB") or multi-location code ("us-east")
-        QString isoCode;     //!< country ISO code, used for the flag and for exact-match search
+        QString code;
+        QString isoCode;
         QString regionId;
-        QString subregionId; //!< empty when the region is not split
+        QString subregionId;
         QString nameEn;
         QString nameRu;
-        QString city;        //!< qualifier for multi-location countries: East, West, Montreal
+        QString city;
         QStringList aliases;
         bool countsTowardSplit = true;
     };
@@ -51,15 +51,12 @@ namespace countryCatalog
         const QVector<Region> &regions() const;
 
         const Entry *find(const QString &countryCode, const QString &isoCode) const;
-
-        int regionOrder(const QString &regionId) const;
-        int subregionOrder(const QString &regionId, const QString &subregionId) const;
         bool hasSubregions(const QString &regionId) const;
 
     private:
         QVector<Region> m_regions;
-        QHash<QString, Entry> m_byCode;   //!< upper-cased catalog key
-        QHash<QString, Entry> m_byIso;    //!< first entry seen per ISO code
+        QHash<QString, Entry> m_byCode;
+        QHash<QString, Entry> m_byIso;
         int m_splitThreshold = 15;
     };
 } // namespace countryCatalog

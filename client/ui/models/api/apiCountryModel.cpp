@@ -41,7 +41,6 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
     case CountryNameRole: {
         return countryInfo.countryName;
     }
-    case CountryIsoCodeRole:
     case CountryImageCodeRole: {
         return apiUtils::getCountryFlagCode(countryInfo.countryCodeL10n, countryInfo.countryCode);
     }
@@ -149,7 +148,6 @@ QHash<int, QByteArray> ApiCountryModel::roleNames() const
     QHash<int, QByteArray> roles;
     roles[CountryNameRole] = "countryName";
     roles[CountryCodeRole] = "countryCode";
-    roles[CountryIsoCodeRole] = "countryIsoCode";
     roles[CountryImageCodeRole] = "countryImageCode";
     roles[IsIssuedRole] = "isIssued";
     roles[IsWorkerExpiredRole] = "isWorkerExpired";

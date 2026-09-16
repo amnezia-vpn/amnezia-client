@@ -13,7 +13,6 @@ public:
     enum Roles {
         CountryNameRole = Qt::UserRole + 1,
         CountryCodeRole,
-        CountryIsoCodeRole,
         CountryImageCodeRole,
         IsIssuedRole,
         IsWorkerExpiredRole

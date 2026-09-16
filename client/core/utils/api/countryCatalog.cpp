@@ -157,31 +157,7 @@ const Entry *Catalog::find(const QString &countryCode, const QString &isoCode) c
     return nullptr;
 }
 
-int Catalog::regionOrder(const QString &regionId) const
-{
-    for (const Region &region : m_regions) {
-        if (region.id == regionId) {
-            return region.order;
-        }
-    }
-    return std::numeric_limits<int>::max();
-}
 
-int Catalog::subregionOrder(const QString &regionId, const QString &subregionId) const
-{
-    for (const Region &region : m_regions) {
-        if (region.id != regionId) {
-            continue;
-        }
-        for (const Subregion &subregion : region.subregions) {
-            if (subregion.id == subregionId) {
-                return subregion.order;
-            }
-        }
-        break;
-    }
-    return std::numeric_limits<int>::max();
-}
 
 bool Catalog::hasSubregions(const QString &regionId) const
 {
@@ -193,4 +169,4 @@ bool Catalog::hasSubregions(const QString &regionId) const
     return false;
 }
 
-} // namespace countryCatalog
+}
