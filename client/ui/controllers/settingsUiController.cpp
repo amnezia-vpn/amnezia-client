@@ -427,3 +427,8 @@ void SettingsUiController::disableLocalProxy()
 {
     m_settingsController->disableLocalProxy();
 }
+
+int SettingsUiController::localProxyActivePort() const
+{
+    return m_settingsController->localProxyActivePort();
+}

@@ -12,6 +12,7 @@
 #include "portAvailabilityHelper.h"
 #include "version.h"
 
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonParseError>
@@ -24,7 +25,7 @@ namespace
 {
     std::nullopt_t fail(QString &errorDescription, const QString &message)
     {
-        qCWarning(lcLocalProxy) << message;
+        qWarning() << message;
         errorDescription = message;
         return std::nullopt;
     }
@@ -82,9 +83,11 @@ std::optional<ProxyConfigManager::ConfigData> ProxyConfigManager::buildConfig(QS
     data.parsedConfig = doc.object();
     if (applyProxyPortToConfig(data.parsedConfig, *proxyPort)) {
         data.serializedConfig = QString::fromUtf8(QJsonDocument(data.parsedConfig).toJson(QJsonDocument::Compact));
+        data.proxyPort = *proxyPort;
     } else {
-        qCWarning(lcLocalProxy) << "Failed to override local proxy inbound port, using original config";
+        qWarning() << "Failed to override local proxy inbound port, using original config";
         data.serializedConfig = *serializedConfig;
+        data.proxyPort = data.parsedConfig.value(QLatin1String("inbounds")).toArray().at(0).toObject().value(QLatin1String("port")).toInt();
     }
 
     return data;
@@ -97,16 +100,21 @@ std::optional<int> ProxyConfigManager::selectProxyPort(QString &errorDescription
         port = localProxy::defaultProxyPort;
     }
 
-    if (PortAvailabilityHelper::isPortAvailable(port)) {
+    if (PortAvailabilityHelper::waitForPort(port, localProxy::portReleaseWaitMs)) {
         return port;
     }
 
-    const bool canAutoSelect = !m_appSettingsRepository->isLocalProxyPortUserDefined() && port == localProxy::defaultProxyPort;
-    if (!canAutoSelect) {
+    if (m_appSettingsRepository->isLocalProxyPortUserDefined()) {
         return fail(errorDescription, QStringLiteral("Local proxy port %1 is already in use").arg(port));
     }
 
-    const auto freePort = PortAvailabilityHelper::findFirstAvailablePort(localProxy::defaultProxyPort + 1, localProxy::proxyPortMax);
+    std::optional<int> freePort;
+    if (port != localProxy::defaultProxyPort && PortAvailabilityHelper::isPortAvailable(localProxy::defaultProxyPort)) {
+        freePort = localProxy::defaultProxyPort;
+    } else {
+        freePort = PortAvailabilityHelper::findFirstAvailablePort(localProxy::defaultProxyPort + 1, localProxy::proxyPortMax);
+    }
+
     if (!freePort) {
         return fail(errorDescription,
                     QStringLiteral("No available local proxy port in range %1-%2")
@@ -114,6 +122,7 @@ std::optional<int> ProxyConfigManager::selectProxyPort(QString &errorDescription
                             .arg(localProxy::proxyPortMax));
     }
 
+    qDebug() << "Local proxy port" << port << "is busy, using" << *freePort;
     return freePort;
 }
 
@@ -232,6 +241,6 @@ std::optional<QString> ProxyConfigManager::fetchSerializedXrayConfigFromGateway(
         return fail(errorDescription, QStringLiteral("Gateway response lacks Xray last_config payload"));
     }
 
-    qCInfo(lcLocalProxy) << "Fetched Xray config from gateway";
+    qDebug() << "Fetched Xray config from gateway";
     return serializedConfig;
 }

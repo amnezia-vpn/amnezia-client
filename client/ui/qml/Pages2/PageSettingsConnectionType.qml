@@ -62,7 +62,7 @@ PageType {
                 Layout.preferredHeight: visible ? implicitHeight : 0
 
                 text: qsTr("Local proxy")
-                descriptionText: SettingsController.isLocalProxyHttpEnabled ? qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyPort || 0)
+                descriptionText: SettingsController.isLocalProxyHttpEnabled ? qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyActivePort > 0 ? SettingsController.localProxyActivePort : SettingsController.localProxyPort)
                                                                             : qsTr("Off")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 

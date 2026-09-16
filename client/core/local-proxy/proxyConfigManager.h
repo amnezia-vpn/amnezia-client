@@ -16,6 +16,7 @@ public:
     {
         QString serializedConfig;
         QJsonObject parsedConfig;
+        int proxyPort = 0;
     };
 
     ProxyConfigManager(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository);

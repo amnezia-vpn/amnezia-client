@@ -100,6 +100,8 @@ public:
     int findFirstAvailableLocalProxyPort(int startPort) const;
     bool enableLocalProxy(const QString &ownerId, int port);
     void disableLocalProxy();
+    int localProxyActivePort() const;
+    void setLocalProxyActivePort(int port);
 
 signals:
     void siteSplitTunnelingRouteModeChanged(RouteMode mode);
@@ -120,6 +122,7 @@ private:
     QString m_appVersion;
     QDateTime m_loggingDisableDate;
     bool m_isDevModeEnabled = false;
+    int m_localProxyActivePort = 0;
 };
 
 #endif

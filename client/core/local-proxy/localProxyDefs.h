@@ -1,9 +1,7 @@
 #ifndef LOCALPROXYDEFS_H
 #define LOCALPROXYDEFS_H
 
-#include <QLoggingCategory>
-
-Q_DECLARE_LOGGING_CATEGORY(lcLocalProxy)
+#include <QtGlobal>
 
 namespace amnezia::localProxy
 {
@@ -11,6 +9,7 @@ namespace amnezia::localProxy
     constexpr int proxyPortMin = 1024;
     constexpr int proxyPortMax = 65535;
     constexpr quint16 apiPort = 49490;
+    constexpr int portReleaseWaitMs = 800;
 }
 
 #endif // LOCALPROXYDEFS_H

@@ -4,9 +4,9 @@
 #include "core/repositories/secureServersRepository.h"
 #include "localProxyDefs.h"
 
-using namespace amnezia;
+#include <QDebug>
 
-Q_LOGGING_CATEGORY(lcLocalProxy, "amnezia.localproxy")
+using namespace amnezia;
 
 ProxyServer::ProxyServer(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
                          QObject *parent)
@@ -14,6 +14,8 @@ ProxyServer::ProxyServer(SecureServersRepository *serversRepository, SecureAppSe
       m_appSettingsRepository(appSettingsRepository),
       m_service(new ProxyService(serversRepository, appSettingsRepository))
 {
+    connect(m_service.data(), &ProxyService::xrayStatusChanged, this,
+            [this](bool running, int port) { emit activePortChanged(running ? port : 0); });
 }
 
 ProxyServer::~ProxyServer()
@@ -24,7 +26,7 @@ ProxyServer::~ProxyServer()
 void ProxyServer::applySettings()
 {
     if (!m_appSettingsRepository || !m_appSettingsRepository->isLocalProxyHttpEnabled()) {
-        qCInfo(lcLocalProxy) << "Local proxy is disabled";
+        qDebug() << "Local proxy is disabled";
         stop();
         return;
     }
@@ -39,7 +41,7 @@ void ProxyServer::applySettings()
         return;
     }
 
-    qCInfo(lcLocalProxy) << "Local proxy is running on 127.0.0.1:" << m_currentApiPort;
+    qDebug() << "Local proxy is running on 127.0.0.1:" << m_currentApiPort;
 }
 
 void ProxyServer::onServerEdited(const QString &serverId)
@@ -48,7 +50,7 @@ void ProxyServer::onServerEdited(const QString &serverId)
         return;
     }
 
-    qCInfo(lcLocalProxy) << "Owner server edited, restarting Xray";
+    qDebug() << "Owner server edited, restarting Xray";
     if (m_service->restartXray()) {
         m_currentProxyPort = m_appSettingsRepository->localProxyPort();
     } else {
@@ -107,7 +109,7 @@ bool ProxyServer::syncXray()
     if (!m_service->isXrayRunning()) {
         synced = m_service->startXray();
     } else if (m_currentProxyPort != proxyPort) {
-        qCInfo(lcLocalProxy) << "Proxy port changed from" << m_currentProxyPort << "to" << proxyPort;
+        qDebug() << "Proxy port changed from" << m_currentProxyPort << "to" << proxyPort;
         synced = m_service->restartXray();
     } else {
         return true;
@@ -121,7 +123,7 @@ bool ProxyServer::syncXray()
 
 void ProxyServer::disableWithError(const QString &message)
 {
-    qCWarning(lcLocalProxy) << message;
+    qWarning() << message;
 
     if (m_appSettingsRepository && m_appSettingsRepository->isLocalProxyHttpEnabled()) {
         m_appSettingsRepository->setLocalProxyHttpEnabled(false);

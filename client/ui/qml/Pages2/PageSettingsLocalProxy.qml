@@ -19,24 +19,19 @@ PageType {
 
     property string portValidationError: ""
     property int pendingStartRequestedPort: -1
-    property int pendingStartAutoSelectedPort: -1
     property bool pendingStartVpnWasActive: false
     property bool pendingEnableAfterVpnDisconnect: false
     property string pendingEnableServerId: ""
     property int pendingEnableRequestedPort: -1
-    property int pendingEnableAutoSelectedPort: -1
-    property int pendingEnablePortToUse: -1
 
     function clearPendingEnableAfterVpnDisconnect() {
         root.pendingEnableAfterVpnDisconnect = false
         root.pendingEnableServerId = ""
         root.pendingEnableRequestedPort = -1
-        root.pendingEnableAutoSelectedPort = -1
-        root.pendingEnablePortToUse = -1
     }
 
-    function enableLocalProxyNow(serverId, requestedPort, autoSelectedPort, portToEnable, vpnWasActive) {
-        if (!SettingsController.enableLocalProxy(serverId, portToEnable)) {
+    function enableLocalProxyNow(serverId, requestedPort, vpnWasActive) {
+        if (!SettingsController.enableLocalProxy(serverId, requestedPort)) {
             PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2).")
                 .arg(root.localProxyPortMin)
                 .arg(root.localProxyPortMax))
@@ -44,7 +39,6 @@ PageType {
         }
 
         root.pendingStartRequestedPort = requestedPort
-        root.pendingStartAutoSelectedPort = autoSelectedPort
         root.pendingStartVpnWasActive = vpnWasActive
         startSuccessToastTimer.restart()
         return true
@@ -107,40 +101,26 @@ PageType {
                 return
             }
 
-            let autoSelectedPort = -1
-            if (SettingsController.isLocalProxyPortBusy(requestedPort)) {
-                if (SettingsController.isLocalProxyPortUserDefined()
-                        || requestedPort !== root.defaultLocalProxyPort) {
-                    PageController.showNotificationMessage(qsTr("Port %1 is already in use on this device. Choose another one")
-                        .arg(requestedPort))
-                    return
-                }
-
-                autoSelectedPort = SettingsController.findFirstAvailableLocalProxyPort(root.defaultLocalProxyPort + 1)
-                if (autoSelectedPort <= 0) {
-                    PageController.showNotificationMessage(qsTr("Port %1 is already in use on this device. Choose another one")
-                        .arg(requestedPort))
-                    return
-                }
+            if (SettingsController.isLocalProxyPortBusy(requestedPort)
+                    && SettingsController.isLocalProxyPortUserDefined()) {
+                PageController.showNotificationMessage(qsTr("Port %1 is already in use on this device. Choose another one")
+                    .arg(requestedPort))
+                return
             }
 
-            const portToEnable = autoSelectedPort > 0 ? autoSelectedPort : requestedPort
             if (wasVpnActive) {
                 root.pendingEnableAfterVpnDisconnect = true
                 root.pendingEnableServerId = serverId
                 root.pendingEnableRequestedPort = requestedPort
-                root.pendingEnableAutoSelectedPort = autoSelectedPort
-                root.pendingEnablePortToUse = portToEnable
                 ConnectionController.closeConnection()
                 return
             }
 
-            root.enableLocalProxyNow(serverId, requestedPort, autoSelectedPort, portToEnable, false)
+            root.enableLocalProxyNow(serverId, requestedPort, false)
         } else {
             startSuccessToastTimer.stop()
             root.clearPendingEnableAfterVpnDisconnect()
             root.pendingStartRequestedPort = -1
-            root.pendingStartAutoSelectedPort = -1
             root.pendingStartVpnWasActive = false
             SettingsController.disableLocalProxy()
             PageController.showNotificationMessage(qsTr("Local proxy stopped"))
@@ -263,7 +243,10 @@ PageType {
                 textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
 
                 function syncPortValue() {
-                    const port = SettingsController.localProxyPort
+                    let port = SettingsController.localProxyPort
+                    if (SettingsController.isLocalProxyHttpEnabled && SettingsController.localProxyActivePort > 0) {
+                        port = SettingsController.localProxyActivePort
+                    }
                     const isValidPort = port >= root.localProxyPortMin && port <= root.localProxyPortMax
                     textField.text = isValidPort ? port.toString() : ""
                 }
@@ -274,6 +257,9 @@ PageType {
                 }
 
                 function effectivePortText() {
+                    if (SettingsController.isLocalProxyHttpEnabled && SettingsController.localProxyActivePort > 0) {
+                        return SettingsController.localProxyActivePort.toString()
+                    }
                     const value = portValue()
                     if (value >= root.localProxyPortMin && value <= root.localProxyPortMax) {
                         return value.toString()
@@ -352,20 +338,23 @@ PageType {
                 return
             }
 
-            if (root.pendingStartAutoSelectedPort > 0) {
+            const activePort = SettingsController.localProxyActivePort
+            const requestedPort = root.pendingStartRequestedPort
+            const shownPort = activePort > 0 ? activePort : requestedPort
+
+            if (activePort > 0 && requestedPort > 0 && activePort !== requestedPort) {
                 PageController.showNotificationMessage(qsTr("Port %1 is in use — selected free port %2.")
-                    .arg(root.defaultLocalProxyPort)
-                    .arg(root.pendingStartAutoSelectedPort))
-            } else if (root.pendingStartVpnWasActive && root.pendingStartRequestedPort > 0) {
+                    .arg(requestedPort)
+                    .arg(activePort))
+            } else if (root.pendingStartVpnWasActive && shownPort > 0) {
                 PageController.showNotificationMessage(qsTr("VPN turned off. Local proxy is running: 127.0.0.1:%1")
-                    .arg(root.pendingStartRequestedPort))
-            } else if (root.pendingStartRequestedPort > 0) {
+                    .arg(shownPort))
+            } else if (shownPort > 0) {
                 PageController.showNotificationMessage(qsTr("Local proxy is running: 127.0.0.1:%1")
-                    .arg(root.pendingStartRequestedPort))
+                    .arg(shownPort))
             }
 
             root.pendingStartRequestedPort = -1
-            root.pendingStartAutoSelectedPort = -1
             root.pendingStartVpnWasActive = false
         }
     }
@@ -384,11 +373,9 @@ PageType {
 
             const serverId = root.pendingEnableServerId
             const requestedPort = root.pendingEnableRequestedPort
-            const autoSelectedPort = root.pendingEnableAutoSelectedPort
-            const portToEnable = root.pendingEnablePortToUse
             root.clearPendingEnableAfterVpnDisconnect()
 
-            root.enableLocalProxyNow(serverId, requestedPort, autoSelectedPort, portToEnable, true)
+            root.enableLocalProxyNow(serverId, requestedPort, true)
         }
     }
 
@@ -405,7 +392,6 @@ PageType {
         function onLocalProxyStartFailed(message) {
             startSuccessToastTimer.stop()
             root.pendingStartRequestedPort = -1
-            root.pendingStartAutoSelectedPort = -1
             root.pendingStartVpnWasActive = false
             PageController.showNotificationMessage(message)
         }

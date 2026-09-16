@@ -1,16 +1,12 @@
 #include "proxyService.h"
 
-#include "localProxyDefs.h"
+#include <QDebug>
+
 
 ProxyService::ProxyService(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
                            QObject *parent)
     : QObject(parent), m_configManager(serversRepository, appSettingsRepository)
 {
-}
-
-QJsonObject ProxyService::config() const
-{
-    return m_cachedConfig;
 }
 
 bool ProxyService::startXray()
@@ -26,13 +22,13 @@ bool ProxyService::startXray()
     }
 
     if (!m_engine.start(configData->serializedConfig)) {
-        qCWarning(lcLocalProxy) << "Failed to start Xray:" << m_engine.lastError();
+        qWarning() << "Failed to start Xray:" << m_engine.lastError();
         return false;
     }
 
-    m_cachedConfig = configData->parsedConfig;
-    qCInfo(lcLocalProxy) << "Xray started";
-    emit xrayStatusChanged(true);
+    m_activePort = configData->proxyPort;
+    qDebug() << "Xray started on port" << m_activePort;
+    emit xrayStatusChanged(true, m_activePort);
     return true;
 }
 
@@ -41,21 +37,21 @@ bool ProxyService::stopXray()
     const bool wasRunning = m_engine.isRunning();
 
     if (!m_engine.stop()) {
-        qCWarning(lcLocalProxy) << "Failed to stop Xray:" << m_engine.lastError();
+        qWarning() << "Failed to stop Xray:" << m_engine.lastError();
         return false;
     }
 
-    m_cachedConfig = QJsonObject();
+    m_activePort = 0;
     if (wasRunning) {
-        qCInfo(lcLocalProxy) << "Xray stopped";
-        emit xrayStatusChanged(false);
+        qDebug() << "Xray stopped";
+        emit xrayStatusChanged(false, 0);
     }
     return true;
 }
 
 bool ProxyService::restartXray()
 {
-    qCInfo(lcLocalProxy) << "Restarting Xray with updated config";
+    qDebug() << "Restarting Xray with updated config";
 
     if (!stopXray()) {
         return false;
@@ -67,4 +63,9 @@ bool ProxyService::restartXray()
 bool ProxyService::isXrayRunning() const
 {
     return m_engine.isRunning();
+}
+
+int ProxyService::activePort() const
+{
+    return m_engine.isRunning() ? m_activePort : 0;
 }

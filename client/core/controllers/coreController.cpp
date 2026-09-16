@@ -62,6 +62,7 @@ void CoreController::initLocalProxy()
             [this](const QString &serverId, int) { m_proxyServer->onServerRemoved(serverId); });
 
     connect(m_proxyServer.data(), &ProxyServer::startFailed, m_settingsController, &SettingsController::localProxyStartFailed);
+    connect(m_proxyServer.data(), &ProxyServer::activePortChanged, m_settingsController, &SettingsController::setLocalProxyActivePort);
     connect(m_connectionController, &ConnectionController::localProxyStoppedBecauseVpnTurnedOn, m_pageController,
             &PageController::showNotificationMessage);
 
