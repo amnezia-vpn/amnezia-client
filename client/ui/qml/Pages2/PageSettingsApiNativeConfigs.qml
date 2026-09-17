@@ -173,44 +173,17 @@ PageType {
 
             spacing: 4
 
-            Item {
+            BackButtonType {
+                id: backButton
+                objectName: "backButton"
+
                 Layout.fillWidth: true
                 Layout.topMargin: 20 + PageController.safeAreaTopMargin
-                Layout.preferredHeight: backButton.implicitHeight
 
-                BackButtonType {
-                    id: backButton
-                    objectName: "backButton"
-
-                    anchors.left: parent.left
-                    anchors.right: settingsButton.left
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    onActiveFocusChanged: {
-                        if (backButton.enabled && backButton.activeFocus) {
-                            menuContent.positionViewAtBeginning()
-                        }
+                onActiveFocusChanged: {
+                    if (backButton.enabled && backButton.activeFocus) {
+                        menuContent.positionViewAtBeginning()
                     }
-                }
-
-                ImageButtonType {
-                    id: settingsButton
-                    objectName: "settingsButton"
-
-                    anchors.right: parent.right
-                    anchors.rightMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    implicitWidth: 40
-                    implicitHeight: 40
-
-                    hoverEnabled: true
-                    image: "qrc:/images/controls/settings.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    onClicked: PageController.closePage()
-                    Keys.onEnterPressed: PageController.closePage()
-                    Keys.onReturnPressed: PageController.closePage()
                 }
             }
 
