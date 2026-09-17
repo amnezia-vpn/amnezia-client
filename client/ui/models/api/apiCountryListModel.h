@@ -37,12 +37,6 @@ public:
     };
     Q_ENUM(SortMode)
 
-    enum TabFilter {
-        AllLocations = 0,
-        AllowlistLocations = 1
-    };
-    Q_ENUM(TabFilter)
-
     explicit ApiCountryListModel(ApiCountryModel *source, SecureAppSettingsRepository *settings,
                                  const QString &listId, QObject *parent = nullptr);
 
@@ -51,7 +45,6 @@ public:
 
     Q_PROPERTY(QString searchText READ searchText WRITE setSearchText NOTIFY searchTextChanged)
     Q_PROPERTY(int sortMode READ sortMode WRITE setSortMode NOTIFY sortModeChanged)
-    Q_PROPERTY(int tabFilter READ tabFilter WRITE setTabFilter NOTIFY tabFilterChanged)
     Q_PROPERTY(bool isSearchActive READ isSearchActive NOTIFY searchTextChanged)
     Q_PROPERTY(bool hasResults READ hasResults NOTIFY layoutRebuilt)
     Q_PROPERTY(bool isGrouped READ isGrouped NOTIFY sortModeChanged)
@@ -62,9 +55,6 @@ public:
 
     int sortMode() const;
     void setSortMode(int mode);
-
-    int tabFilter() const;
-    void setTabFilter(int filter);
 
     bool isSearchActive() const;
     bool hasResults() const;
@@ -84,7 +74,6 @@ public slots:
 signals:
     void searchTextChanged();
     void sortModeChanged();
-    void tabFilterChanged();
     void layoutRebuilt();
     void collapsedRevisionChanged();
 
@@ -110,7 +99,6 @@ private:
         QString countryCode;
         QString imageCode;
         bool countsTowardSplit = true;
-        bool isAllowlist = false;
         SearchIndex search;
     };
 
@@ -142,7 +130,6 @@ private:
 
     QString m_searchText;
     int m_sortMode = ByRegion;
-    int m_tabFilter = AllLocations;
     int m_collapsedRevision = 0;
 };
 

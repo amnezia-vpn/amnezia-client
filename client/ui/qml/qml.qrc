@@ -5,7 +5,6 @@
         <file>Components/ConnectButton.qml</file>
         <file>Components/ConnectionTypeSelectionDrawer.qml</file>
         <file>Components/CountrySearchField.qml</file>
-        <file>Components/CountryFilterTabs.qml</file>
         <file>Components/CountrySectionHeader.qml</file>
         <file>Components/CountriesEmptyState.qml</file>
         <file>Components/SortCountriesDrawer.qml</file>

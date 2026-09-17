@@ -16,13 +16,6 @@ namespace
 
     constexpr QLatin1String sectionKeySeparator("/");
 
-    constexpr QLatin1String allowlistMarker("[Allowlist]");
-
-    bool isAllowlistName(const QString &countryName)
-    {
-        return countryName.contains(allowlistMarker, Qt::CaseInsensitive);
-    }
-
     QString normalizeSpaced(const QString &text)
     {
         QString result;
@@ -226,24 +219,6 @@ void ApiCountryListModel::setSortMode(int mode)
     rebuild();
 }
 
-int ApiCountryListModel::tabFilter() const
-{
-    return m_tabFilter;
-}
-
-void ApiCountryListModel::setTabFilter(int filter)
-{
-    const int normalized = filter == AllowlistLocations ? AllowlistLocations : AllLocations;
-    if (m_tabFilter == normalized) {
-        return;
-    }
-    m_tabFilter = normalized;
-    logger.debug() << "tabFilter ->" << (m_tabFilter == AllLocations ? "all" : "allowlist");
-    emit tabFilterChanged();
-    rebuild();
-}
-
-
 bool ApiCountryListModel::isSearchActive() const
 {
     return !normalizeTight(m_searchText).isEmpty();
@@ -400,7 +375,6 @@ void ApiCountryListModel::reloadLocations()
         location.sourceIndex = i;
         location.sourceName = countryInfo.countryName;
         location.displayName = countryInfo.countryName;
-        location.isAllowlist = isAllowlistName(countryInfo.countryName);
         location.countryCode = countryInfo.countryCode;
         location.imageCode = apiUtils::getCountryFlagCode(countryInfo.countryCodeL10n, countryInfo.countryCode);
 
@@ -525,9 +499,6 @@ void ApiCountryListModel::rebuild()
     QHash<QString, QVector<Candidate>> grouped;
 
     for (int i = 0; i < m_locations.size(); ++i) {
-        if (m_tabFilter == AllowlistLocations && !m_locations.at(i).isAllowlist) {
-            continue;
-        }
         const int level = matchLevel(m_locations.at(i), spacedQuery, tightQuery);
         if (level == 0) {
             continue;

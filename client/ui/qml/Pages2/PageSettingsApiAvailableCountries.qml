@@ -405,32 +405,6 @@ PageType {
                 }
             }
 
-            CountryFilterTabs {
-                id: filterTabs
-
-                listModel: ApiCountryListModel
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
-            }
-
-            WarningType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 12
-
-                backGroundColor: AmneziaStyle.color.surfaceBase
-
-                textString: qsTr("Connecting through these countries bypasses allowlist restrictions")
-
-                iconPath: "qrc:/images/controls/info.svg"
-
-                visible: ApiCountryListModel.tabFilter === 1
-            }
-
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
