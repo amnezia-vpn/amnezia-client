@@ -11,7 +11,6 @@
 #include "core/utils/api/countryCatalog.h"
 
 class ApiCountryModel;
-class SecureAppSettingsRepository;
 
 class ApiCountryListModel : public QAbstractListModel
 {
@@ -37,8 +36,8 @@ public:
     };
     Q_ENUM(SortMode)
 
-    explicit ApiCountryListModel(ApiCountryModel *source, SecureAppSettingsRepository *settings,
-                                 const QString &listId, QObject *parent = nullptr);
+    explicit ApiCountryListModel(ApiCountryModel *source, const QString &listId,
+                                 QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -55,6 +54,8 @@ public:
 
     int sortMode() const;
     void setSortMode(int mode);
+
+    QString listId() const;
 
     bool isSearchActive() const;
     bool hasResults() const;
@@ -118,7 +119,6 @@ private:
     int matchLevel(const Location &location, const QString &spacedQuery, const QString &tightQuery) const;
 
     QPointer<ApiCountryModel> m_source;
-    QPointer<SecureAppSettingsRepository> m_settings;
     QString m_listId;
     countryCatalog::Catalog m_catalog;
 

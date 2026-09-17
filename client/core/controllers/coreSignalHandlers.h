@@ -20,6 +20,7 @@ private:
     void initExportControllerHandler();
     void initImportControllerHandler();
     void initApiCountryModelUpdateHandler();
+    void initCountryListSortModeHandler();
     void initSubscriptionRefreshHandler();
     void initAdminConfigRevokedHandler();
     void initPassphraseRequestHandler();

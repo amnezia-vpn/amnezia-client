@@ -125,11 +125,10 @@ void CoreController::initModels()
     m_apiCountryModel = new ApiCountryModel(this);
     setQmlContextProperty("ApiCountryModel", m_apiCountryModel);
 
-    m_apiCountryListModel = new ApiCountryListModel(m_apiCountryModel, m_appSettingsRepository, "picker", this);
+    m_apiCountryListModel = new ApiCountryListModel(m_apiCountryModel, "picker", this);
     setQmlContextProperty("ApiCountryListModel", m_apiCountryListModel);
 
-    m_apiConfigsCountryListModel =
-            new ApiCountryListModel(m_apiCountryModel, m_appSettingsRepository, "nativeConfigs", this);
+    m_apiConfigsCountryListModel = new ApiCountryListModel(m_apiCountryModel, "nativeConfigs", this);
     setQmlContextProperty("ApiConfigsCountryListModel", m_apiConfigsCountryListModel);
 
     m_apiSubscriptionPlansModel = new ApiSubscriptionPlansModel(this);

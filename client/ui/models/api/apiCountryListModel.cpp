@@ -6,7 +6,6 @@
 #include <QLocale>
 
 #include "apiCountryModel.h"
-#include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/api/apiUtils.h"
 #include "logger.h"
 
@@ -66,22 +65,17 @@ namespace
     }
 }
 
-ApiCountryListModel::ApiCountryListModel(ApiCountryModel *source, SecureAppSettingsRepository *settings,
-                                         const QString &listId, QObject *parent)
-    : QAbstractListModel(parent), m_source(source), m_settings(settings), m_listId(listId)
+ApiCountryListModel::ApiCountryListModel(ApiCountryModel *source, const QString &listId, QObject *parent)
+    : QAbstractListModel(parent), m_source(source), m_listId(listId)
 {
     m_catalog = countryCatalog::Catalog::bundled();
     if (m_catalog.isEmpty()) {
         logger.error() << "the country catalog is empty, every location will land in the fallback section";
     }
 
-    if (m_settings) {
-        m_sortMode = m_settings->countryListSortMode(m_listId) == Alphabetical ? Alphabetical : ByRegion;
-    }
     logger.debug() << "list:" << m_listId
                    << "catalog regions:" << m_catalog.regions().size()
-                   << "splitThreshold:" << m_catalog.splitThreshold()
-                   << "restored sortMode:" << m_sortMode;
+                   << "splitThreshold:" << m_catalog.splitThreshold();
 
     if (m_source) {
         connect(m_source, &ApiCountryModel::modelReset, this, [this]() {
@@ -212,11 +206,13 @@ void ApiCountryListModel::setSortMode(int mode)
     }
     m_sortMode = normalized;
     logger.debug() << "sortMode ->" << (m_sortMode == ByRegion ? "byRegion" : "alphabetical");
-    if (m_settings) {
-        m_settings->setCountryListSortMode(m_listId, m_sortMode);
-    }
     emit sortModeChanged();
     rebuild();
+}
+
+QString ApiCountryListModel::listId() const
+{
+    return m_listId;
 }
 
 bool ApiCountryListModel::isSearchActive() const
