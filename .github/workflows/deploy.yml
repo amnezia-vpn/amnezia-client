@@ -833,7 +833,7 @@ jobs:
       uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
-        host: 'linux'
+        host: 'all_os'
         target: 'android'
         arch: 'android_x86_64'
         modules: ${{ env.QT_MODULES }}
@@ -845,7 +845,7 @@ jobs:
       uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
-        host: 'linux'
+        host: 'all_os'
         target: 'android'
         arch: 'android_x86'
         modules: ${{ env.QT_MODULES }}
@@ -857,7 +857,7 @@ jobs:
       uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
-        host: 'linux'
+        host: 'all_os'
         target: 'android'
         arch: 'android_armv7'
         modules: ${{ env.QT_MODULES }}
@@ -869,7 +869,7 @@ jobs:
       uses: jurplel/install-qt-action@v4.3.1
       with:
         version: ${{ env.QT_VERSION }}
-        host: 'linux'
+        host: 'all_os'
         target: 'android'
         arch: 'android_arm64_v8a'
         modules: ${{ env.QT_MODULES }}
@@ -1466,7 +1466,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
-          host: 'linux'
+          host: 'all_os'
           target: 'android'
           arch: 'android_x86_64'
           modules: ${{ env.QT_MODULES }}
