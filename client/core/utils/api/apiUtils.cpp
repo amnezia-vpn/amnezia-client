@@ -117,6 +117,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
 {
     const int httpStatusCodeConflict = 409;
     const int httpStatusCodeNotFound = 404;
+    const int httpStatusCodeGone = 410;
     const int httpStatusCodeNotImplemented = 501;
     const int httpStatusCodePaymentRequired = 402;
     const int httpStatusCodeTooManyRequests = 429;
@@ -151,7 +152,7 @@ amnezia::ErrorCode apiUtils::checkNetworkReplyErrors(const QList<QSslError> &ssl
             }
             return amnezia::ErrorCode::ApiConfigLimitError;
         }
-        if (httpStatusFromBody == httpStatusCodeNotFound) {
+        if (httpStatusFromBody == httpStatusCodeNotFound || httpStatusFromBody == httpStatusCodeGone) {
             return amnezia::ErrorCode::ApiNotFoundError;
         }
         if (httpStatusFromBody == httpStatusCodeRequestTimeout) {
