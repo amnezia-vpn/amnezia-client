@@ -122,7 +122,7 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
                                        const IPAddress& prefix) {
     constexpr size_t rtm_max_size = sizeof(struct rtmsg) +
                                     2 * RTA_SPACE(sizeof(uint32_t)) +
-                                    RTA_SPACE(sizeof(struct in6_addr));
+                                    2 * RTA_SPACE(sizeof(struct in6_addr)); // RTA_DST + RTA_GATEWAY
     wg_allowedip ip;
     if (!buildAllowedIp(&ip, prefix)) {
     logger.warning() << "Invalid destination prefix";
@@ -164,15 +164,32 @@ bool LinuxRouteMonitor::rtmSendRoute(int action, int flags, int type,
     }
 
     if (rtm->rtm_type == RTN_THROW) {
-    QString gateway = NetworkUtilities::getGatewayAndIface().first;
-    if (gateway.isEmpty()) {
-        logger.warning() << "No default gateway available, skipping exclusion route";
-        return false;
+    if (rtm->rtm_family == AF_INET6) {
+        const QPair<QString, QNetworkInterface> gw = NetworkUtilities::getIpv6GatewayAndIface();
+        struct in6_addr ip6;
+        if (gw.first.isEmpty() || inet_pton(AF_INET6, gw.first.toUtf8(), &ip6) != 1) {
+            logger.warning() << "No default IPv6 gateway available, skipping exclusion route";
+            return false;
+        }
+        nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip6, sizeof(ip6));
+        // The IPv6 default gateway is usually link-local, so the outgoing
+        // interface must be set to give the gateway address its scope.
+        const int oif = gw.second.index();
+        if (oif > 0) {
+            nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_OIF, oif);
+        }
+        nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
+    } else {
+        QString gateway = NetworkUtilities::getGatewayAndIface().first;
+        if (gateway.isEmpty()) {
+            logger.warning() << "No default gateway available, skipping exclusion route";
+            return false;
+        }
+        struct in_addr ip4;
+        inet_pton(AF_INET, gateway.toUtf8(), &ip4);
+        nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
+        nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
     }
-    struct in_addr ip4;
-    inet_pton(AF_INET, gateway.toUtf8(), &ip4);
-    nlmsg_append_attr(nlmsg, sizeof(buf), RTA_GATEWAY, &ip4, sizeof(ip4));
-    nlmsg_append_attr32(nlmsg, sizeof(buf), RTA_PRIORITY, 0);
     rtm->rtm_type = RTN_UNICAST;
     }
 

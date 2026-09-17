@@ -243,7 +243,9 @@ void VpnConnection::addSitesRoutes(const QString &gw, amnezia::RouteMode mode)
         const auto &cbResolv = [this, site, gw, mode, ips, remainingLookups, needFlush](const QHostInfo &hostInfo) {
             QStringList resolvedIps;
             for (const QHostAddress &addr : hostInfo.addresses()) {
-                if (addr.protocol() == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol) {
+                const auto protocol = addr.protocol();
+                if (protocol == QAbstractSocket::NetworkLayerProtocol::IPv4Protocol
+                    || protocol == QAbstractSocket::NetworkLayerProtocol::IPv6Protocol) {
                     resolvedIps.append(addr.toString());
                 }
             }
@@ -454,7 +456,15 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
 
         QJsonArray allowedIpsJsonArray = configData.value(configKey::allowedIps).toArray();
-        if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
+        bool hasOnlyDefaultAllowedIps = !allowedIpsJsonArray.isEmpty();
+        for (const QJsonValue &allowedIp : allowedIpsJsonArray) {
+            const QString route = allowedIp.toString();
+            if (route != "0.0.0.0/0" && route != "::/0") {
+                hasOnlyDefaultAllowedIps = false;
+                break;
+            }
+        }
+        if (allowedIpsJsonArray.contains("0.0.0.0/0") && hasOnlyDefaultAllowedIps) {
             allowSiteBasedSplitTunneling = true;
         }
     }

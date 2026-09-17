@@ -141,6 +141,7 @@ struct WGConfig: Decodable {
   }
 
   var str: String {
+    let endpointHost = hostName.contains(":") && !hostName.hasPrefix("[") ? "[\(hostName)]" : hostName
     """
     [Interface]
     Address = \(clientIP)
@@ -152,8 +153,29 @@ struct WGConfig: Decodable {
     PublicKey = \(serverPublicKey)
     \(presharedKey == nil ? "" : "PresharedKey = \(presharedKey!)")
     AllowedIPs = \(allowedIPs.joined(separator: ", "))
-    Endpoint = \(hostName):\(port)
+    Endpoint = \(endpointHost):\(port)
     \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
+    """
+  }
+
+  var redux: String {
+    let endpointHost = hostName.contains(":") && !hostName.hasPrefix("[") ? "[\(hostName)]" : hostName
+    """
+    [Interface]
+    Address = \(clientIP)
+    DNS = \(dns1), \(dns2)
+    MTU = \(mtu)
+    PrivateKey = ***
+    \(settings)
+    [Peer]
+    PublicKey = ***
+    PresharedKey = ***
+    AllowedIPs = \(allowedIPs.joined(separator: ", "))
+    Endpoint = \(endpointHost):\(port)
+    \(persistentKeepAlive == nil ? "" : "PersistentKeepalive = \(persistentKeepAlive!)")
+
+    SplitTunnelType = \(splitTunnelType)
+    SplitTunnelSites = \(splitTunnelSites.joined(separator: ", "))
     """
   }
 }

@@ -11,6 +11,7 @@
 #include <ws2ipdef.h>
 
 #include <QFileInfo>
+#include <QHostAddress>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -169,9 +170,9 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
   if (!config.m_serverPskKey.isNull()) {
     out << "preshared_key=" << QString(pskKey.toHex()) << "\n";
   }
-  if (!config.m_serverIpv4AddrIn.isNull()) {
+  if (!config.m_serverIpv4AddrIn.isEmpty()) {
     out << "endpoint=" << config.m_serverIpv4AddrIn << ":";
-  } else if (!config.m_serverIpv6AddrIn.isNull()) {
+  } else if (!config.m_serverIpv6AddrIn.isEmpty()) {
     out << "endpoint=[" << config.m_serverIpv6AddrIn << "]:";
   } else {
     logger.warning() << "Failed to create peer with no endpoints";
@@ -189,8 +190,12 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 
   // Exclude the server address, except for multihop exit servers.
   if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    if (!QHostAddress(config.m_serverIpv4AddrIn).isNull()) {
+      m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+    }
+    if (!QHostAddress(config.m_serverIpv6AddrIn).isNull()) {
+      m_routeMonitor->addExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    }
   }
 
   QString reply = m_tunnel.uapiCommand(message);
@@ -204,8 +209,12 @@ bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
 
   // Clear exclustion routes for this peer.
   if (m_routeMonitor && config.m_hopType != InterfaceConfig::MultiHopExit) {
-    m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
-    m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    if (!QHostAddress(config.m_serverIpv4AddrIn).isNull()) {
+      m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv4AddrIn));
+    }
+    if (!QHostAddress(config.m_serverIpv6AddrIn).isNull()) {
+      m_routeMonitor->deleteExclusionRoute(IPAddress(config.m_serverIpv6AddrIn));
+    }
   }
 
   // Disable the windows firewall for this peer.

@@ -12,6 +12,6 @@ echo $WIREGUARD_PSK > /opt/amnezia/wireguard/wireguard_psk.key
 cat > /opt/amnezia/wireguard/wg0.conf <<EOF
 [Interface]
 PrivateKey = $WIREGUARD_SERVER_PRIVATE_KEY
-Address = $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR
+Address = $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR, $WIREGUARD_SUBNET_IPV6/$WIREGUARD_SUBNET_IPV6_CIDR
 ListenPort = $WIREGUARD_SERVER_PORT
 EOF

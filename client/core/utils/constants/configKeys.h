@@ -58,6 +58,7 @@ namespace amnezia
         constexpr QLatin1String persistentKeepAlive("persistent_keep_alive");
 
         constexpr QLatin1String clientIp("client_ip");
+        constexpr QLatin1String clientIpv6("client_ipv6");
 
         constexpr QLatin1String site("site");
         constexpr QLatin1String blockOutsideDns("block_outside_dns");
@@ -65,6 +66,8 @@ namespace amnezia
         constexpr QLatin1String subnetAddress("subnet_address");
         constexpr QLatin1String subnetMask("subnet_mask");
         constexpr QLatin1String subnetCidr("subnet_cidr");
+        constexpr QLatin1String subnetIpv6Address("subnet_ipv6_address");
+        constexpr QLatin1String subnetIpv6Cidr("subnet_ipv6_cidr");
 
         constexpr QLatin1String additionalClientConfig("additional_client_config");
         constexpr QLatin1String additionalServerConfig("additional_server_config");

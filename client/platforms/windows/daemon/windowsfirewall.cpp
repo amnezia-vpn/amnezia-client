@@ -313,7 +313,7 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
     // In some cases, we might configure a 2nd DNS server for IPv6, however
     // this should probably be cleaned up by converting m_dnsServer into
     // a QStringList instead.
-    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
+    if (!config.m_serverIpv6Gateway.isEmpty() && config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
       if (!allowTrafficTo(QHostAddress(config.m_serverIpv6Gateway), 53,
                           HIGH_WEIGHT, "Allow extra IPv6 DNS-Server",
                           config.m_serverPublicKey)) {
@@ -330,7 +330,7 @@ bool WindowsFirewall::enablePeerTraffic(const InterfaceConfig& config) {
     // In some cases, we might configure a 2nd DNS server for IPv6, however
     // this should probably be cleaned up by converting m_dnsServer into
     // a QStringList instead.
-    if (config.m_secondaryDnsServer == config.m_serverIpv4Gateway) {
+    if (!config.m_serverIpv6Gateway.isEmpty() && config.m_secondaryDnsServer == config.m_serverIpv4Gateway) {
       if (!allowTrafficTo(QHostAddress(config.m_serverIpv6Gateway), 53,
                           HIGH_WEIGHT, "Allow extra IPv6 DNS-Server",
                           config.m_serverPublicKey)) {

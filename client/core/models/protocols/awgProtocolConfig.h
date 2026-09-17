@@ -23,6 +23,8 @@ struct AwgServerConfig {
     QString protocolVersion;
     QString subnetAddress;
     QString subnetCidr;
+    QString subnetIpv6Address;
+    QString subnetIpv6Cidr;
     QString junkPacketCount;
     QString junkPacketMinSize;
     QString junkPacketMaxSize;
@@ -60,8 +62,9 @@ struct AwgServerConfig {
 struct AwgClientConfig {
     QString nativeConfig;
     QString hostName;
-    int port;
+    int port = 0;
     QString clientIp;
+    QString clientIpv6;
     QString clientPrivateKey;
     QString clientPublicKey;
     QString serverPublicKey;
@@ -122,4 +125,3 @@ struct AwgProtocolConfig {
 } // namespace amnezia
 
 #endif // AWGPROTOCOLCONFIG_H
-
