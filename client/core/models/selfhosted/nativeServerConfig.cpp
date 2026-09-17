@@ -5,7 +5,6 @@
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
-#include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -109,7 +108,7 @@ NativeServerConfig NativeServerConfig::fromJson(const QJsonObject& json)
     if (config.displayName.isEmpty()) {
         config.displayName = config.description.isEmpty() ? config.hostName : config.description;
     }
-    
+
     return config;
 }
 

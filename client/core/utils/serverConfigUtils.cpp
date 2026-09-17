@@ -29,6 +29,12 @@ bool hasThirdPartyConfig(const QJsonObject &json)
     return false;
 }
 
+bool hasXrayConfigs(const QJsonObject &json)
+{
+    const QJsonArray configsArray = json.value(amnezia::configKey::xraySubscriptionConfig).toArray();
+    return !configsArray.isEmpty();
+}
+
 } // namespace
 
 namespace serverConfigUtils
@@ -91,6 +97,10 @@ ConfigType configTypeFromJson(const QJsonObject &serverConfigObject)
     }
     default:
         break;
+    }
+
+    if (hasXrayConfigs(serverConfigObject)) {
+        return ConfigType::XRaySubscription;
     }
 
     if (hasThirdPartyConfig(serverConfigObject)) {

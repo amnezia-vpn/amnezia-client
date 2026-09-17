@@ -52,6 +52,11 @@ QString storedServerDisplayName(const SecureServersRepository *repository, const
             return cfg->displayName;
         }
         break;
+    case Kind::XRaySubscription:
+        if (const auto cfg = repository->xraySubscriptionConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
     case Kind::AmneziaPremiumV2:
     case Kind::AmneziaFreeV3:
     case Kind::ExternalPremium:
@@ -346,6 +351,20 @@ std::optional<NativeServerConfig> SecureServersRepository::nativeConfig(const QS
         return std::nullopt;
     }
     return NativeServerConfig::fromJson(strippedJson);
+}
+
+std::optional<XRaySubscriptionConfig> SecureServersRepository::xraySubscriptionConfig(const QString &serverId) const
+{
+    const auto it = m_serverJsonById.constFind(serverId);
+    if (it == m_serverJsonById.constEnd()) {
+        return std::nullopt;
+    }
+    const QJsonObject strippedJson = withoutStorageServerId(it.value());
+    if (serverConfigUtils::configTypeFromJson(strippedJson) != serverConfigUtils::ConfigType::XRaySubscription) {
+        return std::nullopt;
+    }
+    
+    return XRaySubscriptionConfig::fromJson(strippedJson);
 }
 
 std::optional<ApiV2ServerConfig> SecureServersRepository::apiV2Config(const QString &serverId) const
