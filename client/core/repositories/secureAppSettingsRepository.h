@@ -77,6 +77,9 @@ public:
     void setStartMinimized(bool enabled);
     bool isScreenshotsEnabled() const;
     void setScreenshotsEnabled(bool enabled);
+
+    int countryListSortMode(const QString &listId) const;
+    void setCountryListSortMode(const QString &listId, int mode);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
 
@@ -126,4 +129,3 @@ private:
 };
 
 #endif // SECUREAPPSETTINGSREPOSITORY_H
-

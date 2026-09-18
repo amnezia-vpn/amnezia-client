@@ -65,6 +65,7 @@ void CoreSignalHandlers::initAllHandlers()
     initExportControllerHandler();
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
+    initCountryListSortModeHandler();
     initSubscriptionRefreshHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
@@ -171,6 +172,21 @@ void CoreSignalHandlers::initImportControllerHandler()
             m_coreController->m_serversUiController->setProcessedServerId(serverId);
         }
     });
+}
+
+void CoreSignalHandlers::initCountryListSortModeHandler()
+{
+    SecureAppSettingsRepository *repository = m_coreController->m_appSettingsRepository;
+
+    const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
+                                                  m_coreController->m_apiConfigsCountryListModel };
+
+    for (ApiCountryListModel *model : models) {
+        model->setSortMode(repository->countryListSortMode(model->listId()));
+        connect(model, &ApiCountryListModel::sortModeChanged, this, [repository, model]() {
+            repository->setCountryListSortMode(model->listId(), model->sortMode());
+        });
+    }
 }
 
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
