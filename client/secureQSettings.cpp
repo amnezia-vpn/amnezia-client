@@ -11,6 +11,11 @@
 #include <QRandomGenerator>
 #include <QSharedPointer>
 #include <QTimer>
+#include <QFile>
+
+#include <openssl/evp.h>
+#include <openssl/rand.h>
+#include <openssl/err.h>
 
 using namespace QKeychain;
 

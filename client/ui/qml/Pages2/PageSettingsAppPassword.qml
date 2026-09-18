@@ -89,6 +89,23 @@ PageType {
                 id: indicator
 
                 visible: !root.isChangingPassword
+                implicitHeight: 16
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                disabledColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.goldenApricot
+
+                text: qsTr("Learn more")
+
+                clickedFunc: function() {
+                    Qt.openUrlExternally("https://storage.googleapis.com/amnezia/docs?m-path=/documentation/instructions/encryption")
+                }
+            }
+
+            EncryptionIndicator {
+                id: indicator
 
                 textString: qsTr("Password not set. Encryption disabled")
                 iconPath: "qrc:/images/controls/lock-unlocked.svg"

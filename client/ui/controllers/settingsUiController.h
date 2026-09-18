@@ -76,6 +76,14 @@ public slots:
     bool isStartMinimizedEnabled();
     void toggleStartMinimized(bool enable);
 
+    bool isFileEncryptionEnabled();
+    void toggleFileEncryption(bool enable);
+
+    void setPassword(QString pwd);
+    QString getPassword();
+    void setHint(QString hint);
+    QString getHint();
+
     bool isNewsNotificationsEnabled();
     void toggleNewsNotificationsEnabled(bool enable);
 

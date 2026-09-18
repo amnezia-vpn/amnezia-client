@@ -113,10 +113,10 @@ DrawerType2 {
                         return
                     }
                 } else {
-                if (passwordField.textField.text !== SettingsController.getPassword()) {
+                    if (passwordField.textField.text !== SettingsController.getPassword()) {
                         passwordField.errorText = qsTr("Invalid password")
-                    return
-                }
+                        return
+                    }
                 }
 
                 if (root.securedFunc && typeof root.securedFunc === "function") {
