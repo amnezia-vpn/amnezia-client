@@ -9,6 +9,7 @@
 #include "ipc.h"
 
 #include <QCryptographicHash>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QTimer>
 #include <QJsonObject>
@@ -23,6 +24,54 @@
 static const QString tunName = "utun22";
 #else
 static const QString tunName = "tun2";
+#endif
+
+#ifdef Q_OS_MACOS
+namespace
+{
+bool replaceXrayVnextAddress(QJsonObject &config, const QString &hostName, const QString &resolvedAddress)
+{
+    if (hostName.isEmpty() || resolvedAddress.isEmpty() || hostName == resolvedAddress) {
+        return false;
+    }
+
+    QJsonArray outbounds = config.value(amnezia::protocols::xray::outbounds).toArray();
+    bool changed = false;
+
+    for (qsizetype i = 0; i < outbounds.size(); ++i) {
+        QJsonObject outbound = outbounds.at(i).toObject();
+        QJsonObject settings = outbound.value(amnezia::protocols::xray::settings).toObject();
+        QJsonArray vnext = settings.value(amnezia::protocols::xray::vnext).toArray();
+        bool outboundChanged = false;
+
+        for (qsizetype j = 0; j < vnext.size(); ++j) {
+            QJsonObject endpoint = vnext.at(j).toObject();
+            if (endpoint.value(amnezia::protocols::xray::address).toString() != hostName) {
+                continue;
+            }
+
+            endpoint[amnezia::protocols::xray::address] = resolvedAddress;
+            vnext.replace(j, endpoint);
+            outboundChanged = true;
+            changed = true;
+        }
+
+        if (!outboundChanged) {
+            continue;
+        }
+
+        settings[amnezia::protocols::xray::vnext] = vnext;
+        outbound[amnezia::protocols::xray::settings] = settings;
+        outbounds.replace(i, outbound);
+    }
+
+    if (changed) {
+        config[amnezia::protocols::xray::outbounds] = outbounds;
+    }
+
+    return changed;
+}
+} // namespace
 #endif
 
 XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : VpnProtocol(configuration, parent)
@@ -81,7 +130,16 @@ ErrorCode XrayProtocol::start()
     m_socksPassword = creds.password;
     m_socksPort = creds.port;
 
-    QString xrayConfigStr = QJsonDocument(m_xrayConfig).toJson(QJsonDocument::Compact);
+    QJsonObject runtimeConfig = m_xrayConfig;
+
+#ifdef Q_OS_MACOS
+    const QString remoteHost = m_rawConfig.value(amnezia::configKey::hostName).toString();
+    if (replaceXrayVnextAddress(runtimeConfig, remoteHost, m_remoteAddress)) {
+        qDebug() << "XrayProtocol: using pre-resolved runtime endpoint" << m_remoteAddress;
+    }
+#endif
+
+    QString xrayConfigStr = QJsonDocument(runtimeConfig).toJson(QJsonDocument::Compact);
     if (xrayConfigStr.isEmpty()) {
         qCritical() << "Xray config is empty";
         return ErrorCode::XrayExecutableCrashed;
