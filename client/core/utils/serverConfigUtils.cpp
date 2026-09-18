@@ -34,6 +34,16 @@ bool hasThirdPartyConfig(const QJsonObject &json)
 namespace serverConfigUtils
 {
 
+int configFormatVersion(const QJsonObject &serverConfigObject)
+{
+    return serverConfigObject.value(amnezia::configKey::formatVersion).toInt(0);
+}
+
+bool isConfigFormatVersionSupported(const QJsonObject &serverConfigObject)
+{
+    return configFormatVersion(serverConfigObject) <= currentConfigFormatVersion;
+}
+
 bool isServerFromApi(const QJsonObject &serverConfigObject)
 {
     const int configVersion = serverConfigObject.value(amnezia::configKey::configVersion).toInt();

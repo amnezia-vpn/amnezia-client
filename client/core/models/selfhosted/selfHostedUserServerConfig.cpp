@@ -4,6 +4,7 @@
 
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -66,6 +67,7 @@ QPair<QString, QString> SelfHostedUserServerConfig::getDnsPair(const QString &pr
 QJsonObject SelfHostedUserServerConfig::toJson() const
 {
     QJsonObject obj;
+    obj[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
 
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;

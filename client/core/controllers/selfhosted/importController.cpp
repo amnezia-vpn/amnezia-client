@@ -33,6 +33,18 @@ using namespace ProtocolUtils;
 
 namespace
 {
+    bool rejectUnsupportedFormatVersion(ImportController::ImportResult &result)
+    {
+        if (serverConfigUtils::isConfigFormatVersionSupported(result.config)) {
+            return false;
+        }
+        qWarning() << "Config format version" << serverConfigUtils::configFormatVersion(result.config)
+                   << "is newer than supported" << serverConfigUtils::currentConfigFormatVersion;
+        result.errorCode = ErrorCode::ConfigFormatVersionNotSupportedError;
+        result.config = {};
+        return true;
+    }
+
     ConfigTypes checkConfigFormat(const QString &config)
     {
         const QString openVpnConfigPatternCli = "client";
@@ -207,6 +219,10 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     case ConfigTypes::Amnezia: {
         result.config = QJsonDocument::fromJson(config.toUtf8()).object();
 
+        if (rejectUnsupportedFormatVersion(result)) {
+            return result;
+        }
+
         if (serverConfigUtils::isServerFromApi(result.config)) {
             auto apiConfig = result.config.value(apiDefs::key::apiConfig).toObject();
             apiConfig[apiDefs::key::vpnKey] = data;
@@ -256,6 +272,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
     if (!dataObj.isEmpty()) {
         result.config = dataObj;
         result.configType = ConfigTypes::Amnezia;
+        rejectUnsupportedFormatVersion(result);
         return result;
     }
 
@@ -267,6 +284,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
             return result;
         }
         result.configType = ConfigTypes::Amnezia;
+        rejectUnsupportedFormatVersion(result);
         return result;
     }
 
@@ -284,6 +302,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
             return result;
         }
         result.configType = ConfigTypes::Amnezia;
+        rejectUnsupportedFormatVersion(result);
         return result;
     }
 
@@ -379,6 +398,11 @@ int ImportController::qrChunksTotal() const
 
 void ImportController::importConfig(const QJsonObject &config)
 {
+    if (!serverConfigUtils::isConfigFormatVersionSupported(config)) {
+        emit importErrorOccurred(ErrorCode::ConfigFormatVersionNotSupportedError, false);
+        return;
+    }
+
     ServerCredentials credentials;
     credentials.hostName = config.value(configKey::hostName).toString();
     credentials.port = config.value(configKey::port).toInt();
