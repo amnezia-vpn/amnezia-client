@@ -87,13 +87,8 @@ PageType {
                                      ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
                                      : ""
 
-                    secondaryImageSource: rowItem.isIssued ? "qrc:/images/controls/download.svg" : ""
                     rightImageSource: rowItem.isIssued ? "qrc:/images/controls/more-vertical.svg"
                                                        : "qrc:/images/controls/download.svg"
-
-                    secondaryClickedFunction: function() {
-                        root.showQuestion(true, rowItem.countryCode, rowItem.countryName)
-                    }
 
                     clickedFunction: function() {
                         if (rowItem.isIssued) {

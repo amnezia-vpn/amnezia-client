@@ -3,6 +3,7 @@
 
 #include <QQuickWindow>
 
+
 ListViewFocusController::ListViewFocusController(QQuickItem *listView, QObject *parent)
     : QObject { parent },
       m_listView { listView },
@@ -36,8 +37,8 @@ void ListViewFocusController::viewAtCurrentIndex() const
         break;
     }
     case Section::Delegate: {
-        QMetaObject::invokeMethod(m_listView, "positionViewAtIndex", Q_ARG(int, m_delegateIndex), // Index
-                                  Q_ARG(int, 6)); // PositionMode (0 = Beginning; 1 = Center; 2 = End; 3 = Visible; 4 = Contain; 5 = SnapPosition)
+        QMetaObject::invokeMethod(m_listView, "positionViewAtIndex", Q_ARG(int, m_delegateIndex),
+                                  Q_ARG(int, 4));
         break;
     }
     case Section::Footer: {
@@ -45,6 +46,8 @@ void ListViewFocusController::viewAtCurrentIndex() const
         break;
     }
     }
+
+    QMetaObject::invokeMethod(m_listView, "forceLayout");
 }
 
 int ListViewFocusController::size() const
@@ -251,12 +254,12 @@ void ListViewFocusController::reloadFocusChain()
 
 bool ListViewFocusController::isFirstFocusItemInDelegate() const
 {
-    return m_focusedItem && (m_focusedItem == m_focusChain.first());
+    return m_focusedItem && !m_focusChain.isEmpty() && (m_focusedItem == m_focusChain.first());
 }
 
 bool ListViewFocusController::isLastFocusItemInDelegate() const
 {
-    return m_focusedItem && (m_focusedItem == m_focusChain.last());
+    return m_focusedItem && !m_focusChain.isEmpty() && (m_focusedItem == m_focusChain.last());
 }
 
 bool ListViewFocusController::hasHeader() const

@@ -11,6 +11,8 @@ Item {
 
     property var listModel: null
 
+    property bool isFocusable: root.isRealSection && !root.isPinnedOverlay
+
     property string sectionKey: ""
     property bool isPinnedOverlay: false
 
@@ -78,6 +80,35 @@ Item {
     TapHandler {
         gesturePolicy: TapHandler.ReleaseWithinBounds
 
-        onTapped: root.listModel.toggleSection(root.sectionKey)
+        onTapped: root.toggle()
+    }
+
+    function toggle() {
+        if (root.isRealSection) {
+            root.listModel.toggleSection(root.sectionKey)
+        }
+    }
+
+    Keys.onEnterPressed: root.toggle()
+    Keys.onReturnPressed: root.toggle()
+    Keys.onSpacePressed: root.toggle()
+
+    Keys.onTabPressed: {
+        FocusController.nextKeyTabItem()
+    }
+
+    Keys.onBacktabPressed: {
+        FocusController.previousKeyTabItem()
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 2
+
+        color: AmneziaStyle.color.transparent
+        radius: 8
+
+        border.width: root.activeFocus ? 1 : 0
+        border.color: AmneziaStyle.color.paleGray
     }
 }

@@ -49,19 +49,52 @@ Item {
                                       : qsTr("No locations available yet")
         }
 
-        ParagraphTextType {
+        Item {
+            id: showAll
+
+            property bool isFocusable: root.isSearchResult
+
             Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: showAllText.implicitWidth + 16
+            Layout.preferredHeight: showAllText.implicitHeight + 16
 
             visible: root.isSearchResult
 
-            color: AmneziaStyle.color.goldenApricot
-            horizontalAlignment: Text.AlignHCenter
+            Keys.onEnterPressed: root.showAllRequested()
+            Keys.onReturnPressed: root.showAllRequested()
+            Keys.onSpacePressed: root.showAllRequested()
 
-            text: qsTr("Show all")
+            Keys.onTabPressed: {
+                FocusController.nextKeyTabItem()
+            }
+
+            Keys.onBacktabPressed: {
+                FocusController.previousKeyTabItem()
+            }
+
+            Rectangle {
+                anchors.fill: parent
+
+                color: AmneziaStyle.color.transparent
+                radius: 8
+
+                border.width: showAll.activeFocus ? 1 : 0
+                border.color: AmneziaStyle.color.paleGray
+            }
+
+            ParagraphTextType {
+                id: showAllText
+
+                anchors.centerIn: parent
+
+                color: AmneziaStyle.color.goldenApricot
+                horizontalAlignment: Text.AlignHCenter
+
+                text: qsTr("Show all")
+            }
 
             MouseArea {
                 anchors.fill: parent
-                anchors.margins: -8
                 cursorShape: Qt.PointingHandCursor
                 onClicked: root.showAllRequested()
             }
