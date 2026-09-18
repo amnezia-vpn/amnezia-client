@@ -188,6 +188,9 @@ ErrorCode StorePurchaseController::importServiceFromMarket(const QString &userCo
 
     quint16 crc = qChecksum(QJsonDocument(configObject).toJson());
 
+    if (!serverConfigUtils::isConfigFormatVersionSupported(configObject)) {
+        return ErrorCode::ConfigFormatVersionNotSupportedError;
+    }
     if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }

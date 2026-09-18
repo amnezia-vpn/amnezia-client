@@ -25,6 +25,12 @@ enum ConfigSource {
     AmneziaGateway
 };
 
+constexpr int currentConfigFormatVersion = 1;
+
+int configFormatVersion(const QJsonObject &serverConfigObject);
+
+bool isConfigFormatVersionSupported(const QJsonObject &serverConfigObject);
+
 bool isServerFromApi(const QJsonObject &serverConfigObject);
 
 ConfigSource getConfigSource(const QJsonObject &serverConfigObject);
