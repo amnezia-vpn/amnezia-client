@@ -128,19 +128,6 @@
     </message>
 </context>
 <context>
-    <name>ChangelogDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="70"/>
-        <source>Update</source>
-        <translation>Оновити</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="96"/>
-        <source>Skip</source>
-        <translation>Пропустити</translation>
-    </message>
-</context>
-<context>
     <name>ConnectButton</name>
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="54"/>
@@ -291,71 +278,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallUiController</name>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="125"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="167"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="132"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="174"/>
         <source>%1 installed successfully. </source>
         <translation>%1 встановлено. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="127"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="169"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="134"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="176"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 вже встановлено на сервері. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="131"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="138"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 Додані сервіси і протоколи, які були раніше встановлені на сервері</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="173"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="180"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 На сервері знайдені сервіси та протоколи, всі вони додані в застосунок</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="288"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="327"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="351"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="299"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="340"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="364"/>
         <source>Settings updated successfully</source>
         <translation>Налаштування оновлено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="471"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="487"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>Сервер &apos;%1&apos; перезавантажено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="485"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="501"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; був видалений</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="494"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="510"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Всі сервіси та протоколи були видалені з сервера &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="520"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="538"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="554"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 був видалений з сервера &apos;%2&apos;</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="553"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="569"/>
         <source>%1 cached profile cleared</source>
         <translation>Кешований профіль %1 очищено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="623"/>
         <source>Please login as the user</source>
         <translation>Буль-ласка, увійдіть в систему від імені користувача</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="631"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="647"/>
         <source>Server added successfully</source>
         <translation>Сервер додано</translation>
     </message>
@@ -422,29 +409,6 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="64"/>
         <source>Export completed</source>
         <translation>Експорт завершено</translation>
-    </message>
-</context>
-<context>
-    <name>MarketplaceUpdateController</name>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="153"/>
-        <source>Update available</source>
-        <translation>Доступне оновлення</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of %1 is available.</source>
-        <translation>Доступна нова версія %1.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
-        <source>Update</source>
-        <translation>Оновити</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="156"/>
-        <source>Skip</source>
-        <translation>Пропустити</translation>
     </message>
 </context>
 <context>
@@ -2687,6 +2651,207 @@ Create one from the current settings.</source>
     </message>
 </context>
 <context>
+    <name>PageServiceTProxySettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy started</source>
+        <translation>TProxy запущено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy stopped</source>
+        <translation>TProxy зупинено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="668"/>
+        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
+        <translation>Налаштування заблоковано: час очікування підключення вичерпано (код помилки %1). Відкрийте сторінку заново, щоб повторити спробу.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="275"/>
+        <source>TProxy settings</source>
+        <translation>Налаштування TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="276"/>
+        <source>Read more about Telegram WEB proxy</source>
+        <translation>Докладніше про Telegram WEB проксі</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="286"/>
+        <source>No internet connection. Connect to the internet to change TProxy settings.</source>
+        <translation>Немає підключення до інтернету. Підключіться до інтернету, щоб змінити налаштування TProxy.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="309"/>
+        <source>Connection</source>
+        <translation>Підключення</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="313"/>
+        <source>Settings</source>
+        <translation>Налаштування</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="360"/>
+        <source>Use Telegram WEB proxy link</source>
+        <translation>Скористайтеся посиланням на Telegram WEB проксі</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="386"/>
+        <source>Set a hostname first</source>
+        <translation>Спочатку вкажіть ім&apos;я хоста</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="459"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="541"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="580"/>
+        <source>Copied</source>
+        <translation>Скопійовано</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="446"/>
+        <source>Telegram connection link</source>
+        <translation>Посилання для підключення Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="447"/>
+        <source>TProxy WEB proxy link</source>
+        <translation>Посилання на TProxy WEB проксі</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="473"/>
+        <source>Or enter the proxy details manually.</source>
+        <translation>Або введіть дані проксі вручну.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="479"/>
+        <source>How to do it</source>
+        <translation>Як це зробити</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="522"/>
+        <source>Host</source>
+        <translation>Хост</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="560"/>
+        <source>Secret</source>
+        <translation>Secret</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="593"/>
+        <source>Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.</source>
+        <translation>Потрібен клієнт Telegram із підтримкою WEB (Desktop, proof of concept). Класичні посилання MTProxy не працюватимуть.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="606"/>
+        <source>Delete TProxy</source>
+        <translation>Видалити TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="609"/>
+        <source>Remove %1 from server?</source>
+        <translation>Видалити %1 з сервера?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="616"/>
+        <source>The proxy will be stopped and all users will lose access.</source>
+        <translation>Проксі буде зупинено, і всі користувачі втратять доступ.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Continue</source>
+        <translation>Продовжити</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Cancel</source>
+        <translation>Відмінити</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="637"/>
+        <source>Enable TProxy</source>
+        <translation>Увімкнути TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="666"/>
+        <source>Enable TProxy to edit settings</source>
+        <translation>Увімкніть TProxy, щоб змінювати налаштування</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="669"/>
+        <source>Cannot reach the server — settings are unavailable</source>
+        <translation>Сервер недоступний — налаштування неможливо отримати</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="681"/>
+        <source>Hostname</source>
+        <translation>Ім&apos;я хоста</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="682"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="697"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>Використовуйте малі літери, цифри, крапки та дефіси</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="706"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="878"/>
+        <source>Enter a lowercase DNS hostname (A record to this server)</source>
+        <translation>Введіть DNS-ім&apos;я хоста малими літерами (A-запис на цей сервер)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="719"/>
+        <source>Required. Point a DNS A record at this server. Do not put a CDN in front.</source>
+        <translation>Обов&apos;язково. Спрямуйте DNS A-запис на цей сервер. Не використовуйте CDN перед ним.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="732"/>
+        <source>ACME email</source>
+        <translation>Ел. пошта ACME</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="733"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="748"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="757"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="882"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>Введіть коректну адресу електронної пошти для TLS-сертифіката</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="770"/>
+        <source>Used by Caddy to issue a Let&apos;s Encrypt certificate.</source>
+        <translation>Використовується Caddy для випуску сертифіката Let&apos;s Encrypt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="780"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="794"/>
+        <source>Carrier mode</source>
+        <translation>Режим Carrier</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="820"/>
+        <source>MTProxy workers</source>
+        <translation>Робочі процеси MTProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="860"/>
+        <source>Save</source>
+        <translation>Зберегти</translation>
+    </message>
+</context>
+<context>
     <name>PageServiceTelemtSettings</name>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="215"/>
@@ -3214,87 +3379,102 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <source>You have the latest version of AmneziaVPN</source>
+        <translation>У вас встановлено останню версію AmneziaVPN</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <source>Failed to check for updates</source>
+        <translation>Не вдалося перевірити оновлення</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="73"/>
         <source>Support Amnezia</source>
         <translation>Підтримайте Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
         <translation>Amnezia — це безкоштовний додаток з відкритим кодом. Якщо вам подобається цей додаток, ви можете підтримати розробників.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
         <source>Contacts</source>
         <translation>Контакти</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>Software version: %1</source>
         <translation>Версія ПЗ: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
         <source>Check for updates</source>
         <translation>Перевірити оновлення</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
+        <source>Checking...</source>
+        <translation>Перевірка...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="186"/>
         <source>Privacy Policy</source>
         <translation>Політика конфіденційності</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="205"/>
         <source>Telegram group</source>
         <translation>Група в Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="206"/>
         <source>To discuss features</source>
         <translation>Для дискусій</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="193"/>
-        <source>https://t.me/amnezia_vpn_en</source>
-        <translation>https://t.me/amnezia_vpn</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="209"/>
+        <source>https://telegram.me/amnezia_vpn_en</source>
+        <translation>https://telegram.me/amnezia_vpn</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
         <source>support@amnezia.org</source>
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="217"/>
         <source>For reviews and bug reports</source>
         <translation>Для відгуків і повідомлень про помилки</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="220"/>
         <source>mailto:support@amnezia.org</source>
         <translation>mailto:support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="227"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="228"/>
         <source>Discover the source code</source>
         <translation>Переглянути вихідний код</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="231"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="238"/>
         <source>Website</source>
         <translation>Веб-сайт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="239"/>
         <source>Visit official website</source>
         <translation>Перейти на офіційний сайт</translation>
     </message>
@@ -3906,52 +4086,62 @@ Create one from the current settings.</source>
         <translation>Показувати значок повідомлення про непрочитані новини</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="201"/>
+        <source>Check for updates automatically</source>
+        <translation>Автоматично перевіряти оновлення</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="202"/>
+        <source>Check for a new app version at startup</source>
+        <translation>Перевіряти наявність нової версії застосунку під час запуску</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="226"/>
         <source>Language</source>
         <translation>Мова</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
         <source>Logging</source>
         <translation>Логування</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Enabled</source>
         <translation>Увімкнено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Disabled</source>
         <translation>Вимкнено</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="258"/>
         <source>Reset settings and remove all data from the application</source>
         <translation>Скинути налаштування і видалити всі дані із застосунку</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="263"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation>Скинути налаштування і видалити всі дані із застосунку?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="264"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation>Всі дані із застосунку будуть видалені, всі встановлені сервіси AmneziaVPN залишаться на сервері.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="265"/>
         <source>Continue</source>
         <translation>Продовжити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="245"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="266"/>
         <source>Cancel</source>
         <translation>Відмінити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="270"/>
         <source>Cannot reset settings during active connection</source>
         <translation>Неможливо скинути налаштування під час активного підключення</translation>
     </message>
@@ -4399,19 +4589,6 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
         <source>AmneziaVPN-service logs</source>
         <translation>Логи служби AmneziaVPN</translation>
-    </message>
-</context>
-<context>
-    <name>PageSettingsNewsDetail</name>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="87"/>
-        <source>Update</source>
-        <translation>Оновити</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="112"/>
-        <source>Skip</source>
-        <translation>Пропустити</translation>
     </message>
 </context>
 <context>
@@ -5084,7 +5261,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="248"/>
         <source>Password or SSH private key</source>
         <translation>Пароль або SSH ключ</translation>
     </message>
@@ -5104,47 +5281,57 @@ Create one from the current settings.</source>
         <translation>Усі дані, які ви вводите, залишатимуться суворо конфіденційними та не будуть передані чи розголошені Amnezia або будь-яким третім особам</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="157"/>
+        <source>Don&apos;t have a server?</source>
+        <translation>Немає сервера?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="158"/>
+        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
+        <translation>Хостинг Amnezia. VPN-сервери без складних налаштувань і зайвого клопоту</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
         <source>How to run your VPN server</source>
         <translation>Як запустити ваш VPN-сервер</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="180"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
         <translation>Де отримати дані для підключення: покрокові інструкції з придбання VPS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="200"/>
         <source>Ip address cannot be empty</source>
         <translation>Поле IP address не може бути пустим</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="203"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>Введіть адресу в форматі 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="208"/>
         <source>Login cannot be empty</source>
         <translation>Поле Login не може бути пустим</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="214"/>
         <source>Password/private key cannot be empty</source>
         <translation>Поле Password/Private key не може бути пустим</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="230"/>
         <source>Server IP address [:port]</source>
         <translation>IP-адреса сервера [:порт]</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="231"/>
         <source>255.255.255.255:22</source>
         <translation>255.255.255.255:22</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="239"/>
         <source>SSH Username</source>
         <translation>SSH Username</translation>
     </message>
@@ -5239,17 +5426,58 @@ Create one from the current settings.</source>
         <translation>Мережевий протокол</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="215"/>
         <source>Port</source>
         <translation>Порт</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="229"/>
+        <source>Hostname</source>
+        <translation>Ім&apos;я хоста</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="244"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>Використовуйте малі літери, цифри, крапки та дефіси</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="260"/>
+        <source>ACME email</source>
+        <translation>Ел. пошта ACME</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="261"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="275"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="329"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>Введіть коректну адресу електронної пошти для TLS-сертифіката</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="288"/>
+        <source>Needs a DNS A record and free, internet-reachable ports 443 (HTTPS) and 80 (ACME). If either port is busy or blocked, the proxy will not work. Classic Telegram MTProxy links will not work.</source>
+        <translation>Потрібен DNS A-запис і вільні, доступні з інтернету порти 443 (HTTPS) і 80 (ACME). Якщо будь-який із портів зайнятий або заблокований, проксі не працюватиме. Класичні посилання Telegram MTProxy не працюватимуть.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="310"/>
         <source>Install</source>
         <translation>Встановити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="325"/>
+        <source>Enter a lowercase DNS hostname</source>
+        <translation>Введіть DNS-ім&apos;я хоста малими літерами</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="344"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>Порт повинен бути в межах від 1 до 65535</translation>
     </message>
@@ -5651,6 +5879,60 @@ Create one from the current settings.</source>
     </message>
 </context>
 <context>
+    <name>PageUpdate</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="24"/>
+        <source>Done. Install the update</source>
+        <translation>Готово. Встановіть оновлення</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="26"/>
+        <source>Download failed. Download manually from amnezia.org</source>
+        <translation>Не вдалося завантажити. Завантажте вручну з amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="169"/>
+        <source>New version available</source>
+        <translation>Доступна нова версія</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="186"/>
+        <source>New</source>
+        <translation>Нове</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="194"/>
+        <source>Improved</source>
+        <translation>Покращено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="202"/>
+        <source>Fixed</source>
+        <translation>Виправлено</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="248"/>
+        <source>Update app</source>
+        <translation>Оновити застосунок</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="245"/>
+        <source>Downloading update...</source>
+        <translation>Завантаження оновлення...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="246"/>
+        <source>Install update</source>
+        <translation>Встановити оновлення</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="247"/>
+        <source>Retry</source>
+        <translation>Повторити</translation>
+    </message>
+</context>
+<context>
     <name>PopupType</name>
     <message>
         <location filename="../ui/qml/Controls2/PopupType.qml" line="101"/>
@@ -5830,83 +6112,93 @@ Create one from the current settings.</source>
         <translation>Конфігурація не містить контейнерів і облікових даних для підключення до серверу</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="82"/>
-        <location filename="../core/utils/errorStrings.cpp" line="91"/>
+        <location filename="../core/utils/errorStrings.cpp" line="74"/>
+        <source>This configuration was created in a newer version of the application and is not fully supported. Please update the application</source>
+        <translation>Цю конфігурацію створено в новішій версії застосунку, і вона підтримується не повністю. Будь ласка, оновіть застосунок</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <source>Some configurations from the backup were not restored because they require a newer version of the application</source>
+        <translation>Деякі конфігурації з резервної копії не відновлено, оскільки вони потребують новішої версії застосунку</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Error when retrieving configuration from API</source>
         <translation>Помилка під час отримання конфігурації з API</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="83"/>
+        <location filename="../core/utils/errorStrings.cpp" line="85"/>
         <source>This config has already been added to the application</source>
         <translation>Ця конфігурація вже була додана в застосунок</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
         <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
         <translation>Ваш платіж очікує підтвердження в Google Play. Після завершення оплати підписку буде додано автоматично під час наступного запуску застосунку.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
         <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
         <translation>Ваш платіж очікує підтвердження. Після схвалення підписку буде додано автоматично.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="110"/>
         <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
         <translation>Ваш платіж очікує підтвердження. Будь ласка, завершіть оплату, а потім відновіть підписку.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
         <translation>Немає покупок для відновлення. Якщо у вас є активна підписка, переконайтеся, що ви увійшли в той самий обліковий запис Google, з якого здійснювали покупку.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
         <translation>Немає покупок для відновлення. Якщо у вас є активна підписка, переконайтеся, що ви увійшли з тим самим Apple ID, з якого здійснювали покупку.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="119"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
         <translation>Немає покупок для відновлення. Якщо у вас є активна підписка, переконайтеся, що ви увійшли в той самий обліковий запис, з якого здійснювали покупку.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
         <source>Transaction was canceled by the user</source>
         <translation>Транзакцію скасовано користувачем</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
         <source>Billing error</source>
         <translation>Помилка оплати</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
         <source>Internal Google Play error, please try again later</source>
         <translation>Внутрішня помилка Google Play, спробуйте пізніше</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
         <source>Billing is unavailable, please try again later</source>
         <translation>Оплата недоступна, спробуйте пізніше</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
         <source>You already own this subscription</source>
         <translation>У вас уже є ця підписка</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <location filename="../core/utils/errorStrings.cpp" line="137"/>
         <source>The requested subscription is not available for purchase</source>
         <translation>Запитана підписка недоступна для купівлі</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <location filename="../core/utils/errorStrings.cpp" line="138"/>
         <source>A network error occurred during the operation, please check the Internet connection</source>
         <translation>Під час операції сталася мережева помилка, перевірте підключення до інтернету</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="143"/>
+        <location filename="../core/utils/errorStrings.cpp" line="145"/>
         <source>ErrorCode: %1. </source>
         <translation>Код помилки: %1. </translation>
     </message>
@@ -5966,69 +6258,69 @@ Create one from the current settings.</source>
         <translation>Цей застарілий формат підписки Amnezia більше не підтримується</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="74"/>
+        <location filename="../core/utils/errorStrings.cpp" line="76"/>
         <source>This protocol is no longer supported. Please select another protocol or remove this container from the server settings.</source>
         <translation>Цей протокол більше не підтримується. Будь ласка, виберіть інший протокол або видаліть цей контейнер із налаштувань сервера.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <location filename="../core/utils/errorStrings.cpp" line="77"/>
         <source>Unable to open config file</source>
         <translation>Не вдалося відкрити файл конфігурації</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="76"/>
+        <location filename="../core/utils/errorStrings.cpp" line="78"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
         <translation>VPN протоколи не встановлено.
  Будь-ласка, встановіть VPN контейнер</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="79"/>
+        <location filename="../core/utils/errorStrings.cpp" line="81"/>
         <source>VPN connection error</source>
         <translation>Помилка VPN-підключення</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="86"/>
         <source>In the response from the server, an empty config was received</source>
         <translation>У відповіді від сервера отримано порожню конфігурацію</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="85"/>
+        <location filename="../core/utils/errorStrings.cpp" line="87"/>
         <source>SSL error occurred</source>
         <translation>Сталася помилка SSL</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="86"/>
+        <location filename="../core/utils/errorStrings.cpp" line="88"/>
         <source>Server response timeout on api request</source>
         <translation>Час очікування відповіді сервера на API-запит вичерпано</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="87"/>
+        <location filename="../core/utils/errorStrings.cpp" line="89"/>
         <source>Missing AGW public key</source>
         <translation>Відсутній публічний ключ AGW</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="88"/>
+        <location filename="../core/utils/errorStrings.cpp" line="90"/>
         <source>Failed to decrypt response payload</source>
         <translation>Не вдалося розшифрувати вміст відповіді</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="89"/>
+        <location filename="../core/utils/errorStrings.cpp" line="91"/>
         <source>Missing list of available services</source>
         <translation>Відсутній список доступних сервісів</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="90"/>
+        <location filename="../core/utils/errorStrings.cpp" line="92"/>
         <source>The limit of allowed configurations per subscription has been exceeded</source>
         <translation>Перевищено ліміт допустимих конфігурацій для однієї підписки</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="92"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Please update the application to use this feature</source>
         <translation>Будь ласка, оновіть застосунок, щоб скористатися цією функцією</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -6037,77 +6329,77 @@ Create one from the current settings.</source>
  Якщо листа не надійшло, зв&apos;яжіться з нашою підтримкою.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>Unable to process purchase</source>
         <translation>Не вдалося обробити покупку</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>No active subscription found</source>
         <translation>Активну підписку не знайдено</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>Придбаних підписок не знайдено. Будь ласка, спочатку придбайте підписку</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>Ця адреса електронної пошти вже використовувалася для активації пробного періоду</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA verification is required</source>
         <translation>Потрібна перевірка CAPTCHA</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>CAPTCHA введено неправильно. Будь ласка, спробуйте ще раз</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="102"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA оновлено. Будь ласка, спробуйте ще раз</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="103"/>
         <source>Too many requests. Please try again later</source>
         <translation>Занадто багато запитів. Будь ласка, спробуйте пізніше</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="122"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be opened</source>
         <translation>Помилка QFile: не вдалося відкрити файл</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="123"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>Помилка QFile: сталася помилка під час читання з файлу</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="124"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>Помилка QFile: не вдалося отримати доступ до файлу</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="125"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>Помилка QFile: сталася невизначена помилка</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="126"/>
+        <location filename="../core/utils/errorStrings.cpp" line="128"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>Помилка QFile: сталася критична помилка</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="127"/>
+        <location filename="../core/utils/errorStrings.cpp" line="129"/>
         <source>QFile error: The operation was aborted</source>
         <translation>Помилка QFile: операцію було перервано</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="140"/>
+        <location filename="../core/utils/errorStrings.cpp" line="142"/>
         <source>Internal error</source>
         <translation>Внутрішня помилка</translation>
     </message>
@@ -6117,17 +6409,17 @@ Create one from the current settings.</source>
         <translation>IPsec</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="107"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="108"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>IKEv2/IPsec — сучасний стабільний протокол, який дещо швидший за інші та відновлює підключення після втрати сигналу. Має нативну підтримку на останніх версіях Android та iOS.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="114"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="115"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>Створіть на сервері файлове сховище для безпечного зберігання та передачі файлів.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="184"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="187"/>
         <source>DNS Service</source>
         <translation>DNS Сервіс</translation>
     </message>
@@ -6138,7 +6430,7 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="76"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="183"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
         <source>Website in Tor network</source>
         <translation>Веб-сайт в мережі Tor</translation>
     </message>
@@ -6148,40 +6440,51 @@ Create one from the current settings.</source>
         <translation>AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="72"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <source>MTProxy (Telegram)</source>
         <translation>MTProxy (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="73"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <source>Telemt (Telegram)</source>
         <translation>Telemt (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="88"/>
+        <location filename="../core/protocols/protocolUtils.cpp" line="74"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="82"/>
+        <source>TProxy (Telegram WEB)</source>
+        <translation>TProxy (Telegram WEB)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="89"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
         <translation>OpenVPN - популярний VPN-протокол, гнучний в налаштуваннях. Має власний протокол оснований на обміні ключами SSL/TLS.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="91"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="93"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="92"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="94"/>
         <source>This protocol is no longer supported.</source>
         <translation>Цей протокол більше не підтримується.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="117"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="118"/>
         <source>Telegram MTProto proxy server</source>
         <translation>Telegram MTProto проксі сервер</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="119"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="120"/>
         <source>Telegram MTProto proxy (Telemt, Rust)</source>
         <translation>Telegram MTProto проксі (Telemt, Rust)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="127"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="122"/>
+        <source>Telegram WEB proxy (tproxy-server)</source>
+        <translation>Telegram WEB проксі (tproxy-server)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="130"/>
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
 Features:
@@ -6198,7 +6501,7 @@ Features:
 * Працює за протоколами TCP і UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="138"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="141"/>
         <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
 Features:
@@ -6217,7 +6520,7 @@ Features:
 * Працює за протоколом UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="148"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="151"/>
         <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
 AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
@@ -6240,7 +6543,7 @@ AmneziaWG — відмінний вибір для тих, хто шукає ш�
 * Працює за протоколом UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="160"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="163"/>
         <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
 Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
 
@@ -6261,7 +6564,7 @@ Features:
 * Працює за протоколом TCP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="173"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="176"/>
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
 Features:
@@ -6280,54 +6583,59 @@ Features:
 * Працює за протоколом UDP (порти 500 і 4500)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="192"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="195"/>
         <source>Telegram MTProto proxy server. Allows Telegram clients to connect through your server using the MTProto protocol. Supports FakeTLS mode for bypassing DPI-based blocking.</source>
         <translation>Telegram MTProto проксі сервер. Дозволяє клієнтам Telegram підключатися через ваш сервер за протоколом MTProto. Підтримує режим FakeTLS для обходу блокувань на основі DPI.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="197"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="200"/>
         <source>Telegram MTProto proxy powered by Telemt (Rust). Supports secure and TLS fronting modes with optional traffic masking.</source>
         <translation>Telegram MTProto проксі на основі Telemt (Rust). Підтримує безпечний режим та режим TLS fronting з можливістю маскування трафіку.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="329"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="203"/>
+        <source>Telegram WEB proxy. Clients connect over HTTPS to a hostname; the server relays traffic to official MTProxy. Requires a domain, ports 80 and 443, and a WEB-capable Telegram app.</source>
+        <translation>Telegram WEB проксі. Клієнти підключаються через HTTPS до імені хоста, а сервер передає трафік до офіційного MTProxy. Потрібні домен, порти 80 і 443 та застосунок Telegram із підтримкою WEB.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="340"/>
         <source>Automatic</source>
         <translation>Автоматична</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="337"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="348"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>Буде встановлено протокол AmneziaWG. Він забезпечує високу швидкість з&apos;єднання та гарантує стабільну роботу навіть у найскладніших умовах мережі.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="95"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="96"/>
         <source>WireGuard - popular VPN protocol with high performance, high speed and low power consumption.</source>
         <translation>WireGuard — популярний VPN-протокол із високою продуктивністю, високою швидкістю та низьким енергоспоживанням.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="98"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="101"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="99"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="102"/>
         <location filename="../ui/models/containersModel.cpp" line="41"/>
         <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>AmneziaWG — спеціальний протокол від Amnezia, заснований на WireGuard. Він забезпечує високу швидкість з&apos;єднання та гарантує стабільну роботу навіть у найскладніших умовах мережі.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="104"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="105"/>
         <source>XRay with REALITY masks VPN traffic as web traffic and protects against active probing. It is highly resistant to detection and offers high speed.</source>
         <translation>XRay з REALITY маскує VPN-трафік під веб-трафік і захищає від активного зондування. Має високу стійкість до виявлення та забезпечує високу швидкість.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="110"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="111"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>Розгорніть сайт WordPress в мережі Tor в два кліка.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="112"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="113"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>Замініть DNS-сервер на AmneziaDNS. Це підвищить вашу рівень захищеності в інтернеті.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="189"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
@@ -6351,9 +6659,9 @@ For more detailed information, you can
         <translation>Сервіс SFTP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="190"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="71"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="193"/>
         <source>SOCKS5 proxy server</source>
         <translation>SOCKS5 proxy server</translation>
     </message>
@@ -6520,7 +6828,7 @@ For more detailed information, you can
 <context>
     <name>SecureServersRepository</name>
     <message>
-        <location filename="../core/repositories/secureServersRepository.cpp" line="212"/>
+        <location filename="../core/repositories/secureServersRepository.cpp" line="225"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
@@ -6582,7 +6890,7 @@ For more detailed information, you can
 <context>
     <name>SettingsUiController</name>
     <message>
-        <location filename="../ui/controllers/settingsUiController.cpp" line="183"/>
+        <location filename="../ui/controllers/settingsUiController.cpp" line="187"/>
         <source>All settings have been reset to default values</source>
         <translation>Всі налаштування були скинуті до значення &quot;По замовчуванню&quot;</translation>
     </message>
@@ -6634,51 +6942,51 @@ For more detailed information, you can
         <translation>Підписку успішно відновлено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="344"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="380"/>
         <source>Purchase confirmed. Subscription has been added to the app</source>
         <translation>Покупку підтверджено. Підписку додано до застосунку</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="436"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="489"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="612"/>
         <source>%1 installed successfully.</source>
         <translation>%1 встановлено успішно.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="451"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="497"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="524"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="555"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="583"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="647"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="740"/>
         <source>Enter the digits from the image to continue</source>
         <translation>Введіть цифри з зображення, щоб продовжити</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="605"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>Ця адреса електронної пошти вже використовувалася для активації пробного періоду. Сподобався сервіс? Перейдіть на Premium</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="665"/>
         <source>API config reloaded</source>
         <translation>Конфігурацію API перезавантажено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="669"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Успішно змінено країну підключення на %1</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="784"/>
         <source>API config removed</source>
         <translation>Конфігурацію API видалено</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="793"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Сервер &apos;%1&apos; був видалений</translation>
     </message>
@@ -6733,21 +7041,56 @@ For more detailed information, you can
     </message>
 </context>
 <context>
-    <name>UpdateUiController</name>
+    <name>UpdateSupportDrawer</name>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="20"/>
-        <source>New version released: %1</source>
-        <translation>Випущено нову версію: %1</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="39"/>
+        <source>Support</source>
+        <translation>Підтримка</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="23"/>
-        <source>New version released: %1 (%2)</source>
-        <translation>Випущено нову версію: %1 (%2)</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="47"/>
+        <source>If the update won&apos;t install, message us</source>
+        <translation>Якщо оновлення не встановлюється, напишіть нам</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="34"/>
-        <source>Failed to load changelog text</source>
-        <translation>Не вдалося завантажити текст списку змін</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="54"/>
+        <source>Telegram</source>
+        <translation>Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="55"/>
+        <source>We&apos;ll reply in chat</source>
+        <translation>Ми відповімо в чаті</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="60"/>
+        <source>https://t.me/amnezia_vpn_en</source>
+        <translation>https://t.me/amnezia_vpn</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="69"/>
+        <source>support@amnezia.org</source>
+        <translation>support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="70"/>
+        <source>Support email</source>
+        <translation>Ел. пошта підтримки</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="75"/>
+        <source>mailto:support@amnezia.org</source>
+        <translation>mailto:support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="84"/>
+        <source>amnezia.org</source>
+        <translation>amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="85"/>
+        <source>Download the update manually</source>
+        <translation>Завантажити оновлення вручну</translation>
     </message>
 </context>
 <context>
@@ -6835,39 +7178,39 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="279"/>
+        <location filename="../ui/qml/main2.qml" line="285"/>
         <source>Private key passphrase</source>
         <translation>Пароль для особистого ключа</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="300"/>
+        <location filename="../ui/qml/main2.qml" line="306"/>
         <source>Save</source>
         <translation>Зберегти</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="394"/>
+        <location filename="../ui/qml/main2.qml" line="400"/>
         <source>This subscription format is no longer supported</source>
         <translation>Цей формат підписки більше не підтримується</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="395"/>
+        <location filename="../ui/qml/main2.qml" line="401"/>
         <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
         <translation>Цей застарілий тип підписки Amnezia більше не можна використовувати для підключення в цій версії застосунку.
 Видаліть сервер із застосунку, щоб продовжити.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="396"/>
+        <location filename="../ui/qml/main2.qml" line="402"/>
         <source>Continue</source>
         <translation>Продовжити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="397"/>
+        <location filename="../ui/qml/main2.qml" line="403"/>
         <source>Cancel</source>
         <translation>Відмінити</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="401"/>
+        <location filename="../ui/qml/main2.qml" line="407"/>
         <source>Cannot remove server during active connection</source>
         <translation>Неможливо видалити сервер під час активного підключення</translation>
     </message>

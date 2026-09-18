@@ -6,7 +6,7 @@
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="33"/>
         <source>The address does not look like a valid IP address</source>
-        <translation>L'adresse ne semble pas être une adresse IP valide</translation>
+        <translation>L&apos;adresse ne semble pas être une adresse IP valide</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="38"/>
@@ -26,12 +26,12 @@
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="56"/>
         <source>Can&apos;t open file: %1</source>
-        <translation>Impossible d'ouvrir le fichier : %1</translation>
+        <translation>Impossible d&apos;ouvrir le fichier : %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="62"/>
         <source>Failed to parse JSON data from file: %1</source>
-        <translation>Échec de l'analyse des données JSON du fichier : %1</translation>
+        <translation>Échec de l&apos;analyse des données JSON du fichier : %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="67"/>
@@ -73,7 +73,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="77"/>
         <source>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.&lt;/a&gt;</source>
-        <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Non disponible dans votre région. Si un VPN est activé, désactivez-le, revenez à l'écran précédent et réessayez.&lt;/a&gt;</translation>
+        <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Non disponible dans votre région. Si un VPN est activé, désactivez-le, revenez à l&apos;écran précédent et réessayez.&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
@@ -86,7 +86,7 @@
     <message>
         <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="30"/>
         <source>The application has already been added</source>
-        <translation>L'application a déjà été ajoutée</translation>
+        <translation>L&apos;application a déjà été ajoutée</translation>
     </message>
     <message>
         <location filename="../ui/controllers/appSplitTunnelingUiController.cpp" line="40"/>
@@ -104,12 +104,12 @@
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="18"/>
         <source>Enter the digits from the image to continue</source>
-        <translation>Saisissez les chiffres de l'image pour continuer</translation>
+        <translation>Saisissez les chiffres de l&apos;image pour continuer</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="228"/>
         <source>Digits from the image</source>
-        <translation>Chiffres de l'image</translation>
+        <translation>Chiffres de l&apos;image</translation>
     </message>
     <message>
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="231"/>
@@ -125,19 +125,6 @@
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="271"/>
         <source>Close</source>
         <translation>Fermer</translation>
-    </message>
-</context>
-<context>
-    <name>ChangelogDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="70"/>
-        <source>Update</source>
-        <translation>Mettre à jour</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="96"/>
-        <source>Skip</source>
-        <translation>Ignorer</translation>
     </message>
 </context>
 <context>
@@ -230,7 +217,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="55"/>
         <source>Unable change protocol while there is an active connection</source>
-        <translation>Impossible de changer de protocole tant qu'une connexion est active</translation>
+        <translation>Impossible de changer de protocole tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -243,7 +230,7 @@
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="35"/>
         <source>Allows you to connect to some sites or applications through a VPN connection and bypass others</source>
-        <translation>Permet de faire passer certains sites ou applications par le VPN et d'en exclure d'autres</translation>
+        <translation>Permet de faire passer certains sites ou applications par le VPN et d&apos;en exclure d&apos;autres</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/HomeSplitTunnelingDrawer.qml" line="45"/>
@@ -291,71 +278,71 @@ Ne peut pas être désactivé pour le serveur actuel</translation>
 <context>
     <name>InstallUiController</name>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="125"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="167"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="132"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="174"/>
         <source>%1 installed successfully. </source>
         <translation>%1 installé avec succès. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="127"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="169"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="134"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="176"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 est déjà installé sur le serveur. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="131"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="138"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 Les conteneurs déjà installés sur le serveur ont été ajoutés</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="173"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="180"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
-Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les conteneurs installés ont été ajoutés à l'application</translation>
+Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les conteneurs installés ont été ajoutés à l&apos;application</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="288"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="327"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="351"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="299"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="340"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="364"/>
         <source>Settings updated successfully</source>
         <translation>Paramètres mis à jour avec succès</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="471"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="487"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>Le serveur « %1 » a été redémarré</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="485"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="501"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Le serveur « %1 » a été supprimé</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="494"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="510"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>Tous les conteneurs du serveur « %1 » ont été supprimés</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="520"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="538"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="554"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 a été supprimé du serveur « %2 »</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="553"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="569"/>
         <source>%1 cached profile cleared</source>
         <translation>Profil %1 mis en cache effacé</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="623"/>
         <source>Please login as the user</source>
-        <translation>Veuillez vous connecter en tant qu'utilisateur</translation>
+        <translation>Veuillez vous connecter en tant qu&apos;utilisateur</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="631"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="647"/>
         <source>Server added successfully</source>
         <translation>Serveur ajouté avec succès</translation>
     </message>
@@ -370,7 +357,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="124"/>
         <source>application name</source>
-        <translation>nom de l'application</translation>
+        <translation>nom de l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/InstalledAppsDrawer.qml" line="137"/>
@@ -383,7 +370,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="224"/>
         <source>Failed to parse JSON data: %1</source>
-        <translation>Échec de l'analyse des données JSON : %1</translation>
+        <translation>Échec de l&apos;analyse des données JSON : %1</translation>
     </message>
     <message>
         <location filename="../core/controllers/ipSplitTunnelingController.cpp" line="229"/>
@@ -411,7 +398,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="45"/>
         <source>Can&apos;t open file: %1</source>
-        <translation>Impossible d'ouvrir le fichier : %1</translation>
+        <translation>Impossible d&apos;ouvrir le fichier : %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="51"/>
@@ -422,29 +409,6 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="64"/>
         <source>Export completed</source>
         <translation>Exportation terminée</translation>
-    </message>
-</context>
-<context>
-    <name>MarketplaceUpdateController</name>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="153"/>
-        <source>Update available</source>
-        <translation>Mise à jour disponible</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of %1 is available.</source>
-        <translation>Une nouvelle version de %1 est disponible.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
-        <source>Update</source>
-        <translation>Mettre à jour</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="156"/>
-        <source>Skip</source>
-        <translation>Ignorer</translation>
     </message>
 </context>
 <context>
@@ -507,7 +471,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="60"/>
         <source>Gateway endpoint</source>
-        <translation>Point d'accès de la passerelle</translation>
+        <translation>Point de terminaison de la passerelle</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageDevMenu.qml" line="77"/>
@@ -550,12 +514,12 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="426"/>
         <source>AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.</source>
-        <translation>AmneziaWG 2.0 est obsolète et n'est plus pris en charge. Pour continuer à l'utiliser, une nouvelle installation du conteneur AmneziaWG 3.1 est nécessaire.</translation>
+        <translation>AmneziaWG 2.0 est obsolète et n&apos;est plus pris en charge. Pour continuer à l&apos;utiliser, une nouvelle installation du conteneur AmneziaWG 3.1 est nécessaire.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="472"/>
         <source>Unable change protocol while trying to make an active connection</source>
-        <translation>Impossible de changer de protocole pendant l'établissement d'une connexion</translation>
+        <translation>Impossible de changer de protocole pendant l&apos;établissement d&apos;une connexion</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="476"/>
@@ -630,7 +594,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="223"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - Délai d'expiration du renouvellement de clé</translation>
+        <translation>RekeyTimeout - Délai d&apos;expiration du renouvellement de clé</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="235"/>
@@ -640,7 +604,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="247"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - Délai d'expiration du keepalive</translation>
+        <translation>KeepaliveTimeout - Délai d&apos;expiration du keepalive</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="259"/>
@@ -695,7 +659,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="425"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -708,7 +672,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="81"/>
         <source>VPN address subnet</source>
-        <translation>Sous-réseau d'adresses VPN</translation>
+        <translation>Sous-réseau d&apos;adresses VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
@@ -733,7 +697,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="161"/>
         <source>S1 - Init packet junk size</source>
-        <translation>S1 - Taille du parasite du paquet d'initialisation</translation>
+        <translation>S1 - Taille du parasite du paquet d&apos;initialisation</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="171"/>
@@ -753,7 +717,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="207"/>
         <source>H1 - Init packet magic header</source>
-        <translation>H1 - En-tête magique du paquet d'initialisation</translation>
+        <translation>H1 - En-tête magique du paquet d&apos;initialisation</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="219"/>
@@ -813,7 +777,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="352"/>
         <source>RekeyTimeout - Rekey timeout</source>
-        <translation>RekeyTimeout - Délai d'expiration du renouvellement de clé</translation>
+        <translation>RekeyTimeout - Délai d&apos;expiration du renouvellement de clé</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="365"/>
@@ -823,7 +787,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="378"/>
         <source>KeepaliveTimeout - Keepalive timeout</source>
-        <translation>KeepaliveTimeout - Délai d'expiration du keepalive</translation>
+        <translation>KeepaliveTimeout - Délai d&apos;expiration du keepalive</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="391"/>
@@ -853,7 +817,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="490"/>
         <source>The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)</source>
-        <translation>La valeur du champ S1 + la taille du message d'initiation (148) ne doit pas être égale à S2 + la taille du message de réponse (92) + S3 + la taille de la réponse cookie (64) + S4 + la taille du paquet de transport (32)</translation>
+        <translation>La valeur du champ S1 + la taille du message d&apos;initiation (148) ne doit pas être égale à S2 + la taille du message de réponse (92) + S3 + la taille de la réponse cookie (64) + S4 + la taille du paquet de transport (32)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="495"/>
@@ -863,7 +827,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="496"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="497"/>
@@ -878,7 +842,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="502"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -891,7 +855,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="76"/>
         <source>VPN address subnet</source>
-        <translation>Sous-réseau d'adresses VPN</translation>
+        <translation>Sous-réseau d&apos;adresses VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="94"/>
@@ -1059,7 +1023,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="426"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="427"/>
@@ -1074,7 +1038,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="432"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1107,7 +1071,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="181"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolRaw.qml" line="182"/>
@@ -1170,7 +1134,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="127"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1183,7 +1147,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="70"/>
         <source>VPN address subnet</source>
-        <translation>Sous-réseau d'adresses VPN</translation>
+        <translation>Sous-réseau d&apos;adresses VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="89"/>
@@ -1203,7 +1167,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="121"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="122"/>
@@ -1218,7 +1182,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="127"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1236,7 +1200,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="97"/>
         <source>xtls-rprx-vision is available only with the RAW (TCP) transport.</source>
-        <translation>xtls-rprx-vision n'est disponible qu'avec le transport RAW (TCP).</translation>
+        <translation>xtls-rprx-vision n&apos;est disponible qu&apos;avec le transport RAW (TCP).</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="118"/>
@@ -1251,7 +1215,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="121"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="122"/>
@@ -1266,7 +1230,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayFlowSettings.qml" line="126"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1294,7 +1258,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="95"/>
         <source>REALITY is not supported with the mKCP transport. Use None or TLS.</source>
-        <translation>REALITY n'est pas pris en charge avec le transport mKCP. Utilisez None ou TLS.</translation>
+        <translation>REALITY n&apos;est pas pris en charge avec le transport mKCP. Utilisez Aucune ou TLS.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="115"/>
@@ -1335,7 +1299,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="316"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="317"/>
@@ -1350,7 +1314,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySecuritySettings.qml" line="321"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1363,7 +1327,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="82"/>
         <source>You have read-only access to this server. XRay settings cannot be edited.</source>
-        <translation>Vous disposez d'un accès en lecture seule à ce serveur. Les paramètres XRay ne peuvent pas être modifiés.</translation>
+        <translation>Vous disposez d&apos;un accès en lecture seule à ce serveur. Les paramètres XRay ne peuvent pas être modifiés.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="93"/>
@@ -1413,7 +1377,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="223"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="224"/>
@@ -1429,7 +1393,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="228"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySettings.qml" line="250"/>
@@ -1508,7 +1472,7 @@ Des conteneurs déjà installés ont été trouvés sur le serveur. Tous les con
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="121"/>
         <source>Failed to import configuration</source>
-        <translation>Échec de l'importation de la configuration</translation>
+        <translation>Échec de l&apos;importation de la configuration</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXraySnapshots.qml" line="123"/>
@@ -1643,7 +1607,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="206"/>
         <source>Write buffer size (MB). Range: 1–2147483647.</source>
-        <translation>Taille du tampon d'écriture (Mo). Plage : 1–2147483647.</translation>
+        <translation>Taille du tampon d&apos;écriture (Mo). Plage : 1–2147483647.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="224"/>
@@ -1690,7 +1654,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="381"/>
         <source>Disable gRPC Header</source>
-        <translation>Désactiver l'en-tête gRPC</translation>
+        <translation>Désactiver l&apos;en-tête gRPC</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="382"/>
@@ -1700,7 +1664,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="393"/>
         <source>Disable SSE Header</source>
-        <translation>Désactiver l'en-tête SSE</translation>
+        <translation>Désactiver l&apos;en-tête SSE</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="394"/>
@@ -1737,7 +1701,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="545"/>
         <source>Header/Cookie apply only in Packet-up mode</source>
-        <translation>Header/Cookie ne s'appliquent qu'en mode Packet-up</translation>
+        <translation>Header/Cookie ne s&apos;appliquent qu&apos;en mode Packet-up</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="546"/>
@@ -1827,7 +1791,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="778"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="779"/>
@@ -1842,7 +1806,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="783"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1870,7 +1834,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="94"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="95"/>
@@ -1885,7 +1849,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingBytesSettings.qml" line="99"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -1940,7 +1904,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="223"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="224"/>
@@ -1955,7 +1919,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXPaddingSettings.qml" line="228"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -2014,7 +1978,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="236"/>
         <source>All users with whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="237"/>
@@ -2029,7 +1993,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayXmuxSettings.qml" line="241"/>
         <source>Unable change settings while there is an active connection</source>
-        <translation>Impossible de modifier les paramètres tant qu'une connexion est active</translation>
+        <translation>Impossible de modifier les paramètres tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -2038,13 +2002,13 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="52"/>
         <source>A DNS service is installed on your server, and it is only accessible via VPN.
 </source>
-        <translation>Un service DNS est installé sur votre serveur, il n'est accessible que via le VPN.
+        <translation>Un service DNS est installé sur votre serveur, il n&apos;est accessible que via le VPN.
 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>L'adresse DNS est identique à l'adresse de votre serveur. Vous pouvez configurer le DNS dans les paramètres, sous l'onglet des connexions.</translation>
+        <translation>L&apos;adresse DNS est identique à l&apos;adresse de votre serveur. Vous pouvez configurer le DNS dans les paramètres, sous l&apos;onglet des connexions.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="68"/>
@@ -2069,7 +2033,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="79"/>
         <source>Cannot remove AmneziaDNS from running server</source>
-        <translation>Impossible de supprimer AmneziaDNS d'un serveur en cours d'exécution</translation>
+        <translation>Impossible de supprimer AmneziaDNS d&apos;un serveur en cours d&apos;exécution</translation>
     </message>
 </context>
 <context>
@@ -2092,7 +2056,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="225"/>
         <source>Running</source>
-        <translation>En cours d'exécution</translation>
+        <translation>En cours d&apos;exécution</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="228"/>
@@ -2123,7 +2087,7 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="362"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="910"/>
         <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
-        <translation>Paramètres verrouillés : délai de connexion dépassé (code d'erreur %1). Rouvrez la page pour réessayer.</translation>
+        <translation>Paramètres verrouillés : délai de connexion dépassé (code d&apos;erreur %1). Rouvrez la page pour réessayer.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="442"/>
@@ -2160,7 +2124,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="558"/>
         <source>Deploy MTProxy first</source>
-        <translation>Déployez d'abord MTProxy</translation>
+        <translation>Déployez d&apos;abord MTProxy</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="574"/>
@@ -2198,7 +2162,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="695"/>
         <source>Host</source>
-        <translation>Host</translation>
+        <translation>Hôte</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="731"/>
@@ -2223,7 +2187,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="806"/>
         <source>The proxy will be stopped and all users will lose access.</source>
-        <translation>Le proxy sera arrêté et tous les utilisateurs perdront l'accès.</translation>
+        <translation>Le proxy sera arrêté et tous les utilisateurs perdront l&apos;accès.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="807"/>
@@ -2296,12 +2260,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1020"/>
         <source>Leave empty to use server IP automatically</source>
-        <translation>Laissez vide pour utiliser automatiquement l'IP du serveur</translation>
+        <translation>Laissez vide pour utiliser automatiquement l&apos;IP du serveur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1033"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ Ceci remplace l'IP du serveur dans les liens de connexion. Assurez-vous que cet hôte/domaine pointe bien vers votre serveur.</translation>
+        <translation>⚠ Ceci remplace l&apos;IP du serveur dans les liens de connexion. Assurez-vous que cet hôte/domaine pointe bien vers votre serveur.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1046"/>
@@ -2316,7 +2280,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1088"/>
         <source>The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.</source>
-        <translation>La chaîne promue se configure dans @MTProxyBot. Collez ici le tag du proxy : exactement 32 caractères hexadécimaux (0-9, A-F), tels qu'indiqués dans le message du bot — ou laissez vide.</translation>
+        <translation>La chaîne promue se configure dans @MTProxyBot. Collez ici le tag du proxy : exactement 32 caractères hexadécimaux (0-9, A-F), tels qu&apos;indiqués dans le message du bot — ou laissez vide.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1101"/>
@@ -2336,7 +2300,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1133"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.</source>
-        <translation>Le tag du proxy doit comporter exactement 32 caractères hexadécimaux (0-9, A-F). Laissez vide s'il n'est pas utilisé.</translation>
+        <translation>Le tag du proxy doit comporter exactement 32 caractères hexadécimaux (0-9, A-F). Laissez vide s&apos;il n&apos;est pas utilisé.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1152"/>
@@ -2359,7 +2323,7 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1189"/>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1193"/>
         <source>Standard MTProto</source>
-        <translation>Standard MTProto</translation>
+        <translation>MTProto standard</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1222"/>
@@ -2376,7 +2340,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1265"/>
         <source>The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.</source>
-        <translation>Le domaine est encodé dans le secret client FakeTLS (ee + base_secret + hex(domaine)). Il doit prendre en charge HTTPS / TLS 1.3.</translation>
+        <translation>Le domaine est encodé dans le secret client FakeTLS (ee + base_secret + hex(domain)). Il doit prendre en charge HTTPS / TLS 1.3.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1272"/>
@@ -2436,7 +2400,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1641"/>
         <source>Enable if your server is not directly accessible from the internet, e.g. Docker or private network</source>
-        <translation>Activez cette option si votre serveur n'est pas directement accessible depuis Internet, par exemple derrière Docker ou un réseau privé</translation>
+        <translation>Activez cette option si votre serveur n&apos;est pas directement accessible depuis Internet, par exemple derrière Docker ou un réseau privé</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1658"/>
@@ -2505,7 +2469,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1842"/>
         <source>Stats endpoint</source>
-        <translation>Point d'accès des statistiques</translation>
+        <translation>Point d&apos;accès des statistiques</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1855"/>
@@ -2520,7 +2484,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1867"/>
         <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
-        <translation>Si vous modifiez les paramètres, le lien de connexion du proxy changera. L'ancien lien cessera de fonctionner.</translation>
+        <translation>Si vous modifiez les paramètres, le lien de connexion du proxy changera. L&apos;ancien lien cessera de fonctionner.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1881"/>
@@ -2563,7 +2527,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="75"/>
         <source>Host</source>
-        <translation>Host</translation>
+        <translation>Hôte</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="85"/>
@@ -2581,7 +2545,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="117"/>
         <source>User name</source>
-        <translation>Nom d'utilisateur</translation>
+        <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="138"/>
@@ -2591,7 +2555,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="172"/>
         <source>Mount folder on device</source>
-        <translation>Monter le dossier sur l'appareil</translation>
+        <translation>Monter le dossier sur l&apos;appareil</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="197"/>
@@ -2632,7 +2596,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="73"/>
         <source>Host</source>
-        <translation>Host</translation>
+        <translation>Hôte</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="83"/>
@@ -2651,7 +2615,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="111"/>
         <source>User name</source>
-        <translation>Nom d'utilisateur</translation>
+        <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="130"/>
@@ -2662,7 +2626,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="220"/>
         <source>Username</source>
-        <translation>Nom d'utilisateur</translation>
+        <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="272"/>
@@ -2683,7 +2647,208 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="283"/>
         <source>Username cannot be empty</source>
-        <translation>Le nom d'utilisateur ne peut pas être vide</translation>
+        <translation>Le nom d&apos;utilisateur ne peut pas être vide</translation>
+    </message>
+</context>
+<context>
+    <name>PageServiceTProxySettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy started</source>
+        <translation>TProxy démarré</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy stopped</source>
+        <translation>TProxy arrêté</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="668"/>
+        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
+        <translation>Paramètres verrouillés : délai de connexion dépassé (code d&apos;erreur %1). Rouvrez la page pour réessayer.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="275"/>
+        <source>TProxy settings</source>
+        <translation>Paramètres TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="276"/>
+        <source>Read more about Telegram WEB proxy</source>
+        <translation>En savoir plus sur le proxy Telegram WEB</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="286"/>
+        <source>No internet connection. Connect to the internet to change TProxy settings.</source>
+        <translation>Aucune connexion Internet. Connectez-vous à Internet pour modifier les paramètres TProxy.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="309"/>
+        <source>Connection</source>
+        <translation>Connexion</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="313"/>
+        <source>Settings</source>
+        <translation>Paramètres</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="360"/>
+        <source>Use Telegram WEB proxy link</source>
+        <translation>Utiliser le lien du proxy Telegram WEB</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="386"/>
+        <source>Set a hostname first</source>
+        <translation>Définissez d&apos;abord un nom d&apos;hôte</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="459"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="541"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="580"/>
+        <source>Copied</source>
+        <translation>Copié</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="446"/>
+        <source>Telegram connection link</source>
+        <translation>Lien de connexion Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="447"/>
+        <source>TProxy WEB proxy link</source>
+        <translation>Lien du proxy WEB TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="473"/>
+        <source>Or enter the proxy details manually.</source>
+        <translation>Ou saisissez les détails du proxy manuellement.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="479"/>
+        <source>How to do it</source>
+        <translation>Comment faire</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="522"/>
+        <source>Host</source>
+        <translation>Hôte</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="560"/>
+        <source>Secret</source>
+        <translation>Secret</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="593"/>
+        <source>Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.</source>
+        <translation>Nécessite un client Telegram compatible WEB (démonstration sur Desktop). Les liens MTProxy classiques ne fonctionneront pas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="606"/>
+        <source>Delete TProxy</source>
+        <translation>Supprimer TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="609"/>
+        <source>Remove %1 from server?</source>
+        <translation>Supprimer %1 du serveur ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="616"/>
+        <source>The proxy will be stopped and all users will lose access.</source>
+        <translation>Le proxy sera arrêté et tous les utilisateurs perdront l&apos;accès.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Continue</source>
+        <translation>Continuer</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Cancel</source>
+        <translation>Annuler</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="637"/>
+        <source>Enable TProxy</source>
+        <translation>Activer TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="666"/>
+        <source>Enable TProxy to edit settings</source>
+        <translation>Activez TProxy pour modifier les paramètres</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="669"/>
+        <source>Cannot reach the server — settings are unavailable</source>
+        <translation>Serveur injoignable — les paramètres sont indisponibles</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="681"/>
+        <source>Hostname</source>
+        <translation>Nom d&apos;hôte</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="682"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="697"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>Utilisez des lettres minuscules, des chiffres, des points et des traits d&apos;union</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="706"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="878"/>
+        <source>Enter a lowercase DNS hostname (A record to this server)</source>
+        <translation>Saisissez un nom d&apos;hôte DNS en minuscules (enregistrement A pointant vers ce serveur)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="719"/>
+        <source>Required. Point a DNS A record at this server. Do not put a CDN in front.</source>
+        <translation>Obligatoire. Faites pointer un enregistrement DNS A vers ce serveur. Ne placez pas de CDN devant.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="732"/>
+        <source>ACME email</source>
+        <translation>E-mail ACME</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="733"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="748"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="757"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="882"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>Saisissez une adresse e-mail valide pour le certificat TLS</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="770"/>
+        <source>Used by Caddy to issue a Let&apos;s Encrypt certificate.</source>
+        <translation>Utilisée par Caddy pour émettre un certificat Let&apos;s Encrypt.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="780"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="794"/>
+        <source>Carrier mode</source>
+        <translation>Mode de transport</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="820"/>
+        <source>MTProxy workers</source>
+        <translation>Workers MTProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="860"/>
+        <source>Save</source>
+        <translation>Enregistrer</translation>
     </message>
 </context>
 <context>
@@ -2706,7 +2871,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="225"/>
         <source>Running</source>
-        <translation>En cours d'exécution</translation>
+        <translation>En cours d&apos;exécution</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="228"/>
@@ -2737,7 +2902,7 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="362"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="910"/>
         <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
-        <translation>Paramètres verrouillés : délai de connexion dépassé (code d'erreur %1). Rouvrez la page pour réessayer.</translation>
+        <translation>Paramètres verrouillés : délai de connexion dépassé (code d&apos;erreur %1). Rouvrez la page pour réessayer.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="442"/>
@@ -2774,7 +2939,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="558"/>
         <source>Deploy Telemt first</source>
-        <translation>Déployez d'abord Telemt</translation>
+        <translation>Déployez d&apos;abord Telemt</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="574"/>
@@ -2812,7 +2977,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="695"/>
         <source>Host</source>
-        <translation>Host</translation>
+        <translation>Hôte</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="731"/>
@@ -2837,7 +3002,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="806"/>
         <source>The proxy will be stopped and all users will lose access.</source>
-        <translation>Le proxy sera arrêté et tous les utilisateurs perdront l'accès.</translation>
+        <translation>Le proxy sera arrêté et tous les utilisateurs perdront l&apos;accès.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="807"/>
@@ -2910,12 +3075,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1020"/>
         <source>Leave empty to use server IP automatically</source>
-        <translation>Laissez vide pour utiliser automatiquement l'IP du serveur</translation>
+        <translation>Laissez vide pour utiliser automatiquement l&apos;IP du serveur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1033"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ Ceci remplace l'IP du serveur dans les liens de connexion. Assurez-vous que cet hôte/domaine pointe bien vers votre serveur.</translation>
+        <translation>⚠ Ceci remplace l&apos;IP du serveur dans les liens de connexion. Assurez-vous que cet hôte/domaine pointe bien vers votre serveur.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1046"/>
@@ -2930,7 +3095,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1088"/>
         <source>The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.</source>
-        <translation>La chaîne promue se configure dans @MTProxyBot. Collez ici le tag du proxy : exactement 32 caractères hexadécimaux (0-9, A-F), tels qu'indiqués dans le message du bot — ou laissez vide.</translation>
+        <translation>La chaîne promue se configure dans @MTProxyBot. Collez ici le tag du proxy : exactement 32 caractères hexadécimaux (0-9, A-F), tels qu&apos;indiqués dans le message du bot — ou laissez vide.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1101"/>
@@ -2950,7 +3115,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1133"/>
         <source>Proxy tag must be exactly 32 hexadecimal characters (0-9, A-F). Leave empty if unused.</source>
-        <translation>Le tag du proxy doit comporter exactement 32 caractères hexadécimaux (0-9, A-F). Laissez vide s'il n'est pas utilisé.</translation>
+        <translation>Le tag du proxy doit comporter exactement 32 caractères hexadécimaux (0-9, A-F). Laissez vide s&apos;il n&apos;est pas utilisé.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1152"/>
@@ -2973,7 +3138,7 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1189"/>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1193"/>
         <source>Standard MTProto</source>
-        <translation>Standard MTProto</translation>
+        <translation>MTProto standard</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1222"/>
@@ -2990,7 +3155,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1265"/>
         <source>The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.</source>
-        <translation>Le domaine est encodé dans le secret client FakeTLS (ee + base_secret + hex(domaine)). Il doit prendre en charge HTTPS / TLS 1.3.</translation>
+        <translation>Le domaine est encodé dans le secret client FakeTLS (ee + base_secret + hex(domain)). Il doit prendre en charge HTTPS / TLS 1.3.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1272"/>
@@ -3020,7 +3185,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
         <source>Set public IP manually</source>
-        <translation>Définir l'IP publique manuellement</translation>
+        <translation>Définir l&apos;IP publique manuellement</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1533"/>
@@ -3087,7 +3252,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1699"/>
         <source>Stats endpoint</source>
-        <translation>Point d'accès des statistiques</translation>
+        <translation>Point d&apos;accès des statistiques</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1712"/>
@@ -3102,7 +3267,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1724"/>
         <source>If you change the settings, the proxy connection link will change. The old link will stop working.</source>
-        <translation>Si vous modifiez les paramètres, le lien de connexion du proxy changera. L'ancien lien cessera de fonctionner.</translation>
+        <translation>Si vous modifiez les paramètres, le lien de connexion du proxy changera. L&apos;ancien lien cessera de fonctionner.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1738"/>
@@ -3173,7 +3338,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="85"/>
         <source>Close application</source>
-        <translation>Fermer l'application</translation>
+        <translation>Fermer l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="117"/>
@@ -3203,7 +3368,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="177"/>
         <source>About AmneziaVPN</source>
-        <translation>À propos d'AmneziaVPN</translation>
+        <translation>À propos d&apos;AmneziaVPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettings.qml" line="188"/>
@@ -3214,87 +3379,102 @@ Créez-en une à partir des paramètres actuels.</translation>
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <source>You have the latest version of AmneziaVPN</source>
+        <translation>Vous disposez de la dernière version d&apos;AmneziaVPN</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <source>Failed to check for updates</source>
+        <translation>Échec de la recherche de mises à jour</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="73"/>
         <source>Support Amnezia</source>
         <translation>Soutenir Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
         <translation>Amnezia est une application libre et open source. Vous pouvez soutenir les développeurs si elle vous plaît.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
         <source>Contacts</source>
         <translation>Contacts</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>Software version: %1</source>
         <translation>Version du logiciel : %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
         <source>Check for updates</source>
         <translation>Rechercher des mises à jour</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
+        <source>Checking...</source>
+        <translation>Vérification...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="186"/>
         <source>Privacy Policy</source>
         <translation>Politique de confidentialité</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="205"/>
         <source>Telegram group</source>
         <translation>Groupe Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="206"/>
         <source>To discuss features</source>
         <translation>Pour discuter des fonctionnalités</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="193"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="209"/>
         <source>https://telegram.me/amnezia_vpn_en</source>
         <translation>https://telegram.me/amnezia_vpn_en</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
         <source>support@amnezia.org</source>
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="217"/>
         <source>For reviews and bug reports</source>
         <translation>Pour les avis et les rapports de bogues</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="220"/>
         <source>mailto:support@amnezia.org</source>
         <translation>mailto:support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="227"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="228"/>
         <source>Discover the source code</source>
         <translation>Découvrir le code source</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="231"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="238"/>
         <source>Website</source>
         <translation>Site web</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="239"/>
         <source>Visit official website</source>
         <translation>Visiter le site officiel</translation>
     </message>
@@ -3309,12 +3489,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="147"/>
         <source>Subscription expiring soon</source>
-        <translation>Abonnement bientôt expiré</translation>
+        <translation>L&apos;abonnement expire bientôt</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="166"/>
         <source>Renew subscription</source>
-        <translation>Renouveler l'abonnement</translation>
+        <translation>Renouveler l&apos;abonnement</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="180"/>
@@ -3324,12 +3504,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="209"/>
         <source>Unable change server location while trying to make an active connection</source>
-        <translation>Impossible de changer d'emplacement de serveur pendant l'établissement d'une connexion</translation>
+        <translation>Impossible de changer d&apos;emplacement de serveur pendant l&apos;établissement d&apos;une connexion</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiAvailableCountries.qml" line="213"/>
         <source>Unable change server location while there is an active connection</source>
-        <translation>Impossible de changer d'emplacement de serveur tant qu'une connexion est active</translation>
+        <translation>Impossible de changer d&apos;emplacement de serveur tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -3347,7 +3527,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="55"/>
         <source>You can find the identifier on the Support tab or, for older versions of the app, by tapping &apos;+&apos; and then the three dots at the top of the page.</source>
-        <translation>Vous trouverez l'identifiant dans l'onglet Assistance ou, pour les anciennes versions de l'application, en appuyant sur « + » puis sur les trois points en haut de la page.</translation>
+        <translation>Vous trouverez l&apos;identifiant dans l&apos;onglet Assistance ou, pour les anciennes versions de l&apos;application, en appuyant sur « + » puis sur les trois points en haut de la page.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="69"/>
@@ -3357,7 +3537,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="70"/>
         <source>Support tag: </source>
-        <translation>Tag d'assistance : </translation>
+        <translation>Tag d&apos;assistance : </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="70"/>
@@ -3377,7 +3557,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="80"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
-        <translation>Cela dissociera l'appareil de votre abonnement. Vous pourrez le reconnecter à tout moment en appuyant sur « Recharger la configuration API » dans les paramètres d'abonnement de l'appareil.</translation>
+        <translation>Cela dissociera l&apos;appareil de votre abonnement. Vous pourrez le reconnecter à tout moment en appuyant sur « Recharger la configuration API » dans les paramètres d&apos;abonnement de l&apos;appareil.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiDevices.qml" line="81"/>
@@ -3470,7 +3650,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiInstructions.qml" line="102"/>
         <source>Setup guides on the Amnezia website</source>
-        <translation>Guides de configuration sur le site d'Amnezia</translation>
+        <translation>Guides de configuration sur le site d&apos;Amnezia</translation>
     </message>
 </context>
 <context>
@@ -3488,7 +3668,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="61"/>
         <source>For router setup or the AmneziaWG app</source>
-        <translation>Pour la configuration d'un routeur ou l'application AmneziaWG</translation>
+        <translation>Pour la configuration d&apos;un routeur ou de l&apos;application AmneziaWG</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="73"/>
@@ -3538,7 +3718,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="224"/>
         <source>Your previous configuration file will no longer work, and it will not be possible to connect using it</source>
-        <translation>Votre ancien fichier de configuration ne fonctionnera plus et il ne sera plus possible de s'y connecter</translation>
+        <translation>Votre ancien fichier de configuration ne fonctionnera plus et il ne sera plus possible de l&apos;utiliser pour se connecter</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="225"/>
@@ -3561,12 +3741,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
         <source>Subscription Status</source>
-        <translation>État de l'abonnement</translation>
+        <translation>État de l&apos;abonnement</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="38"/>
         <source>Valid Until</source>
-        <translation>Valable jusqu'au</translation>
+        <translation>Valable jusqu&apos;au</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="47"/>
@@ -3581,13 +3761,13 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="159"/>
         <source>Subscription expiring soon</source>
-        <translation>Abonnement bientôt expiré</translation>
+        <translation>L&apos;abonnement expire bientôt</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="189"/>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="254"/>
         <source>Renew subscription</source>
-        <translation>Renouveler l'abonnement</translation>
+        <translation>Renouveler l&apos;abonnement</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="277"/>
@@ -3597,7 +3777,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="298"/>
         <source>Subscription Key</source>
-        <translation>Clé d'abonnement</translation>
+        <translation>Clé d&apos;abonnement</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="320"/>
@@ -3671,7 +3851,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="440"/>
         <source>This will unlink the device from your subscription. You can reconnect it anytime by pressing&#xa0;&quot;Reload API config&quot; in subscription settings on device.</source>
-        <translation>Cela dissociera l'appareil de votre abonnement. Vous pourrez le reconnecter à tout moment en appuyant sur « Recharger la configuration API » dans les paramètres d'abonnement de l'appareil.</translation>
+        <translation>Cela dissociera l&apos;appareil de votre abonnement. Vous pourrez le reconnecter à tout moment en appuyant sur « Recharger la configuration API » dans les paramètres d&apos;abonnement de l&apos;appareil.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="446"/>
@@ -3681,12 +3861,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="474"/>
         <source>Remove from application</source>
-        <translation>Retirer de l'application</translation>
+        <translation>Retirer de l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="477"/>
         <source>Remove from application?</source>
-        <translation>Retirer de l'application ?</translation>
+        <translation>Retirer de l&apos;application ?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="483"/>
@@ -3734,7 +3914,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSubscriptionKey.qml" line="191"/>
         <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
-        <translation>Pour lire le QR code dans l'application Amnezia, appuyez sur « + » dans le menu principal → « QR code »</translation>
+        <translation>Pour lire le QR code dans l&apos;application Amnezia, appuyez sur « + » dans le menu principal → « QR code »</translation>
     </message>
 </context>
 <context>
@@ -3772,7 +3952,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="110"/>
         <source>Support tag</source>
-        <translation>Tag d'assistance</translation>
+        <translation>Tag d&apos;assistance</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="120"/>
@@ -3830,7 +4010,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="245"/>
         <source>application name</source>
-        <translation>nom de l'application</translation>
+        <translation>nom de l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="255"/>
@@ -3853,7 +4033,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="66"/>
         <source>Allow application screenshots</source>
-        <translation>Autoriser les captures d'écran de l'application</translation>
+        <translation>Autoriser les captures d&apos;écran de l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="87"/>
@@ -3863,7 +4043,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="88"/>
         <source>Enable notifications to show the VPN state in the status bar</source>
-        <translation>Activez les notifications pour afficher l'état du VPN dans la barre d'état</translation>
+        <translation>Activez les notifications pour afficher l&apos;état du VPN dans la barre d&apos;état</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="108"/>
@@ -3873,7 +4053,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="109"/>
         <source>Launch the application every time the device is starts</source>
-        <translation>Lancer l'application à chaque démarrage de l'appareil</translation>
+        <translation>Lancer l&apos;application à chaque démarrage de l&apos;appareil</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="131"/>
@@ -3883,7 +4063,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="132"/>
         <source>Connect to VPN on app start</source>
-        <translation>Se connecter au VPN au démarrage de l'application</translation>
+        <translation>Se connecter au VPN au démarrage de l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="154"/>
@@ -3893,12 +4073,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="155"/>
         <source>Launch application minimized (works with autostart option turned on)</source>
-        <translation>Lancer l'application en mode réduit (fonctionne avec le démarrage automatique activé)</translation>
+        <translation>Lancer l&apos;application en mode réduit (fonctionne avec le démarrage automatique activé)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="180"/>
         <source>News Notification</source>
-        <translation>Notification d'actualités</translation>
+        <translation>Notification d&apos;actualités</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="181"/>
@@ -3906,52 +4086,62 @@ Créez-en une à partir des paramètres actuels.</translation>
         <translation>Afficher une icône de notification pour les actualités non lues</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="201"/>
+        <source>Check for updates automatically</source>
+        <translation>Rechercher les mises à jour automatiquement</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="202"/>
+        <source>Check for a new app version at startup</source>
+        <translation>Rechercher une nouvelle version de l&apos;application au démarrage</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="226"/>
         <source>Language</source>
         <translation>Langue</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
         <source>Logging</source>
         <translation>Journalisation</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Enabled</source>
         <translation>Activé</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Disabled</source>
         <translation>Désactivé</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="258"/>
         <source>Reset settings and remove all data from the application</source>
-        <translation>Réinitialiser les paramètres et supprimer toutes les données de l'application</translation>
+        <translation>Réinitialiser les paramètres et supprimer toutes les données de l&apos;application</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="263"/>
         <source>Reset settings and remove all data from the application?</source>
-        <translation>Réinitialiser les paramètres et supprimer toutes les données de l'application ?</translation>
+        <translation>Réinitialiser les paramètres et supprimer toutes les données de l&apos;application ?</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="264"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation>Tous les paramètres seront réinitialisés par défaut. Tous les services AmneziaVPN installés resteront sur le serveur.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="265"/>
         <source>Continue</source>
         <translation>Continuer</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="245"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="266"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="270"/>
         <source>Cannot reset settings during active connection</source>
         <translation>Impossible de réinitialiser les paramètres pendant une connexion active</translation>
     </message>
@@ -3971,7 +4161,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="70"/>
         <source>You can save your settings to a backup file to restore them the next time you install the application.</source>
-        <translation>Vous pouvez enregistrer vos paramètres dans un fichier de sauvegarde afin de les restaurer lors de la prochaine installation de l'application.</translation>
+        <translation>Vous pouvez enregistrer vos paramètres dans un fichier de sauvegarde afin de les restaurer lors de la prochaine installation de l&apos;application.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsBackup.qml" line="88"/>
@@ -4060,7 +4250,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>Lorsqu'AmneziaDNS n'est pas utilisé ou installé</translation>
+        <translation>Lorsqu&apos;AmneziaDNS n&apos;est pas utilisé ou installé</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
@@ -4080,7 +4270,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="124"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation>Permet d'utiliser le VPN uniquement pour certaines applications</translation>
+        <translation>Permet d&apos;utiliser le VPN uniquement pour certaines applications</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="142"/>
@@ -4108,7 +4298,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
         <source>If AmneziaDNS is not used or installed</source>
-        <translation>Si AmneziaDNS n'est pas utilisé ou installé</translation>
+        <translation>Si AmneziaDNS n&apos;est pas utilisé ou installé</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="84"/>
@@ -4171,7 +4361,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
         <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
-        <translation>Activez cette option pour garantir que le trafic réseau passe par un tunnel VPN sécurisé, afin d'éviter l'exposition accidentelle de votre IP et de vos requêtes DNS en cas de coupure de la connexion</translation>
+        <translation>Activez cette option pour garantir que le trafic réseau passe par un tunnel VPN sécurisé, afin d&apos;éviter l&apos;exposition accidentelle de votre IP et de vos requêtes DNS en cas de coupure de la connexion</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
@@ -4186,7 +4376,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
         <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
-        <translation>L'accès à Internet est bloqué si le VPN se déconnecte de manière inattendue</translation>
+        <translation>L&apos;accès à Internet est bloqué si le VPN se déconnecte de manière inattendue</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
@@ -4196,7 +4386,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
         <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
-        <translation>La connexion Internet est bloquée même lorsque le VPN est désactivé manuellement ou n'a pas démarré</translation>
+        <translation>La connexion Internet est bloquée même lorsque le VPN est désactivé manuellement ou n&apos;a pas démarré</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
@@ -4206,7 +4396,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
         <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
-        <translation>Si le VPN se déconnecte ou tombe alors que le KillSwitch strict est activé, l'accès à Internet sera bloqué. Pour le rétablir, reconnectez le VPN ou désactivez/modifiez le KillSwitch.</translation>
+        <translation>Si le VPN se déconnecte ou tombe alors que le KillSwitch strict est activé, l&apos;accès à Internet sera bloqué. Pour le rétablir, reconnectez le VPN ou désactivez/modifiez le KillSwitch.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
@@ -4274,7 +4464,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="187"/>
         <source>Save address list</source>
-        <translation>Enregistrer la liste d'adresses</translation>
+        <translation>Enregistrer la liste d&apos;adresses</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="194"/>
@@ -4286,23 +4476,23 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="265"/>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="281"/>
         <source>Address files (*.json)</source>
-        <translation>Fichiers d'adresses (*.json)</translation>
+        <translation>Fichiers d&apos;adresses (*.json)</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="254"/>
         <source>Import address list</source>
-        <translation>Importer une liste d'adresses</translation>
+        <translation>Importer une liste d&apos;adresses</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="261"/>
         <source>Replace address list</source>
-        <translation>Remplacer la liste d'adresses</translation>
+        <translation>Remplacer la liste d&apos;adresses</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="264"/>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="280"/>
         <source>Open address file</source>
-        <translation>Ouvrir un fichier d'adresses</translation>
+        <translation>Ouvrir un fichier d&apos;adresses</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="277"/>
@@ -4320,7 +4510,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="51"/>
         <source>Enabling this function will save application&apos;s logs automatically. By default, logging functionality is disabled. Enable log saving in case of application malfunction.</source>
-        <translation>L'activation de cette fonction enregistrera automatiquement les journaux de l'application. Par défaut, la journalisation est désactivée. Activez l'enregistrement des journaux en cas de dysfonctionnement de l'application.</translation>
+        <translation>L&apos;activation de cette fonction enregistrera automatiquement les journaux de l&apos;application. Par défaut, la journalisation est désactivée. Activez l&apos;enregistrement des journaux en cas de dysfonctionnement de l&apos;application.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="63"/>
@@ -4370,7 +4560,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="182"/>
         <source>AmneziaVPN logs</source>
-        <translation>Journaux d'AmneziaVPN</translation>
+        <translation>Journaux d&apos;AmneziaVPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="192"/>
@@ -4402,19 +4592,6 @@ Créez-en une à partir des paramètres actuels.</translation>
     </message>
 </context>
 <context>
-    <name>PageSettingsNewsDetail</name>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="87"/>
-        <source>Update</source>
-        <translation>Mettre à jour</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="112"/>
-        <source>Skip</source>
-        <translation>Ignorer</translation>
-    </message>
-</context>
-<context>
     <name>PageSettingsNewsNotifications</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsNewsNotifications.qml" line="33"/>
@@ -4427,12 +4604,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="28"/>
         <source>All installed containers have been added to the application</source>
-        <translation>Tous les conteneurs installés ont été ajoutés à l'application</translation>
+        <translation>Tous les conteneurs installés ont été ajoutés à l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="30"/>
         <source>No new installed containers found</source>
-        <translation>Aucun nouveau conteneur installé n'a été trouvé</translation>
+        <translation>Aucun nouveau conteneur installé n&apos;a été trouvé</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="98"/>
@@ -4442,7 +4619,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="99"/>
         <source>Add them to the application if they were not displayed</source>
-        <translation>Les ajouter à l'application s'ils n'étaient pas affichés</translation>
+        <translation>Les ajouter à l&apos;application s&apos;ils n&apos;étaient pas affichés</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="112"/>
@@ -4483,12 +4660,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="142"/>
         <source>Remove server from application</source>
-        <translation>Retirer le serveur de l'application</translation>
+        <translation>Retirer le serveur de l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="146"/>
         <source>Do you want to remove the server from application?</source>
-        <translation>Voulez-vous retirer le serveur de l'application ?</translation>
+        <translation>Voulez-vous retirer le serveur de l&apos;application ?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="147"/>
@@ -4513,7 +4690,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="177"/>
         <source>All users whom you shared a connection with will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="183"/>
@@ -4564,12 +4741,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="57"/>
         <source>This protocol is no longer supported.</source>
-        <translation>Ce protocole n'est plus pris en charge.</translation>
+        <translation>Ce protocole n&apos;est plus pris en charge.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="71"/>
         <source>AmneziaWG 2.0 is outdated and does not include the latest security improvements, but it will continue to work. Moving to AmneziaWG 3.1 by deploying a new container on the server is recommended for stronger protocol security</source>
-        <translation>AmneziaWG 2.0 est obsolète et n'intègre pas les dernières améliorations de sécurité, mais il continuera de fonctionner. Il est recommandé de passer à AmneziaWG 3.1 en déployant un nouveau conteneur sur le serveur pour renforcer la sécurité du protocole</translation>
+        <translation>AmneziaWG 2.0 est obsolète et n&apos;intègre pas les dernières améliorations de sécurité, mais il continuera de fonctionner. Il est recommandé de passer à AmneziaWG 3.1 en déployant un nouveau conteneur sur le serveur pour renforcer la sécurité du protocole</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="90"/>
@@ -4616,7 +4793,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="161"/>
         <source>Unable to clear %1 profile while there is an active connection</source>
-        <translation>Impossible d'effacer le profil %1 tant qu'une connexion est active</translation>
+        <translation>Impossible d&apos;effacer le profil %1 tant qu&apos;une connexion est active</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="195"/>
@@ -4631,7 +4808,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="200"/>
         <source>All users with whom you shared a connection will no longer be able to connect to it.</source>
-        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s'y connecter.</translation>
+        <translation>Tous les utilisateurs avec qui vous avez partagé une connexion ne pourront plus s&apos;y connecter.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerProtocol.qml" line="207"/>
@@ -4796,7 +4973,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="167"/>
         <source>Change plan</source>
-        <translation>Changer d'offre</translation>
+        <translation>Changer d&apos;offre</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="180"/>
@@ -4818,14 +4995,14 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="271"/>
         <source>Start %n-day free trial</source>
         <translation>
-            <numerusform>Démarrer l'essai gratuit de %n jour</numerusform>
-            <numerusform>Démarrer l'essai gratuit de %n jours</numerusform>
+            <numerusform>Démarrer l&apos;essai gratuit de %n jour</numerusform>
+            <numerusform>Démarrer l&apos;essai gratuit de %n jours</numerusform>
         </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="273"/>
         <source>Subscribe — %1 for %2</source>
-        <translation>S'abonner — %1 pour %2</translation>
+        <translation>S&apos;abonner — %1 pour %2</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="296"/>
@@ -4835,7 +5012,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="297"/>
         <source>The current plan will be replaced with the %1 / %2 plan. The change will take effect immediately after confirmation</source>
-        <translation>L'offre actuelle sera remplacée par l'offre %1 / %2. Le changement prendra effet immédiatement après confirmation</translation>
+        <translation>L&apos;offre actuelle sera remplacée par l&apos;offre %1 / %2. Le changement prendra effet immédiatement après confirmation</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="300"/>
@@ -4845,17 +5022,17 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="301"/>
         <source>The current plan will be replaced with the %1 / %2 plan. The store will apply the change based on its billing rules</source>
-        <translation>L'offre actuelle sera remplacée par l'offre %1 / %2. La boutique appliquera le changement selon ses règles de facturation</translation>
+        <translation>L&apos;offre actuelle sera remplacée par l&apos;offre %1 / %2. La boutique appliquera le changement selon ses règles de facturation</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="304"/>
         <source>Confirm subscription change?</source>
-        <translation>Confirmer le changement d'abonnement ?</translation>
+        <translation>Confirmer le changement d&apos;abonnement ?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="305"/>
         <source>An active subscription already exists. The current plan will be replaced with the %1 / %2 plan</source>
-        <translation>Un abonnement actif existe déjà. L'offre actuelle sera remplacée par l'offre %1 / %2</translation>
+        <translation>Un abonnement actif existe déjà. L&apos;offre actuelle sera remplacée par l&apos;offre %1 / %2</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="309"/>
@@ -4866,8 +5043,8 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiPremiumInfo.qml" line="335"/>
         <source>%n day(s) free, then %1/%2. Auto-renews until canceled. Cancel anytime in Settings.</source>
         <translation>
-            <numerusform>%n jour gratuit, puis %1/%2. Renouvellement automatique jusqu'à annulation. Annulable à tout moment dans les paramètres.</numerusform>
-            <numerusform>%n jours gratuits, puis %1/%2. Renouvellement automatique jusqu'à annulation. Annulable à tout moment dans les paramètres.</numerusform>
+            <numerusform>%n jour gratuit, puis %1/%2. Renouvellement automatique jusqu&apos;à annulation. Annulable à tout moment dans les paramètres.</numerusform>
+            <numerusform>%n jours gratuits, puis %1/%2. Renouvellement automatique jusqu&apos;à annulation. Annulable à tout moment dans les paramètres.</numerusform>
         </translation>
     </message>
     <message>
@@ -4915,7 +5092,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="102"/>
         <source>We will create an account for your trial subscription and send important subscription updates to this email address</source>
-        <translation>Nous créerons un compte pour votre abonnement d'essai et enverrons les informations importantes le concernant à cette adresse e-mail</translation>
+        <translation>Nous créerons un compte pour votre abonnement d&apos;essai et enverrons les informations importantes le concernant à cette adresse e-mail</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiTrialEmail.qml" line="118"/>
@@ -4968,7 +5145,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="131"/>
         <source>Support tag</source>
-        <translation>Tag d'assistance</translation>
+        <translation>Tag d&apos;assistance</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="142"/>
@@ -5068,7 +5245,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="392"/>
         <source>I have nothing</source>
-        <translation>Je n'ai rien</translation>
+        <translation>Je n&apos;ai rien</translation>
     </message>
 </context>
 <context>
@@ -5081,7 +5258,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="248"/>
         <source>Password or SSH private key</source>
         <translation>Mot de passe ou clé privée SSH</translation>
     </message>
@@ -5101,49 +5278,59 @@ Créez-en une à partir des paramètres actuels.</translation>
         <translation>Toutes les données que vous saisissez resteront strictement confidentielles et ne seront ni partagées ni divulguées à Amnezia ou à des tiers</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="157"/>
+        <source>Don&apos;t have a server?</source>
+        <translation>Vous n&apos;avez pas de serveur ?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="158"/>
+        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
+        <translation>Hébergement Amnezia. Des serveurs VPN sans réglages compliqués ni prise de tête</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
         <source>How to run your VPN server</source>
         <translation>Comment faire fonctionner votre serveur VPN</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="180"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
         <translation>Où trouver les données de connexion, instructions pas à pas pour acheter un VPS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="200"/>
         <source>Ip address cannot be empty</source>
-        <translation>L'adresse IP ne peut pas être vide</translation>
+        <translation>L&apos;adresse IP ne peut pas être vide</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="203"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
-        <translation>Saisissez l'adresse au format 255.255.255.255:88</translation>
+        <translation>Saisissez l&apos;adresse au format 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="208"/>
         <source>Login cannot be empty</source>
-        <translation>L'identifiant ne peut pas être vide</translation>
+        <translation>L&apos;identifiant ne peut pas être vide</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="214"/>
         <source>Password/private key cannot be empty</source>
         <translation>Le mot de passe ou la clé privée ne peut pas être vide</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="230"/>
         <source>Server IP address [:port]</source>
         <translation>Adresse IP du serveur [:port]</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="231"/>
         <source>255.255.255.255:22</source>
         <translation>255.255.255.255:22</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="239"/>
         <source>SSH Username</source>
-        <translation>Nom d'utilisateur SSH</translation>
+        <translation>Nom d&apos;utilisateur SSH</translation>
     </message>
 </context>
 <context>
@@ -5151,7 +5338,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="85"/>
         <source>Choose Installation Type</source>
-        <translation>Choisissez le type d'installation</translation>
+        <translation>Choisissez le type d&apos;installation</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardEasy.qml" line="138"/>
@@ -5180,12 +5367,12 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="25"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="69"/>
         <source>Usually it takes no more than 5 minutes</source>
-        <translation>Cela prend généralement moins de 5 minutes</translation>
+        <translation>Cela ne prend généralement pas plus de 5 minutes</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="57"/>
         <source>The server has already been added to the application</source>
-        <translation>Le serveur a déjà été ajouté à l'application</translation>
+        <translation>Le serveur a déjà été ajouté à l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
@@ -5195,12 +5382,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
         <source>busy installing other software. Amnezia installation </source>
-        <translation>occupé à installer d'autres logiciels. L'installation d'Amnezia </translation>
+        <translation>occupé à installer d&apos;autres logiciels. L&apos;installation d&apos;Amnezia </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="65"/>
         <source>will pause until the server finishes installing other software</source>
-        <translation>sera suspendue jusqu'à ce que le serveur ait fini d'installer les autres logiciels</translation>
+        <translation>sera suspendue jusqu&apos;à ce que le serveur ait fini d&apos;installer les autres logiciels</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="104"/>
@@ -5210,7 +5397,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="150"/>
         <source>Cancel installation</source>
-        <translation>Annuler l'installation</translation>
+        <translation>Annuler l&apos;installation</translation>
     </message>
 </context>
 <context>
@@ -5236,17 +5423,58 @@ Créez-en une à partir des paramètres actuels.</translation>
         <translation>Protocole réseau</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="215"/>
         <source>Port</source>
         <translation>Port</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="229"/>
+        <source>Hostname</source>
+        <translation>Nom d&apos;hôte</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="244"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>Utilisez des lettres minuscules, des chiffres, des points et des traits d&apos;union</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="260"/>
+        <source>ACME email</source>
+        <translation>E-mail ACME</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="261"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="275"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="329"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>Saisissez une adresse e-mail valide pour le certificat TLS</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="288"/>
+        <source>Needs a DNS A record and free, internet-reachable ports 443 (HTTPS) and 80 (ACME). If either port is busy or blocked, the proxy will not work. Classic Telegram MTProxy links will not work.</source>
+        <translation>Nécessite un enregistrement DNS A ainsi que les ports 443 (HTTPS) et 80 (ACME) libres et accessibles depuis Internet. Si l&apos;un de ces ports est occupé ou bloqué, le proxy ne fonctionnera pas. Les liens MTProxy Telegram classiques ne fonctionneront pas.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="310"/>
         <source>Install</source>
         <translation>Installer</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="325"/>
+        <source>Enter a lowercase DNS hostname</source>
+        <translation>Saisissez un nom d&apos;hôte DNS en minuscules</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="344"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>Le port doit être compris entre 1 et 65535</translation>
     </message>
@@ -5261,7 +5489,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="79"/>
         <source>Choose the one with the highest priority for you. Later, you can install other protocols and additional services, such as DNS proxy and SFTP.</source>
-        <translation>Choisissez celui qui est prioritaire pour vous. Vous pourrez installer d'autres protocoles et services supplémentaires par la suite, comme un proxy DNS et SFTP.</translation>
+        <translation>Choisissez celui qui est prioritaire pour vous. Vous pourrez installer d&apos;autres protocoles et services supplémentaires par la suite, comme un proxy DNS et SFTP.</translation>
     </message>
 </context>
 <context>
@@ -5269,7 +5497,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardQrReader.qml" line="38"/>
         <source>Point the camera at the QR code and hold for a couple of seconds. </source>
-        <translation>Dirigez l'appareil photo vers le QR code et maintenez-le quelques secondes. </translation>
+        <translation>Dirigez l&apos;appareil photo vers le QR code et maintenez-le quelques secondes. </translation>
     </message>
 </context>
 <context>
@@ -5277,7 +5505,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardStart.qml" line="42"/>
         <source>Let&apos;s get started</source>
-        <translation>C'est parti</translation>
+        <translation>C&apos;est parti</translation>
     </message>
 </context>
 <context>
@@ -5328,12 +5556,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="132"/>
         <source>Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.</source>
-        <translation>Activer l'obfuscation WireGuard. Cela peut être utile si WireGuard est bloqué par votre fournisseur.</translation>
+        <translation>Activer l&apos;obfuscation WireGuard. Cela peut être utile si WireGuard est bloqué par votre fournisseur.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="163"/>
         <source>Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.</source>
-        <translation>N'utilisez que des codes de connexion provenant de sources fiables. Les codes issus de sources publiques peuvent avoir été créés pour intercepter vos données.</translation>
+        <translation>N&apos;utilisez que des codes de connexion provenant de sources fiables. Les codes issus de sources publiques peuvent avoir été créés pour intercepter vos données.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="207"/>
@@ -5386,7 +5614,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="108"/>
         <source>For the AmneziaVPN app</source>
-        <translation>Pour l'application AmneziaVPN</translation>
+        <translation>Pour l&apos;application AmneziaVPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="113"/>
@@ -5411,12 +5639,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="156"/>
         <source>Share VPN Access</source>
-        <translation>Partager l'accès au VPN</translation>
+        <translation>Partager l&apos;accès au VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Share full access to the server and VPN</source>
-        <translation>Partager l'accès complet au serveur et au VPN</translation>
+        <translation>Partager l&apos;accès complet au serveur et au VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
@@ -5443,12 +5671,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="271"/>
         <source>Share VPN access without the ability to manage the server</source>
-        <translation>Partager l'accès au VPN sans possibilité de gérer le serveur</translation>
+        <translation>Partager l&apos;accès au VPN sans possibilité de gérer le serveur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="282"/>
         <source>User name</source>
-        <translation>Nom d'utilisateur</translation>
+        <translation>Nom d&apos;utilisateur</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="301"/>
@@ -5521,12 +5749,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="840"/>
         <source>Revoke the config for a user - %1?</source>
-        <translation>Révoquer la configuration de l'utilisateur « %1 » ?</translation>
+        <translation>Révoquer la configuration de l&apos;utilisateur « %1 » ?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="841"/>
         <source>The user will no longer be able to connect to your server.</source>
-        <translation>L'utilisateur ne pourra plus se connecter à votre serveur.</translation>
+        <translation>L&apos;utilisateur ne pourra plus se connecter à votre serveur.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="842"/>
@@ -5575,7 +5803,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="326"/>
         <source>To read the QR code in the Amnezia app, tap + in the main menu → &apos;QR code&apos;</source>
-        <translation>Pour lire le QR code dans l'application Amnezia, appuyez sur « + » dans le menu principal → « QR code »</translation>
+        <translation>Pour lire le QR code dans l&apos;application Amnezia, appuyez sur « + » dans le menu principal → « QR code »</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareConnection.qml" line="342"/>
@@ -5594,13 +5822,13 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="67"/>
         <source>We recommend that you use full access to the server only for your own additional devices.
 </source>
-        <translation>Nous vous recommandons de n'utiliser l'accès complet au serveur que pour vos propres appareils supplémentaires.
+        <translation>Nous vous recommandons de n&apos;utiliser l&apos;accès complet au serveur que pour vos propres appareils supplémentaires.
 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="68"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation>Si vous partagez l'accès complet avec d'autres personnes, elles peuvent supprimer et ajouter des protocoles et des services sur le serveur, ce qui fera dysfonctionner le VPN pour tous les utilisateurs. </translation>
+        <translation>Si vous partagez l&apos;accès complet avec d&apos;autres personnes, elles peuvent supprimer et ajouter des protocoles et des services sur le serveur, ce qui fera dysfonctionner le VPN pour tous les utilisateurs. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="87"/>
@@ -5616,7 +5844,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="116"/>
         <source>File with accessing settings to </source>
-        <translation>Fichier contenant les paramètres d'accès à </translation>
+        <translation>Fichier contenant les paramètres d&apos;accès à </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="147"/>
@@ -5626,7 +5854,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="155"/>
         <source>Access error!</source>
-        <translation>Erreur d'accès !</translation>
+        <translation>Erreur d&apos;accès !</translation>
     </message>
 </context>
 <context>
@@ -5644,7 +5872,61 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
-        <translation>La journalisation est activée. Notez qu'elle sera automatiquement désactivée au bout de 14 jours et que tous les fichiers journaux seront supprimés.</translation>
+        <translation>La journalisation est activée. Notez qu&apos;elle sera automatiquement désactivée au bout de 14 jours et que tous les fichiers journaux seront supprimés.</translation>
+    </message>
+</context>
+<context>
+    <name>PageUpdate</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="24"/>
+        <source>Done. Install the update</source>
+        <translation>Terminé. Installez la mise à jour</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="26"/>
+        <source>Download failed. Download manually from amnezia.org</source>
+        <translation>Échec du téléchargement. Téléchargez manuellement depuis amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="169"/>
+        <source>New version available</source>
+        <translation>Nouvelle version disponible</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="186"/>
+        <source>New</source>
+        <translation>Nouveautés</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="194"/>
+        <source>Improved</source>
+        <translation>Améliorations</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="202"/>
+        <source>Fixed</source>
+        <translation>Corrections</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="248"/>
+        <source>Update app</source>
+        <translation>Mettre à jour l&apos;application</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="245"/>
+        <source>Downloading update...</source>
+        <translation>Téléchargement de la mise à jour...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="246"/>
+        <source>Install update</source>
+        <translation>Installer la mise à jour</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="247"/>
+        <source>Retry</source>
+        <translation>Réessayer</translation>
     </message>
 </context>
 <context>
@@ -5670,12 +5952,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="14"/>
         <source>Background service is not running</source>
-        <translation>Le service en arrière-plan n'est pas en cours d'exécution</translation>
+        <translation>Le service en arrière-plan n&apos;est pas en cours d&apos;exécution</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="15"/>
         <source>The selected protocol is not supported on the current platform</source>
-        <translation>Le protocole sélectionné n'est pas pris en charge sur la plateforme actuelle</translation>
+        <translation>Le protocole sélectionné n&apos;est pas pris en charge sur la plateforme actuelle</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="18"/>
@@ -5685,7 +5967,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="19"/>
         <source>Server port already used. Check for another software</source>
-        <translation>Le port du serveur est déjà utilisé. Vérifiez si un autre logiciel l'occupe</translation>
+        <translation>Le port du serveur est déjà utilisé. Vérifiez si un autre logiciel l&apos;occupe</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="20"/>
@@ -5700,12 +5982,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="22"/>
         <source>Installation canceled by user</source>
-        <translation>Installation annulée par l'utilisateur</translation>
+        <translation>Installation annulée par l&apos;utilisateur</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="23"/>
         <source>The user is not a member of the sudo group</source>
-        <translation>L'utilisateur n'est pas membre du groupe sudo</translation>
+        <translation>L&apos;utilisateur n&apos;est pas membre du groupe sudo</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="24"/>
@@ -5715,12 +5997,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="25"/>
         <source>The sudo package is not pre-installed on the server</source>
-        <translation>Le paquet sudo n'est pas préinstallé sur le serveur</translation>
+        <translation>Le paquet sudo n&apos;est pas préinstallé sur le serveur</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="26"/>
         <source>The server user&apos;s home directory is not accessible</source>
-        <translation>Le répertoire personnel de l'utilisateur du serveur n'est pas accessible</translation>
+        <translation>Le répertoire personnel de l&apos;utilisateur du serveur n&apos;est pas accessible</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="27"/>
@@ -5730,7 +6012,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="28"/>
         <source>The user&apos;s password is required</source>
-        <translation>Le mot de passe de l'utilisateur est requis</translation>
+        <translation>Le mot de passe de l&apos;utilisateur est requis</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="29"/>
@@ -5740,7 +6022,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="30"/>
         <source>Server error: cgroup mountpoint does not exist</source>
-        <translation>Erreur serveur : le point de montage cgroup n'existe pas</translation>
+        <translation>Erreur serveur : le point de montage cgroup n&apos;existe pas</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="31"/>
@@ -5760,7 +6042,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="37"/>
         <source>Server error: XRay server has no VLESS clients</source>
-        <translation>Erreur serveur : le serveur XRay n'a aucun client VLESS</translation>
+        <translation>Erreur serveur : le serveur XRay n&apos;a aucun client VLESS</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="40"/>
@@ -5771,14 +6053,14 @@ Créez-en une à partir des paramètres actuels.</translation>
         <location filename="../core/utils/errorStrings.cpp" line="42"/>
         <source>Server error: The default container runtime available for installation on this server is not supported.
  Install Docker Engine on the server manually and try again.</source>
-        <translation>Erreur serveur : le moteur de conteneurs disponible par défaut sur ce serveur n'est pas pris en charge.
+        <translation>Erreur serveur : le moteur de conteneurs disponible par défaut sur ce serveur n&apos;est pas pris en charge.
  Installez Docker Engine manuellement sur le serveur, puis réessayez.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="43"/>
         <source>Container runtime error: The container runtime service is not running.
  Check the container runtime service on the server, or wait about a minute and try again.</source>
-        <translation>Erreur du moteur de conteneurs : le service du moteur de conteneurs n'est pas en cours d'exécution.
+        <translation>Erreur du moteur de conteneurs : le service du moteur de conteneurs n&apos;est pas en cours d&apos;exécution.
  Vérifiez ce service sur le serveur, ou patientez environ une minute et réessayez.</translation>
     </message>
     <message>
@@ -5804,7 +6086,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="50"/>
         <source>The selected private key format is not supported, use openssh ED25519 key types or PEM key types</source>
-        <translation>Le format de clé privée sélectionné n'est pas pris en charge, utilisez une clé openssh ED25519 ou une clé au format PEM</translation>
+        <translation>Le format de clé privée sélectionné n&apos;est pas pris en charge, utilisez une clé openssh ED25519 ou une clé au format PEM</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="51"/>
@@ -5819,7 +6101,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="70"/>
         <source>The config does not contain any containers and credentials for connecting to the server</source>
-        <translation>La configuration ne contient aucun conteneur ni aucune information d'identification pour se connecter au serveur</translation>
+        <translation>La configuration ne contient aucun conteneur ni aucune information d&apos;identification pour se connecter au serveur</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="71"/>
@@ -5834,89 +6116,99 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="73"/>
         <source>This legacy Amnezia subscription format is no longer supported</source>
-        <translation>Cet ancien format d'abonnement Amnezia n'est plus pris en charge</translation>
+        <translation>Cet ancien format d&apos;abonnement Amnezia n&apos;est plus pris en charge</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="74"/>
-        <source>This protocol is no longer supported. Please select another protocol or remove this container from the server settings.</source>
-        <translation>Ce protocole n'est plus pris en charge. Veuillez sélectionner un autre protocole ou supprimer ce conteneur dans les paramètres du serveur.</translation>
+        <source>This configuration was created in a newer version of the application and is not fully supported. Please update the application</source>
+        <translation>Cette configuration a été créée dans une version plus récente de l&apos;application et n&apos;est pas entièrement prise en charge. Veuillez mettre à jour l&apos;application</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <source>Some configurations from the backup were not restored because they require a newer version of the application</source>
+        <translation>Certaines configurations de la sauvegarde n&apos;ont pas été restaurées car elles nécessitent une version plus récente de l&apos;application</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="76"/>
+        <source>This protocol is no longer supported. Please select another protocol or remove this container from the server settings.</source>
+        <translation>Ce protocole n&apos;est plus pris en charge. Veuillez sélectionner un autre protocole ou supprimer ce conteneur dans les paramètres du serveur.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="78"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
-        <translation>Aucun protocole VPN n'est installé.
- Veuillez d'abord installer un conteneur VPN</translation>
+        <translation>Aucun protocole VPN n&apos;est installé.
+ Veuillez d&apos;abord installer un conteneur VPN</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="82"/>
-        <location filename="../core/utils/errorStrings.cpp" line="91"/>
-        <source>Error when retrieving configuration from API</source>
-        <translation>Erreur lors de la récupération de la configuration depuis l'API</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="83"/>
-        <source>This config has already been added to the application</source>
-        <translation>Cette configuration a déjà été ajoutée à l'application</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="92"/>
-        <source>Please update the application to use this feature</source>
-        <translation>Veuillez mettre à jour l'application pour utiliser cette fonctionnalité</translation>
-    </message>
-    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="84"/>
         <location filename="../core/utils/errorStrings.cpp" line="93"/>
+        <source>Error when retrieving configuration from API</source>
+        <translation>Erreur lors de la récupération de la configuration depuis l&apos;API</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="85"/>
+        <source>This config has already been added to the application</source>
+        <translation>Cette configuration a déjà été ajoutée à l&apos;application</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <source>Please update the application to use this feature</source>
+        <translation>Veuillez mettre à jour l&apos;application pour utiliser cette fonctionnalité</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
         <translation>Votre abonnement Amnezia Premium a expiré.
  Veuillez consulter votre boîte mail pour les instructions de renouvellement.
- Si vous n'avez reçu aucun e-mail, contactez notre support.</translation>
+ Si vous n&apos;avez reçu aucun e-mail, contactez notre support.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>Unable to process purchase</source>
-        <translation>Impossible de traiter l'achat</translation>
+        <translation>Impossible de traiter l&apos;achat</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>No active subscription found</source>
         <translation>Aucun abonnement actif trouvé</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
-        <translation>Aucun abonnement acheté n'a été trouvé. Veuillez d'abord souscrire un abonnement</translation>
+        <translation>Aucun abonnement acheté n&apos;a été trouvé. Veuillez d&apos;abord souscrire un abonnement</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>Cette adresse e-mail a déjà été utilisée pour activer un essai</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA verification is required</source>
         <translation>Une vérification CAPTCHA est requise</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>Le CAPTCHA était incorrect. Veuillez réessayer</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="102"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA actualisé. Veuillez réessayer</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="103"/>
         <source>Too many requests. Please try again later</source>
         <translation>Trop de requêtes. Veuillez réessayer plus tard</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="143"/>
+        <location filename="../core/utils/errorStrings.cpp" line="145"/>
         <source>ErrorCode: %1. </source>
-        <translation>Code d'erreur : %1. </translation>
+        <translation>Code d&apos;erreur : %1. </translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="57"/>
@@ -5936,12 +6228,12 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="62"/>
         <source>Amnezia helper service error</source>
-        <translation>Erreur du service d'assistance Amnezia</translation>
+        <translation>Erreur du service auxiliaire Amnezia</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="63"/>
         <source>OpenSSL failed</source>
-        <translation>Échec d'OpenSSL</translation>
+        <translation>Échec d&apos;OpenSSL</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="66"/>
@@ -5951,7 +6243,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="67"/>
         <source>Can&apos;t setup OpenVPN TAP network adapter</source>
-        <translation>Impossible de configurer l'adaptateur réseau TAP d'OpenVPN</translation>
+        <translation>Impossible de configurer l&apos;adaptateur réseau TAP d&apos;OpenVPN</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="68"/>
@@ -5959,147 +6251,147 @@ Créez-en une à partir des paramètres actuels.</translation>
         <translation>Erreur du pool VPN : aucune adresse disponible</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <location filename="../core/utils/errorStrings.cpp" line="77"/>
         <source>Unable to open config file</source>
-        <translation>Impossible d'ouvrir le fichier de configuration</translation>
+        <translation>Impossible d&apos;ouvrir le fichier de configuration</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="79"/>
+        <location filename="../core/utils/errorStrings.cpp" line="81"/>
         <source>VPN connection error</source>
         <translation>Erreur de connexion VPN</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="86"/>
         <source>In the response from the server, an empty config was received</source>
         <translation>Une configuration vide a été reçue dans la réponse du serveur</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="85"/>
+        <location filename="../core/utils/errorStrings.cpp" line="87"/>
         <source>SSL error occurred</source>
-        <translation>Une erreur SSL s'est produite</translation>
+        <translation>Une erreur SSL s&apos;est produite</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="86"/>
+        <location filename="../core/utils/errorStrings.cpp" line="88"/>
         <source>Server response timeout on api request</source>
         <translation>Délai de réponse du serveur dépassé lors de la requête API</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="87"/>
+        <location filename="../core/utils/errorStrings.cpp" line="89"/>
         <source>Missing AGW public key</source>
         <translation>Clé publique AGW manquante</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="88"/>
+        <location filename="../core/utils/errorStrings.cpp" line="90"/>
         <source>Failed to decrypt response payload</source>
         <translation>Échec du déchiffrement du contenu de la réponse</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="89"/>
+        <location filename="../core/utils/errorStrings.cpp" line="91"/>
         <source>Missing list of available services</source>
         <translation>Liste des services disponibles manquante</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="90"/>
+        <location filename="../core/utils/errorStrings.cpp" line="92"/>
         <source>The limit of allowed configurations per subscription has been exceeded</source>
         <translation>La limite de configurations autorisées par abonnement a été dépassée</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="104"/>
-        <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
-        <translation>Votre paiement est en attente de confirmation dans Google Play. Une fois le paiement terminé, l'abonnement sera ajouté automatiquement au prochain lancement de l'application.</translation>
-    </message>
-    <message>
         <location filename="../core/utils/errorStrings.cpp" line="106"/>
-        <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
-        <translation>Votre paiement est en attente de confirmation. Une fois approuvé, l'abonnement sera ajouté automatiquement.</translation>
+        <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
+        <translation>Votre paiement est en attente de confirmation dans Google Play. Une fois le paiement terminé, l&apos;abonnement sera ajouté automatiquement au prochain lancement de l&apos;application.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
+        <translation>Votre paiement est en attente de confirmation. Une fois approuvé, l&apos;abonnement sera ajouté automatiquement.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="110"/>
         <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
         <translation>Votre paiement est en attente de confirmation. Veuillez finaliser le paiement, puis restaurer votre abonnement.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="113"/>
-        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
-        <translation>Aucun achat à restaurer. Si vous avez un abonnement actif, vérifiez que vous êtes connecté avec le compte Google utilisé pour l'achat.</translation>
-    </message>
-    <message>
         <location filename="../core/utils/errorStrings.cpp" line="115"/>
-        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
-        <translation>Aucun achat à restaurer. Si vous avez un abonnement actif, vérifiez que vous êtes connecté avec l'identifiant Apple utilisé pour l'achat.</translation>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
+        <translation>Aucun achat à restaurer. Si vous avez un abonnement actif, vérifiez que vous êtes connecté avec le compte Google utilisé pour l&apos;achat.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
+        <translation>Aucun achat à restaurer. Si vous avez un abonnement actif, vérifiez que vous êtes connecté avec l&apos;identifiant Apple utilisé pour l&apos;achat.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="119"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
-        <translation>Aucun achat à restaurer. Si vous avez un abonnement actif, vérifiez que vous êtes connecté avec le compte utilisé pour l'achat.</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="122"/>
-        <source>QFile error: The file could not be opened</source>
-        <translation>Erreur QFile : impossible d'ouvrir le fichier</translation>
-    </message>
-    <message>
-        <location filename="../core/utils/errorStrings.cpp" line="123"/>
-        <source>QFile error: An error occurred when reading from the file</source>
-        <translation>Erreur QFile : une erreur s'est produite lors de la lecture du fichier</translation>
+        <translation>Aucun achat à restaurer. Si vous avez un abonnement actif, vérifiez que vous êtes connecté avec le compte utilisé pour l&apos;achat.</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="124"/>
-        <source>QFile error: The file could not be accessed</source>
-        <translation>Erreur QFile : impossible d'accéder au fichier</translation>
+        <source>QFile error: The file could not be opened</source>
+        <translation>Erreur QFile : impossible d&apos;ouvrir le fichier</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="125"/>
-        <source>QFile error: An unspecified error occurred</source>
-        <translation>Erreur QFile : une erreur non spécifiée s'est produite</translation>
+        <source>QFile error: An error occurred when reading from the file</source>
+        <translation>Erreur QFile : une erreur s&apos;est produite lors de la lecture du fichier</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="126"/>
-        <source>QFile error: A fatal error occurred</source>
-        <translation>Erreur QFile : une erreur fatale s'est produite</translation>
+        <source>QFile error: The file could not be accessed</source>
+        <translation>Erreur QFile : impossible d&apos;accéder au fichier</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="127"/>
+        <source>QFile error: An unspecified error occurred</source>
+        <translation>Erreur QFile : une erreur non spécifiée s&apos;est produite</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="128"/>
+        <source>QFile error: A fatal error occurred</source>
+        <translation>Erreur QFile : une erreur fatale s&apos;est produite</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="129"/>
         <source>QFile error: The operation was aborted</source>
-        <translation>Erreur QFile : l'opération a été interrompue</translation>
+        <translation>Erreur QFile : l&apos;opération a été interrompue</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
         <source>Transaction was canceled by the user</source>
-        <translation>La transaction a été annulée par l'utilisateur</translation>
+        <translation>La transaction a été annulée par l&apos;utilisateur</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
         <source>Billing error</source>
         <translation>Erreur de facturation</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
         <source>Internal Google Play error, please try again later</source>
         <translation>Erreur interne de Google Play, veuillez réessayer plus tard</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
         <source>Billing is unavailable, please try again later</source>
         <translation>La facturation est indisponible, veuillez réessayer plus tard</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
         <source>You already own this subscription</source>
         <translation>Vous possédez déjà cet abonnement</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <location filename="../core/utils/errorStrings.cpp" line="137"/>
         <source>The requested subscription is not available for purchase</source>
-        <translation>L'abonnement demandé n'est pas disponible à l'achat</translation>
+        <translation>L&apos;abonnement demandé n&apos;est pas disponible à l&apos;achat</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <location filename="../core/utils/errorStrings.cpp" line="138"/>
         <source>A network error occurred during the operation, please check the Internet connection</source>
-        <translation>Une erreur réseau s'est produite pendant l'opération, veuillez vérifier votre connexion Internet</translation>
+        <translation>Une erreur réseau s&apos;est produite pendant l&apos;opération, veuillez vérifier votre connexion Internet</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="140"/>
+        <location filename="../core/utils/errorStrings.cpp" line="142"/>
         <source>Internal error</source>
         <translation>Erreur interne</translation>
     </message>
@@ -6109,65 +6401,76 @@ Créez-en une à partir des paramètres actuels.</translation>
         <translation>IPsec</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="72"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <source>MTProxy (Telegram)</source>
         <translation>MTProxy (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="73"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <source>Telemt (Telegram)</source>
         <translation>Telemt (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="91"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="93"/>
+        <location filename="../core/protocols/protocolUtils.cpp" line="74"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="82"/>
+        <source>TProxy (Telegram WEB)</source>
+        <translation>TProxy (Telegram WEB)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="92"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="94"/>
         <source>This protocol is no longer supported.</source>
-        <translation>Ce protocole n'est plus pris en charge.</translation>
+        <translation>Ce protocole n&apos;est plus pris en charge.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="107"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="108"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
-        <translation>IKEv2/IPsec - Protocole moderne et stable, un peu plus rapide que les autres, il rétablit la connexion après une perte de signal. Il est pris en charge nativement par les dernières versions d'Android et d'iOS.</translation>
+        <translation>IKEv2/IPsec - Protocole moderne et stable, un peu plus rapide que les autres, il rétablit la connexion après une perte de signal. Il est pris en charge nativement par les dernières versions d&apos;Android et d&apos;iOS.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="114"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="115"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>Créez un coffre-fort de fichiers sur votre serveur pour stocker et transférer des fichiers en toute sécurité.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="117"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="118"/>
         <source>Telegram MTProto proxy server</source>
         <translation>Serveur proxy MTProto pour Telegram</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="119"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="120"/>
         <source>Telegram MTProto proxy (Telemt, Rust)</source>
         <translation>Proxy MTProto Telegram (Telemt, Rust)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="184"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="187"/>
         <source>DNS Service</source>
         <translation>Service DNS</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="192"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="195"/>
         <source>Telegram MTProto proxy server. Allows Telegram clients to connect through your server using the MTProto protocol. Supports FakeTLS mode for bypassing DPI-based blocking.</source>
         <translation>Serveur proxy MTProto pour Telegram. Permet aux clients Telegram de se connecter via votre serveur en utilisant le protocole MTProto. Prend en charge le mode FakeTLS pour contourner le blocage par DPI.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="197"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="200"/>
         <source>Telegram MTProto proxy powered by Telemt (Rust). Supports secure and TLS fronting modes with optional traffic masking.</source>
         <translation>Proxy MTProto Telegram propulsé par Telemt (Rust). Prend en charge les modes sécurisé et TLS fronting, avec masquage du trafic en option.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="329"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="203"/>
+        <source>Telegram WEB proxy. Clients connect over HTTPS to a hostname; the server relays traffic to official MTProxy. Requires a domain, ports 80 and 443, and a WEB-capable Telegram app.</source>
+        <translation>Proxy Telegram WEB. Les clients se connectent en HTTPS à un nom d&apos;hôte ; le serveur relaie le trafic vers le MTProxy officiel. Nécessite un domaine, les ports 80 et 443, et une application Telegram compatible WEB.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="340"/>
         <source>Automatic</source>
         <translation>Automatique</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="337"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="348"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>Le protocole AmneziaWG sera installé. Il offre une vitesse de connexion élevée et garantit un fonctionnement stable même dans les conditions réseau les plus difficiles.</translation>
     </message>
@@ -6178,7 +6481,7 @@ Créez-en une à partir des paramètres actuels.</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="76"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="183"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
         <source>Website in Tor network</source>
         <translation>Site web sur le réseau Tor</translation>
     </message>
@@ -6188,29 +6491,34 @@ Créez-en une à partir des paramètres actuels.</translation>
         <translation>AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="88"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="89"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
-        <translation>OpenVPN est le protocole VPN le plus répandu, avec des options de configuration flexibles. Il utilise son propre protocole de sécurité avec SSL/TLS pour l'échange de clés.</translation>
+        <translation>OpenVPN est le protocole VPN le plus répandu, avec des options de configuration flexibles. Il utilise son propre protocole de sécurité avec SSL/TLS pour l&apos;échange de clés.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="95"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="96"/>
         <source>WireGuard - popular VPN protocol with high performance, high speed and low power consumption.</source>
-        <translation>WireGuard - protocole VPN populaire offrant des performances élevées, une grande vitesse et une faible consommation d'énergie.</translation>
+        <translation>WireGuard - protocole VPN populaire offrant des performances élevées, une grande vitesse et une faible consommation d&apos;énergie.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="98"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="101"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="99"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="102"/>
         <location filename="../ui/models/containersModel.cpp" line="41"/>
         <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
-        <translation>AmneziaWG est un protocole spécifique d'Amnezia basé sur WireGuard. Il offre une vitesse de connexion élevée et garantit un fonctionnement stable même dans les conditions réseau les plus difficiles.</translation>
+        <translation>AmneziaWG est un protocole spécifique d&apos;Amnezia basé sur WireGuard. Il offre une vitesse de connexion élevée et garantit un fonctionnement stable même dans les conditions réseau les plus difficiles.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="104"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="105"/>
         <source>XRay with REALITY masks VPN traffic as web traffic and protects against active probing. It is highly resistant to detection and offers high speed.</source>
         <translation>XRay avec REALITY masque le trafic VPN en trafic web et protège contre le sondage actif. Il résiste très bien à la détection et offre une vitesse élevée.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="127"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="122"/>
+        <source>Telegram WEB proxy (tproxy-server)</source>
+        <translation>Proxy Telegram WEB (tproxy-server)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="130"/>
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
 Features:
@@ -6218,16 +6526,16 @@ Features:
 * Normal battery consumption on mobile devices
 * Flexible customization for various devices and OS
 * Operates over both TCP and UDP protocols</source>
-        <translation>OpenVPN est l'un des protocoles VPN les plus populaires et les plus fiables. Il utilise le chiffrement SSL/TLS, prend en charge une grande variété d'appareils et de systèmes d'exploitation, et est continuellement amélioré par la communauté grâce à sa nature open source. Il offre un bon équilibre entre vitesse et sécurité, mais il est facilement reconnu par les systèmes DPI, ce qui le rend sensible au blocage.
+        <translation>OpenVPN est l&apos;un des protocoles VPN les plus populaires et les plus fiables. Il utilise le chiffrement SSL/TLS, prend en charge une grande variété d&apos;appareils et de systèmes d&apos;exploitation, et est continuellement amélioré par la communauté grâce à sa nature open source. Il offre un bon équilibre entre vitesse et sécurité, mais il est facilement reconnu par les systèmes DPI, ce qui le rend sensible au blocage.
 
 Caractéristiques :
 * Disponible sur toutes les plateformes AmneziaVPN
 * Consommation de batterie normale sur les appareils mobiles
-* Personnalisation souple pour différents appareils et systèmes d'exploitation
+* Personnalisation souple pour différents appareils et systèmes d&apos;exploitation
 * Fonctionne sur les protocoles TCP et UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="138"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="141"/>
         <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
 Features:
@@ -6236,17 +6544,17 @@ Features:
 * Minimal configuration required
 * Easily detected by DPI systems (susceptible to blocking)
 * Operates over UDP protocol</source>
-        <translation>WireGuard est un protocole VPN moderne et épuré qui offre une connectivité stable et d'excellentes performances sur tous les appareils. Il utilise des paramètres de chiffrement fixes, ce qui réduit la latence et augmente les débits par rapport à OpenVPN. Cependant, WireGuard est facilement identifiable par les systèmes DPI en raison de la signature caractéristique de ses paquets, ce qui le rend sensible au blocage.
+        <translation>WireGuard est un protocole VPN moderne et épuré qui offre une connectivité stable et d&apos;excellentes performances sur tous les appareils. Il utilise des paramètres de chiffrement fixes, ce qui réduit la latence et augmente les débits par rapport à OpenVPN. Cependant, WireGuard est facilement identifiable par les systèmes DPI en raison de la signature caractéristique de ses paquets, ce qui le rend sensible au blocage.
 
 Caractéristiques :
 * Disponible sur toutes les plateformes AmneziaVPN
-* Faible consommation d'énergie sur les appareils mobiles
+* Faible consommation d&apos;énergie sur les appareils mobiles
 * Configuration minimale requise
 * Facilement détecté par les systèmes DPI (sensible au blocage)
 * Fonctionne sur le protocole UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="148"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="151"/>
         <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
 AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
@@ -6257,7 +6565,7 @@ Features:
 * Minimal settings required
 * Undetectable by traffic analysis systems (DPI)
 * Operates over UDP protocol</source>
-        <translation>AmneziaWG est un protocole VPN moderne basé sur WireGuard, qui associe une architecture simplifiée à des performances élevées sur tous les appareils. Il corrige la principale faiblesse de WireGuard (sa détection facile par les systèmes DPI) grâce à des techniques d'obfuscation avancées, rendant le trafic VPN indiscernable du trafic Internet ordinaire.
+        <translation>AmneziaWG est un protocole VPN moderne basé sur WireGuard, qui associe une architecture simplifiée à des performances élevées sur tous les appareils. Il corrige la principale faiblesse de WireGuard (sa détection facile par les systèmes DPI) grâce à des techniques d&apos;obfuscation avancées, rendant le trafic VPN indiscernable du trafic Internet ordinaire.
 
 AmneziaWG est un excellent choix pour qui recherche une connexion VPN rapide et discrète.
 
@@ -6265,11 +6573,11 @@ Caractéristiques :
 * Disponible sur toutes les plateformes AmneziaVPN
 * Faible consommation de batterie sur les appareils mobiles
 * Paramétrage minimal requis
-* Indétectable par les systèmes d'analyse de trafic (DPI)
+* Indétectable par les systèmes d&apos;analyse de trafic (DPI)
 * Fonctionne sur le protocole UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="160"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="163"/>
         <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
 Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
 
@@ -6279,8 +6587,8 @@ Features:
 * Highly effective in heavily censored regions
 * Minimal battery consumption on devices
 * Operates over TCP protocol</source>
-        <translation>REALITY est un protocole innovant développé par les créateurs de XRay, conçu spécifiquement pour lutter contre les niveaux élevés de censure d'Internet. REALITY identifie les systèmes de censure pendant le handshake TLS et redirige de façon transparente le trafic suspect vers des sites légitimes comme google.com, tout en fournissant de véritables certificats TLS. Le trafic VPN se fond ainsi dans le trafic web ordinaire sans configuration particulière.
-Contrairement aux protocoles plus anciens comme VMess, VLESS et XTLS-Vision, REALITY intègre un mécanisme avancé de reconnaissance « ami ou ennemi », qui protège efficacement contre le DPI et les autres méthodes d'analyse de trafic.
+        <translation>REALITY est un protocole innovant développé par les créateurs de XRay, conçu spécifiquement pour lutter contre les niveaux élevés de censure d&apos;Internet. REALITY identifie les systèmes de censure pendant le handshake TLS et redirige de façon transparente le trafic suspect vers des sites légitimes comme google.com, tout en fournissant de véritables certificats TLS. Le trafic VPN se fond ainsi dans le trafic web ordinaire sans configuration particulière.
+Contrairement aux protocoles plus anciens comme VMess, VLESS et XTLS-Vision, REALITY intègre un mécanisme avancé de reconnaissance « ami ou ennemi », qui protège efficacement contre le DPI et les autres méthodes d&apos;analyse de trafic.
 
 Caractéristiques :
 * Résistant au sondage actif et à la détection par DPI
@@ -6290,7 +6598,7 @@ Caractéristiques :
 * Fonctionne sur le protocole TCP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="173"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="176"/>
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
 Features:
@@ -6299,17 +6607,17 @@ Features:
 * Minimal configuration required
 * Detectable by DPI analysis systems(easily blocked)
 * Operates over UDP protocol(ports 500 and 4500)</source>
-        <translation>IKEv2, associé au chiffrement IPSec, est un protocole VPN moderne et fiable. Il se reconnecte rapidement lors d'un changement de réseau ou d'appareil, ce qui le rend idéal pour les environnements réseau changeants. Bien qu'il offre une bonne sécurité et de bonnes performances, il est facilement reconnu par les systèmes DPI et sensible au blocage.
+        <translation>IKEv2, associé au chiffrement IPSec, est un protocole VPN moderne et fiable. Il se reconnecte rapidement lors d&apos;un changement de réseau ou d&apos;appareil, ce qui le rend idéal pour les environnements réseau changeants. Bien qu&apos;il offre une bonne sécurité et de bonnes performances, il est facilement reconnu par les systèmes DPI et sensible au blocage.
 
 Caractéristiques :
 * Disponible dans AmneziaVPN uniquement sous Windows
 * Faible consommation de batterie sur les appareils mobiles
 * Configuration minimale requise
-* Détectable par les systèmes d'analyse DPI (facilement bloqué)
+* Détectable par les systèmes d&apos;analyse DPI (facilement bloqué)
 * Fonctionne sur le protocole UDP (ports 500 et 4500)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="189"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
@@ -6318,22 +6626,22 @@ Caractéristiques :
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>Après l'installation, Amnezia créera un
+        <translation>Après l&apos;installation, Amnezia créera un
 
  espace de stockage de fichiers sur votre serveur. Vous pourrez y accéder avec
- FileZilla ou d'autres clients SFTP, et aussi monter le disque sur votre appareil pour y accéder
+ FileZilla ou d&apos;autres clients SFTP, et aussi monter le disque sur votre appareil pour y accéder
  directement depuis celui-ci.
 
 Pour plus de détails, consultez
- la section d'assistance, rubrique « Créer un stockage de fichiers SFTP ». </translation>
+ la section d&apos;assistance, rubrique « Créer un stockage de fichiers SFTP ». </translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="110"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="111"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>Déployez un site WordPress sur le réseau Tor en deux clics.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="112"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="113"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>Remplacez le serveur DNS actuel par le vôtre. Cela augmentera votre niveau de confidentialité.</translation>
     </message>
@@ -6348,16 +6656,16 @@ Pour plus de détails, consultez
         <translation>Service SFTP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="190"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="71"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="193"/>
         <source>SOCKS5 proxy server</source>
         <translation>Serveur proxy SOCKS5</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess_new.cpp" line="57"/>
         <source>vmess:// url is invalid</source>
-        <translation>L'URL vmess:// est invalide</translation>
+        <translation>L&apos;URL vmess:// est invalide</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vmess_new.cpp" line="82"/>
@@ -6392,7 +6700,7 @@ Pour plus de détails, consultez
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="53"/>
         <source>link parse failed: %1</source>
-        <translation>échec de l'analyse du lien : %1</translation>
+        <translation>échec de l&apos;analyse du lien : %1</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/vless.cpp" line="61"/>
@@ -6452,22 +6760,22 @@ Pour plus de détails, consultez
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="114"/>
         <source>Invalid ssd link: base64 parse failed</source>
-        <translation>Lien ssd invalide : échec de l'analyse base64</translation>
+        <translation>Lien ssd invalide : échec de l&apos;analyse base64</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="121"/>
         <source>Invalid ssd link: json parse failed</source>
-        <translation>Lien ssd invalide : échec de l'analyse json</translation>
+        <translation>Lien ssd invalide : échec de l&apos;analyse json</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ssd.cpp" line="144"/>
         <source>Invalid ssd link: rc4-md5 encryption is not supported by v2ray-core</source>
-        <translation>Lien ssd invalide : le chiffrement rc4-md5 n'est pas pris en charge par v2ray-core</translation>
+        <translation>Lien ssd invalide : le chiffrement rc4-md5 n&apos;est pas pris en charge par v2ray-core</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="51"/>
         <source>SS URI is too short</source>
-        <translation>L'URI SS est trop courte</translation>
+        <translation>L&apos;URI SS est trop courte</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="74"/>
@@ -6478,12 +6786,12 @@ Pour plus de détails, consultez
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="83"/>
         <source>Can&apos;t find the at separator between password and hostname</source>
-        <translation>Impossible de trouver le séparateur « @ » entre le mot de passe et le nom d'hôte</translation>
+        <translation>Impossible de trouver le séparateur « @ » entre le mot de passe et le nom d&apos;hôte</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="92"/>
         <source>Can&apos;t find the colon separator between hostname and port</source>
-        <translation>Impossible de trouver le séparateur « : » entre le nom d'hôte et le port</translation>
+        <translation>Impossible de trouver le séparateur « : » entre le nom d&apos;hôte et le port</translation>
     </message>
     <message>
         <location filename="../core/models/protocols/awgProtocolConfig.cpp" line="436"/>
@@ -6517,7 +6825,7 @@ Pour plus de détails, consultez
 <context>
     <name>SecureServersRepository</name>
     <message>
-        <location filename="../core/repositories/secureServersRepository.cpp" line="212"/>
+        <location filename="../core/repositories/secureServersRepository.cpp" line="225"/>
         <source>Server</source>
         <translation>Serveur</translation>
     </message>
@@ -6545,7 +6853,7 @@ Pour plus de détails, consultez
     <message>
         <location filename="../ui/qml/Components/ServersListView.qml" line="83"/>
         <source>Unable change server while there is an active connection</source>
-        <translation>Impossible de changer de serveur tant qu'une connexion est active</translation>
+        <translation>Impossible de changer de serveur tant qu&apos;une connexion est active</translation>
     </message>
 </context>
 <context>
@@ -6553,12 +6861,12 @@ Pour plus de détails, consultez
     <message>
         <location filename="../ui/controllers/serversUiController.cpp" line="99"/>
         <source>Legacy API v1 configs are no longer supported. Remove this server to continue.</source>
-        <translation>Les anciennes configurations de l'API v1 ne sont plus prises en charge. Supprimez ce serveur pour continuer.</translation>
+        <translation>Les anciennes configurations de l&apos;API v1 ne sont plus prises en charge. Supprimez ce serveur pour continuer.</translation>
     </message>
     <message>
         <location filename="../ui/controllers/serversUiController.cpp" line="100"/>
         <source>Use the remove action to delete this legacy config.</source>
-        <translation>Utilisez l'action de suppression pour effacer cette ancienne configuration.</translation>
+        <translation>Utilisez l&apos;action de suppression pour effacer cette ancienne configuration.</translation>
     </message>
 </context>
 <context>
@@ -6579,7 +6887,7 @@ Pour plus de détails, consultez
 <context>
     <name>SettingsUiController</name>
     <message>
-        <location filename="../ui/controllers/settingsUiController.cpp" line="183"/>
+        <location filename="../ui/controllers/settingsUiController.cpp" line="187"/>
         <source>All settings have been reset to default values</source>
         <translation>Tous les paramètres ont été réinitialisés à leurs valeurs par défaut</translation>
     </message>
@@ -6589,7 +6897,7 @@ Pour plus de détails, consultez
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="46"/>
         <source> subscription has expired</source>
-        <translation> abonnement a expiré</translation>
+        <translation> : abonnement expiré</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="59"/>
@@ -6623,7 +6931,7 @@ Pour plus de détails, consultez
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="254"/>
         <source>%1 has been added to the app</source>
-        <translation>%1 a été ajouté à l'application</translation>
+        <translation>%1 a été ajouté à l&apos;application</translation>
     </message>
     <message>
         <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="289"/>
@@ -6631,51 +6939,51 @@ Pour plus de détails, consultez
         <translation>Abonnement restauré avec succès</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="344"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="380"/>
         <source>Purchase confirmed. Subscription has been added to the app</source>
-        <translation>Achat confirmé. L'abonnement a été ajouté à l'application</translation>
+        <translation>Achat confirmé. L&apos;abonnement a été ajouté à l&apos;application</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="436"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="489"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="612"/>
         <source>%1 installed successfully.</source>
         <translation>%1 installé avec succès.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="451"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="497"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="524"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="555"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="583"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="647"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="740"/>
         <source>Enter the digits from the image to continue</source>
-        <translation>Saisissez les chiffres de l'image pour continuer</translation>
+        <translation>Saisissez les chiffres de l&apos;image pour continuer</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="605"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>Cette adresse e-mail a déjà été utilisée pour activer un essai. Le service vous plaît ? Passez à Premium</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="665"/>
         <source>API config reloaded</source>
         <translation>Configuration API rechargée</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="669"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>Le pays de connexion a bien été changé pour %1</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="784"/>
         <source>API config removed</source>
         <translation>Configuration API supprimée</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="793"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>Le serveur « %1 » a été supprimé</translation>
     </message>
@@ -6718,7 +7026,7 @@ Pour plus de détails, consultez
     <message>
         <location filename="../ui/qml/Components/TermsAndPrivacyText.qml" line="23"/>
         <source>By continuing, you agree to the &lt;a href=&quot;%1&quot; style=&quot;color: %3;&quot;&gt;Terms of Use&lt;/a&gt; and &lt;a href=&quot;%2&quot; style=&quot;color: %3;&quot;&gt;Privacy Policy&lt;/a&gt;</source>
-        <translation>En continuant, vous acceptez les &lt;a href=&quot;%1&quot; style=&quot;color: %3;&quot;&gt;conditions d'utilisation&lt;/a&gt; et la &lt;a href=&quot;%2&quot; style=&quot;color: %3;&quot;&gt;politique de confidentialité&lt;/a&gt;</translation>
+        <translation>En continuant, vous acceptez les &lt;a href=&quot;%1&quot; style=&quot;color: %3;&quot;&gt;conditions d&apos;utilisation&lt;/a&gt; et la &lt;a href=&quot;%2&quot; style=&quot;color: %3;&quot;&gt;politique de confidentialité&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
@@ -6730,21 +7038,56 @@ Pour plus de détails, consultez
     </message>
 </context>
 <context>
-    <name>UpdateUiController</name>
+    <name>UpdateSupportDrawer</name>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="20"/>
-        <source>New version released: %1</source>
-        <translation>Nouvelle version publiée : %1</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="39"/>
+        <source>Support</source>
+        <translation>Assistance</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="23"/>
-        <source>New version released: %1 (%2)</source>
-        <translation>Nouvelle version publiée : %1 (%2)</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="47"/>
+        <source>If the update won&apos;t install, message us</source>
+        <translation>Si la mise à jour ne s&apos;installe pas, écrivez-nous</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="34"/>
-        <source>Failed to load changelog text</source>
-        <translation>Échec du chargement du texte des nouveautés</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="54"/>
+        <source>Telegram</source>
+        <translation>Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="55"/>
+        <source>We&apos;ll reply in chat</source>
+        <translation>Nous vous répondrons dans le chat</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="60"/>
+        <source>https://t.me/amnezia_vpn_en</source>
+        <translation>https://t.me/amnezia_vpn_en</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="69"/>
+        <source>support@amnezia.org</source>
+        <translation>support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="70"/>
+        <source>Support email</source>
+        <translation>E-mail d&apos;assistance</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="75"/>
+        <source>mailto:support@amnezia.org</source>
+        <translation>mailto:support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="84"/>
+        <source>amnezia.org</source>
+        <translation>amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="85"/>
+        <source>Download the update manually</source>
+        <translation>Télécharger la mise à jour manuellement</translation>
     </message>
 </context>
 <context>
@@ -6832,39 +7175,39 @@ Pour plus de détails, consultez
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="279"/>
+        <location filename="../ui/qml/main2.qml" line="285"/>
         <source>Private key passphrase</source>
         <translation>Phrase secrète de la clé privée</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="300"/>
+        <location filename="../ui/qml/main2.qml" line="306"/>
         <source>Save</source>
         <translation>Enregistrer</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="394"/>
+        <location filename="../ui/qml/main2.qml" line="400"/>
         <source>This subscription format is no longer supported</source>
-        <translation>Ce format d'abonnement n'est plus pris en charge</translation>
+        <translation>Ce format d&apos;abonnement n&apos;est plus pris en charge</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="395"/>
+        <location filename="../ui/qml/main2.qml" line="401"/>
         <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
-        <translation>Cet ancien type d'abonnement Amnezia ne peut plus être utilisé pour se connecter dans cette version de l'application.
-Supprimez le serveur de l'application pour continuer.</translation>
+        <translation>Cet ancien type d&apos;abonnement Amnezia ne peut plus être utilisé pour se connecter dans cette version de l&apos;application.
+Supprimez le serveur de l&apos;application pour continuer.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="396"/>
+        <location filename="../ui/qml/main2.qml" line="402"/>
         <source>Continue</source>
         <translation>Continuer</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="397"/>
+        <location filename="../ui/qml/main2.qml" line="403"/>
         <source>Cancel</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="401"/>
+        <location filename="../ui/qml/main2.qml" line="407"/>
         <source>Cannot remove server during active connection</source>
         <translation>Impossible de supprimer un serveur pendant une connexion active</translation>
     </message>
