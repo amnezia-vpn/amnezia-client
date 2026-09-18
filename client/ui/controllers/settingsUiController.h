@@ -74,6 +74,19 @@ public slots:
     bool isAutoUpdateCheckEnabled();
     void toggleAutoUpdateCheckEnabled(bool enable);
 
+    bool isFileEncryptionEnabled();
+    void toggleFileEncryption(bool enable);
+
+    void setPassword(QString pwd);
+    QString getPassword();
+    void setHint(QString hint);
+    QString getHint();
+
+    void setTempPassword(QString pwd);
+    QString getTempPassword();
+    void setTempHint(QString hint);
+    QString getTempHint();
+
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
@@ -139,7 +152,13 @@ signals:
     void autoStartChanged();
     void startMinimizedChanged();
 
+    void fileEncryptionStateChanged();
+    void changingPassword();
+
 private:
+    QString tempPassword;
+    QString tempHint;
+
     SettingsController* m_settingsController;
     ServersController* m_serversController;
 };

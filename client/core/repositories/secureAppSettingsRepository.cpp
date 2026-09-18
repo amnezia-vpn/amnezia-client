@@ -344,6 +344,33 @@ void SecureAppSettingsRepository::setStrictKillSwitchEnabled(bool enabled)
     setValue("Conf/strictKillSwitchEnabled", enabled);
 }
 
+bool SecureAppSettingsRepository::isFileEncryption() const
+{
+    return value("Sec/fileEncryption", false).toBool();
+}
+void SecureAppSettingsRepository::setFileEncryption(bool enabled)
+{
+    setValue("Sec/fileEncryption", enabled);
+}
+
+QString SecureAppSettingsRepository::getPassword() const
+{
+    return m_settings->password();
+}
+void SecureAppSettingsRepository::setPassword(const QString &pwd)
+{
+    m_settings->setPassword(pwd);
+}
+
+QString SecureAppSettingsRepository::getHint() const
+{
+    return value("Sec/hint", "").toString();
+}
+void SecureAppSettingsRepository::setHint(const QString &hint)
+{
+    setValue("Sec/hint", hint);
+}
+
 bool SecureAppSettingsRepository::isAutoConnect() const
 {
     return value("Conf/autoConnect", false).toBool();

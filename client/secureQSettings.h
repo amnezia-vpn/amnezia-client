@@ -24,6 +24,9 @@ public:
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &json);
 
+    void setPassword(const QString &password);
+    QString password() const;
+
     void clearSettings();
 
 private:
