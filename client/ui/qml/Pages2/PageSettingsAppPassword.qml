@@ -103,13 +103,6 @@ PageType {
                     Qt.openUrlExternally("https://storage.googleapis.com/amnezia/docs?m-path=/documentation/instructions/encryption")
                 }
             }
-
-            EncryptionIndicator {
-                id: indicator
-
-                textString: qsTr("Password not set. Encryption disabled")
-                iconPath: "qrc:/images/controls/lock-unlocked.svg"
-            }
         }
 
         model: inputFields

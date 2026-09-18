@@ -178,6 +178,16 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
     return true;
 }
 
+void SecureQSettings::setPassword(const QString &password)
+{
+    setSecTag("password", password.toUtf8());
+}
+
+QString SecureQSettings::password() const
+{
+    return QString::fromUtf8(getSecTag("password"));
+}
+
 void SecureQSettings::clearSettings()
 {
     QMutexLocker locker(&m_mutex);

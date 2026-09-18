@@ -355,11 +355,11 @@ void SecureAppSettingsRepository::setFileEncryption(bool enabled)
 
 QString SecureAppSettingsRepository::getPassword() const
 {
-    return value("Sec/password", "").toString();
+    return m_settings->password();
 }
 void SecureAppSettingsRepository::setPassword(const QString &pwd)
 {
-    setValue("Sec/password", pwd);
+    m_settings->setPassword(pwd);
 }
 
 QString SecureAppSettingsRepository::getHint() const

@@ -27,6 +27,9 @@ public:
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &json);
 
+    void setPassword(const QString &password);
+    QString password() const;
+
     void clearSettings();
 
 private:
@@ -48,7 +51,7 @@ private:
     QStringList encryptedKeys; // encode only key listed here
     // only this fields need for backup
     QStringList m_fieldsToBackup = {
-        "Conf/", "Servers/", "Sec/",
+        "Conf/", "Servers/",
     };
 
     mutable QByteArray m_key;
