@@ -8,18 +8,161 @@
 #include <iphlpapi.h>
 #include <windows.h>
 #include <winsock2.h>
+#include <winsvc.h>
 #include <ws2ipdef.h>
 
 #include <QFileInfo>
+#include <QScopeGuard>
 
 #include "leakdetector.h"
 #include "logger.h"
 #include "windowsfirewall.h"
 
 #pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "advapi32.lib")
 
 namespace {
 Logger logger("WireguardUtilsWindows");
+
+constexpr qsizetype WCM_SUSPEND_ROUTE_THRESHOLD = 500;
+constexpr LONG NT_STATUS_SUCCESS = 0;
+
+using NtProcessFunction = LONG(NTAPI*)(HANDLE);
+NtProcessFunction ntSuspendProcess = nullptr;
+NtProcessFunction ntResumeProcess = nullptr;
+
+bool ensureNtProcessFunctions() {
+  static const bool initialized = [] {
+    HMODULE module = GetModuleHandleW(L"ntdll.dll");
+    if (module == nullptr) {
+      return false;
+    }
+
+    ntSuspendProcess = reinterpret_cast<NtProcessFunction>(
+        GetProcAddress(module, "NtSuspendProcess"));
+    ntResumeProcess = reinterpret_cast<NtProcessFunction>(
+        GetProcAddress(module, "NtResumeProcess"));
+    return ntSuspendProcess != nullptr && ntResumeProcess != nullptr;
+  }();
+  return initialized;
+}
+
+bool ensureDebugPrivilege() {
+  static const bool enabled = [] {
+    HANDLE token = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES,
+                          &token)) {
+      return false;
+    }
+    auto tokenGuard = qScopeGuard([token] { CloseHandle(token); });
+
+    TOKEN_PRIVILEGES privileges = {};
+    if (!LookupPrivilegeValueW(nullptr, SE_DEBUG_NAME,
+                               &privileges.Privileges[0].Luid)) {
+      return false;
+    }
+    privileges.PrivilegeCount = 1;
+    privileges.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+    SetLastError(ERROR_SUCCESS);
+    if (!AdjustTokenPrivileges(token, FALSE, &privileges, sizeof(privileges),
+                               nullptr, nullptr)) {
+      return false;
+    }
+    return GetLastError() == ERROR_SUCCESS;
+  }();
+  return enabled;
+}
+
+DWORD getServiceProcessId(LPCWSTR serviceName) {
+  SC_HANDLE manager =
+      OpenSCManagerW(nullptr, nullptr, SC_MANAGER_CONNECT);
+  if (manager == nullptr) {
+    return 0;
+  }
+  auto managerGuard =
+      qScopeGuard([manager] { CloseServiceHandle(manager); });
+
+  SC_HANDLE service =
+      OpenServiceW(manager, serviceName, SERVICE_QUERY_STATUS);
+  if (service == nullptr) {
+    return 0;
+  }
+  auto serviceGuard =
+      qScopeGuard([service] { CloseServiceHandle(service); });
+
+  SERVICE_STATUS_PROCESS status = {};
+  DWORD bytesNeeded = 0;
+  if (!QueryServiceStatusEx(service, SC_STATUS_PROCESS_INFO,
+                            reinterpret_cast<LPBYTE>(&status), sizeof(status),
+                            &bytesNeeded)) {
+    return 0;
+  }
+  return status.dwProcessId;
+}
+
+class WcmServiceSuspender final {
+ public:
+  explicit WcmServiceSuspender(qsizetype routeCount) {
+    if (routeCount < WCM_SUSPEND_ROUTE_THRESHOLD) {
+      return;
+    }
+    if (!ensureNtProcessFunctions() || !ensureDebugPrivilege()) {
+      logger.warning() << "wcmSvc suspension is unavailable";
+      return;
+    }
+
+    const DWORD processId = getServiceProcessId(L"wcmSvc");
+    if (processId == 0) {
+      logger.warning() << "wcmSvc process was not found";
+      return;
+    }
+
+    m_process = OpenProcess(PROCESS_SUSPEND_RESUME, FALSE, processId);
+    if (m_process == nullptr) {
+      logger.warning() << "Failed to open wcmSvc process:" << GetLastError();
+      return;
+    }
+
+    const LONG status = ntSuspendProcess(m_process);
+    if (status != NT_STATUS_SUCCESS) {
+      logger.warning() << "Failed to suspend wcmSvc:" << status;
+      CloseHandle(m_process);
+      m_process = nullptr;
+      return;
+    }
+
+    m_suspended = true;
+    logger.debug() << "wcmSvc suspended for" << routeCount << "routes";
+  }
+
+  ~WcmServiceSuspender() {
+    if (m_process == nullptr) {
+      return;
+    }
+
+    if (m_suspended) {
+      LONG status = ntResumeProcess(m_process);
+      if (status != NT_STATUS_SUCCESS) {
+        status = ntResumeProcess(m_process);
+      }
+      if (status == NT_STATUS_SUCCESS) {
+        logger.debug() << "wcmSvc resumed";
+      } else {
+        logger.error() << "Failed to resume wcmSvc:" << status;
+      }
+    }
+    CloseHandle(m_process);
+  }
+
+  WcmServiceSuspender(const WcmServiceSuspender& other) = delete;
+
+  WcmServiceSuspender& operator=(const WcmServiceSuspender& other) = delete;
+
+ private:
+  HANDLE m_process = nullptr;
+  bool m_suspended = false;
+};
 };  // namespace
 
 std::unique_ptr<WireguardUtilsWindows> WireguardUtilsWindows::create(
@@ -309,7 +452,25 @@ bool WireguardUtilsWindows::deleteRoutePrefix(const IPAddress& prefix) {
 }
 
 bool WireguardUtilsWindows::addExclusionRoute(const IPAddress& prefix) {
+  if (!m_routeMonitor) {
+    logger.error() << "Route monitor is unavailable";
+    return false;
+  }
   return m_routeMonitor->addExclusionRoute(prefix);
+}
+
+bool WireguardUtilsWindows::addExclusionRoutes(
+    const QList<IPAddress>& prefixes) {
+  if (prefixes.isEmpty()) {
+    return true;
+  }
+  if (!m_routeMonitor) {
+    logger.error() << "Route monitor is unavailable";
+    return false;
+  }
+
+  WcmServiceSuspender suspender(prefixes.size());
+  return m_routeMonitor->addExclusionRoutes(prefixes);
 }
 
 bool WireguardUtilsWindows::deleteExclusionRoute(const IPAddress& prefix) {
