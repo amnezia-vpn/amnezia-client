@@ -32,6 +32,20 @@ class MacosRouteMonitor final : public QObject {
   bool deleteExclusionRoute(const IPAddress& prefix);
   void flushExclusionRoutes();
 
+  /*! Keeps an interface-scoped default route pointing at the physical
+   *  interface while the tunnel owns the routing table.
+   *
+   *  The tunnel claims traffic with the 0.0.0.0/1 + 128.0.0.0/1 pair, which
+   *  beats the physical default on prefix length. The physical default stays
+   *  in the table but is not scoped, so "route -n get -ifscope en0" answers
+   *  "not in table" and anything bound to the physical interface - curl
+   *  --interface, and every flow the split-tunnel extension pushes back out -
+   *  gets "No network route". macOS builds this scoped route itself for VPNs
+   *  that go through NEVPNManager; a tunnel that routes on its own has to do
+   *  it. */
+  void syncPhysicalScopedDefaults();
+  void flushPhysicalScopedDefaults();
+
  private:
   void handleRtmDelete(const struct rt_msghdr* msg, const QByteArray& payload);
   void handleRtmUpdate(const struct rt_msghdr* msg, const QByteArray& payload);
@@ -50,11 +64,17 @@ class MacosRouteMonitor final : public QObject {
   static QString addrToString(const struct sockaddr* sa);
   static QString addrToString(const QByteArray& data);
 
+  bool syncPhysicalScopedDefault(int family, const QByteArray& gateway,
+                                 unsigned int ifindex);
+
   QList<IPAddress> m_exclusionRoutes;
   QByteArray m_defaultGatewayIpv4;
   QByteArray m_defaultGatewayIpv6;
   unsigned int m_defaultIfindexIpv4 = 0;
   unsigned int m_defaultIfindexIpv6 = 0;
+  /*! Interface the scoped default currently points at, 0 when there is none. */
+  unsigned int m_scopedIfindexIpv4 = 0;
+  unsigned int m_scopedIfindexIpv6 = 0;
 
   QString m_ifname;
   unsigned int m_ifindex = 0;

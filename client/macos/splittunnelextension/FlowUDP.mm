@@ -12,6 +12,10 @@
 @property (atomic) uint64_t datagramsIn;
 /*! Guarded by STUtils.stateQueue. */
 @property (nonatomic) NSMutableDictionary<NSString *, nw_connection_t> *connections;
+/*! Per-session queue for the remote connections, so one flow cannot stall the
+ *  others. Previously every connection of every flow shared the main queue. */
+@property (nonatomic) dispatch_queue_t queue;
+- (void)closeWithError:(NSError *)error stage:(NSString *)stage;
 @end
 
 /*! Registry keeping sessions alive while they are running.
@@ -36,6 +40,11 @@ static NSMutableSet<FlowUDP *> *UDPSessionsLocked(void)
     session.flowId = flowId;
     session.connections = [NSMutableDictionary dictionary];
 
+    char label[64];
+    snprintf(label, sizeof(label), "org.amnezia.split-tunnel.udp.%llu", (unsigned long long)flowId);
+    session.queue = dispatch_queue_create(label, DISPATCH_QUEUE_SERIAL);
+
+    [STStats udpOpened];
     dispatch_sync([STUtils stateQueue], ^{
         [UDPSessionsLocked() addObject:session];
         STLogDebug("udp[%{public}llu]: registered, %{public}lu live udp sessions",
@@ -166,7 +175,7 @@ static NSMutableSet<FlowUDP *> *UDPSessionsLocked(void)
 
     __weak FlowUDP *weakSelf = self;
     nw_connection_t connection = result;
-    nw_connection_set_queue(connection, dispatch_get_main_queue());
+    nw_connection_set_queue(connection, self.queue);
     nw_connection_set_state_changed_handler(connection, ^(nw_connection_state_t state, nw_error_t error) {
         FlowUDP *strongSelf = weakSelf;
         if (strongSelf == nil) {
@@ -175,6 +184,13 @@ static NSMutableSet<FlowUDP *> *UDPSessionsLocked(void)
         NSError *nsError = [STUtils errorFromNWError:error];
         STLogDebug("udp[%{public}llu]: %{public}@ state=%{public}s error=%{public}@",
                    fid, key, [STUtils connectionStateName:state], nsError ?: @"nil");
+        if (state == nw_connection_state_waiting || state == nw_connection_state_failed) {
+            // "waiting" with no error means the system found no usable path for
+            // the interface this flow is pinned to; the path itself says why.
+            STLogInfo("udp[%{public}llu]: %{public}@ %{public}s - %{public}@",
+                      fid, key, [STUtils connectionStateName:state],
+                      [STUtils describeConnectionPath:connection]);
+        }
         if (state == nw_connection_state_ready) {
             [strongSelf receiveFromConnection:connection host:host key:key];
         } else if (state == nw_connection_state_failed || state == nw_connection_state_cancelled) {
@@ -219,7 +235,7 @@ static NSMutableSet<FlowUDP *> *UDPSessionsLocked(void)
     STLogDebug("udp[%{public}llu]: app -> %{public}@:%{public}@ %{public}lu bytes (total out %{public}llu)",
                fid, host.hostname, host.port, (unsigned long)datagram.length, self.datagramsOut);
 
-    dispatch_data_t payload = dispatch_data_create(datagram.bytes, datagram.length, dispatch_get_main_queue(),
+    dispatch_data_t payload = dispatch_data_create(datagram.bytes, datagram.length, self.queue,
                                                    DISPATCH_DATA_DESTRUCTOR_DEFAULT);
     nw_connection_send(connection, payload, NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT, true, ^(nw_error_t sendError) {
         NSError *nsError = [STUtils errorFromNWError:sendError];
@@ -273,6 +289,20 @@ static NSMutableSet<FlowUDP *> *UDPSessionsLocked(void)
                           });
 }
 
++ (void)closeAll
+{
+    __block NSArray<FlowUDP *> *live = nil;
+    dispatch_sync([STUtils stateQueue], ^{
+        live = [UDPSessionsLocked() allObjects];
+    });
+    if (live.count > 0) {
+        STLogInfo("udp: closing %{public}lu live session(s) on stop", (unsigned long)live.count);
+    }
+    for (FlowUDP *session in live) {
+        [session closeWithError:nil stage:@"proxy-stopped"];
+    }
+}
+
 #pragma mark - teardown
 
 - (void)closeWithError:(NSError *)error stage:(NSString *)stage
@@ -291,6 +321,7 @@ static NSMutableSet<FlowUDP *> *UDPSessionsLocked(void)
     [keepAlive.flow closeReadWithError:error];
     [keepAlive.flow closeWriteWithError:error];
 
+    [STStats udpClosedWithOut:keepAlive.datagramsOut in:keepAlive.datagramsIn];
     dispatch_async([STUtils stateQueue], ^{
         for (nw_connection_t connection in keepAlive.connections.allValues) {
             nw_connection_cancel(connection);

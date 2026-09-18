@@ -49,6 +49,9 @@ const NSUInteger kSeenSigningIdsLimit = 512;
     nw_path_monitor_t _pathMonitor;
     /*! Guarded by STUtils.stateQueue. */
     NSMutableSet<NSString *> *_seenSigningIds;
+    /*! Periodic relay summary, so a long session leaves a trace even when the
+     *  per-flow lines are at debug level. */
+    dispatch_source_t _statsTimer;
 }
 
 - (instancetype)init
@@ -61,6 +64,49 @@ const NSUInteger kSeenSigningIdsLimit = 512;
                   (int)getpid(), (int)getuid(), (int)getgid());
     }
     return self;
+}
+
+#pragma mark - Logging
+
+- (void)applyLogSettings:(NSDictionary *)options
+{
+    id debugFlag = options[@"logDebug"];
+    if ([debugFlag respondsToSelector:@selector(boolValue)]) {
+        [STFileLog setDebugEnabled:[debugFlag boolValue]];
+    }
+
+    id dir = options[@"logDir"];
+    if ([dir isKindOfClass:[NSString class]] && [dir length] > 0) {
+        [STFileLog configureWithDirectory:dir];
+        STLogInfo("provider: file logging directory=%{public}@ debug=%{public}d",
+                  dir, (int)[STFileLog isDebugEnabled]);
+    } else {
+        os_log(STUtils.log, "provider: no logDir in the options, file logging stays off "
+                            "(os_log still works)");
+    }
+}
+
+- (void)startStatsTimer
+{
+    if (_statsTimer != nil) {
+        return;
+    }
+    _statsTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, [STUtils stateQueue]);
+    dispatch_source_set_timer(_statsTimer, dispatch_time(DISPATCH_TIME_NOW, 60 * NSEC_PER_SEC),
+                              60 * NSEC_PER_SEC, 5 * NSEC_PER_SEC);
+    dispatch_source_set_event_handler(_statsTimer, ^{
+        STLogInfo("provider: relay stats: %{public}@", [STStats summary]);
+    });
+    dispatch_resume(_statsTimer);
+    STLogDebug("provider: stats ticker started (every 60s)");
+}
+
+- (void)stopStatsTimer
+{
+    if (_statsTimer != nil) {
+        dispatch_source_cancel(_statsTimer);
+        _statsTimer = nil;
+    }
 }
 
 #pragma mark - Physical interface tracking
@@ -121,12 +167,17 @@ const NSUInteger kSeenSigningIdsLimit = 512;
 
 - (void)startProxyWithOptions:(NSDictionary *)options completionHandler:(void (^)(NSError *))completionHandler
 {
+    // Before anything else: a system extension runs as root and cannot find the
+    // user's Documents folder, so the host app hands us the directory.
+    [self applyLogSettings:options];
+
     STLogInfo("provider: startProxy options=%{public}@", options ?: @{});
     if (options == nil) {
         STLogError("provider: startProxy called without options - the app list is empty, nothing will be excluded");
     }
     [_settings applyDictionary:options source:@"startProxy"];
     [self startPathMonitor];
+    [self startStatsTimer];
 
     NETransparentProxyNetworkSettings *settings =
         [[NETransparentProxyNetworkSettings alloc] initWithTunnelRemoteAddress:@"127.0.0.1"];
@@ -161,7 +212,13 @@ const NSUInteger kSeenSigningIdsLimit = 512;
 - (void)stopProxyWithReason:(NEProviderStopReason)reason completionHandler:(void (^)(void))completionHandler
 {
     STLogInfo("provider: stopProxy reason=%{public}s (%{public}d)", StopReasonName(reason), (int)reason);
+    STLogInfo("provider: final relay stats: %{public}@", [STStats summary]);
+    [self stopStatsTimer];
     [self stopPathMonitor];
+    // Without this the registries keep every still-open session alive, and the
+    // counters keep reporting them as active across proxy restarts.
+    [FlowTCP closeAll];
+    [FlowUDP closeAll];
     dispatch_sync([STUtils stateQueue], ^{
         STLogInfo("provider: clearing %{public}lu remembered signing ids",
                   (unsigned long)self->_seenSigningIds.count);
@@ -177,6 +234,7 @@ const NSUInteger kSeenSigningIdsLimit = 512;
     id json = [NSJSONSerialization JSONObjectWithData:messageData options:0 error:&error];
     BOOL ok = NO;
     if (error == nil && [json isKindOfClass:[NSDictionary class]]) {
+        [self applyLogSettings:json];
         ok = [_settings applyDictionary:json source:@"appMessage"];
     } else {
         STLogError("provider: handleAppMessage parse failed: %{public}@", error);
@@ -214,32 +272,58 @@ const NSUInteger kSeenSigningIdsLimit = 512;
 {
     const uint64_t flowId = [STUtils nextFlowId];
     NSString *sid = flow.metaData.sourceAppSigningIdentifier;
-    NSString *path = [STUtils pathFromAuditTokenData:flow.metaData.sourceAppAuditToken];
+    // Resolving the audit token goes through the code-signing machinery, which is
+    // far from free. Skip it when the signing identifier alone already decides.
+    NSString *path = [_settings.policy needsPathForSigningId:sid]
+        ? [STUtils pathFromAuditTokenData:flow.metaData.sourceAppAuditToken]
+        : nil;
     const char *kind = [flow isKindOfClass:[NEAppProxyTCPFlow class]]
                            ? "tcp"
                            : ([flow isKindOfClass:[NEAppProxyUDPFlow class]] ? "udp" : "other");
 
     [self noteFirstSightOfSigningId:sid path:path];
 
-    NSString *reason = nil;
-    const STFlowDecision decision = [_settings.policy decisionForSigningId:sid path:path reason:&reason];
+    const STRouteMode mode = _settings.policy.mode;
+    const STFlowVerdict verdict = [_settings.policy verdictForSigningId:sid path:path];
 
-    if (decision != STFlowDecisionBypass) {
-        STLogDebug("flow[%{public}llu] %{public}s sid=%{public}@ -> system (%{public}@)",
-                   flowId, kind, sid ?: @"", reason ?: @"");
+    // Log the rare side of the decision at info level and the common side at
+    // debug, so neither mode floods the log: "except" claims few flows, "only"
+    // claims nearly all of them. The reason string is rendered only when the
+    // line is really emitted - verdictForSigningId itself allocates nothing.
+    const BOOL bypassIsRare = (mode != STRouteModeOnly);
+
+    if (verdict.decision != STFlowDecisionBypass) {
+        if (!bypassIsRare || os_log_type_enabled(STUtils.log, OS_LOG_TYPE_DEBUG)) {
+            NSString *reason = STDescribeVerdict(verdict);
+            if (bypassIsRare) {
+                STLogDebug("flow[%{public}llu] %{public}s sid=%{public}@ -> tunnel (%{public}@)",
+                           flowId, kind, sid ?: @"", reason);
+            } else {
+                STLogInfo("flow[%{public}llu] %{public}s sid=%{public}@ path=%{public}@ -> tunnel (%{public}@)",
+                          flowId, kind, sid ?: @"", path ?: @"", reason);
+            }
+        }
+        [STStats flowSentToTunnel];
         return NO;
     }
 
     nw_interface_t physical = self.physicalInterface;
     if (physical == NULL) {
-        STLogError("flow[%{public}llu] %{public}s sid=%{public}@ should bypass (%{public}@) but no physical "
-                   "interface is available - leaving it to the system (it will go through the tunnel)",
-                   flowId, kind, sid ?: @"", reason ?: @"");
+        STLogError("flow[%{public}llu] %{public}s sid=%{public}@ should leave the tunnel (%{public}@) but no "
+                   "physical interface is available - leaving it to the system, so it goes through the tunnel",
+                   flowId, kind, sid ?: @"", STDescribeVerdict(verdict));
         return NO;
     }
 
-    STLogInfo("flow[%{public}llu] %{public}s bypass sid=%{public}@ path=%{public}@ if=%{public}s (%{public}@)",
-              flowId, kind, sid ?: @"", path ?: @"", nw_interface_get_name(physical) ?: "?", reason ?: @"");
+    if (bypassIsRare) {
+        STLogInfo("flow[%{public}llu] %{public}s bypass sid=%{public}@ path=%{public}@ if=%{public}s (%{public}@)",
+                  flowId, kind, sid ?: @"", path ?: @"", nw_interface_get_name(physical) ?: "?",
+                  STDescribeVerdict(verdict));
+    } else if (os_log_type_enabled(STUtils.log, OS_LOG_TYPE_DEBUG)) {
+        STLogDebug("flow[%{public}llu] %{public}s bypass sid=%{public}@ if=%{public}s (%{public}@)",
+                   flowId, kind, sid ?: @"", nw_interface_get_name(physical) ?: "?",
+                   STDescribeVerdict(verdict));
+    }
 
     if ([flow isKindOfClass:[NEAppProxyTCPFlow class]]) {
         [FlowTCP handleFlow:(NEAppProxyTCPFlow *)flow interface:physical flowId:flowId];

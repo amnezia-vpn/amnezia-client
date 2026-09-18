@@ -461,16 +461,23 @@ void CoreSignalHandlers::initMacosSplitTunnelHandler()
 
     auto reconcile = [this, manager](const char *trigger) {
         auto *st = m_coreController->m_appSplitTunnelingController;
-        QString vpnServer;
-        const QString serverId = m_coreController->m_serversController->getDefaultServerId();
-        if (serverId.isEmpty()) {
-            logger.debug() << "macos split tunnel [" << trigger << "]: no default server id";
-        } else {
-            vpnServer = m_coreController->m_serversController->getServerCredentials(serverId).hostName;
+
+        // The resolved address of the server we are actually connected to. It
+        // has to reach the extension, otherwise the VPN's own traffic to the
+        // server is claimed by the proxy and relayed through userspace - which
+        // is what broke AmneziaWG, whose tunnel is run by the service and so is
+        // not covered by the bundle-path self-exclusion.
+        // Taken from VpnConnection rather than from the stored credentials:
+        // credentials are empty for API configs, the live connection is not.
+        QString vpnServer = m_coreController->m_vpnConnection->remoteAddress();
+        if (vpnServer.isEmpty()) {
+            const QString serverId = m_coreController->m_serversController->getDefaultServerId();
+            if (!serverId.isEmpty()) {
+                vpnServer = m_coreController->m_serversController->getServerCredentials(serverId).hostName;
+            }
             if (vpnServer.isEmpty()) {
                 logger.debug() << "macos split tunnel [" << trigger
-                               << "]: no stored host name for server" << serverId
-                               << "(expected for API configs)";
+                               << "]: no server address yet (not connected, or an API config before connect)";
             }
         }
 
@@ -501,8 +508,24 @@ void CoreSignalHandlers::initMacosSplitTunnelHandler()
         logger.info() << "macos split tunnel: system extension registered";
     });
 
+    connect(manager, &MacOSSplitTunnelManager::extensionStateChanged, this,
+            [this](bool installed, bool enabled, bool awaitingApproval) {
+                logger.info() << "macos split tunnel: extension installed=" << installed << "enabled=" << enabled
+                              << "awaitingApproval=" << awaitingApproval;
+                if (installed && !enabled && !awaitingApproval) {
+                    // The user switched the extension off in System Settings while
+                    // the app still shows the feature as on; say so instead of
+                    // silently doing nothing.
+                    emit m_coreController->m_pageController->showNotificationMessage(
+                        tr("The AmneziaVPN system extension is switched off in System Settings > General > "
+                           "Login Items & Extensions > Network Extensions"));
+                }
+            });
+
     connect(manager, &MacOSSplitTunnelManager::proxyStarted, this, [this]() {
-        logger.info() << "macos split tunnel: proxy is running, listed apps now bypass the tunnel";
+        // Mode-neutral on purpose: in exclude mode the listed apps leave the
+        // tunnel, in include mode everything except them does.
+        logger.info() << "macos split tunnel: proxy is running";
         emit m_coreController->m_pageController->showNotificationMessage(
             tr("App split tunneling is active"));
     });
@@ -528,7 +551,10 @@ void CoreSignalHandlers::initMacosSplitTunnelHandler()
                 logger.info() << "macos split tunnel: feature toggled ->" << enabled;
                 if (enabled) {
                     // Ask for approval right away, while the user is in the settings page.
-                    manager->activateExtension();
+                    // userInitiated: an approval left unanswered from an earlier
+                    // run is cleared first, so the install prompt shows up again
+                    // instead of the request going nowhere.
+                    manager->activateExtension(/*userInitiated=*/true);
                     reconcile("appsSplitTunnelingEnabledChanged");
                 } else {
                     // Leave nothing behind in System Settings when the user opts out.

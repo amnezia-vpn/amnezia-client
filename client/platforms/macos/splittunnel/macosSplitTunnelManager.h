@@ -39,17 +39,32 @@ class MacOSSplitTunnelManager : public QObject
 public:
     static MacOSSplitTunnelManager *instance();
 
-    /*! Submits an activation request if one has not been submitted yet. */
-    void activateExtension();
+    /*! Submits an activation request. Pass userInitiated when the user just
+     *  switched the feature on: a pending approval that the user never answered
+     *  is then cleared first, so macOS offers the install prompt again instead
+     *  of silently sitting on the old request. */
+    void activateExtension(bool userInitiated = false);
 
     /*! Brings the proxy in line with the desired state. Cheap and idempotent. */
     void reconcile(bool vpnConnected, bool splitTunnelEnabled, amnezia::AppsRouteMode mode,
                    const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer);
 
-    /*! Stops the proxy, removes the saved NE configuration and unregisters the
-     *  extension - in that order, each step waiting for the previous one. Call
-     *  when the user switches app split tunneling off. */
+    /*! Switches the feature off without uninstalling anything: the proxy is
+     *  stopped and the NE configuration is disabled, so the extension keeps its
+     *  row in System Settings -> Network Extensions with the toggle off and the
+     *  user is never asked to approve it again. Call when the user switches app
+     *  split tunneling off. */
     void disableFeature();
+
+    /*! Removes every trace: stops the proxy, deletes the saved NE configuration
+     *  and unregisters the system extension. Only for an actual uninstall - a
+     *  plain off/on cycle must use disableFeature(). */
+    void uninstallFeature();
+
+    /*! Asks the system for the extension's real state and emits
+     *  extensionStateChanged. Cheap; safe to call on startup and whenever the
+     *  UI needs to show what System Settings shows. */
+    void refreshExtensionState();
 
 signals:
     /*! macOS is waiting for the user to approve the extension in
@@ -61,6 +76,10 @@ signals:
     void proxyStarted();
     void proxyStopped();
     void errorOccurred(const QString &message);
+    /*! What the system reports about the extension. "installed" means macOS has
+     *  it registered, "enabled" is the toggle the user sees in System Settings
+     *  -> General -> Login Items & Extensions -> Network Extensions. */
+    void extensionStateChanged(bool installed, bool enabled, bool awaitingApproval);
 
 private:
     explicit MacOSSplitTunnelManager(QObject *parent = nullptr);
@@ -69,15 +88,24 @@ private:
     {
         bool valid = false;
         bool shouldRun = false;
+        amnezia::AppsRouteMode mode = amnezia::AppsRouteMode::VpnAllExceptApps;
         QVector<amnezia::InstalledAppInfo> apps;
         QString vpnServer;
     };
 
     void startProxy();
     void stopProxy();
+    /*! Disables the saved NE configuration, keeping it in System Settings. */
+    void setConfigurationEnabled(bool enabled, void (^completion)(void));
     void removeConfiguration(void (^completion)(void));
-    void deactivateExtension();
-    QByteArray optionsJson(const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer) const;
+    /*! Unregisters the extension - the API equivalent of
+     *  "systemextensionsctl uninstall <team> <bundle id>". With
+     *  reactivateAfterwards the activation request is submitted again once the
+     *  removal completes, which is what clears a stuck approval. */
+    void deactivateExtension(bool reactivateAfterwards = false);
+    void onExtensionStateKnown(bool installed, bool enabled, bool awaitingApproval);
+    QByteArray optionsJson(const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer,
+                           amnezia::AppsRouteMode mode) const;
 
     /*! Emits a signal on this object's thread, whatever queue we are on. */
     void postError(const QString &message);
@@ -88,8 +116,15 @@ private:
     /*! Called from the NEVPNStatusDidChangeNotification observer. */
     void onProxyStatusChanged(int status);
 
+    /*! True only while an activation request is in flight, so a second one is
+     *  not submitted on top of it. Cleared when the request finishes either way
+     *  - the lasting state lives in m_extensionInstalled/m_extensionEnabled. */
     bool m_activationRequested = false;
     bool m_extensionActivated = false;
+    /*! Last state reported by the system extension properties request. */
+    bool m_extensionInstalled = false;
+    bool m_extensionEnabled = false;
+    bool m_extensionAwaitingApproval = false;
     /*! Mirrors NEVPNStatus; -1 until the configuration has been loaded once. */
     int m_proxyStatus = -1;
     bool m_tearingDown = false;

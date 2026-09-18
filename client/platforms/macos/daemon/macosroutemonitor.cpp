@@ -47,11 +47,14 @@ MacosRouteMonitor::MacosRouteMonitor(const QString& ifname, QObject* parent)
   // Grab the default routes at startup.
   rtmFetchRoutes(AF_INET);
   rtmFetchRoutes(AF_INET6);
+
+  syncPhysicalScopedDefaults();
 }
 
 MacosRouteMonitor::~MacosRouteMonitor() {
   MZ_COUNT_DTOR(MacosRouteMonitor);
   flushExclusionRoutes();
+  flushPhysicalScopedDefaults();
   if (m_rtsock >= 0) {
     close(m_rtsock);
   }
@@ -256,12 +259,72 @@ void MacosRouteMonitor::handleRtmUpdate(const struct rt_msghdr* rtm,
   // Update the exclusion routes with the new default route.
   logger.debug() << "Updating default route via" << ifname
                  << addrToString(addrlist[1]);
+  syncPhysicalScopedDefaults();
   for (const IPAddress& prefix : m_exclusionRoutes) {
     if (prefix.address().protocol() == protocol) {
       logger.debug() << "Updating exclusion route to"
                      << prefix.toString();
       rtmSendRoute(rtm_type, prefix, ifindex, addrlist[1].constData());
     }
+  }
+}
+
+bool MacosRouteMonitor::syncPhysicalScopedDefault(int family,
+                                                 const QByteArray& gateway,
+                                                 unsigned int ifindex) {
+  unsigned int& scoped =
+      (family == AF_INET) ? m_scopedIfindexIpv4 : m_scopedIfindexIpv6;
+
+  // No physical default to mirror, or it points at the tunnel itself.
+  if (ifindex == 0 || ifindex == m_ifindex || gateway.isEmpty()) {
+    return false;
+  }
+  if (scoped == ifindex) {
+    return true;  // already in place and pointing at the right interface
+  }
+
+  const IPAddress anywhere =
+      (family == AF_INET) ? IPAddress(QHostAddress(QHostAddress::AnyIPv4), 0)
+                          : IPAddress(QHostAddress(QHostAddress::AnyIPv6), 0);
+
+  // A scope change means the old route is stale; drop it before adding.
+  if (scoped != 0) {
+    rtmSendRoute(RTM_DELETE, anywhere, scoped, nullptr, RTF_IFSCOPE);
+    scoped = 0;
+  }
+
+  if (!rtmSendRoute(RTM_ADD, anywhere, ifindex, gateway.constData(),
+                    RTF_IFSCOPE)) {
+    logger.error() << "Failed to add the interface-scoped default route via"
+                   << ifindex
+                   << "- traffic bound to the physical interface will have no "
+                      "route while the tunnel is up";
+    return false;
+  }
+
+  scoped = ifindex;
+  logger.debug() << "Added interface-scoped default route via index" << ifindex
+                 << addrToString(gateway);
+  return true;
+}
+
+void MacosRouteMonitor::syncPhysicalScopedDefaults() {
+  syncPhysicalScopedDefault(AF_INET, m_defaultGatewayIpv4,
+                            m_defaultIfindexIpv4);
+  syncPhysicalScopedDefault(AF_INET6, m_defaultGatewayIpv6,
+                            m_defaultIfindexIpv6);
+}
+
+void MacosRouteMonitor::flushPhysicalScopedDefaults() {
+  if (m_scopedIfindexIpv4 != 0) {
+    rtmSendRoute(RTM_DELETE, IPAddress(QHostAddress(QHostAddress::AnyIPv4), 0),
+                 m_scopedIfindexIpv4, nullptr, RTF_IFSCOPE);
+    m_scopedIfindexIpv4 = 0;
+  }
+  if (m_scopedIfindexIpv6 != 0) {
+    rtmSendRoute(RTM_DELETE, IPAddress(QHostAddress(QHostAddress::AnyIPv6), 0),
+                 m_scopedIfindexIpv6, nullptr, RTF_IFSCOPE);
+    m_scopedIfindexIpv6 = 0;
   }
 }
 

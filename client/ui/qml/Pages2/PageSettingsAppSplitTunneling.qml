@@ -23,9 +23,6 @@ PageType {
     property bool pageEnabled
 
     Component.onCompleted: {
-        if (root.isMacosAppSplitTunnel && AppSplitTunnelingController.routeMode !== routeMode.allExceptApps) {
-            AppSplitTunnelingController.routeMode = routeMode.allExceptApps
-        }
         if (ConnectionController.isConnected) {
             PageController.showNotificationMessage(qsTr("Cannot change split tunneling settings during active connection"))
             root.pageEnabled = false
@@ -43,12 +40,10 @@ PageType {
 
     property bool isMacosAppSplitTunnel: Qt.platform.os === "osx" && !IsMacOsNeBuild
 
-    // macOS only implements the exclude mode, so the picker has a single entry
-    // there. Windows keeps the original two-entry model (its picker has always
-    // been disabled, and narrowing it would change which stored app list is used).
-    property list<QtObject> routeModesModel: isMacosAppSplitTunnel
-        ? [allExceptApps]
-        : [onlyForwardApps, allExceptApps]
+    property list<QtObject> routeModesModel: [
+        onlyForwardApps,
+        allExceptApps
+    ]
 
     QtObject {
         id: onlyForwardApps
@@ -66,9 +61,6 @@ PageType {
 
     function getRouteModesModelIndex() {
         var currentRouteMode = AppSplitTunnelingController.routeMode
-        if (root.isMacosAppSplitTunnel) {
-            return 0
-        }
         if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
             return 0
         } else if (routeMode.allExceptApps === currentRouteMode) {
@@ -121,7 +113,7 @@ PageType {
 
             headerText: qsTr("Mode")
 
-            enabled: (Qt.platform.os === "android") && root.pageEnabled
+            enabled: (Qt.platform.os === "android" || root.isMacosAppSplitTunnel) && root.pageEnabled
 
             listView: ListViewWithRadioButtonType {
                 rootWidth: root.width
@@ -173,7 +165,7 @@ PageType {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            textString: qsTr("Only exclude mode is available on macOS. Safari and other WebKit apps cannot be excluded — their traffic comes from com.apple.WebKit.Networking.")
+            textString: qsTr("Safari and other WebKit apps cannot be split on macOS — their traffic comes from com.apple.WebKit.Networking, not from the app itself.")
             iconPath: "qrc:/images/controls/alert-circle.svg"
 
             visible: root.isMacosAppSplitTunnel && root.pageEnabled

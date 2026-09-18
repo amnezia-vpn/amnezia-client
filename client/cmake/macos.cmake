@@ -96,6 +96,17 @@ execute_process(
 )
 message("OSX_SDK_PATH is: ${OSX_SDK_PATH}")
 
+# The daemon reads its pf anchor files from applicationDirPath(), i.e. from
+# Contents/MacOS next to its own executable. Do this for every configuration,
+# not just Debug - a Release bundle copied to /Applications by hand needs the
+# rules just as much.
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/deploy/data/macos/pf"
+        "$<TARGET_BUNDLE_CONTENT_DIR:${PROJECT}>/MacOS/pf"
+    COMMENT "Copy pf anchor rules into the app bundle"
+)
+
 add_subdirectory(macos/splittunnelextension)
 
 add_dependencies(${PROJECT} ${CLIENT_MACOS_ST_TARGET_NAME})

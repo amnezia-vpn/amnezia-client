@@ -74,17 +74,6 @@ void AppSplitTunnelingUiController::toggleSplitTunneling(bool enabled)
     logger.debug() << "toggleSplitTunneling" << enabled
                    << "routeMode=" << static_cast<int>(m_appSplitTunnelingController->getRouteMode())
                    << "apps=" << m_appSplitTunnelingController->getApps().size();
-#if defined(Q_OS_MACOS) && !defined(MACOS_NE)
-    // Only the exclude mode is implemented on macOS; pin it before the feature
-    // flag flips, so the reconcile triggered by the flag already sees it.
-    if (enabled && m_appSplitTunnelingController->getRouteMode() != amnezia::AppsRouteMode::VpnAllExceptApps) {
-        logger.info() << "macOS supports exclude mode only, forcing route mode from"
-                      << static_cast<int>(m_appSplitTunnelingController->getRouteMode())
-                      << "to VpnAllExceptApps";
-        m_appSplitTunnelingController->setRouteMode(amnezia::AppsRouteMode::VpnAllExceptApps);
-        emit routeModeChanged();
-    }
-#endif
     // The system extension is activated / torn down by CoreSignalHandlers, which
     // listens on SecureAppSettingsRepository::appsSplitTunnelingEnabledChanged.
     m_appSplitTunnelingController->toggleSplitTunneling(enabled);

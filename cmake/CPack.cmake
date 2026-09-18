@@ -95,6 +95,10 @@ if (APPLE AND NOT IOS AND NOT MACOS_NE)
         DESTINATION "AmneziaVPN.app/Contents/Resources"
         COMPONENT AmneziaVPN
     )
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/data/macos/pf
+        DESTINATION "AmneziaVPN.app/Contents/MacOS"
+        COMPONENT AmneziaVPN
+    )
 endif()
 
 include(CPackIFW)

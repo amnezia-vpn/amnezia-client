@@ -5,6 +5,7 @@
 @property (atomic, copy, readwrite) NSString *vpnServer;
 @end
 
+
 @implementation STSettings
 
 - (instancetype)init
@@ -34,8 +35,24 @@
               where, dict[@"mode"] ?: @"(nil)", STRouteModeName(mode));
     if (mode == STRouteModeUnknown) {
         STLogError("settings[%{public}@]: unknown mode, the provider will not claim any flow", where);
-    } else if (mode == STRouteModeOnly) {
-        STLogError("settings[%{public}@]: include mode is not implemented, the provider will not claim any flow", where);
+    }
+
+    // Self-exclusion data. Mandatory for "only" mode, where everything that is
+    // not listed gets claimed - including, without this, our own relay sockets
+    // and the traffic of the bundled VPN helpers.
+    id selfBundleId = dict[@"selfBundleId"];
+    if ([selfBundleId isKindOfClass:[NSString class]]) {
+        self.policy.selfBundleIdPrefix = selfBundleId;
+    }
+    id selfAppPath = dict[@"selfAppPath"];
+    if ([selfAppPath isKindOfClass:[NSString class]]) {
+        self.policy.selfAppPath = selfAppPath;
+    }
+    STLogInfo("settings[%{public}@]: self exclusion bundleIdPrefix=%{public}@ appPath=%{public}@",
+              where, self.policy.selfBundleIdPrefix ?: @"", self.policy.selfAppPath ?: @"");
+    if (mode == STRouteModeOnly && ![self.policy isSelfExclusionUsable]) {
+        STLogError("settings[%{public}@]: only mode requires selfBundleId/selfAppPath - refusing to claim "
+                   "any flow, otherwise the provider would relay its own traffic", where);
     }
 
     id server = dict[@"vpnServer"];
@@ -116,6 +133,11 @@
         @[ @"172.16.0.0", @12 ],
         @[ @"192.168.0.0", @16 ],
         @[ @"169.254.0.0", @16 ],
+        // RFC 6598 carrier-grade NAT. VPN tunnels commonly address their
+        // gateway and resolver here (100.64.0.1). Claiming these flows pushes
+        // them out of the physical interface, where the address does not exist,
+        // and every lookup then waits for a timeout.
+        @[ @"100.64.0.0", @10 ],
         @[ @"::1", @128 ],
         @[ @"fc00::", @7 ],
         @[ @"fe80::", @10 ],

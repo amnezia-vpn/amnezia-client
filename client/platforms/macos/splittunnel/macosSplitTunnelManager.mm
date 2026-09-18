@@ -4,10 +4,12 @@
 #import <NetworkExtension/NetworkExtension.h>
 #import <SystemExtensions/SystemExtensions.h>
 
+#include <QDir>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMetaObject>
+#include <QStandardPaths>
 
 #include "logger.h"
 
@@ -97,6 +99,27 @@ void LogHostBundle()
     }
 }
 
+/*! Where the extension writes its own log file.
+ *
+ *  The extension runs as root, so NSHomeDirectory() there is /var/root and it
+ *  cannot find the user's folder on its own - the path has to travel in the
+ *  start options. We create the directory here, from the user's process, so it
+ *  ends up owned by the user rather than by root. */
+QString SplitTunnelLogDirectory()
+{
+    const QString base = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    if (base.isEmpty()) {
+        logger.error() << "cannot resolve the Documents directory, the extension will not write a log file";
+        return {};
+    }
+    const QString dir = base + QStringLiteral("/AmneziaVPN");
+    if (!QDir().mkpath(dir)) {
+        logger.error() << "cannot create the log directory" << dir;
+        return {};
+    }
+    return dir;
+}
+
 NSDictionary *OptionsDictionary(const QByteArray &json)
 {
     if (json.isEmpty()) {
@@ -119,6 +142,7 @@ NSDictionary *OptionsDictionary(const QByteArray &json)
 @interface AmneziaSTExtensionDelegate : NSObject <OSSystemExtensionRequestDelegate>
 @property (nonatomic, copy) void (^onNeedsApproval)(void);
 @property (nonatomic, copy) void (^onFinished)(BOOL ok, NSString *message);
+@property (nonatomic, copy) void (^onProperties)(BOOL found, BOOL enabled, BOOL awaitingApproval);
 @end
 
 @implementation AmneziaSTExtensionDelegate
@@ -146,8 +170,48 @@ NSDictionary *OptionsDictionary(const QByteArray &json)
 {
     (void)request;
     logger.error() << "sysex: request failed:" << ErrorDump(error);
+    // A properties request for an extension macOS does not know about fails
+    // instead of returning an empty list; that is the "not installed" answer.
+    if (self.onProperties) {
+        self.onProperties(NO, NO, NO);
+        return;
+    }
     if (self.onFinished) {
         self.onFinished(NO, error.localizedDescription);
+    }
+}
+
+- (void)request:(OSSystemExtensionRequest *)request
+    foundProperties:(NSArray<OSSystemExtensionProperties *> *)properties API_AVAILABLE(macos(12.0))
+{
+    (void)request;
+    BOOL found = NO;
+    BOOL enabled = NO;
+    BOOL awaiting = NO;
+    int uninstalling = 0;
+    for (OSSystemExtensionProperties *item in properties) {
+        if (item.isUninstalling) {
+            // Records left by previous deactivations. macOS only drops them on
+            // reboot, and they pile up one per off/on cycle.
+            ++uninstalling;
+            continue;
+        }
+        found = YES;
+        enabled = enabled || item.isEnabled;
+        awaiting = awaiting || item.isAwaitingUserApproval;
+        logger.info() << "sysex properties: v" << QStr(item.bundleVersion) << "enabled=" << (item.isEnabled ? 1 : 0)
+                      << "awaitingApproval=" << (item.isAwaitingUserApproval ? 1 : 0);
+    }
+    if (uninstalling > 0) {
+        logger.warning() << "sysex properties:" << uninstalling
+                         << "copies are waiting to uninstall on reboot; macOS may refuse to show the "
+                            "approval row until the machine is restarted";
+    }
+    if (!found) {
+        logger.info() << "sysex properties: the extension is not installed";
+    }
+    if (self.onProperties) {
+        self.onProperties(found, enabled, awaiting);
     }
 }
 
@@ -167,6 +231,7 @@ NSDictionary *OptionsDictionary(const QByteArray &json)
 
 static AmneziaSTExtensionDelegate *g_activationDelegate = nil;
 static AmneziaSTExtensionDelegate *g_deactivationDelegate = nil;
+static AmneziaSTExtensionDelegate *g_propertiesDelegate = nil;
 
 /*! The NE configuration is loaded once and cached, so reconcile() does not pay
  *  for an async loadAllFromPreferences round trip on every connection state
@@ -185,6 +250,8 @@ MacOSSplitTunnelManager *MacOSSplitTunnelManager::instance()
 MacOSSplitTunnelManager::MacOSSplitTunnelManager(QObject *parent) : QObject(parent)
 {
     logger.info() << "created, provider bundle id =" << QStr(ProviderBundleId());
+    // Ask the system what it already has before anything decides to install.
+    refreshExtensionState();
 }
 
 void MacOSSplitTunnelManager::postError(const QString &message)
@@ -204,7 +271,8 @@ void MacOSSplitTunnelManager::postActivated()
 }
 
 QByteArray MacOSSplitTunnelManager::optionsJson(const QVector<amnezia::InstalledAppInfo> &apps,
-                                                const QString &vpnServer) const
+                                                const QString &vpnServer,
+                                                amnezia::AppsRouteMode mode) const
 {
     QJsonArray appsJson;
     for (const auto &app : apps) {
@@ -215,22 +283,113 @@ QByteArray MacOSSplitTunnelManager::optionsJson(const QVector<amnezia::Installed
     }
 
     QJsonObject root;
-    // Only the exclude mode is implemented; the extension refuses to claim any
-    // flow for any other value instead of silently excluding.
-    root.insert(QStringLiteral("mode"), QStringLiteral("except"));
+    root.insert(QStringLiteral("mode"),
+                mode == amnezia::AppsRouteMode::VpnOnlyForwardApps ? QStringLiteral("only")
+                                                                   : QStringLiteral("except"));
     root.insert(QStringLiteral("apps"), appsJson);
     root.insert(QStringLiteral("vpnServer"), vpnServer);
+
+    // Self-exclusion. In "only" mode the extension claims every flow that is not
+    // listed, so it must be able to recognise our own processes - the app, this
+    // extension, and the helpers shipped inside the bundle (AmneziaVPN-service,
+    // tun2socks, amneziawg-go, openvpn) - or it would relay its own sockets.
+    NSBundle *bundle = [NSBundle mainBundle];
+    root.insert(QStringLiteral("selfBundleId"), QStr(bundle.bundleIdentifier));
+    root.insert(QStringLiteral("selfAppPath"), QStr(bundle.bundlePath));
+
+    // File logging for the extension. It writes into
+    // <logDir>/AmneziaVPNSplitTunnel_root/AmneziaVPNSplitTunnel.log, next to the app
+    // and service logs.
+    const QString logDir = SplitTunnelLogDirectory();
+    root.insert(QStringLiteral("logDir"), logDir);
+#ifdef QT_NO_DEBUG
+    // Release: lifecycle only. Flip to true to get the per-read chatter.
+    root.insert(QStringLiteral("logDebug"), false);
+#else
+    root.insert(QStringLiteral("logDebug"), true);
+#endif
+
     return QJsonDocument(root).toJson(QJsonDocument::Compact);
 }
 
 #pragma mark - System extension registration
 
-void MacOSSplitTunnelManager::activateExtension()
+void MacOSSplitTunnelManager::refreshExtensionState()
+{
+    if (@available(macOS 12.0, *)) {
+        g_propertiesDelegate = [[AmneziaSTExtensionDelegate alloc] init];
+        g_propertiesDelegate.onProperties = ^(BOOL found, BOOL enabled, BOOL awaiting) {
+            const bool installedCopy = found ? true : false;
+            const bool enabledCopy = enabled ? true : false;
+            const bool awaitingCopy = awaiting ? true : false;
+            QMetaObject::invokeMethod(
+                this,
+                [this, installedCopy, enabledCopy, awaitingCopy]() {
+                    onExtensionStateKnown(installedCopy, enabledCopy, awaitingCopy);
+                },
+                Qt::QueuedConnection);
+        };
+
+        OSSystemExtensionRequest *request =
+            [OSSystemExtensionRequest propertiesRequestForExtension:ProviderBundleId()
+                                                              queue:dispatch_get_main_queue()];
+        request.delegate = g_propertiesDelegate;
+        [[OSSystemExtensionManager sharedManager] submitRequest:request];
+    } else {
+        // Before macOS 12 there is no way to ask; assume whatever this process
+        // did itself is the truth.
+        onExtensionStateKnown(m_extensionActivated, m_extensionActivated, false);
+    }
+}
+
+void MacOSSplitTunnelManager::onExtensionStateKnown(bool installed, bool enabled, bool awaitingApproval)
+{
+    const bool changed = installed != m_extensionInstalled || enabled != m_extensionEnabled
+                         || awaitingApproval != m_extensionAwaitingApproval;
+    m_extensionInstalled = installed;
+    m_extensionEnabled = enabled;
+    m_extensionAwaitingApproval = awaitingApproval;
+
+    // The system is the authority: an extension macOS still has registered does
+    // not need another activation request, and one it dropped does.
+    m_extensionActivated = installed && enabled;
+    if (!installed) {
+        m_activationRequested = false;
+    }
+
+    logger.info() << "extension state: installed=" << installed << "enabled=" << enabled
+                  << "awaitingApproval=" << awaitingApproval;
+    if (changed) {
+        emit extensionStateChanged(installed, enabled, awaitingApproval);
+    }
+}
+
+void MacOSSplitTunnelManager::activateExtension(bool userInitiated)
 {
     if (@available(macOS 11.0, *)) {
-        if (m_activationRequested) {
-            logger.debug() << "activateExtension: already requested (activated=" << m_extensionActivated << ")";
+        if (m_extensionInstalled && m_extensionEnabled) {
+            logger.info() << "activateExtension: already installed and enabled, nothing to do";
+            m_extensionActivated = true;
             return;
+        }
+        if (m_activationRequested) {
+            logger.debug() << "activateExtension: a request is already in flight";
+            return;
+        }
+        if (userInitiated && m_extensionAwaitingApproval) {
+            // An approval the user never answered keeps the record in
+            // "activated waiting for user" forever, and a fresh activation
+            // request on top of it produces no prompt at all. Removing the
+            // record first is what "systemextensionsctl uninstall" does by
+            // hand, and it makes macOS offer the install again.
+            logger.info() << "activateExtension: an unanswered approval is pending; removing it first so "
+                             "macOS offers the install again";
+            deactivateExtension(/*reactivateAfterwards=*/true);
+            return;
+        }
+        if (m_extensionInstalled && !m_extensionEnabled) {
+            logger.info() << "activateExtension: installed but switched off in System Settings; "
+                             "re-activating so macOS re-enables it";
         }
         logger.info() << "activateExtension: submitting request for" << QStr(ProviderBundleId());
         LogHostBundle();
@@ -241,10 +400,10 @@ void MacOSSplitTunnelManager::activateExtension()
             this->postNeedsApproval();
         };
         g_activationDelegate.onFinished = ^(BOOL ok, NSString *message) {
+            this->m_activationRequested = false;
             if (ok) {
                 QMetaObject::invokeMethod(this, [this]() { onExtensionActivated(); }, Qt::QueuedConnection);
             } else {
-                this->m_activationRequested = false;
                 this->postError(QStr(message));
             }
         };
@@ -265,6 +424,9 @@ void MacOSSplitTunnelManager::onExtensionActivated()
     m_extensionActivated = true;
     logger.info() << "extension is registered; desired.shouldRun=" << m_desired.shouldRun;
     postActivated();
+    // The request only says macOS accepted it; the toggle state comes from the
+    // properties request.
+    refreshExtensionState();
 
     // A first-run activation completes long after reconcile() asked for the
     // proxy, so start it now instead of waiting for the next state change.
@@ -274,17 +436,23 @@ void MacOSSplitTunnelManager::onExtensionActivated()
     }
 }
 
-void MacOSSplitTunnelManager::deactivateExtension()
+void MacOSSplitTunnelManager::deactivateExtension(bool reactivateAfterwards)
 {
     if (@available(macOS 11.0, *)) {
-        if (!m_activationRequested && !m_extensionActivated) {
-            // Nothing was ever registered from this process; a deactivation
-            // request would just come back as ExtensionNotFound (code 4).
+        // macOS knows about the extension even when this process never
+        // registered it - a record left pending by an earlier run is exactly
+        // the case we have to clear - so go by what the properties request
+        // reported, not by what this process did.
+        if (!m_activationRequested && !m_extensionActivated && !m_extensionInstalled) {
             logger.info() << "deactivateExtension: nothing registered, skipping";
+            if (reactivateAfterwards) {
+                activateExtension();
+            }
             return;
         }
 
-        logger.info() << "deactivateExtension: submitting request for" << QStr(ProviderBundleId());
+        logger.info() << "deactivateExtension: submitting request for" << QStr(ProviderBundleId())
+                      << "reactivateAfterwards=" << reactivateAfterwards;
         g_deactivationDelegate = [[AmneziaSTExtensionDelegate alloc] init];
         g_deactivationDelegate.onNeedsApproval = ^{
             logger.info() << "deactivateExtension: waiting for user approval";
@@ -297,6 +465,22 @@ void MacOSSplitTunnelManager::deactivateExtension()
                 // off, and a failure to unregister does not affect them.
                 logger.error() << "deactivateExtension failed:" << QStr(message);
             }
+            if (!reactivateAfterwards) {
+                return;
+            }
+            // The record is gone, so the next activation request produces a
+            // fresh install prompt. Back on the Qt thread: the state this
+            // touches belongs to it.
+            QMetaObject::invokeMethod(
+                this,
+                [this]() {
+                    m_extensionInstalled = false;
+                    m_extensionEnabled = false;
+                    m_extensionAwaitingApproval = false;
+                    logger.info() << "deactivateExtension: re-submitting the activation request";
+                    activateExtension();
+                },
+                Qt::QueuedConnection);
         };
 
         OSSystemExtensionRequest *request =
@@ -382,16 +566,17 @@ void MacOSSplitTunnelManager::onProxyStatusChanged(int status)
 void MacOSSplitTunnelManager::reconcile(bool vpnConnected, bool splitTunnelEnabled, amnezia::AppsRouteMode mode,
                                         const QVector<amnezia::InstalledAppInfo> &apps, const QString &vpnServer)
 {
-    const bool exceptMode = mode == amnezia::AppsRouteMode::VpnAllExceptApps;
-    const bool shouldRun = vpnConnected && splitTunnelEnabled && exceptMode && !apps.isEmpty();
-    const QByteArray options = optionsJson(apps, vpnServer);
+    const bool modeSupported = mode == amnezia::AppsRouteMode::VpnAllExceptApps
+        || mode == amnezia::AppsRouteMode::VpnOnlyForwardApps;
+    const bool shouldRun = vpnConnected && splitTunnelEnabled && modeSupported && !apps.isEmpty();
+    const QByteArray options = optionsJson(apps, vpnServer, mode);
 
     const bool desiredChanged = !m_desired.valid || m_desired.shouldRun != shouldRun
-        || m_desired.vpnServer != vpnServer || m_desired.apps.size() != apps.size()
-        || options != optionsJson(m_desired.apps, m_desired.vpnServer);
+        || options != optionsJson(m_desired.apps, m_desired.vpnServer, m_desired.mode);
 
     m_desired.valid = true;
     m_desired.shouldRun = shouldRun;
+    m_desired.mode = mode;
     m_desired.apps = apps;
     m_desired.vpnServer = vpnServer;
 
@@ -406,16 +591,20 @@ void MacOSSplitTunnelManager::reconcile(bool vpnConnected, bool splitTunnelEnabl
 
     logger.info() << "reconcile: vpnConnected=" << vpnConnected
                   << "splitEnabled=" << splitTunnelEnabled
-                  << "exceptMode=" << exceptMode
+                  << "mode=" << (mode == amnezia::AppsRouteMode::VpnOnlyForwardApps ? "only" : "except")
                   << "apps=" << apps.size()
                   << "extensionActivated=" << m_extensionActivated
                   << "proxyStatus=" << (m_proxyStatus < 0 ? "unknown" : VpnStatusName(static_cast<NEVPNStatus>(m_proxyStatus)))
                   << "=> shouldRun=" << shouldRun;
     LogApps("reconcile", apps);
 
-    if (splitTunnelEnabled && !exceptMode) {
-        logger.error() << "reconcile: route mode is" << static_cast<int>(mode)
-                       << "- only VpnAllExceptApps is supported on macOS, the proxy stays off";
+    if (splitTunnelEnabled && !modeSupported) {
+        logger.error() << "reconcile: unsupported route mode" << static_cast<int>(mode)
+                       << "- the proxy stays off";
+    }
+    if (shouldRun && mode == amnezia::AppsRouteMode::VpnOnlyForwardApps) {
+        logger.info() << "reconcile: include mode claims every flow that is not listed, so all traffic "
+                         "except the listed apps is relayed through the extension";
     }
     if (shouldRun && vpnServer.isEmpty() && !m_warnedAboutEmptyServer) {
         m_warnedAboutEmptyServer = true;
@@ -441,13 +630,14 @@ void MacOSSplitTunnelManager::reconcile(bool vpnConnected, bool splitTunnelEnabl
 void MacOSSplitTunnelManager::startProxy()
 {
     if (@available(macOS 11.0, *)) {
-        const QByteArray json = optionsJson(m_desired.apps, m_desired.vpnServer);
+        const QByteArray json = optionsJson(m_desired.apps, m_desired.vpnServer, m_desired.mode);
         const bool optionsChanged = (json != m_appliedOptions);
         NSDictionary *options = OptionsDictionary(json);
         NSData *messageData = [NSData dataWithBytes:json.constData() length:static_cast<NSUInteger>(json.size())];
         NSString *bundleId = ProviderBundleId();
 
-        logger.info() << "startProxy: apps=" << m_desired.apps.size() << "optionsChanged=" << optionsChanged;
+        logger.info() << "startProxy: apps=" << m_desired.apps.size() << "optionsChanged=" << optionsChanged
+                      << "extension log dir=" << SplitTunnelLogDirectory() + QStringLiteral("/AmneziaVPNSplitTunnel_root");
         logger.debug() << "startProxy: options =" << QString::fromUtf8(json);
 
         WithProxyManager(^(NETransparentProxyManager *manager, NSError *loadError) {
@@ -602,7 +792,46 @@ void MacOSSplitTunnelManager::removeConfiguration(void (^completion)(void))
 
 void MacOSSplitTunnelManager::disableFeature()
 {
-    logger.info() << "disableFeature: tearing down (stop -> remove configuration -> unregister)";
+    logger.info() << "disableFeature: stopping the proxy and disabling the configuration "
+                     "(the extension stays installed)";
+    m_tearingDown = true;
+    m_desired = DesiredState {};
+    m_appliedOptions.clear();
+
+    if (@available(macOS 11.0, *)) {
+        if (g_proxyManager == nil && m_proxyStatus < 0) {
+            // Nothing was ever configured in this process; there may still be a
+            // saved configuration from an earlier run, so load it and turn it
+            // off rather than assuming there is nothing to do.
+            logger.debug() << "disableFeature: nothing running here, disabling any saved configuration";
+        }
+
+        WithProxyManager(^(NETransparentProxyManager *manager, NSError *loadError) {
+            if (manager == nil) {
+                logger.debug() << "disableFeature: no saved configuration:" << ErrorDump(loadError);
+                this->m_tearingDown = false;
+                this->refreshExtensionState();
+                return;
+            }
+            if (manager.connection.status != NEVPNStatusDisconnected
+                && manager.connection.status != NEVPNStatusInvalid) {
+                logger.info() << "disableFeature: stopping the proxy, status was"
+                              << VpnStatusName(manager.connection.status);
+                [manager.connection stopVPNTunnel];
+            }
+            this->setConfigurationEnabled(false, ^{
+                this->m_tearingDown = false;
+                this->refreshExtensionState();
+            });
+        });
+    } else {
+        m_tearingDown = false;
+    }
+}
+
+void MacOSSplitTunnelManager::uninstallFeature()
+{
+    logger.info() << "uninstallFeature: tearing down (stop -> remove configuration -> unregister)";
     m_tearingDown = true;
     m_desired = DesiredState {};
     m_appliedOptions.clear();
@@ -612,7 +841,7 @@ void MacOSSplitTunnelManager::disableFeature()
         // still stopping, or unregistering before the configuration is gone,
         // leaves entries behind in System Settings.
         if (g_proxyManager == nil && m_proxyStatus < 0) {
-            logger.debug() << "disableFeature: nothing was running";
+            logger.debug() << "uninstallFeature: nothing was running";
             deactivateExtension();
             m_tearingDown = false;
             return;
@@ -621,7 +850,7 @@ void MacOSSplitTunnelManager::disableFeature()
         WithProxyManager(^(NETransparentProxyManager *manager, NSError *loadError) {
             if (manager != nil && manager.connection.status != NEVPNStatusDisconnected
                 && manager.connection.status != NEVPNStatusInvalid) {
-                logger.info() << "disableFeature: stopping the proxy, status was"
+                logger.info() << "uninstallFeature: stopping the proxy, status was"
                               << VpnStatusName(manager.connection.status);
                 [manager.connection stopVPNTunnel];
             }
@@ -632,5 +861,50 @@ void MacOSSplitTunnelManager::disableFeature()
         });
     } else {
         m_tearingDown = false;
+    }
+}
+
+void MacOSSplitTunnelManager::setConfigurationEnabled(bool enabled, void (^completion)(void))
+{
+    if (@available(macOS 11.0, *)) {
+        if (g_proxyManager == nil) {
+            logger.debug() << "setConfigurationEnabled: nothing loaded";
+            if (completion) {
+                completion();
+            }
+            return;
+        }
+        if (g_proxyManager.protocolConfiguration == nil) {
+            // WithProxyManager hands out a blank manager when preferences hold
+            // no configuration for us. Saving that one fails with "Missing
+            // protocol", and there is nothing to disable anyway.
+            logger.debug() << "setConfigurationEnabled: no saved configuration, nothing to disable";
+            if (completion) {
+                completion();
+            }
+            return;
+        }
+        if (g_proxyManager.enabled == (enabled ? YES : NO)) {
+            logger.debug() << "setConfigurationEnabled: already" << enabled;
+            if (completion) {
+                completion();
+            }
+            return;
+        }
+
+        logger.info() << "setConfigurationEnabled:" << enabled;
+        g_proxyManager.enabled = enabled ? YES : NO;
+        [g_proxyManager saveToPreferencesWithCompletionHandler:^(NSError *saveError) {
+            if (saveError != nil) {
+                logger.error() << "setConfigurationEnabled failed:" << ErrorDump(saveError);
+            } else {
+                logger.info() << "setConfigurationEnabled: saved";
+            }
+            if (completion) {
+                completion();
+            }
+        }];
+    } else if (completion) {
+        completion();
     }
 }

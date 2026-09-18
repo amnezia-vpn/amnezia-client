@@ -21,7 +21,7 @@ endif()
 if(NOT CLIENT_MACOS_ST_BUNDLE_VERSION)
     # Bump on every change to the extension, otherwise sysextd keeps the copy it
     # already installed instead of replacing it.
-    set(CLIENT_MACOS_ST_BUNDLE_VERSION "4" CACHE STRING "CFBundleVersion of the macOS split-tunnel system extension")
+    set(CLIENT_MACOS_ST_BUNDLE_VERSION "10" CACHE STRING "CFBundleVersion of the macOS split-tunnel system extension")
 endif()
 
 if(NOT BUILD_OSX_APP_IDENTIFIER)

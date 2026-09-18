@@ -46,7 +46,8 @@ namespace {
 #include <QDir>
 #include <QStandardPaths>
 
-// Read-only rules bundled with the application.
+// Read-only rules bundled with the application: Contents/MacOS/pf inside the
+// bundle, the same sibling layout when started from the build tree.
 #define ResourceDir (qApp->applicationDirPath() + "/pf")
 
 // Writable location that does NOT live inside the signed bundle.  Using a
@@ -92,6 +93,11 @@ void MacOSFirewall::installRootAnchors()
 {
     logger.info() << "Installing PF root anchors";
 
+    // When these fail the kernel silently keeps whatever anchors a previous run
+    // left behind: the kill switch and the split-tunnel pass rule then do
+    // nothing, while the log still reports every anchor as "ON".
+    const QString rootRules = QStringLiteral("%1/%2.conf").arg(ResourceDir, kRootAnchor);
+
     // Append our NAT anchors by reading back and re-applying NAT rules only
     auto insertNatAnchors = QStringLiteral(
         "( "
@@ -101,7 +107,9 @@ void MacOSFirewall::installRootAnchors()
         R"(echo 'load anchor "%4" from "%5/%6.conf"'; )" // Load the PIA anchors from file
         ") | pfctl -N -f -").arg(kRootAnchor, kRootAnchor, kRootAnchor, kRootAnchor, ResourceDir, kRootAnchor);
 
-    execute(insertNatAnchors);
+    if (execute(insertNatAnchors) != 0) {
+        logger.error() << "failed to load the PF translation anchors from" << rootRules;
+    }
 
     // Append our filter anchor by reading back and re-applying filter rules
     // only.  pfctl -sr also includes scrub rules, but these will be ignored
@@ -112,7 +120,10 @@ void MacOSFirewall::installRootAnchors()
         R"(echo 'anchor "%2/*"'; )"         // PIA's filter anchors
         R"(echo 'load anchor "%3" from "%4/%5.conf"'; )" // Load the PIA anchors from file
         " ) | pfctl -R -f -").arg(kRootAnchor, kRootAnchor, kRootAnchor, ResourceDir, kRootAnchor);
-    execute(insertFilterAnchor);
+    if (execute(insertFilterAnchor) != 0) {
+        logger.error() << "failed to load the PF filter anchors from" << rootRules
+                       << "- sub-anchors listed there will not be evaluated";
+    }
 }
 
 void MacOSFirewall::install()
@@ -171,7 +182,11 @@ bool MacOSFirewall::isRootAnchorLoaded()
 
 void MacOSFirewall::enableAnchor(const QString& anchor)
 {
-    execute(QStringLiteral("if pfctl -q -a '%1/%2' -s rules 2> /dev/null | grep -q . ; then echo '%2: ON' ; else echo '%2: OFF -> ON' ; pfctl -q -a '%1/%2' -F all -f '%3/%1.%2.conf' ; fi").arg(kRootAnchor, anchor, ResourceDir));
+    // The file is only read when the anchor is empty, so rules left in the
+    // kernel by an earlier run survive a change to the .conf. Print what is
+    // actually resident in that case - otherwise "ON" says nothing about which
+    // rules are in force.
+    execute(QStringLiteral("if pfctl -q -a '%1/%2' -s rules 2> /dev/null | grep -q . ; then echo '%2: ON (kept, rules already in the kernel):' ; pfctl -q -a '%1/%2' -s rules ; else echo '%2: OFF -> ON' ; pfctl -q -a '%1/%2' -F all -f '%3/%1.%2.conf' ; fi").arg(kRootAnchor, anchor, ResourceDir));
 }
 
 void MacOSFirewall::disableAnchor(const QString& anchor)
