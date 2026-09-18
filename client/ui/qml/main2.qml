@@ -16,6 +16,12 @@ Window  {
     id: root
     objectName: "mainWindow"
 
+    Binding {
+        target: AmneziaStyle
+        property: "isDark"
+        value: AppearanceController.isDarkMode
+    }
+
     Connections {
         target: Qt.application
         function onStateChanged() {

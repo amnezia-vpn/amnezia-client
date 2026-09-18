@@ -503,13 +503,20 @@ PageType {
                         Component.onCompleted: root.containersDropDownRef = containersDropDown
 
                         rootButtonImageColor: AmneziaStyle.color.midnightBlack
-                        rootButtonBackgroundColor: AmneziaStyle.color.paleGray
+                        // Inverted "prominent" chip: a light pill in dark mode; in light mode
+                        // a softened charcoal (not the harsh near-black paleGray) keeps it
+                        // prominent without clashing with the soft light surface.
+                        rootButtonBackgroundColor: AmneziaStyle.isDark ? AmneziaStyle.color.paleGray : "#3A3B40"
                         rootButtonBackgroundHoveredColor: AmneziaStyle.color.mistyGray
                         rootButtonBackgroundPressedColor: AmneziaStyle.color.cloudyGray
                         rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
                         rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
+                        // Short content-hugging pill: trim the chevron's right margin so the
+                        // caret sits ~symmetric with the 16px text left margin (the 40px icon
+                        // touch-target already adds ~8px of centering padding).
+                        rootButtonImageRightMargin: 8
 
                         enabled: drawer.isOpened
 

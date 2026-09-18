@@ -39,7 +39,7 @@ Popup {
     background: Rectangle {
         anchors.fill: parent
 
-        color: "white"
+        color: AmneziaStyle.color.notificationBackground
         radius: 4
     }
 
@@ -90,7 +90,7 @@ Popup {
 
                 implicitHeight: 32
 
-                defaultColor: "white"
+                defaultColor: AmneziaStyle.color.notificationBackground
                 hoveredColor: AmneziaStyle.color.lightGray
                 pressedColor: AmneziaStyle.color.lightGray
                 disabledColor: AmneziaStyle.color.charcoalGray

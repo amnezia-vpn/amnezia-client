@@ -64,6 +64,8 @@ PageType {
                 text: title
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: leftImagePath
+                // Keep the multi-color "unread news" badge intact; tint the rest.
+                leftImageColor: leftImagePath.indexOf("news-unread") !== -1 ? "" : AmneziaStyle.color.paleGray
 
                 clickedFunction: clickedHandler
             }

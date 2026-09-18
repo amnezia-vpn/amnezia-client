@@ -10,12 +10,12 @@ import "TextTypes"
 Button {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.lightGray
-    property string defaultColor: AmneziaStyle.color.paleGray
-    property string disabledColor: AmneziaStyle.color.charcoalGray
-    property string pressedColor: AmneziaStyle.color.mutedGray
+    property string hoveredColor: AmneziaStyle.color.primaryButtonHovered
+    property string defaultColor: AmneziaStyle.color.primaryButton
+    property string disabledColor: AmneziaStyle.color.primaryButtonDisabled
+    property string pressedColor: AmneziaStyle.color.primaryButtonPressed
 
-    property string textColor: AmneziaStyle.color.midnightBlack
+    property string textColor: AmneziaStyle.color.primaryButtonText
 
     property string borderColor: AmneziaStyle.color.paleGray
     property string borderFocusedColor: AmneziaStyle.color.paleGray

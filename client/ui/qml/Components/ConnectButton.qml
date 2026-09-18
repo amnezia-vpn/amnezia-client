@@ -77,7 +77,8 @@ Button {
                 verticalOffset: 0
                 radius: 10
                 samples: 25
-                color: root.buttonActiveFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot
+                color: AmneziaStyle.isDark ? (root.buttonActiveFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.goldenApricot)
+                                           : AmneziaStyle.color.transparent
                 source: backgroundCircle
             }
 
