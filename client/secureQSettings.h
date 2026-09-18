@@ -17,9 +17,6 @@ public:
     explicit SecureQSettings(const QString &organization, const QString &application = QString(),
                              QObject *parent = nullptr, bool enableEncryption = true);
 
-    Q_INVOKABLE bool encryptFile(const QString &filePath, const QString &password, QString *error = nullptr) const;
-    Q_INVOKABLE bool decryptFile(const QString &filePath, const QString &password, QString *error = nullptr) const;
-
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
     void remove(const QString &key);
