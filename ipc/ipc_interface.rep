@@ -40,6 +40,9 @@ class IpcInterface
 
     SLOT(bool xrayStart(const QString &config));
     SLOT(bool xrayStop());
+    SLOT(qint64 xrayStartOwned(const QString &config));
+    SLOT(bool xrayStopOwned(qint64 token));
+    SLOT(qint64 xrayCurrentToken());
 
     SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
     SLOT( bool stopNetworkCheck() );

@@ -68,6 +68,7 @@ signals:
     void openConnectionRequested(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
     void closeConnectionRequested();
     void killSwitchModeChangedRequested(bool enabled);
+    void localProxyStoppedBecauseVpnTurnedOn(const QString &message);
 
 #ifdef Q_OS_ANDROID
     void restoreConnectionRequested();
