@@ -12,9 +12,15 @@ TabButton {
 
     property string image
 
+    property string accessibleName: ""
+
     property bool isSelected: false
 
 	property bool isFocusable: true
+
+    Accessible.name: accessibleName
+    Accessible.role: Accessible.PageTab
+    Accessible.description: isSelected ? qsTr("Selected") : ""
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
