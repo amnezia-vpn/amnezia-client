@@ -178,7 +178,10 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
   } else {
     if (config.m_killSwitchEnabled) {
       FirewallParams params { };
-      params.dnsServers.append(config.m_primaryDnsServer);
+      if (!config.m_primaryDnsServer.isEmpty()) {
+          params.dnsServers.append(config.m_primaryDnsServer);
+      }
+      params.dnsServers.append(config.m_allowedDnsServers);
       if (!config.m_secondaryDnsServer.isEmpty()) {
           params.dnsServers.append(config.m_secondaryDnsServer);
       }

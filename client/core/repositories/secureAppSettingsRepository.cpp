@@ -49,6 +49,21 @@ void SecureAppSettingsRepository::setAppLanguage(QLocale locale)
     emit appLanguageChanged(locale);
 }
 
+bool SecureAppSettingsRepository::useSystemDns() const
+{
+#if defined(Q_OS_WIN) || (defined(Q_OS_MACOS) && !defined(MACOS_NE))
+    return value("Conf/useSystemDns", false).toBool();
+#else
+    return false;
+#endif
+}
+
+void SecureAppSettingsRepository::setUseSystemDns(bool enabled)
+{
+    setValue("Conf/useSystemDns", enabled);
+    emit useSystemDnsChanged(enabled);
+}
+
 bool SecureAppSettingsRepository::useAmneziaDns() const
 {
     return value("Conf/useAmneziaDns", true).toBool();

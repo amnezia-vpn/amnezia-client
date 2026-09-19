@@ -72,6 +72,68 @@ static QStringList cfParseStringList(CFTypeRef ref) {
   return result;
 }
 
+QStringList DnsUtilsMacos::systemResolvers() const {
+  if (!m_scStore) {
+    return {};
+  }
+  CFArrayRef keys = SCDynamicStoreCopyKeyList(
+      m_scStore, CFSTR("State:/Network/Service/[^/]+/(DNS|IPv4|IPv6)"));
+  if (!keys) {
+    return {};
+  }
+  auto keysGuard = qScopeGuard([&] { CFRelease(keys); });
+  QStringList services;
+  for (CFIndex i = 0; i < CFArrayGetCount(keys); ++i) {
+    CFTypeRef key = CFArrayGetValueAtIndex(keys, i);
+    if (CFGetTypeID(key) != CFStringGetTypeID()) {
+      continue;
+    }
+    services.append(cfParseString(key).section('/', 3, 3));
+  }
+  services.removeDuplicates();
+
+  auto readServers = [&](const QString& path) -> QStringList {
+    CFStringRef key = CFStringCreateWithCString(kCFAllocatorDefault,
+        path.toUtf8().constData(), kCFStringEncodingUTF8);
+    if (!key) {
+      return {};
+    }
+    auto keyGuard = qScopeGuard([&] { CFRelease(key); });
+    CFPropertyListRef value = SCDynamicStoreCopyValue(m_scStore, key);
+    if (!value) {
+      return {};
+    }
+    auto valueGuard = qScopeGuard([&] { CFRelease(value); });
+    if (CFGetTypeID(value) != CFDictionaryGetTypeID()) {
+      return {};
+    }
+    CFTypeRef servers = CFDictionaryGetValue((CFDictionaryRef)value, kSCPropNetDNSServerAddresses);
+    if (!servers || CFGetTypeID(servers) != CFArrayGetTypeID()) {
+      return {};
+    }
+    return cfParseStringList(servers);
+  };
+
+  QStringList resolvers;
+  for (const QString& service : services) {
+    // Manually configured DNS takes precedence over DHCP for this service.
+    QStringList servers = readServers(QStringLiteral("Setup:/Network/Service/%1/DNS").arg(service));
+    if (servers.isEmpty()) {
+      servers = readServers(QStringLiteral("State:/Network/Service/%1/DNS").arg(service));
+    }
+    for (const QString& server : servers) {
+      const QHostAddress address(server);
+      if (!address.isNull() && !address.isMulticast() && !address.isBroadcast()
+          && address != QHostAddress(QHostAddress::AnyIPv4)
+          && address != QHostAddress(QHostAddress::AnyIPv6)) {
+        resolvers.append(address.toString());
+      }
+    }
+  }
+  resolvers.removeDuplicates();
+  return resolvers;
+}
+
 static void cfDictSetString(CFMutableDictionaryRef dict, CFStringRef name,
                             const QString& value) {
   if (value.isNull()) {

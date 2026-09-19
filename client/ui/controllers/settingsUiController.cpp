@@ -39,6 +39,22 @@ SettingsUiController::SettingsUiController(SettingsController* settingsControlle
     }
 }
 
+bool SettingsUiController::isSystemDnsSupported() const
+{
+    return m_settingsController->isSystemDnsSupported();
+}
+
+bool SettingsUiController::isSystemDnsEnabled() const
+{
+    return m_settingsController->isSystemDnsEnabled();
+}
+
+void SettingsUiController::toggleSystemDns(bool enable)
+{
+    m_settingsController->toggleSystemDns(enable);
+    emit systemDnsChanged();
+}
+
 void SettingsUiController::toggleAmneziaDns(bool enable)
 {
     m_settingsController->toggleAmneziaDns(enable);
