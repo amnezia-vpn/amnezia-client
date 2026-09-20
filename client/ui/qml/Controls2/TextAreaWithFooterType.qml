@@ -79,9 +79,21 @@ Rectangle {
 
                 wrapMode: Text.Wrap
 
-                ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
-                ContextMenu.onRequested: function(position) {
-                    contextMenu.requestNative(position)
+                // The ContextMenu attached type needs Qt 6.9. These two handlers reproduce
+                // the triggers it gives us -- right click on desktop, long press on touch --
+                // and work back to Qt 6.2. Handlers rather than a filled MouseArea, so left
+                // press and drag still reach the TextArea for cursor placement, selection
+                // and flicking.
+                TapHandler {
+                    acceptedButtons: Qt.RightButton
+                    onTapped: function(eventPoint) {
+                        contextMenu.show(eventPoint.position)
+                    }
+                }
+
+                TapHandler {
+                    acceptedDevices: PointerDevice.TouchScreen
+                    onLongPressed: contextMenu.show(point.position)
                 }
 
                 // Native iOS text fields select the word and show the edit

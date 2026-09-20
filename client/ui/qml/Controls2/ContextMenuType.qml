@@ -4,7 +4,8 @@ import QtQuick.Controls
 Menu {
     property var textObj
 
-    popupType: Popup.Native
+    // popupType: Popup.Native needs Qt 6.8. Left unset so the menu is Qt-drawn
+    // on older Qt; see the note in TextAreaType.qml for the tradeoff.
 
     // On Qt < 6.10 the ContextMenu attached type has no native backing on iOS
     // and opens this Qt-drawn menu instead. In that case the native edit menu
@@ -18,6 +19,22 @@ Menu {
             textObj.forceActiveFocus()
             IosContextMenu.present(textObj, position.x, position.y)
         }
+    }
+
+    // Single entry point for the triggers that replace the ContextMenu attached
+    // type: the native edit menu where there is one, this menu otherwise.
+    // position is in the coordinate system of the item the menu is declared in,
+    // which is also what Menu.popup(x, y) expects.
+    function show(position) {
+        if (useNativeEditMenu) {
+            requestNative(position)
+            return
+        }
+
+        if (textObj) {
+            textObj.forceActiveFocus()
+        }
+        popup(position.x, position.y)
     }
 
     property Item inputBlocker: null
