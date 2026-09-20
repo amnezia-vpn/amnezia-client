@@ -15,7 +15,6 @@
 #include <WS2tcpip.h>
 
 #include <iphlpapi.h>
-#include <IcmpAPI.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -39,6 +38,8 @@ public:
     int routeAddList(const QString &gw, const QStringList &ips);
     bool clearSavedRoutes();
     int routeDeleteList(const QString &gw, const QStringList &ips);
+    bool routeAddDefault(const QString &dev);
+    bool routeDeleteDefault(const QString &dev);
     bool flushDns();
     void resetIpStack();
 
@@ -63,10 +64,12 @@ private:
     BOOL SuspendProcess(BOOL fSuspend, DWORD dwProcessId);
 
     QNetworkInterface findLoopbackIface();
+    static bool buildDefaultRow(const QString &dev, MIB_IPFORWARD_ROW2 *entry);
 
 private:
     RouterWin() {m_dnsUtil = new DnsUtilsWindows(this);}
     QMultiMap<QString, MIB_IPFORWARDROW> m_ipForwardRows;
+    QMap<QString, MIB_IPFORWARD_ROW2> m_defaultRoutes;
     bool m_suspended = false;
     DnsUtilsWindows *m_dnsUtil; 
 };

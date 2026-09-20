@@ -121,6 +121,12 @@ void XrayProtocol::stop()
     qDebug() << "XrayProtocol::stop()";
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+#ifdef Q_OS_WIN
+        auto routeDeleteDefault = iface->routeDeleteDefault(tunName);
+        if (!routeDeleteDefault.waitForFinished() || !routeDeleteDefault.returnValue())
+            qWarning() << "Failed to delete the default route for TUN";
+#endif
+
         auto disableKillSwitch = iface->disableKillSwitch();
         if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
             qWarning() << "Failed to disable killswitch";
@@ -295,6 +301,13 @@ ErrorCode XrayProtocol::setupRouting()
                 }
 
                 if (m_routeMode == amnezia::RouteMode::VpnAllSites) {
+#ifdef Q_OS_WIN
+                    auto routeAddDefault = iface->routeAddDefault(tunName);
+                    if (!routeAddDefault.waitForFinished() || !routeAddDefault.returnValue()) {
+                        qCritical() << "Failed to set the default route for TUN";
+                        return ErrorCode::InternalError;
+                    }
+#else
                     static const QStringList subnets = { "1.0.0.0/8",  "2.0.0.0/7",  "4.0.0.0/6",  "8.0.0.0/5",
                                                          "16.0.0.0/4", "32.0.0.0/3", "64.0.0.0/2", "128.0.0.0/1" };
 
@@ -303,6 +316,7 @@ ErrorCode XrayProtocol::setupRouting()
                         qCritical() << "Failed to set routes for TUN";
                         return ErrorCode::InternalError;
                     }
+#endif
                 }
 
                 auto StopRoutingIpv6 = iface->StopRoutingIpv6();
