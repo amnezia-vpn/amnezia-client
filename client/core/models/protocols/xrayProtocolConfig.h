@@ -1,9 +1,11 @@
 #ifndef XRAYPROTOCOLCONFIG_H
 #define XRAYPROTOCOLCONFIG_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include "core/utils/constants/protocolConstants.h"
 #include <QString>
+#include <QStringList>
 #include <optional>
 
 namespace amnezia
@@ -16,8 +18,8 @@ struct XrayXPaddingConfig {
     bool    obfsMode = true;            // xPaddingObfsMode
     QString key;                        // xPaddingKey
     QString header;                     // xPaddingHeader
-    QString placement = protocols::xray::defaultXPaddingPlacement; // xPaddingPlacement: Cookie|Header|Query|Body
-    QString method = protocols::xray::defaultXPaddingMethod;       // xPaddingMethod: Repeat-x|Random|Zero
+    QString placement;                  // xPaddingPlacement: Cookie|Header|Query|Query in header
+    QString method;                     // xPaddingMethod: Repeat-x|Tokenish
 
     QJsonObject toJson() const;
     static XrayXPaddingConfig fromJson(const QJsonObject &json);
@@ -45,33 +47,35 @@ struct XrayXmuxConfig {
 
 // ── XHTTP transport ───────────────────────────────────────────────────────────
 struct XrayXhttpConfig {
-    QString mode             = protocols::xray::defaultXhttpMode;  // Auto|Packet-up|Stream-up|Stream-one
-    QString host             = protocols::xray::defaultXhttpHost;
+    QString mode;
+    QString host;
     QString path;
-    QString uplinkMethod     = protocols::xray::defaultXhttpUplinkMethod;  // POST|PUT|PATCH
     bool    disableGrpc      = true;
     bool    disableSse       = true;
 
     // Session & Sequence
-    QString sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
-    QString sessionKey       = protocols::xray::defaultXhttpSessionKey;
-    QString seqPlacement     = protocols::xray::defaultXhttpSeqPlacement;
+    QString sessionPlacement;
+    QString sessionKey;
+    QString seqPlacement;
     QString seqKey;
-    QString uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
+    QString uplinkDataPlacement;
     QString uplinkDataKey;
 
     // Traffic Shaping
-    QString uplinkChunkSize       = protocols::xray::defaultXhttpUplinkChunkSize;
+    QString uplinkMethod;
+    QString uplinkChunkSize;
+    QString scMinPostsIntervalMsMin;
+    QString scMinPostsIntervalMsMax;
+
+    XrayXmuxConfig xmux;
+
     QString scMaxBufferedPosts;
-    QString scMaxEachPostBytesMin = protocols::xray::defaultXhttpScMaxEachPostBytesMin;
-    QString scMaxEachPostBytesMax = protocols::xray::defaultXhttpScMaxEachPostBytesMax;
-    QString scMinPostsIntervalMsMin = protocols::xray::defaultXhttpScMinPostsIntervalMsMin;
-    QString scMinPostsIntervalMsMax = protocols::xray::defaultXhttpScMinPostsIntervalMsMax;
-    QString scStreamUpServerSecsMin = protocols::xray::defaultXhttpScStreamUpServerSecsMin;
-    QString scStreamUpServerSecsMax = protocols::xray::defaultXhttpScStreamUpServerSecsMax;
+    QString scMaxEachPostBytesMin;
+    QString scMaxEachPostBytesMax;
+    QString scStreamUpServerSecsMin;
+    QString scStreamUpServerSecsMax;
 
     XrayXPaddingConfig xPadding;
-    XrayXmuxConfig     xmux;
 
     QJsonObject toJson() const;
     /// Reads only keys present in JSON (no Amnezia UI defaults). Use XrayConfigModel::applyDefaultsToServerConfig for UI.
@@ -81,14 +85,38 @@ struct XrayXhttpConfig {
 // ── mKCP transport ────────────────────────────────────────────────────────────
 struct XrayMkcpConfig {
     QString tti;
+    QString mtu;
     QString uplinkCapacity;
     QString downlinkCapacity;
-    QString readBufferSize;
-    QString writeBufferSize;
-    bool    congestion = true;
+    QString cwndMultiplier;
+    QString maxSendingWindow;
 
     QJsonObject toJson() const;
     static XrayMkcpConfig fromJson(const QJsonObject &json);
+};
+
+enum class XrayStreamSide {
+    Server,
+    Client,
+};
+
+struct XrayServerInboundInputs {
+    QJsonArray clients;
+    QString realityPrivateKey;
+    QString realityShortId;
+};
+
+enum class XrayServerJsonStatus {
+    Ok,
+    MissingInbounds,
+    EmptyInbounds,
+    MissingStreamSettings,
+    MissingSettings,
+};
+
+enum class XrayClientListFilter {
+    KeepAll,
+    DropWithoutId,
 };
 
 // ── Server config (settings editable by user) ─────────────────────────────────
@@ -99,11 +127,13 @@ struct XrayServerConfig {
     QString site;
     bool isThirdPartyConfig = false;
 
+    int settingsVersion = 0;
+
     QString security;
     QString flow;
-    QString fingerprint;
     QString sni;
     QString alpn;
+    QString fingerprint = protocols::xray::defaultFingerprint;
 
     QString transport;
     XrayXhttpConfig xhttp;
@@ -113,7 +143,64 @@ struct XrayServerConfig {
 
     static XrayServerConfig fromJson(const QJsonObject &json);
 
+    void applyDefaults(bool fillFlowDefault = false);
+
+    QJsonObject streamSettingsJson(XrayStreamSide side) const;
+
+    QJsonObject serverStreamSettings() const;
+
+    QJsonObject clientStreamSettings() const;
+
+    QJsonObject toServerInboundJson(const XrayServerInboundInputs &inputs) const;
+
+    static XrayServerJsonStatus fromServerInboundJson(const QJsonObject &serverJson, XrayServerConfig &outServerConfig);
+
+    static QJsonArray clientsFromServerInboundJson(const QJsonObject &serverJson);
+    static XrayServerJsonStatus setClientsInServerInboundJson(QJsonObject &serverJson, const QJsonArray &clients);
+
+    static QJsonObject makeClientEntry(const QString &clientId, const QString &flowValue);
+    static QJsonObject applyFlowToClient(const QJsonObject &client, const QString &flowValue);
+    static int indexOfClient(const QJsonArray &clients, const QString &clientId);
+    static QString firstClientId(const QJsonArray &clients);
+    static QJsonArray applyFlowToClients(const QJsonArray &clients, const QString &flowValue,
+                                         XrayClientListFilter filter = XrayClientListFilter::KeepAll);
+
+    QJsonObject serverView() const;
+
+    QJsonObject issuedConfigView() const;
+
     bool hasEqualServerSettings(const XrayServerConfig &other) const;
+
+    bool breaksIssuedConfigs(const XrayServerConfig &other) const;
+};
+
+namespace xrayEffective
+{
+    QString xhttpMode(const QString &mode);
+    QString sessionSeqPlacement(const QString &placement);
+    QString uplinkDataPlacement(const QString &placement);
+    QString xPaddingPlacement(const QString &placement);
+    QString xPaddingMethod(const QString &method);
+    QString range(const QString &minV, const QString &maxV);
+    void putRangeIfAny(QJsonObject &obj, const char *key, QString minV, QString maxV, const char *fallbackMin,
+                       const char *fallbackMax);
+
+    QString security(const XrayServerConfig &srv);
+    QString clientFlow(const XrayServerConfig &srv);
+    QString network(const XrayServerConfig &srv);
+    QString xhttpModeSent(const XrayServerConfig &srv);
+}
+
+QString sanitizeNativeConfig(const QString &nativeConfig);
+
+struct XrayClientOutboundInputs {
+    QString serverAddress;
+    QString clientId;
+    QString realityPublicKey;
+    QString realityShortId;
+    QString tlsPinnedPeerCertSha256;
+
+    static std::optional<XrayClientOutboundInputs> fromClientNativeJson(const QJsonObject &nativeJson);
 };
 
 // ── Client config (generated, not edited by user) ─────────────────────────────
@@ -124,6 +211,9 @@ struct XrayClientConfig {
 
     QJsonObject toJson() const;
     static XrayClientConfig fromJson(const QJsonObject &json);
+
+    static QString idFromNativeJson(const QJsonObject &nativeJson);
+    static QString localPortFromNativeJson(const QJsonObject &nativeJson);
 };
 
 // ── Top-level protocol config ──────────────────────────────────────────────────
@@ -140,7 +230,14 @@ struct XrayProtocolConfig {
 
     bool needsClientHydration = false;
 
+    QJsonObject toClientOutboundJson(const XrayClientOutboundInputs &inputs) const;
+
+    bool fromClientOutboundJson(const QJsonObject &nativeJson);
+
     bool hydrateServerConfigFromClientNative();
+
+    bool regenerateClientConfigFromNative();
+
 };
 
 } // namespace amnezia
