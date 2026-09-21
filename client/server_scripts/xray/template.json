@@ -34,7 +34,7 @@
                 "network": "tcp",
                 "security": "reality",
                 "realitySettings": {
-                    "fingerprint": "chrome",
+                    "fingerprint": "firefox",
                     "serverName": "$XRAY_SITE_NAME",
                     "publicKey": "$XRAY_PUBLIC_KEY",
                     "shortId": "$XRAY_SHORT_ID",
