@@ -15,6 +15,7 @@ find_library(FW_FOUNDATION Foundation)
 find_library(FW_STOREKIT StoreKit)
 find_library(FW_USERNOTIFICATIONS UserNotifications)
 find_library(FW_NETWORKEXTENSION NetworkExtension)
+find_library(LIB_RESOLV resolv)
 
 set(LIBS ${LIBS}
     ${FW_AUTHENTICATIONSERVICES}
@@ -24,6 +25,7 @@ set(LIBS ${LIBS}
     ${FW_STOREKIT}
     ${FW_USERNOTIFICATIONS}
     ${FW_NETWORKEXTENSION}
+    ${LIB_RESOLV}
 )
 
 
@@ -34,6 +36,7 @@ set(HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ioscontextmenu.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate-C-Interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_network_diagnostics.h
 )
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_controller.h PROPERTIES OBJECTIVE_CPP_HEADER TRUE)
 
@@ -47,6 +50,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/AmneziaSceneDelegateHooks.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/ios_network_diagnostics.mm
 )
 
 # The context menu helper uses ARC-only constructs (weak references); the
@@ -122,6 +126,7 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
     ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
+    ${CLIENT_ROOT_DIR}/platforms/ios/NetworkDiagnosticsController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/ScreenProtection.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/VPNCController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/StoreKit2Helper.swift

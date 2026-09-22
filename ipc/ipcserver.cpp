@@ -16,6 +16,7 @@
 #include "logger.h"
 #include "router.h"
 #include "killswitch.h"
+#include "networkdiagnostics.h"
 #include "xray.h"
 
 #ifdef Q_OS_WIN
@@ -239,6 +240,15 @@ bool IpcServer::stopNetworkCheck()
 
     m_pingHelper.stop();
     return true;
+}
+
+QString IpcServer::runNetworkDiagnostics()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::runNetworkDiagnostics";
+#endif
+
+    return NetworkDiagnostics::run();
 }
 
 bool IpcServer::resetKillSwitchAllowedRange(QStringList ranges)
