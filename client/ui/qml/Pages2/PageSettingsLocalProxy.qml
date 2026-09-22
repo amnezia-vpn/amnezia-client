@@ -17,6 +17,12 @@ PageType {
     readonly property int localProxyPortMax: 65535
     readonly property int defaultLocalProxyPort: 10808
 
+    readonly property bool isEnabledForThisServer: SettingsController.isLocalProxyHttpEnabled
+                                                   && SettingsController.localProxyOwnerId === ServersUiController.processedServerId
+    readonly property bool isOwnedByOtherServer: SettingsController.isLocalProxyHttpEnabled
+                                                 && SettingsController.localProxyOwnerId !== ""
+                                                 && SettingsController.localProxyOwnerId !== ServersUiController.processedServerId
+
     property string portValidationError: ""
     property int pendingStartRequestedPort: -1
     property bool pendingStartVpnWasActive: false
@@ -163,17 +169,30 @@ PageType {
                 descriptionText: qsTr("Use a proxy to route selected apps (for example, the CensorTracker extension) through Amnezia Premium.")
                 showSwitcher: ServersUiController.processedServerIsPremium
                 switcher {
-                    checked: SettingsController.isLocalProxyHttpEnabled
+                    checked: root.isEnabledForThisServer
+                    enabled: !root.isOwnedByOtherServer
                 }
                 switcherFunction: function(checked) {
-                    if (checked === SettingsController.isLocalProxyHttpEnabled) {
+                    if (checked === root.isEnabledForThisServer) {
                         return
                     }
                     root.handleLocalProxyToggle(checked)
                     localProxyHeader.switcher.checked = Qt.binding(function() {
-                        return SettingsController.isLocalProxyHttpEnabled
+                        return root.isEnabledForThisServer
                     })
                 }
+            }
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                visible: root.isOwnedByOtherServer
+
+                color: AmneziaStyle.color.goldenApricot
+                text: qsTr("Local proxy is already running for \"%1\". Turn it off there to use it with this server.")
+                    .arg(ServersUiController.serverName(SettingsController.localProxyOwnerId))
             }
 
             ParagraphTextType {
@@ -244,7 +263,7 @@ PageType {
 
                 function syncPortValue() {
                     let port = SettingsController.localProxyPort
-                    if (SettingsController.isLocalProxyHttpEnabled && SettingsController.localProxyActivePort > 0) {
+                    if (root.isEnabledForThisServer && SettingsController.localProxyActivePort > 0) {
                         port = SettingsController.localProxyActivePort
                     }
                     const isValidPort = port >= root.localProxyPortMin && port <= root.localProxyPortMax
@@ -257,7 +276,7 @@ PageType {
                 }
 
                 function effectivePortText() {
-                    if (SettingsController.isLocalProxyHttpEnabled && SettingsController.localProxyActivePort > 0) {
+                    if (root.isEnabledForThisServer && SettingsController.localProxyActivePort > 0) {
                         return SettingsController.localProxyActivePort.toString()
                     }
                     const value = portValue()
