@@ -221,12 +221,12 @@ Item {
         text: root.buttonText
         leftImageSource: root.buttonImageSource
 
-        anchors.top: content.top
-        anchors.bottom: content.bottom
-        anchors.right: content.right
+        anchors.top: backgroud.top
+        anchors.bottom: backgroud.bottom
+        anchors.right: backgroud.right
 
-        height: content.implicitHeight
-        width: content.implicitHeight
+        height: backgroud.height
+        width: backgroud.height
         squareLeftSide: true
 
         clickedFunc: function() {
