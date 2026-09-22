@@ -294,6 +294,64 @@ bool SubscriptionUiController::restoreServiceFromStore()
     return true;
 }
 
+void SubscriptionUiController::otpLogin(const QString &serverId)
+{
+    const auto apiV2 = m_serversController->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return;
+    }
+    const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
+
+    QString proof;
+    ErrorCode errorCode = m_storePurchaseController->resolveOtpLoginProof(proof);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    SubscriptionController::OtpData otpData;
+    errorCode = m_subscriptionController->otpLogin(proof, otpData, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    m_requestOtpId = otpData.requestOtpId;
+    m_otpIsTestPurchase = isTestPurchase;
+    emit otpCodeReceived(otpData.code, otpData.expiresInSec);
+}
+
+void SubscriptionUiController::checkOtpStatus()
+{
+    if (m_requestOtpId.isEmpty() || m_otpStatusCheckInProgress) {
+        return;
+    }
+    m_otpStatusCheckInProgress = true;
+
+    using OtpStatusResult = QPair<ErrorCode, SubscriptionController::OtpStatus>;
+    auto *watcher = new QFutureWatcher<OtpStatusResult>(this);
+    connect(watcher, &QFutureWatcher<OtpStatusResult>::finished, this, [this, watcher]() {
+        const auto [errorCode, status] = watcher->result();
+        watcher->deleteLater();
+        m_otpStatusCheckInProgress = false;
+
+        // Poll failures are silent: the drawer keeps polling on its timer
+        if (errorCode != ErrorCode::NoError) {
+            qWarning().noquote() << "[OTP] Status check failed, errorCode =" << static_cast<int>(errorCode);
+            return;
+        }
+        if (status == SubscriptionController::OtpStatus::Confirmed) {
+            m_requestOtpId.clear();
+            emit otpConfirmed();
+        } else if (status == SubscriptionController::OtpStatus::Expired) {
+            m_requestOtpId.clear();
+            emit otpExpired();
+        }
+    });
+    watcher->setFuture(m_subscriptionController->otpStatus(m_requestOtpId, m_otpIsTestPurchase));
+}
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
 void SubscriptionUiController::onStoreTransactionUpdated(const QVariantMap &transaction)
 {

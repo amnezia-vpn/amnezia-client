@@ -65,6 +65,16 @@ PageType {
     readonly property bool showRenewLink: !root.showSubscriptionNote
                                           && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
+    readonly property bool isStorePlatform: Qt.platform.os === "ios" || Qt.platform.os === "android" || Qt.platform.os === "osx"
+
+    Connections {
+        target: SubscriptionUiController
+
+        function onOtpCodeReceived(code, expiresInSec) {
+            otpLoginDrawer.showCode(code, expiresInSec)
+        }
+    }
+
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
@@ -366,6 +376,21 @@ PageType {
                         PageController.goToPage(PageEnum.PageSettingsApiInstructions)
                     }
                 }
+
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    visible: root.isStorePlatform
+
+                    text: qsTr("Log in to your account")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.showBusyIndicator(true)
+                        SubscriptionUiController.otpLogin(ServersUiController.processedServerId)
+                        PageController.showBusyIndicator(false)
+                    }
+                }
             }
 
             Item {
@@ -487,5 +512,11 @@ PageType {
         id: serverNameEditDrawer
 
         serverNameText: root.processedServer != null ? root.processedServer.name : ""
+    }
+
+    OtpLoginDrawer {
+        id: otpLoginDrawer
+
+        anchors.fill: parent
     }
 }
