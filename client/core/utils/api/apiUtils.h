@@ -29,9 +29,7 @@ namespace apiUtils
 
     bool isPremiumServer(const QJsonObject &serverConfigObject);
 
-    amnezia::ErrorCode checkNetworkReplyErrors(const QList<QSslError> &sslErrors, const QString &replyErrorString,
-                                               const QNetworkReply::NetworkError &replyError, const int httpStatusCode,
-                                               const QByteArray &responseBody);
+    amnezia::ErrorCode checkApiResponseErrors(const QByteArray &responseBody);
 
     QString getPremiumV2VpnKey(const QJsonObject &serverConfigObject);
 }
