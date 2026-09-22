@@ -16,18 +16,6 @@ PageType {
 
     property bool isChangingPassword: false
 
-    Connections {
-        target: SettingsController
-
-        function onFileEncryptionStateChanged() {
-            PageController.showBusyIndicator(true)
-            PageController.closePage()
-            SettingsController.isFileEncryptionEnabled() ? PageController.goToPage(PageEnum.PageSettingsAppEncryption) : PageController.goToPage(PageEnum.PageSettingsAppPassword)
-            PageController.showBusyIndicator(false)
-            PageController.showNotificationMessage(SettingsController.isFileEncryptionEnabled() ? qsTr("Encryption enabled") : qsTr("Encryption disabled"))
-        }
-    }
-
     BackButtonType {
         id: backButton
 
@@ -110,10 +98,12 @@ PageType {
                 clickedFunc: function() {
                     passwordDrawer.securedFunc = function() {
                         PageController.showBusyIndicator(true)
-                        SettingsController.toggleFileEncryption(false)
                         SettingsController.setPassword("")
                         SettingsController.setHint("")
+                        PageController.closePage()
+                        PageController.goToPage(PageEnum.PageSettingsAppPassword)
                         PageController.showBusyIndicator(false)
+                        PageController.showNotificationMessage(qsTr("Encryption disabled"))
                     }
                     passwordDrawer.openTriggered()
                 }
@@ -185,7 +175,7 @@ PageType {
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.RichText
 
-                text: qsTr("If the password is forgotten, it can be recovered. To reset the password, "
+                text: qsTr("If the password is forgotten, it cant be recovered. To reset the password, "
                          + "<a href=\"appSettings\" style=\"text-decoration:none; color:%1;\">settings must be reset</a>."
                          + "\nEncrypted files can only be opened with password used to encrypt them").arg(AmneziaStyle.color.goldenApricot)
                 color: AmneziaStyle.color.mutedGray

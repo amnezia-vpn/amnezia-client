@@ -202,11 +202,6 @@ bool SettingsController::isFileEncryptionEnabled()
     return m_appSettingsRepository->isFileEncryption();
 }
 
-void SettingsController::toggleFileEncryption(bool enable)
-{
-    m_appSettingsRepository->setFileEncryption(enable);
-}
-
 void SettingsController::setPassword(QString pwd)
 {
     m_appSettingsRepository->setPassword(pwd);

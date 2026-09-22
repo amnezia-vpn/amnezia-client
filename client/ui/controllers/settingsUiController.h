@@ -75,7 +75,6 @@ public slots:
     void toggleAutoUpdateCheckEnabled(bool enable);
 
     bool isFileEncryptionEnabled();
-    void toggleFileEncryption(bool enable);
 
     void setPassword(QString pwd);
     QString getPassword();
@@ -152,7 +151,6 @@ signals:
     void autoStartChanged();
     void startMinimizedChanged();
 
-    void fileEncryptionStateChanged();
     void changingPassword();
 
 private:

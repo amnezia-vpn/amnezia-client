@@ -135,7 +135,7 @@ PageType {
                     PageController.closePage()
                     PageController.goToPage(PageEnum.PageSettings)
                     PageController.goToPage(PageEnum.PageSettingsAppEncryption)
-                    SettingsController.toggleFileEncryption(true)
+                    PageController.showNotificationMessage(qsTr("Encryption enabled"))
                 }
             }
         }

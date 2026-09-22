@@ -72,7 +72,6 @@ public:
     void setStrictKillSwitchEnabled(bool enabled);
 
     bool isFileEncryption() const;
-    void setFileEncryption(bool enabled);
     QString getPassword() const;
     void setPassword(const QString &pwd);
     QString getHint() const;

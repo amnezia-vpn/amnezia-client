@@ -198,12 +198,6 @@ bool SettingsUiController::isFileEncryptionEnabled()
     return m_settingsController->isFileEncryptionEnabled();
 }
 
-void SettingsUiController::toggleFileEncryption(bool enable)
-{
-    m_settingsController->toggleFileEncryption(enable);
-    emit fileEncryptionStateChanged();
-}
-
 void SettingsUiController::setPassword(QString pwd)
 {
     m_settingsController->setPassword(pwd);

@@ -46,7 +46,6 @@ public:
     void clearSettings();
 
     bool isFileEncryptionEnabled();
-    void toggleFileEncryption(bool enable);
 
     void setPassword(QString pwd);
     QString getPassword();

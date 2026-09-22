@@ -123,6 +123,31 @@ void SecureQSettings::remove(const QString &key)
     m_cache.remove(key);
 }
 
+bool SecureQSettings::hasSecTag(const QString &tag) const
+{
+    auto job = QSharedPointer<ReadPasswordJob>(new ReadPasswordJob(keyChainName), &QObject::deleteLater);
+
+    job->setAutoDelete(false);
+    job->setKey(tag);
+
+    QEventLoop loop;
+
+    QObject::connect(job.data(), &ReadPasswordJob::finished, &loop, &QEventLoop::quit);
+
+    job->start();
+    loop.exec();
+
+    if (job->error() == QKeychain::EntryNotFound)
+        return false;
+
+    if (job->error()) {
+        qCritical() << "SecureQSettings::hasSecTag Error:" << job->errorString();
+        return false;
+    }
+
+    return !job->binaryData().isEmpty();
+}
+
 QByteArray SecureQSettings::backupAppConfig() const
 {
     QMutexLocker locker(&m_mutex);
@@ -178,14 +203,29 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
     return true;
 }
 
+bool SecureQSettings::hasPassword() const
+{
+    return hasSecTag("password");
+}
+
 void SecureQSettings::setPassword(const QString &password)
 {
     setSecTag("password", password.toUtf8());
 }
 
-QString SecureQSettings::password() const
+QString SecureQSettings::getPassword() const
 {
     return QString::fromUtf8(getSecTag("password"));
+}
+
+void SecureQSettings::setHint(const QString &hint)
+{
+    setSecTag("hint", hint.toUtf8());
+}
+
+QString SecureQSettings::getHint() const
+{
+    return QString::fromUtf8(getSecTag("hint"));
 }
 
 void SecureQSettings::clearSettings()

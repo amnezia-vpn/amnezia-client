@@ -244,8 +244,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    SettingsController.getPassword() === "" ? PageController.goToPage(PageEnum.PageSettingsAppPassword)
-                                                            : PageController.goToPage(PageEnum.PageSettingsAppEncryption)
+                    SettingsController.isFileEncryptionEnabled() ? PageController.goToPage(PageEnum.PageSettingsAppEncryption)
+                                                                 : PageController.goToPage(PageEnum.PageSettingsAppPassword)
                 }
             }
 
