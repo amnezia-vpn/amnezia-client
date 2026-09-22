@@ -8,6 +8,7 @@ import Style 1.0
 import "./"
 import "../Controls2"
 import "../Config"
+import "../Components"
 
 PageType {
     id: root
@@ -131,6 +132,17 @@ PageType {
 
             DividerType {
                 visible: root.isAppSplitTinnelingEnabled
+            }
+
+            StrictSplitTunnelingSwitcher {
+                id: strictSplitTunnelingSwitch
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+            }
+
+            DividerType {
+                visible: strictSplitTunnelingSwitch.visible
             }
 
             LabelWithButtonType {
