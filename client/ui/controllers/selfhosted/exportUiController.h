@@ -4,13 +4,16 @@
 #include <QObject>
 
 #include "core/controllers/selfhosted/exportController.h"
+#include "core/controllers/settingsController.h"
 #include "core/utils/errorCodes.h"
 
 class ExportUiController : public QObject
 {
     Q_OBJECT
 public:
-    explicit ExportUiController(ExportController* exportController, QObject *parent = nullptr);
+    explicit ExportUiController(ExportController *exportController,
+                                SettingsController *settingsController,
+                                QObject *parent = nullptr);
 
     Q_PROPERTY(QList<QString> qrCodes READ getQrCodes NOTIFY exportConfigChanged)
     Q_PROPERTY(int qrCodesCount READ getQrCodesCount NOTIFY exportConfigChanged)
@@ -57,6 +60,7 @@ private:
     void applyExportResult(const ExportController::ExportResult &result);
 
     ExportController* m_exportController;
+    SettingsController* m_settingsController;
 
     QString m_config;
     QString m_nativeConfigString;

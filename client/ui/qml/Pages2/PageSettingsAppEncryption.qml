@@ -175,7 +175,7 @@ PageType {
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.RichText
 
-                text: qsTr("If the password is forgotten, it cant be recovered. To reset the password, "
+                text: qsTr("If the password is forgotten, it can't be recovered. To reset the password, "
                          + "<a href=\"appSettings\" style=\"text-decoration:none; color:%1;\">settings must be reset</a>."
                          + "\nEncrypted files can only be opened with password used to encrypt them").arg(AmneziaStyle.color.goldenApricot)
                 color: AmneziaStyle.color.mutedGray

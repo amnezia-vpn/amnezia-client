@@ -133,12 +133,13 @@ void SettingsUiController::clearLogs()
 
 void SettingsUiController::backupAppConfig(const QString &fileName)
 {
-    QByteArray data = m_settingsController->backupAppConfig();
+    QByteArray data = isFileEncryptionEnabled()
+            ? SystemController::encryptData(m_settingsController->backupAppConfig(), getPassword(), getHint())
+            : m_settingsController->backupAppConfig();
+
     if (!SystemController::saveFile(fileName, data)) {
         qInfo() << "SettingsUiController::backupAppConfig: save or share was cancelled or failed";
     }
-    if (isFileEncryptionEnabled())
-        SystemController::encryptFile(fileName, getPassword(), getHint());
 }
 
 void SettingsUiController::restoreAppConfig(const QString &fileName)

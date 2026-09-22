@@ -108,8 +108,6 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         ExportController.exportConfig(fileName)
-                        if (SettingsController.isFileEncryptionEnabled())
-                            SystemController.QEncryptFile(fileName, SettingsController.getPassword(), SettingsController.getHint())
                         PageController.showBusyIndicator(false)
                     }
                 }

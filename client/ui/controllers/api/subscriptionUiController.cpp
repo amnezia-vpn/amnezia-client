@@ -115,9 +115,17 @@ bool SubscriptionUiController::exportNativeConfig(const QString &serverId, const
         return false;
     }
 
+    if (m_settingsController->isFileEncryptionEnabled()) {
+        const QByteArray data = nativeConfig.toUtf8();
+        const QByteArray encryptedData = SystemController::encryptData(data, m_settingsController->getPassword(), m_settingsController->getHint());
+
+        if (encryptedData.isEmpty())
+            return false;
+
+        nativeConfig = QString::fromLatin1(encryptedData.toBase64());
+    }
+
     const bool saved = SystemController::saveFile(fileName, nativeConfig);
-    if (m_settingsController->isFileEncryptionEnabled())
-        SystemController::encryptFile(fileName, m_settingsController->getPassword(), m_settingsController->getHint());
     getAccountInfo(serverId, true);
     return saved;
 }
