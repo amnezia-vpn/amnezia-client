@@ -19,16 +19,23 @@ import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.asSequence
 import org.amnezia.vpn.util.net.InetEndpoint
 import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.StrictSplitTunnelGuard
 import org.amnezia.vpn.util.net.parseInetAddress
 import org.amnezia.vpn.util.optStringOrNull
 import org.json.JSONObject
 
 private const val TAG = "Wireguard"
 
+// Mirrors the process-wide filter in libwg-go, shared by every Wireguard instance, so the
+// bridge is only called to clear a filter that was installed.
+@Volatile
+private var uidFilterInstalled = false
+
 open class Wireguard : Protocol() {
 
     private var tunnelHandle: Int = -1
     private var config: WireguardConfig? = null // save config for reconnect
+    private var strictSplitTunnel: Boolean = false // save for reconnect
     protected open val ifName: String = "amn0"
     private lateinit var scope: CoroutineScope
     private var statusJob: Job? = null
@@ -62,8 +69,10 @@ open class Wireguard : Protocol() {
 
     override suspend fun startVpn(config: JSONObject, vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val wireguardConfig = parseConfig(config)
-        start(wireguardConfig, vpnBuilder, protect)
+        val strictSplitTunnel = config.optBoolean("strictSplitTunneling", false)
+        start(wireguardConfig, vpnBuilder, protect, strictSplitTunnel)
         this.config = wireguardConfig
+        this.strictSplitTunnel = strictSplitTunnel
     }
 
     protected open fun parseConfig(config: JSONObject): WireguardConfig {
@@ -158,6 +167,7 @@ open class Wireguard : Protocol() {
         config: WireguardConfig,
         vpnBuilder: Builder,
         protect: (Int) -> Boolean,
+        strictSplitTunnel: Boolean,
         stopExistingVpn: Boolean = false
     ) {
         if (!stopExistingVpn && tunnelHandle != -1) {
@@ -175,17 +185,21 @@ open class Wireguard : Protocol() {
                 throw VpnStartException("Create VPN interface: permission not granted or revoked")
             }
             Log.i(TAG, "awg-go backend ${GoBackend.awgVersion()}")
+            // Registered after turnOffVpn() above, which clears it on reconnect.
+            registerUidFilter(config, strictSplitTunnel)
             tunnelHandle = GoBackend.awgTurnOn(ifName, tunFd.detachFd(), config.toWgUserspaceString())
         }
 
         if (tunnelHandle < 0) {
             tunnelHandle = -1
+            clearUidFilter()
             throw VpnStartException("Wireguard tunnel creation error")
         }
 
         if (!protect(GoBackend.awgGetSocketV4(tunnelHandle)) || !protect(GoBackend.awgGetSocketV6(tunnelHandle))) {
             GoBackend.awgTurnOff(tunnelHandle)
             tunnelHandle = -1
+            clearUidFilter()
             throw VpnStartException("Protect VPN interface: permission not granted or revoked")
         }
         launchStatusJob()
@@ -233,6 +247,36 @@ open class Wireguard : Protocol() {
         val handleToClose = tunnelHandle
         tunnelHandle = -1
         GoBackend.awgTurnOff(handleToClose)
+        clearUidFilter()
+    }
+
+    // Strict Split Tunneling (issue #2457): when enabled, installs a userspace
+    // per-flow UID filter so apps that bypass the OS split-tunnel rules
+    // (SO_BINDTODEVICE on the tun interface) cannot leak traffic into the tunnel.
+    // Off, or with no app split tunneling configured, the filter is cleared; the bridge is
+    // not called at all unless a filter was installed.
+    private fun registerUidFilter(config: WireguardConfig, strictSplitTunnel: Boolean) {
+        val guard = if (strictSplitTunnel) {
+            StrictSplitTunnelGuard.createOrNull(context, config.includedApplications, config.excludedApplications)
+        } else {
+            null
+        }
+        if (guard == null) {
+            clearUidFilter()
+            return
+        }
+
+        if (GoBackend.awgSetUidFilter(guard::allow) != 0) {
+            throw VpnStartException("Failed to register uid filter")
+        }
+        uidFilterInstalled = true
+    }
+
+    private fun clearUidFilter() {
+        if (uidFilterInstalled) {
+            GoBackend.awgSetUidFilter(null)
+            uidFilterInstalled = false
+        }
     }
 
     override fun stopVpn() {
@@ -246,6 +290,6 @@ open class Wireguard : Protocol() {
 
     override fun reconnectVpn(vpnBuilder: Builder, protect: (Int) -> Boolean) {
         val config = this.config ?: throw VpnException("Reconnect config is empty")
-        start(config, vpnBuilder, protect, true)
+        start(config, vpnBuilder, protect, strictSplitTunnel, true)
     }
 }
