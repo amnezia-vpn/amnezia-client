@@ -16,6 +16,7 @@ Item {
     property string headerTextColor: AmneziaStyle.color.mutedGray
 
     property alias errorText: errorField.text
+    property bool clearErrorOnTextChanged: true
     property bool checkEmptyText: false
     property bool rightButtonClickedOnEnter: false
 
@@ -137,7 +138,9 @@ Item {
                         }
 
                         onTextChanged: {
-                            root.errorText = ""
+                            if (root.clearErrorOnTextChanged) {
+                                root.errorText = ""
+                            }
                         }
 
                         onActiveFocusChanged: {
@@ -219,11 +222,10 @@ Item {
         leftImageSource: root.buttonImageSource
 
         anchors.top: content.top
-        anchors.bottom: content.bottom
         anchors.right: content.right
 
-        height: content.implicitHeight
-        width: content.implicitHeight
+        height: backgroud.height
+        width: backgroud.height
         squareLeftSide: true
 
         clickedFunc: function() {

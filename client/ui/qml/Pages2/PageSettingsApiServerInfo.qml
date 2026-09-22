@@ -288,11 +288,30 @@ PageType {
             }
 
             LabelWithButtonType {
-                id: vpnKey
+                id: connectionSwitcher
 
                 Layout.fillWidth: true
                 Layout.topMargin: warning.visible ? 16 : 0
+                visible: SettingsController.isLocalProxySupported && ServersUiController.processedServerIsPremium
+                text: qsTr("Connection")
+                descriptionText: SettingsController.isLocalProxySupported
+                                  ? qsTr("Protocol selection and local proxy setup")
+                                  : qsTr("Protocol selection")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
+                clickedFunction: function() {
+                    PageController.goToPage(PageEnum.PageSettingsConnectionType)
+                }
+            }
+
+            DividerType {
+                visible: connectionSwitcher.visible
+            }
+
+            LabelWithButtonType {
+                id: vpnKey
+
+                Layout.fillWidth: true
                 visible: footer.isVisibleForAmneziaFree
 
                 text: qsTr("Subscription Key")
@@ -444,6 +463,9 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
+                        } else if (SettingsController.isLocalProxyHttpEnabled
+                                   && SettingsController.localProxyOwnerId === ServersUiController.processedServerId) {
+                            PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         } else {
                             PageController.showBusyIndicator(true)
                             if (SubscriptionUiController.deactivateDevice(ServersUiController.processedServerId)) {
@@ -481,6 +503,9 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
+                        } else if (SettingsController.isLocalProxyHttpEnabled
+                                   && SettingsController.localProxyOwnerId === ServersUiController.processedServerId) {
+                            PageController.showNotificationMessage(qsTr("Cannot remove server while local proxy is running"))
                         } else {
                             PageController.showBusyIndicator(true)
                             SubscriptionUiController.removeServer(ServersUiController.processedServerId)
