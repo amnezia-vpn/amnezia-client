@@ -3740,6 +3740,10 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsApiServerInfo</name>
     <message>
+        <source>Log in to your account</source>
+        <translation>Войти в личный кабинет</translation>
+    </message>
+    <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiServerInfo.qml" line="29"/>
         <source>Subscription Status</source>
         <translation>Статус подписки</translation>
@@ -6175,6 +6179,10 @@ Create one from the current settings.</source>
         <translation>Не удалось обработать покупку</translation>
     </message>
     <message>
+        <source>Unable to get the login code. Please try again in a minute</source>
+        <translation>Не удалось получить код для входа. Попробуйте через минуту</translation>
+    </message>
+    <message>
         <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>No active subscription found</source>
         <translation>Активная подписка не найдена</translation>
@@ -7219,6 +7227,37 @@ Remove the server from the app to continue.</source>
         <location filename="../ui/qml/main2.qml" line="407"/>
         <source>Cannot remove server during active connection</source>
         <translation>Невозможно удалить сервер во время активного соединения</translation>
+    </message>
+</context>
+<context>
+    <name>OtpLoginDrawer</name>
+    <message>
+        <source>Signed in successfully</source>
+        <translation>Вход выполнен</translation>
+    </message>
+    <message>
+        <source>Done</source>
+        <translation>Готово</translation>
+    </message>
+    <message>
+        <source>Log in to your account</source>
+        <translation>Войти в личный кабинет</translation>
+    </message>
+    <message>
+        <source>Enter this code in your account to sign in</source>
+        <translation>Введите этот код в личном кабинете для входа</translation>
+    </message>
+    <message>
+        <source>Code expires in %1</source>
+        <translation>Код действует ещё %1</translation>
+    </message>
+    <message>
+        <source>Code has expired</source>
+        <translation>Срок действия кода истёк</translation>
+    </message>
+    <message>
+        <source>Get new code</source>
+        <translation>Получить новый код</translation>
     </message>
 </context>
 </TS>

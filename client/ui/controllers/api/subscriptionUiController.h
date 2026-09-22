@@ -76,6 +76,8 @@ public slots:
 
     bool getAccountInfo(const QString &serverId, bool reload);
     void getRenewalLink(const QString &serverId);
+    void otpLogin(const QString &serverId);
+    void checkOtpStatus();
 
     void updateApiCountryModel();
     void updateApiDevicesModel();
@@ -86,6 +88,9 @@ signals:
     void trialEmailError(const QString &message);
     void subscriptionExpiredOnServer();
     void renewalLinkReceived(const QString &url);
+    void otpCodeReceived(const QString &code, int expiresInSec);
+    void otpConfirmed();
+    void otpExpired();
 
     void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
     void backgroundPurchaseCompleted(const QString &message);
@@ -158,6 +163,10 @@ private:
     QString getVpnKey();
 
     QList<QString> m_qrCodes;
+
+    QString m_requestOtpId;
+    bool m_otpIsTestPurchase = false;
+    bool m_otpStatusCheckInProgress = false;
     QString m_vpnKey;
 
     ServersController* m_serversController;

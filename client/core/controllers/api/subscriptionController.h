@@ -32,6 +32,18 @@ public:
         bool isRequired = false;
     };
 
+    struct OtpData {
+        QString code;
+        QString requestOtpId;
+        int expiresInSec = 0;
+    };
+
+    enum class OtpStatus {
+        Pending,
+        Confirmed,
+        Expired
+    };
+
     explicit SubscriptionController(SecureServersRepository* serversRepository,
                                      SecureAppSettingsRepository* appSettingsRepository);
 
@@ -76,6 +88,9 @@ public:
 
     ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
     QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
+
+    ErrorCode otpLogin(const QString &transactionId, OtpData &otpData, bool isTestPurchase = false);
+    QFuture<QPair<ErrorCode, OtpStatus>> otpStatus(const QString &requestId, bool isTestPurchase);
 
     ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
                                           const QString &serviceProtocol, const ProtocolData &protocolData,
