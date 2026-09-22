@@ -221,9 +221,8 @@ Item {
         text: root.buttonText
         leftImageSource: root.buttonImageSource
 
-        anchors.top: backgroud.top
-        anchors.bottom: backgroud.bottom
-        anchors.right: backgroud.right
+        anchors.top: content.top
+        anchors.right: content.right
 
         height: backgroud.height
         width: backgroud.height
