@@ -15,6 +15,7 @@
         <file>Components/BenefitRow.qml</file>
         <file>Components/BenefitsPanel.qml</file>
         <file>Components/SubscriptionExpiredDrawer.qml</file>
+        <file>Components/OtpLoginDrawer.qml</file>
         <file>Components/SubscriptionPlanCard.qml</file>
         <file>Components/TermsAndPrivacyText.qml</file>
         <file>Components/TransportProtoSelector.qml</file>

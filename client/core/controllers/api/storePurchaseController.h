@@ -51,6 +51,8 @@ public:
 
     QStringList resolveActiveStoreProductIds();
 
+    ErrorCode resolveOtpLoginProof(QString &proof);
+
     // Android counterpart of the iOS Transaction.updates listener: purchases that were
     // paid but never acknowledged (validation failed earlier, or a PENDING purchase was
     // completed outside the app). Query once with findUnacknowledgedPlayPurchases(), then
