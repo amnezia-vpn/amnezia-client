@@ -385,6 +385,36 @@ void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, 
     setValue("Conf/countryListSortMode/" + listId, mode);
 }
 
+QStringList SecureAppSettingsRepository::favoriteLocations() const
+{
+    return value("Conf/favoriteLocations").toStringList();
+}
+
+void SecureAppSettingsRepository::setFavoriteLocations(const QStringList &codes)
+{
+    setValue("Conf/favoriteLocations", codes);
+}
+
+QStringList SecureAppSettingsRepository::countryListCollapsedSections(const QString &listId) const
+{
+    return value("Conf/countryListCollapsedSections/" + listId).toStringList();
+}
+
+void SecureAppSettingsRepository::setCountryListCollapsedSections(const QString &listId, const QStringList &keys)
+{
+    setValue("Conf/countryListCollapsedSections/" + listId, keys);
+}
+
+int SecureAppSettingsRepository::countryListCatalogVersion(const QString &listId) const
+{
+    return value("Conf/countryListCatalogVersion/" + listId, 0).toInt();
+}
+
+void SecureAppSettingsRepository::setCountryListCatalogVersion(const QString &listId, int version)
+{
+    setValue("Conf/countryListCatalogVersion/" + listId, version);
+}
+
 bool SecureAppSettingsRepository::isNewsNotifications() const
 {
     return value("Conf/newsNotifications", true).toBool();

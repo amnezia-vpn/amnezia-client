@@ -65,6 +65,8 @@
         <file>controls/settings.svg</file>
         <file>controls/settings-news.svg</file>
         <file>controls/share-2.svg</file>
+        <file>controls/star.svg</file>
+        <file>controls/star-filled.svg</file>
         <file>controls/split-tunneling.svg</file>
         <file>controls/smartphone.svg</file>
         <file>controls/tag.svg</file>

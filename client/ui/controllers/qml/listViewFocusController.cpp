@@ -212,6 +212,9 @@ void ListViewFocusController::focusNextItem()
         return;
     }
     m_focusedItemIndex++;
+    if (m_focusedItemIndex < 0 || m_focusedItemIndex >= m_focusChain.size()) {
+        m_focusedItemIndex = 0;
+    }
     m_focusedItem = qobject_cast<QQuickItem *>(m_focusChain.at(m_focusedItemIndex));
     m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
 }
@@ -232,10 +235,13 @@ void ListViewFocusController::focusPreviousItem()
         focusPreviousItem();
         return;
     }
-    if (m_focusedItemIndex == -1) {
+    if (m_focusedItemIndex < 0 || m_focusedItemIndex > m_focusChain.size()) {
         m_focusedItemIndex = m_focusChain.size();
     }
     m_focusedItemIndex--;
+    if (m_focusedItemIndex < 0) {
+        m_focusedItemIndex = m_focusChain.size() - 1;
+    }
     m_focusedItem = qobject_cast<QQuickItem *>(m_focusChain.at(m_focusedItemIndex));
     m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
 }
@@ -250,6 +256,7 @@ void ListViewFocusController::resetFocusChain()
 void ListViewFocusController::reloadFocusChain()
 {
     m_focusChain = FocusControl::getItemsChain(currentDelegate());
+    m_focusedItemIndex = m_focusChain.indexOf(m_focusedItem);
 }
 
 bool ListViewFocusController::isFirstFocusItemInDelegate() const

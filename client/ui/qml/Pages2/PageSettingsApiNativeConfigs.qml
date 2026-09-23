@@ -8,6 +8,7 @@ import Style 1.0
 
 import "./"
 import "../Controls2"
+import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
@@ -18,7 +19,47 @@ PageType {
     property string configCaption: qsTr("Save AmneziaVPN config")
 
     Component.onCompleted: {
-        ApiConfigsCountryListModel.clearSearch()
+        ApiConfigsCountryListModel.applyDefaultState(false)
+    }
+
+    property int stickyRevision: 0
+    property real savedScroll: 0
+
+    Connections {
+        target: ApiConfigsCountryListModel
+
+        function onLayoutRebuilt() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                root.stickyRevision += 1
+            })
+        }
+
+        function onSourceAboutToRefresh() {
+            root.savedScroll = menuContent.contentY - menuContent.originY
+        }
+
+        function onSourceRefreshed() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                const maxScroll = Math.max(0, menuContent.contentHeight - menuContent.height)
+                menuContent.contentY = menuContent.originY + Math.min(root.savedScroll, maxScroll)
+            })
+        }
+    }
+
+    function openConfigOptions(countryCode, countryName) {
+        moreOptionsDrawer.countryName = countryName
+        moreOptionsDrawer.countryCode = countryCode
+        moreOptionsDrawer.openTriggered()
+    }
+
+    function downloadConfig(countryCode, countryName, isIssued) {
+        if (isIssued) {
+            root.showQuestion(true, countryCode, countryName)
+        } else {
+            root.issueConfig(countryCode)
+        }
     }
 
     ListViewType {
@@ -54,9 +95,7 @@ PageType {
 
             width: menuContent.width
 
-            implicitHeight: rowItem.rowType === "section"
-                            ? 60
-                            : (rowItem.isWorkerExpired ? 88 : 72)
+            implicitHeight: rowItem.rowType === "section" ? 60 : 72
             height: implicitHeight
 
             CountrySectionHeader {
@@ -67,42 +106,151 @@ PageType {
                 sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
             }
 
-            ColumnLayout {
+            Item {
+                id: countryRow
+
                 width: rowItem.width
                 height: rowItem.height
                 visible: rowItem.rowType === "country"
-                spacing: 0
 
-                LabelWithButtonType {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
+                Item {
+                    id: rowBody
 
-                    text: rowItem.countryName
+                    property bool isFocusable: countryRow.visible
 
-                    descriptionText: rowItem.isWorkerExpired ? qsTr("Download update") : ""
-                    hideDescription: !rowItem.isWorkerExpired
-                    descriptionColor: AmneziaStyle.color.vibrantRed
+                    anchors.fill: parent
 
-                    leftImageSource: rowItem.countryImageCode !== ""
-                                     ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
-                                     : ""
-
-                    rightImageSource: rowItem.isIssued ? "qrc:/images/controls/more-vertical.svg"
-                                                       : "qrc:/images/controls/download.svg"
-
-                    clickedFunction: function() {
+                    function activate() {
                         if (rowItem.isIssued) {
-                            moreOptionsDrawer.countryName = rowItem.countryName
-                            moreOptionsDrawer.countryCode = rowItem.countryCode
-                            moreOptionsDrawer.openTriggered()
+                            root.openConfigOptions(rowItem.countryCode, rowItem.countryName)
                         } else {
                             root.issueConfig(rowItem.countryCode)
                         }
                     }
+
+                    HoverHandler {
+                        id: rowHover
+                        cursorShape: Qt.PointingHandCursor
+                    }
+
+                    TapHandler {
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
+
+                        onTapped: function(eventPoint) {
+                            if (buttons.contains(buttons.mapFromItem(rowBody, eventPoint.position))) {
+                                return
+                            }
+                            rowBody.activate()
+                        }
+                    }
+
+                    Keys.onEnterPressed: rowBody.activate()
+                    Keys.onReturnPressed: rowBody.activate()
+                    Keys.onSpacePressed: rowBody.activate()
+                    Keys.onTabPressed: FocusController.nextKeyTabItem()
+                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
+                    Keys.onUpPressed: FocusController.nextKeyUpItem()
+                    Keys.onDownPressed: FocusController.nextKeyDownItem()
+                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
+                    Keys.onRightPressed: FocusController.nextKeyRightItem()
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        anchors.topMargin: 4
+                        anchors.bottomMargin: 4
+                        radius: 16
+
+                        color: ((rowHover.hovered && !buttonsHover.hovered) || rowBody.activeFocus)
+                               ? AmneziaStyle.color.surfaceHovered
+                               : AmneziaStyle.color.transparent
+                    }
+
+                    Image {
+                        id: flag
+
+                        x: 28
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 24
+                        height: 16
+
+                        source: rowItem.countryImageCode !== ""
+                                ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
+                                : ""
+                    }
+
+                    ColumnLayout {
+                        anchors.left: flag.right
+                        anchors.leftMargin: 16
+                        anchors.right: buttons.left
+                        anchors.rightMargin: 8
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        spacing: 0
+
+                        ListItemTitleType {
+                            Layout.fillWidth: true
+
+                            text: rowItem.countryName
+                            color: AmneziaStyle.color.textPrimary
+                            maximumLineCount: 1
+                            elide: Text.ElideRight
+                        }
+
+                        CaptionTextType {
+                            Layout.fillWidth: true
+
+                            visible: rowItem.isWorkerExpired
+                            text: qsTr("Download update")
+                            color: AmneziaStyle.color.textTertiary
+                        }
+                    }
+                }
+
+                Row {
+                    id: buttons
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: 28
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 12
+
+                    HoverHandler {
+                        id: buttonsHover
+                    }
+
+                    ImageButtonType {
+                        implicitWidth: 40
+                        implicitHeight: 40
+
+                        visible: countryRow.visible
+                        hoverEnabled: true
+                        image: "qrc:/images/controls/download.svg"
+                        imageColor: AmneziaStyle.color.paleGray
+
+                        onClicked: root.downloadConfig(rowItem.countryCode, rowItem.countryName, rowItem.isIssued)
+                    }
+
+                    ImageButtonType {
+                        implicitWidth: 40
+                        implicitHeight: 40
+
+                        visible: countryRow.visible && rowItem.isIssued
+                        hoverEnabled: true
+                        image: "qrc:/images/controls/more-vertical.svg"
+                        imageColor: AmneziaStyle.color.paleGray
+
+                        onClicked: root.openConfigOptions(rowItem.countryCode, rowItem.countryName)
+                    }
                 }
 
                 DividerType {
-                    Layout.fillWidth: true
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+                    anchors.bottom: parent.bottom
                 }
             }
         }
@@ -114,10 +262,36 @@ PageType {
         listModel: ApiConfigsCountryListModel
 
         anchors.top: topBar.bottom
+        anchors.topMargin: stickyHeader.pushOffset
         anchors.left: parent.left
         anchors.right: parent.right
 
-        readonly property int topRow: menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 1)
+        readonly property int topRow: {
+            root.stickyRevision
+            return menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 1)
+        }
+
+        readonly property real pushOffset: {
+            root.stickyRevision
+            const probe = menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 60)
+            if (probe < 0 || probe === stickyHeader.topRow || !ApiConfigsCountryListModel.isSectionHeaderRow(probe)) {
+                return 0
+            }
+            const next = menuContent.itemAtIndex(probe)
+            if (!next) {
+                return 0
+            }
+            return Math.min(0, next.y - menuContent.contentY - 60)
+        }
+
+        onToggled: function(sectionKey) {
+            Qt.callLater(function() {
+                const headerRow = ApiConfigsCountryListModel.rowForSectionHeader(sectionKey)
+                if (headerRow >= 0) {
+                    menuContent.positionViewAtIndex(headerRow, ListView.Beginning)
+                }
+            })
+        }
 
         isPinnedOverlay: true
         sectionKey: stickyHeader.topRow >= 0 ? ApiConfigsCountryListModel.sectionKeyAtRow(stickyHeader.topRow) : ""
@@ -139,8 +313,15 @@ PageType {
         visible: !ApiConfigsCountryListModel.hasResults
 
         isSearchResult: ApiConfigsCountryListModel.isSearchActive
+        categoryName: ApiConfigsCountryListModel.activeUseCaseId !== "all"
+                      ? (CountryRegionNames.useCaseNames[ApiConfigsCountryListModel.activeUseCaseId]
+                         || ApiConfigsCountryListModel.activeUseCaseId)
+                      : ""
 
-        onShowAllRequested: searchField.clear()
+        onShowAllRequested: {
+            searchField.clear()
+            ApiConfigsCountryListModel.activeUseCaseId = "all"
+        }
     }
 
     Rectangle {
@@ -197,8 +378,6 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 12
 
-                Layout.bottomMargin: warning.visible ? 0 : (ApiConfigsCountryListModel.isGrouped ? 0 : 12)
-
                 spacing: 8
 
                 CountrySearchField {
@@ -220,8 +399,6 @@ PageType {
                     imageColor: AmneziaStyle.color.paleGray
 
                     onClicked: sortDrawer.openTriggered()
-                    Keys.onEnterPressed: sortDrawer.openTriggered()
-                    Keys.onReturnPressed: sortDrawer.openTriggered()
                 }
             }
 
@@ -232,15 +409,29 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 12
-                Layout.bottomMargin: ApiConfigsCountryListModel.isGrouped ? 0 : 12
 
-                backGroundColor: AmneziaStyle.color.translucentRichBrown
+                backGroundColor: AmneziaStyle.color.surfaceBase
 
                 textString: qsTr("Configuration updates are available for some countries. Download and install the updated configuration files")
 
-                iconPath: "qrc:/images/controls/alert-circle.svg"
+                iconPath: "qrc:/images/controls/info.svg"
 
                 visible: ApiCountryModel.hasExpiredWorkerConfigs
+            }
+
+            CountryUseCaseChips {
+                id: useCaseChips
+
+                listModel: ApiConfigsCountryListModel
+
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.preferredHeight: useCaseChips.implicitHeight
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 12
             }
         }
     }

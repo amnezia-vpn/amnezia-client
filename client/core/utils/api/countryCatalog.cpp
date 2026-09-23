@@ -31,6 +31,12 @@ namespace
     constexpr QLatin1String keyCity("city");
     constexpr QLatin1String keyAliases("aliases");
     constexpr QLatin1String keyCountsTowardSplit("countsTowardSplit");
+    constexpr QLatin1String keySplit("split");
+    constexpr QLatin1String keyUseCases("useCases");
+    constexpr QLatin1String keyLocationIds("locationIds");
+
+    constexpr QLatin1String splitAlways("always");
+    constexpr QLatin1String splitNever("never");
 }
 
 namespace countryCatalog
@@ -48,6 +54,7 @@ Catalog Catalog::fromJson(const QByteArray &json)
     }
 
     const QJsonObject root = document.object();
+    catalog.m_version = root.value(keyVersion).toInt();
     if (root.contains(keySplitThreshold)) {
         catalog.m_splitThreshold = root.value(keySplitThreshold).toInt(catalog.m_splitThreshold);
     }
@@ -62,6 +69,13 @@ Catalog Catalog::fromJson(const QByteArray &json)
             continue;
         }
         region.order = regionObject.value(keyOrder).toInt();
+
+        const QString split = regionObject.value(keySplit).toString();
+        if (split == splitAlways) {
+            region.split = SplitMode::Always;
+        } else if (split == splitNever) {
+            region.split = SplitMode::Never;
+        }
 
         const QJsonArray subregions = regionObject.value(keySubregions).toArray();
         for (const QJsonValue &subregionValue : subregions) {
@@ -108,11 +122,36 @@ Catalog Catalog::fromJson(const QByteArray &json)
         if (!catalog.m_byIso.contains(entry.isoCode)) {
             catalog.m_byIso.insert(entry.isoCode, entry);
         }
+
+        if (!entry.regionId.isEmpty() && entry.countsTowardSplit) {
+            catalog.m_catalogCounts[entry.regionId] += 1;
+        }
+    }
+
+    const QJsonArray useCases = root.value(keyUseCases).toArray();
+    for (const QJsonValue &value : useCases) {
+        const QJsonObject useCaseObject = value.toObject();
+
+        UseCase useCase;
+        useCase.id = useCaseObject.value(keyId).toString();
+        if (useCase.id.isEmpty()) {
+            continue;
+        }
+        useCase.order = useCaseObject.value(keyOrder).toInt();
+
+        const QJsonArray locationIds = useCaseObject.value(keyLocationIds).toArray();
+        for (const QJsonValue &locationId : locationIds) {
+            const QString id = locationId.toString();
+            if (!id.isEmpty()) {
+                useCase.locationIds.push_back(id);
+            }
+        }
+        catalog.m_useCases.push_back(useCase);
     }
 
     logger.info() << "loaded" << catalog.m_regions.size() << "regions and"
                   << catalog.m_byCode.size() << "locations, catalog version"
-                  << root.value(keyVersion).toInt();
+                  << catalog.m_version;
 
     return catalog;
 }
@@ -137,9 +176,19 @@ int Catalog::splitThreshold() const
     return m_splitThreshold;
 }
 
+int Catalog::version() const
+{
+    return m_version;
+}
+
 const QVector<Region> &Catalog::regions() const
 {
     return m_regions;
+}
+
+const QVector<UseCase> &Catalog::useCases() const
+{
+    return m_useCases;
 }
 
 const Entry *Catalog::find(const QString &countryCode, const QString &isoCode) const
@@ -165,6 +214,23 @@ bool Catalog::hasSubregions(const QString &regionId) const
         if (region.id == regionId) {
             return !region.subregions.isEmpty();
         }
+    }
+    return false;
+}
+
+bool Catalog::isSplit(const QString &regionId) const
+{
+    for (const Region &region : m_regions) {
+        if (region.id != regionId) {
+            continue;
+        }
+        if (region.subregions.isEmpty() || region.split == SplitMode::Never) {
+            return false;
+        }
+        if (region.split == SplitMode::Always) {
+            return true;
+        }
+        return m_catalogCounts.value(regionId) > m_splitThreshold;
     }
     return false;
 }

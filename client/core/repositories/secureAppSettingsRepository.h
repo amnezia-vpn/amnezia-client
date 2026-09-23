@@ -80,6 +80,12 @@ public:
 
     int countryListSortMode(const QString &listId) const;
     void setCountryListSortMode(const QString &listId, int mode);
+    QStringList favoriteLocations() const;
+    void setFavoriteLocations(const QStringList &codes);
+    QStringList countryListCollapsedSections(const QString &listId) const;
+    void setCountryListCollapsedSections(const QString &listId, const QStringList &keys);
+    int countryListCatalogVersion(const QString &listId) const;
+    void setCountryListCatalogVersion(const QString &listId, int version);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
 

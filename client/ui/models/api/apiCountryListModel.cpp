@@ -15,6 +15,15 @@ namespace
 
     constexpr QLatin1String sectionKeySeparator("/");
 
+    constexpr QLatin1String useCaseAll("all");
+    constexpr QLatin1String useCaseFavorites("favorites");
+    constexpr QLatin1String useCaseAllowlist("allowlist");
+    constexpr QLatin1String useCaseCreated("created");
+
+    constexpr QLatin1String configFilesListId("nativeConfigs");
+
+    constexpr int favoritesLimitValue = 15;
+
     QString normalizeSpaced(const QString &text)
     {
         QString result;
@@ -66,7 +75,11 @@ namespace
 }
 
 ApiCountryListModel::ApiCountryListModel(ApiCountryModel *source, const QString &listId, QObject *parent)
-    : QAbstractListModel(parent), m_source(source), m_listId(listId)
+    : QAbstractListModel(parent),
+      m_source(source),
+      m_listId(listId),
+      m_useCaseSet(listId == configFilesListId ? UseCaseSet::ConfigFiles : UseCaseSet::Connection),
+      m_activeUseCaseId(useCaseAll)
 {
     m_catalog = countryCatalog::Catalog::bundled();
     if (m_catalog.isEmpty()) {
@@ -79,8 +92,11 @@ ApiCountryListModel::ApiCountryListModel(ApiCountryModel *source, const QString 
 
     if (m_source) {
         connect(m_source, &ApiCountryModel::modelReset, this, [this]() {
+            emit sourceAboutToRefresh();
             reloadLocations();
+            rebuildUseCases();
             rebuild();
+            emit sourceRefreshed();
         });
         connect(m_source, &ApiCountryModel::currentIndexChanged, this, [this]() {
             if (m_rows.isEmpty()) {
@@ -91,6 +107,7 @@ ApiCountryListModel::ApiCountryListModel(ApiCountryModel *source, const QString 
     }
 
     reloadLocations();
+    rebuildUseCases();
     rebuild();
 }
 
@@ -127,6 +144,7 @@ QVariant ApiCountryListModel::data(const QModelIndex &index, int role) const
         case IsCurrentRole:
         case IsIssuedRole:
         case IsWorkerExpiredRole:
+        case IsFavoriteRole:
             return false;
         default:
             return {};
@@ -145,8 +163,13 @@ QVariant ApiCountryListModel::data(const QModelIndex &index, int role) const
         return location.countryCode;
     case CountryImageCodeRole:
         return location.imageCode;
-    case IsCurrentRole:
-        return m_source && location.sourceIndex == m_source->getCurrentIndex();
+    case IsCurrentRole: {
+        if (!m_source) {
+            return false;
+        }
+        const QString currentCountryCode = m_source->getCurrentCountryCode();
+        return !currentCountryCode.isEmpty() && location.countryCode == currentCountryCode;
+    }
     case IsIssuedRole:
     case IsWorkerExpiredRole: {
         if (!m_source) {
@@ -156,6 +179,8 @@ QVariant ApiCountryListModel::data(const QModelIndex &index, int role) const
                                                     : ApiCountryModel::IsWorkerExpiredRole;
         return m_source->data(m_source->index(location.sourceIndex), sourceRole);
     }
+    case IsFavoriteRole:
+        return m_favorites.contains(location.countryCode);
     default:
         return {};
     }
@@ -174,6 +199,7 @@ QHash<int, QByteArray> ApiCountryListModel::roleNames() const
     roles[IsCurrentRole] = "isCurrent";
     roles[IsIssuedRole] = "isIssued";
     roles[IsWorkerExpiredRole] = "isWorkerExpired";
+    roles[IsFavoriteRole] = "isFavorite";
     return roles;
 }
 
@@ -207,6 +233,7 @@ void ApiCountryListModel::setSortMode(int mode)
     m_sortMode = normalized;
     logger.debug() << "sortMode ->" << (m_sortMode == ByRegion ? "byRegion" : "alphabetical");
     emit sortModeChanged();
+    emit groupingChanged();
     rebuild();
 }
 
@@ -227,7 +254,230 @@ bool ApiCountryListModel::hasResults() const
 
 bool ApiCountryListModel::isGrouped() const
 {
-    return m_sortMode == ByRegion;
+    return m_sortMode == ByRegion && m_activeUseCaseId != useCaseFavorites;
+}
+
+QString ApiCountryListModel::activeUseCaseId() const
+{
+    return m_activeUseCaseId;
+}
+
+bool ApiCountryListModel::isIssued(const Location &location) const
+{
+    if (!m_source || location.sourceIndex < 0) {
+        return false;
+    }
+    return m_source->data(m_source->index(location.sourceIndex), ApiCountryModel::IsIssuedRole).toBool();
+}
+
+void ApiCountryListModel::setActiveUseCaseId(const QString &id)
+{
+    const QString normalized = id.isEmpty() ? QString(useCaseAll) : id;
+    if (m_activeUseCaseId == normalized) {
+        return;
+    }
+    bool listed = false;
+    for (const QVariant &entry : m_useCases) {
+        if (entry.toMap().value(QStringLiteral("useCaseId")).toString() == normalized) {
+            listed = true;
+            break;
+        }
+    }
+    if (!listed) {
+        return;
+    }
+    m_activeUseCaseId = normalized;
+    emit activeUseCaseIdChanged();
+    emit groupingChanged();
+    rebuildUseCases();
+    rebuild();
+}
+
+QVariantList ApiCountryListModel::useCases() const
+{
+    return m_useCases;
+}
+
+int ApiCountryListModel::favoritesLimit() const
+{
+    return favoritesLimitValue;
+}
+
+int ApiCountryListModel::catalogVersion() const
+{
+    return m_catalog.version();
+}
+
+QStringList ApiCountryListModel::favorites() const
+{
+    QStringList codes(m_favorites.cbegin(), m_favorites.cend());
+    codes.sort();
+    return codes;
+}
+
+void ApiCountryListModel::setFavorites(const QStringList &codes)
+{
+    m_favorites = QSet<QString>(codes.cbegin(), codes.cend());
+    m_favorites.remove(QString());
+    rebuildUseCases();
+    rebuild();
+}
+
+QStringList ApiCountryListModel::collapsedSections() const
+{
+    QStringList keys;
+    for (auto it = m_collapsedSections.cbegin(); it != m_collapsedSections.cend(); ++it) {
+        if (it.value()) {
+            keys.append(it.key());
+        }
+    }
+    keys.sort();
+    return keys;
+}
+
+void ApiCountryListModel::setCollapsedSections(const QStringList &keys)
+{
+    m_collapsedSections.clear();
+    for (const QString &key : keys) {
+        if (!key.isEmpty()) {
+            m_collapsedSections.insert(key, true);
+        }
+    }
+    notifyCollapsedChanged();
+    rebuild();
+}
+
+void ApiCountryListModel::emitCollapsedSections()
+{
+    emit collapsedSectionsChanged(collapsedSections());
+}
+
+const countryCatalog::UseCase *ApiCountryListModel::findUseCase(const QString &id) const
+{
+    for (const countryCatalog::UseCase &useCase : m_catalog.useCases()) {
+        if (useCase.id == id) {
+            return &useCase;
+        }
+    }
+    return nullptr;
+}
+
+bool ApiCountryListModel::isUseCaseVisible(const countryCatalog::UseCase &useCase) const
+{
+    if (useCase.id == useCaseAllowlist) {
+        return m_source && m_source->getUserCountryCode() == QLatin1String("RU");
+    }
+    return true;
+}
+
+bool ApiCountryListModel::passesActiveUseCase(const Location &location) const
+{
+    if (m_activeUseCaseId == useCaseAll) {
+        return true;
+    }
+    if (m_activeUseCaseId == useCaseFavorites) {
+        return m_favorites.contains(location.countryCode);
+    }
+    if (m_activeUseCaseId == useCaseCreated) {
+        return isIssued(location);
+    }
+    const countryCatalog::UseCase *useCase = findUseCase(m_activeUseCaseId);
+    if (!useCase) {
+        return false;
+    }
+    for (const QString &id : useCase->locationIds) {
+        if (id.compare(location.countryCode, Qt::CaseInsensitive) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ApiCountryListModel::rebuildUseCases()
+{
+    auto makeEntry = [](const QString &id, int count) {
+        QVariantMap entry;
+        entry.insert(QStringLiteral("useCaseId"), id);
+        entry.insert(QStringLiteral("count"), count);
+        return QVariant(entry);
+    };
+
+    QVariantList list;
+
+    if (m_useCaseSet == UseCaseSet::ConfigFiles) {
+        int issuedCount = 0;
+        for (const Location &location : m_locations) {
+            if (isIssued(location)) {
+                ++issuedCount;
+            }
+        }
+        if (issuedCount > 0) {
+            list.append(makeEntry(useCaseCreated, issuedCount));
+        }
+        list.append(makeEntry(useCaseAll, m_locations.size()));
+    }
+
+    int favoriteCount = 0;
+    if (m_useCaseSet == UseCaseSet::Connection) {
+        for (const Location &location : m_locations) {
+            if (m_favorites.contains(location.countryCode)) {
+                ++favoriteCount;
+            }
+        }
+    }
+    if (favoriteCount > 0) {
+        list.append(makeEntry(useCaseFavorites, favoriteCount));
+    }
+
+    if (m_useCaseSet == UseCaseSet::Connection) {
+        list.append(makeEntry(useCaseAll, m_locations.size()));
+    }
+
+    QVector<countryCatalog::UseCase> catalogUseCases;
+    if (m_useCaseSet == UseCaseSet::Connection) {
+        catalogUseCases = m_catalog.useCases();
+    }
+    std::sort(catalogUseCases.begin(), catalogUseCases.end(),
+              [](const countryCatalog::UseCase &left, const countryCatalog::UseCase &right) {
+                  return left.order < right.order;
+              });
+    for (const countryCatalog::UseCase &useCase : catalogUseCases) {
+        if (!isUseCaseVisible(useCase)) {
+            continue;
+        }
+        int count = 0;
+        for (const Location &location : m_locations) {
+            for (const QString &id : useCase.locationIds) {
+                if (id.compare(location.countryCode, Qt::CaseInsensitive) == 0) {
+                    ++count;
+                    break;
+                }
+            }
+        }
+        if (count > 0) {
+            list.append(makeEntry(useCase.id, count));
+        }
+    }
+
+    if (list != m_useCases) {
+        m_useCases = list;
+        emit useCasesChanged();
+    }
+
+    bool activeStillListed = false;
+    for (const QVariant &entry : m_useCases) {
+        if (entry.toMap().value(QStringLiteral("useCaseId")).toString() == m_activeUseCaseId) {
+            activeStillListed = true;
+            break;
+        }
+    }
+    if (activeStillListed) {
+        return false;
+    }
+    m_activeUseCaseId = useCaseAll;
+    emit activeUseCaseIdChanged();
+    emit groupingChanged();
+    return true;
 }
 
 int ApiCountryListModel::collapsedRevision() const
@@ -282,44 +532,47 @@ void ApiCountryListModel::toggleSection(const QString &sectionKey)
 
 void ApiCountryListModel::setSectionCollapsed(const QString &sectionKey, bool collapsed)
 {
-    int headerRow = -1;
-    for (int i = 0; i < m_rows.size(); ++i) {
-        if (m_rows.at(i).isSectionHeader && m_rows.at(i).sectionKey == sectionKey) {
-            headerRow = i;
-            break;
-        }
-    }
-    if (headerRow < 0) {
-        return;
-    }
-
-    const QVector<int> &order = m_sectionOrder[sectionKey];
-    if (order.isEmpty()) {
+    if (m_sectionCounts.value(sectionKey) == 0) {
         return;
     }
 
     m_collapsedSections.insert(sectionKey, collapsed);
 
-    if (collapsed) {
-        beginRemoveRows(QModelIndex(), headerRow + 1, headerRow + order.size());
-        m_rows.remove(headerRow + 1, order.size());
-        endRemoveRows();
-    } else {
-        beginInsertRows(QModelIndex(), headerRow + 1, headerRow + order.size());
-        QVector<Row> inserted;
-        inserted.reserve(order.size());
-        for (int locationIndex : order) {
-            Row row;
-            row.locationIndex = locationIndex;
-            row.sectionKey = sectionKey;
-            inserted.push_back(row);
-        }
-        m_rows.insert(headerRow + 1, order.size(), Row {});
-        std::copy(inserted.cbegin(), inserted.cend(), m_rows.begin() + headerRow + 1);
-        endInsertRows();
-    }
+    applyRows(buildRows());
 
     notifyCollapsedChanged();
+    emitCollapsedSections();
+}
+
+void ApiCountryListModel::applyRows(const QVector<Row> &next)
+{
+    const int oldSize = m_rows.size();
+    const int newSize = next.size();
+    const int shorter = std::min(oldSize, newSize);
+
+    int prefix = 0;
+    while (prefix < shorter && m_rows.at(prefix) == next.at(prefix)) {
+        ++prefix;
+    }
+    int suffix = 0;
+    while (suffix < shorter - prefix
+           && m_rows.at(oldSize - 1 - suffix) == next.at(newSize - 1 - suffix)) {
+        ++suffix;
+    }
+
+    if (newSize < oldSize) {
+        beginRemoveRows(QModelIndex(), prefix, oldSize - suffix - 1);
+        m_rows = next;
+        endRemoveRows();
+    } else if (newSize > oldSize) {
+        beginInsertRows(QModelIndex(), prefix, newSize - suffix - 1);
+        m_rows = next;
+        endInsertRows();
+    } else {
+        m_rows = next;
+    }
+
+    m_layoutRevision += 1;
     emit layoutRebuilt();
 }
 
@@ -329,13 +582,32 @@ void ApiCountryListModel::expandCurrentSection()
         return;
     }
 
-    const int currentIndex = m_source->getCurrentIndex();
+    const QString currentCountryCode = m_source->getCurrentCountryCode();
+    if (currentCountryCode.isEmpty()) {
+        return;
+    }
+
     for (const Location &location : m_locations) {
-        if (location.sourceIndex != currentIndex) {
+        if (location.countryCode != currentCountryCode) {
             continue;
         }
-        if (m_collapsedSections.value(location.sectionKey, false)) {
-            setSectionCollapsed(location.sectionKey, false);
+
+        const QStringList chain { parentSectionKey(location.sectionKey), location.sectionKey };
+        bool changedFlat = false;
+        for (const QString &key : chain) {
+            if (key.isEmpty() || !m_collapsedSections.value(key, false)) {
+                continue;
+            }
+            if (isGrouped()) {
+                setSectionCollapsed(key, false);
+            } else {
+                m_collapsedSections.insert(key, false);
+                changedFlat = true;
+            }
+        }
+        if (changedFlat) {
+            notifyCollapsedChanged();
+            emitCollapsedSections();
         }
         return;
     }
@@ -346,12 +618,166 @@ void ApiCountryListModel::clearSearch()
     setSearchText({});
 }
 
+bool ApiCountryListModel::toggleFavorite(const QString &countryCode)
+{
+    if (countryCode.isEmpty()) {
+        return false;
+    }
+
+    if (m_favorites.contains(countryCode)) {
+        m_favorites.remove(countryCode);
+    } else {
+        int visibleFavorites = 0;
+        for (const Location &location : m_locations) {
+            if (m_favorites.contains(location.countryCode)) {
+                ++visibleFavorites;
+            }
+        }
+        if (visibleFavorites >= favoritesLimitValue) {
+            emit favoritesLimitExceeded();
+            return false;
+        }
+        m_favorites.insert(countryCode);
+    }
+
+    for (int i = 0; i < m_rows.size(); ++i) {
+        const Row &row = m_rows.at(i);
+        if (row.isSectionHeader || row.locationIndex < 0 || row.locationIndex >= m_locations.size()) {
+            continue;
+        }
+        if (m_locations.at(row.locationIndex).countryCode == countryCode) {
+            emit dataChanged(index(i), index(i), { IsFavoriteRole });
+        }
+    }
+
+    emit favoritesChanged(favorites());
+
+    if (rebuildUseCases()) {
+        rebuild();
+        return true;
+    }
+
+    if (m_activeUseCaseId == useCaseFavorites && !m_favorites.contains(countryCode)) {
+        for (auto it = m_sectionOrder.begin(); it != m_sectionOrder.end(); ++it) {
+            QVector<int> &order = it.value();
+            for (int i = 0; i < order.size(); ++i) {
+                if (m_locations.at(order.at(i)).countryCode != countryCode) {
+                    continue;
+                }
+                order.remove(i);
+                const QString key = it.key();
+                m_sectionCounts[key] -= 1;
+                const QString parent = parentSectionKey(key);
+                if (!parent.isEmpty()) {
+                    m_sectionCounts[parent] -= 1;
+                }
+                break;
+            }
+        }
+        m_orderedSectionKeys.erase(std::remove_if(m_orderedSectionKeys.begin(), m_orderedSectionKeys.end(),
+                                                  [this](const QString &key) {
+                                                      return m_sectionCounts.value(key) <= 0;
+                                                  }),
+                                   m_orderedSectionKeys.end());
+        applyRows(buildRows());
+    }
+    return true;
+}
+
+int ApiCountryListModel::layoutRevision() const
+{
+    return m_layoutRevision;
+}
+
+bool ApiCountryListModel::isSectionHeaderRow(int row) const
+{
+    return row >= 0 && row < m_rows.size() && m_rows.at(row).isSectionHeader;
+}
+
+int ApiCountryListModel::rowForSectionHeader(const QString &sectionKey) const
+{
+    for (int i = 0; i < m_rows.size(); ++i) {
+        if (m_rows.at(i).isSectionHeader && m_rows.at(i).sectionKey == sectionKey) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int ApiCountryListModel::rowForCountryCode(const QString &countryCode) const
+{
+    if (countryCode.isEmpty()) {
+        return -1;
+    }
+    for (int i = 0; i < m_rows.size(); ++i) {
+        const Row &row = m_rows.at(i);
+        if (row.isSectionHeader || row.locationIndex < 0 || row.locationIndex >= m_locations.size()) {
+            continue;
+        }
+        if (m_locations.at(row.locationIndex).countryCode == countryCode) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void ApiCountryListModel::applyDefaultState(bool followCurrentLocation)
+{
+    clearSearch();
+
+    const QString current = (followCurrentLocation && m_source) ? m_source->getCurrentCountryCode()
+                                                                : QString();
+
+    bool hasFavoritesChip = false;
+    for (const QVariant &entry : m_useCases) {
+        if (entry.toMap().value(QStringLiteral("useCaseId")).toString() == useCaseFavorites) {
+            hasFavoritesChip = true;
+            break;
+        }
+    }
+
+    QString target = useCaseAll;
+    if (hasFavoritesChip) {
+        if (!followCurrentLocation) {
+            target = useCaseFavorites;
+        } else if (!current.isEmpty() && m_favorites.contains(current)) {
+            target = useCaseFavorites;
+        }
+    }
+
+    if (m_activeUseCaseId != target) {
+        setActiveUseCaseId(target);
+    } else {
+        rebuild();
+    }
+
+    if (!followCurrentLocation || current.isEmpty()) {
+        return;
+    }
+    expandCurrentSection();
+    emit positionRequested(rowForCountryCode(current));
+}
+
 QString ApiCountryListModel::buildSectionKey(const QString &regionId, const QString &subregionId) const
 {
     if (subregionId.isEmpty()) {
         return regionId;
     }
     return regionId + sectionKeySeparator + subregionId;
+}
+
+QString ApiCountryListModel::parentSectionKey(const QString &sectionKey) const
+{
+    if (!sectionKey.contains(sectionKeySeparator)) {
+        return {};
+    }
+    return sectionKey.section(sectionKeySeparator, 0, 0);
+}
+
+bool ApiCountryListModel::isHiddenByParent(const QString &sectionKey) const
+{
+    const QString parent = parentSectionKey(sectionKey);
+    return !parent.isEmpty() && isSectionCollapsed(parent);
 }
 
 void ApiCountryListModel::reloadLocations()
@@ -378,9 +804,31 @@ void ApiCountryListModel::reloadLocations()
         if (entry) {
             location.regionId = entry->regionId;
             location.subregionId = entry->subregionId;
-            location.countsTowardSplit = entry->countsTowardSplit;
         } else {
             location.regionId = countryCatalog::otherRegionId;
+        }
+
+        const countryCatalog::Region *region = nullptr;
+        for (const countryCatalog::Region &candidate : m_catalog.regions()) {
+            if (candidate.id == location.regionId) {
+                region = &candidate;
+                break;
+            }
+        }
+        if (!region) {
+            location.regionId = countryCatalog::otherRegionId;
+            location.subregionId.clear();
+        } else if (!location.subregionId.isEmpty()) {
+            bool known = false;
+            for (const countryCatalog::Subregion &subregion : region->subregions) {
+                if (subregion.id == location.subregionId) {
+                    known = true;
+                    break;
+                }
+            }
+            if (!known) {
+                location.subregionId.clear();
+            }
         }
 
         QStringList exact;
@@ -408,17 +856,8 @@ void ApiCountryListModel::reloadLocations()
         m_locations.push_back(location);
     }
 
-    QHash<QString, int> countableByRegion;
-    for (const Location &location : m_locations) {
-        if (location.countsTowardSplit) {
-            countableByRegion[location.regionId] += 1;
-        }
-    }
-
     for (Location &location : m_locations) {
-        const bool split = m_catalog.hasSubregions(location.regionId)
-                && countableByRegion.value(location.regionId) > m_catalog.splitThreshold();
-        if (!split) {
+        if (!m_catalog.isSplit(location.regionId)) {
             location.subregionId.clear();
         }
         location.sectionKey = buildSectionKey(location.regionId, location.subregionId);
@@ -495,6 +934,9 @@ void ApiCountryListModel::rebuild()
     QHash<QString, QVector<Candidate>> grouped;
 
     for (int i = 0; i < m_locations.size(); ++i) {
+        if (!passesActiveUseCase(m_locations.at(i))) {
+            continue;
+        }
         const int level = matchLevel(m_locations.at(i), spacedQuery, tightQuery);
         if (level == 0) {
             continue;
@@ -521,6 +963,9 @@ void ApiCountryListModel::rebuild()
                   });
 
         for (const countryCatalog::Region &region : regions) {
+            if (region.id == countryCatalog::otherRegionId || orderedKeys.contains(region.id)) {
+                continue;
+            }
             QVector<countryCatalog::Subregion> subregions = region.subregions;
             std::sort(subregions.begin(), subregions.end(),
                       [](const countryCatalog::Subregion &left, const countryCatalog::Subregion &right) {
@@ -544,7 +989,12 @@ void ApiCountryListModel::rebuild()
         }
 
         std::sort(candidates.begin(), candidates.end(), byLevelThenName);
-        m_sectionCounts.insert(key, candidates.size());
+        m_sectionCounts[key] += candidates.size();
+
+        const QString parent = parentSectionKey(key);
+        if (!parent.isEmpty()) {
+            m_sectionCounts[parent] += candidates.size();
+        }
 
         QVector<int> order;
         order.reserve(candidates.size());
@@ -552,27 +1002,65 @@ void ApiCountryListModel::rebuild()
             order.push_back(candidate.locationIndex);
         }
         m_sectionOrder.insert(key, order);
+    }
 
+    m_orderedSectionKeys.clear();
+    for (const QString &key : orderedKeys) {
+        if (m_sectionCounts.value(key) > 0) {
+            m_orderedSectionKeys.append(key);
+        }
+    }
+
+    int matched = 0;
+    for (auto it = grouped.cbegin(); it != grouped.cend(); ++it) {
+        matched += it.value().size();
+    }
+    int placed = 0;
+    for (const QString &key : m_orderedSectionKeys) {
+        if (parentSectionKey(key).isEmpty()) {
+            placed += m_sectionCounts.value(key);
+        }
+    }
+    if (placed != matched) {
+        logger.error() << "list:" << m_listId << matched << "locations matched but" << placed
+                       << "were placed into sections";
+    }
+
+    m_rows = buildRows();
+    m_layoutRevision += 1;
+
+    endResetModel();
+
+    emit layoutRebuilt();
+}
+
+QVector<ApiCountryListModel::Row> ApiCountryListModel::buildRows() const
+{
+    QVector<Row> rows;
+
+    for (const QString &key : m_orderedSectionKeys) {
         if (isGrouped()) {
+            if (isHiddenByParent(key)) {
+                continue;
+            }
+
             Row header;
             header.isSectionHeader = true;
             header.sectionKey = key;
-            m_rows.push_back(header);
+            rows.push_back(header);
 
             if (isSectionCollapsed(key)) {
                 continue;
             }
         }
 
-        for (const Candidate &candidate : candidates) {
+        for (int locationIndex : m_sectionOrder.value(key)) {
             Row row;
-            row.locationIndex = candidate.locationIndex;
+            row.locationIndex = locationIndex;
             row.sectionKey = key;
-            m_rows.push_back(row);
+            rows.push_back(row);
         }
     }
 
-    endResetModel();
-
-    emit layoutRebuilt();
+    return rows;
 }

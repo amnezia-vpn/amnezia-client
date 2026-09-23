@@ -66,6 +66,7 @@ void CoreSignalHandlers::initAllHandlers()
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
     initCountryListSortModeHandler();
+    initCountryListStateHandler();
     initSubscriptionRefreshHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
@@ -189,6 +190,33 @@ void CoreSignalHandlers::initCountryListSortModeHandler()
     }
 }
 
+void CoreSignalHandlers::initCountryListStateHandler()
+{
+    SecureAppSettingsRepository *repository = m_coreController->m_appSettingsRepository;
+
+    const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
+                                                  m_coreController->m_apiConfigsCountryListModel };
+
+    ApiCountryListModel *picker = m_coreController->m_apiCountryListModel;
+    picker->setFavorites(repository->favoriteLocations());
+    connect(picker, &ApiCountryListModel::favoritesChanged, this, [repository](const QStringList &codes) {
+        repository->setFavoriteLocations(codes);
+    });
+
+    for (ApiCountryListModel *model : models) {
+        const QString listId = model->listId();
+        if (repository->countryListCatalogVersion(listId) == model->catalogVersion()) {
+            model->setCollapsedSections(repository->countryListCollapsedSections(listId));
+        } else {
+            repository->setCountryListCollapsedSections(listId, {});
+            repository->setCountryListCatalogVersion(listId, model->catalogVersion());
+        }
+        connect(model, &ApiCountryListModel::collapsedSectionsChanged, this, [repository, listId](const QStringList &keys) {
+            repository->setCountryListCollapsedSections(listId, keys);
+        });
+    }
+}
+
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
 {
     connect(m_coreController->m_serversUiController, &ServersUiController::updateApiCountryModel, this, [this]() {
@@ -203,7 +231,8 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
         }
 
         m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
-                                                           apiV2->apiConfig.serverCountryCode);
+                                                           apiV2->apiConfig.serverCountryCode,
+                                                           apiV2->apiConfig.userCountryCode);
     });
 }
 

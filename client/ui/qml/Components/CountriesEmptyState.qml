@@ -11,6 +11,8 @@ Item {
 
     property bool isSearchResult: true
 
+    property string categoryName: ""
+
     signal showAllRequested()
 
     ColumnLayout {
@@ -45,20 +47,25 @@ Item {
             color: AmneziaStyle.color.textPrimary
             horizontalAlignment: Text.AlignHCenter
 
-            text: root.isSearchResult ? qsTr("Not found. Try a different spelling")
-                                      : qsTr("No locations available yet")
+            text: {
+                if (root.categoryName !== "") {
+                    return qsTr("Nothing found in \"%1\"").arg(root.categoryName)
+                }
+                return root.isSearchResult ? qsTr("Not found. Try a different spelling")
+                                           : qsTr("No locations available yet")
+            }
         }
 
         Item {
             id: showAll
 
-            property bool isFocusable: root.isSearchResult
+            property bool isFocusable: root.isSearchResult || root.categoryName !== ""
 
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: showAllText.implicitWidth + 16
             Layout.preferredHeight: showAllText.implicitHeight + 16
 
-            visible: root.isSearchResult
+            visible: root.isSearchResult || root.categoryName !== ""
 
             Keys.onEnterPressed: root.showAllRequested()
             Keys.onReturnPressed: root.showAllRequested()

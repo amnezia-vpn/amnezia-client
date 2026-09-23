@@ -16,6 +16,10 @@ Item {
     property string sectionKey: ""
     property bool isPinnedOverlay: false
 
+    readonly property bool canToggle: root.isRealSection && !root.listModel.isSearchActive
+
+    signal toggled(string sectionKey)
+
     readonly property bool isRealSection: root.listModel !== null && root.sectionKey !== ""
 
     visible: root.isRealSection
@@ -24,6 +28,8 @@ Item {
 
     readonly property string regionId: root.isRealSection ? root.listModel.sectionRegionId(root.sectionKey) : ""
     readonly property string subregionId: root.isRealSection ? root.listModel.sectionSubregionId(root.sectionKey) : ""
+
+    readonly property int level: root.subregionId !== "" ? 2 : 1
 
     readonly property bool collapsed: {
         if (!root.isRealSection) {
@@ -54,27 +60,35 @@ Item {
         ParagraphTextType {
             Layout.fillWidth: true
 
-            color: AmneziaStyle.color.textTertiary
+            color: root.level === 1 ? AmneziaStyle.color.textPrimary
+                                    : AmneziaStyle.color.textTertiary
+            font.pixelSize: root.level === 1 ? 18 : 16
+            font.weight: root.level === 1 ? 700 : 400
             font.letterSpacing: -0.4
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
 
-            text: root.collapsed
-                  ? "%1 (%2)".arg(root.title).arg(root.listModel.sectionCount(root.sectionKey))
-                  : root.title
+            text: {
+                if (!root.isRealSection) {
+                    return ""
+                }
+                root.listModel.layoutRevision
+                return "%1 · %2".arg(root.title).arg(root.listModel.sectionCount(root.sectionKey))
+            }
         }
 
         Image {
             Layout.preferredWidth: 24
             Layout.preferredHeight: 24
 
+            visible: root.canToggle
             source: root.collapsed ? "qrc:/images/controls/chevron-down.svg"
                                    : "qrc:/images/controls/chevron-up.svg"
         }
     }
 
     HoverHandler {
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: root.canToggle ? Qt.PointingHandCursor : Qt.ArrowCursor
     }
 
     TapHandler {
@@ -84,8 +98,9 @@ Item {
     }
 
     function toggle() {
-        if (root.isRealSection) {
+        if (root.canToggle) {
             root.listModel.toggleSection(root.sectionKey)
+            root.toggled(root.sectionKey)
         }
     }
 

@@ -7,6 +7,7 @@
         <file>Components/CountrySearchField.qml</file>
         <file>Components/CountrySectionHeader.qml</file>
         <file>Components/CountriesEmptyState.qml</file>
+        <file>Components/CountryUseCaseChips.qml</file>
         <file>Components/SortCountriesDrawer.qml</file>
         <file>Components/GamepadLoader.qml</file>
         <file>Components/HomeContainersListView.qml</file>

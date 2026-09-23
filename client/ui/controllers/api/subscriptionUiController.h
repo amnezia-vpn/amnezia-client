@@ -77,7 +77,7 @@ public slots:
     bool getAccountInfo(const QString &serverId, bool reload);
     void getRenewalLink(const QString &serverId);
 
-    void updateApiCountryModel();
+    void updateApiCountryModel(const QString &currentCountryCode, const QString &userCountryCode);
     void updateApiDevicesModel();
 
 signals:

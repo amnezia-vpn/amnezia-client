@@ -33,15 +33,18 @@ public:
 
     const QVector<CountryInfo> &countries() const;
 
-    Q_PROPERTY(int currentIndex READ getCurrentIndex WRITE setCurrentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(int currentIndex READ getCurrentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(QString currentCountryCode READ getCurrentCountryCode NOTIFY currentIndexChanged)
     Q_PROPERTY(bool hasExpiredWorkerConfigs READ hasExpiredWorkerConfigs NOTIFY issuedConfigsChanged)
 
 public slots:
-    void updateModel(const QJsonArray &countries, const QString &currentCountryCode);
+    void updateModel(const QJsonArray &countries, const QString &currentCountryCode,
+                     const QString &userCountryCode);
     void updateIssuedConfigsInfo(const QJsonArray &issuedConfigs);
 
+    QString getCurrentCountryCode() const;
+    QString getUserCountryCode() const;
     int getCurrentIndex();
-    void setCurrentIndex(const int i);
 
     bool hasExpiredWorkerConfigs() const;
 
@@ -66,6 +69,8 @@ private:
 
     QVector<CountryInfo> m_countries;
     QHash<QString, IssuedConfigInfo> m_issuedConfigs;
+    QString m_currentCountryCode;
+    QString m_userCountryCode;
     int m_currentIndex = -1;
 };
 

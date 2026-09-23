@@ -31,11 +31,25 @@ namespace countryCatalog
         int order = 0;
     };
 
+    enum class SplitMode {
+        Auto,
+        Always,
+        Never
+    };
+
     struct Region
     {
         QString id;
         int order = 0;
+        SplitMode split = SplitMode::Auto;
         QVector<Subregion> subregions;
+    };
+
+    struct UseCase
+    {
+        QString id;
+        int order = 0;
+        QStringList locationIds;
     };
 
     class Catalog
@@ -48,16 +62,23 @@ namespace countryCatalog
 
         bool isEmpty() const;
         int splitThreshold() const;
+        int version() const;
         const QVector<Region> &regions() const;
+        const QVector<UseCase> &useCases() const;
 
         const Entry *find(const QString &countryCode, const QString &isoCode) const;
         bool hasSubregions(const QString &regionId) const;
 
+        bool isSplit(const QString &regionId) const;
+
     private:
         QVector<Region> m_regions;
+        QVector<UseCase> m_useCases;
         QHash<QString, Entry> m_byCode;
         QHash<QString, Entry> m_byIso;
+        QHash<QString, int> m_catalogCounts;
         int m_splitThreshold = 15;
+        int m_version = 0;
     };
 } // namespace countryCatalog
 
