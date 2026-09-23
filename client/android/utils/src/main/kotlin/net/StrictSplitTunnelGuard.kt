@@ -22,6 +22,25 @@ private const val INVALID_UID = -1
 private const val CACHE_TTL_MS = 10_000L
 private const val CACHE_MAX_ENTRIES = 2048
 
+// UserHandle.PER_USER_RANGE; UserHandle.getAppId is not public API.
+private const val PER_USER_RANGE = 100_000
+
+// Process.FIRST_SDK_SANDBOX_UID..LAST_SDK_SANDBOX_UID: the SDK sandbox of app id N
+// runs as N + 10000 (Android 13+). Process.getAppUidForSdkSandboxUid is API 35.
+private const val FIRST_SDK_SANDBOX_UID = 20_000
+private const val LAST_SDK_SANDBOX_UID = 29_999
+private const val SDK_SANDBOX_UID_OFFSET = 10_000
+
+/**
+ * Maps a uid to the app id it belongs to, the way the platform applies a VPN's app
+ * list: one entry covers every copy of the app (other users, cloned apps, a second
+ * space) and its SDK sandbox.
+ */
+internal fun appIdOf(uid: Int): Int {
+    val appId = uid % PER_USER_RANGE
+    return if (appId in FIRST_SDK_SANDBOX_UID..LAST_SDK_SANDBOX_UID) appId - SDK_SANDBOX_UID_OFFSET else appId
+}
+
 enum class SplitTunnelMode { INCLUDE, EXCLUDE }
 
 /**
@@ -38,10 +57,14 @@ enum class SplitTunnelMode { INCLUDE, EXCLUDE }
  * an app outside the split-tunnel rules lands here, which is the intended deny.
  * Crafting an ownerless packet needs raw sockets (root), which is outside this
  * feature's threat model.
+ *
+ * Apps are matched by app id ([appIdOf]), not by uid: Android applies a listed
+ * package to all its copies and its SDK sandbox, so a cloned app has a uid of its
+ * own and must still count as listed.
  */
 class StrictSplitTunnelGuard internal constructor(
     private val mode: SplitTunnelMode,
-    private val appUids: Set<Int>,
+    private val appIds: Set<Int>,
     private val ownUid: Int,
     private val resolveUid: (network: String, srcIp: String, srcPort: Int, dstIp: String, dstPort: Int) -> Int,
 ) {
@@ -60,10 +83,14 @@ class StrictSplitTunnelGuard internal constructor(
             return false
         }
         if (uid == ownUid) return true
-        return when (mode) {
-            SplitTunnelMode.INCLUDE -> uid in appUids   // only listed apps may tunnel
-            SplitTunnelMode.EXCLUDE -> uid !in appUids   // excluded apps may not
+        val allowed = when (mode) {
+            SplitTunnelMode.INCLUDE -> appIdOf(uid) in appIds   // only listed apps may tunnel
+            SplitTunnelMode.EXCLUDE -> appIdOf(uid) !in appIds   // excluded apps may not
         }
+        if (!allowed) {
+            Log.w(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: uid $uid not allowed in $mode mode")
+        }
+        return allowed
     }
 
     private fun ownerUid(network: String, srcIp: String, srcPort: Int, dstIp: String, dstPort: Int): Int {
@@ -107,16 +134,16 @@ class StrictSplitTunnelGuard internal constructor(
         /**
          * Builds a guard whose resolver uses
          * [ConnectivityManager.getConnectionOwnerUid] (API 29+). [packageNames] is
-         * the split-tunnel app list for [mode]; it is resolved to UIDs once here.
+         * the split-tunnel app list for [mode]; it is resolved to app ids once here.
          */
         @RequiresApi(Build.VERSION_CODES.Q)
         fun create(context: Context, mode: SplitTunnelMode, packageNames: Set<String>): StrictSplitTunnelGuard {
             val connectivityManager = context.getSystemService<ConnectivityManager>()!!
             val packageManager = context.packageManager
-            val appUids = packageNames.mapNotNullTo(HashSet()) { packageUid(packageManager, it) }
-            Log.i(TAG, "strict split tunneling: mode=$mode, ${appUids.size}/${packageNames.size} app uids resolved")
+            val appIds = packageNames.mapNotNullTo(HashSet()) { packageUid(packageManager, it)?.let(::appIdOf) }
+            Log.i(TAG, "strict split tunneling: mode=$mode, ${appIds.size}/${packageNames.size} app ids resolved")
 
-            return StrictSplitTunnelGuard(mode, appUids, Process.myUid()) {
+            return StrictSplitTunnelGuard(mode, appIds, Process.myUid()) {
                     network, srcIp, srcPort, dstIp, dstPort ->
                 val protocol = when (network) {
                     "tcp" -> OsConstants.IPPROTO_TCP
