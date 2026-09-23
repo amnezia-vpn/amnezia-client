@@ -1,0 +1,150 @@
+From 61f3ae8298d1c503cbc31539e0f3a73446c7db9d Mon Sep 17 00:00:00 2001
+From: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Date: Tue, 21 Mar 2023 15:33:56 +0100
+Subject: [PATCH] [release-branch.go1.20] runtime: use CLOCK_BOOTTIME in
+ nanotime on Linux
+
+This makes timers account for having expired while a computer was
+asleep, which is quite common on mobile devices. Note that BOOTTIME is
+identical to MONOTONIC, except that it takes into account time spent
+in suspend. In Linux 4.17, the kernel will actually make MONOTONIC act
+like BOOTTIME anyway, so this switch will additionally unify the
+timer behavior across kernels.
+
+BOOTTIME was introduced into Linux 2.6.39-rc1 with 70a08cca1227d in
+2011.
+
+Fixes #24595
+
+Change-Id: I7b2a6ca0c5bc5fce57ec0eeafe7b68270b429321
+---
+diff --git a/src/runtime/sys_linux_386.s b/src/runtime/sys_linux_386.s
+--- a/src/runtime/sys_linux_386.s
++++ b/src/runtime/sys_linux_386.s
+@@ -365,13 +365,13 @@
+ 
+ 	LEAL	8(SP), BX	// &ts (struct timespec)
+ 	MOVL	BX, 4(SP)
+-	MOVL	$1, 0(SP)	// CLOCK_MONOTONIC
++	MOVL	$7, 0(SP)	// CLOCK_BOOTTIME
+ 	CALL	AX
+ 	JMP finish
+ 
+ fallback:
+ 	MOVL	$SYS_clock_gettime, AX
+-	MOVL	$1, BX		// CLOCK_MONOTONIC
++	MOVL	$7, BX		// CLOCK_BOOTTIME
+ 	LEAL	8(SP), CX
+ 	INVOKE_SYSCALL
+ 
+diff --git a/src/runtime/sys_linux_amd64.s b/src/runtime/sys_linux_amd64.s
+--- a/src/runtime/sys_linux_amd64.s
++++ b/src/runtime/sys_linux_amd64.s
+@@ -267,7 +267,7 @@
+ 	SUBQ	$16, SP		// Space for results
+ 	ANDQ	$~15, SP	// Align for C code
+ 
+-	MOVL	$1, DI // CLOCK_MONOTONIC
++	MOVL	$7, DI // CLOCK_BOOTTIME
+ 	LEAQ	0(SP), SI
+ 	MOVQ	runtime·vdsoClockgettimeSym(SB), AX
+ 	CMPQ	AX, $0
+diff --git a/src/runtime/sys_linux_arm.s b/src/runtime/sys_linux_arm.s
+--- a/src/runtime/sys_linux_arm.s
++++ b/src/runtime/sys_linux_arm.s
+@@ -11,7 +11,7 @@
+ #include "textflag.h"
+ 
+ #define CLOCK_REALTIME	0
+-#define CLOCK_MONOTONIC	1
++#define CLOCK_BOOTTIME	7
+ 
+ // for EABI, as we don't support OABI
+ #define SYS_BASE 0x0
+@@ -386,7 +386,7 @@
+ 
+ // func nanotime1() int64
+ TEXT runtime·nanotime1(SB),NOSPLIT,$12-8
+-	MOVW	$CLOCK_MONOTONIC, R0
++	MOVW	$CLOCK_BOOTTIME, R0
+ 	MOVW	$spec-12(SP), R1	// timespec
+ 
+ 	MOVW	runtime·vdsoClockgettimeSym(SB), R4
+diff --git a/src/runtime/sys_linux_arm64.s b/src/runtime/sys_linux_arm64.s
+--- a/src/runtime/sys_linux_arm64.s
++++ b/src/runtime/sys_linux_arm64.s
+@@ -14,7 +14,7 @@
+ #define AT_FDCWD -100
+ 
+ #define CLOCK_REALTIME 0
+-#define CLOCK_MONOTONIC 1
++#define CLOCK_BOOTTIME 7
+ 
+ #define SYS_exit		93
+ #define SYS_read		63
+@@ -352,7 +352,7 @@
+ 	BIC	$15, R1
+ 	MOVD	R1, RSP
+ 
+-	MOVW	$CLOCK_MONOTONIC, R0
++	MOVW	$CLOCK_BOOTTIME, R0
+ 	MOVD	runtime·vdsoClockgettimeSym(SB), R2
+ 	CBZ	R2, fallback
+ 
+diff --git a/src/runtime/sys_linux_mips64x.s b/src/runtime/sys_linux_mips64x.s
+--- a/src/runtime/sys_linux_mips64x.s
++++ b/src/runtime/sys_linux_mips64x.s
+@@ -326,7 +326,7 @@
+ 	AND	$~15, R1	// Align for C code
+ 	MOVV	R1, R29
+ 
+-	MOVW	$1, R4 // CLOCK_MONOTONIC
++	MOVW	$7, R4 // CLOCK_BOOTTIME
+ 	MOVV	$0(R29), R5
+ 
+ 	MOVV	runtime·vdsoClockgettimeSym(SB), R25
+@@ -336,7 +336,7 @@
+ 	// see walltime for detail
+ 	BEQ	R2, R0, finish
+ 	MOVV	R0, runtime·vdsoClockgettimeSym(SB)
+-	MOVW	$1, R4 // CLOCK_MONOTONIC
++	MOVW	$7, R4 // CLOCK_BOOTTIME
+ 	MOVV	$0(R29), R5
+ 	JMP	fallback
+ 
+diff --git a/src/runtime/sys_linux_mipsx.s b/src/runtime/sys_linux_mipsx.s
+--- a/src/runtime/sys_linux_mipsx.s
++++ b/src/runtime/sys_linux_mipsx.s
+@@ -256,7 +256,7 @@
+ 	RET
+ 
+ TEXT runtime·nanotime1(SB),NOSPLIT,$8-8
+-	MOVW	$1, R4	// CLOCK_MONOTONIC
++	MOVW	$7, R4	// CLOCK_BOOTTIME
+ 	MOVW	$4(R29), R5
+ 	MOVW	$SYS_clock_gettime, R2
+ 	SYSCALL
+diff --git a/src/runtime/sys_linux_ppc64x.s b/src/runtime/sys_linux_ppc64x.s
+--- a/src/runtime/sys_linux_ppc64x.s
++++ b/src/runtime/sys_linux_ppc64x.s
+@@ -299,7 +299,7 @@
+ 	JMP	return
+ 
+ TEXT runtime·nanotime1(SB),NOSPLIT,$16-8
+-	MOVD	$1, R3		// CLOCK_MONOTONIC
++	MOVD	$7, R3		// CLOCK_BOOTTIME
+ 
+ 	MOVD	R1, R15		// R15 is unchanged by C code
+ 	MOVD	g_m(g), R21	// R21 = m
+diff --git a/src/runtime/sys_linux_s390x.s b/src/runtime/sys_linux_s390x.s
+--- a/src/runtime/sys_linux_s390x.s
++++ b/src/runtime/sys_linux_s390x.s
+@@ -297,7 +297,7 @@
+ 	RET
+ 
+ TEXT runtime·nanotime1(SB),NOSPLIT,$32-8
+-	MOVW	$1, R2			// CLOCK_MONOTONIC
++	MOVW	$7, R2			// CLOCK_BOOTTIME
+ 
+ 	MOVD	R15, R7			// Backup stack pointer
+ 
