@@ -23,6 +23,7 @@
     #include <sys/ioctl.h>
     #include <sys/socket.h>
     #include <unistd.h>
+    #include <cerrno>
     #include <climits>
     #include <cstring>
 #endif
@@ -334,6 +335,9 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
 
     while (!done) {
         ssize_t received_bytes = recv(sock, buffer, sizeof(buffer), 0);
+        if (received_bytes < 0 && errno == EINTR) {
+            continue;
+        }
         if (received_bytes <= 0) {
             if (received_bytes < 0) {
                 perror("Error in recv");
@@ -349,7 +353,13 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 break;
             }
             if (nlh->nlmsg_type == NLMSG_ERROR) {
-                perror("Error in received packet");
+                /* errno is not set here; the error code is in the message itself */
+                if (nlh->nlmsg_len >= NLMSG_LENGTH(sizeof(struct nlmsgerr))) {
+                    const struct nlmsgerr *error = static_cast<struct nlmsgerr *>(NLMSG_DATA(nlh));
+                    qDebug() << "getGatewayAndIface: netlink error:" << strerror(-error->error);
+                } else {
+                    qDebug() << "getGatewayAndIface: truncated netlink error message";
+                }
                 done = true;
                 break;
             }
