@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, chdir
+from conan.tools.files import get, chdir, patch, rmdir
 from conan.tools.apple import XCRun
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import is_apple_os
@@ -10,6 +10,7 @@ from conan.tools.env import Environment
 
 import os
 import shlex
+import shutil
 
 
 class AwgGo(ConanFile):
@@ -17,6 +18,7 @@ class AwgGo(ConanFile):
     version = "3.1.20260814"
     package_type = "application"
     settings = "os", "arch"
+    exports_sources = "patches/*"
 
     _binary_name = "amneziawg-go"
 
@@ -77,7 +79,22 @@ class AwgGo(ConanFile):
         self._cflags = tc.cflags
         tc.generate(env)
 
+    def _prepare_goroot(self):
+        # Stock Go measures time with a clock that stops while the machine sleeps
+        # (CLOCK_MONOTONIC on Linux, mach_absolute_time on Darwin). WireGuard then
+        # keeps using keys the server has already expired after a suspend, so build
+        # with a copy of the toolchain whose runtime counts suspended time, the same
+        # way the official WireGuard apps do.
+        goroot = os.path.join(self.build_folder, "goroot")
+        rmdir(self, goroot)
+        shutil.copytree(self.dependencies.build["go"].package_folder, goroot, symlinks=True)
+        patches_folder = os.path.join(self.export_sources_folder, "patches")
+        for patch_file in sorted(os.listdir(patches_folder)):
+            patch(self, base_path=goroot, patch_file=os.path.join(patches_folder, patch_file))
+        return goroot
+
     def build(self):
+        goroot = self._prepare_goroot()
         with chdir(self, self.source_folder):
             for arch in self._archs:
                 goarch = self._arch_map.get(arch)
@@ -89,6 +106,8 @@ class AwgGo(ConanFile):
                     cflags.append(f"-arch {_to_apple_arch(arch)}")
 
                 env = Environment()
+                env.define("GOROOT", goroot)
+                env.define("GOTOOLCHAIN", "local")
                 env.define("GOARCH", goarch)
                 env.define("CGO_LDFLAGS", " ".join(ldflags))
                 env.define("CGO_CFLAGS", " ".join(cflags))
