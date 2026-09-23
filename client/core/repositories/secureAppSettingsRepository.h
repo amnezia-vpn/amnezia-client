@@ -70,6 +70,12 @@ public:
     void setKillSwitchEnabled(bool enabled);
     bool isStrictKillSwitchEnabled() const;
     void setStrictKillSwitchEnabled(bool enabled);
+
+    bool isFileEncryption() const;
+    QString getPassword() const;
+    void setPassword(const QString &pwd);
+    QString getHint() const;
+    void setHint(const QString &hint);
     
     bool isAutoConnect() const;
     void setAutoConnect(bool enabled);

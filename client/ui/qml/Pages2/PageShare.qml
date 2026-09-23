@@ -272,6 +272,16 @@ PageType {
                 color: AmneziaStyle.color.mutedGray
             }
 
+            EncryptionIndicator {
+                id: indicator
+
+                visible: SettingsController.isFileEncryptionEnabled()
+                linkEnabled: true
+
+                textString: qsTr("Encryption enabled.")
+                iconPath: "qrc:/images/controls/lock-locked.svg"
+            }
+
             TextFieldWithHeaderType {
                 id: clientNameTextField
                 Layout.fillWidth: true

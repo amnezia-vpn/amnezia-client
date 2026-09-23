@@ -21,8 +21,18 @@ public:
     void setValue(const QString &key, const QVariant &value);
     void remove(const QString &key);
 
+    bool hasSecTag(const QString &tag) const;
+
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &json);
+
+    bool hasPassword() const;
+
+    void setPassword(const QString &password);
+    QString getPassword() const;
+
+    void setHint(const QString &hint);
+    QString getHint() const;
 
     void clearSettings();
 

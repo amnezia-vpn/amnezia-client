@@ -69,6 +69,16 @@ PageType {
                 color: AmneziaStyle.color.mutedGray
             }
 
+            EncryptionIndicator {
+                id: indicator
+
+                visible: SettingsController.isFileEncryptionEnabled()
+                linkEnabled: true
+
+                textString: qsTr("Encryption enabled.")
+                iconPath: "qrc:/images/controls/lock-locked.svg"
+            }
+
             DropDownType {
                 id: serverSelector
                 objectName: "serverSelector"
