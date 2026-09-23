@@ -18,6 +18,7 @@ namespace countryCatalog
         QString isoCode;
         QString regionId;
         QString subregionId;
+        QString subsubregionId;
         QString nameEn;
         QString nameRu;
         QString city;
@@ -25,16 +26,24 @@ namespace countryCatalog
         bool countsTowardSplit = true;
     };
 
-    struct Subregion
+    enum class SplitMode {
+        Auto,
+        Always,
+        Never
+    };
+
+    struct Subsubregion
     {
         QString id;
         int order = 0;
     };
 
-    enum class SplitMode {
-        Auto,
-        Always,
-        Never
+    struct Subregion
+    {
+        QString id;
+        int order = 0;
+        SplitMode split = SplitMode::Auto;
+        QVector<Subsubregion> subsubregions;
     };
 
     struct Region
@@ -70,6 +79,7 @@ namespace countryCatalog
         bool hasSubregions(const QString &regionId) const;
 
         bool isSplit(const QString &regionId) const;
+        bool isSplit(const QString &regionId, const QString &subregionId) const;
 
     private:
         QVector<Region> m_regions;

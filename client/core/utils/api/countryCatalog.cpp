@@ -26,6 +26,7 @@ namespace
     constexpr QLatin1String keyIso("iso");
     constexpr QLatin1String keyRegion("region");
     constexpr QLatin1String keySubregion("subregion");
+    constexpr QLatin1String keySubsubregion("subsubregion");
     constexpr QLatin1String keyNameEn("nameEn");
     constexpr QLatin1String keyNameRu("nameRu");
     constexpr QLatin1String keyCity("city");
@@ -37,6 +38,23 @@ namespace
 
     constexpr QLatin1String splitAlways("always");
     constexpr QLatin1String splitNever("never");
+
+    countryCatalog::SplitMode parseSplit(const QJsonObject &object)
+    {
+        const QString split = object.value(keySplit).toString();
+        if (split == splitAlways) {
+            return countryCatalog::SplitMode::Always;
+        }
+        if (split == splitNever) {
+            return countryCatalog::SplitMode::Never;
+        }
+        return countryCatalog::SplitMode::Auto;
+    }
+
+    QString subregionCountKey(const QString &regionId, const QString &subregionId)
+    {
+        return regionId + QLatin1Char('/') + subregionId;
+    }
 }
 
 namespace countryCatalog
@@ -69,13 +87,7 @@ Catalog Catalog::fromJson(const QByteArray &json)
             continue;
         }
         region.order = regionObject.value(keyOrder).toInt();
-
-        const QString split = regionObject.value(keySplit).toString();
-        if (split == splitAlways) {
-            region.split = SplitMode::Always;
-        } else if (split == splitNever) {
-            region.split = SplitMode::Never;
-        }
+        region.split = parseSplit(regionObject);
 
         const QJsonArray subregions = regionObject.value(keySubregions).toArray();
         for (const QJsonValue &subregionValue : subregions) {
@@ -87,6 +99,21 @@ Catalog Catalog::fromJson(const QByteArray &json)
                 continue;
             }
             subregion.order = subregionObject.value(keyOrder).toInt();
+            subregion.split = parseSplit(subregionObject);
+
+            const QJsonArray subsubregions = subregionObject.value(keySubregions).toArray();
+            for (const QJsonValue &subsubregionValue : subsubregions) {
+                const QJsonObject subsubregionObject = subsubregionValue.toObject();
+
+                Subsubregion subsubregion;
+                subsubregion.id = subsubregionObject.value(keyId).toString();
+                if (subsubregion.id.isEmpty()) {
+                    continue;
+                }
+                subsubregion.order = subsubregionObject.value(keyOrder).toInt();
+                subregion.subsubregions.push_back(subsubregion);
+            }
+
             region.subregions.push_back(subregion);
         }
 
@@ -105,6 +132,7 @@ Catalog Catalog::fromJson(const QByteArray &json)
         entry.isoCode = countryObject.value(keyIso).toString(entry.code).toUpper();
         entry.regionId = countryObject.value(keyRegion).toString();
         entry.subregionId = countryObject.value(keySubregion).toString();
+        entry.subsubregionId = countryObject.value(keySubsubregion).toString();
         entry.nameEn = countryObject.value(keyNameEn).toString();
         entry.nameRu = countryObject.value(keyNameRu).toString();
         entry.city = countryObject.value(keyCity).toString();
@@ -125,6 +153,9 @@ Catalog Catalog::fromJson(const QByteArray &json)
 
         if (!entry.regionId.isEmpty() && entry.countsTowardSplit) {
             catalog.m_catalogCounts[entry.regionId] += 1;
+            if (!entry.subregionId.isEmpty()) {
+                catalog.m_catalogCounts[subregionCountKey(entry.regionId, entry.subregionId)] += 1;
+            }
         }
     }
 
@@ -231,6 +262,29 @@ bool Catalog::isSplit(const QString &regionId) const
             return true;
         }
         return m_catalogCounts.value(regionId) > m_splitThreshold;
+    }
+    return false;
+}
+
+bool Catalog::isSplit(const QString &regionId, const QString &subregionId) const
+{
+    for (const Region &region : m_regions) {
+        if (region.id != regionId) {
+            continue;
+        }
+        for (const Subregion &subregion : region.subregions) {
+            if (subregion.id != subregionId) {
+                continue;
+            }
+            if (subregion.subsubregions.isEmpty() || subregion.split == SplitMode::Never) {
+                return false;
+            }
+            if (subregion.split == SplitMode::Always) {
+                return true;
+            }
+            return m_catalogCounts.value(subregionCountKey(regionId, subregionId)) > m_splitThreshold;
+        }
+        return false;
     }
     return false;
 }

@@ -501,6 +501,11 @@ QString ApiCountryListModel::sectionSubregionId(const QString &sectionKey) const
     return sectionKey.section(sectionKeySeparator, 1, 1);
 }
 
+QString ApiCountryListModel::sectionSubsubregionId(const QString &sectionKey) const
+{
+    return sectionKey.section(sectionKeySeparator, 2, 2);
+}
+
 int ApiCountryListModel::sectionCount(const QString &sectionKey) const
 {
     return m_sectionCounts.value(sectionKey, 0);
@@ -592,7 +597,10 @@ void ApiCountryListModel::expandCurrentSection()
             continue;
         }
 
-        const QStringList chain { parentSectionKey(location.sectionKey), location.sectionKey };
+        QStringList chain { location.sectionKey };
+        for (QString key = parentSectionKey(location.sectionKey); !key.isEmpty(); key = parentSectionKey(key)) {
+            chain.prepend(key);
+        }
         bool changedFlat = false;
         for (const QString &key : chain) {
             if (key.isEmpty() || !m_collapsedSections.value(key, false)) {
@@ -667,8 +675,7 @@ bool ApiCountryListModel::toggleFavorite(const QString &countryCode)
                 order.remove(i);
                 const QString key = it.key();
                 m_sectionCounts[key] -= 1;
-                const QString parent = parentSectionKey(key);
-                if (!parent.isEmpty()) {
+                for (QString parent = parentSectionKey(key); !parent.isEmpty(); parent = parentSectionKey(parent)) {
                     m_sectionCounts[parent] -= 1;
                 }
                 break;
@@ -758,26 +765,35 @@ void ApiCountryListModel::applyDefaultState(bool followCurrentLocation)
     emit positionRequested(rowForCountryCode(current));
 }
 
-QString ApiCountryListModel::buildSectionKey(const QString &regionId, const QString &subregionId) const
+QString ApiCountryListModel::buildSectionKey(const QString &regionId, const QString &subregionId,
+                                             const QString &subsubregionId) const
 {
     if (subregionId.isEmpty()) {
         return regionId;
     }
-    return regionId + sectionKeySeparator + subregionId;
+    if (subsubregionId.isEmpty()) {
+        return regionId + sectionKeySeparator + subregionId;
+    }
+    return regionId + sectionKeySeparator + subregionId + sectionKeySeparator + subsubregionId;
 }
 
 QString ApiCountryListModel::parentSectionKey(const QString &sectionKey) const
 {
-    if (!sectionKey.contains(sectionKeySeparator)) {
+    const int separator = sectionKey.lastIndexOf(sectionKeySeparator);
+    if (separator < 0) {
         return {};
     }
-    return sectionKey.section(sectionKeySeparator, 0, 0);
+    return sectionKey.left(separator);
 }
 
 bool ApiCountryListModel::isHiddenByParent(const QString &sectionKey) const
 {
-    const QString parent = parentSectionKey(sectionKey);
-    return !parent.isEmpty() && isSectionCollapsed(parent);
+    for (QString parent = parentSectionKey(sectionKey); !parent.isEmpty(); parent = parentSectionKey(parent)) {
+        if (isSectionCollapsed(parent)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void ApiCountryListModel::reloadLocations()
@@ -804,6 +820,7 @@ void ApiCountryListModel::reloadLocations()
         if (entry) {
             location.regionId = entry->regionId;
             location.subregionId = entry->subregionId;
+            location.subsubregionId = entry->subsubregionId;
         } else {
             location.regionId = countryCatalog::otherRegionId;
         }
@@ -818,17 +835,32 @@ void ApiCountryListModel::reloadLocations()
         if (!region) {
             location.regionId = countryCatalog::otherRegionId;
             location.subregionId.clear();
+            location.subsubregionId.clear();
         } else if (!location.subregionId.isEmpty()) {
-            bool known = false;
-            for (const countryCatalog::Subregion &subregion : region->subregions) {
-                if (subregion.id == location.subregionId) {
-                    known = true;
+            const countryCatalog::Subregion *subregion = nullptr;
+            for (const countryCatalog::Subregion &candidate : region->subregions) {
+                if (candidate.id == location.subregionId) {
+                    subregion = &candidate;
                     break;
                 }
             }
-            if (!known) {
+            if (!subregion) {
                 location.subregionId.clear();
+                location.subsubregionId.clear();
+            } else if (!location.subsubregionId.isEmpty()) {
+                bool known = false;
+                for (const countryCatalog::Subsubregion &subsubregion : subregion->subsubregions) {
+                    if (subsubregion.id == location.subsubregionId) {
+                        known = true;
+                        break;
+                    }
+                }
+                if (!known) {
+                    location.subsubregionId.clear();
+                }
             }
+        } else {
+            location.subsubregionId.clear();
         }
 
         QStringList exact;
@@ -860,8 +892,12 @@ void ApiCountryListModel::reloadLocations()
         if (!m_catalog.isSplit(location.regionId)) {
             location.subregionId.clear();
         }
-        location.sectionKey = buildSectionKey(location.regionId, location.subregionId);
+        if (location.subregionId.isEmpty() || !m_catalog.isSplit(location.regionId, location.subregionId)) {
+            location.subsubregionId.clear();
+        }
+        location.sectionKey = buildSectionKey(location.regionId, location.subregionId, location.subsubregionId);
     }
+
 
     QStringList unmatched;
     for (const Location &location : m_locations) {
@@ -975,6 +1011,15 @@ void ApiCountryListModel::rebuild()
             orderedKeys.append(region.id);
             for (const countryCatalog::Subregion &subregion : subregions) {
                 orderedKeys.append(buildSectionKey(region.id, subregion.id));
+
+                QVector<countryCatalog::Subsubregion> subsubregions = subregion.subsubregions;
+                std::sort(subsubregions.begin(), subsubregions.end(),
+                          [](const countryCatalog::Subsubregion &left, const countryCatalog::Subsubregion &right) {
+                              return left.order < right.order;
+                          });
+                for (const countryCatalog::Subsubregion &subsubregion : subsubregions) {
+                    orderedKeys.append(buildSectionKey(region.id, subregion.id, subsubregion.id));
+                }
             }
         }
         orderedKeys.append(countryCatalog::otherRegionId);
@@ -990,9 +1035,7 @@ void ApiCountryListModel::rebuild()
 
         std::sort(candidates.begin(), candidates.end(), byLevelThenName);
         m_sectionCounts[key] += candidates.size();
-
-        const QString parent = parentSectionKey(key);
-        if (!parent.isEmpty()) {
+        for (QString parent = parentSectionKey(key); !parent.isEmpty(); parent = parentSectionKey(parent)) {
             m_sectionCounts[parent] += candidates.size();
         }
 

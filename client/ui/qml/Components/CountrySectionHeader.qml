@@ -28,8 +28,9 @@ Item {
 
     readonly property string regionId: root.isRealSection ? root.listModel.sectionRegionId(root.sectionKey) : ""
     readonly property string subregionId: root.isRealSection ? root.listModel.sectionSubregionId(root.sectionKey) : ""
+    readonly property string subsubregionId: root.isRealSection ? root.listModel.sectionSubsubregionId(root.sectionKey) : ""
 
-    readonly property int level: root.subregionId !== "" ? 2 : 1
+    readonly property int level: root.subsubregionId !== "" ? 3 : (root.subregionId !== "" ? 2 : 1)
 
     readonly property bool collapsed: {
         if (!root.isRealSection) {
@@ -39,9 +40,15 @@ Item {
         return root.listModel.isSectionCollapsed(root.sectionKey)
     }
 
-    readonly property string title: root.subregionId !== ""
-                                    ? (CountryRegionNames.subregionNames[root.subregionId] || root.subregionId)
-                                    : (CountryRegionNames.regionNames[root.regionId] || root.regionId)
+    readonly property string title: {
+        if (root.subsubregionId !== "") {
+            return CountryRegionNames.subsubregionNames[root.subsubregionId] || root.subsubregionId
+        }
+        if (root.subregionId !== "") {
+            return CountryRegionNames.subregionNames[root.subregionId] || root.subregionId
+        }
+        return CountryRegionNames.regionNames[root.regionId] || root.regionId
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -51,7 +58,7 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 16
+        anchors.leftMargin: root.level === 3 ? 32 : 16
         anchors.rightMargin: 16
         anchors.topMargin: 24
         anchors.bottomMargin: 12
@@ -62,7 +69,7 @@ Item {
 
             color: root.level === 1 ? AmneziaStyle.color.textPrimary
                                     : AmneziaStyle.color.textTertiary
-            font.pixelSize: root.level === 1 ? 18 : 16
+            font.pixelSize: root.level === 1 ? 18 : (root.level === 2 ? 16 : 14)
             font.weight: root.level === 1 ? 700 : 400
             font.letterSpacing: -0.4
             horizontalAlignment: Text.AlignLeft

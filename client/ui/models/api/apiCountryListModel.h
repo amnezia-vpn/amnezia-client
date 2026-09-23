@@ -89,6 +89,7 @@ public:
 public slots:
     Q_INVOKABLE QString sectionRegionId(const QString &sectionKey) const;
     Q_INVOKABLE QString sectionSubregionId(const QString &sectionKey) const;
+    Q_INVOKABLE QString sectionSubsubregionId(const QString &sectionKey) const;
     Q_INVOKABLE int sectionCount(const QString &sectionKey) const;
     Q_INVOKABLE QString sectionKeyAtRow(int row) const;
     Q_INVOKABLE bool isSectionCollapsed(const QString &sectionKey) const;
@@ -133,6 +134,7 @@ private:
         int sourceIndex = -1;
         QString regionId;
         QString subregionId;
+        QString subsubregionId;
         QString sectionKey;
         QString displayName;
         QString sourceName;
@@ -161,7 +163,8 @@ private:
     void notifyCollapsedChanged();
     void setSectionCollapsed(const QString &sectionKey, bool collapsed);
 
-    QString buildSectionKey(const QString &regionId, const QString &subregionId) const;
+    QString buildSectionKey(const QString &regionId, const QString &subregionId,
+                            const QString &subsubregionId = QString()) const;
     QString parentSectionKey(const QString &sectionKey) const;
     bool isHiddenByParent(const QString &sectionKey) const;
 

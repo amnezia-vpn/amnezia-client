@@ -42,6 +42,29 @@ QtObject {
         "polynesia": qsTr("Polynesia")
     })
 
+    readonly property var subsubregionNames: ({
+        "nordic-countries": qsTr("Nordic countries"),
+        "baltic-states": qsTr("Baltic states"),
+        "uk-and-ireland": qsTr("United Kingdom and Ireland"),
+        "south-western-europe": qsTr("Southwestern Europe"),
+        "south-eastern-europe": qsTr("Southeastern Europe"),
+
+        "caucasus-and-turkey": qsTr("Caucasus and Turkey"),
+        "arabian-peninsula": qsTr("Arabian Peninsula"),
+        "levant-and-mesopotamia": qsTr("Levant and Mesopotamia"),
+
+        "greater-antilles": qsTr("Greater Antilles"),
+        "lesser-antilles": qsTr("Lesser Antilles"),
+        "bahamas-and-southern-caribbean": qsTr("Bahamas and Southern Caribbean"),
+
+        "sahel": qsTr("Sahel"),
+        "gulf-of-guinea": qsTr("Gulf of Guinea"),
+        "atlantic-west-africa": qsTr("Atlantic West Africa"),
+        "east-africa-mainland": qsTr("East Africa (mainland)"),
+        "southeast-africa": qsTr("Southeast Africa"),
+        "indian-ocean-islands": qsTr("Indian Ocean islands")
+    })
+
     readonly property var useCaseNames: ({
         "favorites": qsTr("Favorites"),
         "all": qsTr("All"),
