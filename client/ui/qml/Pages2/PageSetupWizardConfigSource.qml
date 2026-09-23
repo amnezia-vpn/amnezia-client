@@ -336,15 +336,9 @@ PageType {
             if (filePath !== "") {
                 root.isRestoringBackup = true
                 PageController.showBusyIndicator(true)
-                if (SystemController.isFileEncrypted(filePath)) {
-                    passwordDrawer.fileName = filePath
-                    passwordDrawer.restoreSecuredBackup()
-                } else {
-                    SettingsController.restoreAppConfig(filePath)
-                }
-                PageController.showBusyIndicator(false)
                 Qt.callLater(function() {
-                    SettingsController.restoreAppConfig(filePath)
+                    passwordDrawer.fileName = filePath
+                    SystemController.isFileEncrypted(filePath) ? passwordDrawer.restoreSecuredBackup() : SettingsController.restoreAppConfig(filePath)
                     PageController.showBusyIndicator(false)
                     root.isRestoringBackup = false
                 })
