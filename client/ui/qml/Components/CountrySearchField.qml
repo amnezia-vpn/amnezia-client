@@ -64,6 +64,11 @@ Rectangle {
 
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
+            maximumLength: 64
+            validator: RegularExpressionValidator {
+                regularExpression: /^[\p{L}\p{M}' .&’-]*$/
+            }
+
             topPadding: 0
             bottomPadding: 0
             leftPadding: 0
@@ -73,7 +78,13 @@ Rectangle {
                 color: AmneziaStyle.color.transparent
             }
 
-            Keys.onEscapePressed: root.clear()
+            Keys.onEscapePressed: function(event) {
+                if (input.text === "") {
+                    event.accepted = false
+                    return
+                }
+                root.clear()
+            }
 
             ContextMenu.menu: ContextMenuType {
                 textObj: input
