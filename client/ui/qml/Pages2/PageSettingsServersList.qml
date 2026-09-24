@@ -103,6 +103,9 @@ PageType {
 
                             PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
                         } else {
+                            if (ServersModel.getProcessedServerData("isServerFromTelegramApi")) {
+                                ApiSettingsController.getAccountInfo(false)
+                            }
                             PageController.goToPage(PageEnum.PageSettingsServerInfo)
                         }
                     }

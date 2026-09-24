@@ -47,6 +47,8 @@ PageType {
             }
 
             WarningType {
+                visible: !ServersModel.getProcessedServerData("isServerFromTelegramApi")
+
                 Layout.topMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
