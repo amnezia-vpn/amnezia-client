@@ -260,6 +260,25 @@ private slots:
         QString modelUrl = m_coreController->m_ipSplitTunnelingModel->data(m_coreController->m_ipSplitTunnelingModel->index(0, 0), IpSplitTunnelingModel::UrlRole).toString();
         QVERIFY2(modelUrl == "example.com", "Site URL should be available in IpSplitTunnelingModel");
     }
+
+    void testRestoreKeepsSplitTunnelingModes() {
+        // Backups written by the app keep these values as strings
+        const QJsonObject backup {
+            { "Conf/routeMode", "2" },
+            { "Conf/sitesSplitTunnelingEnabled", "true" },
+            { "Conf/appsRouteMode", "1" },
+            { "Conf/appsSplitTunnelingEnabled", "true" }
+        };
+
+        const ErrorCode errorCode =
+                m_coreController->m_settingsController->restoreAppConfigFromData(QJsonDocument(backup).toJson());
+        QCOMPARE(errorCode, ErrorCode::NoError);
+        QCOMPARE(m_coreController->m_appSettingsRepository->routeMode(), RouteMode::VpnAllExceptSites);
+        QVERIFY(m_coreController->m_appSettingsRepository->isSitesSplitTunnelingEnabled());
+#if defined(Q_OS_ANDROID)
+        QCOMPARE(m_coreController->m_appSettingsRepository->appsRouteMode(), AppsRouteMode::VpnOnlyForwardApps);
+#endif
+    }
 };
 
 QTEST_MAIN(TestSettingsSignals)
