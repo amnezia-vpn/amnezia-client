@@ -403,8 +403,7 @@ PageType {
 
             isSearchResult: ApiConfigsCountryListModel.isSearchActive
             categoryName: ApiConfigsCountryListModel.activeUseCaseId !== "all"
-                          ? (CountryRegionNames.useCaseNames[ApiConfigsCountryListModel.activeUseCaseId]
-                             || ApiConfigsCountryListModel.activeUseCaseId)
+                          ? CountryRegionNames.useCaseName(ApiConfigsCountryListModel, ApiConfigsCountryListModel.activeUseCaseId)
                           : ""
 
             onShowAllRequested: {

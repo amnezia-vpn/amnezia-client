@@ -57,6 +57,7 @@ namespace countryCatalog
     {
         QString id;
         int order = 0;
+        QHash<QString, QString> nameLocalized;
         QStringList locationIds;
     };
 

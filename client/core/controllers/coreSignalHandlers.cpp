@@ -281,6 +281,17 @@ void CoreSignalHandlers::initTranslationsUpdatedHandler()
     connect(m_coreController->m_languageUiController, &LanguageUiController::updateTranslations, m_coreController, &CoreController::updateTranslator);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_languageUiController, &LanguageUiController::translationsUpdated);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_connectionUiController, &ConnectionUiController::onTranslationsUpdated);
+
+    const QVector<ApiCountryListModel *> countryListModels { m_coreController->m_apiCountryListModel,
+                                                             m_coreController->m_apiConfigsCountryListModel };
+    auto applyUiLanguage = [this, countryListModels]() {
+        const QString languageCode = QLocale::languageToCode(m_coreController->m_settingsController->getAppLanguage().language());
+        for (ApiCountryListModel *model : countryListModels) {
+            model->setUiLanguage(languageCode);
+        }
+    };
+    applyUiLanguage();
+    connect(m_coreController, &CoreController::translationsUpdated, this, applyUiLanguage);
 }
 
 void CoreSignalHandlers::initLanguageHandler()

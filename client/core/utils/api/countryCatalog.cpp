@@ -35,6 +35,7 @@ namespace
     constexpr QLatin1String keySplit("split");
     constexpr QLatin1String keyUseCases("useCases");
     constexpr QLatin1String keyLocationIds("locationIds");
+    constexpr QLatin1String keyNameLocalized("nameLocalized");
 
     constexpr QLatin1String splitAlways("always");
     constexpr QLatin1String splitNever("never");
@@ -160,6 +161,14 @@ Catalog Catalog::fromJson(const QByteArray &json)
             continue;
         }
         useCase.order = useCaseObject.value(keyOrder).toInt();
+
+        const QJsonObject names = useCaseObject.value(keyNameLocalized).toObject();
+        for (auto it = names.constBegin(); it != names.constEnd(); ++it) {
+            const QString name = it.value().toString().trimmed();
+            if (!name.isEmpty()) {
+                useCase.nameLocalized.insert(it.key(), name);
+            }
+        }
 
         const QJsonArray locationIds = useCaseObject.value(keyLocationIds).toArray();
         for (const QJsonValue &locationId : locationIds) {

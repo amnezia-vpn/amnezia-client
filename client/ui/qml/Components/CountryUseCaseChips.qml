@@ -68,7 +68,7 @@ ListViewType {
                 color: chip.active ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.paleGray
                 wrapMode: Text.NoWrap
 
-                text: "%1 · %2".arg(CountryRegionNames.useCaseNames[chip.useCaseId] || chip.useCaseId)
+                text: "%1 · %2".arg(CountryRegionNames.useCaseName(root.listModel, chip.useCaseId))
                                .arg(delegateRoot.modelData.count)
             }
 

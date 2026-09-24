@@ -494,8 +494,7 @@ PageType {
 
             isSearchResult: ApiCountryListModel.isSearchActive
             categoryName: ApiCountryListModel.activeUseCaseId !== "all"
-                          ? (CountryRegionNames.useCaseNames[ApiCountryListModel.activeUseCaseId]
-                             || ApiCountryListModel.activeUseCaseId)
+                          ? CountryRegionNames.useCaseName(ApiCountryListModel, ApiCountryListModel.activeUseCaseId)
                           : ""
 
             onShowAllRequested: {

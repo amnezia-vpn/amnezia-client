@@ -85,6 +85,7 @@ public:
     void setFavorites(const QStringList &codes);
     QStringList collapsedSections() const;
     void setCollapsedSections(const QStringList &keys);
+    void setUiLanguage(const QString &languageCode);
 
 public slots:
     Q_INVOKABLE QString sectionRegionId(const QString &sectionKey) const;
@@ -198,6 +199,7 @@ private:
     UseCaseSet m_useCaseSet = UseCaseSet::Connection;
     QString m_activeUseCaseId;
     QVariantList m_useCases;
+    QString m_uiLanguage;
 
     QSet<QString> m_favorites;
     QSet<QString> m_favoritesSnapshot;

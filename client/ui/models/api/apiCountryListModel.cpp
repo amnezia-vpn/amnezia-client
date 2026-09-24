@@ -20,6 +20,8 @@ namespace
     constexpr QLatin1String useCaseAllowlist("allowlist");
     constexpr QLatin1String useCaseCreated("created");
 
+    constexpr QLatin1String fallbackLanguage("en");
+
     constexpr QLatin1String configFilesListId("nativeConfigs");
 
     constexpr int favoritesLimitValue = 15;
@@ -335,6 +337,17 @@ QStringList ApiCountryListModel::collapsedSections() const
     return keys;
 }
 
+void ApiCountryListModel::setUiLanguage(const QString &languageCode)
+{
+    if (m_uiLanguage == languageCode) {
+        return;
+    }
+    m_uiLanguage = languageCode;
+    if (rebuildUseCases()) {
+        rebuild();
+    }
+}
+
 void ApiCountryListModel::setCollapsedSections(const QStringList &keys)
 {
     m_collapsedSections.clear();
@@ -367,7 +380,8 @@ bool ApiCountryListModel::isUseCaseVisible(const countryCatalog::UseCase &useCas
     if (useCase.id == useCaseAllowlist) {
         return m_source && m_source->getUserCountryCode() == QLatin1String("RU");
     }
-    return false;
+    return !useCase.nameLocalized.value(m_uiLanguage).isEmpty()
+           || !useCase.nameLocalized.value(fallbackLanguage).isEmpty();
 }
 
 bool ApiCountryListModel::passesActiveUseCase(const Location &location) const
@@ -399,7 +413,7 @@ bool ApiCountryListModel::rebuildUseCases()
         QVariantMap entry;
         entry.insert(QStringLiteral("useCaseId"), id);
         entry.insert(QStringLiteral("count"), count);
-        return QVariant(entry);
+        return entry;
     };
 
     QVariantList list;
@@ -450,7 +464,10 @@ bool ApiCountryListModel::rebuildUseCases()
             }
         }
         if (count > 0) {
-            list.append(makeEntry(useCase.id, count));
+            QVariantMap entry = makeEntry(useCase.id, count);
+            entry.insert(QStringLiteral("name"), useCase.nameLocalized.value(m_uiLanguage));
+            entry.insert(QStringLiteral("fallbackName"), useCase.nameLocalized.value(fallbackLanguage));
+            list.append(entry);
         }
     }
 

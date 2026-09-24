@@ -72,6 +72,17 @@ QtObject {
         "created": qsTr("Created")
     })
 
+    function useCaseName(listModel, useCaseId) {
+        const entries = listModel ? listModel.useCases : []
+        for (let i = 0; i < entries.length; ++i) {
+            const entry = entries[i]
+            if (entry.useCaseId === useCaseId) {
+                return entry.name || useCaseNames[useCaseId] || entry.fallbackName || useCaseId
+            }
+        }
+        return useCaseNames[useCaseId] || useCaseId
+    }
+
     readonly property var useCaseBanners: ({
         "allowlist": qsTr("Connecting through these countries lets you bypass allowlist restrictions")
     })
