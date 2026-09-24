@@ -143,7 +143,8 @@ ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
 #endif
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
-    int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toInt();
+    // Backups store the modes as strings, which QJsonValue::toInt() turns into 0
+    int appSplitTunnelingRouteMode = newConfigData.value("Conf/appsRouteMode").toVariant().toInt();
     bool appSplittunnelingEnabled =
             newConfigData.value("Conf/appsSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
     emit appSplitTunnelingRouteModeChanged(static_cast<AppsRouteMode>(appSplitTunnelingRouteMode));
@@ -161,7 +162,7 @@ ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
     emit appSplitTunnelingToggled(appSplittunnelingEnabled);
 #endif
 
-    int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toInt();
+    int siteSplitTunnelingRouteMode = newConfigData.value("Conf/routeMode").toVariant().toInt();
     bool siteSplittunnelingEnabled =
             newConfigData.value("Conf/sitesSplitTunnelingEnabled").toVariant().toString().toLower() == "true";
     emit siteSplitTunnelingRouteModeChanged(static_cast<RouteMode>(siteSplitTunnelingRouteMode));
