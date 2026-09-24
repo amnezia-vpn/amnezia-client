@@ -327,9 +327,11 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
         return {};
     }
 
-    char gateway_address[INET_ADDRSTRLEN] = {};
-    char interface[IF_NAMESIZE] = {};
-    unsigned int best_metric = UINT_MAX;
+    struct DefaultRoute {
+        char gateway[INET_ADDRSTRLEN] = {};
+        char iface[IF_NAMESIZE] = {};
+        unsigned int metric = UINT_MAX;
+    } best;
     bool done = false;
     char buffer[BUFFER_SIZE];
 
@@ -376,9 +378,8 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 continue;
             }
 
-            char candidate_gateway[INET_ADDRSTRLEN] = {};
-            char candidate_interface[IF_NAMESIZE] = {};
-            unsigned int candidate_metric = 0;
+            DefaultRoute candidate;
+            candidate.metric = 0;
 
             struct rtattr *route_attribute = RTM_RTA(route_entry);
             int route_attribute_len = RTM_PAYLOAD(nlh);
@@ -389,14 +390,14 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
                 switch (route_attribute->rta_type) {
                 case RTA_OIF:
                     if_indextoname(*static_cast<unsigned int *>(RTA_DATA(route_attribute)),
-                                   candidate_interface);
+                                   candidate.iface);
                     break;
                 case RTA_GATEWAY:
-                    inet_ntop(AF_INET, RTA_DATA(route_attribute), candidate_gateway,
-                              sizeof(candidate_gateway));
+                    inet_ntop(AF_INET, RTA_DATA(route_attribute), candidate.gateway,
+                              sizeof(candidate.gateway));
                     break;
                 case RTA_PRIORITY:
-                    candidate_metric = *static_cast<unsigned int *>(RTA_DATA(route_attribute));
+                    candidate.metric = *static_cast<unsigned int *>(RTA_DATA(route_attribute));
                     break;
                 default:
                     break;
@@ -404,23 +405,21 @@ QPair<QString, QNetworkInterface> NetworkUtilities::getGatewayAndIface()
             }
 
             /* Multiple default routes may coexist; the kernel prefers the lowest metric. */
-            if ((*candidate_gateway) && (*candidate_interface) && candidate_metric < best_metric) {
-                best_metric = candidate_metric;
-                memcpy(gateway_address, candidate_gateway, sizeof(gateway_address));
-                memcpy(interface, candidate_interface, sizeof(interface));
+            if ((*candidate.gateway) && (*candidate.iface) && candidate.metric < best.metric) {
+                best = candidate;
             }
         }
     }
 
     close(sock);
 
-    if (!(*gateway_address) || !(*interface)) {
+    if (!(*best.gateway) || !(*best.iface)) {
         qDebug() << "getGatewayAndIface: no gateway found";
         return {};
     }
 
-    qDebug() << "Gateway " << gateway_address << " for interface " << interface;
-    return { gateway_address, QNetworkInterface::interfaceFromName(interface) };
+    qDebug() << "Gateway " << best.gateway << " for interface " << best.iface;
+    return { best.gateway, QNetworkInterface::interfaceFromName(best.iface) };
 #endif
 #if defined(Q_OS_MAC) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     QString gateway;
