@@ -207,6 +207,22 @@
                 android:value="true" />
         </service>
 
+        <!--
+            Tasker / automation support.
+            Receives CONNECT, DISCONNECT and TOGGLE intents from Tasker (or any automation app).
+            Broadcasts org.amnezia.vpn.tasker.VPN_STATE_CHANGED on every VPN state change so
+            Tasker tasks can react via the "Intent Received" event.
+        -->
+        <receiver
+            android:name=".TaskerReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.amnezia.vpn.tasker.CONNECT" />
+                <action android:name="org.amnezia.vpn.tasker.DISCONNECT" />
+                <action android:name="org.amnezia.vpn.tasker.TOGGLE" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="org.amnezia.vpn.qtprovider"
