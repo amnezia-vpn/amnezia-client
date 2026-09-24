@@ -26,6 +26,7 @@ class DnsUtilsLinux final : public DnsUtils {
   void setLinkDNS(int ifindex, const QList<QHostAddress>& resolvers);
   void setLinkDomains(int ifindex, const QList<DnsLinkDomain>& domains);
   void setLinkDefaultRoute(int ifindex, bool enable);
+  void updateLinkDefaultRoutes();
   void updateLinkDomains();
 
  private slots:
@@ -35,6 +36,7 @@ class DnsUtilsLinux final : public DnsUtils {
  private:
   int m_ifindex = 0;
   QMap<int, DnsLinkDomainList> m_linkDomains;
+  QMap<int, bool> m_linkDefaultRoutes;
   QDBusInterface* m_resolver = nullptr;
 };
 
