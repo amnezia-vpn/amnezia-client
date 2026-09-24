@@ -197,11 +197,17 @@ void CoreSignalHandlers::initCountryListStateHandler()
     const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
                                                   m_coreController->m_apiConfigsCountryListModel };
 
-    ApiCountryListModel *picker = m_coreController->m_apiCountryListModel;
-    picker->setFavorites(repository->favoriteLocations());
-    connect(picker, &ApiCountryListModel::favoritesChanged, this, [repository](const QStringList &codes) {
-        repository->setFavoriteLocations(codes);
-    });
+    for (ApiCountryListModel *model : models) {
+        model->setFavorites(repository->favoriteLocations());
+        connect(model, &ApiCountryListModel::favoritesChanged, this, [repository, models, model](const QStringList &codes) {
+            repository->setFavoriteLocations(codes);
+            for (ApiCountryListModel *other : models) {
+                if (other != model) {
+                    other->setFavorites(codes);
+                }
+            }
+        });
+    }
 
     for (ApiCountryListModel *model : models) {
         const QString listId = model->listId();

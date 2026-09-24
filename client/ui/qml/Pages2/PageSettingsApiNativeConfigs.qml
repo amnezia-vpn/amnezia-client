@@ -46,6 +46,11 @@ PageType {
                 menuContent.contentY = menuContent.originY + Math.min(root.savedScroll, maxScroll)
             })
         }
+
+        function onFavoritesLimitExceeded() {
+            PageController.showNotificationMessage(qsTr("You can add up to %1 locations to favorites")
+                                                   .arg(ApiConfigsCountryListModel.favoritesLimit))
+        }
     }
 
     function openConfigOptions(countryCode, countryName) {
@@ -92,6 +97,7 @@ PageType {
             required property string countryImageCode
             required property bool isIssued
             required property bool isWorkerExpired
+            required property bool isFavorite
 
             width: menuContent.width
 
@@ -183,8 +189,8 @@ PageType {
                     ColumnLayout {
                         anchors.left: flag.right
                         anchors.leftMargin: 16
-                        anchors.right: buttons.left
-                        anchors.rightMargin: 8
+                        anchors.right: parent.right
+                        anchors.rightMargin: 28 + buttons.width + 8
                         anchors.verticalCenter: parent.verticalCenter
 
                         spacing: 0
@@ -218,6 +224,61 @@ PageType {
 
                     HoverHandler {
                         id: buttonsHover
+                    }
+
+                    Item {
+                        id: star
+
+                        property bool isFocusable: countryRow.visible
+
+                        width: 40
+                        height: 40
+
+                        function toggle() {
+                            ApiConfigsCountryListModel.toggleFavorite(rowItem.countryCode)
+                        }
+
+                        Accessible.name: rowItem.isFavorite ? qsTr("Remove from favorites")
+                                                            : qsTr("Add to favorites")
+
+                        HoverHandler {
+                            id: starHover
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        TapHandler {
+                            gesturePolicy: TapHandler.ReleaseWithinBounds
+                            onTapped: star.toggle()
+                        }
+
+                        Keys.onEnterPressed: star.toggle()
+                        Keys.onReturnPressed: star.toggle()
+                        Keys.onSpacePressed: star.toggle()
+                        Keys.onTabPressed: FocusController.nextKeyTabItem()
+                        Keys.onBacktabPressed: FocusController.previousKeyTabItem()
+                        Keys.onUpPressed: FocusController.nextKeyUpItem()
+                        Keys.onDownPressed: FocusController.nextKeyDownItem()
+                        Keys.onLeftPressed: FocusController.nextKeyLeftItem()
+                        Keys.onRightPressed: FocusController.nextKeyRightItem()
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 12
+
+                            color: (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
+                                                                           : AmneziaStyle.color.transparent
+                            border.width: star.activeFocus ? 1 : 0
+                            border.color: AmneziaStyle.color.borderSoft
+                        }
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 24
+                            height: 24
+
+                            source: rowItem.isFavorite ? "qrc:/images/controls/star-filled.svg"
+                                                       : "qrc:/images/controls/star.svg"
+                        }
                     }
 
                     ImageButtonType {

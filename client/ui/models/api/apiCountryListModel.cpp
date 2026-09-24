@@ -404,6 +404,18 @@ bool ApiCountryListModel::rebuildUseCases()
 
     QVariantList list;
 
+    int favoriteCount = 0;
+    for (const Location &location : m_locations) {
+        if (m_favorites.contains(location.countryCode)) {
+            ++favoriteCount;
+        }
+    }
+    if (favoriteCount > 0) {
+        list.append(makeEntry(useCaseFavorites, favoriteCount));
+    }
+
+    list.append(makeEntry(useCaseAll, m_locations.size()));
+
     if (m_useCaseSet == UseCaseSet::ConfigFiles) {
         int issuedCount = 0;
         for (const Location &location : m_locations) {
@@ -414,23 +426,6 @@ bool ApiCountryListModel::rebuildUseCases()
         if (issuedCount > 0) {
             list.append(makeEntry(useCaseCreated, issuedCount));
         }
-        list.append(makeEntry(useCaseAll, m_locations.size()));
-    }
-
-    int favoriteCount = 0;
-    if (m_useCaseSet == UseCaseSet::Connection) {
-        for (const Location &location : m_locations) {
-            if (m_favorites.contains(location.countryCode)) {
-                ++favoriteCount;
-            }
-        }
-    }
-    if (favoriteCount > 0) {
-        list.append(makeEntry(useCaseFavorites, favoriteCount));
-    }
-
-    if (m_useCaseSet == UseCaseSet::Connection) {
-        list.append(makeEntry(useCaseAll, m_locations.size()));
     }
 
     QVector<countryCatalog::UseCase> catalogUseCases;

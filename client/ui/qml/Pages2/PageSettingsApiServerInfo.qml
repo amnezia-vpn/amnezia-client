@@ -317,7 +317,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    SubscriptionUiController.updateApiCountryModel()
+                    SubscriptionUiController.updateApiCountryModel(ServersUiController.processedServerId)
                     PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
