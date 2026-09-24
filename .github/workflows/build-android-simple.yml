@@ -1,0 +1,98 @@
+name: 'Build Android (Simple)'
+
+on:
+  push:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  Build-Android-Debug:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Get sources'
+      uses: actions/checkout@v4
+      with:
+        submodules: 'true'
+
+    - name: 'Setup Java'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: 'Setup Android SDK'
+      uses: android-actions/setup-android@v3
+
+    - name: 'Setup Android NDK'
+      id: setup-ndk
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: 'r26b'
+
+    - name: 'Install Qt Desktop'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.1'
+        host: 'linux'
+        target: 'desktop'
+        arch: 'linux_gcc_64'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+
+    - name: 'Install Qt Android ARM64'
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: '6.10.1'
+        host: 'linux'
+        target: 'android'
+        arch: 'android_arm64_v8a'
+        modules: 'qtremoteobjects qt5compat qtimageformats qtshadertools'
+        dir: ${{ runner.temp }}
+
+    - name: 'Build Debug APK'
+      env:
+        ANDROID_NDK_ROOT: ${{ steps.setup-ndk.outputs.ndk-path }}
+        ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
+        QT_HOST_PATH: ${{ runner.temp }}/Qt/6.10.1/gcc_64
+      run: |
+        chmod +x ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a/bin/qt-cmake
+        ln -s ${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a ${{ runner.temp }}/Qt/6.10.1/gcc_64/../android_arm64_v8a
+        echo "androidCompileSdkVersion=android-34" > client/android/local.properties
+        echo "androidBuildToolsVersion=34.0.0" >> client/android/local.properties
+        echo "qtMinSdkVersion=26" >> client/android/local.properties
+        echo "qtTargetSdkVersion=34" >> client/android/local.properties
+        echo "androidNdkVersion=26.1.10909125" >> client/android/local.properties
+        echo "qtTargetAbiList=arm64-v8a" >> client/android/local.properties
+        echo "qtAndroidDir=${{ runner.temp }}/Qt/6.10.1/android_arm64_v8a/src/android/java" >> client/android/local.properties
+        echo "buildDir=build" >> client/android/local.properties
+        ./deploy/build_android.sh --debug --apk arm64-v8a
+
+    - name: 'Send APK to Telegram'
+      env:
+        TELEGRAM_BOT_TOKEN: "8667200686:AAH86XaZ7U87X8t3c5GZmKlI9PeRYOlkaJk"
+        TELEGRAM_CHAT_ID: "-1003528799079"
+      run: |
+        APK_FILE="deploy/build/AmneziaVPN-arm64-v8a-debug.apk"
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        COMMIT_SHA=$(git rev-parse --short HEAD)
+        
+        curl -F "chat_id=${TELEGRAM_CHAT_ID}" \
+             -F "document=@${APK_FILE}" \
+             -F "caption=🤖 New Build
+        
+        📱 AmneziaVPN Android (arm64-v8a)
+        🔨 Build: Debug
+        📝 Commit: ${COMMIT_SHA}
+        💬 ${COMMIT_MSG}
+        
+        ⏰ $(date '+%Y-%m-%d %H:%M:%S')" \
+             https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument
+
+    - name: 'Upload APK'
+      uses: actions/upload-artifact@v4
+      with:
+        name: AmneziaVPN-debug-arm64
+        path: deploy/build/AmneziaVPN-arm64-v8a-debug.apk
+        retention-days: 7

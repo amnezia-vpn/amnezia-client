@@ -73,6 +73,7 @@ private const val CHECK_VPN_PERMISSION_ACTION_CODE = 1
 private const val CREATE_FILE_ACTION_CODE = 2
 private const val OPEN_FILE_ACTION_CODE = 3
 private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
+private const val CHECK_PHONE_PERMISSION_ACTION_CODE = 5
 
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
@@ -600,6 +601,27 @@ class AmneziaActivity : QtActivity() {
         }
     }
 
+    private fun checkPhonePermission(onChecked: () -> Unit) {
+        Log.d(TAG, "Check phone permission")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermission(
+                    Manifest.permission.READ_PHONE_STATE,
+                    CHECK_PHONE_PERMISSION_ACTION_CODE,
+                    PermissionRequestHandler(
+                        onSuccess = { onChecked() },
+                        onFail = { onChecked() },
+                        onAny = {}
+                    )
+                )
+            } else {
+                onChecked()
+            }
+        } else {
+            onChecked()
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun showNotificationPermissionDialog(onChecked: () -> Unit) {
         AlertDialog.Builder(this)
@@ -699,8 +721,10 @@ class AmneziaActivity : QtActivity() {
         Log.v(TAG, "Start VPN")
         mainScope.launch {
             checkVpnPermission {
-                checkNotificationPermission {
-                    startVpn(vpnConfig)
+                checkPhonePermission {
+                    checkNotificationPermission {
+                        startVpn(vpnConfig)
+                    }
                 }
             }
         }
@@ -1238,6 +1262,7 @@ class AmneziaActivity : QtActivity() {
                 CREATE_FILE_ACTION_CODE -> "CREATE_FILE"
                 OPEN_FILE_ACTION_CODE -> "OPEN_FILE"
                 CHECK_NOTIFICATION_PERMISSION_ACTION_CODE -> "CHECK_NOTIFICATION_PERMISSION"
+                CHECK_PHONE_PERMISSION_ACTION_CODE -> "CHECK_PHONE_PERMISSION"
                 else -> actionCode.toString()
             }
     }
