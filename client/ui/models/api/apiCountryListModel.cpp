@@ -516,7 +516,7 @@ QString ApiCountryListModel::sectionKeyAtRow(int row) const
 
 bool ApiCountryListModel::isSectionCollapsed(const QString &sectionKey) const
 {
-    if (isSearchActive()) {
+    if (isSearchActive() || m_forcedExpanded.contains(sectionKey)) {
         return false;
     }
     return m_collapsedSections.value(sectionKey, false);
@@ -527,7 +527,9 @@ void ApiCountryListModel::toggleSection(const QString &sectionKey)
     if (sectionKey.isEmpty() || isSearchActive()) {
         return;
     }
-    setSectionCollapsed(sectionKey, !m_collapsedSections.value(sectionKey, false));
+    const bool collapse = !isSectionCollapsed(sectionKey);
+    m_forcedExpanded.remove(sectionKey);
+    setSectionCollapsed(sectionKey, collapse);
 }
 
 void ApiCountryListModel::setSectionCollapsed(const QString &sectionKey, bool collapsed)
@@ -596,21 +598,19 @@ void ApiCountryListModel::expandCurrentSection()
         for (QString key = parentSectionKey(location.sectionKey); !key.isEmpty(); key = parentSectionKey(key)) {
             chain.prepend(key);
         }
-        bool changedFlat = false;
+        bool changed = false;
         for (const QString &key : chain) {
-            if (key.isEmpty() || !m_collapsedSections.value(key, false)) {
+            if (key.isEmpty() || !m_collapsedSections.value(key, false) || m_forcedExpanded.contains(key)) {
                 continue;
             }
-            if (isGrouped()) {
-                setSectionCollapsed(key, false);
-            } else {
-                m_collapsedSections.insert(key, false);
-                changedFlat = true;
-            }
+            m_forcedExpanded.insert(key);
+            changed = true;
         }
-        if (changedFlat) {
+        if (changed) {
+            if (isGrouped()) {
+                applyRows(buildRows());
+            }
             notifyCollapsedChanged();
-            emitCollapsedSections();
         }
         return;
     }
@@ -701,6 +701,11 @@ int ApiCountryListModel::rowForCountryCode(const QString &countryCode) const
 void ApiCountryListModel::applyDefaultState(bool followCurrentLocation)
 {
     clearSearch();
+
+    if (!m_forcedExpanded.isEmpty()) {
+        m_forcedExpanded.clear();
+        notifyCollapsedChanged();
+    }
 
     const QString current = (followCurrentLocation && m_source) ? m_source->getCurrentCountryCode()
                                                                 : QString();

@@ -187,6 +187,7 @@ private:
     QHash<QString, QVector<int>> m_sectionOrder;
     QStringList m_orderedSectionKeys;
     QHash<QString, bool> m_collapsedSections;
+    QSet<QString> m_forcedExpanded;
     QHash<QString, bool> m_splitState;
 
     QString m_searchText;
