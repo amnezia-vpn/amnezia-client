@@ -239,6 +239,10 @@ PageType {
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) saveButton.forceActiveFocus()
                     }
+                    if (!root.portDirty && !XrayConfigModel.breaksIssuedConnections()) {
+                        yesButtonFunction()
+                        return
+                    }
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
                 Keys.onEnterPressed: saveButton.clicked()

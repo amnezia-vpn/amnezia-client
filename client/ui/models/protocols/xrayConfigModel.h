@@ -115,6 +115,9 @@ public:
     Q_INVOKABLE static QString mkcpDefaultReadBufferSize();
     Q_INVOKABLE static QString mkcpDefaultWriteBufferSize();
 
+    // True when already issued connection keys stop matching the server after saving
+    Q_INVOKABLE bool breaksIssuedConnections() const;
+
     Q_INVOKABLE static QString portDefault();
     Q_INVOKABLE static QString sniDefault();
     Q_INVOKABLE static QString xhttpHostDefault();

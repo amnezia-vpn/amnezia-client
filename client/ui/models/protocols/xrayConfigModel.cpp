@@ -368,6 +368,15 @@ amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
     return m_protocolConfig;
 }
 
+bool XrayConfigModel::breaksIssuedConnections() const
+{
+    const auto &oldSrv = m_originalProtocolConfig.serverConfig;
+    const auto &newSrv = m_protocolConfig.serverConfig;
+    return oldSrv.port != newSrv.port || oldSrv.transport != newSrv.transport || oldSrv.security != newSrv.security
+            || oldSrv.flow != newSrv.flow || oldSrv.sni != newSrv.sni || oldSrv.alpn != newSrv.alpn
+            || (newSrv.transport == QLatin1String("xhttp") && oldSrv.xhttp.toJson() != newSrv.xhttp.toJson());
+}
+
 bool XrayConfigModel::isServerSettingsEqual() const
 {
     return m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
