@@ -1,5 +1,7 @@
 #include "xrayConfigurator.h"
 
+#include <algorithm>
+
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -157,10 +159,48 @@ amnezia::ProtocolConfig XrayConfigurator::processConfigWithLocalSettings(const a
     return protocolConfig;
 }
 
+void XrayConfigurator::allowAmneziaDns(QJsonObject &serverConfig)
+{
+    // Since Xray-core 26 freedom blocks private destinations for vless inbounds by default,
+    // which blackholes AmneziaDNS; explicit finalRules are matched before that default.
+    const QString dnsIp = QString::fromLatin1(amnezia::protocols::dns::amneziaDnsIp);
+    const QString finalRulesKey = QStringLiteral("finalRules");
+
+    QJsonArray outbounds = serverConfig.value(amnezia::protocols::xray::outbounds).toArray();
+    for (int i = 0; i < outbounds.size(); ++i) {
+        QJsonObject outbound = outbounds[i].toObject();
+        if (outbound.value(QStringLiteral("protocol")).toString() != QLatin1String("freedom")) {
+            continue;
+        }
+
+        QJsonObject settings = outbound.value(amnezia::protocols::xray::settings).toObject();
+        QJsonArray finalRules = settings.value(finalRulesKey).toArray();
+        const bool alreadyAllowed = std::any_of(finalRules.cbegin(), finalRules.cend(), [&dnsIp](const QJsonValue &v) {
+            const QJsonObject rule = v.toObject();
+            return rule.value(QStringLiteral("action")).toString() == QLatin1String("allow")
+                    && rule.value(QStringLiteral("ip")).toArray().contains(dnsIp);
+        });
+        if (alreadyAllowed) {
+            continue;
+        }
+
+        finalRules.prepend(QJsonObject { { QStringLiteral("action"), QStringLiteral("allow") },
+                                         { QStringLiteral("network"), QStringLiteral("tcp,udp") },
+                                         { QStringLiteral("port"), QStringLiteral("53") },
+                                         { QStringLiteral("ip"), QJsonArray { dnsIp } } });
+        settings[finalRulesKey] = finalRules;
+        outbound[amnezia::protocols::xray::settings] = settings;
+        outbounds[i] = outbound;
+    }
+    serverConfig[amnezia::protocols::xray::outbounds] = outbounds;
+}
+
 ErrorCode XrayConfigurator::uploadServerConfigJson(const ServerCredentials &credentials, DockerContainer container,
                                                     const DnsSettings &dnsSettings, const QJsonObject &serverConfig) const
 {
-    const QString updatedConfig = QJsonDocument(serverConfig).toJson();
+    QJsonObject config = serverConfig;
+    allowAmneziaDns(config);
+    const QString updatedConfig = QJsonDocument(config).toJson();
     ErrorCode errorCode = m_sshSession->uploadTextFileToContainer(
             container, credentials, updatedConfig, amnezia::protocols::xray::serverConfigPath,
             libssh::ScpOverwriteMode::ScpOverwriteExisting);
@@ -449,6 +489,7 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     serverConfig[px::inbounds] = QJsonArray { inbound };
     serverConfig[px::outbounds] =
             QJsonArray { QJsonObject { { QStringLiteral("protocol"), QStringLiteral("freedom") } } };
+    allowAmneziaDns(serverConfig);
 
     const QString json = QString::fromUtf8(QJsonDocument(serverConfig).toJson());
     errorCode = m_sshSession->uploadTextFileToContainer(container, credentials, json,
