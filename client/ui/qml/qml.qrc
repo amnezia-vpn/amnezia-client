@@ -4,7 +4,9 @@
         <file>Components/AdLabel.qml</file>
         <file>Components/ConnectButton.qml</file>
         <file>Components/ConnectionTypeSelectionDrawer.qml</file>
+        <file>Components/CountryListStickyHeader.qml</file>
         <file>Components/CountrySearchField.qml</file>
+        <file>Components/CountrySearchRow.qml</file>
         <file>Components/CountrySectionHeader.qml</file>
         <file>Components/CountriesEmptyState.qml</file>
         <file>Components/CountryUseCaseChips.qml</file>
@@ -37,6 +39,7 @@
         <file>Controls2/TagBadgeType.qml</file>
         <file>Controls2/CardWithIconsType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>
+        <file>Controls2/CollapsingHeaderType.qml</file>
         <file>Controls2/ContextMenuType.qml</file>
         <file>Controls2/DividerType.qml</file>
         <file>Controls2/DrawerType2.qml</file>

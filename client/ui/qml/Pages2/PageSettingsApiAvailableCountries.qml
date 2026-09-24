@@ -51,24 +51,12 @@ PageType {
         PageController.showBusyIndicator(false)
     }
 
-    readonly property real listScrolled: menuContent.contentY - menuContent.originY
     readonly property bool showSubscriptionNote: root.subscriptionExpired || root.subscriptionExpiringSoon
     readonly property bool showRenewButton: root.showSubscriptionNote
                                             && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
-    readonly property real collapsibleHeight: menuContent.headerItem ? menuContent.headerItem.collapsibleHeight : 0
-    readonly property real collapseProgress: root.collapsibleHeight > 0
-                                             ? Math.max(0, Math.min(1, root.listScrolled / root.collapsibleHeight))
-                                             : 0
-    readonly property real listOcclusion: pinnedBlock.y + pinnedBlock.height - menuContent.y
-    readonly property bool pinnedBlockStuck: root.listScrolled >= root.collapsibleHeight
 
     property int stickyRevision: 0
     property real savedScroll: 0
-
-    function clampContentY(value) {
-        const maxY = menuContent.originY + Math.max(0, menuContent.contentHeight - menuContent.height)
-        return Math.max(menuContent.originY, Math.min(value, maxY))
-    }
 
     function activateCountry(countryCode, countryName) {
         if (ConnectionController.isConnectionInProgress) {
@@ -96,7 +84,8 @@ PageType {
                 const current = ApiCountryListModel.rowForCountryCode(ApiCountryModel.currentCountryCode)
                 if (current >= 0) {
                     menuContent.positionViewAtIndex(current, ListView.Center)
-                    menuContent.contentY = root.clampContentY(menuContent.contentY - pinnedBlock.height / 2)
+                    menuContent.contentY = collapsingHeader.clampContentY(menuContent.contentY
+                                                                          - collapsingHeader.pinnedHeight / 2)
                 }
             })
         }
@@ -171,85 +160,20 @@ PageType {
     ListViewType {
         id: menuContent
 
-        anchors.top: topBar.bottom
+        anchors.top: parent.top
+        anchors.topMargin: collapsingHeader.topBarHeight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
+        anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
         model: ApiCountryListModel
 
         interactive: menuContent.contentHeight > menuContent.height
 
-        ScrollBar.vertical: listScrollBar
+        ScrollBar.vertical: collapsingHeader.scrollBar
 
-        header: Item {
-            readonly property real collapsibleHeight: collapsibleContent.implicitHeight + 4
-
-            width: menuContent.width
-            height: collapsibleHeight + pinnedBlock.height
-
-            ColumnLayout {
-                id: collapsibleContent
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.topMargin: 4
-
-                spacing: 0
-
-                opacity: 1 - root.collapseProgress
-
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: largeTitleMetrics.height
-                    Layout.bottomMargin: root.showSubscriptionNote ? 0 : 4
-                }
-
-                ParagraphTextType {
-                    visible: root.showSubscriptionNote
-
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 12
-
-                    text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
-                    color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
-                }
-
-                BasicButtonType {
-                    visible: root.showRenewButton
-
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 28
-
-                    defaultColor: AmneziaStyle.color.paleGray
-                    hoveredColor: AmneziaStyle.color.lightGray
-                    pressedColor: AmneziaStyle.color.mutedGray
-                    textColor: AmneziaStyle.color.midnightBlack
-
-                    text: qsTr("Renew subscription")
-
-                    clickedFunc: function() {
-                        SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
-                    }
-                }
-
-                ParagraphTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: root.showSubscriptionNote ? 12 : 4
-
-                    text: qsTr("Countries")
-                    color: AmneziaStyle.color.mutedGray
-                }
-            }
-        }
+        header: collapsingHeader.listHeader
 
         footer: Item {
             width: menuContent.width
@@ -440,117 +364,64 @@ PageType {
         }
     }
 
-    CountrySectionHeader {
-        id: stickyHeader
+    CollapsingHeaderType {
+        id: collapsingHeader
 
-        listModel: ApiCountryListModel
+        anchors.fill: parent
 
-        anchors.top: pinnedBlock.bottom
-        anchors.topMargin: stickyHeader.pushOffset
-        anchors.left: parent.left
-        anchors.right: parent.right
+        listView: menuContent
+        title: qsTr("Amnezia Premium")
 
-        readonly property real visibleTop: menuContent.contentY + root.listOcclusion
+        collapsibleContent: ColumnLayout {
+            spacing: 0
 
-        readonly property int topRow: {
-            root.stickyRevision
-            return menuContent.indexAt(menuContent.width / 2, stickyHeader.visibleTop + 1)
-        }
+            ParagraphTextType {
+                visible: root.showSubscriptionNote
 
-        readonly property real pushOffset: {
-            root.stickyRevision
-            const probe = menuContent.indexAt(menuContent.width / 2, stickyHeader.visibleTop + 60)
-            if (probe < 0 || probe === stickyHeader.topRow || !ApiCountryListModel.isSectionHeaderRow(probe)) {
-                return 0
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
+                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
             }
-            const next = menuContent.itemAtIndex(probe)
-            if (!next) {
-                return 0
-            }
-            return Math.min(0, next.y - stickyHeader.visibleTop - 60)
-        }
 
-        onToggled: function(sectionKey) {
-            Qt.callLater(function() {
-                const headerRow = ApiCountryListModel.rowForSectionHeader(sectionKey)
-                if (headerRow >= 0) {
-                    menuContent.positionViewAtIndex(headerRow, ListView.Beginning)
-                    menuContent.contentY = root.clampContentY(menuContent.contentY - pinnedBlock.height)
+            BasicButtonType {
+                visible: root.showRenewButton
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 28
+
+                defaultColor: AmneziaStyle.color.paleGray
+                hoveredColor: AmneziaStyle.color.lightGray
+                pressedColor: AmneziaStyle.color.mutedGray
+                textColor: AmneziaStyle.color.midnightBlack
+
+                text: qsTr("Renew subscription")
+
+                clickedFunc: function() {
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
-            })
-        }
-
-        isPinnedOverlay: true
-        sectionKey: stickyHeader.topRow >= 0 ? ApiCountryListModel.sectionKeyAtRow(stickyHeader.topRow) : ""
-
-        visible: ApiCountryListModel.isGrouped
-                 && ApiCountryListModel.hasResults
-                 && root.pinnedBlockStuck
-                 && stickyHeader.sectionKey !== ""
-    }
-
-    CountriesEmptyState {
-        anchors.top: pinnedBlock.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
-
-        visible: !ApiCountryListModel.hasResults
-
-        isSearchResult: ApiCountryListModel.isSearchActive
-        categoryName: ApiCountryListModel.activeUseCaseId !== "all"
-                      ? (CountryRegionNames.useCaseNames[ApiCountryListModel.activeUseCaseId]
-                         || ApiCountryListModel.activeUseCaseId)
-                      : ""
-
-        onShowAllRequested: {
-            searchField.clear()
-            ApiCountryListModel.activeUseCaseId = "all"
-        }
-    }
-
-    Rectangle {
-        id: topBar
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        color: AmneziaStyle.color.midnightBlack
-
-        implicitHeight: navigationRow.y + navigationRow.height + 4
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.AllButtons
-        }
-
-        Item {
-            id: navigationRow
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.topMargin: 20 + PageController.safeAreaTopMargin
-            height: backButton.implicitHeight
-
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
-
-                anchors.left: parent.left
-                anchors.right: settingsButton.left
-                anchors.verticalCenter: parent.verticalCenter
             }
 
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: root.showSubscriptionNote ? 12 : 8
+
+                text: qsTr("Countries")
+                color: AmneziaStyle.color.mutedGray
+            }
+        }
+
+        navigationButtons: [
             ImageButtonType {
                 id: settingsButton
                 objectName: "settingsButton"
-
-                anchors.right: parent.right
-                anchors.rightMargin: 16
-                anchors.verticalCenter: parent.verticalCenter
 
                 implicitWidth: 40
                 implicitHeight: 40
@@ -561,62 +432,16 @@ PageType {
 
                 onClicked: root.openServerInfo()
             }
-        }
-    }
+        ]
 
-    Rectangle {
-        id: pinnedBlock
+        pinnedContent: [
+            CountrySearchRow {
+                id: searchRow
 
-        anchors.left: parent.left
-        anchors.right: parent.right
-        y: topBar.height + Math.max(0, root.collapsibleHeight - root.listScrolled)
-        height: pinnedContent.implicitHeight
+                listModel: ApiCountryListModel
 
-        color: AmneziaStyle.color.midnightBlack
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.AllButtons
-        }
-
-        ColumnLayout {
-            id: pinnedContent
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-
-            spacing: 0
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 12
-
-                spacing: 8
-
-                CountrySearchField {
-                    id: searchField
-
-                    Layout.fillWidth: true
-
-                    onTextChanged: ApiCountryListModel.searchText = searchField.text
-                }
-
-                ImageButtonType {
-                    objectName: "sortButton"
-
-                    implicitWidth: 64
-                    implicitHeight: 64
-
-                    hoverEnabled: true
-                    image: "qrc:/images/controls/sort-desc.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    onClicked: sortDrawer.openTriggered()
-                }
-            }
+                onSortRequested: sortDrawer.openTriggered()
+            },
 
             CountryUseCaseChips {
                 id: useCaseChips
@@ -626,7 +451,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 12
                 Layout.preferredHeight: useCaseChips.implicitHeight
-            }
+            },
 
             WarningType {
                 readonly property string bannerText:
@@ -642,59 +467,46 @@ PageType {
                 backGroundColor: AmneziaStyle.color.surfaceBase
                 iconPath: "qrc:/images/controls/info.svg"
                 textString: bannerText
-            }
+            },
 
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
             }
+        ]
+
+        CountryListStickyHeader {
+            listModel: ApiCountryListModel
+            listView: menuContent
+            header: collapsingHeader
+            revision: root.stickyRevision
         }
-    }
 
-    Header1TextType {
-        id: largeTitleMetrics
+        CountriesEmptyState {
+            anchors.top: parent.top
+            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
-        visible: false
-        text: movingTitle.text
-    }
+            visible: !ApiCountryListModel.hasResults
 
-    Header1TextType {
-        id: movingTitle
+            isSearchResult: ApiCountryListModel.isSearchActive
+            categoryName: ApiCountryListModel.activeUseCaseId !== "all"
+                          ? (CountryRegionNames.useCaseNames[ApiCountryListModel.activeUseCaseId]
+                             || ApiCountryListModel.activeUseCaseId)
+                          : ""
 
-        readonly property real compactScale: 18 / 32
-        readonly property real titleScale: 1 - (1 - movingTitle.compactScale) * root.collapseProgress
-        readonly property real expandedX: 16
-        readonly property real compactX: (root.width - movingTitle.implicitWidth * movingTitle.compactScale) / 2
-        readonly property real expandedY: topBar.height + 4 - Math.min(0, root.listScrolled)
-        readonly property real compactY: navigationRow.y
-                                         + (navigationRow.height - movingTitle.implicitHeight * movingTitle.compactScale) / 2
-
-        x: movingTitle.expandedX + (movingTitle.compactX - movingTitle.expandedX) * root.collapseProgress
-        y: Math.max(movingTitle.compactY, movingTitle.expandedY - Math.max(0, root.listScrolled))
-        width: movingTitle.implicitWidth
-
-        transformOrigin: Item.TopLeft
-        scale: movingTitle.titleScale
-
-        wrapMode: Text.NoWrap
-        maximumLineCount: 1
-        text: qsTr("Amnezia Premium")
-    }
-
-    ScrollBarType {
-        id: listScrollBar
-
-        z: 1
-
-        anchors.top: menuContent.top
-        anchors.right: menuContent.right
-        anchors.bottom: menuContent.bottom
+            onShowAllRequested: {
+                searchRow.searchField.clear()
+                ApiCountryListModel.activeUseCaseId = "all"
+            }
+        }
     }
 
     SortCountriesDrawer {
         id: sortDrawer
-
-        z: 2
 
         listModel: ApiCountryListModel
 

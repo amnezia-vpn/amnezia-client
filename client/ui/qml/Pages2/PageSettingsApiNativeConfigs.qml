@@ -70,17 +70,20 @@ PageType {
     ListViewType {
         id: menuContent
 
-        anchors.top: topBar.bottom
+        anchors.top: parent.top
+        anchors.topMargin: collapsingHeader.topBarHeight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
+        anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
         model: ApiConfigsCountryListModel
 
-        visible: ApiConfigsCountryListModel.hasResults
-
         interactive: menuContent.contentHeight > menuContent.height
+
+        ScrollBar.vertical: collapsingHeader.scrollBar
+
+        header: collapsingHeader.listHeader
 
         footer: Item {
             width: menuContent.width
@@ -317,151 +320,36 @@ PageType {
         }
     }
 
-    CountrySectionHeader {
-        id: stickyHeader
+    CollapsingHeaderType {
+        id: collapsingHeader
 
-        listModel: ApiConfigsCountryListModel
+        anchors.fill: parent
 
-        anchors.top: topBar.bottom
-        anchors.topMargin: stickyHeader.pushOffset
-        anchors.left: parent.left
-        anchors.right: parent.right
+        listView: menuContent
+        title: qsTr("Configuration files")
 
-        readonly property int topRow: {
-            root.stickyRevision
-            return menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 1)
-        }
+        collapsibleContent: ColumnLayout {
+            spacing: 0
 
-        readonly property real pushOffset: {
-            root.stickyRevision
-            const probe = menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 60)
-            if (probe < 0 || probe === stickyHeader.topRow || !ApiConfigsCountryListModel.isSectionHeaderRow(probe)) {
-                return 0
-            }
-            const next = menuContent.itemAtIndex(probe)
-            if (!next) {
-                return 0
-            }
-            return Math.min(0, next.y - menuContent.contentY - 60)
-        }
-
-        onToggled: function(sectionKey) {
-            Qt.callLater(function() {
-                const headerRow = ApiConfigsCountryListModel.rowForSectionHeader(sectionKey)
-                if (headerRow >= 0) {
-                    menuContent.positionViewAtIndex(headerRow, ListView.Beginning)
-                }
-            })
-        }
-
-        isPinnedOverlay: true
-        sectionKey: stickyHeader.topRow >= 0 ? ApiConfigsCountryListModel.sectionKeyAtRow(stickyHeader.topRow) : ""
-
-        visible: ApiConfigsCountryListModel.isGrouped
-                 && menuContent.visible
-                 && menuContent.contentHeight > menuContent.height
-                 && menuContent.contentY > menuContent.originY
-                 && stickyHeader.sectionKey !== ""
-    }
-
-    CountriesEmptyState {
-        anchors.top: topBar.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
-
-        visible: !ApiConfigsCountryListModel.hasResults
-
-        isSearchResult: ApiConfigsCountryListModel.isSearchActive
-        categoryName: ApiConfigsCountryListModel.activeUseCaseId !== "all"
-                      ? (CountryRegionNames.useCaseNames[ApiConfigsCountryListModel.activeUseCaseId]
-                         || ApiConfigsCountryListModel.activeUseCaseId)
-                      : ""
-
-        onShowAllRequested: {
-            searchField.clear()
-            ApiConfigsCountryListModel.activeUseCaseId = "all"
-        }
-    }
-
-    Rectangle {
-        id: topBar
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        color: AmneziaStyle.color.midnightBlack
-
-        implicitHeight: topBarContent.implicitHeight
-
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.AllButtons
-        }
-
-        ColumnLayout {
-            id: topBarContent
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-
-            spacing: 4
-
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
-
-                Layout.fillWidth: true
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
-
-                onActiveFocusChanged: {
-                    if (backButton.enabled && backButton.activeFocus) {
-                        menuContent.positionViewAtBeginning()
-                    }
-                }
-            }
-
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                headerText: qsTr("Configuration files")
-                descriptionText: qsTr("For router setup or the AmneziaWG app")
-            }
-
-            RowLayout {
+            ParagraphTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 12
+                Layout.topMargin: 16
 
-                spacing: 8
-
-                CountrySearchField {
-                    id: searchField
-
-                    Layout.fillWidth: true
-
-                    onTextChanged: ApiConfigsCountryListModel.searchText = searchField.text
-                }
-
-                ImageButtonType {
-                    objectName: "sortButton"
-
-                    implicitWidth: 64
-                    implicitHeight: 64
-
-                    hoverEnabled: true
-                    image: "qrc:/images/controls/sort-desc.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    onClicked: sortDrawer.openTriggered()
-                }
+                text: qsTr("For router setup or the AmneziaWG app")
+                color: AmneziaStyle.color.mutedGray
             }
+        }
+
+        pinnedContent: [
+            CountrySearchRow {
+                id: searchRow
+
+                listModel: ApiConfigsCountryListModel
+
+                onSortRequested: sortDrawer.openTriggered()
+            },
 
             WarningType {
                 id: warning
@@ -478,7 +366,7 @@ PageType {
                 iconPath: "qrc:/images/controls/info.svg"
 
                 visible: ApiCountryModel.hasExpiredWorkerConfigs
-            }
+            },
 
             CountryUseCaseChips {
                 id: useCaseChips
@@ -488,11 +376,50 @@ PageType {
                 Layout.fillWidth: true
                 Layout.topMargin: 12
                 Layout.preferredHeight: useCaseChips.implicitHeight
-            }
+            },
 
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 12
+            }
+        ]
+
+        CountryListStickyHeader {
+            listModel: ApiConfigsCountryListModel
+            listView: menuContent
+            header: collapsingHeader
+            revision: root.stickyRevision
+        }
+
+        CountriesEmptyState {
+            anchors.top: parent.top
+            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
+
+            visible: !ApiConfigsCountryListModel.hasResults
+
+            isSearchResult: ApiConfigsCountryListModel.isSearchActive
+            categoryName: ApiConfigsCountryListModel.activeUseCaseId !== "all"
+                          ? (CountryRegionNames.useCaseNames[ApiConfigsCountryListModel.activeUseCaseId]
+                             || ApiConfigsCountryListModel.activeUseCaseId)
+                          : ""
+
+            onShowAllRequested: {
+                searchRow.searchField.clear()
+                ApiConfigsCountryListModel.activeUseCaseId = "all"
+            }
+        }
+    }
+
+    Connections {
+        target: collapsingHeader.backButton
+
+        function onActiveFocusChanged() {
+            if (collapsingHeader.backButton.enabled && collapsingHeader.backButton.activeFocus) {
+                menuContent.positionViewAtBeginning()
             }
         }
     }
