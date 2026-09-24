@@ -12,9 +12,19 @@ RUN chmod a+x /opt/amnezia/start.sh
 
 RUN mkdir -p /opt/amnezia/xray
 
-RUN curl -L https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-64.zip > /root/xray.zip;\
-  unzip /root/xray.zip -d /usr/bin/;\
-  chmod a+x /usr/bin/xray;
+RUN SERVER_ARCH=$(uname -m) && \
+  if [ "$SERVER_ARCH" = "x86_64" ]; then XRAY_ARCH="64"; \
+  elif [ "$SERVER_ARCH" = "i686" ]; then XRAY_ARCH="32"; \
+  elif [ "$SERVER_ARCH" = "aarch64" ]; then XRAY_ARCH="arm64-v8a"; \
+  elif [ "$SERVER_ARCH" = "armv8l" ]; then XRAY_ARCH="arm32-v7a"; \
+  elif [ "$SERVER_ARCH" = "armv7l" ]; then XRAY_ARCH="arm32-v7a"; \
+  elif [ "$SERVER_ARCH" = "armv6l" ]; then XRAY_ARCH="arm32-v6"; \
+  elif [ "$SERVER_ARCH" = "armv5tel" ]; then XRAY_ARCH="arm32-v5"; \
+  else echo "unsupported architecture: $SERVER_ARCH" >&2; exit 1; fi && \
+  curl -fsSL "https://github.com/XTLS/Xray-core/releases/download/${XRAY_RELEASE}/Xray-linux-${XRAY_ARCH}.zip" -o /root/xray.zip && \
+  unzip /root/xray.zip -d /usr/bin/ && \
+  chmod a+x /usr/bin/xray && \
+  rm /root/xray.zip
 
 # Tune network  
 RUN echo -e " \n\
