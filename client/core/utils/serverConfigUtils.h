@@ -16,6 +16,7 @@ enum ConfigType {
 
     SelfHostedAdmin = 8,
     SelfHostedUser,
+    XRaySubscription,
     Native,
     Invalid
 };
