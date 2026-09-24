@@ -181,6 +181,8 @@ PageType {
 
         interactive: menuContent.contentHeight > menuContent.height
 
+        ScrollBar.vertical: listScrollBar
+
         header: Item {
             readonly property real collapsibleHeight: collapsibleContent.implicitHeight + 4
 
@@ -679,8 +681,20 @@ PageType {
         text: qsTr("Amnezia Premium")
     }
 
+    ScrollBarType {
+        id: listScrollBar
+
+        z: 1
+
+        anchors.top: menuContent.top
+        anchors.right: menuContent.right
+        anchors.bottom: menuContent.bottom
+    }
+
     SortCountriesDrawer {
         id: sortDrawer
+
+        z: 2
 
         listModel: ApiCountryListModel
 
