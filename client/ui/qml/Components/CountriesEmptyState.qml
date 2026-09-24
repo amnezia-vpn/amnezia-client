@@ -51,7 +51,7 @@ Item {
                 if (root.categoryName !== "") {
                     return qsTr("Nothing found in \"%1\"").arg(root.categoryName)
                 }
-                return root.isSearchResult ? qsTr("Not found. Try a different spelling")
+                return root.isSearchResult ? qsTr("Not found. Try a different spelling or switch the keyboard layout")
                                            : qsTr("No locations available yet")
             }
         }
