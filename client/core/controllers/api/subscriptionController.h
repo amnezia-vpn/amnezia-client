@@ -82,6 +82,16 @@ public:
                                           const QString &captchaId, const QString &captchaSolution,
                                           CaptchaInfo *retryCaptchaOut = nullptr);
 
+#ifdef AMNEZIA_BUILD_TESTS
+    // Exposes the gateway response parsing path without performing a network request.
+    ErrorCode applyImportedServiceConfigForTest(const QString &userCountryCode, const QString &serviceType,
+                                                const QString &serviceProtocol, const ProtocolData &protocolData,
+                                                const QByteArray &responseBody)
+    {
+        return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
+    }
+#endif
+
 private:
     ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
     bool isApiKeyExpired(const QString &serverId) const;
