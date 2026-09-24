@@ -208,19 +208,6 @@ void CoreSignalHandlers::initCountryListStateHandler()
             }
         });
     }
-
-    for (ApiCountryListModel *model : models) {
-        const QString listId = model->listId();
-        if (repository->countryListCatalogVersion(listId) == model->catalogVersion()) {
-            model->setCollapsedSections(repository->countryListCollapsedSections(listId));
-        } else {
-            repository->setCountryListCollapsedSections(listId, {});
-            repository->setCountryListCatalogVersion(listId, model->catalogVersion());
-        }
-        connect(model, &ApiCountryListModel::collapsedSectionsChanged, this, [repository, listId](const QStringList &keys) {
-            repository->setCountryListCollapsedSections(listId, keys);
-        });
-    }
 }
 
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
