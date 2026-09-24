@@ -200,7 +200,13 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
     ErrorCode errorCode = ErrorCode::NoError;
-    if (reinstallRequired) {
+    if (reinstallRequired && canUpdateXrayInPlace(container, oldConfig, newConfig)) {
+        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+        XrayConfigurator xrayConfigurator(&sshSession);
+        errorCode = xrayConfigurator.updateServerSettings(credentials, container, oldConfig, newConfig, dnsSettings);
+        // Issued clients and this device's profile stay valid, so nothing has to be revoked
+        reinstallRequired = false;
+    } else if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
 
         // Reinstall pulls the latest container image, so the server runs the latest protocol version
@@ -706,6 +712,24 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
         return ErrorCode::ServerPortAlreadyAllocatedError;
     }
     return ErrorCode::NoError;
+}
+
+bool InstallController::canUpdateXrayInPlace(DockerContainer container, const ContainerConfig &oldConfig,
+                                             const ContainerConfig &newConfig)
+{
+    if (container != DockerContainer::Xray) {
+        return false;
+    }
+    const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
+    const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
+    if (!oldXrayConfig || !newXrayConfig || newXrayConfig->serverConfig.isThirdPartyConfig) {
+        return false;
+    }
+    // The published port is part of the container, any other setting only lives in server.json
+    auto effectivePort = [](const XrayServerConfig &srv) {
+        return srv.port.isEmpty() ? QString::fromLatin1(protocols::xray::defaultPort) : srv.port;
+    };
+    return effectivePort(oldXrayConfig->serverConfig) == effectivePort(newXrayConfig->serverConfig);
 }
 
 bool InstallController::isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig)

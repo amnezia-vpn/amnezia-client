@@ -7,6 +7,7 @@
 #include <QTest>
 
 #include "utils/testCoreController.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/installers/xrayInstaller.h"
 #include "core/models/serverDescription.h"
 #include "core/utils/serialization/serialization.h"
@@ -319,6 +320,113 @@ private slots:
         QCOMPARE(srv.sni, QString("www.googletagmanager.com"));
         QCOMPARE(srv.site, QString("www.googletagmanager.com"));
         QCOMPARE(srv.fingerprint, QString("firefox"));
+    }
+
+    void testMergeChangedSettingsFollowsServer()
+    {
+        XrayServerConfig remote;
+        remote.security = "reality";
+        remote.flow = "xtls-rprx-vision";
+        remote.transport = "raw";
+        remote.sni = "www.googletagmanager.com";
+        remote.site = "www.googletagmanager.com";
+        remote.fingerprint = "chrome";
+
+        XrayServerConfig oldSrv;
+        oldSrv.security = "";
+        oldSrv.transport = "raw";
+        oldSrv.sni = "www.example.com";
+        oldSrv.site = "www.example.com";
+        oldSrv.fingerprint = "chrome";
+
+        XrayServerConfig newSrv = oldSrv;
+        newSrv.fingerprint = "firefox";
+
+        XrayServerConfig target = XrayConfigurator::mergeChangedSettings(remote, oldSrv, newSrv);
+        QCOMPARE(target.fingerprint, QString("firefox"));
+        QCOMPARE(target.security, QString("reality"));
+        QCOMPARE(target.flow, QString("xtls-rprx-vision"));
+        QCOMPARE(target.sni, QString("www.googletagmanager.com"));
+
+        newSrv = oldSrv;
+        newSrv.sni = "www.microsoft.com";
+        target = XrayConfigurator::mergeChangedSettings(remote, oldSrv, newSrv);
+        QCOMPARE(target.sni, QString("www.microsoft.com"));
+        QCOMPARE(target.site, QString("www.microsoft.com"));
+    }
+
+    void testPatchServerConfigKeepsIdentity()
+    {
+        const QJsonObject reality {
+            { "dest", "www.googletagmanager.com:443" },
+            { "fingerprint", "chrome" },
+            { "privateKey", "private-key" },
+            { "serverNames", QJsonArray { "www.googletagmanager.com", "extra.example.com" } },
+            { "shortIds", QJsonArray { "aaaa", "bbbb" } }
+        };
+        const QJsonArray clients {
+            QJsonObject { { "id", "admin" }, { "flow", "xtls-rprx-vision" } },
+            QJsonObject { { "id", "friend" } }
+        };
+        const QJsonObject outbound { { "protocol", "freedom" }, { "settings", QJsonObject { { "finalRules", QJsonArray {} } } } };
+        const QJsonObject serverConfig {
+            { "log", QJsonObject { { "loglevel", "error" } } },
+            { "routing", QJsonObject { { "rules", QJsonArray {} } } },
+            { "inbounds", QJsonArray { QJsonObject {
+                { "port", 443 },
+                { "protocol", "vless" },
+                { "settings", QJsonObject { { "clients", clients }, { "decryption", "none" } } },
+                { "streamSettings", QJsonObject { { "network", "tcp" }, { "security", "reality" }, { "realitySettings", reality },
+                                                  { "sockopt", QJsonObject { { "tcpFastOpen", true } } } } }
+            } } },
+            { "outbounds", QJsonArray { outbound } }
+        };
+
+        XrayServerConfig current;
+        QCOMPARE(XrayInstaller::readServerConfig(serverConfig, current), ErrorCode::NoError);
+
+        XrayConfigurator configurator(nullptr);
+
+        // Fingerprint only: nothing but the fingerprint changes on the server
+        XrayServerConfig target = current;
+        target.fingerprint = "firefox";
+        QJsonObject patched = configurator.patchServerConfig(serverConfig, current, target, "unused", "unused");
+        QJsonObject inbound = patched["inbounds"].toArray()[0].toObject();
+        QJsonObject stream = inbound["streamSettings"].toObject();
+        QJsonObject patchedReality = stream["realitySettings"].toObject();
+        QCOMPARE(patchedReality["fingerprint"].toString(), QString("firefox"));
+        QCOMPARE(patchedReality["privateKey"].toString(), QString("private-key"));
+        QCOMPARE(patchedReality["shortIds"].toArray(), reality["shortIds"].toArray());
+        QCOMPARE(patchedReality["serverNames"].toArray(), reality["serverNames"].toArray());
+        QCOMPARE(patchedReality["dest"].toString(), QString("www.googletagmanager.com:443"));
+        QCOMPARE(inbound["settings"].toObject()["clients"].toArray(), clients);
+        QCOMPARE(stream["sockopt"].toObject(), (QJsonObject { { "tcpFastOpen", true } }));
+        QCOMPARE(patched["routing"].toObject(), serverConfig["routing"].toObject());
+        QCOMPARE(patched["outbounds"].toArray(), QJsonArray { outbound });
+
+        // SNI change: the new name leads, extra names stay, the destination follows
+        target = current;
+        target.sni = "www.microsoft.com";
+        target.site = "www.microsoft.com";
+        patched = configurator.patchServerConfig(serverConfig, current, target, "unused", "unused");
+        patchedReality = patched["inbounds"].toArray()[0].toObject()["streamSettings"].toObject()["realitySettings"].toObject();
+        QCOMPARE(patchedReality["serverNames"].toArray(), (QJsonArray { "www.microsoft.com", "extra.example.com" }));
+        QCOMPARE(patchedReality["dest"].toString(), QString("www.microsoft.com:443"));
+        QCOMPARE(patchedReality["privateKey"].toString(), QString("private-key"));
+
+        // Switching to XHTTP drops Vision from every client but keeps the clients and Reality keys
+        target = current;
+        target.transport = "xhttp";
+        patched = configurator.patchServerConfig(serverConfig, current, target, "unused", "unused");
+        inbound = patched["inbounds"].toArray()[0].toObject();
+        stream = inbound["streamSettings"].toObject();
+        QCOMPARE(stream["network"].toString(), QString("xhttp"));
+        QVERIFY(stream.contains("xhttpSettings"));
+        QCOMPARE(stream["realitySettings"].toObject()["privateKey"].toString(), QString("private-key"));
+        const QJsonArray patchedClients = inbound["settings"].toObject()["clients"].toArray();
+        QCOMPARE(patchedClients.size(), 2);
+        QCOMPARE(patchedClients[0].toObject(), (QJsonObject { { "id", "admin" } }));
+        QCOMPARE(patchedClients[1].toObject(), (QJsonObject { { "id", "friend" } }));
     }
 };
 

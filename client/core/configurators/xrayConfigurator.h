@@ -35,6 +35,22 @@ public:
                                                  amnezia::ContainerConfig &containerConfig,
                                                  const amnezia::DnsSettings &dnsSettings);
 
+    // Applies an edit of the server settings to the running server without reinstalling the container,
+    // so the Reality keys, short ids and every issued client stay valid.
+    amnezia::ErrorCode updateServerSettings(const amnezia::ServerCredentials &credentials,
+                                            amnezia::DockerContainer container,
+                                            const amnezia::ContainerConfig &oldConfig,
+                                            amnezia::ContainerConfig &newConfig,
+                                            const amnezia::DnsSettings &dnsSettings);
+
+    static amnezia::XrayServerConfig mergeChangedSettings(const amnezia::XrayServerConfig &remote,
+                                                          const amnezia::XrayServerConfig &oldSrv,
+                                                          const amnezia::XrayServerConfig &newSrv);
+
+    QJsonObject patchServerConfig(const QJsonObject &serverConfig, const amnezia::XrayServerConfig &current,
+                                  const amnezia::XrayServerConfig &target, const QString &realityPrivateKey,
+                                  const QString &realityShortId) const;
+
 private:
     amnezia::ErrorCode readContainerKeyFile(amnezia::DockerContainer container,
                                             const amnezia::ServerCredentials &credentials,

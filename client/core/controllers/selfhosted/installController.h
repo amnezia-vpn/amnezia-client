@@ -111,6 +111,7 @@ private:
     ErrorCode isServerDpkgBusy(const ServerCredentials &credentials, SshSession &sshSession);
     ErrorCode setupServerFirewall(const ServerCredentials &credentials, SshSession &sshSession);
     bool isReinstallContainerRequired(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
+    bool canUpdateXrayInPlace(DockerContainer container, const ContainerConfig &oldConfig, const ContainerConfig &newConfig);
 
     ErrorCode prepareContainerConfig(DockerContainer container, const ServerCredentials &credentials, ContainerConfig &containerConfig, SshSession &sshSession);
 

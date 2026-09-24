@@ -141,6 +141,15 @@ ErrorCode XrayInstaller::readServerConfig(const QJsonObject &serverConfig, XrayS
             srv.site = srv.sni;
         }
 
+        // dest is the camouflage site and may differ from the advertised server name
+        const QString dest = rs.value(QStringLiteral("dest")).toString();
+        const qsizetype portSeparator = dest.lastIndexOf(QLatin1Char(':'));
+        QString destHost = portSeparator > 0 ? dest.left(portSeparator) : QString();
+        destHost.remove(QLatin1Char('[')).remove(QLatin1Char(']'));
+        if (!destHost.isEmpty()) {
+            srv.site = destHost;
+        }
+
         srv.fingerprint = normalizeXrayFingerprint(rs.value(protocols::xray::fingerprint).toString());
     }
 

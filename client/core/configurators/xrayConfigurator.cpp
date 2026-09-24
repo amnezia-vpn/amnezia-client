@@ -1,5 +1,7 @@
 #include "xrayConfigurator.h"
 
+#include <algorithm>
+
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -358,6 +360,222 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     }
     containerConfig.protocolConfig = updated;
     logger.info() << "Xray applyServerSettings: done, clientId=" << clientId;
+    return ErrorCode::NoError;
+}
+
+XrayServerConfig XrayConfigurator::mergeChangedSettings(const XrayServerConfig &remote, const XrayServerConfig &oldSrv,
+                                                        const XrayServerConfig &newSrv)
+{
+    // Only fields the user actually edited are taken from the new settings; everything else follows the server,
+    // which may differ from the local copy when Xray was configured from another admin device.
+    XrayServerConfig target = remote;
+    if (oldSrv.port != newSrv.port)
+        target.port = newSrv.port;
+    if (oldSrv.security != newSrv.security)
+        target.security = newSrv.security;
+    if (oldSrv.flow != newSrv.flow)
+        target.flow = newSrv.flow;
+    if (oldSrv.fingerprint != newSrv.fingerprint)
+        target.fingerprint = newSrv.fingerprint;
+    if (oldSrv.alpn != newSrv.alpn)
+        target.alpn = newSrv.alpn;
+    if (oldSrv.transport != newSrv.transport)
+        target.transport = newSrv.transport;
+    if (oldSrv.xhttp.toJson() != newSrv.xhttp.toJson())
+        target.xhttp = newSrv.xhttp;
+    if (oldSrv.mkcp.toJson() != newSrv.mkcp.toJson())
+        target.mkcp = newSrv.mkcp;
+    if (oldSrv.site != newSrv.site)
+        target.site = newSrv.site;
+    if (oldSrv.sni != newSrv.sni) {
+        target.sni = newSrv.sni;
+        // The settings page has a single SNI field for Reality, so the camouflage destination has to follow it
+        if (oldSrv.site == newSrv.site)
+            target.site = newSrv.sni;
+    }
+    return target;
+}
+
+QJsonObject XrayConfigurator::patchServerConfig(const QJsonObject &serverConfig, const XrayServerConfig &current,
+                                                const XrayServerConfig &target, const QString &realityPrivateKey,
+                                                const QString &realityShortId) const
+{
+    namespace px = amnezia::protocols::xray;
+
+    auto overlay = [](QJsonObject base, const QJsonObject &changes) {
+        for (auto it = changes.begin(); it != changes.end(); ++it) {
+            base[it.key()] = it.value();
+        }
+        return base;
+    };
+
+    const QJsonObject managed = buildStreamSettings(target, QString());
+    const QString securityEff = effectiveSecurity(target);
+    const bool securityChanged = effectiveSecurity(current) != securityEff;
+    const bool transportChanged = current.transport != target.transport;
+
+    QJsonArray inbounds = serverConfig.value(px::inbounds).toArray();
+    QJsonObject inbound = inbounds.at(0).toObject();
+    QJsonObject stream = inbound.value(px::streamSettings).toObject();
+
+    stream[px::network] = managed.value(px::network);
+    stream[px::security] = securityEff;
+
+    const QString xhttpKey = QStringLiteral("xhttpSettings");
+    if (managed.contains(xhttpKey) && (transportChanged || current.xhttp.toJson() != target.xhttp.toJson())) {
+        stream[xhttpKey] = overlay(stream.value(xhttpKey).toObject(), managed.value(xhttpKey).toObject());
+    }
+    const QString kcpKey = QStringLiteral("kcpSettings");
+    if (managed.contains(kcpKey) && (transportChanged || current.mkcp.toJson() != target.mkcp.toJson())) {
+        stream[kcpKey] = overlay(stream.value(kcpKey).toObject(), managed.value(kcpKey).toObject());
+    }
+
+    const QString tlsKey = QStringLiteral("tlsSettings");
+    if (securityEff == QLatin1String("tls")
+        && (securityChanged || current.sni != target.sni || current.alpn != target.alpn
+            || current.fingerprint != target.fingerprint)) {
+        stream[tlsKey] = overlay(stream.value(tlsKey).toObject(), managed.value(tlsKey).toObject());
+    }
+
+    if (securityEff == QLatin1String("reality")) {
+        // Keys and short ids of an existing Reality block are kept as they are
+        QJsonObject reality = stream.value(px::realitySettings).toObject();
+        if (reality.value(QStringLiteral("privateKey")).toString().isEmpty()) {
+            reality[QStringLiteral("privateKey")] = realityPrivateKey;
+            reality[QStringLiteral("shortIds")] = QJsonArray { realityShortId };
+        }
+        const QString siteEff = target.site.isEmpty() ? QString::fromLatin1(px::defaultSite) : target.site;
+        const QString sniEff = target.sni.isEmpty() ? siteEff : target.sni;
+        if (securityChanged || current.site != target.site || !reality.contains(QStringLiteral("dest"))) {
+            reality[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
+        }
+        if (securityChanged || current.sni != target.sni || !reality.contains(px::serverNames)) {
+            QJsonArray serverNames { sniEff };
+            for (const QJsonValue &name : reality.value(px::serverNames).toArray()) {
+                if (name.toString() != current.sni && name.toString() != sniEff) {
+                    serverNames.append(name);
+                }
+            }
+            reality[px::serverNames] = serverNames;
+        }
+        reality[px::fingerprint] = managed.value(px::realitySettings).toObject().value(px::fingerprint);
+        stream[px::realitySettings] = reality;
+    }
+    inbound[px::streamSettings] = stream;
+
+    const QString flowCurrent = effectiveClientFlow(current);
+    const QString flowTarget = effectiveClientFlow(target);
+    if (flowCurrent != flowTarget) {
+        QJsonObject settings = inbound.value(px::settings).toObject();
+        QJsonArray clients;
+        for (const QJsonValue &v : settings.value(px::clients).toArray()) {
+            QJsonObject client = v.toObject();
+            if (flowTarget.isEmpty()) {
+                client.remove(px::flow);
+            } else {
+                client[px::flow] = flowTarget;
+            }
+            clients.append(client);
+        }
+        settings[px::clients] = clients;
+        inbound[px::settings] = settings;
+    }
+
+    inbounds[0] = inbound;
+    QJsonObject result = serverConfig;
+    result[px::inbounds] = inbounds;
+    return result;
+}
+
+ErrorCode XrayConfigurator::updateServerSettings(const ServerCredentials &credentials, DockerContainer container,
+                                                 const ContainerConfig &oldConfig, ContainerConfig &newConfig,
+                                                 const DnsSettings &dnsSettings)
+{
+    namespace px = amnezia::protocols::xray;
+
+    const auto *oldXray = oldConfig.protocolConfig.as<XrayProtocolConfig>();
+    const auto *newXray = newConfig.protocolConfig.as<XrayProtocolConfig>();
+    if (!oldXray || !newXray) {
+        logger.error() << "Xray updateServerSettings: missing XrayProtocolConfig";
+        return ErrorCode::InternalError;
+    }
+
+    ErrorCode errorCode = ErrorCode::NoError;
+    const QString currentConfig =
+            m_sshSession->getTextFileFromContainer(container, credentials, px::serverConfigPath, errorCode);
+    if (errorCode != ErrorCode::NoError) {
+        logger.error() << "Xray updateServerSettings: failed to read server config, error=" << static_cast<int>(errorCode);
+        return errorCode;
+    }
+    const QJsonDocument doc = QJsonDocument::fromJson(currentConfig.toUtf8());
+    if (!doc.isObject()) {
+        logger.error() << "Xray updateServerSettings: server config is not a JSON object";
+        return ErrorCode::XrayServerConfigInvalid;
+    }
+    QJsonObject serverConfig = doc.object();
+    const QJsonObject inbound = serverConfig.value(px::inbounds).toArray().at(0).toObject();
+    if (inbound.value(QStringLiteral("protocol")).toString() != QLatin1String("vless")) {
+        logger.error() << "Xray updateServerSettings: first inbound is not the managed VLESS inbound";
+        return ErrorCode::XrayServerConfigInvalid;
+    }
+
+    XrayServerConfig current = oldXray->serverConfig;
+    errorCode = XrayInstaller::readServerConfig(serverConfig, current);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    const XrayServerConfig target = mergeChangedSettings(current, oldXray->serverConfig, newXray->serverConfig);
+
+    QString realityPrivateKey;
+    QString realityPublicKey;
+    QString realityShortId;
+    if (effectiveSecurity(target) == QLatin1String("reality")) {
+        errorCode = readContainerKeyFile(container, credentials, QString::fromLatin1(px::PrivateKeyPath), realityPrivateKey);
+        if (errorCode != ErrorCode::NoError)
+            return errorCode;
+        errorCode = readRealityKeyFiles(container, credentials, realityPublicKey, realityShortId);
+        if (errorCode != ErrorCode::NoError)
+            return errorCode;
+    }
+
+    serverConfig = patchServerConfig(serverConfig, current, target, realityPrivateKey, realityShortId);
+
+    // Keep this device's own profile; a new client is added only if it is no longer on the server
+    QString clientId = oldXray->hasClientConfig() ? oldXray->clientConfig->id : QString();
+    QJsonArray inbounds = serverConfig.value(px::inbounds).toArray();
+    QJsonObject patchedInbound = inbounds.at(0).toObject();
+    QJsonObject settings = patchedInbound.value(px::settings).toObject();
+    QJsonArray clients = settings.value(px::clients).toArray();
+    const bool clientPresent = !clientId.isEmpty() && std::any_of(clients.cbegin(), clients.cend(), [&clientId](const QJsonValue &v) {
+        return v.toObject().value(px::id).toString() == clientId;
+    });
+    if (!clientPresent) {
+        clientId = QUuid::createUuid().toString(QUuid::WithoutBraces);
+        QJsonObject clientEntry { { px::id, clientId } };
+        const QString flowValue = effectiveClientFlow(target);
+        if (!flowValue.isEmpty()) {
+            clientEntry[px::flow] = flowValue;
+        }
+        clients.append(clientEntry);
+        settings[px::clients] = clients;
+        patchedInbound[px::settings] = settings;
+        inbounds[0] = patchedInbound;
+        serverConfig[px::inbounds] = inbounds;
+    }
+
+    errorCode = uploadServerConfigJson(credentials, container, dnsSettings, serverConfig);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    XrayProtocolConfig updated =
+            buildClientProtocolConfig(credentials, container, target, clientId, errorCode, realityPublicKey, realityShortId);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+    newConfig.protocolConfig = updated;
+    logger.info() << "Xray updateServerSettings: done, transport=" << target.transport << "security=" << target.security
+                  << "clientId=" << clientId;
     return ErrorCode::NoError;
 }
 
