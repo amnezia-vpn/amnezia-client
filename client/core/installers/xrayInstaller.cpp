@@ -78,8 +78,18 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         logger.error() << "Failed to parse server config JSON";
         return ErrorCode::InternalError;
     }
-    QJsonObject serverConfig = doc.object();
 
+    auto *xrayConfig = config.getXrayProtocolConfig();
+    if (!xrayConfig) {
+        logger.error() << "No XrayProtocolConfig in ContainerConfig";
+        return ErrorCode::InternalError;
+    }
+
+    return readServerConfig(doc.object(), xrayConfig->serverConfig);
+}
+
+ErrorCode XrayInstaller::readServerConfig(const QJsonObject &serverConfig, XrayServerConfig &srv)
+{
     if (!serverConfig.contains(protocols::xray::inbounds)) {
         logger.error() << "Server config missing 'inbounds' field";
         return ErrorCode::InternalError;
@@ -98,13 +108,6 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
     }
 
     QJsonObject streamSettings = inbound[protocols::xray::streamSettings].toObject();
-    auto *xrayConfig = config.getXrayProtocolConfig();
-    if (!xrayConfig) {
-        logger.error() << "No XrayProtocolConfig in ContainerConfig";
-        return ErrorCode::InternalError;
-    }
-
-    XrayServerConfig &srv = xrayConfig->serverConfig;
 
     // ── Port ─────────────────────────────────────────────────────────
     if (inbound.contains(protocols::xray::port)) {

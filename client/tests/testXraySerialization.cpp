@@ -7,6 +7,7 @@
 #include <QTest>
 
 #include "utils/testCoreController.h"
+#include "core/installers/xrayInstaller.h"
 #include "core/models/serverDescription.h"
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
@@ -283,6 +284,41 @@ private slots:
         }
 
         QCOMPARE(importResult.config, config);
+    }
+
+    void testReadServerConfigOverridesCachedSettings()
+    {
+        const QJsonObject realitySettings {
+            { "dest", "www.googletagmanager.com:443" },
+            { "fingerprint", "firefox" },
+            { "privateKey", "private" },
+            { "serverNames", QJsonArray { "www.googletagmanager.com" } },
+            { "shortIds", QJsonArray { "abcd" } }
+        };
+        const QJsonObject inbound {
+            { "port", 8443 },
+            { "protocol", "vless" },
+            { "settings", QJsonObject { { "clients", QJsonArray { QJsonObject { { "id", "c1" }, { "flow", "xtls-rprx-vision" } } } },
+                                        { "decryption", "none" } } },
+            { "streamSettings", QJsonObject { { "network", "tcp" }, { "security", "reality" }, { "realitySettings", realitySettings } } }
+        };
+        const QJsonObject serverConfig { { "inbounds", QJsonArray { inbound } } };
+
+        XrayServerConfig srv;
+        srv.port = "443";
+        srv.transport = "raw";
+        srv.security = "";
+        srv.flow = "";
+        srv.site = "www.example.com";
+
+        QCOMPARE(XrayInstaller::readServerConfig(serverConfig, srv), ErrorCode::NoError);
+        QCOMPARE(srv.port, QString("8443"));
+        QCOMPARE(srv.transport, QString("raw"));
+        QCOMPARE(srv.security, QString("reality"));
+        QCOMPARE(srv.flow, QString("xtls-rprx-vision"));
+        QCOMPARE(srv.sni, QString("www.googletagmanager.com"));
+        QCOMPARE(srv.site, QString("www.googletagmanager.com"));
+        QCOMPARE(srv.fingerprint, QString("firefox"));
     }
 };
 

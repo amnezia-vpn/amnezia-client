@@ -19,6 +19,7 @@
 #include "core/utils/constants/protocolConstants.h"
 #include "core/models/containerConfig.h"
 #include "core/models/protocols/xrayProtocolConfig.h"
+#include "core/installers/xrayInstaller.h"
 
 namespace {
     Logger logger("XrayConfigurator");
@@ -223,7 +224,7 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
         return ErrorCode::InternalError;
     }
 
-    const XrayServerConfig &srv = xrayCfg->serverConfig;
+    XrayServerConfig srv = xrayCfg->serverConfig;
     if (srv.isThirdPartyConfig) {
         logger.info() << "Xray applyServerSettings: skipped (third-party/native profile)";
         if (outClientId && xrayCfg->hasClientConfig()) {
@@ -236,18 +237,6 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
                     << "container=" << static_cast<int>(container) << "host=" << credentials.hostName
                     << "transport=" << srv.transport << "security=" << srv.security << "port=" << srv.port
                     << "appendClient=" << appendNewClient;
-    const QString flowValue = effectiveClientFlow(srv);
-    QString realityPublicKey;
-    QString realityShortId;
-    if (effectiveSecurity(srv) == QLatin1String("reality")) {
-        errorCode = readRealityKeyFiles(container, credentials, realityPublicKey, realityShortId);
-        if (errorCode != ErrorCode::NoError) {
-            logger.error() << "Xray applyServerSettings: readRealityKeyFiles failed, error="
-                           << static_cast<int>(errorCode);
-            return errorCode;
-        }
-    }
-
     QString currentConfig = m_sshSession->getTextFileFromContainer(
             container, credentials, amnezia::protocols::xray::serverConfigPath, errorCode);
     if (errorCode != ErrorCode::NoError) {
@@ -273,6 +262,30 @@ ErrorCode XrayConfigurator::applyServerSettingsToRemote(const ServerCredentials 
     if (inbounds.isEmpty()) {
         logger.error() << "Server config has empty 'inbounds' array";
         return ErrorCode::XrayServerConfigInvalid;
+    }
+
+    if (appendNewClient) {
+        // The locally stored settings may be stale (e.g. Xray was reinstalled from another admin device),
+        // so the new client has to follow what the server actually runs.
+        errorCode = XrayInstaller::readServerConfig(serverConfig, srv);
+        if (errorCode != ErrorCode::NoError) {
+            logger.error() << "Xray applyServerSettings: readServerConfig failed, error=" << static_cast<int>(errorCode);
+            return errorCode;
+        }
+        logger.info() << "Xray applyServerSettings: remote settings transport=" << srv.transport
+                      << "security=" << srv.security << "port=" << srv.port;
+    }
+
+    const QString flowValue = effectiveClientFlow(srv);
+    QString realityPublicKey;
+    QString realityShortId;
+    if (effectiveSecurity(srv) == QLatin1String("reality")) {
+        errorCode = readRealityKeyFiles(container, credentials, realityPublicKey, realityShortId);
+        if (errorCode != ErrorCode::NoError) {
+            logger.error() << "Xray applyServerSettings: readRealityKeyFiles failed, error="
+                           << static_cast<int>(errorCode);
+            return errorCode;
+        }
     }
 
     QJsonObject inbound = inbounds[0].toObject();
@@ -469,22 +482,6 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     containerConfig.protocolConfig = updated;
     logger.info() << "Xray writeServerConfigForSetup: done, clientId=" << clientId;
     return ErrorCode::NoError;
-}
-
-QString XrayConfigurator::prepareServerConfig(const ServerCredentials &credentials, DockerContainer container,
-                                               const ContainerConfig &containerConfig,
-                                               const DnsSettings &dnsSettings,
-                                               ErrorCode &errorCode)
-{
-    ContainerConfig mutableConfig = containerConfig;
-    QString clientId;
-    const ErrorCode applyError =
-            applyServerSettingsToRemote(credentials, container, mutableConfig, dnsSettings, true, &clientId);
-    errorCode = applyError;
-    if (applyError != ErrorCode::NoError || clientId.isEmpty()) {
-        return QString();
-    }
-    return clientId;
 }
 
 XrayProtocolConfig XrayConfigurator::buildClientProtocolConfig(const ServerCredentials &credentials,
@@ -757,20 +754,9 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
         }
     }
 
-    const XrayServerConfig *serverConfig = nullptr;
-    if (const auto *xrayCfg = containerConfig.protocolConfig.as<XrayProtocolConfig>()) {
-        serverConfig = &xrayCfg->serverConfig;
-    }
-
-    if (!serverConfig) {
-        logger.error() << "No XrayProtocolConfig found";
-        errorCode = ErrorCode::InternalError;
-        return XrayProtocolConfig{};
-    }
-
-    const XrayServerConfig &srv = *serverConfig;
-
-    QString xrayClientId = prepareServerConfig(credentials, container, containerConfig, dnsSettings, errorCode);
+    ContainerConfig updatedConfig = containerConfig;
+    QString xrayClientId;
+    errorCode = applyServerSettingsToRemote(credentials, container, updatedConfig, dnsSettings, true, &xrayClientId);
     if (errorCode != ErrorCode::NoError || xrayClientId.isEmpty()) {
         logger.error() << "Failed to prepare server config";
         if (errorCode == ErrorCode::NoError) {
@@ -779,5 +765,5 @@ ProtocolConfig XrayConfigurator::createConfig(const ServerCredentials &credentia
         return XrayProtocolConfig{};
     }
 
-    return buildClientProtocolConfig(credentials, container, srv, xrayClientId, errorCode);
+    return updatedConfig.protocolConfig;
 }

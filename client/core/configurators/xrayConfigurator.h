@@ -40,10 +40,6 @@ private:
                                             const amnezia::ServerCredentials &credentials,
                                             const QString &path, QString &out) const;
 
-    QString prepareServerConfig(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container, const amnezia::ContainerConfig &containerConfig,
-                                const amnezia::DnsSettings &dnsSettings,
-                                amnezia::ErrorCode &errorCode);
-
     amnezia::ErrorCode uploadServerConfigJson(const amnezia::ServerCredentials &credentials, amnezia::DockerContainer container,
                                               const amnezia::DnsSettings &dnsSettings, const QJsonObject &serverConfig) const;
 
