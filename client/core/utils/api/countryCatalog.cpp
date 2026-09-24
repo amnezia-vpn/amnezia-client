@@ -31,7 +31,6 @@ namespace
     constexpr QLatin1String keyNameRu("nameRu");
     constexpr QLatin1String keyCity("city");
     constexpr QLatin1String keyAliases("aliases");
-    constexpr QLatin1String keyCountsTowardSplit("countsTowardSplit");
     constexpr QLatin1String keySplit("split");
     constexpr QLatin1String keyUseCases("useCases");
     constexpr QLatin1String keyLocationIds("locationIds");
@@ -49,11 +48,6 @@ namespace
             return countryCatalog::SplitMode::Never;
         }
         return countryCatalog::SplitMode::Auto;
-    }
-
-    QString subregionCountKey(const QString &regionId, const QString &subregionId)
-    {
-        return regionId + QLatin1Char('/') + subregionId;
     }
 }
 
@@ -136,7 +130,6 @@ Catalog Catalog::fromJson(const QByteArray &json)
         entry.nameEn = countryObject.value(keyNameEn).toString();
         entry.nameRu = countryObject.value(keyNameRu).toString();
         entry.city = countryObject.value(keyCity).toString();
-        entry.countsTowardSplit = countryObject.value(keyCountsTowardSplit).toBool(true);
 
         const QJsonArray aliases = countryObject.value(keyAliases).toArray();
         for (const QJsonValue &aliasValue : aliases) {
@@ -151,12 +144,6 @@ Catalog Catalog::fromJson(const QByteArray &json)
             catalog.m_byIso.insert(entry.isoCode, entry);
         }
 
-        if (!entry.regionId.isEmpty() && entry.countsTowardSplit) {
-            catalog.m_catalogCounts[entry.regionId] += 1;
-            if (!entry.subregionId.isEmpty()) {
-                catalog.m_catalogCounts[subregionCountKey(entry.regionId, entry.subregionId)] += 1;
-            }
-        }
     }
 
     const QJsonArray useCases = root.value(keyUseCases).toArray();
@@ -249,7 +236,7 @@ bool Catalog::hasSubregions(const QString &regionId) const
     return false;
 }
 
-bool Catalog::isSplit(const QString &regionId) const
+bool Catalog::isSplit(const QString &regionId, int visibleCount) const
 {
     for (const Region &region : m_regions) {
         if (region.id != regionId) {
@@ -261,12 +248,12 @@ bool Catalog::isSplit(const QString &regionId) const
         if (region.split == SplitMode::Always) {
             return true;
         }
-        return m_catalogCounts.value(regionId) > m_splitThreshold;
+        return visibleCount > m_splitThreshold;
     }
     return false;
 }
 
-bool Catalog::isSplit(const QString &regionId, const QString &subregionId) const
+bool Catalog::isSplit(const QString &regionId, const QString &subregionId, int visibleCount) const
 {
     for (const Region &region : m_regions) {
         if (region.id != regionId) {
@@ -282,7 +269,7 @@ bool Catalog::isSplit(const QString &regionId, const QString &subregionId) const
             if (subregion.split == SplitMode::Always) {
                 return true;
             }
-            return m_catalogCounts.value(subregionCountKey(regionId, subregionId)) > m_splitThreshold;
+            return visibleCount > m_splitThreshold;
         }
         return false;
     }

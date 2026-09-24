@@ -858,11 +858,21 @@ void ApiCountryListModel::reloadLocations()
         m_locations.push_back(location);
     }
 
+    QHash<QString, int> visibleCounts;
+    for (const Location &location : m_locations) {
+        visibleCounts[location.regionId] += 1;
+        if (!location.subregionId.isEmpty()) {
+            visibleCounts[buildSectionKey(location.regionId, location.subregionId)] += 1;
+        }
+    }
+
     for (Location &location : m_locations) {
-        if (!m_catalog.isSplit(location.regionId)) {
+        if (!m_catalog.isSplit(location.regionId, visibleCounts.value(location.regionId))) {
             location.subregionId.clear();
         }
-        if (location.subregionId.isEmpty() || !m_catalog.isSplit(location.regionId, location.subregionId)) {
+        if (location.subregionId.isEmpty()
+            || !m_catalog.isSplit(location.regionId, location.subregionId,
+                                  visibleCounts.value(buildSectionKey(location.regionId, location.subregionId)))) {
             location.subsubregionId.clear();
         }
         location.sectionKey = buildSectionKey(location.regionId, location.subregionId, location.subsubregionId);

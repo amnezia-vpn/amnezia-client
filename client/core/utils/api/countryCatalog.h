@@ -23,7 +23,6 @@ namespace countryCatalog
         QString nameRu;
         QString city;
         QStringList aliases;
-        bool countsTowardSplit = true;
     };
 
     enum class SplitMode {
@@ -78,15 +77,14 @@ namespace countryCatalog
         const Entry *find(const QString &countryCode, const QString &isoCode) const;
         bool hasSubregions(const QString &regionId) const;
 
-        bool isSplit(const QString &regionId) const;
-        bool isSplit(const QString &regionId, const QString &subregionId) const;
+        bool isSplit(const QString &regionId, int visibleCount) const;
+        bool isSplit(const QString &regionId, const QString &subregionId, int visibleCount) const;
 
     private:
         QVector<Region> m_regions;
         QVector<UseCase> m_useCases;
         QHash<QString, Entry> m_byCode;
         QHash<QString, Entry> m_byIso;
-        QHash<QString, int> m_catalogCounts;
         int m_splitThreshold = 15;
         int m_version = 0;
     };
