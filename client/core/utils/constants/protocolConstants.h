@@ -144,6 +144,7 @@ namespace amnezia
             constexpr char Endpoint[] = "Endpoint";
             constexpr char PersistentKeepalive[] = "PersistentKeepalive";
             constexpr char MTU[] = "MTU";
+            constexpr char DNS[] = "DNS";
 
             constexpr char defaultSubnetAddress[] = "10.8.1.0";
             constexpr char defaultSubnetMask[] = "255.255.255.0";
