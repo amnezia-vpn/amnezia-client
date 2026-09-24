@@ -163,6 +163,10 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit restoreBackupFinished();
         emit autoStartChanged();
         emit startMinimizedChanged();
+
+        if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
+            emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
+        }
     } else {
         emit errorOccurred(errorCode);
     }

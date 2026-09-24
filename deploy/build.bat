@@ -10,6 +10,8 @@ if /i "%~1" == "-i"             set "ARG_BUILD_INSTALLERS=!ARG_BUILD_INSTALLERS!
 if /i "%~1" == "--installer"    set "ARG_BUILD_INSTALLERS=!ARG_BUILD_INSTALLERS! %~2" & shift
 if /i "%~1" == "-arch"          set "ARCH=%~2" & shift
 if /i "%~1" == "--architecture" set "ARCH=%~2" & shift
+if /i "%~1" == "--sign-cloud"   set "SIGNTOOL_SUBJECT_NAME=%~2" & shift
+if /i "%~1" == "--sign-phys"    set "SIGNTOOL_SUBJECT_NAME=%~2" & set "SIGNTOOL_CERT_HAS_UI=true" & shift
 shift
 goto :parse_args
 :done_args
@@ -94,8 +96,10 @@ if exist "%VCVARS_PATH%" (
 )
 
 :: build project and installers
+set "_tests_arg="
+if defined AMNEZIA_BUILD_TESTS set "_tests_arg=-DAMNEZIA_BUILD_TESTS=%AMNEZIA_BUILD_TESTS%"
 @echo on
-cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true" || goto :fail
+cmake -S "%PROJECT_DIR%" -B "%BUILD_DIR%" -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=%QT_ROOT_PATH%\msvc2022_%_qt_postfix_arg%" "-DCMAKE_VS_GLOBALS=UseMultiToolTask=true;EnforceProcessCountAcrossBuilds=true" %_tests_arg% || goto :fail
 cmake --build "%BUILD_DIR%" --config Release -- /m  || goto :fail
 @echo off
 for %%I in (%ARG_BUILD_INSTALLERS%) do (

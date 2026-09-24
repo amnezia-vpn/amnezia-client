@@ -128,19 +128,6 @@
     </message>
 </context>
 <context>
-    <name>ChangelogDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="70"/>
-        <source>Update</source>
-        <translation>به‌روزرسانی</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="96"/>
-        <source>Skip</source>
-        <translation>رد کردن</translation>
-    </message>
-</context>
-<context>
     <name>ConnectButton</name>
     <message>
         <location filename="../ui/qml/Components/ConnectButton.qml" line="54"/>
@@ -291,71 +278,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallUiController</name>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="125"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="167"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="132"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="174"/>
         <source>%1 installed successfully. </source>
         <translation>%1 با موفقیت نصب شد. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="127"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="169"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="134"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="176"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 در حال حاضر بر روی سرور نصب شده است. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="131"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="138"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 کانتینرهایی که بر روی سرور موجود بودند اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="173"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="180"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 کانتینرهای نصب شده بر روی سرور شناسایی شدند. تمام کانتینترهای نصب شده به نرم افزار اضافه شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="288"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="327"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="351"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="299"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="340"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="364"/>
         <source>Settings updated successfully</source>
         <translation>تنظیمات با موفقیت به‎روز‎رسانی شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="471"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="487"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>سرور %1 راه اندازی مجدد شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="485"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="501"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="494"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="510"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>تمام کانتینترها از سرور %1 حذف شدند</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="520"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="538"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="554"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>%1 از سرور %2 حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="553"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="569"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 پروفایل ذخیره شده پاک شد.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="623"/>
         <source>Please login as the user</source>
         <translation>لطفا به عنوان کاربر وارد شوید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="631"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="647"/>
         <source>Server added successfully</source>
         <translation>سرور با موفقیت اضافه شد</translation>
     </message>
@@ -425,29 +412,6 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
-    <name>MarketplaceUpdateController</name>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="153"/>
-        <source>Update available</source>
-        <translation>به‌روزرسانی موجود است</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of %1 is available.</source>
-        <translation>نسخه جدیدی از %1 در دسترس است.</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
-        <source>Update</source>
-        <translation>به‌روزرسانی</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="156"/>
-        <source>Skip</source>
-        <translation>رد کردن</translation>
-    </message>
-</context>
-<context>
     <name>MinMaxRowType</name>
     <message>
         <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="78"/>
@@ -471,12 +435,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="58"/>
         <source>VPN Connected</source>
-        <translation>وی‎پی‎ان وصل شد</translation>
+        <translation>VPN وصل شد</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="65"/>
         <source>VPN Disconnected</source>
-        <translation>وی‎پی‎ان قطع شد</translation>
+        <translation>VPN قطع شد</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="88"/>
@@ -567,7 +531,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageHome.qml" line="518"/>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="636"/>
         <source>VPN protocol</source>
-        <translation>پروتکل وی‎پی‎ان</translation>
+        <translation>پروتکل VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="571"/>
@@ -1028,7 +992,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="322"/>
         <source>Block DNS requests outside of VPN</source>
-        <translation>مسدود کردن درخواست‎های DNS خارج از وی‎پی‎ان</translation>
+        <translation>مسدود کردن درخواست‎های DNS خارج از VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="343"/>
@@ -2038,13 +2002,13 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="52"/>
         <source>A DNS service is installed on your server, and it is only accessible via VPN.
 </source>
-        <translation>یک سرویس DSN بر روی سرور شما نصب شده و فقط از طریق وی‎پی‎ان قابل دسترسی می‎باشد.
+        <translation>یک سرویس DNS بر روی سرور شما نصب شده و فقط از طریق VPN قابل دسترسی می‎باشد.
 </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="53"/>
         <source>The DNS address is the same as the address of your server. You can configure DNS in the settings, under the connections tab.</source>
-        <translation>آدرس DSN همان آدرس سرور شماست. میتوانید از قسمت تنظیمات و تب اتصالات DSN خود را تنظیم کنید.</translation>
+        <translation>آدرس DNS همان آدرس سرور شماست. میتوانید از قسمت تنظیمات و تب اتصالات DNS خود را تنظیم کنید.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="68"/>
@@ -2284,7 +2248,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="984"/>
         <source>Public host / IP</source>
-        <translation>هاست عمومی / آی‌پی</translation>
+        <translation>هاست عمومی / IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="995"/>
@@ -2296,12 +2260,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1020"/>
         <source>Leave empty to use server IP automatically</source>
-        <translation>برای استفاده خودکار از آی‌پی سرور، خالی بگذارید</translation>
+        <translation>برای استفاده خودکار از IP سرور، خالی بگذارید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1033"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ این مورد آی‌پی سرور را در لینک‌های اتصال جایگزین می‌کند. مطمئن شوید این هاست/دامنه به سرور شما اشاره دارد.</translation>
+        <translation>⚠ این مورد IP سرور را در لینک‌های اتصال جایگزین می‌کند. مطمئن شوید این هاست/دامنه به سرور شما اشاره دارد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1046"/>
@@ -2441,7 +2405,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1658"/>
         <source>Internal IP</source>
-        <translation>آی‌پی داخلی</translation>
+        <translation>IP داخلی</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1667"/>
@@ -2455,7 +2419,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1693"/>
         <source>External IP</source>
-        <translation>آی‌پی خارجی</translation>
+        <translation>IP خارجی</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1741"/>
@@ -2540,12 +2504,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1928"/>
         <source>NAT internal IP: enter a valid IPv4 address</source>
-        <translation>آی‌پی داخلی NAT: یک آدرس IPv4 معتبر وارد کنید</translation>
+        <translation>IP داخلی NAT: یک آدرس IPv4 معتبر وارد کنید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="1932"/>
         <source>NAT external IP: enter a valid IPv4 address</source>
-        <translation>آی‌پی خارجی NAT: یک آدرس IPv4 معتبر وارد کنید</translation>
+        <translation>IP خارجی NAT: یک آدرس IPv4 معتبر وارد کنید</translation>
     </message>
 </context>
 <context>
@@ -2684,6 +2648,207 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="283"/>
         <source>Username cannot be empty</source>
         <translation>نام کاربری نمی‌تواند خالی باشد</translation>
+    </message>
+</context>
+<context>
+    <name>PageServiceTProxySettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy started</source>
+        <translation>TProxy راه‌اندازی شد</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy stopped</source>
+        <translation>TProxy متوقف شد</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="668"/>
+        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
+        <translation>تنظیمات قفل شد: زمان اتصال به پایان رسید (کد خطا %1). برای تلاش دوباره صفحه را باز کنید.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="275"/>
+        <source>TProxy settings</source>
+        <translation>تنظیمات TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="276"/>
+        <source>Read more about Telegram WEB proxy</source>
+        <translation>درباره پروکسی Telegram WEB بیشتر بخوانید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="286"/>
+        <source>No internet connection. Connect to the internet to change TProxy settings.</source>
+        <translation>اتصال اینترنت وجود ندارد. برای تغییر تنظیمات TProxy به اینترنت متصل شوید.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="309"/>
+        <source>Connection</source>
+        <translation>ارتباط</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="313"/>
+        <source>Settings</source>
+        <translation>تنظیمات</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="360"/>
+        <source>Use Telegram WEB proxy link</source>
+        <translation>از لینک پروکسی Telegram WEB استفاده کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="386"/>
+        <source>Set a hostname first</source>
+        <translation>نخست یک نام هاست تعیین کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="459"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="541"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="580"/>
+        <source>Copied</source>
+        <translation>کپی شد</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="446"/>
+        <source>Telegram connection link</source>
+        <translation>لینک اتصال Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="447"/>
+        <source>TProxy WEB proxy link</source>
+        <translation>لینک پروکسی TProxy WEB</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="473"/>
+        <source>Or enter the proxy details manually.</source>
+        <translation>یا اطلاعات پروکسی را دستی وارد کنید.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="479"/>
+        <source>How to do it</source>
+        <translation>چگونه انجام دهیم</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="522"/>
+        <source>Host</source>
+        <translation>هاست</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="560"/>
+        <source>Secret</source>
+        <translation>Secret</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="593"/>
+        <source>Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.</source>
+        <translation>به یک کلاینت Telegram با پشتیبانی از WEB نیاز دارد (نمونه اولیه دسکتاپ). لینک‌های کلاسیک MTProxy کار نمی‌کنند.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="606"/>
+        <source>Delete TProxy</source>
+        <translation>حذف TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="609"/>
+        <source>Remove %1 from server?</source>
+        <translation>%1 از سرور حذف شود؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="616"/>
+        <source>The proxy will be stopped and all users will lose access.</source>
+        <translation>پروکسی متوقف می‌شود و همه کاربران دسترسی خود را از دست می‌دهند.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Continue</source>
+        <translation>ادامه</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Cancel</source>
+        <translation>کنسل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="637"/>
+        <source>Enable TProxy</source>
+        <translation>فعال‌سازی TProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="666"/>
+        <source>Enable TProxy to edit settings</source>
+        <translation>برای ویرایش تنظیمات، TProxy را فعال کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="669"/>
+        <source>Cannot reach the server — settings are unavailable</source>
+        <translation>دسترسی به سرور امکان‌پذیر نیست — تنظیمات در دسترس نیست</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="681"/>
+        <source>Hostname</source>
+        <translation>نام هاست</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="682"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="697"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>از حروف کوچک، ارقام، نقطه و خط تیره استفاده کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="706"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="878"/>
+        <source>Enter a lowercase DNS hostname (A record to this server)</source>
+        <translation>یک نام هاست DNS با حروف کوچک وارد کنید (رکورد A به این سرور)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="719"/>
+        <source>Required. Point a DNS A record at this server. Do not put a CDN in front.</source>
+        <translation>الزامی است. یک رکورد A در DNS را به این سرور اشاره دهید. جلوی آن CDN قرار ندهید.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="732"/>
+        <source>ACME email</source>
+        <translation>ایمیل ACME</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="733"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="748"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="757"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="882"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>یک ایمیل معتبر برای گواهی TLS وارد کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="770"/>
+        <source>Used by Caddy to issue a Let&apos;s Encrypt certificate.</source>
+        <translation>توسط Caddy برای صدور گواهی Let&apos;s Encrypt استفاده می‌شود.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="780"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="794"/>
+        <source>Carrier mode</source>
+        <translation>حالت Carrier</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="820"/>
+        <source>MTProxy workers</source>
+        <translation>کارگرهای MTProxy</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="860"/>
+        <source>Save</source>
+        <translation>ذخیره</translation>
     </message>
 </context>
 <context>
@@ -2898,7 +3063,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="984"/>
         <source>Public host / IP</source>
-        <translation>هاست عمومی / آی‌پی</translation>
+        <translation>هاست عمومی / IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="995"/>
@@ -2910,12 +3075,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1020"/>
         <source>Leave empty to use server IP automatically</source>
-        <translation>برای استفاده خودکار از آی‌پی سرور، خالی بگذارید</translation>
+        <translation>برای استفاده خودکار از IP سرور، خالی بگذارید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1033"/>
         <source>⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.</source>
-        <translation>⚠ این مورد آی‌پی سرور را در لینک‌های اتصال جایگزین می‌کند. مطمئن شوید این هاست/دامنه به سرور شما اشاره دارد.</translation>
+        <translation>⚠ این مورد IP سرور را در لینک‌های اتصال جایگزین می‌کند. مطمئن شوید این هاست/دامنه به سرور شما اشاره دارد.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1046"/>
@@ -3020,17 +3185,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1532"/>
         <source>Set public IP manually</source>
-        <translation>تعیین دستی آی‌پی عمومی</translation>
+        <translation>تعیین دستی IP عمومی</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1533"/>
         <source>By default the proxy auto-detects its public IP. Enable to override it manually, e.g. when the server is behind NAT / Docker bridge</source>
-        <translation>به‌طور پیش‌فرض پروکسی آی‌پی عمومی خود را خودکار تشخیص می‌دهد. برای تعیین دستی آن فعال کنید، مثلاً وقتی سرور پشت NAT / پل Docker است</translation>
+        <translation>به‌طور پیش‌فرض پروکسی IP عمومی خود را خودکار تشخیص می‌دهد. برای تعیین دستی آن فعال کنید، مثلاً وقتی سرور پشت NAT / پل Docker است</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1550"/>
         <source>Public IP</source>
-        <translation>آی‌پی عمومی</translation>
+        <translation>IP عمومی</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1559"/>
@@ -3122,7 +3287,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="1784"/>
         <source>Public IP: enter a valid IPv4 address</source>
-        <translation>آی‌پی عمومی: یک آدرس IPv4 معتبر وارد کنید</translation>
+        <translation>IP عمومی: یک آدرس IPv4 معتبر وارد کنید</translation>
     </message>
 </context>
 <context>
@@ -3214,87 +3379,102 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <source>You have the latest version of AmneziaVPN</source>
+        <translation>آخرین نسخه AmneziaVPN را دارید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <source>Failed to check for updates</source>
+        <translation>بررسی به‌روزرسانی‌ها ناموفق بود</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="73"/>
         <source>Support Amnezia</source>
         <translation>پشتیبانی از Amnezia</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
         <translation>Amnezia یک برنامه رایگان و متن باز است. اگر دوست دارید می توانید از توسعه دهندگان حمایت کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
         <source>Contacts</source>
         <translation>مخاطب</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>Software version: %1</source>
         <translation>%1 :نسخه نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
         <source>Check for updates</source>
         <translation>بررسی بروز‎رسانی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
+        <source>Checking...</source>
+        <translation>در حال بررسی...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="186"/>
         <source>Privacy Policy</source>
         <translation>سیاست حفظ حریم خصوصی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="205"/>
         <source>Telegram group</source>
-        <translation>گروه تلگرام</translation>
+        <translation>گروه Telegram</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="206"/>
         <source>To discuss features</source>
         <translation>برای گفتگو در مورد ویژگی‎ها</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="193"/>
-        <source>https://t.me/amnezia_vpn_en</source>
-        <translation>https://t.me/amnezia_vpn_ir</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="209"/>
+        <source>https://telegram.me/amnezia_vpn_en</source>
+        <translation>https://telegram.me/amnezia_vpn_ir</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
         <source>support@amnezia.org</source>
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="217"/>
         <source>For reviews and bug reports</source>
         <translation>برای ارائه نظرات و گزارشات باگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="220"/>
         <source>mailto:support@amnezia.org</source>
         <translation>mailto:support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="227"/>
         <source>GitHub</source>
         <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="228"/>
         <source>Discover the source code</source>
         <translation>مشاهده کد منبع</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="231"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="238"/>
         <source>Website</source>
         <translation>وب سایت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="239"/>
         <source>Visit official website</source>
         <translation>مشاهده وب‌سایت رسمی</translation>
     </message>
@@ -3742,7 +3922,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="22"/>
         <source>Telegram</source>
-        <translation>تلگرام</translation>
+        <translation>Telegram</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="30"/>
@@ -3906,52 +4086,62 @@ Create one from the current settings.</source>
         <translation>نمایش نشان اعلان برای اخبار خوانده‌نشده</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="201"/>
+        <source>Check for updates automatically</source>
+        <translation>بررسی خودکار به‌روزرسانی‌ها</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="202"/>
+        <source>Check for a new app version at startup</source>
+        <translation>بررسی نسخه جدید برنامه هنگام راه‌اندازی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="226"/>
         <source>Language</source>
         <translation>زبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
         <source>Logging</source>
         <translation>گزارشات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Enabled</source>
         <translation>فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Disabled</source>
         <translation>غیر فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="258"/>
         <source>Reset settings and remove all data from the application</source>
         <translation>ریست کردن تنظیمات و حذف تمام داده‎ها از نرم‎افزار</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="263"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation>ریست کردن تنظیمات و حذف تمام داده‎ها از نرم‎افزار؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="264"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
         <translation>تمام تنظیمات به حالت پیش‎فرض ریست می‎شوند. تمام سرویس‎های Amnezia بر روی سرور باقی می‎مانند.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="265"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="245"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="266"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="270"/>
         <source>Cannot reset settings during active connection</source>
         <translation>نمی‌توان تنظیمات را در حین اتصال فعال بازنشانی کرد.</translation>
     </message>
@@ -4070,7 +4260,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
-        <translation>میتوانید مشخص کنید که چه سایت‎هایی از وی‎پی‎ان استفاده کنند</translation>
+        <translation>میتوانید مشخص کنید که چه سایت‎هایی از VPN استفاده کنند</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="123"/>
@@ -4098,7 +4288,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="46"/>
         <source>Default server does not support custom DNS</source>
-        <translation>سرور پیش‌فرض از دی‌ان‌اس سفارشی پشتیبانی نمی‌کند</translation>
+        <translation>سرور پیش‌فرض از DNS سفارشی پشتیبانی نمی‌کند</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="59"/>
@@ -4171,7 +4361,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
         <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
-        <translation>فعال کنید تا ترافیک شبکه از تانل امن VPN بگذرد و در صورت قطع اتصال، آی‌پی و درخواست‌های DNS شما به‌طور تصادفی افشا نشود</translation>
+        <translation>فعال کنید تا ترافیک شبکه از تانل امن VPN بگذرد و در صورت قطع اتصال، IP و درخواست‌های DNS شما به‌طور تصادفی افشا نشود</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
@@ -4399,19 +4589,6 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
         <source>AmneziaVPN-service logs</source>
         <translation>گزارش‌های سرویس AmneziaVPN</translation>
-    </message>
-</context>
-<context>
-    <name>PageSettingsNewsDetail</name>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="87"/>
-        <source>Update</source>
-        <translation>به‌روزرسانی</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="112"/>
-        <source>Skip</source>
-        <translation>رد کردن</translation>
     </message>
 </context>
 <context>
@@ -4667,7 +4844,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="70"/>
         <source>Addresses from the list should not be accessed via VPN</source>
-        <translation>دسترسی به آدرس‎های لیست بدون وی‎پی‎ان</translation>
+        <translation>دسترسی به آدرس‎های لیست بدون VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="101"/>
@@ -5078,7 +5255,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="248"/>
         <source>Password or SSH private key</source>
         <translation>رمز عبور یا کلید خصوصی SSH</translation>
     </message>
@@ -5098,47 +5275,57 @@ Create one from the current settings.</source>
         <translation>تمام داده‎هایی که شما وارد می‎کنید به شدت محرمانه‎ است و با Amnezia یا هر شخص ثالث دیگری به اشتراک گذاشته نمی‎شود</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="157"/>
+        <source>Don&apos;t have a server?</source>
+        <translation>سرور ندارید؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="158"/>
+        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
+        <translation>هاستینگ Amnezia. سرورهای VPN بدون تنظیمات پیچیده و دردسر</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
         <source>How to run your VPN server</source>
         <translation>چگونه سرور VPN خود را اجرا کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="180"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
         <translation>داده‌های اتصال را از کجا دریافت کنید و دستورالعمل‌های مرحله به مرحله برای خرید یک VPS</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="200"/>
         <source>Ip address cannot be empty</source>
         <translation>آدرس آی‎پی نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="203"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>آدرس را با فرمت 255.255.255.255:88 وارد کنید</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="208"/>
         <source>Login cannot be empty</source>
         <translation>نام‎کاربری نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="214"/>
         <source>Password/private key cannot be empty</source>
         <translation>پسورد یا کلید خصوصی نمی‎تواند خالی باشد</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="230"/>
         <source>Server IP address [:port]</source>
         <translation>آدرس آی‎پی سرور (:پورت)</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="231"/>
         <source>255.255.255.255:22</source>
         <translation>255.255.255.255:22</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="239"/>
         <source>SSH Username</source>
         <translation>نام کاربری SSH</translation>
     </message>
@@ -5233,17 +5420,58 @@ Create one from the current settings.</source>
         <translation>پروتکل شبکه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="215"/>
         <source>Port</source>
         <translation>پورت</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="229"/>
+        <source>Hostname</source>
+        <translation>نام هاست</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="244"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>از حروف کوچک، ارقام، نقطه و خط تیره استفاده کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="260"/>
+        <source>ACME email</source>
+        <translation>ایمیل ACME</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="261"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="275"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="329"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>یک ایمیل معتبر برای گواهی TLS وارد کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="288"/>
+        <source>Needs a DNS A record and free, internet-reachable ports 443 (HTTPS) and 80 (ACME). If either port is busy or blocked, the proxy will not work. Classic Telegram MTProxy links will not work.</source>
+        <translation>به یک رکورد A در DNS و پورت‌های آزاد و قابل دسترس از اینترنت 443 (HTTPS) و 80 (ACME) نیاز دارد. اگر یکی از این پورت‌ها اشغال یا مسدود باشد، پروکسی کار نمی‌کند. لینک‌های کلاسیک MTProxy در Telegram کار نمی‌کنند.</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="310"/>
         <source>Install</source>
         <translation>نصب</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="325"/>
+        <source>Enter a lowercase DNS hostname</source>
+        <translation>یک نام هاست DNS با حروف کوچک وارد کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="344"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>پورت باید در محدوده ۱ تا ۶۵۵۳۵ باشد</translation>
     </message>
@@ -5253,7 +5481,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="78"/>
         <source>VPN protocol</source>
-        <translation>پروتکل وی‎پی‎ان</translation>
+        <translation>پروتکل VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="79"/>
@@ -5408,12 +5636,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="156"/>
         <source>Share VPN Access</source>
-        <translation>اتصال vpn را به اشتراک بگذارید</translation>
+        <translation>اتصال VPN را به اشتراک بگذارید</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Share full access to the server and VPN</source>
-        <translation>به اشتراک گذاشتن دسترسی کامل به سرور و وی‎پی‎ان</translation>
+        <translation>به اشتراک گذاشتن دسترسی کامل به سرور و VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
@@ -5440,7 +5668,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="271"/>
         <source>Share VPN access without the ability to manage the server</source>
-        <translation>به اشتراک گذاشتن دسترسی وی‎پی‎ان بدون امکان مدیریت سرور</translation>
+        <translation>به اشتراک گذاشتن دسترسی VPN بدون امکان مدیریت سرور</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="282"/>
@@ -5493,7 +5721,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="750"/>
         <source>Allowed IPs: %1</source>
-        <translation>آی‌پی‌های مجاز: %1</translation>
+        <translation>IP‌های مجاز: %1</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="765"/>
@@ -5585,7 +5813,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
         <source>Full access to the server and VPN</source>
-        <translation>دسترسی کامل به سرور و وی‎پی‎ان</translation>
+        <translation>دسترسی کامل به سرور و VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="67"/>
@@ -5597,7 +5825,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="68"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation>اگر دسترسی کامل را با دیگران به اشتراک بگذارید، آن‎ها می‎توانند پروتکل‎ها و سرویس‎ها را حذف یا اضافه کنند که باعث می‎شود که وی‎پی‎ان دیگر برای سایر کاربران کار نکند. </translation>
+        <translation>اگر دسترسی کامل را با دیگران به اشتراک بگذارید، آن‎ها می‎توانند پروتکل‎ها و سرویس‎ها را حذف یا اضافه کنند که باعث می‎شود که VPN دیگر برای سایر کاربران کار نکند. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="87"/>
@@ -5642,6 +5870,60 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageStart.qml" line="217"/>
         <source>Logging is enabled. Note that logs will be automaticallydisabled after 14 days, and all log files will be deleted.</source>
         <translation>ثبت گزارش فعال است. توجه کنید که پس از 14 روز به‌طور خودکار غیرفعال می‌شود و همه فایل‌های گزارش حذف می‌شوند.</translation>
+    </message>
+</context>
+<context>
+    <name>PageUpdate</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="24"/>
+        <source>Done. Install the update</source>
+        <translation>انجام شد. به‌روزرسانی را نصب کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="26"/>
+        <source>Download failed. Download manually from amnezia.org</source>
+        <translation>دانلود ناموفق بود. به‌صورت دستی از amnezia.org دانلود کنید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="169"/>
+        <source>New version available</source>
+        <translation>نسخه جدید در دسترس است</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="186"/>
+        <source>New</source>
+        <translation>جدید</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="194"/>
+        <source>Improved</source>
+        <translation>بهبودها</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="202"/>
+        <source>Fixed</source>
+        <translation>رفع اشکالات</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="248"/>
+        <source>Update app</source>
+        <translation>به‌روزرسانی برنامه</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="245"/>
+        <source>Downloading update...</source>
+        <translation>در حال دانلود به‌روزرسانی...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="246"/>
+        <source>Install update</source>
+        <translation>نصب به‌روزرسانی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="247"/>
+        <source>Retry</source>
+        <translation>تلاش دوباره</translation>
     </message>
 </context>
 <context>
@@ -5784,88 +6066,88 @@ Create one from the current settings.</source>
         <translation>تنظیمات شامل هیچ کانتینر یا اعتبارنامه‎ای برای اتصال به سرور نیست</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="79"/>
+        <location filename="../core/utils/errorStrings.cpp" line="81"/>
         <source>VPN connection error</source>
         <translation>خطای اتصال VPN</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="82"/>
-        <location filename="../core/utils/errorStrings.cpp" line="91"/>
+        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Error when retrieving configuration from API</source>
         <translation>خطا هنگام بازیابی پیکربندی از API</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="83"/>
+        <location filename="../core/utils/errorStrings.cpp" line="85"/>
         <source>This config has already been added to the application</source>
         <translation>این پیکربندی قبلاً به برنامه اضافه شده است</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
         <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
         <translation>پرداخت شما در Google Play در انتظار تأیید است. پس از تکمیل پرداخت، اشتراک در اجرای بعدی برنامه به‌طور خودکار افزوده می‌شود.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
         <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
         <translation>پرداخت شما در انتظار تأیید است. پس از تأیید، اشتراک به‌طور خودکار افزوده می‌شود.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="110"/>
         <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
         <translation>پرداخت شما در انتظار تأیید است. لطفاً پرداخت را کامل کنید و سپس اشتراک خود را بازیابی کنید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
         <translation>خریدی برای بازیابی وجود ندارد. اگر اشتراک فعالی دارید، مطمئن شوید با همان حساب Google که خرید انجام شده وارد شده‌اید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
         <translation>خریدی برای بازیابی وجود ندارد. اگر اشتراک فعالی دارید، مطمئن شوید با همان Apple ID که خرید انجام شده وارد شده‌اید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="119"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
         <translation>خریدی برای بازیابی وجود ندارد. اگر اشتراک فعالی دارید، مطمئن شوید با همان حسابی که خرید انجام شده وارد شده‌اید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
         <source>Transaction was canceled by the user</source>
         <translation>تراکنش توسط کاربر لغو شد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
         <source>Billing error</source>
         <translation>خطای صورت‌حساب</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
         <source>Internal Google Play error, please try again later</source>
         <translation>خطای داخلی Google Play، لطفاً بعداً دوباره تلاش کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
         <source>Billing is unavailable, please try again later</source>
         <translation>سرویس صورت‌حساب در دسترس نیست، لطفاً بعداً دوباره تلاش کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
         <source>You already own this subscription</source>
         <translation>شما از قبل این اشتراک را دارید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <location filename="../core/utils/errorStrings.cpp" line="137"/>
         <source>The requested subscription is not available for purchase</source>
         <translation>اشتراک درخواستی برای خرید در دسترس نیست</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <location filename="../core/utils/errorStrings.cpp" line="138"/>
         <source>A network error occurred during the operation, please check the Internet connection</source>
         <translation>در حین عملیات خطای شبکه رخ داد، لطفاً اتصال اینترنت را بررسی کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="143"/>
+        <location filename="../core/utils/errorStrings.cpp" line="145"/>
         <source>ErrorCode: %1. </source>
         <translation>کد خطا: %1. </translation>
     </message>
@@ -5966,63 +6248,73 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="74"/>
+        <source>This configuration was created in a newer version of the application and is not fully supported. Please update the application</source>
+        <translation>این پیکربندی در نسخه جدیدتری از برنامه ایجاد شده و به‌طور کامل پشتیبانی نمی‌شود. لطفاً برنامه را به‌روزرسانی کنید</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <source>Some configurations from the backup were not restored because they require a newer version of the application</source>
+        <translation>برخی از پیکربندی‌های موجود در پشتیبان بازیابی نشدند، زیرا به نسخه جدیدتری از برنامه نیاز دارند</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="76"/>
         <source>This protocol is no longer supported. Please select another protocol or remove this container from the server settings.</source>
         <translation>این پروتکل دیگر پشتیبانی نمی‌شود. لطفاً پروتکل دیگری انتخاب کنید یا این کانتینر را از تنظیمات سرور حذف کنید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <location filename="../core/utils/errorStrings.cpp" line="77"/>
         <source>Unable to open config file</source>
         <translation>امکان باز کردن فایل پیکربندی وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="76"/>
+        <location filename="../core/utils/errorStrings.cpp" line="78"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
-        <translation>پروتکل وی‎پی‎ان نصب نشده است
-لطفا کانتینر وی‎پی‎ان را نصب کنید</translation>
+        <translation>پروتکل VPN نصب نشده است
+لطفا کانتینر VPN را نصب کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="86"/>
         <source>In the response from the server, an empty config was received</source>
         <translation>در پاسخ از سرور، پیکربندی خالی دریافت شد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="85"/>
+        <location filename="../core/utils/errorStrings.cpp" line="87"/>
         <source>SSL error occurred</source>
         <translation>خطای SSL رخ داد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="86"/>
+        <location filename="../core/utils/errorStrings.cpp" line="88"/>
         <source>Server response timeout on api request</source>
         <translation>زمان پاسخ سرور برای درخواست API به پایان رسید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="87"/>
+        <location filename="../core/utils/errorStrings.cpp" line="89"/>
         <source>Missing AGW public key</source>
         <translation>کلید عمومی AGW وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="88"/>
+        <location filename="../core/utils/errorStrings.cpp" line="90"/>
         <source>Failed to decrypt response payload</source>
         <translation>رمزگشایی محتوای پاسخ انجام نشد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="89"/>
+        <location filename="../core/utils/errorStrings.cpp" line="91"/>
         <source>Missing list of available services</source>
         <translation>فهرست سرویس‌های موجود وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="90"/>
+        <location filename="../core/utils/errorStrings.cpp" line="92"/>
         <source>The limit of allowed configurations per subscription has been exceeded</source>
         <translation>از حد مجاز پیکربندی‌ها برای هر اشتراک فراتر رفته‌اید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="92"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Please update the application to use this feature</source>
         <translation>برای استفاده از این قابلیت، برنامه را به‌روزرسانی کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -6031,77 +6323,77 @@ Create one from the current settings.</source>
  اگر ایمیلی دریافت نکرده‌اید، با پشتیبانی ما تماس بگیرید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>Unable to process purchase</source>
         <translation>امکان پردازش خرید وجود ندارد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>No active subscription found</source>
         <translation>هیچ اشتراک فعالی یافت نشد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>هیچ اشتراک خریداری‌شده‌ای یافت نشد. لطفاً ابتدا یک اشتراک خریداری کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>این آدرس ایمیل قبلاً برای فعال‌سازی نسخه آزمایشی استفاده شده است</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA verification is required</source>
         <translation>تأیید CAPTCHA لازم است</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>CAPTCHA نادرست بود. لطفاً دوباره تلاش کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="102"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA به‌روزرسانی شد. لطفاً دوباره تلاش کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="103"/>
         <source>Too many requests. Please try again later</source>
         <translation>درخواست‌های بیش از حد. لطفاً بعداً دوباره تلاش کنید</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="122"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be opened</source>
         <translation>خطای QFile: فایل باز نشد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="123"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>خطای QFile: هنگام خواندن از فایل خطایی رخ داد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="124"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>خطای QFile: دسترسی به فایل امکان‌پذیر نبود</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="125"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>خطای QFile: خطای نامشخصی رخ داد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="126"/>
+        <location filename="../core/utils/errorStrings.cpp" line="128"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>خطای QFile: یک خطای مهلک رخ داد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="127"/>
+        <location filename="../core/utils/errorStrings.cpp" line="129"/>
         <source>QFile error: The operation was aborted</source>
         <translation>خطای QFile: عملیات لغو شد</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="140"/>
+        <location filename="../core/utils/errorStrings.cpp" line="142"/>
         <source>Internal error</source>
         <translation>خطای داخلی</translation>
     </message>
@@ -6111,17 +6403,17 @@ Create one from the current settings.</source>
         <translation>IPsec</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="107"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="108"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>IKEv2/IPsec - پروتکل مدرن و پایدار، کمی سریع‌تر از سایرین است و پس از قطع شدن سیگنال، اتصال را بازیابی می‌کند. از پشتیبانی بومی در آخرین نسخه‌های Android و iOS برخوردار است.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="114"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="115"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>ساختن یک گنجانده فایل بر روی سرور شما برای ذخیره و انتقال ایمن فایل‌ها.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="184"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="187"/>
         <source>DNS Service</source>
         <translation>سرویس DNS</translation>
     </message>
@@ -6132,7 +6424,7 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="76"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="183"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
         <source>Website in Tor network</source>
         <translation>وب سایت در شبکه Tor</translation>
     </message>
@@ -6142,40 +6434,51 @@ Create one from the current settings.</source>
         <translation>AmneziaDNS</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="72"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <source>MTProxy (Telegram)</source>
         <translation>MTProxy (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="73"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <source>Telemt (Telegram)</source>
         <translation>Telemt (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="88"/>
-        <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
-        <translation>پروتکل OpenVPN یکی از پروتکل‎های وی‎پی‎ان محبوب می‎باشد با تنظیمات و پیکربندی‎های قابل تغییر. از پروتکل امنیتی داخلی خود با تبادل کلید SSL/TLS استفاده می‎کند.</translation>
+        <location filename="../core/protocols/protocolUtils.cpp" line="74"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="82"/>
+        <source>TProxy (Telegram WEB)</source>
+        <translation>TProxy (Telegram WEB)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="91"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="93"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="89"/>
+        <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
+        <translation>پروتکل OpenVPN یکی از پروتکل‎های VPN محبوب می‎باشد با تنظیمات و پیکربندی‎های قابل تغییر. از پروتکل امنیتی داخلی خود با تبادل کلید SSL/TLS استفاده می‎کند.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="92"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="94"/>
         <source>This protocol is no longer supported.</source>
         <translation>این پروتکل دیگر پشتیبانی نمی‌شود.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="117"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="118"/>
         <source>Telegram MTProto proxy server</source>
         <translation>سرور پروکسی Telegram MTProto</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="119"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="120"/>
         <source>Telegram MTProto proxy (Telemt, Rust)</source>
         <translation>پروکسی Telegram MTProto (Telemt، Rust)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="127"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="122"/>
+        <source>Telegram WEB proxy (tproxy-server)</source>
+        <translation>پروکسی Telegram WEB (tproxy-server)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="130"/>
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
 Features:
@@ -6192,7 +6495,7 @@ Features:
 * کار با هر دو پروتکل TCP و UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="138"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="141"/>
         <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
 Features:
@@ -6211,7 +6514,7 @@ Features:
 * کار با پروتکل UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="148"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="151"/>
         <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
 AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
@@ -6234,7 +6537,7 @@ AmneziaWG گزینه‌ای بسیار مناسب برای کسانی است ک�
 * کار با پروتکل UDP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="160"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="163"/>
         <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
 Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
 
@@ -6255,7 +6558,7 @@ Features:
 * کار با پروتکل TCP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="173"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="176"/>
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
 Features:
@@ -6274,54 +6577,59 @@ Features:
 * کار با پروتکل UDP (پورت‌های 500 و 4500)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="192"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="195"/>
         <source>Telegram MTProto proxy server. Allows Telegram clients to connect through your server using the MTProto protocol. Supports FakeTLS mode for bypassing DPI-based blocking.</source>
         <translation>سرور پروکسی Telegram MTProto. به کلاینت‌های Telegram اجازه می‌دهد از طریق سرور شما و با پروتکل MTProto متصل شوند. از حالت FakeTLS برای دور زدن مسدودسازی مبتنی بر DPI پشتیبانی می‌کند.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="197"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="200"/>
         <source>Telegram MTProto proxy powered by Telemt (Rust). Supports secure and TLS fronting modes with optional traffic masking.</source>
         <translation>پروکسی Telegram MTProto بر پایه Telemt (Rust). از حالت امن و حالت TLS fronting با قابلیت اختیاری پنهان‌سازی ترافیک پشتیبانی می‌کند.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="329"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="203"/>
+        <source>Telegram WEB proxy. Clients connect over HTTPS to a hostname; the server relays traffic to official MTProxy. Requires a domain, ports 80 and 443, and a WEB-capable Telegram app.</source>
+        <translation>پروکسی Telegram WEB. کلاینت‌ها از طریق HTTPS به یک نام هاست متصل می‌شوند و سرور ترافیک را به MTProxy رسمی منتقل می‌کند. به یک دامنه، پورت‌های 80 و 443 و یک برنامه Telegram با پشتیبانی از WEB نیاز دارد.</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="340"/>
         <source>Automatic</source>
         <translation>خودکار</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="337"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="348"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>پروتکل AmneziaWG نصب خواهد شد. سرعت اتصال بالایی فراهم می‌کند و عملکرد پایدار را حتی در دشوارترین شرایط شبکه تضمین می‌کند.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="95"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="96"/>
         <source>WireGuard - popular VPN protocol with high performance, high speed and low power consumption.</source>
         <translation>WireGuard — پروتکل محبوب VPN با کارایی بالا، سرعت زیاد و مصرف انرژی کم.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="98"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="101"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="99"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="102"/>
         <location filename="../ui/models/containersModel.cpp" line="41"/>
         <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>AmneziaWG یک پروتکل ویژه از Amnezia بر پایه WireGuard است. سرعت اتصال بالایی فراهم می‌کند و عملکرد پایدار را حتی در دشوارترین شرایط شبکه تضمین می‌کند.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="104"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="105"/>
         <source>XRay with REALITY masks VPN traffic as web traffic and protects against active probing. It is highly resistant to detection and offers high speed.</source>
         <translation>XRay با REALITY ترافیک VPN را به شکل ترافیک وب پنهان می‌کند و از کاوش فعال محافظت می‌کند. مقاومت بسیار بالایی در برابر شناسایی دارد و سرعت زیادی ارائه می‌دهد.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="110"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="111"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>با دو کلیک یک سایت وردپرس در شبکه Tor راه‎اندازی کنید.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="112"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="113"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>سرور DNS را با مال خودتان جایگزین کنید. این کار سطح حریم خصوصی شما را افزایش می‎دهد.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="189"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
@@ -6345,9 +6653,9 @@ For more detailed information, you can
         <translation>سرویس SFTP</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="190"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="71"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="193"/>
         <source>SOCKS5 proxy server</source>
         <translation>سرور پروکسی SOCKS5</translation>
     </message>
@@ -6514,7 +6822,7 @@ For more detailed information, you can
 <context>
     <name>SecureServersRepository</name>
     <message>
-        <location filename="../core/repositories/secureServersRepository.cpp" line="212"/>
+        <location filename="../core/repositories/secureServersRepository.cpp" line="225"/>
         <source>Server</source>
         <translation>سرور</translation>
     </message>
@@ -6576,7 +6884,7 @@ For more detailed information, you can
 <context>
     <name>SettingsUiController</name>
     <message>
-        <location filename="../ui/controllers/settingsUiController.cpp" line="183"/>
+        <location filename="../ui/controllers/settingsUiController.cpp" line="187"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام تنظیمات به مقادیر پیش فرض ریست شد</translation>
     </message>
@@ -6628,51 +6936,51 @@ For more detailed information, you can
         <translation>اشتراک با موفقیت بازیابی شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="344"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="380"/>
         <source>Purchase confirmed. Subscription has been added to the app</source>
         <translation>خرید تأیید شد. اشتراک به برنامه افزوده شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="436"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="489"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="612"/>
         <source>%1 installed successfully.</source>
         <translation>%1 با موفقیت نصب شد.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="451"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="497"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="524"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="555"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="583"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="647"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="740"/>
         <source>Enter the digits from the image to continue</source>
         <translation>برای ادامه، اعداد موجود در تصویر را وارد کنید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="605"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>این آدرس ایمیل قبلاً برای فعال‌سازی نسخه آزمایشی استفاده شده است. از سرویس راضی هستید؟ به Premium ارتقا دهید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="665"/>
         <source>API config reloaded</source>
         <translation>پیکربندی API دوباره بارگذاری شد.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="669"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>کشور اتصال با موفقیت به %1 تغییر یافت.</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="784"/>
         <source>API config removed</source>
         <translation>پیکربندی API حذف شد</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="793"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 حذف شد</translation>
     </message>
@@ -6727,21 +7035,56 @@ For more detailed information, you can
     </message>
 </context>
 <context>
-    <name>UpdateUiController</name>
+    <name>UpdateSupportDrawer</name>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="20"/>
-        <source>New version released: %1</source>
-        <translation>نسخه جدید منتشر شد: %1</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="39"/>
+        <source>Support</source>
+        <translation>پشتیبانی</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="23"/>
-        <source>New version released: %1 (%2)</source>
-        <translation>نسخه جدید منتشر شد: %1 (%2)</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="47"/>
+        <source>If the update won&apos;t install, message us</source>
+        <translation>اگر به‌روزرسانی نصب نشد، به ما پیام دهید</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="34"/>
-        <source>Failed to load changelog text</source>
-        <translation>بارگذاری متن تغییرات انجام نشد</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="54"/>
+        <source>Telegram</source>
+        <translation>Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="55"/>
+        <source>We&apos;ll reply in chat</source>
+        <translation>در چت پاسخ می‌دهیم</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="60"/>
+        <source>https://t.me/amnezia_vpn_en</source>
+        <translation>https://t.me/amnezia_vpn_ir</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="69"/>
+        <source>support@amnezia.org</source>
+        <translation>support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="70"/>
+        <source>Support email</source>
+        <translation>ایمیل پشتیبانی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="75"/>
+        <source>mailto:support@amnezia.org</source>
+        <translation>mailto:support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="84"/>
+        <source>amnezia.org</source>
+        <translation>amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="85"/>
+        <source>Download the update manually</source>
+        <translation>دانلود دستی به‌روزرسانی</translation>
     </message>
 </context>
 <context>
@@ -6829,39 +7172,39 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="279"/>
+        <location filename="../ui/qml/main2.qml" line="285"/>
         <source>Private key passphrase</source>
         <translation>عبارت کلید خصوصی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="300"/>
+        <location filename="../ui/qml/main2.qml" line="306"/>
         <source>Save</source>
         <translation>ذخیره</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="394"/>
+        <location filename="../ui/qml/main2.qml" line="400"/>
         <source>This subscription format is no longer supported</source>
         <translation>این قالب اشتراک دیگر پشتیبانی نمی‌شود</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="395"/>
+        <location filename="../ui/qml/main2.qml" line="401"/>
         <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
         <translation>این نوع اشتراک قدیمی Amnezia دیگر برای اتصال در این نسخه برنامه قابل استفاده نیست.
 برای ادامه، سرور را از برنامه حذف کنید.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="396"/>
+        <location filename="../ui/qml/main2.qml" line="402"/>
         <source>Continue</source>
         <translation>ادامه</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="397"/>
+        <location filename="../ui/qml/main2.qml" line="403"/>
         <source>Cancel</source>
         <translation>کنسل</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="401"/>
+        <location filename="../ui/qml/main2.qml" line="407"/>
         <source>Cannot remove server during active connection</source>
         <translation>نمی‌توان سرور را در حین اتصال فعال حذف کرد.</translation>
     </message>

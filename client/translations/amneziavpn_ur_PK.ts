@@ -11,17 +11,17 @@
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="38"/>
         <source>New DNS server added: %1</source>
-        <translation>نیا ڈی این ایس سرور شامل ہو گیا: %1</translation>
+        <translation>نیا DNS سرور شامل ہو گیا: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="40"/>
         <source>DNS server already exists: %1</source>
-        <translation>ڈی این ایس سرور پہلے ہی موجود ہے: %1</translation>
+        <translation>DNS سرور پہلے ہی موجود ہے: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="49"/>
         <source>DNS server removed: %1</source>
-        <translation>ڈی این ایس سرور ہٹا دیا گیا: %1</translation>
+        <translation>DNS سرور ہٹا دیا گیا: %1</translation>
     </message>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="56"/>
@@ -73,7 +73,7 @@
     <message>
         <location filename="../ui/models/api/apiServicesModel.cpp" line="77"/>
         <source>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;Not available in your region. If you have VPN enabled, disable it, return to the previous screen, and try again.&lt;/a&gt;</source>
-        <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;آپ کے علاقے میں دستیاب نہیں ہے۔ اگر آپ کا وی پی این آن ہے تو اسے بند کریں، پچھلی اسکرین پر واپس جائیں اور دوبارہ کوشش کریں۔&lt;/a&gt;</translation>
+        <translation>&lt;p&gt;&lt;a style=&quot;color: #EB5757;&quot;&gt;آپ کے علاقے میں دستیاب نہیں ہے۔ اگر آپ کا VPN آن ہے تو اسے بند کریں، پچھلی اسکرین پر واپس جائیں اور دوبارہ کوشش کریں۔&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
@@ -125,19 +125,6 @@
         <location filename="../ui/qml/Controls2/CaptchaDialogType.qml" line="271"/>
         <source>Close</source>
         <translation>بند</translation>
-    </message>
-</context>
-<context>
-    <name>ChangelogDrawer</name>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="70"/>
-        <source>Update</source>
-        <translation>اپ ڈیٹ کریں</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Components/ChangelogDrawer.qml" line="96"/>
-        <source>Skip</source>
-        <translation>چھوڑ دیں</translation>
     </message>
 </context>
 <context>
@@ -291,71 +278,71 @@ Can&apos;t be disabled for current server</source>
 <context>
     <name>InstallUiController</name>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="125"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="167"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="132"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="174"/>
         <source>%1 installed successfully. </source>
         <translation>%1 کامیابی سےنصب. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="127"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="169"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="134"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="176"/>
         <source>%1 is already installed on the server. </source>
         <translation>%1 پہلے ہی سرور پر انسٹال ہے. </translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="131"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="138"/>
         <source>
 Added containers that were already installed on the server</source>
         <translation>
 وہ کنٹینرز شامل کیے گئے جو پہلے سے سرور پر نصب تھے</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="173"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="180"/>
         <source>
 Already installed containers were found on the server. All installed containers have been added to the application</source>
         <translation>
 سرور پر پہلے سے نصب کنٹینرز پائے گئے۔ تمام نصب کنٹینرز کو ایپلی کیشن میں شامل کر دیا گیا ہے</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="288"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="327"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="351"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="299"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="340"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="364"/>
         <source>Settings updated successfully</source>
         <translation>ترتیبات کامیابی سے اپ ڈیٹ ہو گئیں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="471"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="487"/>
         <source>Server &apos;%1&apos; was rebooted</source>
         <translation>سرور %1 دوبارہ چالو کیا گیا تھا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="485"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="501"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 ہٹا دیا گیا تھا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="494"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="510"/>
         <source>All containers from server &apos;%1&apos; have been removed</source>
         <translation>سرور &apos;%1&apos; سے تمام کنٹینرز ہٹا دیے گئے ہیں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="520"/>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="538"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="536"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="554"/>
         <source>%1 has been removed from the server &apos;%2&apos;</source>
         <translation>سرور &apos;%2&apos; سے %1 ہٹا دیا گیا ہے</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="553"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="569"/>
         <source>%1 cached profile cleared</source>
         <translation>%1 کیش کردہ پروفائل ختم کر دی گئی</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="607"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="623"/>
         <source>Please login as the user</source>
         <translation>براہ کرم صارف کے طور پر لاگ ان کریں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="631"/>
+        <location filename="../ui/controllers/selfhosted/installUiController.cpp" line="647"/>
         <source>Server added successfully</source>
         <translation>سرور کامیابی سے شامل کیا گیا</translation>
     </message>
@@ -425,29 +412,6 @@ Already installed containers were found on the server. All installed containers 
     </message>
 </context>
 <context>
-    <name>MarketplaceUpdateController</name>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="153"/>
-        <source>Update available</source>
-        <translation>اپ ڈیٹ دستیاب ہے</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="154"/>
-        <source>A new version of %1 is available.</source>
-        <translation>%1 کا ایک نیا ورژن دستیاب ہے۔</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="155"/>
-        <source>Update</source>
-        <translation>اپ ڈیٹ کریں</translation>
-    </message>
-    <message>
-        <location filename="../ui/controllers/marketplaceUpdateController.cpp" line="156"/>
-        <source>Skip</source>
-        <translation>چھوڑ دیں</translation>
-    </message>
-</context>
-<context>
     <name>MinMaxRowType</name>
     <message>
         <location filename="../ui/qml/Controls2/MinMaxRowType.qml" line="78"/>
@@ -471,17 +435,17 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="58"/>
         <source>VPN Connected</source>
-        <translation>وی پی این متصل ہوگیا</translation>
+        <translation>VPN متصل ہوگیا</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="65"/>
         <source>VPN Disconnected</source>
-        <translation>وی پی این منقطع ہوگیا</translation>
+        <translation>VPN منقطع ہوگیا</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="88"/>
         <source>AmneziaVPN notification</source>
-        <translation>امنیزیا وی پی این کی اطلاعات</translation>
+        <translation>AmneziaVPN کی اطلاعات</translation>
     </message>
     <message>
         <location filename="../ui/utils/notificationHandler.cpp" line="89"/>
@@ -567,7 +531,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageHome.qml" line="518"/>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="636"/>
         <source>VPN protocol</source>
-        <translation>وی پی این پروٹوکول</translation>
+        <translation>VPN پروٹوکول</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageHome.qml" line="571"/>
@@ -580,12 +544,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="56"/>
         <source>AmneziaWG settings</source>
-        <translation>امنیزیا وی جی کی ترتیبات</translation>
+        <translation>AmneziaWG کی ترتیبات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="80"/>
         <source>MTU</source>
-        <translation>ام ٹی یو</translation>
+        <translation>MTU</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgClientSettings.qml" line="132"/>
@@ -703,12 +667,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="68"/>
         <source>AmneziaWG settings</source>
-        <translation>امنیزیا وی جی کی ترتیبات</translation>
+        <translation>AmneziaWG کی ترتیبات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="81"/>
         <source>VPN address subnet</source>
-        <translation>وی پی این ایڈریس سب نیٹ</translation>
+        <translation>VPN ایڈریس سب نیٹ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolAwgSettings.qml" line="108"/>
@@ -891,7 +855,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="76"/>
         <source>VPN address subnet</source>
-        <translation>وی پی این ایڈریس سب نیٹ</translation>
+        <translation>VPN ایڈریس سب نیٹ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="94"/>
@@ -912,7 +876,7 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="172"/>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="173"/>
         <source>Hash</source>
-        <translation>ہیش</translation>
+        <translation>Hash</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="183"/>
@@ -1028,7 +992,7 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="322"/>
         <source>Block DNS requests outside of VPN</source>
-        <translation>وی پی این کے باہر DNS درخواستوں کو بلاک کریں</translation>
+        <translation>VPN کے باہر DNS درخواستوں کو بلاک کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolOpenVpnSettings.qml" line="343"/>
@@ -1125,12 +1089,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="58"/>
         <source>WG settings</source>
-        <translation>وائر گارڈ ترتیبات</translation>
+        <translation>WG ترتیبات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="68"/>
         <source>MTU</source>
-        <translation>ام ٹی یو</translation>
+        <translation>MTU</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardClientSettings.qml" line="86"/>
@@ -1178,12 +1142,12 @@ Already installed containers were found on the server. All installed containers 
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="59"/>
         <source>WG settings</source>
-        <translation>وائر گارڈ ترتیبات</translation>
+        <translation>WG ترتیبات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="70"/>
         <source>VPN address subnet</source>
-        <translation>وی پی این ایڈریس سب نیٹ</translation>
+        <translation>VPN ایڈریس سب نیٹ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolWireGuardSettings.qml" line="89"/>
@@ -1664,9 +1628,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="299"/>
         <source>Host</source>
-        <translation>The term &quot;Host&quot; in the context of SFTP (Secure File Transfer Protocol) can be translated into Urdu as:
-
-میزبان</translation>
+        <translation>میزبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageProtocolXrayTransportSettings.qml" line="308"/>
@@ -2071,7 +2033,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceDnsSettings.qml" line="79"/>
         <source>Cannot remove AmneziaDNS from running server</source>
-        <translation>آمنیزیا ڈی این ایس کو چل رہے سرور سے ہٹا نہیں سکتے</translation>
+        <translation>آمنیزیا DNS کو چل رہے سرور سے ہٹا نہیں سکتے</translation>
     </message>
 </context>
 <context>
@@ -2200,9 +2162,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="695"/>
         <source>Host</source>
-        <translation>The term &quot;Host&quot; in the context of SFTP (Secure File Transfer Protocol) can be translated into Urdu as:
-
-میزبان</translation>
+        <translation>میزبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceMtProxySettings.qml" line="731"/>
@@ -2562,14 +2522,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="64"/>
         <source>SFTP settings</source>
-        <translation>ایس ایف ٹی پی ترتیبات</translation>
+        <translation>SFTP ترتیبات</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="75"/>
         <source>Host</source>
-        <translation>The term &quot;Host&quot; in the context of SFTP (Secure File Transfer Protocol) can be translated into Urdu as:
-
-میزبان</translation>
+        <translation>میزبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSftpSettings.qml" line="85"/>
@@ -2638,9 +2596,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="73"/>
         <source>Host</source>
-        <translation>The term &quot;Host&quot; in the context of SFTP (Secure File Transfer Protocol) can be translated into Urdu as:
-
-میزبان</translation>
+        <translation>میزبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="83"/>
@@ -2692,6 +2648,207 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageServiceSocksProxySettings.qml" line="283"/>
         <source>Username cannot be empty</source>
         <translation>صارف نام خالی نہیں ہو سکتا</translation>
+    </message>
+</context>
+<context>
+    <name>PageServiceTProxySettings</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy started</source>
+        <translation>TProxy شروع ہو گیا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="151"/>
+        <source>TProxy stopped</source>
+        <translation>TProxy رک گیا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="166"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="668"/>
+        <source>Settings locked: connection timed out (error code %1). Re-open the page to retry.</source>
+        <translation>ترتیبات مقفل: کنکشن کا وقت ختم (خرابی کا کوڈ %1)۔ دوبارہ کوشش کے لیے صفحہ دوبارہ کھولیں۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="275"/>
+        <source>TProxy settings</source>
+        <translation>TProxy ترتیبات</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="276"/>
+        <source>Read more about Telegram WEB proxy</source>
+        <translation>Telegram WEB پراکسی کے بارے میں مزید پڑھیں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="286"/>
+        <source>No internet connection. Connect to the internet to change TProxy settings.</source>
+        <translation>انٹرنیٹ کنکشن نہیں ہے۔ TProxy ترتیبات بدلنے کے لیے انٹرنیٹ سے جڑیں۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="309"/>
+        <source>Connection</source>
+        <translation>کنکشن</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="313"/>
+        <source>Settings</source>
+        <translation>ترتیبات</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="360"/>
+        <source>Use Telegram WEB proxy link</source>
+        <translation>Telegram WEB پراکسی لنک استعمال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="386"/>
+        <source>Set a hostname first</source>
+        <translation>پہلے ہوسٹ نام سیٹ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="402"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="459"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="541"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="580"/>
+        <source>Copied</source>
+        <translation>نقل کر دیا گیا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="446"/>
+        <source>Telegram connection link</source>
+        <translation>Telegram کنکشن لنک</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="447"/>
+        <source>TProxy WEB proxy link</source>
+        <translation>TProxy WEB پراکسی لنک</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="473"/>
+        <source>Or enter the proxy details manually.</source>
+        <translation>یا پراکسی کی تفصیلات دستی طور پر درج کریں۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="479"/>
+        <source>How to do it</source>
+        <translation>یہ کیسے کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="522"/>
+        <source>Host</source>
+        <translation>میزبان</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="560"/>
+        <source>Secret</source>
+        <translation>Secret</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="593"/>
+        <source>Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.</source>
+        <translation>WEB سپورٹ کرنے والا Telegram کلائنٹ درکار ہے (Desktop پر آزمائشی)۔ کلاسک MTProxy لنکس کام نہیں کریں گے۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="606"/>
+        <source>Delete TProxy</source>
+        <translation>TProxy حذف کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="609"/>
+        <source>Remove %1 from server?</source>
+        <translation>سرور سے %1 کو ہٹائیں؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="616"/>
+        <source>The proxy will be stopped and all users will lose access.</source>
+        <translation>پراکسی روک دیا جائے گا اور تمام صارفین رسائی کھو دیں گے۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Continue</source>
+        <translation>جاری رکھیں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="617"/>
+        <source>Cancel</source>
+        <translation>منسوخ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="637"/>
+        <source>Enable TProxy</source>
+        <translation>TProxy فعال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="666"/>
+        <source>Enable TProxy to edit settings</source>
+        <translation>ترتیبات میں تبدیلی کے لیے TProxy فعال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="669"/>
+        <source>Cannot reach the server — settings are unavailable</source>
+        <translation>سرور تک نہیں پہنچا جا سکا — ترتیبات دستیاب نہیں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="681"/>
+        <source>Hostname</source>
+        <translation>ہوسٹ نام</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="682"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="697"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>چھوٹے انگریزی حروف، ہندسے، نقطے اور ہائفن استعمال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="706"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="878"/>
+        <source>Enter a lowercase DNS hostname (A record to this server)</source>
+        <translation>چھوٹے حروف میں DNS ہوسٹ نام درج کریں (اس سرور کی طرف A ریکارڈ)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="719"/>
+        <source>Required. Point a DNS A record at this server. Do not put a CDN in front.</source>
+        <translation>ضروری ہے۔ DNS A ریکارڈ کو اس سرور کی طرف اشارہ کروائیں۔ اس کے آگے CDN نہ لگائیں۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="732"/>
+        <source>ACME email</source>
+        <translation>ACME ای میل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="733"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="748"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="757"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="882"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>TLS سرٹیفکیٹ کے لیے ایک درست ای میل درج کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="770"/>
+        <source>Used by Caddy to issue a Let&apos;s Encrypt certificate.</source>
+        <translation>Caddy اسے Let&apos;s Encrypt سرٹیفکیٹ جاری کرنے کے لیے استعمال کرتا ہے۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="780"/>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="794"/>
+        <source>Carrier mode</source>
+        <translation>کیریئر موڈ</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="820"/>
+        <source>MTProxy workers</source>
+        <translation>MTProxy ورکرز</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageServiceTProxySettings.qml" line="860"/>
+        <source>Save</source>
+        <translation>محفوظ کریں</translation>
     </message>
 </context>
 <context>
@@ -2820,9 +2977,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="695"/>
         <source>Host</source>
-        <translation>The term &quot;Host&quot; in the context of SFTP (Secure File Transfer Protocol) can be translated into Urdu as:
-
-میزبان</translation>
+        <translation>میزبان</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageServiceTelemtSettings.qml" line="731"/>
@@ -3224,87 +3379,102 @@ Create one from the current settings.</source>
 <context>
     <name>PageSettingsAbout</name>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="61"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="21"/>
+        <source>You have the latest version of AmneziaVPN</source>
+        <translation>آپ کے پاس AmneziaVPN کا تازہ ترین ورژن ہے</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="25"/>
+        <source>Failed to check for updates</source>
+        <translation>اپ ڈیٹس چیک کرنے میں ناکامی</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="73"/>
         <source>Support Amnezia</source>
         <translation>Amnezia کی حمایت کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="76"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="88"/>
         <source>Amnezia is a free and open-source application. You can support the developers if you like it.</source>
-        <translation>ایمنیزیا ایک مفت اور آزاد سورس ایپلیکیشن ہے۔ آپ اگر اسے پسند کریں تو ڈویلپرز کی حمایت کرسکتے ہیں.</translation>
+        <translation>Amnezia ایک مفت اور آزاد سورس ایپلیکیشن ہے۔ آپ اگر اسے پسند کریں تو ڈویلپرز کی حمایت کرسکتے ہیں.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="86"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="98"/>
         <source>Contacts</source>
         <translation>رابطے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="119"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="131"/>
         <source>Software version: %1</source>
         <translation>سافٹ ویئر ورژن: %1</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="149"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
         <source>Check for updates</source>
         <translation>اپ ڈیٹس چیک کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="170"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="165"/>
+        <source>Checking...</source>
+        <translation>جانچ ہو رہی ہے...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="186"/>
         <source>Privacy Policy</source>
         <translation>رازداری کی پالیسی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="189"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="205"/>
         <source>Telegram group</source>
-        <translation>ٹیلیگرام گروپ</translation>
+        <translation>Telegram گروپ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="206"/>
         <source>To discuss features</source>
         <translation>&quot;فیچرز&quot; پر گفتگو کرنے کے لئے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="193"/>
-        <source>https://t.me/amnezia_vpn_en</source>
-        <translation>https://t.me/amnezia_vpn_en</translation>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="209"/>
+        <source>https://telegram.me/amnezia_vpn_en</source>
+        <translation>https://telegram.me/amnezia_vpn_en</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="200"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="216"/>
         <source>support@amnezia.org</source>
         <translation>support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="201"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="217"/>
         <source>For reviews and bug reports</source>
         <translation>جائزہ اور بگ رپورٹس کے لئے</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="204"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="220"/>
         <source>mailto:support@amnezia.org</source>
         <translation>mailto:support@amnezia.org</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="211"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="227"/>
         <source>GitHub</source>
-        <translation>گِٹ ہَب</translation>
+        <translation>GitHub</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="212"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="228"/>
         <source>Discover the source code</source>
         <translation>سورس کوڈ دیکھیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="231"/>
         <source>https://github.com/amnezia-vpn/amnezia-client</source>
         <translation>https://github.com/amnezia-vpn/amnezia-client</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="238"/>
         <source>Website</source>
         <translation>ویب سائٹ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="223"/>
+        <location filename="../ui/qml/Pages2/PageSettingsAbout.qml" line="239"/>
         <source>Visit official website</source>
         <translation>سرکاری ویب سائٹ دیکھیں</translation>
     </message>
@@ -3752,7 +3922,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="22"/>
         <source>Telegram</source>
-        <translation>ٹیلیگرام</translation>
+        <translation>Telegram</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApiSupport.qml" line="30"/>
@@ -3800,12 +3970,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="49"/>
         <source>Only the apps from the list should have access via VPN</source>
-        <translation>صرف فہرست کی ایپس کو وی پی این کے ذریعے رسائی ہونی چاہیے</translation>
+        <translation>صرف فہرست کی ایپس کو VPN کے ذریعے رسائی ہونی چاہیے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="56"/>
         <source>Apps from the list should not have access via VPN</source>
-        <translation>فہرست کی ایپس کو وی پی این کے ذریعے رسائی نہیں ہونی چاہیے</translation>
+        <translation>فہرست کی ایپس کو VPN کے ذریعے رسائی نہیں ہونی چاہیے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="87"/>
@@ -3820,7 +3990,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="154"/>
         <source>Only &quot;Apps from the list should not have access via VPN&quot; mode is available on Windows</source>
-        <translation>Windows پر صرف &quot;فہرست کی ایپس کو وی پی این کے ذریعے رسائی نہیں ہونی چاہیے&quot; موڈ دستیاب ہے</translation>
+        <translation>Windows پر صرف &quot;فہرست کی ایپس کو VPN کے ذریعے رسائی نہیں ہونی چاہیے&quot; موڈ دستیاب ہے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsAppSplitTunneling.qml" line="200"/>
@@ -3873,7 +4043,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="88"/>
         <source>Enable notifications to show the VPN state in the status bar</source>
-        <translation>اسٹیٹس بار میں وی پی این کی حالت دکھانے کے لیے اطلاعات فعال کریں</translation>
+        <translation>اسٹیٹس بار میں VPN کی حالت دکھانے کے لیے اطلاعات فعال کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="108"/>
@@ -3916,52 +4086,62 @@ Create one from the current settings.</source>
         <translation>غیر پڑھی خبروں کے لیے اطلاعی آئیکن دکھائیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="205"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="201"/>
+        <source>Check for updates automatically</source>
+        <translation>خودکار طور پر اپ ڈیٹس چیک کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="202"/>
+        <source>Check for a new app version at startup</source>
+        <translation>ایپ کے آغاز پر نئے ورژن کی جانچ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="226"/>
         <source>Language</source>
         <translation>زبان</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="221"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
         <source>Logging</source>
         <translation>لاگنگ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Enabled</source>
         <translation>فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="222"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
         <source>Disabled</source>
         <translation>غیر فعال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="237"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="258"/>
         <source>Reset settings and remove all data from the application</source>
         <translation>ترتیبات کو دوبارہ ترتیب کریں اور ایپلیکیشن سے تمام ڈیٹا کو ختم کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="263"/>
         <source>Reset settings and remove all data from the application?</source>
         <translation>ترتیبات کو دوبارہ ترتیب دیں اور ایپلیکیشن سے تمام ڈیٹا کو ہٹا دیں؟</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="243"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="264"/>
         <source>All settings will be reset to default. All installed AmneziaVPN services will still remain on the server.</source>
-        <translation>تمام ترتیبات کو معمولی حالت پر لوٹایا جائے گا۔ سب انسٹال کیے گئے امنیزیا وی پی این سروسزسرورپرموجودرہیںگی.</translation>
+        <translation>تمام ترتیبات کو معمولی حالت پر لوٹایا جائے گا۔ سب انسٹال کیے گئے AmneziaVPN سروسزسرورپرموجودرہیںگی.</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="244"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="265"/>
         <source>Continue</source>
         <translation>جاری رکھیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="245"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="266"/>
         <source>Cancel</source>
         <translation>منسوخ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="249"/>
+        <location filename="../ui/qml/Pages2/PageSettingsApplication.qml" line="270"/>
         <source>Cannot reset settings during active connection</source>
         <translation>چالو کنکشن کے دوران ترتیبات کو دوبارہ ترتیب نہیں دی جا سکتی</translation>
     </message>
@@ -4065,12 +4245,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="83"/>
         <source>DNS servers</source>
-        <translation>ڈی این ایس سرور</translation>
+        <translation>DNS سرور</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="84"/>
         <source>When AmneziaDNS is not used or installed</source>
-        <translation>ایمنیزیا ڈی این ایس کو استعمال نہیں کیا گیا ہو یا اسے انسٹال نہیں کیا گیاہے</translation>
+        <translation>Amnezia DNS کو استعمال نہیں کیا گیا ہو یا اسے انسٹال نہیں کیا گیاہے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="99"/>
@@ -4080,7 +4260,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="100"/>
         <source>Allows you to select which sites you want to access through the VPN</source>
-        <translation>آپ کو یہ امکان فراہم کرتا ہے کہ آپ وی پی این کے ذریعہ کس سائٹ کو دسترس دینا چاہتے ہیں وہ منتخب کریں</translation>
+        <translation>آپ کو یہ امکان فراہم کرتا ہے کہ آپ VPN کے ذریعہ کس سائٹ کو دسترس دینا چاہتے ہیں وہ منتخب کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="123"/>
@@ -4090,7 +4270,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="124"/>
         <source>Allows you to use the VPN only for certain Apps</source>
-        <translation>آپ کو صرف مخصوص ایپلیکیشنز کے لئے وی پی این استعمال کرنے کی اجازت دیتا ہے</translation>
+        <translation>آپ کو صرف مخصوص ایپلیکیشنز کے لئے VPN استعمال کرنے کی اجازت دیتا ہے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="142"/>
@@ -4100,7 +4280,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsConnection.qml" line="143"/>
         <source>Blocks network connections without VPN</source>
-        <translation>وی پی این کے بغیر نیٹ ورک کنکشنز کو روکتا ہے</translation>
+        <translation>VPN کے بغیر نیٹ ورک کنکشنز کو روکتا ہے</translation>
     </message>
 </context>
 <context>
@@ -4113,7 +4293,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="59"/>
         <source>DNS servers</source>
-        <translation>ڈی این ایس سرور</translation>
+        <translation>DNS سرور</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="67"/>
@@ -4163,7 +4343,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="153"/>
         <source>Primary DNS cannot be empty</source>
-        <translation>پرائمری ڈی این ایس خالی نہیں ہو سکتا</translation>
+        <translation>پرائمری DNS خالی نہیں ہو سکتا</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsDns.qml" line="165"/>
@@ -4181,7 +4361,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="41"/>
         <source>Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops</source>
-        <translation>نیٹ ورک ٹریفک محفوظ وی پی این ٹنل سے گزرے یہ یقینی بنانے کے لیے فعال کریں، تاکہ کنکشن ٹوٹنے پر آپ کا IP اور DNS استفسارات غیر ارادی طور پر ظاہر نہ ہوں</translation>
+        <translation>نیٹ ورک ٹریفک محفوظ VPN ٹنل سے گزرے یہ یقینی بنانے کے لیے فعال کریں، تاکہ کنکشن ٹوٹنے پر آپ کا IP اور DNS استفسارات غیر ارادی طور پر ظاہر نہ ہوں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="52"/>
@@ -4196,7 +4376,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="69"/>
         <source>Internet access is blocked if the VPN disconnects unexpectedly</source>
-        <translation>اگر وی پی این غیر متوقع طور پر منقطع ہو جائے تو انٹرنیٹ رسائی روک دی جاتی ہے</translation>
+        <translation>اگر VPN غیر متوقع طور پر منقطع ہو جائے تو انٹرنیٹ رسائی روک دی جاتی ہے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="92"/>
@@ -4206,7 +4386,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="93"/>
         <source>Internet connection is blocked even when VPN is turned off manually or hasn&apos;t started</source>
-        <translation>وی پی این دستی طور پر بند ہونے یا شروع نہ ہونے پر بھی انٹرنیٹ کنکشن روک دیا جاتا ہے</translation>
+        <translation>VPN دستی طور پر بند ہونے یا شروع نہ ہونے پر بھی انٹرنیٹ کنکشن روک دیا جاتا ہے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="96"/>
@@ -4216,7 +4396,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="97"/>
         <source>If the VPN disconnects or drops while Strict KillSwitch is enabled, internet access will be blocked. To restore access, reconnect VPN or disable/change the KillSwitch.</source>
-        <translation>اگر سخت KillSwitch فعال ہونے کے دوران وی پی این منقطع ہو جائے تو انٹرنیٹ رسائی روک دی جائے گی۔ رسائی بحال کرنے کے لیے وی پی این دوبارہ جوڑیں یا KillSwitch بند/تبدیل کریں۔</translation>
+        <translation>اگر سخت KillSwitch فعال ہونے کے دوران VPN منقطع ہو جائے تو انٹرنیٹ رسائی روک دی جائے گی۔ رسائی بحال کرنے کے لیے VPN دوبارہ جوڑیں یا KillSwitch بند/تبدیل کریں۔</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="98"/>
@@ -4231,12 +4411,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="123"/>
         <source>DNS Exceptions</source>
-        <translation>ڈی این ایس استثنیٰ</translation>
+        <translation>DNS استثنیٰ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitch.qml" line="124"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active.</source>
-        <translation>KillSwitch فعال ہونے پر یہاں درج ڈی این ایس سرورز قابل رسائی رہیں گے۔</translation>
+        <translation>KillSwitch فعال ہونے پر یہاں درج DNS سرورز قابل رسائی رہیں گے۔</translation>
     </message>
 </context>
 <context>
@@ -4244,12 +4424,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="44"/>
         <source>DNS Exceptions</source>
-        <translation>ڈی این ایس استثنیٰ</translation>
+        <translation>DNS استثنیٰ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="45"/>
         <source>DNS servers listed here will remain accessible when KillSwitch is active</source>
-        <translation>KillSwitch فعال ہونے پر یہاں درج ڈی این ایس سرورز قابل رسائی رہیں گے</translation>
+        <translation>KillSwitch فعال ہونے پر یہاں درج DNS سرورز قابل رسائی رہیں گے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsKillSwitchExceptions.qml" line="105"/>
@@ -4412,19 +4592,6 @@ Create one from the current settings.</source>
     </message>
 </context>
 <context>
-    <name>PageSettingsNewsDetail</name>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="87"/>
-        <source>Update</source>
-        <translation>اپ ڈیٹ کریں</translation>
-    </message>
-    <message>
-        <location filename="../ui/qml/Pages2/PageSettingsNewsDetail.qml" line="112"/>
-        <source>Skip</source>
-        <translation>چھوڑ دیں</translation>
-    </message>
-</context>
-<context>
     <name>PageSettingsNewsNotifications</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsNewsNotifications.qml" line="33"/>
@@ -4528,7 +4695,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="183"/>
         <source>Cannot clear server from Amnezia software during active connection</source>
-        <translation>چالو کنکشن کے دوران سرور کو ایمنیزیا سافٹ ویئر سے صاف کرنا ممکن نہیں</translation>
+        <translation>چالو کنکشن کے دوران سرور کو Amnezia سافٹ ویئر سے صاف کرنا ممکن نہیں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsServerData.qml" line="201"/>
@@ -4672,12 +4839,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="65"/>
         <source>Only the sites listed here will be accessed through the VPN</source>
-        <translation>صرف یہاں درج کردہ سائٹس وی پی این کے ذریعے دسترس حاصل کریں گی</translation>
+        <translation>صرف یہاں درج کردہ سائٹس VPN کے ذریعے دسترس حاصل کریں گی</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="70"/>
         <source>Addresses from the list should not be accessed via VPN</source>
-        <translation>اس فہرست سے پتوں کا وی پی این کے ذریعے دسترس حاصل نہیں کیا جانا چاہئے</translation>
+        <translation>اس فہرست سے پتوں کا VPN کے ذریعے دسترس حاصل نہیں کیا جانا چاہئے</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="101"/>
@@ -4709,7 +4876,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="262"/>
         <source>website or IP</source>
-        <translation>ویب سائٹ یا آئی پی</translation>
+        <translation>ویب سائٹ یا IP</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="308"/>
@@ -4891,12 +5058,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="52"/>
         <source>VPN by Amnezia</source>
-        <translation>Amnezia کا وی پی این</translation>
+        <translation>Amnezia کا VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="53"/>
         <source>Choose a VPN service that suits your needs.</source>
-        <translation>اپنی ضروریات کے مطابق وی پی این سروس منتخب کریں۔</translation>
+        <translation>اپنی ضروریات کے مطابق VPN سروس منتخب کریں۔</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiServicesList.qml" line="91"/>
@@ -5023,17 +5190,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="284"/>
         <source>VPN by Amnezia</source>
-        <translation>Amnezia کا وی پی این</translation>
+        <translation>Amnezia کا VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="285"/>
         <source>The easiest way to connect to the VPN</source>
-        <translation>وی پی این سے جڑنے کا آسان ترین طریقہ</translation>
+        <translation>VPN سے جڑنے کا آسان ترین طریقہ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="303"/>
         <source>Self-hosted VPN</source>
-        <translation>خود میزبان وی پی این</translation>
+        <translation>خود میزبان VPN</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardConfigSource.qml" line="304"/>
@@ -5091,7 +5258,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="82"/>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="94"/>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="224"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="248"/>
         <source>Password or SSH private key</source>
         <translation>پاس ورڈ یا SSH نجی کلید</translation>
     </message>
@@ -5108,52 +5275,62 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="144"/>
         <source>All data you enter will remain strictly confidential and will not be shared or disclosed to the Amnezia or any third parties</source>
-        <translation>آپ جو ڈیٹا داخل کریں گے وہ بالکل خفیہ رہے گا اور نہ تو امنیزیا یا کسی تیسری شخصیت کے ساتھ اشتراک کیا جائے گا</translation>
+        <translation>آپ جو ڈیٹا داخل کریں گے وہ بالکل خفیہ رہے گا اور نہ تو Amnezia یا کسی تیسری شخصیت کے ساتھ اشتراک کیا جائے گا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="155"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="157"/>
+        <source>Don&apos;t have a server?</source>
+        <translation>سرور نہیں ہے؟</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="158"/>
+        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
+        <translation>Amnezia ہوسٹنگ۔ پیچیدہ ترتیبات اور جھنجھٹ کے بغیر VPN سرورز</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
         <source>How to run your VPN server</source>
-        <translation>اپنا وی پی این سرور کیسے چلائیں</translation>
+        <translation>اپنا VPN سرور کیسے چلائیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="156"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="180"/>
         <source>Where to get connection data, step-by-step instructions for buying a VPS</source>
         <translation>کنکشن ڈیٹا کہاں سے حاصل کریں، VPS خریدنے کی مرحلہ وار ہدایات</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="176"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="200"/>
         <source>Ip address cannot be empty</source>
-        <translation>آئی پی پتہ خالی نہیں ہو سکتا</translation>
+        <translation>IP پتہ خالی نہیں ہو سکتا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="179"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="203"/>
         <source>Enter the address in the format 255.255.255.255:88</source>
         <translation>ایڈریس درج کریں فارمیٹ 255.255.255.255:88</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="184"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="208"/>
         <source>Login cannot be empty</source>
         <translation>لاگ ان نام خالی نہیں ہو سکتا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="190"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="214"/>
         <source>Password/private key cannot be empty</source>
         <translation>پاس ورڈ یا نجی کلید خالی نہیں ہو سکتی</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="206"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="230"/>
         <source>Server IP address [:port]</source>
-        <translation>سرور آئی پی پتہ [:پورٹ]</translation>
+        <translation>سرور IP پتہ [:پورٹ]</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="207"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="231"/>
         <source>255.255.255.255:22</source>
         <translation>255.255.255.255:22</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="215"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="239"/>
         <source>SSH Username</source>
-        <translation>ایس ایس ایچ صارف نام</translation>
+        <translation>SSH صارف نام</translation>
     </message>
 </context>
 <context>
@@ -5200,7 +5377,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="63"/>
         <source>Amnezia has detected that your server is currently </source>
-        <translation>ایمنیزیا نے دریافت کیا ہے کہ آپ کا سرور موجودہ </translation>
+        <translation>Amnezia نے دریافت کیا ہے کہ آپ کا سرور موجودہ </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardInstalling.qml" line="64"/>
@@ -5246,17 +5423,58 @@ Create one from the current settings.</source>
         <translation>نیٹ ورک پروٹوکول</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="214"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="215"/>
         <source>Port</source>
         <translation>پورٹ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="235"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="229"/>
+        <source>Hostname</source>
+        <translation>ہوسٹ نام</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="230"/>
+        <source>proxy.example.com</source>
+        <translation>proxy.example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="244"/>
+        <source>Use lowercase letters, digits, dots and hyphens</source>
+        <translation>چھوٹے انگریزی حروف، ہندسے، نقطے اور ہائفن استعمال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="260"/>
+        <source>ACME email</source>
+        <translation>ACME ای میل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="261"/>
+        <source>you@example.com</source>
+        <translation>you@example.com</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="275"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="329"/>
+        <source>Enter a valid email for the TLS certificate</source>
+        <translation>TLS سرٹیفکیٹ کے لیے ایک درست ای میل درج کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="288"/>
+        <source>Needs a DNS A record and free, internet-reachable ports 443 (HTTPS) and 80 (ACME). If either port is busy or blocked, the proxy will not work. Classic Telegram MTProxy links will not work.</source>
+        <translation>DNS A ریکارڈ اور انٹرنیٹ سے قابل رسائی خالی پورٹس 443 (HTTPS) اور 80 (ACME) درکار ہیں۔ اگر ان میں سے کوئی پورٹ مصروف یا بلاک ہو تو پراکسی کام نہیں کرے گی۔ کلاسک Telegram MTProxy لنکس کام نہیں کریں گے۔</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="310"/>
         <source>Install</source>
         <translation>انسٹال</translation>
     </message>
     <message>
-        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="241"/>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="325"/>
+        <source>Enter a lowercase DNS hostname</source>
+        <translation>چھوٹے حروف میں DNS ہوسٹ نام درج کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSetupWizardProtocolSettings.qml" line="344"/>
         <source>The port must be in the range of 1 to 65535</source>
         <translation>پورٹ 1 سے 65535 کی حد میں ہونا چاہیے</translation>
     </message>
@@ -5266,7 +5484,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="78"/>
         <source>VPN protocol</source>
-        <translation>وی پی این پروٹوکول</translation>
+        <translation>VPN پروٹوکول</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardProtocols.qml" line="79"/>
@@ -5338,7 +5556,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="132"/>
         <source>Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.</source>
-        <translation>وائر گارڈ کی غلط شناخت کو بروئے کار لانے کے لئے وائر گارڈ غلط شناخت کو فعال کریں۔ آپ کے پرووائیڈر پر وائر گارڈ بند ہونے کی صورت میں یہ کار آمد ہو سکتی ہے۔</translation>
+        <translation>WireGuard کی غلط شناخت کو بروئے کار لانے کے لئے WireGuard غلط شناخت کو فعال کریں۔ آپ کے پرووائیڈر پر WireGuard بند ہونے کی صورت میں یہ کار آمد ہو سکتی ہے۔</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardViewConfig.qml" line="163"/>
@@ -5366,17 +5584,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="58"/>
         <source>Save OpenVPN config</source>
-        <translation>اوپن وی پی این کی ترتیبات کو محفوظ کریں</translation>
+        <translation>OpenVPN کی ترتیبات کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="65"/>
         <source>Save WireGuard config</source>
-        <translation>وائر گارڈ کی ترتیبات کو محفوظ کریں</translation>
+        <translation>WireGuard کی ترتیبات کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="72"/>
         <source>Save AmneziaWG config</source>
-        <translation>ایمنیزیا ڈبلیو جی کی ترتیبات کو محفوظ کریں</translation>
+        <translation>AmneziaWG کی ترتیبات کو محفوظ کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="79"/>
@@ -5406,17 +5624,17 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="118"/>
         <source>WireGuard native format</source>
-        <translation>وائر گارڈ کا اصل فارمیٹ</translation>
+        <translation>WireGuard کا اصل فارمیٹ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="123"/>
         <source>AmneziaWG native format</source>
-        <translation>ایمنیزیا ڈبلیو جی کا اصل فارمیٹ</translation>
+        <translation>AmneziaWG کا اصل فارمیٹ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="128"/>
         <source>XRay native format</source>
-        <translation>ایکس رے کا نیٹویٹ فارمیٹ</translation>
+        <translation>XRay کا نیٹویٹ فارمیٹ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="156"/>
@@ -5426,7 +5644,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="190"/>
         <source>Share full access to the server and VPN</source>
-        <translation>سرور اور وی پی این کے لئے مکمل دسترسی کو شیئر کریں</translation>
+        <translation>سرور اور VPN کے لئے مکمل دسترسی کو شیئر کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="191"/>
@@ -5453,7 +5671,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="271"/>
         <source>Share VPN access without the ability to manage the server</source>
-        <translation>سرور کو منظم کرنے کی صلاحیت کے بغیر وی پی این کی دسترسی شیئر</translation>
+        <translation>سرور کو منظم کرنے کی صلاحیت کے بغیر VPN کی دسترسی شیئر</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShare.qml" line="282"/>
@@ -5598,7 +5816,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="57"/>
         <source>Full access to the server and VPN</source>
-        <translation>سرور اور وی پی این کی مکمل رسائی</translation>
+        <translation>سرور اور VPN کی مکمل رسائی</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="67"/>
@@ -5610,7 +5828,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="68"/>
         <source>If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. </source>
-        <translation>&quot;اگر آپ دوسروں کے ساتھ مکمل رسائی شیئر کریں تو وہ سرور پروٹوکول اور خدمات کو ہٹا سکتے ہیں اور شامل کر سکتے ہیں، جس سے وی پی این تمام صارفین کے لئے غلط کام کرے گا. </translation>
+        <translation>&quot;اگر آپ دوسروں کے ساتھ مکمل رسائی شیئر کریں تو وہ سرور پروٹوکول اور خدمات کو ہٹا سکتے ہیں اور شامل کر سکتے ہیں، جس سے VPN تمام صارفین کے لئے غلط کام کرے گا. </translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageShareFullAccess.qml" line="87"/>
@@ -5658,6 +5876,60 @@ Create one from the current settings.</source>
     </message>
 </context>
 <context>
+    <name>PageUpdate</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="24"/>
+        <source>Done. Install the update</source>
+        <translation>مکمل۔ اپ ڈیٹ انسٹال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="26"/>
+        <source>Download failed. Download manually from amnezia.org</source>
+        <translation>ڈاؤن لوڈ ناکام۔ amnezia.org سے دستی طور پر ڈاؤن لوڈ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="169"/>
+        <source>New version available</source>
+        <translation>نیا ورژن دستیاب ہے</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="186"/>
+        <source>New</source>
+        <translation>نیا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="194"/>
+        <source>Improved</source>
+        <translation>بہتر کیا گیا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="202"/>
+        <source>Fixed</source>
+        <translation>درست کیا گیا</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="242"/>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="248"/>
+        <source>Update app</source>
+        <translation>ایپ اپ ڈیٹ کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="245"/>
+        <source>Downloading update...</source>
+        <translation>اپ ڈیٹ ڈاؤن لوڈ ہو رہی ہے...</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="246"/>
+        <source>Install update</source>
+        <translation>اپ ڈیٹ انسٹال کریں</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageUpdate.qml" line="247"/>
+        <source>Retry</source>
+        <translation>دوبارہ کوشش کریں</translation>
+    </message>
+</context>
+<context>
     <name>PopupType</name>
     <message>
         <location filename="../ui/qml/Controls2/PopupType.qml" line="101"/>
@@ -5670,14 +5942,20 @@ Create one from the current settings.</source>
     <message>
         <location filename="../core/protocols/protocolUtils.cpp" line="70"/>
         <source>SFTP service</source>
-        <translation>ایس ایف ٹی پی سروس</translation>
+        <translation>SFTP سروس</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="190"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="71"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="79"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="193"/>
         <source>SOCKS5 proxy server</source>
         <translation>SOCKS5 پراکسی سرور</translation>
+    </message>
+    <message>
+        <location filename="../core/protocols/protocolUtils.cpp" line="74"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="82"/>
+        <source>TProxy (Telegram WEB)</source>
+        <translation>TProxy (Telegram WEB)</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="11"/>
@@ -5707,12 +5985,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="20"/>
         <source>Server error: Docker container missing</source>
-        <translation>سرور کی خرابی: ڈوکر کنٹینر غائب ہے</translation>
+        <translation>سرور کی خرابی: Docker کنٹینر غائب ہے</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="21"/>
         <source>Server error: Docker failed</source>
-        <translation>سرور کی خرابی: ڈوکر ناکام ہو گیا</translation>
+        <translation>سرور کی خرابی: Docker ناکام ہو گیا</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="22"/>
@@ -5727,7 +6005,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="29"/>
         <source>Docker error: runc doesn&apos;t work on cgroups v2</source>
-        <translation>ڈوکر کی خرابی: runc، cgroups v2 پر کام نہیں کرتا</translation>
+        <translation>Docker کی خرابی: runc، cgroups v2 پر کام نہیں کرتا</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="30"/>
@@ -5737,12 +6015,12 @@ Create one from the current settings.</source>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="31"/>
         <source>Docker error: The pull rate limit has been reached</source>
-        <translation>ڈوکر کی خرابی: پل ریٹ کی حد تک پہنچ گئی ہے</translation>
+        <translation>Docker کی خرابی: پل ریٹ کی حد تک پہنچ گئی ہے</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="32"/>
         <source>Server error: Linux kernel is too old</source>
-        <translation>سرور کی خرابی: لینکس کرنل بہت پرانا ہے</translation>
+        <translation>سرور کی خرابی: Linux کرنل بہت پرانا ہے</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="34"/>
@@ -5819,33 +6097,33 @@ Create one from the current settings.</source>
         <translation>Amnezia سبسکرپشن کا یہ پرانا فارمیٹ اب سپورٹ نہیں کیا جاتا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="74"/>
+        <location filename="../core/utils/errorStrings.cpp" line="76"/>
         <source>This protocol is no longer supported. Please select another protocol or remove this container from the server settings.</source>
         <translation>یہ پروٹوکول اب سپورٹ نہیں کیا جاتا۔ براہ کرم کوئی دوسرا پروٹوکول منتخب کریں یا اس کنٹینر کو سرور کی ترتیبات سے ہٹا دیں۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="79"/>
+        <location filename="../core/utils/errorStrings.cpp" line="81"/>
         <source>VPN connection error</source>
         <translation>VPN کنکشن کی خرابی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="82"/>
-        <location filename="../core/utils/errorStrings.cpp" line="91"/>
+        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="93"/>
         <source>Error when retrieving configuration from API</source>
         <translation>آپی سے کنفیگریشن بازیافت کرتے وقت خرابی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="83"/>
+        <location filename="../core/utils/errorStrings.cpp" line="85"/>
         <source>This config has already been added to the application</source>
         <translation>یہ تشکیل پہلے ہی ایپلی کیشن میں شامل کی جا چکی ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="92"/>
+        <location filename="../core/utils/errorStrings.cpp" line="94"/>
         <source>Please update the application to use this feature</source>
         <translation>اس خصوصیت کو استعمال کرنے کے لیے براہ کرم ایپلیکیشن اپ ڈیٹ کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="93"/>
+        <location filename="../core/utils/errorStrings.cpp" line="95"/>
         <source>Your Amnezia Premium subscription has expired.
  Please check your email for renewal instructions.
  If you haven&apos;t received an email, please contact our support.</source>
@@ -5854,47 +6132,47 @@ Create one from the current settings.</source>
  اگر آپ کو ای میل نہیں ملا تو براہ کرم ہماری سپورٹ سے رابطہ کریں۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="94"/>
+        <location filename="../core/utils/errorStrings.cpp" line="96"/>
         <source>Unable to process purchase</source>
         <translation>خریداری پر کارروائی نہیں کی جا سکی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="95"/>
+        <location filename="../core/utils/errorStrings.cpp" line="97"/>
         <source>No active subscription found</source>
         <translation>کوئی فعال سبسکرپشن نہیں ملا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="96"/>
+        <location filename="../core/utils/errorStrings.cpp" line="98"/>
         <source>No purchased subscriptions found. Please purchase a subscription first</source>
         <translation>کوئی خریدا ہوا سبسکرپشن نہیں ملا۔ براہ کرم پہلے سبسکرپشن خریدیں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="97"/>
+        <location filename="../core/utils/errorStrings.cpp" line="99"/>
         <source>This email address has already been used to activate a trial</source>
         <translation>یہ ای میل ایڈریس پہلے ہی ٹرائل فعال کرنے کے لیے استعمال ہو چکا ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="98"/>
+        <location filename="../core/utils/errorStrings.cpp" line="100"/>
         <source>CAPTCHA verification is required</source>
         <translation>CAPTCHA کی تصدیق درکار ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="99"/>
+        <location filename="../core/utils/errorStrings.cpp" line="101"/>
         <source>CAPTCHA was incorrect. Please try again</source>
         <translation>CAPTCHA غلط تھا۔ براہ کرم دوبارہ کوشش کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="100"/>
+        <location filename="../core/utils/errorStrings.cpp" line="102"/>
         <source>CAPTCHA refreshed. Please try again</source>
         <translation>CAPTCHA تازہ کر دیا گیا۔ براہ کرم دوبارہ کوشش کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="101"/>
+        <location filename="../core/utils/errorStrings.cpp" line="103"/>
         <source>Too many requests. Please try again later</source>
         <translation>بہت زیادہ درخواستیں۔ براہ کرم بعد میں دوبارہ کوشش کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="143"/>
+        <location filename="../core/utils/errorStrings.cpp" line="145"/>
         <source>ErrorCode: %1. </source>
         <translation>ایرر کوڈ: %1. </translation>
     </message>
@@ -5956,7 +6234,7 @@ Create one from the current settings.</source>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="62"/>
         <source>Amnezia helper service error</source>
-        <translation>ایمنیزیا مددگار سروس کی خرابی</translation>
+        <translation>Amnezia مددگار سروس کی خرابی</translation>
     </message>
     <message>
         <location filename="../core/utils/errorStrings.cpp" line="63"/>
@@ -5984,167 +6262,177 @@ Create one from the current settings.</source>
         <translation>ترتیب میں سرور سے منسلک ہونے کے لیے کوئی کنٹینرز اور اسناد نہیں ہیں</translation>
     </message>
     <message>
+        <location filename="../core/utils/errorStrings.cpp" line="74"/>
+        <source>This configuration was created in a newer version of the application and is not fully supported. Please update the application</source>
+        <translation>یہ کنفیگریشن ایپلیکیشن کے نئے ورژن میں بنائی گئی تھی اور مکمل طور پر سپورٹ نہیں ہے۔ براہ کرم ایپلیکیشن اپ ڈیٹ کریں</translation>
+    </message>
+    <message>
         <location filename="../core/utils/errorStrings.cpp" line="75"/>
+        <source>Some configurations from the backup were not restored because they require a newer version of the application</source>
+        <translation>بیک اپ سے کچھ کنفیگریشنز بحال نہیں کی گئیں کیونکہ ان کے لیے ایپلیکیشن کا نیا ورژن درکار ہے</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/errorStrings.cpp" line="77"/>
         <source>Unable to open config file</source>
         <translation>کنفیگ فائل کو کھولا نہیں جا سکا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="76"/>
+        <location filename="../core/utils/errorStrings.cpp" line="78"/>
         <source>VPN Protocols is not installed.
  Please install VPN container at first</source>
-        <translation>وی پی این پروٹوکول انسٹال نہیں ہے۔
- براہ کرم پہلے وی پی این کنٹینر انسٹال کریں</translation>
+        <translation>VPN پروٹوکول انسٹال نہیں ہے۔
+ براہ کرم پہلے VPN کنٹینر انسٹال کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="84"/>
+        <location filename="../core/utils/errorStrings.cpp" line="86"/>
         <source>In the response from the server, an empty config was received</source>
         <translation>سرور کے جواب میں ایک خالی کنفیگریشن موصول ہوئی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="85"/>
+        <location filename="../core/utils/errorStrings.cpp" line="87"/>
         <source>SSL error occurred</source>
         <translation>SSL کی خرابی پیش آگئی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="86"/>
+        <location filename="../core/utils/errorStrings.cpp" line="88"/>
         <source>Server response timeout on api request</source>
         <translation>API درخواست پر سرور کے جواب کا وقت ختم ہو گیا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="87"/>
+        <location filename="../core/utils/errorStrings.cpp" line="89"/>
         <source>Missing AGW public key</source>
         <translation>AGW پبلک کی غائب ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="88"/>
+        <location filename="../core/utils/errorStrings.cpp" line="90"/>
         <source>Failed to decrypt response payload</source>
         <translation>جوابی پے لوڈ کو ڈی کرپٹ کرنے میں ناکامی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="89"/>
+        <location filename="../core/utils/errorStrings.cpp" line="91"/>
         <source>Missing list of available services</source>
         <translation>دستیاب سروسز کی فہرست غائب ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="90"/>
+        <location filename="../core/utils/errorStrings.cpp" line="92"/>
         <source>The limit of allowed configurations per subscription has been exceeded</source>
         <translation>فی سبسکرپشن اجازت شدہ کنفیگریشنز کی حد سے تجاوز ہو گیا ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="104"/>
+        <location filename="../core/utils/errorStrings.cpp" line="106"/>
         <source>Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.</source>
         <translation>آپ کی ادائیگی Google Play میں تصدیق کی منتظر ہے۔ ادائیگی مکمل ہونے پر، اگلی بار ایپ کھولنے پر سبسکرپشن خودکار طور پر شامل ہو جائے گا۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="106"/>
+        <location filename="../core/utils/errorStrings.cpp" line="108"/>
         <source>Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.</source>
         <translation>آپ کی ادائیگی تصدیق کی منتظر ہے۔ منظوری ملتے ہی سبسکرپشن خودکار طور پر شامل ہو جائے گا۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="108"/>
+        <location filename="../core/utils/errorStrings.cpp" line="110"/>
         <source>Your payment is pending confirmation. Please complete the payment and then restore your subscription.</source>
         <translation>آپ کی ادائیگی تصدیق کی منتظر ہے۔ براہ کرم ادائیگی مکمل کریں اور پھر اپنا سبسکرپشن بحال کریں۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="113"/>
+        <location filename="../core/utils/errorStrings.cpp" line="115"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Google account used for the purchase.</source>
         <translation>بحال کرنے کے لیے کوئی خریداری نہیں۔ اگر آپ کا سبسکرپشن فعال ہے تو یقینی بنائیں کہ آپ اسی Google اکاؤنٹ سے سائن ان ہیں جس سے خریداری کی گئی تھی۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="115"/>
+        <location filename="../core/utils/errorStrings.cpp" line="117"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same Apple ID used for the purchase.</source>
         <translation>بحال کرنے کے لیے کوئی خریداری نہیں۔ اگر آپ کا سبسکرپشن فعال ہے تو یقینی بنائیں کہ آپ اسی Apple ID سے سائن ان ہیں جس سے خریداری کی گئی تھی۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="117"/>
+        <location filename="../core/utils/errorStrings.cpp" line="119"/>
         <source>No purchases to restore. If you have an active subscription, make sure you&apos;re signed in with the same account used for the purchase.</source>
         <translation>بحال کرنے کے لیے کوئی خریداری نہیں۔ اگر آپ کا سبسکرپشن فعال ہے تو یقینی بنائیں کہ آپ اسی اکاؤنٹ سے سائن ان ہیں جس سے خریداری کی گئی تھی۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="122"/>
+        <location filename="../core/utils/errorStrings.cpp" line="124"/>
         <source>QFile error: The file could not be opened</source>
         <translation>QFile کی خرابی: فائل کو نہیں کھولا جا سکا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="123"/>
+        <location filename="../core/utils/errorStrings.cpp" line="125"/>
         <source>QFile error: An error occurred when reading from the file</source>
         <translation>کیو فائل کی خرابی: فائل سے پڑھتے وقت ایک خرابی پیش آگئی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="124"/>
+        <location filename="../core/utils/errorStrings.cpp" line="126"/>
         <source>QFile error: The file could not be accessed</source>
         <translation>QFile کی خرابی: فائل تک رسائی نہیں ہو سکی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="125"/>
+        <location filename="../core/utils/errorStrings.cpp" line="127"/>
         <source>QFile error: An unspecified error occurred</source>
         <translation>کیو فائل میں خرابی: ایک غیر متعینہ خرابی پیش آگئی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="126"/>
+        <location filename="../core/utils/errorStrings.cpp" line="128"/>
         <source>QFile error: A fatal error occurred</source>
         <translation>کیو فائل میں خرابی: ایک مہلک خرابی پیش آگئی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="127"/>
+        <location filename="../core/utils/errorStrings.cpp" line="129"/>
         <source>QFile error: The operation was aborted</source>
         <translation>کیو فائل کی خرابی: آپریشن روک دیا گیا تھا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="130"/>
+        <location filename="../core/utils/errorStrings.cpp" line="132"/>
         <source>Transaction was canceled by the user</source>
         <translation>صارف نے لین دین منسوخ کر دیا</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="131"/>
+        <location filename="../core/utils/errorStrings.cpp" line="133"/>
         <source>Billing error</source>
         <translation>بلنگ کی خرابی</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="132"/>
+        <location filename="../core/utils/errorStrings.cpp" line="134"/>
         <source>Internal Google Play error, please try again later</source>
         <translation>Google Play کی اندرونی خرابی، براہ کرم بعد میں دوبارہ کوشش کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="133"/>
+        <location filename="../core/utils/errorStrings.cpp" line="135"/>
         <source>Billing is unavailable, please try again later</source>
         <translation>بلنگ دستیاب نہیں ہے، براہ کرم بعد میں دوبارہ کوشش کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="134"/>
+        <location filename="../core/utils/errorStrings.cpp" line="136"/>
         <source>You already own this subscription</source>
         <translation>یہ سبسکرپشن پہلے ہی آپ کے پاس ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="135"/>
+        <location filename="../core/utils/errorStrings.cpp" line="137"/>
         <source>The requested subscription is not available for purchase</source>
         <translation>درخواست کردہ سبسکرپشن خریداری کے لیے دستیاب نہیں ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="136"/>
+        <location filename="../core/utils/errorStrings.cpp" line="138"/>
         <source>A network error occurred during the operation, please check the Internet connection</source>
         <translation>کارروائی کے دوران نیٹ ورک کی خرابی پیش آئی، براہ کرم انٹرنیٹ کنکشن چیک کریں</translation>
     </message>
     <message>
-        <location filename="../core/utils/errorStrings.cpp" line="140"/>
+        <location filename="../core/utils/errorStrings.cpp" line="142"/>
         <source>Internal error</source>
         <translation>داخلی خامی</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="73"/>
         <source>IPsec</source>
-        <translation>آئی پی ایس سی</translation>
+        <translation>IPsec</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="76"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="183"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
         <source>Website in Tor network</source>
         <translation>ٹور نیٹ ورک میں ویب سائٹ</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="77"/>
         <source>AmneziaDNS</source>
-        <translation>ایمنیزیا ڈی این ایس</translation>
+        <translation>Amnezia DNS</translation>
     </message>
     <message>
         <location filename="../core/utils/containers/containerUtils.cpp" line="78"/>
@@ -6152,40 +6440,45 @@ Create one from the current settings.</source>
         <translation>SFTP فائل شیئرنگ سروس</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="72"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="80"/>
         <source>MTProxy (Telegram)</source>
         <translation>MTProxy (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <location filename="../core/protocols/protocolUtils.cpp" line="73"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="81"/>
         <source>Telemt (Telegram)</source>
         <translation>Telemt (Telegram)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="88"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="89"/>
         <source>OpenVPN is the most popular VPN protocol, with flexible configuration options. It uses its own security protocol with SSL/TLS for key exchange.</source>
-        <translation>اوپن وی پی این لچکدار ترتیب کے اختیارات کے ساتھ سب سے زیادہ مقبول VPN پروٹوکول ہے۔ یہ کلیدی تبادلے کے لیے SSL/TLS کے ساتھ اپنا سیکیورٹی پروٹوکول استعمال کرتا ہے۔</translation>
+        <translation>OpenVPN لچکدار ترتیب کے اختیارات کے ساتھ سب سے زیادہ مقبول VPN پروٹوکول ہے۔ یہ کلیدی تبادلے کے لیے SSL/TLS کے ساتھ اپنا سیکیورٹی پروٹوکول استعمال کرتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="91"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="93"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="92"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="94"/>
         <source>This protocol is no longer supported.</source>
         <translation>یہ پروٹوکول اب سپورٹ نہیں کیا جاتا۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="117"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="118"/>
         <source>Telegram MTProto proxy server</source>
         <translation>Telegram MTProto پراکسی سرور</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="119"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="120"/>
         <source>Telegram MTProto proxy (Telemt, Rust)</source>
         <translation>Telegram MTProto پراکسی (Telemt، Rust)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="127"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="122"/>
+        <source>Telegram WEB proxy (tproxy-server)</source>
+        <translation>Telegram WEB پراکسی (tproxy-server)</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="130"/>
         <source>OpenVPN is one of the most popular and reliable VPN protocols. It uses SSL/TLS encryption, supports a wide variety of devices and operating systems, and is continuously improved by the community due to its open-source nature. It provides a good balance between speed and security but is easily recognized by DPI systems, making it susceptible to blocking.
 
 Features:
@@ -6193,7 +6486,7 @@ Features:
 * Normal battery consumption on mobile devices
 * Flexible customization for various devices and OS
 * Operates over both TCP and UDP protocols</source>
-        <translation>OpenVPN سب سے مقبول اور قابل اعتماد وی پی این پروٹوکولز میں سے ایک ہے۔ یہ SSL/TLS انکرپشن استعمال کرتا ہے، مختلف قسم کے ڈیوائسز اور آپریٹنگ سسٹمز کو سپورٹ کرتا ہے، اور اوپن سورس ہونے کی وجہ سے کمیونٹی کی جانب سے مسلسل بہتر بنایا جاتا ہے۔ یہ رفتار اور سیکیورٹی کے درمیان اچھا توازن فراہم کرتا ہے، لیکن DPI سسٹمز اسے آسانی سے پہچان لیتے ہیں، جس سے یہ بلاک ہونے کا خطرہ رکھتا ہے۔
+        <translation>OpenVPN سب سے مقبول اور قابل اعتماد VPN پروٹوکولز میں سے ایک ہے۔ یہ SSL/TLS انکرپشن استعمال کرتا ہے، مختلف قسم کے ڈیوائسز اور آپریٹنگ سسٹمز کو سپورٹ کرتا ہے، اور اوپن سورس ہونے کی وجہ سے کمیونٹی کی جانب سے مسلسل بہتر بنایا جاتا ہے۔ یہ رفتار اور سیکیورٹی کے درمیان اچھا توازن فراہم کرتا ہے، لیکن DPI سسٹمز اسے آسانی سے پہچان لیتے ہیں، جس سے یہ بلاک ہونے کا خطرہ رکھتا ہے۔
 
 خصوصیات:
 * تمام AmneziaVPN پلیٹ فارمز پر دستیاب
@@ -6202,7 +6495,7 @@ Features:
 * TCP اور UDP دونوں پروٹوکولز پر کام کرتا ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="138"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="141"/>
         <source>WireGuard is a modern, streamlined VPN protocol offering stable connectivity and excellent performance across all devices. It uses fixed encryption settings, delivering lower latency and higher data transfer speeds compared to OpenVPN. However, WireGuard is easily identifiable by DPI systems due to its distinctive packet signatures, making it susceptible to blocking.
 
 Features:
@@ -6211,7 +6504,7 @@ Features:
 * Minimal configuration required
 * Easily detected by DPI systems (susceptible to blocking)
 * Operates over UDP protocol</source>
-        <translation>WireGuard ایک جدید اور سادہ وی پی این پروٹوکول ہے جو تمام ڈیوائسز پر مستحکم کنیکٹیویٹی اور بہترین کارکردگی فراہم کرتا ہے۔ یہ مقررہ انکرپشن ترتیبات استعمال کرتا ہے، جس سے OpenVPN کے مقابلے میں کم تعویق اور زیادہ ڈیٹا ٹرانسفر رفتار حاصل ہوتی ہے۔ تاہم، اپنے مخصوص پیکٹ دستخطوں کی وجہ سے WireGuard کو DPI سسٹمز آسانی سے پہچان لیتے ہیں، جس سے یہ بلاک ہونے کا خطرہ رکھتا ہے۔
+        <translation>WireGuard ایک جدید اور سادہ VPN پروٹوکول ہے جو تمام ڈیوائسز پر مستحکم کنیکٹیویٹی اور بہترین کارکردگی فراہم کرتا ہے۔ یہ مقررہ انکرپشن ترتیبات استعمال کرتا ہے، جس سے OpenVPN کے مقابلے میں کم تعویق اور زیادہ ڈیٹا ٹرانسفر رفتار حاصل ہوتی ہے۔ تاہم، اپنے مخصوص پیکٹ دستخطوں کی وجہ سے WireGuard کو DPI سسٹمز آسانی سے پہچان لیتے ہیں، جس سے یہ بلاک ہونے کا خطرہ رکھتا ہے۔
 
 خصوصیات:
 * تمام AmneziaVPN پلیٹ فارمز پر دستیاب
@@ -6221,7 +6514,7 @@ Features:
 * UDP پروٹوکول پر کام کرتا ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="148"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="151"/>
         <source>AmneziaWG is a modern VPN protocol based on WireGuard, combining simplified architecture with high performance across all devices. It addresses WireGuard&apos;s main vulnerability (easy detection by DPI systems) through advanced obfuscation techniques, making VPN traffic indistinguishable from regular internet traffic.
 
 AmneziaWG is an excellent choice for those seeking a fast, stealthy VPN connection.
@@ -6232,9 +6525,9 @@ Features:
 * Minimal settings required
 * Undetectable by traffic analysis systems (DPI)
 * Operates over UDP protocol</source>
-        <translation>AmneziaWG، WireGuard پر مبنی ایک جدید وی پی این پروٹوکول ہے جو سادہ آرکیٹیکچر کو تمام ڈیوائسز پر اعلیٰ کارکردگی کے ساتھ ملاتا ہے۔ یہ جدید اوبفسکیشن تکنیکوں کے ذریعے WireGuard کی بنیادی کمزوری (DPI سسٹمز کے ذریعے آسان شناخت) کو دور کرتا ہے، جس سے وی پی این ٹریفک عام انٹرنیٹ ٹریفک سے الگ نہیں پہچانا جا سکتا۔
+        <translation>AmneziaWG، WireGuard پر مبنی ایک جدید VPN پروٹوکول ہے جو سادہ آرکیٹیکچر کو تمام ڈیوائسز پر اعلیٰ کارکردگی کے ساتھ ملاتا ہے۔ یہ جدید اوبفسکیشن تکنیکوں کے ذریعے WireGuard کی بنیادی کمزوری (DPI سسٹمز کے ذریعے آسان شناخت) کو دور کرتا ہے، جس سے VPN ٹریفک عام انٹرنیٹ ٹریفک سے الگ نہیں پہچانا جا سکتا۔
 
-جو لوگ تیز اور غیر محسوس وی پی این کنکشن چاہتے ہیں، ان کے لیے AmneziaWG ایک بہترین انتخاب ہے۔
+جو لوگ تیز اور غیر محسوس VPN کنکشن چاہتے ہیں، ان کے لیے AmneziaWG ایک بہترین انتخاب ہے۔
 
 خصوصیات:
 * تمام AmneziaVPN پلیٹ فارمز پر دستیاب
@@ -6244,7 +6537,7 @@ Features:
 * UDP پروٹوکول پر کام کرتا ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="160"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="163"/>
         <source>REALITY is an innovative protocol developed by the creators of XRay, designed specifically to combat high levels of internet censorship. REALITY identifies censorship systems during the TLS handshake, redirecting suspicious traffic seamlessly to legitimate websites like google.com while providing genuine TLS certificates. This allows VPN traffic to blend indistinguishably with regular web traffic without special configuration.
 Unlike older protocols such as VMess, VLESS, and XTLS-Vision, REALITY incorporates an advanced built-in &quot;friend-or-foe&quot; detection mechanism, effectively protecting against DPI and other traffic analysis methods.
 
@@ -6254,7 +6547,7 @@ Features:
 * Highly effective in heavily censored regions
 * Minimal battery consumption on devices
 * Operates over TCP protocol</source>
-        <translation>REALITY، XRay کے تخلیق کاروں کی جانب سے تیار کردہ ایک اختراعی پروٹوکول ہے، جو خاص طور پر انٹرنیٹ کی شدید سنسرشپ کا مقابلہ کرنے کے لیے ڈیزائن کیا گیا ہے۔ REALITY، TLS ہینڈشیک کے دوران سنسرشپ سسٹمز کی شناخت کرتا ہے اور مشتبہ ٹریفک کو اصل TLS سرٹیفکیٹس فراہم کرتے ہوئے google.com جیسی حقیقی ویب سائٹس کی طرف بغیر رکاوٹ موڑ دیتا ہے۔ اس سے وی پی این ٹریفک کسی خاص ترتیب کے بغیر عام ویب ٹریفک میں مکمل طور پر گھل مل جاتا ہے۔
+        <translation>REALITY، XRay کے تخلیق کاروں کی جانب سے تیار کردہ ایک اختراعی پروٹوکول ہے، جو خاص طور پر انٹرنیٹ کی شدید سنسرشپ کا مقابلہ کرنے کے لیے ڈیزائن کیا گیا ہے۔ REALITY، TLS ہینڈشیک کے دوران سنسرشپ سسٹمز کی شناخت کرتا ہے اور مشتبہ ٹریفک کو اصل TLS سرٹیفکیٹس فراہم کرتے ہوئے google.com جیسی حقیقی ویب سائٹس کی طرف بغیر رکاوٹ موڑ دیتا ہے۔ اس سے VPN ٹریفک کسی خاص ترتیب کے بغیر عام ویب ٹریفک میں مکمل طور پر گھل مل جاتا ہے۔
 VMess، VLESS اور XTLS-Vision جیسے پرانے پروٹوکولز کے برعکس، REALITY میں ایک جدید بلٹ ان &quot;دوست یا دشمن&quot; شناختی نظام شامل ہے، جو DPI اور ٹریفک تجزیے کے دیگر طریقوں سے مؤثر تحفظ دیتا ہے۔
 
 خصوصیات:
@@ -6265,7 +6558,7 @@ VMess، VLESS اور XTLS-Vision جیسے پرانے پروٹوکولز کے ب�
 * TCP پروٹوکول پر کام کرتا ہے</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="173"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="176"/>
         <source>IKEv2, combined with IPSec encryption, is a modern and reliable VPN protocol. It reconnects quickly when switching networks or devices, making it ideal for dynamic network environments. While it provides good security and speed, it&apos;s easily recognized by DPI systems and susceptible to blocking.
 
 Features:
@@ -6274,7 +6567,7 @@ Features:
 * Minimal configuration required
 * Detectable by DPI analysis systems(easily blocked)
 * Operates over UDP protocol(ports 500 and 4500)</source>
-        <translation>IKEv2، IPSec انکرپشن کے ساتھ مل کر ایک جدید اور قابل اعتماد وی پی این پروٹوکول بناتا ہے۔ نیٹ ورک یا ڈیوائس تبدیل کرنے پر یہ تیزی سے دوبارہ منسلک ہو جاتا ہے، جس سے یہ بدلتے نیٹ ورک ماحول کے لیے مثالی ہے۔ اگرچہ یہ اچھی سیکیورٹی اور رفتار فراہم کرتا ہے، DPI سسٹمز اسے آسانی سے پہچان لیتے ہیں اور یہ بلاک ہونے کا خطرہ رکھتا ہے۔
+        <translation>IKEv2، IPSec انکرپشن کے ساتھ مل کر ایک جدید اور قابل اعتماد VPN پروٹوکول بناتا ہے۔ نیٹ ورک یا ڈیوائس تبدیل کرنے پر یہ تیزی سے دوبارہ منسلک ہو جاتا ہے، جس سے یہ بدلتے نیٹ ورک ماحول کے لیے مثالی ہے۔ اگرچہ یہ اچھی سیکیورٹی اور رفتار فراہم کرتا ہے، DPI سسٹمز اسے آسانی سے پہچان لیتے ہیں اور یہ بلاک ہونے کا خطرہ رکھتا ہے۔
 
 خصوصیات:
 * AmneziaVPN میں صرف Windows پر دستیاب
@@ -6284,54 +6577,59 @@ Features:
 * UDP پروٹوکول پر کام کرتا ہے (پورٹ 500 اور 4500)</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="192"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="195"/>
         <source>Telegram MTProto proxy server. Allows Telegram clients to connect through your server using the MTProto protocol. Supports FakeTLS mode for bypassing DPI-based blocking.</source>
         <translation>Telegram MTProto پراکسی سرور۔ Telegram کلائنٹس کو MTProto پروٹوکول کے ذریعے آپ کے سرور سے منسلک ہونے دیتا ہے۔ DPI پر مبنی بلاکنگ سے بچنے کے لیے FakeTLS موڈ کو سپورٹ کرتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="197"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="200"/>
         <source>Telegram MTProto proxy powered by Telemt (Rust). Supports secure and TLS fronting modes with optional traffic masking.</source>
         <translation>Telemt (Rust) پر مبنی Telegram MTProto پراکسی۔ محفوظ اور TLS فرنٹنگ موڈز کو سپورٹ کرتا ہے، اختیاری ٹریفک ماسکنگ کے ساتھ۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="329"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="203"/>
+        <source>Telegram WEB proxy. Clients connect over HTTPS to a hostname; the server relays traffic to official MTProxy. Requires a domain, ports 80 and 443, and a WEB-capable Telegram app.</source>
+        <translation>Telegram WEB پراکسی۔ کلائنٹس HTTPS کے ذریعے ایک ہوسٹ نام سے منسلک ہوتے ہیں؛ سرور ٹریفک کو سرکاری MTProxy تک پہنچاتا ہے۔ اس کے لیے ایک ڈومین، پورٹس 80 اور 443، اور WEB سپورٹ کرنے والی Telegram ایپ درکار ہے۔</translation>
+    </message>
+    <message>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="340"/>
         <source>Automatic</source>
         <translation>خودکار</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="337"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="348"/>
         <source>AmneziaWG protocol will be installed. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>AmneziaWG پروٹوکول انسٹال کیا جائے گا۔ یہ تیز رفتار کنکشن فراہم کرتا ہے اور انتہائی مشکل نیٹ ورک حالات میں بھی مستحکم کارکردگی کو یقینی بناتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="95"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="96"/>
         <source>WireGuard - popular VPN protocol with high performance, high speed and low power consumption.</source>
-        <translation>WireGuard — اعلیٰ کارکردگی، تیز رفتاری اور کم بجلی کی کھپت والا مقبول وی پی این پروٹوکول۔</translation>
+        <translation>WireGuard — اعلیٰ کارکردگی، تیز رفتاری اور کم بجلی کی کھپت والا مقبول VPN پروٹوکول۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="98"/>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="101"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="99"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="102"/>
         <location filename="../ui/models/containersModel.cpp" line="41"/>
         <source>AmneziaWG is a special protocol from Amnezia based on WireGuard. It provides high connection speed and ensures stable operation even in the most challenging network conditions.</source>
         <translation>AmneziaWG، WireGuard پر مبنی Amnezia کا ایک خصوصی پروٹوکول ہے۔ یہ تیز رفتار کنکشن فراہم کرتا ہے اور انتہائی مشکل نیٹ ورک حالات میں بھی مستحکم کارکردگی کو یقینی بناتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="104"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="105"/>
         <source>XRay with REALITY masks VPN traffic as web traffic and protects against active probing. It is highly resistant to detection and offers high speed.</source>
-        <translation>REALITY کے ساتھ XRay، وی پی این ٹریفک کو ویب ٹریفک کے طور پر چھپاتا ہے اور ایکٹو پروبنگ سے تحفظ دیتا ہے۔ یہ شناخت کے خلاف انتہائی مزاحم ہے اور تیز رفتاری فراہم کرتا ہے۔</translation>
+        <translation>REALITY کے ساتھ XRay، VPN ٹریفک کو ویب ٹریفک کے طور پر چھپاتا ہے اور ایکٹو پروبنگ سے تحفظ دیتا ہے۔ یہ شناخت کے خلاف انتہائی مزاحم ہے اور تیز رفتاری فراہم کرتا ہے۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="107"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="108"/>
         <source>IKEv2/IPsec -  Modern stable protocol, a bit faster than others, restores connection after signal loss. It has native support on the latest versions of Android and iOS.</source>
         <translation>IKEv2/IPsec — ایک جدید اور مستحکم پروٹوکول، دوسروں سے کچھ تیز، سگنل ختم ہونے کے بعد کنکشن بحال کرتا ہے۔ Android اور iOS کے تازہ ترین ورژنز میں اس کی مقامی سپورٹ موجود ہے۔</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="114"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="115"/>
         <source>Create a file vault on your server to securely store and transfer files.</source>
         <translation>فائلوں کو محفوظ طریقے سے اسٹور اور ٹرانسفر کرنے کے لیے اپنے سرور پر ایک فائل والٹ بنائیں.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="186"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="189"/>
         <source>After installation, Amnezia will create a
 
  file storage on your server. You will be able to access it using
@@ -6340,27 +6638,27 @@ Features:
 
 For more detailed information, you can
  find it in the support section under &quot;Create SFTP file storage.&quot; </source>
-        <translation>انسٹالیشن کے بعد، ایمنیزیا آپ کے سرور پر
+        <translation>انسٹالیشن کے بعد، Amnezia آپ کے سرور پر
 
  ایک فائل اسٹوریج بنائے گا۔ آپ اس تک رسائی حاصل کر سکیں گے
- فائل زلا یا دیگر SFTP کلائنٹس کے ذریعے، اور ڈسک کو اپنے آلہ پر ماؤنٹ کر کے
+ FileZilla یا دیگر SFTP کلائنٹس کے ذریعے، اور ڈسک کو اپنے آلہ پر ماؤنٹ کر کے
  براہ راست اپنے آلہ سے بھی رسائی لے سکیں گے۔
 
 مزید تفصیلی معلومات کے لیے، آپ
  سپورٹ سیکشن میں &quot;SFTP فائل اسٹوریج بنانا&quot; کے تحت دیکھ سکتے ہیں۔ </translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="110"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="111"/>
         <source>Deploy a WordPress site on the Tor network in two clicks.</source>
         <translation>ٹور نیٹ ورک پر ایک ورڈپریس سائٹ کو دو کلکس میں تعینات کریں.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="112"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="113"/>
         <source>Replace the current DNS server with your own. This will increase your privacy level.</source>
         <translation>موجودہ DNS سرور کو اپنے سے تبدیل کریں۔ اس سے آپ کی رازداری کی سطح میں اضافہ ہوگا.</translation>
     </message>
     <message>
-        <location filename="../core/utils/containers/containerUtils.cpp" line="184"/>
+        <location filename="../core/utils/containers/containerUtils.cpp" line="187"/>
         <source>DNS Service</source>
         <translation>DNS سروس</translation>
     </message>
@@ -6477,7 +6775,7 @@ For more detailed information, you can
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="51"/>
         <source>SS URI is too short</source>
-        <translation>SS یو آر آئی بہت مختصر ہے</translation>
+        <translation>SS URI بہت مختصر ہے</translation>
     </message>
     <message>
         <location filename="../core/utils/serialization/ss.cpp" line="74"/>
@@ -6527,7 +6825,7 @@ For more detailed information, you can
 <context>
     <name>SecureServersRepository</name>
     <message>
-        <location filename="../core/repositories/secureServersRepository.cpp" line="212"/>
+        <location filename="../core/repositories/secureServersRepository.cpp" line="225"/>
         <source>Server</source>
         <translation>سرور</translation>
     </message>
@@ -6589,7 +6887,7 @@ For more detailed information, you can
 <context>
     <name>SettingsUiController</name>
     <message>
-        <location filename="../ui/controllers/settingsUiController.cpp" line="183"/>
+        <location filename="../ui/controllers/settingsUiController.cpp" line="187"/>
         <source>All settings have been reset to default values</source>
         <translation>تمام ترتیبات کو ڈیفالٹ اقدار پر دوبارہ ترتیب دیا گیا ہے</translation>
     </message>
@@ -6604,7 +6902,7 @@ For more detailed information, you can
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="59"/>
         <source>Renew to continue using VPN</source>
-        <translation>وی پی این استعمال جاری رکھنے کے لیے تجدید کریں</translation>
+        <translation>VPN استعمال جاری رکھنے کے لیے تجدید کریں</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="71"/>
@@ -6641,51 +6939,51 @@ For more detailed information, you can
         <translation>سبسکرپشن کامیابی سے بحال ہو گیا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="343"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="379"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="344"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="380"/>
         <source>Purchase confirmed. Subscription has been added to the app</source>
         <translation>خریداری کی تصدیق ہو گئی۔ سبسکرپشن ایپ میں شامل کر دیا گیا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="435"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="488"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="611"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="436"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="489"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="612"/>
         <source>%1 installed successfully.</source>
         <translation>%1 کامیابی سے نصب ہو گیا۔</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="450"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="496"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="523"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="554"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="582"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="646"/>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="739"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="451"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="497"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="524"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="555"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="583"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="647"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="740"/>
         <source>Enter the digits from the image to continue</source>
         <translation>جاری رکھنے کے لیے تصویر میں دیے گئے ہندسے درج کریں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="604"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="605"/>
         <source>This email address has already been used to activate a trial. Like the service? Upgrade to Premium</source>
         <translation>یہ ای میل ایڈریس پہلے ہی ٹرائل فعال کرنے کے لیے استعمال ہو چکا ہے۔ سروس پسند آئی؟ Premium میں اپ گریڈ کریں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="664"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="665"/>
         <source>API config reloaded</source>
         <translation>API کنفیگ دوبارہ لوڈ ہو گیا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="668"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="669"/>
         <source>Successfully changed the country of connection to %1</source>
         <translation>کنکشن کا ملک کامیابی سے %1 میں تبدیل کر دیا گیا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="783"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="784"/>
         <source>API config removed</source>
         <translation>API کنفیگ ہٹا دیا گیا</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="792"/>
+        <location filename="../ui/controllers/api/subscriptionUiController.cpp" line="793"/>
         <source>Server &apos;%1&apos; was removed</source>
         <translation>سرور %1 ہٹا دیا گیا تھا</translation>
     </message>
@@ -6740,21 +7038,56 @@ For more detailed information, you can
     </message>
 </context>
 <context>
-    <name>UpdateUiController</name>
+    <name>UpdateSupportDrawer</name>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="20"/>
-        <source>New version released: %1</source>
-        <translation>نیا ورژن جاری ہوا: %1</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="39"/>
+        <source>Support</source>
+        <translation>سپورٹ</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="23"/>
-        <source>New version released: %1 (%2)</source>
-        <translation>نیا ورژن جاری ہوا: %1 (%2)</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="47"/>
+        <source>If the update won&apos;t install, message us</source>
+        <translation>اگر اپ ڈیٹ انسٹال نہ ہو تو ہمیں پیغام بھیجیں</translation>
     </message>
     <message>
-        <location filename="../ui/controllers/updateUiController.cpp" line="34"/>
-        <source>Failed to load changelog text</source>
-        <translation>چینج لاگ کا متن لوڈ کرنے میں ناکامی</translation>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="54"/>
+        <source>Telegram</source>
+        <translation>Telegram</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="55"/>
+        <source>We&apos;ll reply in chat</source>
+        <translation>ہم چیٹ میں جواب دیں گے</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="60"/>
+        <source>https://t.me/amnezia_vpn_en</source>
+        <translation>https://t.me/amnezia_vpn_en</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="69"/>
+        <source>support@amnezia.org</source>
+        <translation>support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="70"/>
+        <source>Support email</source>
+        <translation>سپورٹ ای میل</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="75"/>
+        <source>mailto:support@amnezia.org</source>
+        <translation>mailto:support@amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="84"/>
+        <source>amnezia.org</source>
+        <translation>amnezia.org</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/UpdateSupportDrawer.qml" line="85"/>
+        <source>Download the update manually</source>
+        <translation>اپ ڈیٹ دستی طور پر ڈاؤن لوڈ کریں</translation>
     </message>
 </context>
 <context>
@@ -6842,39 +7175,39 @@ For more detailed information, you can
 <context>
     <name>main2</name>
     <message>
-        <location filename="../ui/qml/main2.qml" line="279"/>
+        <location filename="../ui/qml/main2.qml" line="285"/>
         <source>Private key passphrase</source>
         <translation>نجی کلید پاس فریز</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="300"/>
+        <location filename="../ui/qml/main2.qml" line="306"/>
         <source>Save</source>
         <translation>محفوظ کریں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="394"/>
+        <location filename="../ui/qml/main2.qml" line="400"/>
         <source>This subscription format is no longer supported</source>
         <translation>سبسکرپشن کا یہ فارمیٹ اب سپورٹ نہیں کیا جاتا</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="395"/>
+        <location filename="../ui/qml/main2.qml" line="401"/>
         <source>This legacy Amnezia subscription type can no longer be used to connect in this application version.
 Remove the server from the app to continue.</source>
         <translation>Amnezia سبسکرپشن کی یہ پرانی قسم اس ایپلیکیشن ورژن میں منسلک ہونے کے لیے استعمال نہیں کی جا سکتی۔
 جاری رکھنے کے لیے سرور کو ایپ سے ہٹا دیں۔</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="396"/>
+        <location filename="../ui/qml/main2.qml" line="402"/>
         <source>Continue</source>
         <translation>جاری رکھیں</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="397"/>
+        <location filename="../ui/qml/main2.qml" line="403"/>
         <source>Cancel</source>
         <translation>منسوخ</translation>
     </message>
     <message>
-        <location filename="../ui/qml/main2.qml" line="401"/>
+        <location filename="../ui/qml/main2.qml" line="407"/>
         <source>Cannot remove server during active connection</source>
         <translation>چالو کنکشن کے دوران سرور کو ہٹایا نہیں جا سکتا</translation>
     </message>

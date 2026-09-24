@@ -82,6 +82,8 @@ namespace amnezia
         RestoreBackupInvalidError = 904,
         LegacyApiV1NotSupportedError = 905,
         LegacyContainerNotSupportedError = 906,
+        ConfigFormatVersionNotSupportedError = 907,
+        RestoreBackupUnsupportedConfigsSkipped = 908,
 
         // Android errors
         AndroidError = 1000,

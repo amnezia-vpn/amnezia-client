@@ -111,8 +111,9 @@ class AmneziaXrayBindings(ConanFile):
                 env.define("CGO_LDFLAGS", " ".join(ldflags))
                 with env.vars(self).apply():
                     at = Autotools(self)
+                    make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                     at.make(args=[
-                        f"BUILD_DIR={build_dir.replace("\\", "/") if self._is_windows else build_dir}"
+                        f"BUILD_DIR={make_build_dir}"
                     ])
 
             if is_apple_os(self) and self._is_multiarch:

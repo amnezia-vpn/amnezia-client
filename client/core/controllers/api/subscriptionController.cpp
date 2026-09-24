@@ -239,6 +239,9 @@ ErrorCode SubscriptionController::applyImportedServiceConfig(const QString &user
 
     updateApiConfigInJson(serverConfigJson, serviceType, serviceProtocol, userCountryCode, responseBody);
 
+    if (!serverConfigUtils::isConfigFormatVersionSupported(serverConfigJson)) {
+        return ErrorCode::ConfigFormatVersionNotSupportedError;
+    }
     if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
@@ -291,6 +294,9 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     }
 
     QJsonObject configObject = QJsonDocument::fromJson(configBytes).object();
+    if (!serverConfigUtils::isConfigFormatVersionSupported(configObject)) {
+        return ErrorCode::ConfigFormatVersionNotSupportedError;
+    }
     if (configObject.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
@@ -380,6 +386,9 @@ ErrorCode SubscriptionController::applyUpdatedServiceConfig(const QString &serve
 
     updateApiConfigInJson(serverConfigJson, apiV2->apiConfig.serviceType, serviceProtocol, apiV2->apiConfig.userCountryCode, responseBody);
 
+    if (!serverConfigUtils::isConfigFormatVersionSupported(serverConfigJson)) {
+        return ErrorCode::ConfigFormatVersionNotSupportedError;
+    }
     if (serverConfigJson.value(configKey::configVersion).toInt() != serverConfigUtils::ConfigSource::AmneziaGateway) {
         return ErrorCode::InternalError;
     }
