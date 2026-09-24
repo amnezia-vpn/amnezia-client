@@ -197,6 +197,7 @@ private:
     QVariantList m_useCases;
 
     QSet<QString> m_favorites;
+    QSet<QString> m_favoritesSnapshot;
 };
 
 #endif

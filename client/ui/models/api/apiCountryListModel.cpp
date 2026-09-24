@@ -376,7 +376,7 @@ bool ApiCountryListModel::passesActiveUseCase(const Location &location) const
         return true;
     }
     if (m_activeUseCaseId == useCaseFavorites) {
-        return m_favorites.contains(location.countryCode);
+        return m_favoritesSnapshot.contains(location.countryCode);
     }
     if (m_activeUseCaseId == useCaseCreated) {
         return isIssued(location);
@@ -662,31 +662,6 @@ bool ApiCountryListModel::toggleFavorite(const QString &countryCode)
 
     if (rebuildUseCases()) {
         rebuild();
-        return true;
-    }
-
-    if (m_activeUseCaseId == useCaseFavorites && !m_favorites.contains(countryCode)) {
-        for (auto it = m_sectionOrder.begin(); it != m_sectionOrder.end(); ++it) {
-            QVector<int> &order = it.value();
-            for (int i = 0; i < order.size(); ++i) {
-                if (m_locations.at(order.at(i)).countryCode != countryCode) {
-                    continue;
-                }
-                order.remove(i);
-                const QString key = it.key();
-                m_sectionCounts[key] -= 1;
-                for (QString parent = parentSectionKey(key); !parent.isEmpty(); parent = parentSectionKey(parent)) {
-                    m_sectionCounts[parent] -= 1;
-                }
-                break;
-            }
-        }
-        m_orderedSectionKeys.erase(std::remove_if(m_orderedSectionKeys.begin(), m_orderedSectionKeys.end(),
-                                                  [this](const QString &key) {
-                                                      return m_sectionCounts.value(key) <= 0;
-                                                  }),
-                                   m_orderedSectionKeys.end());
-        applyRows(buildRows());
     }
     return true;
 }
@@ -954,6 +929,8 @@ int ApiCountryListModel::matchLevel(const Location &location, const QString &spa
 void ApiCountryListModel::rebuild()
 {
     beginResetModel();
+
+    m_favoritesSnapshot = m_favorites;
 
     m_rows.clear();
     m_sectionCounts.clear();
