@@ -117,8 +117,11 @@
         <file>Pages2/PageSettingsKillSwitch.qml</file>
         <file>Pages2/PageSettingsKillSwitchExceptions.qml</file>
         <file>Pages2/PageSettingsLogging.qml</file>
+        <file>Pages2/PageSettingsServerBackup.qml</file>
+        <file>Pages2/PageSettingsServerBackupRestored.qml</file>
         <file>Pages2/PageSettingsServerData.qml</file>
         <file>Pages2/PageSettingsServerInfo.qml</file>
+        <file>Pages2/PageSettingsServerRestoreMode.qml</file>
         <file>Pages2/PageSettingsServerProtocol.qml</file>
         <file>Pages2/PageSettingsServerProtocols.qml</file>
         <file>Pages2/PageSettingsServerServices.qml</file>

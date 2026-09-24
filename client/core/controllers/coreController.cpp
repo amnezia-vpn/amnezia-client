@@ -212,6 +212,9 @@ void CoreController::initControllers()
     m_ipSplitTunnelingUiController = new IpSplitTunnelingUiController(m_ipSplitTunnelingController, m_ipSplitTunnelingModel, this);
     setQmlContextProperty("IpSplitTunnelingController", m_ipSplitTunnelingUiController);
 
+    m_serversBackupController = new ServersBackupController(m_settings, m_serversModel, m_serversUiController, m_serversController);
+    setQmlContextProperty("ServersBackupController", m_serversBackupController);
+
     m_allowedDnsUiController = new AllowedDnsUiController(m_allowedDnsController, m_allowedDnsModel, this);
     setQmlContextProperty("AllowedDnsController", m_allowedDnsUiController);
 

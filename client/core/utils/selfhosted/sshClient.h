@@ -38,6 +38,8 @@ namespace libssh {
                                const QString &localPath,
                                const QString &remotePath,
                                const QString &fileDesc);
+        ErrorCode scpFileDownload(const QString &remotePath,
+                                   const QString &localPath);
         ErrorCode getDecryptedPrivateKey(const ServerCredentials &credentials, QString &decryptedPrivateKey, const std::function<QString()> &passphraseCallback);
     private:
         ErrorCode closeChannel();
@@ -54,6 +56,7 @@ namespace libssh {
     signals:
         void writeToChannelFinished();
         void scpFileCopyFinished();
+        void scpFileDownloadFinished();
     };
 }
 

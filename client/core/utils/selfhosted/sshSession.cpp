@@ -44,6 +44,11 @@ SshSession::~SshSession()
     m_sshClient.disconnectFromHost();
 }
 
+void SshSession::resetConnection()
+{
+    m_sshClient.disconnectFromHost();
+}
+
 ErrorCode SshSession::runScript(const ServerCredentials &credentials, QString script,
                                 const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
                                 const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)

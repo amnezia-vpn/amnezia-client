@@ -168,6 +168,42 @@ void SystemController::setQmlRoot(QObject *qmlRoot)
     m_qmlRoot = qmlRoot;
 }
 
+QString SystemController::getFileNameFromPath(const QString &filePath)
+{
+    if (filePath.isEmpty()) {
+        return "";
+    }
+    
+#ifdef Q_OS_ANDROID
+    // Для Android URI используем специальный метод для получения имени файла
+    if (filePath.startsWith("content://")) {
+        QString fileName = AndroidController::instance()->getFileName(filePath);
+        if (!fileName.isEmpty()) {
+            return fileName;
+        }
+        // Если не удалось получить имя через ContentResolver, пытаемся извлечь из URI
+    }
+#endif
+    
+    // Для обычных путей или если Android метод не сработал
+    QFileInfo fileInfo(filePath);
+    QString fileName = fileInfo.fileName();
+    
+    // Если имя файла пустое, пытаемся извлечь из пути
+    if (fileName.isEmpty()) {
+        QStringList parts = filePath.split('/');
+        if (!parts.isEmpty()) {
+            fileName = parts.last();
+            // Декодируем URL-кодированные символы
+            if (fileName.contains('%')) {
+                fileName = QUrl::fromPercentEncoding(fileName.toUtf8());
+            }
+        }
+    }
+    
+    return fileName;
+}
+
 bool SystemController::isAuthenticated()
 {
 #ifdef Q_OS_ANDROID

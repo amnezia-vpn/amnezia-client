@@ -290,6 +290,86 @@ namespace libssh {
         return watcher.result();
     }
 
+    ErrorCode Client::scpFileDownload(const QString& remotePath, const QString& localPath)
+    {
+        // Use full path for SCP download
+        m_scpSession = ssh_scp_new(m_session, SSH_SCP_READ, remotePath.toStdString().c_str());
+
+        if (m_scpSession == nullptr) {
+            return fromLibsshErrorCode();
+        }
+
+        if (ssh_scp_init(m_scpSession) != SSH_OK) {
+            auto errorCode = fromLibsshErrorCode();
+            closeScpSession();
+            return errorCode;
+        }
+
+        QFutureWatcher<ErrorCode> watcher;
+        connect(&watcher, &QFutureWatcher<ErrorCode>::finished, this, &Client::scpFileDownloadFinished);
+        QFuture<ErrorCode> future = QtConcurrent::run([this, &remotePath, &localPath]() {
+            // Pull request - this gets file info
+            int result = ssh_scp_pull_request(m_scpSession);
+            if (result != SSH_SCP_REQUEST_NEWFILE) {
+                return fromLibsshErrorCode();
+            }
+
+            // Accept the request
+            ssh_scp_accept_request(m_scpSession);
+
+            // Get file size
+            int fileSize = ssh_scp_request_get_size(m_scpSession);
+            if (fileSize <= 0) {
+                return ErrorCode::InternalError;
+            }
+
+            // Open local file for writing
+            QFile fout(localPath);
+            if (!fout.open(QIODevice::WriteOnly)) {
+                return fromFileErrorCode(fout.error());
+            }
+
+            // Read file data in chunks
+            constexpr size_t bufferSize = 16384;
+            int transferred = 0;
+
+            while (transferred < fileSize) {
+                int chunkSize = qMin(bufferSize, static_cast<size_t>(fileSize - transferred));
+                QByteArray buffer(chunkSize, 0);
+
+                int bytesRead = ssh_scp_read(m_scpSession, buffer.data(), chunkSize);
+                if (bytesRead == SSH_ERROR) {
+                    fout.close();
+                    return fromLibsshErrorCode();
+                }
+
+                if (bytesRead != chunkSize) {
+                    fout.close();
+                    return ErrorCode::InternalError;
+                }
+
+                qint64 bytesWritten = fout.write(buffer);
+                if (bytesWritten != chunkSize) {
+                    fout.close();
+                    return fromFileErrorCode(fout.error());
+                }
+
+                transferred += bytesRead;
+            }
+
+            fout.close();
+            return ErrorCode::NoError;
+        });
+        watcher.setFuture(future);
+
+        QEventLoop wait;
+        QObject::connect(this, &Client::scpFileDownloadFinished, &wait, &QEventLoop::quit);
+        wait.exec();
+
+        closeScpSession();
+        return watcher.result();
+    }
+
     void Client::closeScpSession()
     {
         if (m_scpSession != nullptr) {
