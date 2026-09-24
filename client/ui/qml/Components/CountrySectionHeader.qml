@@ -80,7 +80,10 @@ Item {
                     return ""
                 }
                 root.listModel.layoutRevision
-                return "%1 · %2".arg(root.title).arg(root.listModel.sectionCount(root.sectionKey))
+                if (!root.collapsed) {
+                    return root.title
+                }
+                return "%1 (%2)".arg(root.title).arg(root.listModel.sectionCount(root.sectionKey))
             }
         }
 
