@@ -40,8 +40,13 @@ LRESULT WindowsNetworkWatcher::PowerWndProcCallback(HWND hwnd, UINT uMsg, WPARAM
   }
   switch (uMsg) {
   case WM_POWERBROADCAST:
-    if (wParam == PBT_APMRESUMESUSPEND) {
+    if (wParam == PBT_APMSUSPEND) {
+      obj->m_suspended = true;
+    } else if (wParam == PBT_APMRESUMEAUTOMATIC) {
+      if (obj->m_suspended) {
+        obj->m_suspended = false;
         emit obj->wakeup();
+      }
     }
     break;
   default:
