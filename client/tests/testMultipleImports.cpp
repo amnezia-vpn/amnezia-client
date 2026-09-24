@@ -210,6 +210,40 @@ private slots:
         QVERIFY2(ipErrorOccurredSpy.count() == 0, "(ip) errorOccurred signal should NOT be emitted");
         QVERIFY2(ipFinishedSpy.count() == 1, "(ip) finished signal should be emitted");
     }
+
+    void testWireGuardDnsImport_data() {
+        QTest::addColumn<QString>("dnsLine");
+        QTest::addColumn<QString>("expectedDns1");
+        QTest::addColumn<QString>("expectedDns2");
+
+        QTest::newRow("single") << "DNS = 192.168.12.1" << "192.168.12.1" << "192.168.12.1";
+        QTest::newRow("pair") << "DNS = 1.1.1.1, 8.8.8.8" << "1.1.1.1" << "8.8.8.8";
+        QTest::newRow("no spaces") << "DNS=10.0.0.1,10.0.0.2" << "10.0.0.1" << "10.0.0.2";
+        QTest::newRow("ipv6 and search domain") << "DNS = 2001:db8::1, 172.16.3.254, lan" << "172.16.3.254" << "172.16.3.254";
+        QTest::newRow("none") << "" << "" << "";
+    }
+
+    void testWireGuardDnsImport() {
+        QFETCH(QString, dnsLine);
+        QFETCH(QString, expectedDns1);
+        QFETCH(QString, expectedDns2);
+
+        const QString config = QStringLiteral("[Interface]\n"
+                                              "Address = 192.168.12.2/32\n"
+                                              "PrivateKey = yAnz5TF+lXXJte14tji3zlMNq+hd2rYUIgJBgB3fBmk=\n"
+                                              "%1\n"
+                                              "MTU = 1280\n"
+                                              "\n"
+                                              "[Peer]\n"
+                                              "PublicKey = xTIBA5rboUvnH4htodjb6e697QjLERt1NAB4mZqp8Dg=\n"
+                                              "AllowedIPs = 0.0.0.0/0\n"
+                                              "Endpoint = vpn.example.com:51820\n").arg(dnsLine);
+
+        const auto importResult = m_coreController->m_importCoreController->extractConfigFromData(config, "test.conf");
+        QCOMPARE(importResult.errorCode, ErrorCode::NoError);
+        QCOMPARE(importResult.config.value(configKey::dns1).toString(), expectedDns1);
+        QCOMPARE(importResult.config.value(configKey::dns2).toString(), expectedDns2);
+    }
 };
 
 QTEST_MAIN(TestMultipleImports)

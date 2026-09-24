@@ -27,6 +27,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/qrCodeUtils.h"
+#include "core/utils/networkUtilities.h"
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -642,13 +643,18 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
     config[configKey::defaultContainer] = containerName;
     config[configKey::description] = m_serversRepository->nextAvailableServerName();
 
-    const static QRegularExpression dnsRegExp(
-            "DNS = "
-            "(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)");
-    QRegularExpressionMatch dnsMatch = dnsRegExp.match(data);
-    if (dnsMatch.hasMatch()) {
-        config[configKey::dns1] = dnsMatch.captured(1);
-        config[configKey::dns2] = dnsMatch.captured(2);
+    QStringList dnsServers;
+    const QStringList dnsEntries = configMap.value(protocols::wireguard::DNS).split(',', Qt::SkipEmptyParts);
+    for (const QString &entry : dnsEntries) {
+        const QString address = entry.trimmed();
+        if (NetworkUtilities::checkIPv4Format(address)) {
+            dnsServers.append(address);
+        }
+    }
+    if (!dnsServers.isEmpty()) {
+        // A single server fills both slots, otherwise the secondary one falls back to the app DNS and leaks queries
+        config[configKey::dns1] = dnsServers.at(0);
+        config[configKey::dns2] = dnsServers.value(1, dnsServers.at(0));
     }
 
     config[configKey::hostName] = hostName;
