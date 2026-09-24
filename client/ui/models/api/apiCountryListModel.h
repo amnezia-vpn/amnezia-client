@@ -183,6 +183,7 @@ private:
     QVector<Location> m_locations;
     QVector<Row> m_rows;
     QHash<QString, int> m_sectionCounts;
+    QHash<QString, int> m_sectionTotals;
     QHash<QString, QVector<int>> m_sectionOrder;
     QStringList m_orderedSectionKeys;
     QHash<QString, bool> m_collapsedSections;

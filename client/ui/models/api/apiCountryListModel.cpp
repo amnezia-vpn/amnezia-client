@@ -503,7 +503,7 @@ QString ApiCountryListModel::sectionSubsubregionId(const QString &sectionKey) co
 
 int ApiCountryListModel::sectionCount(const QString &sectionKey) const
 {
-    return m_sectionCounts.value(sectionKey, 0);
+    return m_sectionTotals.value(sectionKey, 0);
 }
 
 QString ApiCountryListModel::sectionKeyAtRow(int row) const
@@ -950,6 +950,7 @@ void ApiCountryListModel::rebuild()
 
     m_rows.clear();
     m_sectionCounts.clear();
+    m_sectionTotals.clear();
     m_sectionOrder.clear();
 
     const QString spacedQuery = normalizeSpaced(m_searchText);
@@ -966,11 +967,16 @@ void ApiCountryListModel::rebuild()
         if (!passesActiveUseCase(m_locations.at(i))) {
             continue;
         }
+        const QString key = isGrouped() ? m_locations.at(i).sectionKey : QString();
+        m_sectionTotals[key] += 1;
+        for (QString parent = parentSectionKey(key); !parent.isEmpty(); parent = parentSectionKey(parent)) {
+            m_sectionTotals[parent] += 1;
+        }
+
         const int level = matchLevel(m_locations.at(i), spacedQuery, tightQuery);
         if (level == 0) {
             continue;
         }
-        const QString key = isGrouped() ? m_locations.at(i).sectionKey : QString();
         grouped[key].push_back({ i, level });
     }
 
