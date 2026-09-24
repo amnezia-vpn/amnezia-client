@@ -70,6 +70,7 @@ namespace countryCatalog
 
         bool isEmpty() const;
         int splitThreshold() const;
+        int collapseThreshold() const;
         int version() const;
         const QVector<Region> &regions() const;
         const QVector<UseCase> &useCases() const;
@@ -77,15 +78,18 @@ namespace countryCatalog
         const Entry *find(const QString &countryCode, const QString &isoCode) const;
         bool hasSubregions(const QString &regionId) const;
 
-        bool isSplit(const QString &regionId, int visibleCount) const;
-        bool isSplit(const QString &regionId, const QString &subregionId, int visibleCount) const;
+        bool isSplit(const QString &regionId, int visibleCount, bool wasSplit) const;
+        bool isSplit(const QString &regionId, const QString &subregionId, int visibleCount, bool wasSplit) const;
 
     private:
         QVector<Region> m_regions;
         QVector<UseCase> m_useCases;
         QHash<QString, Entry> m_byCode;
         QHash<QString, Entry> m_byIso;
+        bool splitByCount(int visibleCount, bool wasSplit) const;
+
         int m_splitThreshold = 15;
+        int m_collapseThreshold = 13;
         int m_version = 0;
     };
 } // namespace countryCatalog

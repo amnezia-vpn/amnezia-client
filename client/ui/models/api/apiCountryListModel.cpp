@@ -866,13 +866,24 @@ void ApiCountryListModel::reloadLocations()
         }
     }
 
+    QHash<QString, bool> splitState;
+    for (const countryCatalog::Region &region : m_catalog.regions()) {
+        splitState.insert(region.id, m_catalog.isSplit(region.id, visibleCounts.value(region.id),
+                                                       m_splitState.value(region.id, false)));
+        for (const countryCatalog::Subregion &subregion : region.subregions) {
+            const QString key = buildSectionKey(region.id, subregion.id);
+            splitState.insert(key, m_catalog.isSplit(region.id, subregion.id, visibleCounts.value(key),
+                                                     m_splitState.value(key, false)));
+        }
+    }
+    m_splitState = splitState;
+
     for (Location &location : m_locations) {
-        if (!m_catalog.isSplit(location.regionId, visibleCounts.value(location.regionId))) {
+        if (!m_splitState.value(location.regionId, false)) {
             location.subregionId.clear();
         }
         if (location.subregionId.isEmpty()
-            || !m_catalog.isSplit(location.regionId, location.subregionId,
-                                  visibleCounts.value(buildSectionKey(location.regionId, location.subregionId)))) {
+            || !m_splitState.value(buildSectionKey(location.regionId, location.subregionId), false)) {
             location.subsubregionId.clear();
         }
         location.sectionKey = buildSectionKey(location.regionId, location.subregionId, location.subsubregionId);

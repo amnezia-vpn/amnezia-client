@@ -17,6 +17,7 @@ namespace
 
     constexpr QLatin1String keyVersion("version");
     constexpr QLatin1String keySplitThreshold("splitThreshold");
+    constexpr QLatin1String keyCollapseThreshold("collapseThreshold");
     constexpr QLatin1String keyRegions("regions");
     constexpr QLatin1String keySubregions("subregions");
     constexpr QLatin1String keyCountries("countries");
@@ -69,6 +70,9 @@ Catalog Catalog::fromJson(const QByteArray &json)
     catalog.m_version = root.value(keyVersion).toInt();
     if (root.contains(keySplitThreshold)) {
         catalog.m_splitThreshold = root.value(keySplitThreshold).toInt(catalog.m_splitThreshold);
+    }
+    if (root.contains(keyCollapseThreshold)) {
+        catalog.m_collapseThreshold = root.value(keyCollapseThreshold).toInt(catalog.m_collapseThreshold);
     }
 
     const QJsonArray regions = root.value(keyRegions).toArray();
@@ -194,6 +198,22 @@ int Catalog::splitThreshold() const
     return m_splitThreshold;
 }
 
+int Catalog::collapseThreshold() const
+{
+    return m_collapseThreshold;
+}
+
+bool Catalog::splitByCount(int visibleCount, bool wasSplit) const
+{
+    if (visibleCount > m_splitThreshold) {
+        return true;
+    }
+    if (visibleCount < m_collapseThreshold) {
+        return false;
+    }
+    return wasSplit;
+}
+
 int Catalog::version() const
 {
     return m_version;
@@ -236,7 +256,7 @@ bool Catalog::hasSubregions(const QString &regionId) const
     return false;
 }
 
-bool Catalog::isSplit(const QString &regionId, int visibleCount) const
+bool Catalog::isSplit(const QString &regionId, int visibleCount, bool wasSplit) const
 {
     for (const Region &region : m_regions) {
         if (region.id != regionId) {
@@ -248,12 +268,12 @@ bool Catalog::isSplit(const QString &regionId, int visibleCount) const
         if (region.split == SplitMode::Always) {
             return true;
         }
-        return visibleCount > m_splitThreshold;
+        return splitByCount(visibleCount, wasSplit);
     }
     return false;
 }
 
-bool Catalog::isSplit(const QString &regionId, const QString &subregionId, int visibleCount) const
+bool Catalog::isSplit(const QString &regionId, const QString &subregionId, int visibleCount, bool wasSplit) const
 {
     for (const Region &region : m_regions) {
         if (region.id != regionId) {
@@ -269,7 +289,7 @@ bool Catalog::isSplit(const QString &regionId, const QString &subregionId, int v
             if (subregion.split == SplitMode::Always) {
                 return true;
             }
-            return visibleCount > m_splitThreshold;
+            return splitByCount(visibleCount, wasSplit);
         }
         return false;
     }
