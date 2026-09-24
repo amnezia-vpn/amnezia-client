@@ -51,27 +51,23 @@ PageType {
         PageController.showBusyIndicator(false)
     }
 
-    property bool headerCollapsed: false
     readonly property real listScrolled: menuContent.contentY - menuContent.originY
     readonly property bool showSubscriptionNote: root.subscriptionExpired || root.subscriptionExpiringSoon
     readonly property bool showRenewButton: root.showSubscriptionNote
                                             && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
-    readonly property real collapsibleHeight: headerContent.implicitHeight + 4
-                                              + (root.showSubscriptionNote ? subscriptionNote.implicitHeight + 16 : 0)
-                                              + (root.showRenewButton ? renewButton.implicitHeight + 32 : 0)
-                                              + countriesLabel.implicitHeight + 8
-    readonly property bool canCollapseHeader: menuContent.contentHeight - menuContent.height
-                                              > root.collapsibleHeight + 64
+    readonly property real collapsibleHeight: menuContent.headerItem ? menuContent.headerItem.collapsibleHeight : 0
+    readonly property real collapseProgress: root.collapsibleHeight > 0
+                                             ? Math.max(0, Math.min(1, root.listScrolled / root.collapsibleHeight))
+                                             : 0
+    readonly property real listOcclusion: pinnedBlock.y + pinnedBlock.height - menuContent.y
+    readonly property bool pinnedBlockStuck: root.listScrolled >= root.collapsibleHeight
 
     property int stickyRevision: 0
     property real savedScroll: 0
 
-    onListScrolledChanged: {
-        if (!root.headerCollapsed && root.canCollapseHeader && root.listScrolled > 56) {
-            root.headerCollapsed = true
-        } else if (root.headerCollapsed && root.listScrolled < 8) {
-            root.headerCollapsed = false
-        }
+    function clampContentY(value) {
+        const maxY = menuContent.originY + Math.max(0, menuContent.contentHeight - menuContent.height)
+        return Math.max(menuContent.originY, Math.min(value, maxY))
     }
 
     function activateCountry(countryCode, countryName) {
@@ -100,6 +96,7 @@ PageType {
                 const current = ApiCountryListModel.rowForCountryCode(ApiCountryModel.currentCountryCode)
                 if (current >= 0) {
                     menuContent.positionViewAtIndex(current, ListView.Center)
+                    menuContent.contentY = root.clampContentY(menuContent.contentY - pinnedBlock.height / 2)
                 }
             })
         }
@@ -182,9 +179,75 @@ PageType {
 
         model: ApiCountryListModel
 
-        visible: ApiCountryListModel.hasResults
-
         interactive: menuContent.contentHeight > menuContent.height
+
+        header: Item {
+            readonly property real collapsibleHeight: collapsibleContent.implicitHeight + 4
+
+            width: menuContent.width
+            height: collapsibleHeight + pinnedBlock.height
+
+            ColumnLayout {
+                id: collapsibleContent
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 4
+
+                spacing: 0
+
+                opacity: 1 - root.collapseProgress
+
+                Item {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: largeTitleMetrics.height
+                    Layout.bottomMargin: root.showSubscriptionNote ? 0 : 4
+                }
+
+                ParagraphTextType {
+                    visible: root.showSubscriptionNote
+
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 12
+
+                    text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
+                    color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+                }
+
+                BasicButtonType {
+                    visible: root.showRenewButton
+
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 28
+
+                    defaultColor: AmneziaStyle.color.paleGray
+                    hoveredColor: AmneziaStyle.color.lightGray
+                    pressedColor: AmneziaStyle.color.mutedGray
+                    textColor: AmneziaStyle.color.midnightBlack
+
+                    text: qsTr("Renew subscription")
+
+                    clickedFunc: function() {
+                        SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
+                    }
+                }
+
+                ParagraphTextType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: root.showSubscriptionNote ? 12 : 4
+
+                    text: qsTr("Countries")
+                    color: AmneziaStyle.color.mutedGray
+                }
+            }
+        }
 
         footer: Item {
             width: menuContent.width
@@ -380,19 +443,21 @@ PageType {
 
         listModel: ApiCountryListModel
 
-        anchors.top: topBar.bottom
+        anchors.top: pinnedBlock.bottom
         anchors.topMargin: stickyHeader.pushOffset
         anchors.left: parent.left
         anchors.right: parent.right
 
+        readonly property real visibleTop: menuContent.contentY + root.listOcclusion
+
         readonly property int topRow: {
             root.stickyRevision
-            return menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 1)
+            return menuContent.indexAt(menuContent.width / 2, stickyHeader.visibleTop + 1)
         }
 
         readonly property real pushOffset: {
             root.stickyRevision
-            const probe = menuContent.indexAt(menuContent.width / 2, menuContent.contentY + 60)
+            const probe = menuContent.indexAt(menuContent.width / 2, stickyHeader.visibleTop + 60)
             if (probe < 0 || probe === stickyHeader.topRow || !ApiCountryListModel.isSectionHeaderRow(probe)) {
                 return 0
             }
@@ -400,7 +465,7 @@ PageType {
             if (!next) {
                 return 0
             }
-            return Math.min(0, next.y - menuContent.contentY - 60)
+            return Math.min(0, next.y - stickyHeader.visibleTop - 60)
         }
 
         onToggled: function(sectionKey) {
@@ -408,6 +473,7 @@ PageType {
                 const headerRow = ApiCountryListModel.rowForSectionHeader(sectionKey)
                 if (headerRow >= 0) {
                     menuContent.positionViewAtIndex(headerRow, ListView.Beginning)
+                    menuContent.contentY = root.clampContentY(menuContent.contentY - pinnedBlock.height)
                 }
             })
         }
@@ -416,14 +482,13 @@ PageType {
         sectionKey: stickyHeader.topRow >= 0 ? ApiCountryListModel.sectionKeyAtRow(stickyHeader.topRow) : ""
 
         visible: ApiCountryListModel.isGrouped
-                 && menuContent.visible
-                 && menuContent.contentHeight > menuContent.height
-                 && menuContent.contentY > menuContent.originY
+                 && ApiCountryListModel.hasResults
+                 && root.pinnedBlockStuck
                  && stickyHeader.sectionKey !== ""
     }
 
     CountriesEmptyState {
-        anchors.top: topBar.bottom
+        anchors.top: pinnedBlock.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -452,7 +517,60 @@ PageType {
 
         color: AmneziaStyle.color.midnightBlack
 
-        implicitHeight: topBarContent.implicitHeight
+        implicitHeight: navigationRow.y + navigationRow.height + 4
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.AllButtons
+        }
+
+        Item {
+            id: navigationRow
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.topMargin: 20 + PageController.safeAreaTopMargin
+            height: backButton.implicitHeight
+
+            BackButtonType {
+                id: backButton
+                objectName: "backButton"
+
+                anchors.left: parent.left
+                anchors.right: settingsButton.left
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            ImageButtonType {
+                id: settingsButton
+                objectName: "settingsButton"
+
+                anchors.right: parent.right
+                anchors.rightMargin: 16
+                anchors.verticalCenter: parent.verticalCenter
+
+                implicitWidth: 40
+                implicitHeight: 40
+
+                hoverEnabled: true
+                image: "qrc:/images/controls/settings.svg"
+                imageColor: AmneziaStyle.color.paleGray
+
+                onClicked: root.openServerInfo()
+            }
+        }
+    }
+
+    Rectangle {
+        id: pinnedBlock
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        y: topBar.height + Math.max(0, root.collapsibleHeight - root.listScrolled)
+        height: pinnedContent.implicitHeight
+
+        color: AmneziaStyle.color.midnightBlack
 
         MouseArea {
             anchors.fill: parent
@@ -460,126 +578,13 @@ PageType {
         }
 
         ColumnLayout {
-            id: topBarContent
+            id: pinnedContent
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
 
-            spacing: 4
-
-            Item {
-                id: navigationRow
-
-                Layout.fillWidth: true
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
-                Layout.preferredHeight: backButton.implicitHeight
-
-                BackButtonType {
-                    id: backButton
-                    objectName: "backButton"
-
-                    anchors.left: parent.left
-                    anchors.right: settingsButton.left
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                ListItemTitleType {
-                    anchors.centerIn: parent
-                    width: Math.min(implicitWidth, parent.width - 2 * 72)
-
-                    visible: root.headerCollapsed
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
-                    horizontalAlignment: Text.AlignHCenter
-                    text: qsTr("Connection")
-                    color: AmneziaStyle.color.textPrimary
-                    font.weight: 500
-                }
-
-                ImageButtonType {
-                    id: settingsButton
-                    objectName: "settingsButton"
-
-                    anchors.right: parent.right
-                    anchors.rightMargin: 16
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    implicitWidth: 40
-                    implicitHeight: 40
-
-                    hoverEnabled: true
-                    image: "qrc:/images/controls/settings.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    onClicked: root.openServerInfo()
-                }
-            }
-
-            BaseHeaderType {
-                id: headerContent
-                objectName: "headerContent"
-
-                visible: !root.headerCollapsed
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
-
-                headerText: root.processedServer ? root.processedServer.name : ""
-            }
-
-            ParagraphTextType {
-                id: subscriptionNote
-
-                visible: !root.headerCollapsed && root.showSubscriptionNote
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 12
-
-                text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
-                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
-            }
-
-            BasicButtonType {
-                id: renewButton
-
-                visible: !root.headerCollapsed && root.showRenewButton
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 28
-                Layout.bottomMargin: 0
-
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.lightGray
-                pressedColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.midnightBlack
-
-                text: qsTr("Renew subscription")
-
-                clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
-                }
-            }
-
-            ParagraphTextType {
-                id: countriesLabel
-
-                visible: !root.headerCollapsed
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
-
-                text: qsTr("Countries")
-                color: AmneziaStyle.color.mutedGray
-            }
+            spacing: 0
 
             RowLayout {
                 Layout.fillWidth: true
@@ -642,6 +647,36 @@ PageType {
                 Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
             }
         }
+    }
+
+    Header1TextType {
+        id: largeTitleMetrics
+
+        visible: false
+        text: movingTitle.text
+    }
+
+    Header1TextType {
+        id: movingTitle
+
+        readonly property real compactScale: 18 / 32
+        readonly property real titleScale: 1 - (1 - movingTitle.compactScale) * root.collapseProgress
+        readonly property real expandedX: 16
+        readonly property real compactX: (root.width - movingTitle.implicitWidth * movingTitle.compactScale) / 2
+        readonly property real expandedY: topBar.height + 4 - Math.min(0, root.listScrolled)
+        readonly property real compactY: navigationRow.y
+                                         + (navigationRow.height - movingTitle.implicitHeight * movingTitle.compactScale) / 2
+
+        x: movingTitle.expandedX + (movingTitle.compactX - movingTitle.expandedX) * root.collapseProgress
+        y: Math.max(movingTitle.compactY, movingTitle.expandedY - Math.max(0, root.listScrolled))
+        width: movingTitle.implicitWidth
+
+        transformOrigin: Item.TopLeft
+        scale: movingTitle.titleScale
+
+        wrapMode: Text.NoWrap
+        maximumLineCount: 1
+        text: qsTr("Amnezia Premium")
     }
 
     SortCountriesDrawer {
