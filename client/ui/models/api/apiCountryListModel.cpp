@@ -367,7 +367,7 @@ bool ApiCountryListModel::isUseCaseVisible(const countryCatalog::UseCase &useCas
     if (useCase.id == useCaseAllowlist) {
         return m_source && m_source->getUserCountryCode() == QLatin1String("RU");
     }
-    return true;
+    return false;
 }
 
 bool ApiCountryListModel::passesActiveUseCase(const Location &location) const
