@@ -35,6 +35,8 @@ public:
                                                  amnezia::ContainerConfig &containerConfig,
                                                  const amnezia::DnsSettings &dnsSettings);
 
+    static void allowAmneziaDns(QJsonObject &serverConfig);
+
 private:
     amnezia::ErrorCode readContainerKeyFile(amnezia::DockerContainer container,
                                             const amnezia::ServerCredentials &credentials,

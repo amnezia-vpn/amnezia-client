@@ -7,6 +7,7 @@
 #include <QTest>
 
 #include "utils/testCoreController.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/models/serverDescription.h"
 #include "core/utils/serialization/serialization.h"
 #include "core/utils/utilities.h"
@@ -283,6 +284,35 @@ private slots:
         }
 
         QCOMPARE(importResult.config, config);
+    }
+
+    void testAllowAmneziaDns()
+    {
+        const QString dnsIp = QString::fromLatin1(protocols::dns::amneziaDnsIp);
+        const QJsonObject customRule { { "action", "block" }, { "ip", QJsonArray { "10.0.0.0/8" } } };
+
+        QJsonObject serverConfig;
+        serverConfig[protocols::xray::outbounds] = QJsonArray {
+            QJsonObject { { "protocol", "freedom" },
+                          { "settings", QJsonObject { { "finalRules", QJsonArray { customRule } } } } },
+            QJsonObject { { "protocol", "blackhole" }, { "tag", "block" } }
+        };
+
+        XrayConfigurator::allowAmneziaDns(serverConfig);
+        XrayConfigurator::allowAmneziaDns(serverConfig);
+
+        const QJsonArray outbounds = serverConfig[protocols::xray::outbounds].toArray();
+        QCOMPARE(outbounds.size(), 2);
+        const QJsonArray finalRules = outbounds[0].toObject()["settings"].toObject()["finalRules"].toArray();
+        QCOMPARE(finalRules.size(), 2);
+
+        const QJsonObject allowRule = finalRules[0].toObject();
+        QCOMPARE(allowRule["action"].toString(), QString("allow"));
+        QCOMPARE(allowRule["network"].toString(), QString("tcp,udp"));
+        QCOMPARE(allowRule["port"].toString(), QString("53"));
+        QCOMPARE(allowRule["ip"].toArray(), QJsonArray { dnsIp });
+        QCOMPARE(finalRules[1].toObject(), customRule);
+        QCOMPARE(outbounds[1].toObject(), (QJsonObject { { "protocol", "blackhole" }, { "tag", "block" } }));
     }
 };
 
