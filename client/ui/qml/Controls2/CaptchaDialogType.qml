@@ -275,7 +275,6 @@ Popup {
                 textColor: AmneziaStyle.color.paleGray
                 borderWidth: 1
                 borderColor: AmneziaStyle.color.mutedGray
-                borderFocusedColor: AmneziaStyle.color.paleGray
 
                 clickedFunc: function() {
                     root.close()

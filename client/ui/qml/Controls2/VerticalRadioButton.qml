@@ -26,8 +26,6 @@ RadioButton {
     property string descriptionColor: AmneziaStyle.color.mutedGray
     property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
 
     property string imageSource
     property bool showImage
@@ -66,13 +64,25 @@ RadioButton {
 
     hoverEnabled: true
 
+    // the radio dot is small; outline the whole row instead
+    background: Rectangle {
+        color: AmneziaStyle.color.transparent
+
+        FocusIndicatorType {
+            control: root
+            baseRadius: 16
+            active: root.focus && AmneziaStyle.focus.isOnTv
+        }
+    }
+
     indicator: Rectangle {
         id: background
 
         anchors.verticalCenter: parent.verticalCenter
 
-        border.color: root.focus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.focus ? root.borderFocusedWidth : 0
+        border.color: (root.focus && !AmneziaStyle.focus.isOnTv) ? AmneziaStyle.focus.borderColor
+                                                                    : AmneziaStyle.color.transparent
+        border.width: (root.focus && !AmneziaStyle.focus.isOnTv) ? AmneziaStyle.focus.borderWidth : 0
 
         implicitWidth: 56
         implicitHeight: 56

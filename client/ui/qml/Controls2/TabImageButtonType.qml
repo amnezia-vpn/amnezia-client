@@ -40,8 +40,6 @@ TabButton {
         FocusController.nextKeyRightItem()
     }
     
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
 
     property var clickedFunc
 
@@ -56,9 +54,10 @@ TabButton {
         color: AmneziaStyle.color.transparent
         radius: 10
 
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
-
+        FocusIndicatorType {
+            control: root
+            baseRadius: background.radius
+        }
     }
 
     MouseArea {

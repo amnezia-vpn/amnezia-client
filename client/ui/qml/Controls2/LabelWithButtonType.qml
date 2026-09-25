@@ -36,9 +36,6 @@ Item {
     property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
     property real textOpacity: 1.0
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
     property string rightImageColor: AmneziaStyle.color.paleGray
     property string leftImageColor: ""
 
@@ -256,6 +253,7 @@ Item {
 
         ImageButtonType {
             id: eyeImage
+            showFocusIndicator: !AmneziaStyle.focus.isOnTv
             visible: buttonImageSource !== ""
 
             implicitWidth: 40
@@ -293,6 +291,7 @@ Item {
 
         ImageButtonType {
             id: rightImage
+            showFocusIndicator: !AmneziaStyle.focus.isOnTv
 
             implicitWidth: 40
             implicitHeight: 40
@@ -327,12 +326,18 @@ Item {
         anchors.fill: root
         color: AmneziaStyle.color.transparent
 
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
-
-
         Behavior on color {
             PropertyAnimation { duration: 200 }
+        }
+
+        FocusIndicatorType {
+            control: root
+            // the border this replaces was square
+            baseRadius: AmneziaStyle.focus.isOnTv ? 12 : 0
+            // The row's own focusable target is one of the small buttons on its
+            // right; on a TV highlight the whole row so the selection is findable.
+            active: root.activeFocus
+                    || (AmneziaStyle.focus.isOnTv && (rightImage.activeFocus || eyeImage.activeFocus))
         }
     }
 

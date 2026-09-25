@@ -31,7 +31,7 @@ Item {
     property bool textFieldEditable: true
 
     property string borderColor: AmneziaStyle.color.slateGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    property string borderFocusedColor: AmneziaStyle.focus.borderColor
 
     property string backgroundColor: AmneziaStyle.color.onyxBlack
     property string backgroundDisabledColor: AmneziaStyle.color.transparent

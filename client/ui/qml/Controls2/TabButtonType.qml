@@ -12,8 +12,6 @@ TabButton {
 
     property string textColor: AmneziaStyle.color.paleGray
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
 
     property bool isSelected: false
 
@@ -53,8 +51,13 @@ TabButton {
         anchors.fill: parent
         color: AmneziaStyle.color.transparent
 
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
+        FocusIndicatorType {
+            control: root
+            baseRadius: AmneziaStyle.focus.isOnTv ? 8 : 0
+            // stays under the tab's own underline, the way the border it
+            // replaces used to
+            z: 0
+        }
 
         Rectangle {
             width: parent.width

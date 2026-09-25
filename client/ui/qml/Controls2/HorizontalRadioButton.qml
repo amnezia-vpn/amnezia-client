@@ -19,9 +19,9 @@ RadioButton {
 
     property string pressedBorderColor: AmneziaStyle.color.charcoalGray
     property string checkedBorderColor: AmneziaStyle.color.goldenApricot
+    property string borderFocusedColor: AmneziaStyle.focus.borderColor
     property string defaultBodredColor: AmneziaStyle.color.transparent
     property string checkedDisabledBorderColor: AmneziaStyle.color.mutedBrown
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
     property int borderWidth: 0
 
     implicitWidth: content.implicitWidth
@@ -89,10 +89,16 @@ RadioButton {
         }
 
         border.width: {
-            if(root.checked || root.activeFocus) {
+            if (root.checked || root.activeFocus) {
                 return 1
             }
             return root.pressed ? 1 : 0
+        }
+
+        FocusIndicatorType {
+            control: root
+            baseRadius: 16
+            active: root.activeFocus && AmneziaStyle.focus.isOnTv
         }
 
         Behavior on color {

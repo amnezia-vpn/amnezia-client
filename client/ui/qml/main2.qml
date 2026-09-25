@@ -75,6 +75,12 @@ Window  {
 
     title: "AmneziaVPN"
 
+    Component.onCompleted: {
+        // On a TV the UI is driven by a remote and read from across the room, so
+        // the focus indicator has to be far more prominent than on desktop.
+        AmneziaStyle.focus.isOnTv = Qt.platform.os === "android" && SettingsController.isOnTv()
+    }
+
     Item { // This item is needed for focus handling
         id: defaultFocusItem
         objectName: "defaultFocusItem"

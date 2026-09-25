@@ -104,14 +104,13 @@ Rectangle {
                 anchors.fill: parent
                 radius: 12
                 color: AmneziaStyle.color.transparent
-                border.width: root.activeFocus ? 1 : 0
-                border.color: AmneziaStyle.color.paleGray
 
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
+                FocusIndicatorType {
+                    control: root
+                    baseRadius: chevronBackground.radius
                 }
 
-                Behavior on border.width {
+                Behavior on color {
                     PropertyAnimation { duration: 200 }
                 }
             }

@@ -99,6 +99,10 @@ ListViewType {
 
                     visible: ServersUiController.serverHasOutdatedAwgContainer(serverId)
 
+                    // purely informational, it has no action; without this the
+                    // D-pad stops on it on the way to the settings button
+                    isFocusable: false
+
                     hoverEnabled: false
                     image: "qrc:/images/controls/alert-circle.svg"
                     imageColor: AmneziaStyle.color.goldenApricot

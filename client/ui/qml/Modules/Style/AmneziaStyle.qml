@@ -3,6 +3,8 @@ pragma Singleton
 import QtQuick
 
 QtObject {
+    id: root
+
     property QtObject color: QtObject {
         readonly property color transparent: 'transparent'
         readonly property color paleGray: '#D7D8DB'
@@ -35,6 +37,7 @@ QtObject {
         readonly property color translucentRichBrown: Qt.rgba(99/255, 51/255, 3/255, 0.26)
         readonly property color translucentSlateGray: Qt.rgba(85/255, 86/255, 92/255, 0.13)
         readonly property color translucentOnyxBlack: Qt.rgba(28/255, 29/255, 33/255, 0.13)
+        readonly property color faintGoldenApricot: Qt.rgba(251/255, 178/255, 106/255, 0.14)
 
         readonly property string goldenApricotString: '#FBB26A'
 
@@ -52,5 +55,26 @@ QtObject {
         readonly property color borderSoft: '#3F3F46'
         readonly property color accentSuccess: '#4ADE80'
         readonly property color accentWarning: '#EAB308'
+    }
+
+    // Appearance of the keyboard/D-pad focus indicator. On a TV the control is
+    // several metres away and a 1px hairline in the same tone as the control is
+    // not readable, so there the indicator switches to a thick accent outline
+    // with a tinted fill. Set from main2.qml.
+    property QtObject focus: QtObject {
+        property bool isOnTv: false
+
+        readonly property color borderColor: isOnTv ? root.color.goldenApricot
+                                                    : root.color.paleGray
+        readonly property int borderWidth: isOnTv ? 3 : 1
+        // off a TV the outline shares the control's own tone, so the control is
+        // shrunk a little to leave a dark gap that makes the outline readable
+        readonly property int backgroundInset: isOnTv ? 0 : 2
+        // breathing room for controls whose content sits flush against their own
+        // edge, so the outline does not run straight through the label
+        readonly property int contentPadding: isOnTv ? 16 : 0
+        // kept light: the fill sits over the control's own label
+        readonly property color overlayColor: isOnTv ? root.color.faintGoldenApricot
+                                                     : root.color.transparent
     }
 }

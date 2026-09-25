@@ -50,6 +50,42 @@ PageType {
         root.updateApiProtocolState()
     }
 
+    // Nothing holds the focus when the app opens, so on a TV the first press of
+    // the remote is spent only on entering the focus chain and the screen gives
+    // no feedback until then. Start on the connect button instead, the way
+    // PageSetupWizardStart already does for TV.
+    //
+    // PageType's own timer puts the focus back on the invisible default item
+    // shortly after the page shows, so it is off here; and the handler below is
+    // a Connections rather than an onVisibleChanged override, so PageType keeps
+    // its own handler.
+    enableTimer: !SettingsController.isOnTv()
+
+    Connections {
+        target: root
+
+        function onVisibleChanged() {
+            if (root.visible && SettingsController.isOnTv()) {
+                connectButtonFocusTimer.restart()
+            }
+        }
+    }
+
+    Timer {
+        id: connectButtonFocusTimer
+
+        interval: 250
+        repeat: true
+        running: SettingsController.isOnTv()
+
+        onTriggered: {
+            connectButton.forceActiveFocus()
+            if (connectButton.activeFocus) {
+                stop()
+            }
+        }
+    }
+
     Connections {
         target: ServersUiController
 
