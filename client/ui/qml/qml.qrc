@@ -64,6 +64,7 @@
         <file>Controls2/TabButtonType.qml</file>
         <file>Controls2/TabImageButtonType.qml</file>
         <file>Controls2/TextAreaType.qml</file>
+        <file>Controls2/ToastType.qml</file>
         <file>Controls2/TextAreaWithFooterType.qml</file>
         <file>Controls2/TextFieldWithHeaderType.qml</file>
         <file>Controls2/TextTypes/AppCaptionTextType.qml</file>

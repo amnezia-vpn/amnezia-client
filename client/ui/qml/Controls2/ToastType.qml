@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -30,20 +31,48 @@ Popup {
     x: (parent.width - width) / 2
     y: parent.height - height - 24 - PageController.safeAreaBottomMargin - PageController.imeHeight
 
-    padding: 0
+    leftPadding: 16
+    rightPadding: 8
+    topPadding: 12
+    bottomPadding: 12
+
     modal: false
     focus: false
     closePolicy: Popup.NoAutoClose
 
     onClosed: hideTimer.stop()
 
-    background: Rectangle {
-        radius: 16
-        color: AmneziaStyle.color.surfaceInverse
-
+    background: Item {
         transform: Translate {
             x: swipe.offsetX
             y: swipe.offsetY
+        }
+
+        Rectangle {
+            id: surface
+
+            anchors.fill: parent
+            radius: 12
+            color: AmneziaStyle.color.surfaceInverse
+            visible: false
+        }
+
+        DropShadow {
+            anchors.fill: surface
+            source: surface
+            verticalOffset: 4
+            radius: 8
+            samples: 17
+            color: Qt.rgba(0, 0, 0, 0.15)
+        }
+
+        DropShadow {
+            anchors.fill: surface
+            source: surface
+            verticalOffset: 1
+            radius: 3
+            samples: 7
+            color: Qt.rgba(0, 0, 0, 0.3)
         }
     }
 
@@ -53,7 +82,7 @@ Popup {
         property real offsetX: 0
         property real offsetY: 0
 
-        implicitHeight: content.implicitHeight + 32
+        implicitHeight: content.implicitHeight
 
         transform: Translate {
             x: swipe.offsetX
@@ -91,31 +120,57 @@ Popup {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
 
-            spacing: 16
+            spacing: 4
 
             ParagraphTextType {
                 Layout.fillWidth: true
+
+                lineHeight: 18 + LanguageUiController.getLineHeightAppend()
+                font.pixelSize: 14
 
                 text: root.text
                 color: AmneziaStyle.color.textInverted
                 wrapMode: Text.Wrap
             }
 
-            ParagraphTextType {
+            Rectangle {
+                id: actionButton
+
                 visible: root.actionText !== ""
 
-                text: root.actionText
-                color: AmneziaStyle.color.goldenApricot
-                font.weight: 500
+                Layout.preferredWidth: actionLabel.implicitWidth + 28
+                Layout.preferredHeight: 48
+
+                radius: 16
+                color: {
+                    if (actionTap.pressed) {
+                        return AmneziaStyle.color.surfaceInversePressed
+                    }
+                    return actionHover.hovered ? AmneziaStyle.color.surfaceInverseHovered
+                                               : AmneziaStyle.color.surfaceInverse
+                }
+
+                ParagraphTextType {
+                    id: actionLabel
+
+                    anchors.centerIn: parent
+
+                    text: root.actionText
+                    color: AmneziaStyle.color.goldenApricotLight
+                    font.weight: 600
+                    font.letterSpacing: -0.4
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
                 HoverHandler {
+                    id: actionHover
                     cursorShape: Qt.PointingHandCursor
                 }
 
                 TapHandler {
+                    id: actionTap
+
                     gesturePolicy: TapHandler.ReleaseWithinBounds
                     onTapped: {
                         root.close()
