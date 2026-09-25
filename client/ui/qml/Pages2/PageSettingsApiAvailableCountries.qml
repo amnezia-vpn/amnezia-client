@@ -112,8 +112,9 @@ PageType {
         }
 
         function onFavoritesLimitExceeded() {
-            PageController.showNotificationMessage(qsTr("You can add up to %1 locations to favorites")
-                                                   .arg(ApiCountryListModel.favoritesLimit))
+            favoritesLimitToast.show(qsTr("You already have %1 locations in favorites. Remove one")
+                                     .arg(ApiCountryListModel.favoritesLimit),
+                                     qsTr("Show"))
         }
     }
 
@@ -539,5 +540,11 @@ PageType {
         listModel: ApiCountryListModel
 
         anchors.fill: parent
+    }
+
+    ToastType {
+        id: favoritesLimitToast
+
+        onActionTriggered: ApiCountryListModel.activeUseCaseId = "favorites"
     }
 }

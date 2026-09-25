@@ -50,8 +50,9 @@ PageType {
         }
 
         function onFavoritesLimitExceeded() {
-            PageController.showNotificationMessage(qsTr("You can add up to %1 locations to favorites")
-                                                   .arg(ApiConfigsCountryListModel.favoritesLimit))
+            favoritesLimitToast.show(qsTr("You already have %1 locations in favorites. Remove one")
+                                     .arg(ApiConfigsCountryListModel.favoritesLimit),
+                                     qsTr("Show"))
         }
     }
 
@@ -611,5 +612,11 @@ PageType {
         var noButtonFunction = function() {}
 
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+    }
+
+    ToastType {
+        id: favoritesLimitToast
+
+        onActionTriggered: ApiConfigsCountryListModel.activeUseCaseId = "favorites"
     }
 }
