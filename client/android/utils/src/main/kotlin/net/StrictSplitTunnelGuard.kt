@@ -73,7 +73,7 @@ class StrictSplitTunnelGuard internal constructor(
     fun allow(network: String, srcIp: String, srcPort: Int, dstIp: String, dstPort: Int): Boolean {
         val uid = resolveUid(network, srcIp, srcPort, dstIp, dstPort)
         if (uid == INVALID_UID) {
-            Log.w(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: owner unresolved or outside this VPN")
+            Log.d(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: owner unresolved or outside this VPN")
             return false
         }
         if (uid == ownUid) return true
@@ -82,7 +82,7 @@ class StrictSplitTunnelGuard internal constructor(
             SplitTunnelMode.EXCLUDE -> appIdOf(uid) !in appIds   // excluded apps may not
         }
         if (!allowed) {
-            Log.w(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: uid $uid not allowed in $mode mode")
+            Log.d(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: uid $uid not allowed in $mode mode")
         }
         return allowed
     }
