@@ -292,6 +292,17 @@ void SettingsUiController::toggleStrictKillSwitch(bool enable)
     emit strictKillSwitchEnabledChanged(enable);
 }
 
+bool SettingsUiController::isStrictSplitTunnelingEnabled()
+{
+    return m_settingsController->isStrictSplitTunnelingEnabled();
+}
+
+void SettingsUiController::toggleStrictSplitTunneling(bool enable)
+{
+    m_settingsController->toggleStrictSplitTunneling(enable);
+    emit strictSplitTunnelingEnabledChanged();
+}
+
 bool SettingsUiController::isNotificationPermissionGranted()
 {
 #ifdef Q_OS_ANDROID
