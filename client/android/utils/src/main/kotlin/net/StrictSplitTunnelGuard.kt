@@ -9,18 +9,12 @@ import android.system.OsConstants
 import androidx.annotation.RequiresApi
 import androidx.core.content.getSystemService
 import java.net.InetSocketAddress
-import java.util.concurrent.ConcurrentHashMap
 import org.amnezia.vpn.util.Log
 
 private const val TAG = "StrictSplitTunnelGuard"
 
 // android.os.Process.INVALID_UID
 private const val INVALID_UID = -1
-
-// Positive-resolution cache TTL. UID lookups happen once per new connection, so
-// the cache mostly absorbs retransmits / rapid re-dials; keep it short.
-private const val CACHE_TTL_MS = 10_000L
-private const val CACHE_MAX_ENTRIES = 2048
 
 // UserHandle.PER_USER_RANGE; UserHandle.getAppId is not public API.
 private const val PER_USER_RANGE = 100_000
@@ -56,7 +50,11 @@ enum class SplitTunnelMode { INCLUDE, EXCLUDE }
  * both when no socket matches and when the owner is not covered by this VPN, so
  * an app outside the split-tunnel rules lands here, which is the intended deny.
  * Crafting an ownerless packet needs raw sockets (root), which is outside this
- * feature's threat model.
+ * feature's threat model. There is no retry: the answer is not a race to ride out,
+ * and a retry would double the cost of exactly the flows an attacker sends.
+ *
+ * The guard keeps no state and is called from several native threads at once. It
+ * is asked once per new flow; the datapath caches the verdict where it needs one.
  *
  * Apps are matched by app id ([appIdOf]), not by uid: Android applies a listed
  * package to all its copies and its SDK sandbox, so a cloned app has a uid of its
@@ -68,16 +66,12 @@ class StrictSplitTunnelGuard internal constructor(
     private val ownUid: Int,
     private val resolveUid: (network: String, srcIp: String, srcPort: Int, dstIp: String, dstPort: Int) -> Int,
 ) {
-    private class CachedUid(val uid: Int, val expiresAt: Long)
-
-    private val cache = ConcurrentHashMap<String, CachedUid>()
-
     /**
      * Returns whether a new connection with the given 5-tuple may enter the tunnel.
      * network is "tcp"/"udp"; src is the originating app endpoint, dst the destination.
      */
     fun allow(network: String, srcIp: String, srcPort: Int, dstIp: String, dstPort: Int): Boolean {
-        val uid = ownerUid(network, srcIp, srcPort, dstIp, dstPort)
+        val uid = resolveUid(network, srcIp, srcPort, dstIp, dstPort)
         if (uid == INVALID_UID) {
             Log.w(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: owner unresolved or outside this VPN")
             return false
@@ -91,25 +85,6 @@ class StrictSplitTunnelGuard internal constructor(
             Log.w(TAG, "deny $network $srcIp:$srcPort->$dstIp:$dstPort: uid $uid not allowed in $mode mode")
         }
         return allowed
-    }
-
-    private fun ownerUid(network: String, srcIp: String, srcPort: Int, dstIp: String, dstPort: Int): Int {
-        val key = "$network/$srcIp/$srcPort"
-        val now = System.currentTimeMillis()
-        cache[key]?.let { if (it.expiresAt > now) return it.uid }
-
-        var uid = resolveUid(network, srcIp, srcPort, dstIp, dstPort)
-        if (uid == INVALID_UID) {
-            // One immediate re-query to ride out a socket-table lookup race.
-            uid = resolveUid(network, srcIp, srcPort, dstIp, dstPort)
-        }
-        if (uid != INVALID_UID) {
-            if (cache.size > CACHE_MAX_ENTRIES) {
-                cache.entries.removeIf { it.value.expiresAt <= now }
-            }
-            cache[key] = CachedUid(uid, now + CACHE_TTL_MS)
-        }
-        return uid
     }
 
     companion object {
