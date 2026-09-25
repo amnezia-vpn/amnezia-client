@@ -113,9 +113,6 @@ class Xray : Protocol() {
 
             addRoute(InetNetwork("0.0.0.0", 0))
             addRoute(InetNetwork("2000::0", 3))
-            config.getString("hostName").let {
-                excludeRoute(InetNetwork(it, 32))
-            }
 
             config.optString("mtu").let {
                 if (it.isNotBlank()) setMtu(it.toInt())
