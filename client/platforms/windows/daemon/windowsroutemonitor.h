@@ -12,6 +12,7 @@
 #include <ws2ipdef.h>
 
 #include <QHash>
+#include <QList>
 #include <QMap>
 #include <QObject>
 
@@ -27,6 +28,7 @@ class WindowsRouteMonitor final : public QObject {
   void setDetaultRouteCapture(bool enable);
 
   bool addExclusionRoute(const IPAddress& prefix);
+  QList<IPAddress> addExclusionRoutes(const QList<IPAddress>& prefixes);
   bool deleteExclusionRoute(const IPAddress& prefix);
   void flushExclusionRoutes() { return flushRouteTable(m_exclusionRoutes); };
 
@@ -42,7 +44,10 @@ class WindowsRouteMonitor final : public QObject {
   static QHostAddress prefixToAddress(const IP_ADDRESS_PREFIX* dest);
 
   void flushRouteTable(QHash<IPAddress, MIB_IPFORWARD_ROW2*>& table);
-  void updateExclusionRoute(MIB_IPFORWARD_ROW2* data, void* table);
+  QList<const MIB_IPFORWARD_ROW2*> exclusionRouteCandidates(void* table) const;
+  void updateExclusionRoute(
+      MIB_IPFORWARD_ROW2* data,
+      const QList<const MIB_IPFORWARD_ROW2*>& routeCandidates);
   void updateInterfaceMetrics(int family);
   void updateCapturedRoutes(int family);
   void updateCapturedRoutes(int family, void* table);
