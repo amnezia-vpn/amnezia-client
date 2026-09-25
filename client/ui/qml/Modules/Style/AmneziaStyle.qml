@@ -50,6 +50,7 @@ QtObject {
         readonly property color textInverted: '#09090B'
         readonly property color textStaticWhite: '#FFFFFF'
         readonly property color borderSoft: '#3F3F46'
+        readonly property color borderStrong: '#52525B'
         readonly property color accentSuccess: '#4ADE80'
         readonly property color accentWarning: '#EAB308'
     }

@@ -25,6 +25,7 @@ namespace
     constexpr QLatin1String configFilesListId("nativeConfigs");
 
     constexpr int favoritesLimitValue = 15;
+    constexpr int searchTextMaxLength = 64;
 
     QString normalizeSpaced(const QString &text)
     {
@@ -203,6 +204,41 @@ QHash<int, QByteArray> ApiCountryListModel::roleNames() const
     roles[IsWorkerExpiredRole] = "isWorkerExpired";
     roles[IsFavoriteRole] = "isFavorite";
     return roles;
+}
+
+QString ApiCountryListModel::sanitizeSearchFieldText(const QString &input) const
+{
+    static const QString allowedPunctuation = QStringLiteral("'.&\u2019-");
+
+    QString out;
+    out.reserve(qMin(input.size(), searchTextMaxLength));
+    for (const QChar &character : input) {
+        if (out.size() >= searchTextMaxLength) {
+            break;
+        }
+        if (character.isLetter()) {
+            out.append(character);
+            continue;
+        }
+        if (out.isEmpty()) {
+            continue;
+        }
+        const QChar previous = out.back();
+        if (character.isMark()) {
+            if (previous.isLetter() || previous.isMark()) {
+                out.append(character);
+            }
+        } else if (character == QChar(' ')) {
+            if (previous != QChar(' ')) {
+                out.append(character);
+            }
+        } else if (allowedPunctuation.contains(character)) {
+            if (previous.isLetter() || previous.isMark() || previous == QChar(' ')) {
+                out.append(character);
+            }
+        }
+    }
+    return out;
 }
 
 QString ApiCountryListModel::searchText() const

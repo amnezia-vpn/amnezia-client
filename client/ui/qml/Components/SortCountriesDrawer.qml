@@ -22,7 +22,7 @@ DrawerType2 {
         spacing: 0
 
         Component.onCompleted: {
-            root.expandedHeight = content.implicitHeight + 32
+            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
         }
 
         ButtonGroup {

@@ -19,7 +19,7 @@ CountrySectionHeader {
 
     readonly property real pushOffset: {
         root.revision
-        const probe = root.listView.indexAt(root.listView.width / 2, root.visibleTop + 60)
+        const probe = root.listView.indexAt(root.listView.width / 2, root.visibleTop + root.height)
         if (probe < 0 || probe === root.topRow || !root.listModel.isSectionHeaderRow(probe)) {
             return 0
         }
@@ -27,7 +27,7 @@ CountrySectionHeader {
         if (!next) {
             return 0
         }
-        return Math.min(0, next.y - root.visibleTop - 60)
+        return Math.min(0, next.y - root.visibleTop - root.height)
     }
 
     anchors.top: parent.top
@@ -37,6 +37,10 @@ CountrySectionHeader {
 
     isPinnedOverlay: true
     sectionKey: root.topRow >= 0 ? root.listModel.sectionKeyAtRow(root.topRow) : ""
+    row: {
+        root.revision
+        return root.sectionKey !== "" ? root.listModel.rowForSectionHeader(root.sectionKey) : -1
+    }
 
     visible: root.listModel.isGrouped
              && root.listModel.hasResults

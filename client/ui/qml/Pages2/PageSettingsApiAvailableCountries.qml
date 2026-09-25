@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    isTabBarHidden: true
+
     property var processedServer
     property bool subscriptionExpired: false
     property bool subscriptionExpiringSoon: false
@@ -177,12 +179,13 @@ PageType {
 
         footer: Item {
             width: menuContent.width
-            height: 16
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
         delegate: Item {
             id: rowItem
 
+            required property int index
             required property string rowType
             required property string sectionKey
             required property bool isCurrent
@@ -194,7 +197,7 @@ PageType {
 
             width: menuContent.width
 
-            implicitHeight: rowItem.rowType === "section" ? 60 : 72
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
             height: implicitHeight
 
             CountrySectionHeader {
@@ -205,6 +208,7 @@ PageType {
                 visible: rowItem.rowType === "section"
 
                 sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+                row: rowItem.rowType === "section" ? rowItem.index : -1
             }
 
             Item {
@@ -214,7 +218,7 @@ PageType {
                 height: rowItem.height
                 visible: rowItem.rowType === "country"
 
-                readonly property int flagX: ApiCountryListModel.isGrouped ? 44 : 28
+                readonly property bool rowPressed: rowTap.pressed && !starTap.pressed
 
                 Item {
                     id: rowBody
@@ -233,6 +237,8 @@ PageType {
                     }
 
                     TapHandler {
+                        id: rowTap
+
                         gesturePolicy: TapHandler.ReleaseWithinBounds
 
                         onTapped: function(eventPoint) {
@@ -261,20 +267,25 @@ PageType {
                         anchors.bottomMargin: 4
                         radius: 16
 
-                        color: ((rowHover.hovered && !starHover.hovered) || rowBody.activeFocus)
-                               ? AmneziaStyle.color.surfaceHovered
-                               : AmneziaStyle.color.transparent
-                        border.width: rowItem.isCurrent ? 1 : 0
+                        color: {
+                            if (countryRow.rowPressed) {
+                                return AmneziaStyle.color.surfacePressed
+                            }
+                            return ((rowHover.hovered && !starHover.hovered) || rowBody.activeFocus)
+                                   ? AmneziaStyle.color.surfaceHovered
+                                   : AmneziaStyle.color.transparent
+                        }
+                        border.width: (rowItem.isCurrent || countryRow.rowPressed) ? 1 : 0
                         border.color: AmneziaStyle.color.textTertiary
                     }
 
                     Image {
                         id: flag
 
-                        x: countryRow.flagX
+                        x: 32
                         anchors.verticalCenter: parent.verticalCenter
                         width: 24
-                        height: 16
+                        height: 15
 
                         source: rowItem.countryImageCode !== ""
                                 ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
@@ -285,8 +296,11 @@ PageType {
                         anchors.left: flag.right
                         anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 16 + 12 + star.width + 8
+                        anchors.rightMargin: star.anchors.rightMargin + star.width + 12
                         anchors.verticalCenter: parent.verticalCenter
+
+                        lineHeight: 24 + LanguageUiController.getLineHeightAppend()
+                        font.letterSpacing: -0.4
 
                         text: rowItem.countryName
                         color: AmneziaStyle.color.textPrimary
@@ -303,8 +317,8 @@ PageType {
                     anchors.right: parent.right
                     anchors.rightMargin: 28
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 40
-                    height: 40
+                    width: 48
+                    height: 48
 
                     function toggle() {
                         ApiCountryListModel.toggleFavorite(rowItem.countryCode)
@@ -319,6 +333,8 @@ PageType {
                     }
 
                     TapHandler {
+                        id: starTap
+
                         gesturePolicy: TapHandler.ReleaseWithinBounds
                         onTapped: star.toggle()
                     }
@@ -337,10 +353,15 @@ PageType {
                         anchors.fill: parent
                         radius: 12
 
-                        color: (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
-                                                                       : AmneziaStyle.color.transparent
-                        border.width: star.activeFocus ? 1 : 0
-                        border.color: AmneziaStyle.color.borderSoft
+                        color: {
+                            if (starTap.pressed) {
+                                return AmneziaStyle.color.surfacePressed
+                            }
+                            return (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
+                                                                           : AmneziaStyle.color.transparent
+                        }
+                        border.width: (starTap.pressed || star.activeFocus) ? 1 : 0
+                        border.color: starTap.pressed ? AmneziaStyle.color.borderStrong : AmneziaStyle.color.borderSoft
                     }
 
                     Image {
@@ -359,6 +380,8 @@ PageType {
                     anchors.leftMargin: 16
                     anchors.rightMargin: 16
                     anchors.bottom: parent.bottom
+
+                    color: AmneziaStyle.color.borderSoft
                 }
             }
         }
@@ -413,8 +436,8 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: root.showSubscriptionNote ? 12 : 8
 
-                text: qsTr("Countries")
-                color: AmneziaStyle.color.mutedGray
+                text: qsTr("Countries to connect to")
+                color: AmneziaStyle.color.paleGray
             }
         }
 
@@ -462,9 +485,15 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 12
+                Layout.topMargin: 24
 
                 backGroundColor: AmneziaStyle.color.surfaceBase
+                radius: 16
+                verticalPadding: 16
+                iconSpacing: 12
+                textPixelSize: 14
+                textLineHeight: 18
+                textColor: AmneziaStyle.color.textPrimary
                 iconPath: "qrc:/images/controls/info.svg"
                 textString: bannerText
             },

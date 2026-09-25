@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -15,6 +16,7 @@ Item {
 
     property string sectionKey: ""
     property bool isPinnedOverlay: false
+    property int row: -1
 
     readonly property bool canToggle: root.isRealSection && !root.listModel.isSearchActive
 
@@ -24,13 +26,29 @@ Item {
 
     visible: root.isRealSection
 
-    implicitHeight: root.isRealSection ? 60 : 0
+    readonly property bool isDirectlyUnderParent: {
+        if (!root.isRealSection || root.row <= 0) {
+            return false
+        }
+        root.listModel.layoutRevision
+        if (!root.listModel.isSectionHeaderRow(root.row - 1)) {
+            return false
+        }
+        return root.listModel.sectionKeyAtRow(root.row - 1).split("/").length < root.sectionKey.split("/").length
+    }
+
+    readonly property int contentTopMargin: root.isDirectlyUnderParent ? 0 : 24
+    readonly property int contentBottomMargin: root.collapsed ? 0 : (root.level === 1 ? 4 : 8)
+
+    implicitHeight: root.isRealSection ? root.contentTopMargin + 32 + root.contentBottomMargin : 0
 
     readonly property string regionId: root.isRealSection ? root.listModel.sectionRegionId(root.sectionKey) : ""
     readonly property string subregionId: root.isRealSection ? root.listModel.sectionSubregionId(root.sectionKey) : ""
     readonly property string subsubregionId: root.isRealSection ? root.listModel.sectionSubsubregionId(root.sectionKey) : ""
 
     readonly property int level: root.subsubregionId !== "" ? 3 : (root.subregionId !== "" ? 2 : 1)
+    readonly property color titleColor: root.level === 1 ? AmneziaStyle.color.textPrimary
+                                                         : AmneziaStyle.color.textTertiary
 
     readonly property bool collapsed: {
         if (!root.isRealSection) {
@@ -59,19 +77,19 @@ Item {
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: root.level === 3 ? 32 : 16
-        anchors.rightMargin: 16
-        anchors.topMargin: 24
-        anchors.bottomMargin: 12
+        anchors.rightMargin: 20
+        anchors.topMargin: root.contentTopMargin
+        anchors.bottomMargin: root.contentBottomMargin
         spacing: 8
 
         ParagraphTextType {
             Layout.fillWidth: true
 
-            color: root.level === 1 ? AmneziaStyle.color.textPrimary
-                                    : AmneziaStyle.color.textTertiary
-            font.pixelSize: root.level === 1 ? 18 : (root.level === 2 ? 16 : 14)
+            color: root.titleColor
+            lineHeight: (root.level === 1 ? 24 : 18) + LanguageUiController.getLineHeightAppend()
+            font.pixelSize: root.level === 1 ? 16 : 14
             font.weight: root.level === 1 ? 700 : 400
-            font.letterSpacing: -0.4
+            font.letterSpacing: root.level === 1 ? -0.4 : 0
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
 
@@ -90,10 +108,18 @@ Item {
         Image {
             Layout.preferredWidth: 24
             Layout.preferredHeight: 24
+            Layout.leftMargin: 10
 
             visible: root.canToggle
             source: root.collapsed ? "qrc:/images/controls/chevron-down.svg"
                                    : "qrc:/images/controls/chevron-up.svg"
+
+            layer {
+                enabled: true
+                effect: ColorOverlay {
+                    color: root.titleColor
+                }
+            }
         }
     }
 

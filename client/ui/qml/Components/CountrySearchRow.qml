@@ -26,7 +26,17 @@ RowLayout {
 
         Layout.fillWidth: true
 
-        onTextChanged: root.listModel.searchText = searchField.text
+        onTextChanged: {
+            const current = searchField.text
+            const clean = root.listModel.sanitizeSearchFieldText(current)
+            if (clean !== current) {
+                const cursor = searchField.textField.cursorPosition - (current.length - clean.length)
+                searchField.text = clean
+                searchField.textField.cursorPosition = Math.max(0, Math.min(cursor, clean.length))
+            }
+        }
+
+        onDisplayTextChanged: root.listModel.searchText = root.listModel.sanitizeSearchFieldText(searchField.displayText)
     }
 
     ImageButtonType {

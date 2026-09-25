@@ -46,7 +46,7 @@ ListViewType {
 
             anchors.fill: parent
             implicitWidth: label.implicitWidth + 32
-            radius: 16
+            radius: height / 2
 
             color: chipHover.hovered ? AmneziaStyle.color.surfaceHovered
                                      : AmneziaStyle.color.surfaceBase
@@ -67,6 +67,9 @@ ListViewType {
 
                 color: chip.active ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.paleGray
                 wrapMode: Text.NoWrap
+                lineHeightMode: Text.ProportionalHeight
+                lineHeight: 1.0
+                font.letterSpacing: -0.4
 
                 text: "%1 · %2".arg(CountryRegionNames.useCaseName(root.listModel, chip.useCaseId))
                                .arg(delegateRoot.modelData.count)

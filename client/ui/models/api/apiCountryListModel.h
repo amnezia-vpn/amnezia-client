@@ -88,6 +88,7 @@ public:
     void setUiLanguage(const QString &languageCode);
 
 public slots:
+    Q_INVOKABLE QString sanitizeSearchFieldText(const QString &input) const;
     Q_INVOKABLE QString sectionRegionId(const QString &sectionKey) const;
     Q_INVOKABLE QString sectionSubregionId(const QString &sectionKey) const;
     Q_INVOKABLE QString sectionSubsubregionId(const QString &sectionKey) const;

@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    isTabBarHidden: true
+
     property string configExtension: ".conf"
     property string configCaption: qsTr("Save AmneziaVPN config")
 
@@ -87,12 +89,13 @@ PageType {
 
         footer: Item {
             width: menuContent.width
-            height: 16
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
         delegate: Item {
             id: rowItem
 
+            required property int index
             required property string rowType
             required property string sectionKey
             required property string countryName
@@ -104,15 +107,18 @@ PageType {
 
             width: menuContent.width
 
-            implicitHeight: rowItem.rowType === "section" ? 60 : 72
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
             height: implicitHeight
 
             CountrySectionHeader {
+                id: sectionHeader
+
                 listModel: ApiConfigsCountryListModel
                 width: rowItem.width
                 visible: rowItem.rowType === "section"
 
                 sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+                row: rowItem.rowType === "section" ? rowItem.index : -1
             }
 
             Item {
@@ -142,7 +148,12 @@ PageType {
                         cursorShape: Qt.PointingHandCursor
                     }
 
+                    readonly property bool rowPressed: rowTap.pressed
+                                                       && !buttons.contains(buttons.mapFromItem(rowBody, rowTap.point.position))
+
                     TapHandler {
+                        id: rowTap
+
                         gesturePolicy: TapHandler.ReleaseWithinBounds
 
                         onTapped: function(eventPoint) {
@@ -171,18 +182,25 @@ PageType {
                         anchors.bottomMargin: 4
                         radius: 16
 
-                        color: ((rowHover.hovered && !buttonsHover.hovered) || rowBody.activeFocus)
-                               ? AmneziaStyle.color.surfaceHovered
-                               : AmneziaStyle.color.transparent
+                        color: {
+                            if (rowBody.rowPressed) {
+                                return AmneziaStyle.color.surfacePressed
+                            }
+                            return ((rowHover.hovered && !buttonsHover.hovered) || rowBody.activeFocus)
+                                   ? AmneziaStyle.color.surfaceHovered
+                                   : AmneziaStyle.color.transparent
+                        }
+                        border.width: rowBody.rowPressed ? 1 : 0
+                        border.color: AmneziaStyle.color.textTertiary
                     }
 
                     Image {
                         id: flag
 
-                        x: 28
+                        x: 32
                         anchors.verticalCenter: parent.verticalCenter
                         width: 24
-                        height: 16
+                        height: 15
 
                         source: rowItem.countryImageCode !== ""
                                 ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
@@ -193,13 +211,16 @@ PageType {
                         anchors.left: flag.right
                         anchors.leftMargin: 16
                         anchors.right: parent.right
-                        anchors.rightMargin: 28 + buttons.width + 8
+                        anchors.rightMargin: buttons.anchors.rightMargin + buttons.width + 12
                         anchors.verticalCenter: parent.verticalCenter
 
                         spacing: 0
 
                         ListItemTitleType {
                             Layout.fillWidth: true
+
+                            lineHeight: 24 + LanguageUiController.getLineHeightAppend()
+                            font.letterSpacing: -0.4
 
                             text: rowItem.countryName
                             color: AmneziaStyle.color.textPrimary
@@ -223,7 +244,7 @@ PageType {
                     anchors.right: parent.right
                     anchors.rightMargin: 28
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 12
+                    spacing: 0
 
                     HoverHandler {
                         id: buttonsHover
@@ -234,8 +255,8 @@ PageType {
 
                         property bool isFocusable: countryRow.visible
 
-                        width: 40
-                        height: 40
+                        width: 48
+                        height: 48
 
                         function toggle() {
                             ApiConfigsCountryListModel.toggleFavorite(rowItem.countryCode)
@@ -250,6 +271,8 @@ PageType {
                         }
 
                         TapHandler {
+                            id: starTap
+
                             gesturePolicy: TapHandler.ReleaseWithinBounds
                             onTapped: star.toggle()
                         }
@@ -268,10 +291,15 @@ PageType {
                             anchors.fill: parent
                             radius: 12
 
-                            color: (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
-                                                                           : AmneziaStyle.color.transparent
-                            border.width: star.activeFocus ? 1 : 0
-                            border.color: AmneziaStyle.color.borderSoft
+                            color: {
+                                if (starTap.pressed) {
+                                    return AmneziaStyle.color.surfacePressed
+                                }
+                                return (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
+                                                                               : AmneziaStyle.color.transparent
+                            }
+                            border.width: (starTap.pressed || star.activeFocus) ? 1 : 0
+                            border.color: starTap.pressed ? AmneziaStyle.color.borderStrong : AmneziaStyle.color.borderSoft
                         }
 
                         Image {
@@ -285,8 +313,8 @@ PageType {
                     }
 
                     ImageButtonType {
-                        implicitWidth: 40
-                        implicitHeight: 40
+                        implicitWidth: 48
+                        implicitHeight: 48
 
                         visible: countryRow.visible
                         hoverEnabled: true
@@ -297,8 +325,8 @@ PageType {
                     }
 
                     ImageButtonType {
-                        implicitWidth: 40
-                        implicitHeight: 40
+                        implicitWidth: 48
+                        implicitHeight: 48
 
                         visible: countryRow.visible && rowItem.isIssued
                         hoverEnabled: true
@@ -315,6 +343,8 @@ PageType {
                     anchors.leftMargin: 16
                     anchors.rightMargin: 16
                     anchors.bottom: parent.bottom
+
+                    color: AmneziaStyle.color.borderSoft
                 }
             }
         }
@@ -360,6 +390,12 @@ PageType {
                 Layout.topMargin: 12
 
                 backGroundColor: AmneziaStyle.color.surfaceBase
+                radius: 16
+                verticalPadding: 16
+                iconSpacing: 12
+                textPixelSize: 14
+                textLineHeight: 18
+                textColor: AmneziaStyle.color.textPrimary
 
                 textString: qsTr("Configuration updates are available for some countries. Download and install the updated configuration files")
 

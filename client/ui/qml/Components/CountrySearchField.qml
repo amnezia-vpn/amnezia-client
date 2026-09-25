@@ -11,6 +11,7 @@ Rectangle {
 
     property alias textField: input
     property alias text: input.text
+    readonly property alias displayText: input.displayText
 
     signal cleared()
 
@@ -65,9 +66,6 @@ Rectangle {
             inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
 
             maximumLength: 64
-            validator: RegularExpressionValidator {
-                regularExpression: /^[\p{L}\p{M}' .&’-]*$/
-            }
 
             topPadding: 0
             bottomPadding: 0
