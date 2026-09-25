@@ -1,0 +1,2217 @@
+{
+  "version": 4,
+  "splitThreshold": 15,
+  "regions": [
+    {
+      "id": "europe",
+      "order": 1,
+      "subregions": [
+        {
+          "id": "northern-europe",
+          "order": 1,
+          "subregions": [
+            {
+              "id": "nordic-countries",
+              "order": 1
+            },
+            {
+              "id": "baltic-states",
+              "order": 2
+            }
+          ]
+        },
+        {
+          "id": "western-europe",
+          "order": 2,
+          "subregions": [
+            {
+              "id": "uk-and-ireland",
+              "order": 1
+            }
+          ]
+        },
+        {
+          "id": "eastern-europe",
+          "order": 3
+        },
+        {
+          "id": "southern-europe",
+          "order": 4,
+          "subregions": [
+            {
+              "id": "south-western-europe",
+              "order": 1
+            },
+            {
+              "id": "south-eastern-europe",
+              "order": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "asia",
+      "order": 2,
+      "subregions": [
+        {
+          "id": "western-asia",
+          "order": 1,
+          "subregions": [
+            {
+              "id": "caucasus-and-turkey",
+              "order": 1
+            },
+            {
+              "id": "arabian-peninsula",
+              "order": 2
+            },
+            {
+              "id": "levant-and-mesopotamia",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "id": "central-asia",
+          "order": 2
+        },
+        {
+          "id": "southern-asia",
+          "order": 3
+        },
+        {
+          "id": "eastern-asia",
+          "order": 4
+        },
+        {
+          "id": "south-eastern-asia",
+          "order": 5
+        }
+      ]
+    },
+    {
+      "id": "americas",
+      "order": 3,
+      "subregions": [
+        {
+          "id": "northern-america",
+          "order": 1
+        },
+        {
+          "id": "central-america",
+          "order": 2
+        },
+        {
+          "id": "caribbean",
+          "order": 3,
+          "subregions": [
+            {
+              "id": "greater-antilles",
+              "order": 1
+            },
+            {
+              "id": "lesser-antilles",
+              "order": 2
+            },
+            {
+              "id": "bahamas-and-southern-caribbean",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "id": "south-america",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "id": "africa",
+      "order": 4,
+      "subregions": [
+        {
+          "id": "northern-africa",
+          "order": 1
+        },
+        {
+          "id": "western-africa",
+          "order": 2,
+          "subregions": [
+            {
+              "id": "sahel",
+              "order": 1
+            },
+            {
+              "id": "gulf-of-guinea",
+              "order": 2
+            },
+            {
+              "id": "atlantic-west-africa",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "id": "middle-africa",
+          "order": 3
+        },
+        {
+          "id": "eastern-africa",
+          "order": 4,
+          "subregions": [
+            {
+              "id": "east-africa-mainland",
+              "order": 1
+            },
+            {
+              "id": "southeast-africa",
+              "order": 2
+            },
+            {
+              "id": "indian-ocean-islands",
+              "order": 3
+            }
+          ]
+        },
+        {
+          "id": "southern-africa",
+          "order": 5
+        }
+      ]
+    },
+    {
+      "id": "oceania",
+      "order": 5,
+      "subregions": [
+        {
+          "id": "australia-nz",
+          "order": 1
+        },
+        {
+          "id": "melanesia",
+          "order": 2
+        },
+        {
+          "id": "micronesia",
+          "order": 3
+        },
+        {
+          "id": "polynesia",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "id": "special",
+      "order": 6,
+      "split": "never"
+    }
+  ],
+  "countries": [
+    {
+      "code": "DK",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Denmark",
+      "nameRu": "Дания"
+    },
+    {
+      "code": "NO",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Norway",
+      "nameRu": "Норвегия"
+    },
+    {
+      "code": "SE",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Sweden",
+      "nameRu": "Швеция"
+    },
+    {
+      "code": "FI",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Finland",
+      "nameRu": "Финляндия"
+    },
+    {
+      "code": "IS",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Iceland",
+      "nameRu": "Исландия"
+    },
+    {
+      "code": "FO",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Faroe Islands",
+      "nameRu": "Фарерские о-ва"
+    },
+    {
+      "code": "GL",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Greenland",
+      "nameRu": "Гренландия"
+    },
+    {
+      "code": "SJ",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Svalbard and Jan Mayen Islands",
+      "nameRu": "Шпицберген и Ян-Майен"
+    },
+    {
+      "code": "AX",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "nordic-countries",
+      "nameEn": "Åland Islands",
+      "nameRu": "Аландские о-ва"
+    },
+    {
+      "code": "EE",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "baltic-states",
+      "nameEn": "Estonia",
+      "nameRu": "Эстония"
+    },
+    {
+      "code": "LV",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "baltic-states",
+      "nameEn": "Latvia",
+      "nameRu": "Латвия"
+    },
+    {
+      "code": "LT",
+      "region": "europe",
+      "subregion": "northern-europe",
+      "subsubregion": "baltic-states",
+      "nameEn": "Lithuania",
+      "nameRu": "Литва"
+    },
+    {
+      "code": "GB",
+      "region": "europe",
+      "subregion": "western-europe",
+      "subsubregion": "uk-and-ireland",
+      "nameEn": "United Kingdom",
+      "nameRu": "Великобритания",
+      "aliases": [
+        "uk",
+        "britain",
+        "england",
+        "англия",
+        "британия"
+      ]
+    },
+    {
+      "code": "IE",
+      "region": "europe",
+      "subregion": "western-europe",
+      "subsubregion": "uk-and-ireland",
+      "nameEn": "Ireland",
+      "nameRu": "Ирландия"
+    },
+    {
+      "code": "IM",
+      "region": "europe",
+      "subregion": "western-europe",
+      "subsubregion": "uk-and-ireland",
+      "nameEn": "Isle of Man",
+      "nameRu": "о-в Мэн"
+    },
+    {
+      "code": "GG",
+      "region": "europe",
+      "subregion": "western-europe",
+      "subsubregion": "uk-and-ireland",
+      "nameEn": "Guernsey",
+      "nameRu": "Гернси"
+    },
+    {
+      "code": "JE",
+      "region": "europe",
+      "subregion": "western-europe",
+      "subsubregion": "uk-and-ireland",
+      "nameEn": "Jersey",
+      "nameRu": "Джерси"
+    },
+    {
+      "code": "DE",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Germany",
+      "nameRu": "Германия",
+      "aliases": [
+        "deutschland",
+        "germaniya"
+      ]
+    },
+    {
+      "code": "NL",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Netherlands",
+      "nameRu": "Нидерланды",
+      "aliases": [
+        "holland",
+        "голландия"
+      ]
+    },
+    {
+      "code": "BE",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Belgium",
+      "nameRu": "Бельгия"
+    },
+    {
+      "code": "LU",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Luxembourg",
+      "nameRu": "Люксембург"
+    },
+    {
+      "code": "FR",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "France",
+      "nameRu": "Франция"
+    },
+    {
+      "code": "MC",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Monaco",
+      "nameRu": "Монако"
+    },
+    {
+      "code": "CH",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Switzerland",
+      "nameRu": "Швейцария"
+    },
+    {
+      "code": "LI",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Liechtenstein",
+      "nameRu": "Лихтенштейн"
+    },
+    {
+      "code": "AT",
+      "region": "europe",
+      "subregion": "western-europe",
+      "nameEn": "Austria",
+      "nameRu": "Австрия"
+    },
+    {
+      "code": "PL",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Poland",
+      "nameRu": "Польша"
+    },
+    {
+      "code": "CZ",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Czech Republic",
+      "nameRu": "Чехия",
+      "aliases": [
+        "czechia",
+        "чехословакия"
+      ]
+    },
+    {
+      "code": "SK",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Slovakia",
+      "nameRu": "Словакия"
+    },
+    {
+      "code": "HU",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Hungary",
+      "nameRu": "Венгрия"
+    },
+    {
+      "code": "RO",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Romania",
+      "nameRu": "Румыния"
+    },
+    {
+      "code": "BG",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Bulgaria",
+      "nameRu": "Болгария"
+    },
+    {
+      "code": "UA",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Ukraine",
+      "nameRu": "Украина"
+    },
+    {
+      "code": "BY",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Belarus",
+      "nameRu": "Беларусь"
+    },
+    {
+      "code": "MD",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Moldova",
+      "nameRu": "Молдова"
+    },
+    {
+      "code": "RU",
+      "region": "europe",
+      "subregion": "eastern-europe",
+      "nameEn": "Russia",
+      "nameRu": "Россия",
+      "aliases": [
+        "рф",
+        "russian federation"
+      ]
+    },
+    {
+      "code": "PT",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Portugal",
+      "nameRu": "Португалия"
+    },
+    {
+      "code": "ES",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Spain",
+      "nameRu": "Испания"
+    },
+    {
+      "code": "AD",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Andorra",
+      "nameRu": "Андорра"
+    },
+    {
+      "code": "GI",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Gibraltar",
+      "nameRu": "Гибралтар"
+    },
+    {
+      "code": "IT",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Italy",
+      "nameRu": "Италия"
+    },
+    {
+      "code": "SM",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "San Marino",
+      "nameRu": "Сан-Марино"
+    },
+    {
+      "code": "VA",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Holy See (Vatican City)",
+      "nameRu": "Ватикан"
+    },
+    {
+      "code": "MT",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-western-europe",
+      "nameEn": "Malta",
+      "nameRu": "Мальта"
+    },
+    {
+      "code": "GR",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Greece",
+      "nameRu": "Греция"
+    },
+    {
+      "code": "CY",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Cyprus",
+      "nameRu": "Кипр"
+    },
+    {
+      "code": "SI",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Slovenia",
+      "nameRu": "Словения"
+    },
+    {
+      "code": "HR",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Croatia",
+      "nameRu": "Хорватия"
+    },
+    {
+      "code": "BA",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Bosnia & Herzegovina",
+      "nameRu": "Босния и Герцеговина",
+      "aliases": [
+        "bosnia and herzegovina",
+        "bosnia",
+        "босния"
+      ]
+    },
+    {
+      "code": "RS",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Serbia",
+      "nameRu": "Сербия"
+    },
+    {
+      "code": "ME",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Montenegro",
+      "nameRu": "Черногория"
+    },
+    {
+      "code": "MK",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "North Macedonia",
+      "nameRu": "Северная Македония",
+      "aliases": [
+        "macedonia",
+        "македония"
+      ]
+    },
+    {
+      "code": "AL",
+      "region": "europe",
+      "subregion": "southern-europe",
+      "subsubregion": "south-eastern-europe",
+      "nameEn": "Albania",
+      "nameRu": "Албания"
+    },
+    {
+      "code": "TR",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "caucasus-and-turkey",
+      "nameEn": "Turkey",
+      "nameRu": "Турция",
+      "aliases": [
+        "turkiye",
+        "türkiye"
+      ]
+    },
+    {
+      "code": "GE",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "caucasus-and-turkey",
+      "nameEn": "Georgia",
+      "nameRu": "Грузия"
+    },
+    {
+      "code": "AM",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "caucasus-and-turkey",
+      "nameEn": "Armenia",
+      "nameRu": "Армения"
+    },
+    {
+      "code": "AZ",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "caucasus-and-turkey",
+      "nameEn": "Azerbaijan",
+      "nameRu": "Азербайджан"
+    },
+    {
+      "code": "AE",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "UAE",
+      "nameRu": "ОАЭ",
+      "aliases": [
+        "uae",
+        "emirates",
+        "эмираты",
+        "united arab emirates",
+        "объединённые арабские эмираты",
+        "оаэ"
+      ]
+    },
+    {
+      "code": "SA",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "Saudi Arabia",
+      "nameRu": "Саудовская Аравия"
+    },
+    {
+      "code": "QA",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "Qatar",
+      "nameRu": "Катар"
+    },
+    {
+      "code": "BH",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "Bahrain",
+      "nameRu": "Бахрейн"
+    },
+    {
+      "code": "KW",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "Kuwait",
+      "nameRu": "Кувейт"
+    },
+    {
+      "code": "OM",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "Oman",
+      "nameRu": "Оман"
+    },
+    {
+      "code": "YE",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "arabian-peninsula",
+      "nameEn": "Yemen",
+      "nameRu": "Йемен"
+    },
+    {
+      "code": "IL",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "levant-and-mesopotamia",
+      "nameEn": "Israel",
+      "nameRu": "Израиль"
+    },
+    {
+      "code": "PS",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "levant-and-mesopotamia",
+      "nameEn": "Palestine",
+      "nameRu": "Палестинские территории"
+    },
+    {
+      "code": "JO",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "levant-and-mesopotamia",
+      "nameEn": "Jordan",
+      "nameRu": "Иордания"
+    },
+    {
+      "code": "LB",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "levant-and-mesopotamia",
+      "nameEn": "Lebanon",
+      "nameRu": "Ливан"
+    },
+    {
+      "code": "SY",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "levant-and-mesopotamia",
+      "nameEn": "Syria",
+      "nameRu": "Сирия"
+    },
+    {
+      "code": "IQ",
+      "region": "asia",
+      "subregion": "western-asia",
+      "subsubregion": "levant-and-mesopotamia",
+      "nameEn": "Iraq",
+      "nameRu": "Ирак"
+    },
+    {
+      "code": "KZ",
+      "region": "asia",
+      "subregion": "central-asia",
+      "nameEn": "Kazakhstan",
+      "nameRu": "Казахстан"
+    },
+    {
+      "code": "UZ",
+      "region": "asia",
+      "subregion": "central-asia",
+      "nameEn": "Uzbekistan",
+      "nameRu": "Узбекистан"
+    },
+    {
+      "code": "KG",
+      "region": "asia",
+      "subregion": "central-asia",
+      "nameEn": "Kyrgyzstan",
+      "nameRu": "Киргизия"
+    },
+    {
+      "code": "TJ",
+      "region": "asia",
+      "subregion": "central-asia",
+      "nameEn": "Tajikistan",
+      "nameRu": "Таджикистан"
+    },
+    {
+      "code": "TM",
+      "region": "asia",
+      "subregion": "central-asia",
+      "nameEn": "Turkmenistan",
+      "nameRu": "Туркменистан"
+    },
+    {
+      "code": "IN",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "India",
+      "nameRu": "Индия"
+    },
+    {
+      "code": "PK",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Pakistan",
+      "nameRu": "Пакистан"
+    },
+    {
+      "code": "BD",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Bangladesh",
+      "nameRu": "Бангладеш"
+    },
+    {
+      "code": "LK",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Sri Lanka",
+      "nameRu": "Шри-Ланка"
+    },
+    {
+      "code": "NP",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Nepal",
+      "nameRu": "Непал"
+    },
+    {
+      "code": "BT",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Bhutan",
+      "nameRu": "Бутан"
+    },
+    {
+      "code": "MV",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Maldives",
+      "nameRu": "Мальдивы"
+    },
+    {
+      "code": "AF",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Afghanistan",
+      "nameRu": "Афганистан"
+    },
+    {
+      "code": "IR",
+      "region": "asia",
+      "subregion": "southern-asia",
+      "nameEn": "Iran",
+      "nameRu": "Иран"
+    },
+    {
+      "code": "CN",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "China",
+      "nameRu": "Китай"
+    },
+    {
+      "code": "HK",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "Hong Kong",
+      "nameRu": "Гонконг",
+      "aliases": [
+        "гонконг (сар)"
+      ]
+    },
+    {
+      "code": "MO",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "Macao",
+      "nameRu": "Макао (САР)"
+    },
+    {
+      "code": "TW",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "Taiwan",
+      "nameRu": "Тайвань"
+    },
+    {
+      "code": "JP",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "Japan",
+      "nameRu": "Япония"
+    },
+    {
+      "code": "KR",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "South Korea",
+      "nameRu": "Южная Корея",
+      "aliases": [
+        "korea",
+        "корея",
+        "республика корея"
+      ]
+    },
+    {
+      "code": "KP",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "North Korea",
+      "nameRu": "Северная Корея",
+      "aliases": [
+        "кндр"
+      ]
+    },
+    {
+      "code": "MN",
+      "region": "asia",
+      "subregion": "eastern-asia",
+      "nameEn": "Mongolia",
+      "nameRu": "Монголия"
+    },
+    {
+      "code": "SG",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Singapore",
+      "nameRu": "Сингапур"
+    },
+    {
+      "code": "MY",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Malaysia",
+      "nameRu": "Малайзия"
+    },
+    {
+      "code": "TH",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Thailand",
+      "nameRu": "Таиланд"
+    },
+    {
+      "code": "VN",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Vietnam",
+      "nameRu": "Вьетнам"
+    },
+    {
+      "code": "ID",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Indonesia",
+      "nameRu": "Индонезия"
+    },
+    {
+      "code": "PH",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Philippines",
+      "nameRu": "Филиппины"
+    },
+    {
+      "code": "KH",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Cambodia",
+      "nameRu": "Камбоджа"
+    },
+    {
+      "code": "LA",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Laos",
+      "nameRu": "Лаос"
+    },
+    {
+      "code": "MM",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Myanmar (Burma)",
+      "nameRu": "Мьянма (Бирма)"
+    },
+    {
+      "code": "BN",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Brunei",
+      "nameRu": "Бруней"
+    },
+    {
+      "code": "TL",
+      "region": "asia",
+      "subregion": "south-eastern-asia",
+      "nameEn": "Timor-Leste",
+      "nameRu": "Восточный Тимор"
+    },
+    {
+      "code": "us-east",
+      "iso": "US",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "USA East",
+      "nameRu": "США Восток",
+      "aliases": [
+        "usa",
+        "us",
+        "сша",
+        "америка",
+        "america",
+        "united states",
+        "соединенные штаты"
+      ]
+    },
+    {
+      "code": "us-west",
+      "iso": "US",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "USA West",
+      "nameRu": "США Запад",
+      "aliases": [
+        "usa",
+        "us",
+        "сша",
+        "америка",
+        "america",
+        "united states",
+        "соединенные штаты"
+      ]
+    },
+    {
+      "code": "ca-east",
+      "iso": "CA",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "Canada East",
+      "nameRu": "Канада Восток",
+      "city": "Montreal",
+      "aliases": [
+        "canada",
+        "канада",
+        "montreal",
+        "монреаль"
+      ]
+    },
+    {
+      "code": "ca-west",
+      "iso": "CA",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "Canada West",
+      "nameRu": "Канада Запад",
+      "aliases": [
+        "canada",
+        "канада"
+      ]
+    },
+    {
+      "code": "MX",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "Mexico",
+      "nameRu": "Мексика"
+    },
+    {
+      "code": "BM",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "Bermuda",
+      "nameRu": "Бермудские о-ва"
+    },
+    {
+      "code": "PM",
+      "region": "americas",
+      "subregion": "northern-america",
+      "nameEn": "Saint Pierre and Miquelon",
+      "nameRu": "Сен-Пьер и Микелон"
+    },
+    {
+      "code": "GT",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "Guatemala",
+      "nameRu": "Гватемала"
+    },
+    {
+      "code": "BZ",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "Belize",
+      "nameRu": "Белиз"
+    },
+    {
+      "code": "SV",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "El Salvador",
+      "nameRu": "Сальвадор"
+    },
+    {
+      "code": "HN",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "Honduras",
+      "nameRu": "Гондурас"
+    },
+    {
+      "code": "NI",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "Nicaragua",
+      "nameRu": "Никарагуа"
+    },
+    {
+      "code": "CR",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "Costa Rica",
+      "nameRu": "Коста-Рика"
+    },
+    {
+      "code": "PA",
+      "region": "americas",
+      "subregion": "central-america",
+      "nameEn": "Panama",
+      "nameRu": "Панама"
+    },
+    {
+      "code": "CU",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "greater-antilles",
+      "nameEn": "Cuba",
+      "nameRu": "Куба"
+    },
+    {
+      "code": "JM",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "greater-antilles",
+      "nameEn": "Jamaica",
+      "nameRu": "Ямайка"
+    },
+    {
+      "code": "HT",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "greater-antilles",
+      "nameEn": "Haiti",
+      "nameRu": "Гаити"
+    },
+    {
+      "code": "DO",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "greater-antilles",
+      "nameEn": "Dominican Republic",
+      "nameRu": "Доминиканская Республика"
+    },
+    {
+      "code": "PR",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "greater-antilles",
+      "nameEn": "Puerto Rico",
+      "nameRu": "Пуэрто-Рико"
+    },
+    {
+      "code": "KY",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "greater-antilles",
+      "nameEn": "Cayman Islands",
+      "nameRu": "о-ва Кайман"
+    },
+    {
+      "code": "AI",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Anguilla",
+      "nameRu": "Ангилья"
+    },
+    {
+      "code": "AG",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Antigua and Barbuda",
+      "nameRu": "Антигуа и Барбуда"
+    },
+    {
+      "code": "VG",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "British Virgin Islands",
+      "nameRu": "Виргинские о-ва (Великобритания)"
+    },
+    {
+      "code": "DM",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Dominica",
+      "nameRu": "Доминика"
+    },
+    {
+      "code": "GD",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Grenada",
+      "nameRu": "Гренада"
+    },
+    {
+      "code": "GP",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Guadeloupe",
+      "nameRu": "Гваделупа"
+    },
+    {
+      "code": "MQ",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Martinique",
+      "nameRu": "Мартиника"
+    },
+    {
+      "code": "MS",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Montserrat",
+      "nameRu": "Монтсеррат"
+    },
+    {
+      "code": "BL",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Saint Barthélemy",
+      "nameRu": "Сен-Бартелеми"
+    },
+    {
+      "code": "KN",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Saint Kitts and Nevis",
+      "nameRu": "Сент-Китс и Невис"
+    },
+    {
+      "code": "LC",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Saint Lucia",
+      "nameRu": "Сент-Люсия"
+    },
+    {
+      "code": "MF",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Saint Martin (French Part)",
+      "nameRu": "Сен-Мартен"
+    },
+    {
+      "code": "VC",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Saint Vincent and the Grenadines",
+      "nameRu": "Сент-Винсент и Гренадины"
+    },
+    {
+      "code": "SX",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "Sint Maarten (Dutch part)",
+      "nameRu": "Синт-Мартен"
+    },
+    {
+      "code": "VI",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "lesser-antilles",
+      "nameEn": "United States Virgin Islands",
+      "nameRu": "Виргинские о-ва (США)"
+    },
+    {
+      "code": "BS",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Bahamas",
+      "nameRu": "Багамы"
+    },
+    {
+      "code": "TC",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Turks and Caicos Islands",
+      "nameRu": "Тёркс и Кайкос"
+    },
+    {
+      "code": "AW",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Aruba",
+      "nameRu": "Аруба"
+    },
+    {
+      "code": "BQ",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Bonaire, Sint Eustatius and Saba",
+      "nameRu": "Бонэйр, Синт-Эстатиус и Саба"
+    },
+    {
+      "code": "CW",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Curaçao",
+      "nameRu": "Кюрасао"
+    },
+    {
+      "code": "TT",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Trinidad and Tobago",
+      "nameRu": "Тринидад и Тобаго"
+    },
+    {
+      "code": "BB",
+      "region": "americas",
+      "subregion": "caribbean",
+      "subsubregion": "bahamas-and-southern-caribbean",
+      "nameEn": "Barbados",
+      "nameRu": "Барбадос"
+    },
+    {
+      "code": "CO",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Colombia",
+      "nameRu": "Колумбия"
+    },
+    {
+      "code": "VE",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Venezuela",
+      "nameRu": "Венесуэла"
+    },
+    {
+      "code": "GY",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Guyana",
+      "nameRu": "Гайана"
+    },
+    {
+      "code": "SR",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Suriname",
+      "nameRu": "Суринам"
+    },
+    {
+      "code": "GF",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "French Guiana",
+      "nameRu": "Французская Гвиана"
+    },
+    {
+      "code": "EC",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Ecuador",
+      "nameRu": "Эквадор"
+    },
+    {
+      "code": "PE",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Peru",
+      "nameRu": "Перу"
+    },
+    {
+      "code": "BR",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Brazil",
+      "nameRu": "Бразилия"
+    },
+    {
+      "code": "BO",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Bolivia",
+      "nameRu": "Боливия"
+    },
+    {
+      "code": "PY",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Paraguay",
+      "nameRu": "Парагвай"
+    },
+    {
+      "code": "CL",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Chile",
+      "nameRu": "Чили"
+    },
+    {
+      "code": "AR",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Argentina",
+      "nameRu": "Аргентина"
+    },
+    {
+      "code": "UY",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Uruguay",
+      "nameRu": "Уругвай"
+    },
+    {
+      "code": "FK",
+      "region": "americas",
+      "subregion": "south-america",
+      "nameEn": "Falkland Islands (Malvinas)",
+      "nameRu": "Фолклендские о-ва"
+    },
+    {
+      "code": "DZ",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Algeria",
+      "nameRu": "Алжир"
+    },
+    {
+      "code": "EG",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Egypt",
+      "nameRu": "Египет"
+    },
+    {
+      "code": "LY",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Libya",
+      "nameRu": "Ливия"
+    },
+    {
+      "code": "MA",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Morocco",
+      "nameRu": "Марокко"
+    },
+    {
+      "code": "TN",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Tunisia",
+      "nameRu": "Тунис"
+    },
+    {
+      "code": "SD",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Sudan",
+      "nameRu": "Судан"
+    },
+    {
+      "code": "EH",
+      "region": "africa",
+      "subregion": "northern-africa",
+      "nameEn": "Western Sahara",
+      "nameRu": "Западная Сахара"
+    },
+    {
+      "code": "BF",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "sahel",
+      "nameEn": "Burkina Faso",
+      "nameRu": "Буркина-Фасо"
+    },
+    {
+      "code": "ML",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "sahel",
+      "nameEn": "Mali",
+      "nameRu": "Мали"
+    },
+    {
+      "code": "MR",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "sahel",
+      "nameEn": "Mauritania",
+      "nameRu": "Мавритания"
+    },
+    {
+      "code": "NE",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "sahel",
+      "nameEn": "Niger",
+      "nameRu": "Нигер"
+    },
+    {
+      "code": "BJ",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Benin",
+      "nameRu": "Бенин"
+    },
+    {
+      "code": "CI",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Côte d'Ivoire",
+      "nameRu": "Кот-д’Ивуар"
+    },
+    {
+      "code": "GH",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Ghana",
+      "nameRu": "Гана"
+    },
+    {
+      "code": "GN",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Guinea",
+      "nameRu": "Гвинея"
+    },
+    {
+      "code": "LR",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Liberia",
+      "nameRu": "Либерия"
+    },
+    {
+      "code": "NG",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Nigeria",
+      "nameRu": "Нигерия"
+    },
+    {
+      "code": "SL",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Sierra Leone",
+      "nameRu": "Сьерра-Леоне"
+    },
+    {
+      "code": "TG",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "gulf-of-guinea",
+      "nameEn": "Togo",
+      "nameRu": "Того"
+    },
+    {
+      "code": "CV",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "atlantic-west-africa",
+      "nameEn": "Cabo Verde",
+      "nameRu": "Кабо-Верде"
+    },
+    {
+      "code": "GM",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "atlantic-west-africa",
+      "nameEn": "Gambia",
+      "nameRu": "Гамбия"
+    },
+    {
+      "code": "GW",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "atlantic-west-africa",
+      "nameEn": "Guinea-Bissau",
+      "nameRu": "Гвинея-Бисау"
+    },
+    {
+      "code": "SN",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "atlantic-west-africa",
+      "nameEn": "Senegal",
+      "nameRu": "Сенегал"
+    },
+    {
+      "code": "SH",
+      "region": "africa",
+      "subregion": "western-africa",
+      "subsubregion": "atlantic-west-africa",
+      "nameEn": "Saint Helena",
+      "nameRu": "о-в Св. Елены"
+    },
+    {
+      "code": "AO",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Angola",
+      "nameRu": "Ангола"
+    },
+    {
+      "code": "CM",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Cameroon",
+      "nameRu": "Камерун"
+    },
+    {
+      "code": "CF",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Central African Republic",
+      "nameRu": "Центрально-Африканская Республика"
+    },
+    {
+      "code": "TD",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Chad",
+      "nameRu": "Чад"
+    },
+    {
+      "code": "CG",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Congo (Brazzaville)",
+      "nameRu": "Конго - Браззавиль"
+    },
+    {
+      "code": "CD",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Congo (Kinshasa)",
+      "nameRu": "Конго - Киншаса"
+    },
+    {
+      "code": "GQ",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Equatorial Guinea",
+      "nameRu": "Экваториальная Гвинея"
+    },
+    {
+      "code": "GA",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "Gabon",
+      "nameRu": "Габон"
+    },
+    {
+      "code": "ST",
+      "region": "africa",
+      "subregion": "middle-africa",
+      "nameEn": "São Tomé and Príncipe",
+      "nameRu": "Сан-Томе и Принсипи"
+    },
+    {
+      "code": "KE",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Kenya",
+      "nameRu": "Кения"
+    },
+    {
+      "code": "TZ",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Tanzania",
+      "nameRu": "Танзания"
+    },
+    {
+      "code": "UG",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Uganda",
+      "nameRu": "Уганда"
+    },
+    {
+      "code": "RW",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Rwanda",
+      "nameRu": "Руанда"
+    },
+    {
+      "code": "BI",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Burundi",
+      "nameRu": "Бурунди"
+    },
+    {
+      "code": "ET",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Ethiopia",
+      "nameRu": "Эфиопия"
+    },
+    {
+      "code": "ER",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Eritrea",
+      "nameRu": "Эритрея"
+    },
+    {
+      "code": "DJ",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Djibouti",
+      "nameRu": "Джибути"
+    },
+    {
+      "code": "SO",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "Somalia",
+      "nameRu": "Сомали"
+    },
+    {
+      "code": "SS",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "east-africa-mainland",
+      "nameEn": "South Sudan",
+      "nameRu": "Южный Судан"
+    },
+    {
+      "code": "MW",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "southeast-africa",
+      "nameEn": "Malawi",
+      "nameRu": "Малави"
+    },
+    {
+      "code": "MZ",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "southeast-africa",
+      "nameEn": "Mozambique",
+      "nameRu": "Мозамбик"
+    },
+    {
+      "code": "ZM",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "southeast-africa",
+      "nameEn": "Zambia",
+      "nameRu": "Замбия"
+    },
+    {
+      "code": "ZW",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "southeast-africa",
+      "nameEn": "Zimbabwe",
+      "nameRu": "Зимбабве"
+    },
+    {
+      "code": "MG",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "Madagascar",
+      "nameRu": "Мадагаскар"
+    },
+    {
+      "code": "MU",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "Mauritius",
+      "nameRu": "Маврикий"
+    },
+    {
+      "code": "SC",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "Seychelles",
+      "nameRu": "Сейшельские о-ва"
+    },
+    {
+      "code": "KM",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "Comoros",
+      "nameRu": "Коморы"
+    },
+    {
+      "code": "YT",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "Mayotte",
+      "nameRu": "Майотта"
+    },
+    {
+      "code": "RE",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "Réunion",
+      "nameRu": "Реюньон"
+    },
+    {
+      "code": "IO",
+      "region": "africa",
+      "subregion": "eastern-africa",
+      "subsubregion": "indian-ocean-islands",
+      "nameEn": "British Indian Ocean Territory",
+      "nameRu": "Британская территория в Индийском океане"
+    },
+    {
+      "code": "ZA",
+      "region": "africa",
+      "subregion": "southern-africa",
+      "nameEn": "South Africa",
+      "nameRu": "ЮАР",
+      "city": "Johannesburg",
+      "aliases": [
+        "south africa",
+        "южная африка",
+        "южно-африканская республика"
+      ]
+    },
+    {
+      "code": "NA",
+      "region": "africa",
+      "subregion": "southern-africa",
+      "nameEn": "Namibia",
+      "nameRu": "Намибия"
+    },
+    {
+      "code": "BW",
+      "region": "africa",
+      "subregion": "southern-africa",
+      "nameEn": "Botswana",
+      "nameRu": "Ботсвана"
+    },
+    {
+      "code": "LS",
+      "region": "africa",
+      "subregion": "southern-africa",
+      "nameEn": "Lesotho",
+      "nameRu": "Лесото"
+    },
+    {
+      "code": "SZ",
+      "region": "africa",
+      "subregion": "southern-africa",
+      "nameEn": "Eswatini",
+      "nameRu": "Эсватини"
+    },
+    {
+      "code": "au-sydney",
+      "iso": "AU",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "Australia Sydney",
+      "nameRu": "Австралия Сидней",
+      "city": "Sydney",
+      "aliases": [
+        "australia",
+        "австралия",
+        "sydney",
+        "сидней"
+      ]
+    },
+    {
+      "code": "au-melbourne",
+      "iso": "AU",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "Australia Melbourne",
+      "nameRu": "Австралия Мельбурн",
+      "city": "Melbourne",
+      "aliases": [
+        "австралия"
+      ]
+    },
+    {
+      "code": "au-perth",
+      "iso": "AU",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "Australia Perth",
+      "nameRu": "Австралия Перт",
+      "city": "Perth",
+      "aliases": [
+        "австралия"
+      ]
+    },
+    {
+      "code": "NZ",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "New Zealand",
+      "nameRu": "Новая Зеландия"
+    },
+    {
+      "code": "CX",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "Christmas Island",
+      "nameRu": "о-в Рождества"
+    },
+    {
+      "code": "CC",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "Cocos (Keeling) Islands",
+      "nameRu": "Кокосовые о-ва"
+    },
+    {
+      "code": "NF",
+      "region": "oceania",
+      "subregion": "australia-nz",
+      "nameEn": "Norfolk Island",
+      "nameRu": "о-в Норфолк"
+    },
+    {
+      "code": "FJ",
+      "region": "oceania",
+      "subregion": "melanesia",
+      "nameEn": "Fiji",
+      "nameRu": "Фиджи"
+    },
+    {
+      "code": "PG",
+      "region": "oceania",
+      "subregion": "melanesia",
+      "nameEn": "Papua New Guinea",
+      "nameRu": "Папуа — Новая Гвинея"
+    },
+    {
+      "code": "SB",
+      "region": "oceania",
+      "subregion": "melanesia",
+      "nameEn": "Solomon Islands",
+      "nameRu": "Соломоновы о-ва"
+    },
+    {
+      "code": "VU",
+      "region": "oceania",
+      "subregion": "melanesia",
+      "nameEn": "Vanuatu",
+      "nameRu": "Вануату"
+    },
+    {
+      "code": "NC",
+      "region": "oceania",
+      "subregion": "melanesia",
+      "nameEn": "New Caledonia",
+      "nameRu": "Новая Каледония"
+    },
+    {
+      "code": "GU",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Guam",
+      "nameRu": "Гуам"
+    },
+    {
+      "code": "KI",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Kiribati",
+      "nameRu": "Кирибати"
+    },
+    {
+      "code": "MH",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Marshall Islands",
+      "nameRu": "Маршалловы о-ва"
+    },
+    {
+      "code": "FM",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Micronesia",
+      "nameRu": "Федеративные Штаты Микронезии"
+    },
+    {
+      "code": "NR",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Nauru",
+      "nameRu": "Науру"
+    },
+    {
+      "code": "MP",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Northern Mariana Islands",
+      "nameRu": "Северные Марианские о-ва"
+    },
+    {
+      "code": "PW",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "Palau",
+      "nameRu": "Палау"
+    },
+    {
+      "code": "UM",
+      "region": "oceania",
+      "subregion": "micronesia",
+      "nameEn": "United States Minor Outlying Islands",
+      "nameRu": "Внешние малые о-ва (США)"
+    },
+    {
+      "code": "WS",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Samoa",
+      "nameRu": "Самоа"
+    },
+    {
+      "code": "AS",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "American Samoa",
+      "nameRu": "Американское Самоа"
+    },
+    {
+      "code": "TO",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Tonga",
+      "nameRu": "Тонга"
+    },
+    {
+      "code": "TV",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Tuvalu",
+      "nameRu": "Тувалу"
+    },
+    {
+      "code": "CK",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Cook Islands",
+      "nameRu": "о-ва Кука"
+    },
+    {
+      "code": "PF",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "French Polynesia",
+      "nameRu": "Французская Полинезия"
+    },
+    {
+      "code": "NU",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Niue",
+      "nameRu": "Ниуэ"
+    },
+    {
+      "code": "PN",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Pitcairn",
+      "nameRu": "о-ва Питкэрн"
+    },
+    {
+      "code": "TK",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Tokelau",
+      "nameRu": "Токелау"
+    },
+    {
+      "code": "WF",
+      "region": "oceania",
+      "subregion": "polynesia",
+      "nameEn": "Wallis and Futuna Islands",
+      "nameRu": "Уоллис и Футуна"
+    },
+    {
+      "code": "AQ",
+      "region": "special",
+      "nameEn": "Antarctica",
+      "nameRu": "Антарктида"
+    },
+    {
+      "code": "BV",
+      "region": "special",
+      "nameEn": "Bouvet Island",
+      "nameRu": "о-в Буве"
+    },
+    {
+      "code": "GS",
+      "region": "special",
+      "nameEn": "South Georgia and the South Sandwich Islands",
+      "nameRu": "Южная Георгия и Южные Сандвичевы о-ва"
+    },
+    {
+      "code": "HM",
+      "region": "special",
+      "nameEn": "Heard Island and McDonald Islands",
+      "nameRu": "о-ва Херд и Макдональд"
+    },
+    {
+      "code": "TF",
+      "region": "special",
+      "nameEn": "French Southern Territories",
+      "nameRu": "Французские Южные территории"
+    }
+  ],
+  "useCases": [
+    {
+      "id": "allowlist",
+      "order": 1,
+      "locationIds": [
+        "GL"
+      ]
+    }
+  ]
+}

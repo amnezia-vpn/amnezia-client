@@ -59,11 +59,14 @@
         <file>controls/save.svg</file>
         <file>controls/scan-line.svg</file>
         <file>controls/search.svg</file>
+        <file>controls/sort-desc.svg</file>
         <file>controls/server.svg</file>
         <file>controls/settings-2.svg</file>
         <file>controls/settings.svg</file>
         <file>controls/settings-news.svg</file>
         <file>controls/share-2.svg</file>
+        <file>controls/star.svg</file>
+        <file>controls/star-filled.svg</file>
         <file>controls/split-tunneling.svg</file>
         <file>controls/smartphone.svg</file>
         <file>controls/tag.svg</file>
@@ -77,4 +80,3 @@
         <file>controls/monitor.svg</file>
     </qresource>
 </RCC>
-

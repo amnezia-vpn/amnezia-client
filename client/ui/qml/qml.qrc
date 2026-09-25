@@ -4,6 +4,13 @@
         <file>Components/AdLabel.qml</file>
         <file>Components/ConnectButton.qml</file>
         <file>Components/ConnectionTypeSelectionDrawer.qml</file>
+        <file>Components/CountryListStickyHeader.qml</file>
+        <file>Components/CountrySearchField.qml</file>
+        <file>Components/CountrySearchRow.qml</file>
+        <file>Components/CountrySectionHeader.qml</file>
+        <file>Components/CountriesEmptyState.qml</file>
+        <file>Components/CountryUseCaseChips.qml</file>
+        <file>Components/SortCountriesDrawer.qml</file>
         <file>Components/GamepadLoader.qml</file>
         <file>Components/HomeContainersListView.qml</file>
         <file>Components/HomeSplitTunnelingDrawer.qml</file>
@@ -20,6 +27,7 @@
         <file>Components/TransportProtoSelector.qml</file>
         <file>Components/AddSitePanel.qml</file>
         <file>Config/GlobalConfig.qml</file>
+        <file>Config/CountryRegionNames.qml</file>
         <file>Config/qmldir</file>
         <file>Controls2/BackButtonType.qml</file>
         <file>Controls2/BasicButtonType.qml</file>
@@ -31,6 +39,7 @@
         <file>Controls2/TagBadgeType.qml</file>
         <file>Controls2/CardWithIconsType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>
+        <file>Controls2/CollapsingHeaderType.qml</file>
         <file>Controls2/ContextMenuType.qml</file>
         <file>Controls2/DividerType.qml</file>
         <file>Controls2/DrawerType2.qml</file>
@@ -55,6 +64,7 @@
         <file>Controls2/TabButtonType.qml</file>
         <file>Controls2/TabImageButtonType.qml</file>
         <file>Controls2/TextAreaType.qml</file>
+        <file>Controls2/ToastType.qml</file>
         <file>Controls2/TextAreaWithFooterType.qml</file>
         <file>Controls2/TextFieldWithHeaderType.qml</file>
         <file>Controls2/TextTypes/AppCaptionTextType.qml</file>
@@ -158,4 +168,3 @@
         <file>Components/SmartScroll.qml</file>
     </qresource>
 </RCC>
-
