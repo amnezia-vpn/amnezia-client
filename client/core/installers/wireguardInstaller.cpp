@@ -44,6 +44,7 @@ ErrorCode WireguardInstaller::extractConfigFromContainer(DockerContainer contain
 
     if (auto* wgConfig = config.getWireGuardProtocolConfig()) {
         wgConfig->serverConfig.subnetAddress = serverConfigMap.value("Address").remove("/24");
+        wgConfig->serverConfig.mtu = serverConfigMap.value("MTU");
     }
     
     return ErrorCode::NoError;
