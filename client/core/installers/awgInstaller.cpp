@@ -63,6 +63,7 @@ void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
     serverConfig.disableCookies = protocols::awg::defaultDisableCookies;
 
     serverConfig.specialJunk1 = protocols::awg::defaultSpecialJunk1;
+    serverConfig.mtu = protocols::awg::defaultMtu;
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,
@@ -102,6 +103,7 @@ ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, co
         if (addressParts.size() > 1) {
             awgConfig->serverConfig.subnetCidr = addressParts.value(1);
         }
+        awgConfig->serverConfig.mtu = serverConfigMap.value("MTU");
         awgConfig->serverConfig.junkPacketCount = serverConfigMap.value(configKey::junkPacketCount);
         awgConfig->serverConfig.junkPacketMinSize = serverConfigMap.value(configKey::junkPacketMinSize);
         awgConfig->serverConfig.junkPacketMaxSize = serverConfigMap.value(configKey::junkPacketMaxSize);

@@ -225,6 +225,7 @@ amnezia::ScriptVars amnezia::genWireGuardVars(const ContainerConfig &containerCo
         vars.append({ { "$WIREGUARD_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
         vars.append({ { "$WIREGUARD_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::wireguard::defaultSubnetCidr : config.subnetCidr } });
         vars.append({ { "$WIREGUARD_SERVER_PORT", config.port.isEmpty() ? protocols::wireguard::defaultPort : config.port } });
+        vars.append({ { "$MTU", config.mtu } });
     }
     
     return vars;
@@ -240,6 +241,7 @@ amnezia::ScriptVars amnezia::genAwgVars(const ContainerConfig &containerConfig)
         vars.append({ { "$AWG_SUBNET_IP", config.subnetAddress.isEmpty() ? protocols::wireguard::defaultSubnetAddress : config.subnetAddress } });
         vars.append({ { "$WIREGUARD_SUBNET_CIDR", config.subnetCidr.isEmpty() ? protocols::wireguard::defaultSubnetCidr : config.subnetCidr } });
         vars.append({ { "$AWG_SERVER_PORT", config.port.isEmpty() ? protocols::awg::defaultPort : config.port } });
+        vars.append({ { "$MTU", config.mtu } });
         vars.append({ { "$JUNK_PACKET_COUNT", config.junkPacketCount } });
         vars.append({ { "$JUNK_PACKET_MIN_SIZE", config.junkPacketMinSize } });
         vars.append({ { "$JUNK_PACKET_MAX_SIZE", config.junkPacketMaxSize } });
