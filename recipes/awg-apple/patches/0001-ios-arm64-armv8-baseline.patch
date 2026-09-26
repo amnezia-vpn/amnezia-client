@@ -1,0 +1,23 @@
+diff --git a/Sources/WireGuardKitGo/Makefile b/Sources/WireGuardKitGo/Makefile
+index 16cb2d58..6c9652bd 100644
+--- a/Sources/WireGuardKitGo/Makefile
++++ b/Sources/WireGuardKitGo/Makefile
+@@ -33,12 +33,17 @@ $(GOROOT)/.prepared:
+ 	cat goruntime-*.diff | patch -p1 -f -N -r- -d "$(GOROOT)"
+ 	touch "$@"
+ 
++# Apple Clang lowers __atomic_load_n(__ATOMIC_CONSUME) to LDAPR
++# (FEAT_LRCPC). A10/A11 then SIGILL in _cgo_wait_runtime_init_done
++# on the first call into libwg-go (wgSetLogger).
++CGO_ARM64_BASELINE := $(if $(filter iphoneos,$(PLATFORM_NAME)),-mcpu=apple-a10 -Xclang -target-feature -Xclang -rcpc -Xclang -target-feature -Xclang -lse)
+ define libwg-go-a
+ $(BUILDDIR)/libwg-go-$(1).a: export CGO_ENABLED := 1
+-$(BUILDDIR)/libwg-go-$(1).a: export CGO_CFLAGS := $(CFLAGS_PREFIX) $(ARCH)
++$(BUILDDIR)/libwg-go-$(1).a: export CGO_CFLAGS := $(CFLAGS_PREFIX) $(ARCH) $(if $(filter arm64,$(1)),$(CGO_ARM64_BASELINE))
+ $(BUILDDIR)/libwg-go-$(1).a: export CGO_LDFLAGS := $(CFLAGS_PREFIX) $(ARCH)
+ $(BUILDDIR)/libwg-go-$(1).a: export GOOS := $(GOOS_$(PLATFORM_NAME))
+ $(BUILDDIR)/libwg-go-$(1).a: export GOARCH := $(GOARCH_$(1))
++$(BUILDDIR)/libwg-go-$(1).a: export GOARM64 := v8.0
+ $(BUILDDIR)/libwg-go-$(1).a: $(GOROOT)/.prepared go.mod
+ 	go build -ldflags=-w -trimpath -v -o "$(BUILDDIR)/libwg-go-$(1).a" -buildmode c-archive
+ 	rm -f "$(BUILDDIR)/libwg-go-$(1).h"

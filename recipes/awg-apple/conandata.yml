@@ -1,0 +1,2 @@
+patches:
+  - patch_file: "patches/0001-ios-arm64-armv8-baseline.patch"
