@@ -97,7 +97,6 @@ Vpn::ConnectionState iosStatusToState(NEVPNStatus status) {
 
 namespace {
 constexpr int kHandshakeTimeoutMs = 12000;
-constexpr uint64_t kHandshakeRxThreshold = 4096;
 bool isWireGuardBasedProto(amnezia::Proto proto) {
     return proto == amnezia::Proto::WireGuard || proto == amnezia::Proto::Awg;
 }
@@ -358,13 +357,8 @@ void IosController::checkStatus()
 
         QMetaObject::invokeMethod(this, [this, txBytes, rxBytes, last_handshake_time_sec]() {
             if (isWireGuardBasedProto(m_proto) && m_handshakeAwaiting) {
-                const bool hasHandshakeData = (last_handshake_time_sec >= 0);
-                const bool hasFreshHandshake = hasHandshakeData &&
-                        ((last_handshake_time_sec > 0) ||
-                         (rxBytes >= kHandshakeRxThreshold) ||
-                         (txBytes >= kHandshakeRxThreshold));
-
-                if (hasFreshHandshake) {
+                // Traffic counters include handshake retries, not just established tunnel traffic.
+                if (last_handshake_time_sec > 0) {
                     m_handshakeConfirmed = true;
                     m_handshakeAwaiting = false;
                     m_handshakeTimer.invalidate();
