@@ -5,9 +5,10 @@
 #include "../systemController.h"
 #include "core/utils/qrCodeUtils.h"
 
-ExportUiController::ExportUiController(ExportController* exportController, QObject *parent)
+ExportUiController::ExportUiController(ExportController* exportController, SettingsController* settingsController, QObject *parent)
     : QObject(parent),
-      m_exportController(exportController)
+      m_exportController(exportController),
+      m_settingsController(settingsController)
 {
     connect(m_exportController, &ExportController::revokeFinished, this, [this](ErrorCode errorCode) {
         if (errorCode == ErrorCode::NoError) {
@@ -94,6 +95,21 @@ QList<QString> ExportUiController::getQrCodes()
 
 void ExportUiController::exportConfig(const QString &fileName)
 {
+    if (m_settingsController->isFileEncryptionEnabled()) {
+        QByteArray data = m_config.toUtf8();
+        QByteArray encryptedData = SystemController::encryptData(data, m_settingsController->getPassword(), m_settingsController->getHint());
+
+        if (encryptedData.isEmpty()) {
+            qInfo() << "ExportUiController::exportConfig: encryption failed";
+            return;
+        }
+
+        if (!SystemController::saveFile(fileName, encryptedData))
+            qInfo() << "ExportUiController::exportConfig: save or share was cancelled or failed";
+
+        return;
+    }
+
     if (!SystemController::saveFile(fileName, m_config)) {
         qInfo() << "ExportUiController::exportConfig: save or share was cancelled or failed";
     }

@@ -161,6 +161,21 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
                        QJniObject::fromString(data).object<jstring>());
 }
 
+void AndroidController::saveFile(const QString &fileName, const QByteArray &data)
+{
+    QJniEnvironment env;
+    const jsize size = static_cast<jsize>(data.size());
+    jbyteArray bytes = env->NewByteArray(size);
+    if (!bytes) {
+        qCritical() << "AndroidController::saveFile: cannot allocate byte array of size" << size;
+        return;
+    }
+    env->SetByteArrayRegion(bytes, 0, size, reinterpret_cast<const jbyte *>(data.constData()));
+    callActivityMethod("saveFileBytes", "(Ljava/lang/String;[B)V",
+                       QJniObject::fromString(fileName).object<jstring>(), bytes);
+    env->DeleteLocalRef(bytes);
+}
+
 QString AndroidController::openFile(const QString &filter)
 {
     QEventLoop wait;

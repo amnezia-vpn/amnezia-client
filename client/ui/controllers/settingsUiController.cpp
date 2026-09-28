@@ -133,7 +133,10 @@ void SettingsUiController::clearLogs()
 
 void SettingsUiController::backupAppConfig(const QString &fileName)
 {
-    QByteArray data = m_settingsController->backupAppConfig();
+    QByteArray data = isFileEncryptionEnabled()
+            ? SystemController::encryptData(m_settingsController->backupAppConfig(), getPassword(), getHint())
+            : m_settingsController->backupAppConfig();
+
     if (!SystemController::saveFile(fileName, data)) {
         qInfo() << "SettingsUiController::backupAppConfig: save or share was cancelled or failed";
     }
@@ -189,6 +192,51 @@ void SettingsUiController::clearSettings()
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     SWIFT_BRIDGE_NAMESPACE::clearSettings();
 #endif
+}
+
+bool SettingsUiController::isFileEncryptionEnabled()
+{
+    return m_settingsController->isFileEncryptionEnabled();
+}
+
+void SettingsUiController::setPassword(QString pwd)
+{
+    m_settingsController->setPassword(pwd);
+}
+
+QString SettingsUiController::getPassword()
+{
+    return m_settingsController->getPassword();
+}
+
+void SettingsUiController::setHint(QString hint)
+{
+    m_settingsController->setHint(hint);
+}
+
+QString SettingsUiController::getHint()
+{
+    return m_settingsController->getHint();
+}
+
+void SettingsUiController::setTempPassword(QString pwd)
+{
+    tempPassword = pwd;
+}
+
+QString SettingsUiController::getTempPassword()
+{
+    return tempPassword;
+}
+
+void SettingsUiController::setTempHint(QString hint)
+{
+    tempHint = hint;
+}
+
+QString SettingsUiController::getTempHint()
+{
+    return tempHint;
 }
 
 bool SettingsUiController::isAutoConnectEnabled()

@@ -194,7 +194,7 @@ void CoreController::initControllers()
     m_importController = new ImportUiController(m_importCoreController, this);
     setQmlContextProperty("ImportController", m_importController);
 
-    m_exportUiController = new ExportUiController(m_exportController, this);
+    m_exportUiController = new ExportUiController(m_exportController, m_settingsController, this);
     setQmlContextProperty("ExportController", m_exportUiController);
 
     m_languageUiController = new LanguageUiController(m_settingsController, m_languageModel, this);
