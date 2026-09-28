@@ -10,6 +10,8 @@
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/serverConfigUtils.h"
+
+#include "amneziaApplication.h"
 #include "secureQSettings.h"
 #include "vpnConnection.h"
 
@@ -277,5 +279,13 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestGatewayServiceImport)
+int main(int argc, char *argv[])
+{
+    // CoreController reaches the gateway through amnApp->networkManager(), so the
+    // application instance has to really be an AmneziaApplication.
+    AmneziaApplication app(argc, argv);
+    TestGatewayServiceImport tc;
+    QTEST_SET_MAIN_SOURCE_PATH
+    return QTest::qExec(&tc, argc, argv);
+}
 #include "testGatewayServiceImport.moc"
