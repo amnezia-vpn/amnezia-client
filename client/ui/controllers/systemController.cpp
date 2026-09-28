@@ -156,7 +156,7 @@ bool SystemController::saveFile(const QString &fileName, const QString &data)
 bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
 {
 #if defined Q_OS_ANDROID
-    AndroidController::instance()->saveFile(fileName, QString::fromUtf8(data));
+    AndroidController::instance()->saveFile(fileName, data);
     return true;
 #endif
 

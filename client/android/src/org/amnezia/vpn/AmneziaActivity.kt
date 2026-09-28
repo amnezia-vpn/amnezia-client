@@ -44,6 +44,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
@@ -733,6 +734,16 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun saveFile(fileName: String, data: String) {
         Log.d(TAG, "Save file $fileName")
+        createFile(fileName) { os -> os.bufferedWriter().use { it.write(data) } }
+    }
+
+    @Suppress("unused")
+    fun saveFileBytes(fileName: String, data: ByteArray) {
+        Log.d(TAG, "Save file $fileName, ${data.size} bytes")
+        createFile(fileName) { os -> os.write(data) }
+    }
+
+    private fun createFile(fileName: String, write: (OutputStream) -> Unit) {
         mainScope.launch {
             Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -745,9 +756,7 @@ class AmneziaActivity : QtActivity() {
                             it?.data?.let { uri ->
                                 Log.v(TAG, "Save file to $uri")
                                 try {
-                                    contentResolver.openOutputStream(uri)?.use { os ->
-                                        os.bufferedWriter().use { it.write(data) }
-                                    }
+                                    contentResolver.openOutputStream(uri)?.use { os -> write(os) }
                                 } catch (e: IOException) {
                                     Log.e(TAG, "Failed to save file $uri: $e")
                                     // todo: send error to Qt

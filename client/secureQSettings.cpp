@@ -137,6 +137,10 @@ bool SecureQSettings::hasSecTag(const QString &tag) const
     job->start();
     loop.exec();
 
+    qWarning().noquote() << "SEC: hasSecTag tag=" << tag
+                         << "error=" << int(job->error()) << job->errorString()
+                         << "hasData=" << !job->binaryData().isEmpty();
+
     if (job->error() == QKeychain::EntryNotFound)
         return false;
 
@@ -180,6 +184,13 @@ QByteArray SecureQSettings::backupAppConfig() const
 
         cfg.insert(key, QJsonValue::fromVariant(value(key)));
     }
+
+    QStringList secKeys;
+    for (const QString &k : cfg.keys()) {
+        if (k.startsWith("Sec/"))
+            secKeys << k;
+    }
+    qWarning().noquote() << "SEC: backup built keys=" << cfg.keys().size() << "secKeys=" << secKeys;
 
     return QJsonDocument(cfg).toJson();
 }
@@ -231,8 +242,13 @@ QString SecureQSettings::getHint() const
 void SecureQSettings::clearSettings()
 {
     QMutexLocker locker(&m_mutex);
+    qWarning().noquote() << "SEC: clearSettings before: hasPassword=" << hasPassword()
+                         << "hasHint=" << hasSecTag("hint");
     m_settings.clear();
     m_cache.clear();
+    qWarning().noquote() << "SEC: clearSettings after:  hasPassword=" << hasPassword()
+                         << "hasHint=" << hasSecTag("hint")
+                         << "(keychain entries are not removed by clearSettings)";
 }
 
 QByteArray SecureQSettings::encryptText(const QByteArray &value) const
@@ -331,6 +347,10 @@ QByteArray SecureQSettings::getSecTag(const QString &tag)
     job->start();
     loop.exec();
 
+    qWarning().noquote() << "SEC: getSecTag tag=" << tag
+                         << "error=" << int(job->error())
+                         << "bytes=" << job->binaryData().size();
+
     if (job->error()) {
         qCritical() << "SecureQSettings::getSecTag Error:" << job->errorString();
     }
@@ -346,9 +366,18 @@ void SecureQSettings::setSecTag(const QString &tag, const QByteArray &data)
     job->setBinaryData(data);
     QEventLoop loop;
     QTimer::singleShot(1000, &loop, SLOT(quit()));
-    job->connect(job.data(), &WritePasswordJob::finished, job.data(), [&loop]() { loop.quit(); });
+    bool finished = false;
+    job->connect(job.data(), &WritePasswordJob::finished, job.data(), [&loop, &finished]() {
+        finished = true;
+        loop.quit();
+    });
     job->start();
     loop.exec();
+
+    qWarning().noquote() << "SEC: setSecTag tag=" << tag
+                         << "bytes=" << data.size()
+                         << "finishedBeforeTimeout=" << finished
+                         << "error=" << int(job->error()) << job->errorString();
 
     if (job->error()) {
         qCritical() << "SecureQSettings::setSecTag Error:" << job->errorString();

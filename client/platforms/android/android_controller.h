@@ -33,6 +33,7 @@ public:
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
+    void saveFile(const QString &fileName, const QByteArray &data);
     QString openFile(const QString &filter);
     int getFd(const QString &fileName);
     void closeFd();

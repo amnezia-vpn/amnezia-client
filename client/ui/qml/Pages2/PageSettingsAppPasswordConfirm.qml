@@ -14,6 +14,7 @@ PageType {
     id: root
 
     property bool isChangingPassword: false
+    property bool isSaving: false
 
     Connections {
         target: SettingsController
@@ -122,15 +123,17 @@ PageType {
                 text: root.isChangingPassword ? qsTr("Save new password") : qsTr("Turn on encryption")
 
                 clickedFunc: function() {
-                    if (!root.isPasswordProperlyFilled()) {
+                    if (root.isSaving || !root.isPasswordProperlyFilled()) {
                         return
                     }
+                    root.isSaving = true
 
                     SettingsController.setPassword(SettingsController.getTempPassword())
                     SettingsController.setHint(SettingsController.getTempHint())
 
                     SettingsController.setTempPassword("")
                     SettingsController.setTempHint("")
+                    root.isSaving = false
 
                     PageController.closePage()
                     PageController.goToPage(PageEnum.PageSettings)
