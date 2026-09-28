@@ -11,7 +11,7 @@ from pathlib import Path
 
 class AwgApple(ConanFile):
     name = "awg-apple"
-    # Blocked by amneziawg-apple#49. Replace this pin and sha256 with the tag
+    # Blocked by amnezia-vpn/amneziawg-apple#49. Replace this pin and sha256 with the tag
     # that contains the iphoneos ARMv8.0 baseline.
     version = "3.1.4"
     settings = "os", "arch", "compiler"
