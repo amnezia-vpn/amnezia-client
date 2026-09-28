@@ -41,6 +41,15 @@ target_include_directories(test_common PUBLIC
 )
 
 if(NOT ANDROID)
+    add_executable(test_network_utilities
+        testNetworkUtilities.cpp
+    )
+
+    target_link_libraries(test_network_utilities PRIVATE
+        Qt6::Test
+        test_common
+    )
+
     add_executable(test_multiple_imports
         testMultipleImports.cpp
     )
@@ -393,6 +402,7 @@ endif()
 enable_testing()
 
 if(NOT ANDROID)
+    add_test(NAME NetworkUtilitiesTest            COMMAND test_network_utilities)
     add_test(NAME MultipleImportsTest              COMMAND test_multiple_imports)
     add_test(NAME ServerEditTest                   COMMAND test_server_edit)
     add_test(NAME DefaultServerChangeTest          COMMAND test_default_server_change)
