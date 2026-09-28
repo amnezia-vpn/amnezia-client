@@ -29,7 +29,7 @@ class AwgApple(ConanFile):
         basic_layout(self, build_folder=os.path.join(self.folders.source, "Sources/WireGuardKitGo"))
 
     def build_requirements(self):
-        self.tool_requires("go/1.26.0")
+        self.tool_requires("go/1.27.1")
 
     def validate(self):
         if not is_apple_os(self):

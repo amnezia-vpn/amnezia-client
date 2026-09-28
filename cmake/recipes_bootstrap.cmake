@@ -14,12 +14,8 @@ foreach(RECIPE ${LOCAL_RECIPES})
     )
 endforeach()
 
-# FIXME(ygurov): export all versions declared on recipies_bootstrap call
 execute_process(
-    COMMAND ${CONAN_COMMAND} export "${CMAKE_SOURCE_DIR}/recipes/go" --version 1.26.0
-)
-execute_process(
-    COMMAND ${CONAN_COMMAND} export "${CMAKE_SOURCE_DIR}/recipes/go" --version 1.23.12
+    COMMAND ${CONAN_COMMAND} export "${CMAKE_SOURCE_DIR}/recipes/go" --version 1.27.1
 )
 
 execute_process(

@@ -46,7 +46,7 @@ class AwgGo(ConanFile):
         basic_layout(self, build_folder=".")
 
     def build_requirements(self):
-        self.tool_requires("go/1.26.0")
+        self.tool_requires("go/1.27.1")
 
     def validate(self):
         if not self._goos or not all(arch in self._arch_map for arch in self._archs):
