@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, collect_libs, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, collect_libs
 from conan.tools.apple import is_apple_os
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 
@@ -11,6 +11,8 @@ from pathlib import Path
 
 class AwgApple(ConanFile):
     name = "awg-apple"
+    # Blocked by amneziawg-apple#49. Replace this pin and sha256 with the tag
+    # that contains the iphoneos ARMv8.0 baseline.
     version = "3.1.4"
     settings = "os", "arch", "compiler"
 
@@ -22,9 +24,6 @@ class AwgApple(ConanFile):
         }
         archs = str(self.settings.arch).split("|")
         return " ".join(arch_map.get(arch, arch) for arch in archs)
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -57,7 +56,6 @@ class AwgApple(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.make()
         self._reject_ldapr()
