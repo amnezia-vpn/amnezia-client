@@ -24,5 +24,8 @@
     <string name="notificationSettingsDialogMessage">Для показа уведомлений необходимо включить уведомления в системных настройках</string>
     <string name="openNotificationSettings">Открыть настройки уведомлений</string>
 
+    <string name="vpnStateEventChannelName">Уведомления о VPN</string>
+    <string name="vpnStateEventChannelDescription">Краткие оповещения при подключении и отключении VPN</string>
+
     <string name="tvNoFileBrowser">Пожалуйста, установите приложение для просмотра файлов</string>
 </resources>

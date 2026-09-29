@@ -4,8 +4,6 @@
 
 #include "platforms/ios/iosnotificationhandler.h"
 
-#include "core/utils/appUiConfig.h"
-
 #import <UserNotifications/UserNotifications.h>
 #import <Foundation/Foundation.h>
 
@@ -63,6 +61,7 @@ IOSNotificationHandler::~IOSNotificationHandler() { }
 void IOSNotificationHandler::notify(NotificationHandler::Message type, const QString& title,
                                     const QString& message, int timerMsec) {
   Q_UNUSED(type);
+  Q_UNUSED(timerMsec);
 
   if (!m_delegate) {
     return;
@@ -73,12 +72,13 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
   content.body = message.toNSString();
   content.sound = [UNNotificationSound defaultSound];
 
-  int timerSec = timerMsec / 1000;
+  NSTimeInterval delay = 0.1;
   UNTimeIntervalNotificationTrigger* trigger =
-      [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timerSec repeats:NO];
+      [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:delay repeats:NO];
 
-  UNNotificationRequest* request =
-      [UNNotificationRequest requestWithIdentifier:[NSString stringWithUTF8String:APP_NOTIFICATION_IDENTIFIER]
+  NSString* requestId = [NSString stringWithFormat:@"amneziavpn.vpnstate.%lld",
+      (long long)([[NSDate date] timeIntervalSince1970] * 1000.0)];
+  UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:requestId
                                                                         content:content
                                                                         trigger:trigger];
 
@@ -146,6 +146,7 @@ IOSNotificationHandler::~IOSNotificationHandler() { }
 void IOSNotificationHandler::notify(NotificationHandler::Message type, const QString& title,
                                     const QString& message, int timerMsec) {
   Q_UNUSED(type);
+  Q_UNUSED(timerMsec);
 
   if (!m_delegate) {
     return;
@@ -156,12 +157,13 @@ void IOSNotificationHandler::notify(NotificationHandler::Message type, const QSt
   content.body = message.toNSString();
   content.sound = [UNNotificationSound defaultSound];
 
-  int timerSec = timerMsec / 1000;
+  NSTimeInterval delay = 0.1;
   UNTimeIntervalNotificationTrigger* trigger =
-      [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timerSec repeats:NO];
+      [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:delay repeats:NO];
 
-  UNNotificationRequest* request =
-      [UNNotificationRequest requestWithIdentifier:[NSString stringWithUTF8String:APP_NOTIFICATION_IDENTIFIER]
+  NSString* requestId = [NSString stringWithFormat:@"amneziavpn.vpnstate.%lld",
+      (long long)([[NSDate date] timeIntervalSince1970] * 1000.0)];
+  UNNotificationRequest* request = [UNNotificationRequest requestWithIdentifier:requestId
                                                                         content:content
                                                                         trigger:trigger];
 
