@@ -13,6 +13,14 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
+namespace
+{
+    QString awgToggleValue(bool enabled)
+    {
+        return enabled ? QString(protocols::awg::awgBoolOn) : QString();
+    }
+} // namespace
+
 AwgConfigModel::AwgConfigModel(QObject *parent) : QAbstractListModel(parent)
 {
 }
@@ -50,6 +58,12 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     case Roles::ClientRejectAfterTimeRole: m_protocolConfig.clientConfig->rejectAfterTime = strValue; break;
     case Roles::ClientKeepaliveTimeoutRole: m_protocolConfig.clientConfig->keepaliveTimeout = strValue; break;
     case Roles::ClientMaxHandshakeAttemptsRole: m_protocolConfig.clientConfig->maxHandshakeAttempts = strValue; break;
+    case Roles::ClientRandomTrailersRole:
+        m_protocolConfig.clientConfig->randomTrailers = awgToggleValue(value.toBool());
+        break;
+    case Roles::ClientDisableCookiesRole:
+        m_protocolConfig.clientConfig->disableCookies = awgToggleValue(value.toBool());
+        break;
     case Roles::ServerJunkPacketCountRole: m_protocolConfig.serverConfig.junkPacketCount = strValue; break;
     case Roles::ServerJunkPacketMinSizeRole: m_protocolConfig.serverConfig.junkPacketMinSize = strValue; break;
     case Roles::ServerJunkPacketMaxSizeRole: m_protocolConfig.serverConfig.junkPacketMaxSize = strValue; break;
@@ -84,6 +98,12 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
         }
         break;
     }
+    case Roles::ServerRandomTrailersRole:
+        m_protocolConfig.serverConfig.randomTrailers = awgToggleValue(value.toBool());
+        break;
+    case Roles::ServerDisableCookiesRole:
+        m_protocolConfig.serverConfig.disableCookies = awgToggleValue(value.toBool());
+        break;
     default:
         return false;
     }
@@ -118,6 +138,14 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ClientKeepaliveTimeoutRole: return m_protocolConfig.clientConfig->keepaliveTimeout;
     case Roles::ClientMaxHandshakeAttemptsRole: return m_protocolConfig.clientConfig->maxHandshakeAttempts;
     case Roles::ClientHeaderProtectionEnabledRole: return !m_protocolConfig.clientConfig->headerProtectionKey.isEmpty();
+    case Roles::ClientRandomTrailersRole:
+        return m_protocolConfig.clientConfig->randomTrailers.compare(QLatin1String(protocols::awg::awgBoolOn),
+                                                                     Qt::CaseInsensitive)
+                == 0;
+    case Roles::ClientDisableCookiesRole:
+        return m_protocolConfig.clientConfig->disableCookies.compare(QLatin1String(protocols::awg::awgBoolOn),
+                                                                     Qt::CaseInsensitive)
+                == 0;
 
     case Roles::ServerJunkPacketCountRole: return m_protocolConfig.serverConfig.junkPacketCount;
     case Roles::ServerJunkPacketMinSizeRole: return m_protocolConfig.serverConfig.junkPacketMinSize;
@@ -143,6 +171,14 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     case Roles::ServerKeepaliveTimeoutRole: return m_protocolConfig.serverConfig.keepaliveTimeout;
     case Roles::ServerMaxHandshakeAttemptsRole: return m_protocolConfig.serverConfig.maxHandshakeAttempts;
     case Roles::ServerHeaderProtectionEnabledRole: return !m_protocolConfig.serverConfig.headerProtectionKey.isEmpty();
+    case Roles::ServerRandomTrailersRole:
+        return m_protocolConfig.serverConfig.randomTrailers.compare(QLatin1String(protocols::awg::awgBoolOn),
+                                                                    Qt::CaseInsensitive)
+                == 0;
+    case Roles::ServerDisableCookiesRole:
+        return m_protocolConfig.serverConfig.disableCookies.compare(QLatin1String(protocols::awg::awgBoolOn),
+                                                                    Qt::CaseInsensitive)
+                == 0;
 
     case Roles::IsAwg2Role: {
         QString version = serverProtocolVersion();
@@ -161,6 +197,8 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
     
     m_protocolConfig = protocolConfig;
     
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+
     if (!m_protocolConfig.clientConfig.has_value()) {
         m_protocolConfig.clientConfig = amnezia::AwgClientConfig{};
     }
@@ -174,6 +212,13 @@ void AwgConfigModel::updateModel(amnezia::DockerContainer container, const amnez
 QString AwgConfigModel::serverProtocolVersion() const
 {
     return m_protocolConfig.serverConfig.protocolVersion;
+}
+
+void AwgConfigModel::applyDefaultsToServerConfig(amnezia::AwgServerConfig& config)
+{
+    if (config.subnetAddress.isEmpty()) {
+        config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
+    }
 }
 
 void AwgConfigModel::applyDefaultsToClientConfig(amnezia::AwgClientConfig& config)
@@ -232,6 +277,8 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ClientKeepaliveTimeoutRole] = "clientKeepaliveTimeout";
     roles[ClientMaxHandshakeAttemptsRole] = "clientMaxHandshakeAttempts";
     roles[ClientHeaderProtectionEnabledRole] = "clientHeaderProtectionEnabled";
+    roles[ClientRandomTrailersRole] = "clientRandomTrailers";
+    roles[ClientDisableCookiesRole] = "clientDisableCookies";
 
     roles[ServerJunkPacketCountRole] = "serverJunkPacketCount";
     roles[ServerJunkPacketMinSizeRole] = "serverJunkPacketMinSize";
@@ -258,6 +305,8 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
     roles[ServerKeepaliveTimeoutRole] = "serverKeepaliveTimeout";
     roles[ServerMaxHandshakeAttemptsRole] = "serverMaxHandshakeAttempts";
     roles[ServerHeaderProtectionEnabledRole] = "serverHeaderProtectionEnabled";
+    roles[ServerRandomTrailersRole] = "serverRandomTrailers";
+    roles[ServerDisableCookiesRole] = "serverDisableCookies";
 
     roles[IsAwg2Role] = "isAwg2";
     roles[IsAwg3Role] = "isAwg3";

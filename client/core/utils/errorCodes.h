@@ -82,6 +82,8 @@ namespace amnezia
         RestoreBackupInvalidError = 904,
         LegacyApiV1NotSupportedError = 905,
         LegacyContainerNotSupportedError = 906,
+        ConfigFormatVersionNotSupportedError = 907,
+        RestoreBackupUnsupportedConfigsSkipped = 908,
 
         // Android errors
         AndroidError = 1000,
@@ -97,7 +99,6 @@ namespace amnezia
         ApiServicesMissingError = 1107,
         ApiConfigLimitError = 1108,
         ApiNotFoundError = 1109,
-        ApiMigrationError = 1110,
         ApiUpdateRequestError = 1111,
         ApiSubscriptionExpiredError = 1112,
         ApiPurchaseError = 1113,
@@ -105,22 +106,24 @@ namespace amnezia
         ApiNoPurchasedSubscriptionsError = 1115,
         ApiTrialAlreadyUsedError = 1116,
 
-        // QR pairing (gateway /v1/generate_qr, /v1/scan_qr)
-        ApiPairingForbiddenError = 1117,
-        ApiPairingConflictError = 1118,
-        ApiPairingRateLimitedError = 1119,
-        ApiPairingServiceUnavailableError = 1120,
-        ApiPairingPayloadTooLargeError = 1121,
-        ApiPairingMissingMetadataError = 1122,
-        ApiPairingSessionExpiredError = 1123,
-
         // Captcha errors (gateway 402 payment_required with captcha markers)
-        ApiCaptchaRequiredError = 1124,
-        ApiCaptchaInvalidError = 1125,
-        ApiCaptchaRefreshError = 1126,
+        ApiCaptchaRequiredError = 1117,
+        ApiCaptchaInvalidError = 1118,
+        ApiCaptchaRefreshError = 1119,
 
         // Rate limiting (HTTP 429 Too Many Requests)
-        ApiRateLimitError = 1127,
+        ApiRateLimitError = 1120,
+        ApiNoPurchasesToRestore = 1121,
+        ApiPurchasePendingError = 1122,
+
+        // QR pairing (gateway /v1/generate_qr, /v1/scan_qr)
+        ApiPairingForbiddenError = 1123,
+        ApiPairingConflictError = 1124,
+        ApiPairingRateLimitedError = 1125,
+        ApiPairingServiceUnavailableError = 1126,
+        ApiPairingPayloadTooLargeError = 1127,
+        ApiPairingMissingMetadataError = 1128,
+        ApiPairingSessionExpiredError = 1129,
 
         // QFile errors
         OpenError = 1200,
@@ -128,7 +131,16 @@ namespace amnezia
         PermissionsError = 1202,
         UnspecifiedError = 1203,
         FatalError = 1204,
-        AbortError = 1205
+        AbortError = 1205,
+
+        // Billing errors
+        BillingCanceled = 1300,
+        BillingError = 1301,
+        BillingGooglePlayError = 1302,
+        BillingUnavailable = 1303,
+        SubscriptionAlreadyOwned = 1304,
+        SubscriptionUnavailable = 1305,
+        BillingNetworkError = 1306,
       };
       Q_ENUM_NS(ErrorCode)
     }

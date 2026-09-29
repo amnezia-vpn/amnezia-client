@@ -52,6 +52,8 @@ public:
 
     void invalidateCache();
 
+    int unsupportedFormatConfigsCount() const;
+
 signals:
     void serverAdded(const QString &serverId);
     void serverEdited(const QString &serverId);
@@ -77,6 +79,7 @@ private:
     QVector<QString> m_orderedServerIds;
 
     QString m_defaultServerId;
+    int m_unsupportedFormatConfigsCount = 0;
 };
 
 #endif // SECURESERVERSREPOSITORY_H

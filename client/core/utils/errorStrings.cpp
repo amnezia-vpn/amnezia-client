@@ -71,6 +71,8 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ImportBackupFileUseRestoreInstead): errorMessage = QObject::tr("Backup files cannot be imported here. Use 'Restore from backup' instead."); break;
     case (ErrorCode::RestoreBackupInvalidError): errorMessage = QObject::tr("Backup file is corrupted or has invalid format"); break;
     case (ErrorCode::LegacyApiV1NotSupportedError): errorMessage = QObject::tr("This legacy Amnezia subscription format is no longer supported"); break;
+    case (ErrorCode::ConfigFormatVersionNotSupportedError): errorMessage = QObject::tr("This configuration was created in a newer version of the application and is not fully supported. Please update the application"); break;
+    case (ErrorCode::RestoreBackupUnsupportedConfigsSkipped): errorMessage = QObject::tr("Some configurations from the backup were not restored because they require a newer version of the application"); break;
     case (ErrorCode::LegacyContainerNotSupportedError): errorMessage = QObject::tr("This protocol is no longer supported. Please select another protocol or remove this container from the server settings."); break;
     case (ErrorCode::ImportOpenConfigError): errorMessage = QObject::tr("Unable to open config file"); break;
     case (ErrorCode::NoInstalledContainersError): errorMessage = QObject::tr("VPN Protocols is not installed.\n Please install VPN container at first"); break;
@@ -89,13 +91,34 @@ QString errorString(ErrorCode code) {
     case (ErrorCode::ApiServicesMissingError): errorMessage = QObject::tr("Missing list of available services"); break;
     case (ErrorCode::ApiConfigLimitError): errorMessage = QObject::tr("The limit of allowed configurations per subscription has been exceeded"); break;
     case (ErrorCode::ApiNotFoundError): errorMessage = QObject::tr("Error when retrieving configuration from API"); break;
-    case (ErrorCode::ApiMigrationError): errorMessage = QObject::tr("A migration error has occurred. Please contact our technical support"); break;
     case (ErrorCode::ApiUpdateRequestError): errorMessage = QObject::tr("Please update the application to use this feature"); break;
     case (ErrorCode::ApiSubscriptionExpiredError): errorMessage = QObject::tr("Your Amnezia Premium subscription has expired.\n Please check your email for renewal instructions.\n If you haven't received an email, please contact our support."); break;
     case (ErrorCode::ApiPurchaseError): errorMessage = QObject::tr("Unable to process purchase"); break;
     case (ErrorCode::ApiSubscriptionNotActiveError): errorMessage = QObject::tr("No active subscription found"); break;
     case (ErrorCode::ApiNoPurchasedSubscriptionsError): errorMessage = QObject::tr("No purchased subscriptions found. Please purchase a subscription first"); break;
     case (ErrorCode::ApiTrialAlreadyUsedError): errorMessage = QObject::tr("This email address has already been used to activate a trial"); break;
+    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
+    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
+    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
+    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    case (ErrorCode::ApiPurchasePendingError):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("Your payment is pending confirmation in Google Play. Once the payment is completed, the subscription will be added automatically on the next app launch.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("Your payment is awaiting confirmation. Once it is approved, the subscription will be added automatically.");
+#else
+        errorMessage = QObject::tr("Your payment is pending confirmation. Please complete the payment and then restore your subscription.");
+#endif
+        break;
+    case (ErrorCode::ApiNoPurchasesToRestore):
+#if defined(Q_OS_ANDROID)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Google account used for the purchase.");
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Apple ID used for the purchase.");
+#else
+        errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same account used for the purchase.");
+#endif
+        break;
     case (ErrorCode::ApiPairingForbiddenError): errorMessage = QObject::tr("QR pairing was rejected (forbidden)"); break;
     case (ErrorCode::ApiPairingConflictError): errorMessage = QObject::tr("This QR code has already been used"); break;
     case (ErrorCode::ApiPairingRateLimitedError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
@@ -112,13 +135,14 @@ QString errorString(ErrorCode code) {
     case(ErrorCode::FatalError): errorMessage =  QObject::tr("QFile error: A fatal error occurred"); break;
     case(ErrorCode::AbortError): errorMessage =  QObject::tr("QFile error: The operation was aborted"); break;
 
-    // Captcha errors
-    case (ErrorCode::ApiCaptchaRequiredError): errorMessage = QObject::tr("CAPTCHA verification is required"); break;
-    case (ErrorCode::ApiCaptchaInvalidError): errorMessage = QObject::tr("CAPTCHA was incorrect. Please try again"); break;
-    case (ErrorCode::ApiCaptchaRefreshError): errorMessage = QObject::tr("CAPTCHA refreshed. Please try again"); break;
-
-    // Rate limiting (HTTP 429)
-    case (ErrorCode::ApiRateLimitError): errorMessage = QObject::tr("Too many requests. Please try again later"); break;
+    // Billing errors
+    case(ErrorCode::BillingCanceled): errorMessage = QObject::tr("Transaction was canceled by the user"); break;
+    case(ErrorCode::BillingError): errorMessage = QObject::tr("Billing error"); break;
+    case(ErrorCode::BillingGooglePlayError): errorMessage = QObject::tr("Internal Google Play error, please try again later"); break;
+    case(ErrorCode::BillingUnavailable): errorMessage = QObject::tr("Billing is unavailable, please try again later"); break;
+    case(ErrorCode::SubscriptionAlreadyOwned): errorMessage = QObject::tr("You already own this subscription"); break;
+    case(ErrorCode::SubscriptionUnavailable): errorMessage = QObject::tr("The requested subscription is not available for purchase"); break;
+    case(ErrorCode::BillingNetworkError): errorMessage = QObject::tr("A network error occurred during the operation, please check the Internet connection"); break;
 
     case(ErrorCode::InternalError):
     default:

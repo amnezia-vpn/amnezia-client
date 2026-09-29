@@ -33,6 +33,8 @@ public:
         ClientKeepaliveTimeoutRole,
         ClientMaxHandshakeAttemptsRole,
         ClientHeaderProtectionEnabledRole,
+        ClientRandomTrailersRole,
+        ClientDisableCookiesRole,
 
         ServerJunkPacketCountRole,
         ServerJunkPacketMinSizeRole,
@@ -59,6 +61,8 @@ public:
         ServerKeepaliveTimeoutRole,
         ServerMaxHandshakeAttemptsRole,
         ServerHeaderProtectionEnabledRole,
+        ServerRandomTrailersRole,
+        ServerDisableCookiesRole,
 
         IsAwg2Role,
         IsAwg3Role
@@ -88,6 +92,7 @@ private:
     amnezia::AwgProtocolConfig m_originalProtocolConfig;
     
     QString serverProtocolVersion() const;
+    void applyDefaultsToServerConfig(amnezia::AwgServerConfig& config);
     void applyDefaultsToClientConfig(amnezia::AwgClientConfig& config);
 };
 

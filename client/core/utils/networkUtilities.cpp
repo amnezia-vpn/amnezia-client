@@ -53,7 +53,8 @@ QRegularExpression NetworkUtilities::ipAddressRegExp()
 QRegExp NetworkUtilities::ipAddressWithSubnetRegExp()
 {
     return QRegExp("(?:(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3}"
-                   "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])(\\/[0-9]{1,2}){0,1}");
+                   "(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])"
+                   "(\\/(?:[0-9]|[1-2][0-9]|3[0-2])){0,1}");
 }
 
 QRegExp NetworkUtilities::ipNetwork24RegExp()
@@ -78,12 +79,16 @@ QString NetworkUtilities::netMaskFromIpWithSubnet(const QString ip)
     if (!ip.contains("/"))
         return "255.255.255.255";
 
-    bool ok;
-    int prefix = ip.split("/").at(1).toInt(&ok);
-    if (!ok)
+    const QStringList parts = ip.split("/");
+    if (parts.size() < 2)
         return "255.255.255.255";
 
-    unsigned long mask = (0xFFFFFFFF << (32 - prefix)) & 0xFFFFFFFF;
+    bool ok;
+    int prefix = parts.at(1).toInt(&ok);
+    if (!ok || prefix < 0 || prefix > 32)
+        return "255.255.255.255";
+
+    const quint32 mask = prefix == 0 ? 0 : 0xFFFFFFFFu << (32 - prefix);
 
     return QString("%1.%2.%3.%4").arg(mask >> 24).arg((mask >> 16) & 0xFF).arg((mask >> 8) & 0xFF).arg(mask & 0xFF);
 }

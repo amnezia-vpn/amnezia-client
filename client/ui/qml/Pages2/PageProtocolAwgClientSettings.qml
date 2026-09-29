@@ -263,6 +263,39 @@ PageType {
                 onEdited: (text) => { clientMaxHandshakeAttempts = text }
             }
 
+            CheckBoxType {
+                id: randomTrailersCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: false
+
+                text: qsTr("RandomTrailers")
+
+                checked: clientRandomTrailers
+            }
+
+            CheckBoxType {
+                id: disableCookiesCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("DisableCookies")
+
+                checked: clientDisableCookies
+                onCheckedChanged: {
+                    if (checked !== clientDisableCookies) {
+                        clientDisableCookies = checked
+                    }
+                }
+            }
+
 
             Header2TextType {
                 Layout.fillWidth: true

@@ -190,7 +190,6 @@ namespace amnezia
             constexpr int initPacketJunkSizeMax = 150;
             constexpr int responsePacketJunkSizeMax = 150;
             constexpr int cookieReplyPacketJunkSizeMax = 64;
-            constexpr int defaultTransportPacketJunkSize = 12;
 
             constexpr char defaultInitPacketMagicHeader[] = "1";
             constexpr char defaultResponsePacketMagicHeader[] = "2";
@@ -201,10 +200,11 @@ namespace amnezia
             constexpr char defaultSpecialJunk3[] = "";
             constexpr char defaultSpecialJunk4[] = "";
             constexpr char defaultSpecialJunk5[] = "";
+            constexpr char defaultPadding[] = "12";
 
             constexpr char awgV1_5[] = "1.5";
             constexpr char awgV2[] = "2";
-            constexpr char awgV3[] = "3";
+            constexpr char awgV3[] = "3.1";
 
             constexpr char defaultContentPaddingAddition[] = "10-100";
             constexpr char defaultRekeyAfterTime[] = "100-120";
@@ -213,6 +213,10 @@ namespace amnezia
             constexpr char defaultKeepaliveTimeout[] = "5-15";
             constexpr char defaultMaxHandshakeAttempts[] = "15-20";
             constexpr char defaultPersistentKeepAlive[] = "25-35";
+            constexpr char defaultRandomTrailers[] = "on";
+            constexpr char defaultDisableCookies[] = "on";
+            constexpr char awgBoolOn[] = "on";
+            constexpr char awgBoolOff[] = "off";
 
 
         }
@@ -288,6 +292,29 @@ namespace amnezia
             constexpr char workersModeManual[]     = "manual";
             constexpr int  maxWorkers              = 32;
             constexpr int  botTagHexLength         = 32;
+        }
+
+        namespace tProxy
+        {
+            constexpr char secretKey[]        = "tproxy_secret";
+            constexpr char hostnameKey[]      = "tproxy_hostname";
+            constexpr char acmeEmailKey[]     = "tproxy_acme_email";
+            constexpr char carrierModeKey[]   = "tproxy_carrier_mode";
+            constexpr char tgLinkKey[]        = "tproxy_tg_link";
+            constexpr char tmeLinkKey[]       = "tproxy_tme_link";
+            constexpr char isEnabledKey[]     = "tproxy_is_enabled";
+            constexpr char workersKey[]       = "tproxy_workers";
+            constexpr char httpPortKey[]      = "tproxy_http_port";
+
+            constexpr char carrierModeHttps[]          = "https";
+            constexpr char carrierModeHttpsLanes[]     = "https-lanes";
+            constexpr char carrierModeWebsocket[]      = "websocket";
+            constexpr char carrierModeWebsocketLanes[] = "websocket-lanes";
+
+            constexpr char defaultHttpPort[] = "80";
+            constexpr char defaultPort[]     = "443";
+            constexpr char defaultWorkers[] = "1";
+            constexpr int  maxWorkers       = 32;
         }
 
     } // namespace protocols

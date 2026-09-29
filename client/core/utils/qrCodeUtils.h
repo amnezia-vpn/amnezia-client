@@ -1,6 +1,8 @@
 #ifndef QRCODEUTILS_H
 #define QRCODEUTILS_H
 
+#include <QByteArray>
+#include <QList>
 #include <QString>
 
 #include "qrcodegen.hpp"
