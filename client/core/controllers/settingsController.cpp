@@ -119,6 +119,11 @@ QByteArray SettingsController::backupAppConfig() const
     return QJsonDocument(config).toJson();
 }
 
+int SettingsController::unsupportedFormatConfigsSkippedCount() const
+{
+    return m_serversRepository->unsupportedFormatConfigsCount();
+}
+
 ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
 {
     if (!m_appSettingsRepository->restoreAppConfig(data)) {
@@ -217,6 +222,11 @@ void SettingsController::toggleAutoStart(bool enable)
 
 bool SettingsController::isStartMinimizedEnabled() const
 {
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    if (!isAutoStartEnabled()) {
+        return false;
+    }
+#endif
     return m_appSettingsRepository->isStartMinimized();
 }
 
@@ -243,6 +253,16 @@ bool SettingsController::isNewsNotificationsEnabled() const
 void SettingsController::toggleNewsNotificationsEnabled(bool enable)
 {
     m_appSettingsRepository->setNewsNotifications(enable);
+}
+
+bool SettingsController::isAutoUpdateCheckEnabled() const
+{
+    return m_appSettingsRepository->isAutoUpdateCheckEnabled();
+}
+
+void SettingsController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_appSettingsRepository->setAutoUpdateCheckEnabled(enable);
 }
 
 bool SettingsController::isKillSwitchEnabled() const
@@ -346,18 +366,8 @@ void SettingsController::setAppLanguage(const QLocale &locale)
     m_appSettingsRepository->setAppLanguage(locale);
 }
 
-bool SettingsController::isPremV1MigrationReminderActive() const
-{
-    return m_appSettingsRepository->isPremV1MigrationReminderActive();
-}
-
-void SettingsController::disablePremV1MigrationReminder()
-{
-    m_appSettingsRepository->disablePremV1MigrationReminder();
-}
-
 QString SettingsController::nextAvailableServerName() const
 {
-    return m_appSettingsRepository->nextAvailableServerName();
+    return m_serversRepository->nextAvailableServerName();
 }
 

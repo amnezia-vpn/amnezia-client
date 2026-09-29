@@ -20,7 +20,7 @@ import "../Components"
 PageType {
     id: root
 
-    property var isServerFromTelegramApi: ServersModel.getDefaultServerData("isServerFromTelegramApi")
+    property var isServerFromTelegramApi: ServersUiController.isServerFromApi(ServersUiController.defaultServerId)
     
     property bool pageEnabled
 

@@ -1,0 +1,4 @@
+patches:
+  "2.7.0":
+    - patch_file: "patches/0001-carefully-handle-CMAKE_GENERATOR_PLATFORM.patch"
+    - patch_file: "patches/0002-explicitly-pass-unicode-everywhere.patch"

@@ -1,22 +1,24 @@
-#include <QTest>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
 #include <QSignalSpy>
+#include <QTest>
 
-#include "core/controllers/coreController.h"
+#include "utils/testCoreController.h"
 #include "core/models/serverDescription.h"
+#include "utils/testUtils.h"
 #include "vpnConnection.h"
 #include "secureQSettings.h"
 
 using namespace amnezia;
+using namespace amnezia::test;
 
 class TestSignalOrder : public QObject
 {
     Q_OBJECT
 
 private:
-    CoreController* m_coreController;
+    TestCoreController* m_coreController;
     SecureQSettings* m_settings;
 
 private slots:
@@ -25,7 +27,7 @@ private slots:
         m_settings = new SecureQSettings(testOrg, "amnezia-client", nullptr, false);
         
         auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
-        m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
+        m_coreController = new TestCoreController(vpnConnection, m_settings, nullptr, this);
     }
 
     void cleanupTestCase() {
@@ -38,12 +40,16 @@ private slots:
         m_settings->clearSettings();
         m_coreController->m_serversRepository->invalidateCache();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), QString{});
         }
     }
 
     void testSignalOrderOnImport() {
-        QString awgKey = "vpn://AAABFHjadZBBT4QwEIX_ipkzS2wBJdyMB1cPXvbgwRgyQnclgZa0RTYS_rszXRa52Mt77TfzOu0EldEeG62sg-J9AhxPUEywF1CAuF3WTl4dRLCXhJIVpVuUEMpWdLdFKaH7FeUb9Mx3scpFk0XTRbOLvlSkKZsOz-Gi4BsdRiV_EGEydhwlg0tWynEZmd5Yz1bkoaK3xpvKtOU3_UFjOE3SsRs-tfIl1rVVzoWQOI9FzC3eonYcU4ZmgkPdwxz9fSYdYafVT4M7-lEJ80cEtTri0PrH_2q4wlW26f1lioe3p5uDsjQWoS_j_Ct2ipvGU6zO2PWtiivT8RPQudHYmqBXzl-3Yn2slBEMTtklgYt4C_Mv3ROMwA";
+        QString awgKey = getEnvValue("THIRD_PARTY_AWG_VPN_KEY");
+
+        if (!isEnvValueConfigured(awgKey)) {
+            QSKIP("Set THIRD_PARTY_AWG_VPN_KEY");
+        }
 
         QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
         QSignalSpy serverAddedSpy(m_coreController->m_serversRepository, &SecureServersRepository::serverAdded);
@@ -60,8 +66,12 @@ private slots:
     }
 
     void testSignalOrderOnRemoveDefault() {
-        QString awgKey = "vpn://AAABFHjadZBBT4QwEIX_ipkzS2wBJdyMB1cPXvbgwRgyQnclgZa0RTYS_rszXRa52Mt77TfzOu0EldEeG62sg-J9AhxPUEywF1CAuF3WTl4dRLCXhJIVpVuUEMpWdLdFKaH7FeUb9Mx3scpFk0XTRbOLvlSkKZsOz-Gi4BsdRiV_EGEydhwlg0tWynEZmd5Yz1bkoaK3xpvKtOU3_UFjOE3SsRs-tfIl1rVVzoWQOI9FzC3eonYcU4ZmgkPdwxz9fSYdYafVT4M7-lEJ80cEtTri0PrH_2q4wlW26f1lioe3p5uDsjQWoS_j_Ct2ipvGU6zO2PWtiivT8RPQudHYmqBXzl-3Yn2slBEMTtklgYt4C_Mv3ROMwA";
-        QString xrayKey = "vpn://AAAAtXjadY7NCsJADIRfRXKui1YP0qt3L14EkRK7EQt2d0lS_0rf3awonjyFmW-YyQBNDIptIBao9sNPQgXYBXq2OL0zPqCA96kGSJHV6HK5MFP6YyCt0XsmsQqYz9zKzd3MmDIGyek6cdRoUJsE43gowNMJ-4uu_695kobbpG0MBndmTrbEV4sWcI6iG-zIQE47umOXLuSa2BlNKHKL7PMeiX5lmdH79bIsoBfiT0UOZQnjCw_AXRQ";
+        QString awgKey = getEnvValue("THIRD_PARTY_AWG_VPN_KEY");
+        QString xrayKey = getEnvValue("THIRD_PARTY_XRAY_VPN_KEY");
+
+        if (!isEnvValueConfigured(awgKey) || !isEnvValueConfigured(xrayKey)) {
+            QSKIP("Set THIRD_PARTY_AWG_VPN_KEY and THIRD_PARTY_XRAY_VPN_KEY");
+        }
 
         auto importResult1 = m_coreController->m_importCoreController->extractConfigFromData(awgKey);
         m_coreController->m_importCoreController->importConfig(importResult1.config);

@@ -130,6 +130,9 @@ PageType {
             PageController.showBusyIndicator(false)
 
             if (!result) {
+                if (SubscriptionUiController.isCaptchaAwaitingUser()) {
+                    return
+                }
                 var endpoint = ApiServicesModel.getStoreEndpoint()
                 Qt.openUrlExternally(endpoint)
                 PageController.closePage()

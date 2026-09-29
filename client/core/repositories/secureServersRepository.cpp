@@ -3,7 +3,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonValue>
+#include <QSet>
 #include <QUuid>
+#include <QDebug>
 
 #include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/apiKeys.h"
@@ -30,6 +32,45 @@ QJsonObject embedStorageServerId(const QString &serverId, const QJsonObject &pay
     QJsonObject o = payloadSansId;
     o.insert(QString(configKey::storageServerId), serverId);
     return o;
+}
+
+QString storedServerDisplayName(const SecureServersRepository *repository, const QString &serverId)
+{
+    using Kind = serverConfigUtils::ConfigType;
+    switch (repository->serverKind(serverId)) {
+    case Kind::SelfHostedAdmin:
+        if (const auto cfg = repository->selfHostedAdminConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::SelfHostedUser:
+        if (const auto cfg = repository->selfHostedUserConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::Native:
+        if (const auto cfg = repository->nativeConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::AmneziaPremiumV2:
+    case Kind::AmneziaFreeV3:
+    case Kind::ExternalPremium:
+        if (const auto cfg = repository->apiV2Config(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::AmneziaPremiumV1:
+    case Kind::AmneziaFreeV2:
+        if (const auto cfg = repository->legacyApiConfig(serverId)) {
+            return cfg->displayName;
+        }
+        break;
+    case Kind::Invalid:
+    default:
+        break;
+    }
+    return {};
 }
 
 } // namespace
@@ -102,6 +143,7 @@ void SecureServersRepository::persistDefaultServerFields()
 void SecureServersRepository::loadFromStorage()
 {
     clearServerStateMaps();
+    m_unsupportedFormatConfigsCount = 0;
 
     const QJsonArray serversArray =
             QJsonDocument::fromJson(value(QStringLiteral("Servers/serversList"), QByteArray()).toByteArray())
@@ -112,6 +154,12 @@ void SecureServersRepository::loadFromStorage()
         const QString candidateId = readStorageServerId(json);
         const QString serverId = normalizedOrGeneratedServerId(candidateId);
         const QJsonObject strippedJson = withoutStorageServerId(json);
+        if (!serverConfigUtils::isConfigFormatVersionSupported(strippedJson)) {
+            qWarning() << "Skipping stored server config with unsupported format version"
+                       << serverConfigUtils::configFormatVersion(strippedJson);
+            ++m_unsupportedFormatConfigsCount;
+            continue;
+        }
         const serverConfigUtils::ConfigType kind = serverConfigUtils::configTypeFromJson(strippedJson);
 
         if (m_serverJsonById.contains(serverId) || kind == serverConfigUtils::ConfigType::Invalid) {
@@ -144,6 +192,11 @@ void SecureServersRepository::invalidateCache()
     loadFromStorage();
 }
 
+int SecureServersRepository::unsupportedFormatConfigsCount() const
+{
+    return m_unsupportedFormatConfigsCount;
+}
+
 void SecureServersRepository::clearServers()
 {
     clearServerStateMaps();
@@ -153,6 +206,28 @@ void SecureServersRepository::clearServers()
     syncToStorage();
 }
 
+QString SecureServersRepository::nextAvailableServerName() const
+{
+    QSet<QString> usedNames;
+    usedNames.reserve(m_orderedServerIds.size());
+
+    for (const QString &serverId : m_orderedServerIds) {
+        const QString displayName = storedServerDisplayName(this, serverId);
+        if (!displayName.isEmpty()) {
+            usedNames.insert(displayName);
+        }
+    }
+
+    int i = 0;
+    QString candidate;
+    do {
+        ++i;
+        candidate = tr("Server") + QLatin1Char(' ') + QString::number(i);
+    } while (usedNames.contains(candidate));
+
+    return candidate;
+}
+
 QString SecureServersRepository::addServer(const QString &serverId, const QJsonObject &serverJson, serverConfigUtils::ConfigType kind)
 {
     const QString id = normalizedOrGeneratedServerId(serverId);
@@ -160,7 +235,8 @@ QString SecureServersRepository::addServer(const QString &serverId, const QJsonO
         return id;
     }
     const QJsonObject strippedJson = withoutStorageServerId(serverJson);
-    if (serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
+    if (!serverConfigUtils::isConfigFormatVersionSupported(strippedJson)
+        || serverConfigUtils::configTypeFromJson(strippedJson) != kind) {
         return id;
     }
     m_serverJsonById.insert(id, embedStorageServerId(id, strippedJson));
