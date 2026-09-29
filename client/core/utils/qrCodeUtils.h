@@ -12,6 +12,7 @@ namespace qrCodeUtils
     constexpr const qint16 qrMagicCode = 1984;
 
     QList<QString> generateQrCodeImageSeries(const QByteArray &data);
+    QList<QString> generateQrCodeImageSeriesPlainText(const QByteArray &utf8Text);
     QString generatePlainQrCodeImage(const QByteArray &data);
     qrcodegen::QrCode generateQrCode(const QByteArray &data);
     QString svgToBase64(const QString &image);

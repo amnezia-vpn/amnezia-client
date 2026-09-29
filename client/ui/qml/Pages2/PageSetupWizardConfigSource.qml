@@ -273,6 +273,7 @@ PageType {
         selfHostVpn,
         backupRestore,
         fileOpen,
+        gatewayQrPairingAddServer,
         qrScan,
         restorePurchases,
         siteLink
@@ -350,6 +351,24 @@ PageType {
                 if (ImportController.extractConfigFromFile(fileName)) {
                     PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
+            }
+        }
+    }
+
+    QtObject {
+        id: gatewayQrPairingAddServer
+
+        property bool featuredAmneziaConnection: false
+        property string title: qsTr("Scan a QR code")
+        property string description: qsTr("To connect to a self-hosted server")
+        property string imageSource: "qrc:/images/controls/folder-search-2.svg"
+        property bool isVisible: true
+        property var handler: function() {
+            PageController.showBusyIndicator(true)
+            var result = PairingUiController.canOpenTvQrPairingPage()
+            PageController.showBusyIndicator(false)
+            if (result) {
+                PageController.goToPage(PageEnum.PageSetupWizardApiQrPairingReceive)
             }
         }
     }

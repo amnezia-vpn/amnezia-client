@@ -47,6 +47,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/pairingController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/updateController.h
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.h
@@ -73,6 +74,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
     ${CLIENT_ROOT_DIR}/core/utils/managementServer.h
     ${CLIENT_ROOT_DIR}/core/utils/constants.h
+    ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingCameraAccess.h
+    ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingQrOverlayWindow.h
 )
 
 # Mozilla headres
@@ -132,6 +135,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/pairingController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/updateController.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.cpp
@@ -171,6 +175,7 @@ set(SOURCES ${SOURCES}
 if(NOT IOS AND NOT MACOS_NE)
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/platforms/ios/QRCodeReaderBase.cpp
+        ${CLIENT_ROOT_DIR}/platforms/ios/iosPairingCameraAccess_stub.cpp
     )
 endif()
 
