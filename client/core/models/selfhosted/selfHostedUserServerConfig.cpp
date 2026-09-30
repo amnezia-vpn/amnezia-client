@@ -4,6 +4,7 @@
 
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
@@ -43,6 +44,11 @@ ContainerConfig SelfHostedUserServerConfig::containerConfig(DockerContainer cont
     return containers.value(container);
 }
 
+void SelfHostedUserServerConfig::updateContainerConfig(DockerContainer container, const ContainerConfig &config)
+{
+    containers[container] = config;
+}
+
 QPair<QString, QString> SelfHostedUserServerConfig::getDnsPair(const QString &primaryDns,
                                                                const QString &secondaryDns) const
 {
@@ -61,6 +67,7 @@ QPair<QString, QString> SelfHostedUserServerConfig::getDnsPair(const QString &pr
 QJsonObject SelfHostedUserServerConfig::toJson() const
 {
     QJsonObject obj;
+    obj[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
 
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;

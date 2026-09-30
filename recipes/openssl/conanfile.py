@@ -650,6 +650,9 @@ class OpenSSLConan(ConanFile):
         if self._use_nmake:
             self.cpp_info.components["ssl"].libs = ["libssl"]
             self.cpp_info.components["crypto"].libs = ["libcrypto"]
+        elif self.settings.os == "Android" and self.options.shared:
+            self.cpp_info.components["ssl"].libs = ["ssl_3"]
+            self.cpp_info.components["crypto"].libs = ["crypto_3"]
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]

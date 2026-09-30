@@ -105,7 +105,8 @@ ErrorCode SshSession::runContainerScript(const ServerCredentials &credentials, D
                                          const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdOut,
                                          const std::function<ErrorCode(const QString &, libssh::Client &)> &cbReadStdErr)
 {
-    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
+    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy
+            || container == DockerContainer::Telemt || container == DockerContainer::TProxy;
     const QString shell = useSh ? QStringLiteral("sh") : QStringLiteral("bash");
     const QString b64 = QString::fromLatin1(script.toUtf8().toBase64());
 
@@ -160,7 +161,8 @@ QByteArray SshSession::getTextFileFromContainer(DockerContainer container, const
 
     errorCode = ErrorCode::NoError;
 
-    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerUtils::containerToString(container), path);
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2' 2>/dev/null || od -An -v -tx1 '%2'\"")
+                             .arg(ContainerUtils::containerToString(container), path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {

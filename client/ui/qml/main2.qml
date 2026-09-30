@@ -53,7 +53,7 @@ Window  {
         }
     }
 
-    visible: true
+    visible: !GC.isDesktop()
     width: GC.screenWidth
     height: GC.screenHeight
     minimumWidth: GC.isDesktop() ? 360 : 0
@@ -145,9 +145,6 @@ Window  {
             PageController.disableControls(visible)
         }
 
-        function onShowChangelogDrawer() {
-            changelogDrawer.openTriggered()
-        }
     }
 
     Connections {
@@ -177,6 +174,15 @@ Window  {
 
         PopupType {
             id: popupNotificationMessage
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    popupNotificationMessage.close()
+                    popupNotificationTimer.stop()
+                }
+            }
         }
 
         Timer {
@@ -234,6 +240,8 @@ Window  {
         DrawerType2 {
             id: privateKeyPassphraseDrawer
 
+            property bool isCloseByUser: false
+
             anchors.fill: parent
             expandedHeight: root.height * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
@@ -253,6 +261,11 @@ Window  {
                     }
 
                     function onAboutToHide() {
+                        if (privateKeyPassphraseDrawer.isCloseByUser === false) {
+                            privateKeyPassphraseDrawer.isCloseByUser = true
+                            PageController.passphraseRequestDrawerClosed("")
+                        }
+
                         if (passphrase.textField.text !== "") {
                             PageController.showBusyIndicator(true)
                         }
@@ -293,6 +306,7 @@ Window  {
                     text: qsTr("Save")
 
                     clickedFunc: function() {
+                        privateKeyPassphraseDrawer.isCloseByUser = true
                         privateKeyPassphraseDrawer.closeTriggered()
                         PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
                     }
@@ -437,13 +451,4 @@ Window  {
         onRejected: SystemController.fileDialogClosed(false)
     }
 
-    Item {
-        anchors.fill: parent
-
-        ChangelogDrawer {
-            id: changelogDrawer
-
-            anchors.fill: parent
-        }
-    }
 }

@@ -73,15 +73,15 @@ Component.prototype.createOperations = function()
                                        "workingDirectory=@TargetDir@", "iconPath=@TargetDir@\\" + appExecutableFileName(), "iconId=0");
 
         if (!vcRuntimeIsInstalled()) {
-			if (systemInfo.currentCpuArchitecture.search("64") < 0) {
-				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x86.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
-			}
-			else {
-				component.addElevatedOperation("Execute", "@TargetDir@\\" + "vc_redist.x64.exe", "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
-			}
-
+            var vcRedistFileName = (systemInfo.currentCpuArchitecture.search("64") < 0) ? "vc_redist.x86.exe"
+                                                                                       : "vc_redist.x64.exe";
+            if (installer.findPath(vcRedistFileName, [installer.value("TargetDir").replace(/\//g, '\\')]).length !== 0) {
+                component.addElevatedOperation("Execute", "@TargetDir@\\" + vcRedistFileName, "/install", "/quiet", "/norestart", "/log", "vc_redist.log");
+            } else {
+                console.log(vcRedistFileName + " is not bundled, relying on the application-local MSVC runtime");
+            }
         } else {
-            console.log("Microsoft Visual C++ 2017 Redistributable already installed");
+            console.log("Microsoft Visual C++ Redistributable already installed");
         }
 
         let pu_path = installer.value("TargetDir").replace(/\//g, '\\') + "\\"

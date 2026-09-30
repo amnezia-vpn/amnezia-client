@@ -16,7 +16,6 @@ extension PacketTunnelProvider {
         do {
             let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
             let wgConfigStr = wgConfig.str
-            wg_log(.info, title: "config: ", message: wgConfig.redux)
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
 
@@ -93,7 +92,7 @@ extension PacketTunnelProvider {
                 }
             }
         } catch {
-            wg_log(.error, message: "Can't parse WG config: \(error.localizedDescription)")
+            wg_log(.error, message: "Can't parse WG config: \(String(describing: error))")
             errorNotifier.notify(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             completionHandler(PacketTunnelProviderError.savedProtocolConfigurationIsInvalid)
             return
