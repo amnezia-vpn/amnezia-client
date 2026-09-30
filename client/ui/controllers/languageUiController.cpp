@@ -31,6 +31,7 @@ int LanguageUiController::getCurrentLanguageIndex() const
     case QLocale::Hindi: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Hindi); break;
     case QLocale::Korean: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Korean); break;
     case QLocale::Spanish: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::Spanish); break;
+    case QLocale::French: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::French); break;
     default: return static_cast<int>(LanguageSettings::AvailableLanguageEnum::English); break;
     }
 }
@@ -65,6 +66,7 @@ LanguageSettings::AvailableLanguageEnum LanguageUiController::getSystemLanguageE
     case QLocale::Korean: return LanguageSettings::AvailableLanguageEnum::Korean;
     case QLocale::English: return LanguageSettings::AvailableLanguageEnum::English;
     case QLocale::Spanish: return LanguageSettings::AvailableLanguageEnum::Spanish;
+    case QLocale::French: return LanguageSettings::AvailableLanguageEnum::French;
     default: return LanguageSettings::AvailableLanguageEnum::English;
     }
 }
@@ -111,6 +113,7 @@ QString LanguageUiController::getLocalLanguageName(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Hindi: strLanguage = "हिन्दी"; break;
     case LanguageSettings::AvailableLanguageEnum::Korean: strLanguage = "한국어"; break;
     case LanguageSettings::AvailableLanguageEnum::Spanish: strLanguage = "Español"; break;
+    case LanguageSettings::AvailableLanguageEnum::French: strLanguage = "Français"; break;
     default: break;
     }
 
@@ -131,6 +134,7 @@ QLocale LanguageUiController::languageEnumToLocale(const LanguageSettings::Avail
     case LanguageSettings::AvailableLanguageEnum::Hindi: return QLocale::Hindi;
     case LanguageSettings::AvailableLanguageEnum::Korean: return QLocale::Korean;
     case LanguageSettings::AvailableLanguageEnum::Spanish: return QLocale::Spanish;
+    case LanguageSettings::AvailableLanguageEnum::French: return QLocale::French;
     default: return QLocale::English;
     }
 }
