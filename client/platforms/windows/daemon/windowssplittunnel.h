@@ -49,7 +49,8 @@ class WindowsSplitTunnel final {
   bool excludeApps(const QStringList& appPaths);
 
   // Fetches and Pushed needed info to move to engaged mode
-  bool start(int inetAdapterIndex, int vpnAdapterIndex = 0);
+  bool start(int inetAdapterIndex, int vpnAdapterIndex = 0,
+             bool invertTunnelInternet = false);
   // Deletes Rules and puts the driver into passive mode
   void stop();
 
@@ -85,7 +86,9 @@ class WindowsSplitTunnel final {
   // Generates a Configuration for Each APP
   std::vector<uint8_t> generateAppConfiguration(const QStringList& appPaths);
   // Generates a Configuration which IP's are VPN and which network
-  std::vector<std::byte> generateIPConfiguration(int inetAdapterIndex, int vpnAdapterIndex = 0);
+  std::vector<std::byte> generateIPConfiguration(
+      int inetAdapterIndex, int vpnAdapterIndex = 0,
+      bool invertTunnelInternet = false);
   std::vector<uint8_t> generateProcessBlob();
 
   [[nodiscard]] bool getAddress(int adapterIndex, IN_ADDR* out_ipv4,

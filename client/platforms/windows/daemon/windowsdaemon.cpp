@@ -25,6 +25,8 @@
 #include "windowsfirewall.h"
 
 #include "core/utils/networkUtilities.h"
+#include "core/utils/routeModes.h"
+#include "../windowscommons.h"
 
 namespace {
 Logger logger("WindowsDaemon");
@@ -61,33 +63,41 @@ void WindowsDaemon::prepareActivation(const InterfaceConfig& config, int inetAda
   }
 }
 
-void WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
+bool WindowsDaemon::activateSplitTunnel(const InterfaceConfig& config, int vpnAdapterIndex) {
+  const bool includeOnly =
+      config.m_appSplitTunnelType ==
+      static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps);
     if (m_splitTunnelManager == nullptr) {
         if (config.m_vpnDisabledApps.length() > 0) {
             logger.error() << "Split tunnel manager is not initialized";
             emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_INIT_FAILURE);
+            return false;
         }
-        return;
+        return true;
     }
 
   if (config.m_vpnDisabledApps.length() > 0) {
-      if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex)) {
+      if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex,
+                                       includeOnly)) {
           logger.error() << "Failed to start split tunnel";
           emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
-          return;
+          return false;
       }
       if (!m_splitTunnelManager->excludeApps(config.m_vpnDisabledApps)) {
           logger.error() << "Failed to apply split tunnel app exclusions";
           emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_EXCLUDE_FAILURE);
-          return;
+          return false;
       }
       if (!m_splitTunnelManager->isRunning()) {
           logger.error() << "Split tunnel did not reach running state";
           emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
+          return false;
       }
   } else {
       m_splitTunnelManager->stop();
   }
+
+  return true;
 }
 
 bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
@@ -108,7 +118,14 @@ bool WindowsDaemon::run(Op op, const InterfaceConfig& config) {
     return true;
   }
   if (config.m_vpnDisabledApps.length() > 0) {
-    if (!m_splitTunnelManager->start(m_inetAdapterIndex)) {
+    const bool includeOnly =
+        config.m_appSplitTunnelType ==
+        static_cast<int>(amnezia::AppsRouteMode::VpnOnlyForwardApps);
+    int vpnAdapterIndex = WindowsCommons::VPNAdapterIndex();
+    if (vpnAdapterIndex < 0) {
+      vpnAdapterIndex = 0;
+    }
+    if (!m_splitTunnelManager->start(m_inetAdapterIndex, vpnAdapterIndex, includeOnly)) {
       logger.error() << "Split tunnel start failed";
       emit backendFailure(DaemonError::ERROR_SPLIT_TUNNEL_START_FAILURE);
       return false;
