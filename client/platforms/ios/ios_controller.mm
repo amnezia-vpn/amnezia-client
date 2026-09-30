@@ -941,7 +941,7 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
 
 }
 
-bool IosController::shareText(const QStringList& filesToSend) {
+bool IosController::shareText(const QStringList& filesToSend, ShareResult *result) {
     NSMutableArray *sharingItems = [NSMutableArray new];
 
     for (int i = 0; i < filesToSend.size(); i++) {
@@ -951,18 +951,33 @@ bool IosController::shareText(const QStringList& filesToSend) {
 #if !MACOS_NE
     UIViewController *qtController = getViewController();
     if (!qtController) {
+        qWarning() << "IosController::shareText: no root view controller, cannot present the share sheet";
+        if (result) {
+            result->errorString = QStringLiteral("no root view controller");
+        }
         return false;
     }
 
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
 #endif
     __block bool isAccepted = false;
+    __block QString pickedActivity;
+    __block QString errorString;
 #if !MACOS_NE
     [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
         isAccepted = completed;
+        pickedActivity = activityType ? QString::fromNSString(activityType) : QString();
+        if (activityError) {
+            errorString = QString::fromNSString(activityError.localizedDescription);
+        }
+        qDebug() << "IosController::shareText: completion handler, completed:" << (completed ? "YES" : "NO")
+                 << "activityType:" << (pickedActivity.isEmpty() ? QStringLiteral("<nil>") : pickedActivity)
+                 << "returnedItems:" << (returnedItems ? (int)returnedItems.count : -1)
+                 << "error:" << (errorString.isEmpty() ? QStringLiteral("<none>") : errorString);
         emit finished();
     }];
 
+    qDebug() << "IosController::shareText: presenting the share sheet for" << filesToSend.size() << "item(s)";
     [qtController presentViewController:activityController animated:YES completion:nil];
     UIPopoverPresentationController *popController = activityController.popoverPresentationController;
     if (popController) {
@@ -974,6 +989,12 @@ bool IosController::shareText(const QStringList& filesToSend) {
     QEventLoop wait;
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
+
+    if (result) {
+        result->completed = isAccepted;
+        result->activityType = pickedActivity;
+        result->errorString = errorString;
+    }
 
     return isAccepted;
 }
