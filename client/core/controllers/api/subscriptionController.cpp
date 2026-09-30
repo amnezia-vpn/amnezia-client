@@ -644,7 +644,7 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
 
                          const QString status = QJsonDocument::fromJson(responseBody).object().value(apiDefs::key::otpStatus).toString();
                          OtpStatus parsedStatus = OtpStatus::Pending;
-                         if (status == QLatin1String("confirmed")) {
+                         if (status == QLatin1String("consumed")) {
                              parsedStatus = OtpStatus::Confirmed;
                          } else if (status == QLatin1String("expired")) {
                              parsedStatus = OtpStatus::Expired;
