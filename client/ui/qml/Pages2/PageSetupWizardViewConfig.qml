@@ -72,7 +72,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 
-                headerText: qsTr("New connection")
+                headerText: qsTr("Add this connection?")
             }
 
             RowLayout {
@@ -204,7 +204,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
-                text: qsTr("Connect")
+                text: qsTr("Add")
                 clickedFunc: function() {
                     const headerItem = listView.headerItem;
                     if (!headerItem) {
