@@ -79,6 +79,9 @@ public:
     void setScreenshotsEnabled(bool enabled);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
+
+    bool isAutoUpdateCheckEnabled() const;
+    void setAutoUpdateCheckEnabled(bool enabled);
     bool isSaveLogs() const;
     void setSaveLogs(bool enabled);
     QDateTime getLogEnableDate() const;
@@ -90,8 +93,6 @@ public:
 
     bool isHomeAdLabelVisible() const;
     void disableHomeAdLabel();
-    bool isPremV1MigrationReminderActive() const;
-    void disablePremV1MigrationReminder();
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &cfg);
     void clearSettings();

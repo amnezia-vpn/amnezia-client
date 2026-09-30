@@ -325,6 +325,22 @@ PageType {
                 horizontalAlignment: Text.AlignHCenter
                 text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
             }
+
+            WarningType {
+                Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: pageShareConnection.isSelfHostedConfig
+                         && pageShareConnection.configExtension === ".conf"
+                         && !isQrCodeVisible
+                         && ExportController.config !== ""
+
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+                textString: qsTr("This config is too large for a QR code. Share the file or copy the connection settings instead.")
+            }
         }
     }
 }

@@ -5,14 +5,14 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>${CLIENT_NETWORK_EXTENSION_NAME}</string>
 
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>${CLIENT_NETWORK_EXTENSION_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,7 +27,7 @@
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
 
 	<key>CFBundleDisplayName</key>
-	<string>AmneziaVPNNetworkExtension</string>
+	<string>${CLIENT_NETWORK_EXTENSION_NAME}</string>
 
 	<key>NSExtension</key>
 	<dict>
@@ -38,9 +38,9 @@
 	</dict>
 
 	<key>com.wireguard.ios.app_group_id</key>
-	<string>group.org.amnezia.AmneziaVPN</string>
+	<string>${BUILD_IOS_GROUP_IDENTIFIER}</string>
 
 	<key>com.wireguard.macos.app_group_id</key>
-	<string>$(DEVELOPMENT_TEAM).group.org.amnezia.AmneziaVPN</string>
+	<string>$(DEVELOPMENT_TEAM).${BUILD_IOS_GROUP_IDENTIFIER}</string>
 </dict>
 </plist>

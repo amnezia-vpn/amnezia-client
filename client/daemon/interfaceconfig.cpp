@@ -179,6 +179,12 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   if (!m_maxHandshakeAttempts.isEmpty()) {
     out << "MaxHandshakeAttempts = " << m_maxHandshakeAttempts << "\n";
   }
+  if (!m_randomTrailers.isEmpty()) {
+    out << "RandomTrailers = " << m_randomTrailers << "\n";
+  }
+  if (!m_disableCookies.isEmpty()) {
+    out << "DisableCookies = " << m_disableCookies << "\n";
+  }
 
   // If any extra config was provided, append it now.
   for (const QString& key : extra.keys()) {
@@ -205,4 +211,14 @@ QString InterfaceConfig::toWgConf(const QMap<QString, QString>& extra) const {
   }
 
   return content;
+}
+
+QString InterfaceConfig::awgBoolToUapi(const QString& value) {
+  const QString v = value.trimmed().toLower();
+  if (v == QLatin1String("on") || v == QLatin1String("1") ||
+      v == QLatin1String("true") || v == QLatin1String("t") ||
+      v == QLatin1String("yes")) {
+    return QStringLiteral("1");
+  }
+  return QStringLiteral("0");
 }

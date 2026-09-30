@@ -33,6 +33,18 @@ using namespace ProtocolUtils;
 
 namespace
 {
+    bool rejectUnsupportedFormatVersion(ImportController::ImportResult &result)
+    {
+        if (serverConfigUtils::isConfigFormatVersionSupported(result.config)) {
+            return false;
+        }
+        qWarning() << "Config format version" << serverConfigUtils::configFormatVersion(result.config)
+                   << "is newer than supported" << serverConfigUtils::currentConfigFormatVersion;
+        result.errorCode = ErrorCode::ConfigFormatVersionNotSupportedError;
+        result.config = {};
+        return true;
+    }
+
     ConfigTypes checkConfigFormat(const QString &config)
     {
         const QString openVpnConfigPatternCli = "client";
@@ -207,6 +219,10 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     case ConfigTypes::Amnezia: {
         result.config = QJsonDocument::fromJson(config.toUtf8()).object();
 
+        if (rejectUnsupportedFormatVersion(result)) {
+            return result;
+        }
+
         if (serverConfigUtils::isServerFromApi(result.config)) {
             auto apiConfig = result.config.value(apiDefs::key::apiConfig).toObject();
             apiConfig[apiDefs::key::vpnKey] = data;
@@ -256,6 +272,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
     if (!dataObj.isEmpty()) {
         result.config = dataObj;
         result.configType = ConfigTypes::Amnezia;
+        rejectUnsupportedFormatVersion(result);
         return result;
     }
 
@@ -267,6 +284,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
             return result;
         }
         result.configType = ConfigTypes::Amnezia;
+        rejectUnsupportedFormatVersion(result);
         return result;
     }
 
@@ -284,6 +302,7 @@ ImportController::ImportResult ImportController::extractConfigFromQr(const QByte
             return result;
         }
         result.configType = ConfigTypes::Amnezia;
+        rejectUnsupportedFormatVersion(result);
         return result;
     }
 
@@ -379,6 +398,11 @@ int ImportController::qrChunksTotal() const
 
 void ImportController::importConfig(const QJsonObject &config)
 {
+    if (!serverConfigUtils::isConfigFormatVersionSupported(config)) {
+        emit importErrorOccurred(ErrorCode::ConfigFormatVersionNotSupportedError, false);
+        return;
+    }
+
     ServerCredentials credentials;
     credentials.hostName = config.value(configKey::hostName).toString();
     credentials.port = config.value(configKey::port).toInt();
@@ -511,9 +535,10 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         if (trimmedLine.startsWith("[") && trimmedLine.endsWith("]")) {
             continue;
         } else {
-            QStringList parts = trimmedLine.split(" = ");
-            if (parts.count() == 2) {
-                configMap[parts.at(0).trimmed()] = parts.at(1).trimmed();
+            const qsizetype separatorIndex = trimmedLine.indexOf('=');
+            if (separatorIndex > 0) {
+                configMap[trimmedLine.left(separatorIndex).trimmed()] =
+                        trimmedLine.mid(separatorIndex + 1).trimmed();
             }
         }
     }
@@ -566,8 +591,9 @@ QJsonObject ImportController::extractWireGuardConfig(const QString &data, Config
         lastConfig[configKey::persistentKeepAlive] = configMap.value(protocols::wireguard::PersistentKeepalive);
     }
 
-    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(
-                configMap.value(protocols::wireguard::AllowedIPs).split(", "));
+    const QStringList allowedIps = configMap.value(protocols::wireguard::AllowedIPs).split(
+            QRegularExpression("\\s*,\\s*"), Qt::SkipEmptyParts);
+    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIps);
 
     lastConfig[configKey::allowedIps] = allowedIpsJsonArray;
 
@@ -635,11 +661,24 @@ QJsonObject ImportController::extractXrayConfig(const QString &data, ConfigTypes
 {
     QJsonParseError parserErr;
     QJsonDocument jsonConf = QJsonDocument::fromJson(data.toLocal8Bit(), &parserErr);
+    if (parserErr.error != QJsonParseError::NoError || !jsonConf.isObject()) {
+        qDebug() << "Xray config JSON parse failed:" << parserErr.errorString();
+        return QJsonObject();
+    }
+
+    const QJsonObject parsedConfig = jsonConf.object();
+    if (!parsedConfig.value(protocols::xray::inbounds).isArray()
+            || !parsedConfig.value(protocols::xray::outbounds).isArray()) {
+        qDebug() << "Xray config is missing inbounds or outbounds";
+        return QJsonObject();
+    }
+
+    const QString serializedConfig = QString::fromUtf8(jsonConf.toJson());
 
     QJsonObject xrayVpnConfig;
-    xrayVpnConfig[configKey::config] = jsonConf.toJson().constData();
+    xrayVpnConfig[configKey::config] = serializedConfig;
     QJsonObject lastConfig;
-    lastConfig[configKey::lastConfig] = jsonConf.toJson().constData();
+    lastConfig[configKey::lastConfig] = serializedConfig;
     lastConfig[configKey::isThirdPartyConfig] = true;
 
     QJsonObject containers;

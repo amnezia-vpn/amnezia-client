@@ -60,9 +60,6 @@ private:
                                            QString &outPublicKey,
                                            QString &outShortId) const;
 
-    QJsonObject mergeStreamSettingsForServerInbound(const amnezia::XrayServerConfig &srv,
-                                                    const QJsonObject &existingStreamSettings) const;
-
     QJsonObject buildStreamSettings(const amnezia::XrayServerConfig &srv,
                                     const QString &clientId) const;
 };

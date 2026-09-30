@@ -464,6 +464,12 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (const auto maxHandshakeAttempts = obj.value("MaxHandshakeAttempts"); !maxHandshakeAttempts.isUndefined()) {
     config.m_maxHandshakeAttempts = maxHandshakeAttempts.toString();
   }
+  if (const auto randomTrailers = obj.value("RandomTrailers"); !randomTrailers.isUndefined()) {
+    config.m_randomTrailers = randomTrailers.toString();
+  }
+  if (const auto disableCookies = obj.value("DisableCookies"); !disableCookies.isUndefined()) {
+    config.m_disableCookies = disableCookies.toString();
+  }
 
   return true;
 }

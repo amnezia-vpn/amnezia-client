@@ -16,6 +16,7 @@
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "core/models/protocols/mtProxyProtocolConfig.h"
 #include "core/models/protocols/telemtProtocolConfig.h"
+#include "core/models/protocols/tProxyProtocolConfig.h"
 #include "core/models/protocols/ikev2ProtocolConfig.h"
 #include "core/models/protocols/torProtocolConfig.h"
 
@@ -113,6 +114,15 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             TelemtProtocolConfig telemtConfig;
             telemtConfig.port = portStr;
             config.protocolConfig = telemtConfig;
+            break;
+        }
+        case Proto::TProxy: {
+            TProxyProtocolConfig tProxyConfig;
+            tProxyConfig.port = portStr.isEmpty() ? QString(protocols::tProxy::defaultPort) : portStr;
+            tProxyConfig.httpPort = QString(protocols::tProxy::defaultHttpPort);
+            tProxyConfig.carrierMode = QString(protocols::tProxy::carrierModeHttps);
+            tProxyConfig.workers = QString(protocols::tProxy::defaultWorkers);
+            config.protocolConfig = tProxyConfig;
             break;
         }
         case Proto::Ikev2: {

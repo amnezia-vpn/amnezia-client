@@ -2,6 +2,7 @@
 
 #include "ui/utils/converter.h"
 #include "core/utils/errorStrings.h"
+#include "core/utils/appUiConfig.h"
 #if defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
 #endif
@@ -63,7 +64,8 @@ QString PageController::getPagePath(PageLoader::PageEnum page)
 {
     QMetaEnum metaEnum = QMetaEnum::fromType<PageLoader::PageEnum>();
     QString pageName = metaEnum.valueToKey(static_cast<int>(page));
-    return "qrc:/ui/qml/Pages2/" + pageName + ".qml";
+
+    return QStringLiteral(APP_QML_PAGES_PREFIX) + pageName + QStringLiteral(".qml");
 }
 
 void PageController::closeWindow()

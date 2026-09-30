@@ -23,8 +23,10 @@ namespace apiDefs
         constexpr QLatin1String installationUuid("installation_uuid");
         constexpr QLatin1String uuid("installation_uuid");
         constexpr QLatin1String osVersion("os_version");
+        constexpr QLatin1String distribution("distribution");
         constexpr QLatin1String userCountryCode("user_country_code");
         constexpr QLatin1String serverCountryCode("server_country_code");
+        constexpr QLatin1String serverCountryCodeL10n("server_country_code_l10n");
         constexpr QLatin1String serverCountryName("server_country_name");
         constexpr QLatin1String appVersion("app_version");
         constexpr QLatin1String authData("auth_data");
@@ -66,7 +68,6 @@ namespace apiDefs
 
         constexpr QLatin1String id("id");
         constexpr QLatin1String orderId("order_id");
-        constexpr QLatin1String migrationCode("migration_code");
         constexpr QLatin1String transactionId("transaction_id");
         constexpr QLatin1String isTestPurchase("is_test_purchase");
         constexpr QLatin1String isInAppPurchase("is_in_app_purchase");
@@ -79,6 +80,17 @@ namespace apiDefs
         constexpr QLatin1String adEndpoint("ad_endpoint");
 
         constexpr QLatin1String configs("configs");
+
+        constexpr QLatin1String updateAvailable("update_available");
+        constexpr QLatin1String updateVersion("version");
+        constexpr QLatin1String releaseDate("release_date");
+        constexpr QLatin1String updateTags("tags");
+        constexpr QLatin1String updateDescription("description");
+        constexpr QLatin1String newFeatures("new_features");
+        constexpr QLatin1String improvements("improvements");
+        constexpr QLatin1String bugFixes("bug_fixes");
+        constexpr QLatin1String downloadBaseUrl("download_base_url");
+        constexpr QLatin1String releasePageUrl("release_page_url");
 
         constexpr QLatin1String publicKeyInfo("public_key");
         constexpr QLatin1String publicKey("public_key");

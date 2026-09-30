@@ -385,6 +385,16 @@ void SecureAppSettingsRepository::setNewsNotifications(bool enabled)
     setValue("Conf/newsNotifications", enabled);
 }
 
+bool SecureAppSettingsRepository::isAutoUpdateCheckEnabled() const
+{
+    return value("Conf/autoUpdateCheck", true).toBool();
+}
+
+void SecureAppSettingsRepository::setAutoUpdateCheckEnabled(bool enabled)
+{
+    setValue("Conf/autoUpdateCheck", enabled);
+}
+
 bool SecureAppSettingsRepository::isSaveLogs() const
 {
     return value("Conf/saveLogs", false).toBool();
@@ -440,16 +450,6 @@ bool SecureAppSettingsRepository::isHomeAdLabelVisible() const
 void SecureAppSettingsRepository::disableHomeAdLabel()
 {
     setValue("Conf/homeAdLabelVisible", false);
-}
-
-bool SecureAppSettingsRepository::isPremV1MigrationReminderActive() const
-{
-    return value("Conf/premV1MigrationReminderActive", true).toBool();
-}
-
-void SecureAppSettingsRepository::disablePremV1MigrationReminder()
-{
-    setValue("Conf/premV1MigrationReminderActive", false);
 }
 
 QByteArray SecureAppSettingsRepository::backupAppConfig() const

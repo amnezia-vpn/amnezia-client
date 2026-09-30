@@ -189,6 +189,27 @@ PageType {
             }
 
             DividerType {
+                visible: ServersUiController.hasServersFromGatewayApi
+            }
+
+            SwitcherType {
+                id: switcherAutoUpdateCheck
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Check for updates automatically")
+                descriptionText: qsTr("Check for a new app version at startup")
+
+                checked: SettingsController.isAutoUpdateCheckEnabled()
+                onToggled: function() {
+                    if (checked !== SettingsController.isAutoUpdateCheckEnabled()) {
+                        SettingsController.toggleAutoUpdateCheckEnabled(checked)
+                    }
+                }
+            }
+
+            DividerType {
                 visible: !GC.isMobile()
             }
         }
