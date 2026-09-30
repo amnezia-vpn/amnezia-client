@@ -14,7 +14,7 @@ import shlex
 
 class Libagw(ConanFile):
     name = "libagw"
-    version = "1.0.0"
+    version = "1.0.2"
     settings = "os", "arch", "compiler"
 
     _arch_map = {
@@ -174,9 +174,5 @@ class Libagw(ConanFile):
             self.cpp_info.frameworks = ["CoreFoundation", "Security"]
         elif self._is_android:
             self.cpp_info.system_libs = ["log"]
-            # androiddeployqt only packs shared libraries it is told about.
-            self.cpp_info.set_property("cmake_extra_variables", {
-                "LIBAGW_LIBRARY_PATH": os.path.join(self.package_folder, "lib", "libagw.so")
-            })
         elif str(self.settings.os) == "Linux":
             self.cpp_info.system_libs = ["pthread"]

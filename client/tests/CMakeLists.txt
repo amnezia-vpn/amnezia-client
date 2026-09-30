@@ -2,6 +2,24 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 
 include(CTest)
 
+function(amnezia_copy_runtime_dlls)
+    if(NOT WIN32)
+        return()
+    endif()
+    get_property(_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(_target ${_targets})
+        get_target_property(_type ${_target} TYPE)
+        if(_type STREQUAL "EXECUTABLE")
+            add_custom_command(TARGET ${_target} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<FILTER:$<TARGET_RUNTIME_DLLS:${_target}>,EXCLUDE,/Qt6[^/]*\\.dll$>"
+                    "$<TARGET_FILE_DIR:${_target}>"
+                COMMAND_EXPAND_LISTS
+            )
+        endif()
+    endforeach()
+endfunction()
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -415,3 +433,5 @@ endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
 # CTest cannot run Android binaries on the host machine, so no add_test() entries are registered here.
+
+amnezia_copy_runtime_dlls()
