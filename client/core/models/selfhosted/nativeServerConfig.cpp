@@ -8,6 +8,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
+#include "core/utils/serverConfigUtils.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
 
@@ -51,6 +52,7 @@ QPair<QString, QString> NativeServerConfig::getDnsPair(const QString &primaryDns
 QJsonObject NativeServerConfig::toJson() const
 {
     QJsonObject obj;
+    obj[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
     
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;
