@@ -17,6 +17,14 @@ class Libagw(ConanFile):
     version = "1.0.2"
     settings = "os", "arch", "compiler"
 
+    _headers = ("agw.h", "agw_types.h")
+    _static_lib = "libagw.a"
+    _shared_lib = "libagw.so"
+    _dll = "agw.dll"
+    _def_file = "agw.def"
+    _import_lib = "agw.lib"
+    _slices_dir = "slices"
+
     _arch_map = {
         "x86": "386",
         "x86_64": "amd64",
@@ -51,9 +59,6 @@ class Libagw(ConanFile):
         return str(self.settings.os) == "Android"
 
     def config_options(self):
-        # Windows: MSVC cannot link a Go c-archive (LNK1223 — it rejects the
-        # gcc-generated .pdata contributions), so it gets a DLL plus an import lib.
-        # Android: go has no c-archive buildmode there at all.
         shared = self._is_windows or self._is_android
         self.package_type = "shared-library" if shared else "static-library"
 
@@ -61,15 +66,12 @@ class Libagw(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if self._is_windows:
-            # mingw-builds is being used on Windows
             del self.settings.compiler
 
     def layout(self):
         basic_layout(self)
 
     def build_requirements(self):
-        # 1.23 line: go>=1.24 has an android/arm futex_time64 regression
-        # (golang/go#77930), the same reason openvpn-pt-android pins it.
         self.tool_requires("go/1.23.12")
         if self._is_windows:
             self.win_bash = True
@@ -119,7 +121,7 @@ class Libagw(ConanFile):
     def build(self):
         with chdir(self, self.source_folder):
             for arch in self._archs:
-                build_dir = os.path.join(self.build_folder, "slices", arch) if self._is_multiarch else self.build_folder
+                build_dir = os.path.join(self.build_folder, self._slices_dir, arch) if self._is_multiarch else self.build_folder
                 if self._is_windows:
                     build_dir = build_dir.replace("\\", "/")
                 goarch = self._arch_map.get(arch)
@@ -131,25 +133,21 @@ class Libagw(ConanFile):
                     ldflags.append(f"-arch {_to_apple_arch(arch)}")
 
                 if self._is_windows:
-                    dll = f"{build_dir}/agw.dll"
-                    self._go_build(dll, "c-shared", goarch, cflags, ldflags)
-                    # An import lib MSVC accepts: gendef reads the DLL exports,
-                    # dlltool turns them into agw.lib.
+                    self._go_build(f"{build_dir}/{self._dll}", "c-shared", goarch, cflags, ldflags)
                     with chdir(self, build_dir):
-                        self.run("gendef agw.dll")
-                        self.run("dlltool -d agw.def -l agw.lib -D agw.dll")
+                        self.run(f"gendef {self._dll}")
+                        self.run(f"dlltool -d {self._def_file} -l {self._import_lib} -D {self._dll}")
                 elif self._is_android:
-                    # Without an explicit soname the DT_NEEDED entry picks up the
-                    # full build path, which does not exist on the device.
-                    self._go_build(os.path.join(build_dir, "libagw.so"), "c-shared", goarch, cflags, ldflags,
-                                   goldflags="-extldflags=-Wl,-soname,libagw.so")
+                    self._go_build(os.path.join(build_dir, self._shared_lib), "c-shared", goarch, cflags, ldflags,
+                                   goldflags=f"-extldflags=-Wl,-soname,{self._shared_lib}")
                 else:
-                    self._go_build(os.path.join(build_dir, "libagw.a"), "c-archive", goarch, cflags, ldflags)
+                    self._go_build(os.path.join(build_dir, self._static_lib), "c-archive", goarch, cflags, ldflags)
 
             if is_apple_os(self) and self._is_multiarch:
                 lipo = XCRun(self).find("lipo")
-                archives = [os.path.join(self.build_folder, "slices", arch, "libagw.a") for arch in self._archs]
-                output = os.path.join(self.build_folder, "libagw.a")
+                archives = [os.path.join(self.build_folder, self._slices_dir, arch, self._static_lib)
+                            for arch in self._archs]
+                output = os.path.join(self.build_folder, self._static_lib)
                 self.run("{} -create -output {} {}".format(
                     shlex.quote(lipo),
                     shlex.quote(output),
@@ -158,19 +156,21 @@ class Libagw(ConanFile):
 
     def package(self):
         headers = os.path.join(self.source_folder, "cabi")
-        copy(self, "agw.h", src=headers, dst=os.path.join(self.package_folder, "include"), keep_path=False)
-        copy(self, "agw_types.h", src=headers, dst=os.path.join(self.package_folder, "include"), keep_path=False)
-        copy(self, "libagw.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"),
-             keep_path=False, excludes=["slices/*"])
-        copy(self, "libagw.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "agw.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "agw.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        include_dir = os.path.join(self.package_folder, "include")
+        lib_dir = os.path.join(self.package_folder, "lib")
+        bin_dir = os.path.join(self.package_folder, "bin")
+        for header in self._headers:
+            copy(self, header, src=headers, dst=include_dir, keep_path=False)
+        copy(self, self._static_lib, src=self.build_folder, dst=lib_dir, keep_path=False,
+             excludes=[f"{self._slices_dir}/*"])
+        copy(self, self._shared_lib, src=self.build_folder, dst=lib_dir, keep_path=False)
+        copy(self, self._import_lib, src=self.build_folder, dst=lib_dir, keep_path=False)
+        copy(self, self._dll, src=self.build_folder, dst=bin_dir, keep_path=False)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_target_name", "amnezia::libagw")
         self.cpp_info.libs = ["agw"]
         if is_apple_os(self):
-            # Go's crypto/x509 reads the system trust store.
             self.cpp_info.frameworks = ["CoreFoundation", "Security"]
         elif self._is_android:
             self.cpp_info.system_libs = ["log"]

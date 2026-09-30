@@ -43,7 +43,6 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 find_package(OpenSSL REQUIRED)
 
-# Gateway transport (envelope crypto, HTTP, proxy failover) — Go library.
 find_package(libagw REQUIRED)
 
 set(LIBS ${LIBS}

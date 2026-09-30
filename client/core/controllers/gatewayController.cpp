@@ -24,41 +24,40 @@
 
 namespace
 {
-    // Key under which the library's failover caches (working proxy + proxy
-    // lists) are persisted in the secure settings repository.
-    const QString agwStateCacheKey = QStringLiteral("agw_state_v1");
+    namespace agwConfigKey
+    {
+        constexpr QLatin1String gatewayEndpoint("gateway_endpoint");
+        constexpr QLatin1String publicKeyPem("public_key_pem");
+        constexpr QLatin1String s3PrimaryEndpoints("s3_primary_endpoints");
+        constexpr QLatin1String s3FallbackEndpoints("s3_fallback_endpoints");
+        constexpr QLatin1String isDevEnvironment("is_dev_environment");
+        constexpr QLatin1String requestTimeoutMsecs("request_timeout_msecs");
+    }
+
+    namespace agwOptionsKey
+    {
+        constexpr QLatin1String serviceType("service_type");
+        constexpr QLatin1String userCountryCode("user_country_code");
+    }
+
+    constexpr QLatin1String agwStateCacheKey("agw_state");
+    constexpr QLatin1String agwLogPrefix("agw:");
+    constexpr QLatin1String endpointListSeparator(", ");
+    constexpr QLatin1String legacyEndpointPlaceholder("%1");
 
     QStringList splitEndpoints(const char *raw)
     {
-        return QString::fromUtf8(raw).split(", ", Qt::SkipEmptyParts);
+        return QString::fromUtf8(raw).split(endpointListSeparator, Qt::SkipEmptyParts);
     }
 
     void agwLogCallback(int level, const char *message, void *userData)
     {
         Q_UNUSED(userData);
         switch (level) {
-        case AGW_LOG_ERROR: qCritical().noquote() << "agw:" << message; break;
-        case AGW_LOG_WARNING: qWarning().noquote() << "agw:" << message; break;
-        case AGW_LOG_INFO: qInfo().noquote() << "agw:" << message; break;
-        default: qDebug().noquote() << "agw:" << message; break;
-        }
-    }
-
-    // Called by the library (from a worker thread) right before every network
-    // attempt: direct gateway, storage objects, health checks and proxies.
-    void agwBeforeRequestCallback(const char *host, void *userData)
-    {
-        auto *controller = static_cast<GatewayController *>(userData);
-        const QString hostString = QString::fromUtf8(host);
-        if (QThread::currentThread() == controller->thread()) {
-            controller->handleBeforeRequest(hostString);
-        } else {
-            // Blocking: the killswitch exception must exist before the
-            // request proceeds. The controller's thread is either pumping the
-            // sync-post event loop or running the application loop.
-            QMetaObject::invokeMethod(
-                    controller, [controller, hostString]() { controller->handleBeforeRequest(hostString); },
-                    Qt::BlockingQueuedConnection);
+        case AGW_LOG_ERROR: qCritical().noquote() << agwLogPrefix << message; break;
+        case AGW_LOG_WARNING: qWarning().noquote() << agwLogPrefix << message; break;
+        case AGW_LOG_INFO: qInfo().noquote() << agwLogPrefix << message; break;
+        default: qDebug().noquote() << agwLogPrefix << message; break;
         }
     }
 }
@@ -83,17 +82,17 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
     }
 
     QJsonObject config;
-    config[QStringLiteral("gateway_endpoint")] = gatewayEndpoint;
-    config[QStringLiteral("public_key_pem")] = QString::fromUtf8(publicKey);
-    config[QStringLiteral("s3_primary_endpoints")] = QJsonArray::fromStringList(primaryEndpoints);
-    config[QStringLiteral("s3_fallback_endpoints")] = QJsonArray::fromStringList(fallbackEndpoints);
-    config[QStringLiteral("is_dev_environment")] = isDevEnvironment;
-    config[QStringLiteral("request_timeout_msecs")] = requestTimeoutMsecs;
+    config[agwConfigKey::gatewayEndpoint] = gatewayEndpoint;
+    config[agwConfigKey::publicKeyPem] = QString::fromUtf8(publicKey);
+    config[agwConfigKey::s3PrimaryEndpoints] = QJsonArray::fromStringList(primaryEndpoints);
+    config[agwConfigKey::s3FallbackEndpoints] = QJsonArray::fromStringList(fallbackEndpoints);
+    config[agwConfigKey::isDevEnvironment] = isDevEnvironment;
+    config[agwConfigKey::requestTimeoutMsecs] = requestTimeoutMsecs;
 
     agw_callbacks callbacks {};
     callbacks.struct_size = sizeof(agw_callbacks);
     callbacks.log = &agwLogCallback;
-    callbacks.on_before_request = &agwBeforeRequestCallback;
+    callbacks.on_before_request = &GatewayController::onBeforeRequest;
     callbacks.on_before_request_user_data = this;
 
     m_client = agw_client_create(QJsonDocument(config).toJson(QJsonDocument::Compact).constData(), &callbacks);
@@ -119,8 +118,6 @@ amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonO
 {
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> future = postAsync(endpoint, apiPayload);
 
-    // Same waiting semantics as the historical implementation: pump a local
-    // event loop so the (typically UI) calling thread stays serviced.
     QFutureWatcher<QPair<amnezia::ErrorCode, QByteArray>> watcher;
     QEventLoop wait;
     connect(&watcher, &QFutureWatcherBase::finished, &wait, &QEventLoop::quit);
@@ -147,14 +144,12 @@ QPair<amnezia::ErrorCode, QByteArray> GatewayController::executePost(const QStri
                          QByteArray());
     }
 
-    // Call sites pass the historical "%1v1/..." templates; the library takes
-    // a path relative to the gateway base.
     QString path = endpoint;
-    path.remove(QLatin1String("%1"));
+    path.remove(legacyEndpointPlaceholder);
 
     QJsonObject options;
-    options[apiDefs::key::serviceType] = apiPayload.value(apiDefs::key::serviceType).toString("");
-    options[apiDefs::key::userCountryCode] = apiPayload.value(apiDefs::key::userCountryCode).toString("");
+    options[agwOptionsKey::serviceType] = apiPayload.value(apiDefs::key::serviceType).toString();
+    options[agwOptionsKey::userCountryCode] = apiPayload.value(apiDefs::key::userCountryCode).toString();
 
     const QByteArray payload = QJsonDocument(apiPayload).toJson(QJsonDocument::Compact);
     const QByteArray optionsJson = QJsonDocument(options).toJson(QJsonDocument::Compact);
@@ -168,8 +163,6 @@ QPair<amnezia::ErrorCode, QByteArray> GatewayController::executePost(const QStri
     const int code = result.code;
     agw_result_free(&result);
 
-    // Persist the failover caches on the controller's thread; the repository
-    // is not assumed to be thread-safe.
     QMetaObject::invokeMethod(this, [this]() { persistState(); }, Qt::QueuedConnection);
 
     return qMakePair(mapResultCode(code, responseBody), responseBody);
@@ -185,6 +178,19 @@ amnezia::ErrorCode GatewayController::mapResultCode(const int code, const QByteA
     case AGW_ERR_CONFIG: return amnezia::ErrorCode::ApiMissingAgwPublicKey;
     case AGW_ERR_DECRYPT: return amnezia::ErrorCode::ApiConfigDecryptionError;
     default: return amnezia::ErrorCode::ApiConfigDownloadError;
+    }
+}
+
+void GatewayController::onBeforeRequest(const char *host, void *userData)
+{
+    auto *controller = static_cast<GatewayController *>(userData);
+    const QString hostString = QString::fromUtf8(host);
+    if (QThread::currentThread() == controller->thread()) {
+        controller->handleBeforeRequest(hostString);
+    } else {
+        QMetaObject::invokeMethod(
+                controller, [controller, hostString]() { controller->handleBeforeRequest(hostString); },
+                Qt::BlockingQueuedConnection);
     }
 }
 

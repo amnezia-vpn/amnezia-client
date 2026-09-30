@@ -20,6 +20,9 @@ namespace
 
     constexpr QLatin1String unprocessableSubscriptionMessage("Failed to retrieve subscription information. Is it activated?");
     constexpr QLatin1String trialAlreadyUsedMessage("trial subscription already used");
+    constexpr QLatin1String refreshCaptchaMessage("refresh_captcha");
+    constexpr QLatin1String invalidCaptchaMessage("invalid_captcha");
+    constexpr QLatin1String rateLimitExceededMessage("rate_limit_exceeded");
 
     QDateTime subscriptionEndUtcFromString(const QString &subscriptionEndDate)
     {
@@ -127,7 +130,7 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
     }
 
     QJsonObject jsonObj = jsonDoc.object();
-    const int httpStatusFromBody = jsonObj.value(QStringLiteral("http_status")).toInt(-1);
+    const int httpStatusFromBody = jsonObj.value(apiDefs::key::httpStatus).toInt(-1);
 
     if (httpStatusFromBody == httpStatusCodeTooManyRequests) {
         return amnezia::ErrorCode::ApiRateLimitError;
@@ -155,15 +158,14 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
     }
     if (httpStatusFromBody == httpStatusCodePaymentRequired) {
         const QString message = apiErrorMessageFromJson(jsonObj);
-        if (message.contains(QLatin1String("refresh_captcha"), Qt::CaseInsensitive)) {
+        if (message.contains(refreshCaptchaMessage, Qt::CaseInsensitive)) {
             return amnezia::ErrorCode::ApiCaptchaRefreshError;
         }
-        if (message.contains(QLatin1String("invalid_captcha"), Qt::CaseInsensitive)) {
+        if (message.contains(invalidCaptchaMessage, Qt::CaseInsensitive)) {
             return amnezia::ErrorCode::ApiCaptchaInvalidError;
         }
-        if (jsonObj.contains(QStringLiteral("captcha_id")) || jsonObj.contains(QStringLiteral("captcha_image"))
-            || message.compare(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive) == 0
-            || message.contains(QLatin1String("rate_limit_exceeded"), Qt::CaseInsensitive)) {
+        if (jsonObj.contains(apiDefs::key::captchaId) || jsonObj.contains(apiDefs::key::captchaImage)
+            || message.contains(rateLimitExceededMessage, Qt::CaseInsensitive)) {
             return amnezia::ErrorCode::ApiCaptchaRequiredError;
         }
         return amnezia::ErrorCode::ApiSubscriptionNotActiveError;
