@@ -2,11 +2,15 @@
 #define SUBSCRIPTIONUICONTROLLER_H
 
 #include <QObject>
+#include <QQueue>
+#include <QSet>
+#include <QVariantMap>
 
 #include "core/controllers/serversController.h"
 #include "core/controllers/settingsController.h"
 #include "core/controllers/connectionController.h"
 #include "core/controllers/api/servicesCatalogController.h"
+#include "core/controllers/api/storePurchaseController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
 #include "ui/models/api/apiBenefitsModel.h"
@@ -23,6 +27,7 @@ public:
                          ApiServicesModel* apiServicesModel,
                          ServicesCatalogController* servicesCatalogController,
                          SubscriptionController* subscriptionController,
+                         StorePurchaseController* storePurchaseController,
                          ApiSubscriptionPlansModel* apiSubscriptionPlansModel,
                          ApiBenefitsModel* apiBenefitsModel,
                          ApiAccountInfoModel* apiAccountInfoModel,
@@ -44,9 +49,10 @@ public slots:
     void copyVpnKeyToClipboard();
 
     bool fillAvailableServices();
-    bool importPremiumFromAppStore(const QString &storeProductId);
+    QVariantMap currentActivePlanInfo();
+    bool importPremiumFromStore(const QString &storeProductId);
     bool importFreeFromGateway();
-    bool restoreServiceFromAppStore();
+    bool restoreServiceFromStore();
     bool importTrialFromGateway(const QString &email);
     bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
@@ -57,6 +63,8 @@ public slots:
 
     void setCurrentProtocol(const QString &serverId, const QString &protocolName);
     bool isVlessProtocol(const QString &serverId);
+    QString currentProtocol(const QString &serverId);
+    QStringList availableProtocols(const QString &serverId);
 
     bool isCaptchaAwaitingUser() const;
     void onCaptchaSolved(const QString &captchaId, const QString &solution);
@@ -80,6 +88,7 @@ signals:
     void renewalLinkReceived(const QString &url);
 
     void installServerFromApiFinished(const QString &message, int preferredDefaultServerIndex = -1);
+    void backgroundPurchaseCompleted(const QString &message);
     void changeApiCountryFinished(const QString &message);
     void reloadServerFromApiFinished(const QString &message);
     void updateServerFromApiFinished();
@@ -95,7 +104,15 @@ signals:
     void unsupportedConnectDrawerRequested();
 
 private:
+    enum class CaptchaFlow {
+        Import,
+        Update
+    };
+
     struct CaptchaState {
+        CaptchaFlow flow = CaptchaFlow::Import;
+
+        // Import flow
         QString userCountryCode;
         QString serviceType;
         QString serviceProtocol;
@@ -103,10 +120,39 @@ private:
         QString wireguardClientPrivKey;
         QString wireguardClientPubKey;
         QString xrayUuid;
+
+        // Update flow
+        QString serverId;
+        QString newCountryCode;
+        QString newCountryName;
+        bool isConnectEvent = false;
+        bool reloadServiceConfig = false;
+        bool wasSubscriptionExpired = false;
+        bool fromValidateConfig = false;
+        SubscriptionController::ProtocolData updateProtocolData;
+
         bool isPending = false;
     } m_captchaState;
 
 private:
+    void emitUpdateSuccess(bool wasSubscriptionExpired, bool reloadServiceConfig, const QString &newCountryName);
+    void emitCaptchaUpdateSuccess();
+    void resolveUpdateCaptcha(const QString &captchaId, const QString &solution);
+
+    bool selectPremiumServiceQuietly();
+    void applyDefaultServerAfterInstall(int preferredDefaultServerIndex);
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    void onStoreTransactionUpdated(const QVariantMap &transaction);
+    void processStoreTransactionUpdate(const QVariantMap &transaction);
+
+    QSet<QString> m_handledStoreUpdateTransactionIds;
+    QQueue<QVariantMap> m_pendingStoreUpdates;
+    bool m_storeUpdateInProgress = false;
+#elif defined(Q_OS_ANDROID)
+    void checkUnacknowledgedPlayPurchases();
+#endif
+
     QList<QString> getQrCodes();
     int getQrCodesCount();
     QString getVpnKey();
@@ -118,6 +164,7 @@ private:
     ApiServicesModel* m_apiServicesModel;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    StorePurchaseController* m_storePurchaseController;
     ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
     ApiBenefitsModel* m_apiBenefitsModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;

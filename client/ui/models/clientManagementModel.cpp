@@ -27,6 +27,7 @@ QVariant ClientManagementModel::data(const QModelIndex &index, int role) const
     auto userData = client.value(configKey::userData).toObject();
 
     switch (role) {
+    case ClientIdRole: return client.value(configKey::clientId).toString();
     case ClientNameRole: return userData.value(configKey::clientName).toString();
     case CreationDateRole: return userData.value(configKey::creationDate).toString();
     case LatestHandshakeRole: return userData.value(configKey::latestHandshake).toString();
@@ -62,6 +63,7 @@ void ClientManagementModel::updateClientName(int row, const QString &newName)
 QHash<int, QByteArray> ClientManagementModel::roleNames() const
 {
     QHash<int, QByteArray> roles;
+    roles[ClientIdRole] = "clientId";
     roles[ClientNameRole] = "clientName";
     roles[CreationDateRole] = "creationDate";
     roles[LatestHandshakeRole] = "latestHandshake";

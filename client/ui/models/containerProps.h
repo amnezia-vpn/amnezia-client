@@ -23,6 +23,10 @@ public:
     Q_INVOKABLE int containerFromString(const QString &container) const {
         return static_cast<int>(amnezia::ContainerUtils::containerFromString(container));
     }
+
+    Q_INVOKABLE bool isUnsupportedContainer(int containerIndex) const {
+        return amnezia::ContainerUtils::isUnsupportedContainer(static_cast<amnezia::DockerContainer>(containerIndex));
+    }
 };
 
 #endif // CONTAINERPROPS_H

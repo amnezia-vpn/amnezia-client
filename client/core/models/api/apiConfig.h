@@ -19,6 +19,7 @@ struct ApiConfig
     QString serviceProtocol;
     QString userCountryCode;
     QString serverCountryCode;
+    QString serverCountryCodeL10n;
     QString serverCountryName;
     QString vpnKey;
     
@@ -34,7 +35,6 @@ struct ApiConfig
     int maxDeviceCount;
     int issuedConfigs;
     QJsonArray availableCountries;
-    QJsonArray supportedProtocols;
     
     struct ServiceInfo {
         bool isAdVisible = false;

@@ -145,6 +145,30 @@ PageType {
             }
 
             CardWithIconsType {
+                id: hostLink
+
+                visible: GC.isDesktop() && !IsMacOsNeBuild
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 8
+
+                headerText: qsTr("Don't have a server?")
+                bodyText: qsTr("Amnezia hosting. VPN servers without complicated settings and headaches")
+
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                leftImageSource: "qrc:/images/controls/amnezia.svg"
+
+                onClicked: {
+                    Qt.openUrlExternally(LanguageUiController.getCurrentHostUrl())
+                }
+
+                Keys.onEnterPressed: this.clicked()
+                Keys.onReturnPressed: this.clicked()
+            }
+
+            CardWithIconsType {
                 id: siteLink
 
                 Layout.fillWidth: true

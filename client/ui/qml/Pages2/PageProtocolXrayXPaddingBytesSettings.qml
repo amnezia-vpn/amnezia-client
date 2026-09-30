@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool editDirty: false
+
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -61,8 +63,11 @@ PageType {
                 Layout.rightMargin: 16
                 minValue: xPaddingBytesMin
                 maxValue: xPaddingBytesMax
-                onMinChanged: xPaddingBytesMin = val
-                onMaxChanged: xPaddingBytesMax = val
+                minPlaceholder: XrayConfigModel.xPaddingBytesMinDefault()
+                maxPlaceholder: XrayConfigModel.xPaddingBytesMaxDefault()
+                onMinChanged: function(val) { xPaddingBytesMin = val; root.editDirty = false }
+                onMaxChanged: function(val) { xPaddingBytesMax = val; root.editDirty = false }
+                onEdited: root.editDirty = true
             }
 
             Item {
@@ -81,7 +86,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
@@ -95,7 +100,7 @@ PageType {
                     return
                 }
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
             var noButtonFunction = function () {
                 if (typeof GC !== "undefined" && !GC.isMobile()) {

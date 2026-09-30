@@ -32,6 +32,8 @@ struct SelfHostedUserServerConfig {
     bool hasContainers() const;
     ContainerConfig containerConfig(DockerContainer container) const;
 
+    void updateContainerConfig(DockerContainer container, const ContainerConfig &config);
+
     QPair<QString, QString> getDnsPair(const QString &primaryDns, const QString &secondaryDns) const;
 
     QJsonObject toJson() const;

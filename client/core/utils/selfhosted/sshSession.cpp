@@ -103,7 +103,8 @@ ErrorCode SshSession::runContainerScript(const ServerCredentials &credentials, D
     if (e)
         return e;
 
-    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy || container == DockerContainer::Telemt;
+    const bool useSh = container == DockerContainer::Socks5Proxy || container == DockerContainer::MtProxy
+            || container == DockerContainer::Telemt || container == DockerContainer::TProxy;
     QString runner = QString("sudo docker exec -i $CONTAINER_NAME %2 %1 ").arg(fileName, useSh ? "sh" : "bash");
     e = runScript(credentials, replaceVars(runner, amnezia::genBaseVars(credentials, container, QString(), QString())), cbReadStdOut, cbReadStdErr);
 
@@ -176,7 +177,8 @@ QByteArray SshSession::getTextFileFromContainer(DockerContainer container, const
 
     errorCode = ErrorCode::NoError;
 
-    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2'\"").arg(ContainerUtils::containerToString(container), path);
+    QString script = QStringLiteral("sudo docker exec -i %1 sh -c \"xxd -p '%2' 2>/dev/null || od -An -v -tx1 '%2'\"")
+                             .arg(ContainerUtils::containerToString(container), path);
 
     QString stdOut;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {

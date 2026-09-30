@@ -36,6 +36,7 @@
 #include "core/controllers/ipSplitTunnelingController.h"
 #include "core/controllers/allowedDnsController.h"
 #include "core/controllers/api/servicesCatalogController.h"
+#include "core/controllers/api/storePurchaseController.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "core/controllers/api/newsController.h"
 #include "core/controllers/selfhosted/installController.h"
@@ -73,6 +74,7 @@
 #include "ui/models/services/socks5ProxyConfigModel.h"
 #include "ui/models/services/mtProxyConfigModel.h"
 #include "ui/models/services/telemtConfigModel.h"
+#include "ui/models/services/tProxyConfigModel.h"
 
 #include "ui/models/ipSplitTunnelingModel.h"
 #include "ui/models/newsModel.h"
@@ -90,10 +92,12 @@ class CoreController : public QObject
 
 public:
     explicit CoreController(const QSharedPointer<VpnConnection> &vpnConnection, SecureQSettings* settings,
-                            QQmlApplicationEngine *engine, QObject *parent = nullptr);
+                            QQmlApplicationEngine *engine, QObject *parent = nullptr,
+                            bool skipPlatformControllerInit = false);
 
     PageController* pageController() const;
     void setQmlRoot();
+    void checkForAppUpdates();
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);
@@ -114,7 +118,7 @@ protected:
     AppSplitTunnelingModel* appSplitTunnelingModelProtected() const { return m_appSplitTunnelingModel; }
     IpSplitTunnelingModel* ipSplitTunnelingModelProtected() const { return m_ipSplitTunnelingModel; }
     LanguageModel* languageModelProtected() const { return m_languageModel; }
-
+    ConnectionUiController* connectionUiControllerProtected() const { return m_connectionUiController; }
     InstallUiController* installUiControllerProtected() const { return m_installUiController; }
     ImportController* importCoreControllerProtected() const { return m_importCoreController; }
     ExportController* exportControllerProtected() const { return m_exportController; }
@@ -187,6 +191,7 @@ private:
     AllowedDnsController* m_allowedDnsController;
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
+    StorePurchaseController* m_storePurchaseController;
     NewsController* m_newsController;
     UpdateController* m_updateController;
     InstallController* m_installController;
@@ -225,6 +230,7 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    TProxyConfigModel* m_tProxyConfigModel;
 
     CoreSignalHandlers* m_signalHandlers;
 };

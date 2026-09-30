@@ -16,6 +16,8 @@ import "../Config"
 PageType {
     id: root
 
+    property bool isRestoringBackup: false
+
     Connections {
         target: ImportController
 
@@ -228,6 +230,8 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 leftImageSource: imageSource
 
+                enabled: !root.isRestoringBackup
+
                 onClicked: { handler() }
 
                 Keys.onEnterPressed: this.clicked()
@@ -314,12 +318,19 @@ PageType {
         property string imageSource: "qrc:/images/controls/archive-restore.svg"
         property bool isVisible: PageController.isStartPageVisible()
         property var handler: function() {
+            if (root.isRestoringBackup) {
+                return
+            }
             var filePath = SystemController.getFileName(qsTr("Open backup file"),
                                                         qsTr("Backup files (*.backup)"))
             if (filePath !== "") {
+                root.isRestoringBackup = true
                 PageController.showBusyIndicator(true)
-                SettingsController.restoreAppConfig(filePath)
-                PageController.showBusyIndicator(false)
+                Qt.callLater(function() {
+                    SettingsController.restoreAppConfig(filePath)
+                    PageController.showBusyIndicator(false)
+                    root.isRestoringBackup = false
+                })
             }
         }
     }
@@ -366,10 +377,10 @@ PageType {
         property string title: qsTr("Restore purchases")
         property string description: qsTr("")
         property string imageSource: "qrc:/images/controls/refresh-cw.svg"
-        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild
+        property bool isVisible: Qt.platform.os === "ios" || IsMacOsNeBuild || IsPlayBuild
         property var handler: function() {
             PageController.showBusyIndicator(true)
-            SubscriptionUiController.restoreServiceFromAppStore()
+            SubscriptionUiController.restoreServiceFromStore()
             PageController.showBusyIndicator(false)
         }
     }

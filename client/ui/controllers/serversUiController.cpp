@@ -1,10 +1,13 @@
 #include "serversUiController.h"
 
+#include "core/utils/api/apiUtils.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/models/protocolConfig.h"
 #include "core/models/containerConfig.h"
+#include "core/models/protocols/awgProtocolConfig.h"
+#include "core/utils/constants/protocolConstants.h"
 
 using namespace amnezia;
 
@@ -156,7 +159,17 @@ void ServersUiController::updateModel()
 
     m_serversModel->updateModel(m_orderedServerDescriptions, defaultServerId);
 
-    updateContainersModel();
+    if (!m_processedServerId.isEmpty()) {
+        if (isServerFromApi(m_processedServerId)) {
+            const auto &description = serverDescriptionById(m_processedServerId);
+            if (description.isApiV2 && description.isCountrySelectionAvailable
+                && !description.apiAvailableCountries.isEmpty()) {
+                emit updateApiCountryModel();
+            }
+        } else {
+            updateContainersModel();
+        }
+    }
     updateDefaultServerContainersModel();
 
     if (hadServersFromGatewayBefore != hasServersFromGatewayNow) {
@@ -193,10 +206,14 @@ QString ServersUiController::getDefaultServerDescriptionCollapsed() const
 QString ServersUiController::getDefaultServerImagePathCollapsed() const
 {
     const auto &description = serverDescriptionById(getDefaultServerId());
-    if (!description.isApiV2 || description.apiServerCountryCode.isEmpty()) {
+    if (!description.isApiV2) {
         return "";
     }
-    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(description.apiServerCountryCode.toUpper());
+    const QString flagCode = apiUtils::getCountryFlagCode(description.apiServerCountryCodeL10n, description.apiServerCountryCode);
+    if (flagCode.isEmpty()) {
+        return "";
+    }
+    return QString("qrc:/countriesFlags/images/flagKit/%1.svg").arg(flagCode);
 }
 
 QString ServersUiController::getDefaultServerDescriptionExpanded() const
@@ -350,19 +367,14 @@ void ServersUiController::setProcessedServerId(const QString &serverId)
         m_processedServerId = normalizedServerId;
 
         if (newIndex >= 0) {
-            updateContainersModel();
-
-            for (const auto &description : m_orderedServerDescriptions) {
-                if (description.serverId != normalizedServerId) {
-                    continue;
+            if (isServerFromApi(m_processedServerId)) {
+                const auto &description = serverDescriptionById(m_processedServerId);
+                if (description.isApiV2 && description.isCountrySelectionAvailable
+                    && !description.apiAvailableCountries.isEmpty()) {
+                    emit updateApiCountryModel();
                 }
-                if (description.isApiV2) {
-                    if (description.isCountrySelectionAvailable && !description.apiAvailableCountries.isEmpty()) {
-                        emit updateApiCountryModel();
-                    }
-                    emit updateApiServicesModel();
-                }
-                break;
+            } else {
+                updateContainersModel();
             }
         }
 
@@ -378,6 +390,59 @@ bool ServersUiController::processedServerIsPremium() const
 bool ServersUiController::isDefaultServerCurrentlyProcessed() const
 {
     return m_serversController->getDefaultServerId() == m_processedServerId;
+}
+
+bool ServersUiController::serverHasOutdatedAwgContainer(const QString &serverId) const
+{
+    // The warning suggests reinstalling the container, so it only makes sense
+    // for servers the user can administer
+    if (!isServerHasWriteAccess(serverId)) {
+        return false;
+    }
+
+    const QMap<DockerContainer, ContainerConfig> containers = m_serversController->getServerContainersMap(serverId);
+    for (DockerContainer container : { DockerContainer::Awg, DockerContainer::Awg2 }) {
+        if (!containers.contains(container)) {
+            continue;
+        }
+        if (const auto* awgConfig = containers.value(container).getAwgProtocolConfig()) {
+            if (awgConfig->serverConfig.protocolVersion != protocols::awg::awgV3) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool ServersUiController::defaultServerHasOutdatedAwgContainer() const
+{
+    return serverHasOutdatedAwgContainer(getDefaultServerId());
+}
+
+bool ServersUiController::isContainerOutdatedAwg(int containerIndex) const
+{
+    if (!isProcessedServerHasWriteAccess()) {
+        return false;
+    }
+
+    DockerContainer container = static_cast<DockerContainer>(containerIndex);
+    if (!ContainerUtils::isAwgContainer(container)) {
+        return false;
+    }
+
+    const QMap<DockerContainer, ContainerConfig> containers = m_serversController->getServerContainersMap(m_processedServerId);
+    if (!containers.contains(container)) {
+        return false;
+    }
+    if (const auto* awgConfig = containers.value(container).getAwgProtocolConfig()) {
+        return awgConfig->serverConfig.protocolVersion != protocols::awg::awgV3;
+    }
+    return false;
+}
+
+bool ServersUiController::isProcessedContainerOutdatedAwg() const
+{
+    return isContainerOutdatedAwg(m_processedContainerIndex);
 }
 
 bool ServersUiController::isProcessedServerHasWriteAccess() const
@@ -507,6 +572,8 @@ QStringList ServersUiController::getAllInstalledServicesName(int serverIndex) co
                 servicesName.append("MTProxy");
             } else if (container == DockerContainer::Telemt) {
                 servicesName.append("Telemt");
+            } else if (container == DockerContainer::TProxy) {
+                servicesName.append("TProxy");
             }
         }
     }

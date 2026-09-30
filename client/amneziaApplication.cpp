@@ -18,13 +18,23 @@
 #include <QtQuick/QQuickWindow>  
 #include <QWindow>     
 
+#include "core/controllers/updateController.h"
 #include "core/protocols/qmlRegisterProtocols.h"
 #include "logger.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/models/installedAppsModel.h"
+#include "ui/utils/mtProxyPublicHostInput.h"
 #include "version.h"
+#include "core/utils/appUiConfig.h"
 
 #include "platforms/ios/QRCodeReaderBase.h"
+#ifdef Q_OS_IOS
+    #include "platforms/ios/ioscontextmenu.h"
+#endif
+
+#ifdef Q_OS_ANDROID
+#include "platforms/android/android_controller.h"
+#endif
          
 
 bool AmneziaApplication::m_forceQuit = false;
@@ -98,7 +108,7 @@ void AmneziaApplication::init()
 {
     m_engine = new QQmlApplicationEngine;
 
-    const QUrl url(QStringLiteral("qrc:/ui/qml/main2.qml"));
+    const QUrl url(QStringLiteral(APP_QML_ENTRYPOINT));
     QObject::connect(
         m_engine, &QQmlApplicationEngine::objectCreated, this,
         [this, url](QObject *obj, const QUrl &objUrl) {
@@ -119,7 +129,13 @@ void AmneziaApplication::init()
                 win->setPersistentSceneGraph(true);
                 win->setPersistentGraphics(true);
 #endif
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
                 win->show();
+#else
+                if (!m_coreController || !m_coreController->pageController()->shouldStartMinimized()) {
+                    win->show();
+                }
+#endif
             }
         },
         Qt::QueuedConnection);
@@ -132,13 +148,23 @@ void AmneziaApplication::init()
     m_engine->rootContext()->setContextProperty("IsMacOsNeBuild", false);
 #endif
 
+#ifdef Q_OS_IOS
+    m_engine->rootContext()->setContextProperty("IosContextMenu", new IosContextMenu(this));
+#endif
+
+#ifdef Q_OS_ANDROID
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", AndroidController::instance()->isPlay());
+#else
+    m_engine->rootContext()->setContextProperty("IsPlayBuild", false);
+#endif
+
     m_vpnConnection.reset(new VpnConnection(nullptr, nullptr));
     m_vpnConnection->moveToThread(&m_vpnConnectionThread);
     m_vpnConnectionThread.start();
 
     m_coreController.reset(new CoreController(m_vpnConnection, m_settings, m_engine));
 
-    m_engine->addImportPath("qrc:/ui/qml/Modules/");
+    m_engine->addImportPath(QStringLiteral(APP_QML_IMPORT_PATH));
 
     if (m_parser.isSet(m_optImport)) {
         const QString data = m_parser.value(m_optImport);
@@ -152,6 +178,10 @@ void AmneziaApplication::init()
     m_engine->load(url);
 
     m_coreController->setQmlRoot();
+
+#if CLIENT_ENABLE_APP_UPDATES
+    m_coreController->checkForAppUpdates();
+#endif
 
 #ifdef Q_OS_WIN //TODO
     if (m_parser.isSet(m_optAutostart))
@@ -215,16 +245,20 @@ void AmneziaApplication::registerTypes()
 
     qmlRegisterType<InstalledAppsModel>("InstalledAppsModel", 1, 0, "InstalledAppsModel");
 
+    qmlRegisterType<PublicHostInputValidator>("MtProxyConfig", 1, 0, "PublicHostInputValidator");
+    qmlRegisterType<PublicHostInputValidator>("TelemtConfig", 1, 0, "PublicHostInputValidator");
+
     amnezia::declareQmlProtocolEnum();
     Vpn::declareQmlVpnConnectionStateEnum();
     PageLoader::declareQmlPageEnum();
+    UpdateState::declareQmlUpdateStateEnum();
 }
 
 void AmneziaApplication::loadFonts()
 {
     QQuickStyle::setStyle("Basic");
 
-    QFontDatabase::addApplicationFont(":/fonts/pt-root-ui_vf.ttf");
+    QFontDatabase::addApplicationFont(QStringLiteral(APP_UI_FONT_RESOURCE));
 }
 
 bool AmneziaApplication::parseCommands()
@@ -251,7 +285,7 @@ bool AmneziaApplication::parseCommands()
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
 void AmneziaApplication::startLocalServer() {
-    const QString serverName("AmneziaVPNInstance");
+    const QString serverName(APP_INSTANCE_NAME);
     QLocalServer::removeServer(serverName);
 
     QLocalServer *server = new QLocalServer(this);

@@ -7,10 +7,6 @@ struct OpenVPNConfig: Decodable {
     let config: String
     let splitTunnelType: Int
     let splitTunnelSites: [String]
-
-    var str: String {
-        "splitTunnelType: \(splitTunnelType) splitTunnelSites: \(splitTunnelSites) config: \(config)"
-    }
 }
 
 extension PacketTunnelProvider {
@@ -30,11 +26,6 @@ extension PacketTunnelProvider {
 
         do {
             let openVPNConfig = try JSONDecoder().decode(OpenVPNConfig.self, from: openVPNConfigData)
-            ovpnLog(.info, title: "config: ", message: openVPNConfig.str)
-            let wrapperPreview = String(decoding: openVPNConfigData.prefix(512), as: UTF8.self)
-            let ovpnPreview = String(openVPNConfig.config.prefix(512))
-            ovpnLog(.info, title: "config wrapper", message: "bytes=\(openVPNConfigData.count) preview=\(wrapperPreview)")
-            ovpnLog(.info, title: "config raw", message: "chars=\(openVPNConfig.config.count) preview=\(ovpnPreview)")
             let ovpnConfiguration = Data(openVPNConfig.config.utf8)
             splitTunnelType = openVPNConfig.splitTunnelType
             splitTunnelSites = openVPNConfig.splitTunnelSites
@@ -105,12 +96,6 @@ extension PacketTunnelProvider {
         let hasTlsAuthClose = configString.contains("</tls-auth>")
         ovpnLog(.info, title: "ConfigFlags", message: "tls-auth open=\(hasTlsAuthOpen) close=\(hasTlsAuthClose)")
 
-        let lines = configString.split(separator: "\n")
-        let head = lines.prefix(10).joined(separator: "\n")
-        let tail = lines.suffix(10).joined(separator: "\n")
-        ovpnLog(.debug, title: "ConfigHead", message: head)
-        ovpnLog(.debug, title: "ConfigTail", message: tail)
-
         if hasTlsAuthOpen && hasTlsAuthClose {
             ovpnLog(.info, title: "TLSAuthSanitized", message: "preserve original tls-auth block")
         }
@@ -155,8 +140,6 @@ extension PacketTunnelProvider {
             normalizedConfig.append("\n")
         }
         let normalizedLines = normalizedConfig.split(whereSeparator: \.isNewline)
-        let normalizedTail = normalizedLines.suffix(10).joined(separator: "\n")
-        ovpnLog(.debug, title: "ConfigTailSanitized", message: normalizedTail)
         let redirectLines = normalizedLines
             .map(String.init)
             .filter { $0.lowercased().contains("redirect-gateway") }
