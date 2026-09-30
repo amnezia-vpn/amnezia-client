@@ -1,9 +1,9 @@
 #include "coreSignalHandlers.h"
 
 #include <QTimer>
-#include <QtConcurrent>
 
 #include "core/utils/selfhosted/sshSession.h"
+#include "core/utils/selfhosted/sshExecutor.h"
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/controllers/coreController.h"
@@ -145,7 +145,7 @@ void CoreSignalHandlers::initExportControllerHandler()
             });
     connect(m_coreController->m_exportController, &ExportController::revokeClientRequested, this,
             [this](const QString &serverId, int row, DockerContainer container) {
-                QtConcurrent::run([this, serverId, row, container]() {
+                SshExecutor::instance().run(serverId, [this, serverId, row, container]() {
                     m_coreController->m_usersController->revokeClient(serverId, row, container);
                 });
             });
@@ -205,8 +205,10 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
 {
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
             [this](const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container) {
-                m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
-            }, Qt::DirectConnection);
+                SshExecutor::instance().run(serverId, [this, serverId, containerConfig, container]() {
+                    m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
+                });
+            });
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
             [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {

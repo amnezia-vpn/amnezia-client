@@ -16,6 +16,7 @@
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/utils/selfhosted/sshSession.h"
+#include "core/utils/selfhosted/sshExecutor.h"
 #include "core/installers/awgInstaller.h"
 #include "core/installers/installerBase.h"
 #include "core/installers/openvpnInstaller.h"
@@ -104,6 +105,7 @@ InstallController::~InstallController()
 ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,
                                             bool isUpdate)
 {
+    qDebug().noquote() << "InstallController::setupContainer" << ContainerUtils::containerToString(container);
     SshSession sshSession;
     ErrorCode e = ErrorCode::NoError;
 
@@ -371,7 +373,7 @@ ErrorCode InstallController::validateAndPrepareConfig(const QString &serverId)
 
 void InstallController::validateConfig(const QString &serverId)
 {
-    QFuture<ErrorCode> future = QtConcurrent::run([this, serverId]() {
+    QFuture<ErrorCode> future = SshExecutor::instance().run(serverId, [this, serverId]() {
         return validateAndPrepareConfig(serverId);
     });
 
