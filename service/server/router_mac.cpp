@@ -1,5 +1,7 @@
 #include "router_mac.h"
 #include "helper_route_mac.h"
+#include "killswitch.h"
+#include "../client/platforms/macos/daemon/macosfirewall.h"
 
 #include <QProcess>
 #include <QThread>
@@ -269,5 +271,54 @@ bool RouterMac::flushDns()
     p.waitForFinished();
     
     qDebug().noquote() << "OUTPUT killall -HUP mDNSResponder: " + p.readAll();
+    return true;
+}
+
+bool RouterMac::StopRoutingIpv6()
+{
+    if (!MacOSFirewall::isInstalled()) {
+        MacOSFirewall::install();
+        m_pfInstalledForIpv6 = true;
+
+        static const QStringList killSwitchAnchors = { "100.blockAll", "110.allowNets", "120.blockNets",
+                                                       "150.allowExcludedApps", "200.allowVPN", "290.allowDHCP",
+                                                       "310.blockDNS", "350.allowHnsd" };
+        for (const QString &anchor : killSwitchAnchors) {
+            MacOSFirewall::setAnchorEnabled(anchor, false);
+        }
+    }
+    MacOSFirewall::ensureRootAnchorPriority();
+
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("000.allowLoopback"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("300.allowLAN"), true);
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("400.allowPIA"), true);
+
+    if (!MacOSFirewall::isInstalled() || !MacOSFirewall::isAnchorEnabled(QStringLiteral("250.blockIPv6"))) {
+        qCritical() << "RouterMac::StopRoutingIpv6: IPv6 block is not active";
+        return false;
+    }
+    qDebug() << "RouterMac::StopRoutingIpv6: IPv6 blocked, pf installed by StopRoutingIpv6 =" << m_pfInstalledForIpv6;
+    return true;
+}
+
+bool RouterMac::StartRoutingIpv6()
+{
+    if (KillSwitch::instance()->isStrictKillSwitchEnabled() || !MacOSFirewall::isInstalled()) {
+        m_pfInstalledForIpv6 = false;
+        return true;
+    }
+
+    MacOSFirewall::setAnchorEnabled(QStringLiteral("250.blockIPv6"), false);
+    if (m_pfInstalledForIpv6) {
+        MacOSFirewall::uninstall();
+        qDebug() << "RouterMac::StartRoutingIpv6: pf uninstalled";
+    }
+    m_pfInstalledForIpv6 = false;
+
+    if (MacOSFirewall::isInstalled() && MacOSFirewall::isAnchorEnabled(QStringLiteral("250.blockIPv6"))) {
+        qWarning() << "RouterMac::StartRoutingIpv6: 250.blockIPv6 is still active";
+        return false;
+    }
     return true;
 }
