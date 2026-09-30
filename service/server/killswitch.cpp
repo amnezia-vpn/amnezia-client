@@ -64,6 +64,14 @@ bool KillSwitch::init()
         return disableAllTraffic();
     }
 
+#ifdef Q_OS_MACOS
+    if (MacOSFirewall::isInstalled() && MacOSFirewall::isAnchorEnabled(QStringLiteral("250.blockIPv6"))
+        && !MacOSFirewall::isAnchorEnabled(QStringLiteral("100.blockAll"))) {
+        qWarning() << "KillSwitch::init: leftover 250.blockIPv6 after service restart, removing pf";
+        MacOSFirewall::uninstall();
+    }
+#endif
+
     return true;
 }
 
