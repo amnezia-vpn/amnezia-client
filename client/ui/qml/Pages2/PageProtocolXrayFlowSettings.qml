@@ -37,6 +37,9 @@ PageType {
             width: listView.width
             spacing: 0
 
+            // xtls-rprx-vision requires the RAW (TCP) transport; it is invalid with XHTTP / mKCP.
+            readonly property bool visionAllowed: transport === "" || transport === "raw"
+
             BaseHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -51,7 +54,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Empty")
-                checked: flow === ""
+                checked: flow === "" || !visionAllowed
                 onClicked: flow = ""
             }
 
@@ -63,7 +66,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision"
-                checked: flow === "xtls-rprx-vision"
+                enabled: visionAllowed
+                checked: flow === "xtls-rprx-vision" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision"
             }
 
@@ -75,11 +79,22 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision-udp443"
-                checked: flow === "xtls-rprx-vision-udp443"
+                enabled: visionAllowed
+                checked: flow === "xtls-rprx-vision-udp443" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision-udp443"
             }
 
             DividerType {
+            }
+
+            CaptionTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 8
+                visible: !visionAllowed
+                color: AmneziaStyle.color.goldenApricot
+                text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport.")
             }
 
             Item {

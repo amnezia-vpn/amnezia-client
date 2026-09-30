@@ -72,6 +72,17 @@ if(WIN32)
         DESTINATION "."
         COMPONENT AmneziaVPN
     )
+
+    set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+    include(InstallRequiredSystemLibraries)
+    if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+        install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+            DESTINATION "."
+            COMPONENT AmneziaVPN
+        )
+    else()
+        message(WARNING "MSVC runtime libraries were not found, packages will not ship them")
+    endif()
 endif()
 
 if (APPLE AND NOT IOS AND NOT MACOS_NE)

@@ -48,7 +48,6 @@ struct XrayXhttpConfig {
     QString mode             = protocols::xray::defaultXhttpMode;  // Auto|Packet-up|Stream-up|Stream-one
     QString host             = protocols::xray::defaultXhttpHost;
     QString path;
-    QString headersTemplate  = protocols::xray::defaultXhttpHeadersTemplate;  // HTTP|None
     QString uplinkMethod     = protocols::xray::defaultXhttpUplinkMethod;  // POST|PUT|PATCH
     bool    disableGrpc      = true;
     bool    disableSse       = true;

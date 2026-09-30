@@ -39,12 +39,22 @@ struct AwgServerConfig {
     QString specialJunk3;
     QString specialJunk4;
     QString specialJunk5;
+    QString headerProtectionKey;
+    QString contentPaddingAddition;
+    QString rekeyAfterTime;
+    QString rekeyTimeout;
+    QString rejectAfterTime;
+    QString keepaliveTimeout;
+    QString maxHandshakeAttempts;
+    QString randomTrailers;
+    QString disableCookies;
     bool isThirdPartyConfig = false;
     
     QJsonObject toJson() const;
     static AwgServerConfig fromJson(const QJsonObject& json);
-    
+
     bool hasEqualServerSettings(const AwgServerConfig& other) const;
+    bool hasAwg3Params() const;
 };
 
 struct AwgClientConfig {
@@ -76,8 +86,15 @@ struct AwgClientConfig {
     QString specialJunk3;
     QString specialJunk4;
     QString specialJunk5;
-    bool isObfuscationEnabled = false;
-    
+    QString headerProtectionKey;
+    QString contentPaddingAddition;
+    QString rekeyAfterTime;
+    QString rekeyTimeout;
+    QString rejectAfterTime;
+    QString keepaliveTimeout;
+    QString maxHandshakeAttempts;
+    QString randomTrailers;
+    QString disableCookies;
     QJsonObject toJson() const;
     static AwgClientConfig fromJson(const QJsonObject& json);
 };
@@ -89,6 +106,11 @@ struct AwgProtocolConfig {
     QJsonObject toJson() const;
     static AwgProtocolConfig fromJson(const QJsonObject& json);
     
+    QString serverProtocolVersion() const;
+    QString clientProtocolVersion() const;
+    static QString protocolVersionString(const QString &version);
+    static bool isToggleEnabled(const QString &value);
+
     bool hasClientConfig() const;
     void setClientConfig(const AwgClientConfig& config);
     void clearClientConfig();

@@ -105,11 +105,17 @@ QJsonObject WireGuardClientConfig::toJson() const
     if (!mtu.isEmpty()) {
         obj[configKey::mtu] = mtu;
     }
-    
+
+    for (auto it = awgParams.constBegin(); it != awgParams.constEnd(); ++it) {
+        if (!it.value().isEmpty()) {
+            obj[it.key()] = it.value();
+        }
+    }
+
     if (isObfuscationEnabled) {
         obj[configKey::isObfuscationEnabled] = isObfuscationEnabled;
     }
-    
+
     return obj;
 }
 
@@ -133,9 +139,16 @@ WireGuardClientConfig WireGuardClientConfig::fromJson(const QJsonObject& json)
     }
     config.persistentKeepAlive = json.value(configKey::persistentKeepAlive).toString();
     config.mtu = json.value(configKey::mtu).toString();
-    
+
+    for (const QString &key : configKey::awgProtocolKeys()) {
+        const QString value = json.value(key).toString();
+        if (!value.isEmpty()) {
+            config.awgParams.insert(key, value);
+        }
+    }
+
     config.isObfuscationEnabled = json.value(configKey::isObfuscationEnabled).toBool(false);
-    
+
     return config;
 }
 

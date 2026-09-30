@@ -1,6 +1,8 @@
 #ifndef QRCODEUTILS_H
 #define QRCODEUTILS_H
 
+#include <QByteArray>
+#include <QList>
 #include <QString>
 
 #include "qrcodegen.hpp"
@@ -10,6 +12,7 @@ namespace qrCodeUtils
     constexpr const qint16 qrMagicCode = 1984;
 
     QList<QString> generateQrCodeImageSeries(const QByteArray &data);
+    QString generatePlainQrCodeImage(const QByteArray &data);
     qrcodegen::QrCode generateQrCode(const QByteArray &data);
     QString svgToBase64(const QString &image);
 };

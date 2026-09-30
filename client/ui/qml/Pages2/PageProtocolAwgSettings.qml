@@ -128,372 +128,309 @@ PageType {
             AwgTextField {
                 id: junkPacketCountTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("Jc - Junk packet count")
                 textField.text: serverJunkPacketCount
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverJunkPacketCount) {
-                        serverJunkPacketCount = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(junkPacketCountTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverJunkPacketCount = text }
             }
 
             AwgTextField {
                 id: junkPacketMinSizeTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("Jmin - Junk packet minimum size")
                 textField.text: serverJunkPacketMinSize
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverJunkPacketMinSize) {
-                        serverJunkPacketMinSize = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(junkPacketMinSizeTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverJunkPacketMinSize = text }
             }
 
             AwgTextField {
                 id: junkPacketMaxSizeTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("Jmax - Junk packet maximum size")
                 textField.text: serverJunkPacketMaxSize
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverJunkPacketMaxSize) {
-                        serverJunkPacketMaxSize = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(junkPacketMaxSizeTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverJunkPacketMaxSize = text }
             }
 
             AwgTextField {
                 id: initPacketJunkSizeTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("S1 - Init packet junk size")
                 textField.text: serverInitPacketJunkSize
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverInitPacketJunkSize) {
-                        serverInitPacketJunkSize = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(initPacketJunkSizeTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverInitPacketJunkSize = text }
             }
 
             AwgTextField {
                 id: responsePacketJunkSizeTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("S2 - Response packet junk size")
                 textField.text: serverResponsePacketJunkSize
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverResponsePacketJunkSize) {
-                        serverResponsePacketJunkSize = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(responsePacketJunkSizeTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverResponsePacketJunkSize = text }
             }
 
             AwgTextField {
                 id: cookieReplyPacketJunkSizeTextField
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
                 visible: isAwg2
 
                 headerText: qsTr("S3 - Cookie reply packet junk size")
                 textField.text: serverCookieReplyPacketJunkSize
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverCookieReplyPacketJunkSize) {
-                        serverCookieReplyPacketJunkSize = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(cookieReplyPacketJunkSizeTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverCookieReplyPacketJunkSize = text }
             }
 
             AwgTextField {
                 id: transportPacketJunkSizeTextField
-
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
                 visible: isAwg2
 
                 headerText: qsTr("S4 - Transport packet junk size")
                 textField.text: serverTransportPacketJunkSize
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverTransportPacketJunkSize) {
-                        serverTransportPacketJunkSize = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(transportPacketJunkSizeTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverTransportPacketJunkSize = text }
             }
 
             AwgTextField {
                 id: initPacketMagicHeaderTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                rangeValidation: true
 
                 headerText: qsTr("H1 - Init packet magic header")
                 textField.text: serverInitPacketMagicHeader
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: /^(\d+)(-\d+)?$/
-                }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverInitPacketMagicHeader) {
-                        serverInitPacketMagicHeader = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(initPacketMagicHeaderTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverInitPacketMagicHeader = text }
             }
 
             AwgTextField {
                 id: responsePacketMagicHeaderTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                rangeValidation: true
 
                 headerText: qsTr("H2 - Response packet magic header")
                 textField.text: serverResponsePacketMagicHeader
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: /^(\d+)(-\d+)?$/
-                }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverResponsePacketMagicHeader) {
-                        serverResponsePacketMagicHeader = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(responsePacketMagicHeaderTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverResponsePacketMagicHeader = text }
             }
 
             AwgTextField {
                 id: underloadPacketMagicHeaderTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                rangeValidation: true
 
                 headerText: qsTr("H3 - Underload packet magic header")
                 textField.text: serverUnderloadPacketMagicHeader
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: /^(\d+)(-\d+)?$/
-                }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverUnderloadPacketMagicHeader) {
-                        serverUnderloadPacketMagicHeader = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(underloadPacketMagicHeaderTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverUnderloadPacketMagicHeader = text }
             }
 
             AwgTextField {
                 id: transportPacketMagicHeaderTextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                rangeValidation: true
 
                 headerText: qsTr("H4 - Transport packet magic header")
                 textField.text: serverTransportPacketMagicHeader
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: /^(\d+)(-\d+)?$/
-                }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverTransportPacketMagicHeader) {
-                        serverTransportPacketMagicHeader = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(transportPacketMagicHeaderTextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverTransportPacketMagicHeader = text }
             }
 
             AwgTextField {
                 id: specialJunk1TextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("I1 - Special junk 1")
                 textField.text: serverSpecialJunk1
-                checkEmptyText: false
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverSpecialJunk1) {
-                        serverSpecialJunk1 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(specialJunk1TextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverSpecialJunk1 = text }
             }
 
             AwgTextField {
                 id: specialJunk2TextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("I2 - Special junk 2")
                 textField.text: serverSpecialJunk2
-                checkEmptyText: false
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverSpecialJunk2) {
-                        serverSpecialJunk2 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(specialJunk2TextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverSpecialJunk2 = text }
             }
 
             AwgTextField {
                 id: specialJunk3TextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("I3 - Special junk 3")
                 textField.text: serverSpecialJunk3
-                checkEmptyText: false
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverSpecialJunk3) {
-                        serverSpecialJunk3 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(specialJunk3TextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverSpecialJunk3 = text }
             }
 
             AwgTextField {
                 id: specialJunk4TextField
 
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
                 headerText: qsTr("I4 - Special junk 4")
                 textField.text: serverSpecialJunk4
-                checkEmptyText: false
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverSpecialJunk4) {
-                        serverSpecialJunk4 = textField.text
-                    }
-                }
-
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(specialJunk4TextField)
-                    }
-                }
+                scroller: smartScroll
+                onEdited: (text) => { serverSpecialJunk4 = text }
             }
 
             AwgTextField {
                 id: specialJunk5TextField
 
+                headerText: qsTr("I5 - Special junk 5")
+                textField.text: serverSpecialJunk5
+
+                scroller: smartScroll
+                onEdited: (text) => { serverSpecialJunk5 = text }
+            }
+
+            CheckBoxType {
+                id: headerProtectionCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                headerText: qsTr("I5 - Special junk 5")
-                textField.text: serverSpecialJunk5
-                checkEmptyText: false
+                visible: isAwg3
 
-                textField.onEditingFinished: {
-                    if (textField.text !== serverSpecialJunk5) {
-                        serverSpecialJunk5 = textField.text
+                text: qsTr("HeaderProtectionKey")
+
+                checked: serverHeaderProtectionEnabled
+                onCheckedChanged: {
+                    if (checked !== serverHeaderProtectionEnabled) {
+                        serverHeaderProtectionEnabled = checked
                     }
                 }
+            }
 
-                textField.onActiveFocusChanged: {
-                    if (textField.activeFocus) {
-                        smartScroll.scrollToItem(specialJunk5TextField)
+            AwgTextField {
+                id: contentPaddingAdditionTextField
+
+                visible: isAwg3
+                rangeValidation: true
+
+                headerText: qsTr("ContentPaddingAddition - Content padding addition")
+                textField.text: serverContentPaddingAddition
+
+                scroller: smartScroll
+                onEdited: (text) => { serverContentPaddingAddition = text }
+            }
+
+            AwgTextField {
+                id: rekeyAfterTimeTextField
+
+                visible: isAwg3
+                rangeValidation: true
+
+                headerText: qsTr("RekeyAfterTime - Rekey after time")
+                textField.text: serverRekeyAfterTime
+
+                scroller: smartScroll
+                onEdited: (text) => { serverRekeyAfterTime = text }
+            }
+
+            AwgTextField {
+                id: rekeyTimeoutTextField
+
+                visible: isAwg3
+                rangeValidation: true
+
+                headerText: qsTr("RekeyTimeout - Rekey timeout")
+                textField.text: serverRekeyTimeout
+
+                scroller: smartScroll
+                onEdited: (text) => { serverRekeyTimeout = text }
+            }
+
+            AwgTextField {
+                id: rejectAfterTimeTextField
+
+                visible: isAwg3
+                rangeValidation: true
+
+                headerText: qsTr("RejectAfterTime - Reject after time")
+                textField.text: serverRejectAfterTime
+
+                scroller: smartScroll
+                onEdited: (text) => { serverRejectAfterTime = text }
+            }
+
+            AwgTextField {
+                id: keepaliveTimeoutTextField
+
+                visible: isAwg3
+                rangeValidation: true
+
+                headerText: qsTr("KeepaliveTimeout - Keepalive timeout")
+                textField.text: serverKeepaliveTimeout
+
+                scroller: smartScroll
+                onEdited: (text) => { serverKeepaliveTimeout = text }
+            }
+
+            AwgTextField {
+                id: maxHandshakeAttemptsTextField
+
+                visible: isAwg3
+                rangeValidation: true
+
+                headerText: qsTr("MaxHandshakeAttempts - Max handshake attempts")
+                textField.text: serverMaxHandshakeAttempts
+
+                scroller: smartScroll
+                onEdited: (text) => { serverMaxHandshakeAttempts = text }
+            }
+
+            CheckBoxType {
+                id: randomTrailersCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg3
+
+                text: qsTr("RandomTrailers")
+
+                checked: serverRandomTrailers
+                onCheckedChanged: {
+                    if (checked !== serverRandomTrailers) {
+                        serverRandomTrailers = checked
+                    }
+                }
+            }
+
+            CheckBoxType {
+                id: disableCookiesCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg3
+
+                text: qsTr("DisableCookies")
+
+                checked: serverDisableCookies
+                onCheckedChanged: {
+                    if (checked !== serverDisableCookies) {
+                        serverDisableCookies = checked
                     }
                 }
             }
@@ -511,6 +448,12 @@ PageType {
                          transportPacketMagicHeaderTextField.errorText === "" &&
                          responsePacketMagicHeaderTextField.errorText === "" &&
                          initPacketMagicHeaderTextField.errorText === "" &&
+                         contentPaddingAdditionTextField.errorText === "" &&
+                         rekeyAfterTimeTextField.errorText === "" &&
+                         rekeyTimeoutTextField.errorText === "" &&
+                         rejectAfterTimeTextField.errorText === "" &&
+                         keepaliveTimeoutTextField.errorText === "" &&
+                         maxHandshakeAttemptsTextField.errorText === "" &&
                          responsePacketJunkSizeTextField.errorText === "" &&
                          cookieReplyPacketJunkSizeTextField.errorText === "" &&
                          transportPacketJunkSizeTextField.errorText === "" &&
@@ -540,10 +483,10 @@ PageType {
                             return
                         }
 
-                        if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text),
-                                                            parseInt(responsePacketJunkSizeTextField.textField.text),
-                                                            parseInt(cookieReplyPacketJunkSizeTextField.textField.text),
-                                                            parseInt(transportPacketJunkSizeTextField.textField.text))) {
+                        if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text) || 0,
+                                                            parseInt(responsePacketJunkSizeTextField.textField.text) || 0,
+                                                            parseInt(cookieReplyPacketJunkSizeTextField.textField.text) || 0,
+                                                            parseInt(transportPacketJunkSizeTextField.textField.text) || 0)) {
                             PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
                             return
                         }

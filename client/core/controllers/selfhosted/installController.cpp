@@ -2,6 +2,7 @@
 
 #include "core/models/protocolConfig.h"
 
+#include <QCoreApplication>
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
@@ -10,6 +11,7 @@
 #include <QtConcurrent>
 
 #include "core/configurators/configuratorBase.h"
+#include "core/configurators/xrayConfigurator.h"
 #include "core/utils/containerEnum.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
@@ -21,8 +23,8 @@
 #include "core/installers/sftpInstaller.h"
 #include "core/installers/socks5Installer.h"
 #include "core/installers/mtProxyInstaller.h"
-#include "core/configurators/xrayConfigurator.h"
 #include "core/installers/telemtInstaller.h"
+#include "core/installers/tProxyInstaller.h"
 #include "core/installers/torInstaller.h"
 #include "core/installers/wireguardInstaller.h"
 #include "core/installers/xrayInstaller.h"
@@ -118,7 +120,6 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     e = installDockerWorker(credentials, container, sshSession);
     if (e)
         return e;
-    qDebug().noquote() << "InstallController::setupContainer installDockerWorker finished";
 
     if (!isUpdate) {
         e = isServerPortBusy(credentials, container, config, sshSession);
@@ -129,32 +130,34 @@ ErrorCode InstallController::setupContainer(const ServerCredentials &credentials
     e = prepareHostWorker(credentials, container, sshSession);
     if (e)
         return e;
-    qDebug().noquote() << "InstallController::setupContainer prepareHostWorker finished";
 
     const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    const bool removeDataVolume = !isUpdate && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    const bool removeDataVolume = !isUpdate && (container == DockerContainer::MtProxy
+            || container == DockerContainer::Telemt || container == DockerContainer::TProxy);
     sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
-    qDebug().noquote() << "InstallController::setupContainer removeContainer finished";
 
-    qDebug().noquote() << "buildContainerWorker start";
     e = buildContainerWorker(credentials, container, config, sshSession);
     if (e)
         return e;
-    qDebug().noquote() << "InstallController::setupContainer buildContainerWorker finished";
 
     e = runContainerWorker(credentials, container, config, sshSession);
     if (e)
         return e;
-    qDebug().noquote() << "InstallController::setupContainer runContainerWorker finished";
 
     e = configureContainerWorker(credentials, container, config, sshSession);
     if (e)
         return e;
-    qDebug().noquote() << "InstallController::setupContainer configureContainerWorker finished";
+
+    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
+        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
+        XrayConfigurator xrayConfigurator(&sshSession);
+        e = xrayConfigurator.writeServerConfigForSetup(credentials, container, config, dnsSettings);
+        if (e)
+            return e;
+    }
 
     setupServerFirewall(credentials, sshSession);
-    qDebug().noquote() << "InstallController::setupContainer setupServerFirewall finished";
 
     return startupContainerWorker(credentials, container, config, sshSession);
 }
@@ -175,6 +178,10 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             ServerCredentials credentials = adminConfig->credentials();
             SshSession sshSession;
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
+        } else if (container == DockerContainer::TProxy) {
+            ServerCredentials credentials = adminConfig->credentials();
+            SshSession sshSession;
+            TProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
@@ -194,38 +201,27 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
     bool reinstallRequired = isReinstallContainerRequired(container, oldConfig, newConfig);
     qDebug() << "InstallController::updateServerConfig for container" << container << "reinstall required is" << reinstallRequired;
 
-    bool xrayServerSettingsChanged = false;
-    if (container == DockerContainer::Xray || container == DockerContainer::SSXray) {
-        const auto *oldXrayConfig = oldConfig.getXrayProtocolConfig();
-        const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
-        if (oldXrayConfig && newXrayConfig) {
-            xrayServerSettingsChanged =
-                    !oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig);
-        }
-    }
-
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
         errorCode = setupContainer(credentials, container, newConfig, true);
-    } else {
+
+        // Reinstall pulls the latest container image, so the server runs the latest protocol version
+        if (errorCode == ErrorCode::NoError && container == DockerContainer::Awg2) {
+            if (auto* awgConfig = newConfig.getAwgProtocolConfig()) {
+                awgConfig->serverConfig.protocolVersion = protocols::awg::awgV3;
+            }
+        }
+    } else if (container != DockerContainer::Xray && container != DockerContainer::SSXray) {
         errorCode = configureContainerWorker(credentials, container, newConfig, sshSession);
         if (errorCode == ErrorCode::NoError) {
             errorCode = startupContainerWorker(credentials, container, newConfig, sshSession);
         }
-    }
 
-    const bool skipXrayInboundSync =
-            newConfig.getXrayProtocolConfig() && newConfig.getXrayProtocolConfig()->serverConfig.isThirdPartyConfig;
-
-    if (errorCode == ErrorCode::NoError && xrayServerSettingsChanged && !skipXrayInboundSync) {
-        DnsSettings dnsSettings = { m_appSettingsRepository->primaryDns(), m_appSettingsRepository->secondaryDns() };
-        XrayConfigurator xrayConfigurator(&sshSession);
-        qDebug() << "InstallController::updateServerConfig applying Xray server inbound sync, reinstall="
-                 << reinstallRequired;
-        errorCode = xrayConfigurator.applyServerSettingsToRemote(credentials, container, newConfig, dnsSettings, false);
-        if (errorCode != ErrorCode::NoError) {
-            qDebug() << "InstallController::updateServerConfig Xray inbound sync failed, error="
-                     << static_cast<int>(errorCode);
+        if (errorCode == ErrorCode::NoError
+            && (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+                || container == DockerContainer::TProxy)) {
+            const QString containerName = ContainerUtils::containerToString(container);
+            errorCode = sshSession.runScript(credentials, "sudo docker restart " + containerName);
         }
     }
 
@@ -234,8 +230,12 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
             MtProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         } else if (container == DockerContainer::Telemt) {
             TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
+        } else if (container == DockerContainer::TProxy) {
+            TProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, newConfig);
         }
-        clearCachedProfile(serverId, container);
+        if (reinstallRequired) {
+            clearCachedProfile(serverId, container);
+        }
         adminConfig->updateContainerConfig(container, newConfig);
         m_serversRepository->editServer(serverId, adminConfig->toJson(), serverConfigUtils::ConfigType::SelfHostedAdmin);
     }
@@ -415,6 +415,11 @@ ErrorCode InstallController::prepareContainerConfig(DockerContainer container, c
     }
 
     if (ContainerUtils::containerService(container) != ServiceType::Other) {
+        if ((container == DockerContainer::Xray || container == DockerContainer::SSXray)
+            && containerConfig.protocolConfig.hasClientConfig()) {
+            return ErrorCode::NoError;
+        }
+
         Proto protocol = ContainerUtils::defaultProtocol(container);
 
         DnsSettings dnsSettings = {
@@ -502,6 +507,12 @@ ErrorCode InstallController::buildContainerWorker(const ServerCredentials &crede
     if (stdOut.contains("have reached") && stdOut.contains("pull rate limit"))
         return ErrorCode::DockerPullRateLimit;
 
+    if (stdOut.contains("returned a non-zero code")
+        || stdOut.contains("failed to solve")
+        || stdOut.contains("Unable to find image")
+        || stdOut.contains("Couldn't connect to server"))
+        return ErrorCode::ServerDockerFailedError;
+
     return error;
 }
 
@@ -525,6 +536,8 @@ ErrorCode InstallController::runContainerWorker(const ServerCredentials &credent
     if (stdOut.contains("is already in use by container"))
         return ErrorCode::ServerPortAlreadyAllocatedError;
     if (stdOut.contains("invalid publish"))
+        return ErrorCode::ServerDockerFailedError;
+    if (stdOut.contains("Unable to find image") || stdOut.contains("No such image"))
         return ErrorCode::ServerDockerFailedError;
 
     return e;
@@ -565,6 +578,8 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
         MtProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, config);
     } else if (container == DockerContainer::Telemt) {
         TelemtInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, config);
+    } else if (container == DockerContainer::TProxy) {
+        TProxyInstaller::uploadClientSettingsSnapshot(sshSession, credentials, container, config);
     }
 
     return ErrorCode::NoError;
@@ -616,22 +631,42 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
     if (port.isEmpty()) {
         port = QString::number(ProtocolUtils::defaultPort(protocol));
     }
+    if (container == DockerContainer::TProxy) {
+        if (const auto *tProxyConfig = config.getTProxyProtocolConfig()) {
+            const QString httpPort =
+                    tProxyConfig->httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : tProxyConfig->httpPort;
+            if (!fixedPorts.contains(httpPort) && httpPort != port) {
+                fixedPorts.append(httpPort);
+            }
+        }
+    }
     QString transportProto = config.protocolConfig.transportProto();
     if (transportProto.isEmpty()) {
         transportProto = ProtocolUtils::transportProtoToString(ProtocolUtils::defaultTransportProto(protocol), protocol);
     }
 
-    // TODO reimplement with netstat
-    QString script = QString("which lsof > /dev/null 2>&1 || true && sudo lsof -i -P -n 2>/dev/null | grep -E ':%1 ").arg(port);
-    for (auto &port : fixedPorts) {
-        script = script.append("|:%1").arg(port);
+    // Match exact host ports in lsof output (e.g. *:80) but not prefixes like *:8025 or *:8080.
+    QStringList portsToCheck;
+    portsToCheck << port;
+    for (const QString &fixedPort : fixedPorts) {
+        if (!portsToCheck.contains(fixedPort)) {
+            portsToCheck << fixedPort;
+        }
     }
+    QStringList portRegexParts;
+    for (const QString &p : portsToCheck) {
+        portRegexParts << QString(":%1([^0-9]|$)").arg(p);
+    }
+    const QString portRegex = portRegexParts.join(QLatin1Char('|'));
+
+    QString script = QString("which lsof > /dev/null 2>&1 || true && sudo lsof -i -P -n 2>/dev/null | grep -E '%1'")
+                               .arg(portRegex);
 
     if (transportProto == "tcpandudp") {
         QString tcpProtoScript = script;
         QString udpProtoScript = script;
-        tcpProtoScript.append("' | grep -i tcp");
-        udpProtoScript.append("' | grep -i udp");
+        tcpProtoScript.append(" | grep -i tcp");
+        udpProtoScript.append(" | grep -i udp");
         tcpProtoScript.append(" | grep LISTEN");
 
         ErrorCode errorCode = sshSession.runScript(
@@ -656,7 +691,7 @@ ErrorCode InstallController::isServerPortBusy(const ServerCredentials &credentia
         return ErrorCode::NoError;
     }
 
-    script = script.append("' | grep -i %1").arg(transportProto);
+    script = script.append(" | grep -i %1").arg(transportProto);
 
     if (transportProto == "tcp") {
         script = script.append(" | grep LISTEN");
@@ -715,13 +750,7 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
         const auto *newXrayConfig = newConfig.getXrayProtocolConfig();
 
         if (oldXrayConfig && newXrayConfig) {
-            const QString oldPort = oldXrayConfig->serverConfig.port.isEmpty()
-                    ? QString(protocols::xray::defaultPort)
-                    : oldXrayConfig->serverConfig.port;
-            const QString newPort = newXrayConfig->serverConfig.port.isEmpty()
-                    ? QString(protocols::xray::defaultPort)
-                    : newXrayConfig->serverConfig.port;
-            if (oldPort != newPort) {
+            if (!oldXrayConfig->serverConfig.hasEqualServerSettings(newXrayConfig->serverConfig)) {
                 return true;
             }
         }
@@ -738,18 +767,6 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             if (oldPort != newPort) {
                 return true;
             }
-            const QString oldTransport = oldMt->transportMode.isEmpty() ? QString(
-                    protocols::mtProxy::transportModeStandard)
-                                                                        : oldMt->transportMode;
-            const QString newTransport = newMt->transportMode.isEmpty() ? QString(
-                    protocols::mtProxy::transportModeStandard)
-                                                                        : newMt->transportMode;
-            if (oldTransport != newTransport) {
-                return true;
-            }
-            if (oldMt->tlsDomain != newMt->tlsDomain) {
-                return true;
-            }
         }
     }
 
@@ -764,37 +781,22 @@ bool InstallController::isReinstallContainerRequired(DockerContainer container, 
             if (oldPort != newPort) {
                 return true;
             }
-            const QString oldTransport = oldT->transportMode.isEmpty()
-                    ? QString(protocols::telemt::transportModeStandard)
-                    : oldT->transportMode;
-            const QString newTransport = newT->transportMode.isEmpty()
-                    ? QString(protocols::telemt::transportModeStandard)
-                    : newT->transportMode;
-            if (oldTransport != newTransport) {
-                return true;
-            }
-            if (oldT->tlsDomain != newT->tlsDomain) {
-                return true;
-            }
-            if (oldT->maskEnabled != newT->maskEnabled) {
-                return true;
-            }
-            if (oldT->tlsEmulation != newT->tlsEmulation) {
-                return true;
-            }
-            if (oldT->useMiddleProxy != newT->useMiddleProxy) {
-                return true;
-            }
-            if (oldT->tag != newT->tag) {
-                return true;
-            }
-            const QString oldUser = oldT->userName.isEmpty()
-                    ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                    : oldT->userName;
-            const QString newUser = newT->userName.isEmpty()
-                    ? QString::fromUtf8(protocols::telemt::defaultUserName)
-                    : newT->userName;
-            if (oldUser != newUser) {
+        }
+    }
+
+    if (container == DockerContainer::TProxy) {
+        const auto *oldP = oldConfig.getTProxyProtocolConfig();
+        const auto *newP = newConfig.getTProxyProtocolConfig();
+        if (oldP && newP) {
+            const QString oldHttps =
+                    oldP->port.isEmpty() ? QString(protocols::tProxy::defaultPort) : oldP->port;
+            const QString newHttps =
+                    newP->port.isEmpty() ? QString(protocols::tProxy::defaultPort) : newP->port;
+            const QString oldHttp =
+                    oldP->httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : oldP->httpPort;
+            const QString newHttp =
+                    newP->httpPort.isEmpty() ? QString(protocols::tProxy::defaultHttpPort) : newP->httpPort;
+            if (oldHttps != newHttps || oldHttp != newHttp) {
                 return true;
             }
         }
@@ -836,9 +838,24 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
 
     qDebug().noquote() << "InstallController::installDockerWorker" << stdOut;
 
+    if (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+            || container == DockerContainer::TProxy) {
+        QString conntrackOut;
+        auto cbConntrack = [&](const QString &data, libssh::Client &) {
+            conntrackOut += data + "\n";
+            return ErrorCode::NoError;
+        };
+        sshSession.runScript(
+                credentials,
+                sshSession.replaceVars(amnezia::scriptData(SharedScriptType::install_conntrack),
+                                       amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
+                cbConntrack, cbConntrack);
+        qDebug().noquote() << "InstallController::installDockerWorker install_conntrack:" << conntrackOut;
+    }
+
     if (container == DockerContainer::Awg2) {
-        QRegularExpression regex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
-        QRegularExpressionMatch match = regex.match(stdOut);
+        QRegularExpression kernelVersionRegex(R"(Linux\s+(\d+)\.(\d+)[^\d]*)");
+        QRegularExpressionMatch match = kernelVersionRegex.match(stdOut);
         if (match.hasMatch()) {
             int majorVersion = match.captured(1).toInt();
             int minorVersion = match.captured(2).toInt();
@@ -851,8 +868,19 @@ ErrorCode InstallController::installDockerWorker(const ServerCredentials &creden
 
     if (stdOut.contains("lock"))
         return ErrorCode::ServerPacketManagerError;
-    if (stdOut.contains("command not found"))
+    if (stdOut.contains("Container runtime is not supported"))
+        return ErrorCode::ServerContainerRuntimeNotSupported;
+    
+    QRegularExpression notFoundRegex(
+        R"(^.*(?:sudo:|docker:).*not found.*$)",
+        QRegularExpression::MultilineOption);
+
+    if (notFoundRegex.match(stdOut).hasMatch()) {
         return ErrorCode::ServerDockerFailedError;
+    }
+    
+    if (stdOut.contains("Container runtime service not running"))
+        return ErrorCode::ContainerRuntimeServiceNotRunning;
 
     return error;
 }
@@ -889,7 +917,7 @@ ErrorCode InstallController::isUserInSudo(const ServerCredentials &credentials, 
         return ErrorCode::ServerUserNotInSudo;
     if (stdOut.contains("can't cd to") || stdOut.contains("Permission denied") || stdOut.contains("No such file or directory"))
         return ErrorCode::ServerUserDirectoryNotAccessible;
-    if (stdOut.contains("sudoers") || stdOut.contains("is not allowed to run sudo on"))
+    if (stdOut.contains(QRegularExpression(R"(\bsudoers\b)")) || stdOut.contains("is not allowed to") || stdOut.contains("can't do that"))
         return ErrorCode::ServerUserNotAllowedInSudoers;
     if (stdOut.contains("password is required") || stdOut.contains("authentication is required"))
         return ErrorCode::ServerUserPasswordRequired;
@@ -1024,7 +1052,8 @@ ErrorCode InstallController::removeContainer(const QString &serverId, DockerCont
     SshSession sshSession;
     const amnezia::ScriptVars removeContainerVars =
             amnezia::genBaseVars(credentials, container, QString(), QString());
-    const bool removeDataVolume = (container == DockerContainer::MtProxy || container == DockerContainer::Telemt);
+    const bool removeDataVolume = (container == DockerContainer::MtProxy || container == DockerContainer::Telemt
+            || container == DockerContainer::TProxy);
     ErrorCode errorCode =
             sshSession.runScript(credentials, buildRemoveContainerScript(removeContainerVars, removeDataVolume));
 
@@ -1063,6 +1092,7 @@ QScopedPointer<InstallerBase> InstallController::createInstaller(DockerContainer
     case DockerContainer::Socks5Proxy: return QScopedPointer<InstallerBase>(new Socks5Installer(this));
     case DockerContainer::MtProxy: return QScopedPointer<InstallerBase>(new MtProxyInstaller(this));
     case DockerContainer::Telemt: return QScopedPointer<InstallerBase>(new TelemtInstaller(this));
+    case DockerContainer::TProxy: return QScopedPointer<InstallerBase>(new TProxyInstaller(this));
     default: return QScopedPointer<InstallerBase>(new InstallerBase(this));
     }
 }
@@ -1077,7 +1107,33 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
                                               TransportProto transportProto, ContainerConfig &config)
 {
     config = generateConfig(container, port, transportProto);
+    if (container == DockerContainer::TProxy) {
+        auto *tProxyConfig = config.getTProxyProtocolConfig();
+        if (tProxyConfig) {
+            if (!m_tproxyInstallHostname.isEmpty()) {
+                tProxyConfig->hostname = m_tproxyInstallHostname;
+            }
+            if (!m_tproxyInstallEmail.isEmpty()) {
+                tProxyConfig->acmeEmail = m_tproxyInstallEmail;
+            }
+        }
+        m_tproxyInstallHostname.clear();
+        m_tproxyInstallEmail.clear();
+
+        // TProxy needs a hostname and ACME email before the first deploy (configure_container.sh
+        // exits 1 without them). Fail fast with a clear error instead of a confusing server-side
+        // failure if the install path is reached without them being supplied via setTProxyInstallHints().
+        if (!tProxyConfig || tProxyConfig->hostname.isEmpty() || tProxyConfig->acmeEmail.isEmpty()) {
+            return ErrorCode::InternalError;
+        }
+    }
     return setupContainer(credentials, container, config, false);
+}
+
+void InstallController::setTProxyInstallHints(const QString &hostname, const QString &email)
+{
+    m_tproxyInstallHostname = hostname;
+    m_tproxyInstallEmail = email;
 }
 
 
@@ -1115,6 +1171,13 @@ bool InstallController::isUpdateDockerContainerRequired(DockerContainer containe
             return true;
         }
         return !oldT->equalsDockerDeploymentSettings(*newT);
+    } else if (container == DockerContainer::TProxy) {
+        const auto *oldP = oldConfig.getTProxyProtocolConfig();
+        const auto *newP = newConfig.getTProxyProtocolConfig();
+        if (!oldP || !newP) {
+            return true;
+        }
+        return !oldP->equalsDockerDeploymentSettings(*newP);
     }
 
     return true;
@@ -1466,6 +1529,34 @@ void InstallController::updateContainerConfigAfterInstallation(DockerContainer c
                 telemtConfig->tmeLink = mTmeLink.captured(1);
             }
         }
+    } else if (container == DockerContainer::TProxy) {
+        if (auto *tProxyConfig = containerConfig.getTProxyProtocolConfig()) {
+            static const QRegularExpression reSecret(
+                    QStringLiteral(R"(\[\*\]\s+Secret:\s+([0-9a-fA-F]{32}))"),
+                    QRegularExpression::CaseInsensitiveOption);
+            static const QRegularExpression reTgLink(QStringLiteral(R"(\[\*\]\s+tg://\s+link:\s+(tg://webproxy\?[^\s]+))"));
+            static const QRegularExpression reTmeLink(
+                    QStringLiteral(R"(\[\*\]\s+t\.me\s+link:\s+(https://t\.me/webproxy\?[^\s]+))"));
+            static const QRegularExpression reHost(QStringLiteral(R"(\[\*\]\s+Hostname:\s+(\S+))"));
+
+            const QRegularExpressionMatch mSecret = reSecret.match(stdOut);
+            const QRegularExpressionMatch mTgLink = reTgLink.match(stdOut);
+            const QRegularExpressionMatch mTmeLink = reTmeLink.match(stdOut);
+            const QRegularExpressionMatch mHost = reHost.match(stdOut);
+
+            if (mSecret.hasMatch()) {
+                tProxyConfig->secret = mSecret.captured(1);
+            }
+            if (mTgLink.hasMatch()) {
+                tProxyConfig->tgLink = mTgLink.captured(1);
+            }
+            if (mTmeLink.hasMatch()) {
+                tProxyConfig->tmeLink = mTmeLink.captured(1);
+            }
+            if (mHost.hasMatch() && tProxyConfig->hostname.isEmpty()) {
+                tProxyConfig->hostname = mHost.captured(1);
+            }
+        }
     }
 }
 
@@ -1513,6 +1604,11 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
             auto installer = createInstaller(container);
             ContainerConfig config = installer->createBaseConfig(container, port, transportProto);
+            if (container == DockerContainer::TProxy) {
+                if (auto *tProxyConfig = config.getTProxyProtocolConfig()) {
+                    TProxyInstaller::applyDockerPublishedPorts(containerInfo, *tProxyConfig);
+                }
+            }
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
 
             if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
@@ -1538,6 +1634,11 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
             auto installer = createInstaller(container);
             ContainerConfig config = installer->createBaseConfig(container, port, transportProto);
+            if (container == DockerContainer::TProxy) {
+                if (auto *tProxyConfig = config.getTProxyProtocolConfig()) {
+                    TProxyInstaller::applyDockerPublishedPorts(containerInfo, *tProxyConfig);
+                }
+            }
             ErrorCode extractError = installer->extractConfigFromContainer(container, credentials, &sshSession, config);
 
             if (extractError != ErrorCode::NoError && extractError != ErrorCode::ServerContainerMissingError) {
@@ -1553,7 +1654,8 @@ ErrorCode InstallController::getAlreadyInstalledContainers(const ServerCredentia
 
 ErrorCode InstallController::setDockerContainerEnabledState(const QString &serverId, DockerContainer container, bool enabled)
 {
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
+            && container != DockerContainer::TProxy) {
         return ErrorCode::InternalError;
     }
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
@@ -1579,6 +1681,9 @@ ErrorCode InstallController::setDockerContainerEnabledState(const QString &serve
         persist = true;
     } else if (auto *telemtConfig = currentConfig.getTelemtProtocolConfig()) {
         telemtConfig->isEnabled = enabled;
+        persist = true;
+    } else if (auto *tProxyConfig = currentConfig.getTProxyProtocolConfig()) {
+        tProxyConfig->isEnabled = enabled;
         persist = true;
     }
     if (persist) {
@@ -1645,7 +1750,8 @@ ErrorCode InstallController::queryMtProxyDiagnostics(const QString &serverId, Do
 
 QString InstallController::fetchDockerContainerSecret(const QString &serverId, DockerContainer container)
 {
-    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt) {
+    if (container != DockerContainer::MtProxy && container != DockerContainer::Telemt
+            && container != DockerContainer::TProxy) {
         return {};
     }
     auto adminConfig = m_serversRepository->selfHostedAdminConfig(serverId);
