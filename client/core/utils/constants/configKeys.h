@@ -25,6 +25,7 @@ namespace amnezia
         constexpr QLatin1String accessToken("api_key");
         constexpr QLatin1String config("config");
         constexpr QLatin1String configVersion("config_version");
+        constexpr QLatin1String formatVersion("format_version");
 
         constexpr QLatin1String sendPayload("send_payload");
         constexpr QLatin1String sendPayloadEndpoint("endpoint");
