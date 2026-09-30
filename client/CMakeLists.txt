@@ -43,11 +43,14 @@ endif()
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 find_package(OpenSSL REQUIRED)
 
+find_package(libagw REQUIRED)
+
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
+    amnezia::libagw
 )
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
