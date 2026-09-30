@@ -35,6 +35,8 @@ using namespace amnezia;
 
 namespace
 {
+constexpr int httpStatusCodeNotFound = 404;
+
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
     if (apiConfig.subscriptionExpiredByServer) {
@@ -590,10 +592,10 @@ ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData
 
     const QJsonObject responseObject = QJsonDocument::fromJson(responseBody).object();
     otpData.code = responseObject.value(apiDefs::key::otpCode).toString();
-    otpData.requestOtpId = responseObject.value(apiDefs::key::requestOtpId).toString();
-    otpData.expiresInSec = responseObject.value(apiDefs::key::expiresIn).toInt(600);
-    if (otpData.code.isEmpty()) {
-        qWarning().noquote() << "[OTP] Response does not contain an otp code";
+    otpData.otpRequestId = responseObject.value(apiDefs::key::otpRequestId).toString();
+    otpData.expiresAt = QDateTime::fromString(responseObject.value(apiDefs::key::expiresAt).toString(), Qt::ISODateWithMs);
+    if (otpData.code.isEmpty() || otpData.otpRequestId.isEmpty()) {
+        qWarning().noquote() << "[OTP] Response does not contain an otp code or request id";
         return ErrorCode::ApiOtpLoginError;
     }
     return ErrorCode::NoError;
@@ -606,7 +608,7 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
     promise->start();
 
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::requestOtpId, requestId)
+                                     .addField(apiDefs::key::otpRequestId, requestId)
                                      .build();
 
     auto gatewayController = QSharedPointer<GatewayController>::create(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase),
@@ -621,7 +623,14 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
                          const auto [errorCode, responseBody] = watcher->result();
                          watcher->deleteLater();
                          if (errorCode != ErrorCode::NoError) {
-                             promise->addResult(qMakePair(errorCode, OtpStatus::Pending));
+                             const QJsonObject errorObject = QJsonDocument::fromJson(responseBody).object();
+                             const int httpStatus = errorObject.value(QLatin1String("http_status"))
+                                                            .toInt(errorObject.value(QLatin1String("status")).toInt(-1));
+                             if (httpStatus == httpStatusCodeNotFound) {
+                                 promise->addResult(qMakePair(ErrorCode::NoError, OtpStatus::Expired));
+                             } else {
+                                 promise->addResult(qMakePair(errorCode, OtpStatus::Pending));
+                             }
                              promise->finish();
                              return;
                          }

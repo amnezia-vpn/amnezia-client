@@ -10,6 +10,7 @@
 #include "ui/controllers/systemController.h"
 #include "version.h"
 #include <QClipboard>
+#include <QDateTime>
 #include <QDebug>
 #include <QSet>
 #include <QEventLoop>
@@ -25,6 +26,7 @@
 namespace
 {
 constexpr char premiumServiceType[] = "amnezia-premium";
+constexpr int otpDefaultTtlSec = 600;
 }
 
 SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
@@ -317,14 +319,19 @@ void SubscriptionUiController::otpLogin(const QString &serverId)
         return;
     }
 
-    m_requestOtpId = otpData.requestOtpId;
+    m_otpRequestId = otpData.otpRequestId;
     m_otpIsTestPurchase = isTestPurchase;
-    emit otpCodeReceived(otpData.code, otpData.expiresInSec);
+
+    int expiresInSec = otpDefaultTtlSec;
+    if (otpData.expiresAt.isValid()) {
+        expiresInSec = static_cast<int>(qMax<qint64>(0, QDateTime::currentDateTimeUtc().secsTo(otpData.expiresAt)));
+    }
+    emit otpCodeReceived(otpData.code, expiresInSec);
 }
 
 void SubscriptionUiController::checkOtpStatus()
 {
-    if (m_requestOtpId.isEmpty() || m_otpStatusCheckInProgress) {
+    if (m_otpRequestId.isEmpty() || m_otpStatusCheckInProgress) {
         return;
     }
     m_otpStatusCheckInProgress = true;
@@ -342,14 +349,14 @@ void SubscriptionUiController::checkOtpStatus()
             return;
         }
         if (status == SubscriptionController::OtpStatus::Confirmed) {
-            m_requestOtpId.clear();
+            m_otpRequestId.clear();
             emit otpConfirmed();
         } else if (status == SubscriptionController::OtpStatus::Expired) {
-            m_requestOtpId.clear();
+            m_otpRequestId.clear();
             emit otpExpired();
         }
     });
-    watcher->setFuture(m_subscriptionController->otpStatus(m_requestOtpId, m_otpIsTestPurchase));
+    watcher->setFuture(m_subscriptionController->otpStatus(m_otpRequestId, m_otpIsTestPurchase));
 }
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
