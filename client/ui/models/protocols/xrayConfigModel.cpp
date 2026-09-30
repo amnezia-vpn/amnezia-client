@@ -5,6 +5,7 @@
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
 #include "core/utils/networkUtilities.h"
+#include "core/utils/containers/containerUtils.h"
 
 #include <QHostAddress>
 #include <QRegularExpression>
@@ -48,8 +49,15 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::PortRole: srv.port = str;
         break;
-    case Roles::TransportRole: srv.transport = str;
+    case Roles::TransportRole: {
+        const bool becameXhttp = srv.transport != str
+                && str == QLatin1String(protocols::xray::transportXhttp);
+        srv.transport = str;
+        if (becameXhttp) {
+            srv.applyDefaults(false);
+        }
         break;
+    }
     case Roles::SecurityRole: srv.security = str;
         break;
     case Roles::FlowRole: srv.flow = str;
@@ -58,7 +66,9 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
     // ── Security ──────────────────────────────────────────────────────
     case Roles::FingerprintRole: srv.fingerprint = str;
         break;
-    case Roles::SniRole: srv.sni = str;
+    case Roles::SniRole:
+        srv.sni = str;
+        srv.site = str;
         break;
     case Roles::AlpnRole: srv.alpn = str;
         break;
@@ -114,11 +124,11 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
         break;
     case Roles::MkcpDownlinkCapacityRole: mkcp.downlinkCapacity = str;
         break;
-    case Roles::MkcpReadBufferSizeRole: mkcp.readBufferSize = str;
+    case Roles::MkcpMtuRole: mkcp.mtu = str;
         break;
-    case Roles::MkcpWriteBufferSizeRole: mkcp.writeBufferSize = str;
+    case Roles::MkcpCwndMultiplierRole: mkcp.cwndMultiplier = str;
         break;
-    case Roles::MkcpCongestionRole: mkcp.congestion = value.toBool();
+    case Roles::MkcpMaxSendingWindowRole: mkcp.maxSendingWindow = str;
         break;
 
     // ── xPadding ──────────────────────────────────────────────────────
@@ -228,9 +238,9 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::MkcpTtiRole: return mkcp.tti;
     case Roles::MkcpUplinkCapacityRole: return mkcp.uplinkCapacity;
     case Roles::MkcpDownlinkCapacityRole: return mkcp.downlinkCapacity;
-    case Roles::MkcpReadBufferSizeRole: return mkcp.readBufferSize;
-    case Roles::MkcpWriteBufferSizeRole: return mkcp.writeBufferSize;
-    case Roles::MkcpCongestionRole: return mkcp.congestion;
+    case Roles::MkcpMtuRole: return mkcp.mtu;
+    case Roles::MkcpCwndMultiplierRole: return mkcp.cwndMultiplier;
+    case Roles::MkcpMaxSendingWindowRole: return mkcp.maxSendingWindow;
 
     // ── xPadding ──────────────────────────────────────────────────────
     case Roles::XPaddingBytesMinRole: return pad.bytesMin;
@@ -279,6 +289,7 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
     m_originalProtocolConfig = m_protocolConfig;
 
     endResetModel();
+
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
     }
@@ -286,86 +297,75 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
 
 void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config, bool fillFlowDefault)
 {
-    if (config.port.isEmpty()) {
-        config.port = protocols::xray::defaultPort;
-    }
-
-    if (config.transportProto.isEmpty()) {
-        config.transportProto = ProtocolUtils::transportProtoToString(
-            ProtocolUtils::defaultTransportProto(amnezia::Proto::Xray), amnezia::Proto::Xray);
-    }
-
-    if (config.site.isEmpty()) {
-        config.site = protocols::xray::defaultSite;
-    }
-
-    if (config.transport.isEmpty()) {
-        config.transport = protocols::xray::defaultTransport;
-    }
-
-    if (config.security.isEmpty()) {
-        config.security = protocols::xray::defaultSecurity;
-    }
-
-    if (fillFlowDefault && config.flow.isEmpty()) {
-        config.flow = protocols::xray::defaultFlow;
-    }
-
-    if (config.fingerprint.isEmpty()) {
-        config.fingerprint = protocols::xray::defaultFingerprint;
-    } else if (config.fingerprint.contains(QLatin1String("Mozilla/5.0"), Qt::CaseInsensitive)) {
-        config.fingerprint = QString::fromLatin1(protocols::xray::defaultFingerprint);
-    }
-
-    if (config.sni.isEmpty()) {
-        config.sni = protocols::xray::defaultSni;
-    }
-
-    if (config.alpn.isEmpty()) {
-        config.alpn = protocols::xray::defaultAlpn;
-    }
-
-    // XHTTP transport defaults
-    if (config.xhttp.host.isEmpty()) {
-        config.xhttp.host = protocols::xray::defaultXhttpHost;
-    }
-    if (config.xhttp.mode.isEmpty()) {
-        config.xhttp.mode = protocols::xray::defaultXhttpMode;
-    }
-    if (config.xhttp.uplinkMethod.isEmpty()) {
-        config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
-    }
-    if (config.xhttp.sessionPlacement.isEmpty()) {
-        config.xhttp.sessionPlacement = protocols::xray::defaultXhttpSessionPlacement;
-    }
-    if (config.xhttp.sessionKey.isEmpty()) {
-        config.xhttp.sessionKey = protocols::xray::defaultXhttpSessionKey;
-    }
-    if (config.xhttp.seqPlacement.isEmpty()) {
-        config.xhttp.seqPlacement = protocols::xray::defaultXhttpSeqPlacement;
-    }
-    if (config.xhttp.uplinkDataPlacement.isEmpty()) {
-        config.xhttp.uplinkDataPlacement = protocols::xray::defaultXhttpUplinkDataPlacement;
-    }
-
-    // xPadding defaults
-    if (config.xhttp.xPadding.placement.isEmpty()) {
-        config.xhttp.xPadding.placement = protocols::xray::defaultXPaddingPlacement;
-    }
-    if (config.xhttp.xPadding.method.isEmpty()) {
-        config.xhttp.xPadding.method = protocols::xray::defaultXPaddingMethod;
-    }
+    config.applyDefaults(fillFlowDefault);
 }
 
 amnezia::XrayProtocolConfig XrayConfigModel::getProtocolConfig()
 {
-    const bool serverSettingsChanged =
-            !m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+    if (!m_protocolConfig.serverConfig.hasEqualServerSettings(m_originalProtocolConfig.serverConfig)) {
+        m_protocolConfig.clearClientConfig();
+        return m_protocolConfig;
+    }
 
-    if (serverSettingsChanged) {
+    if (m_protocolConfig.serverConfig.toJson() == m_originalProtocolConfig.serverConfig.toJson()) {
+        return m_protocolConfig;
+    }
+
+    if (!m_protocolConfig.regenerateClientConfigFromNative()) {
         m_protocolConfig.clearClientConfig();
     }
     return m_protocolConfig;
+}
+
+amnezia::XrayServerConfig XrayConfigModel::pendingServerConfig(const QString &pendingPort) const
+{
+    amnezia::XrayServerConfig pending = m_protocolConfig.serverConfig;
+    if (!pendingPort.isEmpty()) {
+        pending.port = pendingPort;
+    }
+    return pending;
+}
+
+bool XrayConfigModel::pendingChangeTouchesServer(const QString &pendingPort) const
+{
+    return !pendingServerConfig(pendingPort).hasEqualServerSettings(m_originalProtocolConfig.serverConfig);
+}
+
+bool XrayConfigModel::pendingChangeBreaksIssuedConfigs(const QString &pendingPort) const
+{
+    return pendingServerConfig(pendingPort).breaksIssuedConfigs(m_originalProtocolConfig.serverConfig);
+}
+
+bool XrayConfigModel::pendingChangeRequiresReinstall(const QString &pendingPort) const
+{
+    const auto effectivePort = [](const QString &port) -> QString {
+        return port.isEmpty() ? QString::fromLatin1(protocols::xray::defaultPort) : port;
+    };
+    const amnezia::XrayServerConfig pending = pendingServerConfig(pendingPort);
+    return effectivePort(pending.port) != effectivePort(m_originalProtocolConfig.serverConfig.port);
+}
+
+QString XrayConfigModel::saveDescription(const QString &pendingPort) const
+{
+    const bool touchesServer = pendingChangeTouchesServer(pendingPort);
+    const bool breaksIssued = pendingChangeBreaksIssuedConfigs(pendingPort);
+    const bool requiresReinstall = pendingChangeRequiresReinstall(pendingPort);
+
+    if (requiresReinstall) {
+        if (breaksIssued) {
+            return tr("All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
+        } else {
+            return tr("The server will be recreated. This takes up to a minute, and connections that were already shared keep working.");
+        }
+    } else if (touchesServer) {
+        if (breaksIssued) {
+            return tr("The server configuration will be updated. All users with whom you shared a connection with will no longer be able to connect to it. You will need to share the connection again.");
+        } else {
+            return tr("The server configuration will be updated. The container will not be recreated.");
+        }
+    } else {
+        return tr("The server will not be changed now. The new settings apply the next time you connect.");
+    }
 }
 
 bool XrayConfigModel::isServerSettingsEqual() const
@@ -375,7 +375,7 @@ bool XrayConfigModel::isServerSettingsEqual() const
 
 bool XrayConfigModel::hasUnsavedChanges() const
 {
-    return !isServerSettingsEqual();
+    return m_protocolConfig.serverConfig.toJson() != m_originalProtocolConfig.serverConfig.toJson();
 }
 
 QHash<int, QByteArray> XrayConfigModel::roleNames() const
@@ -422,9 +422,9 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
     roles[MkcpTtiRole] = "mkcpTti";
     roles[MkcpUplinkCapacityRole] = "mkcpUplinkCapacity";
     roles[MkcpDownlinkCapacityRole] = "mkcpDownlinkCapacity";
-    roles[MkcpReadBufferSizeRole] = "mkcpReadBufferSize";
-    roles[MkcpWriteBufferSizeRole] = "mkcpWriteBufferSize";
-    roles[MkcpCongestionRole] = "mkcpCongestion";
+    roles[MkcpMtuRole] = "mkcpMtu";
+    roles[MkcpCwndMultiplierRole] = "mkcpCwndMultiplier";
+    roles[MkcpMaxSendingWindowRole] = "mkcpMaxSendingWindow";
 
     // xPadding
     roles[XPaddingBytesMinRole] = "xPaddingBytesMin";
@@ -458,8 +458,9 @@ void XrayConfigModel::resetToDefaults()
 
     beginResetModel();
     m_protocolConfig.serverConfig = amnezia::XrayServerConfig{};
-    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    applyDefaultsToServerConfig(m_protocolConfig.serverConfig, true);
     endResetModel();
+
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
@@ -472,9 +473,11 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
 
     beginResetModel();
     m_protocolConfig.serverConfig = serverConfig;
-    // Clear client config since server settings changed
-    m_protocolConfig.clearClientConfig();
+    if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
+        m_protocolConfig.serverConfig.applyDefaults(false);
+    }
     endResetModel();
+
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
         emit hasUnsavedChangesChanged();
@@ -512,7 +515,7 @@ QStringList XrayConfigModel::alpnOptions()
 
 QStringList XrayConfigModel::xhttpModeOptions()
 {
-    return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
+    return { "Stream-up", "Stream-one" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()
@@ -532,8 +535,7 @@ QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
 {
-    // Matches splithttp uplink payload placement (packet-up / advanced)
-    return { "Body", "Auto", "Header", "Cookie" };
+    return { "Body", "Auto" };
 }
 
 QStringList XrayConfigModel::xPaddingPlacementOptions()
@@ -562,14 +564,14 @@ QString XrayConfigModel::mkcpDefaultDownlinkCapacity()
     return QString::fromLatin1(protocols::xray::defaultMkcpDownlinkCapacity);
 }
 
-QString XrayConfigModel::mkcpDefaultReadBufferSize()
+QString XrayConfigModel::mkcpDefaultMtu()
 {
-    return QString::fromLatin1(protocols::xray::defaultMkcpReadBufferSize);
+    return QString::fromLatin1(protocols::xray::defaultMkcpMtu);
 }
 
-QString XrayConfigModel::mkcpDefaultWriteBufferSize()
+QString XrayConfigModel::mkcpDefaultCwndMultiplier()
 {
-    return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
+    return QString::fromLatin1(protocols::xray::defaultMkcpCwndMultiplier);
 }
 
 QString XrayConfigModel::portDefault()

@@ -39,6 +39,25 @@ PageType {
         return value === "" ? qsTr("Empty") : value
     }
 
+    Connections {
+        target: InstallController
+
+        function onXrayKeyMigrationNeedsConfirm(message) {
+            PageController.showBusyIndicator(false)
+            showQuestionDrawer(
+                qsTr("Recreate XRay with new keys?"),
+                message,
+                qsTr("Continue"),
+                qsTr("Cancel"),
+                function() {
+                    InstallController.updateServerConfig(ServersUiController.processedServerId,
+                                                         ServersUiController.processedContainerIndex,
+                                                         ProtocolEnum.Xray, true, true)
+                },
+                function() {})
+        }
+    }
+
     BackButtonType {
         id: backButton
 
@@ -219,8 +238,10 @@ PageType {
                         PageController.showErrorMessage(errs.join("\n"))
                         return
                     }
+                    var pendingPort = textFieldWithHeaderType.textField.text
+
                     var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                    var descriptionText = XrayConfigModel.saveDescription(pendingPort)
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
                     var yesButtonFunction = function() {
