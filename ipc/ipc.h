@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QRegularExpression>
+#include <QSet>
 
 #include "../client/core/utils/utilities.h"
 
@@ -16,7 +18,8 @@ enum PermittedProcess {
     Wireguard,
     Tun2Socks,
     CertUtil,
-    Security
+    Security,
+    PermittedProcessCount,
 };
 
 inline QString permittedProcessPath(PermittedProcess pid)
@@ -60,15 +63,26 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
     QList<Validator> positionalArgs;
 
     switch (proc) {
+    case OpenVPN: {
+        namedArgs["--config"] = [](const QString& v) { return !v.isEmpty(); };
+        namedArgs["--management"] = [](const QString& v) { return !v.isEmpty(); };
+        namedArgs["--management-client"] = nullptr;
+        positionalArgs.append([](const QString& v) {
+            bool ok;
+            int port = v.toInt(&ok);
+            return ok && port > 0 && port <= 65535;
+        });
+        break;
+    }
     case Tun2Socks:
         namedArgs["-device"] = [](const QString& v) { return v.startsWith("tun://"); };
         namedArgs["-proxy"] = [](const QString& v) { return v.startsWith("socks5://"); };
         break;
-    default:
-        //FIXME
+    case CertUtil:
         return args;
+    default:
+        return {};
     }
-
 
     QStringList sanitized;
 

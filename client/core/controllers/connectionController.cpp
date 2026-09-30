@@ -6,6 +6,7 @@
 #include "core/utils/protocolEnum.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
+#include "core/utils/payloadSender.h"
 #include "core/utils/utilities.h"
 #include "core/utils/serverConfigUtils.h"
 #include "version.h"
@@ -30,7 +31,6 @@ ConnectionController::ConnectionController(SecureServersRepository* serversRepos
     connect(m_vpnConnection, &VpnConnection::connectionStateChanged, this, &ConnectionController::connectionStateChanged);
     connect(this, &ConnectionController::openConnectionRequested, m_vpnConnection, &VpnConnection::connectToVpn, Qt::QueuedConnection);
     connect(this, &ConnectionController::closeConnectionRequested, m_vpnConnection, &VpnConnection::disconnectFromVpn, Qt::QueuedConnection);
-    connect(this, &ConnectionController::setConnectionStateRequested, m_vpnConnection, &VpnConnection::setConnectionState, Qt::QueuedConnection);
     connect(this, &ConnectionController::killSwitchModeChangedRequested, m_vpnConnection, &VpnConnection::onKillSwitchModeChanged, Qt::QueuedConnection);
 #ifdef Q_OS_ANDROID
     connect(this, &ConnectionController::restoreConnectionRequested, m_vpnConnection, &VpnConnection::restoreConnection, Qt::QueuedConnection);
@@ -44,19 +44,99 @@ bool ConnectionController::isConnected() const
 
 void ConnectionController::setConnectionState(Vpn::ConnectionState state)
 {
-    if (m_vpnConnection) {
-        emit setConnectionStateRequested(state);
+    emit connectionStateChanged(state);
+}
+
+ErrorCode ConnectionController::defaultContainerForServer(const QString &serverId, DockerContainer &container) const
+{
+    const auto kind = m_serversRepository->serverKind(serverId);
+    switch (kind) {
+    case serverConfigUtils::ConfigType::SelfHostedAdmin: {
+        const auto cfg = m_serversRepository->selfHostedAdminConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
     }
+    case serverConfigUtils::ConfigType::SelfHostedUser: {
+        const auto cfg = m_serversRepository->selfHostedUserConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::Native: {
+        const auto cfg = m_serversRepository->nativeConfig(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV2:
+    case serverConfigUtils::ConfigType::AmneziaFreeV3:
+    case serverConfigUtils::ConfigType::ExternalPremium: {
+        const auto cfg = m_serversRepository->apiV2Config(serverId);
+        if (!cfg.has_value()) {
+            return ErrorCode::InternalError;
+        }
+        container = cfg->defaultContainer;
+        return ErrorCode::NoError;
+    }
+    case serverConfigUtils::ConfigType::AmneziaPremiumV1:
+    case serverConfigUtils::ConfigType::AmneziaFreeV2:
+        return ErrorCode::LegacyApiV1NotSupportedError;
+    case serverConfigUtils::ConfigType::Invalid:
+    default:
+        return ErrorCode::InternalError;
+    }
+}
+
+ErrorCode ConnectionController::isConnectionSupported(const QString &serverId) const
+{
+    if (serverId.isEmpty()) {
+        return ErrorCode::InternalError;
+    }
+
+    if (!isServiceReady()) {
+        return ErrorCode::AmneziaServiceNotRunning;
+    }
+
+    const serverConfigUtils::ConfigType kind = m_serversRepository->serverKind(serverId);
+    if (serverConfigUtils::isLegacyApiSubscription(kind)) {
+        return ErrorCode::LegacyApiV1NotSupportedError;
+    }
+
+    DockerContainer container = DockerContainer::None;
+    const ErrorCode errorCode = defaultContainerForServer(serverId, container);
+    if (errorCode != ErrorCode::NoError) {
+        return errorCode;
+    }
+
+    if (container == DockerContainer::None) {
+        if (serverConfigUtils::isApiV2Subscription(kind)) {
+            return ErrorCode::NoError;
+        }
+        return ErrorCode::NoInstalledContainersError;
+    }
+
+    if (ContainerUtils::isUnsupportedContainer(container)) {
+        return ErrorCode::LegacyContainerNotSupportedError;
+    }
+
+    if (!isContainerSupported(container)) {
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
+    return ErrorCode::NoError;
 }
 
 ErrorCode ConnectionController::prepareConnection(const QString &serverId,
                                                  QJsonObject& vpnConfiguration,
                                                  DockerContainer& container)
 {
-    if (!isServiceReady()) {
-        return ErrorCode::AmneziaServiceNotRunning;
-    }
-
     ContainerConfig containerConfigModel;
     QPair<QString, QString> dns;
     QString hostName;
@@ -120,10 +200,6 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         return ErrorCode::InternalError;
     }
 
-    if (!isContainerSupported(container)) {
-        return ErrorCode::NotSupportedOnThisPlatform;
-    }
-
     vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,
                                                      containerConfigModel, container);
 
@@ -138,6 +214,11 @@ ErrorCode ConnectionController::openConnection(const QString &serverId)
     ErrorCode errorCode = prepareConnection(serverId, vpnConfiguration, container);
     if (errorCode != ErrorCode::NoError) {
         return errorCode;
+    }
+
+    const auto apiV2 = m_serversRepository->apiV2Config(serverId);
+    if (apiV2.has_value() && !apiV2->sendPayload.isEmpty()) {
+        PayloadSender::sendAll(apiV2->sendPayload);
     }
 
     emit openConnectionRequested(serverId, container, vpnConfiguration);

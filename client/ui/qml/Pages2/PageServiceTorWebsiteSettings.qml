@@ -100,6 +100,12 @@ PageType {
                 onLinkActivated: Qt.openUrlExternally(link)
                 textFormat: Text.RichText
                 text: qsTr("Use <a href=\"https://www.torproject.org/download/\" style=\"color: #FBB26A;\">Tor Browser</a> to open this URL.")
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.NoButton
+                    cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+                }
             }
 
             ParagraphTextType {

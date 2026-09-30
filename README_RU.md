@@ -28,21 +28,21 @@
 
 - Простой в использовании — введите IP-адрес, SSH-логин и пароль, и Amnezia автоматически установит VPN-контейнеры Docker на ваш сервер и подключится к VPN.
 - Классические VPN-протоколы: OpenVPN, WireGuard и IKEv2.
-- Протоколы с маскировкой трафика (обфускацией): OpenVPN с плагином [Cloak](https://github.com/cbeuw/Cloak), Shadowsocks (OpenVPN over Shadowsocks), [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) and XRay.
+- Протоколы с маскировкой трафика (обфускацией): OpenVPN с плагином [Cloak](https://github.com/cbeuw/Cloak), Shadowsocks (OpenVPN over Shadowsocks), [AmneziaWG](https://docs.amnezia.org/documentation/amnezia-wg/) и XRay.
 - Поддержка Split Tunneling — добавляйте любые сайты или приложения в список, чтобы включить VPN только для них.
 - Поддерживает платформы: Windows, macOS, Linux, Android, iOS.
 - Поддержка конфигурации протокола AmneziaWG на [бета-прошивке Keenetic](https://docs.keenetic.com/ua/air/kn-1611/en/6319-latest-development-release.html#UUID-186c4108-5afd-c10b-f38a-cdff6c17fab3_section-idm33192196168192-improved).
 
 ## Ссылки
 
-- [https://amnezia.org](https://amnezia.org) - Веб-сайт проекта | [Альтернативная ссылка (зеркало)](https://storage.googleapis.com/kldscp/amnezia.org)
-- [https://docs.amnezia.org](https://docs.amnezia.org) - Документация
+- [https://amnezia.org](https://amnezia.org/?utm_source=github&utm_campaign=amnezia_website-read) - Веб-сайт проекта | [Альтернативная ссылка (зеркало)](https://storage.googleapis.com/amnezia/amnezia.org?utm_source=github&utm_campaign=amnezia_website-read)
+- [https://docs.amnezia.org](https://docs.amnezia.org/?utm_source=github&utm_campaign=amnezia_website-read) - Документация | [Альтернативная ссылка (зеркало)](https://storage.googleapis.com/amnezia/docs?utm_source=github&utm_campaign=amnezia_website-read)
 - [https://www.reddit.com/r/AmneziaVPN](https://www.reddit.com/r/AmneziaVPN) - Reddit  
-- [https://t.me/amnezia_vpn_en](https://t.me/amnezia_vpn_en) - Канал поддержки в Telegram (Английский)
-- [https://t.me/amnezia_vpn_ir](https://t.me/amnezia_vpn_ir) - Канал поддержки в Telegram (Фарси)
-- [https://t.me/amnezia_vpn_mm](https://t.me/amnezia_vpn_mm) - Канал поддержки в Telegram (Мьянма) 
-- [https://t.me/amnezia_vpn](https://t.me/amnezia_vpn) - Канал поддержки в Telegram  (Русский)
-- [https://vpnpay.io/en/amnezia-premium/](https://vpnpay.io/en/amnezia-premium/) - Amnezia Premium | [Зеркало](https://storage.googleapis.com/kldscp/vpnpay.io/ru/amnezia-premium\)
+- [https://telegram.me/amnezia_vpn_en](https://telegram.me/amnezia_vpn_en) - Канал поддержки в Telegram (Английский)
+- [https://telegram.me/amnezia_vpn_ir](https://telegram.me/amnezia_vpn_ir) - Канал поддержки в Telegram (Фарси)
+- [https://telegram.me/amnezia_vpn_mm](https://telegram.me/amnezia_vpn_mm) - Канал поддержки в Telegram (Мьянма) 
+- [https://telegram.me/amnezia_vpn](https://telegram.me/amnezia_vpn) - Канал поддержки в Telegram  (Русский)
+- [Оформите Premium на 6 или 12 месяцев](https://storage.googleapis.com/amnezia/pay?utm_source=github&utm_campaign=ampay-read)
 
 ## Технологии
 

@@ -28,6 +28,9 @@ rm -f /data/config.toml
     if [ -n "$TELEMT_TAG" ]; then
         echo "ad_tag = \"$TELEMT_TAG\""
     fi
+    if [ -n "$TELEMT_MIDDLE_PROXY_NAT_IP" ]; then
+        echo "middle_proxy_nat_ip = \"$TELEMT_MIDDLE_PROXY_NAT_IP\""
+    fi
     echo ""
     echo "[general.modes]"
     echo "classic = false"
@@ -61,6 +64,12 @@ rm -f /data/config.toml
     echo ""
     echo "[access.users]"
     echo "$TELEMT_USER_NAME = \"$SECRET\""
+    i=1
+    for EXTRA in $(echo "$TELEMT_ADDITIONAL_SECRETS" | tr ',' ' '); do
+        echo "$EXTRA" | grep -qE '^[0-9a-fA-F]{32}$' || continue
+        echo "extra_$i = \"$EXTRA\""
+        i=$((i + 1))
+    done
 } > /data/config.toml
 
 echo "$SECRET" > /data/secret
