@@ -1,4 +1,3 @@
-#include <QTest>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -6,8 +5,9 @@
 #include <QUuid>
 #include <QSignalSpy>
 #include <QModelIndex>
+#include <QTest>
 
-#include "core/controllers/coreController.h"
+#include "utils/testCoreController.h"
 #include "core/models/serverDescription.h"
 #include "core/controllers/selfhosted/importController.h"
 #include "ui/models/serversModel.h"
@@ -40,7 +40,7 @@ class TestUiServersModelAndController : public QObject
     Q_OBJECT
 
 private:
-    CoreController* m_coreController;
+    TestCoreController* m_coreController;
     SecureQSettings* m_settings;
 
     QJsonObject createAwg2Config()
@@ -55,6 +55,14 @@ private:
         clientConfig[configKey::specialJunk3] = protocols::awg::defaultSpecialJunk3;
         clientConfig[configKey::specialJunk4] = protocols::awg::defaultSpecialJunk4;
         clientConfig[configKey::specialJunk5] = protocols::awg::defaultSpecialJunk5;
+        clientConfig[configKey::initPacketJunkSize] = QString::number(protocols::awg::initPacketJunkSizeMax);
+        clientConfig[configKey::responsePacketJunkSize] = QString::number(protocols::awg::responsePacketJunkSizeMax);
+        clientConfig[configKey::cookieReplyPacketJunkSize] = QString::number(protocols::awg::cookieReplyPacketJunkSizeMax);
+        clientConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultPadding;
+        clientConfig[configKey::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
+        clientConfig[configKey::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;
+        clientConfig[configKey::underloadPacketMagicHeader] = protocols::awg::defaultUnderloadPacketMagicHeader;
+        clientConfig[configKey::transportPacketMagicHeader] = protocols::awg::defaultTransportPacketMagicHeader;
         clientConfig[configKey::clientPrivKey] = "test_client_private_key";
         clientConfig[configKey::clientPubKey] = "test_client_public_key";
         clientConfig[configKey::serverPubKey] = "test_server_public_key";
@@ -71,10 +79,10 @@ private:
         awgConfig[configKey::junkPacketCount] = protocols::awg::defaultJunkPacketCount;
         awgConfig[configKey::junkPacketMinSize] = protocols::awg::defaultJunkPacketMinSize;
         awgConfig[configKey::junkPacketMaxSize] = protocols::awg::defaultJunkPacketMaxSize;
-        awgConfig[configKey::initPacketJunkSize] = protocols::awg::defaultInitPacketJunkSize;
-        awgConfig[configKey::responsePacketJunkSize] = protocols::awg::defaultResponsePacketJunkSize;
-        awgConfig[configKey::cookieReplyPacketJunkSize] = protocols::awg::defaultCookieReplyPacketJunkSize;
-        awgConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultTransportPacketJunkSize;
+        awgConfig[configKey::initPacketJunkSize] = QString::number(protocols::awg::initPacketJunkSizeMax);
+        awgConfig[configKey::responsePacketJunkSize] = QString::number(protocols::awg::responsePacketJunkSizeMax);
+        awgConfig[configKey::cookieReplyPacketJunkSize] = QString::number(protocols::awg::cookieReplyPacketJunkSizeMax);
+        awgConfig[configKey::transportPacketJunkSize] = protocols::awg::defaultPadding;
         awgConfig[configKey::initPacketMagicHeader] = protocols::awg::defaultInitPacketMagicHeader;
         awgConfig[configKey::responsePacketMagicHeader] = protocols::awg::defaultResponsePacketMagicHeader;
         awgConfig[configKey::underloadPacketMagicHeader] = protocols::awg::defaultUnderloadPacketMagicHeader;
@@ -119,7 +127,7 @@ private slots:
         
         auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
         
-        m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
+        m_coreController = new TestCoreController(vpnConnection, m_settings, nullptr, this);
     }
 
     void cleanupTestCase() {
@@ -131,7 +139,7 @@ private slots:
     void init() {
         m_settings->clearSettings();
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), -1);
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), QString{});
         }
     }
 
@@ -274,7 +282,7 @@ private slots:
         QVector<ServerDescription> descriptionsNoDns = m_coreController->m_serversController->buildServerDescriptions(
             m_coreController->m_appSettingsRepository->useAmneziaDns());
         const QString defIdNoDns = m_coreController->m_serversRepository->defaultServerId();
-        m_coreController->m_serversModel->updateModel(descriptionsNoDns, defaultServerRow(descriptionsNoDns, defIdNoDns));
+        m_coreController->m_serversModel->updateModel(descriptionsNoDns, defIdNoDns);
 
         QString descNoDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();
@@ -293,7 +301,7 @@ private slots:
         QVector<ServerDescription> descriptionsWithDns = m_coreController->m_serversController->buildServerDescriptions(
             m_coreController->m_appSettingsRepository->useAmneziaDns());
         const QString defIdWithDns = m_coreController->m_serversRepository->defaultServerId();
-        m_coreController->m_serversModel->updateModel(descriptionsWithDns, defaultServerRow(descriptionsWithDns, defIdWithDns));
+        m_coreController->m_serversModel->updateModel(descriptionsWithDns, defIdWithDns);
 
         QString descWithDns = m_coreController->m_serversModel->data(
             m_coreController->m_serversModel->index(0, 0), ServersModel::ServerDescriptionRole).toString();

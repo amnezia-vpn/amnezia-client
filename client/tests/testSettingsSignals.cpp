@@ -1,11 +1,11 @@
-#include <QTest>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QUuid>
 #include <QSignalSpy>
 #include <QLocale>
+#include <QTest>
 
-#include "core/controllers/coreController.h"
+#include "utils/testCoreController.h"
 #include "ui/controllers/settingsUiController.h"
 #include "ui/controllers/languageUiController.h"
 #include "ui/models/allowedDnsModel.h"
@@ -20,7 +20,7 @@ class TestSettingsSignals : public QObject
     Q_OBJECT
 
 private:
-    CoreController* m_coreController;
+    TestCoreController* m_coreController;
     SecureQSettings* m_settings;
 
 private slots:
@@ -29,7 +29,7 @@ private slots:
         m_settings = new SecureQSettings(testOrg, "amnezia-client", nullptr, false);
         
         auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
-        m_coreController = new CoreController(vpnConnection, m_settings, nullptr, this);
+        m_coreController = new TestCoreController(vpnConnection, m_settings, nullptr, this);
     }
 
     void cleanupTestCase() {
@@ -135,8 +135,10 @@ private slots:
 
         bool initialStartMinimized = m_coreController->m_settingsController->isStartMinimizedEnabled();
 
+        // AutoStart should be enabled else isStartMinimizedEnabled will return false
+        m_coreController->m_settingsUiController->toggleAutoStart(true);
         m_coreController->m_settingsUiController->toggleStartMinimized(!initialStartMinimized);
-        QVERIFY2(startMinimizedChangedSpy.count() == 1, "startMinimizedChanged signal should be emitted");
+        QVERIFY2(startMinimizedChangedSpy.count() == 2, "startMinimizedChanged signal should be emitted 2 times: on autoStart and StartMinimized");
         QVERIFY2(m_coreController->m_settingsController->isStartMinimizedEnabled() == !initialStartMinimized, "Start minimized state should be updated in SettingsController");
         QVERIFY2(m_coreController->m_settingsUiController->isStartMinimizedEnabled() == !initialStartMinimized, "Start minimized state should be available in SettingsUiController");
         QVERIFY2(m_coreController->m_appSettingsRepository->isStartMinimized() == !initialStartMinimized, "Start minimized state should be available in SecureAppSettingsRepository");
@@ -244,10 +246,10 @@ private slots:
         QVERIFY2(m_coreController->m_appSplitTunnelingController->getRouteMode() == newAppsRouteMode, "Apps route mode should be updated in AppSplitTunnelingController");
         QVERIFY2(m_coreController->m_appSettingsRepository->appsRouteMode() == newAppsRouteMode, "Apps route mode should be available in SecureAppSettingsRepository");
 
-        QMap<QString, QString> sitesMap{{"example.com", "1.2.3.4"}};
+        QMap<QString, QStringList> sitesMap{{"example.com", QStringList{"1.2.3.4"}}};
         m_coreController->m_ipSplitTunnelingController->addSites(sitesMap, true);
         QVERIFY2(sitesChangedSpy.count() >= 1, "sitesChanged signal should be emitted");
-        QVector<QPair<QString, QString>> currentSites = m_coreController->m_ipSplitTunnelingController->getCurrentSites();
+        QVector<QPair<QString, QStringList>> currentSites = m_coreController->m_ipSplitTunnelingController->getCurrentSites();
         QVERIFY2(currentSites.size() >= 1, "Sites should be available in IpSplitTunnelingController");
         
         QVERIFY2(m_coreController->m_ipSplitTunnelingUiController != nullptr, "IpSplitTunnelingUiController should exist");

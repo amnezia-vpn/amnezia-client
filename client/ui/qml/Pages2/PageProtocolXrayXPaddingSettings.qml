@@ -15,6 +15,8 @@ import "../Components"
 PageType {
     id: root
 
+    property bool editDirty: false
+
     BackButtonType {
         id: backButton
         anchors.top: parent.top
@@ -77,9 +79,15 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
                 headerText: qsTr("xPaddingKey")
+                placeholderText: XrayConfigModel.xPaddingKeyDefault()
                 textField.text: xPaddingKey
+                textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                textField.onTextEdited: root.editDirty = (textField.text !== xPaddingKey)
                 textField.onEditingFinished: {
-                    if (textField.text !== xPaddingKey) xPaddingKey = textField.text
+                    var v = textField.text.trim()
+                    if (v !== xPaddingKey) xPaddingKey = v
+                    else if (textField.text !== v) textField.text = v
+                    root.editDirty = false
                 }
             }
 
@@ -89,14 +97,21 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 8
                 headerText: qsTr("xPaddingHeader")
+                placeholderText: XrayConfigModel.xPaddingHeaderDefault()
                 textField.text: xPaddingHeader
+                textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                textField.onTextEdited: root.editDirty = (textField.text !== xPaddingHeader)
                 textField.onEditingFinished: {
-                    if (textField.text !== xPaddingHeader) xPaddingHeader = textField.text
+                    var v = textField.text.trim()
+                    if (v !== xPaddingHeader) xPaddingHeader = v
+                    else if (textField.text !== v) textField.text = v
+                    root.editDirty = false
                 }
             }
 
             DropDownType {
                 id: placementDropDown
+                fitContent: true
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -107,6 +122,7 @@ PageType {
                 drawerParent: root
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
+                    currentValue: xPaddingPlacement
                     model: ListModel {
                         Component.onCompleted: {
                             var opts = XrayConfigModel.xPaddingPlacementOptions()
@@ -140,6 +156,7 @@ PageType {
 
             DropDownType {
                 id: methodDropDown
+                fitContent: true
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -150,6 +167,7 @@ PageType {
                 drawerParent: root
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
+                    currentValue: xPaddingMethod
                     model: ListModel {
                         Component.onCompleted: {
                             var opts = XrayConfigModel.xPaddingMethodOptions()
@@ -197,7 +215,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
+        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
         clickedFunc: function () {
@@ -206,12 +224,12 @@ PageType {
             var yesButtonText = qsTr("Continue")
             var noButtonText = qsTr("Cancel")
             var yesButtonFunction = function () {
-                if (ConnectionController.isConnected && ServersModel.getDefaultServerData("defaultContainer") === ServersUiController.processedContainerIndex) {
+                if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
                     PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
                     return
                 }
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
-                InstallController.updateContainer(ServersUiController.processedIndex, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
             var noButtonFunction = function () {
                 if (typeof GC !== "undefined" && !GC.isMobile()) {

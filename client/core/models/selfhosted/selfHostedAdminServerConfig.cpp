@@ -9,6 +9,7 @@
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/protocolEnum.h"
 #include "core/utils/networkUtilities.h"
+#include "core/utils/serverConfigUtils.h"
 
 namespace amnezia
 {
@@ -83,12 +84,10 @@ QPair<QString, QString> SelfHostedAdminServerConfig::getDnsPair(bool isAmneziaDn
 QJsonObject SelfHostedAdminServerConfig::toJson() const
 {
     QJsonObject obj;
+    obj[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
 
     if (!description.isEmpty()) {
         obj[configKey::description] = this->description;
-    }
-    if (!displayName.isEmpty()) {
-        obj[configKey::displayName] = displayName;
     }
     if (!hostName.isEmpty()) {
         obj[configKey::hostName] = hostName;
@@ -132,7 +131,6 @@ SelfHostedAdminServerConfig SelfHostedAdminServerConfig::fromJson(const QJsonObj
     SelfHostedAdminServerConfig config;
 
     config.description = json.value(configKey::description).toString();
-    config.displayName = json.value(configKey::displayName).toString();
     config.hostName = json.value(configKey::hostName).toString();
 
     QJsonArray containersArray = json.value(configKey::containers).toArray();

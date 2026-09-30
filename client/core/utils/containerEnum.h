@@ -15,6 +15,8 @@ namespace amnezia
             Awg2,
             WireGuard,
             OpenVpn,
+            Cloak,
+            ShadowSocks,
             Ipsec,
             Xray,
             SSXray,
@@ -26,6 +28,7 @@ namespace amnezia
             Socks5Proxy,
             MtProxy,
             Telemt,
+            TProxy,
         };
         Q_ENUM_NS(DockerContainer)
     } // namespace ContainerEnumNS

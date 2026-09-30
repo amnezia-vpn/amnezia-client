@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, copy, replace_in_file
+from conan.tools.files import get, copy, replace_in_file, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake, CMakeDeps
@@ -17,6 +17,7 @@ class Openvpn(ConanFile):
         return str(self.settings.os).startswith("Windows")
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "*applink.c", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def layout(self):
@@ -27,7 +28,7 @@ class Openvpn(ConanFile):
 
     def build_requirements(self):
         if self._is_windows:
-            self.tool_requires("cmake/[>=3.14 <4]")
+            self.tool_requires("cmake/[>=4.2]")
         else:
             self.tool_requires("libtool/2.4.7")
             self.tool_requires("automake/1.16.5")
@@ -36,7 +37,7 @@ class Openvpn(ConanFile):
             self.tool_requires("pkgconf/2.5.1")
 
     def requirements(self):
-        self.requires("openssl/3.6.1", visible=False)
+        self.requires("openssl/3.6.2", visible=False)
         self.requires("lz4/1.10.0", visible=False)
         self.requires("lzo/2.10", visible=False)
         if self.settings.os == "Linux":
@@ -79,11 +80,21 @@ class Openvpn(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.extend(["--disable-shared", "--enable-static"])
             tc.configure_args.append("--disable-plugins")
+            if self.settings.os == "Linux":
+                openssl_libdir = self.dependencies["openssl"].cpp_info.aggregated_components().libdirs[0]
+                # pad the rpath so consumers can rewrite it in place (it cannot grow)
+                padding = max(0, 256 - len(openssl_libdir) - 2)
+                rpath = f"{openssl_libdir}:/" + "_" * padding
+                tc.extra_ldflags.append(f"-Wl,-rpath,{rpath}")
+            elif self.settings.os == "Macos":
+                # reserve header space so consumers can rewrite rpaths via install_name_tool
+                tc.extra_ldflags.append("-Wl,-headerpad_max_install_names")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         if self._is_windows:
             cmake = CMake(self)
             cmake.configure()

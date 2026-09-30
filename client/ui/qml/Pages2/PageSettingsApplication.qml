@@ -108,9 +108,9 @@ PageType {
                 text: qsTr("Auto start")
                 descriptionText: qsTr("Launch the application every time the device is starts")
 
-                checked: SettingsController.isAutoStartEnabled()
+                checked: SettingsController.autoStartEnabled
                 onToggled: function() {
-                    if (checked !== SettingsController.isAutoStartEnabled()) {
+                    if (checked !== SettingsController.autoStartEnabled) {
                         SettingsController.toggleAutoStart(checked)
                     }
                 }
@@ -154,10 +154,10 @@ PageType {
                 text: qsTr("Start minimized")
                 descriptionText: qsTr("Launch application minimized (works with autostart option turned on)")
 
-                enabled: switcherAutoStart.checked
+                enabled: SettingsController.autoStartEnabled
                 opacity: enabled ? 1.0 : 0.5
 
-                checked: SettingsController.startMinimized
+                checked: SettingsController.autoStartEnabled && SettingsController.startMinimized
                 onToggled: function() {
                     if (checked !== SettingsController.startMinimized) {
                         SettingsController.toggleStartMinimized(checked)
@@ -166,7 +166,7 @@ PageType {
             }
 
             DividerType {
-                visible: !GC.isMobile()
+                visible: !GC.isMobile() && ServersUiController.hasServersFromGatewayApi
             }
 
             SwitcherType {
@@ -184,6 +184,27 @@ PageType {
                 onToggled: function() {
                     if (checked !== SettingsController.isNewsNotificationsEnabled()) {
                         SettingsController.toggleNewsNotificationsEnabled(checked)
+                    }
+                }
+            }
+
+            DividerType {
+                visible: ServersUiController.hasServersFromGatewayApi
+            }
+
+            SwitcherType {
+                id: switcherAutoUpdateCheck
+
+                Layout.fillWidth: true
+                Layout.margins: 16
+
+                text: qsTr("Check for updates automatically")
+                descriptionText: qsTr("Check for a new app version at startup")
+
+                checked: SettingsController.isAutoUpdateCheckEnabled()
+                onToggled: function() {
+                    if (checked !== SettingsController.isAutoUpdateCheckEnabled()) {
+                        SettingsController.toggleAutoUpdateCheckEnabled(checked)
                     }
                 }
             }

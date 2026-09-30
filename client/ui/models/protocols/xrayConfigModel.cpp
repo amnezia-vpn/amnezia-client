@@ -4,6 +4,10 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/networkUtilities.h"
+
+#include <QHostAddress>
+#include <QRegularExpression>
 
 using namespace amnezia;
 using namespace ProtocolUtils;
@@ -65,8 +69,6 @@ bool XrayConfigModel::setData(const QModelIndex& index, const QVariant& value, i
     case Roles::XhttpHostRole: xhttp.host = str;
         break;
     case Roles::XhttpPathRole: xhttp.path = str;
-        break;
-    case Roles::XhttpHeadersTemplateRole: xhttp.headersTemplate = str;
         break;
     case Roles::XhttpUplinkMethodRole: xhttp.uplinkMethod = str;
         break;
@@ -202,7 +204,6 @@ QVariant XrayConfigModel::data(const QModelIndex& index, int role) const
     case Roles::XhttpModeRole: return xhttp.mode;
     case Roles::XhttpHostRole: return xhttp.host;
     case Roles::XhttpPathRole: return xhttp.path;
-    case Roles::XhttpHeadersTemplateRole: return xhttp.headersTemplate;
     case Roles::XhttpUplinkMethodRole: return xhttp.uplinkMethod;
     case Roles::XhttpDisableGrpcRole: return xhttp.disableGrpc;
     case Roles::XhttpDisableSseRole: return xhttp.disableSse;
@@ -267,8 +268,13 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
     m_container = container;
 
     m_protocolConfig = protocolConfig;
+    if (m_protocolConfig.needsClientHydration) {
+        m_protocolConfig.hydrateServerConfigFromClientNative();
+    }
 
-    applyDefaultsToServerConfig(m_protocolConfig.serverConfig);
+    if (!m_protocolConfig.serverConfig.isThirdPartyConfig) {
+        applyDefaultsToServerConfig(m_protocolConfig.serverConfig, false);
+    }
 
     m_originalProtocolConfig = m_protocolConfig;
 
@@ -278,7 +284,7 @@ void XrayConfigModel::updateModel(amnezia::DockerContainer container, const amne
     }
 }
 
-void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config)
+void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &config, bool fillFlowDefault)
 {
     if (config.port.isEmpty()) {
         config.port = protocols::xray::defaultPort;
@@ -301,7 +307,7 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
         config.security = protocols::xray::defaultSecurity;
     }
 
-    if (config.flow.isEmpty()) {
+    if (fillFlowDefault && config.flow.isEmpty()) {
         config.flow = protocols::xray::defaultFlow;
     }
 
@@ -325,9 +331,6 @@ void XrayConfigModel::applyDefaultsToServerConfig(amnezia::XrayServerConfig &con
     }
     if (config.xhttp.mode.isEmpty()) {
         config.xhttp.mode = protocols::xray::defaultXhttpMode;
-    }
-    if (config.xhttp.headersTemplate.isEmpty()) {
-        config.xhttp.headersTemplate = protocols::xray::defaultXhttpHeadersTemplate;
     }
     if (config.xhttp.uplinkMethod.isEmpty()) {
         config.xhttp.uplinkMethod = protocols::xray::defaultXhttpUplinkMethod;
@@ -395,7 +398,6 @@ QHash<int, QByteArray> XrayConfigModel::roleNames() const
     roles[XhttpModeRole] = "xhttpMode";
     roles[XhttpHostRole] = "xhttpHost";
     roles[XhttpPathRole] = "xhttpPath";
-    roles[XhttpHeadersTemplateRole] = "xhttpHeadersTemplate";
     roles[XhttpUplinkMethodRole] = "xhttpUplinkMethod";
     roles[XhttpDisableGrpcRole] = "xhttpDisableGrpc";
     roles[XhttpDisableSseRole] = "xhttpDisableSse";
@@ -472,7 +474,6 @@ void XrayConfigModel::applyServerConfig(const amnezia::XrayServerConfig &serverC
     m_protocolConfig.serverConfig = serverConfig;
     // Clear client config since server settings changed
     m_protocolConfig.clearClientConfig();
-    m_originalProtocolConfig = m_protocolConfig;
     endResetModel();
 
     if (wasUnsavedChanges != hasUnsavedChanges()) {
@@ -506,17 +507,12 @@ QStringList XrayConfigModel::fingerprintOptions()
 
 QStringList XrayConfigModel::alpnOptions()
 {
-    return { "HTTP/2", "HTTP/1.1", "HTTP/2,HTTP/1.1" };
+    return { "h2", "http/1.1", "h2,http/1.1" };
 }
 
 QStringList XrayConfigModel::xhttpModeOptions()
 {
     return { "Auto", "Packet-up", "Stream-up", "Stream-one" };
-}
-
-QStringList XrayConfigModel::xhttpHeadersTemplateOptions()
-{
-    return { "HTTP", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkMethodOptions()
@@ -526,17 +522,12 @@ QStringList XrayConfigModel::xhttpUplinkMethodOptions()
 
 QStringList XrayConfigModel::xhttpSessionPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
-}
-
-QStringList XrayConfigModel::xhttpSessionKeyOptions()
-{
-    return { "Path", "Header", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpSeqPlacementOptions()
 {
-    return { "Path", "Header", "Cookie", "None" };
+    return { "Path", "Header", "Cookie", "Query", "None" };
 }
 
 QStringList XrayConfigModel::xhttpUplinkDataPlacementOptions()
@@ -579,4 +570,158 @@ QString XrayConfigModel::mkcpDefaultReadBufferSize()
 QString XrayConfigModel::mkcpDefaultWriteBufferSize()
 {
     return QString::fromLatin1(protocols::xray::defaultMkcpWriteBufferSize);
+}
+
+QString XrayConfigModel::portDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultPort);
+}
+
+QString XrayConfigModel::sniDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultSni);
+}
+
+QString XrayConfigModel::xhttpHostDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpHost);
+}
+
+QString XrayConfigModel::xhttpUplinkChunkSizeDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpUplinkChunkSize);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMin);
+}
+
+QString XrayConfigModel::scMaxEachPostBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMaxEachPostBytesMax);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMin);
+}
+
+QString XrayConfigModel::scMinPostsIntervalMsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScMinPostsIntervalMsMax);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMin);
+}
+
+QString XrayConfigModel::scStreamUpServerSecsMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXhttpScStreamUpServerSecsMax);
+}
+
+QString XrayConfigModel::xPaddingKeyDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingKey);
+}
+
+QString XrayConfigModel::xPaddingHeaderDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingHeader);
+}
+
+QString XrayConfigModel::xPaddingBytesMinDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMin);
+}
+
+QString XrayConfigModel::xPaddingBytesMaxDefault()
+{
+    return QString::fromLatin1(protocols::xray::defaultXPaddingBytesMax);
+}
+
+namespace {
+    bool isValidSingleHost(const QString &t)
+    {
+        if (t.isEmpty() || t.length() > 253) {
+            return false;
+        }
+        QHostAddress a(t);
+        if (a.protocol() == QHostAddress::IPv4Protocol) {
+            return NetworkUtilities::checkIPv4Format(t);
+        }
+        if (a.protocol() == QHostAddress::IPv6Protocol) {
+            return true;
+        }
+        static const QRegularExpression onlyDigits(QStringLiteral(R"(^\d+$)"));
+        if (onlyDigits.match(t).hasMatch()) {
+            return false;
+        }
+        QRegExp re = NetworkUtilities::domainRegExp();
+        re.setCaseSensitivity(Qt::CaseInsensitive);
+        return re.exactMatch(t);
+    }
+}
+
+bool XrayConfigModel::isValidHost(const QString &host)
+{
+    const QString t = host.trimmed();
+    if (t.isEmpty()) {
+        return true;
+    }
+    return isValidSingleHost(t);
+}
+
+bool XrayConfigModel::isValidSni(const QString &sni)
+{
+    const QString t = sni.trimmed();
+    if (t.isEmpty()) {
+        return true;
+    }
+    if (t.startsWith(QLatin1String("*."))) {
+        return isValidSingleHost(t.mid(2));
+    }
+    return isValidSingleHost(t);
+}
+
+bool XrayConfigModel::isValidPath(const QString &path)
+{
+    const QString t = path.trimmed();
+    if (t.isEmpty()) {
+        return true;
+    }
+    return t.startsWith(QLatin1Char('/'));
+}
+
+QStringList XrayConfigModel::validationErrors() const
+{
+    QStringList errs;
+    const auto &srv = m_protocolConfig.serverConfig;
+
+    if (!srv.port.isEmpty()) {
+        bool ok = false;
+        const int p = srv.port.toInt(&ok);
+        if (!ok || p < 1 || p > 65535) {
+            errs << tr("Port must be in the range of 1 to 65535");
+        }
+    }
+
+    if (srv.security == QLatin1String("tls") || srv.security == QLatin1String("reality")) {
+        if (!isValidSni(srv.sni)) {
+            errs << tr("SNI: enter a valid IP address or domain name");
+        }
+    }
+
+    if (srv.transport == QLatin1String("xhttp")) {
+        if (!isValidHost(srv.xhttp.host)) {
+            errs << tr("Host: enter a valid IP address or domain name");
+        }
+        if (!isValidPath(srv.xhttp.path)) {
+            errs << tr("Path must start with \"/\"");
+        }
+    }
+
+    return errs;
 }
