@@ -182,6 +182,7 @@ bool WireguardUtilsMacos::addInterface(const InterfaceConfig& config) {
       if (!config.m_secondaryDnsServer.isEmpty()) {
           params.dnsServers.append(config.m_secondaryDnsServer);
       }
+      params.dnsServers.append(config.m_allowedDnsServers);
 
       if (config.m_allowedIPAddressRanges.contains(IPAddress("0.0.0.0/0"))) {
           params.blockAll = true;
