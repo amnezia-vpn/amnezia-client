@@ -16,49 +16,22 @@
 #include <QFutureWatcher>
 #include <QTimer>
 
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    #include "platforms/ios/ios_controller.h"
+#elif defined(Q_OS_ANDROID)
+    #include "platforms/android/android_controller.h"
+#endif
+
 namespace
 {
-    namespace configKey
-    {
-        constexpr char awg[] = "awg";
-        constexpr char vless[] = "vless";
-
-        constexpr char apiEndpoint[] = "api_endpoint";
-        constexpr char accessToken[] = "api_key";
-        constexpr char certificate[] = "certificate";
-        constexpr char publicKey[] = "public_key";
-        constexpr char protocol[] = "protocol";
-
-        constexpr char uuid[] = "installation_uuid";
-        constexpr char osVersion[] = "os_version";
-        constexpr char appVersion[] = "app_version";
-
-        constexpr char userCountryCode[] = "user_country_code";
-        constexpr char serverCountryCode[] = "server_country_code";
-        constexpr char serviceType[] = "service_type";
-        constexpr char serviceInfo[] = "service_info";
-        constexpr char serviceProtocol[] = "service_protocol";
-
-        constexpr char apiPayload[] = "api_payload";
-        constexpr char keyPayload[] = "key_payload";
-
-        constexpr char apiConfig[] = "api_config";
-        constexpr char authData[] = "auth_data";
-
-        constexpr char config[] = "config";
-
-        constexpr char subscription[] = "subscription";
-        constexpr char endDate[] = "end_date";
-
-        constexpr char isConnectEvent[] = "is_connect_event";
-    }
-
+constexpr char premiumServiceType[] = "amnezia-premium";
 }
 
 SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
                                            ApiServicesModel* apiServicesModel,
                                            ServicesCatalogController* servicesCatalogController,
                                            SubscriptionController* subscriptionController,
+                                           StorePurchaseController* storePurchaseController,
                                            ApiSubscriptionPlansModel* apiSubscriptionPlansModel,
                                            ApiBenefitsModel* apiBenefitsModel,
                                            ApiAccountInfoModel* apiAccountInfoModel,
@@ -72,6 +45,7 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
       m_apiServicesModel(apiServicesModel),
       m_servicesCatalogController(servicesCatalogController),
       m_subscriptionController(subscriptionController),
+      m_storePurchaseController(storePurchaseController),
       m_apiSubscriptionPlansModel(apiSubscriptionPlansModel),
       m_apiBenefitsModel(apiBenefitsModel),
       m_apiAccountInfoModel(apiAccountInfoModel),
@@ -88,18 +62,21 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
 
     connect(this, &SubscriptionUiController::installServerFromApiFinished, this,
             [this](const QString &, int preferredDefaultServerIndex) {
-        if (m_connectionController->isConnected()) {
-            return;
-        }
-
-        const int selectedServerIndex = preferredDefaultServerIndex >= 0
-                ? preferredDefaultServerIndex
-                : (m_serversController->getServersCount() - 1);
-        const QString serverId = m_serversController->getServerId(selectedServerIndex);
-        if (!serverId.isEmpty()) {
-            m_serversController->setDefaultServer(serverId);
-        }
+        applyDefaultServerAfterInstall(preferredDefaultServerIndex);
     });
+
+    connect(this, &SubscriptionUiController::backgroundPurchaseCompleted, this,
+            [this](const QString &) {
+        applyDefaultServerAfterInstall(-1);
+    });
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    connect(IosController::Instance(), &IosController::storeTransactionUpdated, this,
+            &SubscriptionUiController::onStoreTransactionUpdated, Qt::QueuedConnection);
+    IosController::Instance()->startStoreTransactionObserver();
+#elif defined(Q_OS_ANDROID)
+    QTimer::singleShot(0, this, [this]() { checkUnacknowledgedPlayPurchases(); });
+#endif
 }
 
 bool SubscriptionUiController::isCaptchaAwaitingUser() const
@@ -197,74 +174,111 @@ bool SubscriptionUiController::fillAvailableServices()
     return true;
 }
 
-bool SubscriptionUiController::importPremiumFromAppStore(const QString &storeProductId)
+QVariantMap SubscriptionUiController::currentActivePlanInfo()
 {
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    QVariantMap info;
+    info.insert(QStringLiteral("hasActivePlan"), false);
+
+    const QStringList activeProductIds = m_storePurchaseController->resolveActiveStoreProductIds();
+
+    if (activeProductIds.isEmpty()) {
+        return info;
+    }
+
+    info.insert(QStringLiteral("hasActivePlan"), true);
+
+    for (const QString &productId : activeProductIds) {
+        const int row = m_apiSubscriptionPlansModel->rowForStoreProductId(productId);
+        if (row < 0) {
+            continue;
+        }
+        const QVariantMap plan = m_apiSubscriptionPlansModel->planAt(row);
+        info.insert(QStringLiteral("storeProductId"), productId);
+        info.insert(QStringLiteral("priceAmount"), plan.value(QStringLiteral("priceAmount")));
+        info.insert(QStringLiteral("billingPeriod"), plan.value(QStringLiteral("billingPeriod")));
+        break;
+    }
+
+    return info;
+}
+
+bool SubscriptionUiController::importPremiumFromStore(const QString &storeProductId)
+{
     QString productId = storeProductId.trimmed();
+    int duplicateServerIndex = -1;
+    bool wasUpgrade = false;
+    ErrorCode errorCode = ErrorCode::ApiPurchaseError;
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     if (productId.isEmpty()) {
         productId = QStringLiteral("amnezia_premium_6_month");
     }
 
-    int duplicateServerIndex = -1;
-    ErrorCode errorCode = m_subscriptionController->processAppStorePurchase(
+    errorCode = m_storePurchaseController->processAppStorePurchase(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol(),
         productId,
-        &duplicateServerIndex);
+        &duplicateServerIndex, &wasUpgrade);
+#elif defined(Q_OS_ANDROID)
+    if (productId.isEmpty()) {
+        productId = QStringLiteral("premium");
+    }
+
+    errorCode = m_storePurchaseController->processPlayMarketPurchase(
+        m_apiServicesModel->getCountryCode(),
+        m_apiServicesModel->getSelectedServiceType(),
+        m_apiServicesModel->getSelectedServiceProtocol(),
+        productId,
+        &duplicateServerIndex, &wasUpgrade);
+#else
+    Q_UNUSED(wasUpgrade);
+    return false;
+#endif
 
     if (errorCode != ErrorCode::NoError) {
         if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
-            emit installServerFromApiFinished(tr("This subscription has already been added"), duplicateServerIndex);
+            const QString message = wasUpgrade ? tr("Your subscription has been upgraded")
+                                                 : tr("This subscription has already been added");
+            emit installServerFromApiFinished(message, duplicateServerIndex);
             return true;
+        }
+        if (errorCode == ErrorCode::BillingCanceled) {
+            qInfo().noquote() << "[IAP] Purchase cancelled by user";
+            return false;
         }
         emit errorOccurred(errorCode);
         return false;
     }
 
     emit installServerFromApiFinished(tr("%1 has been added to the app").arg(m_apiServicesModel->getSelectedServiceName()));
-#endif
     return true;
 }
 
-bool SubscriptionUiController::restoreServiceFromAppStore()
+bool SubscriptionUiController::restoreServiceFromStore()
 {
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    const QString premiumServiceType = QStringLiteral("amnezia-premium");
-
-    if (!fillAvailableServices()) {
-        qWarning().noquote() << "[IAP] Unable to fetch services list before restore";
-        emit errorOccurred(ErrorCode::ApiServicesMissingError);
-        return false;
-    }
-
-    if (m_apiServicesModel->rowCount() <= 0) {
-        emit errorOccurred(ErrorCode::ApiServicesMissingError);
-        return false;
-    }
-
+#if defined(Q_OS_IOS) || defined(MACOS_NE) || defined(Q_OS_ANDROID)
     // Ensure we have a valid premium selection for gateway requests
-    bool premiumSelected = false;
-    for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
-        m_apiServicesModel->setServiceIndex(i);
-        if (m_apiServicesModel->getSelectedServiceType() == premiumServiceType) {
-            premiumSelected = true;
-            break;
-        }
-    }
-
-    if (!premiumSelected) {
+    if (!selectPremiumServiceQuietly()) {
+        qWarning().noquote() << "[IAP] Unable to select premium service before restore";
         emit errorOccurred(ErrorCode::ApiServicesMissingError);
         return false;
     }
 
-    SubscriptionController::AppStoreRestoreResult result = m_subscriptionController->processAppStoreRestore(
+#if defined(Q_OS_ANDROID)
+    StorePurchaseController::StoreRestoreResult result = m_storePurchaseController->processPlayMarketRestore(
         m_apiServicesModel->getCountryCode(),
         m_apiServicesModel->getSelectedServiceType(),
         m_apiServicesModel->getSelectedServiceProtocol());
+#else
+    StorePurchaseController::StoreRestoreResult result = m_storePurchaseController->processAppStoreRestore(
+        m_apiServicesModel->getCountryCode(),
+        m_apiServicesModel->getSelectedServiceType(),
+        m_apiServicesModel->getSelectedServiceProtocol());
+#endif
 
     if (!result.hasInstalledConfig) {
-        if (result.duplicateConfigAlreadyPresent) {
+        if (result.duplicateConfigAlreadyPresent && result.errorCode == ErrorCode::ApiConfigAlreadyAdded) {
             emit installServerFromApiFinished(tr("This subscription has already been added"), result.duplicateServerIndex);
             return true;
         }
@@ -274,11 +288,130 @@ bool SubscriptionUiController::restoreServiceFromAppStore()
 
     emit installServerFromApiFinished(tr("Subscription restored successfully"));
     if (result.duplicateCount > 0) {
-        qInfo().noquote() << "[IAP] Skipped" << result.duplicateCount
-                          << "duplicate restored transactions for original transaction IDs already processed";
+        qInfo().noquote() << "[IAP] Skipped" << result.duplicateCount << "duplicate restored purchases";
     }
 #endif
     return true;
+}
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+void SubscriptionUiController::onStoreTransactionUpdated(const QVariantMap &transaction)
+{
+    m_pendingStoreUpdates.enqueue(transaction);
+    if (m_storeUpdateInProgress) {
+        return;
+    }
+
+    m_storeUpdateInProgress = true;
+    while (!m_pendingStoreUpdates.isEmpty()) {
+        processStoreTransactionUpdate(m_pendingStoreUpdates.dequeue());
+    }
+    m_storeUpdateInProgress = false;
+}
+
+void SubscriptionUiController::processStoreTransactionUpdate(const QVariantMap &transaction)
+{
+    const QString transactionId = transaction.value(QStringLiteral("transactionId")).toString();
+    const QString originalTransactionId = transaction.value(QStringLiteral("originalTransactionId")).toString();
+
+    if (transactionId.isEmpty() || originalTransactionId.isEmpty()
+        || m_handledStoreUpdateTransactionIds.contains(transactionId)) {
+        return;
+    }
+
+    qInfo().noquote() << "[IAP] Store transaction update received. transactionId =" << transactionId
+                      << "originalTransactionId =" << originalTransactionId;
+
+    // Failures here are intentionally silent: the transaction stays unfinished
+    // and is redelivered by the Transaction.updates listener on the next launch
+    if (!selectPremiumServiceQuietly()) {
+        qWarning().noquote() << "[IAP] Unable to select premium service for transaction update, will retry on next launch";
+        return;
+    }
+
+    int duplicateServerIndex = -1;
+    ErrorCode errorCode = m_storePurchaseController->processAppStoreTransactionUpdate(
+        m_apiServicesModel->getCountryCode(),
+        m_apiServicesModel->getSelectedServiceType(),
+        m_apiServicesModel->getSelectedServiceProtocol(),
+        originalTransactionId,
+        transactionId,
+        transaction.value(QStringLiteral("environment")).toString(),
+        &duplicateServerIndex);
+
+    if (errorCode == ErrorCode::NoError) {
+        m_handledStoreUpdateTransactionIds.insert(transactionId);
+        emit backgroundPurchaseCompleted(tr("Purchase confirmed. Subscription has been added to the app"));
+    } else if (errorCode == ErrorCode::ApiConfigAlreadyAdded) {
+        m_handledStoreUpdateTransactionIds.insert(transactionId);
+        qInfo().noquote() << "[IAP] Transaction update for already added subscription, transaction finished";
+    } else {
+        qWarning().noquote() << "[IAP] Transaction update validation failed, errorCode =" << static_cast<int>(errorCode)
+                             << "- will retry on next launch";
+    }
+}
+
+#elif defined(Q_OS_ANDROID)
+void SubscriptionUiController::checkUnacknowledgedPlayPurchases()
+{
+    if (!AndroidController::instance()->isPlay()) {
+        return;
+    }
+
+    const QJsonArray unacknowledgedPurchases = m_storePurchaseController->findUnacknowledgedPlayPurchases();
+    if (unacknowledgedPurchases.isEmpty()) {
+        return;
+    }
+
+    qInfo().noquote() << "[Billing] Found unacknowledged purchases on startup, validating";
+
+    // Failures here are intentionally silent: the purchase stays unacknowledged
+    // and is retried on the next launch (or via manual restore)
+    if (!selectPremiumServiceQuietly()) {
+        qWarning().noquote() << "[Billing] Unable to select premium service for purchase validation, will retry on next launch";
+        return;
+    }
+
+    if (m_storePurchaseController->processUnacknowledgedPlayPurchases(
+            unacknowledgedPurchases,
+            m_apiServicesModel->getCountryCode(),
+            m_apiServicesModel->getSelectedServiceType(),
+            m_apiServicesModel->getSelectedServiceProtocol())) {
+        emit backgroundPurchaseCompleted(tr("Purchase confirmed. Subscription has been added to the app"));
+    }
+}
+#endif
+
+void SubscriptionUiController::applyDefaultServerAfterInstall(int preferredDefaultServerIndex)
+{
+    if (m_connectionController->isConnected()) {
+        return;
+    }
+
+    const int selectedServerIndex = preferredDefaultServerIndex >= 0
+            ? preferredDefaultServerIndex
+            : (m_serversController->getServersCount() - 1);
+    const QString serverId = m_serversController->getServerId(selectedServerIndex);
+    if (!serverId.isEmpty()) {
+        m_serversController->setDefaultServer(serverId);
+    }
+}
+
+bool SubscriptionUiController::selectPremiumServiceQuietly()
+{
+    QJsonObject servicesData;
+    if (m_servicesCatalogController->fillAvailableServices(servicesData) != ErrorCode::NoError) {
+        return false;
+    }
+    m_apiServicesModel->updateModel(servicesData);
+
+    for (int i = 0; i < m_apiServicesModel->rowCount(); ++i) {
+        m_apiServicesModel->setServiceIndex(i);
+        if (m_apiServicesModel->getSelectedServiceType() == QLatin1String(premiumServiceType)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool SubscriptionUiController::importFreeFromGateway()

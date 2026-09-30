@@ -39,6 +39,7 @@ public:
 
     QByteArray backupAppConfig() const;
     ErrorCode restoreAppConfigFromData(const QByteArray &data);
+    int unsupportedFormatConfigsSkippedCount() const;
 
     QString getAppVersion() const;
 
@@ -58,6 +59,9 @@ public:
 
     bool isNewsNotificationsEnabled() const;
     void toggleNewsNotificationsEnabled(bool enable);
+
+    bool isAutoUpdateCheckEnabled() const;
+    void toggleAutoUpdateCheckEnabled(bool enable);
 
     bool isKillSwitchEnabled() const;
     void toggleKillSwitch(bool enable);

@@ -5,6 +5,7 @@ from conan.tools.scm import Git
 from conan.errors import ConanInvalidConfiguration
 
 import os
+from pathlib import Path
 
 class OpenvpnPtAndroid(ConanFile):
     name = "openvpn-pt-android"
@@ -53,5 +54,5 @@ class OpenvpnPtAndroid(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "amnezia::openvpn-pt-android")
         self.cpp_info.libs = [ "ovpn3", "ovpnutil", "rsapss" ]
         self.cpp_info.set_property("cmake_extra_variables", {
-            "OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH": os.path.join(self.package_folder, "lib", "libck-ovpn-plugin.so")
+            "OPENVPN_PT_ANDROID_LIBCK_OVPN_PLUGIN_PATH": Path(self.package_folder, "lib", "libck-ovpn-plugin.so").as_posix()
         })

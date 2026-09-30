@@ -18,6 +18,9 @@
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
 #include "platforms/ios/ios_controller.h"
+#elif defined(Q_OS_ANDROID)
+#include "platforms/android/android_controller.h"
+#include "platforms/android/android_utils.h"
 #endif
 
 namespace
@@ -28,9 +31,12 @@ namespace
         constexpr char subscriptionPlans[] = "subscription_plans";
         constexpr char storeProductId[] = "store_product_id";
         constexpr char priceLabel[] = "price_label";
+        constexpr char priceAmount[] = "price_amount";
         constexpr char subtitle[] = "subtitle";
         constexpr char isTrial[] = "is_trial";
         constexpr char minPriceLabel[] = "min_price_label";
+        constexpr char hasFreeTrial[] = "has_free_trial";
+        constexpr char trialDays[] = "trial_days";
     }
 
     namespace serviceType
@@ -38,12 +44,14 @@ namespace
         constexpr char amneziaPremium[] = "amnezia-premium";
     }
 
-#if defined(Q_OS_IOS) || defined(MACOS_NE)
-    struct StoreKitPlanQuote {
+#if defined(Q_OS_IOS) || defined(MACOS_NE) || defined(Q_OS_ANDROID)
+    struct SubscriptionPlanQuote {
         QString displayPrice;
         double priceAmount = 0.0;
         double subscriptionBillingMonths = 0.0;
         QString displayPricePerMonth;
+        bool hasFreeTrial = false;
+        int trialDays = 0;
     };
 
     constexpr double oneMonthThreshold = 1.0 + 1e-6;
@@ -76,48 +84,9 @@ namespace
         return productIds;
     }
 
-    QHash<QString, StoreKitPlanQuote> buildStoreKitQuoteMap(const QList<QVariantMap> &fetchedProducts)
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    QHash<QString, SubscriptionPlanQuote> buildStoreKitQuoteMap(const QStringList &productIds)
     {
-        QHash<QString, StoreKitPlanQuote> quotesByProductId;
-        quotesByProductId.reserve(fetchedProducts.size());
-
-        for (const QVariantMap &productInfo : fetchedProducts) {
-            const QString productId = productInfo.value(QStringLiteral("productId")).toString();
-            if (productId.isEmpty()) {
-                continue;
-            }
-
-            QString displayPrice = productInfo.value(QStringLiteral("displayPrice")).toString();
-            if (displayPrice.isEmpty()) {
-                const QString price = productInfo.value(QStringLiteral("price")).toString();
-                const QString currencyCode = productInfo.value(QStringLiteral("currencyCode")).toString();
-                displayPrice = currencyCode.isEmpty() ? price : (price + QLatin1Char(' ') + currencyCode);
-            }
-
-            StoreKitPlanQuote quote;
-            quote.displayPrice = displayPrice;
-            quote.priceAmount = productInfo.value(QStringLiteral("priceAmount")).toDouble();
-            quote.subscriptionBillingMonths = productInfo.value(QStringLiteral("subscriptionBillingMonths")).toDouble();
-            quote.displayPricePerMonth = productInfo.value(QStringLiteral("displayPricePerMonth")).toString();
-            quotesByProductId.insert(productId, quote);
-        }
-
-        return quotesByProductId;
-    }
-
-    void mergeStoreKitPricesIntoPremiumPlans(QJsonObject &data)
-    {
-        QJsonArray services = data.value(apiDefs::key::services).toArray();
-        if (services.isEmpty()) {
-            return;
-        }
-
-        const QStringList productIds = collectPremiumStoreProductIds(services);
-        if (productIds.isEmpty()) {
-            qInfo().noquote() << "[IAP] No store_product_id in premium plans; skip StoreKit merge into services payload";
-            return;
-        }
-
         QList<QVariantMap> fetchedProducts;
         QEventLoop loop;
         IosController::Instance()->fetchProducts(productIds,
@@ -134,7 +103,117 @@ namespace
                                                  });
         loop.exec();
 
-        const QHash<QString, StoreKitPlanQuote> quotesByProductId = buildStoreKitQuoteMap(fetchedProducts);
+        QHash<QString, SubscriptionPlanQuote> quotesByProductId;
+        quotesByProductId.reserve(fetchedProducts.size());
+
+        for (const QVariantMap &productInfo : fetchedProducts) {
+            const QString productId = productInfo.value(QStringLiteral("productId")).toString();
+            if (productId.isEmpty()) {
+                continue;
+            }
+
+            QString displayPrice = productInfo.value(QStringLiteral("displayPrice")).toString();
+            if (displayPrice.isEmpty()) {
+                const QString price = productInfo.value(QStringLiteral("price")).toString();
+                const QString currencyCode = productInfo.value(QStringLiteral("currencyCode")).toString();
+                displayPrice = currencyCode.isEmpty() ? price : (price + QLatin1Char(' ') + currencyCode);
+            }
+
+            SubscriptionPlanQuote quote;
+            quote.priceAmount = productInfo.value(QStringLiteral("priceAmount")).toDouble();
+            quote.subscriptionBillingMonths = productInfo.value(QStringLiteral("subscriptionBillingMonths")).toDouble();
+            quote.displayPricePerMonth = productInfo.value(QStringLiteral("displayPricePerMonth")).toString();
+            quote.hasFreeTrial = productInfo.value(QStringLiteral("hasFreeTrial")).toBool();
+            quote.trialDays = productInfo.value(QStringLiteral("trialDays")).toInt();
+
+            // If the account is eligible for a paid introductory discount (not a free trial, which
+            // stays invisible here and just applies silently at purchase time), show that price instead.
+            const QString introOfferDisplayPrice = productInfo.value(QStringLiteral("introOfferDisplayPrice")).toString();
+            if (introOfferDisplayPrice.isEmpty()) {
+                quote.displayPrice = displayPrice;
+            } else {
+                quote.displayPrice = introOfferDisplayPrice;
+                qInfo().noquote() << "[IAP] Applying" << productInfo.value(QStringLiteral("introOfferPaymentMode")).toString()
+                                  << "intro offer price for" << productId << ":" << introOfferDisplayPrice;
+            }
+            quotesByProductId.insert(productId, quote);
+        }
+
+        return quotesByProductId;
+    }
+#elif defined(Q_OS_ANDROID)
+    QHash<QString, SubscriptionPlanQuote> buildGooglePlayQuoteMap(const QStringList &productIds)
+    {
+        Q_UNUSED(productIds); // Google Play returns every offer for the app's single product in one call
+
+        auto androidController = AndroidController::instance();
+        const QJsonObject plansResult = AndroidUtils::runOnWorkerThread([androidController]() {
+            return androidController->getSubscriptionPlans();
+        });
+
+        QHash<QString, SubscriptionPlanQuote> quotesByProductId;
+        if (plansResult.value("responseCode").toInt(-1) != 0) {
+            qWarning() << "[Billing] Failed to get subscription plans for price display, responseCode:"
+                       << plansResult.value("responseCode").toInt(-1);
+            return quotesByProductId;
+        }
+
+        const QJsonArray products = plansResult.value("products").toArray();
+
+        QHash<QString, int> trialDaysByBasePlanId;
+        for (const QJsonValue &productValue : products) {
+            const QJsonArray offers = productValue.toObject().value("offers").toArray();
+            for (const QJsonValue &offerValue : offers) {
+                const QJsonObject offer = offerValue.toObject();
+                const QString basePlanId = offer.value("basePlanId").toString();
+                if (basePlanId.isEmpty() || trialDaysByBasePlanId.contains(basePlanId)) {
+                    continue;
+                }
+                if (offer.value("hasFreeTrial").toBool()) {
+                    trialDaysByBasePlanId.insert(basePlanId, offer.value("trialDays").toInt());
+                }
+            }
+        }
+
+        for (const QJsonValue &productValue : products) {
+            const QJsonArray offers = productValue.toObject().value("offers").toArray();
+            for (const QJsonValue &offerValue : offers) {
+                const QJsonObject offer = offerValue.toObject();
+                const QString basePlanId = offer.value("basePlanId").toString();
+                if (basePlanId.isEmpty() || quotesByProductId.contains(basePlanId)) {
+                    continue;
+                }
+
+                const QJsonArray pricingPhases = offer.value("pricingPhases").toArray();
+                if (pricingPhases.isEmpty()) {
+                    continue;
+                }
+                // Last phase is always the ongoing recurring price, after any trial/intro phases
+                const QJsonObject regularPhase = pricingPhases.last().toObject();
+
+                SubscriptionPlanQuote quote;
+                quote.displayPrice = regularPhase.value("formattedPrice").toString();
+                if (quote.displayPrice.isEmpty()) {
+                    continue;
+                }
+                quote.priceAmount = regularPhase.value("priceAmountMicros").toDouble() / 1000000.0;
+                quote.subscriptionBillingMonths = regularPhase.value("subscriptionBillingMonths").toDouble();
+                quote.displayPricePerMonth = regularPhase.value("displayPricePerMonth").toString();
+                quote.hasFreeTrial = trialDaysByBasePlanId.contains(basePlanId);
+                quote.trialDays = trialDaysByBasePlanId.value(basePlanId, 0);
+                quotesByProductId.insert(basePlanId, quote);
+            }
+        }
+        return quotesByProductId;
+    }
+#endif
+
+    void mergeQuotesIntoPremiumPlans(QJsonObject &data, const QHash<QString, SubscriptionPlanQuote> &quotesByProductId)
+    {
+        QJsonArray services = data.value(apiDefs::key::services).toArray();
+        if (services.isEmpty() || quotesByProductId.isEmpty()) {
+            return;
+        }
 
         for (int serviceIndex = 0; serviceIndex < services.size(); ++serviceIndex) {
             QJsonObject serviceObject = services.at(serviceIndex).toObject();
@@ -166,8 +245,11 @@ namespace
                 }
 
                 const bool isTrialPlan = planObject.value(configKey::isTrial).toBool();
-                const StoreKitPlanQuote &quote = *quoteIterator;
+                const SubscriptionPlanQuote &quote = *quoteIterator;
                 planObject.insert(configKey::priceLabel, quote.displayPrice);
+                planObject.insert(configKey::priceAmount, quote.priceAmount);
+                planObject.insert(configKey::hasFreeTrial, quote.hasFreeTrial);
+                planObject.insert(configKey::trialDays, quote.trialDays);
 
                 const double months = quote.subscriptionBillingMonths;
                 if (!isTrialPlan && months > oneMonthThreshold && !quote.displayPricePerMonth.isEmpty()) {
@@ -202,7 +284,29 @@ namespace
         }
         data.insert(apiDefs::key::services, services);
     }
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    void mergeStoreKitPricesIntoPremiumPlans(QJsonObject &data)
+    {
+        const QStringList productIds = collectPremiumStoreProductIds(data.value(apiDefs::key::services).toArray());
+        if (productIds.isEmpty()) {
+            qInfo().noquote() << "[IAP] No store_product_id in premium plans; skip StoreKit merge into services payload";
+            return;
+        }
+        mergeQuotesIntoPremiumPlans(data, buildStoreKitQuoteMap(productIds));
+    }
+#elif defined(Q_OS_ANDROID)
+    void mergeGooglePlayPricesIntoPremiumPlans(QJsonObject &data)
+    {
+        const QStringList productIds = collectPremiumStoreProductIds(data.value(apiDefs::key::services).toArray());
+        if (productIds.isEmpty()) {
+            qInfo().noquote() << "[Billing] No store_product_id in premium plans; skip Google Play merge into services payload";
+            return;
+        }
+        mergeQuotesIntoPremiumPlans(data, buildGooglePlayQuoteMap(productIds));
+    }
 #endif
+#endif // Q_OS_IOS || MACOS_NE || Q_OS_ANDROID
 }
 
 ServicesCatalogController::ServicesCatalogController(SecureAppSettingsRepository* appSettingsRepository)
@@ -230,6 +334,8 @@ ErrorCode ServicesCatalogController::fillAvailableServices(QJsonObject &services
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     mergeStoreKitPricesIntoPremiumPlans(servicesData);
+#elif defined(Q_OS_ANDROID)
+    mergeGooglePlayPricesIntoPremiumPlans(servicesData);
 #endif
 
     return ErrorCode::NoError;

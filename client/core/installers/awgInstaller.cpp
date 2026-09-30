@@ -40,31 +40,13 @@ void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
     QString junkPacketMinSize = QString::number(10);
     QString junkPacketMaxSize = QString::number(50);
 
-    int s1 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::initPacketJunkSizeMax);
-    int s2 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::responsePacketJunkSizeMax);
-    int s3 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::cookieReplyPacketJunkSizeMax);
-    int s4 = protocols::awg::defaultTransportPacketJunkSize;
-
-    // Ensure all values are unique and don't create equal packet sizes
-    QSet<int> usedValues { s1, s4 };
-
-    while (usedValues.contains(s2) || s1 + amnezia::AwgConstant::messageInitiationSize == s2 + amnezia::AwgConstant::messageResponseSize) {
-        s2 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::responsePacketJunkSizeMax);
-    }
-    usedValues.insert(s2);
-
-    while (usedValues.contains(s3) || s1 + amnezia::AwgConstant::messageInitiationSize == s3 + amnezia::AwgConstant::messageCookieReplySize
-           || s2 + amnezia::AwgConstant::messageResponseSize == s3 + amnezia::AwgConstant::messageCookieReplySize) {
-        s3 = QRandomGenerator::global()->bounded(protocols::awg::junkPacketSizeMin, protocols::awg::cookieReplyPacketJunkSizeMax);
-    }
-
     serverConfig.junkPacketCount = junkPacketCount;
     serverConfig.junkPacketMinSize = junkPacketMinSize;
     serverConfig.junkPacketMaxSize = junkPacketMaxSize;
-    serverConfig.initPacketJunkSize = QString::number(s1);
-    serverConfig.responsePacketJunkSize = QString::number(s2);
-    serverConfig.cookieReplyPacketJunkSize = QString::number(s3);
-    serverConfig.transportPacketJunkSize = QString::number(s4);
+    serverConfig.initPacketJunkSize = protocols::awg::defaultPadding;
+    serverConfig.responsePacketJunkSize = protocols::awg::defaultPadding;
+    serverConfig.cookieReplyPacketJunkSize = protocols::awg::defaultPadding;
+    serverConfig.transportPacketJunkSize = protocols::awg::defaultPadding;
 
     serverConfig.initPacketMagicHeader = protocols::awg::defaultInitPacketMagicHeader;
     serverConfig.responsePacketMagicHeader = protocols::awg::defaultResponsePacketMagicHeader;
@@ -72,7 +54,6 @@ void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
     serverConfig.transportPacketMagicHeader = protocols::awg::defaultTransportPacketMagicHeader;
 
     serverConfig.headerProtectionKey = WireguardConfigurator::genClientKeys().clientPrivKey;
-    serverConfig.contentPaddingAddition = protocols::awg::defaultContentPaddingAddition;
     serverConfig.rekeyAfterTime = protocols::awg::defaultRekeyAfterTime;
     serverConfig.rekeyTimeout = protocols::awg::defaultRekeyTimeout;
     serverConfig.rejectAfterTime = protocols::awg::defaultRejectAfterTime;
@@ -80,6 +61,8 @@ void AwgInstaller::generateAwgParameters(AwgServerConfig &serverConfig)
     serverConfig.maxHandshakeAttempts = protocols::awg::defaultMaxHandshakeAttempts;
     serverConfig.randomTrailers = protocols::awg::defaultRandomTrailers;
     serverConfig.disableCookies = protocols::awg::defaultDisableCookies;
+
+    serverConfig.specialJunk1 = protocols::awg::defaultSpecialJunk1;
 }
 
 ErrorCode AwgInstaller::extractConfigFromContainer(DockerContainer container, const ServerCredentials &credentials,

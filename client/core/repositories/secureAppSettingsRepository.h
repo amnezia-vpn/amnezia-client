@@ -79,6 +79,9 @@ public:
     void setScreenshotsEnabled(bool enabled);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
+
+    bool isAutoUpdateCheckEnabled() const;
+    void setAutoUpdateCheckEnabled(bool enabled);
     bool isSaveLogs() const;
     void setSaveLogs(bool enabled);
     QDateTime getLogEnableDate() const;

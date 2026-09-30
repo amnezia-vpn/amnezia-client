@@ -163,6 +163,10 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit restoreBackupFinished();
         emit autoStartChanged();
         emit startMinimizedChanged();
+
+        if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
+            emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
+        }
     } else {
         emit errorOccurred(errorCode);
     }
@@ -238,6 +242,16 @@ bool SettingsUiController::isNewsNotificationsEnabled()
 void SettingsUiController::toggleNewsNotificationsEnabled(bool enable)
 {
     m_settingsController->toggleNewsNotificationsEnabled(enable);
+}
+
+bool SettingsUiController::isAutoUpdateCheckEnabled()
+{
+    return m_settingsController->isAutoUpdateCheckEnabled();
+}
+
+void SettingsUiController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_settingsController->toggleAutoUpdateCheckEnabled(enable);
 }
 
 bool SettingsUiController::isCameraPresent()
