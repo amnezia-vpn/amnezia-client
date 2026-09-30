@@ -38,6 +38,8 @@ namespace amnezia
         XrayServerConfigInvalid = 215,
         XrayServerNoVlessClients = 216,
         XrayRealityKeysReadFailed = 217,
+        ServerContainerRuntimeNotSupported = 218,
+        ContainerRuntimeServiceNotRunning = 219,
 
         // Ssh connection errors
         SshRequestDeniedError = 300,
@@ -80,6 +82,8 @@ namespace amnezia
         RestoreBackupInvalidError = 904,
         LegacyApiV1NotSupportedError = 905,
         LegacyContainerNotSupportedError = 906,
+        ConfigFormatVersionNotSupportedError = 907,
+        RestoreBackupUnsupportedConfigsSkipped = 908,
 
         // Android errors
         AndroidError = 1000,
@@ -95,7 +99,6 @@ namespace amnezia
         ApiServicesMissingError = 1107,
         ApiConfigLimitError = 1108,
         ApiNotFoundError = 1109,
-        ApiMigrationError = 1110,
         ApiUpdateRequestError = 1111,
         ApiSubscriptionExpiredError = 1112,
         ApiPurchaseError = 1113,
@@ -106,6 +109,8 @@ namespace amnezia
         ApiCaptchaInvalidError = 1118,
         ApiCaptchaRefreshError = 1119,
         ApiRateLimitError = 1120,
+        ApiNoPurchasesToRestore = 1121,
+        ApiPurchasePendingError = 1122,
 
         // QFile errors
         OpenError = 1200,
@@ -113,7 +118,16 @@ namespace amnezia
         PermissionsError = 1202,
         UnspecifiedError = 1203,
         FatalError = 1204,
-        AbortError = 1205
+        AbortError = 1205,
+
+        // Billing errors
+        BillingCanceled = 1300,
+        BillingError = 1301,
+        BillingGooglePlayError = 1302,
+        BillingUnavailable = 1303,
+        SubscriptionAlreadyOwned = 1304,
+        SubscriptionUnavailable = 1305,
+        BillingNetworkError = 1306,
       };
       Q_ENUM_NS(ErrorCode)
     }
@@ -124,5 +138,3 @@ namespace amnezia
 Q_DECLARE_METATYPE(amnezia::ErrorCode)
 
 #endif // ERRORCODES_H
-
-

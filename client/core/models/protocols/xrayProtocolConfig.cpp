@@ -32,7 +32,7 @@ XrayXPaddingConfig XrayXPaddingConfig::fromJson(const QJsonObject &json)
     c.bytesMin  = json.value(configKey::xPaddingBytesMin).toString();
     c.bytesMax  = json.value(configKey::xPaddingBytesMax).toString();
     c.obfsMode  = json.value(configKey::xPaddingObfsMode).toBool(true);
-    c.key       = json.value(configKey::xPaddingKey).toString(protocols::xray::defaultSite);
+    c.key       = json.value(configKey::xPaddingKey).toString();
     c.header    = json.value(configKey::xPaddingHeader).toString();
     c.placement = json.value(configKey::xPaddingPlacement).toString(protocols::xray::defaultXPaddingPlacement);
     c.method    = json.value(configKey::xPaddingMethod).toString(protocols::xray::defaultXPaddingMethod);
@@ -81,7 +81,6 @@ QJsonObject XrayXhttpConfig::toJson() const
     if (!mode.isEmpty())            obj[configKey::xhttpMode]            = mode;
     if (!host.isEmpty())            obj[configKey::xhttpHost]            = host;
     if (!path.isEmpty())            obj[configKey::xhttpPath]            = path;
-    if (!headersTemplate.isEmpty()) obj[configKey::xhttpHeadersTemplate] = headersTemplate;
     if (!uplinkMethod.isEmpty())    obj[configKey::xhttpUplinkMethod]    = uplinkMethod;
     obj[configKey::xhttpDisableGrpc] = disableGrpc;
     obj[configKey::xhttpDisableSse]  = disableSse;
@@ -116,7 +115,6 @@ namespace
         c.mode = QString();
         c.host = QString();
         c.path = QString();
-        c.headersTemplate = QString();
         c.uplinkMethod = QString();
         c.disableGrpc = false;
         c.disableSse = false;
@@ -154,9 +152,6 @@ XrayXhttpConfig XrayXhttpConfig::fromJson(const QJsonObject &json)
     }
     if (json.contains(configKey::xhttpPath)) {
         c.path = json.value(configKey::xhttpPath).toString();
-    }
-    if (json.contains(configKey::xhttpHeadersTemplate)) {
-        c.headersTemplate = json.value(configKey::xhttpHeadersTemplate).toString();
     }
     if (json.contains(configKey::xhttpUplinkMethod)) {
         c.uplinkMethod = json.value(configKey::xhttpUplinkMethod).toString();
@@ -365,6 +360,8 @@ XrayServerConfig XrayServerConfig::fromJson(const QJsonObject &json)
 bool XrayServerConfig::hasEqualServerSettings(const XrayServerConfig &other) const
 {
     return port == other.port
+           && transportProto == other.transportProto
+           && subnetAddress == other.subnetAddress
            && site == other.site
            && security == other.security
            && flow == other.flow
@@ -463,6 +460,17 @@ XrayProtocolConfig XrayProtocolConfig::fromJson(const QJsonObject &json)
                         QJsonObject inbound = inbounds[0].toObject();
                         if (inbound.contains(protocols::xray::port)) {
                             clientCfg.localPort = QString::number(inbound.value(protocols::xray::port).toInt());
+                        }
+                    }
+                }
+                const QJsonArray outbounds = parsed.value(protocols::xray::outbounds).toArray();
+                if (!outbounds.isEmpty()) {
+                    const QJsonObject settings = outbounds[0].toObject().value(protocols::xray::settings).toObject();
+                    const QJsonArray vnext = settings.value(protocols::xray::vnext).toArray();
+                    if (!vnext.isEmpty()) {
+                        const QJsonArray users = vnext[0].toObject().value(protocols::xray::users).toArray();
+                        if (!users.isEmpty()) {
+                            clientCfg.id = users[0].toObject().value(protocols::xray::id).toString();
                         }
                     }
                 }

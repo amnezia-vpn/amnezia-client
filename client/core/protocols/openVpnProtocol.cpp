@@ -222,6 +222,18 @@ ErrorCode OpenVpnProtocol::start()
     }
 #endif
 
+#ifdef Q_OS_WIN
+    // In "all except sites" mode the config uses redirect-gateway !ipv4, so OpenVPN
+    // never reports net_route_v4_best_gw and m_routeGateway would stay empty
+    const QString winGateway = NetworkUtilities::getGatewayAndIface().first;
+    if (!winGateway.isEmpty()) {
+        m_routeGateway = winGateway;
+        qDebug() << "Set VPN route gateway" << m_routeGateway;
+    } else {
+        qWarning() << "Unable to detect physical default gateway";
+    }
+#endif
+
     uint mgmtPort = selectMgmtPort();
     qDebug() << "OpenVpnProtocol::start mgmt port selected:" << mgmtPort;
 

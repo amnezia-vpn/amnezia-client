@@ -17,7 +17,7 @@
 #endif
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 SettingsUiController::SettingsUiController(SettingsController* settingsController,
@@ -81,7 +81,7 @@ void SettingsUiController::toggleLogging(bool enable)
 {
     m_settingsController->toggleLogging(enable);
 #if defined(Q_OS_IOS)
-    AmneziaVPN::toggleLogging(enable);
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
 #endif
     if (enable == true) {
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
@@ -163,6 +163,10 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit restoreBackupFinished();
         emit autoStartChanged();
         emit startMinimizedChanged();
+
+        if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
+            emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
+        }
     } else {
         emit errorOccurred(errorCode);
     }
@@ -183,7 +187,7 @@ void SettingsUiController::clearSettings()
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
-    AmneziaVPN::clearSettings();
+    SWIFT_BRIDGE_NAMESPACE::clearSettings();
 #endif
 }
 
@@ -238,6 +242,16 @@ bool SettingsUiController::isNewsNotificationsEnabled()
 void SettingsUiController::toggleNewsNotificationsEnabled(bool enable)
 {
     m_settingsController->toggleNewsNotificationsEnabled(enable);
+}
+
+bool SettingsUiController::isAutoUpdateCheckEnabled()
+{
+    return m_settingsController->isAutoUpdateCheckEnabled();
+}
+
+void SettingsUiController::toggleAutoUpdateCheckEnabled(bool enable)
+{
+    m_settingsController->toggleAutoUpdateCheckEnabled(enable);
 }
 
 bool SettingsUiController::isCameraPresent()

@@ -91,6 +91,7 @@ PageType {
         }
 
         function onExportErrorOccurred(error) {
+            PageController.showBusyIndicator(false)
             PageController.showErrorMessage(error)
         }
     }
@@ -608,7 +609,7 @@ PageType {
             ListView {
                 id: clientsListView
                 Layout.fillWidth: true
-                Layout.preferredHeight: childrenRect.height
+                Layout.preferredHeight: contentHeight
 
                 visible: accessTypeSelector.currentIndex === 1
 

@@ -53,7 +53,7 @@ Window  {
         }
     }
 
-    visible: true
+    visible: !GC.isDesktop()
     width: GC.screenWidth
     height: GC.screenHeight
     minimumWidth: GC.isDesktop() ? 360 : 0
@@ -145,9 +145,6 @@ Window  {
             PageController.disableControls(visible)
         }
 
-        function onShowChangelogDrawer() {
-            changelogDrawer.openTriggered()
-        }
     }
 
     Connections {
@@ -177,6 +174,15 @@ Window  {
 
         PopupType {
             id: popupNotificationMessage
+
+            MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    popupNotificationMessage.close()
+                    popupNotificationTimer.stop()
+                }
+            }
         }
 
         Timer {
@@ -443,16 +449,6 @@ Window  {
 
         onAccepted: SystemController.fileDialogClosed(true)
         onRejected: SystemController.fileDialogClosed(false)
-    }
-
-    Item {
-        anchors.fill: parent
-
-        ChangelogDrawer {
-            id: changelogDrawer
-
-            anchors.fill: parent
-        }
     }
 
     Connections {

@@ -28,6 +28,7 @@ public slots:
     QString getCurrentLanguageName() const;
     QString getCurrentSiteUrl(const QString &path = "") const;
     QString getCurrentDocsUrl(const QString &path = "") const;
+    QString getCurrentHostUrl(const QString &path = "") const;
     LanguageSettings::AvailableLanguageEnum getSystemLanguageEnum() const;
 
 signals:

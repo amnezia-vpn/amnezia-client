@@ -259,41 +259,9 @@ PageType {
             }
 
             DividerType {
-                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
-            }
-
-            SwitcherType {
-                id: switcher
-
-                readonly property bool isVlessProtocol: SubscriptionUiController.isVlessProtocol(ServersUiController.processedServerId)
-                readonly property bool isProtocolSwitchBlocked: ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected
-
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 24
-
-                visible: ApiAccountInfoModel.data("isProtocolSelectionSupported")
-                enabled: !switcher.isProtocolSwitchBlocked
-
-                text: qsTr("Use VLESS protocol")
-                checked: switcher.isVlessProtocol
-                onToggled: function() {
-                    if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
-                        PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                    } else {
-                        PageController.showBusyIndicator(true)
-                        SubscriptionUiController.setCurrentProtocol(ServersUiController.processedServerId, switcher.isVlessProtocol ? "awg" : "vless")
-                        SubscriptionUiController.updateServiceFromGateway(ServersUiController.processedServerId, "", "", true)
-                        PageController.showBusyIndicator(false)
-                    }
-                }
-            }
-
-            DividerType {
-                visible: footer.isVisibleForAmneziaFree
+                visible: (!root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
+                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase)
+                    || footer.isVisibleForAmneziaFree
             }
 
             WarningType {
