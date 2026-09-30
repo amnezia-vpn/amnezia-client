@@ -164,7 +164,7 @@ private:
 
     QList<QString> m_qrCodes;
 
-    QString m_requestOtpId;
+    QString m_otpRequestId;
     bool m_otpIsTestPurchase = false;
     bool m_otpStatusCheckInProgress = false;
     QString m_vpnKey;

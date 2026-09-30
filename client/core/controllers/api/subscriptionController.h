@@ -1,6 +1,7 @@
 #ifndef SUBSCRIPTIONCONTROLLER_H
 #define SUBSCRIPTIONCONTROLLER_H
 
+#include <QDateTime>
 #include <QJsonObject>
 #include <QByteArray>
 #include <QFuture>
@@ -34,8 +35,8 @@ public:
 
     struct OtpData {
         QString code;
-        QString requestOtpId;
-        int expiresInSec = 0;
+        QString otpRequestId;
+        QDateTime expiresAt;
     };
 
     enum class OtpStatus {
