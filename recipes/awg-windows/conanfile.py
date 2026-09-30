@@ -3,13 +3,27 @@ from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, chdir
 from conan.tools.gnu import AutotoolsToolchain
+from conan.tools.env import VirtualBuildEnv
 
 import os
+import sys
+
+_recipe_dir = os.path.dirname(os.path.abspath(__file__))
+if _recipe_dir not in sys.path:
+    sys.path.insert(0, _recipe_dir)
+
+from windows_cgo import is_windows_arm64, run_llvm_mingw_go_build
+
 
 class AwgWindows(ConanFile):
     name = "awg-windows"
     version = "3.1.20260814"
     settings = "os", "arch"
+    exports = "windows_cgo.py"
+
+    @property
+    def _windows_arm64(self):
+        return is_windows_arm64(self)
 
     @property
     def _goarm(self):
@@ -22,7 +36,7 @@ class AwgWindows(ConanFile):
             "armv7s": "7",
             "armv7k": "7",
         }.get(str(self.settings.arch))
-    
+
     @property
     def _goarch(self):
         return {
@@ -55,7 +69,9 @@ class AwgWindows(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("mingw-builds/15.1.0")
+        if not self._windows_arm64:
+            # mingw-builds has no Windows ARM64 binaries; llvm-mingw is used instead.
+            self.tool_requires("mingw-builds/15.1.0")
         self.tool_requires("go/1.26.0")
 
     def requirements(self):
@@ -64,8 +80,12 @@ class AwgWindows(ConanFile):
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/amneziawg-windows/archive/refs/tags/v{self.version}.zip",
             sha256="d941861e3c0fada70b6b66b08aad4c77098d612aa11dd41b8ad70dd8afa6c61b", strip_root=True)
-        
+
     def generate(self):
+        if self._windows_arm64:
+            VirtualBuildEnv(self).generate()
+            return
+
         tc = AutotoolsToolchain(self)
         tc.extra_cflags = [
             "-Wall",
@@ -73,7 +93,7 @@ class AwgWindows(ConanFile):
             "-Wno-switch",
             "-DWINVER=0x0601"
         ]
-        tc.extra_ldflags = [ 
+        tc.extra_ldflags = [
             "-Wl,--dynamicbase",
             "-Wl,--nxcompat",
             "-Wl,--export-all-symbols",
@@ -90,8 +110,20 @@ class AwgWindows(ConanFile):
         tc.generate(env)
 
     def build(self):
+        out_dll = os.path.join(self.build_folder, "tunnel.dll")
+        if self._windows_arm64:
+            run_llvm_mingw_go_build(
+                self,
+                self.source_folder,
+                out_dll,
+                self._goarch,
+                goarm=self._goarm,
+                extra_args='-buildmode c-shared -ldflags="-w -s" -trimpath -v',
+            )
+            return
+
         with chdir(self, self.source_folder):
-            self.run(f'go build -buildmode c-shared -ldflags="-w -s" -trimpath -v -o "{os.path.join(self.build_folder, "tunnel.dll")}"')
+            self.run(f'go build -buildmode c-shared -ldflags="-w -s" -trimpath -v -o "{out_dll}"')
 
     def package(self):
         copy(self, "tunnel.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"))

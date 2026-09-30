@@ -52,7 +52,7 @@ class Openvpn(ConanFile):
         )
 
     def _patch_sources(self):
-        replace_in_file(self, 
+        replace_in_file(self,
             os.path.join(self.source_folder, "CMakeLists.txt"),
             "/Qspectre",
             ""
@@ -73,6 +73,9 @@ class Openvpn(ConanFile):
             tc.extra_cxxflags = [ f"-I{tap_include_path}", f"-I{applink_include_path}" ]
             tc.cache_variables["BUILD_TESTING"] = False
             tc.cache_variables["ENABLE_PKCS11"] = False
+            # Upstream defaults USE_WERROR=ON (/WX with MSVC), which trips on
+            # warnings from newer toolchains (notably the ARM64 MSVC headers).
+            tc.cache_variables["USE_WERROR"] = False
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
