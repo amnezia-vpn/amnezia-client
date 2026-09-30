@@ -583,12 +583,12 @@ void InstallUiController::clearProcessedServerCredentials()
 
 void InstallUiController::setProcessedServerCredentials(const QString &hostName, const QString &userName, const QString &secretData)
 {
-    m_processedServerCredentials.hostName = hostName;
+    m_processedServerCredentials.hostName = hostName.trimmed();
     if (m_processedServerCredentials.hostName.contains(":")) {
         m_processedServerCredentials.port = m_processedServerCredentials.hostName.split(":").at(1).toInt();
         m_processedServerCredentials.hostName = m_processedServerCredentials.hostName.split(":").at(0);
     }
-    m_processedServerCredentials.userName = userName;
+    m_processedServerCredentials.userName = userName.trimmed();
     m_processedServerCredentials.secretData = secretData;
 }
 
