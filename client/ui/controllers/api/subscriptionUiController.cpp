@@ -345,13 +345,14 @@ void SubscriptionUiController::checkOtpStatus()
 
         // Poll failures are silent: the drawer keeps polling on its timer
         if (errorCode != ErrorCode::NoError) {
-            qWarning().noquote() << "[OTP] Status check failed, errorCode =" << static_cast<int>(errorCode);
             return;
         }
         if (status == SubscriptionController::OtpStatus::Confirmed) {
+            qDebug().noquote() << "[OTP] Code confirmed";
             m_otpRequestId.clear();
             emit otpConfirmed();
         } else if (status == SubscriptionController::OtpStatus::Expired) {
+            qDebug().noquote() << "[OTP] Code expired";
             m_otpRequestId.clear();
             emit otpExpired();
         }

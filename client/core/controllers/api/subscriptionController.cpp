@@ -598,6 +598,8 @@ ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData
         qWarning().noquote() << "[OTP] Response does not contain an otp code or request id";
         return ErrorCode::ApiOtpLoginError;
     }
+    qDebug().noquote() << "[OTP] Code issued, request id =" << otpData.otpRequestId
+                       << "expires at =" << otpData.expiresAt.toString(Qt::ISODate);
     return ErrorCode::NoError;
 }
 
@@ -626,6 +628,11 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
                              const QJsonObject errorObject = QJsonDocument::fromJson(responseBody).object();
                              const int httpStatus = errorObject.value(QLatin1String("http_status"))
                                                             .toInt(errorObject.value(QLatin1String("status")).toInt(-1));
+                             qWarning().noquote() << "[OTP] Status request failed, errorCode =" << static_cast<int>(errorCode)
+                                                  << "http status =" << httpStatus
+                                                  << "message =" << errorObject.value(QLatin1String("message")).toString()
+                                                  << errorObject.value(QLatin1String("title")).toString()
+                                                  << errorObject.value(QLatin1String("detail")).toString();
                              if (httpStatus == httpStatusCodeNotFound) {
                                  promise->addResult(qMakePair(ErrorCode::NoError, OtpStatus::Expired));
                              } else {
@@ -641,7 +648,10 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
                              parsedStatus = OtpStatus::Confirmed;
                          } else if (status == QLatin1String("expired")) {
                              parsedStatus = OtpStatus::Expired;
+                         } else if (status != QLatin1String("pending")) {
+                             qWarning().noquote() << "[OTP] Unknown otp_status value:" << status;
                          }
+                         qDebug().noquote() << "[OTP] Status =" << status;
                          promise->addResult(qMakePair(ErrorCode::NoError, parsedStatus));
                          promise->finish();
                      });
