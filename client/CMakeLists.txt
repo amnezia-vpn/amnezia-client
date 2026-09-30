@@ -314,3 +314,7 @@ if(OVPN_SCRIPTS)
             WORLD_READ WORLD_EXECUTE
     )
 endif()
+
+if(AMNEZIA_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()

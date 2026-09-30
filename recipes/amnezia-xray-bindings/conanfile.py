@@ -137,6 +137,7 @@ class AmneziaXrayBindings(ConanFile):
                 make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                 with env.vars(self).apply():
                     at = Autotools(self)
+                    make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                     at.make(args=[
                         f"BUILD_DIR={make_build_dir}"
                     ])
