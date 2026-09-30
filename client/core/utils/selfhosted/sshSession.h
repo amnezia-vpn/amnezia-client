@@ -28,6 +28,8 @@ public:
                                         libssh::ScpOverwriteMode overwriteMode = libssh::ScpOverwriteMode::ScpOverwriteExisting);
     QByteArray getTextFileFromContainer(DockerContainer container, const ServerCredentials &credentials, const QString &path,
                                         ErrorCode &errorCode);
+    QList<QByteArray> getTextFilesFromContainer(DockerContainer container, const ServerCredentials &credentials,
+                                                const QStringList &paths, ErrorCode &errorCode);
 
     static QString replaceVars(const QString &script, const Vars &vars);
 

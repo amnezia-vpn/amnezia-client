@@ -102,9 +102,9 @@ InstallController::~InstallController()
 }
 
 ErrorCode InstallController::setupContainer(const ServerCredentials &credentials, DockerContainer container, ContainerConfig &config,
-                                            bool isUpdate)
+                                            SshSession &sshSession, bool isUpdate)
 {
-    SshSession sshSession;
+    qDebug().noquote() << "InstallController::setupContainer" << ContainerUtils::containerToString(container);
     ErrorCode e = ErrorCode::NoError;
 
     e = isUserInSudo(credentials, sshSession);
@@ -201,7 +201,7 @@ ErrorCode InstallController::updateServerConfig(const QString &serverId, DockerC
 
     ErrorCode errorCode = ErrorCode::NoError;
     if (reinstallRequired) {
-        errorCode = setupContainer(credentials, container, newConfig, true);
+        errorCode = setupContainer(credentials, container, newConfig, sshSession, true);
 
         // Reinstall pulls the latest container image, so the server runs the latest protocol version
         if (errorCode == ErrorCode::NoError && container == DockerContainer::Awg2) {
@@ -1102,7 +1102,7 @@ ContainerConfig InstallController::generateConfig(DockerContainer container, int
 }
 
 ErrorCode InstallController::installContainer(const ServerCredentials &credentials, DockerContainer container, int port,
-                                              TransportProto transportProto, ContainerConfig &config)
+                                              TransportProto transportProto, ContainerConfig &config, SshSession &sshSession)
 {
     config = generateConfig(container, port, transportProto);
     if (container == DockerContainer::TProxy) {
@@ -1125,7 +1125,7 @@ ErrorCode InstallController::installContainer(const ServerCredentials &credentia
             return ErrorCode::InternalError;
         }
     }
-    return setupContainer(credentials, container, config, false);
+    return setupContainer(credentials, container, config, sshSession, false);
 }
 
 void InstallController::setTProxyInstallHints(const QString &hostname, const QString &email)
@@ -1244,7 +1244,7 @@ ErrorCode InstallController::installServer(const ServerCredentials &credentials,
     wasContainerInstalled = false;
     if (!installedContainers.contains(container)) {
         ContainerConfig config;
-        errorCode = installContainer(credentials, container, port, transportProto, config);
+        errorCode = installContainer(credentials, container, port, transportProto, config, sshSession);
         if (errorCode) {
             return errorCode;
         }
@@ -1314,7 +1314,7 @@ ErrorCode InstallController::installContainer(const QString &serverId, DockerCon
     wasContainerInstalled = false;
     if (!installedContainers.contains(container)) {
         ContainerConfig config;
-        errorCode = installContainer(credentials, container, port, transportProto, config);
+        errorCode = installContainer(credentials, container, port, transportProto, config, sshSession);
         if (errorCode) {
             return errorCode;
         }
