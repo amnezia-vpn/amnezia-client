@@ -59,6 +59,7 @@ ListViewType {
                     var containerIndex = proxyDefaultServerContainersModel.mapToSource(index)
 
                     if (!isInstalled) {
+                        ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                         ServersUiController.processedContainerIndex = containerIndex
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
                         containersDropDown.closeTriggered()

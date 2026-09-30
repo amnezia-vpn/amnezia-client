@@ -1,6 +1,6 @@
 #include "mtProxyConfigModel.h"
 
-#include "ui/models/utils/mtproxy_public_host_input.h"
+#include "ui/utils/mtProxyPublicHostInput.h"
 
 #include "core/utils/networkUtilities.h"
 #include "core/utils/qrCodeUtils.h"
@@ -8,19 +8,14 @@
 #include "core/utils/constants/configKeys.h"
 #include "qrcodegen.hpp"
 
-#include <QClipboard>
-#include <QGuiApplication>
 #include <QHostAddress>
 #include <QRegExp>
 #include <QRegularExpression>
 #include <QtGlobal>
-#include <qqml.h>
 
 using namespace amnezia;
 
-MtProxyConfigModel::MtProxyConfigModel(QObject *parent) : QAbstractListModel(parent) {
-    qmlRegisterType<PublicHostInputValidator>("MtProxyConfig", 1, 0, "PublicHostInputValidator");
-}
+MtProxyConfigModel::MtProxyConfigModel(QObject *parent) : QAbstractListModel(parent) {}
 
 int MtProxyConfigModel::rowCount(const QModelIndex &parent) const {
     Q_UNUSED(parent);
@@ -332,7 +327,7 @@ void MtProxyConfigModel::removeAdditionalSecret(int idx) {
 QVariantList MtProxyConfigModel::additionalSecretsList() const {
     QVariantList out;
     out.reserve(m_protocolConfig.additionalSecrets.size());
-    for (const auto &s: m_protocolConfig.additionalSecrets) {
+    for (const auto &s : m_protocolConfig.additionalSecrets) {
         if (!s.isEmpty()) {
             out.append(s);
         }
@@ -398,6 +393,9 @@ bool MtProxyConfigModel::isValidPublicHost(const QString &host) const {
         return NetworkUtilities::checkIPv4Format(t);
     }
     if (a.protocol() == QHostAddress::IPv6Protocol) {
+        if (a.isNull() || a.isLoopback() || a == QHostAddress(QHostAddress::AnyIPv6)) {
+            return false;
+        }
         return true;
     }
     static const QRegularExpression onlyAsciiDigits(QStringLiteral(R"(^\d+$)"));
@@ -504,18 +502,10 @@ bool MtProxyConfigModel::isValidFakeTlsDomain(const QString &domain) const {
     if (!re.exactMatch(t)) {
         return false;
     }
-    // ee + 32 hex (base secret) + hex(UTF-8 domain); keep headroom under typical client limits.
     if (t.toUtf8().size() > 111) {
         return false;
     }
     return true;
-}
-
-QString MtProxyConfigModel::clipboardText() const {
-    if (QClipboard *c = QGuiApplication::clipboard()) {
-        return c->text();
-    }
-    return QString();
 }
 
 QString MtProxyConfigModel::sanitizeFakeTlsDomainFieldText(const QString &input) const {
@@ -578,7 +568,6 @@ QString MtProxyConfigModel::sanitizeMtProxyTagFieldText(const QString &input) co
     if (trimmed.startsWith(QLatin1String("0x"), Qt::CaseInsensitive)) {
         trimmed = trimmed.mid(2).trimmed();
     }
-    // Prefer a contiguous 32-hex run (paste from bot message with extra text).
     static const QRegularExpression runHex(QStringLiteral(R"(([0-9a-fA-F]{32}))"));
     const QRegularExpressionMatch m = runHex.match(trimmed);
     if (m.hasMatch()) {
@@ -593,18 +582,6 @@ QString MtProxyConfigModel::sanitizeMtProxyTagFieldText(const QString &input) co
         }
         const ushort u = c.unicode();
         if ((u >= '0' && u <= '9') || (u >= 'a' && u <= 'f') || (u >= 'A' && u <= 'F')) {
-            out.append(c);
-        }
-    }
-    return out;
-}
-
-QString MtProxyConfigModel::sanitizeWorkersFieldText(const QString &input) const {
-    QString out;
-    out.reserve(qMin(input.size(), 3));
-    for (const QChar &c: input) {
-        const ushort u = c.unicode();
-        if (u >= '0' && u <= '9' && out.size() < 3) {
             out.append(c);
         }
     }

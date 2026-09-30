@@ -96,13 +96,19 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     newClientConfig.specialJunk4 = configMap.value(configKey::specialJunk4);
     newClientConfig.specialJunk5 = configMap.value(configKey::specialJunk5);
     
-    if (container == DockerContainer::Awg2) {
-        newClientConfig.cookieReplyPacketJunkSize = configMap.value(configKey::cookieReplyPacketJunkSize);
-        newClientConfig.transportPacketJunkSize = configMap.value(configKey::transportPacketJunkSize);
-    }
-    
-    newClientConfig.isObfuscationEnabled = false;
-    
+    newClientConfig.cookieReplyPacketJunkSize = configMap.value(configKey::cookieReplyPacketJunkSize);
+    newClientConfig.transportPacketJunkSize = configMap.value(configKey::transportPacketJunkSize);
+
+    newClientConfig.headerProtectionKey = configMap.value(configKey::headerProtectionKey);
+    newClientConfig.contentPaddingAddition = configMap.value(configKey::contentPaddingAddition);
+    newClientConfig.rekeyAfterTime = configMap.value(configKey::rekeyAfterTime);
+    newClientConfig.rekeyTimeout = configMap.value(configKey::rekeyTimeout);
+    newClientConfig.rejectAfterTime = configMap.value(configKey::rejectAfterTime);
+    newClientConfig.keepaliveTimeout = configMap.value(configKey::keepaliveTimeout);
+    newClientConfig.maxHandshakeAttempts = configMap.value(configKey::maxHandshakeAttempts);
+    newClientConfig.randomTrailers = configMap.value(configKey::randomTrailers);
+    newClientConfig.disableCookies = configMap.value(configKey::disableCookies);
+
     protocolConfig.setClientConfig(newClientConfig);
     
     return protocolConfig;

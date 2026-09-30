@@ -26,6 +26,31 @@ namespace
         }
         return fp;
     }
+
+    // Parse an xray int range: "from-to" string, plain int, or legacy {from,to} object.
+    void parseIntRange(const QJsonValue &v, QString &minOut, QString &maxOut)
+    {
+        if (v.isString()) {
+            const QString s = v.toString().trimmed();
+            const int dash = s.indexOf(QLatin1Char('-'), 1);
+            if (dash > 0) {
+                minOut = s.left(dash).trimmed();
+                maxOut = s.mid(dash + 1).trimmed();
+            } else if (!s.isEmpty()) {
+                minOut = s;
+                maxOut = s;
+            }
+        } else if (v.isDouble()) {
+            minOut = QString::number(v.toInt());
+            maxOut = minOut;
+        } else if (v.isObject()) {
+            const QJsonObject o = v.toObject();
+            if (o.contains(QLatin1String("from")) || o.contains(QLatin1String("to"))) {
+                minOut = QString::number(o.value(QLatin1String("from")).toInt());
+                maxOut = QString::number(o.value(QLatin1String("to")).toInt());
+            }
+        }
+    }
 }
 
 using namespace amnezia;
@@ -125,7 +150,13 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         QJsonArray alpnArr = tls.value("alpn").toArray();
         QStringList alpnList;
         for (const QJsonValue &v : alpnArr) {
-            alpnList << v.toString();
+            QString t = v.toString().trimmed();
+            if (t.compare(QLatin1String("HTTP/2"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("h2");
+            else if (t.compare(QLatin1String("HTTP/1.1"), Qt::CaseInsensitive) == 0)
+                t = QStringLiteral("http/1.1");
+            if (!t.isEmpty())
+                alpnList << t;
         }
         srv.alpn = alpnList.join(",");
     }
@@ -159,12 +190,6 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         srv.xhttp.host = xhttpObj.value("host").toString();
         srv.xhttp.path = xhttpObj.value("path").toString();
 
-        {
-            const QJsonObject hdrs = xhttpObj.value("headers").toObject();
-            if (hdrs.contains(QLatin1String("Host")) || !hdrs.isEmpty())
-                srv.xhttp.headersTemplate = QStringLiteral("HTTP");
-        }
-
         if (xhttpObj.contains(QLatin1String("uplinkHTTPMethod")))
             srv.xhttp.uplinkMethod = xhttpObj.value("uplinkHTTPMethod").toString();
         else
@@ -184,7 +209,9 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
                 return QStringLiteral("Query");
             return core;
         };
-        QString sess = xhttpObj.value("sessionPlacement").toString();
+        QString sess = xhttpObj.value("sessionIDPlacement").toString();
+        if (sess.isEmpty())
+            sess = xhttpObj.value("sessionPlacement").toString();
         if (sess.isEmpty())
             sess = xhttpObj.value("scSessionPlacement").toString();
         srv.xhttp.sessionPlacement = sessionSeqUi(sess);
@@ -210,14 +237,17 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             udata = xhttpObj.value("scUplinkDataPlacement").toString();
         srv.xhttp.uplinkDataPlacement = uplinkDataUi(udata);
 
-        srv.xhttp.sessionKey = xhttpObj.value("sessionKey").toString();
+        srv.xhttp.sessionKey = xhttpObj.value("sessionIDKey").toString();
+        if (srv.xhttp.sessionKey.isEmpty())
+            srv.xhttp.sessionKey = xhttpObj.value("sessionKey").toString();
         srv.xhttp.seqKey = xhttpObj.value("seqKey").toString();
         srv.xhttp.uplinkDataKey = xhttpObj.value("uplinkDataKey").toString();
 
         if (xhttpObj.contains(QLatin1String("uplinkChunkSize"))) {
-            QJsonObject uc = xhttpObj.value("uplinkChunkSize").toObject();
-            if (!uc.isEmpty())
-                srv.xhttp.uplinkChunkSize = QString::number(uc.value("from").toInt());
+            QString ucMin, ucMax;
+            parseIntRange(xhttpObj.value("uplinkChunkSize"), ucMin, ucMax);
+            if (!ucMin.isEmpty())
+                srv.xhttp.uplinkChunkSize = ucMin;
         } else if (xhttpObj.contains(QLatin1String("xhttpUplinkChunkSize"))) {
             srv.xhttp.uplinkChunkSize = QString::number(xhttpObj.value("xhttpUplinkChunkSize").toInt());
         }
@@ -226,11 +256,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
         }
 
         auto readRange = [&](const char *key, QString &minOut, QString &maxOut) {
-            QJsonObject r = xhttpObj.value(QLatin1String(key)).toObject();
-            if (!r.isEmpty()) {
-                minOut = QString::number(r.value("from").toInt());
-                maxOut = QString::number(r.value("to").toInt());
-            }
+            parseIntRange(xhttpObj.value(QLatin1String(key)), minOut, maxOut);
         };
         readRange("scMaxEachPostBytes", srv.xhttp.scMaxEachPostBytesMin, srv.xhttp.scMaxEachPostBytesMax);
         readRange("scMinPostsIntervalMs", srv.xhttp.scMinPostsIntervalMsMin, srv.xhttp.scMinPostsIntervalMsMax);
@@ -243,10 +269,11 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             srv.xhttp.xPadding.header = pad.value("xPaddingHeader").toString();
             srv.xhttp.xPadding.placement = pad.value("xPaddingPlacement").toString();
             srv.xhttp.xPadding.method = pad.value("xPaddingMethod").toString();
-            QJsonObject bytesRange = pad.value("xPaddingBytes").toObject();
-            if (!bytesRange.isEmpty()) {
-                srv.xhttp.xPadding.bytesMin = QString::number(bytesRange.value("from").toInt());
-                srv.xhttp.xPadding.bytesMax = QString::number(bytesRange.value("to").toInt());
+            QString bytesMin, bytesMax;
+            parseIntRange(pad.value("xPaddingBytes"), bytesMin, bytesMax);
+            if (!bytesMin.isEmpty()) {
+                srv.xhttp.xPadding.bytesMin = bytesMin;
+                srv.xhttp.xPadding.bytesMax = bytesMax;
             }
             QString pl = srv.xhttp.xPadding.placement.toLower();
             if (pl == QLatin1String("cookie"))
@@ -264,7 +291,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
                 srv.xhttp.xPadding.method = QStringLiteral("Tokenish");
         };
         if (xhttpObj.contains(QLatin1String("xPaddingObfsMode")) || xhttpObj.contains(QLatin1String("xPaddingKey"))
-            || !xhttpObj.value("xPaddingBytes").toObject().isEmpty()) {
+            || xhttpObj.contains(QLatin1String("xPaddingBytes"))) {
             loadPaddingFromObject(xhttpObj);
         } else if (xhttpObj.contains(QLatin1String("xPadding")) && xhttpObj.value("xPadding").isObject()) {
             const QJsonObject nested = xhttpObj.value("xPadding").toObject();
@@ -280,11 +307,7 @@ ErrorCode XrayInstaller::extractConfigFromContainer(DockerContainer container, c
             srv.xhttp.xmux.enabled = true;
 
             auto readMuxRange = [&](const char *key, QString &minOut, QString &maxOut) {
-                QJsonObject r = mux.value(QLatin1String(key)).toObject();
-                if (!r.isEmpty()) {
-                    minOut = QString::number(r.value("from").toInt());
-                    maxOut = QString::number(r.value("to").toInt());
-                }
+                parseIntRange(mux.value(QLatin1String(key)), minOut, maxOut);
             };
             readMuxRange("maxConcurrency", srv.xhttp.xmux.maxConcurrencyMin, srv.xhttp.xmux.maxConcurrencyMax);
             readMuxRange("maxConnections", srv.xhttp.xmux.maxConnectionsMin, srv.xhttp.xmux.maxConnectionsMax);

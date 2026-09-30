@@ -31,6 +31,7 @@
 #include "core/models/protocols/socks5ProxyProtocolConfig.h"
 #include "ui/models/services/mtProxyConfigModel.h"
 #include "ui/models/services/telemtConfigModel.h"
+#include "ui/models/services/tProxyConfigModel.h"
 
 class InstallUiController : public QObject
 {
@@ -53,6 +54,7 @@ public:
                                Socks5ProxyConfigModel* socks5ConfigModel,
                                MtProxyConfigModel* mtConfigModel,
                                TelemtConfigModel* telemtConfigModel,
+                               TProxyConfigModel* tProxyConfigModel,
                                ConnectionController* connectionController,
                                QObject *parent = nullptr);
     ~InstallUiController();
@@ -114,7 +116,7 @@ signals:
     void removeAllContainersFinished(const QString &finishedMessage);
     void removeContainerFinished(const QString &finishedMessage);
     void setContainerEnabledFinished(bool enabled);
-    void containerStatusRefreshed(int status);
+    void containerStatusRefreshed(int status, int errorCode);
     void containerDiagnosticsRefreshed(bool portReachable, bool upstreamReachable, int clientsConnected,
                                        const QString &lastConfigRefresh, const QString &statsEndpoint);
     void containerSecretFetched(const QString &secret);
@@ -155,6 +157,7 @@ private:
     Socks5ProxyConfigModel* m_socks5ConfigModel;
     MtProxyConfigModel* m_mtProxyConfigModel;
     TelemtConfigModel* m_telemtConfigModel;
+    TProxyConfigModel* m_tProxyConfigModel;
     ConnectionController* m_connectionController;
 
     ServerCredentials m_processedServerCredentials;

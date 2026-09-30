@@ -1,5 +1,8 @@
 #include "qrCodeUtils.h"
 
+#include <cmath>
+
+#include <QDataStream>
 #include <QIODevice>
 #include <QList>
 
@@ -16,12 +19,23 @@ QList<QString> qrCodeUtils::generateQrCodeImageSeries(const QByteArray &data)
 
         QByteArray ba = chunk.toBase64(QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
 
-        qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(ba, qrcodegen::QrCode::Ecc::LOW);
+        qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(ba.constData(), qrcodegen::QrCode::Ecc::LOW);
         QString svg = QString::fromStdString(toSvgString(qr, 1));
         chunks.append(svgToBase64(svg));
     }
 
     return chunks;
+}
+
+QString qrCodeUtils::generatePlainQrCodeImage(const QByteArray &data)
+{
+    try {
+        qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(data.constData(), qrcodegen::QrCode::Ecc::LOW);
+        QString svg = QString::fromStdString(toSvgString(qr, 1));
+        return svgToBase64(svg);
+    } catch (const qrcodegen::data_too_long &) {
+        return {};
+    }
 }
 
 QString qrCodeUtils::svgToBase64(const QString &image)
@@ -31,5 +45,5 @@ QString qrCodeUtils::svgToBase64(const QString &image)
 
 qrcodegen::QrCode qrCodeUtils::generateQrCode(const QByteArray &data)
 {
-    return qrcodegen::QrCode::encodeText(data, qrcodegen::QrCode::Ecc::LOW);
+    return qrcodegen::QrCode::encodeText(data.constData(), qrcodegen::QrCode::Ecc::LOW);
 }

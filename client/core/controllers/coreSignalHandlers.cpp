@@ -1,6 +1,7 @@
 #include "coreSignalHandlers.h"
 
 #include <QTimer>
+#include <QtConcurrent>
 
 #include "core/utils/selfhosted/sshSession.h"
 #include "core/utils/errorCodes.h"
@@ -47,7 +48,7 @@
 
 #ifdef Q_OS_IOS
     #include "platforms/ios/ios_controller.h"
-    #include <AmneziaVPN-Swift.h>
+    #include "core/utils/swiftBridge.h"
 #endif
 
 CoreSignalHandlers::CoreSignalHandlers(CoreController* coreController, QObject* parent)
@@ -144,7 +145,9 @@ void CoreSignalHandlers::initExportControllerHandler()
             });
     connect(m_coreController->m_exportController, &ExportController::revokeClientRequested, this,
             [this](const QString &serverId, int row, DockerContainer container) {
-                m_coreController->m_usersController->revokeClient(serverId, row, container);
+                QtConcurrent::run([this, serverId, row, container]() {
+                    m_coreController->m_usersController->revokeClient(serverId, row, container);
+                });
             });
     connect(m_coreController->m_exportController, &ExportController::renameClientRequested, this,
             [this](const QString &serverId, int row, const QString &clientName, DockerContainer container) {
@@ -203,12 +206,12 @@ void CoreSignalHandlers::initAdminConfigRevokedHandler()
     connect(m_coreController->m_installController, &InstallController::clientRevocationRequested, this,
             [this](const QString &serverId, const ContainerConfig &containerConfig, DockerContainer container) {
                 m_coreController->m_usersController->revokeClient(serverId, containerConfig, container);
-            });
+            }, Qt::DirectConnection);
 
     connect(m_coreController->m_installController, &InstallController::clientAppendRequested, this,
             [this](const QString &serverId, const QString &clientId, const QString &clientName, DockerContainer container) {
                 m_coreController->m_usersController->appendClient(serverId, clientId, clientName, container);
-            });
+            }, Qt::DirectConnection);
 
     connect(m_coreController->m_usersController, &UsersController::adminConfigRevoked, m_coreController->m_installController,
             &InstallController::clearCachedProfile);
@@ -285,6 +288,8 @@ void CoreSignalHandlers::initClientManagementModelUpdateHandler()
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateModel);
     connect(m_coreController->m_usersController, &UsersController::clientRenamed,
             m_coreController->m_clientManagementModel, &ClientManagementModel::updateClientName);
+    connect(m_coreController->m_usersController, &UsersController::revokeFinished,
+            m_coreController->m_exportController, &ExportController::revokeFinished);
 }
 
 void CoreSignalHandlers::initSitesModelUpdateHandler()
@@ -408,7 +413,7 @@ void CoreSignalHandlers::initIosImportHandler()
 void CoreSignalHandlers::initIosSettingsHandler()
 {
 #ifdef Q_OS_IOS
-    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { AmneziaVPN::toggleScreenshots(enabled); });
+    connect(m_coreController->m_appSettingsRepository, &SecureAppSettingsRepository::screenshotsEnabledChanged, [](bool enabled) { SWIFT_BRIDGE_NAMESPACE::toggleScreenshots(enabled); });
 #endif
 }
 
@@ -434,17 +439,8 @@ void CoreSignalHandlers::initNotificationHandler()
 
 void CoreSignalHandlers::initUpdateFoundHandler()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    connect(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished, m_coreController->m_updateUiController,
-            &UpdateUiController::checkForUpdates);
-
     connect(m_coreController->m_updateUiController, &UpdateUiController::updateFound, this, [this]() {
-        const QString version = m_coreController->m_updateUiController->getVersion();
-        const QString updateId = version.isEmpty() ? QStringLiteral("update") : QStringLiteral("update-%1").arg(version);
-        m_coreController->m_newsModel->setUpdateNotification(
-                updateId, m_coreController->m_updateUiController->getHeaderText(), m_coreController->m_updateUiController->getChangelogText());
-        emit m_coreController->m_pageController->showChangelogDrawer();
+        emit m_coreController->m_pageController->goToPage(PageLoader::PageEnum::PageUpdate);
     });
-#endif
 }
 

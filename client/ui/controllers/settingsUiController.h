@@ -71,6 +71,9 @@ public slots:
     bool isNewsNotificationsEnabled();
     void toggleNewsNotificationsEnabled(bool enable);
 
+    bool isAutoUpdateCheckEnabled();
+    void toggleAutoUpdateCheckEnabled(bool enable);
+
     bool isScreenshotsEnabled();
     void toggleScreenshotsEnabled(bool enable);
 
