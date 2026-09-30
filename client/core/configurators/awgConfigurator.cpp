@@ -106,6 +106,8 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     newClientConfig.rejectAfterTime = configMap.value(configKey::rejectAfterTime);
     newClientConfig.keepaliveTimeout = configMap.value(configKey::keepaliveTimeout);
     newClientConfig.maxHandshakeAttempts = configMap.value(configKey::maxHandshakeAttempts);
+    newClientConfig.randomTrailers = configMap.value(configKey::randomTrailers);
+    newClientConfig.disableCookies = configMap.value(configKey::disableCookies);
 
     protocolConfig.setClientConfig(newClientConfig);
     

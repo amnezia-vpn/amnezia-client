@@ -2,6 +2,8 @@
 
 #include "core/controllers/gatewayController.h"
 #include "core/repositories/secureServersRepository.h"
+#include "core/utils/api/apiUtils.h"
+#include "core/utils/api/gatewayPayloadBuilder.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/apiConstants.h"
 #include <QtConcurrent/QtConcurrent>
@@ -81,15 +83,12 @@ QFuture<QPair<ErrorCode, QJsonArray>> NewsController::fetchNews()
             m_appSettingsRepository->isStrictKillSwitchEnabled(),
             m_appSettingsRepository);
 
-    QJsonObject payload;
-    payload.insert("locale", m_appSettingsRepository->getAppLanguage().name().split("_").first());
-
-    if (services.contains(apiDefs::key::userCountryCode)) {
-        payload.insert(apiDefs::key::userCountryCode, services.value(apiDefs::key::userCountryCode));
-    }
-    if (services.contains(apiDefs::key::serviceType)) {
-        payload.insert(apiDefs::key::serviceType, services.value(apiDefs::key::serviceType));
-    }
+    // both country codes and service types are arrays here, one entry per gateway stack the user has
+    const QJsonObject payload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                        .addField(apiDefs::key::locale, apiUtils::getAppLanguageCode(m_appSettingsRepository))
+                                        .addField(apiDefs::key::userCountryCode, services.value(apiDefs::key::userCountryCode))
+                                        .addField(apiDefs::key::serviceType, services.value(apiDefs::key::serviceType))
+                                        .build();
 
     auto future = gatewayController->postAsync(QString("%1v1/news"), payload);
     return future.then([gatewayController](QPair<ErrorCode, QByteArray> result) -> QPair<ErrorCode, QJsonArray> {

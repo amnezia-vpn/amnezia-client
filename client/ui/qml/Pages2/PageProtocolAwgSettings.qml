@@ -395,6 +395,46 @@ PageType {
                 onEdited: (text) => { serverMaxHandshakeAttempts = text }
             }
 
+            CheckBoxType {
+                id: randomTrailersCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg3
+
+                text: qsTr("RandomTrailers")
+
+                checked: serverRandomTrailers
+                onCheckedChanged: {
+                    if (checked !== serverRandomTrailers) {
+                        serverRandomTrailers = checked
+                    }
+                }
+            }
+
+            CheckBoxType {
+                id: disableCookiesCheckBox
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: isAwg3
+
+                text: qsTr("DisableCookies")
+
+                checked: serverDisableCookies
+                onCheckedChanged: {
+                    if (checked !== serverDisableCookies) {
+                        serverDisableCookies = checked
+                    }
+                }
+            }
+
             BasicButtonType {
                 id: saveRestartButton
 

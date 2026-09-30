@@ -37,7 +37,11 @@
 using namespace ProtocolUtils;
 
 VpnConnection::VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject *parent)
-    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository), m_checkTimer(this)
+    : QObject(parent),
+      m_serversRepository(serversRepository),
+      m_appSettingsRepository(appSettingsRepository),
+      m_checkTimer(this),
+      m_connectionState(Vpn::ConnectionState::Disconnected)
 {
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     m_checkTimer.setInterval(1000);
@@ -420,12 +424,13 @@ void VpnConnection::appendSplitTunnelingConfig()
             auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
             for (auto &line : nativeConfigLines) {
-                if (line.contains("AllowedIPs")) {
-                    auto allowedIpsString = line.split(" = ");
-                    if (allowedIpsString.size() < 1) {
-                        break;
+                auto allowedIpsString = line.split("=", Qt::KeepEmptyParts);
+                if (allowedIpsString.size() >= 2 && allowedIpsString.first().trimmed() == QStringLiteral("AllowedIPs")) {
+                    QJsonArray allowedIpsJsonArray;
+                    const QString allowedIps = allowedIpsString.mid(1).join(QStringLiteral("=")).trimmed();
+                    for (const QString &allowedIp : allowedIps.split(",", Qt::SkipEmptyParts)) {
+                        allowedIpsJsonArray.append(allowedIp.trimmed());
                     }
-                    QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(allowedIpsString.at(1).split(", "));
                     configData.insert(configKey::allowedIps, allowedIpsJsonArray);
                     m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
@@ -437,12 +442,12 @@ void VpnConnection::appendSplitTunnelingConfig()
             auto nativeConfig = configData.value(configKey::config).toString();
             auto nativeConfigLines = nativeConfig.split("\n");
             for (auto &line : nativeConfigLines) {
-                if (line.contains("PersistentKeepalive")) {
-                    auto persistentKeepaliveString = line.split(" = ");
-                    if (persistentKeepaliveString.size() > 1) {
-                        configData.insert(configKey::persistentKeepAlive, persistentKeepaliveString.at(1));
-                        m_vpnConfiguration.insert(protocolName + "_config_data", configData);
-                    }
+                auto persistentKeepaliveString = line.split("=", Qt::KeepEmptyParts);
+                if (persistentKeepaliveString.size() >= 2
+                        && persistentKeepaliveString.first().trimmed() == QStringLiteral("PersistentKeepalive")) {
+                    configData.insert(configKey::persistentKeepAlive,
+                                      persistentKeepaliveString.mid(1).join(QStringLiteral("=")).trimmed());
+                    m_vpnConfiguration.insert(protocolName + "_config_data", configData);
                     break;
                 }
             }

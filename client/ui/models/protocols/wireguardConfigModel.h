@@ -40,6 +40,7 @@ private:
     amnezia::WireGuardProtocolConfig m_protocolConfig;
     amnezia::WireGuardProtocolConfig m_originalProtocolConfig;
     
+    void applyDefaultsToServerConfig(amnezia::WireGuardServerConfig& config);
     void applyDefaultsToClientConfig(amnezia::WireGuardClientConfig& config);
 };
 

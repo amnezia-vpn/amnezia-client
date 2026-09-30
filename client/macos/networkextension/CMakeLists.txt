@@ -1,22 +1,27 @@
 enable_language(Swift)
-message("Client message >> macos build >> AmneziaVPNNetworkExtension")
+message("Client message >> macos build >> ${CLIENT_MACOS_NE_TARGET_NAME}")
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
-add_executable(AmneziaVPNNetworkExtension)
+add_executable(${CLIENT_MACOS_NE_TARGET_NAME})
 
 message("executable_path is: @executable_path/../../Frameworks")
-set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
+
+# The plist is consumed by Xcode directly, so branding variables have to be
+# substituted by CMake beforehand
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
+
+set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
     XCODE_PRODUCT_TYPE com.apple.product-type.app-extension
     BUNDLE_EXTENSION appex
     XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${BUILD_IOS_APP_IDENTIFIER}.network-extension"
-    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CMAKE_CURRENT_SOURCE_DIR}/AmneziaVPNNetworkExtension.entitlements
+    XCODE_ATTRIBUTE_CODE_SIGN_ENTITLEMENTS ${CLIENT_MACOS_NE_ENTITLEMENTS_PATH}
     XCODE_ATTRIBUTE_MARKETING_VERSION "${APP_MAJOR_VERSION}"
     XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION "${CMAKE_PROJECT_VERSION_TWEAK}"
-    XCODE_ATTRIBUTE_PRODUCT_NAME "AmneziaVPNNetworkExtension"
+    XCODE_ATTRIBUTE_PRODUCT_NAME "${CLIENT_NETWORK_EXTENSION_NAME}"
 
     XCODE_ATTRIBUTE_APPLICATION_EXTENSION_API_ONLY "YES"
 
-    XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in
+    XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
     XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../../../../Frameworks @loader_path/../../../../Frameworks"
 
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
@@ -24,20 +29,20 @@ set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
 
 if(DEPLOY)
     message("DEPLOY is ON")
-    set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
+    set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Apple Distribution"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Debug] "Apple Development"
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Manual
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "distr macos.org.amnezia.amneziaVPN.NE"
-        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "dev macos.org.amnezia.amneziaVPN.NE"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER "${CLIENT_MACOS_NE_PROVISIONING_PROFILE_SPECIFIER}"
+        XCODE_ATTRIBUTE_PROVISIONING_PROFILE_SPECIFIER[variant=Debug] "${CLIENT_MACOS_NE_PROVISIONING_PROFILE_SPECIFIER_DEBUG}"
     )
 else()
-    set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
+    set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
         XCODE_ATTRIBUTE_CODE_SIGN_STYLE Automatic
     )
 endif()
 
-set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
+set_target_properties(${CLIENT_MACOS_NE_TARGET_NAME} PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_VERSION "5.0"
     XCODE_ATTRIBUTE_CLANG_ENABLE_MODULES "YES"
     XCODE_ATTRIBUTE_SWIFT_OBJC_BRIDGING_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/WireGuardNetworkExtension-Bridging-Header.h"
@@ -45,8 +50,8 @@ set_target_properties(AmneziaVPNNetworkExtension PROPERTIES
     XCODE_ATTRIBUTE_SWIFT_PRECOMPILE_BRIDGING_HEADER "NO"
 )
 
-set_target_properties("AmneziaVPNNetworkExtension" PROPERTIES
-    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "X7UJ388FXK"
+set_target_properties("${CLIENT_MACOS_NE_TARGET_NAME}" PROPERTIES
+    XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "${BUILD_VPN_DEVELOPMENT_TEAM}"
 )
 
 find_library(FW_ASSETS_LIBRARY AssetsLibrary)
@@ -58,17 +63,17 @@ find_library(FW_LIBRESOLV libresolv.9.tbd)
 # Set the root directory
 set(CLIENT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR}/../..)
 
-target_link_libraries(AmneziaVPNNetworkExtension PRIVATE ${FW_LIBRESOLV})
+target_link_libraries(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE ${FW_LIBRESOLV})
 
-target_compile_options(AmneziaVPNNetworkExtension PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
-target_compile_options(AmneziaVPNNetworkExtension PRIVATE -DNETWORK_EXTENSION=1)
+target_compile_options(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\")
+target_compile_options(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE -DNETWORK_EXTENSION=1)
 
 set(WG_APPLE_SOURCE_DIR ${CLIENT_ROOT_DIR}/3rd/amneziawg-apple/Sources)
 
 message("WG_APPLE_SOURCE_DIR is: ${WG_APPLE_SOURCE_DIR}")
 message("CLIENT_ROOT_DIR is: ${CLIENT_ROOT_DIR}")
 
-target_sources(AmneziaVPNNetworkExtension PRIVATE
+target_sources(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/WireGuardAdapter.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/PacketTunnelSettingsGenerator.swift
     ${WG_APPLE_SOURCE_DIR}/WireGuardKit/DNSResolver.swift
@@ -91,6 +96,7 @@ target_sources(AmneziaVPNNetworkExtension PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/HevSocksTunnel.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/NELogController.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/Log.swift
+    ${CLIENT_GROUP_IDENTIFIER_SWIFT_FILE}
     ${CLIENT_ROOT_DIR}/platforms/ios/LogRecord.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider.swift
     ${CLIENT_ROOT_DIR}/platforms/ios/PacketTunnelProvider+WireGuard.swift
@@ -101,16 +107,16 @@ target_sources(AmneziaVPNNetworkExtension PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/XrayConfig.swift
 )
 
-target_sources(AmneziaVPNNetworkExtension PRIVATE
+target_sources(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
 )
 
-set_property(TARGET AmneziaVPNNetworkExtension APPEND PROPERTY RESOURCE
+set_property(TARGET ${CLIENT_MACOS_NE_TARGET_NAME} APPEND PROPERTY RESOURCE
     ${CMAKE_CURRENT_SOURCE_DIR}/PrivacyInfo.xcprivacy
 )
 
-target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CLIENT_ROOT_DIR})
-target_include_directories(AmneziaVPNNetworkExtension PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE ${CLIENT_ROOT_DIR})
+target_include_directories(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 find_package(openvpnadapter REQUIRED)
 # FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
@@ -118,10 +124,10 @@ set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATI
 set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
 set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_property(TARGET amnezia::openvpnadapter APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
-target_link_libraries(AmneziaVPNNetworkExtension PRIVATE amnezia::openvpnadapter)
+target_link_libraries(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE amnezia::openvpnadapter)
 
 find_package(awg-apple REQUIRED)
-target_link_libraries(AmneziaVPNNetworkExtension PRIVATE amnezia::awg-apple)
+target_link_libraries(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE amnezia::awg-apple)
 
 find_package(hev-socks5-tunnel REQUIRED)
 # FIXME(ygurov): https://github.com/conan-io/conan/issues/20034
@@ -129,4 +135,4 @@ set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURA
 set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS MINSIZEREL)
 set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_property(TARGET heiher::hev-socks5-tunnel APPEND PROPERTY IMPORTED_CONFIGURATIONS RELWITHDEBINFO)
-target_link_libraries(AmneziaVPNNetworkExtension PRIVATE heiher::hev-socks5-tunnel)
+target_link_libraries(${CLIENT_MACOS_NE_TARGET_NAME} PRIVATE heiher::hev-socks5-tunnel)

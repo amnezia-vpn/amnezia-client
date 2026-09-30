@@ -228,8 +228,6 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
         }
     }
     
-    const bool isAwg3 = awgServerConfig && awgServerConfig->protocolVersion == protocols::awg::awgV3;
-
     amnezia::ScriptVars vars = amnezia::genBaseVars(credentials, container, dnsSettings.primaryDns, dnsSettings.secondaryDns);
     vars.append(amnezia::genProtocolVarsForContainer(container, containerConfig));
     QString scriptData = amnezia::scriptData(m_configTemplate, container);
@@ -275,8 +273,9 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
     clientConfig.presharedKey = connData.pskKey;
     clientConfig.clientId = connData.clientPubKey;
     clientConfig.allowedIps = QStringList { "0.0.0.0/0", "::/0" };
-    clientConfig.persistentKeepAlive = isAwg3 ? protocols::awg::defaultPersistentKeepAlive
-                                              : protocols::wireguard::defaultPersistentKeepAlive;
+    const bool useKeepAliveRange = awgServerConfig && awgServerConfig->hasAwg3Params();
+    clientConfig.persistentKeepAlive = useKeepAliveRange ? protocols::awg::defaultPersistentKeepAlive
+                                                         : protocols::wireguard::defaultPersistentKeepAlive;
     clientConfig.mtu = mtu;
     clientConfig.isObfuscationEnabled = false;
     

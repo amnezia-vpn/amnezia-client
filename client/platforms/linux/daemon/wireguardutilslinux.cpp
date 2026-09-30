@@ -167,6 +167,12 @@ bool WireguardUtilsLinux::addInterface(const InterfaceConfig& config) {
     if (!config.m_maxHandshakeAttempts.isEmpty()) {
         out << "max_handshake_attempts=" << config.m_maxHandshakeAttempts << "\n";
     }
+    if (!config.m_randomTrailers.isEmpty()) {
+        out << "random_trailers=" << InterfaceConfig::awgBoolToUapi(config.m_randomTrailers) << "\n";
+    }
+    if (!config.m_disableCookies.isEmpty()) {
+        out << "disable_cookies=" << InterfaceConfig::awgBoolToUapi(config.m_disableCookies) << "\n";
+    }
 
     int err = uapiErrno(uapiCommand(message));
     if (err != 0) {
