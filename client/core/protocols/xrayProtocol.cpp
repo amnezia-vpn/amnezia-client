@@ -68,6 +68,8 @@ ErrorCode XrayProtocol::start()
 {
     qDebug() << "XrayProtocol::start()";
 
+    [[maybe_unused]] const auto self = sharedFromThis();
+
     // Inject SOCKS5 auth into the inbound before starting xray.
     // Re-uses existing credentials if the config already has them (e.g. imported config).
     amnezia::serialization::inbounds::InboundCredentials creds;
@@ -120,6 +122,15 @@ void XrayProtocol::stop()
 {
     qDebug() << "XrayProtocol::stop()";
 
+    if (m_stopping) {
+        qWarning() << "XrayProtocol::stop(): re-entrancy blocked (already stopping)";
+        return;
+    }
+    m_stopping = true;
+
+    if (m_tun2socksProcess)
+        m_tun2socksProcess->disconnect(this);
+
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();
         if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
@@ -163,6 +174,7 @@ void XrayProtocol::stop()
     }
 
     setConnectionState(Vpn::ConnectionState::Disconnected);
+    m_stopping = false;
 }
 
 ErrorCode XrayProtocol::startTun2Socks()
@@ -180,6 +192,13 @@ ErrorCode XrayProtocol::startTun2Socks()
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardError, this, 
             [this]() {
+                [[maybe_unused]] const auto self = sharedFromThis();
+
+                if (!m_tun2socksProcess) {
+                    qWarning() << "XrayProtocol: readyReadStandardError after teardown, ignoring stale queued slot";
+                    return;
+                }
+
                 auto readAllStandardError = m_tun2socksProcess->readAllStandardError();
                 if (!readAllStandardError.waitForFinished()) {
                     qWarning() << "Failed to read output from tun2socks";
@@ -195,8 +214,14 @@ ErrorCode XrayProtocol::startTun2Socks()
                     disconnect(m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::readyReadStandardOutput, this, nullptr);
 
                     if (ErrorCode res = setupRouting(); res != ErrorCode::NoError) {
-                        stop();
-                        setLastError(res);
+                        qWarning() << "XrayProtocol: setupRouting failed, deferring stop(), res=" << res;
+                        QMetaObject::invokeMethod(
+                                this,
+                                [this, res]() {
+                                    stop();
+                                    setLastError(res);
+                                },
+                                Qt::QueuedConnection);
                     } else {
                         setConnectionState(Vpn::ConnectionState::Connected);
                     }
@@ -207,6 +232,8 @@ ErrorCode XrayProtocol::startTun2Socks()
     connect(
             m_tun2socksProcess.data(), &IpcProcessInterfaceReplica::finished, this,
             [this](int exitCode, QProcess::ExitStatus exitStatus) {
+                [[maybe_unused]] const auto self = sharedFromThis();
+
                 // Check stdout for "resource busy" — the TUN device was not yet released
                 // by the previous tun2socks instance. Retry after a short delay.
                 bool resourceBusy = false;
@@ -239,8 +266,14 @@ ErrorCode XrayProtocol::startTun2Socks()
                 } else {
                     qCritical() << QString("Tun2socks process was closed with %1 exit code").arg(exitCode);
                 }
-                stop();
-                setLastError(ErrorCode::Tun2SockExecutableCrashed);
+                qWarning() << "XrayProtocol: tun2socks exited, deferring stop(), exitCode=" << exitCode;
+                QMetaObject::invokeMethod(
+                        this,
+                        [this]() {
+                            stop();
+                            setLastError(ErrorCode::Tun2SockExecutableCrashed);
+                        },
+                        Qt::QueuedConnection);
             },
             Qt::QueuedConnection);
 
