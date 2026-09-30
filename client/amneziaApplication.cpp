@@ -179,7 +179,9 @@ void AmneziaApplication::init()
 
     m_coreController->setQmlRoot();
 
+#if CLIENT_ENABLE_APP_UPDATES
     m_coreController->checkForAppUpdates();
+#endif
 
 #ifdef Q_OS_WIN //TODO
     if (m_parser.isSet(m_optAutostart))

@@ -85,6 +85,7 @@ QPair<QString, QString> ApiV2ServerConfig::getDnsPair(const QString &primaryDns,
 QJsonObject ApiV2ServerConfig::toJson() const
 {
     QJsonObject obj;
+    obj[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
     
     if (!name.isEmpty()) {
         obj[configKey::name] = name;
