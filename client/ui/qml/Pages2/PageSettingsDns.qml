@@ -149,10 +149,10 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
-                    if (primaryDns.textField.text === "") {
-                        primaryDns.errorText = qsTr("Primary DNS cannot be empty")
-                        return
-                    }
+                    // An empty value is a valid configuration: the app then keeps the DNS
+                    // servers advertised by the server instead of forcing a custom pair,
+                    // which is required for setups that need no DNS routed through the VPN
+                    // (split tunneling only) (#3190).
                     primaryDns.errorText = ""
                     secondaryDns.errorText = ""
 
