@@ -1056,6 +1056,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - UiNewsModelAndControllerTest
 
     runs-on: ubuntu-22.04
 
@@ -1243,6 +1244,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - UiNewsModelAndControllerTest
 
     runs-on: windows-latest
 
@@ -1347,6 +1349,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - UiNewsModelAndControllerTest
 
     runs-on: macos-15
 
