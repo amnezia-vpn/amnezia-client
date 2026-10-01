@@ -1,4 +1,3 @@
-```cpp
 #include <QDateTime>
 #include <QDebug>
 #include <QJsonArray>
