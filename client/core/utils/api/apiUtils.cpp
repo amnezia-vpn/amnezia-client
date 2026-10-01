@@ -121,9 +121,13 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
     const int httpStatusCodeRequestTimeout = 408;
     const int httpStatusCodeUnprocessableEntity = 422;
 
+    if (responseBody.isEmpty()) {
+        return amnezia::ErrorCode::ApiConfigDecryptionError;
+    }
+
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (!jsonDoc.isObject()) {
-        return amnezia::ErrorCode::ApiConfigDownloadError;
+        return amnezia::ErrorCode::NoError;
     }
 
     QJsonObject jsonObj = jsonDoc.object();
@@ -173,9 +177,6 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }
 
-    if (httpStatusFromBody < 200) {
-        return amnezia::ErrorCode::ApiConfigDownloadError;
-    }
     return amnezia::ErrorCode::NoError;
 }
 

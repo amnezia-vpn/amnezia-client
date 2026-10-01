@@ -1,13 +1,19 @@
 #include "gatewayController.h"
 
+#include <QCryptographicHash>
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMetaObject>
+#include <QPromise>
 #include <QThread>
-#include <QtConcurrent/QtConcurrentRun>
+#include <QThreadPool>
+
+#include <future>
+#include <memory>
+#include <utility>
 
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/constants/apiKeys.h"
@@ -22,11 +28,19 @@
     #include "platforms/ios/ios_controller.h"
 #endif
 
+#include "include/embedded_agw_public_keys.h"
+
 namespace
 {
     // Key under which the library's failover caches (working proxy + proxy
     // lists) are persisted in the secure settings repository.
-    const QString agwStateCacheKey = QStringLiteral("agw_state_v1");
+    QString agwStateCacheKey(const QString &gatewayEndpoint, const bool isDevEnvironment)
+    {
+        const QByteArray endpointHash =
+                QCryptographicHash::hash(gatewayEndpoint.toUtf8(), QCryptographicHash::Sha1).toHex().left(8);
+        return QStringLiteral("agw_state_v1_%1_%2")
+                .arg(isDevEnvironment ? QStringLiteral("dev") : QStringLiteral("prod"), QString::fromLatin1(endpointHash));
+    }
 
     QStringList splitEndpoints(const char *raw)
     {
@@ -61,6 +75,47 @@ namespace
                     Qt::BlockingQueuedConnection);
         }
     }
+
+    thread_local bool t_onAgwControlThread = false;
+
+    QThreadPool *agwControlPool()
+    {
+        static QThreadPool *pool = [] {
+            auto *p = new QThreadPool;
+            p->setObjectName(QStringLiteral("agw-control"));
+            p->setMaxThreadCount(1);
+            p->setExpiryTimeout(-1);
+            return p;
+        }();
+        return pool;
+    }
+
+    QThreadPool *agwRequestPool()
+    {
+        static QThreadPool *pool = [] {
+            auto *p = new QThreadPool;
+            p->setObjectName(QStringLiteral("agw-requests"));
+            p->setMaxThreadCount(8);
+            return p;
+        }();
+        return pool;
+    }
+
+    template <typename F>
+    auto runOnAgwControlThread(F &&f) -> decltype(f())
+    {
+        if (t_onAgwControlThread) {
+            return f();
+        }
+        using Result = decltype(f());
+        std::packaged_task<Result()> task(std::forward<F>(f));
+        std::future<Result> result = task.get_future();
+        agwControlPool()->start([&task]() {
+            t_onAgwControlThread = true;
+            task();
+        });
+        return result.get();
+    }
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -68,7 +123,8 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
                                      QObject *parent)
     : QObject(parent),
       m_isStrictKillSwitchEnabled(isStrictKillSwitchEnabled),
-      m_appSettingsRepository(appSettingsRepository)
+      m_appSettingsRepository(appSettingsRepository),
+      m_stateKey(agwStateCacheKey(gatewayEndpoint, isDevEnvironment))
 {
     const QByteArray publicKey = isDevEnvironment ? QByteArray(DEV_AGW_PUBLIC_KEY) : QByteArray(PROD_AGW_PUBLIC_KEY);
     m_publicKeyMissing = publicKey.isEmpty();
@@ -96,15 +152,17 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
     callbacks.on_before_request = &agwBeforeRequestCallback;
     callbacks.on_before_request_user_data = this;
 
-    m_client = agw_client_create(QJsonDocument(config).toJson(QJsonDocument::Compact).constData(), &callbacks);
+    const QByteArray configJson = QJsonDocument(config).toJson(QJsonDocument::Compact);
+    m_client = runOnAgwControlThread([&configJson, &callbacks]() { return agw_client_create(configJson.constData(), &callbacks); });
     if (m_client == 0) {
         qCritical() << "GatewayController: failed to create gateway client (missing key or endpoint?)";
         return;
     }
 
     if (m_appSettingsRepository != nullptr) {
-        const QByteArray state = m_appSettingsRepository->readGatewayProxyUrls(agwStateCacheKey);
-        if (!state.isEmpty() && agw_import_state(m_client, state.constData()) == AGW_OK) {
+        const QByteArray state = m_appSettingsRepository->readGatewayProxyUrls(m_stateKey);
+        if (!state.isEmpty()
+            && runOnAgwControlThread([client = m_client, &state]() { return agw_import_state(client, state.constData()); }) == AGW_OK) {
             m_lastPersistedState = state;
         }
     }
@@ -112,7 +170,7 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
 
 GatewayController::~GatewayController()
 {
-    agw_client_destroy(m_client);
+    runOnAgwControlThread([client = m_client]() { agw_client_destroy(client); });
 }
 
 amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
@@ -136,8 +194,14 @@ amnezia::ErrorCode GatewayController::post(const QString &endpoint, const QJsonO
 
 QFuture<QPair<amnezia::ErrorCode, QByteArray>> GatewayController::postAsync(const QString &endpoint, const QJsonObject apiPayload)
 {
-    return QtConcurrent::run(
-            [this, endpoint, apiPayload]() -> QPair<amnezia::ErrorCode, QByteArray> { return executePost(endpoint, apiPayload); });
+    auto promise = std::make_shared<QPromise<QPair<amnezia::ErrorCode, QByteArray>>>();
+    QFuture<QPair<amnezia::ErrorCode, QByteArray>> future = promise->future();
+    promise->start();
+    agwRequestPool()->start([this, promise, endpoint, apiPayload]() {
+        promise->addResult(executePost(endpoint, apiPayload));
+        promise->finish();
+    });
+    return future;
 }
 
 QPair<amnezia::ErrorCode, QByteArray> GatewayController::executePost(const QString &endpoint, const QJsonObject &apiPayload)
@@ -218,15 +282,21 @@ void GatewayController::persistState()
     if (m_client == 0 || m_appSettingsRepository == nullptr) {
         return;
     }
-    char *state = agw_export_state(m_client);
-    if (state == nullptr) {
+    const QByteArray blob = runOnAgwControlThread([client = m_client]() -> QByteArray {
+        char *state = agw_export_state(client);
+        if (state == nullptr) {
+            return {};
+        }
+        const QByteArray copy(state);
+        agw_string_free(state);
+        return copy;
+    });
+    if (blob.isEmpty()) {
         return;
     }
-    const QByteArray blob(state);
-    agw_string_free(state);
 
     if (blob != m_lastPersistedState) {
-        m_appSettingsRepository->writeGatewayProxyUrls(agwStateCacheKey, blob);
+        m_appSettingsRepository->writeGatewayProxyUrls(m_stateKey, blob);
         m_lastPersistedState = blob;
     }
 }
