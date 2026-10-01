@@ -416,10 +416,14 @@ ErrorCode XrayConfigurator::writeServerConfigForSetup(const ServerCredentials &c
     QJsonObject streamSettings = buildStreamSettings(srv, clientId);
     if (securityEff == QLatin1String("reality")) {
         const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(px::defaultSite) : srv.site;
+        // REALITY requires the masked target ("dest", a.k.a. "target") to be consistent with
+        // serverNames. The UI only exposes "Server Name (SNI)", so the effective SNI is the
+        // single source of truth for both fields — otherwise dest keeps the built-in default
+        // while the value the user configured is applied to serverNames only (#3145).
         const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
         const QString fpEff = srv.fingerprint.isEmpty() ? QString::fromLatin1(px::defaultFingerprint) : srv.fingerprint;
         QJsonObject rs;
-        rs[QStringLiteral("dest")] = siteEff + QStringLiteral(":443");
+        rs[QStringLiteral("dest")] = sniEff + QStringLiteral(":443");
         rs[px::fingerprint] = fpEff;
         rs[QStringLiteral("privateKey")] = realityPrivateKey;
         rs[px::serverNames] = QJsonArray { sniEff };
