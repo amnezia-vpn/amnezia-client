@@ -939,13 +939,13 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
     QFutureWatcher<ErrorCode> watcher;
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials, &sshSession]() {
-        // max 100 attempts
+        // max 30 attempts
         for (int i = 0; i < 30; ++i) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
             }
             stdOut.clear();
-            sshSession.runScript(
+            const ErrorCode scriptError = sshSession.runScript(
                     credentials,
                     sshSession.replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
                                                     amnezia::genBaseVars(credentials, DockerContainer::None, QString(), QString())),
@@ -956,14 +956,22 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
             if (stdOut.contains("fuser not installed") || stdOut.contains("cat not installed"))
                 return ErrorCode::NoError;
 
-            if (stdOut.isEmpty()) {
-                return ErrorCode::NoError;
-            } else {
+            // Only the explicit marker emitted by check_server_is_busy.sh means "the package
+            // manager lock is held". Any other output (ssh warnings, fuser file names, ...)
+            // previously counted as busy as well, which kept the client retrying for minutes
+            // although the server was free (#3232).
+            if (!stdOut.contains("SERVER_BUSY"))
+                return scriptError;
 #ifdef MZ_DEBUG
-                qDebug().noquote() << stdOut;
+            qDebug().noquote() << stdOut;
 #endif
-                emit serverIsBusy(true);
-                QThread::msleep(10000);
+            emit serverIsBusy(true);
+            // Sleep in short steps so that a cancellation is honoured right away.
+            for (int tick = 0; tick < 100; ++tick) {
+                if (m_cancelInstallation) {
+                    return ErrorCode::ServerCancelInstallation;
+                }
+                QThread::msleep(100);
             }
         }
         return ErrorCode::ServerPacketManagerError;
