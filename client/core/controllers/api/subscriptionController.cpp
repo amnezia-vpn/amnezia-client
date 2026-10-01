@@ -651,7 +651,6 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
                          } else if (status != QLatin1String("pending")) {
                              qWarning().noquote() << "[OTP] Unknown otp_status value:" << status;
                          }
-                         qDebug().noquote() << "[OTP] Status =" << status;
                          promise->addResult(qMakePair(ErrorCode::NoError, parsedStatus));
                          promise->finish();
                      });
