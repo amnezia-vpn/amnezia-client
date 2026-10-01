@@ -1056,6 +1056,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - UiNewsModelAndControllerTest
 
     runs-on: ubuntu-22.04
 
@@ -1076,6 +1077,7 @@ jobs:
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      PREM_KEY: ${{ secrets.PREM_KEY }}
 
     steps:
       - name: Checkout
@@ -1243,6 +1245,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - UiNewsModelAndControllerTest
 
     runs-on: windows-latest
 
@@ -1262,7 +1265,8 @@ jobs:
       THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
-      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}|
+      PREM_KEY: ${{ secrets.PREM_KEY }}
 
     steps:
       - name: Checkout
@@ -1347,6 +1351,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - UiNewsModelAndControllerTest
 
     runs-on: macos-15
 
@@ -1367,6 +1372,7 @@ jobs:
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      PREM_KEY: ${{ secrets.PREM_KEY }}
 
     steps:
       - name: Setup Xcode
