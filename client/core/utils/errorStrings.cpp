@@ -110,6 +110,7 @@ QString errorString(ErrorCode code) {
         errorMessage = QObject::tr("Your payment is pending confirmation. Please complete the payment and then restore your subscription.");
 #endif
         break;
+    case (ErrorCode::ApiOtpLoginError): errorMessage = QObject::tr("Unable to get the login code. Please try again in a minute"); break;
     case (ErrorCode::ApiNoPurchasesToRestore):
 #if defined(Q_OS_ANDROID)
         errorMessage = QObject::tr("No purchases to restore. If you have an active subscription, make sure you're signed in with the same Google account used for the purchase.");

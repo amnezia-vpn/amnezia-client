@@ -95,6 +95,9 @@ namespace apiDefs
         constexpr QLatin1String publicKeyInfo("public_key");
         constexpr QLatin1String publicKey("public_key");
         constexpr QLatin1String expiresAt("expires_at");
+        constexpr QLatin1String otpCode("otp_code");
+        constexpr QLatin1String otpStatus("otp_status");
+        constexpr QLatin1String otpRequestId("otp_request_id");
         constexpr QLatin1String isConnectEvent("is_connect_event");
         constexpr QLatin1String certificate("certificate");
     } // namespace key

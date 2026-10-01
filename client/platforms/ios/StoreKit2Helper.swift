@@ -20,13 +20,15 @@ public class StoreKit2Helper: NSObject {
         let productId: String
         let purchaseDate: Date
         let environment: String
+        var jwsRepresentation: String = ""
 
         var dictionary: NSDictionary {
             [
                 "transactionId": String(transactionId),
                 "originalTransactionId": String(originalTransactionId),
                 "productId": productId,
-                "environment": environment
+                "environment": environment,
+                "jwsRepresentation": jwsRepresentation
             ]
         }
     }
@@ -53,7 +55,8 @@ public class StoreKit2Helper: NSObject {
                                                     originalTransactionId: transaction.originalID,
                                                     productId: transaction.productID,
                                                     purchaseDate: transaction.purchaseDate,
-                                                    environment: environmentString(for: transaction)))
+                                                    environment: environmentString(for: transaction),
+                                                    jwsRepresentation: result.jwsRepresentation))
             case .unverified(_, let error):
                 print("[IAP][StoreKit2] Unverified transaction skipped: \(error.localizedDescription)")
             }

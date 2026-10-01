@@ -658,6 +658,64 @@ ErrorCode StorePurchaseController::finalizePlayPurchase(const QString &userCount
 }
 #endif
 
+ErrorCode StorePurchaseController::resolveOtpLoginProof(QString &proof)
+{
+#if defined(Q_OS_ANDROID)
+    QJsonObject newestPurchase;
+    bool hasPendingPurchase = false;
+    for (const QJsonValue &purchaseValue : queryPlayPurchases()) {
+        const QJsonObject purchaseObj = purchaseValue.toObject();
+        const int purchaseState = purchaseObj.value("purchaseState").toInt(-1);
+        if (purchaseState == purchaseStatePending) {
+            hasPendingPurchase = true;
+            continue;
+        }
+        if (purchaseState != purchaseStatePurchased || purchaseObj.value("purchaseToken").toString().isEmpty()) {
+            continue;
+        }
+        if (newestPurchase.isEmpty()
+            || purchaseObj.value("purchaseTime").toDouble() > newestPurchase.value("purchaseTime").toDouble()) {
+            newestPurchase = purchaseObj;
+        }
+    }
+    if (newestPurchase.isEmpty()) {
+        return hasPendingPurchase ? ErrorCode::ApiPurchasePendingError : ErrorCode::ApiNoPurchasesToRestore;
+    }
+    proof = newestPurchase.value("purchaseToken").toString();
+    return ErrorCode::NoError;
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+    bool fetchSuccess = false;
+    QList<QVariantMap> entitlements;
+    QString fetchError;
+    QEventLoop waitEntitlements;
+
+    IosController::Instance()->fetchLocalEntitlements([&](bool success, const QList<QVariantMap> &transactions, const QString &errorString) {
+        fetchSuccess = success;
+        entitlements = transactions;
+        fetchError = errorString;
+        waitEntitlements.quit();
+    });
+    waitEntitlements.exec();
+
+    if (!fetchSuccess) {
+        qWarning().noquote() << "[IAP] fetchLocalEntitlements failed:" << fetchError;
+        return ErrorCode::ApiPurchaseError;
+    }
+
+    for (const QVariantMap &transaction : entitlements) {
+        const QString jws = transaction.value(QStringLiteral("jwsRepresentation")).toString();
+        if (!jws.isEmpty()) {
+            proof = jws;
+            return ErrorCode::NoError;
+        }
+    }
+    return ErrorCode::ApiNoPurchasesToRestore;
+#else
+    Q_UNUSED(proof);
+    return ErrorCode::ApiPurchaseError;
+#endif
+}
+
 QJsonArray StorePurchaseController::findUnacknowledgedPlayPurchases()
 {
 #if defined(Q_OS_ANDROID)
