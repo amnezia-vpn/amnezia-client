@@ -90,6 +90,11 @@ public:
     {
         return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, protocolData, responseBody);
     }
+    ErrorCode applyUpdatedServiceConfigForTest(const QString &serverId, const QString &serviceProtocol,
+                                               const ProtocolData &protocolData, const QByteArray &responseBody)
+    {
+        return applyUpdatedServiceConfig(serverId, serviceProtocol, protocolData, responseBody);
+    }
 #endif
 
 private:

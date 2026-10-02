@@ -7,6 +7,7 @@
 
 #include "utils/testCoreController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "core/models/api/apiV2ServerConfig.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/serverConfigUtils.h"
@@ -49,6 +50,14 @@ namespace
         config[configKey::formatVersion] = formatVersion;
         config[configKey::defaultContainer] = QStringLiteral("amnezia-awg");
         config[configKey::containers] = QJsonArray { awgContainer(QString::fromLatin1(privateKeyPlaceholder)) };
+        return config;
+    }
+
+    QJsonObject updatedGatewayServerConfig()
+    {
+        QJsonObject config = gatewayServerConfig();
+        config[configKey::name] = QStringLiteral("Amnezia Premium Updated");
+        config[configKey::hostName] = QStringLiteral("gateway-updated.example.org");
         return config;
     }
 
@@ -101,6 +110,30 @@ private:
         const QString serverId = m_coreController->m_serversRepository->serverIdAt(0);
         const auto config = m_coreController->m_serversRepository->apiV2Config(serverId);
         return config ? config->toJson() : QJsonObject {};
+    }
+
+    static ApiV2ServerConfig storedSubscription()
+    {
+        ApiV2ServerConfig seed = ApiV2ServerConfig::fromJson(gatewayServerConfig());
+        seed.apiConfig.serviceType = QStringLiteral("amnezia-premium");
+        seed.apiConfig.serviceProtocol = QString(configKey::awg);
+        seed.apiConfig.userCountryCode = QStringLiteral("NL");
+        seed.apiConfig.vpnKey = QStringLiteral("vpn://stored-key");
+        seed.authData.apiKey = QStringLiteral("stored-api-key");
+        seed.crc = 42;
+        return seed;
+    }
+
+    QString addStoredServer(const ApiV2ServerConfig &config)
+    {
+        const QJsonObject json = config.toJson();
+        return m_coreController->m_serversRepository->addServer(QString(), json, serverConfigUtils::configTypeFromJson(json));
+    }
+
+    ErrorCode applyUpdate(const QString &serverId, const QByteArray &response)
+    {
+        return m_coreController->m_subscriptionController->applyUpdatedServiceConfigForTest(serverId, configKey::awg,
+                                                                                             awgProtocolData(), response);
     }
 
 private slots:
@@ -230,29 +263,36 @@ private slots:
         QCOMPARE(m_coreController->m_serversRepository->serversCount(), 0);
     }
 
-    // --- live gateway import (requires GitHub Secrets) ---
+    // --- live gateway update (requires AMNEZIA_TEST_API_KEY) ---
 
-    void importsServiceFromLiveGateway()
+    void updatesServiceFromLiveGateway()
     {
-        const QString endpoint = envValue("AMNEZIA_TEST_GATEWAY_ENDPOINT");
-        const QString serviceType = envValue("AMNEZIA_TEST_SERVICE_TYPE");
-        const QString serviceProtocol = envValue("AMNEZIA_TEST_SERVICE_PROTOCOL");
-        const QString countryCode = envValue("AMNEZIA_TEST_COUNTRY_CODE");
-
-        if (endpoint.isEmpty() || serviceType.isEmpty() || serviceProtocol.isEmpty()) {
-            QSKIP("Gateway credentials are not configured, skipping live import test");
+        const QString apiKey = envValue("AMNEZIA_TEST_API_KEY");
+        if (apiKey.isEmpty()) {
+            QSKIP("AMNEZIA_TEST_API_KEY is not set, skipping live update test");
         }
 
-        m_coreController->m_appSettingsRepository->setGatewayEndpoint(endpoint);
+        const QString userCountryCode = QStringLiteral("ru");
+        const QString serverCountryCode = QStringLiteral("de");
 
-        const auto protocolData = SubscriptionController::generateProtocolData(serviceProtocol);
+        // one fixed device identity for the suite, so test runs never consume new device slots
+        m_settings->setValue("Conf/installationUuid",
+                             QUuid::createUuidV5(QUuid(), QByteArrayLiteral("amnezia-gateway-service-import-test"))
+                                     .toString(QUuid::WithoutBraces));
+
+        // updateServiceFromGateway builds its payload from the stored subscription, so seed one first.
+        ApiV2ServerConfig seed = storedSubscription();
+        seed.apiConfig.userCountryCode = userCountryCode;
+        seed.authData.apiKey = apiKey;
+        const QString serverId = addStoredServer(seed);
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
+
         SubscriptionController::CaptchaInfo captchaInfo;
-
-        const ErrorCode errorCode = m_coreController->m_subscriptionController->importServiceFromGateway(
-                countryCode, serviceType, serviceProtocol, protocolData, captchaInfo);
+        const ErrorCode errorCode = m_coreController->m_subscriptionController->updateServiceFromGateway(
+                serverId, serverCountryCode, /*isConnectEvent=*/false, &captchaInfo, nullptr);
 
         if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
-            QSKIP("Gateway requested a captcha, skipping live import test");
+            QSKIP("Gateway requested a captcha, skipping live update test");
         }
 
         QCOMPARE(errorCode, ErrorCode::NoError);
@@ -260,12 +300,19 @@ private slots:
 
         const QJsonObject server = storedServer();
         QVERIFY(!server.value(configKey::hostName).toString().isEmpty());
+        QVERIFY(server.value(configKey::hostName).toString() != QStringLiteral("gateway.example.org"));
         QVERIFY(!server.value(configKey::containers).toArray().isEmpty());
         QCOMPARE(server.value(configKey::configVersion).toInt(), int(serverConfigUtils::ConfigSource::AmneziaGateway));
 
         const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
-        QCOMPARE(apiConfig.value(apiDefs::key::serviceType).toString(), serviceType);
-        QCOMPARE(apiConfig.value(apiDefs::key::serviceProtocol).toString(), serviceProtocol);
+        QCOMPARE(apiConfig.value(apiDefs::key::serviceType).toString(), seed.apiConfig.serviceType);
+        QCOMPARE(apiConfig.value(apiDefs::key::serviceProtocol).toString(), seed.apiConfig.serviceProtocol);
+        QCOMPARE(apiConfig.value(apiDefs::key::userCountryCode).toString(), userCountryCode);
+        QCOMPARE(apiConfig.value(apiDefs::key::serverCountryCode).toString().toLower(), serverCountryCode);
+
+        // QVERIFY, not QCOMPARE: a mismatch must not print the key into CI logs
+        const QJsonObject authData = server.value(apiDefs::key::authData).toObject();
+        QVERIFY(authData.value(apiDefs::key::apiKey).toString() == apiKey);
     }
 
     void rejectsNonGatewayConfigSource()
@@ -276,6 +323,103 @@ private slots:
 
         QCOMPARE(errorCode, ErrorCode::InternalError);
         QCOMPARE(m_coreController->m_serversRepository->serversCount(), 0);
+    }
+
+    // --- update of a stored subscription (offline) ---
+
+    void updatesStoredServerInPlace()
+    {
+        const QString serverId = addStoredServer(storedSubscription());
+
+        QCOMPARE(applyUpdate(serverId, gatewayResponse(updatedGatewayServerConfig())), ErrorCode::NoError);
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
+        QCOMPARE(m_coreController->m_serversRepository->serverIdAt(0), serverId);
+
+        const QJsonObject server = storedServer();
+        QCOMPARE(server.value(configKey::name).toString(), QStringLiteral("Amnezia Premium Updated"));
+        QCOMPARE(server.value(configKey::hostName).toString(), QStringLiteral("gateway-updated.example.org"));
+        QVERIFY(!server.value(configKey::containers).toArray().isEmpty());
+
+        const QJsonObject apiConfig = server.value(apiDefs::key::apiConfig).toObject();
+        QCOMPARE(apiConfig.value(apiDefs::key::serviceType).toString(), QStringLiteral("amnezia-premium"));
+        QCOMPARE(apiConfig.value(apiDefs::key::serviceProtocol).toString(), QString(configKey::awg));
+        QCOMPARE(apiConfig.value(apiDefs::key::userCountryCode).toString(), QStringLiteral("NL"));
+        QCOMPARE(apiConfig.value(apiDefs::key::serviceInfo).toObject().value(apiDefs::key::adHeader).toString(),
+                 QStringLiteral("Promo header"));
+    }
+
+    void preservesCredentialsOnUpdate()
+    {
+        const QString serverId = addStoredServer(storedSubscription());
+
+        QCOMPARE(applyUpdate(serverId, gatewayResponse(updatedGatewayServerConfig())), ErrorCode::NoError);
+
+        const QJsonObject server = storedServer();
+        QCOMPARE(server.value(apiDefs::key::authData).toObject().value(apiDefs::key::apiKey).toString(),
+                 QStringLiteral("stored-api-key"));
+        QCOMPARE(server.value(apiDefs::key::apiConfig).toObject().value(apiDefs::key::vpnKey).toString(),
+                 QStringLiteral("vpn://stored-key"));
+        QCOMPARE(server.value(configKey::crc).toInt(), 42);
+    }
+
+    void keepsNameOverriddenByUserOnUpdate()
+    {
+        ApiV2ServerConfig seed = storedSubscription();
+        seed.name = QStringLiteral("My VPN");
+        seed.nameOverriddenByUser = true;
+        const QString serverId = addStoredServer(seed);
+
+        QCOMPARE(applyUpdate(serverId, gatewayResponse(updatedGatewayServerConfig())), ErrorCode::NoError);
+
+        const QJsonObject server = storedServer();
+        QCOMPARE(server.value(configKey::name).toString(), QStringLiteral("My VPN"));
+        QVERIFY(server.value(configKey::nameOverriddenByUser).toBool());
+        QCOMPARE(server.value(configKey::hostName).toString(), QStringLiteral("gateway-updated.example.org"));
+    }
+
+    void clearsSubscriptionExpiredFlagOnUpdate()
+    {
+        ApiV2ServerConfig seed = storedSubscription();
+        seed.apiConfig.subscriptionExpiredByServer = true;
+        const QString serverId = addStoredServer(seed);
+        QVERIFY(storedServer().value(apiDefs::key::apiConfig).toObject().value(apiDefs::key::subscriptionExpiredByServer).toBool());
+
+        QCOMPARE(applyUpdate(serverId, gatewayResponse(updatedGatewayServerConfig())), ErrorCode::NoError);
+
+        QVERIFY(!storedServer().value(apiDefs::key::apiConfig).toObject().value(apiDefs::key::subscriptionExpiredByServer).toBool());
+    }
+
+    void rejectsUpdateOfUnknownServer()
+    {
+        QCOMPARE(applyUpdate(QStringLiteral("missing-server"), gatewayResponse(updatedGatewayServerConfig())),
+                 ErrorCode::InternalError);
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 0);
+    }
+
+    void rejectsUnsupportedFormatVersionOnUpdate()
+    {
+        const QString serverId = addStoredServer(storedSubscription());
+        const int unsupported = serverConfigUtils::currentConfigFormatVersion + 1;
+
+        QCOMPARE(applyUpdate(serverId, gatewayResponse(gatewayServerConfig(serverConfigUtils::ConfigSource::AmneziaGateway, unsupported))),
+                 ErrorCode::ConfigFormatVersionNotSupportedError);
+
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
+        QCOMPARE(storedServer().value(configKey::hostName).toString(), QStringLiteral("gateway.example.org"));
+    }
+
+    void rejectsNonGatewaySourceOnUpdate()
+    {
+        const QString serverId = addStoredServer(storedSubscription());
+
+        QCOMPARE(applyUpdate(serverId, gatewayResponse(gatewayServerConfig(serverConfigUtils::ConfigSource::Telegram))),
+                 ErrorCode::InternalError);
+
+        const QJsonObject server = storedServer();
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
+        QCOMPARE(server.value(configKey::hostName).toString(), QStringLiteral("gateway.example.org"));
+        QCOMPARE(server.value(apiDefs::key::authData).toObject().value(apiDefs::key::apiKey).toString(),
+                 QStringLiteral("stored-api-key"));
     }
 };
 
