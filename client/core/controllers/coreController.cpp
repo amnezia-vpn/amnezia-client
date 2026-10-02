@@ -266,12 +266,13 @@ void CoreController::initAppleController()
 #ifdef Q_OS_IOS
     IosController::Instance()->initialize();
     QTimer::singleShot(0, this, [this]() { SWIFT_BRIDGE_NAMESPACE::toggleScreenshots(m_appSettingsRepository->isScreenshotsEnabled()); });
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(m_appSettingsRepository->isSaveLogs());
 #endif
 }
 
 void CoreController::initLogging()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#ifndef Q_OS_ANDROID
     bool enabled = m_appSettingsRepository->isSaveLogs();
     if (enabled) {
         if (!Logger::init(false)) {
