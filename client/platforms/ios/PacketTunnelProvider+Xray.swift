@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import NetworkExtension
+import os.log
 
 enum XrayErrors: Error {
     case noXrayConfig
@@ -9,6 +10,85 @@ enum XrayErrors: Error {
     case cantParseListenAndPort
     case cantAcquireLocalPort
     case cantSaveHevSocksConfig
+    case xrayStartFailed
+}
+
+private func takeLibXrayError(_ result: UnsafeMutablePointer<CChar>?) -> String? {
+    guard let result else { return nil }
+    defer { free(result) }
+    let message = String(cString: result)
+    return message.isEmpty ? nil : message
+}
+
+private enum XrayStdoutCapture {
+    private static let queue = DispatchQueue(label: "org.amnezia.xray.stdout")
+    private static let maxPendingSize = 64 * 1024
+    private static var isInstalled = false
+    private static var readHandle: FileHandle?
+    private static var pending = Data()
+
+    static func install() {
+        queue.sync {
+            guard !isInstalled else { return }
+
+            var fds: [Int32] = [0, 0]
+            guard pipe(&fds) == 0 else {
+                xrayLog(.error, message: "Can't create pipe for xray output: \(String(cString: strerror(errno)))")
+                return
+            }
+            guard dup2(fds[1], STDOUT_FILENO) != -1 else {
+                xrayLog(.error, message: "Can't redirect stdout for xray output: \(String(cString: strerror(errno)))")
+                close(fds[0])
+                close(fds[1])
+                return
+            }
+            close(fds[1])
+
+            let handle = FileHandle(fileDescriptor: fds[0], closeOnDealloc: true)
+            handle.readabilityHandler = { handle in
+                let data = handle.availableData
+                guard !data.isEmpty else {
+                    handle.readabilityHandler = nil
+                    return
+                }
+                queue.async { consume(data) }
+            }
+            readHandle = handle
+            isInstalled = true
+        }
+    }
+
+    private static func consume(_ data: Data) {
+        pending.append(data)
+
+        while let newline = pending.firstIndex(of: UInt8(ascii: "\n")) {
+            let lineData = pending[pending.startIndex..<newline]
+            pending.removeSubrange(pending.startIndex...newline)
+            emit(lineData)
+        }
+
+        if pending.count > maxPendingSize {
+            emit(pending)
+            pending.removeAll()
+        }
+    }
+
+    private static func emit(_ lineData: Data) {
+        guard let line = String(data: lineData, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines), !line.isEmpty else { return }
+        xrayLog(level(of: line), title: "core: ", message: line)
+    }
+
+    private static func level(of line: String) -> OSLogType {
+        if line.contains("[Error]") {
+            return .error
+        } else if line.contains("[Warning]") {
+            return .default
+        } else if line.contains("[Debug]") {
+            return .debug
+        }
+        return .info
+    }
 }
 
 extension Constants {
@@ -207,7 +287,9 @@ extension PacketTunnelProvider {
 
     func stopXray(completionHandler: () -> Void) {
         Socks5Tunnel.quit()
-        LibXrayStopXray()
+        if let error = takeLibXrayError(LibXrayStopXray()) {
+            xrayLog(.error, message: "Failed to stop xray: \(error)")
+        }
         completionHandler()
     }
 
@@ -287,6 +369,8 @@ extension PacketTunnelProvider {
 
         updateActiveInterfaceIndexForCurrentPath()
 
+        XrayStdoutCapture.install()
+
         let ctx = Unmanaged.passUnretained(self).toOpaque()
         let cb: libxray_sockcallback = { (fd, ctx) in
             guard let ctx = ctx else { return }
@@ -294,11 +378,17 @@ extension PacketTunnelProvider {
 
             instance.sockCallback(fd: fd)
         }
-        LibXraySetSockCallback(cb, ctx)
+        if let error = takeLibXrayError(LibXraySetSockCallback(cb, ctx)) {
+            xrayLog(.error, message: "Failed to set xray sock callback: \(error)")
+        }
 
-        LibXrayRunXray(nil,
-                       path,
-                       Int64.max)
+        if let error = takeLibXrayError(LibXrayRunXray(nil,
+                                                       path,
+                                                       Int64.max)) {
+            xrayLog(.error, message: "Failed to start xray: \(error)")
+            completionHandler(XrayErrors.xrayStartFailed)
+            return
+        }
 
         completionHandler(nil)
         xrayLog(.info, message: "Xray started")
@@ -323,7 +413,7 @@ extension PacketTunnelProvider {
           task-stack-size: 20480
           connect-timeout: 5000
           read-write-timeout: 60000
-          log-file: stderr
+          log-file: stdout
           log-level: error
           limit-nofile: 65535
         """

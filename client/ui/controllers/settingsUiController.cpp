@@ -80,9 +80,6 @@ bool SettingsUiController::isLoggingEnabled()
 void SettingsUiController::toggleLogging(bool enable)
 {
     m_settingsController->toggleLogging(enable);
-#if defined(Q_OS_IOS)
-    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
-#endif
     if (enable == true) {
         qInfo().noquote() << QString("Logging has enabled on %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
         qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());

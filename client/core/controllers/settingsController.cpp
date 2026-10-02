@@ -11,6 +11,9 @@
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
+#ifdef Q_OS_IOS
+    #include "core/utils/swiftBridge.h"
+#endif
 
 QString getPlatformName()
 {
@@ -86,6 +89,9 @@ void SettingsController::toggleLogging(bool enable)
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
+#endif
+#ifdef Q_OS_IOS
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
 #endif
     Logger::setServiceLogsEnabled(enable);
 
