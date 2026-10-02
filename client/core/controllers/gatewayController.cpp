@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QFutureWatcher>
+#include <QHash>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QMetaObject>
@@ -18,6 +19,7 @@
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/api/apiUtils.h"
+#include "cryptoUtils.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
@@ -41,6 +43,10 @@ namespace
         return QStringLiteral("agw_state_v1_%1_%2")
                 .arg(isDevEnvironment ? QStringLiteral("dev") : QStringLiteral("prod"), QString::fromLatin1(endpointHash));
     }
+
+    const QString kWorkingProxy = QStringLiteral("working_proxy");
+    const QString kProxyLists = QStringLiteral("proxy_lists");
+    const QString kVersion = QStringLiteral("version");
 
     QStringList splitEndpoints(const char *raw)
     {
@@ -116,6 +122,126 @@ namespace
         });
         return result.get();
     }
+
+    QHash<QString, QJsonObject> &agwStateCache()
+    {
+        static auto *cache = new QHash<QString, QJsonObject>;
+        return *cache;
+    }
+
+    QJsonObject parseAgwState(const QByteArray &blob)
+    {
+        const QJsonDocument doc = QJsonDocument::fromJson(blob);
+        return doc.isObject() ? doc.object() : QJsonObject();
+    }
+
+    QByteArray serializeAgwState(const QJsonObject &state)
+    {
+        return QJsonDocument(state).toJson(QJsonDocument::Compact);
+    }
+
+    QJsonObject withoutWorkingProxy(QJsonObject state)
+    {
+        state.remove(kWorkingProxy);
+        return state;
+    }
+
+    QStringList decodeLegacyProxyList(const QByteArray &payload, const bool isDevEnvironment, const QByteArray &publicKey)
+    {
+        QByteArray plain;
+        if (isDevEnvironment) {
+            plain = payload;
+        } else {
+            if (payload.trimmed().startsWith('[')) {
+                return {};
+            }
+            QByteArray pem = publicKey;
+            while (!pem.isEmpty() && (pem.back() == ' ' || pem.back() == '\t' || pem.back() == '\r' || pem.back() == '\n')) {
+                pem.chop(1);
+            }
+            const QByteArray hash = QCryptographicHash::hash(pem, QCryptographicHash::Sha512).toHex();
+            plain = CryptoUtils::decryptAes256Cbc(QByteArray::fromBase64(payload), QByteArray::fromHex(hash.left(64)),
+                                                  QByteArray::fromHex(hash.mid(64, 32)));
+        }
+
+        const QJsonDocument doc = QJsonDocument::fromJson(plain);
+        QStringList urls;
+        for (const QJsonValue &value : doc.array()) {
+            const QString url = value.toString();
+            if (url.startsWith(QLatin1String("https://")) || url.startsWith(QLatin1String("http://"))) {
+                urls.append(url);
+            }
+        }
+        return urls;
+    }
+
+    QJsonObject migrateLegacyProxyLists(SecureAppSettingsRepository *repository, const bool isDevEnvironment, const QByteArray &publicKey)
+    {
+        QJsonObject lists;
+        for (const QString &cacheKey : repository->legacyGatewayProxyListKeys()) {
+            const QStringList urls = decodeLegacyProxyList(repository->readLegacyGatewayProxyList(cacheKey), isDevEnvironment, publicKey);
+            if (!urls.isEmpty()) {
+                lists.insert(cacheKey, QJsonArray::fromStringList(urls));
+            }
+        }
+        return lists;
+    }
+
+    QJsonObject loadAgwState(SecureAppSettingsRepository *repository, const QString &stateKey, const bool isDevEnvironment,
+                             const QByteArray &publicKey)
+    {
+        auto &cache = agwStateCache();
+        const auto cached = cache.constFind(stateKey);
+        if (cached != cache.constEnd()) {
+            return cached.value();
+        }
+
+        QJsonObject state = withoutWorkingProxy(parseAgwState(repository->readGatewayProxyUrls(stateKey)));
+        if (state.value(kProxyLists).toObject().isEmpty()) {
+            const QJsonObject migrated = migrateLegacyProxyLists(repository, isDevEnvironment, publicKey);
+            if (!migrated.isEmpty()) {
+                state.insert(kVersion, 1);
+                state.insert(kProxyLists, migrated);
+                repository->writeGatewayProxyUrls(stateKey, serializeAgwState(state));
+                for (const QString &cacheKey : migrated.keys()) {
+                    repository->removeLegacyGatewayProxyList(cacheKey);
+                }
+                qInfo().noquote() << "GatewayController: migrated" << migrated.size() << "pre-libagw proxy lists into" << stateKey;
+            }
+        }
+        repository->removeLegacyGatewayProxyList(QStringLiteral("agw_state_v1"));
+
+        cache.insert(stateKey, state);
+        return state;
+    }
+
+    QJsonObject mergeAgwState(const QJsonObject &base, const QJsonObject &exported, const QJsonObject &current)
+    {
+        QJsonObject merged = current;
+        merged.insert(kVersion, exported.value(kVersion).toInt(1));
+
+        const QString exportedProxy = exported.value(kWorkingProxy).toString();
+        if (exportedProxy != base.value(kWorkingProxy).toString()) {
+            if (exportedProxy.isEmpty()) {
+                merged.remove(kWorkingProxy);
+            } else {
+                merged.insert(kWorkingProxy, exportedProxy);
+            }
+        }
+
+        const QJsonObject baseLists = base.value(kProxyLists).toObject();
+        const QJsonObject exportedLists = exported.value(kProxyLists).toObject();
+        QJsonObject mergedLists = merged.value(kProxyLists).toObject();
+        for (auto it = exportedLists.constBegin(); it != exportedLists.constEnd(); ++it) {
+            if (baseLists.value(it.key()) != it.value()) {
+                mergedLists.insert(it.key(), it.value());
+            }
+        }
+        if (!mergedLists.isEmpty()) {
+            merged.insert(kProxyLists, mergedLists);
+        }
+        return merged;
+    }
 }
 
 GatewayController::GatewayController(const QString &gatewayEndpoint, const bool isDevEnvironment, const int requestTimeoutMsecs,
@@ -160,10 +286,14 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
     }
 
     if (m_appSettingsRepository != nullptr) {
-        const QByteArray state = m_appSettingsRepository->readGatewayProxyUrls(m_stateKey);
-        if (!state.isEmpty()
-            && runOnAgwControlThread([client = m_client, &state]() { return agw_import_state(client, state.constData()); }) == AGW_OK) {
-            m_lastPersistedState = state;
+        const QJsonObject state = loadAgwState(m_appSettingsRepository, m_stateKey, isDevEnvironment, publicKey);
+        if (!state.isEmpty()) {
+            const QByteArray blob = serializeAgwState(state);
+            const int importResult =
+                    runOnAgwControlThread([client = m_client, &blob]() { return agw_import_state(client, blob.constData()); });
+            if (importResult == AGW_OK) {
+                m_baseState = state;
+            }
         }
     }
 }
@@ -291,12 +421,22 @@ void GatewayController::persistState()
         agw_string_free(state);
         return copy;
     });
-    if (blob.isEmpty()) {
+    const QJsonObject exported = parseAgwState(blob);
+    if (exported.isEmpty()) {
         return;
     }
 
-    if (blob != m_lastPersistedState) {
-        m_appSettingsRepository->writeGatewayProxyUrls(m_stateKey, blob);
-        m_lastPersistedState = blob;
+    auto &cache = agwStateCache();
+    const QJsonObject current = cache.value(m_stateKey, m_baseState);
+    const QJsonObject merged = mergeAgwState(m_baseState, exported, current);
+    m_baseState = exported;
+    if (merged == current) {
+        return;
+    }
+    cache.insert(m_stateKey, merged);
+
+    const QByteArray stored = serializeAgwState(withoutWorkingProxy(merged));
+    if (stored != m_appSettingsRepository->readGatewayProxyUrls(m_stateKey)) {
+        m_appSettingsRepository->writeGatewayProxyUrls(m_stateKey, stored);
     }
 }

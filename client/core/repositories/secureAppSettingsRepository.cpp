@@ -324,6 +324,26 @@ void SecureAppSettingsRepository::writeGatewayProxyUrls(const QString &cacheKey,
     setValue(QStringLiteral("Conf/proxyUrls/") + cacheKey, proxyUrlsEncrypted);
 }
 
+QStringList SecureAppSettingsRepository::legacyGatewayProxyListKeys() const
+{
+    const QString prefix = QStringLiteral("Conf/proxyUrls/");
+    QStringList result;
+    for (const QString &key : m_settings->keys(prefix + QStringLiteral("service_"))) {
+        result.append(key.mid(prefix.size()));
+    }
+    return result;
+}
+
+QByteArray SecureAppSettingsRepository::readLegacyGatewayProxyList(const QString &cacheKey) const
+{
+    return value(QStringLiteral("Conf/proxyUrls/") + cacheKey).toByteArray();
+}
+
+void SecureAppSettingsRepository::removeLegacyGatewayProxyList(const QString &cacheKey)
+{
+    m_settings->remove(QStringLiteral("Conf/proxyUrls/") + cacheKey);
+}
+
 bool SecureAppSettingsRepository::isKillSwitchEnabled() const
 {
     return value("Conf/killSwitchEnabled", true).toBool();

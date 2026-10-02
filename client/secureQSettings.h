@@ -20,6 +20,7 @@ public:
     QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
     void remove(const QString &key);
+    QStringList keys(const QString &prefix) const;
 
     QByteArray backupAppConfig() const;
     bool restoreAppConfig(const QByteArray &json);
@@ -43,10 +44,18 @@ private:
     mutable QHash<QString, QVariant> m_cache;
 
     QStringList encryptedKeys; // encode only key listed here
+    QStringList m_encryptedKeyPrefixes = {
+        "Conf/proxyUrls/",
+    };
+    bool isEncryptedKey(const QString &key) const;
     // only this fields need for backup
     QStringList m_fieldsToBackup = {
         "Conf/", "Servers/",
     };
+    QStringList m_fieldsNotToBackup = {
+        "Conf/proxyUrls/",
+    };
+    bool isBackupExcluded(const QString &key) const;
 
     mutable QByteArray m_key;
     mutable QByteArray m_iv;

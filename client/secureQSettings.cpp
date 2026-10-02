@@ -31,7 +31,7 @@ SecureQSettings::SecureQSettings(const QString &organization, const QString &app
     // convert settings to encrypted for if updated to >= 2.1.0
     if (encryptionRequired() && !encrypted) {
         for (const QString &key : m_settings.allKeys()) {
-            if (encryptedKeys.contains(key)) {
+            if (isEncryptedKey(key)) {
                 const QVariant &val = value(key);
                 setValue(key, val);
             }
@@ -88,7 +88,7 @@ void SecureQSettings::setValue(const QString &key, const QVariant &value)
 {
     QMutexLocker locker(&m_mutex);
 
-    if (encryptionRequired() && encryptedKeys.contains(key)) {
+    if (encryptionRequired() && isEncryptedKey(key)) {
         if (!getEncKey().isEmpty() && !getEncIv().isEmpty()) {
             QByteArray decryptedValue;
             {
@@ -118,6 +118,45 @@ void SecureQSettings::remove(const QString &key)
     m_cache.remove(key);
 }
 
+QStringList SecureQSettings::keys(const QString &prefix) const
+{
+    QMutexLocker locker(&m_mutex);
+
+    QStringList result;
+    for (const QString &key : m_settings.allKeys()) {
+        if (key.startsWith(prefix)) {
+            result.append(key);
+        }
+    }
+    return result;
+}
+
+bool SecureQSettings::isEncryptedKey(const QString &key) const
+{
+    if (encryptedKeys.contains(key)) {
+        return true;
+    }
+    for (const QString &prefix : m_encryptedKeyPrefixes) {
+        if (key.startsWith(prefix)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SecureQSettings::isBackupExcluded(const QString &key) const
+{
+    if (key == "Conf/installationUuid") {
+        return true;
+    }
+    for (const QString &prefix : m_fieldsNotToBackup) {
+        if (key.startsWith(prefix)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QByteArray SecureQSettings::backupAppConfig() const
 {
     QMutexLocker locker(&m_mutex);
@@ -127,7 +166,7 @@ QByteArray SecureQSettings::backupAppConfig() const
     const auto needToBackup = [this](const auto &key) {
       for (const auto &item : m_fieldsToBackup)
       {
-        if (key == "Conf/installationUuid")
+        if (isBackupExcluded(key))
         {
           return false;
         }
@@ -163,7 +202,7 @@ bool SecureQSettings::restoreAppConfig(const QByteArray &json)
         return false;
 
     for (const QString &key : cfg.keys()) {
-        if (key == "Conf/installationUuid") {
+        if (isBackupExcluded(key)) {
             continue;
         }
 

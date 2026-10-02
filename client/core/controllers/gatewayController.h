@@ -52,7 +52,7 @@ private:
 
     agw_client_handle m_client = 0;
     bool m_publicKeyMissing = false;
-    QByteArray m_lastPersistedState;
+    QJsonObject m_baseState;
     QString m_stateKey;
 };
 
