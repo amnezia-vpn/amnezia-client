@@ -29,6 +29,7 @@
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
+#include "core/utils/networkUtilities.h"
 
 // How many times do we try to reconnect.
 constexpr int MAX_CONNECTION_RETRY = 10;
@@ -165,14 +166,16 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
                 wgConfig.value(amnezia::configKey::persistentKeepAlive).toString());
   }
 
+  // The value can come from an imported settings backup, so validate it here as well
+  // instead of handing a non-IP string to the platform DNS layers (#3251 review).
   const QString primaryDns = rawConfig.value(amnezia::configKey::dns1).toString();
-  if (!primaryDns.isEmpty()) {
+  if (NetworkUtilities::checkIPv4Format(primaryDns)) {
     json.insert("primaryDnsServer", primaryDns);
   }
 
   // We don't use secondary DNS if primary DNS is AmneziaDNS
   const QString secondaryDns = rawConfig.value(amnezia::configKey::dns2).toString();
-  if (!primaryDns.contains(amnezia::protocols::dns::amneziaDnsIp) && !secondaryDns.isEmpty()) {
+  if (primaryDns != amnezia::protocols::dns::amneziaDnsIp && NetworkUtilities::checkIPv4Format(secondaryDns)) {
     json.insert("secondaryDnsServer", secondaryDns);
   }
 

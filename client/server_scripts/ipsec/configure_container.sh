@@ -84,12 +84,14 @@ conn xauth-psk
   modecfgpull=yes
   cisco-unity=yes
   also=shared
-
 EOF
 
 if [ -n "$DNS_VALUE" ]; then
   echo "  modecfgdns=$DNS_VALUE" >> /etc/ipsec.conf
 fi
+
+# Terminate the conn section before the top-level include directive.
+echo >> /etc/ipsec.conf
 fi
 
 cat >> /etc/ipsec.conf <<'EOF'

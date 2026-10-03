@@ -34,14 +34,18 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_routeMode = static_cast<amnezia::RouteMode>(configuration.value(amnezia::configKey::splitTunnelType).toInt());
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
+    // Empty means "no custom DNS" and a non-IP string parses to a null address; neither
+    // may reach setupRouting(), where a null address is marshalled as 0.0.0.0 (#3251 review).
     const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
-    if (!primaryDns.isEmpty()) {
-        m_dnsServers.push_back(QHostAddress(primaryDns));
+    const QHostAddress primaryAddress(primaryDns);
+    if (!primaryAddress.isNull()) {
+        m_dnsServers.push_back(primaryAddress);
     }
     if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
         const QString secondaryDns = configuration.value(amnezia::configKey::dns2).toString();
-        if (!secondaryDns.isEmpty()) {
-            m_dnsServers.push_back(QHostAddress(secondaryDns));
+        const QHostAddress secondaryAddress(secondaryDns);
+        if (!secondaryAddress.isNull()) {
+            m_dnsServers.push_back(secondaryAddress);
         }
     }
 

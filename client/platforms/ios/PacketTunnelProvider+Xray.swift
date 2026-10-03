@@ -147,7 +147,19 @@ extension PacketTunnelProvider {
                 dnsArray.append(dns2)
             }
 
-            settings.dnsSettings = dnsArray.isEmpty ? nil : NEDNSSettings(servers: dnsArray)
+            if dnsArray.isEmpty {
+                // Deliberate choice, matching Android (no DNS server is added to the
+                // tunnel there either): dnsSettings stays nil and the system resolvers
+                // are used. Their traffic is routed through the tunnel like any other
+                // and forwarded by xray, so an empty setting never substitutes a
+                // third-party resolver. The limitation is fixed here and logged so it
+                // is not silent (#3251 review).
+                xrayLog(.info, title: "DNS",
+                        message: "No custom DNS configured; using system resolvers over the tunnel")
+                settings.dnsSettings = nil
+            } else {
+                settings.dnsSettings = NEDNSSettings(servers: dnsArray)
+            }
             applyXraySplitTunnel(xrayConfig, settings: settings)
 
             let xrayConfigData = xrayConfig.config.data(using: .utf8)

@@ -170,20 +170,22 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
     // An empty entry means "no custom DNS" and must not be installed as a resolver, or the
-    // platform DNS layer is handed an unspecified address (#3190).
-    if (!config.m_primaryDnsServer.isEmpty()) {
-      resolvers.append(QHostAddress(config.m_primaryDnsServer));
-    }
-    if (!config.m_secondaryDnsServer.isEmpty()) {
-        resolvers.append(QHostAddress(config.m_secondaryDnsServer));
-    }
+    // platform DNS layer is handed an unspecified address (#3190). The same applies to a
+    // non-IP string, which QHostAddress turns into a null address (#3251 review).
+    const auto appendResolver = [&resolvers](const QString& address) {
+      const QHostAddress hostAddress(address);
+      if (!hostAddress.isNull()) {
+        resolvers.append(hostAddress);
+      }
+    };
+    appendResolver(config.m_primaryDnsServer);
+    appendResolver(config.m_secondaryDnsServer);
 
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
     if (!config.m_primaryDnsServer.isEmpty() &&
-        config.m_primaryDnsServer == config.m_serverIpv4Gateway &&
-        !config.m_serverIpv6Gateway.isEmpty()) {
-      resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
+        config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
+      appendResolver(config.m_serverIpv6Gateway);
     }
 
     if (resolvers.isEmpty()) {
@@ -303,6 +305,13 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
       return false;
     }
     config.m_primaryDnsServer = value.toString();
+    // A non-empty string that is not an IP address would be marshalled as 0.0.0.0
+    // by the platform DNS layers (#3251 review).
+    if (!config.m_primaryDnsServer.isEmpty() &&
+        QHostAddress(config.m_primaryDnsServer).isNull()) {
+      logger.warning() << "Ignoring invalid primaryDnsServer";
+      config.m_primaryDnsServer.clear();
+    }
   }
 
   if (!obj.contains("secondaryDnsServer")) {
@@ -314,6 +323,11 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
       return false;
     }
     config.m_secondaryDnsServer = value.toString();
+    if (!config.m_secondaryDnsServer.isEmpty() &&
+        QHostAddress(config.m_secondaryDnsServer).isNull()) {
+      logger.warning() << "Ignoring invalid secondaryDnsServer";
+      config.m_secondaryDnsServer.clear();
+    }
   }
 
   if (!obj.contains("hopType")) {

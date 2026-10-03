@@ -149,24 +149,45 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
-                    var saveSettings = function() {
-                        primaryDns.errorText = ""
-                        secondaryDns.errorText = ""
+                    primaryDns.errorText = ""
+                    secondaryDns.errorText = ""
 
-                        if (primaryDns.textField.text !== SettingsController.primaryDns) {
-                            SettingsController.primaryDns = primaryDns.textField.text
+                    // Values imported from a settings backup bypass the field validator,
+                    // so check them before storing; empty is still allowed and means
+                    // "no custom DNS" (#3251).
+                    if (primaryDns.textField.text.trim() !== "" && !primaryDns.textField.acceptableInput) {
+                        primaryDns.errorText = qsTr("Enter a valid IP address")
+                        return
+                    }
+                    if (secondaryDns.textField.text.trim() !== "" && !secondaryDns.textField.acceptableInput) {
+                        secondaryDns.errorText = qsTr("Enter a valid IP address")
+                        return
+                    }
+
+                    var primaryText = primaryDns.textField.text.trim()
+                    var secondaryText = secondaryDns.textField.text.trim()
+
+                    var saveSettings = function() {
+                        if (primaryText !== SettingsController.primaryDns) {
+                            SettingsController.primaryDns = primaryText
                         }
-                        if (secondaryDns.textField.text !== SettingsController.secondaryDns) {
-                            SettingsController.secondaryDns = secondaryDns.textField.text
+                        if (secondaryText !== SettingsController.secondaryDns) {
+                            SettingsController.secondaryDns = secondaryText
                         }
                         PageController.showNotificationMessage(qsTr("Settings saved"))
                     }
 
-                    if (SettingsController.isKillSwitchEnabled
-                            && primaryDns.textField.text === ""
-                            && secondaryDns.textField.text === "") {
-                        showQuestionDrawer(qsTr("KillSwitch is enabled"),
-                                           qsTr("No DNS servers are specified. With KillSwitch enabled DNS requests will be blocked and websites will not resolve. Save these settings?"),
+                    if (primaryText === "" && secondaryText === "") {
+                        // An empty pair affects the DNS layer no matter how the kill
+                        // switch is configured: with it the queries are blocked, without
+                        // it there may be no resolver on the tunnel at all.
+                        var killSwitchEnabled = SettingsController.isKillSwitchEnabled
+                                || SettingsController.strictKillSwitchEnabled
+                        showQuestionDrawer(killSwitchEnabled ? qsTr("KillSwitch is enabled")
+                                                             : qsTr("No DNS servers are specified"),
+                                           killSwitchEnabled
+                                               ? qsTr("No DNS servers are specified. With KillSwitch enabled DNS requests will be blocked and websites will not resolve. Save these settings?")
+                                               : qsTr("No DNS servers are specified. While the VPN is connected websites may not resolve. Save these settings?"),
                                            qsTr("Save"), qsTr("Cancel"),
                                            saveSettings, function() {})
                     } else {

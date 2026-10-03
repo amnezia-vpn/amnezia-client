@@ -151,7 +151,7 @@ ProtocolConfig OpenVpnConfigurator::createConfig(const ServerCredentials &creden
 ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const ConnectionSettings &settings,
                                                                    ProtocolConfig protocolConfig)
 {
-    applyDnsToNativeConfig(settings.dns, protocolConfig);
+    applyDnsToNativeConfig(settings.dns, protocolConfig, DnsEntryCleanup::OpenVpn);
 
     QString config = protocolConfig.nativeConfig();
 
@@ -159,9 +159,9 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const Connect
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
 
-        if (settings.dns.primaryDns.contains(protocols::dns::amneziaDnsIp)
+        if (settings.dns.primaryDns == protocols::dns::amneziaDnsIp
                 && !settings.dns.secondaryDns.isEmpty()) {
-            QRegularExpression dnsRegex("dhcp-option DNS " + settings.dns.secondaryDns);
+            QRegularExpression dnsRegex(QRegularExpression::escape("dhcp-option DNS " + settings.dns.secondaryDns));
             config.replace(dnsRegex, "");
         }
 
@@ -180,6 +180,15 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const Connect
 
 #ifndef MZ_WINDOWS
     config.replace("block-outside-dns", "");
+#else
+    // block-outside-dns installs WFP filters that block DNS on every non-VPN adapter.
+    // If no DNS server is left in the config, keeping it means nothing can resolve at
+    // all, and that happens even when KillSwitch is disabled (#3251 review).
+    static const QRegularExpression dnsOptionRegex(QStringLiteral(R"(^\s*dhcp-option\s+DNS\s+\S)"),
+                                                   QRegularExpression::Multiline);
+    if (!dnsOptionRegex.match(config).hasMatch()) {
+        config.replace("block-outside-dns", "");
+    }
 #endif
 
 #if (defined(MZ_MACOS) || defined(MZ_LINUX))
@@ -196,16 +205,16 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const Connect
 ProtocolConfig OpenVpnConfigurator::processConfigWithExportSettings(const ExportSettings &settings,
                                                                     ProtocolConfig protocolConfig)
 {
-    applyDnsToNativeConfig(settings.dns, protocolConfig);
+    applyDnsToNativeConfig(settings.dns, protocolConfig, DnsEntryCleanup::OpenVpn);
 
     QString config = protocolConfig.nativeConfig();
 
     QRegularExpression regex("redirect-gateway.*");
     config.replace(regex, "");
 
-    if (settings.dns.primaryDns.contains(protocols::dns::amneziaDnsIp)
+    if (settings.dns.primaryDns == protocols::dns::amneziaDnsIp
             && !settings.dns.secondaryDns.isEmpty()) {
-        QRegularExpression dnsRegex("dhcp-option DNS " + settings.dns.secondaryDns);
+        QRegularExpression dnsRegex(QRegularExpression::escape("dhcp-option DNS " + settings.dns.secondaryDns));
         config.replace(dnsRegex, "");
     }
 
