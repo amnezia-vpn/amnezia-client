@@ -956,8 +956,10 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
             if (stdOut.contains("fuser not installed") || stdOut.contains("cat not installed"))
                 return ErrorCode::NoError;
 
-            // Only the explicit marker emitted by check_server_is_busy.sh means "the package
-            // manager lock is held". Any other output (ssh warnings, fuser file names, ...)
+            // Only the explicit marker emitted by check_server_is_busy.sh means "wait for the
+            // package manager": the script prints it while the lock is really held, and also
+            // when the check could not finish in time, because a timed-out fuser must not be
+            // read as a free server. Any other output (ssh warnings, fuser file names, ...)
             // previously counted as busy as well, which kept the client retrying for minutes
             // although the server was free (#3232).
             if (!stdOut.contains("SERVER_BUSY"))
