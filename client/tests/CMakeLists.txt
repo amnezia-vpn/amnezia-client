@@ -33,6 +33,8 @@ target_link_libraries(test_common PUBLIC
     ${LIBS}
 )
 
+target_compile_definitions(test_common PUBLIC AMNEZIA_BUILD_TESTS)
+
 target_include_directories(test_common PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/..
