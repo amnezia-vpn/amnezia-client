@@ -616,8 +616,14 @@ bool IosController::setupXray()
     QString xrayConfigStr = config.value(configKey::config).toString();
 
     QJsonObject finalConfig;
-    finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1].toString());
-    finalConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2].toString());
+    const QString primaryDns = m_rawConfig[configKey::dns1].toString();
+    const QString secondaryDns = m_rawConfig[configKey::dns2].toString();
+    if (!primaryDns.isEmpty()) {
+        finalConfig.insert(configKey::dns1, primaryDns);
+    }
+    if (!secondaryDns.isEmpty()) {
+        finalConfig.insert(configKey::dns2, secondaryDns);
+    }
     finalConfig.insert(configKey::splitTunnelType, m_rawConfig[configKey::splitTunnelType]);
 
     QJsonArray splitTunnelSites = m_rawConfig[configKey::splitTunnelSites].toArray();
@@ -641,8 +647,14 @@ bool IosController::setupSSXray()
     QString ssXrayConfigStr = config.value(configKey::config).toString();
 
     QJsonObject finalConfig;
-    finalConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
-    finalConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
+    const QString primaryDns = m_rawConfig[configKey::dns1].toString();
+    const QString secondaryDns = m_rawConfig[configKey::dns2].toString();
+    if (!primaryDns.isEmpty()) {
+        finalConfig.insert(configKey::dns1, primaryDns);
+    }
+    if (!secondaryDns.isEmpty()) {
+        finalConfig.insert(configKey::dns2, secondaryDns);
+    }
     finalConfig.insert(configKey::config, ssXrayConfigStr);
 
     QJsonDocument finalConfigDoc(finalConfig);

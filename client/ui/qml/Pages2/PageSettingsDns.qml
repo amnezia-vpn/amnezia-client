@@ -149,20 +149,29 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
-                    // An empty value is valid: no custom pair is forced, so the DNS the
-                    // server advertises is used as-is -- and nothing is pushed at all when
-                    // the server has none, which is what a setup that must not route DNS
-                    // through the tunnel needs (#3190).
-                    primaryDns.errorText = ""
-                    secondaryDns.errorText = ""
+                    var saveSettings = function() {
+                        primaryDns.errorText = ""
+                        secondaryDns.errorText = ""
 
-                    if (primaryDns.textField.text !== SettingsController.primaryDns) {
-                        SettingsController.primaryDns = primaryDns.textField.text
+                        if (primaryDns.textField.text !== SettingsController.primaryDns) {
+                            SettingsController.primaryDns = primaryDns.textField.text
+                        }
+                        if (secondaryDns.textField.text !== SettingsController.secondaryDns) {
+                            SettingsController.secondaryDns = secondaryDns.textField.text
+                        }
+                        PageController.showNotificationMessage(qsTr("Settings saved"))
                     }
-                    if (secondaryDns.textField.text !== SettingsController.secondaryDns) {
-                        SettingsController.secondaryDns = secondaryDns.textField.text
+
+                    if (SettingsController.isKillSwitchEnabled
+                            && primaryDns.textField.text === ""
+                            && secondaryDns.textField.text === "") {
+                        showQuestionDrawer(qsTr("KillSwitch is enabled"),
+                                           qsTr("No DNS servers are specified. With KillSwitch enabled DNS requests will be blocked and websites will not resolve. Save these settings?"),
+                                           qsTr("Save"), qsTr("Cancel"),
+                                           saveSettings, function() {})
+                    } else {
+                        saveSettings()
                     }
-                    PageController.showNotificationMessage(qsTr("Settings saved"))
                 }
             }
         }

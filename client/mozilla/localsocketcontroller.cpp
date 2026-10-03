@@ -165,12 +165,15 @@ void LocalSocketController::activate(const QJsonObject &rawConfig) {
                 wgConfig.value(amnezia::configKey::persistentKeepAlive).toString());
   }
 
-  json.insert("primaryDnsServer", rawConfig.value(amnezia::configKey::dns1));
+  const QString primaryDns = rawConfig.value(amnezia::configKey::dns1).toString();
+  if (!primaryDns.isEmpty()) {
+    json.insert("primaryDnsServer", primaryDns);
+  }
 
   // We don't use secondary DNS if primary DNS is AmneziaDNS
-  if (!rawConfig.value(amnezia::configKey::dns1).toString().
-    contains(amnezia::protocols::dns::amneziaDnsIp)) {
-    json.insert("secondaryDnsServer", rawConfig.value(amnezia::configKey::dns2));
+  const QString secondaryDns = rawConfig.value(amnezia::configKey::dns2).toString();
+  if (!primaryDns.contains(amnezia::protocols::dns::amneziaDnsIp) && !secondaryDns.isEmpty()) {
+    json.insert("secondaryDnsServer", secondaryDns);
   }
 
   QJsonArray jsAllowedIPAddesses;

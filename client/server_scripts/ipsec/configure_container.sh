@@ -14,6 +14,17 @@ NET_IFACE=$(route 2>/dev/null | grep -m 1 '^default' | grep -o '[^ ]*$')
 [ -z "$NET_IFACE" ] && NET_IFACE=$(ip -4 route list 0/0 2>/dev/null | grep -m 1 -Po '(?<=dev )(\S+)')
 [ -z "$NET_IFACE" ] && NET_IFACE=eth0
 
+DNS_VALUE=
+for dns in "$PRIMARY_SERVER_DNS" "$SECONDARY_SERVER_DNS"; do
+  if [ -n "$dns" ]; then
+    if [ -z "$DNS_VALUE" ]; then
+      DNS_VALUE="$dns"
+    else
+      DNS_VALUE="$DNS_VALUE,$dns"
+    fi
+  fi
+done
+
 
 mkdir -p /opt/src
 mkdir -p /opt/amnezia/ikev2/clients
@@ -66,7 +77,6 @@ conn xauth-psk
   auto=add
   leftsubnet=0.0.0.0/0
   rightaddresspool=$IPSEC_VPN_XAUTH_POOL
-  modecfgdns=$PRIMARY_DNS,$SECONDARY_DNS
   leftxauthserver=yes
   rightxauthclient=yes
   leftmodecfgserver=yes
@@ -76,6 +86,10 @@ conn xauth-psk
   also=shared
 
 EOF
+
+if [ -n "$DNS_VALUE" ]; then
+  echo "  modecfgdns=$DNS_VALUE" >> /etc/ipsec.conf
+fi
 fi
 
 cat >> /etc/ipsec.conf <<'EOF'
@@ -120,9 +134,14 @@ proxyarp
 lcp-echo-failure 4
 lcp-echo-interval 30
 connect-delay 5000
-ms-dns $PRIMARY_SERVER_DNS
-ms-dns $SECONDARY_SERVER_DNS
 EOF
+
+if [ -n "$PRIMARY_SERVER_DNS" ]; then
+  echo "ms-dns $PRIMARY_SERVER_DNS" >> /etc/ppp/options.xl2tpd
+fi
+if [ -n "$SECONDARY_SERVER_DNS" ]; then
+  echo "ms-dns $SECONDARY_SERVER_DNS" >> /etc/ppp/options.xl2tpd
+fi
 
 
 # Update sysctl settings
@@ -250,8 +269,11 @@ conn ikev2-cp
   ikelifetime=24h
   salifetime=24h
   encapsulation=yes
-  modecfgdns=$PRIMARY_SERVER_DNS,$SECONDARY_SERVER_DNS
 EOF
+
+if [ -n "$DNS_VALUE" ]; then
+  echo "  modecfgdns=$DNS_VALUE" >> /etc/ipsec.d/ikev2.conf
+fi
 
  ipsec auto --add ikev2-cp
 else

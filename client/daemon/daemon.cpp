@@ -180,7 +180,9 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
 
     // If the DNS is not the Gateway, it's a user defined DNS
     // thus, not add any other :)
-    if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
+    if (!config.m_primaryDnsServer.isEmpty() &&
+        config.m_primaryDnsServer == config.m_serverIpv4Gateway &&
+        !config.m_serverIpv6Gateway.isEmpty()) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
     }
 

@@ -151,10 +151,8 @@ amnezia::ScriptVars amnezia::genBaseVars(const ServerCredentials &credentials,
         qWarning() << "amnezia::genBaseVars unable to resolve address for credentials.hostName";
     }
 
-    QString dns1 = primaryDns.isEmpty() ? QString("8.8.8.8") : primaryDns;
-    QString dns2 = secondaryDns.isEmpty() ? QString("8.8.4.4") : secondaryDns;
-    vars.append({ { "$PRIMARY_SERVER_DNS", dns1 } });
-    vars.append({ { "$SECONDARY_SERVER_DNS", dns2 } });
+    vars.append({ { "$PRIMARY_SERVER_DNS", primaryDns } });
+    vars.append({ { "$SECONDARY_SERVER_DNS", secondaryDns } });
 
     // IPsec vars (constants)
     vars.append({ { "$IPSEC_VPN_L2TP_NET", "192.168.42.0/24" } });

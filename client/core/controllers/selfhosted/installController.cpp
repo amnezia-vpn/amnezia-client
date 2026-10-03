@@ -553,7 +553,9 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
         return ErrorCode::NoError;
     };
 
-    amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
+    amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container,
+                                                        m_appSettingsRepository->primaryDns(),
+                                                        m_appSettingsRepository->secondaryDns());
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
     ErrorCode e = sshSession.runContainerScript(

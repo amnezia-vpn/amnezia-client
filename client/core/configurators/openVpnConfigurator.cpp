@@ -159,7 +159,8 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithLocalSettings(const Connect
         QRegularExpression regex("redirect-gateway.*");
         config.replace(regex, "");
 
-        if (settings.dns.primaryDns.contains(protocols::dns::amneziaDnsIp)) {
+        if (settings.dns.primaryDns.contains(protocols::dns::amneziaDnsIp)
+                && !settings.dns.secondaryDns.isEmpty()) {
             QRegularExpression dnsRegex("dhcp-option DNS " + settings.dns.secondaryDns);
             config.replace(dnsRegex, "");
         }
@@ -202,7 +203,8 @@ ProtocolConfig OpenVpnConfigurator::processConfigWithExportSettings(const Export
     QRegularExpression regex("redirect-gateway.*");
     config.replace(regex, "");
 
-    if (settings.dns.primaryDns.contains(protocols::dns::amneziaDnsIp)) {
+    if (settings.dns.primaryDns.contains(protocols::dns::amneziaDnsIp)
+            && !settings.dns.secondaryDns.isEmpty()) {
         QRegularExpression dnsRegex("dhcp-option DNS " + settings.dns.secondaryDns);
         config.replace(dnsRegex, "");
     }

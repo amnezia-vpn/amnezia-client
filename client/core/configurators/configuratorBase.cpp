@@ -1,5 +1,7 @@
 #include "configuratorBase.h"
 
+#include <QStringList>
+
 #include "core/configurators/awgConfigurator.h"
 #include "core/configurators/ikev2Configurator.h"
 #include "core/configurators/openVpnConfigurator.h"
@@ -7,6 +9,43 @@
 #include "core/configurators/xrayConfigurator.h"
 
 using namespace amnezia;
+
+namespace {
+
+QString stripEmptyDnsEntries(const QString &config)
+{
+    const QString dhcpOption = QStringLiteral("dhcp-option DNS");
+    QStringList filtered;
+    for (const QString &line : config.split('\n')) {
+        const QString trimmed = line.trimmed();
+        if (trimmed.startsWith(dhcpOption)
+            && trimmed.mid(dhcpOption.size()).trimmed().isEmpty()) {
+            continue;
+        }
+
+        const int separator = trimmed.indexOf('=');
+        if (separator > 0
+            && trimmed.left(separator).trimmed().compare(QStringLiteral("DNS"), Qt::CaseInsensitive) == 0) {
+            QStringList servers;
+            for (const QString &value : trimmed.mid(separator + 1).split(',', Qt::SkipEmptyParts)) {
+                const QString server = value.trimmed();
+                if (!server.isEmpty()) {
+                    servers.append(server);
+                }
+            }
+            if (servers.isEmpty()) {
+                continue;
+            }
+            filtered.append(QStringLiteral("DNS = ") + servers.join(QStringLiteral(", ")));
+            continue;
+        }
+
+        filtered.append(line);
+    }
+    return filtered.join('\n');
+}
+
+} // namespace
 
 ConfiguratorBase::ConfiguratorBase(SshSession* sshSession, QObject *parent)
     : QObject { parent }, m_sshSession(sshSession)
@@ -46,5 +85,5 @@ void ConfiguratorBase::applyDnsToNativeConfig(const DnsSettings &dns, ProtocolCo
     QString config = protocolConfig.nativeConfig();
     config.replace("$PRIMARY_DNS", dns.primaryDns);
     config.replace("$SECONDARY_DNS", dns.secondaryDns);
-    protocolConfig.setNativeConfig(config);
+    protocolConfig.setNativeConfig(stripEmptyDnsEntries(config));
 }

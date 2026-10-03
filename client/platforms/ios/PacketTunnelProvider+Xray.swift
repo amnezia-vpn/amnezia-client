@@ -147,9 +147,7 @@ extension PacketTunnelProvider {
                 dnsArray.append(dns2)
             }
 
-            settings.dnsSettings = !dnsArray.isEmpty
-            ? NEDNSSettings(servers: dnsArray)
-            : NEDNSSettings(servers: ["1.1.1.1"])
+            settings.dnsSettings = dnsArray.isEmpty ? nil : NEDNSSettings(servers: dnsArray)
             applyXraySplitTunnel(xrayConfig, settings: settings)
 
             let xrayConfigData = xrayConfig.config.data(using: .utf8)
