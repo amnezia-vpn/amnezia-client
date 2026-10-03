@@ -149,10 +149,10 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
-                    // An empty value is a valid configuration: the app then keeps the DNS
-                    // servers advertised by the server instead of forcing a custom pair,
-                    // which is required for setups that need no DNS routed through the VPN
-                    // (split tunneling only) (#3190).
+                    // An empty value is valid: no custom pair is forced, so the DNS the
+                    // server advertises is used as-is -- and nothing is pushed at all when
+                    // the server has none, which is what a setup that must not route DNS
+                    // through the tunnel needs (#3190).
                     primaryDns.errorText = ""
                     secondaryDns.errorText = ""
 
