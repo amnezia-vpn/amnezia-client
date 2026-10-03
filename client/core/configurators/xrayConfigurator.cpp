@@ -586,9 +586,15 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
     const QString securityEff = effectiveSecurity(srv);
     streamSettings[px::security] = securityEff;
 
+    // A missing SNI falls back to "site" here exactly as it does on the server side
+    // (writeServerConfigForSetup): a legacy config that carries only "site" would otherwise
+    // make the client send the built-in default name while the server lists the site in
+    // serverNames, and the handshake fails (#3145).
+    const QString siteEff = srv.site.isEmpty() ? QString::fromLatin1(px::defaultSite) : srv.site;
+    const QString sniEff = srv.sni.isEmpty() ? siteEff : srv.sni;
+
     if (securityEff == QLatin1String("tls")) {
         QJsonObject tlsSettings;
-        const QString sniEff = srv.sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : srv.sni;
         tlsSettings[px::serverName] = sniEff;
         const QString alpnEff = srv.alpn.isEmpty() ? QString::fromLatin1(px::defaultAlpn) : srv.alpn;
         QJsonArray alpnArray;
@@ -613,7 +619,6 @@ QJsonObject XrayConfigurator::buildStreamSettings(const XrayServerConfig &srv, c
         QJsonObject realSettings;
         const QString fpEff = srv.fingerprint.isEmpty() ? QString::fromLatin1(px::defaultFingerprint) : srv.fingerprint;
         realSettings[px::fingerprint] = fpEff;
-        const QString sniEff = srv.sni.isEmpty() ? QString::fromLatin1(px::defaultSni) : srv.sni;
         realSettings[px::serverName] = sniEff;
         streamSettings[px::realitySettings] = realSettings;
     }
