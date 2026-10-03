@@ -35,10 +35,14 @@ XrayProtocol::XrayProtocol(const QJsonObject &configuration, QObject *parent) : 
     m_remoteAddress = NetworkUtilities::getIPAddress(m_rawConfig.value(amnezia::configKey::hostName).toString());
 
     const QString primaryDns = configuration.value(amnezia::configKey::dns1).toString();
-    m_dnsServers.push_back(QHostAddress(primaryDns));
+    if (!primaryDns.isEmpty()) {
+        m_dnsServers.push_back(QHostAddress(primaryDns));
+    }
     if (primaryDns != amnezia::protocols::dns::amneziaDnsIp) {
         const QString secondaryDns = configuration.value(amnezia::configKey::dns2).toString();
-        m_dnsServers.push_back(QHostAddress(secondaryDns));
+        if (!secondaryDns.isEmpty()) {
+            m_dnsServers.push_back(QHostAddress(secondaryDns));
+        }
     }
 
     QJsonObject xrayConfiguration = configuration.value(ProtocolUtils::key_proto_config_data(Proto::Xray)).toObject();
@@ -261,10 +265,15 @@ ErrorCode XrayProtocol::setupRouting()
                     return ErrorCode::InternalError;
                 }
 
-                auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
-                if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
-                    qCritical() << "Failed to set DNS resolvers for TUN";
-                    return ErrorCode::InternalError;
+                // An empty list means "no DNS through the tunnel": leave the resolvers as
+                // they are instead of asking for an unspecified address, which fails the
+                // connection (#3190).
+                if (!m_dnsServers.isEmpty()) {
+                    auto updateResolvers = iface->updateResolvers(tunName, m_dnsServers);
+                    if (!updateResolvers.waitForFinished() || !updateResolvers.returnValue()) {
+                        qCritical() << "Failed to set DNS resolvers for TUN";
+                        return ErrorCode::InternalError;
+                    }
                 }
 
 #ifdef Q_OS_WIN

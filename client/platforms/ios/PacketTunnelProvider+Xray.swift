@@ -137,11 +137,13 @@ extension PacketTunnelProvider {
             let xrayConfig = try JSONDecoder().decode(XrayConfig.self,
                                                       from: configData)
 
+            // An empty value means "no DNS through the tunnel" (#3190): passing an empty
+            // server string to NetworkExtension is not the same as leaving DNS unset.
             var dnsArray = [String]()
-            if let dns1 = xrayConfig.dns1 {
+            if let dns1 = xrayConfig.dns1, !dns1.isEmpty {
                 dnsArray.append(dns1)
             }
-            if let dns2 = xrayConfig.dns2 {
+            if let dns2 = xrayConfig.dns2, !dns2.isEmpty {
                 dnsArray.append(dns2)
             }
 

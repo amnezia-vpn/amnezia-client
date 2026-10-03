@@ -169,7 +169,11 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
-    resolvers.append(QHostAddress(config.m_primaryDnsServer));
+    // An empty entry means "no custom DNS" and must not be installed as a resolver, or the
+    // platform DNS layer is handed an unspecified address (#3190).
+    if (!config.m_primaryDnsServer.isEmpty()) {
+      resolvers.append(QHostAddress(config.m_primaryDnsServer));
+    }
     if (!config.m_secondaryDnsServer.isEmpty()) {
         resolvers.append(QHostAddress(config.m_secondaryDnsServer));
     }
@@ -178,6 +182,10 @@ bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
     // thus, not add any other :)
     if (config.m_primaryDnsServer == config.m_serverIpv4Gateway) {
       resolvers.append(QHostAddress(config.m_serverIpv6Gateway));
+    }
+
+    if (resolvers.isEmpty()) {
+      return true;
     }
 
     if (!dnsutils()->updateResolvers(wgutils()->interfaceName(), resolvers)) {

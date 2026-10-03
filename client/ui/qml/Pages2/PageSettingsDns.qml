@@ -149,10 +149,10 @@ PageType {
                 text: qsTr("Save")
 
                 clickedFunc: function() {
-                    if (primaryDns.textField.text === "") {
-                        primaryDns.errorText = qsTr("Primary DNS cannot be empty")
-                        return
-                    }
+                    // An empty value is valid: no custom pair is forced, so the DNS the
+                    // server advertises is used as-is -- and nothing is pushed at all when
+                    // the server has none, which is what a setup that must not route DNS
+                    // through the tunnel needs (#3190).
                     primaryDns.errorText = ""
                     secondaryDns.errorText = ""
 
