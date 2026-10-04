@@ -973,8 +973,10 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
             if (scriptError != ErrorCode::NoError) {
                 // A single broken connection is not a verdict: keep polling, as the loop does
                 // for a busy server.  Only a run of failures means that the host is
-                // unreachable.
-                if (++transportErrors >= 3 && !serverBusy)
+                // unreachable, and such a run is not a verdict at all: its output may be a
+                // fragment, so a SERVER_BUSY that arrived before the channel broke must not
+                // mask the transport error for all 30 attempts.
+                if (++transportErrors >= 3)
                     return scriptError;
             } else {
                 transportErrors = 0;
