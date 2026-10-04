@@ -566,8 +566,14 @@ bool IosController::setupWireGuard()
     QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::WireGuard)].toObject();
 
     QJsonObject wgConfig {};
-    wgConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
-    wgConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
+    const QString primaryDns = m_rawConfig[configKey::dns1].toString();
+    const QString secondaryDns = m_rawConfig[configKey::dns2].toString();
+    if (!primaryDns.isEmpty()) {
+        wgConfig.insert(configKey::dns1, primaryDns);
+    }
+    if (!secondaryDns.isEmpty()) {
+        wgConfig.insert(configKey::dns2, secondaryDns);
+    }
 
     if (config.contains(configKey::mtu)) {
         wgConfig.insert(configKey::mtu, config[configKey::mtu]);
@@ -668,8 +674,14 @@ bool IosController::setupAwg()
     QJsonObject config = m_rawConfig[ProtocolUtils::key_proto_config_data(amnezia::Proto::Awg)].toObject();
 
     QJsonObject wgConfig {};
-    wgConfig.insert(configKey::dns1, m_rawConfig[configKey::dns1]);
-    wgConfig.insert(configKey::dns2, m_rawConfig[configKey::dns2]);
+    const QString primaryDns = m_rawConfig[configKey::dns1].toString();
+    const QString secondaryDns = m_rawConfig[configKey::dns2].toString();
+    if (!primaryDns.isEmpty()) {
+        wgConfig.insert(configKey::dns1, primaryDns);
+    }
+    if (!secondaryDns.isEmpty()) {
+        wgConfig.insert(configKey::dns2, secondaryDns);
+    }
 
     if (config.contains(configKey::mtu)) {
         wgConfig.insert(configKey::mtu, config[configKey::mtu]);

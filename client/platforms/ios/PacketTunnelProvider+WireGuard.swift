@@ -15,6 +15,10 @@ extension PacketTunnelProvider {
 
         do {
             let wgConfig = try JSONDecoder().decode(WGConfig.self, from: wgConfigData)
+            if !wgConfig.hasDnsServers {
+                wg_log(.info, title: "DNS",
+                       message: "No custom DNS configured; using system resolvers over the tunnel")
+            }
             let wgConfigStr = wgConfig.str
 
             let tunnelConfiguration = try TunnelConfiguration(fromWgQuickConfig: wgConfigStr)
