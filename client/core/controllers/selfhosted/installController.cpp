@@ -927,24 +927,26 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
 {
     m_cancelInstallation = false;
     QString stdOut;
+    QString stdErr;
     auto cbReadStdOut = [&](const QString &data, libssh::Client &) {
         stdOut += data + "\n";
         return ErrorCode::NoError;
     };
     auto cbReadStdErr = [&](const QString &data, libssh::Client &) {
-        stdOut += data + "\n";
+        stdErr += data + "\n";
         return ErrorCode::NoError;
     };
 
     QFutureWatcher<ErrorCode> watcher;
 
-    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &cbReadStdOut, &cbReadStdErr, &credentials, &sshSession]() {
+    QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &stdErr, &cbReadStdOut, &cbReadStdErr, &credentials, &sshSession]() {
         // max 30 attempts
         for (int i = 0; i < 30; ++i) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
             }
             stdOut.clear();
+            stdErr.clear();
             const ErrorCode scriptError = sshSession.runScript(
                     credentials,
                     sshSession.replaceVars(amnezia::scriptData(SharedScriptType::check_server_is_busy),
@@ -953,17 +955,21 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
 
             if (stdOut.contains("Packet manager not found"))
                 return ErrorCode::ServerPacketManagerError;
-            if (stdOut.contains("fuser not installed") || stdOut.contains("cat not installed"))
-                return ErrorCode::NoError;
 
-            // Only the explicit marker emitted by check_server_is_busy.sh means "wait for the
-            // package manager": the script prints it while the lock is really held, and also
-            // when the check could not finish in time, because a timed-out fuser must not be
-            // read as a free server. Any other output (ssh warnings, fuser file names, ...)
-            // previously counted as busy as well, which kept the client retrying for minutes
-            // although the server was free (#3232).
-            if (!stdOut.contains("SERVER_BUSY"))
+            // check_server_is_busy.sh answers explicitly: SERVER_BUSY while the package manager
+            // lock is held (or while the check is unsure), SERVER_FREE only when nothing runs.
+            // The server is free only on that explicit, clean marker: a missing marker, an
+            // unexpected answer, a non-empty stderr or a failed script must never be read as
+            // "free", otherwise the installation starts on top of a running package manager
+            // (#3232).
+            const bool serverBusy = stdOut.contains("SERVER_BUSY");
+            const bool serverFree = stdOut.contains("SERVER_FREE");
+            if (scriptError == ErrorCode::NoError && serverFree && !serverBusy && stdErr.trimmed().isEmpty())
+                return ErrorCode::NoError;
+            if (scriptError != ErrorCode::NoError && !serverBusy)
                 return scriptError;
+
+            // SERVER_BUSY, or an answer we cannot trust: wait and retry.
 #ifdef MZ_DEBUG
             qDebug().noquote() << stdOut;
 #endif
