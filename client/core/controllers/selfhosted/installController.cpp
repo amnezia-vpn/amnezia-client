@@ -941,6 +941,7 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
 
     QFuture<ErrorCode> future = QtConcurrent::run([this, &stdOut, &stdErr, &cbReadStdOut, &cbReadStdErr, &credentials, &sshSession]() {
         // max 30 attempts
+        int transportErrors = 0;
         for (int i = 0; i < 30; ++i) {
             if (m_cancelInstallation) {
                 return ErrorCode::ServerCancelInstallation;
@@ -958,16 +959,26 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
 
             // check_server_is_busy.sh answers explicitly: SERVER_BUSY while the package manager
             // lock is held (or while the check is unsure), SERVER_FREE only when nothing runs.
-            // The server is free only on that explicit, clean marker: a missing marker, an
-            // unexpected answer, a non-empty stderr or a failed script must never be read as
+            // The server is free only on that explicit marker and a successful script run: a
+            // missing marker, an unexpected answer or a failed script must never be read as
             // "free", otherwise the installation starts on top of a running package manager
-            // (#3232).
+            // (#3232).  stderr is not part of the answer: sshd, pam or the login shell may
+            // write warnings there ("Could not chdir to home directory", BASH_ENV output) even
+            // when the check itself printed SERVER_FREE, so only the markers decide.
             const bool serverBusy = stdOut.contains("SERVER_BUSY");
             const bool serverFree = stdOut.contains("SERVER_FREE");
-            if (scriptError == ErrorCode::NoError && serverFree && !serverBusy && stdErr.trimmed().isEmpty())
+            if (scriptError == ErrorCode::NoError && serverFree && !serverBusy)
                 return ErrorCode::NoError;
-            if (scriptError != ErrorCode::NoError && !serverBusy)
-                return scriptError;
+
+            if (scriptError != ErrorCode::NoError) {
+                // A single broken connection is not a verdict: keep polling, as the loop does
+                // for a busy server.  Only a run of failures means that the host is
+                // unreachable.
+                if (++transportErrors >= 3 && !serverBusy)
+                    return scriptError;
+            } else {
+                transportErrors = 0;
+            }
 
             // SERVER_BUSY, or an answer we cannot trust: wait and retry.
 #ifdef MZ_DEBUG
@@ -991,6 +1002,11 @@ ErrorCode InstallController::isServerDpkgBusy(const ServerCredentials &credentia
     wait.exec();
 
     emit serverIsBusy(false);
+
+    // stderr is only logged, never used as a verdict: a noisy login environment must not keep
+    // a free server busy (the future has finished here, so stdErr is safe to read).
+    if (!stdErr.trimmed().isEmpty())
+        logger.warning() << "check_server_is_busy stderr:" << stdErr.trimmed();
 
     return future.result();
 }
