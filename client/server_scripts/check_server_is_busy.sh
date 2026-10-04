@@ -44,6 +44,15 @@
 # fuser is absent and when sudo is not usable, instead of a lock path that exists being
 # declared busy forever; an answer the scan cannot give (killed, no /proc) is busy, never
 # free.
+#
+# A scan started as an ordinary user on a normal host can see no descriptors at all: for
+# root processes /proc/<pid>/fd is mode 0500 root, so the glob silently matches nothing and
+# the check would answer "nobody holds the lock" while a root package manager is running.
+# The scan is therefore trusted only when this process may read the fd directory of a
+# process that is not itself (/proc/1/fd; root always may).  When that probe fails (hidepid,
+# EPERM) and the privileged fuser/scan was not available either (no usable sudo, or sudo
+# refused the scan), the answer is SERVER_BUSY: installation on such a host is refused
+# instead of being risked on top of a running package manager (#3232).
 if command -v apt-get > /dev/null 2>&1; then LOCK_CMD="fuser"; LOCK_FILE="/var/lib/dpkg/lock-frontend";\
 elif command -v dnf > /dev/null 2>&1; then LOCK_CMD="fuser"; LOCK_FILE="/var/cache/dnf/* /var/run/dnf/* /var/lib/dnf/* /var/lib/rpm/*";\
 elif command -v yum > /dev/null 2>&1; then LOCK_CMD="cat"; LOCK_FILE="/var/run/yum.pid";\
@@ -53,6 +62,7 @@ else echo "Packet manager not found"; echo "Internal error"; echo "SERVER_BUSY";
 fi;\
 SUDO=""; if command -v sudo > /dev/null 2>&1 && [ "$(id -u)" -ne 0 ]; then SUDO="sudo -n"; fi;\
 CAN_CHECK=0; if [ "$(id -u)" -eq 0 ]; then CAN_CHECK=1; elif [ -n "$SUDO" ] && $SUDO true > /dev/null 2>&1; then CAN_CHECK=1; fi;\
+SCAN_TRUSTWORTHY=0; if [ "$(id -u)" -eq 0 ] || [ -r /proc/1/fd ]; then SCAN_TRUSTWORTHY=1; fi;\
 TIMEOUT_CMD=""; if command -v timeout > /dev/null 2>&1; then TIMEOUT_CMD="timeout 15"; fi;\
 if [ "$LOCK_CMD" = "cat" ]; then \
 LOCK_PID=$($SUDO cat $LOCK_FILE 2> /dev/null); RC=$?; \
@@ -95,7 +105,7 @@ if [ "$CAN_CHECK" -eq 1 ] && [ -n "$SUDO" ]; then \
 SCAN_OUT=$($SUDO $TIMEOUT_CMD sh -c "echo run=1; $SCAN; echo rc=\$?" sh $EXISTING 2> /dev/null); \
 case "$SCAN_OUT" in *"rc="*) SCAN_RC=${SCAN_OUT##*rc=}; case "$SCAN_RC" in ''|*[!0-9]*) SCAN_RC=3 ;; esac ;; *"run=1"*) SCAN_RC=124 ;; esac; \
 fi; \
-if [ "$SCAN_RC" -eq 3 ]; then $TIMEOUT_CMD sh -c "$SCAN" sh $EXISTING > /dev/null 2>&1; SCAN_RC=$?; fi; \
+if [ "$SCAN_RC" -eq 3 ] && [ "$SCAN_TRUSTWORTHY" -eq 1 ]; then $TIMEOUT_CMD sh -c "$SCAN" sh $EXISTING > /dev/null 2>&1; SCAN_RC=$?; fi; \
 if [ "$SCAN_RC" -eq 1 ]; then echo "SERVER_FREE"; else echo "SERVER_BUSY"; fi ;; \
 *) echo "SERVER_BUSY" ;; \
 esac; \
