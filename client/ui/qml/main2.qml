@@ -209,6 +209,13 @@ Window  {
         PopupType {
             id: popupErrorMessage
         }
+
+        Connections {
+            target: popupErrorMessage
+            function onClosed() {
+                PageController.onErrorMessageClosed()
+            }
+        }
     }
 
     Item {
