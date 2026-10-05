@@ -19,6 +19,111 @@ import "../Components"
 PageType {
     id: root
 
+    property bool pendingOpenQrPageAfterCamera: false
+    property bool waitingSettingsReturnForQrPage: false
+
+    function proceedOpenQrPairingPage() {
+        PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
+        pendingOpenQrPageAfterCamera = false
+        waitingSettingsReturnForQrPage = false
+    }
+
+    function showCameraDeniedDrawer() {
+        showQuestionDrawer(
+                    qsTr("Camera access is required"),
+                    qsTr("Allow camera access to scan the pairing QR code. You can enable it in the system settings for Amnezia VPN."),
+                    qsTr("Open settings"),
+                    qsTr("Cancel"),
+                    function() {
+                        PairingUiController.openPairingCameraAppSettings()
+                    },
+                    function() {
+                        waitingSettingsReturnForQrPage = false
+                    })
+    }
+
+    function tryResumeQrPageAfterCameraSettings() {
+        if (!waitingSettingsReturnForQrPage || !root.visible) {
+            return
+        }
+        if (PairingUiController.isPairingCameraAccessGranted()) {
+            proceedOpenQrPairingPage()
+        }
+    }
+
+    function openAddDeviceViaQr() {
+        if (Qt.platform.os !== "android" && Qt.platform.os !== "ios") {
+            PageController.goToPage(PageEnum.PageSettingsApiQrPairingSend)
+            return
+        }
+        if (PairingUiController.isPairingCameraAccessGranted()) {
+            proceedOpenQrPairingPage()
+            return
+        }
+        pendingOpenQrPageAfterCamera = true
+        PairingUiController.requestPairingCameraAccess()
+    }
+
+    onVisibleChanged: {
+        if (!visible) {
+            pendingOpenQrPageAfterCamera = false
+            waitingSettingsReturnForQrPage = false
+        }
+    }
+
+    Connections {
+        target: Qt.application
+
+        function onStateChanged() {
+            if (Qt.application.state !== Qt.ApplicationActive) {
+                return
+            }
+            root.tryResumeQrPageAfterCameraSettings()
+        }
+    }
+
+    Connections {
+        target: SettingsController
+
+        enabled: Qt.platform.os === "android"
+
+        function onActivityResumed() {
+            root.tryResumeQrPageAfterCameraSettings()
+        }
+    }
+
+    Connections {
+        target: PairingUiController
+
+        function onPairingCameraAccessFinished(granted) {
+            if (!root.pendingOpenQrPageAfterCamera) {
+                return
+            }
+            root.pendingOpenQrPageAfterCamera = false
+            if (granted) {
+                root.proceedOpenQrPairingPage()
+            } else {
+                root.waitingSettingsReturnForQrPage = true
+                root.showCameraDeniedDrawer()
+            }
+        }
+
+        function onPhonePairingSucceeded() {
+            SubscriptionUiController.updateApiDevicesModel()
+            const label = PairingUiController.lastSuccessfulPhonePairingDisplayName
+            if (label.length > 0) {
+                PageController.showNotificationMessage(
+                            qsTr("Configuration was sent (%1). Finish setup on the device that displayed the QR code — "
+                                 + "if it already has this config, that device will show a message.").arg(label))
+            } else {
+                PageController.showNotificationMessage(
+                            qsTr("Configuration was sent to the device that displayed the QR code. "
+                                 + "If it already has this config, that device will show a message."))
+            }
+        }
+
+    }
+
     ListViewType {
         id: listView
 
@@ -44,6 +149,41 @@ PageType {
 
                 headerText: qsTr("Active Devices")
                 descriptionText: qsTr("Manage currently connected devices")
+            }
+
+            BasicButtonType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 20
+
+                implicitHeight: 52
+
+                defaultColor: AmneziaStyle.color.transparent
+                hoveredColor: AmneziaStyle.color.translucentWhite
+                pressedColor: AmneziaStyle.color.sheerWhite
+                textColor: AmneziaStyle.color.paleGray
+                borderColor: AmneziaStyle.color.paleGray
+                borderWidth: 1
+
+                text: qsTr("Add Device via QR Code")
+
+                clickedFunc: function() {
+                    root.openAddDeviceViaQr()
+                }
+            }
+
+            Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                font.pixelSize: 13
+                color: AmneziaStyle.color.mutedGray
+                text: qsTr("On the other device, tap + at the bottom, then choose Connect to Amnezia Premium")
             }
 
             WarningType {
@@ -89,6 +229,26 @@ PageType {
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                }
+            }
+
+            DividerType {}
+        }
+
+        footer: ColumnLayout {
+            width: listView.width
+
+            LabelWithButtonType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+
+                text: qsTr("Configuration Files: %1").arg(ApiAccountInfoModel.data("configurationFilesCount"))
+                descriptionText: qsTr("Generated configuration files also count towards the device limit")
+                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+
+                clickedFunction: function() {
+                    SubscriptionUiController.updateApiCountryModel()
+                    PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
 
