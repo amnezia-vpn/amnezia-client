@@ -208,7 +208,13 @@ amnezia::ScriptVars amnezia::genXrayVars(const ContainerConfig &containerConfig)
     if (auto* xrayProtocolConfig = containerConfig.getXrayProtocolConfig()) {
         const XrayServerConfig& config = xrayProtocolConfig->serverConfig;
         
-        vars.append({ { "$XRAY_SITE_NAME", config.site.isEmpty() ? protocols::xray::defaultSite : config.site } });
+        // The xray server template uses this value as the REALITY serverName of the generated
+        // client profile, so it has to match the server-side dest/serverNames. The UI exposes
+        // only "Server Name (SNI)", which is therefore authoritative (#3145).
+        const QString siteName = !config.sni.isEmpty()
+                ? config.sni
+                : (config.site.isEmpty() ? QString::fromLatin1(protocols::xray::defaultSite) : config.site);
+        vars.append({ { "$XRAY_SITE_NAME", siteName } });
         vars.append({ { "$XRAY_SERVER_PORT", config.port.isEmpty() ? protocols::xray::defaultPort : config.port } });
     }
     
