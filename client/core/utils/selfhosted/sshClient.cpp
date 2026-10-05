@@ -48,6 +48,9 @@ namespace libssh {
             ssh_options_set(m_session, SSH_OPTIONS_USER, hostUsername.c_str());
             ssh_options_set(m_session, SSH_OPTIONS_LOG_VERBOSITY, &logVerbosity);
 
+            long connectTimeoutSec = 30;
+            ssh_options_set(m_session, SSH_OPTIONS_TIMEOUT, &connectTimeoutSec);
+
             QFutureWatcher<int> watcher;
             QFuture<int> future = QtConcurrent::run([this]() {
                 return ssh_connect(m_session);
@@ -61,7 +64,9 @@ namespace libssh {
             int connectionResult = watcher.result();
 
             if (connectionResult != SSH_OK) {
-                return fromLibsshErrorCode();
+                ErrorCode errorCode = fromLibsshErrorCode();
+                disconnectFromHost();
+                return errorCode;
             }
 
             std::string authUsername = credentials.userName.toStdString();
@@ -95,14 +100,20 @@ namespace libssh {
                     if (errorCode == ErrorCode::NoError) {
                         errorCode = ErrorCode::SshPrivateKeyFormatError;
                     }
+                    disconnectFromHost();
                     return errorCode;
                 }
             } else {
                 authResult = ssh_userauth_password(m_session, authUsername.c_str(), credentials.secretData.toStdString().c_str());
                 if (authResult != SSH_OK) {
-                    return fromLibsshErrorCode();
+                    ErrorCode errorCode = fromLibsshErrorCode();
+                    disconnectFromHost();
+                    return errorCode;
                 }
             }
+
+            long sessionTimeoutSec = 86400;
+            ssh_options_set(m_session, SSH_OPTIONS_TIMEOUT, &sessionTimeoutSec);
         }
         return ErrorCode::NoError;
     }

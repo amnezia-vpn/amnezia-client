@@ -5,7 +5,8 @@ dev tun
 ca /opt/amnezia/openvpn/ca.crt
 cert /opt/amnezia/openvpn/AmneziaReq.crt
 key /opt/amnezia/openvpn/AmneziaReq.key
-dh /opt/amnezia/openvpn/dh.pem
+dh none
+ecdh-curve secp384r1
 server $OPENVPN_SUBNET_IP $OPENVPN_SUBNET_MASK
 ifconfig-pool-persist ipp.txt
 duplicate-cn
