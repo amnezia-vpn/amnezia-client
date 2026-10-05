@@ -6,7 +6,7 @@ import os
 
 class Golang(ConanFile):
     name = "go"
-    # No fixed version: exported explicitly in recipes_bootstrap.cmake.
+    version = "1.27.1"
     settings = "os", "arch"
 
     def layout(self):
