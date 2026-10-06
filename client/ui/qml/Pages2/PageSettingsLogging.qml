@@ -123,7 +123,7 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("Logging")
-                descriptionText: qsTr("Enabling this function will save application's logs automatically. " +
+                descriptionText: qsTr("Enabling this function will save application and tunnel logs automatically. " +
                                       "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
             }
 
@@ -145,7 +145,7 @@ PageType {
                 Layout.rightMargin: 16
 
                 text: qsTr("Enable logs")
-                descriptionText: qsTr("Off: the app and the tunnel stop writing logs. Existing logs stay readable.")
+                descriptionText: qsTr("Existing logs stay readable when logging is off.")
 
                 checked: SettingsController.isLoggingEnabled
 
@@ -172,7 +172,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Tunnel")
+                text: qsTr("Logs")
             }
 
             LabelWithButtonType {
@@ -182,7 +182,8 @@ PageType {
 
                 text: qsTr("Tunnel")
                 descriptionText: ((!GC.isMobile() && !IsMacOsNeBuild) ? qsTr("Service events")
-                                                                      : qsTr("Network extension and VPN service events"))
+                                  : (Qt.platform.os === "android") ? qsTr("VPN service events")
+                                                                   : qsTr("Network extension events"))
                                  + " · " + LogsController.tunnelLogSize
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
@@ -193,15 +194,6 @@ PageType {
             }
 
             DividerType {}
-
-            LabelTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Application")
-            }
 
             LabelWithButtonType {
                 id: appLogsButton

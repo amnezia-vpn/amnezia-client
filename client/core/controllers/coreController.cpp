@@ -277,7 +277,7 @@ void CoreController::initAppleController()
 
 void CoreController::initLogging()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#ifndef Q_OS_ANDROID
     bool enabled = m_appSettingsRepository->isSaveLogs();
     if (enabled) {
         if (!Logger::init(false)) {

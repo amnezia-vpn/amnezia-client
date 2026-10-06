@@ -2,12 +2,10 @@
 
 #include <QDateTime>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDir>
 #include <QJsonDocument>
 #include <QMetaEnum>
 #include <QStandardPaths>
-#include <QUrl>
 
 #include "core/utils/utilities.h"
 #include "version.h"
@@ -129,41 +127,6 @@ QString Logger::userLogsFilePath()
 QString Logger::serviceLogsFilePath()
 {
     return systemLogDir() + QDir::separator() + m_serviceLogFileName;
-}
-
-QString Logger::getLogFile()
-{
-    if (m_file.isOpen()) {
-        m_file.flush();
-    }
-    QFile file(userLogsFilePath());
-
-    file.open(QIODevice::ReadOnly);
-    return file.readAll();
-}
-
-QString Logger::getServiceLogFile()
-{
-    if (m_file.isOpen()) {
-        m_file.flush();
-    }
-    QFile file(serviceLogsFilePath());
-
-    file.open(QIODevice::ReadOnly);
-    return file.readAll();
-}
-
-bool Logger::openLogsFolder(bool isServiceLogger)
-{
-    QString path = isServiceLogger ? systemLogDir() : userLogsDir();
-#ifdef Q_OS_WIN
-    path = "file:///" + path;
-#endif
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path))) {
-        qWarning() << "Can't open url:" << path;
-        return false;
-    }
-    return true;
 }
 
 void Logger::clearLogs(bool isServiceLogger)

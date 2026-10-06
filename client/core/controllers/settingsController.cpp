@@ -9,8 +9,8 @@
 #include "ui/utils/qAutoStart.h"
 #include "logger.h"
 #include "core/controllers/logsController.h"
-#ifdef Q_OS_ANDROID
-    #include "platforms/android/android_controller.h"
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    #include "core/utils/swiftBridge.h"
 #endif
 
 QString getPlatformName()
@@ -87,6 +87,9 @@ void SettingsController::toggleLogging(bool enable)
             qWarning() << "Initialization of debug subsystem failed";
         }
     }
+#endif
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
 #endif
     Logger::setServiceLogsEnabled(enable);
 

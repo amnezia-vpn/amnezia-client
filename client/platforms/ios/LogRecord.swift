@@ -88,12 +88,9 @@ extension Log.Record: CustomStringConvertible {
 extension Log.Record {
   enum Level: String {
     case debug
-    case warning
     case error
-    case critical
     case fatal
     case info
-    case system // critical
 
     init(from osLogType: OSLogType) {
       switch osLogType {
@@ -121,12 +118,6 @@ extension Log.Record {
       case .error:
         return .error
       case .fatal:
-        return .fault
-      case .warning:
-        return .info
-      case .critical:
-        return .fault
-      case .system:
         return .fault
       }
     }
