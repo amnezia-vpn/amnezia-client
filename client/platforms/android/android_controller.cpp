@@ -97,6 +97,7 @@ bool AndroidController::initialize()
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
+        {"onFileSaved", "(Z)V", reinterpret_cast<void *>(onFileSaved)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
@@ -161,7 +162,7 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
                        QJniObject::fromString(data).object<jstring>());
 }
 
-void AndroidController::saveFile(const QString &fileName, const QByteArray &data, const QString &mime)
+bool AndroidController::saveFile(const QString &fileName, const QByteArray &data, const QString &mime)
 {
     QJniEnvironment env;
     const jsize size = static_cast<jsize>(data.size());
@@ -169,13 +170,24 @@ void AndroidController::saveFile(const QString &fileName, const QByteArray &data
     if (!bytes) {
         env.checkAndClearExceptions();
         qCritical() << "AndroidController::saveFile: cannot allocate byte array of size" << size;
-        return;
+        return false;
     }
     env->SetByteArrayRegion(bytes, 0, size, reinterpret_cast<const jbyte *>(data.constData()));
+
+    QEventLoop wait;
+    bool saved = false;
+    connect(this, &AndroidController::fileSaved, this,
+            [&saved, &wait](bool success) {
+                saved = success;
+                wait.quit();
+            },
+            static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
     callActivityMethod("saveFileBytes", "(Ljava/lang/String;[BLjava/lang/String;)V",
                        QJniObject::fromString(fileName).object<jstring>(), bytes,
                        QJniObject::fromString(mime).object<jstring>());
     env->DeleteLocalRef(bytes);
+    wait.exec();
+    return saved;
 }
 
 void AndroidController::shareFile(const QString &path, const QString &mime)
@@ -616,6 +628,15 @@ void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
     Q_UNUSED(thiz);
 
     emit AndroidController::instance()->fileOpened(AndroidUtils::convertJString(env, uri));
+}
+
+// static
+void AndroidController::onFileSaved(JNIEnv *env, jobject thiz, jboolean success)
+{
+    Q_UNUSED(env);
+    Q_UNUSED(thiz);
+
+    emit AndroidController::instance()->fileSaved(success);
 }
 
 // static

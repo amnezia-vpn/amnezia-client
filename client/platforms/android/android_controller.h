@@ -34,7 +34,7 @@ public:
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
-    void saveFile(const QString &fileName, const QByteArray &data, const QString &mime);
+    bool saveFile(const QString &fileName, const QByteArray &data, const QString &mime);
     void shareFile(const QString &path, const QString &mime);
     QString openFile(const QString &filter);
     int getFd(const QString &fileName);
@@ -80,6 +80,7 @@ signals:
     void vpnStateChanged(ConnectionState state);
     void statisticsUpdated(quint64 rxBytes, quint64 txBytes);
     void fileOpened(QString uri);
+    void fileSaved(bool success);
     void configImported(QString config);
     void importConfigFromOutside(QString config);
     void initConnectionState(Vpn::ConnectionState state);
@@ -116,6 +117,7 @@ private:
     static void onStatisticsUpdate(JNIEnv *env, jobject thiz, jlong rxBytes, jlong txBytes);
     static void onConfigImported(JNIEnv *env, jobject thiz, jstring data);
     static void onFileOpened(JNIEnv *env, jobject thiz, jstring uri);
+    static void onFileSaved(JNIEnv *env, jobject thiz, jboolean success);
     static void onAuthResult(JNIEnv *env, jobject thiz, jboolean result);
     static bool decodeQrCode(JNIEnv *env, jobject thiz, jstring data);
     static void onImeInsetsChanged(JNIEnv *env, jobject thiz, jint heightDp);

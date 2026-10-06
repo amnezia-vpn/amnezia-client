@@ -755,19 +755,28 @@ class AmneziaActivity : QtActivity() {
                 try {
                     startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
                         onSuccess = {
-                            it?.data?.let { uri ->
+                            val uri = it?.data
+                            var saved = false
+                            if (uri != null) {
                                 Log.v(TAG, "Save file to $uri")
                                 try {
-                                    contentResolver.openOutputStream(uri)?.use { os -> write(os) }
+                                    contentResolver.openOutputStream(uri)?.use { os ->
+                                        write(os)
+                                        saved = true
+                                    }
                                 } catch (e: IOException) {
                                     Log.e(TAG, "Failed to save file $uri: $e")
-                                    // todo: send error to Qt
                                 }
                             }
+                            QtAndroidController.onFileSaved(saved)
+                        },
+                        onFail = {
+                            QtAndroidController.onFileSaved(false)
                         }
                     ))
                 } catch (_: ActivityNotFoundException) {
                     Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
+                    QtAndroidController.onFileSaved(false)
                 }
             }
         }

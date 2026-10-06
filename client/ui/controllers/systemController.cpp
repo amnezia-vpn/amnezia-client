@@ -38,8 +38,7 @@ bool SystemController::saveFile(const QString &fileName, const QByteArray &data,
 {
 #if defined Q_OS_ANDROID
     const QString documentMime = mimeType.startsWith(QLatin1String("text/")) ? QStringLiteral("text/*") : mimeType;
-    AndroidController::instance()->saveFile(fileName, data, documentMime);
-    return true;
+    return AndroidController::instance()->saveFile(fileName, data, documentMime);
 #else
     Q_UNUSED(mimeType);
 #endif
