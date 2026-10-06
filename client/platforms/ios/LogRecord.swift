@@ -7,43 +7,74 @@ extension Log {
     let level: Level
     let message: String
 
-    init?(_ str: String) {
-      let dateStr = String(str.prefix(19))
-      guard let date = Log.dateFormatter.date(from: dateStr) else { return nil }
-
-      let str = str.dropFirst(20)
-
-      guard let endIndex = str.firstIndex(of: " ") else { return nil }
-      let levelStr = String(str[str.startIndex..<endIndex])
-      guard let level = Level(rawValue: levelStr) else { return nil }
-
-      let messageStartIndex = str.index(after: endIndex)
-      let message = String(str[messageStartIndex..<str.endIndex])
-
-      self.init(date: date, level: level, message: message)
-    }
-
     init(date: Date, level: Level, message: String) {
       self.date = date
       self.level = level
       self.message = message
     }
 
+    private static let saveLock = NSLock()
+    private static let maxFileSize: off_t = 4 * 1024 * 1024
+    private static let keepTailSize: off_t = 2 * 1024 * 1024
+
     func save(at url: URL) {
       osLog.log(level: level.osLogType, "\(message)")
 
-      guard let data = "\n\(description)".data(using: .utf8) else { return }
+      let data = Array("\(description)\n".utf8)
 
-      if !FileManager.default.fileExists(atPath: url.path) {
-        guard (try? "".data(using: .utf8)?.write(to: url)) != nil else { return }
+      Record.saveLock.lock()
+      defer { Record.saveLock.unlock() }
+
+      let fd = open(url.path, O_RDWR | O_APPEND | O_CREAT | O_CLOEXEC, 0o644)
+      guard fd >= 0 else { return }
+      defer { close(fd) }
+
+      guard data.withUnsafeBytes({ Record.writeAll(fd, $0) }) else { return }
+
+      var fileStat = stat()
+      guard fstat(fd, &fileStat) == 0, fileStat.st_size > Record.maxFileSize else { return }
+
+      Record.keepTail(fd, fileSize: fileStat.st_size)
+    }
+
+    private static func writeAll(_ fd: Int32, _ buffer: UnsafeRawBufferPointer) -> Bool {
+      guard var pointer = buffer.baseAddress else { return true }
+      var remaining = buffer.count
+
+      while remaining > 0 {
+        let written = write(fd, pointer, remaining)
+        if written < 0 {
+          if errno == EINTR { continue }
+          return false
+        }
+        pointer += written
+        remaining -= written
+      }
+      return true
+    }
+
+    private static func keepTail(_ fd: Int32, fileSize: off_t) {
+      let tailSize = min(keepTailSize, fileSize)
+      let tailOffset = fileSize - tailSize
+      var tail = [UInt8](repeating: 0, count: Int(tailSize))
+      var readTotal = 0
+
+      while readTotal < tail.count {
+        let count = tail.withUnsafeMutableBytes { buffer in
+          pread(fd, buffer.baseAddress! + readTotal, buffer.count - readTotal, tailOffset + off_t(readTotal))
+        }
+        if count < 0 {
+          if errno == EINTR { continue }
+          return
+        }
+        if count == 0 { break }
+        readTotal += count
       }
 
-      guard let fileHandle = try? FileHandle(forUpdating: url) else { return }
+      let start = tail[0..<readTotal].firstIndex(of: UInt8(ascii: "\n")).map { $0 + 1 } ?? 0
 
-      defer { fileHandle.closeFile() }
-
-      guard (try? fileHandle.seekToEnd()) != nil else { return }
-      try? fileHandle.write(contentsOf: data)
+      guard ftruncate(fd, 0) == 0 else { return }
+      _ = tail[start..<readTotal].withUnsafeBytes { writeAll(fd, $0) }
     }
   }
 }

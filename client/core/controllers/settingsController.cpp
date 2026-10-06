@@ -8,6 +8,7 @@
 #include "version.h"
 #include "ui/utils/qAutoStart.h"
 #include "logger.h"
+#include "core/controllers/logsController.h"
 #ifdef Q_OS_ANDROID
     #include "platforms/android/android_controller.h"
 #endif
@@ -96,12 +97,8 @@ void SettingsController::toggleLogging(bool enable)
 
 void SettingsController::clearLogs()
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->clearLogs();
-#else
-    Logger::clearLogs(false);
-    Logger::clearServiceLogs();
-#endif
+    LogsController::clear(LogsController::Stream::App);
+    LogsController::clear(LogsController::Stream::Tunnel);
 }
 
 QByteArray SettingsController::backupAppConfig() const

@@ -16,10 +16,6 @@
     #include <core/utils/ipcClient.h>
 #endif
 
-#ifdef Q_OS_IOS
-    #include "core/utils/swiftBridge.h"
-#endif
-
 QFile Logger::m_file;
 QTextStream Logger::m_textStream;
 QString Logger::m_logFileName = QString("%1.log").arg(APPLICATION_NAME);
@@ -143,13 +139,7 @@ QString Logger::getLogFile()
     QFile file(userLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
-
-#ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
-#else
-    return qtLog;
-#endif
+    return file.readAll();
 }
 
 QString Logger::getServiceLogFile()
@@ -160,13 +150,7 @@ QString Logger::getServiceLogFile()
     QFile file(serviceLogsFilePath());
 
     file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
-
-#ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
-#else
-    return qtLog;
-#endif
+    return file.readAll();
 }
 
 bool Logger::openLogsFolder(bool isServiceLogger)
@@ -192,10 +176,6 @@ void Logger::clearLogs(bool isServiceLogger)
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.resize(0);
     file.close();
-
-#ifdef Q_OS_IOS
-    SWIFT_BRIDGE_NAMESPACE::swiftDeleteLog();
-#endif
 
     if (isLogActive) {
         init(isServiceLogger);

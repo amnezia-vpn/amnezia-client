@@ -11,7 +11,7 @@ public:
     explicit SystemController(QObject *parent = nullptr);
 
     static bool saveFile(const QString &fileName, const QString &data);
-    static bool saveFile(const QString &fileName, const QByteArray &data);
+    static bool saveFile(const QString &fileName, const QByteArray &data, const QString &mimeType = QStringLiteral("text/plain"));
     static bool readFile(const QString &fileName, QByteArray &data);
     static bool readFile(const QString &fileName, QString &data);
 

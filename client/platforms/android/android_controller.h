@@ -3,6 +3,7 @@
 
 #include <QJniObject>
 #include <QPixmap>
+#include <QStringList>
 
 #include "core/protocols/vpnProtocol.h"
 
@@ -33,6 +34,8 @@ public:
     void stop();
     void resetLastServer(int serverIndex);
     void saveFile(const QString &fileName, const QString &data);
+    void saveFile(const QString &fileName, const QByteArray &data, const QString &mime);
+    void shareFile(const QString &path, const QString &mime);
     QString openFile(const QString &filter);
     int getFd(const QString &fileName);
     void closeFd();
@@ -44,8 +47,6 @@ public:
     int getNavigationBarHeight();
     void startQrReaderActivity();
     void setSaveLogs(bool enabled);
-    void exportLogsFile(const QString &fileName);
-    void clearLogs();
     void setScreenshotsEnabled(bool enabled);
     void setNavigationBarColor(unsigned int color);
     void minimizeApp();
@@ -64,6 +65,10 @@ public:
 
     static bool initLogging();
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &message);
+
+    static QStringList logFiles(int stream);
+    static QString deviceInfo();
+    static void clearLogStream(int stream);
 
 signals:
     void connectionStateChanged(Vpn::ConnectionState state);
@@ -93,6 +98,8 @@ private:
     static jmethodID logWarning;
     static jmethodID logError;
     static jmethodID logFatal;
+
+    static jclass findLogClass();
 
     void qtAndroidControllerInitialized();
 

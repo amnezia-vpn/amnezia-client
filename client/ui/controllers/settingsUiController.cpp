@@ -9,6 +9,7 @@
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "logger.h"
+#include "core/controllers/logsController.h"
 #include "systemController.h"
 #include "amneziaApplication.h"
 #include "version.h"
@@ -80,7 +81,7 @@ bool SettingsUiController::isLoggingEnabled()
 void SettingsUiController::toggleLogging(bool enable)
 {
     m_settingsController->toggleLogging(enable);
-#if defined(Q_OS_IOS)
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
 #endif
     if (enable == true) {
@@ -102,24 +103,16 @@ void SettingsUiController::openServiceLogsFolder()
 
 void SettingsUiController::exportLogsFile(const QString &fileName)
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->exportLogsFile(fileName);
-#else
-    if (!SystemController::saveFile(fileName, Logger::getLogFile())) {
+    if (!SystemController::saveFile(fileName, LogsController::readAll(LogsController::Stream::App))) {
         qInfo() << "SettingsUiController::exportLogsFile: save or share was cancelled or failed";
     }
-#endif
 }
 
 void SettingsUiController::exportServiceLogsFile(const QString &fileName)
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->exportLogsFile(fileName);
-#else
-    if (!SystemController::saveFile(fileName, Logger::getServiceLogFile())) {
+    if (!SystemController::saveFile(fileName, LogsController::readAll(LogsController::Stream::Tunnel))) {
         qInfo() << "SettingsUiController::exportServiceLogsFile: save or share was cancelled or failed";
     }
-#endif
 }
 
 void SettingsUiController::clearLogs()

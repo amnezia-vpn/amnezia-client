@@ -161,6 +161,30 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
                        QJniObject::fromString(data).object<jstring>());
 }
 
+void AndroidController::saveFile(const QString &fileName, const QByteArray &data, const QString &mime)
+{
+    QJniEnvironment env;
+    const jsize size = static_cast<jsize>(data.size());
+    jbyteArray bytes = env->NewByteArray(size);
+    if (!bytes) {
+        env.checkAndClearExceptions();
+        qCritical() << "AndroidController::saveFile: cannot allocate byte array of size" << size;
+        return;
+    }
+    env->SetByteArrayRegion(bytes, 0, size, reinterpret_cast<const jbyte *>(data.constData()));
+    callActivityMethod("saveFileBytes", "(Ljava/lang/String;[BLjava/lang/String;)V",
+                       QJniObject::fromString(fileName).object<jstring>(), bytes,
+                       QJniObject::fromString(mime).object<jstring>());
+    env->DeleteLocalRef(bytes);
+}
+
+void AndroidController::shareFile(const QString &path, const QString &mime)
+{
+    callActivityMethod("shareFile", "(Ljava/lang/String;Ljava/lang/String;)V",
+                       QJniObject::fromString(path).object<jstring>(),
+                       QJniObject::fromString(mime).object<jstring>());
+}
+
 QString AndroidController::openFile(const QString &filter)
 {
     QEventLoop wait;
@@ -229,17 +253,6 @@ void AndroidController::startQrReaderActivity()
 void AndroidController::setSaveLogs(bool enabled)
 {
     callActivityMethod("setSaveLogs", "(Z)V", enabled);
-}
-
-void AndroidController::exportLogsFile(const QString &fileName)
-{
-    callActivityMethod("exportLogsFile", "(Ljava/lang/String;)V",
-                       QJniObject::fromString(fileName).object<jstring>());
-}
-
-void AndroidController::clearLogs()
-{
-    callActivityMethod("clearLogs", "()V");
 }
 
 void AndroidController::setScreenshotsEnabled(bool enabled)
@@ -454,6 +467,48 @@ void AndroidController::messageHandler(QtMsgType type, const QMessageLogContext 
     QJniObject::callStaticMethod<void>(log, logMethod,
                                        QJniObject::fromString(TAG).object<jstring>(),
                                        QJniObject::fromString(formattedMessage).object<jstring>());
+}
+
+// static
+jclass AndroidController::findLogClass()
+{
+    if (log != nullptr) {
+        return log;
+    }
+    return QJniEnvironment().findClass(ANDROID_LOG_CLASS);
+}
+
+// static
+QStringList AndroidController::logFiles(int stream)
+{
+    const jclass logClass = findLogClass();
+    if (logClass == nullptr) {
+        return {};
+    }
+    const QString files =
+        QJniObject::callStaticObjectMethod(logClass, "getLogFiles", "(I)Ljava/lang/String;", static_cast<jint>(stream))
+            .toString();
+    return files.split('\n', Qt::SkipEmptyParts);
+}
+
+// static
+QString AndroidController::deviceInfo()
+{
+    const jclass logClass = findLogClass();
+    if (logClass == nullptr) {
+        return {};
+    }
+    return QJniObject::callStaticObjectMethod(logClass, "getDeviceInfo", "()Ljava/lang/String;").toString();
+}
+
+// static
+void AndroidController::clearLogStream(int stream)
+{
+    const jclass logClass = findLogClass();
+    if (logClass == nullptr) {
+        return;
+    }
+    QJniObject::callStaticMethod<void>(logClass, "clearStream", "(I)V", static_cast<jint>(stream));
 }
 
 void AndroidController::qtAndroidControllerInitialized()
