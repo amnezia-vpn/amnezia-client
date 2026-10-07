@@ -14,7 +14,7 @@ import shlex
 
 class Libagw(ConanFile):
     name = "libagw"
-    version = "1.0.2"
+    version = "1.0.3"
     settings = "os", "arch", "compiler"
 
     _headers = ("agw.h", "agw_types.h")
