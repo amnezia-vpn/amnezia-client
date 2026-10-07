@@ -76,7 +76,8 @@ int main(int argc, char *argv[])
 
     app.registerTypes();
 
-    app.setApplicationName(APPLICATION_NAME);
+    // Keep the existing settings namespace when displaying the Share branding.
+    app.setApplicationName("AmneziaVPN");
     app.setOrganizationName(ORGANIZATION_NAME);
     app.setApplicationDisplayName(APPLICATION_NAME);
 

@@ -5,6 +5,10 @@
 #endif
 
 #include <QDebug>
+#include "tunnelSharing.h"
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkInterface>
 #include <QCoreApplication>
 #include <amnezia_xray.h>
@@ -65,14 +69,36 @@ bool Xray::startXray(const QString &cfg)
 
     amnezia_xray_setloghandler(ctxLogHandler, this);
 
+    m_socksEndpoint = {};
+    const QJsonObject root = QJsonDocument::fromJson(cfg.toUtf8()).object();
+    for (const QJsonValue &value : root.value(QStringLiteral("inbounds")).toArray()) {
+        const QJsonObject inbound = value.toObject();
+        if (inbound.value(QStringLiteral("protocol")).toString().compare(QStringLiteral("socks"), Qt::CaseInsensitive) != 0)
+            continue;
+        const QJsonObject settings = inbound.value(QStringLiteral("settings")).toObject();
+        const QJsonArray accounts = settings.value(QStringLiteral("accounts")).toArray();
+        if (accounts.isEmpty())
+            continue;
+        const QJsonObject account = accounts.first().toObject();
+        m_socksEndpoint = QJsonObject{
+            {QStringLiteral("address"), inbound.value(QStringLiteral("listen")).toString()},
+            {QStringLiteral("port"), inbound.value(QStringLiteral("port")).toInt()},
+            {QStringLiteral("username"), account.value(QStringLiteral("user")).toString()},
+            {QStringLiteral("password"), account.value(QStringLiteral("pass")).toString()},
+            {QStringLiteral("auth"), settings.value(QStringLiteral("auth")).toString()}
+        };
+        break;
+    }
     QByteArray bytes = cfg.toUtf8();
     if (auto err = amnezia_xray_configure(bytes.data()); err != nullptr) {
+        m_socksEndpoint = {};
         qDebug() << "[xray] configuration failed: " << err;
         amnezia_xray_free(err);
         return false;
     }
 
     if (auto err = amnezia_xray_start(); err != nullptr) {
+        m_socksEndpoint = {};
         qDebug() << "[xray] failed to start: " << err;
         amnezia_xray_free(err);
         return false;
@@ -83,8 +109,10 @@ bool Xray::startXray(const QString &cfg)
 
 bool Xray::stopXray()
 {
+    TunnelSharing::instance().stop();
     qDebug() << "Xray::stopXray()";
     bool success = true;
+    m_socksEndpoint = {};
     if (auto err = amnezia_xray_stop(); err != nullptr) {
         qDebug() << "[xray] failed to stop: " << err;
         amnezia_xray_free(err);

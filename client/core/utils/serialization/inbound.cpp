@@ -132,6 +132,10 @@ InboundCredentials EnsureInboundAuth(QJsonObject &xrayConfig)
     // Always ensure auth mode is enforced, even for imported configs that had
     // accounts but auth: "noauth" (or no auth field at all).
     settings["auth"] = QStringLiteral("password");
+    // Tunnel Sharing depends on SOCKS5 UDP_ASSOCIATE for QUIC and other UDP
+    // traffic. Imported or older configs can contain a SOCKS inbound with UDP
+    // disabled (or omit the setting, which defaults to false in XRay).
+    settings["udp"] = true;
     inbound["settings"] = settings;
     inbounds[socksIdx] = inbound;
     xrayConfig["inbounds"] = inbounds;

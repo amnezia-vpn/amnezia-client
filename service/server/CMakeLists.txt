@@ -476,6 +476,13 @@ if (WIN32)
 endif()
 
 # install target
+if(WIN32)
+    add_custom_command(TARGET ${PROJECT} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_LIST_DIR}/sharing" "$<TARGET_FILE_DIR:${PROJECT}>/sharing")
+    install(DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/sharing/"
+        DESTINATION "${CMAKE_INSTALL_BINDIR}/sharing" COMPONENT AmneziaVPN)
+endif()
 install(TARGETS ${PROJECT}
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     RUNTIME_DEPENDENCY_SET service_deps

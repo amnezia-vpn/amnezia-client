@@ -16,6 +16,10 @@ public:
     static IpcClient& Instance();
 
     static QSharedPointer<IpcInterfaceReplica> Interface();
+    static QSharedPointer<IpcInterfaceReplica> interfaceIfReady() {
+        auto iface = Instance().m_interface;
+        return iface && iface->isReplicaValid() ? iface : nullptr;
+    }
     static QSharedPointer<IpcProcessInterfaceReplica> CreatePrivilegedProcess();
 
     template <typename Func>

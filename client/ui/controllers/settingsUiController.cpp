@@ -1,4 +1,35 @@
 #include "settingsUiController.h"
+#include "core/utils/ipcClient.h"
+#include <QPointer>
+#include <QTimer>
+#include <memory>
+
+void SettingsUiController::tunnelSharing(const QString &action, const QString &ssid, const QString &password)
+{
+    auto iface = IpcClient::interfaceIfReady();
+    if (!iface) {
+        emit tunnelSharingUpdated({{"state", "error"}, {"message", "Служба AmneziaVPN Share недоступна."}});
+        return;
+    }
+    auto reply = action == "start" ? iface->sharingStart(ssid, password)
+               : action == "stop" ? iface->sharingStop() : iface->sharingStatus();
+    auto watcher = new QRemoteObjectPendingCallWatcher(reply, this);
+    auto completed = std::make_shared<bool>(false);
+    auto finish = [this, watcher, completed](bool timedOut = false) {
+        if (*completed) return;
+        *completed = true;
+        auto status = timedOut ? QJsonObject{}
+                               : watcher->returnValue().value<QJsonObject>();
+        if (status.isEmpty()) status = {{"state", "error"}, {"message", "Служба раздачи не ответила."}};
+        emit tunnelSharingUpdated(status);
+        watcher->deleteLater();
+    };
+    connect(watcher, &QRemoteObjectPendingCallWatcher::finished, this,
+            [finish] { finish(); });
+    QTimer::singleShot(5000, this, [finish] { finish(true); });
+    connect(watcher, &QRemoteObjectPendingCallWatcher::finished,
+            watcher, &QObject::deleteLater);
+}
 
 #include <QDebug>
 #include <QStandardPaths>

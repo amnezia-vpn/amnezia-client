@@ -321,3 +321,11 @@ bool IpcServer::xrayStop()
 
     return Xray::getInstance().stopXray();
 }
+
+#include "../service/server/tunnelSharing.h"
+QJsonObject IpcServer::sharingStart(const QString &ssid, const QString &password)
+{
+    return TunnelSharing::instance().start(Xray::getInstance().socksEndpoint(), ssid, password);
+}
+QJsonObject IpcServer::sharingStop() { return TunnelSharing::instance().stop(); }
+QJsonObject IpcServer::sharingStatus() { return TunnelSharing::instance().status(); }

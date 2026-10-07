@@ -9,6 +9,18 @@
 #include "ipc.h"
 #include "logger.h"
 #include "ikev2VpnProtocolWindows.h"
+
+// MinGW's ras.h omits newer Windows SDK constants that are present in the
+// Microsoft headers used by the MSVC build.
+#ifndef RASNP_Ipv6
+#define RASNP_Ipv6 0x00000008
+#endif
+#ifndef RASEO2_RequireMachineCertificates
+#define RASEO2_RequireMachineCertificates 0x00400000
+#endif
+#ifndef VS_Ikev2Only
+#define VS_Ikev2Only 7
+#endif
 #include "core/utils/utilities.h"
 #include "core/protocols/protocolUtils.h"
 
@@ -301,7 +313,7 @@ bool Ikev2Protocol::connect_to_vpn(const QString & vpn_name){
     RasDialParams.dwSize = sizeof(RASDIALPARAMS);
     wcscpy_s(RasDialParams.szEntryName, vpn_name.toStdWString().c_str());
     auto ret = RasDial(NULL, NULL, &RasDialParams, 0,
-                       &RasDialFuncCallback,
+                       reinterpret_cast<LPVOID>(&RasDialFuncCallback),
                        &hRasConn);
 
     if (ret == ERROR_SUCCESS){

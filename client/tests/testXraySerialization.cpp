@@ -88,6 +88,25 @@ private slots:
         delete m_settings;
     }
 
+    void testTunnelSharingEnablesSocksUdp()
+    {
+        QJsonObject socksInbound{
+            {QStringLiteral("protocol"), QStringLiteral("socks")},
+            {QStringLiteral("settings"), QJsonObject{
+                {QStringLiteral("auth"), QStringLiteral("noauth")},
+                {QStringLiteral("udp"), false}
+            }}
+        };
+        QJsonObject config{{QStringLiteral("inbounds"), QJsonArray{socksInbound}}};
+
+        serialization::inbounds::EnsureInboundAuth(config);
+
+        const auto settings = config.value(QStringLiteral("inbounds")).toArray()
+                                  .first().toObject().value(QStringLiteral("settings")).toObject();
+        QVERIFY(settings.value(QStringLiteral("udp")).toBool());
+        QCOMPARE(settings.value(QStringLiteral("auth")).toString(), QStringLiteral("password"));
+    }
+
     void init()
     {
         m_settings->clearSettings();

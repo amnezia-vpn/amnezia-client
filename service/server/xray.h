@@ -2,6 +2,7 @@
 #define XRAY_H
 
 #include <QString>
+#include <QJsonObject>
 
 class Xray
 {
@@ -14,6 +15,7 @@ public:
 
     bool startXray(const QString& cfg);
     bool stopXray();
+    QJsonObject socksEndpoint() const { return m_socksEndpoint; }
 
 private:
     static void ctxSockCallback(uintptr_t fd, void* ctx) {
@@ -36,6 +38,7 @@ private:
     QString m_uplinkIfaceName;
     QString m_uplinkGateway;
 #endif
+    QJsonObject m_socksEndpoint;
 };
 
 #endif // XRAY_H

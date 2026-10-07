@@ -2,6 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
+#ifndef NTDDI_VERSION
+#define NTDDI_VERSION 0x0A000000
+#endif
+#include <winsock2.h>
+#include <windows.h>
+#include <netioapi.h>
+
 #include "windowsfirewall.h"
 
 #include <comdef.h>
@@ -14,7 +24,6 @@
 #include <stdio.h>
 #include <windows.h>
 #include <Ws2tcpip.h>
-#include "winsock.h"
 
 #include <QApplication>
 #include <QFileInfo>
@@ -100,6 +109,10 @@ bool ensureSublayer(HANDLE wfp, const GUID& key, const wchar_t* name,
 }
 }  // namespace
 
+QString WindowsFirewall::s_lastSharingError;
+
+QString WindowsFirewall::lastSharingError() { return s_lastSharingError; }
+
 WindowsFirewall* WindowsFirewall::create(QObject* parent) {
   if (s_instance != nullptr) {
     // Only one instance of the firewall is allowed
@@ -121,11 +134,15 @@ WindowsFirewall* WindowsFirewall::create(QObject* parent) {
                            &engineHandle);
 
   if (result != ERROR_SUCCESS) {
+    s_lastSharingError = QString("FwpmEngineOpen failed: 0x%1")
+                             .arg(result, 8, 16, QChar('0'));
+    logger.error() << s_lastSharingError;
     WindowsUtils::windowsLog("FwpmEngineOpen0 failed");
     return nullptr;
   }
   logger.debug() << "Filter engine opened successfully.";
   if (!initSublayer()) {
+    s_lastSharingError = "Windows Filtering Platform sublayer initialization failed; see service log.";
     return nullptr;
   }
   s_instance = new WindowsFirewall(engineHandle, parent);
@@ -171,6 +188,297 @@ bool WindowsFirewall::initSublayer() {
          ensureSublayer(wfp, ST_FW_WINFW_DNS_SUBLAYER_KEY,
                         L"Amnezia-SplitTunnel-DNS-Sublayer",
                         L"DNS filters for split tunneling");
+}
+
+bool WindowsFirewall::enableSharingInterface(int adapterIndex) {
+  s_lastSharingError.clear();
+  if (adapterIndex <= 0) {
+    s_lastSharingError = QString("Invalid TAP interface index: %1").arg(adapterIndex);
+    return false;
+  }
+  disableSharingInterface();
+  const auto previousCount = m_activeRules.size();
+  const bool ok = allowTrafficOfAdapter(adapterIndex, HIGH_WEIGHT, "Amnezia Share TAP");
+  while (m_activeRules.size() > previousCount) m_sharingRules.append(m_activeRules.takeLast());
+  if (!ok) disableSharingInterface();
+  return ok;
+}
+
+bool WindowsFirewall::enableSharingDhcpServer(int adapterIndex) {
+  if (adapterIndex <= 0) {
+    s_lastSharingError = QString("Invalid Wi-Fi Direct interface index: %1")
+                             .arg(adapterIndex);
+    return false;
+  }
+  NET_LUID interfaceLuid = {};
+  const NETIO_STATUS status = ConvertInterfaceIndexToLuid(
+      static_cast<NET_IFINDEX>(adapterIndex), &interfaceLuid);
+  if (status != NO_ERROR) {
+    s_lastSharingError = QString("Cannot resolve Wi-Fi Direct interface index %1 to LUID: 0x%2")
+                             .arg(adapterIndex)
+                             .arg(status, 8, 16, QChar('0'));
+    return false;
+  }
+
+  FWPM_FILTER_CONDITION0 conditions[4] = {};
+  conditions[0].fieldKey = FWPM_CONDITION_IP_LOCAL_INTERFACE;
+  conditions[0].matchType = FWP_MATCH_EQUAL;
+  conditions[0].conditionValue.type = FWP_UINT64;
+  conditions[0].conditionValue.uint64 = &interfaceLuid.Value;
+  conditions[1].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
+  conditions[1].matchType = FWP_MATCH_EQUAL;
+  conditions[1].conditionValue.type = FWP_UINT8;
+  conditions[1].conditionValue.uint8 = IPPROTO_UDP;
+  conditions[2].fieldKey = FWPM_CONDITION_IP_LOCAL_PORT;
+  conditions[2].matchType = FWP_MATCH_EQUAL;
+  conditions[2].conditionValue.type = FWP_UINT16;
+  conditions[2].conditionValue.uint16 = 67;
+  conditions[3].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
+  conditions[3].matchType = FWP_MATCH_EQUAL;
+  conditions[3].conditionValue.type = FWP_UINT16;
+  conditions[3].conditionValue.uint16 = 68;
+
+  FWPM_FILTER0 filter = {};
+  filter.filterCondition = conditions;
+  filter.numFilterConditions = ARRAYSIZE(conditions);
+  filter.action.type = FWP_ACTION_PERMIT;
+  filter.weight.type = FWP_UINT8;
+  filter.weight.uint8 = MAX_WEIGHT;
+  filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+  filter.flags = FWPM_FILTER_FLAG_CLEAR_ACTION_RIGHT;
+
+  const auto previousCount = m_activeRules.size();
+  filter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V4;
+  bool ok = enableFilter(&filter, "Amnezia Share DHCP",
+                         QString("Permit DHCP offers on Wi-Fi Direct adapter %1")
+                             .arg(adapterIndex));
+  if (ok) {
+    filter.layerKey = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4;
+    ok = enableFilter(&filter, "Amnezia Share DHCP",
+                      QString("Permit DHCP requests on Wi-Fi Direct adapter %1")
+                          .arg(adapterIndex));
+  }
+
+  // The VPN kill switch blocks DNS on port 53 globally. Windows Mobile
+  // Hotspot's ICS DNS proxy listens on the Wi-Fi Direct interface, so permit
+  // only DNS transactions on that interface; do not allow all hotspot traffic
+  // through the physical uplink.
+  for (const UINT8 protocol : {static_cast<UINT8>(IPPROTO_UDP),
+                               static_cast<UINT8>(IPPROTO_TCP)}) {
+    if (!ok) break;
+    FWPM_FILTER_CONDITION0 dnsConditions[3] = {};
+    dnsConditions[0].fieldKey = FWPM_CONDITION_IP_LOCAL_INTERFACE;
+    dnsConditions[0].matchType = FWP_MATCH_EQUAL;
+    dnsConditions[0].conditionValue.type = FWP_UINT64;
+    dnsConditions[0].conditionValue.uint64 = &interfaceLuid.Value;
+    dnsConditions[1].fieldKey = FWPM_CONDITION_IP_PROTOCOL;
+    dnsConditions[1].matchType = FWP_MATCH_EQUAL;
+    dnsConditions[1].conditionValue.type = FWP_UINT8;
+    dnsConditions[1].conditionValue.uint8 = protocol;
+    dnsConditions[2].fieldKey = FWPM_CONDITION_IP_LOCAL_PORT;
+    dnsConditions[2].matchType = FWP_MATCH_EQUAL;
+    dnsConditions[2].conditionValue.type = FWP_UINT16;
+    dnsConditions[2].conditionValue.uint16 = 53;
+
+    FWPM_FILTER0 dnsFilter = {};
+    dnsFilter.layerKey = FWPM_LAYER_ALE_AUTH_RECV_ACCEPT_V4;
+    dnsFilter.filterCondition = dnsConditions;
+    dnsFilter.numFilterConditions = ARRAYSIZE(dnsConditions);
+    dnsFilter.action.type = FWP_ACTION_PERMIT;
+    dnsFilter.weight.type = FWP_UINT8;
+    dnsFilter.weight.uint8 = MAX_WEIGHT;
+    dnsFilter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+    dnsFilter.flags = FWPM_FILTER_FLAG_CLEAR_ACTION_RIGHT;
+    ok = enableFilter(&dnsFilter, "Amnezia Share DNS",
+                      QString("Permit hotspot DNS server on Wi-Fi Direct adapter %1")
+                          .arg(adapterIndex));
+
+    if (ok) {
+      dnsConditions[2].fieldKey = FWPM_CONDITION_IP_REMOTE_PORT;
+      dnsFilter.layerKey = FWPM_LAYER_ALE_AUTH_CONNECT_V4;
+      ok = enableFilter(&dnsFilter, "Amnezia Share DNS",
+                        QString("Permit local DNS proxy requests on Wi-Fi Direct adapter %1")
+                            .arg(adapterIndex));
+    }
+  }
+
+  if (!ok) {
+    while (m_activeRules.size() > previousCount) {
+      const auto id = m_activeRules.takeLast();
+      FwpmFilterDeleteById0(m_sessionHandle, id);
+    }
+    return false;
+  }
+
+  while (m_activeRules.size() > previousCount)
+    m_sharingRules.append(m_activeRules.takeLast());
+  return true;
+}
+
+bool WindowsFirewall::enableSharingForwarding(int hotspotInterfaceIndex,
+                                               int tapInterfaceIndex,
+                                               const QString& hotspotSubnet) {
+  if (hotspotInterfaceIndex <= 0 || tapInterfaceIndex <= 0) {
+    s_lastSharingError = QString("Invalid sharing interface indices: Wi-Fi=%1 TAP=%2")
+                             .arg(hotspotInterfaceIndex)
+                             .arg(tapInterfaceIndex);
+    return false;
+  }
+
+  NET_LUID hotspotLuid = {};
+  NET_LUID tapLuid = {};
+  NETIO_STATUS status = ConvertInterfaceIndexToLuid(
+      static_cast<NET_IFINDEX>(hotspotInterfaceIndex), &hotspotLuid);
+  if (status == NO_ERROR)
+    status = ConvertInterfaceIndexToLuid(static_cast<NET_IFINDEX>(tapInterfaceIndex),
+                                         &tapLuid);
+  if (status != NO_ERROR) {
+    s_lastSharingError = QString("Cannot resolve sharing interface index to LUID: 0x%1")
+                             .arg(status, 8, 16, QChar('0'));
+    return false;
+  }
+
+  const auto subnet = QHostAddress::parseSubnet(hotspotSubnet);
+  if (subnet.first.protocol() != QAbstractSocket::IPv4Protocol ||
+      subnet.second < 1 || subnet.second > 32) {
+    s_lastSharingError = QString("Invalid IPv4 hotspot client subnet: %1")
+                             .arg(hotspotSubnet);
+    return false;
+  }
+  const quint32 prefixMask = 0xffffffffu << (32 - subnet.second);
+  quint32_be networkAddress;
+  quint32_be networkMask;
+  qToBigEndian(subnet.first.toIPv4Address(), &networkAddress);
+  qToBigEndian(prefixMask, &networkMask);
+  FWP_V4_ADDR_AND_MASK clientNetwork = {};
+  clientNetwork.addr = networkAddress;
+  clientNetwork.mask = networkMask;
+
+  const auto previousCount = m_activeRules.size();
+  auto addForwardFilter = [&](NET_IFINDEX sourceIndex,
+                              const NET_LUID& destinationLuid,
+                              const QString& description) {
+    FWPM_FILTER_CONDITION0 conditions[2] = {};
+    conditions[0].fieldKey = FWPM_CONDITION_SOURCE_INTERFACE_INDEX;
+    conditions[0].matchType = FWP_MATCH_EQUAL;
+    conditions[0].conditionValue.type = FWP_UINT32;
+    conditions[0].conditionValue.uint32 = sourceIndex;
+    conditions[1].fieldKey = FWPM_CONDITION_IP_FORWARD_INTERFACE;
+    conditions[1].matchType = FWP_MATCH_EQUAL;
+    conditions[1].conditionValue.type = FWP_UINT64;
+    conditions[1].conditionValue.uint64 =
+        const_cast<UINT64*>(&destinationLuid.Value);
+
+    FWPM_FILTER0 filter = {};
+    filter.layerKey = FWPM_LAYER_IPFORWARD_V4;
+    filter.filterCondition = conditions;
+    filter.numFilterConditions = ARRAYSIZE(conditions);
+    filter.action.type = FWP_ACTION_PERMIT;
+    filter.weight.type = FWP_UINT8;
+    filter.weight.uint8 = MAX_WEIGHT;
+    filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+    filter.flags = FWPM_FILTER_FLAG_CLEAR_ACTION_RIGHT;
+    return enableFilter(&filter, "Amnezia Share forwarding", description);
+  };
+
+  // Explicitly grant the hotspot's DHCP subnet an IPv4 path through the
+  // dedicated TAP bridge in both directions. This lets connected subscribers
+  // use the VPN while keeping their packets off the physical uplink.
+  auto addSubnetForwardFilter = [&](const GUID& addressCondition,
+                                    const NET_LUID& destinationLuid,
+                                    const QString& description) {
+    FWPM_FILTER_CONDITION0 conditions[2] = {};
+    conditions[0].fieldKey = addressCondition;
+    conditions[0].matchType = FWP_MATCH_EQUAL;
+    conditions[0].conditionValue.type = FWP_V4_ADDR_MASK;
+    conditions[0].conditionValue.v4AddrMask = &clientNetwork;
+    conditions[1].fieldKey = FWPM_CONDITION_IP_FORWARD_INTERFACE;
+    conditions[1].matchType = FWP_MATCH_EQUAL;
+    conditions[1].conditionValue.type = FWP_UINT64;
+    conditions[1].conditionValue.uint64 =
+        const_cast<UINT64*>(&destinationLuid.Value);
+
+    FWPM_FILTER0 filter = {};
+    filter.layerKey = FWPM_LAYER_IPFORWARD_V4;
+    filter.filterCondition = conditions;
+    filter.numFilterConditions = ARRAYSIZE(conditions);
+    filter.action.type = FWP_ACTION_PERMIT;
+    filter.weight.type = FWP_UINT8;
+    filter.weight.uint8 = MAX_WEIGHT;
+    filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+    filter.flags = FWPM_FILTER_FLAG_CLEAR_ACTION_RIGHT;
+    return enableFilter(&filter, "Amnezia Share subscriber Internet", description);
+  };
+
+  // Tunnel Sharing currently provides IPv4 DHCP/NAT and an IPv4-only XRay
+  // bridge. Do not let Wi-Fi Direct clients send IPv6 around that bridge via
+  // the computer's physical uplink (or select an unusable IPv6 route). Block
+  // only forwarded IPv6 from this hotspot interface; link-local control
+  // traffic and IPv6 on every other interface remain untouched.
+  auto addHotspotIPv6Block = [&](NET_IFINDEX sourceIndex) {
+    FWPM_FILTER_CONDITION0 condition = {};
+    condition.fieldKey = FWPM_CONDITION_SOURCE_INTERFACE_INDEX;
+    condition.matchType = FWP_MATCH_EQUAL;
+    condition.conditionValue.type = FWP_UINT32;
+    condition.conditionValue.uint32 = sourceIndex;
+
+    FWPM_FILTER0 filter = {};
+    filter.layerKey = FWPM_LAYER_IPFORWARD_V6;
+    filter.filterCondition = &condition;
+    filter.numFilterConditions = 1;
+    filter.action.type = FWP_ACTION_BLOCK;
+    filter.weight.type = FWP_UINT8;
+    filter.weight.uint8 = MAX_WEIGHT;
+    filter.subLayerKey = ST_FW_WINFW_BASELINE_SUBLAYER_KEY;
+    filter.flags = FWPM_FILTER_FLAG_CLEAR_ACTION_RIGHT;
+    return enableFilter(&filter, "Amnezia Share IPv6 protection",
+                        QString("Block forwarded IPv6 from Wi-Fi Direct %1; sharing bridge is IPv4")
+                            .arg(sourceIndex));
+  };
+
+  bool ok = addForwardFilter(static_cast<NET_IFINDEX>(hotspotInterfaceIndex),
+                             tapLuid,
+                             QString("Permit forwarded IPv4 from Wi-Fi Direct %1 to TAP %2")
+                                 .arg(hotspotInterfaceIndex)
+                                 .arg(tapInterfaceIndex));
+  if (ok) {
+    ok = addForwardFilter(static_cast<NET_IFINDEX>(tapInterfaceIndex),
+                          hotspotLuid,
+                          QString("Permit forwarded IPv4 from TAP %1 to Wi-Fi Direct %2")
+                              .arg(tapInterfaceIndex)
+                              .arg(hotspotInterfaceIndex));
+  }
+  if (ok) {
+    ok = addSubnetForwardFilter(
+        FWPM_CONDITION_IP_SOURCE_ADDRESS, tapLuid,
+        QString("Permit IPv4 subscribers %1 through the VPN TAP")
+            .arg(hotspotSubnet));
+  }
+  if (ok) {
+    ok = addSubnetForwardFilter(
+        FWPM_CONDITION_IP_DESTINATION_ADDRESS, hotspotLuid,
+        QString("Permit VPN replies to IPv4 subscribers %1")
+            .arg(hotspotSubnet));
+  }
+  if (ok) {
+    ok = addHotspotIPv6Block(static_cast<NET_IFINDEX>(hotspotInterfaceIndex));
+  }
+  if (!ok) {
+    while (m_activeRules.size() > previousCount) {
+      const auto id = m_activeRules.takeLast();
+      FwpmFilterDeleteById0(m_sessionHandle, id);
+    }
+    return false;
+  }
+
+  while (m_activeRules.size() > previousCount)
+    m_sharingRules.append(m_activeRules.takeLast());
+  return true;
+}
+
+void WindowsFirewall::disableSharingInterface() {
+  for (auto id : m_sharingRules) FwpmFilterDeleteById0(m_sessionHandle, id);
+  m_sharingRules.clear();
 }
 
 bool WindowsFirewall::enableInterface(int vpnAdapterIndex) {
@@ -491,12 +799,26 @@ bool WindowsFirewall::allowTrafficForAppOnAll(const QString& exePath,
 
 bool WindowsFirewall::allowTrafficOfAdapter(int networkAdapter, uint8_t weight,
                                             const QString& title) {
+  NET_LUID interfaceLuid = {};
+  const NETIO_STATUS luidStatus = ConvertInterfaceIndexToLuid(
+      static_cast<NET_IFINDEX>(networkAdapter), &interfaceLuid);
+  if (luidStatus != NO_ERROR) {
+    logger.error() << "ConvertInterfaceIndexToLuid failed for adapter"
+                   << networkAdapter << "with error:" << luidStatus;
+    s_lastSharingError = QString("Cannot resolve TAP interface index %1 to LUID: 0x%2")
+                             .arg(networkAdapter)
+                             .arg(luidStatus, 8, 16, QChar('0'));
+    return false;
+  }
+
   FWPM_FILTER_CONDITION0 conds;
-  // Condition: Request must be targeting the TUN interface
-  conds.fieldKey = FWPM_CONDITION_INTERFACE_INDEX;
+  // ALE layers identify the selected local interface by its stable LUID.
+  // The legacy interface-index condition can be rejected by some Windows WFP
+  // providers on ALE layers even though it works on packet layers.
+  conds.fieldKey = FWPM_CONDITION_IP_LOCAL_INTERFACE;
   conds.matchType = FWP_MATCH_EQUAL;
-  conds.conditionValue.type = FWP_UINT32;
-  conds.conditionValue.uint32 = networkAdapter;
+  conds.conditionValue.type = FWP_UINT64;
+  conds.conditionValue.uint64 = &interfaceLuid.Value;
 
   // Assemble the Filter base
   FWPM_FILTER0 filter;
@@ -996,8 +1318,11 @@ bool WindowsFirewall::enableFilter(FWPM_FILTER0* filter, const QString& title,
   filter->displayData.description = (PWSTR)desc.c_str();
   auto result = FwpmFilterAdd0(m_sessionHandle, filter, NULL, &filterID);
   if (result != ERROR_SUCCESS) {
+    s_lastSharingError = QString("FwpmFilterAdd failed for '%1' (%2): 0x%3")
+                             .arg(title, description)
+                             .arg(result, 8, 16, QChar('0'));
     logger.error() << "Failed to enable filter: " << title << " "
-                   << description;
+                   << description << "WFP error:" << result;
     return false;
   }
   logger.info() << "Filter added: " << title << ":" << description;

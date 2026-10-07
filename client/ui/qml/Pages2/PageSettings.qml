@@ -14,6 +14,48 @@ import "../Config"
 PageType {
     id: root
 
+    Dialog {
+        id: sharingDialog
+        title: qsTr("Tunnel Sharing — раздача VPN")
+        anchors.centerIn: parent
+        width: Math.min(parent.width - 24, 420)
+        modal: true
+        standardButtons: Dialog.Close
+        property string state: "stopped"
+        property string statusText: ""
+        function update(action) {
+            SettingsController.tunnelSharing(action, sharingSsid.text, sharingPassword.text)
+        }
+        onOpened: update("status")
+        Connections {
+            target: SettingsController
+            function onTunnelSharingUpdated(result) {
+                sharingDialog.state = result.state || "error"
+                sharingDialog.statusText = result.message || result.state
+            }
+        }
+        contentItem: ColumnLayout {
+            spacing: 12
+            Label { text: qsTr("Подключите XRay, затем включите раздачу Wi-Fi."); wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            TextField { id: sharingSsid; text: "Amnezia Share"; placeholderText: qsTr("Имя Wi-Fi"); Layout.fillWidth: true }
+            TextField { id: sharingPassword; placeholderText: qsTr("Пароль Wi-Fi (8–63 символа)"); echoMode: TextInput.Password; Layout.fillWidth: true }
+            Label { text: sharingDialog.statusText; wrapMode: Text.WordWrap; Layout.fillWidth: true }
+            RowLayout {
+                Button {
+                    text: qsTr("Включить")
+                    enabled: (sharingDialog.state === "stopped" || sharingDialog.state === "error") && sharingPassword.text.length >= 8
+                    onClicked: sharingDialog.update("start")
+                }
+                Button {
+                    text: qsTr("Остановить")
+                    enabled: sharingDialog.state === "running" || sharingDialog.state === "starting"
+                    onClicked: sharingDialog.update("stop")
+                }
+            }
+        }
+        Timer { interval: 2000; repeat: true; running: sharingDialog.opened; onTriggered: sharingDialog.update("status") }
+    }
+
     Connections {
         target: ApiNewsController
         function onFetchNewsFinished() {
@@ -105,11 +147,20 @@ PageType {
         servers,
         connection,
         application,
+        tunnelSharingEntry,
         news,
         backup,
         about,
         devConsole
     ]
+
+    QtObject {
+        id: tunnelSharingEntry
+        property string title: qsTr("Tunnel Sharing — раздача VPN")
+        readonly property string leftImagePath: "qrc:/images/controls/radio.svg"
+        property bool isVisible: Qt.platform.os === "windows"
+        readonly property var clickedHandler: function() { sharingDialog.open() }
+    }
 
     QtObject {
         id: servers

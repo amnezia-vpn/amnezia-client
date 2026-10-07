@@ -36,9 +36,16 @@ class WindowsFirewall final : public QObject {
    * Platform.
    */
   static WindowsFirewall* create(QObject* parent);
+  static QString lastSharingError();
   ~WindowsFirewall() override;
 
   bool enableInterface(int vpnAdapterIndex);
+  bool enableSharingInterface(int adapterIndex);
+  bool enableSharingDhcpServer(int adapterIndex);
+  bool enableSharingForwarding(int hotspotInterfaceIndex,
+                               int tapInterfaceIndex,
+                               const QString& hotspotSubnet);
+  void disableSharingInterface();
   bool enableLanBypass(const QList<IPAddress>& ranges);
   bool enablePeerTraffic(const InterfaceConfig& config);
   bool disablePeerTraffic(const QString& pubkey);
@@ -52,7 +59,9 @@ class WindowsFirewall final : public QObject {
   HANDLE m_sessionHandle;
   bool m_init = false;
   QList<uint64_t> m_activeRules;
+  QList<uint64_t> m_sharingRules;
   QMultiMap<QString, uint64_t> m_peerRules;
+  static QString s_lastSharingError;
 
   bool allowTrafficForAppOnAll(const QString& exePath, int weight,
                                const QString& title);

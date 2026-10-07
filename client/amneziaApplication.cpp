@@ -64,7 +64,12 @@ AmneziaApplication::AmneziaApplication(int &argc, char *argv[]) : AMNEZIA_BASE_C
     QFile::setPermissions(configLoc2, QFileDevice::ReadOwner | QFileDevice::WriteOwner);
 #endif
 
+    // Share is a Windows variant of the same client; retain existing profiles.
+#ifdef Q_OS_WIN
+    m_settings = new SecureQSettings(ORGANIZATION_NAME, "AmneziaVPN", this);
+#else
     m_settings = new SecureQSettings(ORGANIZATION_NAME, APPLICATION_NAME, this);
+#endif
     m_nam = new QNetworkAccessManager(this);
 }
 

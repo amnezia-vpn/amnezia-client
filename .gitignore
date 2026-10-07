@@ -146,3 +146,7 @@ macos-with-sign-build.sh
 DeveloperIdApplicationCertificate.p12
 DeveloperIdInstallerCertificate.p12
 
+# Generated Tunnel Sharing helper and OpenVPN-supplied TAP control utility
+service/server/sharing/tapbridge.exe
+service/server/sharing/tapctl.exe
+

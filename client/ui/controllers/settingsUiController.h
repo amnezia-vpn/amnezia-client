@@ -33,6 +33,7 @@ public:
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
 
 public slots:
+    void tunnelSharing(const QString &action, const QString &ssid = {}, const QString &password = {});
     void toggleAmneziaDns(bool enable);
     bool isAmneziaDnsEnabled();
 
@@ -105,6 +106,7 @@ public slots:
     void disableHomeAdLabel();
 
 signals:
+    void tunnelSharingUpdated(const QJsonObject &status);
     void primaryDnsChanged();
     void secondaryDnsChanged();
     void loggingStateChanged();
