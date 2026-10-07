@@ -29,3 +29,4 @@ add_test(NAME AdminSelfHostedExportTest COMMAND test_admin_self_hosted_export)
 add_test(NAME SelfHostedServerSetupTest COMMAND test_self_hosted_server_setup)
 add_test(NAME MultipleExportsTest COMMAND test_multiple_exports)
 
+amnezia_copy_runtime_dlls()

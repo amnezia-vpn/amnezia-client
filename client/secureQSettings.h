@@ -31,6 +31,7 @@ private:
     QByteArray decryptText(const QByteArray &ba) const;
 
     bool encryptionRequired() const;
+    bool isExcludedFromBackup(const QString &key) const;
 
     QByteArray getEncKey() const;
     QByteArray getEncIv() const;
@@ -46,6 +47,10 @@ private:
     // only this fields need for backup
     QStringList m_fieldsToBackup = {
         "Conf/", "Servers/",
+    };
+
+    QStringList m_fieldsExcludedFromBackup = {
+        "Conf/installationUuid", "Conf/proxyUrls/",
     };
 
     mutable QByteArray m_key;
