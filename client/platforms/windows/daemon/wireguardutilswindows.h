@@ -50,10 +50,23 @@ class WireguardUtilsWindows final : public WireguardUtils {
   void backendFailure();
 
  private:
+  struct InterfaceRoutingState {
+    bool valid = false;
+    bool useAutomaticMetric = true;
+    ULONG metric = 0;
+    bool disableDefaultRoutes = false;
+  };
+
   WireguardUtilsWindows(QObject* parent, WindowsFirewall* fw);
   void buildMibForwardRow(const IPAddress& prefix, void* row);
+  InterfaceRoutingState& interfaceRoutingState(int family);
+  bool applyFullTunnelInterfaceState(int family, bool& stateSaved);
+  bool restoreInterfaceRoutingState(int family);
+  void clearInterfaceRoutingState();
 
   quint64 m_luid = 0;
+  InterfaceRoutingState m_ipv4RoutingState;
+  InterfaceRoutingState m_ipv6RoutingState;
   WindowsTunnelService m_tunnel;
   QPointer<WindowsRouteMonitor> m_routeMonitor;
   QPointer<WindowsFirewall> m_firewall;
