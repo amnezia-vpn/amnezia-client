@@ -71,6 +71,7 @@ public:
     ServersUiController *m_serversUiController;
     ServicesCatalogUiController *m_servicesCatalogUiController;
     ApiNewsUiController *m_apiNewsUiController;
+    SubscriptionController *m_subscriptionController;
 };
 
 #endif // TESTCORECONTROLLER_H

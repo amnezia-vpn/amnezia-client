@@ -136,6 +136,7 @@ protected:
     ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
+    SubscriptionController* subscriptionControllerProtected() const { return m_subscriptionController; }
 
 private:
     void initRepositories();
