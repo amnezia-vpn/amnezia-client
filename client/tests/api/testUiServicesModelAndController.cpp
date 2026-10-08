@@ -209,9 +209,9 @@ private slots:
     {
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
 
-        QJsonArray services { makeServiceItem("service-3", "Third service", "Third service description", "false",
-                                              "false", "false", "$4.99", "2026-09-27T10:00:00Z",
-                                              "https://example.com/terms", "https://example.com/privacy", "false", "3") };
+        QJsonArray services { makeServiceItem("service-3", "Third service", "Third service description", "service-3",
+                                              "wireguard", false, "$4.99", "2026-09-27T10:00:00Z",
+                                              "https://example.com/terms", "https://example.com/privacy") };
 
         QJsonObject data { { "services", services } };
 
