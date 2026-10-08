@@ -3,9 +3,12 @@
 
 #include <QObject>
 #include <QMetaObject>
+#include <QMap>
 #include <QString>
+#include <QStringList>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QSet>
 #include <QTimer>
 
 #include "core/protocols/vpnProtocol.h"
@@ -31,6 +34,7 @@ class VpnConnection : public QObject
 
 public:
     explicit VpnConnection(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository, QObject* parent = nullptr);
+
     ~VpnConnection() override;
 
     static QString bytesPerSecToText(quint64 bytes);
@@ -49,8 +53,11 @@ public:
 
 public slots:
     void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
+
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
+
     void reconnectToVpn();
+
     void disconnectFromVpn();
 
     void onKillSwitchModeChanged(bool enabled);
@@ -79,6 +86,7 @@ private:
     QJsonObject m_vpnConfiguration;
     QJsonObject m_routeMode;
     QString m_remoteAddress;
+    DockerContainer m_currentContainer = DockerContainer::None;
 
     // Only for iOS for now, check counters
     QTimer m_checkTimer;
@@ -96,6 +104,27 @@ private:
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
+
+   void startVpnConnection(DockerContainer container);
+
+#ifdef AMNEZIA_DESKTOP
+   bool prepareSplitTunnelingSites(DockerContainer container);
+
+   void startNextSplitDnsLookups(quint64 requestId);
+
+   void finishSplitTunnelingPreparation(quint64 requestId, bool timedOut);
+
+   void cancelSplitTunnelingPreparation();
+
+   QTimer m_splitDnsTimeoutTimer;
+   QStringList m_pendingSplitDomains;
+   QSet<int> m_activeSplitDnsLookups;
+   QMap<QString, QStringList> m_resolvedSplitSites;
+   DockerContainer m_pendingSplitContainer = DockerContainer::None;
+   RouteMode m_pendingSplitRouteMode = RouteMode::VpnAllSites;
+   quint64 m_splitDnsRequestId = 0;
+   bool m_splitDnsPreparationActive = false;
+#endif
 };
 
 #endif // VPNCONNECTION_H
