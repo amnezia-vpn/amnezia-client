@@ -1056,6 +1056,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - GatewayServiceImportTest
 
     runs-on: ubuntu-22.04
 
@@ -1132,6 +1133,8 @@ jobs:
             -exec chmod +x {} \;
 
       - name: Run tests
+        env:
+          AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
         shell: bash
         run: |
           QT_ROOT="${{ runner.temp }}/Qt/${{ env.QT_VERSION }}/gcc_64"
@@ -1243,6 +1246,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - GatewayServiceImportTest
 
     runs-on: windows-latest
 
@@ -1309,6 +1313,8 @@ jobs:
           arch: x64
 
       - name: Run tests
+        env:
+          AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
         shell: cmd
         run: |
           rem Without an attached console (GitHub runner), QTest sends its output to
@@ -1347,6 +1353,7 @@ jobs:
           - BackupExportImportTest
           - ConnectionTest
           - OpenSSLLibraryTest
+          - GatewayServiceImportTest
 
     runs-on: macos-15
 
@@ -1418,6 +1425,8 @@ jobs:
             -exec chmod +x {} \;
 
       - name: Run tests
+        env:
+          AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
         shell: bash
         run: |
           QT_ROOT="$RUNNER_TEMP/Qt/$QT_VERSION/macos"
