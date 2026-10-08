@@ -6905,25 +6905,25 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     <name>StrictSplitTunnelingSwitcher</name>
     <message>
         <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="17"/>
-        <source>Strict split tunneling</source>
-        <translation>Строгое раздельное туннелирование</translation>
+        <source>Block disallowed apps from the tunnel</source>
+        <translation>Запрет неразрешённых приложений в туннеле</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="18"/>
-        <source>Blocks bypasses of the tunneling rules. Strictly prevents apps from using the VPN tunnel directly unless they are allowed to use the VPN. Supports AmneziaWG and WireGuard</source>
-        <translation>Блокирует обходы правил туннелирования. Строго запрещает приложениям напрямую использовать VPN-туннель, если они не включены в список разрешенных для VPN. Поддерживает AmneziaWG и WireGuard</translation>
+        <source>Keeps apps that are not allowed into the VPN out of its tunnel: apps excluded from the list, in a work profile or in another user. They cannot force their way into the tunnel and learn the server&apos;s address. Supports AmneziaWG and WireGuard.</source>
+        <translation>Не пускает в VPN-туннель приложения, которым доступ в него не разрешён: исключённые из списка, из рабочего профиля или другого пользователя. Они не смогут насильно подключиться к туннелю и узнать адрес сервера. Поддерживает AmneziaWG и WireGuard.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="33"/>
-        <source>Enable strict split tunneling?</source>
-        <translation>Включить строгое раздельное туннелирование?</translation>
+        <source>Block disallowed apps from the tunnel?</source>
+        <translation>Включить запрет неразрешённых приложений в туннеле?</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="34"/>
-        <source>Some apps detect a VPN by connecting through its interface directly, bypassing the split tunneling rules, and can learn the server&apos;s IP address this way. Strict mode drops such connections. This includes apps in a work profile or another user, which can do the same without split tunneling.
+        <source>Some apps detect a VPN by connecting through its interface directly, bypassing the split tunneling rules, and can learn the server&apos;s IP address this way. With this setting on, such connections are dropped. This includes apps in a work profile or another user, which can do the same without split tunneling.
 
 In the &quot;only the apps from the list&quot; mode, and with the VPN in a work profile or another user, Private DNS set to a provider hostname stops working for the apps in the VPN. Set Private DNS to Automatic or Off.</source>
-        <translation>Некоторые приложения обнаруживают VPN, подключаясь через его интерфейс напрямую в обход правил раздельного туннелирования, и так могут узнать IP-адрес сервера. Строгий режим отбрасывает такие соединения. Это касается и приложений в рабочем профиле или у другого пользователя: они могут сделать то же самое и без раздельного туннелирования.
+        <translation>Некоторые приложения обнаруживают VPN, подключаясь через его интерфейс напрямую в обход правил раздельного туннелирования, и так могут узнать IP-адрес сервера. С этим запретом такие соединения отбрасываются. Это касается и приложений в рабочем профиле или у другого пользователя: они могут сделать то же самое и без раздельного туннелирования.
 
 В режиме «только приложения из списка», а также когда VPN работает в рабочем профиле или у другого пользователя, частный DNS-сервер с указанным именем хоста перестаёт работать у приложений в VPN. Выберите для частного DNS режим «Автоматически» или «Отключено».</translation>
     </message>
