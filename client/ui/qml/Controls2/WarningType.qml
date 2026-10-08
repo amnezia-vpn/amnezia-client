@@ -19,6 +19,11 @@ Rectangle {
     property string iconPath
     property real iconWidth: 16
     property real iconHeight: 16
+    property real iconSpacing: 8
+
+    property real verticalPadding: 8
+    property real textPixelSize: 13
+    property real textLineHeight: 16
 
     color: backGroundColor
     radius: 8
@@ -31,8 +36,8 @@ Rectangle {
 
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.topMargin: 8
-        anchors.bottomMargin: 8
+        anchors.topMargin: root.verticalPadding
+        anchors.bottomMargin: root.verticalPadding
 
         spacing: 0
 
@@ -56,7 +61,10 @@ Rectangle {
             id: supportingText
 
             Layout.fillWidth: true
-            Layout.leftMargin: 8
+            Layout.leftMargin: root.iconSpacing
+
+            lineHeight: root.textLineHeight + LanguageUiController.getLineHeightAppend()
+            font.pixelSize: root.textPixelSize
 
             text: textString
             textFormat: root.textFormat

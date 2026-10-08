@@ -1,1 +1,2 @@
 singleton GC 1.0 GlobalConfig.qml
+singleton CountryRegionNames 1.0 CountryRegionNames.qml

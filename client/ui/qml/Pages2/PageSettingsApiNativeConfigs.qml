@@ -1,13 +1,9 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import QtCore
 
-import SortFilterProxyModel 0.2
-
-import PageEnum 1.0
 import Style 1.0
 
 import "./"
@@ -19,77 +15,457 @@ import "../Components"
 PageType {
     id: root
 
+    isTabBarHidden: true
+
     property string configExtension: ".conf"
     property string configCaption: qsTr("Save AmneziaVPN config")
 
-    BackButtonType {
-        id: backButton
+    Component.onCompleted: {
+        ApiConfigsCountryListModel.applyDefaultState(false)
+    }
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
+    property int stickyRevision: 0
+    property real savedScroll: 0
+
+    Connections {
+        target: ApiConfigsCountryListModel
+
+        function onLayoutRebuilt() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                root.stickyRevision += 1
+            })
+        }
+
+        function onSourceAboutToRefresh() {
+            root.savedScroll = menuContent.contentY - menuContent.originY
+        }
+
+        function onSourceRefreshed() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                const maxScroll = Math.max(0, menuContent.contentHeight - menuContent.height)
+                menuContent.contentY = menuContent.originY + Math.min(root.savedScroll, maxScroll)
+            })
+        }
+
+        function onFavoritesLimitExceeded() {
+            favoritesLimitToast.show(qsTr("You already have %1 locations in favorites. Remove one")
+                                     .arg(ApiConfigsCountryListModel.favoritesLimit),
+                                     qsTr("Show"))
+        }
+    }
+
+    function openConfigOptions(countryCode, countryName) {
+        moreOptionsDrawer.countryName = countryName
+        moreOptionsDrawer.countryCode = countryCode
+        moreOptionsDrawer.openTriggered()
+    }
+
+    function downloadConfig(countryCode, countryName, isIssued) {
+        if (isIssued) {
+            root.showQuestion(true, countryCode, countryName)
+        } else {
+            root.issueConfig(countryCode)
         }
     }
 
     ListViewType {
-        id: listView
+        id: menuContent
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.topMargin: collapsingHeader.topBarHeight
         anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
-        model: ApiCountryModel
+        model: ApiConfigsCountryListModel
 
-        header: ColumnLayout {
-            width: listView.width
+        interactive: menuContent.contentHeight > menuContent.height
 
-            BaseHeaderType {
-                id: header
+        ScrollBar.vertical: collapsingHeader.scrollBar
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+        header: collapsingHeader.listHeader
 
-                headerText: qsTr("Configuration Files")
-                descriptionText: qsTr("For router setup or the AmneziaWG app")
-            }
+        footer: Item {
+            width: menuContent.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
-        delegate: ColumnLayout {
-            width: listView.width
+        delegate: Item {
+            id: rowItem
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 6
+            required property int index
+            required property string rowType
+            required property string sectionKey
+            required property string countryName
+            required property string countryCode
+            required property string countryImageCode
+            required property bool isIssued
+            required property bool isWorkerExpired
+            required property bool isFavorite
 
-                text: countryName
-                descriptionText: isWorkerExpired ? qsTr("The configuration needs to be reissued") : ""
-                hideDescription: isWorkerExpired ? false : true
-                descriptionColor: AmneziaStyle.color.vibrantRed
+            width: menuContent.width
 
-                leftImageSource: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
-                rightImageSource: isIssued ? "qrc:/images/controls/more-vertical.svg" : "qrc:/images/controls/download.svg"
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
+            height: implicitHeight
 
-                clickedFunction: function() {
-                    if (isIssued) {
-                        moreOptionsDrawer.countryName = countryName
-                        moreOptionsDrawer.countryCode = countryCode
-                        moreOptionsDrawer.openTriggered()
-                    } else {
-                        issueConfig(countryCode)
+            CountrySectionHeader {
+                id: sectionHeader
+
+                listModel: ApiConfigsCountryListModel
+                width: rowItem.width
+                visible: rowItem.rowType === "section"
+
+                sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+                row: rowItem.rowType === "section" ? rowItem.index : -1
+            }
+
+            Item {
+                id: countryRow
+
+                width: rowItem.width
+                height: rowItem.height
+                visible: rowItem.rowType === "country"
+
+                Item {
+                    id: rowBody
+
+                    property bool isFocusable: countryRow.visible
+
+                    anchors.fill: parent
+
+                    function activate() {
+                        if (rowItem.isIssued) {
+                            root.openConfigOptions(rowItem.countryCode, rowItem.countryName)
+                        } else {
+                            root.issueConfig(rowItem.countryCode)
+                        }
+                    }
+
+                    HoverHandler {
+                        id: rowHover
+                        cursorShape: Qt.PointingHandCursor
+                    }
+
+                    readonly property bool rowPressed: rowTap.pressed
+                                                       && !buttons.contains(buttons.mapFromItem(rowBody, rowTap.point.position))
+
+                    TapHandler {
+                        id: rowTap
+
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
+
+                        onTapped: function(eventPoint) {
+                            if (buttons.contains(buttons.mapFromItem(rowBody, eventPoint.position))) {
+                                return
+                            }
+                            rowBody.activate()
+                        }
+                    }
+
+                    Keys.onEnterPressed: rowBody.activate()
+                    Keys.onReturnPressed: rowBody.activate()
+                    Keys.onSpacePressed: rowBody.activate()
+                    Keys.onTabPressed: FocusController.nextKeyTabItem()
+                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
+                    Keys.onUpPressed: FocusController.nextKeyUpItem()
+                    Keys.onDownPressed: FocusController.nextKeyDownItem()
+                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
+                    Keys.onRightPressed: FocusController.nextKeyRightItem()
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        anchors.topMargin: 4
+                        anchors.bottomMargin: 4
+                        radius: 16
+
+                        color: {
+                            if (rowBody.rowPressed) {
+                                return AmneziaStyle.color.surfacePressed
+                            }
+                            return ((rowHover.hovered && !buttonsHover.hovered) || rowBody.activeFocus)
+                                   ? AmneziaStyle.color.surfaceHovered
+                                   : AmneziaStyle.color.transparent
+                        }
+                        border.width: rowBody.rowPressed ? 1 : 0
+                        border.color: AmneziaStyle.color.textTertiary
+                    }
+
+                    Image {
+                        id: flag
+
+                        x: 32
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 24
+                        height: 15
+
+                        source: rowItem.countryImageCode !== ""
+                                ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
+                                : ""
+                    }
+
+                    ColumnLayout {
+                        anchors.left: flag.right
+                        anchors.leftMargin: 16
+                        anchors.right: parent.right
+                        anchors.rightMargin: buttons.anchors.rightMargin + buttons.width + 12
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        spacing: 0
+
+                        ListItemTitleType {
+                            Layout.fillWidth: true
+
+                            lineHeight: 24 + LanguageUiController.getLineHeightAppend()
+                            font.letterSpacing: -0.4
+
+                            text: rowItem.countryName
+                            color: AmneziaStyle.color.textPrimary
+                            maximumLineCount: 1
+                            elide: Text.ElideRight
+                        }
+
+                        CaptionTextType {
+                            Layout.fillWidth: true
+
+                            visible: rowItem.isWorkerExpired
+                            text: qsTr("Download update")
+                            color: AmneziaStyle.color.textTertiary
+                        }
                     }
                 }
-            }
 
-            DividerType {}
+                Row {
+                    id: buttons
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: 28
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 0
+
+                    HoverHandler {
+                        id: buttonsHover
+                    }
+
+                    Item {
+                        id: star
+
+                        property bool isFocusable: countryRow.visible
+
+                        width: 48
+                        height: 48
+
+                        function toggle() {
+                            ApiConfigsCountryListModel.toggleFavorite(rowItem.countryCode)
+                        }
+
+                        Accessible.name: rowItem.isFavorite ? qsTr("Remove from favorites")
+                                                            : qsTr("Add to favorites")
+
+                        HoverHandler {
+                            id: starHover
+                            cursorShape: Qt.PointingHandCursor
+                        }
+
+                        TapHandler {
+                            id: starTap
+
+                            gesturePolicy: TapHandler.ReleaseWithinBounds
+                            onTapped: star.toggle()
+                        }
+
+                        Keys.onEnterPressed: star.toggle()
+                        Keys.onReturnPressed: star.toggle()
+                        Keys.onSpacePressed: star.toggle()
+                        Keys.onTabPressed: FocusController.nextKeyTabItem()
+                        Keys.onBacktabPressed: FocusController.previousKeyTabItem()
+                        Keys.onUpPressed: FocusController.nextKeyUpItem()
+                        Keys.onDownPressed: FocusController.nextKeyDownItem()
+                        Keys.onLeftPressed: FocusController.nextKeyLeftItem()
+                        Keys.onRightPressed: FocusController.nextKeyRightItem()
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 12
+
+                            color: {
+                                if (starTap.pressed) {
+                                    return AmneziaStyle.color.surfacePressed
+                                }
+                                return (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
+                                                                               : AmneziaStyle.color.transparent
+                            }
+                            border.width: (starTap.pressed || star.activeFocus) ? 1 : 0
+                            border.color: starTap.pressed ? AmneziaStyle.color.borderStrong : AmneziaStyle.color.borderSoft
+                        }
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 24
+                            height: 24
+
+                            source: rowItem.isFavorite ? "qrc:/images/controls/star-filled.svg"
+                                                       : "qrc:/images/controls/star.svg"
+                        }
+                    }
+
+                    ImageButtonType {
+                        implicitWidth: 48
+                        implicitHeight: 48
+
+                        visible: countryRow.visible
+                        hoverEnabled: true
+                        image: "qrc:/images/controls/download.svg"
+                        imageColor: AmneziaStyle.color.paleGray
+
+                        onClicked: root.downloadConfig(rowItem.countryCode, rowItem.countryName, rowItem.isIssued)
+                    }
+
+                    ImageButtonType {
+                        implicitWidth: 48
+                        implicitHeight: 48
+
+                        visible: countryRow.visible && rowItem.isIssued
+                        hoverEnabled: true
+                        image: "qrc:/images/controls/more-vertical.svg"
+                        imageColor: AmneziaStyle.color.paleGray
+
+                        onClicked: root.openConfigOptions(rowItem.countryCode, rowItem.countryName)
+                    }
+                }
+
+                DividerType {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+                    anchors.bottom: parent.bottom
+
+                    color: AmneziaStyle.color.borderSoft
+                }
+            }
         }
+    }
+
+    CollapsingHeaderType {
+        id: collapsingHeader
+
+        anchors.fill: parent
+
+        listView: menuContent
+        title: qsTr("Configuration files")
+
+        collapsibleContent: ColumnLayout {
+            spacing: 0
+
+            ParagraphTextType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 16
+
+                text: qsTr("For router setup or the AmneziaWG app")
+                color: AmneziaStyle.color.mutedGray
+            }
+        }
+
+        pinnedContent: [
+            CountrySearchRow {
+                id: searchRow
+
+                listModel: ApiConfigsCountryListModel
+
+                onSortRequested: sortDrawer.openTriggered()
+            },
+
+            WarningType {
+                id: warning
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 12
+
+                backGroundColor: AmneziaStyle.color.surfaceBase
+                radius: 16
+                verticalPadding: 16
+                iconSpacing: 12
+                textPixelSize: 14
+                textLineHeight: 18
+                textColor: AmneziaStyle.color.textPrimary
+
+                textString: qsTr("Configuration updates are available for some countries. Download and install the updated configuration files")
+
+                iconPath: "qrc:/images/controls/info.svg"
+
+                visible: ApiCountryModel.hasExpiredWorkerConfigs
+            },
+
+            CountryUseCaseChips {
+                id: useCaseChips
+
+                listModel: ApiConfigsCountryListModel
+
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.preferredHeight: useCaseChips.implicitHeight
+            },
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 12
+            }
+        ]
+
+        CountryListStickyHeader {
+            listModel: ApiConfigsCountryListModel
+            listView: menuContent
+            header: collapsingHeader
+            revision: root.stickyRevision
+        }
+
+        CountriesEmptyState {
+            anchors.top: parent.top
+            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
+
+            visible: !ApiConfigsCountryListModel.hasResults
+
+            isSearchResult: ApiConfigsCountryListModel.isSearchActive
+            categoryName: ApiConfigsCountryListModel.activeUseCaseId !== "all"
+                          ? CountryRegionNames.useCaseName(ApiConfigsCountryListModel, ApiConfigsCountryListModel.activeUseCaseId)
+                          : ""
+
+            onShowAllRequested: {
+                searchRow.searchField.clear()
+                ApiConfigsCountryListModel.activeUseCaseId = "all"
+            }
+        }
+    }
+
+    Connections {
+        target: collapsingHeader.backButton
+
+        function onActiveFocusChanged() {
+            if (collapsingHeader.backButton.enabled && collapsingHeader.backButton.activeFocus) {
+                menuContent.positionViewAtBeginning()
+            }
+        }
+    }
+
+    SortCountriesDrawer {
+        id: sortDrawer
+
+        listModel: ApiConfigsCountryListModel
+
+        anchors.fill: parent
     }
 
     DrawerType2 {
@@ -150,7 +526,7 @@ PageType {
                         descriptionText: qsTr("The previously created one will stop working")
 
                         clickedFunction: function() {
-                            showQuestion(true, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
+                            root.showQuestion(true, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
                         }
                     }
 
@@ -168,7 +544,7 @@ PageType {
                         text: qsTr("Revoke the current configuration file")
 
                         clickedFunction: function() {
-                            showQuestion(false, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
+                            root.showQuestion(false, moreOptionsDrawer.countryCode, moreOptionsDrawer.countryName)
                         }
                     }
 
@@ -227,14 +603,20 @@ PageType {
 
         var yesButtonFunction = function() {
             if (isConfigIssue) {
-                issueConfig(countryCode)
+                root.issueConfig(countryCode)
             } else {
-                revokeConfig(countryCode)
+                root.revokeConfig(countryCode)
             }
             moreOptionsDrawer.closeTriggered()
         }
         var noButtonFunction = function() {}
 
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+    }
+
+    ToastType {
+        id: favoritesLimitToast
+
+        onActionTriggered: ApiConfigsCountryListModel.activeUseCaseId = "favorites"
     }
 }
