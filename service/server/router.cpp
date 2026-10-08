@@ -42,6 +42,26 @@ int Router::routeDeleteList(const QString &gw, const QStringList &ips)
 #endif
 }
 
+bool Router::routeAddDefault(const QString &dev)
+{
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().routeAddDefault(dev);
+#else
+    Q_UNUSED(dev)
+    return false;
+#endif
+}
+
+bool Router::routeDeleteDefault(const QString &dev)
+{
+#ifdef Q_OS_WIN
+    return RouterWin::Instance().routeDeleteDefault(dev);
+#else
+    Q_UNUSED(dev)
+    return false;
+#endif
+}
+
 bool Router::flushDns()
 {
 #ifdef Q_OS_WIN
