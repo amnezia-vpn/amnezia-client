@@ -6920,12 +6920,12 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     </message>
     <message>
         <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="34"/>
-        <source>Some apps detect a VPN by connecting through its interface directly, bypassing the split tunneling rules, and can learn the server&apos;s IP address this way. Strict mode drops such connections.
+        <source>Some apps detect a VPN by connecting through its interface directly, bypassing the split tunneling rules, and can learn the server&apos;s IP address this way. Strict mode drops such connections. This includes apps in a work profile or another user, which can do the same without split tunneling.
 
-In the &quot;only the apps from the list&quot; mode, Private DNS set to a provider hostname stops working for the listed apps. Set Private DNS to Automatic or Off.</source>
-        <translation>Некоторые приложения обнаруживают VPN, подключаясь через его интерфейс напрямую в обход правил раздельного туннелирования, и так могут узнать IP-адрес сервера. Строгий режим отбрасывает такие соединения.
+In the &quot;only the apps from the list&quot; mode, and with the VPN in a work profile or another user, Private DNS set to a provider hostname stops working for the apps in the VPN. Set Private DNS to Automatic or Off.</source>
+        <translation>Некоторые приложения обнаруживают VPN, подключаясь через его интерфейс напрямую в обход правил раздельного туннелирования, и так могут узнать IP-адрес сервера. Строгий режим отбрасывает такие соединения. Это касается и приложений в рабочем профиле или у другого пользователя: они могут сделать то же самое и без раздельного туннелирования.
 
-В режиме «только приложения из списка» частный DNS-сервер с указанным именем хоста перестаёт работать у приложений из списка. Выберите для частного DNS режим «Автоматически» или «Отключено».</translation>
+В режиме «только приложения из списка», а также когда VPN работает в рабочем профиле или у другого пользователя, частный DNS-сервер с указанным именем хоста перестаёт работать у приложений в VPN. Выберите для частного DNS режим «Автоматически» или «Отключено».</translation>
     </message>
     <message>
         <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="35"/>

@@ -48,7 +48,9 @@ enum class SplitTunnelMode { INCLUDE, EXCLUDE }
  *
  * An unresolved owner (INVALID_UID) is denied (fail-closed). Android returns it
  * both when no socket matches and when the owner is not covered by this VPN, so
- * an app outside the split-tunnel rules lands here, which is the intended deny.
+ * an app outside the split-tunnel rules lands here, which is the intended deny. So
+ * does an app of another user or profile: a VPN applies to one user only, even with
+ * no app list, while tun0 is reachable from all of them.
  * Crafting an ownerless packet needs raw sockets (root), which is outside this
  * feature's threat model. There is no retry: the answer is not a race to ride out,
  * and a retry would double the cost of exactly the flows an attacker sends.
@@ -90,8 +92,9 @@ class StrictSplitTunnelGuard internal constructor(
     companion object {
         /**
          * Builds a guard for the app split-tunnel lists of a protocol config, or returns
-         * null when there is nothing to enforce: app split tunneling is off, or the
-         * platform is older than API 29, where the owner cannot be resolved.
+         * null on platforms older than API 29, where the owner cannot be resolved. With
+         * no list, every app under this VPN is allowed and apps of other users and
+         * profiles, such as a work profile, are still denied.
          */
         fun createOrNull(
             context: Context,
@@ -101,8 +104,7 @@ class StrictSplitTunnelGuard internal constructor(
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
             return when {
                 includedApps.isNotEmpty() -> create(context, SplitTunnelMode.INCLUDE, includedApps)
-                excludedApps.isNotEmpty() -> create(context, SplitTunnelMode.EXCLUDE, excludedApps)
-                else -> null
+                else -> create(context, SplitTunnelMode.EXCLUDE, excludedApps)
             }
         }
 

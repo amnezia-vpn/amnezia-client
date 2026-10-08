@@ -253,8 +253,8 @@ open class Wireguard : Protocol() {
     // Strict Split Tunneling (issue #2457): when enabled, installs a userspace
     // per-flow UID filter so apps that bypass the OS split-tunnel rules
     // (SO_BINDTODEVICE on the tun interface) cannot leak traffic into the tunnel.
-    // Off, or with no app split tunneling configured, the filter is cleared; the bridge is
-    // not called at all unless a filter was installed.
+    // Off, the filter is cleared; the bridge is not called at all unless a filter was
+    // installed.
     private fun registerUidFilter(config: WireguardConfig, strictSplitTunnel: Boolean) {
         val guard = if (strictSplitTunnel) {
             StrictSplitTunnelGuard.createOrNull(context, config.includedApplications, config.excludedApplications)
