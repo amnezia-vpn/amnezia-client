@@ -26,6 +26,7 @@ class ServersUiController : public QObject
     Q_PROPERTY(QString defaultServerImagePathCollapsed READ getDefaultServerImagePathCollapsed NOTIFY defaultServerIdChanged)
     Q_PROPERTY(QString defaultServerDescriptionExpanded READ getDefaultServerDescriptionExpanded NOTIFY defaultServerIdChanged)
     Q_PROPERTY(bool isDefaultServerDefaultContainerHasSplitTunneling READ isDefaultServerDefaultContainerHasSplitTunneling NOTIFY defaultServerIdChanged)
+    Q_PROPERTY(bool isDefaultServerDefaultContainerSupportsStrictSplitTunneling READ isDefaultServerDefaultContainerSupportsStrictSplitTunneling NOTIFY defaultServerIdChanged)
     Q_PROPERTY(bool isDefaultServerFromApi READ isDefaultServerFromApi NOTIFY defaultServerIdChanged)
     Q_PROPERTY(bool defaultServerHasOutdatedAwgContainer READ defaultServerHasOutdatedAwgContainer NOTIFY defaultServerIdChanged)
     
@@ -70,6 +71,7 @@ public slots:
     QString getDefaultServerImagePathCollapsed() const;
     QString getDefaultServerDescriptionExpanded() const;
     bool isDefaultServerDefaultContainerHasSplitTunneling() const;
+    bool isDefaultServerDefaultContainerSupportsStrictSplitTunneling() const;
     bool isDefaultServerFromApi() const;
     bool hasServerWithWriteAccess() const;
 

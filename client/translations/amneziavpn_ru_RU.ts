@@ -6902,6 +6902,43 @@ FileZilla или другие SFTP-клиенты, а также смонтир�
     </message>
 </context>
 <context>
+    <name>StrictSplitTunnelingSwitcher</name>
+    <message>
+        <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="17"/>
+        <source>Strict split tunneling</source>
+        <translation>Строгое раздельное туннелирование</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="18"/>
+        <source>Blocks bypasses of the tunneling rules. Strictly prevents apps from using the VPN tunnel directly unless they are allowed to use the VPN. Supports AmneziaWG and WireGuard</source>
+        <translation>Блокирует обходы правил туннелирования. Строго запрещает приложениям напрямую использовать VPN-туннель, если они не включены в список разрешенных для VPN. Поддерживает AmneziaWG и WireGuard</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="33"/>
+        <source>Enable strict split tunneling?</source>
+        <translation>Включить строгое раздельное туннелирование?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="34"/>
+        <source>Some apps detect a VPN by connecting through its interface directly, bypassing the split tunneling rules, and can learn the server&apos;s IP address this way. Strict mode drops such connections.
+
+In the &quot;only the apps from the list&quot; mode, Private DNS set to a provider hostname stops working for the listed apps. Set Private DNS to Automatic or Off.</source>
+        <translation>Некоторые приложения обнаруживают VPN, подключаясь через его интерфейс напрямую в обход правил раздельного туннелирования, и так могут узнать IP-адрес сервера. Строгий режим отбрасывает такие соединения.
+
+В режиме «только приложения из списка» частный DNS-сервер с указанным именем хоста перестаёт работать у приложений из списка. Выберите для частного DNS режим «Автоматически» или «Отключено».</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="35"/>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Components/StrictSplitTunnelingSwitcher.qml" line="36"/>
+        <source>Cancel</source>
+        <translation>Отменить</translation>
+    </message>
+</context>
+<context>
     <name>SubscriptionExpiredDrawer</name>
     <message>
         <location filename="../ui/qml/Components/SubscriptionExpiredDrawer.qml" line="46"/>

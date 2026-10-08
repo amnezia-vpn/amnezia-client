@@ -515,6 +515,8 @@ void VpnConnection::appendSplitTunnelingConfig()
     m_vpnConfiguration.insert(configKey::appSplitTunnelType, appsRouteMode);
     m_vpnConfiguration.insert(configKey::splitTunnelApps, appsJsonArray);
 
+    m_vpnConfiguration.insert(configKey::strictSplitTunneling, m_appSettingsRepository->isStrictSplitTunnelingEnabled());
+
     qDebug() << QString("Site split tunneling is %1, route mode is %2")
                         .arg(m_appSettingsRepository->isSitesSplitTunnelingEnabled() ? "enabled" : "disabled")
                         .arg(routeMode);

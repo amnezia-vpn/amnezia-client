@@ -344,6 +344,16 @@ void SecureAppSettingsRepository::setStrictKillSwitchEnabled(bool enabled)
     setValue("Conf/strictKillSwitchEnabled", enabled);
 }
 
+bool SecureAppSettingsRepository::isStrictSplitTunnelingEnabled() const
+{
+    return value("Conf/strictSplitTunneling", false).toBool();
+}
+
+void SecureAppSettingsRepository::setStrictSplitTunnelingEnabled(bool enabled)
+{
+    setValue("Conf/strictSplitTunneling", enabled);
+}
+
 bool SecureAppSettingsRepository::isAutoConnect() const
 {
     return value("Conf/autoConnect", false).toBool();
