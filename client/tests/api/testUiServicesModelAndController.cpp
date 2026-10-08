@@ -135,7 +135,7 @@ private slots:
 
         QSignalSpy selectionChangedSpy(model, &ApiServicesModel::serviceSelectionChanged);
 
-        model->updateModel(makeServices());
+        model->updateModel(makeServicesResponse());
 
         QCOMPARE(model->rowCount(), 3);
         QCOMPARE(selectionChangedSpy.count(), 1);
@@ -158,7 +158,7 @@ private slots:
     void testServiceSelection()
     {
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
-        model->updateModel(makeServices());
+        model->updateModel(makeServicesResponse());
 
         QCOMPARE(model->serviceIndexForType("service-1"), 0);
         QCOMPARE(model->serviceIndexForType("service-2"), 1);
@@ -180,7 +180,7 @@ private slots:
     void testSelectedServiceData()
     {
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
-        model->updateModel(makeServices());
+        model->updateModel(makeServicesResponse());
 
         QCOMPARE(model->getSelectedServiceData("name").toString(), QString("service-1"));
         QCOMPARE(model->getSelectedServiceData("cardDescription").toString(), QString("First service"));
@@ -267,7 +267,7 @@ private slots:
     void testControllerAccessors()
     {
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
-        model->updateModel(makeServices());
+        model->updateModel(makeServicesResponse());
         model->setServiceIndex(0);
 
         ServicesCatalogUiController *controller = m_coreController->m_servicesCatalogUiController;
