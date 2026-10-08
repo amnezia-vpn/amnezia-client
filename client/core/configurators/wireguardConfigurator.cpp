@@ -287,11 +287,13 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
 ProtocolConfig WireguardConfigurator::processConfigWithLocalSettings(const ConnectionSettings &settings,
                                                                      ProtocolConfig protocolConfig)
 {
-    return ConfiguratorBase::processConfigWithLocalSettings(settings, protocolConfig);
+    applyDnsToNativeConfig(settings.dns, protocolConfig, DnsEntryCleanup::Wireguard);
+    return protocolConfig;
 }
 
 ProtocolConfig WireguardConfigurator::processConfigWithExportSettings(const ExportSettings &settings,
                                                                       ProtocolConfig protocolConfig)
 {
-    return ConfiguratorBase::processConfigWithExportSettings(settings, protocolConfig);
+    applyDnsToNativeConfig(settings.dns, protocolConfig, DnsEntryCleanup::Wireguard);
+    return protocolConfig;
 }

@@ -10,6 +10,10 @@ namespace amnezia
         namespace dns
         {
             constexpr char amneziaDnsIp[] = "172.29.172.254";
+            // Public resolvers pushed by self-hosted servers unless an admin explicitly
+            // configures the server otherwise.
+            constexpr char defaultPrimaryDns[] = "8.8.8.8";
+            constexpr char defaultSecondaryDns[] = "8.8.4.4";
         }
 
         namespace openvpn

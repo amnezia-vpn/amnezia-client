@@ -231,10 +231,18 @@ bool KillSwitch::enablePeerTraffic(const QJsonObject &configStr) {
     InterfaceConfig config;
 
     config.m_primaryDnsServer = configStr.value(amnezia::configKey::dns1).toString();
+    if (!config.m_primaryDnsServer.isEmpty() && !isValidIpOrCidr(config.m_primaryDnsServer)) {
+        qWarning() << "IPC: ignoring invalid dns1";
+        config.m_primaryDnsServer.clear();
+    }
 
     // We don't use secondary DNS if primary DNS is AmneziaDNS
     if (!config.m_primaryDnsServer.contains(amnezia::protocols::dns::amneziaDnsIp)) {
         config.m_secondaryDnsServer = configStr.value(amnezia::configKey::dns2).toString();
+        if (!config.m_secondaryDnsServer.isEmpty() && !isValidIpOrCidr(config.m_secondaryDnsServer)) {
+            qWarning() << "IPC: ignoring invalid dns2";
+            config.m_secondaryDnsServer.clear();
+        }
     }
 
     config.m_serverPublicKey = "openvpn";

@@ -20,6 +20,8 @@ import org.amnezia.vpn.util.asSequence
 import org.amnezia.vpn.util.net.InetEndpoint
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.parseInetAddress
+import org.amnezia.vpn.util.net.parseInetAddressOrNull
+import org.amnezia.vpn.util.net.parseInetNetworkOrNull
 import org.amnezia.vpn.util.optStringOrNull
 import org.json.JSONObject
 
@@ -76,16 +78,16 @@ open class Wireguard : Protocol() {
     }
 
     protected fun WireguardConfig.Builder.configWireguard(config: JSONObject, configData: JSONObject) {
-        configData.getString("client_ip").split(",").map { address ->
-            InetNetwork.parse(address.trim())
+        configData.getString("client_ip").split(",").mapNotNull { address ->
+            parseInetNetworkOrNull(address)
         }.forEach(::addAddress)
 
         config.optStringOrNull("dns1")?.let { dns ->
-            addDnsServer(parseInetAddress(dns.trim()))
+            parseInetAddressOrNull(dns)?.let { addDnsServer(it) }
         }
 
         config.optStringOrNull("dns2")?.let { dns ->
-            addDnsServer(parseInetAddress(dns.trim()))
+            parseInetAddressOrNull(dns)?.let { addDnsServer(it) }
         }
 
         val defRoutes = hashSetOf(
@@ -93,8 +95,8 @@ open class Wireguard : Protocol() {
             InetNetwork("::", 0)
         )
         val routes = hashSetOf<InetNetwork>()
-        configData.getJSONArray("allowed_ips").asSequence<String>().map { route ->
-            InetNetwork.parse(route.trim())
+        configData.getJSONArray("allowed_ips").asSequence<String>().mapNotNull { route ->
+            parseInetNetworkOrNull(route)
         }.forEach(routes::add)
         // if the allowed IPs list contains at least one non-default route, disable global split tunneling
         if (routes.any { it !in defRoutes }) disableSplitTunneling()

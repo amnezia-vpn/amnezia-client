@@ -150,10 +150,21 @@ amnezia::ScriptVars amnezia::genBaseVars(const ServerCredentials &credentials,
         qWarning() << "amnezia::genBaseVars unable to resolve address for credentials.hostName";
     }
 
-    QString dns1 = primaryDns.isEmpty() ? QString("8.8.8.8") : primaryDns;
-    QString dns2 = secondaryDns.isEmpty() ? QString("8.8.4.4") : secondaryDns;
-    vars.append({ { "$PRIMARY_SERVER_DNS", dns1 } });
-    vars.append({ { "$SECONDARY_SERVER_DNS", dns2 } });
+    // These values end up inside shell scripts executed as root in the container, and
+    // they can originate from an imported settings backup, not only from the validated
+    // UI field. Anything that is not an IPv4 address is dropped instead of substituted.
+    const auto sanitizeServerDns = [](const QString &dns) {
+        if (dns.isEmpty()) {
+            return QString();
+        }
+        if (NetworkUtilities::checkIPv4Format(dns)) {
+            return dns;
+        }
+        qWarning() << "amnezia::genBaseVars ignoring invalid server DNS" << dns;
+        return QString();
+    };
+    vars.append({ { "$PRIMARY_SERVER_DNS", sanitizeServerDns(primaryDns) } });
+    vars.append({ { "$SECONDARY_SERVER_DNS", sanitizeServerDns(secondaryDns) } });
 
     // IPsec vars (constants)
     vars.append({ { "$IPSEC_VPN_L2TP_NET", "192.168.42.0/24" } });

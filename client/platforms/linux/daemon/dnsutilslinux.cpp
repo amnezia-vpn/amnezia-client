@@ -101,11 +101,21 @@ void DnsUtilsLinux::setLinkDNS(int ifindex,
   char ifnamebuf[IF_NAMESIZE];
   const char* ifname = if_indextoname(ifindex, ifnamebuf);
   for (const auto& ip : resolvers) {
+    // A null QHostAddress (empty or non-IP input) would be marshalled as 0.0.0.0
+    // and silently break resolution for the link (#3251 review).
+    if (ip.isNull()) {
+      logger.error() << "Ignoring invalid DNS resolver";
+      continue;
+    }
     resolverList.append(ip);
     if (ifname) {
       logger.debug() << "Adding DNS resolver" << ip.toString() << "via"
                      << ifname;
     }
+  }
+  if (resolverList.isEmpty()) {
+    logger.debug() << "No valid DNS resolvers, skipping SetLinkDNS";
+    return;
   }
 
   QList<QVariant> argumentList;
