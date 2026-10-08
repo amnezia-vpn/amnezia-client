@@ -110,6 +110,7 @@ class AmneziaXrayBindings(ConanFile):
                 env.define("CGO_CFLAGS", " ".join(cflags))
                 env.define("CGO_LDFLAGS", " ".join(ldflags))
                 with env.vars(self).apply():
+                    make_build_dir = build_dir.replace('\\', '/') if self._is_windows else build_dir
                     at = Autotools(self)
                     make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                     at.make(args=[
