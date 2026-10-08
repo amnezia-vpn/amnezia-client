@@ -114,11 +114,10 @@ PageType {
                 hoveredColor: AmneziaStyle.color.translucentWhite
                 pressedColor: AmneziaStyle.color.sheerWhite
                 disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
+                textColor: isLoggingEnabled ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
                 borderWidth: 0
 
-                visible: isLoggingEnabled ? true : false
-                text: qsTr("Logging enabled")
+                text: isLoggingEnabled ? qsTr("Logs · On") : qsTr("Logs · Off")
 
                 Keys.onEnterPressed: this.clicked()
                 Keys.onReturnPressed: this.clicked()

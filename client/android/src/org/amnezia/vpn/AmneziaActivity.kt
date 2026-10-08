@@ -37,6 +37,7 @@ import android.widget.Toast
 import androidx.annotation.MainThread
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.core.graphics.Insets
 import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
@@ -44,6 +45,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import kotlin.LazyThreadSafetyMode.NONE
 import kotlin.coroutines.CoroutineContext
 import kotlin.text.RegexOption.IGNORE_CASE
@@ -77,6 +79,7 @@ private const val CHECK_NOTIFICATION_PERMISSION_ACTION_CODE = 4
 private const val PREFS_NOTIFICATION_PERMISSION_ASKED = "NOTIFICATION_PERMISSION_ASKED"
 private const val OPEN_FILE_AFTER_RESUME_DELAY_MS = 400L
 private const val KEY_PENDING_OPEN_FILE_URI = "pending_open_file_uri"
+private const val FILE_PROVIDER_AUTHORITY = "org.amnezia.vpn.qtprovider"
 
 class AmneziaActivity : QtActivity() {
 
@@ -733,28 +736,69 @@ class AmneziaActivity : QtActivity() {
     @Suppress("unused")
     fun saveFile(fileName: String, data: String) {
         Log.d(TAG, "Save file $fileName")
+        createFile(fileName, "text/*") { os -> os.bufferedWriter().use { it.write(data) } }
+    }
+
+    @Suppress("unused")
+    fun saveFileBytes(fileName: String, data: ByteArray, mime: String) {
+        Log.d(TAG, "Save file $fileName, ${data.size} bytes, $mime")
+        createFile(fileName, mime) { os -> os.write(data) }
+    }
+
+    private fun createFile(fileName: String, mime: String, write: (OutputStream) -> Unit) {
         mainScope.launch {
             Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
-                type = "text/*"
+                type = mime
                 putExtra(Intent.EXTRA_TITLE, fileName)
             }.also {
                 try {
                     startActivityForResult(it, CREATE_FILE_ACTION_CODE, ActivityResultHandler(
                         onSuccess = {
-                            it?.data?.let { uri ->
+                            val uri = it?.data
+                            var saved = false
+                            if (uri != null) {
                                 Log.v(TAG, "Save file to $uri")
                                 try {
                                     contentResolver.openOutputStream(uri)?.use { os ->
-                                        os.bufferedWriter().use { it.write(data) }
+                                        write(os)
+                                        saved = true
                                     }
                                 } catch (e: IOException) {
                                     Log.e(TAG, "Failed to save file $uri: $e")
-                                    // todo: send error to Qt
                                 }
                             }
+                            QtAndroidController.onFileSaved(saved)
+                        },
+                        onFail = {
+                            QtAndroidController.onFileSaved(false)
                         }
                     ))
+                } catch (_: ActivityNotFoundException) {
+                    Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
+                    QtAndroidController.onFileSaved(false)
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
+    fun shareFile(path: String, mime: String) {
+        Log.d(TAG, "Share file $path, $mime")
+        mainScope.launch {
+            val uri = try {
+                FileProvider.getUriForFile(this@AmneziaActivity, FILE_PROVIDER_AUTHORITY, File(path))
+            } catch (e: IllegalArgumentException) {
+                Log.e(TAG, "Failed to share file $path: $e")
+                return@launch
+            }
+            Intent(Intent.ACTION_SEND).apply {
+                type = mime
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }.also {
+                try {
+                    startActivity(Intent.createChooser(it, null))
                 } catch (_: ActivityNotFoundException) {
                     Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
                 }
@@ -968,20 +1012,6 @@ class AmneziaActivity : QtActivity() {
                     putBoolean(MSG_SAVE_LOGS, enabled)
                 }
             }
-        }
-    }
-
-    @Suppress("unused")
-    fun exportLogsFile(fileName: String) {
-        Log.v(TAG, "Export logs file")
-        saveFile(fileName, Log.getLogs())
-    }
-
-    @Suppress("unused")
-    fun clearLogs() {
-        Log.v(TAG, "Clear logs")
-        mainScope.launch {
-            Log.clearLogs()
         }
     }
 

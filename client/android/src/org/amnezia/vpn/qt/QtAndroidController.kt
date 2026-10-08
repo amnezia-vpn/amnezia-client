@@ -22,6 +22,7 @@ object QtAndroidController {
     external fun onStatisticsUpdate(rxBytes: Long, txBytes: Long)
 
     external fun onFileOpened(uri: String)
+    external fun onFileSaved(success: Boolean)
 
     external fun onConfigImported(data: String)
 

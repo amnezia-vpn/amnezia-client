@@ -34,11 +34,13 @@ bool SystemController::saveFile(const QString &fileName, const QString &data)
     return saveFile(fileName, data.toUtf8());
 }
 
-bool SystemController::saveFile(const QString &fileName, const QByteArray &data)
+bool SystemController::saveFile(const QString &fileName, const QByteArray &data, const QString &mimeType)
 {
 #if defined Q_OS_ANDROID
-    AndroidController::instance()->saveFile(fileName, QString::fromUtf8(data));
-    return true;
+    const QString documentMime = mimeType.startsWith(QLatin1String("text/")) ? QStringLiteral("text/*") : mimeType;
+    return AndroidController::instance()->saveFile(fileName, data, documentMime);
+#else
+    Q_UNUSED(mimeType);
 #endif
 
 #ifdef Q_OS_IOS

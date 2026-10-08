@@ -50,6 +50,12 @@ set(LIBS ${LIBS}
     Qt6::Core5Compat Qt6::Concurrent
 )
 
+find_package(Qt6 QUIET OPTIONAL_COMPONENTS CorePrivate)
+if(TARGET Qt6::CorePrivate)
+    set(LIBS ${LIBS} Qt6::CorePrivate)
+    add_compile_definitions(AMNEZIA_HAS_QZIPWRITER)
+endif()
+
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
     set(LIBS ${LIBS} Qt6::Widgets)
 endif()
