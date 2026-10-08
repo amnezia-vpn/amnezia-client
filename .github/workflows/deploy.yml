@@ -1058,6 +1058,7 @@ jobs:
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
           - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
 
     runs-on: ubuntu-22.04
 
@@ -1250,6 +1251,7 @@ jobs:
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
           - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
 
     runs-on: windows-latest
 
@@ -1359,6 +1361,7 @@ jobs:
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
           - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
 
     runs-on: macos-15
 

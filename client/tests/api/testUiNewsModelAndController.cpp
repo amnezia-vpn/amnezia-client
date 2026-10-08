@@ -5,24 +5,73 @@
 #include <QSignalSpy>
 #include <QTest>
 #include <QUuid>
+#include <QProcessEnvironment>
 
 #include "utils/testCoreController.h"
-#include "utils/testUtils.h"
+#include "utils/testUtils.h""
+#include "secureQSettings.h"
+#include "vpnConnection.h"
+
+#include "core/models/api/apiV2ServerConfig.h"
+#include "core/utils/constants/configKeys.h"
+#include "core/utils/serverConfigUtils.h"
 
 #include "core/controllers/selfhosted/importController.h"
 #include "core/models/serverDescription.h"
 
-#include "secureQSettings.h"
-#include "vpnConnection.h"
-
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/newsModel.h"
 
-        using namespace amnezia;
+using namespace amnezia;
 using namespace amnezia::test;
 
 namespace
 {
+    QJsonObject gatewayServerConfig()
+    {
+        QJsonObject lastConfig;
+        lastConfig[configKey::hostName] = QStringLiteral("10.0.0.1");
+        lastConfig[configKey::clientPrivKey] = QStringLiteral("test-private-key");
+        lastConfig[configKey::persistentKeepAlive] = QStringLiteral("25-35");
+
+        QJsonObject awgConfig;
+        awgConfig[configKey::lastConfig] = QString(QJsonDocument(lastConfig).toJson(QJsonDocument::Compact));
+        awgConfig[configKey::port] = QStringLiteral("35333");
+
+        QJsonObject awgContainer;
+        awgContainer[configKey::container] = QStringLiteral("amnezia-awg");
+        awgContainer[QString(configKey::awg)] = awgConfig;
+
+        QJsonObject config;
+        config[configKey::name] = QStringLiteral("Amnezia Premium");
+        config[configKey::description] = QStringLiteral("Premium service");
+        config[configKey::hostName] = QStringLiteral("gateway.example.org");
+        config[configKey::configVersion] = serverConfigUtils::ConfigSource::AmneziaGateway;
+        config[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
+        config[configKey::defaultContainer] = QStringLiteral("amnezia-awg");
+        config[configKey::containers] = QJsonArray { awgContainer };
+
+        return config;
+    }
+
+    ApiV2ServerConfig gatewayTestSubscription(const QString &apiKey)
+    {
+        ApiV2ServerConfig config = ApiV2ServerConfig::fromJson(gatewayServerConfig());
+
+        config.apiConfig.serviceType = QStringLiteral("amnezia-premium");
+        config.apiConfig.serviceProtocol = QString(configKey::awg);
+        config.apiConfig.userCountryCode = QStringLiteral("ru");
+        config.apiConfig.vpnKey = QStringLiteral("vpn://stored-key");
+        config.authData.apiKey = apiKey;
+        config.crc = 42;
+
+        return config;
+    }
+
+    QString envValue(const char *name)
+    {
+        return QProcessEnvironment::systemEnvironment().value(QString::fromLatin1(name)).trimmed();
+    }
 
     QJsonObject makeNewsItem(const QString &id, const QString &title, const QString &content, const QString &timestamp)
     {
@@ -165,26 +214,32 @@ private slots:
 
     void testFetchNewsFromApi()
     {
-        const QString prem_key = getEnvValue("PREM_KEY");
+        const QString apiKey = envValue("AMNEZIA_TEST_API_KEY");
 
-        logEnvValueState("PREM_KEY");
-
-        if (!isEnvValueConfigured(prem_key)) {
-            QSKIP("Set PREM_KEY");
+        if (apiKey.isEmpty()) {
+            QSKIP("AMNEZIA_TEST_API_KEY is not set, skipping live gateway test");
         }
 
-        QSignalSpy importFinishedSpy(m_coreController->m_importCoreController, &ImportController::importFinished);
+        m_settings->setValue("Conf/installationUuid", QUuid::createUuidV5(QUuid(), QByteArrayLiteral("amnezia-news-api-test")).toString(QUuid::WithoutBraces));
+
+        const ApiV2ServerConfig seed = gatewayTestSubscription(apiKey);
+        const QString serverId = m_coreController->m_serversRepository->addServer(QString(), seed.toJson(), serverConfigUtils::configTypeFromJson(seed.toJson()));
+
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
+
+        SubscriptionController::CaptchaInfo captchaInfo;
+
+        const ErrorCode updateError = m_coreController->m_subscriptionController->updateServiceFromGateway(serverId, QStringLiteral("de"), /*isConnectEvent=*/false, &captchaInfo, nullptr);
+
+        if (updateError == ErrorCode::ApiCaptchaRequiredError) {
+            QSKIP("Gateway requested a captcha, skipping live gateway test");
+        }
+
+        QCOMPARE(updateError, ErrorCode::NoError);
+        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
+
         QSignalSpy fetchNewsFinishedSpy(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished);
         QSignalSpy errorOccurredSpy(m_coreController->m_apiNewsUiController, &ApiNewsUiController::errorOccurred);
-
-        const auto importResult = m_coreController->m_importCoreController->extractConfigFromData(prem_key);
-
-        QVERIFY2(importResult.errorCode == ErrorCode::NoError, "Import should succeed");
-
-        m_coreController->m_importCoreController->importConfig(importResult.config);
-
-        QCOMPARE(importFinishedSpy.count(), 1);
-        QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
 
         m_coreController->m_apiNewsUiController->fetchNews(false);
 
