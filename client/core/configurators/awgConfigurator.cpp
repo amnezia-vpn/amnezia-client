@@ -76,6 +76,9 @@ ProtocolConfig AwgConfigurator::createConfig(const ServerCredentials &credential
     newClientConfig.persistentKeepAlive = wgConfig->clientConfig->persistentKeepAlive;
     
     QString mtu = protocols::awg::defaultMtu;
+    if (serverConfig && !serverConfig->mtu.isEmpty()) {
+        mtu = serverConfig->mtu;
+    }
     if (clientConfig && !clientConfig->mtu.isEmpty()) {
         mtu = clientConfig->mtu;
     }

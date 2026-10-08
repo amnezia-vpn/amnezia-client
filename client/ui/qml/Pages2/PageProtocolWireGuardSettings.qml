@@ -100,6 +100,27 @@ PageType {
                 checkEmptyText: true
             }
 
+            TextFieldWithHeaderType {
+                id: mtuTextField
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                headerText: qsTr("MTU")
+                textField.text: serverMtu
+                textField.maximumLength: 5
+                textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverMtu) {
+                        serverMtu = textField.text
+                    }
+                }
+
+                checkEmptyText: true
+            }
+
             BasicButtonType {
                 id: saveButton
                 
@@ -109,7 +130,8 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: portTextField.errorText === "" &&
+                enabled: mtuTextField.errorText === "" &&
+                         portTextField.errorText === "" &&
                          vpnAddressSubnetTextField.errorText === ""
 
                 text: qsTr("Save")

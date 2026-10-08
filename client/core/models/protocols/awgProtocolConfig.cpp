@@ -84,6 +84,9 @@ QJsonObject AwgServerConfig::toJson() const
     if (!subnetCidr.isEmpty()) {
         obj[configKey::subnetCidr] = subnetCidr;
     }
+    if (!mtu.isEmpty()) {
+        obj[configKey::mtu] = mtu;
+    }
     
     if (!junkPacketCount.isEmpty()) {
         obj[configKey::junkPacketCount] = junkPacketCount;
@@ -170,6 +173,7 @@ AwgServerConfig AwgServerConfig::fromJson(const QJsonObject& json)
     config.protocolVersion = json.value(configKey::protocolVersion).toString();
     config.subnetAddress = json.value(configKey::subnetAddress).toString();
     config.subnetCidr = json.value(configKey::subnetCidr).toString();
+    config.mtu = json.value(configKey::mtu).toString();
     
     config.junkPacketCount = json.value(configKey::junkPacketCount).toString();
     config.junkPacketMinSize = json.value(configKey::junkPacketMinSize).toString();
@@ -456,7 +460,7 @@ void AwgProtocolConfig::clearClientConfig()
 
 bool AwgServerConfig::hasEqualServerSettings(const AwgServerConfig& other) const
 {
-    if (subnetAddress != other.subnetAddress || port != other.port || 
+    if (subnetAddress != other.subnetAddress || port != other.port || mtu != other.mtu ||
         junkPacketCount != other.junkPacketCount ||
         junkPacketMinSize != other.junkPacketMinSize || junkPacketMaxSize != other.junkPacketMaxSize ||
         initPacketJunkSize != other.initPacketJunkSize || responsePacketJunkSize != other.responsePacketJunkSize ||

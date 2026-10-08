@@ -16,6 +16,7 @@ public:
     enum Roles {
         SubnetAddressRole = Qt::UserRole + 1,
         PortRole,
+        ServerMtuRole,
 
         ClientMtuRole,
         ClientJunkPacketCountRole,

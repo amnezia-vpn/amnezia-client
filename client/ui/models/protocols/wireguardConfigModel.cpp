@@ -29,6 +29,7 @@ bool WireGuardConfigModel::setData(const QModelIndex &index, const QVariant &val
     switch (role) {
     case Roles::SubnetAddressRole: m_protocolConfig.serverConfig.subnetAddress = strValue; break;
     case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
+    case Roles::ServerMtuRole: m_protocolConfig.serverConfig.mtu = strValue; break;
     case Roles::ClientMtuRole: {
         if (!m_protocolConfig.clientConfig.has_value()) {
             m_protocolConfig.clientConfig = amnezia::WireGuardClientConfig{};
@@ -53,6 +54,7 @@ QVariant WireGuardConfigModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Roles::SubnetAddressRole: return m_protocolConfig.serverConfig.subnetAddress;
     case Roles::PortRole: return m_protocolConfig.serverConfig.port;
+    case Roles::ServerMtuRole: return m_protocolConfig.serverConfig.mtu;
     case Roles::ClientMtuRole: {
         if (m_protocolConfig.clientConfig.has_value()) {
             return m_protocolConfig.clientConfig->mtu;
@@ -88,6 +90,9 @@ void WireGuardConfigModel::applyDefaultsToServerConfig(amnezia::WireGuardServerC
     if (config.subnetAddress.isEmpty()) {
         config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
     }
+    if (config.mtu.isEmpty()) {
+        config.mtu = protocols::wireguard::defaultMtu;
+    }
 }
 
 void WireGuardConfigModel::applyDefaultsToClientConfig(amnezia::WireGuardClientConfig& config)
@@ -119,6 +124,7 @@ QHash<int, QByteArray> WireGuardConfigModel::roleNames() const
 
     roles[SubnetAddressRole] = "subnetAddress";
     roles[PortRole] = "port";
+    roles[ServerMtuRole] = "serverMtu";
     roles[ClientMtuRole] = "clientMtu";
 
     return roles;

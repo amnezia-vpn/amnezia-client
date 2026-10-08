@@ -245,17 +245,23 @@ ProtocolConfig WireguardConfigurator::createConfig(const ServerCredentials &cred
         return WireGuardProtocolConfig{};
     }
 
-    config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", connData.clientPrivKey);
-    config.replace("$WIREGUARD_CLIENT_IP", connData.clientIP);
-    config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
-    config.replace("$WIREGUARD_PSK", connData.pskKey);
-
     QString mtu = protocols::wireguard::defaultMtu;
+    if (wireguardServerConfig && !wireguardServerConfig->mtu.isEmpty()) {
+        mtu = wireguardServerConfig->mtu;
+    } else if (awgServerConfig && !awgServerConfig->mtu.isEmpty()) {
+        mtu = awgServerConfig->mtu;
+    }
     if (wireguardClientConfig && !wireguardClientConfig->mtu.isEmpty()) {
         mtu = wireguardClientConfig->mtu;
     } else if (awgClientConfig && !awgClientConfig->mtu.isEmpty()) {
         mtu = awgClientConfig->mtu;
     }
+
+    config.replace("$WIREGUARD_CLIENT_PRIVATE_KEY", connData.clientPrivKey);
+    config.replace("$WIREGUARD_CLIENT_IP", connData.clientIP);
+    config.replace("$WIREGUARD_SERVER_PUBLIC_KEY", connData.serverPubKey);
+    config.replace("$WIREGUARD_PSK", connData.pskKey);
+    config.replace("$MTU", mtu);
     
     WireGuardProtocolConfig protocolConfig;
     if (wireguardServerConfig) {

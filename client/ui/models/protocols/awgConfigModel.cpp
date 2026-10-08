@@ -42,6 +42,7 @@ bool AwgConfigModel::setData(const QModelIndex &index, const QVariant &value, in
     switch (role) {
     case Roles::SubnetAddressRole: m_protocolConfig.serverConfig.subnetAddress = strValue; break;
     case Roles::PortRole: m_protocolConfig.serverConfig.port = strValue; break;
+    case Roles::ServerMtuRole: m_protocolConfig.serverConfig.mtu = strValue; break;
 
     case Roles::ClientMtuRole: m_protocolConfig.clientConfig->mtu = strValue; break;
     case Roles::ClientJunkPacketCountRole: m_protocolConfig.clientConfig->junkPacketCount = strValue; break;
@@ -121,6 +122,7 @@ QVariant AwgConfigModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Roles::SubnetAddressRole: return m_protocolConfig.serverConfig.subnetAddress;
     case Roles::PortRole: return m_protocolConfig.serverConfig.port;
+    case Roles::ServerMtuRole: return m_protocolConfig.serverConfig.mtu;
 
     case Roles::ClientMtuRole: return m_protocolConfig.clientConfig->mtu;
     case Roles::ClientJunkPacketCountRole: return m_protocolConfig.clientConfig->junkPacketCount;
@@ -219,6 +221,9 @@ void AwgConfigModel::applyDefaultsToServerConfig(amnezia::AwgServerConfig& confi
     if (config.subnetAddress.isEmpty()) {
         config.subnetAddress = protocols::wireguard::defaultSubnetAddress;
     }
+    if (config.mtu.isEmpty()) {
+        config.mtu = protocols::awg::defaultMtu;
+    }
 }
 
 void AwgConfigModel::applyDefaultsToClientConfig(amnezia::AwgClientConfig& config)
@@ -260,6 +265,7 @@ QHash<int, QByteArray> AwgConfigModel::roleNames() const
 
     roles[SubnetAddressRole] = "subnetAddress";
     roles[PortRole] = "port";
+    roles[ServerMtuRole] = "serverMtu";
 
     roles[ClientMtuRole] = "clientMtu";
     roles[ClientJunkPacketCountRole] = "clientJunkPacketCount";
