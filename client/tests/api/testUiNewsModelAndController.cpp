@@ -8,7 +8,7 @@
 #include <QProcessEnvironment>
 
 #include "utils/testCoreController.h"
-#include "utils/testUtils.h""
+#include "utils/testUtils.h"
 #include "secureQSettings.h"
 #include "vpnConnection.h"
 
@@ -47,7 +47,7 @@ namespace
         config[configKey::description] = QStringLiteral("Premium service");
         config[configKey::hostName] = QStringLiteral("gateway.example.org");
         config[configKey::configVersion] = serverConfigUtils::ConfigSource::AmneziaGateway;
-        config[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
+        // config[configKey::formatVersion] = serverConfigUtils::currentConfigFormatVersion;
         config[configKey::defaultContainer] = QStringLiteral("amnezia-awg");
         config[configKey::containers] = QJsonArray { awgContainer };
 
