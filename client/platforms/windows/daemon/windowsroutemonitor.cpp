@@ -8,6 +8,7 @@
 
 #include "leakdetector.h"
 #include "logger.h"
+#include "windowsroutecapturepolicy.h"
 
 namespace {
 Logger logger("WindowsRouteMonitor");
@@ -256,12 +257,19 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family) {
     return;
   }
 
+  // Keep the connected-interface view fresh when this overload is used
+  // outside routeChanged()/addExclusionRoute().
+  updateInterfaceMetrics(family);
+
   PMIB_IPFORWARD_TABLE2 table;
   DWORD error = GetIpForwardTable2(family, &table);
   if (error != NO_ERROR) {
-    updateCapturedRoutes(family, table);
-    FreeMibTable(table);
+    logger.error() << "Failed to fetch routing table:" << error;
+    return;
   }
+
+  updateCapturedRoutes(family, table);
+  FreeMibTable(table);
 }
 
 void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
@@ -270,25 +278,43 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     return;
   }
 
+  // Build a prefix index once per reconciliation pass. Only LOCAL, on-link
+  // routes on currently connected non-VPN interfaces are admitted. Membership
+  // checks are then bounded by the address width (33 IPv4 / 129 IPv6 prefix
+  // lengths) instead of scanning the full routing table for every candidate.
+  WindowsRouteCapturePolicy::ConnectedPrefixIndex connectedPrefixes;
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
-    // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
+    if (!WindowsRouteCapturePolicy::isConnectedLocalRoute(row, m_luid)) {
       continue;
     }
-    // Ignore the default route
-    if (row->DestinationPrefix.PrefixLength == 0) {
+
+    if (row->DestinationPrefix.Prefix.si_family == AF_INET) {
+      if (!m_interfaceMetricsIpv4.contains(row->InterfaceLuid.Value)) {
+        continue;
+      }
+    } else if (row->DestinationPrefix.Prefix.si_family == AF_INET6) {
+      if (!m_interfaceMetricsIpv6.contains(row->InterfaceLuid.Value)) {
+        continue;
+      }
+    } else {
       continue;
     }
-    // Ignore routes of our own creation.
-    if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
-        (row->Metric == EXCLUSION_ROUTE_METRIC)) {
+
+    connectedPrefixes.add(&row->DestinationPrefix);
+  }
+
+  for (ULONG i = 0; i < table->NumEntries; i++) {
+    MIB_IPFORWARD_ROW2* row = &table->Table[i];
+    bool routeExcluded = isRouteExcluded(&row->DestinationPrefix);
+    bool destinationOnConnectedNetwork =
+        connectedPrefixes.contains(&row->DestinationPrefix);
+    if (!WindowsRouteCapturePolicy::shouldCaptureRoute(
+            row, m_luid, routeExcluded, destinationOnConnectedNetwork,
+            EXCLUSION_ROUTE_METRIC)) {
       continue;
     }
-    // Ignore routes which should be excluded.
-    if (isRouteExcluded(&row->DestinationPrefix)) {
-      continue;
-    }
+
     QHostAddress destination = prefixToAddress(&row->DestinationPrefix);
     if (destination.isLoopback() || destination.isBroadcast() ||
         destination.isLinkLocal() || destination.isMulticast()) {
@@ -424,11 +450,11 @@ bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
     return false;
   }
   updateInterfaceMetrics(family);
-  updateCapturedRoutes(family, table);
   updateExclusionRoute(data, table);
+  m_exclusionRoutes[prefix] = data;
+  updateCapturedRoutes(family, table);
   FreeMibTable(table);
 
-  m_exclusionRoutes[prefix] = data;
   return true;
 }
 
