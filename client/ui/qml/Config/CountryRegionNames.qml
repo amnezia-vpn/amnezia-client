@@ -16,7 +16,7 @@ QtObject {
     readonly property var subregionNames: ({
         "northern-europe": qsTr("Northern Europe"),
         "western-europe": qsTr("Western Europe"),
-        "eastern-europe": qsTr("Eastern Europe"),
+        "eastern-europe": qsTr("Central & Eastern Europe"),
         "southern-europe": qsTr("Southern Europe"),
 
         "western-asia": qsTr("Western Asia"),
@@ -84,6 +84,6 @@ QtObject {
     }
 
     readonly property var useCaseBanners: ({
-        "allowlist": qsTr("Connecting through these countries lets you bypass allowlist restrictions")
+        "allowlist": qsTr("For networks with allowlists")
     })
 }

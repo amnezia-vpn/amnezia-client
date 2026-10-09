@@ -233,7 +233,7 @@ PageType {
                             Layout.fillWidth: true
 
                             visible: rowItem.isWorkerExpired
-                            text: qsTr("Download update")
+                            text: qsTr("Update available")
                             color: AmneziaStyle.color.textTertiary
                         }
                     }
@@ -398,7 +398,7 @@ PageType {
                 textLineHeight: 18
                 textColor: AmneziaStyle.color.textPrimary
 
-                textString: qsTr("Configuration updates are available for some countries. Download and install the updated configuration files")
+                textString: qsTr("New configurations are available for some locations. We recommend updating the files")
 
                 iconPath: "qrc:/images/controls/info.svg"
 
