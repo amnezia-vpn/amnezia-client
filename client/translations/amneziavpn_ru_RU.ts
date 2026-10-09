@@ -2,6 +2,14 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
+    <name>AlertDialogType</name>
+    <message>
+        <location filename="../ui/qml/Controls2/AlertDialogType.qml" line="14"/>
+        <source>Cancel</source>
+        <translation>Отмена</translation>
+    </message>
+</context>
+<context>
     <name>AllowedDnsUiController</name>
     <message>
         <location filename="../ui/controllers/allowedDnsUiController.cpp" line="33"/>
@@ -410,6 +418,24 @@ Already installed containers were found on the server. All installed containers 
         <location filename="../ui/controllers/ipSplitTunnelingUiController.cpp" line="64"/>
         <source>Export completed</source>
         <translation>Экспорт завершен</translation>
+    </message>
+</context>
+<context>
+    <name>LogsUiController</name>
+    <message>
+        <location filename="../ui/controllers/logsUiController.cpp" line="113"/>
+        <source>%1 B</source>
+        <translation>%1 Б</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/logsUiController.cpp" line="116"/>
+        <source>%1 KB</source>
+        <translation>%1 КБ</translation>
+    </message>
+    <message>
+        <location filename="../ui/controllers/logsUiController.cpp" line="118"/>
+        <source>%1 MB</source>
+        <translation>%1 МБ</translation>
     </message>
 </context>
 <context>
@@ -4502,6 +4528,49 @@ Create one from the current settings.</source>
     </message>
 </context>
 <context>
+    <name>PageSettingsLogViewer</name>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="49"/>
+        <source>Save</source>
+        <translation>Сохранить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="50"/>
+        <source>Logs files (*.log)</source>
+        <translation>Файлы логов (*.log)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="110"/>
+        <source>Failed to save logs. Try again later</source>
+        <translation>Не удалось сохранить логи. Повторите позже</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="113"/>
+        <source>Logs file saved</source>
+        <translation>Файл с логами сохранен</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="173"/>
+        <source>Copied</source>
+        <translation>Скопировано</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="209"/>
+        <source>Application</source>
+        <translation>Приложение</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="209"/>
+        <source>Tunnel</source>
+        <translation>Туннель</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogViewer.qml" line="275"/>
+        <source>No logs yet</source>
+        <translation>Логов пока нет</translation>
+    </message>
+</context>
+<context>
     <name>PageSettingsLogging</name>
     <message>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="50"/>
@@ -4590,6 +4659,86 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="211"/>
         <source>AmneziaVPN-service logs</source>
         <translation>AmneziaVPN-service logs</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="36"/>
+        <source>Archive files (*.zip)</source>
+        <translation>Архивы (*.zip)</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="58"/>
+        <source>Clear all logs?</source>
+        <translation>Очистить все логи?</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="59"/>
+        <source>App and tunnel logs will be deleted from the device and can&apos;t be restored</source>
+        <translation>Логи приложения и туннеля удалятся с устройства, вернуть их не получится</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="60"/>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="82"/>
+        <source>Failed to save logs. Try again later</source>
+        <translation>Не удалось сохранить логи. Повторите позже</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="141"/>
+        <source>Logs help support figure out what&apos;s wrong</source>
+        <translation>Логи помогают поддержке разобраться, если что-то работает не так</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="154"/>
+        <source>Record logs</source>
+        <translation>Запись логов</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="155"/>
+        <source>Recording turns off after 14 days and logs are deleted</source>
+        <translation>Через 14 дн запись выключится, а логи удаляются</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="201"/>
+        <source>Logs</source>
+        <translation>Логи</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="212"/>
+        <source>Tunnel</source>
+        <translation>Туннель</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="213"/>
+        <source>Connection events</source>
+        <translation>События подключения</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="227"/>
+        <source>Application</source>
+        <translation>Приложение</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="228"/>
+        <source>App events</source>
+        <translation>События приложения</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="248"/>
+        <source>Save all logs</source>
+        <translation>Сохранить все логи</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="249"/>
+        <source>.zip archive with both logs</source>
+        <translation>Архив .zip с обоими журналами</translation>
+    </message>
+    <message>
+        <location filename="../ui/qml/Pages2/PageSettingsLogging.qml" line="262"/>
+        <source>Clear all logs</source>
+        <translation>Очистить все логи</translation>
     </message>
 </context>
 <context>
