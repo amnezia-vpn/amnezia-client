@@ -59,7 +59,7 @@ public:
     void getBackendLogs(std::function<void(const QString &)> &&callback);
     void checkStatus();
 
-    bool shareText(const QStringList &filesToSend);
+    bool shareText(const QStringList &filesToSend, bool *cancelled = nullptr);
     QString openFile();
 
     // Store-specific purchase failure reasons; values match StoreKit2Helper error codes

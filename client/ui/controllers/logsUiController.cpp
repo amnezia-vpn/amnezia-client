@@ -10,6 +10,7 @@
 #include <QtConcurrent>
 
 #include "core/controllers/logsController.h"
+#include "core/controllers/settingsController.h"
 #include "systemController.h"
 #include "version.h"
 
@@ -23,6 +24,7 @@
 namespace
 {
     constexpr qsizetype kLiveTailTextLimit = 2 * 1024 * 1024;
+    constexpr qsizetype kCopyTextLimit = 512 * 1024;
 
     LogsController::Stream streamFromString(const QString &stream)
     {
@@ -58,7 +60,8 @@ namespace
 #endif
 }
 
-LogsUiController::LogsUiController(QObject *parent) : QObject(parent)
+LogsUiController::LogsUiController(SettingsController *settingsController, QObject *parent)
+    : QObject(parent), m_settingsController(settingsController)
 {
     m_liveTailTimer.setInterval(1000);
     connect(&m_liveTailTimer, &QTimer::timeout, this, &LogsUiController::onLiveTailTimeout);
@@ -67,12 +70,12 @@ LogsUiController::LogsUiController(QObject *parent) : QObject(parent)
 
 QString LogsUiController::appLogSize() const
 {
-    return QLocale().formattedDataSize(LogsController::size(LogsController::Stream::App));
+    return formatSize(LogsController::size(LogsController::Stream::App));
 }
 
 QString LogsUiController::tunnelLogSize() const
 {
-    return QLocale().formattedDataSize(LogsController::size(LogsController::Stream::Tunnel));
+    return formatSize(LogsController::size(LogsController::Stream::Tunnel));
 }
 
 QString LogsUiController::viewerStream() const
@@ -94,15 +97,6 @@ bool LogsUiController::busy() const
     return m_busy;
 }
 
-bool LogsUiController::canShare() const
-{
-#ifdef Q_OS_ANDROID
-    return true;
-#else
-    return false;
-#endif
-}
-
 void LogsUiController::setBusy(bool busy)
 {
     if (m_busy == busy) {
@@ -110,6 +104,18 @@ void LogsUiController::setBusy(bool busy)
     }
     m_busy = busy;
     emit busyChanged();
+}
+
+QString LogsUiController::formatSize(qint64 bytes) const
+{
+    const QLocale locale = m_settingsController->getAppLanguage();
+    if (bytes < 1024) {
+        return tr("%1 B").arg(locale.toString(bytes));
+    }
+    if (bytes < 1024 * 1024) {
+        return tr("%1 KB").arg(locale.toString(qRound64(bytes / 1024.0)));
+    }
+    return tr("%1 MB").arg(locale.toString(bytes / (1024.0 * 1024.0), 'f', 1));
 }
 
 void LogsUiController::refreshSizes()
@@ -165,33 +171,32 @@ void LogsUiController::stopLiveTail()
 
 void LogsUiController::copyLoaded()
 {
-    QGuiApplication::clipboard()->setText(m_lastText);
+    QString text = m_lastText;
+    if (text.size() > kCopyTextLimit) {
+        text = text.right(kCopyTextLimit);
+        const qsizetype firstNewline = text.indexOf(QLatin1Char('\n'));
+        if (firstNewline >= 0) {
+            text.remove(0, firstNewline + 1);
+        }
+    }
+    QGuiApplication::clipboard()->setText(text);
 }
 
 void LogsUiController::exportStream(const QString &stream, const QString &fileName)
 {
     const LogsController::Stream logsStream = streamFromString(stream);
     runExport([logsStream]() { return LogsController::readAll(logsStream); },
-              [fileName](const QByteArray &data) { return SystemController::saveFile(fileName, data); });
+              [fileName](const QByteArray &data, bool *cancelled) {
+                  return SystemController::saveFile(fileName, data, QStringLiteral("text/plain"), cancelled);
+              });
 }
 
 void LogsUiController::saveAll(const QString &fileName)
 {
     runExport([]() { return LogsController::zipAll(); },
-              [fileName](const QByteArray &data) {
-                  return SystemController::saveFile(fileName, data, QStringLiteral("application/zip"));
+              [fileName](const QByteArray &data, bool *cancelled) {
+                  return SystemController::saveFile(fileName, data, QStringLiteral("application/zip"), cancelled);
               });
-}
-
-void LogsUiController::shareAll()
-{
-#ifdef Q_OS_ANDROID
-    const QString fileName = defaultFileName(QStringLiteral("all"));
-    runExport([]() { return LogsController::zipAll(); },
-              [fileName](const QByteArray &data) {
-                  return shareFile(fileName, data, QStringLiteral("application/zip"));
-              });
-#endif
 }
 
 void LogsUiController::shareStream(const QString &stream)
@@ -200,14 +205,14 @@ void LogsUiController::shareStream(const QString &stream)
     const LogsController::Stream logsStream = streamFromString(stream);
     const QString fileName = defaultFileName(stream);
     runExport([logsStream]() { return LogsController::readAll(logsStream); },
-              [fileName](const QByteArray &data) { return shareFile(fileName, data, QStringLiteral("text/plain")); });
+              [fileName](const QByteArray &data, bool *) { return shareFile(fileName, data, QStringLiteral("text/plain")); });
 #else
     Q_UNUSED(stream);
 #endif
 }
 
 void LogsUiController::runExport(const std::function<QByteArray()> &build,
-                                 const std::function<bool(const QByteArray &)> &deliver)
+                                 const std::function<bool(const QByteArray &, bool *)> &deliver)
 {
     if (m_busy) {
         return;
@@ -219,12 +224,13 @@ void LogsUiController::runExport(const std::function<QByteArray()> &build,
         const QByteArray data = watcher->result();
         watcher->deleteLater();
 
-        const bool success = deliver(data);
+        bool cancelled = false;
+        const bool success = deliver(data, &cancelled);
         if (!success) {
-            qInfo() << "LogsUiController: save or share was cancelled or failed";
+            qInfo() << "LogsUiController: save or share" << (cancelled ? "was cancelled" : "failed");
         }
         setBusy(false);
-        emit exportFinished(success);
+        emit exportFinished(success, !success && cancelled);
     });
 
     watcher->setFuture(QtConcurrent::run(build));

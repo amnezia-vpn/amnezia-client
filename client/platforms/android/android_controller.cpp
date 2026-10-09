@@ -97,7 +97,7 @@ bool AndroidController::initialize()
         {"onVpnStateChanged", "(I)V", reinterpret_cast<void *>(onVpnStateChanged)},
         {"onStatisticsUpdate", "(JJ)V", reinterpret_cast<void *>(onStatisticsUpdate)},
         {"onFileOpened", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onFileOpened)},
-        {"onFileSaved", "(Z)V", reinterpret_cast<void *>(onFileSaved)},
+        {"onFileSaved", "(ZZ)V", reinterpret_cast<void *>(onFileSaved)},
         {"onConfigImported", "(Ljava/lang/String;)V", reinterpret_cast<void *>(onConfigImported)},
         {"onAuthResult", "(Z)V", reinterpret_cast<void *>(onAuthResult)},
         {"decodeQrCode", "(Ljava/lang/String;)Z", reinterpret_cast<bool *>(decodeQrCode)},
@@ -162,7 +162,7 @@ void AndroidController::saveFile(const QString &fileName, const QString &data)
                        QJniObject::fromString(data).object<jstring>());
 }
 
-bool AndroidController::saveFile(const QString &fileName, const QByteArray &data, const QString &mime)
+bool AndroidController::saveFile(const QString &fileName, const QByteArray &data, const QString &mime, bool *cancelled)
 {
     QJniEnvironment env;
     const jsize size = static_cast<jsize>(data.size());
@@ -176,9 +176,11 @@ bool AndroidController::saveFile(const QString &fileName, const QByteArray &data
 
     QEventLoop wait;
     bool saved = false;
+    bool saveCancelled = false;
     connect(this, &AndroidController::fileSaved, this,
-            [&saved, &wait](bool success) {
+            [&saved, &saveCancelled, &wait](bool success, bool isCancelled) {
                 saved = success;
+                saveCancelled = isCancelled;
                 wait.quit();
             },
             static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::SingleShotConnection));
@@ -187,6 +189,9 @@ bool AndroidController::saveFile(const QString &fileName, const QByteArray &data
                        QJniObject::fromString(mime).object<jstring>());
     env->DeleteLocalRef(bytes);
     wait.exec();
+    if (cancelled) {
+        *cancelled = saveCancelled;
+    }
     return saved;
 }
 
@@ -631,12 +636,12 @@ void AndroidController::onFileOpened(JNIEnv *env, jobject thiz, jstring uri)
 }
 
 // static
-void AndroidController::onFileSaved(JNIEnv *env, jobject thiz, jboolean success)
+void AndroidController::onFileSaved(JNIEnv *env, jobject thiz, jboolean success, jboolean cancelled)
 {
     Q_UNUSED(env);
     Q_UNUSED(thiz);
 
-    emit AndroidController::instance()->fileSaved(success);
+    emit AndroidController::instance()->fileSaved(success, cancelled);
 }
 
 // static

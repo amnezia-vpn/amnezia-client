@@ -18,9 +18,9 @@ PageType {
     property bool isLoading: false
 
     property bool exportPending: false
-    property bool exportIsShare: false
 
     readonly property bool isAppStream: LogsController.viewerStream === "app"
+    readonly property bool hasText: !root.isLoading && logText.length > 0
 
     function reload() {
         root.isLoading = true
@@ -35,47 +35,26 @@ PageType {
         logFlickable.contentY = Math.max(0, logFlickable.contentHeight - logFlickable.height)
     }
 
-    function runExport(isShare, exportFunction) {
-        root.exportPending = true
-        root.exportIsShare = isShare
-        exportFunction()
-    }
-
     function exportCurrentStream() {
         var stream = LogsController.viewerStream
 
-        if (LogsController.canShare) {
-            var saveFunction = function() {
-                root.runExport(false, function() {
-                    LogsController.exportStream(stream, LogsController.defaultFileName(stream))
-                })
-            }
-            var shareFunction = function() {
-                root.runExport(true, function() {
-                    LogsController.shareStream(stream)
-                })
-            }
-            showQuestionDrawer(qsTr("Save log"),
-                               qsTr("Save the log on this device or send it to another app."),
-                               qsTr("Save to file…"), qsTr("Share…"),
-                               saveFunction, shareFunction)
+        if (Qt.platform.os === "android") {
+            root.exportPending = true
+            LogsController.shareStream(stream)
             return
         }
 
-        var fileName = ""
-        if (GC.isMobile()) {
-            fileName = LogsController.defaultFileName(stream)
-        } else {
+        var fileName = LogsController.defaultFileName(stream)
+        if (!GC.isMobile()) {
             fileName = SystemController.getFileName(qsTr("Save"),
                                                     qsTr("Logs files (*.log)"),
-                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + LogsController.defaultFileName(stream),
+                                                    StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/" + fileName,
                                                     true,
                                                     ".log")
         }
         if (fileName !== "") {
-            root.runExport(false, function() {
-                LogsController.exportStream(stream, fileName)
-            })
+            root.exportPending = true
+            LogsController.exportStream(stream, fileName)
         }
     }
 
@@ -121,17 +100,24 @@ PageType {
             PageController.showBusyIndicator(LogsController.busy)
         }
 
-        function onExportFinished(success) {
+        function onExportFinished(success, cancelled) {
             if (!root.exportPending) {
                 return
             }
             root.exportPending = false
             if (!success) {
-                PageController.showNotificationMessage(qsTr("Failed to save logs"))
-            } else if (!root.exportIsShare) {
+                if (!cancelled) {
+                    PageController.showNotificationMessage(qsTr("Failed to save logs. Try again later"))
+                }
+            } else if (!GC.isMobile()) {
                 PageController.showNotificationMessage(qsTr("Logs file saved"))
             }
         }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: AmneziaStyle.color.backgroundBase
     }
 
     BackButtonType {
@@ -139,37 +125,29 @@ PageType {
 
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.right: parent.right
         anchors.topMargin: 20 + PageController.safeAreaTopMargin
     }
 
     RowLayout {
-        id: headerRow
+        id: actionsRow
 
-        anchors.top: backButton.bottom
-        anchors.left: parent.left
+        anchors.verticalCenter: backButton.verticalCenter
         anchors.right: parent.right
-        anchors.leftMargin: 16
         anchors.rightMargin: 16
 
         spacing: 4
 
-        BaseHeaderType {
-            Layout.fillWidth: true
-            Layout.alignment: Qt.AlignVCenter
-
-            headerText: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
-            headerTextMaximumLineCount: 1
-        }
-
         ImageButtonType {
             id: refreshButton
 
-            implicitWidth: 40
-            implicitHeight: 40
+            implicitWidth: 36
+            implicitHeight: 36
+            icon.width: 20
+            icon.height: 20
 
             image: "qrc:/images/controls/refresh-cw.svg"
-            imageColor: AmneziaStyle.color.paleGray
+            imageColor: AmneziaStyle.color.surfaceInverse
+            disableImageColor: AmneziaStyle.color.charcoalGray
             enabled: !root.isLoading
 
             onClicked: {
@@ -180,12 +158,15 @@ PageType {
         ImageButtonType {
             id: copyButton
 
-            implicitWidth: 40
-            implicitHeight: 40
+            implicitWidth: 36
+            implicitHeight: 36
+            icon.width: 20
+            icon.height: 20
 
             image: "qrc:/images/controls/copy.svg"
-            imageColor: AmneziaStyle.color.paleGray
-            enabled: !root.isLoading
+            imageColor: AmneziaStyle.color.surfaceInverse
+            disableImageColor: AmneziaStyle.color.charcoalGray
+            enabled: root.hasText
 
             onClicked: {
                 LogsController.copyLoaded()
@@ -196,11 +177,15 @@ PageType {
         ImageButtonType {
             id: exportButton
 
-            implicitWidth: 40
-            implicitHeight: 40
+            implicitWidth: 36
+            implicitHeight: 36
+            icon.width: 20
+            icon.height: 20
 
             image: GC.isMobile() ? "qrc:/images/controls/share-2.svg" : "qrc:/images/controls/save.svg"
-            imageColor: AmneziaStyle.color.paleGray
+            imageColor: AmneziaStyle.color.surfaceInverse
+            disableImageColor: AmneziaStyle.color.charcoalGray
+            enabled: root.hasText
 
             onClicked: {
                 root.exportCurrentStream()
@@ -208,44 +193,71 @@ PageType {
         }
     }
 
+    AppH1TextType {
+        id: title
+
+        anchors.top: backButton.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: 12
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+
+        maximumLineCount: 1
+        elide: Text.ElideRight
+
+        text: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
+    }
+
     Flickable {
         id: logFlickable
 
-        anchors.top: headerRow.bottom
+        anchors.top: title.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.topMargin: 16
-        anchors.leftMargin: 16
         anchors.rightMargin: 1
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
         clip: true
-        visible: !root.isLoading && logText.length > 0
+        visible: root.hasText
 
         contentWidth: width
-        contentHeight: logText.height
+        contentHeight: logCard.height + 16 + PageController.safeAreaBottomMargin
         boundsBehavior: Flickable.StopAtBounds
 
         ScrollBar.vertical: ScrollBarType {}
 
-        TextEdit {
-            id: logText
+        Rectangle {
+            id: logCard
 
-            width: logFlickable.width - 15
+            x: 16
+            width: logFlickable.width - 31
+            height: logText.height + 32
 
-            readOnly: true
-            textFormat: TextEdit.PlainText
-            selectByMouse: true
-            persistentSelection: true
-            wrapMode: TextEdit.WrapAnywhere
+            radius: 16
+            color: AmneziaStyle.color.surfaceBase
 
-            color: AmneziaStyle.color.paleGray
-            selectionColor: AmneziaStyle.color.richBrown
-            selectedTextColor: AmneziaStyle.color.paleGray
+            TextEdit {
+                id: logText
 
-            font.family: Qt.platform.os === "ios" || Qt.platform.os === "osx" ? "Menlo" : "monospace"
-            font.pixelSize: 11
+                x: 16
+                y: 16
+                width: logCard.width - 32
+
+                readOnly: true
+                textFormat: TextEdit.PlainText
+                selectByMouse: true
+                persistentSelection: true
+                wrapMode: TextEdit.Wrap
+
+                color: AmneziaStyle.color.textPrimary
+                selectionColor: AmneziaStyle.color.richBrown
+                selectedTextColor: AmneziaStyle.color.textPrimary
+
+                font.family: Qt.platform.os === "ios" || Qt.platform.os === "osx" ? "Menlo" : "monospace"
+                font.pixelSize: 12
+            }
         }
     }
 
@@ -255,12 +267,11 @@ PageType {
         visible: root.isLoading
     }
 
-    ParagraphTextType {
+    AppTextType {
         anchors.centerIn: logFlickable
 
         visible: !root.isLoading && logText.length === 0
 
-        color: AmneziaStyle.color.mutedGray
-        text: qsTr("Empty")
+        text: qsTr("No logs yet")
     }
 }

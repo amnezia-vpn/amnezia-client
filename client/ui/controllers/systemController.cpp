@@ -34,11 +34,11 @@ bool SystemController::saveFile(const QString &fileName, const QString &data)
     return saveFile(fileName, data.toUtf8());
 }
 
-bool SystemController::saveFile(const QString &fileName, const QByteArray &data, const QString &mimeType)
+bool SystemController::saveFile(const QString &fileName, const QByteArray &data, const QString &mimeType, bool *cancelled)
 {
 #if defined Q_OS_ANDROID
     const QString documentMime = mimeType.startsWith(QLatin1String("text/")) ? QStringLiteral("text/*") : mimeType;
-    return AndroidController::instance()->saveFile(fileName, data, documentMime);
+    return AndroidController::instance()->saveFile(fileName, data, documentMime, cancelled);
 #else
     Q_UNUSED(mimeType);
 #endif
@@ -64,8 +64,9 @@ bool SystemController::saveFile(const QString &fileName, const QByteArray &data,
 #ifdef Q_OS_IOS
     QStringList filesToSend;
     filesToSend.append(fileUrl.toString());
-    return IosController::Instance()->shareText(filesToSend);
+    return IosController::Instance()->shareText(filesToSend, cancelled);
 #else
+    Q_UNUSED(cancelled);
     QFileInfo fi(fileName);
 
 #ifdef Q_OS_MAC

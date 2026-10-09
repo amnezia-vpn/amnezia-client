@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Dialogs
 
 import QtCore
 
@@ -17,7 +16,6 @@ PageType {
     id: root
 
     property bool exportPending: false
-    property bool exportIsShare: false
 
     Component.onCompleted: {
         LogsController.refreshSizes()
@@ -29,31 +27,7 @@ PageType {
         }
     }
 
-    function runExport(isShare, exportFunction) {
-        root.exportPending = true
-        root.exportIsShare = isShare
-        exportFunction()
-    }
-
     function saveAll() {
-        if (LogsController.canShare) {
-            var saveFunction = function() {
-                root.runExport(false, function() {
-                    LogsController.saveAll(LogsController.defaultFileName("all"))
-                })
-            }
-            var shareFunction = function() {
-                root.runExport(true, function() {
-                    LogsController.shareAll()
-                })
-            }
-            showQuestionDrawer(qsTr("Save all logs"),
-                               qsTr("Save the archive on this device or send it to another app."),
-                               qsTr("Save to file…"), qsTr("Share…"),
-                               saveFunction, shareFunction)
-            return
-        }
-
         var fileName = ""
         if (GC.isMobile()) {
             fileName = LogsController.defaultFileName("all")
@@ -65,9 +39,28 @@ PageType {
                                                     ".zip")
         }
         if (fileName !== "") {
-            root.runExport(false, function() {
-                LogsController.saveAll(fileName)
-            })
+            root.exportPending = true
+            LogsController.saveAll(fileName)
+        }
+    }
+
+    function clearAll() {
+        PageController.showBusyIndicator(true)
+        SettingsController.clearLogs()
+        LogsController.refreshSizes()
+        PageController.showBusyIndicator(false)
+        PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
+    }
+
+    AlertDialogType {
+        id: clearAllDialog
+
+        headerText: qsTr("Clear all logs?")
+        descriptionText: qsTr("App and tunnel logs will be deleted from the device and can't be restored")
+        confirmButtonText: qsTr("Clear")
+
+        onConfirmed: {
+            root.clearAll()
         }
     }
 
@@ -78,17 +71,22 @@ PageType {
             PageController.showBusyIndicator(LogsController.busy)
         }
 
-        function onExportFinished(success) {
+        function onExportFinished(success, cancelled) {
             if (!root.exportPending) {
                 return
             }
             root.exportPending = false
-            if (!success) {
-                PageController.showNotificationMessage(qsTr("Failed to save logs"))
-            } else if (!root.exportIsShare) {
+            if (success) {
                 PageController.showNotificationMessage(qsTr("Logs file saved"))
+            } else if (!cancelled) {
+                PageController.showNotificationMessage(qsTr("Failed to save logs. Try again later"))
             }
         }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: AmneziaStyle.color.backgroundBase
     }
 
     BackButtonType {
@@ -101,162 +99,175 @@ PageType {
 
         onFocusChanged: {
             if (this.activeFocus) {
-                listView.positionViewAtBeginning()
+                flickable.contentY = 0
             }
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: backButton.bottom
         anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        contentHeight: content.implicitHeight + content.anchors.topMargin + 16 + PageController.safeAreaBottomMargin
 
-        header: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
 
-            BaseHeaderType {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 12
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+
+            spacing: 24
+
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                headerText: qsTr("Logging")
-                descriptionText: qsTr("Enabling this function will save application and tunnel logs automatically. " +
-                                      "By default, logging functionality is disabled. Enable log saving in case of application malfunction.")
+                spacing: 8
+
+                AppH1TextType {
+                    Layout.fillWidth: true
+
+                    text: qsTr("Logging")
+                }
+
+                AppTextType {
+                    Layout.fillWidth: true
+
+                    color: AmneziaStyle.color.surfaceInverse
+                    text: qsTr("Logs help support figure out what's wrong")
+                }
             }
 
-            LabelTextType {
+            CardGroupType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                text: qsTr("Collection")
-            }
+                ActionRowType {
+                    id: loggingRow
 
-            SwitcherType {
-                id: switcher
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: 88
 
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                    text: qsTr("Record logs")
+                    descriptionText: qsTr("Recording turns off after 14 days and logs are deleted")
+                    showDivider: false
 
-                text: qsTr("Enable logs")
-                descriptionText: qsTr("Existing logs stay readable when logging is off.")
+                    clickedFunction: function() {
+                        switcher.toggle()
+                        switcher.toggled()
+                    }
 
-                checked: SettingsController.isLoggingEnabled
+                    SwitcherType {
+                        id: switcher
 
-                onToggled: function() {
-                    if (checked !== SettingsController.isLoggingEnabled) {
-                        SettingsController.isLoggingEnabled = checked
+                        width: indicatorWidth
+                        height: indicatorHeight
+
+                        indicatorWidth: 50
+                        indicatorHeight: 30
+                        checkedInnerCircleSize: 20
+                        checkedInnerCircleMargin: 5
+
+                        checkedIndicatorColor: AmneziaStyle.color.switchTrackChecked
+                        checkedIndicatorBorderColor: AmneziaStyle.color.switchTrackChecked
+                        checkedInnerCircleColor: AmneziaStyle.color.switchThumbChecked
+                        defaultIndicatorBorderColor: AmneziaStyle.color.textTertiary
+
+                        isFocusable: false
+
+                        checked: SettingsController.isLoggingEnabled
+
+                        onToggled: function() {
+                            if (checked !== SettingsController.isLoggingEnabled) {
+                                SettingsController.isLoggingEnabled = checked
+                            }
+                        }
                     }
                 }
             }
 
-            DividerType {}
-        }
-
-        model: 1
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            spacing: 0
-
-            LabelTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Logs")
-            }
-
-            LabelWithButtonType {
-                id: tunnelLogsButton
-
+            ColumnLayout {
                 Layout.fillWidth: true
 
-                text: qsTr("Tunnel")
-                descriptionText: ((!GC.isMobile() && !IsMacOsNeBuild) ? qsTr("Service events")
-                                  : (Qt.platform.os === "android") ? qsTr("VPN service events")
-                                                                   : qsTr("Network extension events"))
-                                 + " · " + LogsController.tunnelLogSize
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                spacing: 12
 
-                clickedFunction: function() {
-                    LogsController.viewerStream = "tunnel"
-                    PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                AppTextType {
+                    Layout.fillWidth: true
+
+                    color: AmneziaStyle.color.textTertiary
+                    text: qsTr("Logs")
                 }
-            }
 
-            DividerType {}
+                CardGroupType {
+                    Layout.fillWidth: true
 
-            LabelWithButtonType {
-                id: appLogsButton
+                    ActionRowType {
+                        id: tunnelLogsRow
 
-                Layout.fillWidth: true
+                        Layout.fillWidth: true
 
-                text: qsTr("Application")
-                descriptionText: qsTr("Client-side events") + " · " + LogsController.appLogSize
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                        text: qsTr("Tunnel")
+                        descriptionText: qsTr("Connection events") + " · " + LogsController.tunnelLogSize
+                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
-                    LogsController.viewerStream = "app"
-                    PageController.goToPage(PageEnum.PageSettingsLogViewer)
-                }
-            }
-
-            DividerType {}
-
-            BasicButtonType {
-                id: saveAllButton
-
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Save all logs (.zip)")
-
-                clickedFunc: function() {
-                    root.saveAll()
-                }
-            }
-
-            LabelWithButtonType {
-                id: clearAllButton
-
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-
-                text: qsTr("Clear all logs")
-                textColor: AmneziaStyle.color.vibrantRed
-                leftImageSource: "qrc:/images/controls/trash.svg"
-                isSmallLeftImage: true
-
-                clickedFunction: function() {
-                    var headerText = qsTr("Clear all logs?")
-                    var descriptionText = qsTr("Application and tunnel logs will be deleted. This can't be undone.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.clearLogs()
-                        LogsController.refreshSizes()
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Logs have been cleaned up"))
+                        clickedFunction: function() {
+                            LogsController.viewerStream = "tunnel"
+                            PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                        }
                     }
 
-                    var noButtonFunction = function() {
+                    ActionRowType {
+                        id: appLogsRow
 
+                        Layout.fillWidth: true
+
+                        text: qsTr("Application")
+                        descriptionText: qsTr("App events") + " · " + LogsController.appLogSize
+                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                        showDivider: false
+
+                        clickedFunction: function() {
+                            LogsController.viewerStream = "app"
+                            PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                        }
                     }
+                }
+            }
 
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            CardGroupType {
+                Layout.fillWidth: true
+
+                ActionRowType {
+                    id: saveAllRow
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Save all logs")
+                    descriptionText: qsTr(".zip archive with both logs")
+                    leftImageSource: "qrc:/images/controls/save.svg"
+
+                    clickedFunction: function() {
+                        root.saveAll()
+                    }
+                }
+
+                ActionRowType {
+                    id: clearAllRow
+
+                    Layout.fillWidth: true
+
+                    text: qsTr("Clear all logs")
+                    textColor: AmneziaStyle.color.accentDanger
+                    leftImageSource: "qrc:/images/controls/trash-2.svg"
+                    leftImageColor: AmneziaStyle.color.accentDanger
+                    showDivider: false
+
+                    clickedFunction: function() {
+                        clearAllDialog.open()
+                    }
                 }
             }
         }

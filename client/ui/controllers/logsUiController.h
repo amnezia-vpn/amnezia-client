@@ -6,6 +6,8 @@
 
 #include <functional>
 
+class SettingsController;
+
 class LogsUiController : public QObject
 {
     Q_OBJECT
@@ -14,10 +16,9 @@ class LogsUiController : public QObject
     Q_PROPERTY(QString tunnelLogSize READ tunnelLogSize NOTIFY sizesChanged)
     Q_PROPERTY(QString viewerStream READ viewerStream WRITE setViewerStream NOTIFY viewerStreamChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
-    Q_PROPERTY(bool canShare READ canShare CONSTANT)
 
 public:
-    explicit LogsUiController(QObject *parent = nullptr);
+    explicit LogsUiController(SettingsController *settingsController, QObject *parent = nullptr);
 
     QString appLogSize() const;
     QString tunnelLogSize() const;
@@ -26,7 +27,6 @@ public:
     void setViewerStream(const QString &stream);
 
     bool busy() const;
-    bool canShare() const;
 
     Q_INVOKABLE void refreshSizes();
 
@@ -39,7 +39,6 @@ public:
 
     Q_INVOKABLE void exportStream(const QString &stream, const QString &fileName);
     Q_INVOKABLE void saveAll(const QString &fileName);
-    Q_INVOKABLE void shareAll();
     Q_INVOKABLE void shareStream(const QString &stream);
 
     Q_INVOKABLE QString defaultFileName(const QString &kind) const;
@@ -53,7 +52,7 @@ signals:
     void appended(const QString &text);
     void reloadRequired();
 
-    void exportFinished(bool success);
+    void exportFinished(bool success, bool cancelled);
 
 private:
     struct LoadResult
@@ -66,8 +65,12 @@ private:
     void onLiveTailTimeout();
     void onApplicationStateChanged(Qt::ApplicationState state);
 
-    void runExport(const std::function<QByteArray()> &build, const std::function<bool(const QByteArray &)> &deliver);
+    void runExport(const std::function<QByteArray()> &build,
+                   const std::function<bool(const QByteArray &, bool *)> &deliver);
     void setBusy(bool busy);
+    QString formatSize(qint64 bytes) const;
+
+    SettingsController *m_settingsController;
 
     QString m_viewerStream = QStringLiteral("app");
     QString m_lastText;

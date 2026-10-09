@@ -768,15 +768,15 @@ class AmneziaActivity : QtActivity() {
                                     Log.e(TAG, "Failed to save file $uri: $e")
                                 }
                             }
-                            QtAndroidController.onFileSaved(saved)
+                            QtAndroidController.onFileSaved(saved, false)
                         },
                         onFail = {
-                            QtAndroidController.onFileSaved(false)
+                            QtAndroidController.onFileSaved(false, true)
                         }
                     ))
                 } catch (_: ActivityNotFoundException) {
                     Toast.makeText(this@AmneziaActivity, "Unsupported", Toast.LENGTH_LONG).show()
-                    QtAndroidController.onFileSaved(false)
+                    QtAndroidController.onFileSaved(false, false)
                 }
             }
         }
