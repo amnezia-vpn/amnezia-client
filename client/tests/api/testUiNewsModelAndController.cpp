@@ -8,6 +8,8 @@
 #include <QProcessEnvironment>
 
 #include "utils/testCoreController.h"
+#include "utils/testUtils.h"
+#include "core/models/serverDescription.h"
 #include "core/controllers/api/subscriptionController.h"
 #include "core/models/api/apiV2ServerConfig.h"
 #include "core/utils/constants/apiKeys.h"
