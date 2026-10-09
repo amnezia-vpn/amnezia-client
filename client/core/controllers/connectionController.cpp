@@ -42,6 +42,11 @@ bool ConnectionController::isConnected() const
     return m_vpnConnection && m_vpnConnection->connectionState() == Vpn::ConnectionState::Connected;
 }
 
+Vpn::ConnectionState ConnectionController::connectionState() const
+{
+    return m_vpnConnection ? m_vpnConnection->connectionState() : Vpn::ConnectionState::Unknown;
+}
+
 void ConnectionController::setConnectionState(Vpn::ConnectionState state)
 {
     emit connectionStateChanged(state);
