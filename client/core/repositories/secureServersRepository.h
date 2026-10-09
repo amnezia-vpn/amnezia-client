@@ -31,6 +31,8 @@ public:
     void removeServer(const QString &serverId);
     serverConfigUtils::ConfigType serverKind(const QString &serverId) const;
 
+    std::optional<QJsonObject> serverJsonById(const QString &serverId) const;
+
     std::optional<SelfHostedAdminServerConfig> selfHostedAdminConfig(const QString &serverId) const;
     std::optional<SelfHostedUserServerConfig> selfHostedUserConfig(const QString &serverId) const;
     std::optional<NativeServerConfig> nativeConfig(const QString &serverId) const;

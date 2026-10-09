@@ -67,6 +67,8 @@ XrayProtocol::~XrayProtocol()
 
 ErrorCode XrayProtocol::start()
 {
+    resetStopGuard();
+
     qDebug() << "XrayProtocol::start()";
 
     // Inject SOCKS5 auth into the inbound before starting xray.
@@ -92,11 +94,12 @@ ErrorCode XrayProtocol::start()
 
     return IpcClient::withInterface(
             [&](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStart = iface->xrayStart(xrayConfigStr);
-                if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
+                auto xrayStart = iface->xrayStartOwned(xrayConfigStr);
+                if (!xrayStart.waitForFinished() || xrayStart.returnValue() == 0) {
                     qCritical() << "Failed to start xray";
                     return ErrorCode::XrayExecutableCrashed;
                 }
+                m_xrayToken = xrayStart.returnValue();
                 return startTun2Socks();
             },
             []() { return ErrorCode::AmneziaServiceConnectionFailed; });
@@ -104,9 +107,13 @@ ErrorCode XrayProtocol::start()
 
 void XrayProtocol::stop()
 {
+    if (guardStop()) {
+        return;
+    }
+
     qDebug() << "XrayProtocol::stop()";
 
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();
         if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
             qWarning() << "Failed to disable killswitch";
@@ -123,9 +130,10 @@ void XrayProtocol::stop()
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
             qWarning() << "Failed to delete tun";
 
-        auto xrayStop = iface->xrayStop();
+        auto xrayStop = iface->xrayStopOwned(m_xrayToken);
         if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
             qWarning() << "Failed to stop xray";
+        m_xrayToken = 0;
     });
 
     if (m_tun2socksProcess) {

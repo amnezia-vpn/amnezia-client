@@ -44,6 +44,9 @@ public:
     virtual bool restoreResolvers() override;
     virtual bool xrayStart(const QString& cfg) override;
     virtual bool xrayStop() override;
+    virtual qint64 xrayStartOwned(const QString& cfg) override;
+    virtual bool xrayStopOwned(qint64 token) override;
+    virtual qint64 xrayCurrentToken() override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
 

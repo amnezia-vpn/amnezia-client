@@ -76,6 +76,12 @@ PageType {
                         return
                     }
 
+                    if (isCurrentDevice && SettingsController.isLocalProxyHttpEnabled
+                            && SettingsController.localProxyOwnerId === ServersUiController.processedServerId) {
+                        PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
+                        return
+                    }
+
                     var headerText = qsTr("Are you sure you want to unlink this device?")
                     var descriptionText = qsTr("This will unlink the device from your subscription. You can reconnect it anytime by pressing \"Reload API config\" in subscription settings on device.")
                     var yesButtonText = qsTr("Continue")

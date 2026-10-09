@@ -31,6 +31,53 @@
     #include "xray_defs.h"
 #endif
 
+qint64 Xray::start(const QString &cfg)
+{
+    if (m_currentToken != 0) {
+        qDebug() << "Xray::start() engine is busy (token" << m_currentToken << "), stopping it for the new owner";
+        stopXray();
+        m_currentToken = 0;
+    }
+
+    if (!startXray(cfg)) {
+        return 0;
+    }
+
+    m_currentToken = ++m_lastToken;
+    qDebug() << "Xray::start() engine started, owner token" << m_currentToken;
+    return m_currentToken;
+}
+
+bool Xray::stop(qint64 token)
+{
+    if (m_currentToken == 0) {
+        return true;
+    }
+
+    if (token == 0 || token != m_currentToken) {
+        qDebug() << "Xray::stop() stale owner token" << token << "(current" << m_currentToken << "), ignoring";
+        return true;
+    }
+
+    m_currentToken = 0;
+    return stopXray();
+}
+
+bool Xray::stopAny()
+{
+    if (m_currentToken == 0) {
+        return true;
+    }
+
+    m_currentToken = 0;
+    return stopXray();
+}
+
+qint64 Xray::currentToken() const
+{
+    return m_currentToken;
+}
+
 bool Xray::startXray(const QString &cfg)
 {
     qDebug() << "Xray::startXray()";
