@@ -200,8 +200,16 @@ ErrorCode ConnectionController::prepareConnection(const QString &serverId,
         return ErrorCode::InternalError;
     }
 
+    // System DNS preservation is currently implemented by the desktop WG daemon.
+    // Reject unsupported protocols instead of silently replacing the system resolver.
+    if (m_appSettingsRepository->useSystemDns()
+            && !ContainerUtils::isAwgContainer(container) && container != DockerContainer::WireGuard) {
+        return ErrorCode::NotSupportedOnThisPlatform;
+    }
+
     vpnConfiguration = createConnectionConfiguration(dns, isApiConfig, hostName, description, configVersion,
                                                      containerConfigModel, container);
+    vpnConfiguration.insert(configKey::useSystemDns, m_appSettingsRepository->useSystemDns());
 
     return ErrorCode::NoError;
 }
