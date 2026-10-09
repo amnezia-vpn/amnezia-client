@@ -40,7 +40,7 @@ fi
 run_cmd launchctl bootout system "$LAUNCH_DAEMONS_PLIST_NAME" || run_cmd launchctl unload "$LAUNCH_DAEMONS_PLIST_NAME"
 run_cmd rm -f "$LAUNCH_DAEMONS_PLIST_NAME"
 
-# Add separate group for xray filtering
+# Add separate group for xray filtering (do not exit the script if the group already exists)
 if dscl . -read "/Groups/$SERVICE_GROUP" >/dev/null 2>&1; then
   log "Group $SERVICE_GROUP already exists"
 else
@@ -53,6 +53,21 @@ fi
 run_cmd chmod -R a-w "$APP_PATH/"
 run_cmd chown -R root "$APP_PATH/"
 run_cmd chgrp -R wheel "$APP_PATH/"
+
+# Refresh Launch Services so CFBundleURLTypes (e.g. vpn://) is picked up without a manual lsregister.
+LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+if [ -d "$APP_PATH" ]; then
+  log "Launch Services: lsregister -f -R $APP_PATH"
+  run_cmd "$LSREGISTER" -f -R "$APP_PATH" || true
+  INFO_PLIST="$APP_PATH/Contents/Info.plist"
+  if [ -f "$INFO_PLIST" ] && plutil -p "$INFO_PLIST" 2>/dev/null | grep -q 'CFBundleURLTypes'; then
+    log "Info.plist: CFBundleURLTypes present (vpn:// can be registered with Launch Services)"
+  else
+    log "ERROR: Info.plist has no CFBundleURLTypes — open vpn:// will fail (-10814). Fix the app bundle Info.plist at build time; lsregister cannot invent URL schemes."
+  fi
+else
+  log "WARN: $APP_PATH missing, skipping lsregister"
+fi
 
 log "Requesting ${APP_NAME} to quit gracefully"
 run_cmd osascript -e 'tell application "AmneziaVPN" to quit' || true
