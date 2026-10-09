@@ -8,19 +8,18 @@
 #include <QProcessEnvironment>
 
 #include "utils/testCoreController.h"
-#include "utils/testUtils.h"
-#include "secureQSettings.h"
-#include "vpnConnection.h"
-
+#include "core/controllers/api/subscriptionController.h"
 #include "core/models/api/apiV2ServerConfig.h"
+#include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/serverConfigUtils.h"
 
-#include "core/controllers/selfhosted/importController.h"
-#include "core/models/serverDescription.h"
-
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/newsModel.h"
+
+#include "amneziaApplication.h"
+#include "secureQSettings.h"
+#include "vpnConnection.h"
 
 using namespace amnezia;
 using namespace amnezia::test;
@@ -190,28 +189,22 @@ private slots:
 
     void testReadStatePersistence()
     {
-        auto *repository = m_coreController->m_appSettingsRepository;
-        auto *model = m_coreController->m_newsModel;
+        const QJsonArray news { makeNewsItem("persist-1", "First", "Content 1", "2026-09-29T10:00:00Z"),
+                                makeNewsItem("persist-2", "Second", "Content 2", "2026-09-28T10:00:00Z") };
 
-        const QJsonArray news = makeNews();
+        NewsModel *model = m_coreController->m_newsModel;
         model->setNewsList(news);
-
-        const QModelIndex firstIndex = model->index(0, 0);
-        QVERIFY(firstIndex.isValid());
-
-        const QString firstId = model->data(firstIndex, NewsModel::IdRole).toString();
-
         model->markAsRead(0);
 
-        QVERIFY(repository->getReadNewsIds().contains(firstId));
+        const QStringList savedIds = m_coreController->m_appSettingsRepository->getReadNewsIds();
 
-        NewsModel restoredModel(repository);
+        QVERIFY(savedIds.contains(QStringLiteral("persist-1")));
+
+        NewsModel restoredModel(m_coreController->m_appSettingsRepository);
         restoredModel.setNewsList(news);
 
-        const QModelIndex restoredIndex = restoredModel.index(0, 0);
-        QVERIFY(restoredIndex.isValid());
-        QCOMPARE(restoredModel.data(restoredIndex, NewsModel::IdRole).toString(), firstId);
-        QVERIFY(restoredModel.data(restoredIndex, NewsModel::IsReadRole).toBool());
+        QCOMPARE(restoredModel.data(restoredModel.index(0, 0), NewsModel::IsReadRole).toBool(), true);
+        QCOMPARE(restoredModel.data(restoredModel.index(1, 0), NewsModel::IsReadRole).toBool(), false);
     }
 
     void testFetchNewsWithoutServers()
@@ -251,7 +244,6 @@ private slots:
             QSKIP("Gateway requested a captcha, skipping live gateway test");
         }
 
-        // QCOMPARE(updateError, ErrorCode::NoError);
         QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
 
         QSignalSpy fetchNewsFinishedSpy(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished);
@@ -277,5 +269,14 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestUiNewsModelAndController)
+int main(int argc, char *argv[])
+{
+    // CoreController accesses the gateway through amnApp->networkManager().
+    // The application instance must be an AmneziaApplication.
+    AmneziaApplication app(argc, argv);
+
+    TestUiNewsModelAndController tc;
+    QTEST_SET_MAIN_SOURCE_PATH
+    return QTest::qExec(&tc, argc, argv);
+}
 #include "testUiNewsModelAndController.moc"
