@@ -5,10 +5,15 @@
 #ifndef WINDOWSSPLITTUNNEL_H
 #define WINDOWSSPLITTUNNEL_H
 
+#include <QHostAddress>
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QTimer>
+#include <cstdint>
 #include <memory>
+#include <optional>
+#include <vector>
 
 // Note: the ws2tcpip.h import must come before the others.
 // clang-format off
@@ -16,12 +21,13 @@
 // clang-format on
 #include <Ws2ipdef.h>
 #include <ioapiset.h>
+#include <iphlpapi.h>
 #include <tlhelp32.h>
 #include <windows.h>
 
 class WindowsFirewall;
 
-class WindowsSplitTunnel final {
+class WindowsSplitTunnel final : public QObject {
  public:
   /**
    * @brief Installs and Initializes the Split Tunnel Driver.
@@ -49,12 +55,13 @@ class WindowsSplitTunnel final {
   bool excludeApps(const QStringList& appPaths);
 
   // Fetches and Pushed needed info to move to engaged mode
-  bool start(int inetAdapterIndex, int vpnAdapterIndex = 0);
+  bool start(const QHostAddress& endpoint, int inetAdapterIndex,
+             int vpnAdapterIndex = 0);
   // Deletes Rules and puts the driver into passive mode
   void stop();
 
-  // Returns true if the split-tunnel driver is now up and running.
-  bool isRunning();
+  // Returns true if split tunneling is running or safely waiting for IPv6 DAD.
+  bool isOperational();
 
   static bool detectConflict();
 
@@ -85,16 +92,54 @@ class WindowsSplitTunnel final {
   // Generates a Configuration for Each APP
   std::vector<uint8_t> generateAppConfiguration(const QStringList& appPaths);
   // Generates a Configuration which IP's are VPN and which network
-  std::vector<std::byte> generateIPConfiguration(int inetAdapterIndex, int vpnAdapterIndex = 0);
+  std::vector<std::byte> generateIPConfiguration();
   std::vector<uint8_t> generateProcessBlob();
 
-  [[nodiscard]] bool getAddress(int adapterIndex, IN_ADDR* out_ipv4,
-                                IN6_ADDR* out_ipv6);
+  bool updateAdapterLuids(int inetAdapterIndex, int vpnAdapterIndex);
+  bool registerIPConfiguration(bool force, bool requireActiveMode = false);
+  bool startAddressMonitoring();
+  void stopAddressMonitoring();
+  void scheduleAddressRefresh();
+  static void dispatchAddressRefresh(PVOID context);
+  static void CALLBACK routeChangeCallback(PVOID context,
+                                           PMIB_IPFORWARD_ROW2 row,
+                                           MIB_NOTIFICATION_TYPE type);
+  static void CALLBACK addressChangeCallback(PVOID context,
+                                             PMIB_UNICASTIPADDRESS_ROW row,
+                                             MIB_NOTIFICATION_TYPE type);
+  static void CALLBACK interfaceChangeCallback(PVOID context,
+                                               PMIB_IPINTERFACE_ROW row,
+                                               MIB_NOTIFICATION_TYPE type);
+
+  [[nodiscard]] bool getAddresses(const NET_LUID& adapter, IN_ADDR* outIpv4,
+                                  IN6_ADDR* outIpv6);
+  [[nodiscard]] std::optional<NET_LUID> getBestDefaultRoute(
+      ADDRESS_FAMILY family, const NET_LUID& preferredAdapter);
+  struct EndpointRoute {
+    NET_LUID adapter;
+    SOCKADDR_INET source;
+  };
+  [[nodiscard]] std::optional<EndpointRoute> getEndpointRoute();
   // Collects info about an Opened Process
 
   // Converts a path to a Dos Path:
   // e.g C:/a.exe -> /harddisk0/a.exe
   QString convertPath(const QString& path);
+
+  struct NotificationContext;
+  QTimer m_addressRefreshTimer;
+  NotificationContext* m_notificationContext = nullptr;
+  HANDLE m_routeChangeHandle = nullptr;
+  HANDLE m_addressChangeHandle = nullptr;
+  HANDLE m_interfaceChangeHandle = nullptr;
+  bool m_addressMonitoringActive = false;
+  bool m_addressStabilizationPending = false;
+  bool m_addressCollectionIncomplete = false;
+  std::uint32_t m_addressRefreshRetryAttempts = 0;
+  QHostAddress m_endpoint;
+  NET_LUID m_internetHintLuid = {};
+  NET_LUID m_vpnAdapterLuid = {};
+  std::vector<std::byte> m_lastIPConfiguration;
 };
 
 #endif  // WINDOWSSPLITTUNNEL_H
