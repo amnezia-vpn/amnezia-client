@@ -329,6 +329,7 @@ PageType {
                         hoverEnabled: false
                         image: "qrc:/images/controls/chevron-down.svg"
                         imageColor: AmneziaStyle.color.paleGray
+                        accessibleName: qsTr("Select server")
 
                         icon.width: 18
                         icon.height: 18

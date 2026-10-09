@@ -27,6 +27,8 @@ Button {
     property string leftImageColor: textColor
     property bool changeLeftImageSize: true
 
+    property string accessibleName: ""
+
     property bool squareLeftSide: false
 
     property var clickedFunc
@@ -34,6 +36,9 @@ Button {
     property alias buttonTextLabel: buttonText
 
     property bool isFocusable: true
+
+    Accessible.name: accessibleName !== "" ? accessibleName : (text !== "" ? text : defaultAccessibleName())
+    Accessible.role: Accessible.Button
 
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
@@ -206,5 +211,14 @@ Button {
         if (root.clickedFunc && typeof root.clickedFunc === "function") {
             root.clickedFunc()
         }
+    }
+
+    function defaultAccessibleName() {
+        var source = leftImageSource !== "" ? leftImageSource : rightImageSource
+        if (source.indexOf("plus.svg") !== -1) return qsTr("Add")
+        if (source.indexOf("chevron-down.svg") !== -1) return qsTr("Expand")
+        if (source.indexOf("chevron-right.svg") !== -1) return qsTr("Open")
+        if (source.indexOf("external-link.svg") !== -1) return qsTr("Open link")
+        return ""
     }
 }

@@ -89,6 +89,7 @@ DrawerType2 {
 
                             text: appName
                             checked: isAppSelected
+                            Accessible.name: qsTr("Select %1").arg(appName)
                             onCheckedChanged: {
                                 installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                             }
@@ -120,6 +121,7 @@ DrawerType2 {
             anchors.leftMargin: 16
 
             backgroundColor: AmneziaStyle.color.slateGray
+            headerText: qsTr("Search applications")
 
             textField.placeholderText: qsTr("application name")
         }

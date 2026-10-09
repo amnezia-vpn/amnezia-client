@@ -71,6 +71,7 @@ PageType {
                 text: title
                 descriptionText: description
                 textColor: tColor
+                Accessible.name: title
 
                 clickedFunction: function() {
                     clickedHandler()

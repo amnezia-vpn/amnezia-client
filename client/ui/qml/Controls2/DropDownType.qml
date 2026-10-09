@@ -51,6 +51,10 @@ Item {
 
     readonly property bool isFocusable: true
 
+    Accessible.name: root.headerText !== "" ? qsTr("%1, %2").arg(root.headerText).arg(root.text) : root.text
+    Accessible.role: Accessible.ComboBox
+    Accessible.description: menu.isClosed ? qsTr("Collapsed") : qsTr("Expanded")
+
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
     }
@@ -197,6 +201,7 @@ Item {
             hoverEnabled: false
             image: rootButtonImage
             imageColor: rootButtonImageColor
+            accessibleName: root.headerText !== "" ? root.headerText : root.text
         }
     }
 

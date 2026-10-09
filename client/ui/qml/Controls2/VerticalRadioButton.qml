@@ -34,6 +34,10 @@ RadioButton {
 
     property bool isFocusable: true
 
+    Accessible.name: descriptionText !== "" ? qsTr("%1, %2").arg(text).arg(descriptionText) : text
+    Accessible.role: Accessible.RadioButton
+    Accessible.description: checked ? qsTr("Selected") : ""
+
     
     property string radioButtonInnerCirclePressedSource: "qrc:/images/controls/radio-button-inner-circle-pressed.png"
     property string radioButtonInnerCircleSource: "qrc:/images/controls/radio-button-inner-circle.png"

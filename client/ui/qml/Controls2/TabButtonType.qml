@@ -19,6 +19,10 @@ TabButton {
 
     property bool isFocusable: true
 
+    Accessible.name: text
+    Accessible.role: Accessible.PageTab
+    Accessible.description: isSelected ? qsTr("Selected") : ""
+
     Keys.onTabPressed: {
         FocusController.nextKeyTabItem()
     }

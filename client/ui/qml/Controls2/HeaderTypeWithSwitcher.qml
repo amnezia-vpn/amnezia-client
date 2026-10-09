@@ -18,6 +18,7 @@ BaseHeaderType {
         id: headerSwitcher
         Layout.alignment: Qt.AlignRight
         visible: root.showSwitcher
+        accessibleName: root.headerText
 
         onToggled: {
             if (switcherFunction && typeof switcherFunction === "function") {
