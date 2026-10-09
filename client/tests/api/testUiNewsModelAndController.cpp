@@ -190,14 +190,28 @@ private slots:
 
     void testReadStatePersistence()
     {
-        m_coreController->m_newsModel->setNewsList(makeNews());
-        m_coreController->m_newsModel->markAsRead(0);
+        auto *repository = m_coreController->m_appSettingsRepository;
+        auto *model = m_coreController->m_newsModel;
 
-        NewsModel restoredModel(m_coreController->m_appSettingsRepository);
-        restoredModel.setNewsList(makeNews());
+        const QJsonArray news = makeNews();
+        model->setNewsList(news);
 
-        QCOMPARE(restoredModel.data(restoredModel.index(0, 0), NewsModel::IsReadRole).toBool(), true);
-        QCOMPARE(restoredModel.data(restoredModel.index(1, 0), NewsModel::IsReadRole).toBool(), false);
+        const QModelIndex firstIndex = model->index(0, 0);
+        QVERIFY(firstIndex.isValid());
+
+        const QString firstId = model->data(firstIndex, NewsModel::IdRole).toString();
+
+        model->markAsRead(0);
+
+        QVERIFY(repository->getReadNewsIds().contains(firstId));
+
+        NewsModel restoredModel(repository);
+        restoredModel.setNewsList(news);
+
+        const QModelIndex restoredIndex = restoredModel.index(0, 0);
+        QVERIFY(restoredIndex.isValid());
+        QCOMPARE(restoredModel.data(restoredIndex, NewsModel::IdRole).toString(), firstId);
+        QVERIFY(restoredModel.data(restoredIndex, NewsModel::IsReadRole).toBool());
     }
 
     void testFetchNewsWithoutServers()
@@ -231,11 +245,13 @@ private slots:
 
         const ErrorCode updateError = m_coreController->m_subscriptionController->updateServiceFromGateway(serverId, QStringLiteral("de"), /*isConnectEvent=*/false, &captchaInfo, nullptr);
 
+        QVERIFY2(updateError == ErrorCode::NoError, qPrintable(QStringLiteral("Gateway update failed: %1").arg(static_cast<int>(updateError))));
+
         if (updateError == ErrorCode::ApiCaptchaRequiredError) {
             QSKIP("Gateway requested a captcha, skipping live gateway test");
         }
 
-        QCOMPARE(updateError, ErrorCode::NoError);
+        // QCOMPARE(updateError, ErrorCode::NoError);
         QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
 
         QSignalSpy fetchNewsFinishedSpy(m_coreController->m_apiNewsUiController, &ApiNewsUiController::fetchNewsFinished);
