@@ -58,6 +58,7 @@ class Daemon : public QObject {
  private:
   bool maybeUpdateResolvers(const InterfaceConfig& config);
   bool addExclusionRoute(const IPAddress& address);
+  bool addExclusionRouteList(const QStringList& addresses);
   bool delExclusionRoute(const IPAddress& address);
 
  protected:
