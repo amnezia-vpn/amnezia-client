@@ -1030,7 +1030,7 @@ IosController::StorePurchaseFailure storePurchaseFailureFromError(NSError *error
 QVariantMap toTransactionMap(NSDictionary *dict)
 {
     QVariantMap transaction;
-    for (NSString *key in @[@"transactionId", @"originalTransactionId", @"productId", @"environment"]) {
+    for (NSString *key in @[@"transactionId", @"originalTransactionId", @"productId", @"environment", @"jwsRepresentation"]) {
         NSString *value = dict[key];
         if (value) {
             transaction.insert(QString::fromUtf8(key.UTF8String), QString::fromUtf8(value.UTF8String));

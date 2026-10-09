@@ -10,6 +10,7 @@
 #include "ui/controllers/systemController.h"
 #include "version.h"
 #include <QClipboard>
+#include <QDateTime>
 #include <QDebug>
 #include <QSet>
 #include <QEventLoop>
@@ -25,6 +26,7 @@
 namespace
 {
 constexpr char premiumServiceType[] = "amnezia-premium";
+constexpr int otpDefaultTtlSec = 600;
 }
 
 SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
@@ -292,6 +294,70 @@ bool SubscriptionUiController::restoreServiceFromStore()
     }
 #endif
     return true;
+}
+
+void SubscriptionUiController::otpLogin(const QString &serverId)
+{
+    const auto apiV2 = m_serversController->apiV2Config(serverId);
+    if (!apiV2.has_value()) {
+        emit errorOccurred(ErrorCode::InternalError);
+        return;
+    }
+    const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
+
+    QString proof;
+    ErrorCode errorCode = m_storePurchaseController->resolveOtpLoginProof(proof);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    SubscriptionController::OtpData otpData;
+    errorCode = m_subscriptionController->otpLogin(proof, otpData, isTestPurchase);
+    if (errorCode != ErrorCode::NoError) {
+        emit errorOccurred(errorCode);
+        return;
+    }
+
+    m_otpRequestId = otpData.otpRequestId;
+    m_otpIsTestPurchase = isTestPurchase;
+
+    int expiresInSec = otpDefaultTtlSec;
+    if (otpData.expiresAt.isValid()) {
+        expiresInSec = static_cast<int>(qMax<qint64>(0, QDateTime::currentDateTimeUtc().secsTo(otpData.expiresAt)));
+    }
+    emit otpCodeReceived(otpData.code, expiresInSec);
+}
+
+void SubscriptionUiController::checkOtpStatus()
+{
+    if (m_otpRequestId.isEmpty() || m_otpStatusCheckInProgress) {
+        return;
+    }
+    m_otpStatusCheckInProgress = true;
+
+    using OtpStatusResult = QPair<ErrorCode, SubscriptionController::OtpStatus>;
+    auto *watcher = new QFutureWatcher<OtpStatusResult>(this);
+    connect(watcher, &QFutureWatcher<OtpStatusResult>::finished, this, [this, watcher]() {
+        const auto [errorCode, status] = watcher->result();
+        watcher->deleteLater();
+        m_otpStatusCheckInProgress = false;
+
+        // Poll failures are silent: the drawer keeps polling on its timer
+        if (errorCode != ErrorCode::NoError) {
+            return;
+        }
+        if (status == SubscriptionController::OtpStatus::Confirmed) {
+            qDebug().noquote() << "[OTP] Code confirmed";
+            m_otpRequestId.clear();
+            emit otpConfirmed();
+        } else if (status == SubscriptionController::OtpStatus::Expired) {
+            qDebug().noquote() << "[OTP] Code expired";
+            m_otpRequestId.clear();
+            emit otpExpired();
+        }
+    });
+    watcher->setFuture(m_subscriptionController->otpStatus(m_otpRequestId, m_otpIsTestPurchase));
 }
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
