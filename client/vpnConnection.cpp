@@ -417,7 +417,11 @@ void VpnConnection::appendSplitTunnelingConfig()
         allowSiteBasedSplitTunneling = false;
         auto configData = m_vpnConfiguration.value(protocolName + "_config_data").toObject();
         if (configData.value(configKey::allowedIps).isString()) {
-            QJsonArray allowedIpsJsonArray = QJsonArray::fromStringList(configData.value(configKey::allowedIps).toString().split(", "));
+            QJsonArray allowedIpsJsonArray;
+            const QString allowedIps = configData.value(configKey::allowedIps).toString();
+            for (const QString &allowedIp : allowedIps.split(",", Qt::SkipEmptyParts)) {
+                allowedIpsJsonArray.append(allowedIp.trimmed());
+            }
             configData.insert(configKey::allowedIps, allowedIpsJsonArray);
             m_vpnConfiguration.insert(protocolName + "_config_data", configData);
         } else if (configData.value(configKey::allowedIps).isUndefined()) {
@@ -454,7 +458,7 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
 
         QJsonArray allowedIpsJsonArray = configData.value(configKey::allowedIps).toArray();
-        if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
+        if (allowedIpsJsonArray.contains("0.0.0.0/0")) {
             allowSiteBasedSplitTunneling = true;
         }
     }
@@ -464,7 +468,11 @@ void VpnConnection::appendSplitTunnelingConfig()
     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
         routeMode = m_appSettingsRepository->routeMode();
 
-        if (allowSiteBasedSplitTunneling) {
+        if (!allowSiteBasedSplitTunneling) {
+            qWarning()
+                    << "VpnConnection::appendSplitTunnelingConfig: site split tunneling requires an IPv4 default route";
+            routeMode = amnezia::RouteMode::VpnAllSites;
+        } else {
             QStringList sites;
             const QVariantMap &m = m_appSettingsRepository->vpnSites(routeMode);
             for (auto i = m.constBegin(); i != m.constEnd(); ++i) {
