@@ -39,6 +39,7 @@ public:
         , m_serversUiController(serversUiControllerProtected())
         , m_servicesCatalogUiController(servicesCatalogUiControllerProtected())
         , m_apiNewsUiController(apiNewsUiControllerProtected())
+        , m_subscriptionController(subscriptionControllerProtected())
     {
     }
 
