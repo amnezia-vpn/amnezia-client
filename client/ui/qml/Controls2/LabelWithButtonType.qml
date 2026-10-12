@@ -330,7 +330,6 @@ Item {
         border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
 
-
         Behavior on color {
             PropertyAnimation { duration: 200 }
         }

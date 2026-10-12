@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    isTabBarHidden: true
+
     property var processedServer
     property bool subscriptionExpired: false
     property bool subscriptionExpiringSoon: false
@@ -30,8 +32,19 @@ PageType {
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
-    function selectConnectionCountry(countryIndex, countryCode, countryName) {
-        if (countryIndex === ApiCountryModel.currentIndex) {
+    function openServerInfo() {
+        PageController.showBusyIndicator(true)
+        let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+        PageController.showBusyIndicator(false)
+        if (!result) {
+            return
+        }
+
+        PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+    }
+
+    function selectConnectionCountry(countryCode, countryName) {
+        if (countryCode === ApiCountryModel.currentCountryCode) {
             return
         }
 
@@ -40,8 +53,69 @@ PageType {
         PageController.showBusyIndicator(false)
     }
 
+    readonly property bool showSubscriptionNote: root.subscriptionExpired || root.subscriptionExpiringSoon
+    readonly property bool showRenewButton: root.showSubscriptionNote
+                                            && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+    property int stickyRevision: 0
+    property real savedScroll: 0
+
+    function activateCountry(countryCode, countryName) {
+        if (ConnectionController.isConnectionInProgress) {
+            PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
+            return
+        }
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
+            return
+        }
+        root.selectConnectionCountry(countryCode, countryName)
+    }
+
     Component.onCompleted: {
         root.updateSubscriptionState()
+
+        ApiCountryListModel.applyDefaultState(true)
+    }
+
+    Connections {
+        target: ApiCountryListModel
+
+        function onPositionRequested(row) {
+            Qt.callLater(function() {
+                const current = ApiCountryListModel.rowForCountryCode(ApiCountryModel.currentCountryCode)
+                if (current >= 0) {
+                    menuContent.positionViewAtIndex(current, ListView.Center)
+                    menuContent.contentY = collapsingHeader.clampContentY(menuContent.contentY
+                                                                          - collapsingHeader.pinnedHeight / 2)
+                }
+            })
+        }
+
+        function onLayoutRebuilt() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                root.stickyRevision += 1
+            })
+        }
+
+        function onSourceAboutToRefresh() {
+            root.savedScroll = menuContent.contentY - menuContent.originY
+        }
+
+        function onSourceRefreshed() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                const maxScroll = Math.max(0, menuContent.contentHeight - menuContent.height)
+                menuContent.contentY = menuContent.originY + Math.min(root.savedScroll, maxScroll)
+            })
+        }
+
+        function onFavoritesLimitExceeded() {
+            favoritesLimitToast.show(qsTr("You already have %1 locations in favorites. Remove one")
+                                     .arg(ApiCountryListModel.favoritesLimit),
+                                     qsTr("Show"))
+        }
     }
 
     Connections {
@@ -89,55 +163,244 @@ PageType {
     ListViewType {
         id: menuContent
 
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.topMargin: collapsingHeader.topBarHeight
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
-        model: ApiCountryModel
+        model: ApiCountryListModel
 
-        currentIndex: ApiCountryModel.currentIndex
+        interactive: menuContent.contentHeight > menuContent.height
 
-        ButtonGroup {
-            id: containersRadioButtonGroup
+        ScrollBar.vertical: collapsingHeader.scrollBar
+
+        header: collapsingHeader.listHeader
+
+        footer: Item {
+            width: menuContent.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
-        header: ColumnLayout {
+        delegate: Item {
+            id: rowItem
+
+            required property int index
+            required property string rowType
+            required property string sectionKey
+            required property bool isCurrent
+            required property bool isFavorite
+            required property string countryName
+            required property string sourceCountryName
+            required property string countryCode
+            required property string countryImageCode
+
             width: menuContent.width
 
-            spacing: 4
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
+            height: implicitHeight
 
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
+            CountrySectionHeader {
+                id: sectionHeader
 
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
+                listModel: ApiCountryListModel
+                width: rowItem.width
+                visible: rowItem.rowType === "section"
+
+                sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+                row: rowItem.rowType === "section" ? rowItem.index : -1
             }
 
-            HeaderTypeWithButton {
-                id: headerContent
-                objectName: "headerContent"
+            Item {
+                id: countryRow
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
+                width: rowItem.width
+                height: rowItem.height
+                visible: rowItem.rowType === "country"
 
-                actionButtonImage: "qrc:/images/controls/settings.svg"
+                readonly property bool rowPressed: rowTap.pressed && !starTap.pressed
 
-                headerText: root.processedServer.name
+                Item {
+                    id: rowBody
 
-                actionButtonFunction: function() {
-                    PageController.showBusyIndicator(true)
-                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                    PageController.showBusyIndicator(false)
-                    if (!result) {
-                        return
+                    property bool isFocusable: countryRow.visible
+
+                    anchors.fill: parent
+
+                    function activate() {
+                        root.activateCountry(rowItem.countryCode, rowItem.sourceCountryName)
                     }
 
-                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                    HoverHandler {
+                        id: rowHover
+                        cursorShape: Qt.PointingHandCursor
+                    }
+
+                    TapHandler {
+                        id: rowTap
+
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
+
+                        onTapped: function(eventPoint) {
+                            if (star.contains(star.mapFromItem(rowBody, eventPoint.position))) {
+                                return
+                            }
+                            rowBody.activate()
+                        }
+                    }
+
+                    Keys.onEnterPressed: rowBody.activate()
+                    Keys.onReturnPressed: rowBody.activate()
+                    Keys.onSpacePressed: rowBody.activate()
+                    Keys.onTabPressed: FocusController.nextKeyTabItem()
+                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
+                    Keys.onUpPressed: FocusController.nextKeyUpItem()
+                    Keys.onDownPressed: FocusController.nextKeyDownItem()
+                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
+                    Keys.onRightPressed: FocusController.nextKeyRightItem()
+
+                    Rectangle {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        anchors.topMargin: 4
+                        anchors.bottomMargin: 4
+                        radius: 16
+
+                        color: {
+                            if (countryRow.rowPressed) {
+                                return AmneziaStyle.color.surfacePressed
+                            }
+                            return ((rowHover.hovered && !starHover.hovered) || rowBody.activeFocus)
+                                   ? AmneziaStyle.color.surfaceHovered
+                                   : AmneziaStyle.color.transparent
+                        }
+                        border.width: (rowItem.isCurrent || countryRow.rowPressed) ? 1 : 0
+                        border.color: AmneziaStyle.color.textTertiary
+                    }
+
+                    Image {
+                        id: flag
+
+                        x: 32
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 24
+                        height: 15
+
+                        source: rowItem.countryImageCode !== ""
+                                ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
+                                : ""
+                    }
+
+                    ListItemTitleType {
+                        anchors.left: flag.right
+                        anchors.leftMargin: 16
+                        anchors.right: parent.right
+                        anchors.rightMargin: star.anchors.rightMargin + star.width + 12
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        lineHeight: 24 + LanguageUiController.getLineHeightAppend()
+                        font.letterSpacing: -0.4
+
+                        text: rowItem.countryName
+                        color: AmneziaStyle.color.textPrimary
+                        maximumLineCount: 2
+                        elide: Text.ElideRight
+                    }
+                }
+
+                Item {
+                    id: star
+
+                    property bool isFocusable: countryRow.visible
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: 28
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 48
+                    height: 48
+
+                    function toggle() {
+                        ApiCountryListModel.toggleFavorite(rowItem.countryCode)
+                    }
+
+                    Accessible.name: rowItem.isFavorite ? qsTr("Remove from favorites")
+                                                        : qsTr("Add to favorites")
+
+                    HoverHandler {
+                        id: starHover
+                        cursorShape: Qt.PointingHandCursor
+                    }
+
+                    TapHandler {
+                        id: starTap
+
+                        gesturePolicy: TapHandler.ReleaseWithinBounds
+                        onTapped: star.toggle()
+                    }
+
+                    Keys.onEnterPressed: star.toggle()
+                    Keys.onReturnPressed: star.toggle()
+                    Keys.onSpacePressed: star.toggle()
+                    Keys.onTabPressed: FocusController.nextKeyTabItem()
+                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
+                    Keys.onUpPressed: FocusController.nextKeyUpItem()
+                    Keys.onDownPressed: FocusController.nextKeyDownItem()
+                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
+                    Keys.onRightPressed: FocusController.nextKeyRightItem()
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 12
+
+                        color: {
+                            if (starTap.pressed) {
+                                return AmneziaStyle.color.surfacePressed
+                            }
+                            return (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
+                                                                           : AmneziaStyle.color.transparent
+                        }
+                        border.width: (starTap.pressed || star.activeFocus) ? 1 : 0
+                        border.color: starTap.pressed ? AmneziaStyle.color.borderStrong : AmneziaStyle.color.borderSoft
+                    }
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 24
+                        height: 24
+
+                        source: rowItem.isFavorite ? "qrc:/images/controls/star-filled.svg"
+                                                   : "qrc:/images/controls/star.svg"
+                    }
+                }
+
+                DividerType {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
+                    anchors.bottom: parent.bottom
+
+                    color: AmneziaStyle.color.borderSoft
                 }
             }
+        }
+    }
+
+    CollapsingHeaderType {
+        id: collapsingHeader
+
+        anchors.fill: parent
+
+        listView: menuContent
+        title: qsTr("Amnezia Premium")
+
+        collapsibleContent: ColumnLayout {
+            spacing: 0
 
             ParagraphTextType {
-                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
+                visible: root.showSubscriptionNote
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
@@ -149,14 +412,12 @@ PageType {
             }
 
             BasicButtonType {
-                visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+                visible: root.showRenewButton
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 28
-                Layout.bottomMargin: 0
 
                 defaultColor: AmneziaStyle.color.paleGray
                 hoveredColor: AmneziaStyle.color.lightGray
@@ -174,74 +435,116 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
-                Layout.bottomMargin: 8
+                Layout.topMargin: root.showSubscriptionNote ? 12 : 8
 
-                text: qsTr("Location for connection")
-                color: AmneziaStyle.color.mutedGray
+                text: qsTr("Countries to connect to")
+                color: AmneziaStyle.color.paleGray
             }
         }
 
-        delegate: ColumnLayout {
-            id: content
+        navigationButtons: [
+            ImageButtonType {
+                id: settingsButton
+                objectName: "settingsButton"
 
-            width: menuContent.width
-            height: content.implicitHeight
+                implicitWidth: 40
+                implicitHeight: 40
 
-            RowLayout {
-                VerticalRadioButton {
-                    id: containerRadioButton
+                hoverEnabled: true
+                image: "qrc:/images/controls/settings.svg"
+                imageColor: AmneziaStyle.color.paleGray
 
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-
-                    text: countryName
-
-                    ButtonGroup.group: containersRadioButtonGroup
-
-                    imageSource: "qrc:/images/controls/download.svg"
-
-                    checked: index === ApiCountryModel.currentIndex
-                    checkable: !ConnectionController.isConnected
-
-                    onClicked: {
-                        if (ConnectionController.isConnectionInProgress) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
-                            return
-                        }
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-                            return
-                        }
-
-                        root.selectConnectionCountry(index, countryCode, countryName)
-                    }
-
-                    Keys.onEnterPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                    Keys.onReturnPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                }
-
-                Image {
-                    Layout.rightMargin: 32
-                    Layout.alignment: Qt.AlignRight
-
-                    source: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
-                }
+                onClicked: root.openServerInfo()
             }
+        ]
 
-            DividerType {
+        pinnedContent: [
+            CountrySearchRow {
+                id: searchRow
+
+                listModel: ApiCountryListModel
+
+                onSortRequested: sortDrawer.openTriggered()
+            },
+
+            CountryUseCaseChips {
+                id: useCaseChips
+
+                listModel: ApiCountryListModel
+
                 Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.preferredHeight: useCaseChips.implicitHeight
+            },
+
+            WarningType {
+                readonly property string bannerText:
+                    CountryRegionNames.useCaseBanners[ApiCountryListModel.activeUseCaseId] || ""
+
+                visible: bannerText !== ""
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.topMargin: 24
+
+                backGroundColor: AmneziaStyle.color.surfaceBase
+                radius: 16
+                verticalPadding: 16
+                iconSpacing: 12
+                textPixelSize: 14
+                textLineHeight: 18
+                textColor: AmneziaStyle.color.textPrimary
+                iconPath: "qrc:/images/controls/info.svg"
+                textString: bannerText
+            },
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
+            }
+        ]
+
+        CountryListStickyHeader {
+            listModel: ApiCountryListModel
+            listView: menuContent
+            header: collapsingHeader
+            revision: root.stickyRevision
+        }
+
+        CountriesEmptyState {
+            anchors.top: parent.top
+            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
+
+            visible: !ApiCountryListModel.hasResults
+
+            isSearchResult: ApiCountryListModel.isSearchActive
+            categoryName: ApiCountryListModel.activeUseCaseId !== "all"
+                          ? CountryRegionNames.useCaseName(ApiCountryListModel, ApiCountryListModel.activeUseCaseId)
+                          : ""
+
+            onShowAllRequested: {
+                searchRow.searchField.clear()
+                ApiCountryListModel.activeUseCaseId = "all"
             }
         }
+    }
+
+    SortCountriesDrawer {
+        id: sortDrawer
+
+        listModel: ApiCountryListModel
+
+        anchors.fill: parent
+    }
+
+    ToastType {
+        id: favoritesLimitToast
+
+        onActionTriggered: ApiCountryListModel.activeUseCaseId = "favorites"
     }
 }

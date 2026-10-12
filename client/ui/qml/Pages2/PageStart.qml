@@ -17,6 +17,7 @@ PageType {
 
     property bool isControlsDisabled: false
     property bool isTabBarDisabled: false
+    property bool isTabBarShown: true
 
     Connections {
         objectName: "pageControllerConnection"
@@ -25,10 +26,10 @@ PageType {
 
         function onGoToPageHome() {
             if (PageController.isStartPageVisible()) {
-                tabBar.visible = false
+                root.isTabBarShown = false
                 tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardStart)
             } else {
-                tabBar.visible = true
+                root.isTabBarShown = true
                 tabBar.setCurrentIndex(0)
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
             }
@@ -286,10 +287,10 @@ PageType {
         Component.onCompleted: {
             var pagePath
             if (PageController.isStartPageVisible()) {
-                tabBar.visible = false
+                root.isTabBarShown = false
                 pagePath = PageController.getPagePath(PageEnum.PageSetupWizardStart)
             } else {
-                tabBar.visible = true
+                root.isTabBarShown = true
                 pagePath = PageController.getPagePath(PageEnum.PageHome)
                 ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
             }
@@ -323,6 +324,9 @@ PageType {
         anchors.right: parent.right
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+
+        visible: root.isTabBarShown
+                 && !(tabBarStackView.currentItem && tabBarStackView.currentItem.isTabBarHidden === true)
 
         // Also adjust TabBar position when keyboard appears (Android 14+ workaround)
         anchors.bottomMargin: PageController.imeHeight

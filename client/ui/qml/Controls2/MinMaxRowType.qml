@@ -51,6 +51,14 @@ Item {
         return String(n)
     }
 
+    function effectiveOther(value, placeholder) {
+        if (value !== "")
+            return parseInt(value, 10)
+        if (placeholder !== "")
+            return parseInt(placeholder, 10)
+        return NaN
+    }
+
     function capEdit(tf, holder) {
         if (tf.text !== "" && parseInt(tf.text, 10) > root.maxLimit) {
             tf.text = holder.lastValid
@@ -86,8 +94,8 @@ Item {
                 textField.onTextEdited: { root.capEdit(minField.textField, minField); root.edited() }
                 textField.onEditingFinished: {
                     var v = root.clampValue(minField.textField.text)
-                    if (v !== "" && root.maxValue !== "") {
-                        var mx = parseInt(root.maxValue, 10)
+                    if (v !== "") {
+                        var mx = root.effectiveOther(root.maxValue, root.maxPlaceholder)
                         if (!isNaN(mx) && parseInt(v, 10) > mx)
                             root.maxChanged(v)
                     }
@@ -121,8 +129,8 @@ Item {
                 textField.onTextEdited: { root.capEdit(maxField.textField, maxField); root.edited() }
                 textField.onEditingFinished: {
                     var v = root.clampValue(maxField.textField.text)
-                    if (v !== "" && root.minValue !== "") {
-                        var mn = parseInt(root.minValue, 10)
+                    if (v !== "") {
+                        var mn = root.effectiveOther(root.minValue, root.minPlaceholder)
                         if (!isNaN(mn) && parseInt(v, 10) < mn)
                             v = String(mn)
                     }

@@ -115,15 +115,6 @@ void XrayConfigSnapshotsModel::createFromCurrent(const amnezia::XrayServerConfig
     persistAll();
 }
 
-amnezia::XrayServerConfig XrayConfigSnapshotsModel::applyConfig(int index) const
-{
-    if (index < 0 || index >= m_configs.size()) {
-        return amnezia::XrayServerConfig {};
-    }
-
-    return m_configs.at(index).serverConfig;
-}
-
 void XrayConfigSnapshotsModel::removeConfig(int index)
 {
     if (index < 0 || index >= m_configs.size()) {
@@ -200,7 +191,7 @@ void XrayConfigSnapshotsModel::createFromCurrentModel()
     if (!m_xrayConfigModel) {
         return;
     }
-    createFromCurrent(m_xrayConfigModel->getProtocolConfig().serverConfig);
+    createFromCurrent(m_xrayConfigModel->pendingServerConfig(QString()));
 }
 
 void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
@@ -208,9 +199,12 @@ void XrayConfigSnapshotsModel::applyConfigToCurrentModel(int index)
     if (!m_xrayConfigModel) {
         return;
     }
-    amnezia::XrayServerConfig cfg = applyConfig(index);
-    if (cfg.port.isEmpty()) {
-        return; // guard against invalid index
+    if (index < 0 || index >= m_configs.size()) {
+        return;
     }
-    m_xrayConfigModel->applyServerConfig(cfg);
+    const XrayConfigSnapshot &snapshot = m_configs.at(index);
+    if (snapshot.serverConfig.port.isEmpty()) {
+        return;
+    }
+    m_xrayConfigModel->applyServerConfig(snapshot.serverConfig);
 }

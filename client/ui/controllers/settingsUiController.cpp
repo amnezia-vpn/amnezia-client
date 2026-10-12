@@ -141,14 +141,14 @@ void SettingsUiController::backupAppConfig(const QString &fileName)
 
 void SettingsUiController::restoreAppConfig(const QString &fileName)
 {
-    QFile file(fileName);
+    QByteArray data;
 
-    if (!file.open(QIODevice::ReadOnly)) {
+    if (!SystemController::readFile(fileName, data)) {
         emit errorOccurred(ErrorCode::OpenError);
         return;
     }
 
-    restoreAppConfigFromData(file.readAll());
+    restoreAppConfigFromData(data);
 }
 
 void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
