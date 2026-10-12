@@ -1,6 +1,7 @@
 import Darwin
 import Foundation
 import NetworkExtension
+import os.log
 
 enum XrayErrors: Error {
     case noXrayConfig
@@ -9,6 +10,38 @@ enum XrayErrors: Error {
     case cantParseListenAndPort
     case cantAcquireLocalPort
     case cantSaveHevSocksConfig
+    case xrayStartFailed
+}
+
+private func takeLibXrayError(_ result: UnsafeMutablePointer<CChar>?) -> String? {
+    guard let result else { return nil }
+    defer { free(result) }
+    let message = String(cString: result)
+    return message.isEmpty ? nil : message
+}
+
+private enum XrayLogForwarder {
+    private static let queue = DispatchQueue(label: "org.amnezia.xray.log")
+
+    static let callback: libxray_logcallback = { msg, _ in
+        guard let msg else { return }
+        let line = String(cString: msg).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !line.isEmpty else { return }
+        XrayLogForwarder.queue.async {
+            xrayLog(XrayLogForwarder.level(of: line), title: "core: ", message: line)
+        }
+    }
+
+    private static func level(of line: String) -> OSLogType {
+        if line.contains("[Error]") {
+            return .error
+        } else if line.contains("[Warning]") {
+            return .default
+        } else if line.contains("[Debug]") {
+            return .debug
+        }
+        return .info
+    }
 }
 
 extension Constants {
@@ -207,7 +240,9 @@ extension PacketTunnelProvider {
 
     func stopXray(completionHandler: () -> Void) {
         Socks5Tunnel.quit()
-        LibXrayStopXray()
+        if let error = takeLibXrayError(LibXrayStopXray()) {
+            xrayLog(.error, message: "Failed to stop xray: \(error)")
+        }
         completionHandler()
     }
 
@@ -287,6 +322,10 @@ extension PacketTunnelProvider {
 
         updateActiveInterfaceIndexForCurrentPath()
 
+        if let error = takeLibXrayError(LibXraySetLogCallback(XrayLogForwarder.callback, nil)) {
+            xrayLog(.error, message: "Failed to set xray log callback: \(error)")
+        }
+
         let ctx = Unmanaged.passUnretained(self).toOpaque()
         let cb: libxray_sockcallback = { (fd, ctx) in
             guard let ctx = ctx else { return }
@@ -294,11 +333,17 @@ extension PacketTunnelProvider {
 
             instance.sockCallback(fd: fd)
         }
-        LibXraySetSockCallback(cb, ctx)
+        if let error = takeLibXrayError(LibXraySetSockCallback(cb, ctx)) {
+            xrayLog(.error, message: "Failed to set xray sock callback: \(error)")
+        }
 
-        LibXrayRunXray(nil,
-                       path,
-                       Int64.max)
+        if let error = takeLibXrayError(LibXrayRunXray(nil,
+                                                       path,
+                                                       Int64.max)) {
+            xrayLog(.error, message: "Failed to start xray: \(error)")
+            completionHandler(XrayErrors.xrayStartFailed)
+            return
+        }
 
         completionHandler(nil)
         xrayLog(.info, message: "Xray started")

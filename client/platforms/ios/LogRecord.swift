@@ -29,10 +29,15 @@ extension Log {
       self.message = message
     }
 
+    private static let saveLock = NSLock()
+
     func save(at url: URL) {
       osLog.log(level: level.osLogType, "\(message)")
 
       guard let data = "\n\(description)".data(using: .utf8) else { return }
+
+      Record.saveLock.lock()
+      defer { Record.saveLock.unlock() }
 
       if !FileManager.default.fileExists(atPath: url.path) {
         guard (try? "".data(using: .utf8)?.write(to: url)) != nil else { return }
