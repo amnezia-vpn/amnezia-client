@@ -92,6 +92,7 @@ namespace amnezia
         LegacyContainerNotSupportedError = 906,
         ConfigFormatVersionNotSupportedError = 907,
         RestoreBackupUnsupportedConfigsSkipped = 908,
+        ImportXraySettingsFileUseXrayPage = 909,
 
         // Android errors
         AndroidError = 1000,
