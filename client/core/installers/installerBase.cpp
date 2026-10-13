@@ -87,8 +87,8 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             srv.flow = protocols::xray::defaultFlow;
             srv.site = protocols::xray::defaultSite;
             srv.sni = protocols::xray::defaultSni;
-            srv.fingerprint = protocols::xray::defaultFingerprint;
             srv.alpn = protocols::xray::defaultAlpn;
+            srv.fingerprint = protocols::xray::defaultFingerprint;
             config.protocolConfig = xrayConfig;
             break;
         }

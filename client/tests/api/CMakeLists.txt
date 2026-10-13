@@ -28,3 +28,5 @@ target_link_libraries(test_gateway_service_import PRIVATE
 add_test(NAME UiApiServicesModelAndControllerTest COMMAND test_ui_api_services_model_and_controller)
 add_test(NAME UiNewsModelAndControllerTest COMMAND test_ui_news_model_and_controller)
 add_test(NAME GatewayServiceImportTest COMMAND test_gateway_service_import)
+
+amnezia_copy_runtime_dlls()

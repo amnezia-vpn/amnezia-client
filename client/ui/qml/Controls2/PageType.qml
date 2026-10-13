@@ -9,6 +9,7 @@ Item {
 
     property StackView stackView: StackView.view
     property bool enableTimer: true
+    property bool isTabBarHidden: false
 
     onVisibleChanged: {
         if (visible && enableTimer) {

@@ -48,18 +48,47 @@ QVariant ApiCountryModel::data(const QModelIndex &index, int role) const
         return isIssued;
     }
     case IsWorkerExpiredRole: {
-        return issuedConfigInfo.lastDownloaded < issuedConfigInfo.workerLastUpdated;
+        return isWorkerExpired(issuedConfigInfo);
     }
     }
 
     return QVariant();
 }
 
-void ApiCountryModel::updateModel(const QJsonArray &countries, const QString &currentCountryCode)
+const QVector<ApiCountryModel::CountryInfo> &ApiCountryModel::countries() const
+{
+    return m_countries;
+}
+
+bool ApiCountryModel::isWorkerExpired(const IssuedConfigInfo &issuedConfigInfo) const
+{
+    if (issuedConfigInfo.workerLastUpdated.isEmpty()) {
+        return false;
+    }
+    return issuedConfigInfo.lastDownloaded < issuedConfigInfo.workerLastUpdated;
+}
+
+bool ApiCountryModel::hasExpiredWorkerConfigs() const
+{
+    for (const CountryInfo &countryInfo : m_countries) {
+        const IssuedConfigInfo issuedConfigInfo = m_issuedConfigs.value(countryInfo.countryCode);
+        if (issuedConfigInfo.sourceType == countryConfig && isWorkerExpired(issuedConfigInfo)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ApiCountryModel::updateModel(const QJsonArray &countries, const QString &currentCountryCode,
+                                  const QString &userCountryCode)
 {
     beginResetModel();
 
     m_countries.clear();
+    m_currentCountryCode = currentCountryCode;
+    m_userCountryCode = userCountryCode.toUpper();
+    m_currentIndex = -1;
+
     for (int i = 0; i < countries.size(); i++) {
         CountryInfo countryInfo;
         QJsonObject countryObject = countries.at(i).toObject();
@@ -70,12 +99,14 @@ void ApiCountryModel::updateModel(const QJsonArray &countries, const QString &cu
 
         if (countryInfo.countryCode == currentCountryCode) {
             m_currentIndex = i;
-            emit currentIndexChanged(m_currentIndex);
         }
         m_countries.push_back(countryInfo);
     }
 
     endResetModel();
+
+    emit currentIndexChanged(m_currentIndex);
+    emit issuedConfigsChanged();
 }
 
 void ApiCountryModel::updateIssuedConfigsInfo(const QJsonArray &issuedConfigs)
@@ -101,17 +132,22 @@ void ApiCountryModel::updateIssuedConfigsInfo(const QJsonArray &issuedConfigs)
     }
 
     endResetModel();
+    emit issuedConfigsChanged();
+}
+
+QString ApiCountryModel::getCurrentCountryCode() const
+{
+    return m_currentCountryCode;
+}
+
+QString ApiCountryModel::getUserCountryCode() const
+{
+    return m_userCountryCode;
 }
 
 int ApiCountryModel::getCurrentIndex()
 {
     return m_currentIndex;
-}
-
-void ApiCountryModel::setCurrentIndex(const int i)
-{
-    m_currentIndex = i;
-    emit currentIndexChanged(m_currentIndex);
 }
 
 QHash<int, QByteArray> ApiCountryModel::roleNames() const

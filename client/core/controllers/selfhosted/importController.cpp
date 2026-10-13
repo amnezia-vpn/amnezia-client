@@ -64,6 +64,7 @@ namespace
         const QString amneziaFreeConfigPattern = "api_key";
         const QString amneziaPremiumConfigPattern = "auth_data";
         const QString backupPattern = "Servers/serversList";
+        const QString xraySettingsPattern = "serverConfig";
 
         if (config.contains(backupPattern)) {
             return ConfigTypes::Backup;
@@ -79,6 +80,8 @@ namespace
         } else if (config.contains(openVpnConfigPatternCli)
                    && (config.contains(openVpnConfigPatternDriver1) || config.contains(openVpnConfigPatternDriver2))) {
             return ConfigTypes::OpenVpn;
+        } else if (QJsonDocument::fromJson(config.toUtf8()).object().value(xraySettingsPattern).isObject()) {
+            return ConfigTypes::XraySettings;
         }
         return ConfigTypes::Invalid;
     }
@@ -245,6 +248,10 @@ ImportController::ImportResult ImportController::extractConfigFromData(const QSt
     }
     case ConfigTypes::Backup: {
         result.errorCode = ErrorCode::ImportBackupFileUseRestoreInstead;
+        return result;
+    }
+    case ConfigTypes::XraySettings: {
+        result.errorCode = ErrorCode::ImportXraySettingsFileUseXrayPage;
         return result;
     }
     case ConfigTypes::Invalid: {

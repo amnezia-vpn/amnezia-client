@@ -67,6 +67,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/../common/crypto/cryptoUtils.h
     ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/api/countryCatalog.h
     ${CLIENT_ROOT_DIR}/core/utils/api/gatewayPayloadBuilder.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
     ${CLIENT_ROOT_DIR}/core/utils/swiftBridge.h
@@ -154,6 +155,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/../common/crypto/cryptoUtils.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/api/countryCatalog.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/gatewayPayloadBuilder.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serverConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp

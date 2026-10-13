@@ -57,11 +57,11 @@ public:
 
         // ── Transport — mKCP ──────────────────────────────────────────
         MkcpTtiRole,
+        MkcpMtuRole,
         MkcpUplinkCapacityRole,
         MkcpDownlinkCapacityRole,
-        MkcpReadBufferSizeRole,
-        MkcpWriteBufferSizeRole,
-        MkcpCongestionRole,
+        MkcpCwndMultiplierRole,
+        MkcpMaxSendingWindowRole,
 
         // ── xPadding ──────────────────────────────────────────────────
         XPaddingBytesMinRole,
@@ -112,8 +112,8 @@ public:
     Q_INVOKABLE static QString mkcpDefaultTti();
     Q_INVOKABLE static QString mkcpDefaultUplinkCapacity();
     Q_INVOKABLE static QString mkcpDefaultDownlinkCapacity();
-    Q_INVOKABLE static QString mkcpDefaultReadBufferSize();
-    Q_INVOKABLE static QString mkcpDefaultWriteBufferSize();
+    Q_INVOKABLE static QString mkcpDefaultMtu();
+    Q_INVOKABLE static QString mkcpDefaultCwndMultiplier();
 
     Q_INVOKABLE static QString portDefault();
     Q_INVOKABLE static QString sniDefault();
@@ -135,9 +135,17 @@ public:
     Q_INVOKABLE static bool isValidPath(const QString &path);
     Q_INVOKABLE QStringList validationErrors() const;
 
+    Q_INVOKABLE bool pendingChangeTouchesServer(const QString &pendingPort) const;
+    Q_INVOKABLE bool pendingChangeBreaksIssuedConfigs(const QString &pendingPort) const;
+    Q_INVOKABLE bool pendingChangeRequiresReinstall(const QString &pendingPort) const;
+
+    Q_INVOKABLE QString saveDescription(const QString &pendingPort) const;
+
 public slots:
     void updateModel(amnezia::DockerContainer container, const amnezia::XrayProtocolConfig& protocolConfig);
     amnezia::XrayProtocolConfig getProtocolConfig();
+    amnezia::XrayServerConfig pendingServerConfig(const QString &pendingPort) const;
+
     bool isServerSettingsEqual() const;
     bool hasUnsavedChanges() const;
     void resetToDefaults();
@@ -154,7 +162,7 @@ private:
     amnezia::XrayProtocolConfig m_protocolConfig;
     amnezia::XrayProtocolConfig m_originalProtocolConfig;
 
-    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config, bool fillFlowDefault = true);
+    void applyDefaultsToServerConfig(amnezia::XrayServerConfig& config, bool fillFlowDefault);
 };
 
 #endif // XRAYCONFIGMODEL_H

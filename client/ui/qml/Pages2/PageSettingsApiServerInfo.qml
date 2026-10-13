@@ -278,13 +278,7 @@ PageType {
 
                 iconPath: "qrc:/images/controls/alert-circle.svg"
 
-                visible: {
-                    for (let i = 0; i < ApiCountryModel.count; ++i) {
-                        if (ApiCountryModel.get(i).isWorkerExpired)
-                            return true;
-                    }
-                    return false;
-                }
+                visible: ApiCountryModel.hasExpiredWorkerConfigs
             }
 
             LabelWithButtonType {
@@ -323,7 +317,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    SubscriptionUiController.updateApiCountryModel()
+                    SubscriptionUiController.updateApiCountryModel(ServersUiController.processedServerId)
                     PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
                 }
             }
