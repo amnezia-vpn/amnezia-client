@@ -59,14 +59,6 @@ PageType {
 
     readonly property bool isStorePlatform: Qt.platform.os === "ios" || Qt.platform.os === "android" || Qt.platform.os === "osx"
 
-    Connections {
-        target: SubscriptionUiController
-
-        function onOtpCodeReceived(code, expiresInSec) {
-            otpLoginDrawer.showCode(code, expiresInSec)
-        }
-    }
-
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
@@ -274,6 +266,26 @@ PageType {
                     || footer.isVisibleForAmneziaFree
             }
 
+            LabelWithButtonType {
+                id: otpLoginEntry
+
+                Layout.fillWidth: true
+
+                visible: root.isStorePlatform
+
+                text: qsTr("Login code for the website")
+                descriptionText: qsTr("To sign in or add a subscription")
+                rightImageSource: "qrc:/images/controls/external-link.svg"
+
+                clickedFunction: function() {
+                    otpLoginDialog.requestCode(ServersUiController.processedServerId)
+                }
+            }
+
+            DividerType {
+                visible: root.isStorePlatform
+            }
+
             WarningType {
                 id: warning
 
@@ -391,25 +403,6 @@ PageType {
 
             DividerType {
                 visible: footer.isVisibleForAmneziaFree
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-
-                visible: root.isStorePlatform
-
-                text: qsTr("Log in to your account")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.showBusyIndicator(true)
-                    SubscriptionUiController.otpLogin(ServersUiController.processedServerId)
-                    PageController.showBusyIndicator(false)
-                }
-            }
-
-            DividerType {
-                visible: root.isStorePlatform
             }
 
             BasicButtonType {
@@ -534,9 +527,7 @@ PageType {
         serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }
 
-    OtpLoginDrawer {
-        id: otpLoginDrawer
-
-        anchors.fill: parent
+    OtpLoginDialog {
+        id: otpLoginDialog
     }
 }

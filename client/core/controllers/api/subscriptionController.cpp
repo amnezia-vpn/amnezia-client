@@ -35,7 +35,32 @@ using namespace amnezia;
 
 namespace
 {
+constexpr int httpStatusCodeBadRequest = 400;
 constexpr int httpStatusCodeNotFound = 404;
+constexpr int httpStatusCodeTooManyRequests = 429;
+
+int httpStatusFromReply(const GatewayController::ReplyInfo &replyInfo, const QByteArray &responseBody)
+{
+    if (replyInfo.httpStatusCode > 0) {
+        return replyInfo.httpStatusCode;
+    }
+    const QJsonObject errorObject = QJsonDocument::fromJson(responseBody).object();
+    return errorObject.value(QLatin1String("http_status")).toInt(errorObject.value(QLatin1String("status")).toInt(0));
+}
+
+SubscriptionController::OtpLoginError classifyOtpLoginError(int httpStatus, QNetworkReply::NetworkError networkError)
+{
+    switch (httpStatus) {
+    case httpStatusCodeBadRequest: return SubscriptionController::OtpLoginError::ReceiptRejected;
+    case httpStatusCodeNotFound: return SubscriptionController::OtpLoginError::PurchaseNotFound;
+    case httpStatusCodeTooManyRequests: return SubscriptionController::OtpLoginError::RateLimited;
+    default: break;
+    }
+    if (httpStatus == 0 && networkError != QNetworkReply::NoError) {
+        return SubscriptionController::OtpLoginError::NoNetwork;
+    }
+    return SubscriptionController::OtpLoginError::Failed;
+}
 
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
@@ -196,11 +221,12 @@ void SubscriptionController::updateApiConfigInJson(QJsonObject &serverConfigJson
     serverConfigJson[apiDefs::key::apiConfig] = apiConfig;
 }
 
-ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase)
+ErrorCode SubscriptionController::executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase,
+                                                 GatewayController::ReplyInfo *replyInfo)
 {
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(isTestPurchase), m_appSettingsRepository->isDevGatewayEnv(isTestPurchase), apiDefs::requestTimeoutMsecs,
                                         m_appSettingsRepository->isStrictKillSwitchEnabled(), m_appSettingsRepository);
-    return gatewayController.post(endpoint, apiPayload, responseBody);
+    return gatewayController.post(endpoint, apiPayload, responseBody, replyInfo);
 }
 
 ErrorCode SubscriptionController::importServiceFromGateway(const QString &userCountryCode, const QString &serviceType,
@@ -578,15 +604,22 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QString &serverId, co
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData &otpData, bool isTestPurchase)
+ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData &otpData, OtpLoginError &loginError, bool isTestPurchase)
 {
+    loginError = OtpLoginError::None;
+
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                      .addField(apiDefs::key::transactionId, transactionId)
                                      .build();
 
     QByteArray responseBody;
-    ErrorCode errorCode = executeRequest(QString("%1v1/get_otp_code"), apiPayload, responseBody, isTestPurchase);
+    GatewayController::ReplyInfo replyInfo;
+    ErrorCode errorCode = executeRequest(QString("%1v1/get_otp_code"), apiPayload, responseBody, isTestPurchase, &replyInfo);
     if (errorCode != ErrorCode::NoError) {
+        const int httpStatus = httpStatusFromReply(replyInfo, responseBody);
+        loginError = classifyOtpLoginError(httpStatus, replyInfo.networkError);
+        qWarning().noquote() << "[OTP] Code request failed, errorCode =" << static_cast<int>(errorCode)
+                             << "http status =" << httpStatus << "network error =" << replyInfo.networkError;
         return errorCode;
     }
 
@@ -596,6 +629,7 @@ ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData
     otpData.expiresAt = QDateTime::fromString(responseObject.value(apiDefs::key::expiresAt).toString(), Qt::ISODateWithMs);
     if (otpData.code.isEmpty() || otpData.otpRequestId.isEmpty()) {
         qWarning().noquote() << "[OTP] Response does not contain an otp code or request id";
+        loginError = OtpLoginError::Failed;
         return ErrorCode::ApiOtpLoginError;
     }
     qDebug().noquote() << "[OTP] Code issued, request id =" << otpData.otpRequestId

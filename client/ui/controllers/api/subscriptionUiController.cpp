@@ -301,6 +301,7 @@ void SubscriptionUiController::otpLogin(const QString &serverId)
     const auto apiV2 = m_serversController->apiV2Config(serverId);
     if (!apiV2.has_value()) {
         emit errorOccurred(ErrorCode::InternalError);
+        emit otpLoginFailed(QString());
         return;
     }
     const bool isTestPurchase = apiV2->apiConfig.isTestPurchase;
@@ -308,17 +309,24 @@ void SubscriptionUiController::otpLogin(const QString &serverId)
     QString proof;
     ErrorCode errorCode = m_storePurchaseController->resolveOtpLoginProof(proof);
     if (errorCode != ErrorCode::NoError) {
-        emit errorOccurred(errorCode);
+        if (errorCode == ErrorCode::ApiPurchasePendingError) {
+            emit otpLoginFailed(QStringLiteral("purchaseNotFound"));
+        } else {
+            emit errorOccurred(errorCode);
+            emit otpLoginFailed(QString());
+        }
         return;
     }
 
     SubscriptionController::OtpData otpData;
-    errorCode = m_subscriptionController->otpLogin(proof, otpData, isTestPurchase);
+    SubscriptionController::OtpLoginError loginError = SubscriptionController::OtpLoginError::None;
+    errorCode = m_subscriptionController->otpLogin(proof, otpData, loginError, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
-        emit errorOccurred(errorCode);
+        emit otpLoginFailed(otpLoginErrorKind(loginError));
         return;
     }
 
+    m_otpReceiptRejectedCount = 0;
     m_otpRequestId = otpData.otpRequestId;
     m_otpIsTestPurchase = isTestPurchase;
 
@@ -327,6 +335,20 @@ void SubscriptionUiController::otpLogin(const QString &serverId)
         expiresInSec = static_cast<int>(qMax<qint64>(0, QDateTime::currentDateTimeUtc().secsTo(otpData.expiresAt)));
     }
     emit otpCodeReceived(otpData.code, expiresInSec);
+}
+
+QString SubscriptionUiController::otpLoginErrorKind(SubscriptionController::OtpLoginError loginError)
+{
+    using OtpLoginError = SubscriptionController::OtpLoginError;
+    switch (loginError) {
+    case OtpLoginError::NoNetwork: return QStringLiteral("noNetwork");
+    case OtpLoginError::PurchaseNotFound: return QStringLiteral("purchaseNotFound");
+    case OtpLoginError::RateLimited: return QStringLiteral("rateLimited");
+    case OtpLoginError::ReceiptRejected:
+        ++m_otpReceiptRejectedCount;
+        return m_otpReceiptRejectedCount > 1 ? QStringLiteral("receiptRejectedAgain") : QStringLiteral("receiptRejected");
+    default: return QStringLiteral("failed");
+    }
 }
 
 void SubscriptionUiController::checkOtpStatus()

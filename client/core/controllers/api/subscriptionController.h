@@ -2,6 +2,8 @@
 #define SUBSCRIPTIONCONTROLLER_H
 
 #include <QDateTime>
+
+#include "core/controllers/gatewayController.h"
 #include <QJsonObject>
 #include <QByteArray>
 #include <QFuture>
@@ -43,6 +45,15 @@ public:
         Pending,
         Confirmed,
         Expired
+    };
+
+    enum class OtpLoginError {
+        None,
+        NoNetwork,
+        PurchaseNotFound,
+        RateLimited,
+        ReceiptRejected,
+        Failed
     };
 
     explicit SubscriptionController(SecureServersRepository* serversRepository,
@@ -90,7 +101,7 @@ public:
     ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
     QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
 
-    ErrorCode otpLogin(const QString &transactionId, OtpData &otpData, bool isTestPurchase = false);
+    ErrorCode otpLogin(const QString &transactionId, OtpData &otpData, OtpLoginError &loginError, bool isTestPurchase = false);
     QFuture<QPair<ErrorCode, OtpStatus>> otpStatus(const QString &requestId, bool isTestPurchase);
 
     ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
@@ -99,7 +110,8 @@ public:
                                           CaptchaInfo *retryCaptchaOut = nullptr);
 
 private:
-    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false);
+    ErrorCode executeRequest(const QString &endpoint, const QJsonObject &apiPayload, QByteArray &responseBody, bool isTestPurchase = false,
+                             GatewayController::ReplyInfo *replyInfo = nullptr);
     bool isApiKeyExpired(const QString &serverId) const;
     
     ErrorCode extractServerConfigJsonFromResponse(const QByteArray &apiResponseBody, const QString &protocol,

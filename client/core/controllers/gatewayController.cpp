@@ -203,7 +203,7 @@ GatewayController::DecryptionResult GatewayController::tryDecryptResponseBody(co
     return result;
 }
 
-ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody)
+ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody, ReplyInfo *replyInfo)
 {
     EncryptedRequestData encRequestData = prepareRequest(endpoint, apiPayload);
     if (encRequestData.errorCode != ErrorCode::NoError) {
@@ -259,6 +259,10 @@ ErrorCode GatewayController::post(const QString &endpoint, const QJsonObject api
     }
 
     responseBody = decryptionResult.decryptedBody;
+    if (replyInfo) {
+        replyInfo->httpStatusCode = httpStatusCode;
+        replyInfo->networkError = replyError;
+    }
     const auto errorCode =
             apiUtils::checkNetworkReplyErrors(sslErrors, replyErrorString, replyError, httpStatusCode, responseBody);
     if (errorCode) {

@@ -27,7 +27,14 @@ public:
                                const bool isStrictKillSwitchEnabled, SecureAppSettingsRepository *appSettingsRepository,
                                QObject *parent = nullptr);
 
-    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody);
+    struct ReplyInfo
+    {
+        int httpStatusCode = 0;
+        QNetworkReply::NetworkError networkError = QNetworkReply::NoError;
+    };
+
+    amnezia::ErrorCode post(const QString &endpoint, const QJsonObject apiPayload, QByteArray &responseBody,
+                            ReplyInfo *replyInfo = nullptr);
     QFuture<QPair<amnezia::ErrorCode, QByteArray>> postAsync(const QString &endpoint, const QJsonObject apiPayload);
 
 private:
