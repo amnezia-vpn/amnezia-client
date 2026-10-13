@@ -85,6 +85,7 @@ PageType {
 
     property list<QtObject> serverActions: [
         check,
+        backupSection,
         reboot,
         remove,
         clear,
@@ -95,6 +96,7 @@ PageType {
         id: check
 
         property bool isVisible: root.isServerWithWriteAccess
+        readonly property bool isBackupSection: false
         readonly property string title: qsTr("Check the server for previously installed Amnezia services")
         readonly property string description: qsTr("Add them to the application if they were not displayed")
         readonly property var tColor: AmneziaStyle.color.paleGray
@@ -106,9 +108,24 @@ PageType {
     }
 
     QtObject {
+        id: backupSection
+
+        property bool isVisible: root.isServerWithWriteAccess
+        readonly property bool isBackupSection: false
+        readonly property string title: qsTr("Backup")
+        readonly property string description: qsTr("Local copy of VPN protocols, services, all server settings and users")
+        readonly property var tColor: AmneziaStyle.color.paleGray
+        readonly property var clickedHandler: function() {
+            // Navigate to server backup page using PageController
+            PageController.goToPage(PageEnum.PageSettingsServerBackup)
+        }
+    }
+
+    QtObject {
         id: reboot
 
         property bool isVisible: root.isServerWithWriteAccess
+        readonly property bool isBackupSection: false
         readonly property string title: qsTr("Reboot server")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -139,6 +156,7 @@ PageType {
         id: remove
 
         property bool isVisible: true
+        readonly property bool isBackupSection: false
         readonly property string title: qsTr("Remove server from application")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -169,6 +187,7 @@ PageType {
         id: clear
 
         property bool isVisible: root.isServerWithWriteAccess
+        readonly property bool isBackupSection: false
         readonly property string title: qsTr("Clear server from Amnezia software")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -198,6 +217,7 @@ PageType {
         id: reset
 
         property bool isVisible: ServersUiController.isServerFromApi(ServersUiController.processedServerId)
+        readonly property bool isBackupSection: false
         readonly property string title: qsTr("Reset API config")
         readonly property string description: ""
         readonly property var tColor: AmneziaStyle.color.vibrantRed
@@ -223,5 +243,6 @@ PageType {
             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
+
 
 }
