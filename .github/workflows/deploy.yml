@@ -1059,6 +1059,7 @@ jobs:
           - GatewayServiceImportTest
           - UiNewsModelAndControllerTest
           - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
 
     runs-on: ubuntu-22.04
 
@@ -1252,6 +1253,7 @@ jobs:
           - GatewayServiceImportTest
           - UiNewsModelAndControllerTest
           - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
 
     runs-on: windows-latest
 
@@ -1362,6 +1364,7 @@ jobs:
           - GatewayServiceImportTest
           - UiNewsModelAndControllerTest
           - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
 
     runs-on: macos-15
 
