@@ -1,8 +1,10 @@
+
 #include <QSignalSpy>
 #include <QTest>
 #include <QUuid>
 
 #include "utils/testCoreController.h"
+#include "utils/testUtils.h"
 
 #include "secureQSettings.h"
 #include "ui/controllers/api/subscriptionUiController.h"
@@ -15,8 +17,9 @@ class TestSubscriptionUiController : public QObject
     Q_OBJECT
 
 private:
-    TestCoreController *m_coreController;
-    SecureQSettings *m_settings;
+    TestCoreController *m_coreController = nullptr;
+    SecureQSettings *m_settings = nullptr;
+    SubscriptionUiController *m_subscriptionUiController = nullptr;
 
 private slots:
     void initTestCase()
@@ -27,6 +30,10 @@ private slots:
         const auto vpnConnection = QSharedPointer<VpnConnection>::create(nullptr, nullptr);
 
         m_coreController = new TestCoreController(vpnConnection, m_settings, nullptr, this);
+
+        m_subscriptionUiController = m_coreController->findChild<SubscriptionUiController *>();
+
+        QVERIFY2(m_subscriptionUiController != nullptr, "SubscriptionUiController should be created by CoreController");
     }
 
     void cleanupTestCase()
@@ -34,61 +41,62 @@ private slots:
         m_settings->clearSettings();
         delete m_coreController;
         delete m_settings;
+
+        m_subscriptionUiController = nullptr;
     }
 
     void init()
     {
-        QVERIFY(m_coreController->m_subscriptionUiController != nullptr);
+        m_settings->clearSettings();
+        QVERIFY2(m_subscriptionUiController != nullptr, "SubscriptionUiController should be available");
     }
 
-    
     void testInitialState()
     {
-        QCOMPARE(m_coreController->m_subscriptionUiController->property("qrCodesCount").toInt(), 0);
-        QVERIFY(m_coreController->m_subscriptionUiController->property("qrCodes").toStringList().isEmpty() || controller()->property("qrCodes").toList().isEmpty());
-        QVERIFY(m_coreController->m_subscriptionUiController->property("vpnKey").toString().isEmpty());
-        QVERIFY(!m_coreController->m_subscriptionUiController->isCaptchaAwaitingUser());
-    }
+        QCOMPARE(m_subscriptionUiController->property("qrCodesCount").toInt(), 0);
+        QCOMPARE(m_subscriptionUiController->property("qrCodes").toList().size(), 0);
+        QVERIFY(m_subscriptionUiController->property("vpnKey").toString().isEmpty());
 
+        QVERIFY(!m_subscriptionUiController->isCaptchaAwaitingUser());
+    }
 
     void testExportVpnKeyWithEmptyFileName()
     {
-        QSignalSpy errorSpy(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred);
+        QSignalSpy errorSpy(m_subscriptionUiController, &SubscriptionUiController::errorOccurred);
 
         QVERIFY(errorSpy.isValid());
 
-        const bool result = m_coreController->m_subscriptionUiController->exportVpnKey(QStringLiteral("unknown-server"), QString());
+        const bool result = m_subscriptionUiController->exportVpnKey(QStringLiteral("unknown-server"), QString());
 
-        QVERIFY(!result);
+        QVERIFY2(!result, "Export should fail when the file name is empty");
         QCOMPARE(errorSpy.count(), 1);
 
-        // Error rise before request to server: filename is required
-        QVERIFY(m_coreController->m_subscriptionUiController->property("vpnKey").toString().isEmpty());
-        QCOMPARE(m_coreController->m_subscriptionUiController->property("qrCodesCount").toInt(), 0);
+        QCOMPARE(m_subscriptionUiController->property("vpnKey").toString(), QString());
+        QCOMPARE(m_subscriptionUiController->property("qrCodesCount").toInt(), 0);
     }
 
     void testGetRenewalLinkWithEmptyServerId()
     {
-        QSignalSpy errorSpy(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred);
+        QSignalSpy errorSpy(m_subscriptionUiController, &SubscriptionUiController::errorOccurred);
 
         QVERIFY(errorSpy.isValid());
 
-        m_coreController->m_subscriptionUiController->getRenewalLink(QString());
+        m_subscriptionUiController->getRenewalLink(QString());
 
-        QVERIFY(errorSpy.count() == 1, "Empty serverId should emit InternalError, not execute request");
+        QVERIFY2(errorSpy.count() == 1, "An empty server ID should emit errorOccurred");
     }
 
     void testCurrentActivePlanInfoWithoutActivePurchase()
     {
-        const QVariantMap info = m_coreController->m_subscriptionUiController->currentActivePlanInfo();
+        const QVariantMap info = m_subscriptionUiController->currentActivePlanInfo();
 
         QVERIFY(info.contains(QStringLiteral("hasActivePlan")));
-        QCOMPARE(info.value(QStringLiteral("hasActivePlan")).toBool(), false);
+        QVERIFY2(!info.value(QStringLiteral("hasActivePlan")).toBool(), "No active store purchase should be reported");
     }
 
     void testErrorSignalIsAvailable()
     {
-        QSignalSpy errorSpy(m_coreController->m_subscriptionUiController, &SubscriptionUiController::errorOccurred);
+        QSignalSpy errorSpy(m_subscriptionUiController, &SubscriptionUiController::errorOccurred);
 
         QVERIFY(errorSpy.isValid());
         QCOMPARE(errorSpy.count(), 0);
