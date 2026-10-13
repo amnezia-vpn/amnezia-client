@@ -126,11 +126,14 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
 
     QJsonDocument jsonDoc = QJsonDocument::fromJson(responseBody);
     if (!jsonDoc.isObject()) {
-        return amnezia::ErrorCode::ApiConfigDownloadError;
+        return amnezia::ErrorCode::NoError;
     }
 
     QJsonObject jsonObj = jsonDoc.object();
     const int httpStatusFromBody = jsonObj.value(apiDefs::key::httpStatus).toInt(-1);
+    if (httpStatusFromBody < 0) {
+        return amnezia::ErrorCode::NoError;
+    }
 
     if (httpStatusFromBody == httpStatusCodeTooManyRequests) {
         return amnezia::ErrorCode::ApiRateLimitError;
@@ -172,10 +175,6 @@ amnezia::ErrorCode apiUtils::checkApiResponseErrors(const QByteArray &responseBo
     }
 
     if (httpStatusFromBody >= 300) {
-        return amnezia::ErrorCode::ApiConfigDownloadError;
-    }
-
-    if (httpStatusFromBody < 200) {
         return amnezia::ErrorCode::ApiConfigDownloadError;
     }
     return amnezia::ErrorCode::NoError;

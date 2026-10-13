@@ -41,7 +41,8 @@ namespace
     }
 
     constexpr QLatin1String agwStateCacheKey("agw_state");
-    constexpr QLatin1String agwLogPrefix("agw:");
+    constexpr QLatin1String agwTracePrefix("agw trace:");
+    constexpr QLatin1String agwTraceFailoverMarker("suspicious");
     constexpr QLatin1String endpointListSeparator(", ");
     constexpr QLatin1String legacyEndpointPlaceholder("%1");
 
@@ -50,14 +51,18 @@ namespace
         return QString::fromUtf8(raw).split(endpointListSeparator, Qt::SkipEmptyParts);
     }
 
-    void agwLogCallback(int level, const char *message, void *userData)
+    void logAgwTrace(const QString &path, const int code, const QString &trace)
     {
-        Q_UNUSED(userData);
-        switch (level) {
-        case AGW_LOG_ERROR: qCritical().noquote() << agwLogPrefix << message; break;
-        case AGW_LOG_WARNING: qWarning().noquote() << agwLogPrefix << message; break;
-        case AGW_LOG_INFO: qInfo().noquote() << agwLogPrefix << message; break;
-        default: qDebug().noquote() << agwLogPrefix << message; break;
+        if (trace.isEmpty()) {
+            return;
+        }
+        const QString text = QStringLiteral("%1 %2\n%3").arg(agwTracePrefix, path, trace).replace(QLatin1Char('\n'), QStringLiteral("\n    "));
+        if (code != AGW_OK) {
+            qWarning().noquote() << text;
+        } else if (trace.contains(agwTraceFailoverMarker)) {
+            qInfo().noquote() << text;
+        } else {
+            qDebug().noquote() << text;
         }
     }
 }
@@ -91,7 +96,6 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
 
     agw_callbacks callbacks {};
     callbacks.struct_size = sizeof(agw_callbacks);
-    callbacks.log = &agwLogCallback;
     callbacks.on_before_request = &GatewayController::onBeforeRequest;
     callbacks.on_before_request_user_data = this;
 
@@ -160,10 +164,15 @@ QPair<amnezia::ErrorCode, QByteArray> GatewayController::executePost(const QStri
     if (result.body != nullptr) {
         responseBody = QByteArray(result.body, static_cast<qsizetype>(result.body_len));
     }
+    QString trace;
+    if (result.trace != nullptr) {
+        trace = QString::fromUtf8(result.trace, static_cast<qsizetype>(result.trace_len));
+    }
     const int code = result.code;
     agw_result_free(&result);
 
-    QMetaObject::invokeMethod(this, [this]() { persistState(); }, Qt::QueuedConnection);
+    logAgwTrace(path, code, trace);
+    persistState();
 
     return qMakePair(mapResultCode(code, responseBody), responseBody);
 }
