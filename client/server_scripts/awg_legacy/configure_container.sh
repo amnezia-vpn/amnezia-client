@@ -14,6 +14,7 @@ cat > /opt/amnezia/awg/wg0.conf <<EOF
 PrivateKey = $WIREGUARD_SERVER_PRIVATE_KEY
 Address = $AWG_SUBNET_IP/$WIREGUARD_SUBNET_CIDR
 ListenPort = $AWG_SERVER_PORT
+MTU = $MTU
 Jc = $JUNK_PACKET_COUNT
 Jmin = $JUNK_PACKET_MIN_SIZE
 Jmax = $JUNK_PACKET_MAX_SIZE
@@ -29,3 +30,5 @@ H4 = $TRANSPORT_PACKET_MAGIC_HEADER
 # I4 = $SPECIAL_JUNK_4
 # I5 = $SPECIAL_JUNK_5
 EOF
+
+sed -i '/^[^=]*= *$/d' /opt/amnezia/awg/wg0.conf

@@ -125,6 +125,35 @@ PageType {
                 checkEmptyText: true
             }
 
+            TextFieldWithHeaderType {
+                id: mtuTextField
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: delegateItem.isEnabled
+
+                headerText: qsTr("MTU")
+                textField.text: serverMtu
+                textField.maximumLength: 5
+                textField.validator: IntValidator { bottom: 576; top: 65535 }
+
+                textField.onEditingFinished: {
+                    if (textField.text !== serverMtu) {
+                        serverMtu = textField.text
+                    }
+                }
+
+                textField.onActiveFocusChanged: {
+                    if (textField.activeFocus) {
+                        smartScroll.scrollToItem(mtuTextField)
+                    }
+                }
+
+                checkEmptyText: true
+            }
+
             AwgTextField {
                 id: junkPacketCountTextField
 
@@ -461,6 +490,7 @@ PageType {
                          junkPacketMaxSizeTextField.errorText === "" &&
                          junkPacketMinSizeTextField.errorText === "" &&
                          junkPacketCountTextField.errorText === "" &&
+                         mtuTextField.errorText === "" &&
                          portTextField.errorText === "" &&
                          vpnAddressSubnetTextField.errorText === ""
 

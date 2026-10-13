@@ -14,4 +14,7 @@ cat > /opt/amnezia/wireguard/wg0.conf <<EOF
 PrivateKey = $WIREGUARD_SERVER_PRIVATE_KEY
 Address = $WIREGUARD_SUBNET_IP/$WIREGUARD_SUBNET_CIDR
 ListenPort = $WIREGUARD_SERVER_PORT
+MTU = $MTU
 EOF
+
+sed -i '/^[^=]*= *$/d' /opt/amnezia/wireguard/wg0.conf

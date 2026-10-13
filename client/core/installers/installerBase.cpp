@@ -58,6 +58,7 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             awgConfig.serverConfig.port = portStr;
             awgConfig.serverConfig.transportProto = transportProtoStr;
             awgConfig.serverConfig.subnetAddress = protocols::wireguard::defaultSubnetAddress;
+            awgConfig.serverConfig.mtu = protocols::awg::defaultMtu;
             config.protocolConfig = awgConfig;
             break;
         }
@@ -66,6 +67,7 @@ ContainerConfig InstallerBase::createBaseConfig(DockerContainer container, int p
             wgConfig.serverConfig.port = portStr;
             wgConfig.serverConfig.transportProto = transportProtoStr;
             wgConfig.serverConfig.subnetAddress = protocols::wireguard::defaultSubnetAddress;
+            wgConfig.serverConfig.mtu = protocols::wireguard::defaultMtu;
             config.protocolConfig = wgConfig;
             break;
         }
