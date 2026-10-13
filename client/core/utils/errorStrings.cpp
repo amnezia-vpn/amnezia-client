@@ -105,6 +105,7 @@ QString errorString(ErrorCode code) {
 
     case (ErrorCode::ImportInvalidConfigError): errorMessage = QObject::tr("The config does not contain any containers and credentials for connecting to the server"); break;
     case (ErrorCode::ImportBackupFileUseRestoreInstead): errorMessage = QObject::tr("Backup files cannot be imported here. Use 'Restore from backup' instead."); break;
+    case (ErrorCode::ImportXraySettingsFileUseXrayPage): errorMessage = QObject::tr("This is an XRay settings file, not a connection config. Import it on the XRay Configurations page using 'Import settings'."); break;
     case (ErrorCode::RestoreBackupInvalidError): errorMessage = QObject::tr("Backup file is corrupted or has invalid format"); break;
     case (ErrorCode::LegacyApiV1NotSupportedError): errorMessage = QObject::tr("This legacy Amnezia subscription format is no longer supported"); break;
     case (ErrorCode::ConfigFormatVersionNotSupportedError): errorMessage = QObject::tr("This configuration was created in a newer version of the application and is not fully supported. Please update the application"); break;
