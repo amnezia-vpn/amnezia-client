@@ -43,6 +43,7 @@ QtObject {
         readonly property color surfaceBase: '#18181B'
         readonly property color surfaceHovered: '#232327'
         readonly property color surfacePressed: '#2C2D30'
+        readonly property color surfaceElevated: '#1F1F23'
         readonly property color surfaceInverse: '#E4E4E7'
         readonly property color surfaceInverseHovered: '#D4D4D8'
         readonly property color surfaceInversePressed: '#A1A1AA'
@@ -54,5 +55,9 @@ QtObject {
         readonly property color borderStrong: '#52525B'
         readonly property color accentSuccess: '#4ADE80'
         readonly property color accentWarning: '#EAB308'
+        readonly property color accentDanger: '#F87171'
+        readonly property color switchTrackChecked: Qt.rgba(217/255, 119/255, 6/255, 0.5)
+        readonly property color switchThumbChecked: '#FDBA74'
+        readonly property color overlayScrim: Qt.rgba(9/255, 9/255, 11/255, 0.5)
     }
 }

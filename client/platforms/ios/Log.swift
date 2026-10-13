@@ -17,63 +17,28 @@ struct Log {
 
   private static let appGroupID = BuildConfig.appGroupIdentifier
 
-  static let appLogURL = {
-    let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
-    return sharedContainerURL.appendingPathComponent("app.log", isDirectory: false)
+  private static let logDirectoryURL: URL = {
+    if let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID) {
+      return sharedContainerURL
+    }
+    return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first
+      ?? FileManager.default.temporaryDirectory
   }()
 
-  static let neLogURL = {
-    let sharedContainerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)!
-    return sharedContainerURL.appendingPathComponent("ne.log", isDirectory: false)
-  }()
+  static let appLogURL = logDirectoryURL.appendingPathComponent("app.log", isDirectory: false)
+
+  static let neLogURL = logDirectoryURL.appendingPathComponent("ne.log", isDirectory: false)
 
   private static var sharedUserDefaults = {
-    UserDefaults(suiteName: appGroupID)!
+    UserDefaults(suiteName: appGroupID) ?? .standard
   }()
 
   static let dateFormatter: DateFormatter = {
     let dateFormatter = DateFormatter()
+    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
     return dateFormatter
   }()
-
-  var records = [Record]()
-
-  var lastRecordDate = Date.distantPast
-
-  init() {
-    self.records = []
-  }
-
-  init(_ str: String) {
-    records = str.split(whereSeparator: \.isNewline)
-      .map {
-        if let record = Record(String($0)) {
-          lastRecordDate = record.date
-          return record
-        } else {
-          return Record(date: lastRecordDate, level: .error, message: "LOG: \($0)")
-        }
-      }
-  }
-
-  init?(at url: URL) {
-    if !FileManager.default.fileExists(atPath: url.path) {
-      guard (try? "".data(using: .utf8)?.write(to: url)) != nil else { return nil }
-    }
-
-    guard let fileHandle = try? FileHandle(forUpdating: url) else { return nil }
-
-    defer { fileHandle.closeFile() }
-
-    guard
-      let data = try? fileHandle.readToEnd(),
-      let str = String(data: data, encoding: .utf8) else {
-      return nil
-    }
-
-    self.init(str)
-  }
 
   static func log(_ type: OSLogType, title: String = "", message: String, url: URL = neLogURL) {
     NSLog("\(title) \(message)")
@@ -126,26 +91,6 @@ struct Log {
         Record(date: date, level: level, message: "\(title)\(message)").save(at: url)
       }
     }
-  }
-
-  static func clear(at url: URL) {
-    if FileManager.default.fileExists(atPath: url.path) {
-      guard let fileHandle = try? FileHandle(forUpdating: url) else { return }
-
-      defer { fileHandle.closeFile() }
-
-      try? fileHandle.truncate(atOffset: 0)
-    }
-  }
-}
-
-extension Log: CustomStringConvertible {
-  var description: String {
-    records
-      .map {
-        $0.description
-      }
-      .joined(separator: "\n")
   }
 }
 

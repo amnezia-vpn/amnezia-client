@@ -268,6 +268,7 @@ void CoreSignalHandlers::initTranslationsUpdatedHandler()
     connect(m_coreController->m_languageUiController, &LanguageUiController::updateTranslations, m_coreController, &CoreController::updateTranslator);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_languageUiController, &LanguageUiController::translationsUpdated);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_connectionUiController, &ConnectionUiController::onTranslationsUpdated);
+    connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_logsUiController, &LogsUiController::refreshSizes);
 
     const QVector<ApiCountryListModel *> countryListModels { m_coreController->m_apiCountryListModel,
                                                              m_coreController->m_apiConfigsCountryListModel };

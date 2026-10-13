@@ -35,6 +35,11 @@ Switch {
     property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
     property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
 
+    property int indicatorWidth: 52
+    property int indicatorHeight: 32
+    property int checkedInnerCircleSize: 24
+    property int checkedInnerCircleMargin: 4
+
     property bool isFocusable: true
 
     Keys.onTabPressed: {
@@ -70,10 +75,10 @@ Switch {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
 
-        implicitWidth: 52
-        implicitHeight: 32
+        implicitWidth: root.indicatorWidth
+        implicitHeight: root.indicatorHeight
 
-        radius: 16
+        radius: height / 2
         color: root.checked ? (root.enabled ? root.checkedIndicatorColor : root.checkedDisabledIndicatorColor)
                             : root.defaultIndicatorColor
 
@@ -91,9 +96,9 @@ Switch {
             id: innerCircle
 
             anchors.verticalCenter: parent.verticalCenter
-            x: root.checked ? parent.width - width - 4 : 8
-            width: root.checked ? 24 : 16
-            height: root.checked ? 24 : 16
+            x: root.checked ? parent.width - width - root.checkedInnerCircleMargin : 8
+            width: root.checked ? root.checkedInnerCircleSize : 16
+            height: root.checked ? root.checkedInnerCircleSize : 16
             radius: 23
             color: root.checked ? (root.enabled ? root.checkedInnerCircleColor : root.checkedDisabledInnerCircleColor)
                                 : (root.enabled ? root.defaultInnerCircleColor : root.defaultDisabledInnerCircleColor)

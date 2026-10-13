@@ -941,7 +941,7 @@ void IosController::sendVpnExtensionMessage(NSDictionary* message, std::function
 
 }
 
-bool IosController::shareText(const QStringList& filesToSend) {
+bool IosController::shareText(const QStringList& filesToSend, bool *cancelled) {
     NSMutableArray *sharingItems = [NSMutableArray new];
 
     for (int i = 0; i < filesToSend.size(); i++) {
@@ -957,9 +957,11 @@ bool IosController::shareText(const QStringList& filesToSend) {
     UIActivityViewController *activityController = [[UIActivityViewController alloc] initWithActivityItems:sharingItems applicationActivities:nil];
 #endif
     __block bool isAccepted = false;
+    __block bool isCancelled = false;
 #if !MACOS_NE
     [activityController setCompletionWithItemsHandler:^(NSString *activityType, BOOL completed, NSArray *returnedItems, NSError *activityError) {
         isAccepted = completed;
+        isCancelled = !completed && activityError == nil;
         emit finished();
     }];
 
@@ -975,6 +977,9 @@ bool IosController::shareText(const QStringList& filesToSend) {
     QObject::connect(this, &IosController::finished, &wait, &QEventLoop::quit);
     wait.exec();
 
+    if (cancelled) {
+        *cancelled = isCancelled;
+    }
     return isAccepted;
 }
 
