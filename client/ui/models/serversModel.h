@@ -30,6 +30,8 @@ public:
         IsServerFromGatewayApiRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
+
+        IsXRayConfigSelectionAvailableRole
     };
 
     ServersModel(QObject *parent = nullptr);

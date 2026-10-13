@@ -20,6 +20,8 @@ public:
 public slots:
     void importConfig();
     void clearConfigFileName();
+    bool importLink(const QUrl &url);
+    bool editServerConfigWithData(const QString &serverId, QString data);
     bool extractConfigFromFile(const QString &fileName);
     bool extractConfigFromData(QString data);
     bool extractConfigFromQr(const QByteArray &data);
