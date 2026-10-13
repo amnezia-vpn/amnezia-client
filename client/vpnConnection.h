@@ -6,6 +6,7 @@
 #include <QString>
 #include <QScopedPointer>
 #include <QRemoteObjectNode>
+#include <QElapsedTimer>
 #include <QTimer>
 
 #include "core/protocols/vpnProtocol.h"
@@ -50,7 +51,6 @@ public:
 public slots:
     void setRepositories(SecureServersRepository* serversRepository, SecureAppSettingsRepository* appSettingsRepository);
     void connectToVpn(const QString &serverId, DockerContainer container, const QJsonObject &vpnConfiguration);
-    void reconnectToVpn();
     void disconnectFromVpn();
 
     void onKillSwitchModeChanged(bool enabled);
@@ -68,6 +68,15 @@ signals:
 protected slots:
     void onBytesChanged(quint64 receivedBytes, quint64 sentBytes);
     void onConnectionStateChanged(Vpn::ConnectionState state);
+
+private slots:
+    void onProtocolConnectionStateChanged(Vpn::ConnectionState state);
+#ifdef AMNEZIA_DESKTOP
+    void onIpcWakeup();
+    void onIpcNetworkChanged();
+    void startReconnectAttempt();
+    void onReconnectWatchdogTimeout();
+#endif
 
 protected:
     QSharedPointer<VpnProtocol> m_vpnProtocol;
@@ -96,6 +105,20 @@ private:
 
    void appendSplitTunnelingConfig();
    void appendKillSwitchConfig();
+
+#ifdef AMNEZIA_DESKTOP
+   void requestReconnect(const QString &trigger);
+   void scheduleReconnectRetry();
+   void cancelReconnect();
+   int reconnectRetryDelayMsec() const;
+
+   bool m_reconnectActive = false;
+   bool m_reconnectAttemptInFlight = false;
+   int m_reconnectAttempt = 0;
+   QTimer m_reconnectRetryTimer{this};
+   QTimer m_reconnectWatchdogTimer{this};
+   QElapsedTimer m_reconnectAttemptAge;
+#endif
 };
 
 #endif // VPNCONNECTION_H

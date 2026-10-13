@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QRecursiveMutex>
 #include <QString>
 #include <QTextStream>
 
@@ -104,6 +105,7 @@ private:
 
     static QFile m_file;
     static QTextStream m_textStream;
+    static QRecursiveMutex m_fileMutex;
     static QString m_logFileName;
     static QString m_serviceLogFileName;
 

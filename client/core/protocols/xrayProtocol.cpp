@@ -67,6 +67,8 @@ XrayProtocol::~XrayProtocol()
 
 ErrorCode XrayProtocol::start()
 {
+    resetStopGuard();
+
     qDebug() << "XrayProtocol::start()";
 
     // Inject SOCKS5 auth into the inbound before starting xray.
@@ -104,6 +106,10 @@ ErrorCode XrayProtocol::start()
 
 void XrayProtocol::stop()
 {
+    if (guardStop()) {
+        return;
+    }
+
     qDebug() << "XrayProtocol::stop()";
 
     IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {

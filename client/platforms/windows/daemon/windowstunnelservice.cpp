@@ -50,7 +50,7 @@ WindowsTunnelService::WindowsTunnelService(QObject* parent) : QObject(parent) {
 }
 
 WindowsTunnelService::~WindowsTunnelService() {
-  MZ_COUNT_CTOR(WindowsTunnelService);
+  MZ_COUNT_DTOR(WindowsTunnelService);
   stop();
   CloseServiceHandle((SC_HANDLE)m_scm);
 }
@@ -295,6 +295,11 @@ static bool waitForServiceStatus(SC_HANDLE service, DWORD expectedStatus) {
 
     if (status.dwCurrentState == expectedStatus) {
       return true;
+    }
+
+    if (expectedStatus == SERVICE_RUNNING &&
+        status.dwCurrentState == SERVICE_STOPPED) {
+      return false;
     }
 
     logger.warning() << "The service is not in the right status yet.";
