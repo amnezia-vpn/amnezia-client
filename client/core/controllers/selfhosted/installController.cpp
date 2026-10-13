@@ -700,7 +700,13 @@ ErrorCode InstallController::configureContainerWorker(const ServerCredentials &c
         return ErrorCode::NoError;
     };
 
-    amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container, QString(), QString());
+    // The app-level DNS fields are a per-device preference: they must not become the
+    // default pushed to every client of this self-hosted server (and a cleared field
+    // must not silently drop DNS for all of them). The container keeps the public
+    // resolvers that were used before the DNS setting was introduced (#3251 review).
+    amnezia::ScriptVars baseVars = amnezia::genBaseVars(credentials, container,
+                                                        protocols::dns::defaultPrimaryDns,
+                                                        protocols::dns::defaultSecondaryDns);
     amnezia::ScriptVars protocolVars = amnezia::genProtocolVarsForContainer(container, config);
     baseVars.append(protocolVars);
     ErrorCode e = sshSession.runContainerScript(

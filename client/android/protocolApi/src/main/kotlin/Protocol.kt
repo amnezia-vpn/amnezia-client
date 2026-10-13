@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
+import org.amnezia.vpn.util.net.parseInetNetworkOrNull
 import org.json.JSONObject
 
 private const val TAG = "Protocol"
@@ -62,7 +63,7 @@ abstract class Protocol {
         }
 
         for (i in 0 until splitTunnelSites.length()) {
-            val address = InetNetwork.parse(splitTunnelSites.getString(i))
+            val address = parseInetNetworkOrNull(splitTunnelSites.optString(i)) ?: continue
             addressHandlerFunc(address)
         }
     }

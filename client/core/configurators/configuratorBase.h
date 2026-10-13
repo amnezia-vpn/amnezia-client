@@ -35,7 +35,16 @@ public:
                                                                      amnezia::ProtocolConfig protocolConfig);
 
 protected:
-    void applyDnsToNativeConfig(const amnezia::DnsSettings &dns, amnezia::ProtocolConfig &protocolConfig);
+    // Native configs are cleaned up only for the protocols that list the DNS servers
+    // line by line; JSON/plist/base64 content must not be text-processed (#3251 review).
+    enum class DnsEntryCleanup {
+        None,
+        OpenVpn,    // drop "dhcp-option DNS" lines that lost their address
+        Wireguard   // drop empty servers from the "DNS = a, b" line
+    };
+
+    void applyDnsToNativeConfig(const amnezia::DnsSettings &dns, amnezia::ProtocolConfig &protocolConfig,
+                                DnsEntryCleanup cleanup = DnsEntryCleanup::None);
 
     SshSession* m_sshSession;
 };

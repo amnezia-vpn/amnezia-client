@@ -10,6 +10,9 @@ import java.lang.reflect.InvocationTargetException
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
+import org.amnezia.vpn.util.Log
+
+private const val TAG = "NetworkUtils"
 
 fun getLocalNetworks(context: Context, ipv6: Boolean): List<InetNetwork> {
     val connectivityManager = context.getSystemService<ConnectivityManager>()!!
@@ -36,6 +39,28 @@ fun getLocalNetworks(context: Context, ipv6: Boolean): List<InetNetwork> {
 }
 
 fun parseInetAddress(address: String): InetAddress = InetAddress.getByName(address)
+
+fun parseInetAddressOrNull(address: String): InetAddress? {
+    val value = address.trim()
+    if (value.isEmpty()) return null
+    return try {
+        parseInetAddress(value)
+    } catch (e: Exception) {
+        Log.w(TAG, "Ignoring invalid address '$address': ${e.message}")
+        null
+    }
+}
+
+fun parseInetNetworkOrNull(address: String): InetNetwork? {
+    val value = address.trim()
+    if (value.isEmpty()) return null
+    return try {
+        InetNetwork.parse(value)
+    } catch (e: Exception) {
+        Log.w(TAG, "Ignoring invalid network '$address': ${e.message}")
+        null
+    }
+}
 
 private val parseNumericAddressCompat: (String) -> InetAddress =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

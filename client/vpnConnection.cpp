@@ -136,12 +136,20 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
+                    // An empty value means "no DNS through the tunnel" (#3190): there is no
+                    // address to route, and routing an empty one is not the same as doing
+                    // nothing.
+                    QStringList dnsRoutes;
+                    if (!dns1.isEmpty()) dnsRoutes << dns1;
+                    if (!dns2.isEmpty()) dnsRoutes << dns2;
+
 #ifdef Q_OS_MACOS
-                    if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
-                        iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+                    if ((!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) && !dnsRoutes.isEmpty()) {
+                        iface->routeAddList(m_vpnProtocol->vpnGateway(), dnsRoutes);
                     }
 #else
-                    iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+                    if (!dnsRoutes.isEmpty())
+                        iface->routeAddList(m_vpnProtocol->vpnGateway(), dnsRoutes);
 #endif
 
                     if (m_appSettingsRepository->isSitesSplitTunnelingEnabled()) {
@@ -156,7 +164,9 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
 
                             iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << remoteAddress());
 #ifdef Q_OS_MACOS
-                            iface->routeAddList(m_vpnProtocol->routeGateway(), QStringList() << dns1 << dns2);
+                            if (!dnsRoutes.isEmpty()) {
+                                iface->routeAddList(m_vpnProtocol->routeGateway(), dnsRoutes);
+                            }
 #endif
                             addSitesRoutes(m_vpnProtocol->routeGateway(), routeMode);
                         }
@@ -488,8 +498,14 @@ void VpnConnection::appendSplitTunnelingConfig()
                 routeMode = amnezia::RouteMode::VpnAllSites;
             } else if (routeMode == amnezia::RouteMode::VpnOnlyForwardSites) {
                 // Allow traffic to Amnezia DNS
-                sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns1).toString());
-                sitesJsonArray.append(m_vpnConfiguration.value(configKey::dns2).toString());
+                const QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
+                const QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
+                if (!dns1.isEmpty()) {
+                    sitesJsonArray.append(dns1);
+                }
+                if (!dns2.isEmpty()) {
+                    sitesJsonArray.append(dns2);
+                }
             }
         }
     }

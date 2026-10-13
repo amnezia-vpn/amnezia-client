@@ -22,6 +22,7 @@ import org.amnezia.vpn.util.Log
 import org.amnezia.vpn.util.net.InetNetwork
 import org.amnezia.vpn.util.net.ip
 import org.amnezia.vpn.util.net.parseInetAddress
+import org.amnezia.vpn.util.net.parseInetAddressOrNull
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -103,13 +104,9 @@ class Xray : Protocol() {
         return XrayConfig.build {
             addAddress(XrayConfig.DEFAULT_IPV4_ADDRESS)
 
-            config.optString("dns1").let {
-                if (it.isNotBlank()) addDnsServer(parseInetAddress(it))
-            }
+            parseInetAddressOrNull(config.optString("dns1"))?.let { addDnsServer(it) }
 
-            config.optString("dns2").let {
-                if (it.isNotBlank()) addDnsServer(parseInetAddress(it))
-            }
+            parseInetAddressOrNull(config.optString("dns2"))?.let { addDnsServer(it) }
 
             addRoute(InetNetwork("0.0.0.0", 0))
             addRoute(InetNetwork("2000::0", 3))

@@ -126,7 +126,14 @@ bool DnsUtilsMacos::updateResolvers(const QString& ifname,
   auto configGuard = qScopeGuard([&] { CFRelease(dnsConfig); });
   QStringList list;
   for (const QHostAddress& addr : resolvers) {
-    list.append(addr.toString());
+    const QString address = addr.toString();
+    if (!address.isEmpty()) {
+      list.append(address);
+    }
+  }
+  if (list.isEmpty()) {
+    logger.debug() << "No non-empty DNS resolvers, skipping resolver update";
+    return true;
   }
   cfDictSetStringList(dnsConfig, kSCPropNetDNSServerAddresses, list);
   cfDictSetString(dnsConfig, kSCPropNetDNSDomainName, "lan");

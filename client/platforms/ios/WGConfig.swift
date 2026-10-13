@@ -9,8 +9,8 @@ struct WGConfig: Decodable {
   let headerProtectionKey: String?
   let contentPaddingAddition, rekeyAfterTime, rekeyTimeout, rejectAfterTime, keepaliveTimeout, maxHandshakeAttempts: String?
   let randomTrailers, disableCookies: String?
-  let dns1: String
-  let dns2: String
+  let dns1: String?
+  let dns2: String?
   let mtu: String
   let hostName: String
   let port: Int
@@ -140,12 +140,27 @@ struct WGConfig: Decodable {
     return settingsLines.joined(separator: "\n")
   }
 
+  /// An empty pair means "no DNS through the tunnel" (#3190). A wg-quick-style parser reads
+  /// "DNS = , " as a broken value, so the line is left out entirely when both are empty; a
+  /// single empty value is dropped rather than emitted as a gap.
+  private var dnsServers: [String] {
+    [dns1, dns2].compactMap { $0 }.filter { !$0.isEmpty }
+  }
+
+  var hasDnsServers: Bool {
+    !dnsServers.isEmpty
+  }
+
+  private var dnsLine: String {
+    let servers = dnsServers
+    return servers.isEmpty ? "" : "DNS = \(servers.joined(separator: ", "))\n"
+  }
+
   var str: String {
     """
     [Interface]
     Address = \(clientIP)
-    DNS = \(dns1), \(dns2)
-    MTU = \(mtu)
+    \(dnsLine)MTU = \(mtu)
     PrivateKey = \(clientPrivateKey)
     \(settings)
     [Peer]
