@@ -1,12 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import copy, chdir
+from conan.tools.files import copy, chdir, get
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.apple import XCRun, is_apple_os
 from conan.tools.apple.apple import _to_apple_arch
 from conan.tools.env import Environment
-from conan.tools.scm import Git
 
 import os
 import shlex
@@ -91,9 +90,9 @@ class Libagw(ConanFile):
             )
 
     def source(self):
-        git = Git(self)
-        git.clone(url="https://github.com/amnezia-vpn/libagw.git", target=".",
-                  args=["--branch", f"v{self.version}"])
+        get(self, f"https://github.com/amnezia-vpn/libagw/archive/refs/tags/v{self.version}.zip",
+            sha256="148f421e20e31b53c7686a29a368e03720c41776facce457c55748d8b2974ddb", strip_root=True
+        )
 
     def generate(self):
         tc = AutotoolsToolchain(self)
