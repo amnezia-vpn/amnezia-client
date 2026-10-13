@@ -3538,6 +3538,30 @@ Create one from the current settings.</source>
         <source>Unable change server location while there is an active connection</source>
         <translation>Невозможно изменить локацию во время активного соединения</translation>
     </message>
+    <message>
+        <source>You already have %1 locations in favorites. Remove one</source>
+        <translation>В избранном уже %1 локаций. Уберите одну</translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation>Показать</translation>
+    </message>
+    <message>
+        <source>Amnezia Premium</source>
+        <translation>Amnezia Premium</translation>
+    </message>
+    <message>
+        <source>Locations</source>
+        <translation>Локации</translation>
+    </message>
+    <message>
+        <source>Add to favorites</source>
+        <translation>Добавить в избранное</translation>
+    </message>
+    <message>
+        <source>Remove from favorites</source>
+        <translation>Убрать из избранного</translation>
+    </message>
 </context>
 <context>
     <name>PageSettingsApiDevices</name>
@@ -3761,6 +3785,34 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsApiNativeConfigs.qml" line="226"/>
         <source>Cancel</source>
         <translation>Отменить</translation>
+    </message>
+    <message>
+        <source>You already have %1 locations in favorites. Remove one</source>
+        <translation>В избранном уже %1 локаций. Уберите одну</translation>
+    </message>
+    <message>
+        <source>Show</source>
+        <translation>Показать</translation>
+    </message>
+    <message>
+        <source>Configuration files</source>
+        <translation>Файлы конфигурации</translation>
+    </message>
+    <message>
+        <source>New configurations are available for some locations. We recommend updating the files</source>
+        <translation>Доступны новые конфигурации для некоторых локаций. Рекомендуется обновить файлы</translation>
+    </message>
+    <message>
+        <source>Update available</source>
+        <translation>Обновление доступно</translation>
+    </message>
+    <message>
+        <source>Add to favorites</source>
+        <translation>Добавить в избранное</translation>
+    </message>
+    <message>
+        <source>Remove from favorites</source>
+        <translation>Убрать из избранного</translation>
     </message>
 </context>
 <context>
@@ -7368,6 +7420,254 @@ Remove the server from the app to continue.</source>
         <location filename="../ui/qml/main2.qml" line="407"/>
         <source>Cannot remove server during active connection</source>
         <translation>Невозможно удалить сервер во время активного соединения</translation>
+    </message>
+</context>
+<context>
+    <name>CountrySearchField</name>
+    <message>
+        <source>Country or region</source>
+        <translation>Страна или регион</translation>
+    </message>
+</context>
+<context>
+    <name>CountriesEmptyState</name>
+    <message>
+        <source>Nothing found. Check the spelling or change your query</source>
+        <translation>Ничего не найдено. Проверьте написание или измените запрос</translation>
+    </message>
+    <message>
+        <source>No locations available yet</source>
+        <translation>Локаций пока нет</translation>
+    </message>
+    <message>
+        <source>Show all</source>
+        <translation>Показать все</translation>
+    </message>
+    <message>
+        <source>Nothing found in "%1"</source>
+        <translation>В категории «%1» ничего не найдено</translation>
+    </message>
+</context>
+<context>
+    <name>SortCountriesDrawer</name>
+    <message>
+        <source>Sort countries</source>
+        <translation>Упорядочить страны</translation>
+    </message>
+    <message>
+        <source>By region</source>
+        <translation>По регионам</translation>
+    </message>
+    <message>
+        <source>Alphabetically</source>
+        <translation>По алфавиту</translation>
+    </message>
+</context>
+<context>
+    <name>CountryRegionNames</name>
+    <message>
+        <source>Europe</source>
+        <translation>Европа</translation>
+    </message>
+    <message>
+        <source>Asia</source>
+        <translation>Азия</translation>
+    </message>
+    <message>
+        <source>Other</source>
+        <translation>Прочие</translation>
+    </message>
+    <message>
+        <source>Western Europe</source>
+        <translation>Западная Европа</translation>
+    </message>
+    <message>
+        <source>Northern Europe</source>
+        <translation>Северная Европа</translation>
+    </message>
+    <message>
+        <source>Central &amp; Eastern Europe</source>
+        <translation>Центральная и Восточная Европа</translation>
+    </message>
+    <message>
+        <source>Southern Europe</source>
+        <translation>Южная Европа</translation>
+    </message>
+    <message>
+        <source>Americas</source>
+        <translation>Америка</translation>
+    </message>
+    <message>
+        <source>Africa</source>
+        <translation>Африка</translation>
+    </message>
+    <message>
+        <source>Oceania</source>
+        <translation>Океания</translation>
+    </message>
+    <message>
+        <source>Special</source>
+        <translation>Особые</translation>
+    </message>
+    <message>
+        <source>Western Asia</source>
+        <translation>Западная Азия</translation>
+    </message>
+    <message>
+        <source>Central Asia</source>
+        <translation>Центральная Азия</translation>
+    </message>
+    <message>
+        <source>Southern Asia</source>
+        <translation>Южная Азия</translation>
+    </message>
+    <message>
+        <source>Eastern Asia</source>
+        <translation>Восточная Азия</translation>
+    </message>
+    <message>
+        <source>South-eastern Asia</source>
+        <translation>Юго-Восточная Азия</translation>
+    </message>
+    <message>
+        <source>Northern America</source>
+        <translation>Северная Америка</translation>
+    </message>
+    <message>
+        <source>Central America</source>
+        <translation>Центральная Америка</translation>
+    </message>
+    <message>
+        <source>Caribbean</source>
+        <translation>Карибский бассейн</translation>
+    </message>
+    <message>
+        <source>South America</source>
+        <translation>Южная Америка</translation>
+    </message>
+    <message>
+        <source>Northern Africa</source>
+        <translation>Северная Африка</translation>
+    </message>
+    <message>
+        <source>Western Africa</source>
+        <translation>Западная Африка</translation>
+    </message>
+    <message>
+        <source>Middle Africa</source>
+        <translation>Центральная Африка</translation>
+    </message>
+    <message>
+        <source>Eastern Africa</source>
+        <translation>Восточная Африка</translation>
+    </message>
+    <message>
+        <source>Southern Africa</source>
+        <translation>Южная часть Африки</translation>
+    </message>
+    <message>
+        <source>Australia and New Zealand</source>
+        <translation>Австралия и Новая Зеландия</translation>
+    </message>
+    <message>
+        <source>Melanesia</source>
+        <translation>Меланезия</translation>
+    </message>
+    <message>
+        <source>Micronesia</source>
+        <translation>Микронезия</translation>
+    </message>
+    <message>
+        <source>Polynesia</source>
+        <translation>Полинезия</translation>
+    </message>
+    <message>
+        <source>Nordic countries</source>
+        <translation>Северные страны</translation>
+    </message>
+    <message>
+        <source>Baltic states</source>
+        <translation>Страны Балтии</translation>
+    </message>
+    <message>
+        <source>United Kingdom and Ireland</source>
+        <translation>Великобритания и Ирландия</translation>
+    </message>
+    <message>
+        <source>Southwestern Europe</source>
+        <translation>Юго-Западная Европа</translation>
+    </message>
+    <message>
+        <source>Southeastern Europe</source>
+        <translation>Юго-Восточная Европа</translation>
+    </message>
+    <message>
+        <source>Caucasus and Turkey</source>
+        <translation>Кавказ и Турция</translation>
+    </message>
+    <message>
+        <source>Arabian Peninsula</source>
+        <translation>Аравийский полуостров</translation>
+    </message>
+    <message>
+        <source>Levant and Mesopotamia</source>
+        <translation>Левант и Месопотамия</translation>
+    </message>
+    <message>
+        <source>Greater Antilles</source>
+        <translation>Большие Антильские острова</translation>
+    </message>
+    <message>
+        <source>Lesser Antilles</source>
+        <translation>Малые Антильские острова</translation>
+    </message>
+    <message>
+        <source>Bahamas and Southern Caribbean</source>
+        <translation>Багамы и Южные Карибы</translation>
+    </message>
+    <message>
+        <source>Sahel</source>
+        <translation>Сахель</translation>
+    </message>
+    <message>
+        <source>Gulf of Guinea</source>
+        <translation>Побережье Гвинейского залива</translation>
+    </message>
+    <message>
+        <source>Atlantic West Africa</source>
+        <translation>Атлантическая Западная Африка</translation>
+    </message>
+    <message>
+        <source>East Africa (mainland)</source>
+        <translation>Восточная Африка (материковая)</translation>
+    </message>
+    <message>
+        <source>Southeast Africa</source>
+        <translation>Юго-Восточная Африка</translation>
+    </message>
+    <message>
+        <source>Indian Ocean islands</source>
+        <translation>Острова Индийского океана</translation>
+    </message>
+    <message>
+        <source>Favorites</source>
+        <translation>Избранное</translation>
+    </message>
+    <message>
+        <source>All</source>
+        <translation>Все</translation>
+    </message>
+    <message>
+        <source>Allowlists</source>
+        <translation>Белые списки</translation>
+    </message>
+    <message>
+        <source>Created</source>
+        <translation>Созданные</translation>
+    </message>
+    <message>
+        <source>For networks with allowlists</source>
+        <translation>Для работы в сетях с белыми списками</translation>
     </message>
 </context>
 </TS>

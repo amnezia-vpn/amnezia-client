@@ -58,6 +58,7 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiCountryModel.h"
+#include "ui/models/api/apiCountryListModel.h"
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -216,6 +217,8 @@ private:
     ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
     ApiBenefitsModel* m_apiBenefitsModel;
     ApiCountryModel* m_apiCountryModel;
+    ApiCountryListModel* m_apiCountryListModel;
+    ApiCountryListModel* m_apiConfigsCountryListModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;
     ApiDevicesModel* m_apiDevicesModel;
 

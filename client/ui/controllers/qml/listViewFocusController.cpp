@@ -3,6 +3,7 @@
 
 #include <QQuickWindow>
 
+
 ListViewFocusController::ListViewFocusController(QQuickItem *listView, QObject *parent)
     : QObject { parent },
       m_listView { listView },
@@ -36,8 +37,8 @@ void ListViewFocusController::viewAtCurrentIndex() const
         break;
     }
     case Section::Delegate: {
-        QMetaObject::invokeMethod(m_listView, "positionViewAtIndex", Q_ARG(int, m_delegateIndex), // Index
-                                  Q_ARG(int, 6)); // PositionMode (0 = Beginning; 1 = Center; 2 = End; 3 = Visible; 4 = Contain; 5 = SnapPosition)
+        QMetaObject::invokeMethod(m_listView, "positionViewAtIndex", Q_ARG(int, m_delegateIndex),
+                                  Q_ARG(int, 4));
         break;
     }
     case Section::Footer: {
@@ -45,6 +46,8 @@ void ListViewFocusController::viewAtCurrentIndex() const
         break;
     }
     }
+
+    QMetaObject::invokeMethod(m_listView, "forceLayout");
 }
 
 int ListViewFocusController::size() const
@@ -209,6 +212,9 @@ void ListViewFocusController::focusNextItem()
         return;
     }
     m_focusedItemIndex++;
+    if (m_focusedItemIndex < 0 || m_focusedItemIndex >= m_focusChain.size()) {
+        m_focusedItemIndex = 0;
+    }
     m_focusedItem = qobject_cast<QQuickItem *>(m_focusChain.at(m_focusedItemIndex));
     m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
 }
@@ -229,10 +235,13 @@ void ListViewFocusController::focusPreviousItem()
         focusPreviousItem();
         return;
     }
-    if (m_focusedItemIndex == -1) {
+    if (m_focusedItemIndex < 0 || m_focusedItemIndex > m_focusChain.size()) {
         m_focusedItemIndex = m_focusChain.size();
     }
     m_focusedItemIndex--;
+    if (m_focusedItemIndex < 0) {
+        m_focusedItemIndex = m_focusChain.size() - 1;
+    }
     m_focusedItem = qobject_cast<QQuickItem *>(m_focusChain.at(m_focusedItemIndex));
     m_focusedItem->forceActiveFocus(Qt::TabFocusReason);
 }
@@ -247,16 +256,17 @@ void ListViewFocusController::resetFocusChain()
 void ListViewFocusController::reloadFocusChain()
 {
     m_focusChain = FocusControl::getItemsChain(currentDelegate());
+    m_focusedItemIndex = m_focusChain.indexOf(m_focusedItem);
 }
 
 bool ListViewFocusController::isFirstFocusItemInDelegate() const
 {
-    return m_focusedItem && (m_focusedItem == m_focusChain.first());
+    return m_focusedItem && !m_focusChain.isEmpty() && (m_focusedItem == m_focusChain.first());
 }
 
 bool ListViewFocusController::isLastFocusItemInDelegate() const
 {
-    return m_focusedItem && (m_focusedItem == m_focusChain.last());
+    return m_focusedItem && !m_focusChain.isEmpty() && (m_focusedItem == m_focusChain.last());
 }
 
 bool ListViewFocusController::hasHeader() const
