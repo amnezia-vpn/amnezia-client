@@ -24,6 +24,7 @@ QJsonObject makeServiceItem(const QString &name,
                             const QString &description,
                             const QString &type,
                             const QString &protocol,
+                            const bool isPremium,
                             const bool isAvailable,
                             const QString &price,
                             const QString &endDate,
@@ -34,6 +35,7 @@ QJsonObject makeServiceItem(const QString &name,
     return {
         { "service_type", type },
         { "service_protocol", protocol },
+        { "is_premium", isPremium },
         { "is_available", isAvailable },
         { "service_description",
           QJsonObject {
@@ -70,6 +72,7 @@ QJsonObject makeServicesResponse()
                               "amnezia-premium",
                               "xray",
                               true,
+                              true,
                               "$19.99",
                               "2026-10-29T10:00:00Z",
                               "https://example.com/terms",
@@ -86,6 +89,7 @@ QJsonObject makeServicesResponse()
                               "Free service description",
                               "amnezia-free",
                               "wireguard",
+                              false,
                               true,
                               "$0",
                               "",
@@ -137,18 +141,18 @@ private slots:
 
         model->updateModel(makeServicesResponse());
 
-        QCOMPARE(model->rowCount(), 3);
+        QCOMPARE(model->rowCount(), 2);
         QCOMPARE(selectionChangedSpy.count(), 1);
 
         const QModelIndex firstIndex = model->index(0, 0);
 
-        QCOMPARE(model->data(firstIndex, ApiServicesModel::NameRole).toString(), QString("service-1"));
-        QCOMPARE(model->data(firstIndex, ApiServicesModel::CardDescriptionRole).toString(), QString("First service"));
-        QCOMPARE(model->data(firstIndex, ApiServicesModel::ServiceDescriptionRole).toString(), QString("First service description"));
+        QCOMPARE(model->data(firstIndex, ApiServicesModel::NameRole).toString(), QString("Amnezia Premium"));
+        QCOMPARE(model->data(firstIndex, ApiServicesModel::CardDescriptionRole).toString(), QString("Premium service"));
+        QCOMPARE(model->data(firstIndex, ApiServicesModel::ServiceDescriptionRole).toString(), QString("Premium service description"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::IsServiceAvailableRole).toBool(), true);
         QCOMPARE(model->data(firstIndex, ApiServicesModel::IsPremiumRole).toBool(), false);
         QCOMPARE(model->data(firstIndex, ApiServicesModel::HasSubscriptionPlansRole).toBool(), true);
-        QCOMPARE(model->data(firstIndex, ApiServicesModel::PriceRole).toString(), QString("$9.99"));
+        QCOMPARE(model->data(firstIndex, ApiServicesModel::PriceRole).toString(), QString("$19.99"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::TermsOfUseUrlRole).toString(),QString("https://example.com/terms"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::PrivacyPolicyUrlRole).toString(), QString("https://example.com/privacy"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::ShowRecommendedRole).toBool(), false);
@@ -160,8 +164,8 @@ private slots:
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
         model->updateModel(makeServicesResponse());
 
-        QCOMPARE(model->serviceIndexForType("service-1"), 0);
-        QCOMPARE(model->serviceIndexForType("service-2"), 1);
+        QCOMPARE(model->serviceIndexForType("amnezia-premium"), 0);
+        QCOMPARE(model->serviceIndexForType("amnezia-free"), 1);
         QCOMPARE(model->serviceIndexForType("unknown"), -1);
 
         QSignalSpy selectionChangedSpy(model, &ApiServicesModel::serviceSelectionChanged);
@@ -169,9 +173,9 @@ private slots:
         model->setServiceIndex(1);
 
         QCOMPARE(selectionChangedSpy.count(), 1);
-        QCOMPARE(model->getSelectedServiceName(), QString("service-2"));
-        QCOMPARE(model->getSelectedServiceType(), QString("service-2"));
-        QCOMPARE(model->getSelectedServiceProtocol(), QString("service-2"));
+        QCOMPARE(model->getSelectedServiceName(), QString("amnezia-free"));
+        QCOMPARE(model->getSelectedServiceType(), QString("amnezia-free"));
+        QCOMPARE(model->getSelectedServiceProtocol(), QString("amnezia-free"));
         QCOMPARE(model->getSelectedServiceCountries(), QJsonArray());
         QCOMPARE(model->getCountryCode(), QString());
         QCOMPARE(model->getStoreEndpoint(), QString());
@@ -182,13 +186,13 @@ private slots:
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
         model->updateModel(makeServicesResponse());
 
-        QCOMPARE(model->getSelectedServiceData("name").toString(), QString("service-1"));
-        QCOMPARE(model->getSelectedServiceData("cardDescription").toString(), QString("First service"));
-        QCOMPARE(model->getSelectedServiceData("serviceDescription").toString(), QString("First service description"));
+        QCOMPARE(model->getSelectedServiceData("name").toString(), QString("Amnezia Premium"));
+        QCOMPARE(model->getSelectedServiceData("cardDescription").toString(), QString("Premium service"));
+        QCOMPARE(model->getSelectedServiceData("serviceDescription").toString(), QString("Premium service description"));
         QCOMPARE(model->getSelectedServiceData("isServiceAvailable").toBool(), true);
-        QCOMPARE(model->getSelectedServiceData("isPremium").toBool(), false);
+        QCOMPARE(model->getSelectedServiceData("isPremium").toBool(), true);
         QCOMPARE(model->getSelectedServiceData("hasSubscriptionPlans").toBool(), true);
-        QCOMPARE(model->getSelectedServiceData("price").toString(), QString("$9.99"));
+        QCOMPARE(model->getSelectedServiceData("price").toString(), QString("$19.99"));
         QCOMPARE(model->getSelectedServiceData("termsOfUseUrl").toString(), QString("https://example.com/terms"));
         QCOMPARE(model->getSelectedServiceData("privacyPolicyUrl").toString(), QString("https://example.com/privacy"));
         QVERIFY(!model->getSelectedServiceData("unknownRole").isValid());
@@ -209,9 +213,8 @@ private slots:
     {
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
 
-        QJsonArray services { makeServiceItem("service-3", "Third service", "Third service description", "service-3",
-                                              "wireguard", false, "$4.99", "2026-09-27T10:00:00Z",
-                                              "https://example.com/terms", "https://example.com/privacy") };
+        QJsonArray services { makeServiceItem("Amnezia Free", "Free service", "Free service description", "amnezia-free",
+                                              "wireguard", false, false, "$0", "", "https://example.com/terms", "https://example.com/privacy") };
 
         QJsonObject data { { "services", services } };
 
