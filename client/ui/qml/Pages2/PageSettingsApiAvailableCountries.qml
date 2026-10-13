@@ -437,7 +437,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: root.showSubscriptionNote ? 12 : 8
 
-                text: qsTr("Countries to connect to")
+                text: qsTr("Locations")
                 color: AmneziaStyle.color.paleGray
             }
         }
