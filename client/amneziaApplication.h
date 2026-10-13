@@ -5,13 +5,15 @@
 #include <QNetworkAccessManager>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include <QThread>
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #include <QGuiApplication>
 #else
   #include <QApplication>
 #endif
 #include <QClipboard>
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#include <QEvent>
+#endif
 
 #include "core/controllers/coreController.h"
 #include "secureQSettings.h"
@@ -41,6 +43,7 @@ public:
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
     void startLocalServer();
+    static void markSecondaryInstanceForDeepLink();
 #endif
 
     QQmlApplicationEngine *qmlEngine() const;
@@ -67,12 +70,19 @@ private:
     QCommandLineOption m_optConnect;
     QCommandLineOption m_optImport;
 
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    void deliverVpnDeepLink(const QString &payload);
+    QString m_pendingVpnDeepLink;
+#endif
+
     QSharedPointer<VpnConnection> m_vpnConnection;
-    QThread m_vpnConnectionThread;
 
     QNetworkAccessManager *m_nam;
 protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+    bool event(QEvent *event) override;
+#endif
 };
 
 #endif // AMNEZIA_APPLICATION_H

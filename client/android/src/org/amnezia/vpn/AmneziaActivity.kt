@@ -249,7 +249,10 @@ class AmneziaActivity : QtActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         Log.v(TAG, "onNewIntent: $intent")
-        intent?.let(::processIntent)
+        intent?.let {
+            setIntent(it)
+            processIntent(it)
+        }
     }
 
     private fun processIntent(intent: Intent) {

@@ -36,6 +36,7 @@ class ImportConfigActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.v(TAG, "onNewIntent: $intent")
+        setIntent(intent)
         intent.let(::readConfig)
     }
 
