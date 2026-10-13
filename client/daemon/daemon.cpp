@@ -53,7 +53,8 @@ Daemon* Daemon::instance() {
   return s_daemon;
 }
 
-bool Daemon::activate(const InterfaceConfig& config) {
+bool Daemon::activate(const InterfaceConfig& requestedConfig) {
+  InterfaceConfig config = requestedConfig;
   Q_ASSERT(wgutils() != nullptr);
 
   // There are 3 possible scenarios in which this method is called:
@@ -110,7 +111,30 @@ bool Daemon::activate(const InterfaceConfig& config) {
     return false;
   }
 
+  if (config.m_useSystemDns) {
+    config.m_systemDnsServers = dnsutils()->systemResolvers();
+    if (config.m_systemDnsServers.isEmpty()) {
+      logger.error() << "Cannot preserve system DNS: no system resolvers found";
+      return false;
+    }
+    config.m_primaryDnsServer.clear();
+    config.m_secondaryDnsServer.clear();
+    for (const QString& dns : config.m_systemDnsServers) {
+      QHostAddress address(dns);
+      // Firewall address tables match the IP, not an interface scope suffix.
+      address.setScopeId(QString());
+      config.m_allowedDnsServers.append(address.toString());
+    }
+    config.m_allowedDnsServers.removeDuplicates();
+  }
+
   prepareActivation(config);
+
+  auto systemDnsCleanup = qScopeGuard([&] {
+    if (config.m_useSystemDns) {
+      deactivate(false);
+    }
+  });
 
   // Bring up the wireguard interface if not already done.
   if (!wgutils()->interfaceExists()) {
@@ -136,6 +160,19 @@ bool Daemon::activate(const InterfaceConfig& config) {
     addExclusionRoute(IPAddress(i));
   }
 
+  // DNS routes must not become general firewall exclusions: only port 53
+  // is allowed by m_allowedDnsServers. Local resolvers retain their OS routes.
+  for (const QString& dns : config.m_systemDnsServers) {
+    const QHostAddress address(dns);
+    if (address.isLoopback() || address.isLinkLocal()) {
+      continue;
+    }
+    if (!addExclusionRoute(IPAddress(address))) {
+      logger.error() << "Cannot route system DNS outside the tunnel";
+      return false;
+    }
+  }
+
   // Add the peer to this interface.
   if (!wgutils()->updatePeer(config)) {
     logger.error() << "Peer creation failed.";
@@ -159,6 +196,7 @@ bool Daemon::activate(const InterfaceConfig& config) {
   if (status) {
     m_connections[config.m_hopType] = ConnectionState(config);
     m_handshakeTimer.start(HANDSHAKE_POLL_MSEC);
+    systemDnsCleanup.dismiss();
     emit_failure_guard.dismiss();
     return true;
   }
@@ -166,6 +204,9 @@ bool Daemon::activate(const InterfaceConfig& config) {
 }
 
 bool Daemon::maybeUpdateResolvers(const InterfaceConfig& config) {
+  if (config.m_useSystemDns) {
+    return true;
+  }
   if ((config.m_hopType == InterfaceConfig::MultiHopExit) ||
       (config.m_hopType == InterfaceConfig::SingleHop)) {
     QList<QHostAddress> resolvers;
@@ -284,6 +325,14 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   config.m_serverIpv4Gateway = obj.value("serverIpv4Gateway").toString();
   config.m_serverIpv6Gateway = obj.value("serverIpv6Gateway").toString();
 
+  const QJsonValue useSystemDns = obj.value("useSystemDns");
+  if (!useSystemDns.isUndefined() && !useSystemDns.isBool()) {
+    logger.error() << "useSystemDns is not a boolean";
+    return false;
+  }
+  config.m_useSystemDns = useSystemDns.toBool();
+  config.m_systemDnsServers.clear();
+
   if (!obj.contains("primaryDnsServer")) {
     config.m_primaryDnsServer = QString();
   } else {
@@ -389,6 +438,19 @@ bool Daemon::parseConfig(const QJsonObject& obj, InterfaceConfig& config) {
   if (!parseStringList(obj, "allowedDnsServers", config.m_allowedDnsServers)) {
     return false;
   }
+  for (QString& dns : config.m_allowedDnsServers) {
+    QHostAddress address(dns);
+    if (address.isNull() || address.isMulticast() || address.isBroadcast()
+        || address == QHostAddress(QHostAddress::AnyIPv4)
+        || address == QHostAddress(QHostAddress::AnyIPv6)) {
+      logger.error() << "allowedDnsServers must contain unicast IP addresses";
+      return false;
+    }
+    // Only canonical addresses may reach the platform firewall command.
+    address.setScopeId(QString());
+    dns = address.toString();
+  }
+  config.m_allowedDnsServers.removeDuplicates();
 
   config.m_killSwitchEnabled = QVariant(obj.value("killSwitchOption").toString()).toBool();
 
@@ -529,7 +591,10 @@ bool Daemon::supportServerSwitching(const InterfaceConfig& config) const {
   const InterfaceConfig& current =
       m_connections.value(config.m_hopType).m_config;
 
-  return current.m_privateKey == config.m_privateKey &&
+  // A full teardown restores the original resolvers before sampling them
+  // again, and drops DNS exceptions from the previous network or mode.
+  return !current.m_useSystemDns && !config.m_useSystemDns &&
+         current.m_privateKey == config.m_privateKey &&
          current.m_deviceIpv4Address == config.m_deviceIpv4Address &&
          current.m_deviceIpv6Address == config.m_deviceIpv6Address &&
          current.m_serverIpv4Gateway == config.m_serverIpv4Gateway &&

@@ -23,6 +23,10 @@ public:
                                QObject* parent = nullptr);
     ~SettingsController() = default;
 
+    bool isSystemDnsSupported() const;
+    bool isSystemDnsEnabled() const;
+    void toggleSystemDns(bool enable);
+
     void toggleAmneziaDns(bool enable);
     bool isAmneziaDnsEnabled() const;
 

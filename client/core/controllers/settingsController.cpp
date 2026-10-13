@@ -40,6 +40,25 @@ SettingsController::SettingsController(SecureServersRepository* serversRepositor
     m_isDevModeEnabled = m_appSettingsRepository->isDevGatewayEnv();
 }
 
+bool SettingsController::isSystemDnsSupported() const
+{
+#if defined(Q_OS_WIN) || (defined(Q_OS_MACOS) && !defined(MACOS_NE))
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool SettingsController::isSystemDnsEnabled() const
+{
+    return m_appSettingsRepository->useSystemDns();
+}
+
+void SettingsController::toggleSystemDns(bool enable)
+{
+    m_appSettingsRepository->setUseSystemDns(isSystemDnsSupported() && enable);
+}
+
 void SettingsController::toggleAmneziaDns(bool enable)
 {
     m_appSettingsRepository->setUseAmneziaDns(enable);
