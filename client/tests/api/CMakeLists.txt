@@ -34,9 +34,19 @@ target_link_libraries(test_ui_subscription_controller PRIVATE
     test_common
 )
 
+add_executable(test_ui_account_info_model
+    testUiAccountInfoModel.cpp
+)
+
+target_link_libraries(test_ui_account_info_model PRIVATE
+    Qt6::Test
+    test_common
+)
+
 add_test(NAME UiNewsModelAndControllerTest COMMAND test_ui_news_model_and_controller)
 add_test(NAME GatewayServiceImportTest COMMAND test_gateway_service_import)
 add_test(NAME UiServicesModelAndControllerTest COMMAND test_ui_services_model_and_controller)
 add_test(NAME UiSubscriptionControllerTest COMMAND test_ui_subscription_controller)
+add_test(NAME UiAccountInfoModelTest COMMAND test_ui_account_info_model)
 
 amnezia_copy_runtime_dlls()
