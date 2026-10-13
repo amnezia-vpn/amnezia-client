@@ -59,7 +59,16 @@ public:
     void getBackendLogs(std::function<void(const QString &)> &&callback);
     void checkStatus();
 
-    bool shareText(const QStringList &filesToSend);
+    // Outcome of the iOS share sheet.
+    // activityType is empty when the user dismissed the sheet without picking any destination.
+    struct ShareResult
+    {
+        bool completed = false;
+        QString activityType;
+        QString errorString;
+    };
+
+    bool shareText(const QStringList &filesToSend, ShareResult *result = nullptr);
     QString openFile();
 
     // Store-specific purchase failure reasons; values match StoreKit2Helper error codes
