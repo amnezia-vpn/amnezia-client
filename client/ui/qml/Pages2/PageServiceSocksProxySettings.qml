@@ -147,10 +147,9 @@ PageType {
                 id: changeSettingsDrawer
                 parent: root
 
-                anchors.fill: parent
-                expandedHeight: root.height * 0.9
+                expandedHeight: windowHeight * 0.9
 
-                expandedStateContent: ColumnLayout {
+                ColumnLayout {
                     property string tempPort: port
                     property string tempUsername: username
                     property string tempPassword: password
@@ -289,7 +288,7 @@ PageType {
                             tempPort = portTextField.textField.text
                             tempUsername = usernameTextField.textField.text
                             tempPassword = passwordTextField.textField.text
-                            changeSettingsDrawer.closeTriggered()
+                            changeSettingsDrawer.close()
                         }
                     }
                 }
@@ -307,7 +306,7 @@ PageType {
                 text: qsTr("Change connection settings")
 
                 clickedFunc: function() {
-                    changeSettingsDrawer.openTriggered()
+                    changeSettingsDrawer.open()
                 }
             }
         }

@@ -789,7 +789,6 @@ PageType {
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
                     Layout.bottomMargin: 16
-                    drawerParent: root
                     drawerHeight: 0.45
                     headerText: qsTr("Carrier mode")
                     text: TProxyConfigModel.carrierModeLabel(carrierMode)
@@ -803,7 +802,7 @@ PageType {
                                 rightImageColor: AmneziaStyle.color.goldenApricot
                                 clickedFunction: function () {
                                     TProxyConfigModel.setCarrierMode(modelData)
-                                    carrierDropDown.closeTriggered()
+                                    carrierDropDown.close()
                                 }
                             }
                         }

@@ -82,7 +82,6 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
-                drawerParent: root
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
@@ -114,7 +113,7 @@ PageType {
 
                         listView.headerText = qsTr("Accessing ") + serverSelector.text
                         listView.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
-                        serverSelector.closeTriggered()
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {

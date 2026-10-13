@@ -59,7 +59,7 @@ PageType {
     function openConfigOptions(countryCode, countryName) {
         moreOptionsDrawer.countryName = countryName
         moreOptionsDrawer.countryCode = countryCode
-        moreOptionsDrawer.openTriggered()
+        moreOptionsDrawer.open()
     }
 
     function downloadConfig(countryCode, countryName, isIssued) {
@@ -132,7 +132,7 @@ PageType {
                 Item {
                     id: rowBody
 
-                    property bool isFocusable: countryRow.visible
+                    activeFocusOnTab: countryRow.visible
 
                     anchors.fill: parent
 
@@ -168,12 +168,6 @@ PageType {
                     Keys.onEnterPressed: rowBody.activate()
                     Keys.onReturnPressed: rowBody.activate()
                     Keys.onSpacePressed: rowBody.activate()
-                    Keys.onTabPressed: FocusController.nextKeyTabItem()
-                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-                    Keys.onUpPressed: FocusController.nextKeyUpItem()
-                    Keys.onDownPressed: FocusController.nextKeyDownItem()
-                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-                    Keys.onRightPressed: FocusController.nextKeyRightItem()
 
                     Rectangle {
                         anchors.fill: parent
@@ -254,7 +248,7 @@ PageType {
                     Item {
                         id: star
 
-                        property bool isFocusable: countryRow.visible
+                        activeFocusOnTab: countryRow.visible
 
                         width: 48
                         height: 48
@@ -281,12 +275,6 @@ PageType {
                         Keys.onEnterPressed: star.toggle()
                         Keys.onReturnPressed: star.toggle()
                         Keys.onSpacePressed: star.toggle()
-                        Keys.onTabPressed: FocusController.nextKeyTabItem()
-                        Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-                        Keys.onUpPressed: FocusController.nextKeyUpItem()
-                        Keys.onDownPressed: FocusController.nextKeyDownItem()
-                        Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-                        Keys.onRightPressed: FocusController.nextKeyRightItem()
 
                         Rectangle {
                             anchors.fill: parent
@@ -379,7 +367,7 @@ PageType {
 
                 listModel: ApiConfigsCountryListModel
 
-                onSortRequested: sortDrawer.openTriggered()
+                onSortRequested: sortDrawer.open()
             },
 
             WarningType {
@@ -464,8 +452,6 @@ PageType {
         id: sortDrawer
 
         listModel: ApiConfigsCountryListModel
-
-        anchors.fill: parent
     }
 
     DrawerType2 {
@@ -474,11 +460,10 @@ PageType {
         property string countryName
         property string countryCode
 
-        anchors.fill: parent
-        expandedHeight: parent.height * 0.4375
+        expandedHeight: windowHeight * 0.4375
 
-        expandedStateContent: Item {
-            implicitHeight: moreOptionsDrawer.expandedHeight
+        Item {
+            anchors.fill: parent
 
             BackButtonType {
                 id: moreOptionsDrawerBackButton
@@ -489,7 +474,7 @@ PageType {
                 anchors.topMargin: 16
 
                 backButtonFunction: function() {
-                    moreOptionsDrawer.closeTriggered()
+                    moreOptionsDrawer.close()
                 }
             }
 
@@ -607,7 +592,7 @@ PageType {
             } else {
                 root.revokeConfig(countryCode)
             }
-            moreOptionsDrawer.closeTriggered()
+            moreOptionsDrawer.close()
         }
         var noButtonFunction = function() {}
 

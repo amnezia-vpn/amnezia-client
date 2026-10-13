@@ -157,7 +157,7 @@ PageType {
 
                 actionButtonImage: "qrc:/images/controls/more-vertical.svg"
                 actionButtonFunction: function() {
-                    shareFullAccessDrawer.openTriggered()
+                    shareFullAccessDrawer.open()
                 }
 
                 DrawerType2 {
@@ -165,10 +165,9 @@ PageType {
 
                     parent: root
 
-                    anchors.fill: parent
-                    expandedHeight: root.height
+                    expandedHeight: shareFullAccessDrawerContent.implicitHeight + 32
 
-                    expandedStateContent: ColumnLayout {
+                    ColumnLayout {
                         id: shareFullAccessDrawerContent
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -176,10 +175,6 @@ PageType {
                         anchors.topMargin: 16
 
                         spacing: 0
-
-                        onImplicitHeightChanged: {
-                            shareFullAccessDrawer.expandedHeight = shareFullAccessDrawerContent.implicitHeight + 32
-                        }
 
                         Header2Type {
                             Layout.fillWidth: true
@@ -200,7 +195,7 @@ PageType {
 
                             clickedFunction: function() {
                                 PageController.goToPage(PageEnum.PageShareFullAccess)
-                                shareFullAccessDrawer.closeTriggered()
+                                shareFullAccessDrawer.close()
                             }
                         }
                     }
@@ -296,7 +291,6 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
-                drawerParent: root
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
@@ -329,7 +323,7 @@ PageType {
                             serverSelector.serverSelectorIndexChanged()
                         }
 
-                        serverSelector.closeTriggered()
+                        serverSelector.close()
                     }
 
                     Component.onCompleted: {
@@ -361,7 +355,6 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.5
-                drawerParent: root
 
                 descriptionText: qsTr("Protocol")
                 headerText: qsTr("Protocol")
@@ -394,7 +387,7 @@ PageType {
                     clickedFunction: function() {
                         handler()
 
-                        containerSelector.closeTriggered()
+                        containerSelector.close()
                     }
 
                     Connections {
@@ -471,7 +464,6 @@ PageType {
                 Layout.topMargin: 16
 
                 drawerHeight: 0.4375
-                drawerParent: root
 
                 visible: accessTypeSelector.currentIndex === 0
                 enabled: root.connectionTypesModel.length > 1
@@ -523,7 +515,7 @@ PageType {
                     clickedFunction: function() {
                         exportTypeSelector.text = exportTypeSelectorListView.selectedText
                         exportTypeSelector.currentIndex = exportTypeSelectorListView.selectedIndex
-                        exportTypeSelector.closeTriggered()
+                        exportTypeSelector.close()
                     }
                 }
             }
@@ -585,7 +577,15 @@ PageType {
                         }
                     }
 
-                    Keys.onTabPressed: { navigateTo() }
+                    Connections {
+                        target: searchTextField.textField
+                        function onActiveFocusChanged() {
+                            if (!searchTextField.textField.activeFocus) {
+                                searchTextField.navigateTo()
+                            }
+                        }
+                    }
+
                     Keys.onEnterPressed: { navigateTo() }
                     Keys.onReturnPressed: { navigateTo() }
                 }
@@ -615,7 +615,6 @@ PageType {
 
                 function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') }
 
-                property bool isFocusable: true
                 property bool freezeFilter: false
 
                 model: SortFilterProxyModel {
@@ -655,7 +654,7 @@ PageType {
                             rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                             clickedFunction: function() {
-                                clientInfoDrawer.openTriggered()
+                                clientInfoDrawer.open()
                             }
                         }
 
@@ -666,21 +665,16 @@ PageType {
 
                             parent: root
 
-                            width: root.width
-                            height: root.height
+                            expandedHeight: clientInfoDrawerContent.implicitHeight + 32
 
-                            expandedStateContent: ColumnLayout {
-                                id: expandedStateContent
+                            ColumnLayout {
+                                id: clientInfoDrawerContent
                                 anchors.top: parent.top
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.topMargin: 16
                                 anchors.leftMargin: 16
                                 anchors.rightMargin: 16
-
-                                onImplicitHeightChanged: {
-                                    clientInfoDrawer.expandedHeight = expandedStateContent.implicitHeight + 32
-                                }
 
                                 Header2TextType {
                                     Layout.maximumWidth: parent.width
@@ -765,7 +759,7 @@ PageType {
                                     text: qsTr("Rename")
 
                                     clickedFunc: function() {
-                                        clientNameEditDrawer.openTriggered()
+                                        clientNameEditDrawer.open()
                                     }
 
                                     DrawerType2 {
@@ -773,10 +767,9 @@ PageType {
 
                                         parent: root
 
-                                        anchors.fill: parent
-                                        expandedHeight: root.height * 0.35
+                                        expandedHeight: windowHeight * 0.35
 
-                                        expandedStateContent: ColumnLayout {
+                                        ColumnLayout {
                                             anchors.top: parent.top
                                             anchors.left: parent.left
                                             anchors.right: parent.right
@@ -814,7 +807,7 @@ PageType {
                                                                                           ServersUiController.processedContainerIndex)
                                                         PageController.showBusyIndicator(false)
                                                         Qt.callLater(function(){ clientsListView.freezeFilter = false })
-                                                        clientNameEditDrawer.closeTriggered()
+                                                        clientNameEditDrawer.close()
                                                     }
                                                 }
                                             }
@@ -843,7 +836,7 @@ PageType {
                                         var noButtonText = qsTr("Cancel")
 
                                         var yesButtonFunction = function() {
-                                            clientInfoDrawer.closeTriggered()
+                                            clientInfoDrawer.close()
                                             PageController.showBusyIndicator(true)
                                             ExportController.revokeConfig(proxyClientManagementModel.mapToSource(index),
                                                                               ServersUiController.processedServerId,

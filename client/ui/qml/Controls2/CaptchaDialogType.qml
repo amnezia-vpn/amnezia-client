@@ -63,8 +63,9 @@ Popup {
         color: AmneziaStyle.color.translucentMidnightBlack
     }
 
+    focus: true
+
     onOpened: {
-        timer.start()
         solutionField.textField.text = ""
         solutionField.textField.forceActiveFocus()
     }
@@ -81,25 +82,10 @@ Popup {
         }
     }
 
-    onClosed: {
-        FocusController.dropRootObject(root)
-    }
-
     background: Rectangle {
         anchors.fill: parent
         color: AmneziaStyle.color.slateGray
         radius: 22
-    }
-
-    Timer {
-        id: timer
-        interval: 200
-        onTriggered: {
-            FocusController.pushRootObject(root)
-            FocusController.setFocusItem(solutionField.textField)
-        }
-        repeat: false
-        running: true
     }
 
     contentItem: Item {

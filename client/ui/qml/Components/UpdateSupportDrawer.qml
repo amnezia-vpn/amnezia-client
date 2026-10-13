@@ -11,16 +11,11 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    expandedStateContent: Item {
+    expandedHeight: content.implicitHeight + 40 + PageController.safeAreaBottomMargin
+
+    Item {
         id: contentRoot
-
-        implicitHeight: content.implicitHeight + 40 + PageController.safeAreaBottomMargin
-
-        Binding {
-            target: root
-            property: "expandedHeight"
-            value: contentRoot.implicitHeight
-        }
+        anchors.fill: parent
 
         ColumnLayout {
             id: content

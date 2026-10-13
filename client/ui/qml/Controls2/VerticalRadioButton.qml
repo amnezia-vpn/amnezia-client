@@ -32,37 +32,11 @@ RadioButton {
     property string imageSource
     property bool showImage
 
-    property bool isFocusable: true
 
-    
     property string radioButtonInnerCirclePressedSource: "qrc:/images/controls/radio-button-inner-circle-pressed.png"
     property string radioButtonInnerCircleSource: "qrc:/images/controls/radio-button-inner-circle.png"
     property string radioButtonPressedSource: "qrc:/images/controls/radio-button-pressed.svg"
     property string radioButtonDefaultSource: "qrc:/images/controls/radio-button.svg"
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
 
     hoverEnabled: true
 
@@ -194,5 +168,4 @@ RadioButton {
         enabled: false
     }
 }
-
 

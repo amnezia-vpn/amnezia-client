@@ -224,7 +224,7 @@ PageType {
                 Item {
                     id: rowBody
 
-                    property bool isFocusable: countryRow.visible
+                    activeFocusOnTab: countryRow.visible
 
                     anchors.fill: parent
 
@@ -253,12 +253,6 @@ PageType {
                     Keys.onEnterPressed: rowBody.activate()
                     Keys.onReturnPressed: rowBody.activate()
                     Keys.onSpacePressed: rowBody.activate()
-                    Keys.onTabPressed: FocusController.nextKeyTabItem()
-                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-                    Keys.onUpPressed: FocusController.nextKeyUpItem()
-                    Keys.onDownPressed: FocusController.nextKeyDownItem()
-                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-                    Keys.onRightPressed: FocusController.nextKeyRightItem()
 
                     Rectangle {
                         anchors.fill: parent
@@ -313,7 +307,7 @@ PageType {
                 Item {
                     id: star
 
-                    property bool isFocusable: countryRow.visible
+                    activeFocusOnTab: countryRow.visible
 
                     anchors.right: parent.right
                     anchors.rightMargin: 28
@@ -343,12 +337,6 @@ PageType {
                     Keys.onEnterPressed: star.toggle()
                     Keys.onReturnPressed: star.toggle()
                     Keys.onSpacePressed: star.toggle()
-                    Keys.onTabPressed: FocusController.nextKeyTabItem()
-                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-                    Keys.onUpPressed: FocusController.nextKeyUpItem()
-                    Keys.onDownPressed: FocusController.nextKeyDownItem()
-                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-                    Keys.onRightPressed: FocusController.nextKeyRightItem()
 
                     Rectangle {
                         anchors.fill: parent
@@ -464,7 +452,7 @@ PageType {
 
                 listModel: ApiCountryListModel
 
-                onSortRequested: sortDrawer.openTriggered()
+                onSortRequested: sortDrawer.open()
             },
 
             CountryUseCaseChips {
@@ -538,8 +526,6 @@ PageType {
         id: sortDrawer
 
         listModel: ApiCountryListModel
-
-        anchors.fill: parent
     }
 
     ToastType {

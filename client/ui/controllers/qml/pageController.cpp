@@ -89,12 +89,7 @@ void PageController::keyPressEvent(Qt::Key key)
     switch (key) {
     case Qt::Key_Back:
     case Qt::Key_Escape: {
-        if (m_drawerDepth) {
-            emit closeTopDrawer();
-            decrementDrawerDepth();
-        } else {
-            emit escapePressed();
-        }
+        emit escapePressed();
         break;
     }
     default: return;
@@ -148,32 +143,6 @@ void PageController::setTriggeredByConnectButton(bool trigger)
 void PageController::closeApplication()
 {
     qApp->quit();
-}
-
-void PageController::setDrawerDepth(const int depth)
-{
-    if (depth >= 0) {
-        m_drawerDepth = depth;
-    }
-}
-
-int PageController::getDrawerDepth() const
-{
-    return m_drawerDepth;
-}
-
-int PageController::incrementDrawerDepth()
-{
-    return ++m_drawerDepth;
-}
-
-int PageController::decrementDrawerDepth()
-{
-    if (m_drawerDepth == 0) {
-        return m_drawerDepth;
-    } else {
-        return --m_drawerDepth;
-    }
 }
 
 bool PageController::isEdgeToEdgeEnabled()

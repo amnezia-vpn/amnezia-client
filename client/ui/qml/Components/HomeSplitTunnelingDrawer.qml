@@ -13,10 +13,9 @@ DrawerType2 {
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
-    anchors.fill: parent
-    expandedHeight: parent.height * 0.9
+    expandedHeight: windowHeight * 0.9
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -48,7 +47,7 @@ DrawerType2 {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.closeTriggered()
+                root.close()
             }
         }
 
@@ -67,7 +66,7 @@ DrawerType2 {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.closeTriggered()
+                root.close()
             }
         }
 
@@ -86,7 +85,7 @@ DrawerType2 {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
-                root.closeTriggered()
+                root.close()
             }
         }
 

@@ -107,7 +107,6 @@ PageType {
             Layout.rightMargin: 16
 
             drawerHeight: 0.4375
-            drawerParent: root
 
             headerText: qsTr("Mode")
 
@@ -122,7 +121,7 @@ PageType {
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.closeTriggered()
+                    selector.close()
                     if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
                         AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
                     }
@@ -258,7 +257,7 @@ PageType {
                             AppSplitTunnelingController.addApp(fileName)
                         }
                     } else if (Qt.platform.os === "android"){
-                        installedAppDrawer.openTriggered()
+                        installedAppDrawer.open()
                     }
 
                     PageController.showBusyIndicator(false)
@@ -269,7 +268,5 @@ PageType {
 
     InstalledAppsDrawer {
         id: installedAppDrawer
-
-        anchors.fill: parent
     }
 }

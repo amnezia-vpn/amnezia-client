@@ -177,7 +177,7 @@ PageType {
                 clickedFunction: function () {
                     root.selectedConfigName = configName
                     root.selectedConfigIndex = index
-                    configActionsDrawer.openTriggered()
+                    configActionsDrawer.open()
                 }
             }
 
@@ -199,25 +199,20 @@ PageType {
     DrawerType2 {
         id: configActionsDrawer
         parent: root
-        anchors.fill: parent
-        expandedHeight: root.height * 0.35
+        expandedHeight: drawerContent.implicitHeight + 32
 
-        expandedStateContent: ColumnLayout {
+        ColumnLayout {
             id: drawerContent
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             spacing: 0
 
-            onImplicitHeightChanged: {
-                configActionsDrawer.expandedHeight = drawerContent.implicitHeight + 32
-            }
-
             BackButtonType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 backButtonFunction: function () {
-                    configActionsDrawer.closeTriggered()
+                    configActionsDrawer.close()
                 }
             }
 
@@ -236,7 +231,7 @@ PageType {
                 text: qsTr("Apply configuration")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 clickedFunction: function () {
-                    configActionsDrawer.closeTriggered()
+                    configActionsDrawer.close()
                     XrayConfigSnapshotsModel.applyConfigToCurrentModel(root.selectedConfigIndex)
                     PageController.closePage()
                 }
@@ -251,7 +246,7 @@ PageType {
                 text: qsTr("Export configuration")
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
                 clickedFunction: function () {
-                    configActionsDrawer.closeTriggered()
+                    configActionsDrawer.close()
                     var json = XrayConfigSnapshotsModel.exportToJson(root.selectedConfigIndex)
                     saveConfigToFile(json)
                 }
@@ -266,7 +261,7 @@ PageType {
                 text: qsTr("Delete configuration")
                 textColor: AmneziaStyle.color.vibrantRed
                 clickedFunction: function () {
-                    configActionsDrawer.closeTriggered()
+                    configActionsDrawer.close()
                     var yesButtonFunction = function () {
                         XrayConfigSnapshotsModel.removeConfig(root.selectedConfigIndex)
                         root.selectedConfigIndex = -1

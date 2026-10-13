@@ -43,72 +43,23 @@ Item {
 
     property real drawerHeight: 0.9
     property bool fitContent: false
-    property Item drawerParent
     property Component listView
 
-    signal openTriggered
-    signal closeTriggered
-
-    readonly property bool isFocusable: true
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
+    function open() {
+        menu.open()
     }
 
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
+    function close() {
+        menu.close()
     }
 
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
-
-    Connections {
-        target: Qt.application
-
-        function onStateChanged() {
-            if (Qt.application.state !== Qt.ApplicationActive) {
-                if (!menu.isClosed) {
-                    menu.closeTriggered()
-                }
-            }
-        }
-    }
+    activeFocusOnTab: true
 
     implicitWidth: rootButtonContent.implicitWidth
     implicitHeight: rootButtonContent.implicitHeight
 
-    onOpenTriggered: {
-        menu.openTriggered()
-    }
-
-    onCloseTriggered: {
-        menu.closeTriggered()
-    }
-
-    Keys.onEnterPressed: {
-        if (menu.isClosed) {
-            menu.openTriggered()
-        }
-    }
-
-    Keys.onReturnPressed: {
-        if (menu.isClosed) {
-            menu.openTriggered()
-        }
-    }
+    Keys.onEnterPressed: menu.open()
+    Keys.onReturnPressed: menu.open()
 
     Rectangle {
         id: focusBorder
@@ -118,7 +69,6 @@ Item {
         border.width: root.activeFocus ? root.borderFocusedWidth : 0
         anchors.fill: rootButtonContent
         radius: 16
-
 
         Rectangle {
             id: rootButtonBackground
@@ -209,7 +159,7 @@ Item {
             if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
                 rootButtonClickedFunction()
             } else {
-                menu.openTriggered()
+                menu.open()
             }
         }
     }
@@ -217,17 +167,14 @@ Item {
     DrawerType2 {
         id: menu
 
-        parent: drawerParent
-
-        anchors.fill: parent
         property real measuredContentHeight: 0
         expandedHeight: (root.fitContent && measuredContentHeight > 0)
-            ? Math.min(measuredContentHeight, drawerParent.height * root.drawerHeight)
-            : drawerParent.height * root.drawerHeight
+            ? Math.min(measuredContentHeight, windowHeight * root.drawerHeight)
+            : windowHeight * root.drawerHeight
 
-        expandedStateContent: Item {
+        Item {
             id: container
-            implicitHeight: menu.expandedHeight
+            anchors.fill: parent
 
             property real fitHeight: backButton.implicitHeight + titleLabel.implicitHeight
                                      + (listViewLoader.item ? listViewLoader.item.contentHeight : 0) + 48
@@ -243,7 +190,7 @@ Item {
                 BackButtonType {
                     id: backButton
                     backButtonImage: root.headerBackButtonImage
-                    backButtonFunction: function() { menu.closeTriggered() }
+                    backButtonFunction: function() { menu.close() }
                 }
 
                 Header2Type {

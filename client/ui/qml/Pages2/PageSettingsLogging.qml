@@ -176,7 +176,7 @@ PageType {
                         checkedInnerCircleColor: AmneziaStyle.color.switchThumbChecked
                         defaultIndicatorBorderColor: AmneziaStyle.color.textTertiary
 
-                        isFocusable: false
+                        focusPolicy: Qt.NoFocus
 
                         checked: SettingsController.isLoggingEnabled
 

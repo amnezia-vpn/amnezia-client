@@ -1183,7 +1183,6 @@ PageType {
                         Layout.rightMargin: 16
                         Layout.bottomMargin: 16
 
-                        drawerParent: root
                         drawerHeight: 0.4
                         headerText: qsTr("Transport mode")
                         text: transportMode === "faketls" ? qsTr("FakeTLS") : qsTr("Standard MTProto")
@@ -1204,7 +1203,7 @@ PageType {
                                         transportMode = (index === 0) ? "standard" : "faketls"
                                         MtProxyConfigModel.setTransportMode(transportMode)
                                         root.syncedSecretTabIndex = transportMode === "faketls" ? 1 : 0
-                                        transportModeDropDown.closeTriggered()
+                                        transportModeDropDown.close()
                                     }
                                 }
                             }

@@ -14,11 +14,13 @@ DrawerType2 {
 
     property bool isRenewalAvailable: false
 
-    onOpened: {
+    expandedHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
+
+    onAboutToShow: {
         isRenewalAvailable = ServersUiController.isServerRenewalAvailable(ServersUiController.defaultServerId) && !ApiAccountInfoModel.data("isInAppPurchase")
     }
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -26,10 +28,6 @@ DrawerType2 {
         anchors.right: parent.right
 
         spacing: 0
-
-        onImplicitHeightChanged: {
-            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
-        }
 
         Item {
             Layout.fillWidth: true
@@ -99,7 +97,7 @@ DrawerType2 {
                 let result = SubscriptionUiController.getAccountInfo(ServersUiController.defaultServerId, false)
                 PageController.showBusyIndicator(false)
                 if (result) {
-                    root.closeTriggered()
+                    root.close()
                     PageController.goToPage(PageEnum.PageSettingsApiSupport)
                 }
             }

@@ -45,31 +45,6 @@ Rectangle {
                 anchors.topMargin: 16
                 anchors.bottomMargin: 16
 
-                property bool isFocusable: true
-
-                Keys.onTabPressed: {
-                    FocusController.nextKeyTabItem()
-                }
-
-                Keys.onBacktabPressed: {
-                    FocusController.previousKeyTabItem()
-                }
-
-                Keys.onUpPressed: {
-                    FocusController.nextKeyUpItem()
-                }
-                
-                Keys.onDownPressed: {
-                    FocusController.nextKeyDownItem()
-                }
-                
-                Keys.onLeftPressed: {
-                    FocusController.nextKeyLeftItem()
-                }
-
-                Keys.onRightPressed: {
-                    FocusController.nextKeyRightItem()
-                }
 
                 color: AmneziaStyle.color.paleGray
                 selectionColor:  AmneziaStyle.color.richBrown
@@ -134,7 +109,6 @@ Rectangle {
             root.border.color = getBorderColor(borderHoveredColor)
         }
     }
-
 
     function getBorderColor(noneFocusedColor) {
         return textArea.focus ? root.borderFocusedColor : noneFocusedColor

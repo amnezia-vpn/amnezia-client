@@ -15,7 +15,7 @@ DrawerType2 {
     id: root
     objectName: "serverNameEditDrawer"
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -48,7 +48,7 @@ DrawerType2 {
                 if (serverName.textField.text !== root.serverNameText) {
                     ServersUiController.editServerName(ServersUiController.processedServerId, serverName.textField.text);
                 }
-                root.closeTriggered()
+                root.close()
             }
         }
     }

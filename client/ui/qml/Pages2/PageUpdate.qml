@@ -56,7 +56,7 @@ PageType {
         imageColor: AmneziaStyle.color.textPrimary
 
         onClicked: function() {
-            supportDrawer.openTriggered()
+            supportDrawer.open()
         }
     }
 
@@ -274,6 +274,5 @@ PageType {
         id: supportDrawer
 
         parent: root
-        anchors.fill: parent
     }
 }

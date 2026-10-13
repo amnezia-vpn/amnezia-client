@@ -22,7 +22,9 @@ DrawerType2 {
     property var yesButtonFunction
     property var noButtonFunction
 
-    expandedStateContent: ColumnLayout {
+    expandedHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
+
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -30,10 +32,6 @@ DrawerType2 {
         anchors.right: parent.right
 
         spacing: 8
-
-        onImplicitHeightChanged: {
-            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
-        }
 
         Header2TextType {
             Layout.fillWidth: true

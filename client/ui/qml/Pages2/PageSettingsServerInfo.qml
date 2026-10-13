@@ -103,7 +103,7 @@ PageType {
             }
 
             actionButtonFunction: function() {
-                serverNameEditDrawer.openTriggered()
+                serverNameEditDrawer.open()
             }
         }
 
@@ -112,8 +112,7 @@ PageType {
 
             parent: root
 
-            anchors.fill: parent
-            expandedHeight: root.height * 0.35
+            expandedHeight: windowHeight * 0.35
 
             serverNameText: root.processedServer != null ? root.processedServer.name : ""
         }

@@ -119,7 +119,6 @@ PageType {
                 text: xPaddingPlacement
                 descriptionText: qsTr("xPaddingPlacement")
                 headerText: qsTr("xPaddingPlacement")
-                drawerParent: root
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
                     currentValue: xPaddingPlacement
@@ -134,7 +133,7 @@ PageType {
                     clickedFunction: function () {
                         xPaddingPlacement = selectedText
                         placementDropDown.text = selectedText
-                        placementDropDown.closeTriggered()
+                        placementDropDown.close()
                     }
                     Component.onCompleted: {
                         for (var i = 0; i < model.count; i++) {
@@ -164,7 +163,6 @@ PageType {
                 text: xPaddingMethod
                 descriptionText: qsTr("xPaddingMethod")
                 headerText: qsTr("xPaddingMethod")
-                drawerParent: root
                 listView: ListViewWithRadioButtonType {
                     rootWidth: root.width
                     currentValue: xPaddingMethod
@@ -179,7 +177,7 @@ PageType {
                     clickedFunction: function () {
                         xPaddingMethod = selectedText
                         methodDropDown.text = selectedText
-                        methodDropDown.closeTriggered()
+                        methodDropDown.close()
                     }
                     Component.onCompleted: {
                         for (var i = 0; i < model.count; i++) {

@@ -11,14 +11,11 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    expandedStateContent: Item {
+    expandedHeight: windowHeight * 0.9
+
+    Item {
         id: container
-
-        implicitHeight: root.height * 0.9
-
-        Component.onCompleted: {
-            root.expandedHeight = container.implicitHeight
-        }
+        anchors.fill: parent
 
         ColumnLayout {
             id: backButtonLayout
@@ -34,7 +31,7 @@ DrawerType2 {
                 Layout.fillWidth: true
 
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                backButtonFunction: function() { root.closeTriggered() }
+                backButtonFunction: function() { root.close() }
             }
 
             Header2Type {
@@ -81,32 +78,6 @@ DrawerType2 {
                         implicitHeight: radioButtonContent.implicitHeight
 
                         hoverEnabled: true
-
-                        property bool isFocusable: true
-
-                        Keys.onTabPressed: {
-                            FocusController.nextKeyTabItem()
-                        }
-
-                        Keys.onBacktabPressed: {
-                            FocusController.previousKeyTabItem()
-                        }
-
-                        Keys.onUpPressed: {
-                            FocusController.nextKeyUpItem()
-                        }
-
-                        Keys.onDownPressed: {
-                            FocusController.nextKeyDownItem()
-                        }
-
-                        Keys.onLeftPressed: {
-                            FocusController.nextKeyLeftItem()
-                        }
-
-                        Keys.onRightPressed: {
-                            FocusController.nextKeyRightItem()
-                        }
 
                         indicator: Rectangle {
                             width: parent.width - 1
@@ -159,7 +130,7 @@ DrawerType2 {
                         onClicked: {
                             listView.selectedIndex = index
                             LanguageUiController.changeLanguage(languageIndex)
-                            root.closeTriggered()
+                            root.close()
                         }
                     }
                 }

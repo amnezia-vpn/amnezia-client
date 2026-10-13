@@ -142,7 +142,7 @@ PageType {
                 headerText: root.processedServer != null ? root.processedServer.name : ""
 
                 actionButtonFunction: function() {
-                    serverNameEditDrawer.openTriggered()
+                    serverNameEditDrawer.open()
                 }
             }
 
@@ -493,8 +493,7 @@ PageType {
     RenameServerDrawer {
         id: serverNameEditDrawer
 
-        anchors.fill: parent
-        expandedHeight: parent.height * 0.35
+        expandedHeight: windowHeight * 0.35
 
         serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }

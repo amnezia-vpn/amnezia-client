@@ -76,8 +76,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        property bool isFocusable: true
-
         ScrollBar.vertical: ScrollBarType {}
         model: 1
         clip: true
@@ -149,7 +147,6 @@ PageType {
                 borderWidth: 1
                 text: qsTr("Copy config string")
                 leftImageSource: "qrc:/images/controls/copy.svg"
-                KeyNavigation.tab: showSettingsButton
             }
 
             BasicButtonType {
@@ -167,18 +164,17 @@ PageType {
                 borderWidth: 1
                 text: qsTr("Show connection settings")
                 clickedFunc: function() {
-                    configContentDrawer.openTriggered()
+                    configContentDrawer.open()
                 }
             }
 
             DrawerType2 {
                 id: configContentDrawer
-                parent: pageShareConnection.parent
-                anchors.fill: parent
-                expandedHeight: (parent ? parent.height : pageShareConnection.height) * 0.9
-                expandedStateContent: Item {
+                parent: pageShareConnection
+                expandedHeight: windowHeight * 0.9
+                Item {
                     id: configContentContainer
-                    implicitHeight: configContentDrawer.expandedHeight
+                    anchors.fill: parent
 
                     Connections {
                         target: copyNativeConfigStringButton
@@ -197,7 +193,7 @@ PageType {
                             configText.copy()
                             configText.select(0, 0)
                             PageController.showNotificationMessage(qsTr("Copied"))
-                            shareHeader.forceActiveFocus()
+                            configContentDrawer.forceActiveFocus()
                         }
                     }
 
@@ -207,7 +203,7 @@ PageType {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.topMargin: 16
-                        backButtonFunction: function() { configContentDrawer.closeTriggered() }
+                        backButtonFunction: function() { configContentDrawer.close() }
                     }
 
                     FlickableType {
@@ -285,13 +281,7 @@ PageType {
                     sourceSize.width: parent.width
                     sourceSize.height: parent.height
                     source: pageShareConnection.isSelfHostedConfig ? (isQrCodeVisible ? ExportController.qrCodes[0] : "") : (isQrCodeVisible ? SubscriptionUiController.qrCodes[0] : "")
-                    property bool isFocusable: true
-                    Keys.onTabPressed: FocusController.nextKeyTabItem()
-                    Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-                    Keys.onUpPressed: FocusController.nextKeyUpItem()
-                    Keys.onDownPressed: FocusController.nextKeyDownItem()
-                    Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-                    Keys.onRightPressed: FocusController.nextKeyRightItem()
+                    activeFocusOnTab: true
 
                     Timer {
                         property int index: 0

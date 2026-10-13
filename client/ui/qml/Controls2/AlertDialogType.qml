@@ -42,12 +42,7 @@ Popup {
     }
 
     onOpened: {
-        FocusController.pushRootObject(root)
         cancelButton.forceActiveFocus()
-    }
-
-    onClosed: {
-        FocusController.dropRootObject(root)
     }
 
     background: Rectangle {
@@ -124,8 +119,6 @@ Popup {
 
         property color textColor
 
-        property bool isFocusable: true
-
         implicitHeight: 48
 
         hoverEnabled: true
@@ -135,10 +128,6 @@ Popup {
         font.weight: 400
         font.letterSpacing: -0.4
 
-        Keys.onTabPressed: FocusController.nextKeyTabItem()
-        Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-        Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-        Keys.onRightPressed: FocusController.nextKeyRightItem()
         Keys.onEnterPressed: button.clicked()
         Keys.onReturnPressed: button.clicked()
 

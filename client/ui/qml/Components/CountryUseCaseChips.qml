@@ -14,7 +14,6 @@ ListViewType {
     readonly property var chips: root.listModel !== null ? root.listModel.useCases : []
 
     visible: root.chips.length > 1
-    isFocusable: root.visible
 
     implicitHeight: root.visible ? 36 : 0
 
@@ -42,7 +41,7 @@ ListViewType {
             readonly property bool active: root.listModel !== null
                                            && root.listModel.activeUseCaseId === chip.useCaseId
 
-            property bool isFocusable: true
+            activeFocusOnTab: true
 
             anchors.fill: parent
             implicitWidth: label.implicitWidth + 32
@@ -89,12 +88,6 @@ ListViewType {
             Keys.onReturnPressed: chip.select()
             Keys.onSpacePressed: chip.select()
 
-            Keys.onTabPressed: FocusController.nextKeyTabItem()
-            Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-            Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-            Keys.onRightPressed: FocusController.nextKeyRightItem()
-            Keys.onUpPressed: FocusController.nextKeyUpItem()
-            Keys.onDownPressed: FocusController.nextKeyDownItem()
         }
     }
 }

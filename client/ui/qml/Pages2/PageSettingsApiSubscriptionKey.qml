@@ -154,7 +154,7 @@ PageType {
                     PageController.showBusyIndicator(true)
                     SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
-                    vpnKeyDrawer.openTriggered()
+                    vpnKeyDrawer.open()
                 }
             }
 
@@ -196,15 +196,15 @@ PageType {
     DrawerType2 {
         id: vpnKeyDrawer
 
-        anchors.fill: root
-        expandedHeight: root.height * 0.9
+        expandedHeight: windowHeight * 0.9
 
-        expandedStateContent: Item {
+        Item {
+            anchors.fill: parent
             BackButtonType {
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.topMargin: 16
-                backButtonFunction: function() { vpnKeyDrawer.closeTriggered() }
+                backButtonFunction: function() { vpnKeyDrawer.close() }
             }
 
             ColumnLayout {
@@ -224,6 +224,7 @@ PageType {
                     Layout.fillWidth: true
                     Layout.topMargin: 16
                     readOnly: true
+                    activeFocusOnTab: false
                     color: AmneziaStyle.color.paleGray
                     selectionColor: AmneziaStyle.color.richBrown
                     selectedTextColor: AmneziaStyle.color.paleGray

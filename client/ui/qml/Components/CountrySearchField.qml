@@ -40,16 +40,6 @@ Rectangle {
         TextField {
             id: input
 
-            property bool isFocusable: true
-
-            Keys.onTabPressed: {
-                FocusController.nextKeyTabItem()
-            }
-
-            Keys.onBacktabPressed: {
-                FocusController.previousKeyTabItem()
-            }
-
             Layout.fillWidth: true
 
             color: AmneziaStyle.color.textPrimary

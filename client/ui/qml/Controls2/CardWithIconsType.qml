@@ -32,6 +32,7 @@ Button {
 
     hoverEnabled: true
     clip: false
+    focusPolicy: Qt.NoFocus
 
     readonly property real cardTextOpacity: !enabled ? 1.0 : pressed ? 0.7 : hovered ? 0.8 : 1.0
 

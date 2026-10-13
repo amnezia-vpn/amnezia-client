@@ -22,8 +22,12 @@ Item {
         id: timer
         interval: 200 // Milliseconds
         onTriggered: {
-            FocusController.resetRootObject()
-            FocusController.setFocusOnDefaultItem()
+            for (let item = root.Window.activeFocusItem; item; item = item.parent) {
+                if (item === root.Overlay.overlay) {
+                    return
+                }
+            }
+            root.forceActiveFocus()
         }
         repeat: false // Stop the timer after one trigger
         running: enableTimer // Start the timer

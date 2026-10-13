@@ -11,20 +11,15 @@ import "../Config"
 DrawerType2 {
     id: root
 
-    width: parent.width
-    height: parent.height
+    expandedHeight: content.implicitHeight + 32
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
-
-        Component.onCompleted: {
-            root.expandedHeight = content.implicitHeight + 32
-        }
 
         Header2Type {
             Layout.fillWidth: true
@@ -46,7 +41,7 @@ DrawerType2 {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSetupWizardCredentials)
-                root.closeTriggered()
+                root.close()
             }
         }
 
@@ -61,7 +56,7 @@ DrawerType2 {
 
             clickedFunction: function() {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-                root.closeTriggered()
+                root.close()
             }
         }
 

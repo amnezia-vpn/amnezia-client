@@ -28,12 +28,12 @@ Popup {
         color: AmneziaStyle.color.translucentMidnightBlack
     }
 
-    onOpened: {
-        timer.start()
-    }
+    focus: root.closeButtonVisible
 
-    onClosed: {
-        FocusController.dropRootObject(root)
+    onOpened: {
+        if (root.closeButtonVisible) {
+            closeButton.forceActiveFocus()
+        }
     }
 
     background: Rectangle {
@@ -41,17 +41,6 @@ Popup {
 
         color: "white"
         radius: 4
-    }
-
-    Timer {
-        id: timer
-        interval: 200 // Milliseconds
-        onTriggered: {
-            FocusController.pushRootObject(root)
-            FocusController.setFocusItem(closeButton)
-        }
-        repeat: false // Stop the timer after one trigger
-        running: true // Start the timer
     }
 
     contentItem: Item {

@@ -228,7 +228,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    selectLanguageDrawer.openTriggered()
+                    selectLanguageDrawer.open()
                 }
             }
 
@@ -287,8 +287,5 @@ PageType {
 
     SelectLanguageDrawer {
         id: selectLanguageDrawer
-
-        width: root.width
-        height: root.height
     }
 }

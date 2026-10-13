@@ -43,8 +43,6 @@ PageType {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
-        property bool isFocusable: true
-
         model: NewsModel
         
         clip: true

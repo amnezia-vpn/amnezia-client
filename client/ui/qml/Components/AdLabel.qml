@@ -13,7 +13,7 @@ Rectangle {
     id: root
 
     property real contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
-    property bool isFocusable: true
+    activeFocusOnTab: true
 
     gradient: Gradient {
         orientation: Gradient.Horizontal
@@ -25,30 +25,6 @@ Rectangle {
     radius: 13
 
     visible: ServersUiController.isAdVisible
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
 
     Keys.onEnterPressed: {
         Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))

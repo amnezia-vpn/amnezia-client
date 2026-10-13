@@ -45,32 +45,8 @@ Item {
     property bool descriptionOnTop: false
     property bool hideDescription: true
 
-    property bool isFocusable: !(eyeImage.visible || rightImage.visible) // TODO: this component already has focusable items
+    activeFocusOnTab: !(eyeImage.visible || rightImage.visible)
 
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
-    
     implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
     implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
 
@@ -190,7 +166,6 @@ Item {
                     PropertyAnimation { duration: 200 }
                 }
             }
-
 
             CaptionTextType {
                 id: description

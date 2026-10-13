@@ -114,7 +114,6 @@ PageType {
                     text: alpn
                     descriptionText: qsTr("ALPN")
                     headerText: qsTr("ALPN")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         currentValue: alpn
@@ -129,7 +128,7 @@ PageType {
                         clickedFunction: function () {
                             alpn = selectedText
                             tlsAlpnDropDown.text = selectedText
-                            tlsAlpnDropDown.closeTriggered()
+                            tlsAlpnDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -159,7 +158,6 @@ PageType {
                     text: fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
@@ -174,7 +172,7 @@ PageType {
                         clickedFunction: function () {
                             fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
-                            tlsFingerprintDropDown.closeTriggered()
+                            tlsFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -231,7 +229,6 @@ PageType {
                     text: fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         model: ListModel {
@@ -246,7 +243,7 @@ PageType {
                         clickedFunction: function () {
                             fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText
-                            realityFingerprintDropDown.closeTriggered()
+                            realityFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {

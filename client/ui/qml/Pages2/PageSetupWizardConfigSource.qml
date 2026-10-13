@@ -51,7 +51,7 @@ PageType {
 
                 actionButtonImage: isVisible ? "qrc:/images/controls/more-vertical.svg" : ""
                 actionButtonFunction: function() {
-                    moreActionsDrawer.openTriggered()
+                    moreActionsDrawer.open()
                 }
 
                 DrawerType2 {
@@ -59,10 +59,9 @@ PageType {
 
                     parent: root
 
-                    anchors.fill: parent
-                    expandedHeight: root.height * 0.5
+                    expandedHeight: windowHeight * 0.5
 
-                    expandedStateContent: ColumnLayout {
+                    ColumnLayout {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.right: parent.right

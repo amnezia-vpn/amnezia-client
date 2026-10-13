@@ -139,7 +139,7 @@ ListViewType {
                             PageController.goToPage(PageEnum.PageSettingsServerInfo)
                         }
 
-                        drawer.closeTriggered()
+                        drawer.close()
                     }
                 }
             }

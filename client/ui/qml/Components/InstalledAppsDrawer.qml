@@ -13,8 +13,7 @@ import Style 1.0
 DrawerType2 {
     id: root
 
-    anchors.fill: parent
-    expandedHeight: parent.height * 0.9
+    expandedHeight: windowHeight * 0.9
 
     onAboutToShow: {
         PageController.showBusyIndicator(true)
@@ -26,10 +25,9 @@ DrawerType2 {
         id: installedAppsModel
     }
 
-    expandedStateContent: Item {
+    Item {
         id: container
-
-        implicitHeight: expandedHeight
+        anchors.fill: parent
 
         ColumnLayout {
             id: backButton
@@ -43,7 +41,7 @@ DrawerType2 {
             BackButtonType {
                 backButtonImage: "qrc:/images/controls/arrow-left.svg"
                 backButtonFunction: function() {
-                    root.closeTriggered()
+                    root.close()
                 }
             }
 
@@ -140,7 +138,7 @@ DrawerType2 {
                 PageController.showBusyIndicator(true)
                 AppSplitTunnelingController.addApps(installedAppsModel.getSelectedAppsInfo())
                 PageController.showBusyIndicator(false)
-                root.closeTriggered()
+                root.close()
             }
         }
     }

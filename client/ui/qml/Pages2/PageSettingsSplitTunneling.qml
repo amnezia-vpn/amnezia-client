@@ -121,7 +121,6 @@ PageType {
             Layout.rightMargin: 16
 
             drawerHeight: 0.4375
-            drawerParent: root
 
             enabled: root.pageEnabled
 
@@ -136,7 +135,7 @@ PageType {
 
                 clickedFunction: function() {
                     selector.text = selectedText
-                    selector.closeTriggered()
+                    selector.close()
                     if (IpSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
                         IpSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
                     }
@@ -279,7 +278,7 @@ PageType {
                 imageColor: AmneziaStyle.color.paleGray
 
                 onClicked: function () {
-                    moreActionsDrawer.openTriggered()
+                    moreActionsDrawer.open()
                 }
 
                 Keys.onReturnPressed: addSiteButtonImage.clicked()
@@ -291,10 +290,9 @@ PageType {
     DrawerType2 {
         id: moreActionsDrawer
 
-        anchors.fill: parent
-        expandedHeight: parent.height * 0.4375
+        expandedHeight: windowHeight * 0.4375
 
-        expandedStateContent: ColumnLayout {
+        ColumnLayout {
             id: moreActionsDrawerContent
 
             anchors.top: parent.top
@@ -316,7 +314,7 @@ PageType {
                 rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
                 clickedFunction: function() {
-                    importSitesDrawer.openTriggered()
+                    importSitesDrawer.open()
                 }
             }
 
@@ -341,7 +339,7 @@ PageType {
                     if (fileName !== "") {
                         PageController.showBusyIndicator(true)
                         IpSplitTunnelingController.exportSites(fileName)
-                        moreActionsDrawer.closeTriggered()
+                        moreActionsDrawer.close()
                         PageController.showBusyIndicator(false)
                     }
                 }
@@ -381,11 +379,10 @@ PageType {
     DrawerType2 {
         id: importSitesDrawer
 
-        anchors.fill: parent
-        expandedHeight: parent.height * 0.4375
+        expandedHeight: windowHeight * 0.4375
 
-        expandedStateContent: Item {
-            implicitHeight: importSitesDrawer.expandedHeight
+        Item {
+            anchors.fill: parent
 
             BackButtonType {
                 id: importSitesDrawerBackButton
@@ -396,7 +393,7 @@ PageType {
                 anchors.topMargin: 16
 
                 backButtonFunction: function() {
-                    importSitesDrawer.closeTriggered()
+                    importSitesDrawer.close()
                 }
                 
                 onFocusChanged: {
@@ -483,7 +480,7 @@ PageType {
         PageController.showBusyIndicator(true)
         IpSplitTunnelingController.importSites(fileName, replaceExistingSites)
         PageController.showBusyIndicator(false)
-        importSitesDrawer.closeTriggered()
-        moreActionsDrawer.closeTriggered()
+        importSitesDrawer.close()
+        moreActionsDrawer.close()
     }
 }

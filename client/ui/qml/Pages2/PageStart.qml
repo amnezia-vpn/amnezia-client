@@ -19,6 +19,13 @@ PageType {
     property bool isTabBarDisabled: false
     property bool isTabBarShown: true
 
+    Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
+            PageController.keyPressEvent(event.key)
+            event.accepted = true
+        }
+    }
+
     Connections {
         objectName: "pageControllerConnection"
 
@@ -296,24 +303,6 @@ PageType {
             }
 
             tabBarStackView.push(pagePath, { "objectName" : pagePath })
-        }
-
-        Keys.onPressed: function(event) {
-            switch (event.key) {
-            case Qt.Key_Tab:
-            case Qt.Key_Down:
-            case Qt.Key_Right:
-                FocusController.nextKeyTabItem()
-                break
-            case Qt.Key_Backtab:
-            case Qt.Key_Up:
-            case Qt.Key_Left:
-                FocusController.previousKeyTabItem()
-                break
-            default:
-                PageController.keyPressEvent(event.key)
-                event.accepted = true
-            }
         }
     }
 

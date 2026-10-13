@@ -1,215 +1,154 @@
 #include "focusController.h"
-#include "ui/utils/qmlUtils.h"
 
+#include <QGuiApplication>
+#include <QKeyEvent>
 #include <QQmlApplicationEngine>
+#include <QQuickItem>
 #include <QQuickWindow>
+#include <QStyleHints>
 
-#include "logger.h"
+#include <algorithm>
 
-namespace {
-    Logger logger("FocusController");
+namespace
+{
+    constexpr qreal ensureVisibleMargin = 40;
+
+    QQuickItem *focusChainRoot(QQuickItem *item)
+    {
+        for (QQuickItem *it = item; it; it = it->parentItem()) {
+            if (it->inherits("QQuickPopupItem")) {
+                return it;
+            }
+        }
+        return item->window()->contentItem();
+    }
 }
 
-FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent)
-    : QObject { parent },
-      m_engine { engine },
-      m_focusChain {},
-      m_focusedItem { nullptr },
-      m_rootObjects {},
-      m_defaultFocusItem { nullptr },
-      m_lvfc { nullptr }
+FocusController::FocusController(QQmlApplicationEngine *engine, QObject *parent) : QObject { parent }
 {
-    QObject::connect(m_engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object, const QUrl &url) {
-        QQuickItem *newDefaultFocusItem = object->findChild<QQuickItem *>("defaultFocusItem");
-        if (newDefaultFocusItem && m_defaultFocusItem != newDefaultFocusItem) {
-            m_defaultFocusItem = newDefaultFocusItem;
+    QGuiApplication::styleHints()->setTabFocusBehavior(Qt::TabFocusAllControls);
+
+    connect(engine, &QQmlApplicationEngine::objectCreated, this, [this](QObject *object) {
+        if (auto *window = qobject_cast<QQuickWindow *>(object)) {
+            window->installEventFilter(this);
         }
     });
-
-    QObject::connect(this, &FocusController::focusedItemChanged, this,
-                     [this]() { m_focusedItem->forceActiveFocus(Qt::TabFocusReason); });
 }
 
-void FocusController::nextKeyTabItem()
+bool FocusController::eventFilter(QObject *watched, QEvent *event)
 {
-    nextItem(Direction::Forward);
-}
-
-void FocusController::previousKeyTabItem()
-{
-    nextItem(Direction::Backward);
-}
-
-void FocusController::nextKeyUpItem()
-{
-    nextItem(Direction::Backward);
-}
-
-void FocusController::nextKeyDownItem()
-{
-    nextItem(Direction::Forward);
-}
-
-void FocusController::nextKeyLeftItem()
-{
-    nextItem(Direction::Backward);
-}
-
-void FocusController::nextKeyRightItem()
-{
-    nextItem(Direction::Forward);
-}
-
-void FocusController::setFocusItem(QQuickItem *item)
-{
-    if (m_focusedItem != item) {
-        m_focusedItem = item;
-    }
-    emit focusedItemChanged();
-}
-
-void FocusController::setFocusOnDefaultItem()
-{
-    setFocusItem(m_defaultFocusItem);
-}
-
-void FocusController::pushRootObject(QObject *object)
-{
-    m_rootObjects.push(object);
-    dropListView();
-    // setFocusOnDefaultItem();
-}
-
-void FocusController::dropRootObject(QObject *object)
-{
-    if (m_rootObjects.empty()) {
-        return;
+    if (event->type() != QEvent::KeyPress) {
+        return false;
     }
 
-    if (m_rootObjects.top() == object) {
-        m_rootObjects.pop();
-        dropListView();
-        setFocusOnDefaultItem();
-    } else {
-        logger.warning() << "TRY TO DROP WRONG ROOT OBJECT: " << m_rootObjects.top() << " SHOULD BE: " << object;
-    }
-}
-
-void FocusController::resetRootObject()
-{
-    m_rootObjects.clear();
-}
-
-void FocusController::reload(Direction direction)
-{
-    m_focusChain.clear();
-
-    QObject *rootObject = (m_rootObjects.empty() ? m_engine->rootObjects().value(0) : m_rootObjects.top());
-
-    if (!rootObject) {
-        logger.error() << "No ROOT OBJECT found!";
-        resetRootObject();
-        dropListView();
-        return;
+    auto *window = qobject_cast<QQuickWindow *>(watched);
+    auto *keyEvent = static_cast<QKeyEvent *>(event);
+    if (!window || (keyEvent->modifiers() & ~(Qt::ShiftModifier | Qt::KeypadModifier))) {
+        return false;
     }
 
-    m_focusChain.append(FocusControl::getSubChain(rootObject));
+    QQuickItem *current = window->activeFocusItem() ? window->activeFocusItem() : window->contentItem();
 
-    std::sort(m_focusChain.begin(), m_focusChain.end(),
-              direction == Direction::Forward ? FocusControl::isLess : FocusControl::isMore);
-
-    if (m_focusChain.empty()) {
-        logger.warning() << "Focus chain is empty!";
-        resetRootObject();
-        dropListView();
-        return;
-    }
-}
-
-void FocusController::nextItem(Direction direction)
-{
-    reload(direction);
-
-    if (m_lvfc && FocusControl::isListView(m_focusedItem)) {
-        direction == Direction::Forward ? focusNextListViewItem() : focusPreviousListViewItem();
-
-        return;
-    }
-
-    if (m_focusChain.empty()) {
-        logger.warning() << "There are no items to navigate";
-        setFocusOnDefaultItem();
-        return;
-    }
-
-    auto focusedItemIndex = m_focusChain.indexOf(m_focusedItem);
-
-    if (focusedItemIndex == -1) {
-        focusedItemIndex = 0;
-    } else if (focusedItemIndex == (m_focusChain.size() - 1)) {
-        focusedItemIndex = 0;
-    } else {
-        focusedItemIndex++;
-    }
-
-    const auto focusedItem = qobject_cast<QQuickItem *>(m_focusChain.at(focusedItemIndex));
-
-    if (focusedItem == nullptr) {
-        logger.warning() << "Failed to get item to focus on. Setting focus on default";
-        setFocusOnDefaultItem();
-        return;
-    }
-
-    if (FocusControl::isListView(focusedItem)) {
-        m_lvfc = new ListViewFocusController(focusedItem, this);
-        m_focusedItem = focusedItem;
-        if (direction == Direction::Forward) {
-            m_lvfc->nextDelegate();
-            focusNextListViewItem();
-        } else {
-            m_lvfc->previousDelegate();
-            focusPreviousListViewItem();
+    bool forward = false;
+    switch (keyEvent->key()) {
+    case Qt::Key_Tab: forward = true; break;
+    case Qt::Key_Backtab: forward = false; break;
+    case Qt::Key_Down:
+    case Qt::Key_Right: forward = true; [[fallthrough]];
+    case Qt::Key_Up:
+    case Qt::Key_Left:
+        if (wantsArrowKey(current, keyEvent->key())) {
+            return false;
         }
+        break;
+    default: return false;
+    }
+
+    sortListViewDelegates(focusChainRoot(current));
+
+    QQuickItem *next = current->nextItemInFocusChain(forward);
+    if (next && next != current) {
+        next->forceActiveFocus(forward ? Qt::TabFocusReason : Qt::BacktabFocusReason);
+        ensureVisible(next);
+    }
+    return true;
+}
+
+bool FocusController::wantsArrowKey(const QQuickItem *item, int key)
+{
+    if (item->inherits("QQuickTextEdit")) {
+        return !item->property("readOnly").toBool();
+    }
+    if (item->inherits("QQuickTextInput")) {
+        return key == Qt::Key_Left || key == Qt::Key_Right;
+    }
+    return false;
+}
+
+void FocusController::sortListViewDelegates(QQuickItem *root)
+{
+    if (!root->isVisible()) {
         return;
     }
 
-    setFocusItem(focusedItem);
-}
-
-void FocusController::focusNextListViewItem()
-{
-    m_lvfc->reloadFocusChain();
-    if (m_lvfc->isLastFocusItemInListView() || m_lvfc->isReturnNeeded()) {
-        dropListView();
-        nextItem(Direction::Forward);
-        return;
-    } else if (m_lvfc->isLastFocusItemInDelegate()) {
-        m_lvfc->resetFocusChain();
-        m_lvfc->nextDelegate();
+    if (root->inherits("QQuickListView")) {
+        if (auto *contentItem = root->property("contentItem").value<QQuickItem *>()) {
+            QList<QQuickItem *> delegates = contentItem->childItems();
+            const auto byPosition = [](const QQuickItem *a, const QQuickItem *b) {
+                return a->y() != b->y() ? a->y() < b->y() : a->x() < b->x();
+            };
+            if (!std::is_sorted(delegates.cbegin(), delegates.cend(), byPosition)) {
+                std::stable_sort(delegates.begin(), delegates.end(), byPosition);
+                for (qsizetype i = 1; i < delegates.size(); ++i) {
+                    delegates.at(i)->stackAfter(delegates.at(i - 1));
+                }
+            }
+        }
     }
 
-    m_lvfc->focusNextItem();
+    const QList<QQuickItem *> children = root->childItems();
+    for (QQuickItem *child : children) {
+        sortListViewDelegates(child);
+    }
 }
 
-void FocusController::focusPreviousListViewItem()
+void FocusController::ensureVisible(QQuickItem *item)
 {
-    m_lvfc->reloadFocusChain();
-    if (m_lvfc->isFirstFocusItemInListView() || m_lvfc->isReturnNeeded()) {
-        dropListView();
-        nextItem(Direction::Backward);
-        return;
-    } else if (m_lvfc->isFirstFocusItemInDelegate()) {
-        m_lvfc->resetFocusChain();
-        m_lvfc->previousDelegate();
+    for (QQuickItem *flickable = item->parentItem(); flickable; flickable = flickable->parentItem()) {
+        if (!flickable->inherits("QQuickFlickable")) {
+            continue;
+        }
+
+        auto *contentItem = flickable->property("contentItem").value<QQuickItem *>();
+        if (!contentItem) {
+            continue;
+        }
+
+        const QRectF rect = item->mapRectToItem(contentItem, item->boundingRect());
+        scrollToRange(flickable, rect.top(), rect.bottom(), flickable->height(), "contentY", "originY",
+                      "contentHeight", "topMargin", "bottomMargin");
+        scrollToRange(flickable, rect.left(), rect.right(), flickable->width(), "contentX", "originX",
+                      "contentWidth", "leftMargin", "rightMargin");
+    }
+}
+
+void FocusController::scrollToRange(QQuickItem *flickable, qreal start, qreal end, qreal viewSize, const char *position,
+                                   const char *origin, const char *contentSize, const char *startMargin,
+                                   const char *endMargin)
+{
+    const qreal current = flickable->property(position).toReal();
+
+    qreal target = current;
+    if (start < current) {
+        target = start - ensureVisibleMargin;
+    } else if (end > current + viewSize) {
+        target = std::min(end - viewSize + ensureVisibleMargin, start - ensureVisibleMargin);
     }
 
-    m_lvfc->focusPreviousItem();
-}
-
-void FocusController::dropListView()
-{
-    if (m_lvfc) {
-        delete m_lvfc;
-        m_lvfc = nullptr;
+    if (target != current) {
+        const qreal min = flickable->property(origin).toReal() - flickable->property(startMargin).toReal();
+        const qreal max = flickable->property(origin).toReal() + flickable->property(contentSize).toReal()
+                + flickable->property(endMargin).toReal() - viewSize;
+        flickable->setProperty(position, std::clamp(target, min, std::max(min, max)));
     }
 }

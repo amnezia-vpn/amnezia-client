@@ -34,34 +34,9 @@ CheckBox {
 
     property string imageSource: "qrc:/images/controls/check.svg"
 
-    property bool isFocusable: true
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
 
     hoverEnabled: enabled ? true : false
-    focusPolicy: Qt.NoFocus
+    focusPolicy: Qt.TabFocus
 
     background: Rectangle {
         color: AmneziaStyle.color.transparent
@@ -185,5 +160,4 @@ CheckBox {
         event.accepted = true
     }
 }
-
 

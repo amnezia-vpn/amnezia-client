@@ -62,11 +62,11 @@ ListViewType {
                         ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
                         ServersUiController.processedContainerIndex = containerIndex
                         PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                        containersDropDown.closeTriggered()
+                        containersDropDown.close()
                         return
                     }
 
-                    containersDropDown.closeTriggered()
+                    containersDropDown.close()
                     ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, containerIndex)
                 }
 

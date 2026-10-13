@@ -10,20 +10,15 @@ DrawerType2 {
 
     property var listModel: null
 
-    width: parent.width
-    height: parent.height
+    expandedHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
         spacing: 0
-
-        Component.onCompleted: {
-            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
-        }
 
         ButtonGroup {
             id: sortModeGroup
@@ -51,7 +46,7 @@ DrawerType2 {
 
             onClicked: {
                 root.listModel.sortMode = 0
-                root.closeTriggered()
+                root.close()
             }
         }
 
@@ -71,7 +66,7 @@ DrawerType2 {
 
             onClicked: {
                 root.listModel.sortMode = 1
-                root.closeTriggered()
+                root.close()
             }
         }
 

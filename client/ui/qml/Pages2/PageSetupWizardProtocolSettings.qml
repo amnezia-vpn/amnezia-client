@@ -88,7 +88,7 @@ PageType {
                 text: qsTr("More detailed")
 
                 clickedFunc: function() {
-                    showDetailsDrawer.openTriggered()
+                    showDetailsDrawer.open()
                 }
             }
 
@@ -96,10 +96,9 @@ PageType {
                 id: showDetailsDrawer
                 parent: root
 
-                anchors.fill: parent
-                expandedHeight: parent.height * 0.9
-                expandedStateContent: Item {
-                    implicitHeight: showDetailsDrawer.expandedHeight
+                expandedHeight: windowHeight * 0.9
+                Item {
+                    anchors.fill: parent
 
                     BackButtonType {
                         id: showDetailsBackButton
@@ -110,7 +109,7 @@ PageType {
                         anchors.topMargin: 16
 
                         backButtonFunction: function() {
-                            showDetailsDrawer.closeTriggered()
+                            showDetailsDrawer.close()
                         }
                     }
 
@@ -175,7 +174,7 @@ PageType {
                                 text: qsTr("Close")
 
                                 clickedFunc: function()  {
-                                    showDetailsDrawer.closeTriggered()
+                                    showDetailsDrawer.close()
                                 }
                             }
                         }

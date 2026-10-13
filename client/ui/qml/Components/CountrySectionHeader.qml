@@ -12,7 +12,7 @@ Item {
 
     property var listModel: null
 
-    property bool isFocusable: root.isRealSection && !root.isPinnedOverlay
+    activeFocusOnTab: root.isRealSection && !root.isPinnedOverlay
 
     property string sectionKey: ""
     property bool isPinnedOverlay: false
@@ -143,14 +143,6 @@ Item {
     Keys.onEnterPressed: root.toggle()
     Keys.onReturnPressed: root.toggle()
     Keys.onSpacePressed: root.toggle()
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
 
     Rectangle {
         anchors.fill: parent

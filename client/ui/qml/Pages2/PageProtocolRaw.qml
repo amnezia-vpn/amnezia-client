@@ -68,7 +68,7 @@ PageType {
                 text: qsTr("Show connection options")
 
                 clickedFunction: function() {
-                    configContentDrawer.openTriggered()
+                    configContentDrawer.open()
                 }
 
                 MouseArea {
@@ -83,13 +83,12 @@ PageType {
             DrawerType2 {
                 id: configContentDrawer
 
-                expandedHeight: root.height * 0.9
+                expandedHeight: windowHeight * 0.9
 
                 parent: root
-                anchors.fill: parent
 
-                expandedStateContent: Item {
-                    implicitHeight: configContentDrawer.expandedHeight
+                Item {
+                    anchors.fill: parent
 
                     BackButtonType {
                         id: drawerBackButton
@@ -100,7 +99,7 @@ PageType {
                         anchors.topMargin: 16
 
                         backButtonFunction: function() {
-                            configContentDrawer.closeTriggered()
+                            configContentDrawer.close()
                         }
                     }
 
@@ -132,6 +131,8 @@ PageType {
 
                             TextArea {
                                 id: configText
+
+                                activeFocusOnTab: false
 
                                 Layout.fillWidth: true
                                 Layout.topMargin: 16

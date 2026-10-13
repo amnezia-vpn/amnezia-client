@@ -25,8 +25,7 @@ PageType {
     property string apiCurrentProtocol: ""
 
     readonly property bool isApiProtocolSelectionVisible: ServersUiController.isDefaultServerFromApi && root.apiAvailableProtocols.length > 0
-    readonly property bool isOutdatedAwgWarningVisible: drawer.isCollapsedStateActive()
-                                                        && ServersUiController.defaultServerHasOutdatedAwgContainer
+    readonly property bool isOutdatedAwgWarningVisible: ServersUiController.defaultServerHasOutdatedAwgContainer
 
     function updateApiProtocolState() {
         if (ServersUiController.isDefaultServerFromApi) {
@@ -59,39 +58,23 @@ PageType {
     }
 
     Connections {
-        target: Qt.application
-
-        function onStateChanged() {
-            if (Qt.application.state !== Qt.ApplicationActive) {
-                if (drawer.isOpened) {
-                    drawer.closeTriggered()
-                }
-                if (homeSplitTunnelingDrawer.isOpened) {
-                    homeSplitTunnelingDrawer.closeTriggered()
-                }
-            }
-        }
-    }
-
-    Connections {
         objectName: "pageControllerConnections"
 
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
-            drawer.openTriggered()
+            drawer.open()
             if (isContainerInstalled && root.containersDropDownRef) {
                 root.containersDropDownRef.rootButtonClickedFunction()
             }
         }
     }
 
-
     Item {
         objectName: "homeColumnItem"
 
         anchors.fill: parent
-        anchors.bottomMargin: drawer.collapsedHeight
+        anchors.bottomMargin: collapsedBar.height
 
         ColumnLayout {
             objectName: "homeColumnLayout"
@@ -198,7 +181,7 @@ PageType {
                 Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
-                    homeSplitTunnelingDrawer.openTriggered()
+                    homeSplitTunnelingDrawer.open()
                 }
 
                 HomeSplitTunnelingDrawer {
@@ -221,272 +204,322 @@ PageType {
         }
     }
 
+    Component {
+        id: serverSummaryComponent
+
+        ColumnLayout {
+            id: summary
+            objectName: "collapsedColumnLayout"
+
+            readonly property bool expanded: parent ? parent.expanded : false
+            readonly property bool hovered: parent ? parent.hovered : false
+            readonly property bool pressed: parent ? parent.pressed : false
+            readonly property bool outdatedWarningVisible: !summary.expanded && root.isOutdatedAwgWarningVisible
+
+            spacing: 0
+
+            DividerType {
+                Layout.topMargin: 10
+                Layout.fillWidth: false
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 2
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            }
+
+            RowLayout {
+                objectName: "rowLayout"
+
+                Layout.topMargin: 14
+                Layout.leftMargin: 24
+                Layout.rightMargin: 24
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+
+                spacing: 0
+
+                Header1TextType {
+                    id: collapsedButtonHeader
+                    objectName: "collapsedButtonHeader"
+
+                    Layout.maximumWidth: drawer.width - 48 - 18 - 12
+
+                    maximumLineCount: 2
+                    elide: Qt.ElideRight
+
+                    text: ServersUiController.defaultServerName
+                    horizontalAlignment: Qt.AlignHCenter
+
+                    opacity: summary.pressed ? 0.7 : (summary.hovered ? 0.8 : 1)
+
+                    Behavior on opacity {
+                        PropertyAnimation { duration: 200 }
+                    }
+                }
+
+                ImageButtonType {
+                    id: collapsedButtonChevron
+                    objectName: "collapsedButtonChevron"
+
+                    Layout.leftMargin: 8
+
+                    visible: !summary.expanded
+
+                    hoverEnabled: false
+                    backgroundColor: summary.pressed ? pressedColor : (summary.hovered ? hoveredColor : defaultColor)
+                    image: "qrc:/images/controls/chevron-down.svg"
+                    imageColor: AmneziaStyle.color.paleGray
+
+                    icon.width: 18
+                    icon.height: 18
+                    backgroundRadius: 16
+                    horizontalPadding: 4
+                    topPadding: 4
+                    bottomPadding: 3
+
+                    Keys.onEnterPressed: this.clicked()
+                    Keys.onReturnPressed: this.clicked()
+
+                    onClicked: drawer.open()
+                }
+            }
+
+            RowLayout {
+                objectName: "rowLayoutLabel"
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.topMargin: 8
+                Layout.bottomMargin: (summary.outdatedWarningVisible || root.isApiProtocolSelectionVisible) ? 8 : 44
+                spacing: 0
+
+                BasicButtonType {
+                    enabled: ServersUiController.defaultServerImagePathCollapsed !== ""
+                    hoverEnabled: enabled
+
+                    implicitHeight: 36
+
+                    leftPadding: 16
+                    rightPadding: 16
+
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.transparent
+                    textColor: AmneziaStyle.color.mutedGray
+
+                    buttonTextLabel.lineHeight: 16
+                    buttonTextLabel.font.pixelSize: 13
+                    buttonTextLabel.font.weight: 400
+
+                    text: ServersUiController.defaultServerDescriptionCollapsed
+                    leftImageSource: ServersUiController.defaultServerImagePathCollapsed
+                    leftImageColor: ""
+                    changeLeftImageSize: false
+
+                    rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
+
+                    Keys.onEnterPressed: this.clicked()
+                    Keys.onReturnPressed: this.clicked()
+
+                    onClicked: {
+                        ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+
+                        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
+                            if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
+                                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+                            } else {
+                                PageController.showBusyIndicator(true)
+                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+                                PageController.showBusyIndicator(false)
+                                if (!result) {
+                                    return
+                                }
+
+                                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                            }
+                        } else {
+                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                        }
+                    }
+                }
+            }
+
+            WarningType {
+                objectName: "outdatedContainerWarning"
+
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 24
+
+                visible: summary.outdatedWarningVisible
+
+                backGroundColor: AmneziaStyle.color.transparent
+                iconPath: "qrc:/images/controls/alert-circle.svg"
+                imageColor: AmneziaStyle.color.goldenApricot
+                textColor: AmneziaStyle.color.goldenApricot
+                textString: qsTr("AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.")
+            }
+
+            RowLayout {
+                objectName: "protocolRowLayout"
+                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+                Layout.bottomMargin: 44
+                spacing: 0
+
+                visible: root.isApiProtocolSelectionVisible
+
+                BasicButtonType {
+                    id: protocolButton
+                    objectName: "protocolButton"
+
+                    enabled: root.apiAvailableProtocols.length > 1
+                    hoverEnabled: enabled
+
+                    implicitHeight: 36
+
+                    leftPadding: 16
+                    rightPadding: 16
+
+                    defaultColor: AmneziaStyle.color.transparent
+                    hoveredColor: AmneziaStyle.color.translucentWhite
+                    pressedColor: AmneziaStyle.color.sheerWhite
+                    disabledColor: AmneziaStyle.color.transparent
+                    textColor: AmneziaStyle.color.mutedGray
+
+                    buttonTextLabel.lineHeight: 16
+                    buttonTextLabel.font.pixelSize: 13
+                    buttonTextLabel.font.weight: 400
+
+                    text: root.apiAvailableProtocols.length > 1
+                        ? root.protocolDisplayName(root.apiCurrentProtocol)
+                        : root.protocolDisplayName(root.apiAvailableProtocols[0])
+                    leftImageSource: "qrc:/images/controls/arrow-left-right.svg"
+                    leftImageColor: AmneziaStyle.color.mutedGray
+
+                    rightImageSource: enabled ? "qrc:/images/controls/chevron-down.svg" : ""
+
+                    Keys.onEnterPressed: this.clicked()
+                    Keys.onReturnPressed: this.clicked()
+
+                    onClicked: {
+                        if (ConnectionController.isConnectionInProgress) {
+                            PageController.showNotificationMessage(qsTr("Unable change protocol while trying to make an active connection"))
+                            return
+                        }
+                        if (ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+                            return
+                        }
+                        protocolSelectionDrawer.open()
+                    }
+                }
+            }
+        }
+    }
+
+    Item {
+        id: collapsedBar
+        objectName: "collapsedBar"
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+
+        height: collapsedSummary.height
+
+        Rectangle {
+            anchors.fill: parent
+            anchors.bottomMargin: -border.width
+
+            topLeftRadius: 16
+            topRightRadius: 16
+            color: AmneziaStyle.color.onyxBlack
+            border.color: AmneziaStyle.color.slateGray
+            border.width: 1
+        }
+
+        MouseArea {
+            id: collapsedBarMouseArea
+
+            property real pressY: 0
+            property bool dragStarted: false
+
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            preventStealing: true
+
+            onPressed: function(mouse) {
+                pressY = mouse.y
+                dragStarted = false
+            }
+            onPositionChanged: function(mouse) {
+                if (!pressed) {
+                    return
+                }
+                if (!dragStarted && pressY - mouse.y > Application.styleHints.startDragDistance) {
+                    dragStarted = true
+                    drawer.beginDrag()
+                }
+                if (dragStarted) {
+                    drawer.dragTo(drawer.closedY + mouse.y - pressY)
+                }
+            }
+            onReleased: {
+                if (dragStarted) {
+                    drawer.endDrag()
+                }
+            }
+            onClicked: {
+                if (!dragStarted) {
+                    drawer.open()
+                }
+            }
+        }
+
+        Loader {
+            id: collapsedSummary
+
+            property bool expanded: false
+            property bool hovered: collapsedBarMouseArea.containsMouse
+            property bool pressed: collapsedBarMouseArea.pressed
+
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            sourceComponent: serverSummaryComponent
+        }
+    }
+
     DrawerType2 {
         id: drawer
         objectName: "drawerProtocol"
 
-        anchors.fill: parent
+        bottomY: root.height
+        closedY: root.height - collapsedBar.height
+        expandedHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
-        collapsedStateContent: Item {
+        Item {
             objectName: "ProtocolDrawerCollapsedContent"
 
-            implicitHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
-            Component.onCompleted: {
-                drawer.expandedHeight = implicitHeight
-            }
+            anchors.fill: parent
 
-            ColumnLayout {
-                id: collapsed
-                objectName: "collapsedColumnLayout"
+            Loader {
+                id: expandedSummary
+
+                property bool expanded: true
+                property bool hovered: false
+                property bool pressed: false
 
                 anchors.left: parent.left
                 anchors.right: parent.right
-                spacing: 0
 
-                Component.onCompleted: {
-                    drawer.collapsedHeight = collapsed.implicitHeight
-                }
-
-                onImplicitHeightChanged: {
-                    drawer.collapsedHeight = collapsed.implicitHeight
-                }
-
-                DividerType {
-                    Layout.topMargin: 10
-                    Layout.fillWidth: false
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 2
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                }
-
-                RowLayout {
-                    objectName: "rowLayout"
-
-                    Layout.topMargin: 14
-                    Layout.leftMargin: 24
-                    Layout.rightMargin: 24
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                    spacing: 0
-
-                    Connections {
-                        objectName: "drawerConnections"
-
-                        target: drawer
-                        function onCursorEntered() {
-                            if (drawer.isCollapsedStateActive) {
-                                collapsedButtonChevron.backgroundColor = collapsedButtonChevron.hoveredColor
-                                collapsedButtonHeader.opacity = 0.8
-                            } else {
-                                collapsedButtonHeader.opacity = 1
-                            }
-                        }
-
-                        function onCursorExited() {
-                            if (drawer.isCollapsedStateActive) {
-                                collapsedButtonChevron.backgroundColor = collapsedButtonChevron.defaultColor
-                                collapsedButtonHeader.opacity = 1
-                            } else {
-                                collapsedButtonHeader.opacity = 1
-                            }
-                        }
-
-                        function onPressed(pressed, entered) {
-                            if (drawer.isCollapsedStateActive) {
-                                collapsedButtonChevron.backgroundColor = pressed ? collapsedButtonChevron.pressedColor : entered ? collapsedButtonChevron.hoveredColor : collapsedButtonChevron.defaultColor
-                                collapsedButtonHeader.opacity = 0.7
-                            } else {
-                                collapsedButtonHeader.opacity = 1
-                            }
-                        }
-                    }
-
-                    Header1TextType {
-                        id: collapsedButtonHeader
-                        objectName: "collapsedButtonHeader"
-
-                        Layout.maximumWidth: drawer.width - 48 - 18 - 12
-
-                        maximumLineCount: 2
-                        elide: Qt.ElideRight
-
-                        text: ServersUiController.defaultServerName
-                        horizontalAlignment: Qt.AlignHCenter
-
-                        Behavior on opacity {
-                            PropertyAnimation { duration: 200 }
-                        }
-                    }
-
-                    ImageButtonType {
-                        id: collapsedButtonChevron
-                        objectName: "collapsedButtonChevron"
-
-                        Layout.leftMargin: 8
-
-                        visible: drawer.isCollapsedStateActive()
-
-                        hoverEnabled: false
-                        image: "qrc:/images/controls/chevron-down.svg"
-                        imageColor: AmneziaStyle.color.paleGray
-
-                        icon.width: 18
-                        icon.height: 18
-                        backgroundRadius: 16
-                        horizontalPadding: 4
-                        topPadding: 4
-                        bottomPadding: 3
-
-                        Keys.onEnterPressed: this.clicked()
-                        Keys.onReturnPressed: this.clicked()
-
-                        onClicked: {
-                            if (drawer.isCollapsedStateActive()) {
-                                drawer.openTriggered()
-                            }
-                        }
-                    }
-                }
-
-                RowLayout {
-                    objectName: "rowLayoutLabel"
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.topMargin: 8
-                    Layout.bottomMargin: root.isOutdatedAwgWarningVisible
-                                         ? 8
-                                         : (root.isApiProtocolSelectionVisible ? 8 : (drawer.isCollapsedStateActive ? 44 : ServersUiController.isDefaultServerFromApi ? 61 : 16))
-                    spacing: 0
-
-                    BasicButtonType {
-                        enabled: (ServersUiController.defaultServerImagePathCollapsed !== "") && drawer.isCollapsedStateActive
-                        hoverEnabled: enabled
-
-                        implicitHeight: 36
-
-                        leftPadding: 16
-                        rightPadding: 16
-
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: AmneziaStyle.color.translucentWhite
-                        pressedColor: AmneziaStyle.color.sheerWhite
-                        disabledColor: AmneziaStyle.color.transparent
-                        textColor: AmneziaStyle.color.mutedGray
-
-                        buttonTextLabel.lineHeight: 16
-                        buttonTextLabel.font.pixelSize: 13
-                        buttonTextLabel.font.weight: 400
-
-                        text: drawer.isCollapsedStateActive ? ServersUiController.defaultServerDescriptionCollapsed : ServersUiController.defaultServerDescriptionExpanded
-                        leftImageSource: ServersUiController.defaultServerImagePathCollapsed
-                        leftImageColor: ""
-                        changeLeftImageSize: false
-
-                        rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
-
-                        Keys.onEnterPressed: this.clicked()
-                        Keys.onReturnPressed: this.clicked()
-
-                        onClicked: {
-                            ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
-
-                            if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
-                                if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
-                                    PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
-                                } else {
-                                    PageController.showBusyIndicator(true)
-                                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                                    PageController.showBusyIndicator(false)
-                                    if (!result) {
-                                        return
-                                    }
-
-                                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                                }
-                            } else {
-                                PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                            }
-                        }
-                    }
-                }
-
-                WarningType {
-                    objectName: "outdatedContainerWarning"
-
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.bottomMargin: 24
-
-                    visible: root.isOutdatedAwgWarningVisible
-
-                    backGroundColor: AmneziaStyle.color.transparent
-                    iconPath: "qrc:/images/controls/alert-circle.svg"
-                    imageColor: AmneziaStyle.color.goldenApricot
-                    textColor: AmneziaStyle.color.goldenApricot
-                    textString: qsTr("AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.")
-                }
-
-                RowLayout {
-                    objectName: "protocolRowLayout"
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    Layout.bottomMargin: drawer.isCollapsedStateActive ? 44 : 61
-                    spacing: 0
-
-                    visible: root.isApiProtocolSelectionVisible
-
-                    BasicButtonType {
-                        id: protocolButton
-                        objectName: "protocolButton"
-
-                        enabled: root.apiAvailableProtocols.length > 1
-                        hoverEnabled: enabled
-
-                        implicitHeight: 36
-
-                        leftPadding: 16
-                        rightPadding: 16
-
-                        defaultColor: AmneziaStyle.color.transparent
-                        hoveredColor: AmneziaStyle.color.translucentWhite
-                        pressedColor: AmneziaStyle.color.sheerWhite
-                        disabledColor: AmneziaStyle.color.transparent
-                        textColor: AmneziaStyle.color.mutedGray
-
-                        buttonTextLabel.lineHeight: 16
-                        buttonTextLabel.font.pixelSize: 13
-                        buttonTextLabel.font.weight: 400
-
-                        text: root.apiAvailableProtocols.length > 1
-                            ? root.protocolDisplayName(root.apiCurrentProtocol)
-                            : root.protocolDisplayName(root.apiAvailableProtocols[0])
-                        leftImageSource: "qrc:/images/controls/arrow-left-right.svg"
-                        leftImageColor: AmneziaStyle.color.mutedGray
-
-                        rightImageSource: enabled ? "qrc:/images/controls/chevron-down.svg" : ""
-
-                        Keys.onEnterPressed: this.clicked()
-                        Keys.onReturnPressed: this.clicked()
-
-                        onClicked: {
-                            if (ConnectionController.isConnectionInProgress) {
-                                PageController.showNotificationMessage(qsTr("Unable change protocol while trying to make an active connection"))
-                                return
-                            }
-                            if (ConnectionController.isConnected) {
-                                PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                                return
-                            }
-                            protocolSelectionDrawer.openTriggered()
-                        }
-                    }
-                }
+                sourceComponent: serverSummaryComponent
             }
 
             ColumnLayout {
                 id: serversMenuHeader
                 objectName: "serversMenuHeader"
 
-                anchors.top: collapsed.bottom
+                anchors.top: expandedSummary.bottom
                 anchors.right: parent.right
                 anchors.left: parent.left
 
@@ -511,18 +544,14 @@ PageType {
                         rootButtonTextTopMargin: 8
                         rootButtonTextBottomMargin: 8
 
-                        enabled: drawer.isOpened
-
                         text: ServersUiController.defaultServerDefaultContainerName
                         textColor: AmneziaStyle.color.midnightBlack
                         headerText: qsTr("VPN protocol")
                         headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
 
                         rootButtonClickedFunction: function() {
-                            containersDropDown.openTriggered()
+                            containersDropDown.open()
                         }
-
-                        drawerParent: root
 
                         listView: HomeContainersListView {
                             id: containersListView
@@ -580,17 +609,6 @@ PageType {
             ServersListView {
                 id: serversMenuContent
                 objectName: "serversMenuContent"
-
-                isFocusable: false
-
-                Connections {
-                    target: drawer
-
-                    // this item shouldn't be focused when drawer is closed
-                    function onIsOpenedChanged() {
-                        serversMenuContent.isFocusable = drawer.isOpened
-                    }
-                }
             }
         }
     }
@@ -599,16 +617,11 @@ PageType {
         id: protocolSelectionDrawer
         objectName: "protocolSelectionDrawer"
 
-        anchors.fill: parent
+        expandedHeight: windowHeight * 0.5
 
-        expandedStateContent: Item {
+        Item {
             id: protocolDrawerContainer
-
-            implicitHeight: root.height * 0.5
-
-            Component.onCompleted: {
-                protocolSelectionDrawer.expandedHeight = protocolDrawerContainer.implicitHeight
-            }
+            anchors.fill: parent
 
             ColumnLayout {
                 id: protocolDrawerHeader
@@ -624,7 +637,7 @@ PageType {
                     Layout.fillWidth: true
 
                     backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                    backButtonFunction: function() { protocolSelectionDrawer.closeTriggered() }
+                    backButtonFunction: function() { protocolSelectionDrawer.close() }
                 }
 
                 Header2Type {
@@ -676,7 +689,7 @@ PageType {
                             checked: modelData === root.apiCurrentProtocol
 
                             onClicked: {
-                                protocolSelectionDrawer.closeTriggered()
+                                protocolSelectionDrawer.close()
 
                                 if (modelData === root.apiCurrentProtocol) {
                                     return

@@ -59,7 +59,7 @@ Item {
         Item {
             id: showAll
 
-            property bool isFocusable: root.isSearchResult || root.categoryName !== ""
+            activeFocusOnTab: root.isSearchResult || root.categoryName !== ""
 
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: showAllText.implicitWidth + 16
@@ -70,14 +70,6 @@ Item {
             Keys.onEnterPressed: root.showAllRequested()
             Keys.onReturnPressed: root.showAllRequested()
             Keys.onSpacePressed: root.showAllRequested()
-
-            Keys.onTabPressed: {
-                FocusController.nextKeyTabItem()
-            }
-
-            Keys.onBacktabPressed: {
-                FocusController.previousKeyTabItem()
-            }
 
             Rectangle {
                 anchors.fill: parent

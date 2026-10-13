@@ -262,7 +262,6 @@ PageType {
                     text: xhttpMode
                     descriptionText: qsTr("Mode")
                     headerText: qsTr("Mode")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         currentValue: xhttpMode
@@ -277,7 +276,7 @@ PageType {
                         clickedFunction: function () {
                             xhttpMode = selectedText
                             modeDropDown.text = selectedText
-                            modeDropDown.closeTriggered()
+                            modeDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -356,7 +355,6 @@ PageType {
                     text: xhttpUplinkMethod
                     descriptionText: qsTr("UplinkHTTPMethod")
                     headerText: qsTr("UplinkHTTPMethod")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         currentValue: xhttpUplinkMethod
@@ -371,7 +369,7 @@ PageType {
                         clickedFunction: function () {
                             xhttpUplinkMethod = selectedText
                             uplinkMethodDropDown.text = selectedText
-                            uplinkMethodDropDown.closeTriggered()
+                            uplinkMethodDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -437,7 +435,6 @@ PageType {
                     text: xhttpSessionPlacement
                     descriptionText: qsTr("SessionPlacement")
                     headerText: qsTr("SessionPlacement")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         currentValue: xhttpSessionPlacement
@@ -452,7 +449,7 @@ PageType {
                         clickedFunction: function () {
                             xhttpSessionPlacement = selectedText
                             sessionPlacementDropDown.text = selectedText
-                            sessionPlacementDropDown.closeTriggered()
+                            sessionPlacementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -499,7 +496,6 @@ PageType {
                     text: xhttpSeqPlacement
                     descriptionText: qsTr("SeqPlacement")
                     headerText: qsTr("SeqPlacement")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         currentValue: xhttpSeqPlacement
@@ -514,7 +510,7 @@ PageType {
                         clickedFunction: function () {
                             xhttpSeqPlacement = selectedText
                             seqPlacementDropDown.text = selectedText
-                            seqPlacementDropDown.closeTriggered()
+                            seqPlacementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -561,7 +557,6 @@ PageType {
                     text: xhttpUplinkDataPlacement
                     descriptionText: qsTr("Where the uploaded data is carried in the request")
                     headerText: qsTr("UplinkDataPlacement")
-                    drawerParent: root
                     listView: ListViewWithRadioButtonType {
                         rootWidth: root.width
                         currentValue: xhttpUplinkDataPlacement
@@ -576,7 +571,7 @@ PageType {
                         clickedFunction: function () {
                             xhttpUplinkDataPlacement = selectedText
                             uplinkDataPlacementDropDown.text = selectedText
-                            uplinkDataPlacementDropDown.closeTriggered()
+                            uplinkDataPlacementDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
