@@ -1060,7 +1060,7 @@ jobs:
           - UiNewsModelAndControllerTest
           - UiServicesModelAndControllerTest
           - UiSubscriptionControllerTest
-          - UiAccountInfoModelTest
+          - UiApiAccountInfoModelTest
 
     runs-on: ubuntu-22.04
 
@@ -1255,7 +1255,7 @@ jobs:
           - UiNewsModelAndControllerTest
           - UiServicesModelAndControllerTest
           - UiSubscriptionControllerTest
-          - UiAccountInfoModelTest
+          - UiApiAccountInfoModelTest
 
     runs-on: windows-latest
 
@@ -1367,7 +1367,7 @@ jobs:
           - UiNewsModelAndControllerTest
           - UiServicesModelAndControllerTest
           - UiSubscriptionControllerTest
-          - UiAccountInfoModelTest
+          - UiApiAccountInfoModelTest
 
     runs-on: macos-15
 

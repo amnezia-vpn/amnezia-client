@@ -43,7 +43,7 @@ namespace
 
 } // namespace
 
-class TestUiAccountInfoModel : public QObject
+class TestUiApiAccountInfoModel : public QObject
 {
     Q_OBJECT
 
@@ -141,5 +141,5 @@ private slots:
     }
 };
 
-QTEST_MAIN(TestUiAccountInfoModel)
-#include "testUiAccountInfoModel.moc"
+QTEST_MAIN(TestUiApiAccountInfoModel)
+#include "testUiApiAccountInfoModel.moc"
