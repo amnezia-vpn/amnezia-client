@@ -196,6 +196,13 @@ QString AndroidController::getFileName(const QString &uri)
     return AndroidUtils::convertJString(env.jniEnv(), fileName.object<jstring>());
 }
 
+QString AndroidController::runNetworkDiagnostics()
+{
+    auto result = callActivityMethod<jstring>("runNetworkDiagnostics", "()Ljava/lang/String;");
+    QJniEnvironment env;
+    return AndroidUtils::convertJString(env.jniEnv(), result.object<jstring>());
+}
+
 bool AndroidController::isCameraPresent()
 {
     return callActivityMethod<jboolean>("isCameraPresent", "()Z");

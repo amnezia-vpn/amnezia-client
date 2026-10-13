@@ -44,6 +44,10 @@ class IpcInterface
     SLOT( bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) );
     SLOT( bool stopNetworkCheck() );
 
+    // Runs the bundled platform diagnostics script and returns the concatenated
+    // section output, or "ERROR: <reason>" on failure.
+    SLOT( QString runNetworkDiagnostics() );
+
     SIGNAL( connectionLose() );
     SIGNAL( wakeup() );
     SIGNAL( networkChanged() );

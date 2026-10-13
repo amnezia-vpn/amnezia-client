@@ -46,6 +46,7 @@ public:
     virtual bool xrayStop() override;
     virtual bool startNetworkCheck(const QString& serverIpv4Gateway, const QString& deviceIpv4Address) override;
     virtual bool stopNetworkCheck() override;
+    virtual QString runNetworkDiagnostics() override;
 
 private:
     int m_localpid = 0;

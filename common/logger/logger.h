@@ -20,6 +20,7 @@ public:
     static void deInit();
 
     static bool setServiceLogsEnabled(bool enabled);
+    static bool runNetworkDiagnostics();
 
     static bool openLogsFolder(bool isServiceLogger);
 
@@ -29,10 +30,13 @@ public:
 
     static QString userLogsFilePath();
     static QString serviceLogsFilePath();
+    static QString newNetworkDiagnosticsFilePath();
+    static QString latestNetworkDiagnosticsFilePath();
     static QString systemLogDir();
 
     static QString getLogFile();
     static QString getServiceLogFile();
+    static QString getNetworkDiagnosticsFile();
 
     // compat with Mozilla logger
     Logger(const QString &className)
@@ -101,6 +105,10 @@ private:
     Logger() = default;
 
     static QString userLogsDir();
+    // Validates a raw diagnostics result (rejects "ERROR: ..." strings) and, if valid,
+    // writes it to a new timestamped network-diagnostics log file with the standard header.
+    // Shared by every platform's runNetworkDiagnostics() backend.
+    static bool saveNetworkDiagnosticsResult(const QString &result);
 
     static QFile m_file;
     static QTextStream m_textStream;

@@ -131,6 +131,18 @@ void SettingsUiController::clearLogs()
     qInfo().noquote() << QString("SSL backend: %1").arg(QSslSocket::sslLibraryVersionString());
 }
 
+bool SettingsUiController::runNetworkDiagnostics()
+{
+    return Logger::runNetworkDiagnostics();
+}
+
+void SettingsUiController::exportNetworkDiagnosticsFile(const QString &fileName)
+{
+    if (!SystemController::saveFile(fileName, Logger::getNetworkDiagnosticsFile())) {
+        qInfo() << "SettingsUiController::exportNetworkDiagnosticsFile: save or share was cancelled or failed";
+    }
+}
+
 void SettingsUiController::backupAppConfig(const QString &fileName)
 {
     QByteArray data = m_settingsController->backupAppConfig();

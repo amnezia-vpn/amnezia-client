@@ -16,15 +16,6 @@ set(PACKAGES
     Core5Compat Concurrent LinguistTools
 )
 
-execute_process(
-  WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-  COMMAND git rev-parse --short HEAD
-  OUTPUT_VARIABLE GIT_COMMIT_HASH
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-add_definitions(-DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
-
 add_definitions(-DPROD_AGW_PUBLIC_KEY="$ENV{PROD_AGW_PUBLIC_KEY}")
 add_definitions(-DPROD_S3_ENDPOINT="$ENV{PROD_S3_ENDPOINT}")
 add_definitions(-DFALLBACK_S3_ENDPOINT="$ENV{FALLBACK_S3_ENDPOINT}")
