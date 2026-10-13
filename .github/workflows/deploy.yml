@@ -1142,7 +1142,7 @@ jobs:
           export LD_LIBRARY_PATH="$PWD/deploy/build/client/tests:$QT_ROOT/lib:${LD_LIBRARY_PATH:-}"
           export QT_QPA_PLATFORM=offscreen
 
-          ctest --test-dir deploy/build/client/tests --output-on-failure -VV -R "^${{ matrix.filter }}$"
+          ctest --test-dir deploy/build/client/tests --output-on-failure -VV --timeout 600 -R "^${{ matrix.filter }}$"
 
 # ------------------------------------------------------
 
@@ -1324,7 +1324,7 @@ jobs:
           set PATH=%PATH%;%CD%\client\3rd-prebuilt\deploy-prebuilt\windows\x64
           set PATH=%PATH%;%Qt6_DIR%\..\..\..\bin
 
-          ctest --test-dir deploy\build\client\tests -C Release -R "${{ matrix.filter }}" --output-on-failure
+          ctest --test-dir deploy\build\client\tests -C Release -R "${{ matrix.filter }}" --output-on-failure -VV --timeout 600
 
 # ------------------------------------------------------
 
@@ -1433,7 +1433,7 @@ jobs:
 
           export DYLD_LIBRARY_PATH="$PWD/deploy/build/client/tests:$QT_ROOT/lib:${DYLD_LIBRARY_PATH:-}"
 
-          ctest --test-dir deploy/build/client/tests -R "${{ matrix.filter }}" --output-on-failure
+          ctest --test-dir deploy/build/client/tests -R "${{ matrix.filter }}" --output-on-failure -VV --timeout 600
 
 # ------------------------------------------------------
 

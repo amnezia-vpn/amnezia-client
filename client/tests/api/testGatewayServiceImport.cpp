@@ -3,6 +3,7 @@
 #include <QJsonObject>
 #include <QProcessEnvironment>
 #include <QTest>
+#include <QThreadPool>
 #include <QUuid>
 
 #include "utils/testCoreController.h"
@@ -148,6 +149,7 @@ private slots:
     void cleanupTestCase()
     {
         m_settings->clearSettings();
+        QTRY_VERIFY_WITH_TIMEOUT(QThreadPool::globalInstance()->activeThreadCount() == 0, 60000);
         delete m_coreController;
         delete m_settings;
     }
