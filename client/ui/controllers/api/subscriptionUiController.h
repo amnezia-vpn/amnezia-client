@@ -89,6 +89,7 @@ signals:
     void subscriptionExpiredOnServer();
     void renewalLinkReceived(const QString &url);
     void otpCodeReceived(const QString &code, int expiresInSec);
+    void otpLoginFailed(const QString &kind);
     void otpConfirmed();
     void otpExpired();
 
@@ -164,9 +165,12 @@ private:
 
     QList<QString> m_qrCodes;
 
+    QString otpLoginErrorKind(SubscriptionController::OtpLoginError loginError);
+
     QString m_otpRequestId;
     bool m_otpIsTestPurchase = false;
     bool m_otpStatusCheckInProgress = false;
+    int m_otpReceiptRejectedCount = 0;
     QString m_vpnKey;
 
     ServersController* m_serversController;

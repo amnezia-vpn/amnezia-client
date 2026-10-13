@@ -35,7 +35,34 @@ using namespace amnezia;
 
 namespace
 {
+constexpr int httpStatusCodeBadRequest = 400;
 constexpr int httpStatusCodeNotFound = 404;
+constexpr int httpStatusCodeTooManyRequests = 429;
+
+int httpStatusFromResponse(const QByteArray &responseBody)
+{
+    const QJsonObject errorObject = QJsonDocument::fromJson(responseBody).object();
+    return errorObject.value(apiDefs::key::httpStatus).toInt(errorObject.value(QLatin1String("status")).toInt(0));
+}
+
+SubscriptionController::OtpLoginError classifyOtpLoginError(int httpStatus, ErrorCode errorCode)
+{
+    switch (httpStatus) {
+    case httpStatusCodeBadRequest: return SubscriptionController::OtpLoginError::ReceiptRejected;
+    case httpStatusCodeNotFound: return SubscriptionController::OtpLoginError::PurchaseNotFound;
+    case httpStatusCodeTooManyRequests: return SubscriptionController::OtpLoginError::RateLimited;
+    default: break;
+    }
+
+    switch (errorCode) {
+    case ErrorCode::ApiNotFoundError: return SubscriptionController::OtpLoginError::PurchaseNotFound;
+    case ErrorCode::ApiRateLimitError: return SubscriptionController::OtpLoginError::RateLimited;
+    case ErrorCode::ApiConfigTimeoutError:
+    case ErrorCode::ApiConfigSslError:
+    case ErrorCode::ApiConfigDownloadError: return SubscriptionController::OtpLoginError::NoNetwork;
+    default: return SubscriptionController::OtpLoginError::Failed;
+    }
+}
 
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
@@ -605,8 +632,10 @@ ErrorCode SubscriptionController::revokeNativeConfig(const QString &serverId, co
     return ErrorCode::NoError;
 }
 
-ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData &otpData, bool isTestPurchase)
+ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData &otpData, OtpLoginError &loginError, bool isTestPurchase)
 {
+    loginError = OtpLoginError::None;
+
     QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                      .addField(apiDefs::key::transactionId, transactionId)
                                      .build();
@@ -614,6 +643,10 @@ ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/get_otp_code"), apiPayload, responseBody, isTestPurchase);
     if (errorCode != ErrorCode::NoError) {
+        const int httpStatus = httpStatusFromResponse(responseBody);
+        loginError = classifyOtpLoginError(httpStatus, errorCode);
+        qWarning().noquote() << "[OTP] Code request failed, errorCode =" << static_cast<int>(errorCode)
+                             << "http status =" << httpStatus;
         return errorCode;
     }
 
@@ -623,6 +656,7 @@ ErrorCode SubscriptionController::otpLogin(const QString &transactionId, OtpData
     otpData.expiresAt = QDateTime::fromString(responseObject.value(apiDefs::key::expiresAt).toString(), Qt::ISODateWithMs);
     if (otpData.code.isEmpty() || otpData.otpRequestId.isEmpty()) {
         qWarning().noquote() << "[OTP] Response does not contain an otp code or request id";
+        loginError = OtpLoginError::Failed;
         return ErrorCode::ApiOtpLoginError;
     }
     qDebug().noquote() << "[OTP] Code issued, request id =" << otpData.otpRequestId

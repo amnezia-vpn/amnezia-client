@@ -67,14 +67,6 @@ PageType {
 
     readonly property bool isStorePlatform: Qt.platform.os === "ios" || Qt.platform.os === "android" || Qt.platform.os === "osx"
 
-    Connections {
-        target: SubscriptionUiController
-
-        function onOtpCodeReceived(code, expiresInSec) {
-            otpLoginDrawer.showCode(code, expiresInSec)
-        }
-    }
-
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
@@ -378,17 +370,18 @@ PageType {
                 }
 
                 ListItemType {
+                    id: otpLoginEntry
+
                     Layout.fillWidth: true
 
                     visible: root.isStorePlatform
 
-                    text: qsTr("Log in to your account")
-                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+                    text: qsTr("Login code for the website")
+                    subtitle: qsTr("To sign in or add a subscription")
+                    trailingIconSource: "qrc:/images/controls/external-link.svg"
 
                     onClicked: {
-                        PageController.showBusyIndicator(true)
-                        SubscriptionUiController.otpLogin(ServersUiController.processedServerId)
-                        PageController.showBusyIndicator(false)
+                        otpLoginDialog.requestCode(ServersUiController.processedServerId)
                     }
                 }
             }
@@ -514,9 +507,7 @@ PageType {
         serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }
 
-    OtpLoginDrawer {
-        id: otpLoginDrawer
-
-        anchors.fill: parent
+    OtpLoginDialog {
+        id: otpLoginDialog
     }
 }

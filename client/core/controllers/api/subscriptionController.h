@@ -2,6 +2,7 @@
 #define SUBSCRIPTIONCONTROLLER_H
 
 #include <QDateTime>
+
 #include <QJsonObject>
 #include <QByteArray>
 #include <QFuture>
@@ -43,6 +44,15 @@ public:
         Pending,
         Confirmed,
         Expired
+    };
+
+    enum class OtpLoginError {
+        None,
+        NoNetwork,
+        PurchaseNotFound,
+        RateLimited,
+        ReceiptRejected,
+        Failed
     };
 
     explicit SubscriptionController(SecureServersRepository* serversRepository,
@@ -92,7 +102,7 @@ public:
     ErrorCode getAccountInfo(const QString &serverId, QJsonObject &accountInfo);
     QFuture<QPair<ErrorCode, QString>> getRenewalLink(const QString &serverId);
 
-    ErrorCode otpLogin(const QString &transactionId, OtpData &otpData, bool isTestPurchase = false);
+    ErrorCode otpLogin(const QString &transactionId, OtpData &otpData, OtpLoginError &loginError, bool isTestPurchase = false);
     QFuture<QPair<ErrorCode, OtpStatus>> otpStatus(const QString &requestId, bool isTestPurchase);
 
     ErrorCode resolveImportServiceCaptcha(const QString &userCountryCode, const QString &serviceType,
