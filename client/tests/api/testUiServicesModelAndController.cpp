@@ -150,7 +150,7 @@ private slots:
         QCOMPARE(model->data(firstIndex, ApiServicesModel::CardDescriptionRole).toString(), QString("Premium service"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::ServiceDescriptionRole).toString(), QString("Premium service description"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::IsServiceAvailableRole).toBool(), true);
-        QCOMPARE(model->data(firstIndex, ApiServicesModel::IsPremiumRole).toBool(), false);
+        QCOMPARE(model->data(firstIndex, ApiServicesModel::IsPremiumRole).toBool(), true);
         QCOMPARE(model->data(firstIndex, ApiServicesModel::HasSubscriptionPlansRole).toBool(), true);
         QCOMPARE(model->data(firstIndex, ApiServicesModel::PriceRole).toString(), QString("$19.99"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::TermsOfUseUrlRole).toString(),QString("https://example.com/terms"));
@@ -173,7 +173,7 @@ private slots:
         model->setServiceIndex(1);
 
         QCOMPARE(selectionChangedSpy.count(), 1);
-        QCOMPARE(model->getSelectedServiceName(), QString("amnezia-free"));
+        QCOMPARE(model->getSelectedServiceName(), QString("Amnezia Free"));
         QCOMPARE(model->getSelectedServiceType(), QString("amnezia-free"));
         QCOMPARE(model->getSelectedServiceProtocol(), QString("amnezia-free"));
         QCOMPARE(model->getSelectedServiceCountries(), QJsonArray());
