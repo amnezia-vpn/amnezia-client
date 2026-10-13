@@ -106,8 +106,8 @@ class TestUiServicesModelAndController : public QObject
     Q_OBJECT
 
 private:
-    TestCoreController *m_coreController = nullptr;
-    SecureQSettings *m_settings = nullptr;
+    TestCoreController *m_coreController;
+    SecureQSettings *m_settings;
 
 private slots:
     void initTestCase()
