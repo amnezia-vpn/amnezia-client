@@ -100,6 +100,7 @@ PageType {
                 text: ip
                 rightImageSource: "qrc:/images/controls/trash.svg"
                 rightImageColor: AmneziaStyle.color.paleGray
+                rightButtonAccessibleName: qsTr("Delete %1").arg(ip)
 
                 clickedFunction: function() {
                     var headerText = qsTr("Delete ") + ip + "?"
