@@ -12,3 +12,4 @@ QRect QRCodeReader::cameraSize() {
 void QRCodeReader::startReading() {}
 void QRCodeReader::stopReading() {}
 void QRCodeReader::setCameraSize(QRect) {}
+void QRCodeReader::notifyCodeRead(const QString &) {}

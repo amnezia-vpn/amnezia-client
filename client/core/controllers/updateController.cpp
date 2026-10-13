@@ -9,12 +9,14 @@
 #include <QUrl>
 
 #include "amneziaApplication.h"
-#include "logger.h"
 #include "core/controllers/gatewayController.h"
 #include "core/utils/api/gatewayPayloadBuilder.h"
 #include "core/utils/appUiConfig.h"
 #include "core/utils/constants/apiKeys.h"
+#include "core/utils/errorStrings.h"
 #include "core/utils/selfhosted/scriptsRegistry.h"
+#include "logger.h"
+#include "version.h"
 
 #if defined(Q_OS_ANDROID)
     #include "platforms/android/android_controller.h"

@@ -24,7 +24,8 @@ public:
         HasExpiredWorkerRole,
         IsSubscriptionExpiredRole,
         IsSubscriptionExpiringSoonRole,
-        IsInAppPurchaseRole
+        IsInAppPurchaseRole,
+        ConfigurationFilesCountRole
     };
 
     explicit ApiAccountInfoModel(QObject *parent = nullptr);
@@ -61,6 +62,7 @@ private:
 
         bool isInAppPurchase = false;
         bool isRenewalAvailable = false;
+        int configurationFilesCount = 0;
     };
 
     AccountInfoData m_accountInfoData;

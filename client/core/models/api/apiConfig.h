@@ -35,7 +35,8 @@ struct ApiConfig
     int maxDeviceCount;
     int issuedConfigs;
     QJsonArray availableCountries;
-    
+    QJsonArray supportedProtocols;
+
     struct ServiceInfo {
         bool isAdVisible = false;
         bool isRenewalAvailable = false;

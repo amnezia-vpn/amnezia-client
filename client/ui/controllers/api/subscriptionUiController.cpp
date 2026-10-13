@@ -814,7 +814,11 @@ bool SubscriptionUiController::getAccountInfo(const QString &serverId, bool relo
     if (reload) {
         QEventLoop wait;
         QTimer::singleShot(1000, &wait, &QEventLoop::quit);
+#ifdef Q_OS_IOS
+        wait.exec();
+#else
         wait.exec(QEventLoop::ExcludeUserInputEvents);
+#endif
     }
     QJsonObject accountInfo;
     ErrorCode errorCode = m_subscriptionController->getAccountInfo(serverId, accountInfo);

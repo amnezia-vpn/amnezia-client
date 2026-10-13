@@ -16,6 +16,7 @@ public slots:
     void startReading();
     void stopReading();
     void setCameraSize(QRect value);
+    void notifyCodeRead(const QString &code);
 
 signals:
     void codeReaded(QString code);

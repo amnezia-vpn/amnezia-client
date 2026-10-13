@@ -6,6 +6,14 @@
 #include <QIODevice>
 #include <QList>
 
+QList<QString> qrCodeUtils::generateQrCodeImageSeriesPlainText(const QByteArray &utf8Text)
+{
+    const QString text = QString::fromUtf8(utf8Text);
+    qrcodegen::QrCode qr = qrcodegen::QrCode::encodeText(text.toUtf8().constData(), qrcodegen::QrCode::Ecc::LOW);
+    const QString svg = QString::fromStdString(toSvgString(qr, 1));
+    return { svgToBase64(svg) };
+}
+
 QList<QString> qrCodeUtils::generateQrCodeImageSeries(const QByteArray &data)
 {
     double k = 850;

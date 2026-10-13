@@ -1,6 +1,7 @@
 #ifndef SUBSCRIPTIONCONTROLLER_H
 #define SUBSCRIPTIONCONTROLLER_H
 
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QByteArray>
 #include <QFuture>
@@ -44,6 +45,9 @@ public:
                                       CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
+
+    ErrorCode importServerFromQrPairingResponse(const QString &vpnConfigKey, const QJsonObject &serviceInfo,
+                                                const QJsonArray &supportedProtocols, int *duplicateServerIndex = nullptr);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);

@@ -1,5 +1,7 @@
 #include "apiAccountInfoModel.h"
 
+#include <QtGlobal>
+
 #include <QDateTime>
 #include <QJsonObject>
 
@@ -10,6 +12,8 @@
 namespace
 {
     Logger logger("AccountInfoModel");
+
+    constexpr QLatin1String kCountryConfigSourceType("country_config");
 }
 
 ApiAccountInfoModel::ApiAccountInfoModel(QObject *parent) : QAbstractListModel(parent)
@@ -100,6 +104,9 @@ QVariant ApiAccountInfoModel::data(const QModelIndex &index, int role) const
     case IsInAppPurchaseRole: {
         return m_accountInfoData.isInAppPurchase;
     }
+    case ConfigurationFilesCountRole: {
+        return m_accountInfoData.configurationFilesCount;
+    }
     }
 
     return QVariant();
@@ -113,6 +120,15 @@ void ApiAccountInfoModel::updateModel(const QJsonObject &accountInfoObject, cons
 
     m_availableCountries = accountInfoObject.value(apiDefs::key::availableCountries).toArray();
     m_issuedConfigsInfo = accountInfoObject.value(apiDefs::key::issuedConfigs).toArray();
+
+    int configurationFilesCount = 0;
+    for (int i = 0; i < m_issuedConfigsInfo.size(); ++i) {
+        const QJsonObject issued = m_issuedConfigsInfo.at(i).toObject();
+        if (issued.value(apiDefs::key::sourceType).toString() == kCountryConfigSourceType) {
+            ++configurationFilesCount;
+        }
+    }
+    accountInfoData.configurationFilesCount = configurationFilesCount;
 
     accountInfoData.activeDeviceCount = accountInfoObject.value(apiDefs::key::activeDeviceCount).toInt();
     accountInfoData.maxDeviceCount = accountInfoObject.value(apiDefs::key::maxDeviceCount).toInt();
@@ -194,6 +210,7 @@ QHash<int, QByteArray> ApiAccountInfoModel::roleNames() const
     roles[IsSubscriptionExpiredRole] = "isSubscriptionExpired";
     roles[IsSubscriptionExpiringSoonRole] = "isSubscriptionExpiringSoon";
     roles[IsInAppPurchaseRole] = "isInAppPurchase";
+    roles[ConfigurationFilesCountRole] = "configurationFilesCount";
 
     return roles;
 }
