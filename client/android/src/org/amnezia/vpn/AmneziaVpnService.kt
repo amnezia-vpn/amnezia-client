@@ -378,6 +378,14 @@ open class AmneziaVpnService : VpnService() {
 
                 VpnStateStore.store { VpnState(protocolState, serverName, serverIndex, vpnProto) }
 
+                sendBroadcast(
+                    Intent(TaskerReceiver.ACTION_TASKER_VPN_STATE_CHANGED).apply {
+                        putExtra(TaskerReceiver.EXTRA_STATE, protocolState.name)
+                        putExtra(TaskerReceiver.EXTRA_SERVER_NAME, serverName ?: "")
+                        putExtra(TaskerReceiver.EXTRA_TASKER_PROTOCOL, vpnProto?.label ?: "")
+                    }
+                )
+
                 when (protocolState) {
                     CONNECTED -> {
                         networkState.bindNetworkListener()
