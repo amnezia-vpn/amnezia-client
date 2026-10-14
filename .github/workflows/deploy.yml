@@ -1063,6 +1063,7 @@ jobs:
           - UiApiAccountInfoModelTest
           - ApiBenefitsModelTest
           - ApiCountryModelTest
+          - ApiDevicesModelTest
 
     runs-on: ubuntu-22.04
 
@@ -1260,6 +1261,7 @@ jobs:
           - UiApiAccountInfoModelTest
           - ApiBenefitsModelTest
           - ApiCountryModelTest
+          - ApiDevicesModelTest
 
     runs-on: windows-latest
 
@@ -1374,6 +1376,7 @@ jobs:
           - UiApiAccountInfoModelTest
           - ApiBenefitsModelTest
           - ApiCountryModelTest
+          - ApiDevicesModelTest
 
     runs-on: macos-15
 
