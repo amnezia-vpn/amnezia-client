@@ -3,7 +3,9 @@
 
 #include <QObject>
 #include <QQmlContext>
+#include <QSharedPointer>
 #include <QThread>
+#include <QTranslator>
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/utils/systemTrayNotificationHandler.h"
