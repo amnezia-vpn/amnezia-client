@@ -4,7 +4,9 @@
 
 #include "windowsroutemonitor.h"
 
+#include <QPair>
 #include <QScopeGuard>
+#include <QSet>
 
 #include "leakdetector.h"
 #include "logger.h"
@@ -115,26 +117,36 @@ void WindowsRouteMonitor::updateInterfaceMetrics(int family) {
   }
 }
 
-void WindowsRouteMonitor::updateExclusionRoute(MIB_IPFORWARD_ROW2* data,
-                                               void* ptable) {
+QList<const MIB_IPFORWARD_ROW2*>
+WindowsRouteMonitor::exclusionRouteCandidates(void* ptable) const {
   PMIB_IPFORWARD_TABLE2 table = reinterpret_cast<PMIB_IPFORWARD_TABLE2>(ptable);
+  QList<const MIB_IPFORWARD_ROW2*> candidates;
+  candidates.reserve(table->NumEntries);
+  for (ULONG i = 0; i < table->NumEntries; i++) {
+    const MIB_IPFORWARD_ROW2* row = &table->Table[i];
+    if (row->InterfaceLuid.Value == m_luid) {
+      continue;
+    }
+    if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
+        (row->Metric == EXCLUSION_ROUTE_METRIC)) {
+      continue;
+    }
+    candidates.append(row);
+  }
+  return candidates;
+}
+
+void WindowsRouteMonitor::updateExclusionRoute(
+    MIB_IPFORWARD_ROW2* data,
+    const QList<const MIB_IPFORWARD_ROW2*>& routeCandidates) {
   SOCKADDR_INET nexthop = {};
   quint64 bestLuid = 0;
   int bestMatch = -1;
   ULONG bestMetric = ULONG_MAX;
 
   nexthop.si_family = data->DestinationPrefix.Prefix.si_family;
-  for (ULONG i = 0; i < table->NumEntries; i++) {
-    MIB_IPFORWARD_ROW2* row = &table->Table[i];
-    // Ignore routes into the VPN interface.
-    if (row->InterfaceLuid.Value == m_luid) {
-      continue;
-    }
+  for (const MIB_IPFORWARD_ROW2* row : routeCandidates) {
     if (row->DestinationPrefix.PrefixLength < bestMatch) {
-      continue;
-    }
-    // Ignore routes of our own creation.
-    if ((row->Protocol == data->Protocol) && (row->Metric == data->Metric)) {
       continue;
     }
 
@@ -366,70 +378,102 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
 }
 
 bool WindowsRouteMonitor::addExclusionRoute(const IPAddress& prefix) {
-  logger.debug() << "Adding exclusion route for" << prefix.toString();
+  return addExclusionRoutes({prefix}).contains(prefix);
+}
 
-  // Silently ignore non-routeable addresses.
-  QHostAddress addr = prefix.address();
-  if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
-      addr.isMulticast()) {
-    return true;
-  }
+QList<IPAddress> WindowsRouteMonitor::addExclusionRoutes(
+    const QList<IPAddress>& prefixes) {
+  QList<IPAddress> addedPrefixes;
+  QList<QPair<IPAddress, MIB_IPFORWARD_ROW2*>> pendingRoutes;
+  QSet<IPAddress> pendingPrefixes;
 
-  if (m_exclusionRoutes.contains(prefix)) {
-    logger.warning() << "Exclusion route already exists";
-    return false;
-  }
+  addedPrefixes.reserve(prefixes.size());
+  pendingRoutes.reserve(prefixes.size());
+  pendingPrefixes.reserve(prefixes.size());
 
-  // Allocate and initialize the MIB routing table row.
-  MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
-  InitializeIpForwardEntry(data);
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    Q_IPV6ADDR buf = prefix.address().toIPv6Address();
-
-    memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buf, sizeof(buf));
-    data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
-    data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+  if (prefixes.size() == 1) {
+    logger.debug() << "Adding exclusion route for" << prefixes.first().toString();
   } else {
-    quint32 buf = prefix.address().toIPv4Address();
-
-    data->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(buf);
-    data->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
-    data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    logger.debug() << "Adding" << prefixes.size() << "exclusion routes";
   }
-  data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
 
-  // Set the rest of the flags for a static route.
-  data->ValidLifetime = 0xffffffff;
-  data->PreferredLifetime = 0xffffffff;
-  data->Metric = EXCLUSION_ROUTE_METRIC;
-  data->Protocol = MIB_IPPROTO_NETMGMT;
-  data->Loopback = false;
-  data->AutoconfigureAddress = false;
-  data->Publish = false;
-  data->Immortal = false;
-  data->Age = 0;
+  for (const IPAddress& prefix : prefixes) {
+    // Silently ignore non-routeable addresses.
+    QHostAddress addr = prefix.address();
+    if (addr.isLoopback() || addr.isBroadcast() || addr.isLinkLocal() ||
+        addr.isMulticast()) {
+      addedPrefixes.append(prefix);
+      continue;
+    }
+
+    if (m_exclusionRoutes.contains(prefix) || pendingPrefixes.contains(prefix)) {
+      logger.warning() << "Exclusion route already exists";
+      continue;
+    }
+
+    // Allocate and initialize the MIB routing table row.
+    MIB_IPFORWARD_ROW2* data = new MIB_IPFORWARD_ROW2;
+    InitializeIpForwardEntry(data);
+    if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
+      Q_IPV6ADDR buf = prefix.address().toIPv6Address();
+
+      memcpy(&data->DestinationPrefix.Prefix.Ipv6.sin6_addr, &buf, sizeof(buf));
+      data->DestinationPrefix.Prefix.Ipv6.sin6_family = AF_INET6;
+      data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    } else {
+      quint32 buf = prefix.address().toIPv4Address();
+
+      data->DestinationPrefix.Prefix.Ipv4.sin_addr.s_addr = htonl(buf);
+      data->DestinationPrefix.Prefix.Ipv4.sin_family = AF_INET;
+      data->DestinationPrefix.PrefixLength = prefix.prefixLength();
+    }
+    data->NextHop.si_family = data->DestinationPrefix.Prefix.si_family;
+
+    // Set the rest of the flags for a static route.
+    data->ValidLifetime = 0xffffffff;
+    data->PreferredLifetime = 0xffffffff;
+    data->Metric = EXCLUSION_ROUTE_METRIC;
+    data->Protocol = MIB_IPPROTO_NETMGMT;
+    data->Loopback = false;
+    data->AutoconfigureAddress = false;
+    data->Publish = false;
+    data->Immortal = false;
+    data->Age = 0;
+
+    pendingRoutes.append(qMakePair(prefix, data));
+    pendingPrefixes.insert(prefix);
+  }
+
+  if (pendingRoutes.isEmpty()) {
+    return addedPrefixes;
+  }
 
   PMIB_IPFORWARD_TABLE2 table;
-  int family;
-  if (prefix.address().protocol() == QAbstractSocket::IPv6Protocol) {
-    family = AF_INET6;
-  } else {
-    family = AF_INET;
-  }
-
-  DWORD result = GetIpForwardTable2(family, &table);
+  DWORD result = GetIpForwardTable2(AF_UNSPEC, &table);
   if (result != NO_ERROR) {
     logger.error() << "Failed to fetch routing table:" << result;
-    delete data;
-    return false;
+    for (const auto& route : pendingRoutes) {
+      delete route.second;
+    }
+    return addedPrefixes;
   }
-  updateInterfaceMetrics(family);
-  updateCapturedRoutes(family, table);
-  updateExclusionRoute(data, table);
-  FreeMibTable(table);
+  auto tableGuard = qScopeGuard([&] { FreeMibTable(table); });
 
-  m_exclusionRoutes[prefix] = data;
-  return true;
+  updateInterfaceMetrics(AF_UNSPEC);
+  const QList<const MIB_IPFORWARD_ROW2*> routeCandidates =
+      exclusionRouteCandidates(table);
+
+  // Make the full batch visible before reconciling captured routes.
+  for (const auto& route : pendingRoutes) {
+    m_exclusionRoutes.insert(route.first, route.second);
+  }
+  updateCapturedRoutes(AF_UNSPEC, table);
+
+  for (const auto& route : pendingRoutes) {
+    updateExclusionRoute(route.second, routeCandidates);
+    addedPrefixes.append(route.first);
+  }
+  return addedPrefixes;
 }
 
 bool WindowsRouteMonitor::deleteExclusionRoute(const IPAddress& prefix) {
@@ -492,8 +536,10 @@ void WindowsRouteMonitor::routeChanged() {
 
   updateInterfaceMetrics(AF_UNSPEC);
   updateCapturedRoutes(AF_UNSPEC, table);
+  const QList<const MIB_IPFORWARD_ROW2*> routeCandidates =
+      exclusionRouteCandidates(table);
   for (MIB_IPFORWARD_ROW2* data : m_exclusionRoutes) {
-    updateExclusionRoute(data, table);
+    updateExclusionRoute(data, routeCandidates);
   }
 
   FreeMibTable(table);
