@@ -270,6 +270,7 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     return;
   }
 
+  QHash<quint64, bool> hardwareInterfaces;
   for (ULONG i = 0; i < table->NumEntries; i++) {
     MIB_IPFORWARD_ROW2* row = &table->Table[i];
     // Ignore routes into the VPN interface.
@@ -283,6 +284,25 @@ void WindowsRouteMonitor::updateCapturedRoutes(int family, void* ptable) {
     // Ignore routes of our own creation.
     if ((row->Protocol == MIB_IPPROTO_NETMGMT) &&
         (row->Metric == EXCLUSION_ROUTE_METRIC)) {
+      continue;
+    }
+    // Do not clone routes from other virtual interfaces, such as Cisco
+    // AnyConnect. Keep them on their original interface; cloning them to
+    // Amnezia would redirect the other VPN's control and private-network
+    // traffic.
+    if (!hardwareInterfaces.contains(row->InterfaceLuid.Value)) {
+      MIB_IF_ROW2 interfaceRow{};
+      interfaceRow.InterfaceLuid.Value = row->InterfaceLuid.Value;
+      const bool isHardwareInterface =
+          GetIfEntry2(&interfaceRow) != NO_ERROR ||
+          interfaceRow.InterfaceAndOperStatusFlags.HardwareInterface;
+      hardwareInterfaces.insert(row->InterfaceLuid.Value,
+                                isHardwareInterface);
+    }
+    if (!hardwareInterfaces.value(row->InterfaceLuid.Value)) {
+      logger.debug() << "Skipping route from virtual interface"
+                     << row->InterfaceIndex
+                     << row->DestinationPrefix.PrefixLength;
       continue;
     }
     // Ignore routes which should be excluded.
