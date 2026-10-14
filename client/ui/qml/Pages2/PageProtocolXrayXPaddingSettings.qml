@@ -17,200 +17,182 @@ PageType {
 
     property bool editDirty: false
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
+
+        anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
+        anchors.bottomMargin: saveButton.visible ? 16 : 0
         anchors.left: parent.left
         anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
-        delegate: ColumnLayout {
+        header: NavigationBarType {
             width: listView.width
-            spacing: 0
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("xPadding")
-            }
+            title: qsTr("xPadding")
+        }
 
-            // xPaddingBytes — min/max display row
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                text: qsTr("xPaddingBytes")
-                descriptionText: (xPaddingBytesMin !== "" ? xPaddingBytesMin : "0") + "—" + (xPaddingBytesMax !== "" ? xPaddingBytesMax : "0")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
-                    PageController.goToPage(PageEnum.PageProtocolXrayXPaddingBytesSettings)
+        footer: Item {
+            width: listView.width
+            height: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
+        }
+
+        delegate: Item {
+            width: listView.width
+            implicitHeight: content.implicitHeight
+
+            ColumnLayout {
+                id: content
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+
+                spacing: 12
+
+                ListItemType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+                    text: qsTr("xPaddingBytes")
+                    subtitle: (xPaddingBytesMin !== "" ? xPaddingBytesMin : "0") + "—" + (xPaddingBytesMax !== "" ? xPaddingBytesMax : "0")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageProtocolXrayXPaddingBytesSettings)
+                    }
                 }
-            }
 
-            DividerType {
-            }
-
-            SwitcherType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-                text: qsTr("xPaddingObfsMode")
-                checked: xPaddingObfsMode
-                onToggled: xPaddingObfsMode = checked
-            }
-
-            DividerType {
-            }
-
-            TextFieldWithHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 16
-                headerText: qsTr("xPaddingKey")
-                placeholderText: XrayConfigModel.xPaddingKeyDefault()
-                textField.text: xPaddingKey
-                textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                textField.onTextEdited: root.editDirty = (textField.text !== xPaddingKey)
-                textField.onEditingFinished: {
-                    var v = textField.text.trim()
-                    if (v !== xPaddingKey) xPaddingKey = v
-                    else if (textField.text !== v) textField.text = v
-                    root.editDirty = false
+                SwitchRowType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 12
+                    text: qsTr("xPaddingObfsMode")
+                    checked: xPaddingObfsMode
+                    onToggled: xPaddingObfsMode = checked
                 }
-            }
 
-            TextFieldWithHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
-                headerText: qsTr("xPaddingHeader")
-                placeholderText: XrayConfigModel.xPaddingHeaderDefault()
-                textField.text: xPaddingHeader
-                textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
-                textField.onTextEdited: root.editDirty = (textField.text !== xPaddingHeader)
-                textField.onEditingFinished: {
-                    var v = textField.text.trim()
-                    if (v !== xPaddingHeader) xPaddingHeader = v
-                    else if (textField.text !== v) textField.text = v
-                    root.editDirty = false
+                TextFieldType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 12
+                    headerText: qsTr("xPaddingKey")
+                    placeholderText: XrayConfigModel.xPaddingKeyDefault()
+                    textField.text: xPaddingKey
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xPaddingKey)
+                    textField.onEditingFinished: {
+                        var v = textField.text.trim()
+                        if (v !== xPaddingKey) xPaddingKey = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
+                    }
                 }
-            }
 
-            DropDownType {
-                id: placementDropDown
-                fitContent: true
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: xPaddingPlacement
-                descriptionText: qsTr("xPaddingPlacement")
-                headerText: qsTr("xPaddingPlacement")
-                drawerParent: root
-                listView: ListViewWithRadioButtonType {
-                    rootWidth: root.width
-                    currentValue: xPaddingPlacement
-                    model: ListModel {
+                TextFieldType {
+                    Layout.fillWidth: true
+                    headerText: qsTr("xPaddingHeader")
+                    placeholderText: XrayConfigModel.xPaddingHeaderDefault()
+                    textField.text: xPaddingHeader
+                    textField.validator: RegularExpressionValidator { regularExpression: /^[A-Za-z0-9_-]*$/ }
+                    textField.onTextEdited: root.editDirty = (textField.text !== xPaddingHeader)
+                    textField.onEditingFinished: {
+                        var v = textField.text.trim()
+                        if (v !== xPaddingHeader) xPaddingHeader = v
+                        else if (textField.text !== v) textField.text = v
+                        root.editDirty = false
+                    }
+                }
+
+                DropDownType {
+                    id: placementDropDown
+                    fitContent: true
+                    Layout.fillWidth: true
+                    text: xPaddingPlacement
+                    descriptionText: qsTr("xPaddingPlacement")
+                    headerText: qsTr("xPaddingPlacement")
+                    listView: RadioListType {
+                        currentValue: xPaddingPlacement
+                        model: ListModel {
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xPaddingPlacementOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
+                            }
+                        }
+                        onActivated: {
+                            xPaddingPlacement = selectedText
+                            placementDropDown.text = selectedText
+                            placementDropDown.close()
+                        }
                         Component.onCompleted: {
-                            var opts = XrayConfigModel.xPaddingPlacementOptions()
-                            for (var i = 0; i < opts.length; i++) {
-                                append({name: opts[i]})
+                            for (var i = 0; i < model.count; i++) {
+                                if (model.get(i).name === xPaddingPlacement) {
+                                    selectedIndex = i;
+                                    break
+                                }
                             }
                         }
                     }
-                    clickedFunction: function () {
-                        xPaddingPlacement = selectedText
-                        placementDropDown.text = selectedText
-                        placementDropDown.closeTriggered()
-                    }
-                    Component.onCompleted: {
-                        for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).name === xPaddingPlacement) {
-                                selectedIndex = i;
-                                break
-                            }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            placementDropDown.text = xPaddingPlacement
                         }
                     }
                 }
-                Connections {
-                    target: XrayConfigModel
 
-                    function onDataChanged() {
-                        placementDropDown.text = xPaddingPlacement
-                    }
-                }
-            }
-
-            DropDownType {
-                id: methodDropDown
-                fitContent: true
-                Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                text: xPaddingMethod
-                descriptionText: qsTr("xPaddingMethod")
-                headerText: qsTr("xPaddingMethod")
-                drawerParent: root
-                listView: ListViewWithRadioButtonType {
-                    rootWidth: root.width
-                    currentValue: xPaddingMethod
-                    model: ListModel {
+                DropDownType {
+                    id: methodDropDown
+                    fitContent: true
+                    Layout.fillWidth: true
+                    text: xPaddingMethod
+                    descriptionText: qsTr("xPaddingMethod")
+                    headerText: qsTr("xPaddingMethod")
+                    listView: RadioListType {
+                        currentValue: xPaddingMethod
+                        model: ListModel {
+                            Component.onCompleted: {
+                                var opts = XrayConfigModel.xPaddingMethodOptions()
+                                for (var i = 0; i < opts.length; i++) {
+                                    append({name: opts[i]})
+                                }
+                            }
+                        }
+                        onActivated: {
+                            xPaddingMethod = selectedText
+                            methodDropDown.text = selectedText
+                            methodDropDown.close()
+                        }
                         Component.onCompleted: {
-                            var opts = XrayConfigModel.xPaddingMethodOptions()
-                            for (var i = 0; i < opts.length; i++) {
-                                append({name: opts[i]})
+                            for (var i = 0; i < model.count; i++) {
+                                if (model.get(i).name === xPaddingMethod) {
+                                    selectedIndex = i;
+                                    break
+                                }
                             }
                         }
                     }
-                    clickedFunction: function () {
-                        xPaddingMethod = selectedText
-                        methodDropDown.text = selectedText
-                        methodDropDown.closeTriggered()
-                    }
-                    Component.onCompleted: {
-                        for (var i = 0; i < model.count; i++) {
-                            if (model.get(i).name === xPaddingMethod) {
-                                selectedIndex = i;
-                                break
-                            }
+                    Connections {
+                        target: XrayConfigModel
+
+                        function onDataChanged() {
+                            methodDropDown.text = xPaddingMethod
                         }
                     }
                 }
-                Connections {
-                    target: XrayConfigModel
-
-                    function onDataChanged() {
-                        methodDropDown.text = xPaddingMethod
-                    }
-                }
-            }
-
-            Item {
-                Layout.preferredHeight: 16
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -218,7 +200,7 @@ PageType {
         visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
             saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")

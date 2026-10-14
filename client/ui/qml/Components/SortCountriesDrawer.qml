@@ -5,15 +5,14 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType2 {
+SheetType {
     id: root
 
     property var listModel: null
 
-    width: parent.width
-    height: parent.height
+    expandedHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -21,25 +20,21 @@ DrawerType2 {
         anchors.right: parent.right
         spacing: 0
 
-        Component.onCompleted: {
-            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
-        }
-
         ButtonGroup {
             id: sortModeGroup
         }
 
-        Header2TextType {
+        SectionHeaderType {
             Layout.fillWidth: true
-            Layout.topMargin: 24
+            Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
             Layout.bottomMargin: 16
 
-            text: qsTr("Sort countries")
+            headerText: qsTr("Sort countries")
         }
 
-        VerticalRadioButton {
+        RadioItemType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -51,32 +46,25 @@ DrawerType2 {
 
             onClicked: {
                 root.listModel.sortMode = 0
-                root.closeTriggered()
+                root.close()
             }
         }
 
-        DividerType {
-            Layout.fillWidth: true
-        }
-
-        VerticalRadioButton {
+        RadioItemType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
             text: qsTr("Alphabetically")
+            showSeparator: false
 
             ButtonGroup.group: sortModeGroup
             checked: root.listModel !== null && root.listModel.sortMode === 1
 
             onClicked: {
                 root.listModel.sortMode = 1
-                root.closeTriggered()
+                root.close()
             }
-        }
-
-        DividerType {
-            Layout.fillWidth: true
         }
     }
 }

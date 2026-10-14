@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF0E0E11</color>
+    <color name="black">#FF101012</color>
     <style name="NoActionBar">
         <item name="android:windowBackground">@color/black</item>
         <item name="android:colorBackground">@color/black</item>

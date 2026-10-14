@@ -66,109 +66,13 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: header
+    ListViewType {
+        id: listView
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        BackButtonType {
-            id: backButton
-        }
-
-        HeaderTypeWithSwitcher {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            headerText: qsTr("App split tunneling")
-
-            enabled: root.pageEnabled
-            showSwitcher: true
-            switcher {
-                checked: AppSplitTunnelingController.isSplitTunnelingEnabled
-                enabled: root.pageEnabled
-            }
-            switcherFunction: function(checked) {
-                AppSplitTunnelingController.toggleSplitTunneling(checked)
-                selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-            }
-        }
-
-        DropDownType {
-            id: selector
-
-            Layout.fillWidth: true
-            Layout.topMargin: 32
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            drawerHeight: 0.4375
-            drawerParent: root
-
-            headerText: qsTr("Mode")
-
-            enabled: (Qt.platform.os === "android") && root.pageEnabled
-
-            listView: ListViewWithRadioButtonType {
-                rootWidth: root.width
-
-                model: root.routeModesModel
-
-                selectedIndex: getRouteModesModelIndex()
-
-                clickedFunction: function() {
-                    selector.text = selectedText
-                    selector.closeTriggered()
-                    if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
-                    }
-                }
-
-                Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
-                        selector.text = selectedText
-                    } else {
-                        selector.text = root.routeModesModel[0].name
-                    }
-                }
-
-                Connections {
-                    target: AppSplitTunnelingController
-                    function onRouteModeChanged() {
-                        selectedIndex = getRouteModesModelIndex()
-                    }
-                }
-            }
-        }
-
-        WarningType {
-            Layout.fillWidth: true
-            Layout.topMargin: 8
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            textString: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
-            iconPath: "qrc:/images/controls/alert-circle.svg"
-
-            visible: (Qt.platform.os === "windows") && root.pageEnabled
-        }
-    }
-
-    ListViewType {
-        id: listView
-
-        ScrollBar.vertical: ScrollBarType { policy: ScrollBar.AlwaysOn }
-
-        anchors.top: header.bottom
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin + (searchField.textField.activeFocus ? 0 : PageController.imeHeight)
-        anchors.left: parent.left
-        anchors.right: parent.right
-        clip: true
+        anchors.bottom: addAppPanel.top
 
         model: SortFilterProxyModel {
             id: proxyAppSplitTunnelingModel
@@ -183,20 +87,105 @@ PageType {
             ]
         }
 
-        delegate: ColumnLayout {
+        header: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            NavigationBarType {
+                id: navigationBar
+
                 Layout.fillWidth: true
 
+                title: qsTr("App split tunneling")
+
+                header.showSwitcher: true
+                header.switcher.checked: AppSplitTunnelingController.isSplitTunnelingEnabled
+                header.switcher.enabled: root.pageEnabled
+
+                Connections {
+                    target: navigationBar.header
+
+                    function onSwitcherToggled(checked) {
+                        AppSplitTunnelingController.toggleSplitTunneling(checked)
+                        selector.text = root.routeModesModel[getRouteModesModelIndex()].name
+                    }
+                }
+            }
+
+            DropDownType {
+                id: selector
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 24
+
+                drawerHeight: 0.4375
+
+                headerText: qsTr("Mode")
+
+                enabled: (Qt.platform.os === "android") && root.pageEnabled
+
+                listView: RadioListType {
+
+                    model: root.routeModesModel
+
+                    selectedIndex: getRouteModesModelIndex()
+
+                    onActivated: {
+                        selector.text = selectedText
+                        selector.close()
+                        if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                            AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
+                            selector.text = selectedText
+                        } else {
+                            selector.text = root.routeModesModel[0].name
+                        }
+                    }
+
+                    Connections {
+                        target: AppSplitTunnelingController
+                        function onRouteModeChanged() {
+                            selectedIndex = getRouteModesModelIndex()
+                        }
+                    }
+                }
+            }
+
+            NotificationType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 24
+
+                text: qsTr("Only \"Apps from the list should not have access via VPN\" mode is available on Windows")
+
+                visible: (Qt.platform.os === "windows") && root.pageEnabled
+            }
+        }
+
+        delegate: Item {
+            width: listView.width
+            implicitHeight: appItem.implicitHeight
+
+            ListItemType {
+                id: appItem
+
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
 
                 text: appPath
-                rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                trailingIconSource: "qrc:/images/controls/trash.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Remove ") + appPath + "?"
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -210,66 +199,59 @@ PageType {
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-
-            DividerType {}
         }
     }
 
     Rectangle {
+        id: addAppPanel
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        
-        height: addAppButton.implicitHeight + 48 + PageController.safeAreaBottomMargin
-        
-        color: AmneziaStyle.color.midnightBlack
-        
-        RowLayout {
-            id: addAppButton
+        anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
+
+        implicitHeight: searchField.implicitHeight + 32 + PageController.safeAreaBottomMargin
+
+        color: AmneziaStyle.color.bgBase
+
+        TextFieldType {
+            id: searchField
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 16
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
 
             enabled: root.pageEnabled
 
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 24
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-            anchors.bottomMargin: 24 + PageController.safeAreaBottomMargin
+            textField.placeholderText: qsTr("application name")
+            buttonImageSource: "qrc:/images/controls/plus.svg"
+            buttonJoined: true
 
-            TextFieldWithHeaderType {
-                id: searchField
+            rightButtonClickedOnEnter: true
 
-                Layout.fillWidth: true
+            clickedFunc: function() {
+                searchField.focus = false
+                PageController.showBusyIndicator(true)
 
-                textField.placeholderText: qsTr("application name")
-                buttonImageSource: "qrc:/images/controls/plus.svg"
-
-                rightButtonClickedOnEnter: true
-
-                clickedFunc: function() {
-                    searchField.focus = false
-                    PageController.showBusyIndicator(true)
-
-                    if (Qt.platform.os === "windows") {
-                        var fileName = SystemController.getFileName(qsTr("Open executable file"),
-                                                                    qsTr("Executable files (*.*)"))
-                        if (fileName !== "") {
-                            AppSplitTunnelingController.addApp(fileName)
-                        }
-                    } else if (Qt.platform.os === "android"){
-                        installedAppDrawer.openTriggered()
+                if (Qt.platform.os === "windows") {
+                    var fileName = SystemController.getFileName(qsTr("Open executable file"),
+                                                                qsTr("Executable files (*.*)"))
+                    if (fileName !== "") {
+                        AppSplitTunnelingController.addApp(fileName)
                     }
-
-                    PageController.showBusyIndicator(false)
+                } else if (Qt.platform.os === "android"){
+                    installedAppDrawer.open()
                 }
+
+                PageController.showBusyIndicator(false)
             }
         }
     }
 
     InstalledAppsDrawer {
         id: installedAppDrawer
-
-        anchors.fill: parent
     }
 }

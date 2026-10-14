@@ -37,111 +37,133 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            HeaderTypeWithButton {
-                id: moreButton
+            spacing: 0
 
-                property bool isVisible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
-                
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.topMargin: 24 + PageController.safeAreaTopMargin
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
 
-                headerText: qsTr("Connection")
+                title: qsTr("Connection")
+                description: qsTr("Insert the key, add a configuration file or scan the QR-code")
+                backButtonVisible: root.stackView !== null && root.stackView.depth > 1
 
-                actionButtonImage: isVisible ? "qrc:/images/controls/more-vertical.svg" : ""
-                actionButtonFunction: function() {
-                    moreActionsDrawer.openTriggered()
+                IconButtonType {
+                    id: moreButton
+
+                    visible: SettingsController.getInstallationUuid() !== "" || PageController.isStartPageVisible()
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/more-vertical.svg"
+
+                    onClicked: moreActionsDrawer.open()
                 }
+            }
 
-                DrawerType2 {
-                    id: moreActionsDrawer
+            SheetType {
+                id: moreActionsDrawer
 
-                    parent: root
+                parent: root
 
-                    anchors.fill: parent
-                    expandedHeight: root.height * 0.5
+                expandedHeight: moreSheetContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
-                    expandedStateContent: ColumnLayout {
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        spacing: 0
+                ColumnLayout {
+                    id: moreSheetContent
 
-                        BaseHeaderType {
-                            Layout.fillWidth: true
-                            Layout.topMargin: 32
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: 0
 
-                            headerText: qsTr("Settings")
-                        }
+                    SectionHeaderType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 16
 
-                        SwitcherType {
-                            id: switcher
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
-                            Layout.leftMargin: 16
-                            Layout.rightMargin: 16
+                        headerText: qsTr("Settings")
+                        descriptionText: supportUuidRow.visible ? qsTr("Support tag") : ""
+                    }
 
-                            text: qsTr("Enable logs")
+                    SwitchType {
+                        id: switcher
+                        Layout.fillWidth: true
+                        Layout.topMargin: 16
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                            visible: PageController.isStartPageVisible()
-                            checked: SettingsController.isLoggingEnabled
-                            onToggled: function() {
-                                if (checked !== SettingsController.isLoggingEnabled) {
-                                    SettingsController.isLoggingEnabled = checked
-                                }
+                        text: qsTr("Enable logs")
+
+                        visible: PageController.isStartPageVisible()
+                        checked: SettingsController.isLoggingEnabled
+                        onToggled: function() {
+                            if (checked !== SettingsController.isLoggingEnabled) {
+                                SettingsController.isLoggingEnabled = checked
                             }
                         }
+                    }
 
-                        LabelWithButtonType {
-                            Layout.fillWidth: true
+                    ListItemType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
 
-                            text: qsTr("Export client logs")
-                            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                        text: qsTr("Export client logs")
+                        trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                            visible: PageController.isStartPageVisible()
+                        visible: PageController.isStartPageVisible()
 
-                            clickedFunction: function() {
-                                var fileName = ""
-                                if (GC.isMobile()) {
-                                    fileName = "AmneziaVPN.log"
-                                } else {
-                                    fileName = SystemController.getFileName(qsTr("Save"),
-                                                                            qsTr("Logs files (*.log)"),
-                                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
-                                                                            true,
-                                                                            ".log")
-                                }
-                                if (fileName !== "") {
-                                    PageController.showBusyIndicator(true)
-                                    SettingsController.exportLogsFile(fileName)
-                                    PageController.showBusyIndicator(false)
-                                    PageController.showNotificationMessage(qsTr("Logs file saved"))
-                                }
+                        onClicked: {
+                            var fileName = ""
+                            if (GC.isMobile()) {
+                                fileName = "AmneziaVPN.log"
+                            } else {
+                                fileName = SystemController.getFileName(qsTr("Save"),
+                                                                        qsTr("Logs files (*.log)"),
+                                                                        StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                                        true,
+                                                                        ".log")
+                            }
+                            if (fileName !== "") {
+                                PageController.showBusyIndicator(true)
+                                SettingsController.exportLogsFile(fileName)
+                                PageController.showBusyIndicator(false)
+                                PageController.showNotificationMessage(qsTr("Logs file saved"))
                             }
                         }
+                    }
 
-                        LabelWithButtonType {
+                    RowLayout {
+                        id: supportUuidRow
+
+                        Layout.fillWidth: true
+                        Layout.topMargin: 28
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        spacing: 16
+
+                        visible: SettingsController.getInstallationUuid() !== ""
+
+                        BodyTextType {
+                            id: supportUuidText
+
+                            Layout.fillWidth: true
+
+                            text: SettingsController.getInstallationUuid()
+                            elide: Text.ElideRight
+                            wrapMode: Text.NoWrap
+                        }
+
+                        IconButtonType {
                             id: supportUuid
-                            Layout.fillWidth: true
-                            Layout.topMargin: 16
 
-                            text: qsTr("Support tag")
-                            descriptionText: SettingsController.getInstallationUuid()
+                            icon.source: "qrc:/images/controls/copy.svg"
+                            Accessible.name: qsTr("Support tag")
 
-                            descriptionOnTop: true
-
-                            rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-
-                            visible: SettingsController.getInstallationUuid() !== ""
-                            clickedFunction: function() {
-                                GC.copyToClipBoard(descriptionText)
+                            onClicked: {
+                                GC.copyToClipBoard(supportUuidText.text)
                                 PageController.showNotificationMessage(qsTr("Copied"))
                                 if (!GC.isMobile()) {
-                                    this.rightButton.forceActiveFocus()
+                                    supportUuid.forceActiveFocus(Qt.TabFocusReason)
                                 }
                             }
                         }
@@ -149,61 +171,51 @@ PageType {
                 }
             }
 
-            ParagraphTextType {
-                objectName: "insertKeyLabel"
-
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 24
-
-                text: qsTr("Insert the key, add a configuration file or scan the QR-code")
-            }
-
-            TextFieldWithHeaderType {
-                id: textKey
-
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                headerText: qsTr("Insert key")
-                buttonText: qsTr("Insert")
-
-                clickedFunc: function() {
-                    textField.text = ""
-                    textField.paste()
-                }
-            }
-
-            BasicButtonType {
-                id: continueButton
-
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                visible: textKey.textField.text !== ""
+                spacing: 12
 
-                text: qsTr("Continue")
+                TextFieldType {
+                    id: textKey
 
-                clickedFunc: function() {
-                    if (ImportController.extractConfigFromData(textKey.textField.text)) {
-                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                    Layout.fillWidth: true
+
+                    headerText: qsTr("Insert key")
+                    buttonText: qsTr("Insert")
+
+                    clickedFunc: function() {
+                        textField.text = ""
+                        textField.paste()
+                    }
+                }
+
+                ButtonType {
+                    id: continueButton
+
+                    Layout.fillWidth: true
+
+                    visible: textKey.textField.text !== ""
+
+                    text: qsTr("Continue")
+
+                    onClicked: {
+                        if (ImportController.extractConfigFromData(textKey.textField.text)) {
+                            PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
+                        }
                     }
                 }
             }
 
-            ParagraphTextType {
+            SmallTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.rightMargin: 16
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
-                Layout.bottomMargin: 24
+                Layout.rightMargin: 16
 
-                color: AmneziaStyle.color.charcoalGray
                 text: qsTr("Other connection options")
             }
         }
@@ -213,55 +225,45 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
-            CardWithIconsType {
+            BasicCardType {
                 Layout.fillWidth: true
+                Layout.topMargin: 12
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-                Layout.bottomMargin: 16
 
                 visible: isVisible
 
-                headerText: title
-                bodyText: description
+                text: title
+                subtitle: description
 
-                showRecommendedBadge: featuredAmneziaConnection
-                recommendedText: featuredAmneziaConnection ? qsTr("Recommended") : ""
+                badgeText: featuredAmneziaConnection ? qsTr("Recommended") : ""
 
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: imageSource
+                icon.source: imageSource
 
                 enabled: !root.isRestoringBackup
 
                 onClicked: { handler() }
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
             }
         }
 
         footer: ColumnLayout {
             width: listView.width
 
-            BasicButtonType {
+            LinkButtonType {
                 id: siteLink2
                 Layout.topMargin: 24
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
                 Layout.alignment: Qt.AlignHCenter
-                implicitHeight: 32
+
+                size: LinkButtonType.Medium
 
                 visible: Qt.platform.os !== "ios" && !IsMacOsNeBuild
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
 
                 text: qsTr("Site Amnezia")
 
                 rightImageSource: "qrc:/images/controls/external-link.svg"
 
-                clickedFunc: function() {
+                onClicked: {
                     Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl())
                 }
             }

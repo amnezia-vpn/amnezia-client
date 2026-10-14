@@ -56,12 +56,22 @@ PageType {
     property bool isSubscriptionExpiringSoon: false
     property bool isSubscriptionRenewalAvailable: false
     property bool isInAppPurchase: false
+    property bool isVisibleForAmneziaFree: false
+    property string serviceDescription: ""
+
+    readonly property bool showSubscriptionNote: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
+    readonly property bool showRenewButton: root.showSubscriptionNote
+                                            && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+    readonly property bool showRenewLink: !root.showSubscriptionNote
+                                          && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
 
     function updateSubscriptionState() {
         root.isSubscriptionExpired = ApiAccountInfoModel.data("isSubscriptionExpired")
         root.isSubscriptionExpiringSoon = ApiAccountInfoModel.data("isSubscriptionExpiringSoon")
         root.isSubscriptionRenewalAvailable = ApiAccountInfoModel.data("isSubscriptionRenewalAvailable")
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
+        root.isVisibleForAmneziaFree = ApiAccountInfoModel.data("isComponentVisible")
+        root.serviceDescription = ApiAccountInfoModel.data("serviceDescription") || ""
     }
 
     Component.onCompleted: {
@@ -109,290 +119,247 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.fill: parent
 
-        model: labelsModel
+        contentHeight: Math.max(content.implicitHeight, flickable.height)
 
-        header: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
 
-            spacing: 4
+            width: flickable.width
+            height: flickable.contentHeight
 
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
+            spacing: 0
 
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
-            }
-
-            HeaderTypeWithButton {
+            NavigationBarType {
                 id: headerContent
                 objectName: "headerContent"
 
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
 
-                actionButtonImage: "qrc:/images/controls/edit-3.svg"
+                title: root.processedServer != null ? root.processedServer.name : ""
+                description: root.serviceDescription
 
-                headerText: root.processedServer != null ? root.processedServer.name : ""
+                IconButtonType {
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/edit-3.svg"
 
-                actionButtonFunction: function() {
-                    serverNameEditDrawer.openTriggered()
+                    onClicked: serverNameEditDrawer.open()
                 }
             }
 
-            ParagraphTextType {
-                visible: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
-
+            BodyTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 12
-
-                text: root.isSubscriptionExpired
-                    ? qsTr("Subscription expired")
-                    : qsTr("Subscription expiring soon")
-
-                color: root.isSubscriptionExpired
-                    ? AmneziaStyle.color.vibrantRed
-                    : AmneziaStyle.color.goldenApricot
-            }
-
-            ParagraphTextType {
-                visible: ApiAccountInfoModel.data("serviceDescription") !== ""
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 16
-                Layout.bottomMargin: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon ? 0 : 10
-
-                text: ApiAccountInfoModel.data("serviceDescription")
-                color: AmneziaStyle.color.mutedGray
-            }
-
-            BasicButtonType {
-                visible: (root.isSubscriptionExpired || root.isSubscriptionExpiringSoon)
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
                 Layout.bottomMargin: 8
 
-                text: qsTr("Renew subscription")
+                visible: root.showSubscriptionNote
 
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.lightGray
-                pressedColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.midnightBlack
-
-                clickedFunc: function() {
-                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
-                }
-            }
-        }
-
-        delegate: ColumnLayout {
-            width: listView.width
-            spacing: 0
-
-            Connections {
-                target: ApiAccountInfoModel
-
-                function onModelReset() {
-                    delegateItem.rightText = ApiAccountInfoModel.data(contentKey)
-                }
+                text: root.isSubscriptionExpired ? qsTr("Subscription expired")
+                                                 : qsTr("Subscription expiring soon")
+                color: root.isSubscriptionExpired ? AmneziaStyle.color.statusDestructive
+                                                  : AmneziaStyle.color.textAccent
             }
 
-            LabelWithImageType {
-                id: delegateItem
-
+            ButtonType {
                 Layout.fillWidth: true
-                Layout.margins: 16
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                imageSource: objectImageSource
-                leftText: title
-                rightText: ApiAccountInfoModel.data(contentKey)
-                rightTextFormat: isRichText ? Text.RichText : Text.PlainText
-
-                visible: rightText !== ""
-            }
-        }
-
-        footer: ColumnLayout {
-            id: footer
-
-            width: listView.width
-            spacing: 0
-
-            readonly property bool isVisibleForAmneziaFree: ApiAccountInfoModel.data("isComponentVisible")
-
-            BasicButtonType {
-                visible: !root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
-
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 16
-                Layout.bottomMargin: 16
-
-                implicitHeight: 25
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.goldenApricot
-                leftImageSource: "qrc:/images/controls/refresh-cw.svg"
-                leftImageColor: AmneziaStyle.color.goldenApricot
+                visible: root.showRenewButton
 
                 text: qsTr("Renew subscription")
 
-                clickedFunc: function() {
+                onClicked: {
                     SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
 
-            DividerType {
-                visible: (!root.isSubscriptionExpired && !root.isSubscriptionExpiringSoon
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase)
-                    || footer.isVisibleForAmneziaFree
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                spacing: 0
+
+                Repeater {
+                    model: root.labelsModel
+
+                    delegate: ListItemType {
+                        id: infoRow
+
+                        required property var modelData
+
+                        property string value: ApiAccountInfoModel.data(infoRow.modelData.contentKey) || ""
+
+                        Layout.fillWidth: true
+
+                        visible: infoRow.value !== ""
+
+                        focusPolicy: Qt.NoFocus
+                        hoverEnabled: false
+                        showSeparator: false
+                        leadingSlotWidth: 24
+
+                        text: infoRow.modelData.title
+                        icon.source: infoRow.modelData.objectImageSource
+
+                        Connections {
+                            target: ApiAccountInfoModel
+
+                            function onModelReset() {
+                                infoRow.value = ApiAccountInfoModel.data(infoRow.modelData.contentKey) || ""
+                            }
+                        }
+
+                        SmallTextType {
+                            Layout.maximumWidth: infoRow.availableWidth * 0.5
+                            Layout.rightMargin: 4
+
+                            text: infoRow.value
+                            textFormat: infoRow.modelData.isRichText ? Text.RichText : Text.PlainText
+                            color: AmneziaStyle.color.textSecondary
+                            horizontalAlignment: Text.AlignRight
+                        }
+                    }
+                }
             }
 
-            WarningType {
+            ButtonType {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 24
+
+                visible: root.showRenewLink
+
+                variant: ButtonType.Text
+                leftImageSource: "qrc:/images/controls/refresh-cw.svg"
+                text: qsTr("Renew subscription")
+
+                onClicked: {
+                    SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
+                }
+            }
+
+            NotificationType {
                 id: warning
 
-                Layout.topMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
                 Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                backGroundColor: AmneziaStyle.color.translucentRichBrown
-
-                textString: qsTr("Configurations have been updated for some countries. Download and install the updated configuration files")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
+                variant: NotificationType.Warning
+                text: qsTr("Configurations have been updated for some countries. Download and install the updated configuration files")
 
                 visible: ApiCountryModel.hasExpiredWorkerConfigs
             }
 
-            LabelWithButtonType {
-                id: vpnKey
-
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: warning.visible ? 16 : 0
-
-                visible: footer.isVisibleForAmneziaFree
-
-                text: qsTr("Subscription Key")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
-                    PageController.showBusyIndicator(true)
-
-                    SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
-
-                    PageController.showBusyIndicator(false)
-                }
-            }
-
-            DividerType {
-                visible: footer.isVisibleForAmneziaFree
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-
-                visible: footer.isVisibleForAmneziaFree
-
-                text: qsTr("Configuration Files")
-
-                descriptionText: qsTr("Manage configuration files")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    SubscriptionUiController.updateApiCountryModel(ServersUiController.processedServerId)
-                    PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
-                }
-            }
-
-            DividerType {
-                visible: footer.isVisibleForAmneziaFree
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-
-                visible: footer.isVisibleForAmneziaFree
-
-                text: qsTr("Active Devices")
-
-                descriptionText: qsTr("Manage currently connected devices")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    SubscriptionUiController.updateApiDevicesModel()
-                    PageController.goToPage(PageEnum.PageSettingsApiDevices)
-                }
-            }
-
-            DividerType {
-                visible: footer.isVisibleForAmneziaFree
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: footer.isVisibleForAmneziaFree ? 0 : 32
-
-                text: qsTr("Support")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApiSupport)
-                }
-            }
-
-            DividerType {}
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-
-                visible: footer.isVisibleForAmneziaFree
-
-                text: qsTr("How to connect on another device")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsApiInstructions)
-                }
-            }
-
-            DividerType {
-                visible: footer.isVisibleForAmneziaFree
-            }
-
-            BasicButtonType {
-                id: resetButton
-                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 24
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 8
-                implicitHeight: 32
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.vibrantRed
+                spacing: 0
 
+                ListItemType {
+                    id: vpnKey
+
+                    Layout.fillWidth: true
+
+                    visible: root.isVisibleForAmneziaFree
+
+                    text: qsTr("Subscription Key")
+                    subtitle: qsTr("For connecting on other devices")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsApiSubscriptionKey)
+                        PageController.showBusyIndicator(true)
+
+                        SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
+
+                        PageController.showBusyIndicator(false)
+                    }
+                }
+
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    visible: root.isVisibleForAmneziaFree
+
+                    text: qsTr("Configuration Files")
+                    subtitle: qsTr("Manage configuration files")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        SubscriptionUiController.updateApiCountryModel(ServersUiController.processedServerId)
+                        PageController.goToPage(PageEnum.PageSettingsApiNativeConfigs)
+                    }
+                }
+
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    visible: root.isVisibleForAmneziaFree
+
+                    text: qsTr("Active Devices")
+                    subtitle: qsTr("Manage currently connected devices")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        SubscriptionUiController.updateApiDevicesModel()
+                        PageController.goToPage(PageEnum.PageSettingsApiDevices)
+                    }
+                }
+
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    text: qsTr("Support")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsApiSupport)
+                    }
+                }
+
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    visible: root.isVisibleForAmneziaFree
+
+                    text: qsTr("How to connect on another device")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsApiInstructions)
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 24
+            }
+
+            ButtonType {
+                id: resetButton
+
+                Layout.alignment: Qt.AlignHCenter
+
+                variant: ButtonType.Text
+                destructive: true
                 text: qsTr("Reload API config")
 
-                clickedFunc: function() {
+                onClicked: {
                     var headerText = qsTr("Reload API config?")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -413,23 +380,19 @@ PageType {
                 }
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: revokeButton
+
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 8
-                implicitHeight: 32
+                Layout.topMargin: 12
 
-                visible: footer.isVisibleForAmneziaFree
+                visible: root.isVisibleForAmneziaFree
 
-                defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.vibrantRed
-
+                variant: ButtonType.Text
+                destructive: true
                 text: qsTr("Unlink this device")
 
-                clickedFunc: function() {
+                onClicked: {
                     var headerText = qsTr("Are you sure you want to unlink this device?")
                     var descriptionText = qsTr("This will unlink the device from your subscription. You can reconnect it anytime by pressing \"Reload API config\" in subscription settings on device.")
                     var yesButtonText = qsTr("Continue")
@@ -453,21 +416,18 @@ PageType {
                 }
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: removeButton
+
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 8
-                implicitHeight: 32
+                Layout.topMargin: 12
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.vibrantRed
-
+                variant: ButtonType.Text
+                destructive: true
                 text: qsTr("Remove from application")
 
-                clickedFunc: function() {
+                onClicked: {
                     var headerText = qsTr("Remove from application?")
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -492,9 +452,6 @@ PageType {
 
     RenameServerDrawer {
         id: serverNameEditDrawer
-
-        anchors.fill: parent
-        expandedHeight: parent.height * 0.35
 
         serverNameText: root.processedServer != null ? root.processedServer.name : ""
     }

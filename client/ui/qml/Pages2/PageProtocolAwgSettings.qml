@@ -20,21 +20,6 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     SmartScroll {
         id: smartScroll
         listView: listView
@@ -43,10 +28,18 @@ PageType {
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        anchors.bottom: saveRestartButton.top
+        anchors.bottomMargin: 16
         anchors.left: parent.left
         anchors.right: parent.right
+
+        header: NavigationBarType {
+            width: listView.width
+            height: implicitHeight + 16
+
+            title: qsTr("AmneziaWG settings")
+        }
 
         model: AwgConfigModel
 
@@ -58,21 +51,71 @@ PageType {
             property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
             property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
 
-            spacing: 0
+            readonly property bool isSaveButtonEnabled: underloadPacketMagicHeaderTextField.errorText === "" &&
+                                                        transportPacketMagicHeaderTextField.errorText === "" &&
+                                                        responsePacketMagicHeaderTextField.errorText === "" &&
+                                                        initPacketMagicHeaderTextField.errorText === "" &&
+                                                        contentPaddingAdditionTextField.errorText === "" &&
+                                                        rekeyAfterTimeTextField.errorText === "" &&
+                                                        rekeyTimeoutTextField.errorText === "" &&
+                                                        rejectAfterTimeTextField.errorText === "" &&
+                                                        keepaliveTimeoutTextField.errorText === "" &&
+                                                        maxHandshakeAttemptsTextField.errorText === "" &&
+                                                        responsePacketJunkSizeTextField.errorText === "" &&
+                                                        cookieReplyPacketJunkSizeTextField.errorText === "" &&
+                                                        transportPacketJunkSizeTextField.errorText === "" &&
+                                                        initPacketJunkSizeTextField.errorText === "" &&
+                                                        junkPacketMaxSizeTextField.errorText === "" &&
+                                                        junkPacketMinSizeTextField.errorText === "" &&
+                                                        junkPacketCountTextField.errorText === "" &&
+                                                        portTextField.errorText === "" &&
+                                                        vpnAddressSubnetTextField.errorText === ""
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            function save() {
+                if (delegateItem.isEnabled) {
+                    if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
+                                                      transportPacketMagicHeaderTextField.textField.text,
+                                                      responsePacketMagicHeaderTextField.textField.text,
+                                                      initPacketMagicHeaderTextField.textField.text)) {
+                        PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
+                        return
+                    }
 
-                headerText: qsTr("AmneziaWG settings")
+                    if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text) || 0,
+                                                         parseInt(responsePacketJunkSizeTextField.textField.text) || 0,
+                                                         parseInt(cookieReplyPacketJunkSizeTextField.textField.text) || 0,
+                                                         parseInt(transportPacketJunkSizeTextField.textField.text) || 0)) {
+                        PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
+                        return
+                    }
+                }
+
+                var headerText = qsTr("Save settings?")
+                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+                var yesButtonText = qsTr("Continue")
+                var noButtonText = qsTr("Cancel")
+
+                var yesButtonFunction = function() {
+                    if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                        return
+                    }
+
+                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                    InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Awg)
+                }
+
+                var noButtonFunction = function() {}
+
+                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
             }
 
-            TextFieldWithHeaderType {
+            spacing: 12
+
+            TextFieldType {
                 id: vpnAddressSubnetTextField
 
                 Layout.fillWidth: true
-                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -96,10 +139,10 @@ PageType {
                 checkEmptyText: true
             }
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: portTextField
+
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -301,7 +344,6 @@ PageType {
                 id: headerProtectionCheckBox
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -399,7 +441,6 @@ PageType {
                 id: randomTrailersCheckBox
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -419,7 +460,6 @@ PageType {
                 id: disableCookiesCheckBox
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -434,84 +474,32 @@ PageType {
                     }
                 }
             }
+        }
+    }
 
-            BasicButtonType {
-                id: saveRestartButton
+    ButtonType {
+        id: saveRestartButton
 
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                enabled: underloadPacketMagicHeaderTextField.errorText === "" &&
-                         transportPacketMagicHeaderTextField.errorText === "" &&
-                         responsePacketMagicHeaderTextField.errorText === "" &&
-                         initPacketMagicHeaderTextField.errorText === "" &&
-                         contentPaddingAdditionTextField.errorText === "" &&
-                         rekeyAfterTimeTextField.errorText === "" &&
-                         rekeyTimeoutTextField.errorText === "" &&
-                         rejectAfterTimeTextField.errorText === "" &&
-                         keepaliveTimeoutTextField.errorText === "" &&
-                         maxHandshakeAttemptsTextField.errorText === "" &&
-                         responsePacketJunkSizeTextField.errorText === "" &&
-                         cookieReplyPacketJunkSizeTextField.errorText === "" &&
-                         transportPacketJunkSizeTextField.errorText === "" &&
-                         initPacketJunkSizeTextField.errorText === "" &&
-                         junkPacketMaxSizeTextField.errorText === "" &&
-                         junkPacketMinSizeTextField.errorText === "" &&
-                         junkPacketCountTextField.errorText === "" &&
-                         portTextField.errorText === "" &&
-                         vpnAddressSubnetTextField.errorText === ""
+        enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
 
-                text: qsTr("Save")
+        text: qsTr("Save")
 
-                onActiveFocusChanged: {
-                    if(activeFocus) {
-                        listView.positionViewAtEnd()
-                    }
-                }
-
-                clickedFunc: function() {
-                    forceActiveFocus()
-                    if (delegateItem.isEnabled) {
-                        if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
-                                                          transportPacketMagicHeaderTextField.textField.text,
-                                                          responsePacketMagicHeaderTextField.textField.text,
-                                                          initPacketMagicHeaderTextField.textField.text)) {
-                            PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
-                            return
-                        }
-
-                        if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text) || 0,
-                                                            parseInt(responsePacketJunkSizeTextField.textField.text) || 0,
-                                                            parseInt(cookieReplyPacketJunkSizeTextField.textField.text) || 0,
-                                                            parseInt(transportPacketJunkSizeTextField.textField.text) || 0)) {
-                            PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
-                            return
-                        }
-                    }
-
-                    var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                            return
-                        }
-
-                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Awg)
-                    }
-
-                    var noButtonFunction = function() {}
-
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
+        onActiveFocusChanged: {
+            if(activeFocus) {
+                listView.positionViewAtEnd()
             }
+        }
+
+        onClicked: {
+            forceActiveFocus()
+            listView.currentItem.save()
         }
     }
 }

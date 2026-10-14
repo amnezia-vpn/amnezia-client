@@ -8,42 +8,52 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType2 {
+SheetType {
     id: root
 
-    expandedStateContent: Item {
+    expandedHeight: windowHeight * 0.9
+
+    Item {
         id: container
 
-        implicitHeight: root.height * 0.9
-
-        Component.onCompleted: {
-            root.expandedHeight = container.implicitHeight
-        }
+        anchors.fill: parent
 
         ColumnLayout {
-            id: backButtonLayout
+            id: headerLayout
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
 
-            BackButtonType {
-                id: backButton
+            spacing: 0
 
+            Item {
                 Layout.fillWidth: true
+                Layout.topMargin: 2
+                Layout.preferredHeight: 48
 
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                backButtonFunction: function() { root.closeTriggered() }
+                IconButtonType {
+                    id: backButton
+
+                    x: 16
+                    y: 4
+
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/arrow-left.svg"
+                    Accessible.name: qsTr("Back")
+
+                    onClicked: root.close()
+                }
             }
 
-            Header2Type {
+            SectionHeaderType {
                 id: header
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                Layout.rightMargin: 16
                 Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("Choose language")
             }
@@ -52,7 +62,7 @@ DrawerType2 {
         ListViewType {
             id: listView
 
-            anchors.top: backButtonLayout.bottom
+            anchors.top: headerLayout.bottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -61,111 +71,37 @@ DrawerType2 {
 
             model: LanguageModel
 
+            footer: Item {
+                width: listView.width
+                height: 16 + PageController.safeAreaBottomMargin
+            }
+
             ButtonGroup {
                 id: buttonGroup
             }
 
             delegate: Item {
-                implicitWidth: root.width
-                implicitHeight: delegateContent.implicitHeight
+                width: listView.width
+                implicitHeight: languageItem.implicitHeight
 
-                ColumnLayout {
-                    id: delegateContent
+                RadioItemType {
+                    id: languageItem
 
                     anchors.fill: parent
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 16
 
-                    RadioButton {
-                        id: radioButton
+                    text: languageName
 
-                        implicitWidth: parent.width
-                        implicitHeight: radioButtonContent.implicitHeight
+                    ButtonGroup.group: buttonGroup
+                    checked: listView.selectedIndex === index
 
-                        hoverEnabled: true
-
-                        property bool isFocusable: true
-
-                        Keys.onTabPressed: {
-                            FocusController.nextKeyTabItem()
-                        }
-
-                        Keys.onBacktabPressed: {
-                            FocusController.previousKeyTabItem()
-                        }
-
-                        Keys.onUpPressed: {
-                            FocusController.nextKeyUpItem()
-                        }
-
-                        Keys.onDownPressed: {
-                            FocusController.nextKeyDownItem()
-                        }
-
-                        Keys.onLeftPressed: {
-                            FocusController.nextKeyLeftItem()
-                        }
-
-                        Keys.onRightPressed: {
-                            FocusController.nextKeyRightItem()
-                        }
-
-                        indicator: Rectangle {
-                            width: parent.width - 1
-                            height: parent.height
-                            color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
-                            border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
-                            border.width: radioButton.focus ? 1 : 0
-
-                            Behavior on color {
-                                PropertyAnimation { duration: 200 }
-                            }
-                            Behavior on border.color {
-                                PropertyAnimation { duration: 200 }
-                            }
-                        }
-
-                        RowLayout {
-                            id: radioButtonContent
-                            anchors.fill: parent
-
-                            anchors.rightMargin: 16
-                            anchors.leftMargin: 16
-
-                            spacing: 0
-
-                            z: 1
-
-                            ParagraphTextType {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 20
-                                Layout.bottomMargin: 20
-
-                                text: languageName
-                            }
-
-                            Image {
-                                source: "qrc:/images/controls/check.svg"
-                                visible: radioButton.checked
-
-                                width: 24
-                                height: 24
-
-                                Layout.rightMargin: 8
-                            }
-                        }
-
-                        ButtonGroup.group: buttonGroup
-                        checked: listView.selectedIndex === index
-
-                        onClicked: {
-                            listView.selectedIndex = index
-                            LanguageUiController.changeLanguage(languageIndex)
-                            root.closeTriggered()
-                        }
+                    onClicked: {
+                        listView.selectedIndex = index
+                        LanguageUiController.changeLanguage(languageIndex)
+                        root.close()
                     }
                 }
-
-                Keys.onEnterPressed: radioButton.clicked()
-                Keys.onReturnPressed: radioButton.clicked()
             }
         }
     }

@@ -9,10 +9,13 @@ import "TextTypes"
 Popup {
     id: root
 
+    enum Role { Default, Destructive }
+
     property string headerText
     property string descriptionText
     property string cancelButtonText: qsTr("Cancel")
     property string confirmButtonText
+    property int role: AlertDialogType.Default
 
     signal confirmed()
 
@@ -20,7 +23,7 @@ Popup {
 
     x: Math.round((parent.width - width) / 2)
     y: Math.round((parent.height - height) / 2)
-    width: parent.width - 32
+    width: Math.min(parent.width - 32, 400)
 
     padding: 0
     topPadding: 20
@@ -30,7 +33,7 @@ Popup {
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
     Overlay.modal: Rectangle {
-        color: AmneziaStyle.color.overlayScrim
+        color: AmneziaStyle.color.bgOverlay
     }
 
     enter: Transition {
@@ -42,21 +45,16 @@ Popup {
     }
 
     onOpened: {
-        FocusController.pushRootObject(root)
         cancelButton.forceActiveFocus()
-    }
-
-    onClosed: {
-        FocusController.dropRootObject(root)
     }
 
     background: Rectangle {
         radius: 16
-        color: AmneziaStyle.color.surfaceElevated
+        color: AmneziaStyle.color.bgSurfaceAlt
     }
 
     contentItem: ColumnLayout {
-        spacing: 0
+        spacing: 2
 
         ColumnLayout {
             Layout.fillWidth: true
@@ -66,13 +64,13 @@ Popup {
 
             spacing: 8
 
-            AppH3TextType {
+            H3TextType {
                 Layout.fillWidth: true
 
                 text: root.headerText
             }
 
-            AppSmallTextType {
+            SmallTextType {
                 Layout.fillWidth: true
 
                 visible: text !== ""
@@ -83,90 +81,36 @@ Popup {
 
         RowLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: 8
-            Layout.rightMargin: 8
-            Layout.bottomMargin: 8
 
-            spacing: 8
+            spacing: 0
 
-            AlertDialogButton {
+            DialogButtonType {
                 id: cancelButton
 
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
 
                 text: root.cancelButtonText
-                textColor: AmneziaStyle.color.textTertiary
 
-                onClicked: {
-                    root.close()
-                }
+                onClicked: root.close()
             }
 
-            AlertDialogButton {
+            DialogButtonType {
                 id: confirmButton
 
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
 
                 text: root.confirmButtonText
-                textColor: AmneziaStyle.color.accentDanger
-                font.weight: 600
+                emphasized: true
+                textColor: root.role === AlertDialogType.Destructive ? AmneziaStyle.color.statusDestructive
+                                                                     : AmneziaStyle.color.textAccent
 
                 onClicked: {
                     root.close()
                     root.confirmed()
                 }
             }
-        }
-    }
-
-    component AlertDialogButton: AbstractButton {
-        id: button
-
-        property color textColor
-
-        property bool isFocusable: true
-
-        implicitHeight: 48
-
-        hoverEnabled: true
-
-        font.family: "PT Root UI VF"
-        font.pixelSize: 16
-        font.weight: 400
-        font.letterSpacing: -0.4
-
-        Keys.onTabPressed: FocusController.nextKeyTabItem()
-        Keys.onBacktabPressed: FocusController.previousKeyTabItem()
-        Keys.onLeftPressed: FocusController.nextKeyLeftItem()
-        Keys.onRightPressed: FocusController.nextKeyRightItem()
-        Keys.onEnterPressed: button.clicked()
-        Keys.onReturnPressed: button.clicked()
-
-        background: Rectangle {
-            radius: 16
-            color: (button.pressed || button.hovered) ? AmneziaStyle.color.translucentWhite : AmneziaStyle.color.transparent
-            border.color: (button.pressed || button.visualFocus) ? AmneziaStyle.color.textTertiary : AmneziaStyle.color.transparent
-            border.width: (button.pressed || button.visualFocus) ? 1 : 0
-
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
-            }
-        }
-
-        contentItem: Text {
-            text: button.text
-            font: button.font
-            color: button.textColor
-
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
-        }
-
-        MouseArea {
-            anchors.fill: parent
-            enabled: false
-            cursorShape: Qt.PointingHandCursor
         }
     }
 }

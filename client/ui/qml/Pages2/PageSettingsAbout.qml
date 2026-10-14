@@ -26,172 +26,171 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
-            width: listView.width
+            spacing: 0
 
-            Image {
-                id: image
-                source: "qrc:/images/amneziaBigLogo.png"
-
-                Layout.alignment: Qt.AlignCenter
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.preferredWidth: 291
-                Layout.preferredHeight: 224
+            NavigationBarType {
+                Layout.fillWidth: true
             }
 
-            Header2TextType {
+            ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                text: qsTr("Support Amnezia")
-                horizontalAlignment: Text.AlignHCenter
-            }
+                spacing: 24
 
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-                horizontalAlignment: Text.AlignHCenter
+                    spacing: 12
 
-                height: 20
-                font.pixelSize: 14
+                    Image {
+                        id: image
 
-                text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
-                color: AmneziaStyle.color.paleGray
-            }
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: 291
+                        Layout.preferredHeight: 224
 
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                        source: "qrc:/images/amneziaBigLogo.png"
+                    }
 
-                text: qsTr("Contacts")
-            }
-        }
+                    H2TextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
 
-        model: contacts
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("Support Amnezia")
+                    }
 
-        delegate: ColumnLayout {
-            width: listView.width
+                    BodyTextType {
+                        Layout.fillWidth: true
 
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 6
+                        horizontalAlignment: Text.AlignHCenter
+                        color: AmneziaStyle.color.textSecondary
+                        text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
+                    }
+                }
 
-                text: title
-                descriptionText: description
-                leftImageSource: imageSource
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-                clickedFunction: handler
-            }
+                    spacing: 12
 
-            DividerType {}
+                    SmallTextType {
+                        Layout.fillWidth: true
 
-        }
+                        text: qsTr("Contacts")
+                    }
 
-        footer: ColumnLayout {
-            width: listView.width
+                    ColumnLayout {
+                        Layout.fillWidth: true
 
-            CaptionTextType {
-                Layout.fillWidth: true
-                Layout.topMargin: 40
+                        spacing: 0
 
-                horizontalAlignment: Text.AlignHCenter
+                        Repeater {
+                            model: contacts
 
-                text: qsTr("Software version: %1").arg(SettingsController.getAppVersion())
-                color: AmneziaStyle.color.mutedGray
+                            delegate: ListItemType {
+                                Layout.fillWidth: true
 
-                MouseArea {
-                    property int clickCount: 0
-                    anchors.fill: parent
-                    onClicked: {
-                        if (clickCount > 10) {
-                            SettingsController.enableDevMode()
-                        } else {
-                            clickCount++
+                                leadingSlotWidth: 24
+                                text: title
+                                subtitle: description
+                                icon.source: imageSource
+                                trailingIconSource: "qrc:/images/controls/external-link.svg"
+
+                                onClicked: handler()
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+
+                    spacing: 12
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+
+                        spacing: 4
+
+                        CaptionTextType {
+                            text: SettingsController.getAppVersion()
+
+                            MouseArea {
+                                property int clickCount: 0
+                                anchors.fill: parent
+                                onClicked: {
+                                    if (clickCount > 10) {
+                                        SettingsController.enableDevMode()
+                                    } else {
+                                        clickCount++
+                                    }
+                                }
+                            }
+                        }
+
+                        IconButtonType {
+                            size: IconButtonType.Small
+                            icon.source: "qrc:/images/controls/copy.svg"
+                            Accessible.name: qsTr("Copy version")
+
+                            onClicked: {
+                                GC.copyToClipBoard(SettingsController.getAppVersion())
+                                PageController.showNotificationMessage(qsTr("Copied"))
+                            }
+                        }
+                    }
+
+                    ButtonType {
+                        id: checkUpdatesButton
+
+                        Layout.fillWidth: true
+
+                        variant: ButtonType.Secondary
+                        enabled: !UpdateController.isCheckRunning
+
+                        text: UpdateController.isCheckRunning ? qsTr("Checking...") : qsTr("Check for updates")
+
+                        onClicked: {
+                            UpdateController.checkForUpdates()
+                        }
+                    }
+
+                    LinkButtonType {
+                        id: privacyPolicyButton
+
+                        Layout.alignment: Qt.AlignHCenter
+
+                        size: LinkButtonType.Medium
+                        text: qsTr("Privacy Policy")
+
+                        onClicked: {
+                            Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl("policy"))
                         }
                     }
                 }
             }
-
-            BasicButtonType {
-                id: checkUpdatesButton
-
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 8
-                Layout.bottomMargin: 16
-                implicitHeight: 48
-
-                defaultColor: AmneziaStyle.color.surfaceBase
-                hoveredColor: AmneziaStyle.color.surfaceHovered
-                pressedColor: AmneziaStyle.color.surfacePressed
-                disabledColor: AmneziaStyle.color.surfaceBase
-                textColor: AmneziaStyle.color.surfaceInverse
-                borderWidth: 1
-                borderColor: AmneziaStyle.color.borderSoft
-
-                enabled: !UpdateController.isCheckRunning
-
-                text: UpdateController.isCheckRunning ? qsTr("Checking...") : qsTr("Check for updates")
-
-                clickedFunc: function() {
-                    UpdateController.checkForUpdates()
-                }
-            }
-
-            BasicButtonType {
-                id: privacyPolicyButton
-
-                Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 16
-                Layout.topMargin: -15
-                implicitHeight: 25
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
-
-                text: qsTr("Privacy Policy")
-
-                clickedFunc: function() {
-                    Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl("policy"))
-                }
-            }
         }
     }
-    
+
     property list<QtObject> contacts: [
         telegramGroup,
         mail,

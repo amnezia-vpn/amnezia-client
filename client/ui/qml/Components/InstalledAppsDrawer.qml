@@ -10,11 +10,10 @@ import SortFilterProxyModel 0.2
 import InstalledAppsModel 1.0
 import Style 1.0
 
-DrawerType2 {
+SheetType {
     id: root
 
-    anchors.fill: parent
-    expandedHeight: parent.height * 0.9
+    expandedHeight: windowHeight * 0.9
 
     onAboutToShow: {
         PageController.showBusyIndicator(true)
@@ -26,121 +25,128 @@ DrawerType2 {
         id: installedAppsModel
     }
 
-    expandedStateContent: Item {
+    Item {
         id: container
+        anchors.fill: parent
 
-        implicitHeight: expandedHeight
-
-        ColumnLayout {
-            id: backButton
+        SectionHeaderType {
+            id: header
 
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+            anchors.topMargin: 12
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
+
+            headerText: qsTr("Choose application")
+        }
+
+        ListViewType {
+            id: listView
+
+            anchors.top: header.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.bottom: searchField.top
             anchors.topMargin: 16
+            anchors.bottomMargin: 8
 
-            BackButtonType {
-                backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                backButtonFunction: function() {
-                    root.closeTriggered()
+            leftMargin: 16
+            rightMargin: 16
+            topMargin: 16
+
+            model: SortFilterProxyModel {
+                id: proxyInstalledAppsModel
+                sourceModel: installedAppsModel
+                filters: RegExpFilter {
+                    roleName: "appName"
+                    pattern: ".*" + searchField.text + ".*"
+                    caseSensitivity: Qt.CaseInsensitive
                 }
             }
 
-            Header2Type {
-                id: header
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+            delegate: Item {
+                width: listView.width - listView.leftMargin - listView.rightMargin
+                implicitHeight: Math.max(72, row.implicitHeight + 24)
 
-                headerText: qsTr("Choose application")
-            }
+                RowLayout {
+                    id: row
 
-            ListViewType {
-                id: listView
+                    anchors.fill: parent
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 12
 
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.topMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+                    spacing: 12
 
-                model: SortFilterProxyModel {
-                    id: proxyInstalledAppsModel
-                    sourceModel: installedAppsModel
-                    filters: RegExpFilter {
-                        roleName: "appName"
-                        pattern: ".*" + searchField.textField.text + ".*"
-                        caseSensitivity: Qt.CaseInsensitive
-                    }
-                }
+                    CheckBoxType {
+                        Layout.fillWidth: true
 
-                ButtonGroup {
-                    id: buttonGroup
-                }
+                        spacing: 20
 
-                delegate: ColumnLayout {
-                    width: listView.width
-
-                    RowLayout {
-                        CheckBoxType {
-                            Layout.fillWidth: true
-
-                            text: appName
-                            checked: isAppSelected
-                            onCheckedChanged: {
-                                installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
-                            }
+                        text: appName
+                        checked: isAppSelected
+                        onCheckedChanged: {
+                            installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                         }
+                    }
+
+                    Item {
+                        Layout.preferredWidth: 48
+                        Layout.preferredHeight: 48
 
                         Image {
+                            anchors.centerIn: parent
+
                             source: "image://installedAppImage/" + appIcon
 
                             sourceSize.width: 24
                             sourceSize.height: 24
-
-                            Layout.rightMargin: 48
                         }
                     }
+                }
 
-                    DividerType {}
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+
+                    height: 1
+                    color: AmneziaStyle.color.borderSoft
                 }
             }
         }
 
-        TextFieldWithHeaderType {
+        SearchFieldType {
             id: searchField
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: addButton.top
-            anchors.bottomMargin: 16
+            anchors.bottomMargin: 12
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
-            backgroundColor: AmneziaStyle.color.slateGray
-
-            textField.placeholderText: qsTr("application name")
+            placeholderText: qsTr("application name")
         }
 
-        BasicButtonType {
+        ButtonType {
             id: addButton
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 16
+            anchors.bottomMargin: Math.max(16, PageController.safeAreaBottomMargin)
             anchors.rightMargin: 16
             anchors.leftMargin: 16
 
             text: qsTr("Add selected")
 
-            clickedFunc: function() {
+            onClicked: {
                 PageController.showBusyIndicator(true)
                 AppSplitTunnelingController.addApps(installedAppsModel.getSelectedAppsInfo())
                 PageController.showBusyIndicator(false)
-                root.closeTriggered()
+                root.close()
             }
         }
     }

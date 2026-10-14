@@ -17,42 +17,33 @@ PageType {
 
     property bool editDirty: false
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
+
+        anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
+        anchors.bottomMargin: saveButton.visible ? 16 : 0
         anchors.left: parent.left
         anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
+        header: NavigationBarType {
+            width: listView.width
+
+            title: qsTr("Security")
+        }
+
         delegate: ColumnLayout {
             width: listView.width
             spacing: 0
 
-            // REALITY is not supported with the mKCP transport (xray refuses reality+mkcp).
             readonly property bool realityAllowed: transport !== "mkcp"
 
-            BaseHeaderType {
+            RadioItemType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("Security")
-            }
-
-            VerticalRadioButton {
-                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("None")
@@ -60,10 +51,7 @@ PageType {
                 onClicked: security = "none"
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -72,10 +60,7 @@ PageType {
                 onClicked: security = "tls"
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -85,38 +70,33 @@ PageType {
                 onClicked: security = "reality"
             }
 
-            CaptionTextType {
+            SmallTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
+                Layout.topMargin: 12
                 visible: !realityAllowed
-                color: AmneziaStyle.color.goldenApricot
+                color: AmneziaStyle.color.textAccent
                 text: qsTr("REALITY is not supported with the mKCP transport. Use None or TLS.")
             }
 
-            DividerType {
-            }
-
-            // ── TLS fields ────────────────────────────────────────────
             ColumnLayout {
-                visible: security === "tls"
                 Layout.fillWidth: true
-                spacing: 0
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: security === "tls"
+                spacing: 12
 
                 DropDownType {
                     id: tlsAlpnDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
                     text: alpn
                     descriptionText: qsTr("ALPN")
                     headerText: qsTr("ALPN")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
+                    listView: RadioListType {
                         currentValue: alpn
                         model: ListModel {
                             Component.onCompleted: {
@@ -126,10 +106,10 @@ PageType {
                                 }
                             }
                         }
-                        clickedFunction: function () {
+                        onActivated: {
                             alpn = selectedText
                             tlsAlpnDropDown.text = selectedText
-                            tlsAlpnDropDown.closeTriggered()
+                            tlsAlpnDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -153,15 +133,10 @@ PageType {
                     id: tlsFingerprintDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    Layout.topMargin: 8
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
                     text: fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
+                    listView: RadioListType {
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.fingerprintOptions()
@@ -171,10 +146,10 @@ PageType {
                             }
                         }
                         currentValue: fingerprint
-                        clickedFunction: function () {
+                        onActivated: {
                             fingerprint = selectedText
                             tlsFingerprintDropDown.text = selectedText
-                            tlsFingerprintDropDown.closeTriggered()
+                            tlsFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -194,12 +169,9 @@ PageType {
                     }
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: sniFieldTls
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
                     placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
@@ -215,25 +187,23 @@ PageType {
                 }
             }
 
-            // ── Reality fields ────────────────────────────────────────
             ColumnLayout {
-                visible: security === "reality" && realityAllowed
                 Layout.fillWidth: true
-                spacing: 0
+                Layout.topMargin: 24
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: security === "reality" && realityAllowed
+                spacing: 12
 
                 DropDownType {
                     id: realityFingerprintDropDown
                     fitContent: true
                     Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
                     text: fingerprint
                     descriptionText: qsTr("Fingerprint")
                     headerText: qsTr("Fingerprint")
-                    drawerParent: root
-                    listView: ListViewWithRadioButtonType {
-                        rootWidth: root.width
+                    listView: RadioListType {
                         model: ListModel {
                             Component.onCompleted: {
                                 var opts = XrayConfigModel.fingerprintOptions()
@@ -243,10 +213,10 @@ PageType {
                             }
                         }
                         currentValue: fingerprint
-                        clickedFunction: function () {
+                        onActivated: {
                             fingerprint = selectedText
                             realityFingerprintDropDown.text = selectedText
-                            realityFingerprintDropDown.closeTriggered()
+                            realityFingerprintDropDown.close()
                         }
                         Component.onCompleted: {
                             for (var i = 0; i < model.count; i++) {
@@ -266,12 +236,9 @@ PageType {
                     }
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: sniFieldReality
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 8
                     headerText: qsTr("Server Name (SNI)")
                     placeholderText: XrayConfigModel.sniDefault()
                     textField.text: sni
@@ -288,17 +255,17 @@ PageType {
             }
 
             Item {
-                Layout.preferredHeight: 16
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -306,7 +273,7 @@ PageType {
         visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
             saveButton.forceActiveFocus()
             var errs = XrayConfigModel.validationErrors()
             if (errs.length > 0) {

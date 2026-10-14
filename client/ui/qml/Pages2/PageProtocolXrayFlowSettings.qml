@@ -15,42 +15,33 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
+
+        anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
+        anchors.bottomMargin: saveButton.visible ? 16 : 0
         anchors.left: parent.left
         anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
+        header: NavigationBarType {
+            width: listView.width
+
+            title: qsTr("Flow")
+        }
+
         delegate: ColumnLayout {
             width: listView.width
             spacing: 0
 
-            // xtls-rprx-vision requires the RAW (TCP) transport; it is invalid with XHTTP / mKCP.
             readonly property bool visionAllowed: transport === "" || transport === "raw"
 
-            BaseHeaderType {
+            RadioItemType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("Flow")
-            }
-
-            VerticalRadioButton {
-                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: qsTr("Empty")
@@ -58,10 +49,7 @@ PageType {
                 onClicked: flow = ""
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -71,45 +59,39 @@ PageType {
                 onClicked: flow = "xtls-rprx-vision"
             }
 
-            DividerType {
-            }
-
-            VerticalRadioButton {
+            RadioItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 text: "xtls-rprx-vision-udp443"
-                descriptionText: qsTr("For apps that require QUIC. Browsers may stop loading.")
+                subtitle: qsTr("For apps that require QUIC. Browsers may stop loading.")
                 enabled: visionAllowed
                 checked: flow === "xtls-rprx-vision-udp443" && visionAllowed
                 onClicked: flow = "xtls-rprx-vision-udp443"
             }
 
-            DividerType {
-            }
-
-            CaptionTextType {
+            SmallTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
+                Layout.topMargin: 12
                 visible: !visionAllowed
-                color: AmneziaStyle.color.goldenApricot
+                color: AmneziaStyle.color.textAccent
                 text: qsTr("xtls-rprx-vision is available only with the RAW (TCP) transport.")
             }
 
             Item {
-                Layout.preferredHeight: 16
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -117,7 +99,7 @@ PageType {
         visible: listView.enabled && XrayConfigModel.hasUnsavedChanges
         enabled: visible
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")

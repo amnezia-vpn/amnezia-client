@@ -30,200 +30,164 @@ PageType {
         return String(n)
     }
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
+
+        anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
+        anchors.bottomMargin: saveButton.visible ? 16 : 0
         anchors.left: parent.left
         anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
-        delegate: ColumnLayout {
+        header: NavigationBarType {
             width: listView.width
-            spacing: 0
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("xmux")
-            }
+            title: qsTr("xmux")
+        }
 
-            SwitcherType {
-                Layout.fillWidth: true
-                Layout.margins: 16
-                text: qsTr("xmux")
-                checked: xmuxEnabled
-                onToggled: xmuxEnabled = checked
-            }
+        footer: Item {
+            width: listView.width
+            height: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
+        }
 
-            DividerType {
-            }
+        delegate: Item {
+            width: listView.width
+            implicitHeight: content.implicitHeight
 
             ColumnLayout {
-                Layout.fillWidth: true
-                spacing: 0
-                enabled: xmuxEnabled
+                id: content
 
-                // maxConcurrency
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 24
-                    Layout.bottomMargin: 8
-                    text: qsTr("maxConcurrency")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxMaxConcurrencyMin
-                    maxValue: xmuxMaxConcurrencyMax
-                    minPlaceholder: "0"
-                    maxPlaceholder: "0"
-                    onMinChanged: function(val) { xmuxMaxConcurrencyMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxMaxConcurrencyMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
 
-                // maxConnections
-                CaptionTextType {
+                spacing: 12
+
+                SwitchRowType {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
                     Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("maxConnections")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxMaxConnectionsMin
-                    maxValue: xmuxMaxConnectionsMax
-                    minPlaceholder: "0"
-                    maxPlaceholder: "0"
-                    onMinChanged: function(val) { xmuxMaxConnectionsMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxMaxConnectionsMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
+                    text: qsTr("xmux")
+                    checked: xmuxEnabled
+                    onToggled: xmuxEnabled = checked
                 }
 
-                // cMaxReuseTimes
-                CaptionTextType {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("cMaxReuseTimes")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxCMaxReuseTimesMin
-                    maxValue: xmuxCMaxReuseTimesMax
-                    minPlaceholder: "0"
-                    maxPlaceholder: "0"
-                    onMinChanged: function(val) { xmuxCMaxReuseTimesMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxCMaxReuseTimesMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    Layout.topMargin: 12
 
-                // hMaxRequestTimes
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("hMaxRequestTimes")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxHMaxRequestTimesMin
-                    maxValue: xmuxHMaxRequestTimesMax
-                    minPlaceholder: "0"
-                    maxPlaceholder: "0"
-                    onMinChanged: function(val) { xmuxHMaxRequestTimesMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxHMaxRequestTimesMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    enabled: xmuxEnabled
+                    spacing: 12
 
-                // hMaxReusableSecs
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 8
-                    text: qsTr("hMaxReusableSecs")
-                    color: AmneziaStyle.color.mutedGray
-                }
-                MinMaxRowType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    minValue: xmuxHMaxReusableSecsMin
-                    maxValue: xmuxHMaxReusableSecsMax
-                    minPlaceholder: "0"
-                    maxPlaceholder: "0"
-                    onMinChanged: function(val) { xmuxHMaxReusableSecsMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xmuxHMaxReusableSecsMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
-                }
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        text: qsTr("maxConcurrency")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: xmuxMaxConcurrencyMin
+                        maxValue: xmuxMaxConcurrencyMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { xmuxMaxConcurrencyMin = val; root.editDirty = false }
+                        onMaxChanged: function(val) { xmuxMaxConcurrencyMax = val; root.editDirty = false }
+                        onEdited: root.editDirty = true
+                    }
 
-                TextFieldWithHeaderType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    Layout.topMargin: 16
-                    headerText: qsTr("hKeepAlivePeriod")
-                    hintText: qsTr("HTTP keep-alive period. Integer, may be negative.")
-                    textField.text: xmuxHKeepAlivePeriod
-                    textField.maximumLength: 11
-                    textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }
-                    textField.onTextEdited: root.editDirty = (textField.text !== xmuxHKeepAlivePeriod)
-                    textField.onEditingFinished: {
-                        var v = root.clampSigned(textField.text)
-                        if (v !== xmuxHKeepAlivePeriod) xmuxHKeepAlivePeriod = v
-                        else if (textField.text !== v) textField.text = v
-                        root.editDirty = false
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("maxConnections")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: xmuxMaxConnectionsMin
+                        maxValue: xmuxMaxConnectionsMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { xmuxMaxConnectionsMin = val; root.editDirty = false }
+                        onMaxChanged: function(val) { xmuxMaxConnectionsMax = val; root.editDirty = false }
+                        onEdited: root.editDirty = true
+                    }
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("cMaxReuseTimes")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: xmuxCMaxReuseTimesMin
+                        maxValue: xmuxCMaxReuseTimesMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { xmuxCMaxReuseTimesMin = val; root.editDirty = false }
+                        onMaxChanged: function(val) { xmuxCMaxReuseTimesMax = val; root.editDirty = false }
+                        onEdited: root.editDirty = true
+                    }
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("hMaxRequestTimes")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: xmuxHMaxRequestTimesMin
+                        maxValue: xmuxHMaxRequestTimesMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { xmuxHMaxRequestTimesMin = val; root.editDirty = false }
+                        onMaxChanged: function(val) { xmuxHMaxRequestTimesMax = val; root.editDirty = false }
+                        onEdited: root.editDirty = true
+                    }
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        text: qsTr("hMaxReusableSecs")
+                    }
+                    MinMaxRowType {
+                        Layout.fillWidth: true
+                        minValue: xmuxHMaxReusableSecsMin
+                        maxValue: xmuxHMaxReusableSecsMax
+                        minPlaceholder: "0"
+                        maxPlaceholder: "0"
+                        onMinChanged: function(val) { xmuxHMaxReusableSecsMin = val; root.editDirty = false }
+                        onMaxChanged: function(val) { xmuxHMaxReusableSecsMax = val; root.editDirty = false }
+                        onEdited: root.editDirty = true
+                    }
+
+                    TextFieldType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        headerText: qsTr("hKeepAlivePeriod")
+                        helperText: qsTr("HTTP keep-alive period. Integer, may be negative.")
+                        textField.text: xmuxHKeepAlivePeriod
+                        textField.maximumLength: 11
+                        textField.validator: RegularExpressionValidator { regularExpression: /^-?\d*$/ }
+                        textField.onTextEdited: root.editDirty = (textField.text !== xmuxHKeepAlivePeriod)
+                        textField.onEditingFinished: {
+                            var v = root.clampSigned(textField.text)
+                            if (v !== xmuxHKeepAlivePeriod) xmuxHKeepAlivePeriod = v
+                            else if (textField.text !== v) textField.text = v
+                            root.editDirty = false
+                        }
                     }
                 }
-            }
-
-            Item {
-                Layout.preferredHeight: 16
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -231,7 +195,7 @@ PageType {
         visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
             saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")

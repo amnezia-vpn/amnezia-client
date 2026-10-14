@@ -115,39 +115,23 @@ PageType {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: AmneziaStyle.color.backgroundBase
-    }
-
-    BackButtonType {
-        id: backButton
+    NavigationBarType {
+        id: navigationBar
 
         anchors.top: parent.top
         anchors.left: parent.left
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
-    RowLayout {
-        id: actionsRow
-
-        anchors.verticalCenter: backButton.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: 16
 
-        spacing: 4
+        title: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
 
-        ImageButtonType {
+        header.headerTextMaximumLineCount: 1
+
+        IconButtonType {
             id: refreshButton
 
-            implicitWidth: 36
-            implicitHeight: 36
-            icon.width: 20
-            icon.height: 20
+            size: IconButtonType.Small
 
-            image: "qrc:/images/controls/refresh-cw.svg"
-            imageColor: AmneziaStyle.color.surfaceInverse
-            disableImageColor: AmneziaStyle.color.charcoalGray
+            icon.source: "qrc:/images/controls/refresh-cw.svg"
             enabled: !root.isLoading
 
             onClicked: {
@@ -155,17 +139,12 @@ PageType {
             }
         }
 
-        ImageButtonType {
+        IconButtonType {
             id: copyButton
 
-            implicitWidth: 36
-            implicitHeight: 36
-            icon.width: 20
-            icon.height: 20
+            size: IconButtonType.Small
 
-            image: "qrc:/images/controls/copy.svg"
-            imageColor: AmneziaStyle.color.surfaceInverse
-            disableImageColor: AmneziaStyle.color.charcoalGray
+            icon.source: "qrc:/images/controls/copy.svg"
             enabled: root.hasText
 
             onClicked: {
@@ -174,17 +153,12 @@ PageType {
             }
         }
 
-        ImageButtonType {
+        IconButtonType {
             id: exportButton
 
-            implicitWidth: 36
-            implicitHeight: 36
-            icon.width: 20
-            icon.height: 20
+            size: IconButtonType.Small
 
-            image: GC.isMobile() ? "qrc:/images/controls/share-2.svg" : "qrc:/images/controls/save.svg"
-            imageColor: AmneziaStyle.color.surfaceInverse
-            disableImageColor: AmneziaStyle.color.charcoalGray
+            icon.source: GC.isMobile() ? "qrc:/images/controls/share-2.svg" : "qrc:/images/controls/save.svg"
             enabled: root.hasText
 
             onClicked: {
@@ -193,37 +167,20 @@ PageType {
         }
     }
 
-    AppH1TextType {
-        id: title
-
-        anchors.top: backButton.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 12
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-
-        maximumLineCount: 1
-        elide: Text.ElideRight
-
-        text: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
-    }
-
     Flickable {
         id: logFlickable
 
-        anchors.top: title.bottom
+        anchors.top: navigationBar.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 16
         anchors.rightMargin: 1
 
         clip: true
         visible: root.hasText
 
         contentWidth: width
-        contentHeight: logCard.height + 16 + PageController.safeAreaBottomMargin
+        contentHeight: logCard.y + logCard.height + 16 + PageController.safeAreaBottomMargin
         boundsBehavior: Flickable.StopAtBounds
 
         ScrollBar.vertical: ScrollBarType {}
@@ -232,11 +189,12 @@ PageType {
             id: logCard
 
             x: 16
+            y: 16
             width: logFlickable.width - 31
             height: logText.height + 32
 
             radius: 16
-            color: AmneziaStyle.color.surfaceBase
+            color: AmneziaStyle.color.bgSurface
 
             TextEdit {
                 id: logText
@@ -252,7 +210,7 @@ PageType {
                 wrapMode: TextEdit.Wrap
 
                 color: AmneziaStyle.color.textPrimary
-                selectionColor: AmneziaStyle.color.richBrown
+                selectionColor: AmneziaStyle.color.bgStateLayerAccent
                 selectedTextColor: AmneziaStyle.color.textPrimary
 
                 font.family: Qt.platform.os === "ios" || Qt.platform.os === "osx" ? "Menlo" : "monospace"
@@ -261,13 +219,15 @@ PageType {
         }
     }
 
-    BusyIndicator {
+    SpinnerType {
         anchors.centerIn: logFlickable
+        size: SpinnerType.Large
         running: root.isLoading
         visible: root.isLoading
     }
 
-    AppTextType {
+    BodyTextType {
+        color: AmneziaStyle.color.textPrimary
         anchors.centerIn: logFlickable
 
         visible: !root.isLoading && logText.length === 0

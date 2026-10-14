@@ -9,6 +9,7 @@ Item {
     property Item sourceItem
     property real blurPadding: 40
     property real blurRadius: 50
+    property real radius: height / 2
     property color tintColor: Qt.alpha(AmneziaStyle.color.textStaticWhite, 0.10)
     property color borderColor: Qt.alpha(AmneziaStyle.color.textStaticWhite, 0.75)
 
@@ -54,13 +55,13 @@ Item {
         id: backdropMask
 
         anchors.fill: parent
-        radius: height / 2
+        radius: root.radius
         visible: false
     }
 
     Rectangle {
         anchors.fill: parent
-        radius: height / 2
+        radius: root.radius
 
         color: root.tintColor
         border.color: root.borderColor

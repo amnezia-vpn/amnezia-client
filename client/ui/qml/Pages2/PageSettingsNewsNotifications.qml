@@ -7,76 +7,62 @@ import Style 1.0
 
 import "./"
 import "../Controls2"
-import "../Controls2/TextTypes"
 import "../Config"
 
 PageType {
     id: root
 
-    ColumnLayout {
-        id: header
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        BackButtonType {
-            id: backButton
-        }
-
-        BaseHeaderType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            
-            headerText: qsTr("News & Notifications")
-        }
-    }
-
-    ListView {
+    ListViewType {
         id: newsList
-        width: parent.width
-        anchors.top: header.bottom
-        anchors.topMargin: 16
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
 
-        property bool isFocusable: true
+        anchors.fill: parent
 
         model: NewsModel
-        
-        clip: true
-        reuseItems: true
 
-        delegate: Item {
-            implicitWidth: newsList.width
-            implicitHeight: content.implicitHeight
+        header: ColumnLayout {
+            width: newsList.width
 
-            ColumnLayout {
-                id: content
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
+            spacing: 0
 
-                LabelWithButtonType {
-                    Layout.fillWidth: true
-                    leftImageSource: read ? "" : "qrc:/images/controls/unread-dot.svg"
-                    isSmallLeftImage: !read
-                    text: title
-                    descriptionText: Qt.formatDateTime(timestamp, "dd.MM.yyyy HH:mm")
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            NavigationBarType {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 16
 
-                    clickedFunction: function() {
-                        NewsModel.markAsRead(index)
-                        NewsModel.processedIndex = index
-                        PageController.goToPage(PageEnum.PageSettingsNewsDetail)
-                    }
-                }
-
-                DividerType {}
+                title: qsTr("News & Notifications")
             }
         }
+
+        delegate: Item {
+            width: newsList.width
+            implicitHeight: newsItem.implicitHeight
+
+            ListItemType {
+                id: newsItem
+
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+
+                leadingSlotWidth: 24
+                icon.source: read ? "" : "qrc:/images/controls/unread-dot.svg"
+                icon.width: 8
+                icon.height: 8
+                icon.color: AmneziaStyle.color.accentLight
+                text: title
+                subtitle: Qt.formatDateTime(timestamp, "dd.MM.yyyy HH:mm")
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
+                    NewsModel.markAsRead(index)
+                    NewsModel.processedIndex = index
+                    PageController.goToPage(PageEnum.PageSettingsNewsDetail)
+                }
+            }
+        }
+
+        footer: Item {
+            width: newsList.width
+            height: 16 + PageController.safeAreaBottomMargin
+        }
     }
-} 
+}

@@ -1,8 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
-
-import Style 1.0
 
 FocusScope {
     id: root
@@ -10,42 +6,25 @@ FocusScope {
     property string backButtonImage: "qrc:/images/controls/arrow-left.svg"
     property var backButtonFunction
 
-    implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight
+    implicitWidth: backButton.implicitWidth + backButton.x
+    implicitHeight: backButton.implicitHeight
 
     visible: backButtonImage !== ""
 
-    RowLayout {
-        id: content
+    IconButtonType {
+        id: backButton
 
-        anchors.fill: parent
-        anchors.leftMargin: 8
+        x: 16
+        anchors.verticalCenter: parent.verticalCenter
 
-        ImageButtonType {
-            id: backButton
-            image: backButtonImage
-            imageColor: AmneziaStyle.color.paleGray
+        icon.source: root.backButtonImage
 
-            implicitWidth: 40
-            implicitHeight: 40
-
-            onClicked: {
-                if (backButtonFunction && typeof backButtonFunction === "function") {
-                    backButtonFunction()
-                } else {
-                    PageController.closePage()
-                }
+        onClicked: {
+            if (root.backButtonFunction && typeof root.backButtonFunction === "function") {
+                root.backButtonFunction()
+            } else {
+                PageController.closePage()
             }
         }
-
-        Rectangle {
-            id: background
-            Layout.fillWidth: true
-
-            color: AmneziaStyle.color.transparent
-        }
     }
-
-    Keys.onEnterPressed: backButton.clicked()
-    Keys.onReturnPressed: backButton.clicked()
 }

@@ -41,11 +41,6 @@ public slots:
 
     void closeApplication();
 
-    void setDrawerDepth(const int depth);
-    int getDrawerDepth() const;
-    int incrementDrawerDepth();
-    int decrementDrawerDepth();
-
     bool isEdgeToEdgeEnabled();
     int getStatusBarHeight();
     int getNavigationBarHeight();
@@ -88,7 +83,6 @@ signals:
     void unsupportedConnectDrawerRequested();
 
     void escapePressed();
-    void closeTopDrawer();
 
     void imeHeightChanged(int height);
     void safeAreaTopMarginChanged();
@@ -99,8 +93,6 @@ private:
     SettingsController* m_settingsController;
 
     bool m_isTriggeredByConnectButton;
-
-    int m_drawerDepth = 0;
 
     mutable int m_cachedStatusBarHeight = -1;
     mutable int m_cachedNavigationBarHeight = -1;

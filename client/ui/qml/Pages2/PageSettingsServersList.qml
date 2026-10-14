@@ -17,99 +17,75 @@ import "../Components"
 PageType {
     id: root
 
-    ColumnLayout {
-        id: header
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        BackButtonType {
-            id: backButton
-        }
-
-        BaseHeaderType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            headerText: qsTr("Servers")
-        }
-    }
-
     ListViewType {
         id: servers
         objectName: "servers"
 
-        width: parent.width
-        anchors.top: header.bottom
-        anchors.topMargin: 16
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.fill: parent
 
+        header: NavigationBarType {
+            width: servers.width
+            height: implicitHeight + 16
+
+            title: qsTr("Servers")
+        }
 
         model: ServersModel
 
         delegate: Item {
             implicitWidth: servers.width
-            implicitHeight: delegateContent.implicitHeight
+            implicitHeight: server.implicitHeight
 
-            ColumnLayout {
-                id: delegateContent
+            ListItemType {
+                id: server
 
-                anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
 
-                LabelWithButtonType {
-                    id: server
-                    Layout.fillWidth: true
+                text: name
 
-                    text: name
+                icon.source: ServersUiController.serverHasOutdatedAwgContainer(serverId) ? "qrc:/images/controls/alert-circle.svg" : ""
+                icon.color: AmneziaStyle.color.statusWarning
 
-                    leftImageSource: ServersUiController.serverHasOutdatedAwgContainer(serverId) ? "qrc:/images/controls/alert-circle.svg" : ""
-                    leftImageColor: AmneziaStyle.color.goldenApricot
-                    isSmallLeftImage: true
-                    isLeftImageHoverEnabled: false
-
-                    descriptionText: {
-                        var servicesNameString = ""
-                        var servicesName = ServersUiController.getAllInstalledServicesName(index)
-                        for (var i = 0; i < servicesName.length; i++) {
-                            servicesNameString += servicesName[i] + " · "
-                        }
-
-                        if (ServersUiController.isServerFromApi(serverId)) {
-                            return servicesNameString + serverDescription
-                        } else {
-                            return servicesNameString + hostName
-                        }
+                subtitle: {
+                    var servicesNameString = ""
+                    var servicesName = ServersUiController.getAllInstalledServicesName(index)
+                    for (var i = 0; i < servicesName.length; i++) {
+                        servicesNameString += servicesName[i] + " · "
                     }
-                    rightImageSource: "qrc:/images/controls/chevron-right.svg"
 
-                    clickedFunction: function() {
-                        ServersUiController.setProcessedServerId(serverId)
-
-                        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
-                            PageController.showBusyIndicator(true)
-                            let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                            PageController.showBusyIndicator(false)
-                            if (!result) {
-                                return
-                            }
-
-                            PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                        } else {
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                        }
+                    if (ServersUiController.isServerFromApi(serverId)) {
+                        return servicesNameString + serverDescription
+                    } else {
+                        return servicesNameString + hostName
                     }
                 }
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                DividerType {}
+                onClicked: {
+                    ServersUiController.setProcessedServerId(serverId)
+
+                    if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
+                        PageController.showBusyIndicator(true)
+                        let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+                        PageController.showBusyIndicator(false)
+                        if (!result) {
+                            return
+                        }
+
+                        PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+                    } else {
+                        PageController.goToPage(PageEnum.PageSettingsServerInfo)
+                    }
+                }
             }
+        }
+
+        footer: Item {
+            width: servers.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
     }
 }

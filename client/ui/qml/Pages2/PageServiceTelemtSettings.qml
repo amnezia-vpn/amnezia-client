@@ -408,79 +408,60 @@ PageType {
         anchors.fill: parent
         enabled: !root.pageBusy
 
-        BackButtonType {
-            id: backButton
+        ColumnLayout {
+            id: pageHeader
+
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
-            onFocusChanged: {
-                if (this.activeFocus) {
-                    if (mainTabBar.currentIndex === 0) {
-                        connectionListView.positionViewAtBeginning()
-                    } else {
-                        settingsListView.positionViewAtBeginning()
-                    }
-                }
-            }
-        }
-
-        ColumnLayout {
-            id: pageHeader
-            anchors.top: backButton.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24
 
-                headerText: qsTr("Telemt settings")
-                descriptionLinkText: qsTr("Read more about this settings")
-                descriptionLinkUrl: "https://github.com/telemt/telemt"
+                title: qsTr("Telemt settings")
             }
 
-            CaptionTextType {
-                Layout.fillWidth: true
+            LinkButtonType {
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
+
+                size: LinkButtonType.Medium
+                horizontalPadding: 14
+                verticalPadding: 8
+
+                text: qsTr("Read more about this settings")
+
+                onClicked: Qt.openUrlExternally("https://github.com/telemt/telemt")
+            }
+
+            SmallTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 visible: root.telemtNetworkBlocked
                 text: qsTr("No internet connection. Connect to the internet to change Telemt settings.")
-                color: AmneziaStyle.color.mutedGray
-                wrapMode: Text.WordWrap
-                font.pixelSize: 14
             }
         }
 
-        TabBar {
+        TabsType {
             id: mainTabBar
             anchors.top: pageHeader.bottom
+            anchors.topMargin: 24
             anchors.left: parent.left
             anchors.right: parent.right
-            width: parent.width
-
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-                Rectangle {
-                    width: parent.width
-                    height: 1
-                    anchors.bottom: parent.bottom
-                    color: AmneziaStyle.color.slateGray
-                }
-            }
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
 
             TabButtonType {
                 text: qsTr("Connection")
-                isSelected: mainTabBar.currentIndex === 0
             }
             TabButtonType {
                 text: qsTr("Settings")
-                isSelected: mainTabBar.currentIndex === 1
             }
         }
 
@@ -523,52 +504,51 @@ PageType {
                         return "tg://proxy?server=" + effectiveHost() + "&port=" + port + "&secret=" + activeSecret()
                     }
 
-                    CaptionTextType {
+                    SmallTextType {
                         Layout.fillWidth: true
                         Layout.topMargin: 24
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
+
                         text: qsTr("Use Telegram connection link")
-                        color: AmneziaStyle.color.mutedGray
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
+                        Layout.topMargin: 12
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
-                        implicitHeight: linkRow.implicitHeight + 16
-                        color: AmneziaStyle.color.onyxBlack
-                        radius: 8
-                        border.color: AmneziaStyle.color.slateGray
-                        border.width: 1
+
+                        implicitHeight: Math.max(72, linkRow.implicitHeight + 24)
+                        color: AmneziaStyle.color.bgSurface
+                        radius: 16
 
                         RowLayout {
                             id: linkRow
+
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 8
-                            spacing: 4
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 12
 
-                            CaptionTextType {
+                            spacing: 0
+
+                            BodyTextType {
                                 Layout.fillWidth: true
+
                                 text: secret !== "" ? tmeLink() : qsTr("Deploy Telemt first")
-                                color: secret !== "" ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+                                color: secret !== "" ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textTertiary
+                                wrapMode: Text.WrapAnywhere
+                                maximumLineCount: 2
                                 elide: Text.ElideRight
-                                maximumLineCount: 1
-                                font.pixelSize: 13
                             }
 
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/copy.svg"
-                                imageColor: AmneziaStyle.color.paleGray
+                            IconButtonType {
                                 visible: secret !== ""
+                                icon.source: "qrc:/images/controls/copy.svg"
+                                Accessible.name: qsTr("Use Telegram connection link")
+
                                 onClicked: {
                                     GC.copyToClipBoard(tmeLink())
                                     PageController.showNotificationMessage(qsTr("Copied"))
@@ -579,40 +559,40 @@ PageType {
 
                     Rectangle {
                         Layout.fillWidth: true
+                        Layout.topMargin: 12
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
-                        implicitHeight: tgLinkRow.implicitHeight + 16
-                        color: AmneziaStyle.color.onyxBlack
-                        radius: 8
-                        border.color: AmneziaStyle.color.slateGray
-                        border.width: 1
+
                         visible: secret !== ""
+                        implicitHeight: Math.max(72, tgLinkRow.implicitHeight + 24)
+                        color: AmneziaStyle.color.bgSurface
+                        radius: 16
 
                         RowLayout {
                             id: tgLinkRow
+
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: 12
-                            anchors.rightMargin: 8
-                            spacing: 4
+                            anchors.leftMargin: 16
+                            anchors.rightMargin: 12
 
-                            CaptionTextType {
+                            spacing: 0
+
+                            BodyTextType {
                                 Layout.fillWidth: true
+
                                 text: tgLink()
-                                color: AmneziaStyle.color.goldenApricot
+                                color: AmneziaStyle.color.textPrimary
+                                wrapMode: Text.WrapAnywhere
+                                maximumLineCount: 2
                                 elide: Text.ElideRight
-                                maximumLineCount: 1
-                                font.pixelSize: 13
                             }
 
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/qr-code.svg"
-                                imageColor: AmneziaStyle.color.paleGray
+                            IconButtonType {
+                                icon.source: "qrc:/images/controls/qr-code.svg"
+                                Accessible.name: qsTr("Telegram connection link")
+
                                 onClicked: {
                                     ExportController.generateQrFromStringRaw(tgLink())
                                     PageController.goToShareConnectionPage(
@@ -622,12 +602,9 @@ PageType {
                                 }
                             }
 
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/copy.svg"
-                                imageColor: AmneziaStyle.color.paleGray
+                            IconButtonType {
+                                icon.source: "qrc:/images/controls/copy.svg"
+
                                 onClicked: {
                                     GC.copyToClipBoard(tgLink())
                                     PageController.showNotificationMessage(qsTr("Copied"))
@@ -636,172 +613,75 @@ PageType {
                         }
                     }
 
-                    RowLayout {
+                    SmallTextType {
                         Layout.fillWidth: true
+                        Layout.topMargin: 24
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
-                        spacing: 4
 
-                        CaptionTextType {
-                            text: qsTr("Or enter the proxy details manually.")
-                            color: AmneziaStyle.color.mutedGray
+                        text: qsTr("Or enter the proxy details manually.")
+                    }
+
+                    ListGroupType {
+                        Layout.fillWidth: true
+                        Layout.topMargin: 12
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+
+                        CopyableValueRow {
+                            Layout.fillWidth: true
+
+                            copiedText: qsTr("Copied")
+                            label: qsTr("Host")
+                            value: effectiveHost()
                         }
 
-                        CaptionTextType {
+                        CopyableValueRow {
                             Layout.fillWidth: true
-                            text: qsTr("How to do it")
-                            color: AmneziaStyle.color.goldenApricot
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: Qt.openUrlExternally("https://core.telegram.org/proxy")
-                            }
+
+                            copiedText: qsTr("Copied")
+                            label: qsTr("Port")
+                            value: port
                         }
 
-                        Item {
+                        CopyableValueRow {
                             Layout.fillWidth: true
+
+                            copiedText: qsTr("Copied")
+                            label: qsTr("Secret")
+                            value: activeSecret()
+                            showSeparator: false
                         }
                     }
 
-                    Rectangle {
-                        Layout.fillWidth: true
+                    LinkButtonType {
+                        Layout.topMargin: 12
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 32
-                        implicitHeight: manualCol.implicitHeight + 8
-                        color: AmneziaStyle.color.onyxBlack
-                        radius: 8
-                        border.color: AmneziaStyle.color.slateGray
-                        border.width: 1
 
-                        ColumnLayout {
-                            id: manualCol
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.topMargin: 8
-                            spacing: 0
+                        size: LinkButtonType.Medium
+                        horizontalPadding: 14
+                        verticalPadding: 8
 
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Layout.leftMargin: 12
-                                Layout.rightMargin: 8
-                                Layout.bottomMargin: 8
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 2
-                                    CaptionTextType {
-                                        text: qsTr("Host")
-                                        color: AmneziaStyle.color.mutedGray
-                                        font.pixelSize: 12
-                                    }
-                                    CaptionTextType {
-                                        Layout.fillWidth: true
-                                        text: effectiveHost()
-                                        color: AmneziaStyle.color.paleGray
-                                        elide: Text.ElideRight
-                                    }
-                                }
-                                ImageButtonType {
-                                    implicitWidth: 36
-                                    implicitHeight: 36
-                                    hoverEnabled: true
-                                    image: "qrc:/images/controls/copy.svg"
-                                    imageColor: AmneziaStyle.color.paleGray
-                                    onClicked: { GC.copyToClipBoard(effectiveHost())
-                                        PageController.showNotificationMessage(qsTr("Copied")) }
-                                }
-                            }
+                        text: qsTr("How to do it")
 
-                            DividerType {
-                                Layout.fillWidth: true
-                            }
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Layout.leftMargin: 12
-                                Layout.rightMargin: 8
-                                Layout.topMargin: 8
-                                Layout.bottomMargin: 8
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 2
-                                    CaptionTextType {
-                                        text: qsTr("Port")
-                                        color: AmneziaStyle.color.mutedGray
-                                        font.pixelSize: 12
-                                    }
-                                    CaptionTextType {
-                                        Layout.fillWidth: true
-                                        text: port
-                                        color: AmneziaStyle.color.paleGray
-                                    }
-                                }
-                                ImageButtonType {
-                                    implicitWidth: 36
-                                    implicitHeight: 36
-                                    hoverEnabled: true
-                                    image: "qrc:/images/controls/copy.svg"
-                                    imageColor: AmneziaStyle.color.paleGray
-                                    onClicked: { GC.copyToClipBoard(port)
-                                        PageController.showNotificationMessage(qsTr("Copied")) }
-                                }
-                            }
-
-                            DividerType {
-                                Layout.fillWidth: true
-                            }
-
-                            ButtonGroup {
-                                id: secretTabGroup
-                            }
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Layout.leftMargin: 12
-                                Layout.rightMargin: 8
-                                Layout.topMargin: 4
-                                Layout.bottomMargin: 8
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 2
-                                    CaptionTextType {
-                                        text: qsTr("Secret")
-                                        color: AmneziaStyle.color.mutedGray
-                                        font.pixelSize: 12
-                                    }
-                                    CaptionTextType {
-                                        Layout.fillWidth: true
-                                        text: activeSecret()
-                                        color: AmneziaStyle.color.paleGray
-                                        wrapMode: Text.WrapAnywhere
-                                        font.pixelSize: 13
-                                    }
-                                }
-                                ImageButtonType {
-                                    implicitWidth: 36
-                                    implicitHeight: 36
-                                    hoverEnabled: true
-                                    image: "qrc:/images/controls/copy.svg"
-                                    imageColor: AmneziaStyle.color.paleGray
-                                    onClicked: { GC.copyToClipBoard(activeSecret())
-                                        PageController.showNotificationMessage(qsTr("Copied")) }
-                                }
-                            }
-                        }
+                        onClicked: Qt.openUrlExternally("https://core.telegram.org/proxy")
                     }
 
-                    LabelWithButtonType {
+                    ButtonType {
                         id: removeButton
+
                         Layout.fillWidth: true
-                        Layout.bottomMargin: 24
-                        Layout.leftMargin: 0
+                        Layout.topMargin: 24
+                        Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                        Layout.leftMargin: 16
                         Layout.rightMargin: 16
+
                         visible: ServersUiController.isProcessedServerHasWriteAccess()
+                        variant: ButtonType.Destructive
                         text: qsTr("Delete Telemt")
-                        textColor: AmneziaStyle.color.vibrantRed
-                        clickedFunction: function () {
+
+                        onClicked: {
                             var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                             var descriptionText = qsTr("The proxy will be stopped and all users will lose access.")
                             var yesButtonText = qsTr("Continue")
@@ -812,11 +692,6 @@ PageType {
                             }
                             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, function () {
                             })
-                        }
-                        MouseArea {
-                            anchors.fill: removeButton
-                            cursorShape: Qt.PointingHandCursor
-                            enabled: false
                         }
                     }
                 }
@@ -829,8 +704,10 @@ PageType {
 
                 delegate: ColumnLayout {
                     id: settingsRoot
+
                     width: settingsListView.width
-                    spacing: 0
+
+                    spacing: 12
 
                     readonly property bool fieldsEditable: isEnabled && containerStatus === 1 && !root.pageBusy
 
@@ -870,13 +747,12 @@ PageType {
                         TelemtConfigModel.removeAdditionalSecret(idx)
                     }
 
-                    SwitcherType {
+                    SwitchRowType {
                         id: enableTelemtSwitch
-                        Layout.fillWidth: true
                         Layout.topMargin: 24
+                        Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
                         text: qsTr("Enable Telemt")
                         checked: isEnabled
                         enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy
@@ -898,54 +774,43 @@ PageType {
                         }
                     }
 
-                    CaptionTextType {
+                    SmallTextType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
                         visible: !fieldsEditable && !root.pageBusy
                         text: (containerStatus === 1 || containerStatus === 2)
                             ? qsTr("Enable Telemt to edit settings")
                             : (statusErrorCode !== 0
                                 ? qsTr("Settings locked: connection timed out (error code %1). Re-open the page to retry.").arg(statusErrorCode)
                                 : qsTr("Cannot reach the server — settings are unavailable"))
-                        color: AmneziaStyle.color.mutedGray
-                        wrapMode: Text.WordWrap
                     }
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.topMargin: 16
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16 * 2
+                        Layout.topMargin: 12
                         spacing: 4
 
-                        CaptionTextType {
+                        SmallTextType {
                             text: qsTr("Base secret")
-                            color: AmneziaStyle.color.mutedGray
-                            font.pixelSize: 12
                         }
 
                         RowLayout {
                             Layout.fillWidth: true
                             spacing: 8
 
-                            CaptionTextType {
+                            SmallTextType {
                                 Layout.fillWidth: true
                                 text: secret !== "" ? telemtActiveSecretForBaseHex(secret) : qsTr("Not generated")
-                                color: secret !== "" ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
+                                color: secret !== "" ? AmneziaStyle.color.textSecondary : AmneziaStyle.color.textTertiary
                                 wrapMode: Text.WrapAnywhere
-                                font.pixelSize: 14
                             }
 
-                            ImageButtonType {
-                                Layout.alignment: Qt.AlignTop
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/refresh-cw.svg"
-                                imageColor: AmneziaStyle.color.paleGray
+                            IconButtonType {
+                                Layout.alignment: Qt.AlignVCenter
+                                icon.source: "qrc:/images/controls/refresh-cw.svg"
                                 visible: ServersUiController.isProcessedServerHasWriteAccess()
                                 enabled: fieldsEditable
                                 onClicked: {
@@ -974,13 +839,13 @@ PageType {
                         }
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: publicHostTextField
+                        Layout.topMargin: 12
                         enabled: fieldsEditable
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 4
                         headerText: qsTr("Public host / IP")
                         textField.placeholderText: ServersUiController.serverHostName(ServersUiController.processedServerId)
                         textField.text: publicHost
@@ -1015,34 +880,26 @@ PageType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 4
                         visible: publicHostTextField.textField.text === ""
                         text: qsTr("Leave empty to use server IP automatically")
-                        color: AmneziaStyle.color.mutedGray
-                        font.pixelSize: 12
-                        wrapMode: Text.WordWrap
                     }
 
                     CaptionTextType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 12
                         visible: publicHostTextField.textField.text !== "" &&
                             publicHostTextField.textField.text !== ServersUiController.serverHostName(ServersUiController.processedServerId)
                         text: qsTr("⚠ This overrides the server IP in connection links. Make sure this host/domain points to your server.")
-                        color: AmneziaStyle.color.goldenApricot
-                        font.pixelSize: 12
-                        wrapMode: Text.WordWrap
+                        color: AmneziaStyle.color.textAccent
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: portTextField
                         enabled: fieldsEditable
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
                         headerText: qsTr("Server port")
                         textField.placeholderText: TelemtConfigModel.defaultPort()
                         textField.maximumLength: 5
@@ -1072,32 +929,24 @@ PageType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 12
                         visible: transportMode === "faketls" && portTextField.textField.text !== "443" && portTextField.textField.text !== ""
                         text: qsTr("FakeTLS may not work on ports other than 443")
-                        color: AmneziaStyle.color.goldenApricot
-                        font.pixelSize: 12
-                        wrapMode: Text.WordWrap
+                        color: AmneziaStyle.color.textAccent
                     }
 
                     CaptionTextType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
                         text: qsTr("The promoted channel is set in @MTProxyBot. Paste the proxy tag here: exactly 32 hexadecimal characters (0-9, A-F), as in the bot message — or leave empty.")
-                        color: AmneziaStyle.color.mutedGray
-                        font.pixelSize: 12
-                        wrapMode: Text.WordWrap
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: tagTextField
                         enabled: fieldsEditable
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
                         headerText: qsTr("Promoted channel tag (optional)")
                         textField.placeholderText: qsTr("32 hex chars from @MTProxyBot (e.g. 3b7b2fa9…)")
                         textField.text: tag
@@ -1145,18 +994,14 @@ PageType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
                         spacing: 4
 
                         CaptionTextType {
                             text: qsTr("Get a tag from")
-                            color: AmneziaStyle.color.mutedGray
-                            font.pixelSize: 12
                         }
                         CaptionTextType {
                             text: "@MTProxyBot"
-                            color: AmneziaStyle.color.goldenApricot
-                            font.pixelSize: 12
+                            color: AmneziaStyle.color.textAccent
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
@@ -1165,59 +1010,50 @@ PageType {
                         }
                     }
 
-                    CaptionTextType {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.topMargin: 16 * 2
-                        text: qsTr("Transport mode")
-                        color: AmneziaStyle.color.mutedGray
-                        font.pixelSize: 12
-                    }
-
                     DropDownType {
                         id: transportModeDropDown
+                        Layout.topMargin: 12
                         enabled: fieldsEditable
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
 
-                        drawerParent: root
                         drawerHeight: 0.4
+                        descriptionText: qsTr("Transport mode")
                         headerText: qsTr("Transport mode")
                         text: transportMode === "faketls" ? qsTr("FakeTLS") : qsTr("Standard MTProto")
 
                         listView: Component {
                             ListViewType {
+                                leftMargin: 16
+                                rightMargin: 16
+
                                 model: [qsTr("Standard MTProto"), qsTr("FakeTLS")]
-                                delegate: LabelWithButtonType {
-                                    Layout.fillWidth: true
+                                delegate: ListItemType {
+                                    width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
                                     text: modelData
-                                    rightImageSource: {
+                                    trailingIconSource: {
                                         var isCurrent = (index === 0 && transportMode === "standard") ||
                                             (index === 1 && transportMode === "faketls")
                                         return isCurrent ? "qrc:/images/controls/check.svg" : ""
                                     }
-                                    rightImageColor: AmneziaStyle.color.goldenApricot
-                                    clickedFunction: function () {
+                                    onClicked: {
                                         transportMode = (index === 0) ? "standard" : "faketls"
                                         TelemtConfigModel.setTransportMode(transportMode)
                                         root.syncedSecretTabIndex = transportMode === "faketls" ? 1 : 0
-                                        transportModeDropDown.closeTriggered()
+                                        transportModeDropDown.close()
                                     }
                                 }
                             }
                         }
                     }
 
-                    TextFieldWithHeaderType {
+                    TextFieldType {
                         id: tlsDomainTextField
                         enabled: fieldsEditable
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
                         visible: transportMode === "faketls"
                         headerText: qsTr("FakeTLS domain")
                         textField.placeholderText: root.previousTlsDomain
@@ -1256,66 +1092,54 @@ PageType {
                         Layout.fillWidth: true
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 16
                         spacing: 4
                         visible: transportMode === "faketls"
 
                         CaptionTextType {
                             Layout.fillWidth: true
                             text: qsTr("The domain is encoded into the FakeTLS client secret (ee + base_secret + hex(domain)). It must support HTTPS / TLS 1.3.")
-                            color: AmneziaStyle.color.mutedGray
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: 12
                         }
                         CaptionTextType {
                             Layout.fillWidth: true
                             text: qsTr("\u26a0 Changing the domain will invalidate all previously issued FakeTLS connection links.")
-                            color: AmneziaStyle.color.goldenApricot
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: 12
+                            color: AmneziaStyle.color.textAccent
                         }
                     }
 
-                    LabelWithButtonType {
+                    ListItemType {
                         id: advancedHeader
+                        Layout.topMargin: 12
                         Layout.fillWidth: true
-                        Layout.leftMargin: 0
+                        Layout.leftMargin: 16
                         Layout.rightMargin: 16
                         property bool expanded: false
                         text: qsTr("Advanced")
-                        rightImageSource: expanded
+                        trailingIconSource: expanded
                             ? "qrc:/images/controls/chevron-up.svg"
                             : "qrc:/images/controls/chevron-down.svg"
-                        rightImageColor: AmneziaStyle.color.mutedGray
-                        clickedFunction: function () {
+                        onClicked: {
                             expanded = !expanded
                         }
                     }
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 0
+                        spacing: 12
                         visible: advancedHeader.expanded
                         enabled: fieldsEditable
 
-                        CaptionTextType {
+                        SmallTextType {
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
-                            Layout.topMargin: 8
-                            Layout.bottomMargin: 4
                             text: qsTr("Additional secrets")
-                            color: AmneziaStyle.color.mutedGray
                         }
                         CaptionTextType {
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
-                            Layout.bottomMargin: 8
                             text: qsTr("Add extra secrets to allow gradual migration without disconnecting existing users.")
-                            color: AmneziaStyle.color.charcoalGray
-                            wrapMode: Text.WordWrap
-                            font.pixelSize: 12
+                            color: AmneziaStyle.color.textQuaternary
                         }
 
                         Repeater {
@@ -1327,7 +1151,6 @@ PageType {
                                 Layout.fillWidth: true
                                 Layout.leftMargin: 16
                                 Layout.rightMargin: 16
-                                Layout.bottomMargin: 8
                                 spacing: 0
 
                                 onLinksPanelAllowedChanged: {
@@ -1339,10 +1162,8 @@ PageType {
                                 Rectangle {
                                     Layout.fillWidth: true
                                     implicitHeight: collapsedBar.implicitHeight + 16
-                                    color: AmneziaStyle.color.onyxBlack
-                                    radius: 8
-                                    border.color: AmneziaStyle.color.slateGray
-                                    border.width: 1
+                                    color: AmneziaStyle.color.bgSurface
+                                    radius: 16
 
                                     RowLayout {
                                         id: collapsedBar
@@ -1363,13 +1184,12 @@ PageType {
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 spacing: 8
 
-                                                CaptionTextType {
+                                                SmallTextType {
                                                     id: hexCaption
                                                     Layout.fillWidth: true
                                                     text: settingsRoot.telemtActiveSecretForBaseHex(modelData)
-                                                    color: AmneziaStyle.color.paleGray
+                                                    color: AmneziaStyle.color.textSecondary
                                                     elide: Text.ElideMiddle
-                                                    font.pixelSize: 13
                                                 }
 
                                                 Image {
@@ -1397,12 +1217,11 @@ PageType {
                                             }
                                         }
 
-                                        ImageButtonType {
-                                            implicitWidth: 32
-                                            implicitHeight: 32
-                                            hoverEnabled: true
-                                            image: "qrc:/images/controls/trash.svg"
-                                            imageColor: AmneziaStyle.color.vibrantRed
+                                        IconButtonType {
+                                            size: IconButtonType.Small
+
+                                            icon.source: "qrc:/images/controls/trash.svg"
+                                            icon.color: AmneziaStyle.color.statusDestructive
                                             onClicked: settingsRoot.telemtRemoveAdditionalSecret(index)
                                         }
                                     }
@@ -1410,23 +1229,19 @@ PageType {
 
                                 ColumnLayout {
                                     Layout.fillWidth: true
-                                    Layout.topMargin: 8
                                     spacing: 8
                                     visible: addSecretDelegate.linksPanelAllowed && addSecretDelegate.linksExpanded
 
-                                    CaptionTextType {
+                                    SmallTextType {
                                         Layout.fillWidth: true
                                         text: qsTr("Use Telegram connection link")
-                                        color: AmneziaStyle.color.mutedGray
                                     }
 
                                     Rectangle {
                                         Layout.fillWidth: true
                                         implicitHeight: expTmeRow.implicitHeight + 16
-                                        color: AmneziaStyle.color.onyxBlack
-                                        radius: 8
-                                        border.color: AmneziaStyle.color.slateGray
-                                        border.width: 1
+                                        color: AmneziaStyle.color.bgSurface
+                                        radius: 16
 
                                         RowLayout {
                                             id: expTmeRow
@@ -1437,21 +1252,18 @@ PageType {
                                             anchors.rightMargin: 8
                                             spacing: 4
 
-                                            CaptionTextType {
+                                            SmallTextType {
                                                 Layout.fillWidth: true
                                                 text: settingsRoot.telemtTmeLinkForAdditional(modelData)
-                                                color: AmneziaStyle.color.goldenApricot
+                                                color: AmneziaStyle.color.textAccent
                                                 elide: Text.ElideRight
                                                 maximumLineCount: 1
-                                                font.pixelSize: 13
                                             }
 
-                                            ImageButtonType {
-                                                implicitWidth: 36
-                                                implicitHeight: 36
-                                                hoverEnabled: true
-                                                image: "qrc:/images/controls/copy.svg"
-                                                imageColor: AmneziaStyle.color.paleGray
+                                            IconButtonType {
+                                                size: IconButtonType.Small
+
+                                                icon.source: "qrc:/images/controls/copy.svg"
                                                 onClicked: settingsRoot.telemtCopyText(settingsRoot.telemtTmeLinkForAdditional(modelData))
                                             }
                                         }
@@ -1460,10 +1272,8 @@ PageType {
                                     Rectangle {
                                         Layout.fillWidth: true
                                         implicitHeight: expTgRow.implicitHeight + 16
-                                        color: AmneziaStyle.color.onyxBlack
-                                        radius: 8
-                                        border.color: AmneziaStyle.color.slateGray
-                                        border.width: 1
+                                        color: AmneziaStyle.color.bgSurface
+                                        radius: 16
 
                                         RowLayout {
                                             id: expTgRow
@@ -1474,30 +1284,25 @@ PageType {
                                             anchors.rightMargin: 8
                                             spacing: 4
 
-                                            CaptionTextType {
+                                            SmallTextType {
                                                 Layout.fillWidth: true
                                                 text: settingsRoot.telemtTgLinkForAdditional(modelData)
-                                                color: AmneziaStyle.color.goldenApricot
+                                                color: AmneziaStyle.color.textAccent
                                                 elide: Text.ElideRight
                                                 maximumLineCount: 1
-                                                font.pixelSize: 13
                                             }
 
-                                            ImageButtonType {
-                                                implicitWidth: 36
-                                                implicitHeight: 36
-                                                hoverEnabled: true
-                                                image: "qrc:/images/controls/qr-code.svg"
-                                                imageColor: AmneziaStyle.color.paleGray
+                                            IconButtonType {
+                                                size: IconButtonType.Small
+
+                                                icon.source: "qrc:/images/controls/qr-code.svg"
                                                 onClicked: settingsRoot.telemtShareQr(settingsRoot.telemtTgLinkForAdditional(modelData))
                                             }
 
-                                            ImageButtonType {
-                                                implicitWidth: 36
-                                                implicitHeight: 36
-                                                hoverEnabled: true
-                                                image: "qrc:/images/controls/copy.svg"
-                                                imageColor: AmneziaStyle.color.paleGray
+                                            IconButtonType {
+                                                size: IconButtonType.Small
+
+                                                icon.source: "qrc:/images/controls/copy.svg"
                                                 onClicked: settingsRoot.telemtCopyText(settingsRoot.telemtTgLinkForAdditional(modelData))
                                             }
                                         }
@@ -1506,29 +1311,23 @@ PageType {
                             }
                         }
 
-                        BasicButtonType {
+                        ButtonType {
                             Layout.fillWidth: true
-                            Layout.topMargin: 8
 
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
-                            Layout.bottomMargin: 16
+                            variant: ButtonType.Secondary
                             text: qsTr("Add additional secret")
-                            clickedFunc: function () {
+                            onClicked: {
                                 TelemtConfigModel.addAdditionalSecret()
                             }
                         }
 
-                        DividerType {
+                        SwitchRowType {
                             Layout.fillWidth: true
-                            Layout.bottomMargin: 8
-                        }
-
-                        SwitcherType {
-                            Layout.fillWidth: true
+                            Layout.topMargin: 12
                             Layout.rightMargin: 16
                             Layout.leftMargin: 16
-                            Layout.bottomMargin: 4
                             text: qsTr("Set public IP manually")
                             descriptionText: qsTr("By default the proxy auto-detects its public IP. Enable to override it manually, e.g. when the server is behind NAT / Docker bridge")
                             checked: natEnabled
@@ -1540,12 +1339,11 @@ PageType {
                             }
                         }
 
-                        TextFieldWithHeaderType {
+                        TextFieldType {
                             id: natExternalIpTextField
                             Layout.fillWidth: true
                             Layout.leftMargin: 16
                             Layout.rightMargin: 16
-                            Layout.bottomMargin: 16
                             visible: natEnabled
                             headerText: qsTr("Public IP")
                             textField.placeholderText: "1.2.3.4"
@@ -1576,33 +1374,28 @@ PageType {
                         }
                     }
 
-                    DividerType {
-                        Layout.fillWidth: true
-                        Layout.topMargin: 8
-                    }
-
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.topMargin: 16
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
+                        Layout.topMargin: 12
                         spacing: 8
                         visible: containerStatus === 1
 
                         RowLayout {
                             Layout.fillWidth: true
 
-                            Header2Type {
+                            SectionHeaderType {
                                 Layout.fillWidth: true
+                                level: SectionHeaderType.Section
                                 headerText: qsTr("Diagnostics")
                             }
 
-                            ImageButtonType {
-                                implicitWidth: 32
-                                implicitHeight: 32
-                                image: "qrc:/images/controls/refresh-cw.svg"
-                                imageColor: diagLoading ? AmneziaStyle.color.mutedGray : AmneziaStyle.color.paleGray
+                            IconButtonType {
+                                size: IconButtonType.Small
+
+                                icon.source: "qrc:/images/controls/refresh-cw.svg"
+                                icon.color: diagLoading ? AmneziaStyle.color.iconSecondary : AmneziaStyle.color.bgSurfaceInverse
                                 hoverEnabled: !diagLoading
                                 enabled: !diagLoading
                                 onClicked: {
@@ -1619,16 +1412,16 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: diagClientsConnected >= 0 ? (diagPortReachable ? AmneziaStyle.color.paleGray : AmneziaStyle.color.vibrantRed) : AmneziaStyle.color.mutedGray
+                                color: diagClientsConnected >= 0 ? (diagPortReachable ? AmneziaStyle.color.bgSurfaceInverse : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.buttonPrimaryPress
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 Layout.fillWidth: true
                                 text: qsTr("Public port reachable")
-                                color: AmneziaStyle.color.paleGray
+                                color: AmneziaStyle.color.textSecondary
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 text: diagClientsConnected < 0 ? qsTr("—") : (diagPortReachable ? qsTr("Yes") : qsTr("No"))
-                                color: diagClientsConnected >= 0 ? (diagPortReachable ? AmneziaStyle.color.paleGray : AmneziaStyle.color.vibrantRed) : AmneziaStyle.color.mutedGray
+                                color: diagClientsConnected >= 0 ? (diagPortReachable ? AmneziaStyle.color.textSecondary : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.textTertiary
                             }
                         }
 
@@ -1639,16 +1432,16 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: diagClientsConnected >= 0 ? (diagTelegramReachable ? AmneziaStyle.color.paleGray : AmneziaStyle.color.vibrantRed) : AmneziaStyle.color.mutedGray
+                                color: diagClientsConnected >= 0 ? (diagTelegramReachable ? AmneziaStyle.color.bgSurfaceInverse : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.buttonPrimaryPress
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 Layout.fillWidth: true
                                 text: qsTr("Telegram upstream reachable")
-                                color: AmneziaStyle.color.paleGray
+                                color: AmneziaStyle.color.textSecondary
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 text: diagClientsConnected < 0 ? qsTr("—") : (diagTelegramReachable ? qsTr("Yes") : qsTr("No"))
-                                color: diagClientsConnected >= 0 ? (diagTelegramReachable ? AmneziaStyle.color.paleGray : AmneziaStyle.color.vibrantRed) : AmneziaStyle.color.mutedGray
+                                color: diagClientsConnected >= 0 ? (diagTelegramReachable ? AmneziaStyle.color.textSecondary : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.textTertiary
                             }
                         }
 
@@ -1659,16 +1452,16 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: diagClientsConnected >= 0 ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+                                color: diagClientsConnected >= 0 ? AmneziaStyle.color.accentLight : AmneziaStyle.color.buttonPrimaryPress
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 Layout.fillWidth: true
                                 text: qsTr("Clients connected")
-                                color: AmneziaStyle.color.paleGray
+                                color: AmneziaStyle.color.textSecondary
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 text: diagClientsConnected < 0 ? qsTr("—") : diagClientsConnected.toString()
-                                color: AmneziaStyle.color.paleGray
+                                color: AmneziaStyle.color.textSecondary
                             }
                         }
 
@@ -1679,64 +1472,47 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: AmneziaStyle.color.mutedGray
+                                color: AmneziaStyle.color.buttonPrimaryPress
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 Layout.fillWidth: true
                                 text: qsTr("Last config refresh")
-                                color: AmneziaStyle.color.paleGray
+                                color: AmneziaStyle.color.textSecondary
                             }
-                            CaptionTextType {
+                            SmallTextType {
                                 text: diagLastConfigRefresh !== "" ? diagLastConfigRefresh : qsTr("—")
-                                color: AmneziaStyle.color.mutedGray
                             }
                         }
 
-                        LabelWithButtonType {
+                        ListItemType {
                             Layout.fillWidth: true
                             Layout.leftMargin: -16
                             visible: diagStatsEndpoint !== ""
-                            text: qsTr("Stats endpoint")
-                            descriptionText: diagStatsEndpoint
-                            descriptionOnTop: true
-                            rightImageSource: "qrc:/images/controls/copy.svg"
-                            rightImageColor: AmneziaStyle.color.paleGray
-                            clickedFunction: function () {
+                            overline: qsTr("Stats endpoint")
+                            text: diagStatsEndpoint
+                            trailingIconSource: "qrc:/images/controls/copy.svg"
+                            onClicked: {
                                 GC.copyToClipBoard(diagStatsEndpoint)
                                 PageController.showNotificationMessage(qsTr("Copied"))
                             }
                         }
 
-                        CaptionTextType {
+                        SmallTextType {
                             Layout.fillWidth: true
                             text: diagLoading ? qsTr("Refreshing…") : qsTr("Tap ↻ to refresh diagnostics")
-                            color: AmneziaStyle.color.mutedGray
                             visible: diagClientsConnected < 0
                         }
                     }
 
-                    CaptionTextType {
+                    ButtonType {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.topMargin: 16 * 2
-                        Layout.bottomMargin: 24
-                        text: qsTr("If you change the settings, the proxy connection link will change. The old link will stop working.")
-                        color: AmneziaStyle.color.mutedGray
-                        wrapMode: Text.WordWrap
-                        font.pixelSize: 12
-                    }
-
-                    BasicButtonType {
-                        Layout.fillWidth: true
-                        Layout.topMargin: 16
-                        Layout.bottomMargin: 32
+                        Layout.topMargin: 12
                         Layout.rightMargin: 16
                         Layout.leftMargin: 16
                         visible: ServersUiController.isProcessedServerHasWriteAccess()
                         enabled: fieldsEditable && !root.telemtNetworkBlocked
                         text: qsTr("Save")
-                        clickedFunc: function () {
+                        onClicked: {
                             if (root.telemtNetworkBlocked) {
                                 PageController.showErrorMessage(qsTr("No internet connection. Connect to the internet to change Telemt settings."))
                                 return
@@ -1813,6 +1589,16 @@ PageType {
                             isUpdating = true
                             root.telemtScheduleUpdate(false)
                         }
+                    }
+
+                    CaptionTextType {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+
+                        horizontalAlignment: Text.AlignHCenter
+                        text: qsTr("If you change the settings, the proxy connection link will change. The old link will stop working.")
                     }
                 }
             }

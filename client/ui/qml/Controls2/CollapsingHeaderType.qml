@@ -35,6 +35,26 @@ Item {
     readonly property real listOcclusion: root.pinnedBottom - root.listView.y
     readonly property bool pinnedStuck: root.listScrolled >= root.collapsibleHeight
 
+    QtObject {
+        id: d
+
+        property real lastScrolled: 0
+    }
+
+    Connections {
+        target: root.listView
+
+        function onContentYChanged() {
+            d.lastScrolled = root.listScrolled
+        }
+    }
+
+    function keepAtTop() {
+        if (d.lastScrolled <= 0 && root.listScrolled !== 0) {
+            root.listView.contentY = root.listView.originY
+        }
+    }
+
     function clampContentY(value) {
         const maxY = root.listView.originY + Math.max(0, root.listView.contentHeight - root.listView.height)
         return Math.max(root.listView.originY, Math.min(value, maxY))
@@ -44,10 +64,12 @@ Item {
         id: headerComponent
 
         Item {
-            readonly property real collapsibleHeight: collapsibleColumn.implicitHeight + 4
+            readonly property real collapsibleHeight: collapsibleColumn.implicitHeight + 12
 
             width: root.listView.width
             height: collapsibleHeight + pinnedBlock.height
+
+            onHeightChanged: Qt.callLater(root.keepAtTop)
 
             ColumnLayout {
                 id: collapsibleColumn
@@ -55,7 +77,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: 4
+                anchors.topMargin: 12
 
                 spacing: 0
 
@@ -88,9 +110,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        color: AmneziaStyle.color.midnightBlack
+        color: AmneziaStyle.color.bgBase
 
-        implicitHeight: navigationRow.y + navigationRow.height + 4
+        implicitHeight: navigationRow.y + navigationRow.height
 
         MouseArea {
             anchors.fill: parent
@@ -103,16 +125,20 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.topMargin: 20 + PageController.safeAreaTopMargin
-            height: backButton.implicitHeight
+            anchors.topMargin: PageController.safeAreaTopMargin
+            height: 48
 
-            BackButtonType {
+            IconButtonType {
                 id: backButton
                 objectName: "backButton"
 
-                anchors.left: parent.left
-                anchors.right: navigationButtonsRow.left
-                anchors.verticalCenter: parent.verticalCenter
+                x: 16
+                y: 4
+
+                size: IconButtonType.Small
+                icon.source: "qrc:/images/controls/arrow-left.svg"
+
+                onClicked: PageController.closePage()
             }
 
             Row {
@@ -120,7 +146,9 @@ Item {
 
                 anchors.right: parent.right
                 anchors.rightMargin: 16
-                anchors.verticalCenter: parent.verticalCenter
+                y: 4
+
+                spacing: 8
             }
         }
     }
@@ -133,7 +161,7 @@ Item {
         y: topBar.height + Math.max(0, root.collapsibleHeight - root.listScrolled)
         height: pinnedColumn.implicitHeight
 
-        color: AmneziaStyle.color.midnightBlack
+        color: AmneziaStyle.color.bgBase
 
         MouseArea {
             anchors.fill: parent
@@ -151,30 +179,49 @@ Item {
         }
     }
 
-    Header1TextType {
+    H1TextType {
         id: largeTitleMetrics
 
         visible: false
         text: movingTitle.text
     }
 
-    Header1TextType {
+    H1TextType {
         id: movingTitle
 
-        readonly property real compactScale: 18 / 32
+        readonly property real compactScale: compactTitle.font.pixelSize / movingTitle.font.pixelSize
         readonly property real titleScale: 1 - (1 - movingTitle.compactScale) * root.collapseProgress
         readonly property real expandedX: 16
-        readonly property real compactX: (root.width - movingTitle.width * movingTitle.compactScale) / 2
-        readonly property real expandedY: topBar.height + 4 - Math.min(0, root.listScrolled)
-        readonly property real compactY: navigationRow.y
-                                         + (navigationRow.height - movingTitle.implicitHeight * movingTitle.compactScale) / 2
+        readonly property real compactX: (root.width - compactTitle.width) / 2
+        readonly property real expandedY: topBar.height + 12 - Math.min(0, root.listScrolled)
+        readonly property real compactY: navigationRow.y + (navigationRow.height - compactTitle.height) / 2
+        readonly property real currentX: movingTitle.expandedX + (movingTitle.compactX - movingTitle.expandedX) * root.collapseProgress
+        readonly property real currentY: Math.max(movingTitle.compactY, movingTitle.expandedY - Math.max(0, root.listScrolled))
 
-        x: movingTitle.expandedX + (movingTitle.compactX - movingTitle.expandedX) * root.collapseProgress
-        y: Math.max(movingTitle.compactY, movingTitle.expandedY - Math.max(0, root.listScrolled))
+        x: movingTitle.currentX
+        y: movingTitle.currentY
         width: Math.min(movingTitle.implicitWidth, root.width - 32)
 
         transformOrigin: Item.TopLeft
         scale: movingTitle.titleScale
+        opacity: 1 - root.collapseProgress
+
+        wrapMode: Text.NoWrap
+        maximumLineCount: 1
+        elide: Text.ElideRight
+        text: root.title
+    }
+
+    H3TextType {
+        id: compactTitle
+
+        x: movingTitle.currentX
+        y: movingTitle.currentY
+        width: Math.min(compactTitle.implicitWidth, root.width - 32)
+
+        transformOrigin: Item.TopLeft
+        scale: movingTitle.titleScale / movingTitle.compactScale
+        opacity: root.collapseProgress
 
         wrapMode: Text.NoWrap
         maximumLineCount: 1

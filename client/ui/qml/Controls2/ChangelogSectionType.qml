@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Controls.impl
 
 import Style 1.0
 
@@ -21,20 +21,17 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: 8
 
-        Image {
+        IconImage {
             Layout.preferredWidth: 18
             Layout.preferredHeight: 18
 
             source: root.iconSource
             sourceSize: Qt.size(18, 18)
-
-            layer.enabled: true
-            layer.effect: ColorOverlay {
-                color: AmneziaStyle.color.accentSuccess
-            }
+            color: AmneziaStyle.color.statusSuccess
         }
 
-        AppH3EmphasizedTextType {
+        H3TextType {
+            font.weight: 600
             Layout.fillWidth: true
 
             text: root.title
@@ -52,7 +49,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0
 
-                AppTextType {
+                BodyTextType {
                     Layout.alignment: Qt.AlignTop
                     Layout.preferredWidth: 24
 
@@ -62,7 +59,7 @@ ColumnLayout {
                     text: "•"
                 }
 
-                AppTextType {
+                BodyTextType {
                     Layout.fillWidth: true
 
                     color: AmneziaStyle.color.textTertiary

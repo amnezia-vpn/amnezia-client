@@ -187,7 +187,6 @@ void CoreController::initControllers()
 
     if (m_engine) {
         m_focusController = new FocusController(m_engine, this);
-        setQmlContextProperty("FocusController", m_focusController);
     }
 
     m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController,

@@ -1,10 +1,11 @@
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Controls.impl
 
 import Style 1.0
 
 import "../Config"
+import "../Controls2"
 import "../Controls2/TextTypes"
 
 Item {
@@ -12,7 +13,7 @@ Item {
 
     property var listModel: null
 
-    property bool isFocusable: root.isRealSection && !root.isPinnedOverlay
+    activeFocusOnTab: root.isRealSection && !root.isPinnedOverlay
 
     property string sectionKey: ""
     property bool isPinnedOverlay: false
@@ -47,8 +48,16 @@ Item {
     readonly property string subsubregionId: root.isRealSection ? root.listModel.sectionSubsubregionId(root.sectionKey) : ""
 
     readonly property int level: root.subsubregionId !== "" ? 3 : (root.subregionId !== "" ? 2 : 1)
-    readonly property color titleColor: root.level === 1 ? AmneziaStyle.color.textPrimary
-                                                         : AmneziaStyle.color.textTertiary
+    readonly property color chevronColor: root.level === 1 ? AmneziaStyle.color.iconDefault
+                                                         : AmneziaStyle.color.iconSecondary
+
+    readonly property string displayTitle: {
+        if (!root.isRealSection) {
+            return ""
+        }
+        root.listModel.layoutRevision
+        return "%1 · %2".arg(root.title).arg(root.listModel.sectionCount(root.sectionKey))
+    }
 
     readonly property bool collapsed: {
         if (!root.isRealSection) {
@@ -70,7 +79,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: root.isPinnedOverlay ? AmneziaStyle.color.midnightBlack
+        color: root.isPinnedOverlay ? AmneziaStyle.color.bgBase
                                     : AmneziaStyle.color.transparent
     }
 
@@ -82,30 +91,23 @@ Item {
         anchors.bottomMargin: root.contentBottomMargin
         spacing: 8
 
-        ParagraphTextType {
+        BodyTextType {
             Layout.fillWidth: true
 
-            color: root.titleColor
-            lineHeight: (root.level === 1 ? 24 : 18) + LanguageUiController.getLineHeightAppend()
-            font.pixelSize: root.level === 1 ? 16 : 14
-            font.weight: root.level === 1 ? 700 : 400
-            font.letterSpacing: root.level === 1 ? -0.4 : 0
-            horizontalAlignment: Text.AlignLeft
-            verticalAlignment: Text.AlignVCenter
-
-            text: {
-                if (!root.isRealSection) {
-                    return ""
-                }
-                root.listModel.layoutRevision
-                if (!root.collapsed) {
-                    return root.title
-                }
-                return "%1 (%2)".arg(root.title).arg(root.listModel.sectionCount(root.sectionKey))
-            }
+            visible: root.level === 1
+            color: AmneziaStyle.color.textPrimary
+            font.weight: 600
+            text: root.displayTitle
         }
 
-        Image {
+        SmallTextType {
+            Layout.fillWidth: true
+
+            visible: root.level !== 1
+            text: root.displayTitle
+        }
+
+        IconImage {
             Layout.preferredWidth: 24
             Layout.preferredHeight: 24
             Layout.leftMargin: 10
@@ -113,13 +115,8 @@ Item {
             visible: root.canToggle
             source: root.collapsed ? "qrc:/images/controls/chevron-down.svg"
                                    : "qrc:/images/controls/chevron-up.svg"
-
-            layer {
-                enabled: true
-                effect: ColorOverlay {
-                    color: root.titleColor
-                }
-            }
+            sourceSize: Qt.size(24, 24)
+            color: root.chevronColor
         }
     }
 
@@ -144,22 +141,9 @@ Item {
     Keys.onReturnPressed: root.toggle()
     Keys.onSpacePressed: root.toggle()
 
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: 2
-
-        color: AmneziaStyle.color.transparent
+    FocusRingType {
+        anchors.margins: 0
         radius: 8
-
-        border.width: root.activeFocus ? 1 : 0
-        border.color: AmneziaStyle.color.paleGray
+        visible: root.activeFocus
     }
 }

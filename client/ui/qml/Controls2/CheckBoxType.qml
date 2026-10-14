@@ -1,7 +1,8 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
+import QtQuick.Effects
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -11,179 +12,120 @@ CheckBox {
     id: root
 
     property string descriptionText
-    property string descriptionTextColor: AmneziaStyle.color.mutedGray
-    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    implicitWidth: implicitContentWidth + leftPadding + rightPadding
+    implicitHeight: Math.max(implicitContentHeight, implicitIndicatorHeight) + topPadding + bottomPadding
 
-    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
-    property string defaultColor: AmneziaStyle.color.transparent
-    property string pressedColor: AmneziaStyle.color.barelyTranslucentWhite
+    topPadding: 8
+    bottomPadding: 8
+    leftPadding: implicitIndicatorWidth + spacing
+    rightPadding: 0
+    spacing: 12
 
-    property string defaultBorderColor: AmneziaStyle.color.paleGray
-    property string checkedBorderColor: AmneziaStyle.color.goldenApricot
-    property string checkedBorderDisabledColor: AmneziaStyle.color.deepBrown
+    hoverEnabled: true
+    focusPolicy: Qt.TabFocus
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
+    opacity: root.enabled ? 1 : 0.5
 
-    property string checkedImageColor: AmneziaStyle.color.goldenApricot
-    property string pressedImageColor: AmneziaStyle.color.burntOrange
-    property string defaultImageColor: AmneziaStyle.color.transparent
-    property string checkedDisabledImageColor: AmneziaStyle.color.mutedBrown
+    indicator: Item {
+        x: 0
+        y: (root.height - height) / 2
 
-    property string imageSource: "qrc:/images/controls/check.svg"
+        implicitWidth: 40
+        implicitHeight: 40
 
-    property bool isFocusable: true
+        Rectangle {
+            anchors.fill: parent
 
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
-
-    hoverEnabled: enabled ? true : false
-    focusPolicy: Qt.NoFocus
-
-    background: Rectangle {
-        color: AmneziaStyle.color.transparent
-        border.color: root.focus ? borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: 1
-        radius: 16
-    }
-
-    indicator: Rectangle {
-        id: background
-
-        anchors.verticalCenter: parent.verticalCenter
-
-        implicitWidth: 56
-        implicitHeight: 56
-        radius: 16
-
-        color:  {
-            if (root.hovered) {
-                return hoveredColor
-            }
-            return defaultColor
-        }
-
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
+            radius: 12
+            visible: root.enabled && (root.hovered || root.down)
+            color: root.checked ? AmneziaStyle.color.bgStateLayerAccent : AmneziaStyle.color.bgStateLayer
         }
 
         Rectangle {
-            id: imageBorder
+            id: box
 
             anchors.centerIn: parent
+
             width: 24
             height: 24
-            color: AmneziaStyle.color.transparent
-            border.color: root.checked ?
-                              (root.enabled ?
-                                   checkedBorderColor :
-                                   checkedBorderDisabledColor) :
-                              defaultBorderColor
+            radius: 6
+
+            color: root.checked ? AmneziaStyle.color.bgBase : AmneziaStyle.color.transparent
             border.width: 1
-            radius: 4
+            border.color: root.checked ? AmneziaStyle.color.accentDark : AmneziaStyle.color.borderBold
 
-            Image {
-                anchors.centerIn: parent
-
-                source: root.pressed ? imageSource : root.checked ? imageSource : ""
-                layer {
-                    enabled: true
-                    effect: ColorOverlay {
-                        color: {
-                            if (root.pressed) {
-                                return root.pressedImageColor
-                            } else if (root.checked) {
-                                if (root.enabled) {
-                                    return root.checkedImageColor
-                                } else {
-                                    return root.checkedDisabledImageColor
-                                }
-                            } else {
-                                return root.defaultImageColor
-                            }
-                        }
-                    }
-                }
+            Behavior on border.color {
+                ColorAnimation { duration: 150 }
             }
+        }
+
+        MultiEffect {
+            anchors.fill: check
+
+            source: check
+            visible: root.checked
+            shadowEnabled: true
+            shadowColor: AmneziaStyle.color.accentLight
+            shadowBlur: 0.6
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+        }
+
+        IconImage {
+            id: check
+
+            anchors.centerIn: box
+
+            width: 16
+            height: 16
+
+            visible: root.checked
+            source: "qrc:/images/controls/check.svg"
+            sourceSize: Qt.size(16, 16)
+            color: AmneziaStyle.color.accentLight
+        }
+
+        FocusRingType {
+            target: box
+            radius: 6
+            visible: root.visualFocus
         }
     }
 
-    contentItem: Item {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: 8 + background.width
+    contentItem: ColumnLayout {
+        spacing: 4
 
-        implicitHeight: content.implicitHeight
+        H3TextType {
+            Layout.fillWidth: true
 
-        ColumnLayout {
-            id: content
+            visible: text !== ""
+            text: root.text
+        }
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
+        SmallTextType {
+            Layout.fillWidth: true
 
-            spacing: 4
-
-            ListItemTitleType {
-                Layout.fillWidth: true
-
-                text: root.text
-                color: root.enabled ? root.textColor : root.textDisabledColor
-            }
-
-            CaptionTextType {
-                id: description
-
-                Layout.fillWidth: true
-
-                text: root.descriptionText
-                color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
-
-                visible: root.descriptionText !== ""
-            }
+            visible: text !== ""
+            text: root.descriptionText
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        enabled: false
     }
 
-    Keys.onEnterPressed: event => handleSwitch(event)
-    Keys.onReturnPressed: event => handleSwitch(event)
-    Keys.onSpacePressed: event => handleSwitch(event)
-
-    function handleSwitch(event) {
+    Keys.onEnterPressed: function(event) {
         if (!event.isAutoRepeat) {
-            root.checked = !root.checked
-            root.checkedChanged()
+            root.toggle()
+            root.toggled()
         }
-        event.accepted = true
+    }
+
+    Keys.onReturnPressed: function(event) {
+        if (!event.isAutoRepeat) {
+            root.toggle()
+            root.toggled()
+        }
     }
 }
-
-

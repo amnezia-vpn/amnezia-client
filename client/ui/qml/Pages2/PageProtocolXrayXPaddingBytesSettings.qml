@@ -17,71 +17,69 @@ PageType {
 
     property bool editDirty: false
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
+
+        anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
+        anchors.bottomMargin: saveButton.visible ? 16 : 0
         anchors.left: parent.left
         anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
-        delegate: ColumnLayout {
+        header: NavigationBarType {
             width: listView.width
-            spacing: 0
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("xPaddingBytes")
-            }
+            title: qsTr("xPaddingBytes")
+        }
 
-            CaptionTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 8
-                text: qsTr("Range")
-                color: AmneziaStyle.color.mutedGray
-            }
+        footer: Item {
+            width: listView.width
+            height: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
+        }
 
-            MinMaxRowType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                minValue: xPaddingBytesMin
-                maxValue: xPaddingBytesMax
-                minPlaceholder: XrayConfigModel.xPaddingBytesMinDefault()
-                maxPlaceholder: XrayConfigModel.xPaddingBytesMaxDefault()
-                onMinChanged: function(val) { xPaddingBytesMin = val; root.editDirty = false }
-                onMaxChanged: function(val) { xPaddingBytesMax = val; root.editDirty = false }
-                onEdited: root.editDirty = true
-            }
+        delegate: Item {
+            width: listView.width
+            implicitHeight: content.implicitHeight
 
-            Item {
-                Layout.preferredHeight: 16
+            ColumnLayout {
+                id: content
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+
+                spacing: 12
+
+                SmallTextType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 16
+                    text: qsTr("Range")
+                }
+
+                MinMaxRowType {
+                    Layout.fillWidth: true
+                    minValue: xPaddingBytesMin
+                    maxValue: xPaddingBytesMax
+                    minPlaceholder: XrayConfigModel.xPaddingBytesMinDefault()
+                    maxPlaceholder: XrayConfigModel.xPaddingBytesMaxDefault()
+                    onMinChanged: function(val) { xPaddingBytesMin = val; root.editDirty = false }
+                    onMaxChanged: function(val) { xPaddingBytesMax = val; root.editDirty = false }
+                    onEdited: root.editDirty = true
+                }
             }
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.left: root.left
-        anchors.right: root.right
-        anchors.bottom: root.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -89,7 +87,7 @@ PageType {
         visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
         enabled: visible
         text: qsTr("Save")
-        clickedFunc: function () {
+        onClicked: {
             saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
