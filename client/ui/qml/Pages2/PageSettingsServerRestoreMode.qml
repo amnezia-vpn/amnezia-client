@@ -83,7 +83,7 @@ PageType {
         restoreReplaceMode = replaceMode
         PageController.showBusyIndicator(true)
 
-        ServersBackupController.startRestore(
+        BackupController.startRestore(
             isFromSetupWizard,
             backupFilePath,
             replaceMode,
@@ -94,11 +94,11 @@ PageType {
     }
 
     Connections {
-        target: ServersBackupController
+        target: BackupController
 
         function onBackupRestored() {
             if (isFromSetupWizard) {
-                ServersBackupController.setDefaultServerAfterRestore(true)
+                BackupController.setDefaultServerAfterRestore(true)
             } else {
                 PageController.showBusyIndicator(false)
                 navigateToRestoredPage()
@@ -110,7 +110,7 @@ PageType {
             navigateToRestoredPage()
         }
 
-        function onErrorOccurred(errorMessage, errorCode) {
+        function onErrorOccurred(errorMessage) {
             PageController.showBusyIndicator(false)
             PageController.showErrorMessage(qsTr("Backup restore error: %1").arg(errorMessage))
         }

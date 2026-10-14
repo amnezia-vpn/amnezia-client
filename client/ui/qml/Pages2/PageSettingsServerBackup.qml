@@ -92,7 +92,7 @@ PageType {
 
         var yesButtonFunction = function() {
             PageController.showBusyIndicator(true)
-            ServersBackupController.createBackupWithDownload(downloadAfterCreate, true)
+            BackupController.createBackupWithDownload(downloadAfterCreate, true)
         }
         var noButtonFunction = function() {}
 
@@ -107,7 +107,7 @@ PageType {
             return
         }
 
-        var fileInfo = ServersBackupController.getBackupFileInfo(localPath)
+        var fileInfo = BackupController.getBackupFileInfo(localPath)
         var fileName = fileInfo.fileName || "backup.tgz"
         var serverIp = fileInfo.serverIp || ""
 
@@ -135,7 +135,7 @@ PageType {
     }
 
     Connections {
-        target: ServersBackupController
+        target: BackupController
 
         function onBackupCreated(backupFilename) {
             PageController.showBusyIndicator(false)
@@ -151,7 +151,7 @@ PageType {
             console.log("Backup progress:", percent, "%", message)
         }
 
-        function onErrorOccurred(errorMessage, errorCode) {
+        function onErrorOccurred(errorMessage) {
             PageController.showBusyIndicator(false)
             PageController.showErrorMessage(qsTr("Backup error: %1").arg(errorMessage))
         }

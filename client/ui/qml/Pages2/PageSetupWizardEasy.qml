@@ -34,28 +34,6 @@ PageType {
     property bool isInstallingContainers: false
 
     Connections {
-        target: ServersBackupController
-
-        function onReadyForRestore(backupFilePath, hostname, username, secretData, serverIp, fileName) {
-            var foundContainers = ServersBackupController.scanBackupForContainers(backupFilePath)
-            console.log("Found containers in backup:", foundContainers)
-
-            if (foundContainers.length === 0) {
-                PageController.showErrorMessage(qsTr("No containers found in backup file"))
-                root.isRestoreFromBackup = false
-                return
-            }
-
-            root.containersToInstall = foundContainers
-            root.currentContainerIndex = 0
-
-            InstallController.setProcessedServerCredentials(hostname, username, secretData)
-            root.waitingForServerToAdd = true
-            InstallController.addEmptyServer()
-        }
-    }
-
-    Connections {
         target: InstallController
 
         function onInstallServerFinished(finishedMessage) {
@@ -318,7 +296,19 @@ PageType {
                         root.restoreUsername = credentialsPage.savedUsername
                         root.restoreSecretData = credentialsPage.savedSecretData
 
-                        ServersBackupController.prepareRestoreFromBackup(localPath, root.restoreHostname, root.restoreUsername, root.restoreSecretData)
+                        var foundContainers = BackupController.scanBackupForContainers(localPath)
+                        if (foundContainers.length === 0) {
+                            PageController.showErrorMessage(qsTr("No containers found in backup file"))
+                            root.isRestoreFromBackup = false
+                            return
+                        }
+
+                        root.containersToInstall = foundContainers
+                        root.currentContainerIndex = 0
+
+                        InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
+                        root.waitingForServerToAdd = true
+                        InstallController.addEmptyServer()
                     }
                 }
             }
