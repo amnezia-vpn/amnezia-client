@@ -176,7 +176,7 @@ private slots:
         QCOMPARE(model->getSelectedServiceName(), QString("Amnezia Free"));
         QCOMPARE(model->getSelectedServiceType(), QString("amnezia-free"));
         QCOMPARE(model->getSelectedServiceProtocol(), QString("wireguard"));
-        QCOMPARE(model->getSelectedServiceCountries(), QJsonArray([ "EE", "FI" ]));
+        QCOMPARE(model->getSelectedServiceCountries(), QJsonArray { "EE", "FI" });
         QCOMPARE(model->getCountryCode(), QString("EE"));
         QCOMPARE(model->getStoreEndpoint(), QString("https://example.com/store"));
     }
