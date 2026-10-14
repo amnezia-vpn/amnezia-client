@@ -76,7 +76,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
         spacing: 12
 

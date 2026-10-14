@@ -47,7 +47,7 @@ RadioDelegate {
     }
 
     indicator: Item {
-        x: 12
+        x: root.leftPadding - width - root.spacing
         y: (root.height - height) / 2
         width: 48
         height: 48

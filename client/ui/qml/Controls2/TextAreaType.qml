@@ -31,7 +31,7 @@ Rectangle {
         return textArea.activeFocus ? AmneziaStyle.color.borderEmphasis : AmneziaStyle.color.borderSoft
     }
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     Flickable {
         id: flickable

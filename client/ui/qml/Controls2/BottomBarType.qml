@@ -11,7 +11,7 @@ Rectangle {
 
     default property alias content: column.data
 
-    implicitHeight: column.implicitHeight + 8 + 16 + PageController.safeAreaBottomMargin
+    implicitHeight: column.implicitHeight + 8 + 8 + PageController.safeAreaBottomMargin
 
     color: root.filled ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.bgBase
 

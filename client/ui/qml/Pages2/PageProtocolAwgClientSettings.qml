@@ -377,7 +377,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.rightMargin: 16
         anchors.leftMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
         enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
 

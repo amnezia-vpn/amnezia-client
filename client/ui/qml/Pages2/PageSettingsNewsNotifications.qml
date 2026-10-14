@@ -44,6 +44,7 @@ PageType {
                 anchors.rightMargin: 16
 
                 leadingSlotWidth: 24
+                leftPadding: read ? padding + leadingSlotWidth + spacing : padding
                 icon.source: read ? "" : "qrc:/images/controls/unread-dot.svg"
                 icon.width: 8
                 icon.height: 8

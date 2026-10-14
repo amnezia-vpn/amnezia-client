@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 
 import PageEnum 1.0
 import Style 1.0
@@ -46,9 +47,42 @@ PageType {
                 Layout.fillWidth: true
             }
 
+            Image {
+                id: image
+
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 153
+                Layout.preferredHeight: 131
+
+                source: "qrc:/images/amneziaLogo.svg"
+                sourceSize: Qt.size(153 * Screen.devicePixelRatio, 131 * Screen.devicePixelRatio)
+                fillMode: Image.PreserveAspectFit
+            }
+
+            H1TextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                horizontalAlignment: Text.AlignHCenter
+                text: qsTr("Support Amnezia")
+            }
+
+            BodyTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                horizontalAlignment: Text.AlignHCenter
+                color: AmneziaStyle.color.textSecondary
+                text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -60,41 +94,10 @@ PageType {
 
                     spacing: 12
 
-                    Image {
-                        id: image
-
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.preferredWidth: 291
-                        Layout.preferredHeight: 224
-
-                        source: "qrc:/images/amneziaBigLogo.png"
-                    }
-
-                    H2TextType {
-                        Layout.fillWidth: true
-                        Layout.topMargin: 12
-
-                        horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Support Amnezia")
-                    }
-
                     BodyTextType {
                         Layout.fillWidth: true
 
-                        horizontalAlignment: Text.AlignHCenter
-                        color: AmneziaStyle.color.textSecondary
-                        text: qsTr("Amnezia is a free and open-source application. You can support the developers if you like it.")
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-
-                    spacing: 12
-
-                    SmallTextType {
-                        Layout.fillWidth: true
-
+                        color: AmneziaStyle.color.textTertiary
                         text: qsTr("Contacts")
                     }
 
@@ -109,11 +112,9 @@ PageType {
                             delegate: ListItemType {
                                 Layout.fillWidth: true
 
-                                leadingSlotWidth: 24
                                 text: title
                                 subtitle: description
                                 icon.source: imageSource
-                                trailingIconSource: "qrc:/images/controls/external-link.svg"
 
                                 onClicked: handler()
                             }
@@ -122,7 +123,8 @@ PageType {
                 }
 
                 ColumnLayout {
-                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.maximumWidth: content.width - 32
 
                     spacing: 12
 
@@ -162,9 +164,12 @@ PageType {
                     ButtonType {
                         id: checkUpdatesButton
 
-                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: Math.max(220, implicitWidth)
+                        Layout.maximumWidth: content.width - 32
 
                         variant: ButtonType.Secondary
+                        loading: UpdateController.isCheckRunning
                         enabled: !UpdateController.isCheckRunning
 
                         text: UpdateController.isCheckRunning ? qsTr("Checking...") : qsTr("Check for updates")
@@ -174,12 +179,12 @@ PageType {
                         }
                     }
 
-                    LinkButtonType {
+                    ButtonType {
                         id: privacyPolicyButton
 
                         Layout.alignment: Qt.AlignHCenter
 
-                        size: LinkButtonType.Medium
+                        variant: ButtonType.Text
                         text: qsTr("Privacy Policy")
 
                         onClicked: {

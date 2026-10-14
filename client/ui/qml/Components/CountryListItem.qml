@@ -12,6 +12,7 @@ ListItemType {
 
     signal favoriteToggled()
 
+    leftPadding: 16
     leadingSlotWidth: 24
     icon.source: root.countryFlagCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + root.countryFlagCode + ".svg" : ""
     icon.width: 21

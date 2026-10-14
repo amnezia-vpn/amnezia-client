@@ -32,7 +32,7 @@ Item {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     function runClickedFunc() {
         if (root.clickedFunc && typeof root.clickedFunc === "function") {
@@ -84,13 +84,13 @@ Item {
                     color: AmneziaStyle.color.bgSurfaceAlt
                     border.width: textField.activeFocus ? 2 : 1
                     border.color: {
-                        if (textField.activeFocus) {
-                            return AmneziaStyle.color.borderEmphasis
-                        }
                         if (root.hasError) {
                             return AmneziaStyle.color.statusDestructive
                         }
-                        return AmneziaStyle.color.borderSoft
+                        if (textField.activeFocus) {
+                            return AmneziaStyle.color.borderFocus
+                        }
+                        return AmneziaStyle.color.borderBold
                     }
 
                     CaptionTextType {

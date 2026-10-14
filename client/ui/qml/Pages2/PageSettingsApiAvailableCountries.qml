@@ -236,7 +236,6 @@ PageType {
         anchors.fill: parent
 
         listView: menuContent
-        title: qsTr("Amnezia Premium")
 
         collapsibleContent: ColumnLayout {
             spacing: 0
@@ -247,7 +246,7 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 12
+                Layout.topMargin: 16
 
                 text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
                 color: root.subscriptionExpired ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
@@ -259,24 +258,13 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 28
+                Layout.topMargin: 16
 
                 text: qsTr("Renew subscription")
 
                 onClicked: {
                     SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
-            }
-
-            BodyTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: root.showSubscriptionNote ? 12 : 8
-                Layout.bottomMargin: 16
-
-                text: qsTr("Locations")
-                color: AmneziaStyle.color.textSecondary
             }
         }
 

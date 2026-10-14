@@ -13,8 +13,6 @@ Item {
     property string headerText
     property int headerTextFormat: Text.AutoText
     property int headerHorizontalAlignment: Text.AlignLeft
-    property int headerTextMaximumLineCount: 2
-    property int headerTextElide: Qt.ElideRight
 
     property string descriptionText
 
@@ -54,8 +52,6 @@ Item {
                 text: root.headerText
                 textFormat: root.headerTextFormat
                 horizontalAlignment: root.headerHorizontalAlignment
-                maximumLineCount: root.headerTextMaximumLineCount
-                elide: root.headerTextElide
             }
 
             IconButtonType {

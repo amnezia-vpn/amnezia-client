@@ -50,6 +50,7 @@ TabButton {
                 anchors.verticalCenter: parent.top
 
                 visible: root.showBadge
+                color: AmneziaStyle.color.accentDefault
             }
         }
     }

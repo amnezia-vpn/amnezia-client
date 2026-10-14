@@ -56,9 +56,9 @@ AbstractButton {
                 return AmneziaStyle.color.bgSurface
             }
             if (root.down) {
-                return AmneziaStyle.color.buttonPrimaryPress
+                return AmneziaStyle.color.bgActionPress
             }
-            return root.hovered ? AmneziaStyle.color.buttonPrimaryHover : AmneziaStyle.color.buttonPrimaryBg
+            return root.hovered ? AmneziaStyle.color.bgActionHover : AmneziaStyle.color.bgAction
         }
 
         Behavior on color {

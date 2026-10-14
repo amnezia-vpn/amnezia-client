@@ -1531,7 +1531,7 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: diagClientsConnected >= 0 ? (diagPortReachable ? AmneziaStyle.color.bgSurfaceInverse : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.buttonPrimaryPress
+                                color: diagClientsConnected >= 0 ? (diagPortReachable ? AmneziaStyle.color.bgSurfaceInverse : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.bgActionPress
                             }
                             SmallTextType {
                                 Layout.fillWidth: true
@@ -1551,7 +1551,7 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: diagClientsConnected >= 0 ? (diagTelegramReachable ? AmneziaStyle.color.bgSurfaceInverse : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.buttonPrimaryPress
+                                color: diagClientsConnected >= 0 ? (diagTelegramReachable ? AmneziaStyle.color.bgSurfaceInverse : AmneziaStyle.color.statusDestructive) : AmneziaStyle.color.bgActionPress
                             }
                             SmallTextType {
                                 Layout.fillWidth: true
@@ -1571,7 +1571,7 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: diagClientsConnected >= 0 ? AmneziaStyle.color.accentLight : AmneziaStyle.color.buttonPrimaryPress
+                                color: diagClientsConnected >= 0 ? AmneziaStyle.color.accentLight : AmneziaStyle.color.bgActionPress
                             }
                             SmallTextType {
                                 Layout.fillWidth: true
@@ -1591,7 +1591,7 @@ PageType {
                                 width: 8
                                 height: 8
                                 radius: 4
-                                color: AmneziaStyle.color.buttonPrimaryPress
+                                color: AmneziaStyle.color.bgActionPress
                             }
                             SmallTextType {
                                 Layout.fillWidth: true

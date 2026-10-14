@@ -20,7 +20,7 @@ Button {
 
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : 0.25
+    opacity: root.enabled ? 1 : 0.4
 
     background: Rectangle {
         radius: 16
@@ -29,9 +29,9 @@ Button {
 
         color: {
             if (root.down) {
-                return AmneziaStyle.color.buttonPrimaryPress
+                return AmneziaStyle.color.bgActionPress
             }
-            return root.hovered ? AmneziaStyle.color.buttonPrimaryHover : AmneziaStyle.color.buttonPrimaryBg
+            return root.hovered ? AmneziaStyle.color.bgActionHover : AmneziaStyle.color.bgAction
         }
 
         Behavior on color {

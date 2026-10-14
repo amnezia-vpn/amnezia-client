@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
 #include <QTranslator>
 #include <QTimer>

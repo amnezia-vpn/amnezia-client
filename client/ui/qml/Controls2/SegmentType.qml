@@ -49,7 +49,7 @@ RadioButton {
     contentItem: BodyTextType {
         text: root.text
         color: AmneziaStyle.color.textPrimary
-        opacity: !root.enabled && !root.checked ? 0.36 : 1
+        opacity: !root.enabled && !root.checked ? 0.4 : 1
 
         lineHeight: (root.size === SegmentType.Small ? 18 : 24) + LanguageUiController.getLineHeightAppend()
         font.pixelSize: root.size === SegmentType.Small ? 14 : 16

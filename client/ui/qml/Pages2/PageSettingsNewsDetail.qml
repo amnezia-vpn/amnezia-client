@@ -49,9 +49,6 @@ PageType {
                 Layout.fillWidth: true
 
                 title: newsItem ? newsItem.title : ""
-
-                header.headerTextMaximumLineCount: 0
-                header.headerTextElide: Text.ElideNone
             }
 
             BodyTextType {

@@ -23,34 +23,17 @@ PageType {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.topMargin: 16 + PageController.safeAreaTopMargin
-        anchors.bottomMargin: 104 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 96 + PageController.safeAreaBottomMargin
 
-        ColumnLayout {
+        Image {
             anchors.centerIn: parent
 
-            spacing: 0
+            width: 153
+            height: 131
 
-            Image {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.preferredWidth: 147
-                Layout.preferredHeight: 115
-
-                source: "qrc:/images/amneziaBigLogo.png"
-                sourceClipRect: Qt.rect(192, 204, 980, 769)
-                fillMode: Image.PreserveAspectFit
-                smooth: true
-                mipmap: true
-            }
-
-            CaptionTextType {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 2
-
-                text: "YOUR OWN VPN"
-                color: AmneziaStyle.color.textAccent
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.NoWrap
-            }
+            source: "qrc:/images/amneziaLogo.svg"
+            sourceSize: Qt.size(153 * Screen.devicePixelRatio, 131 * Screen.devicePixelRatio)
+            fillMode: Image.PreserveAspectFit
         }
     }
 
@@ -62,7 +45,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
         text: qsTr("Let's get started")
 
