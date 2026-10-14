@@ -1,206 +1,169 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 import Style 1.0
 
 import "TextTypes"
 
-Button {
+AbstractButton {
     id: root
 
-    property string headerText
-    property string bodyText
-    property string footerText
+    property string subtitle
+    property string footnote
+    property string badgeText
+    property string errorText
+    property bool muted: false
 
-    property color headerTextColor: AmneziaStyle.color.paleGray
-    property color bodyTextColor: AmneziaStyle.color.mutedGray
-    property bool showRecommendedBadge: false
-    property string recommendedText: ""
+    readonly property real badgeOffset: root.badgeText !== "" ? 16 : 0
 
-    property string hoveredColor: AmneziaStyle.color.slateGray
-    property string defaultColor: AmneziaStyle.color.onyxBlack
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: implicitContentHeight + topPadding + bottomPadding
 
-    property string textColor: AmneziaStyle.color.midnightBlack
+    topInset: root.badgeOffset
+    bottomInset: errorLabel.visible ? errorLabel.implicitHeight + 4 : 0
 
-    property string rightImageSource
-    property string rightImageColor: AmneziaStyle.color.paleGray
+    leftPadding: 16
+    rightPadding: 16
+    topPadding: root.badgeOffset + 12
+    bottomPadding: bottomInset + 12
 
-    property string leftImageSource
-
-    property alias focusItem: rightImage
+    spacing: 12
 
     hoverEnabled: true
-    clip: false
     focusPolicy: Qt.NoFocus
+    opacity: enabled ? 1.0 : 0.4
 
-    readonly property real cardTextOpacity: !enabled ? 1.0 : pressed ? 0.7 : hovered ? 0.8 : 1.0
+    icon.width: 24
+    icon.height: 24
+    icon.color: root.muted ? AmneziaStyle.color.iconSecondary : AmneziaStyle.color.iconDefault
 
-    background: Rectangle {
-        id: backgroundRect
+    Accessible.role: Accessible.Button
+    Accessible.name: root.text
+    Accessible.description: root.subtitle
 
-        anchors.fill: parent
-        radius: 16
+    background: Item {
+        implicitWidth: 358
 
-        color: root.hovered && root.enabled ? root.hoveredColor : root.defaultColor
+        Rectangle {
+            anchors.fill: parent
 
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
+            radius: 16
+            color: root.muted ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.bgSurface
+            opacity: root.muted ? 0.75 : 1.0
+        }
+
+        Rectangle {
+            anchors.fill: parent
+
+            radius: 16
+            color: !root.muted && root.enabled && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer
+                                                                             : AmneziaStyle.color.transparent
+
+            Behavior on color {
+                ColorAnimation { duration: 150 }
+            }
+        }
+
+        RecommendationBadgeType {
+            x: 16
+            y: -root.badgeOffset
+
+            visible: root.badgeText !== ""
+            text: root.badgeText
+        }
+
+        SmallTextType {
+            id: errorLabel
+
+            anchors.top: parent.bottom
+            anchors.topMargin: 4
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            visible: root.errorText !== ""
+            text: root.errorText
+            color: AmneziaStyle.color.statusDestructive
+        }
+
+        HoverHandler {
+            cursorShape: Qt.PointingHandCursor
+            enabled: root.enabled
         }
     }
 
-    contentItem: Item {
-        id: contentRoot
+    contentItem: RowLayout {
+        spacing: root.spacing
 
-        z: 1
-        anchors.left: parent.left
-        anchors.right: parent.right
+        IconImage {
+            Layout.alignment: Qt.AlignTop
+            Layout.preferredWidth: root.icon.width
+            Layout.preferredHeight: root.icon.height
 
-        readonly property bool badgeVisible: root.showRecommendedBadge && root.recommendedText !== ""
-
-        implicitHeight: layoutCol.implicitHeight
+            visible: root.icon.source.toString() !== ""
+            source: root.icon.source
+            sourceSize: Qt.size(root.icon.width, root.icon.height)
+            color: root.icon.color
+        }
 
         ColumnLayout {
-            id: layoutCol
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignTop
 
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: 0
+            spacing: 4
 
-            Item {
-                id: badgeTopSpacer
-
+            H3TextType {
                 Layout.fillWidth: true
-                Layout.preferredHeight: contentRoot.badgeVisible ? (recBadge.height / 2 + 8) : 0
 
-                Rectangle {
-                    id: recBadge
+                visible: text !== ""
+                text: root.text
+                color: root.muted ? AmneziaStyle.color.textTertiary : AmneziaStyle.color.textPrimary
+            }
 
-                    visible: contentRoot.badgeVisible
-                    z: 2
+            SmallTextType {
+                Layout.fillWidth: true
 
-                    anchors.left: parent.left
-                    anchors.leftMargin: 20
-                    anchors.verticalCenter: parent.top
+                visible: text !== "" && !root.muted
+                text: root.subtitle
+                textFormat: Text.RichText
 
-                    radius: 10
-                    color: AmneziaStyle.color.softViolet
-                    implicitHeight: recLabel.implicitHeight + 8
-                    implicitWidth: recLabel.implicitWidth + 16
-
-                    width: implicitWidth
-                    height: implicitHeight
-
-                    BadgeTextType {
-                        id: recLabel
-
-                        anchors.centerIn: parent
-                        text: root.recommendedText
-                    }
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
                 }
             }
 
-            RowLayout {
-                id: content
-
+            CaptionTextType {
                 Layout.fillWidth: true
 
-                Image {
-                    id: leftImage
-                    source: leftImageSource
-
-                    visible: leftImageSource !== ""
-
-                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Layout.topMargin: 24
-                    Layout.bottomMargin: 24
-                    Layout.leftMargin: 24
-                }
-
-                ColumnLayout {
-
-                    ListItemTitleType {
-                        text: root.headerText
-                        visible: text !== ""
-
-                        color: root.headerTextColor
-
-                        Layout.fillWidth: true
-                        Layout.rightMargin: 16
-                        Layout.leftMargin: 16
-                        Layout.topMargin: contentRoot.badgeVisible ? 0 : 16
-                        Layout.bottomMargin: root.bodyText !== "" ? 0 : 16
-
-                        opacity: root.cardTextOpacity
-                    }
-
-                    CaptionTextType {
-                        text: root.bodyText
-                        visible: text !== ""
-
-                        color: root.bodyTextColor
-                        textFormat: Text.RichText
-                        onLinkActivated: function(link) {
-                            Qt.openUrlExternally(link)
-                        }
-
-                        Layout.fillWidth: true
-                        Layout.rightMargin: 16
-                        Layout.leftMargin: 16
-                        Layout.bottomMargin: root.footerText !== "" ? 0 : 8
-
-                        opacity: root.cardTextOpacity
-                    }
-
-                    ButtonTextType {
-                        text: root.footerText
-                        visible: text !== ""
-
-                        color: AmneziaStyle.color.mutedGray
-
-                        Layout.fillWidth: true
-                        Layout.rightMargin: 16
-                        Layout.leftMargin: 16
-                        Layout.topMargin: 16
-                        Layout.bottomMargin: 16
-
-                        opacity: root.cardTextOpacity
-                    }
-                }
-
-                ImageButtonType {
-                    id: rightImage
-
-                    implicitWidth: 40
-                    implicitHeight: 40
-
-                    hoverEnabled: false
-                    image: rightImageSource
-                    imageColor: rightImageColor
-                    visible: rightImageSource ? true : false
-
-                    Layout.alignment: Qt.AlignRight | Qt.AlignTop
-                    Layout.topMargin: 16
-                    Layout.bottomMargin: 16
-                    Layout.rightMargin: 16
-
-                    Rectangle {
-                        id: rightImageBackground
-
-                        anchors.fill: parent
-                        radius: 12
-                        color: root.pressed ? rightImage.pressedColor : root.hovered && root.enabled ? rightImage.hoveredColor : rightImage.defaultColor
-
-                        Behavior on color {
-                            PropertyAnimation { duration: 200 }
-                        }
-                    }
-
-                    onClicked: {
-                        root.clicked()
-                    }
-                }
+                visible: text !== "" && root.muted
+                text: root.subtitle
+                textFormat: Text.RichText
+                color: AmneziaStyle.color.textQuaternary
             }
+
+            SmallTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+
+                visible: text !== ""
+                text: root.footnote
+                color: root.muted ? AmneziaStyle.color.textQuaternary : AmneziaStyle.color.textSecondary
+            }
+        }
+
+        IconButtonType {
+            Layout.alignment: Qt.AlignTop
+            Layout.leftMargin: -root.spacing
+
+            icon.source: "qrc:/images/controls/chevron-right.svg"
+            icon.color: AmneziaStyle.color.iconDefault
+            opacity: root.muted ? 0.5 : 1.0
+            enabled: root.enabled
+            Accessible.name: root.text
+
+            onClicked: root.clicked()
         }
     }
 }

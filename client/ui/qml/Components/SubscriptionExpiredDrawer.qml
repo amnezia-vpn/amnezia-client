@@ -9,12 +9,12 @@ import Style 1.0
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType2 {
+SheetType {
     id: root
 
     property bool isRenewalAvailable: false
 
-    expandedHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
+    expandedHeight: content.implicitHeight + 8 + PageController.safeAreaBottomMargin
 
     onAboutToShow: {
         isRenewalAvailable = ServersUiController.isServerRenewalAvailable(ServersUiController.defaultServerId) && !ApiAccountInfoModel.data("isInAppPurchase")
@@ -29,70 +29,42 @@ DrawerType2 {
 
         spacing: 0
 
-        Item {
-            Layout.fillWidth: true
-            Layout.topMargin: 24
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-            implicitHeight: titleText.implicitHeight
-
-            Header2TextType {
-                id: titleText
-                anchors.left: parent.left
-                anchors.right: parent.right
-
-                text: ServersUiController.serverName(ServersUiController.defaultServerId) + qsTr(" subscription has expired")
-                horizontalAlignment: Text.AlignLeft
-            }
-        }
-
-        ParagraphTextType {
-            visible: root.isRenewalAvailable
-
-            Layout.fillWidth: true
-            Layout.topMargin: 8
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-
-            text: qsTr("Renew to continue using VPN")
-            horizontalAlignment: Text.AlignLeft
-        }
-
-        BasicButtonType {
-            visible: root.isRenewalAvailable
-
+        SectionHeaderType {
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
+            headerText: ServersUiController.serverName(ServersUiController.defaultServerId) + qsTr(" subscription has expired")
+            descriptionText: root.isRenewalAvailable ? qsTr("Renew to continue using VPN") : ""
+        }
+
+        ButtonType {
+            visible: root.isRenewalAvailable
+
+            Layout.fillWidth: true
+            Layout.topMargin: 26
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
+
             text: qsTr("Renew")
 
-            defaultColor: AmneziaStyle.color.paleGray
-            hoveredColor: AmneziaStyle.color.lightGray
-            pressedColor: AmneziaStyle.color.mutedGray
-            textColor: AmneziaStyle.color.midnightBlack
-
-            clickedFunc: function() {
+            onClicked: {
                 SubscriptionUiController.getRenewalLink(ServersUiController.defaultServerId)
             }
         }
 
-        BasicButtonType {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.topMargin: 8
-            Layout.bottomMargin: 8
+        ButtonType {
+            Layout.fillWidth: true
+            Layout.topMargin: root.isRenewalAvailable ? 12 : 26
+            Layout.rightMargin: 16
+            Layout.leftMargin: 16
 
-            implicitHeight: 25
-
-            defaultColor: AmneziaStyle.color.transparent
-            hoveredColor: AmneziaStyle.color.translucentWhite
-            pressedColor: AmneziaStyle.color.sheerWhite
-            textColor: AmneziaStyle.color.goldenApricot
+            variant: ButtonType.Text
 
             text: qsTr("Support")
 
-            clickedFunc: function() {
+            onClicked: {
                 PageController.showBusyIndicator(true)
                 let result = SubscriptionUiController.getAccountInfo(ServersUiController.defaultServerId, false)
                 PageController.showBusyIndicator(false)

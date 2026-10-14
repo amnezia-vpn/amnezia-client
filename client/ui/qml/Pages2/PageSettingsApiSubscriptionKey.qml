@@ -61,60 +61,52 @@ PageType {
     }
 
     FlickableType {
+        id: flickable
+
         anchors.fill: parent
+
         contentHeight: layout.implicitHeight
 
         ColumnLayout {
             id: layout
-            width: root.width
 
-            BackButtonType {
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
+            width: flickable.width
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: root.processedServer ? qsTr(root.processedServer.name + "\nsubscription key") : ""
             }
 
-            Label {
+            ButtonType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
                 Layout.topMargin: 16
-                text: qsTr(root.processedServer.name + "\nsubscription key")
-                font.pixelSize: 32
-                font.bold: true
-                color: AmneziaStyle.color.paleGray
-                wrapMode: Text.Wrap
-            }
-
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("Copy key")
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
-                clickedFunc: function() {
+                onClicked: {
                     SubscriptionUiController.copyVpnKeyToClipboard()
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            BasicButtonType {
+            ButtonType {
+                variant: ButtonType.Secondary
+
                 Layout.fillWidth: true
-                Layout.topMargin: 4
+                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-
-                defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
 
                 text: qsTr("Save key as a file")
                 leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                clickedFunc: function() {
+                onClicked: {
                     var fileName = GC.isMobile()
                         ? root.processedServer.name.toLowerCase().replace(/\s+/g, "_") + "_key.vpn"
                         : SystemController.getFileName(
@@ -136,21 +128,18 @@ PageType {
                 }
             }
 
-            BasicButtonType {
+            ButtonType {
+                variant: ButtonType.Secondary
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                defaultColor: "transparent"
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
 
                 text: qsTr("Show key text")
                 leftImageSource: "qrc:/images/controls/eye.svg"
 
-                clickedFunc: function() {
+                onClicked: {
                     PageController.showBusyIndicator(true)
                     SubscriptionUiController.prepareVpnKeyExport(ServersUiController.processedServerId)
                     PageController.showBusyIndicator(false)
@@ -158,84 +147,42 @@ PageType {
                 }
             }
 
-            Rectangle {
-                Layout.preferredWidth: Math.min(Math.min(root.width - (Layout.leftMargin + Layout.rightMargin), root.height * 0.5), 360)
-                Layout.preferredHeight: Layout.preferredWidth
+            QrCodeCard {
+                Layout.fillWidth: true
+                Layout.maximumWidth: 360
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 20
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 visible: SubscriptionUiController.qrCodesCount > 0
-                color: "white"
-                radius: 12
 
-                Image {
-                    anchors.fill: parent
-                    smooth: false
-                    fillMode: Image.PreserveAspectFit
-                    sourceSize.width: parent.width
-                    sourceSize.height: parent.height
-                    source: SubscriptionUiController.qrCodesCount > 0 && SubscriptionUiController.qrCodes[0] ? SubscriptionUiController.qrCodes[0] : ""
-                }
+                source: SubscriptionUiController.qrCodesCount > 0 && SubscriptionUiController.qrCodes[0] ? SubscriptionUiController.qrCodes[0] : ""
             }
 
-            ParagraphTextType {
+            SmallTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 16
+                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
                 visible: SubscriptionUiController.qrCodesCount > 0
+
                 horizontalAlignment: Text.AlignHCenter
+                color: AmneziaStyle.color.textTertiary
                 text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
+            }
+
+            Item {
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
             }
         }
     }
 
-    DrawerType2 {
+    ConfigContentSheet {
         id: vpnKeyDrawer
 
-        expandedHeight: windowHeight * 0.9
-
-        Item {
-            anchors.fill: parent
-            BackButtonType {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.topMargin: 16
-                backButtonFunction: function() { vpnKeyDrawer.close() }
-            }
-
-            ColumnLayout {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 56
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
-
-                Header2Type {
-                    Layout.fillWidth: true
-                    headerText: qsTr(root.processedServer.name + " Subscription key")
-                }
-
-                TextArea {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    readOnly: true
-                    activeFocusOnTab: false
-                    color: AmneziaStyle.color.paleGray
-                    selectionColor: AmneziaStyle.color.richBrown
-                    selectedTextColor: AmneziaStyle.color.paleGray
-                    font.pixelSize: 16
-                    font.weight: Font.Medium
-                    font.family: "PT Root UI VF"
-                    text: SubscriptionUiController.vpnKey
-                    wrapMode: Text.Wrap
-                    background: Rectangle { color: AmneziaStyle.color.transparent }
-                }
-            }
-        }
+        headerText: root.processedServer ? qsTr(root.processedServer.name + " Subscription key") : ""
+        contentText: SubscriptionUiController.vpnKey
     }
 }

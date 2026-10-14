@@ -13,7 +13,6 @@ import Style 1.0
 
 import "./"
 import "../Controls2"
-import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
@@ -22,53 +21,17 @@ PageType {
     
     property bool pageEnabled: true
 
-    ColumnLayout {
-        id: header
+    ListViewType {
+        id: listView
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        BackButtonType {
-            id: backButton
-        }
-
-        BaseHeaderType {
-            enabled: root.pageEnabled
-
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-
-            headerText: qsTr("DNS Exceptions")
-            descriptionText: qsTr("DNS servers listed here will remain accessible when KillSwitch is active")
-        }
-    }
-
-    ListView {
-        id: listView
-
-        anchors.top: header.bottom
-        anchors.topMargin: 16
-        anchors.bottom: parent.bottom
-
-        width: parent.width
-
-        enabled: root.pageEnabled
+        anchors.bottom: addSitePanel.top
 
         cacheBuffer: 200
         displayMarginBeginning: 40
         displayMarginEnd: 40
-        
-        ScrollBar.vertical: ScrollBarType {}
-        
-        footer: Item {
-            width: listView.width
-            height: addSitePanel.height
-        }
-        
-        footerPositioning: ListView.InlineFooter
 
         model: SortFilterProxyModel {
             id: dnsFilterModel
@@ -82,24 +45,37 @@ PageType {
             ]
         }
 
-        clip: true
-
-        reuseItems: true
-
-        delegate: ColumnLayout {
-            id: delegateContent
-
+        header: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
-                id: site
+            spacing: 0
+
+            NavigationBarType {
                 Layout.fillWidth: true
+                Layout.bottomMargin: 16
+
+                title: qsTr("DNS Exceptions")
+                description: qsTr("DNS servers listed here will remain accessible when KillSwitch is active")
+            }
+        }
+
+        delegate: Item {
+            width: listView.width
+            implicitHeight: site.implicitHeight
+
+            enabled: root.pageEnabled
+
+            ListItemType {
+                id: site
+
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
 
                 text: ip
-                rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                trailingIconSource: "qrc:/images/controls/trash.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Delete ") + ip + "?"
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -107,30 +83,29 @@ PageType {
                     var yesButtonFunction = function() {
                         AllowedDnsController.removeDns(dnsFilterModel.mapToSource(index))
                         if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
+                            site.forceActiveFocus(Qt.TabFocusReason)
                         }
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
+                            site.forceActiveFocus(Qt.TabFocusReason)
                         }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-
-            DividerType {}
         }
     }
 
     AddSitePanel {
         id: addSitePanel
-        
-        anchors.bottom: parent.bottom
+
         anchors.left: parent.left
         anchors.right: parent.right
-        
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: addSitePanel.textField.activeFocus ? 0 : PageController.imeHeight
+
         enabled: root.pageEnabled
         placeholderText: qsTr("IPv4 address")
 
@@ -145,10 +120,10 @@ PageType {
         }
     }
 
-    DrawerType2 {
+    SheetType {
         id: moreActionsDrawer
 
-        expandedHeight: windowHeight * 0.4375
+        expandedHeight: moreActionsDrawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
         ColumnLayout {
             id: moreActionsDrawerContent
@@ -157,33 +132,43 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            Header2Type {
+            spacing: 0
+
+            SectionHeaderType {
                 Layout.fillWidth: true
-                Layout.margins: 16
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("Import / Export addresses")
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 id: importSitesButton
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Import")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     importSitesDrawer.open()
                 }
             }
 
-            DividerType {}
-
-            LabelWithButtonType {
+            ListItemType {
                 id: exportSitesButton
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Save address list")
 
-                clickedFunction: function() {
+                onClicked: {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = "amnezia_killswitch_exceptions.json"
@@ -202,94 +187,91 @@ PageType {
                     }
                 }
             }
-
-            DividerType {}
         }
     }
 
-    DrawerType2 {
+    SheetType {
         id: importSitesDrawer
 
-        expandedHeight: windowHeight * 0.4375
+        expandedHeight: importSitesDrawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
-        Item {
-            anchors.fill: parent
+        ColumnLayout {
+            id: importSitesDrawerContent
 
-            BackButtonType {
-                id: importSitesDrawerBackButton
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
+            spacing: 0
 
-                backButtonFunction: function() {
-                    importSitesDrawer.close()
+            function importSites(fileName, replaceExistingSites) {
+                PageController.showBusyIndicator(true)
+                AllowedDnsController.importDns(fileName, replaceExistingSites)
+                PageController.showBusyIndicator(false)
+                importSitesDrawer.close()
+                moreActionsDrawer.close()
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.topMargin: 2
+                Layout.preferredHeight: 48
+
+                IconButtonType {
+                    x: 16
+                    y: 4
+
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/arrow-left.svg"
+                    Accessible.name: qsTr("Back")
+
+                    onClicked: importSitesDrawer.close()
                 }
             }
 
-            FlickableType {
-                anchors.top: importSitesDrawerBackButton.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+            SectionHeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
 
-                contentHeight: importSitesDrawerContent.height
+                headerText: qsTr("Import address list")
+            }
 
-                ColumnLayout {
-                    id: importSitesDrawerContent
+            ListItemType {
+                id: importSitesButton2
 
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                    Header2Type {
-                        Layout.fillWidth: true
-                        Layout.margins: 16
+                text: qsTr("Replace address list")
 
-                        headerText: qsTr("Import address list")
+                onClicked: {
+                    var fileName = SystemController.getFileName(qsTr("Open address file"),
+                                                                qsTr("Address files (*.json)"))
+                    if (fileName !== "") {
+                        importSitesDrawerContent.importSites(fileName, true)
                     }
+                }
+            }
 
-                    LabelWithButtonType {
-                        id: importSitesButton2
-                        Layout.fillWidth: true
+            ListItemType {
+                id: importSitesButton3
 
-                        text: qsTr("Replace address list")
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                        clickedFunction: function() {
-                            var fileName = SystemController.getFileName(qsTr("Open address file"),
-                                                                        qsTr("Address files (*.json)"))
-                            if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, true)
-                            }
-                        }
+                text: qsTr("Add imported addresses to existing ones")
+
+                onClicked: {
+                    var fileName = SystemController.getFileName(qsTr("Open address file"),
+                                                                qsTr("Address files (*.json)"))
+                    if (fileName !== "") {
+                        importSitesDrawerContent.importSites(fileName, false)
                     }
-
-                    DividerType {}
-
-                    LabelWithButtonType {
-                        id: importSitesButton3
-                        Layout.fillWidth: true
-                        text: qsTr("Add imported addresses to existing ones")
-
-                        clickedFunction: function() {
-                            var fileName = SystemController.getFileName(qsTr("Open address file"),
-                                                                        qsTr("Address files (*.json)"))
-                            if (fileName !== "") {
-                                importSitesDrawerContent.importSites(fileName, false)
-                            }
-                        }
-                    }
-
-                    function importSites(fileName, replaceExistingSites) {
-                        PageController.showBusyIndicator(true)
-                        AllowedDnsController.importDns(fileName, replaceExistingSites)
-                        PageController.showBusyIndicator(false)
-                        importSitesDrawer.close()
-                        moreActionsDrawer.close()
-                    }
-
-                    DividerType {}
                 }
             }
         }

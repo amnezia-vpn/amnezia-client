@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import Style 1.0
+
 import "../Config"
 
 Item {
@@ -10,6 +12,13 @@ Item {
     property StackView stackView: StackView.view
     property bool enableTimer: true
     property bool isTabBarHidden: false
+
+    Rectangle {
+        anchors.fill: parent
+        z: -1
+
+        color: AmneziaStyle.color.bgBase
+    }
 
     onVisibleChanged: {
         if (visible && enableTimer) {

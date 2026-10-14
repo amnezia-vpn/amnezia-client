@@ -23,120 +23,110 @@ PageType {
 
     Component.onCompleted: syncFromModel()
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (activeFocus) {
-                flick.contentY = 0
-            }
-        }
-    }
-
     FlickableType {
         id: flick
 
-        anchors.top: backButton.bottom
-        anchors.bottom: continueButton.top
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: bottomBar.top
 
-        contentHeight: scrollColumn.childrenRect.height + 24
+        contentHeight: scrollColumn.implicitHeight + 16
 
         ColumnLayout {
             id: scrollColumn
 
-            width: flick.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24
 
-                headerText: root.freeHeaderName
-                descriptionText: root.freeHeaderDescription
+                title: root.freeHeaderName
+                description: root.freeHeaderDescription
             }
 
-            LabelTextType {
+            ColumnLayout {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 12
 
-                text: qsTr("Free features")
-                color: AmneziaStyle.color.mutedGray
-                font.pixelSize: 13
-            }
+                spacing: 24
 
-            BenefitsPanel {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24
+                ColumnLayout {
+                    Layout.fillWidth: true
 
-                benefitsModel: ApiBenefitsModel
-            }
+                    spacing: 12
 
-            TermsAndPrivacyText {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                    visible: benefitsPanel.visible
 
-                visible: !(Qt.platform.os === "ios" || IsMacOsNeBuild)
+                    BodyTextType {
+                        Layout.fillWidth: true
 
-                termsUrl: String(ApiServicesModel.getSelectedServiceData("termsOfUseUrl"))
-                privacyUrl: String(ApiServicesModel.getSelectedServiceData("privacyPolicyUrl"))
-            }
+                        text: qsTr("Free features")
+                        color: AmneziaStyle.color.textTertiary
+                    }
 
-            TermsAndPrivacyText {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 24
+                    BenefitsPanel {
+                        id: benefitsPanel
 
-                visible: (Qt.platform.os === "ios" || IsMacOsNeBuild)
+                        Layout.fillWidth: true
 
-                termsUrl: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-                privacyUrl: LanguageUiController.getCurrentSiteUrl("policy")
+                        benefitsModel: ApiBenefitsModel
+                    }
+                }
+
+                TermsAndPrivacyText {
+                    Layout.fillWidth: true
+
+                    visible: !(Qt.platform.os === "ios" || IsMacOsNeBuild)
+
+                    termsUrl: String(ApiServicesModel.getSelectedServiceData("termsOfUseUrl"))
+                    privacyUrl: String(ApiServicesModel.getSelectedServiceData("privacyPolicyUrl"))
+                }
+
+                TermsAndPrivacyText {
+                    Layout.fillWidth: true
+
+                    visible: (Qt.platform.os === "ios" || IsMacOsNeBuild)
+
+                    termsUrl: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+                    privacyUrl: LanguageUiController.getCurrentSiteUrl("policy")
+                }
             }
         }
     }
 
-    BasicButtonType {
-        id: continueButton
+    BottomBarType {
+        id: bottomBar
 
-        z: 2
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        text: qsTr("Continue")
+        ButtonType {
+            id: continueButton
 
-        clickedFunc: function() {
-            PageController.showBusyIndicator(true)
-            var result = SubscriptionUiController.importFreeFromGateway()
-            PageController.showBusyIndicator(false)
+            Layout.fillWidth: true
 
-            if (!result) {
-                if (SubscriptionUiController.isCaptchaAwaitingUser()) {
-                    return
+            text: qsTr("Continue")
+
+            onClicked: {
+                PageController.showBusyIndicator(true)
+                var result = SubscriptionUiController.importFreeFromGateway()
+                PageController.showBusyIndicator(false)
+
+                if (!result) {
+                    if (SubscriptionUiController.isCaptchaAwaitingUser()) {
+                        return
+                    }
+                    var endpoint = ApiServicesModel.getStoreEndpoint()
+                    Qt.openUrlExternally(endpoint)
+                    PageController.closePage()
+                    PageController.closePage()
                 }
-                var endpoint = ApiServicesModel.getStoreEndpoint()
-                Qt.openUrlExternally(endpoint)
-                PageController.closePage()
-                PageController.closePage()
             }
         }
     }

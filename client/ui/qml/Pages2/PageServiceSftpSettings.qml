@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
 import Style 1.0
 
@@ -24,30 +22,18 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.fill: parent
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
+
+        header: NavigationBarType {
+            width: listView.width
+
+            title: qsTr("SFTP settings")
+        }
 
         model: SftpConfigModel
 
@@ -56,143 +42,133 @@ PageType {
 
             spacing: 0
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("SFTP settings")
-            }
-
-            LabelWithButtonType {
+            ListItemType {
                 id: hostLabel
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Host")
-                descriptionText: ServersUiController.serverHostName(ServersUiController.processedServerId)
+                dense: true
+                overline: qsTr("Host")
+                text: ServersUiController.serverHostName(ServersUiController.processedServerId)
+                Accessible.name: overline + " " + text
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 id: portLabel
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Port")
-                descriptionText: port
+                dense: true
+                overline: qsTr("Port")
+                text: port
+                Accessible.name: overline + " " + text
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 id: usernameLabel
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("User name")
-                descriptionText: username
+                dense: true
+                overline: qsTr("User name")
+                text: username
+                Accessible.name: overline + " " + text
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(text)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 id: passwordLabel
+
+                property bool masked: true
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                text: qsTr("Password")
-                descriptionText: password
+                showSeparator: false
+                dense: true
+                overline: qsTr("Password")
+                text: masked ? "*".repeat(password.length) : password
+                Accessible.name: overline
 
-                descriptionOnTop: true
+                trailingIconSource: "qrc:/images/controls/copy.svg"
 
-                rightImageSource: "qrc:/images/controls/copy.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
-
-                buttonImageSource: hideDescription ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-
-                clickedFunction: function() {
-                    GC.copyToClipBoard(descriptionText)
+                onClicked: {
+                    GC.copyToClipBoard(password)
                     PageController.showNotificationMessage(qsTr("Copied"))
+                }
+
+                IconButtonType {
+                    icon.source: passwordLabel.masked ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                    Accessible.name: passwordLabel.masked ? qsTr("Show password") : qsTr("Hide password")
+
+                    onClicked: passwordLabel.masked = !passwordLabel.masked
                 }
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: mountButton
-
-                visible: !GC.isMobile()
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
-                Layout.bottomMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
+                visible: !GC.isMobile()
+                variant: ButtonType.Secondary
 
                 text: qsTr("Mount folder on device")
 
-                clickedFunc: function() {
+                onClicked: {
                     PageController.showBusyIndicator(true)
                     InstallController.mountSftpDrive(ServersUiController.processedServerId, port, password, username)
                     PageController.showBusyIndicator(false)
                 }
             }
 
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\" style=\"color: #FBB26A;\">WinFsp</a>"
-                readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\" style=\"color: #FBB26A;\">SSHFS-Win</a>"
+                readonly property string windowsFirstLink: "<a href=\"https://github.com/billziss-gh/winfsp/releases/latest\">WinFsp</a>"
+                readonly property string windowsSecondLink: "<a href=\"https://github.com/billziss-gh/sshfs-win/releases\">SSHFS-Win</a>"
 
-                readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">macFUSE</a>"
-                readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\" style=\"color: #FBB26A;\">SSHFS</a>"
+                readonly property string macosFirstLink: "<a href=\"https://osxfuse.github.io/\">macFUSE</a>"
+                readonly property string macosSecondLink: "<a href=\"https://osxfuse.github.io/\">SSHFS</a>"
 
-                onLinkActivated: function(link) {
-                    Qt.openUrlExternally(link)
-                }
-                textFormat: Text.RichText
+                visible: text !== ""
+                color: AmneziaStyle.color.textPrimary
+                linkColor: AmneziaStyle.color.textAccent
+                textFormat: Text.StyledText
                 text: {
                     var str = qsTr("In order to mount remote SFTP folder as local drive, perform following steps: <br>")
                     if (Qt.platform.os === "windows") {
@@ -201,39 +177,38 @@ PageType {
                     } else if (Qt.platform.os === "osx") {
                         str += qsTr("<br>1. Install the latest version of ") + macosFirstLink + "\n"
                         str += qsTr("<br>2. Install the latest version of ") + macosSecondLink + "\n"
-                    } else if (Qt.platform.os === "linux") {
+                    } else {
                         return ""
-                    } else return ""
+                    }
 
                     return str
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    acceptedButtons: Qt.NoButton
+                onLinkActivated: function(link) {
+                    Qt.openUrlExternally(link)
+                }
+
+                HoverHandler {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
 
-            BasicButtonType {
+            LinkButtonType {
                 id: detailedInstructionsButton
 
-                Layout.topMargin: 16
-                Layout.bottomMargin: 16
-                Layout.leftMargin: 8
-                implicitHeight: 32
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
+                size: LinkButtonType.Medium
+                horizontalPadding: 14
+                verticalPadding: 8
 
                 text: qsTr("Detailed instructions")
+            }
 
-                clickedFunc: function() {
-                    // Qt.openUrlExternally("https://github.com/amnezia-vpn/desktop-client/releases/latest")
-                }
+            Item {
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
             }
         }
     }

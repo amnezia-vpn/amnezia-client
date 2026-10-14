@@ -13,11 +13,17 @@ Popup {
 
     property real bottomY: height
     property real closedY: bottomY
-    readonly property real openedY: bottomY - Math.min(expandedHeight, bottomY)
+    readonly property real openedY: bottomY - Math.min(expandedHeight + contentTopOffset, bottomY)
     readonly property real progress: closedY > openedY ? Math.max(0, Math.min(1, (closedY - sheet.y) / (closedY - openedY))) : 0
 
-    property color defaultColor: AmneziaStyle.color.onyxBlack
-    property color borderColor: AmneziaStyle.color.slateGray
+    property color defaultColor: AmneziaStyle.color.bgSurfaceAlt
+    property color borderColor: AmneziaStyle.color.borderFaint
+    property bool showGrabber: true
+    readonly property real contentTopOffset: showGrabber ? grabber.anchors.topMargin + grabber.height : 0
+    readonly property real navigationBarColor: 0xFF000000
+                                               + Math.round(defaultColor.r * 255) * 0x10000
+                                               + Math.round(defaultColor.g * 255) * 0x100
+                                               + Math.round(defaultColor.b * 255)
 
     property bool externalDrag: false
     property bool reopenWithParent: false
@@ -67,16 +73,22 @@ Popup {
         }
     }
 
+    onOpened: {
+        if (!externalDrag && sheet.y !== openedY) {
+            settleAnimation.start()
+        }
+    }
+
     onAboutToShow: {
-        if (PageController.getInitialPageNavigationBarColor() !== 0xFF1C1D21) {
-            PageController.updateNavigationBarColor(0xFF1C1D21)
+        if (PageController.getInitialPageNavigationBarColor() !== root.navigationBarColor) {
+            PageController.updateNavigationBarColor(root.navigationBarColor)
         }
     }
 
     onClosed: {
         externalDrag = false
         const initialPageNavigationBarColor = PageController.getInitialPageNavigationBarColor()
-        if (initialPageNavigationBarColor !== 0xFF1C1D21) {
+        if (initialPageNavigationBarColor !== root.navigationBarColor) {
             PageController.updateNavigationBarColor(initialPageNavigationBarColor)
         }
     }
@@ -127,7 +139,7 @@ Popup {
             anchors.right: parent.right
             height: root.bottomY
 
-            color: AmneziaStyle.color.translucentMidnightBlack
+            color: AmneziaStyle.color.bgOverlay
             opacity: root.progress
         }
 
@@ -173,13 +185,24 @@ Popup {
                     }
                 }
 
+                SheetGrabberType {
+                    id: grabber
+
+                    anchors.top: parent.top
+                    anchors.topMargin: 16
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    visible: root.showGrabber
+                }
+
                 Item {
                     id: sheetContent
 
                     anchors.top: parent.top
+                    anchors.topMargin: root.contentTopOffset
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: root.bottomY - root.openedY
+                    height: root.bottomY - root.openedY - root.contentTopOffset
                 }
             }
         }

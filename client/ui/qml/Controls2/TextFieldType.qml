@@ -10,270 +10,207 @@ Item {
     id: root
 
     property string headerText
-    property string subtitleText // optional line under header (e.g. default value hint)
-    property string hintText // optional (i) info tooltip next to the header (e.g. range / max / default)
-    property string headerTextDisabledColor: AmneziaStyle.color.charcoalGray
-    property string headerTextColor: AmneziaStyle.color.mutedGray
-
-    property alias errorText: errorField.text
+    property string helperText
+    property string errorText
     property bool checkEmptyText: false
-    property bool rightButtonClickedOnEnter: false
+
+    property bool passwordToggle: false
+    property bool passwordRevealed: false
+    property bool clearable: false
 
     property string buttonText
     property string buttonImageSource
+    property bool buttonJoined: root.buttonText !== ""
     property var clickedFunc
+    property bool rightButtonClickedOnEnter: false
 
     property alias textField: textField
     property alias placeholderText: textField.placeholderText
-    property string textFieldTextColor: AmneziaStyle.color.paleGray
-    property string textFieldTextDisabledColor: AmneziaStyle.color.mutedGray
 
-    property bool textFieldEditable: true
-
-    property string borderColor: AmneziaStyle.color.slateGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-
-    property string backgroundColor: AmneziaStyle.color.onyxBlack
-    property string backgroundDisabledColor: AmneziaStyle.color.transparent
-    property string bgBorderHoveredColor: AmneziaStyle.color.charcoalGray
+    readonly property bool hasError: root.errorText !== ""
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
+    opacity: root.enabled ? 1 : 0.5
+
+    function runClickedFunc() {
+        if (root.clickedFunc && typeof root.clickedFunc === "function") {
+            root.clickedFunc()
+        }
+    }
+
     ColumnLayout {
         id: content
+
         anchors.fill: parent
+        spacing: 0
 
-        Rectangle {
-            id: backgroud
+        RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: input.implicitHeight
-            color: root.enabled ? root.backgroundColor : root.backgroundDisabledColor
-            radius: 16
-            border.color: getBackgroundBorderColor(root.borderColor)
-            border.width: 1
+            spacing: root.buttonJoined ? 0 : 8
 
-            Behavior on border.color {
-                PropertyAnimation { duration: 200 }
-            }
+            TextField {
+                id: textField
 
-            RowLayout {
-                id: input
-                anchors.fill: backgroud
-                ColumnLayout {
-                    Layout.margins: 16
-                    LabelTextType {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 64
+
+                leftPadding: 16
+                rightPadding: actions.visible ? actions.width + 16 : 16
+                topPadding: root.headerText !== "" ? 28 : 20
+                bottomPadding: root.headerText !== "" ? 12 : 20
+                verticalAlignment: TextInput.AlignVCenter
+
+                color: AmneziaStyle.color.textPrimary
+                placeholderTextColor: AmneziaStyle.color.textTertiary
+                selectionColor: AmneziaStyle.color.accentDeep
+                selectedTextColor: AmneziaStyle.color.textPrimary
+
+                font.pixelSize: 16
+                font.weight: 400
+                font.family: "PT Root UI VF"
+                font.letterSpacing: -0.4
+                font.features: { "ss08": 1, "ss09": 1, "lnum": 1, "tnum": 1 }
+
+                inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
+                echoMode: root.passwordToggle && !root.passwordRevealed ? TextInput.Password : TextInput.Normal
+
+                background: Rectangle {
+                    radius: 16
+                    topRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
+                    bottomRightRadius: root.buttonJoined && attachedButton.visible ? 0 : 16
+
+                    color: AmneziaStyle.color.bgSurfaceAlt
+                    border.width: textField.activeFocus ? 2 : 1
+                    border.color: {
+                        if (textField.activeFocus) {
+                            return AmneziaStyle.color.borderEmphasis
+                        }
+                        if (root.hasError) {
+                            return AmneziaStyle.color.statusDestructive
+                        }
+                        return AmneziaStyle.color.borderSoft
+                    }
+
+                    CaptionTextType {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: textField.rightPadding
+                        anchors.topMargin: 12
+
+                        visible: root.headerText !== ""
                         text: root.headerText
-                        color: root.enabled ? root.headerTextColor : root.headerTextDisabledColor
-
-                        visible: text !== ""
-
-                        Layout.fillWidth: true
-                    }
-
-                    SmallTextType {
-                        text: root.subtitleText
-                        visible: root.subtitleText !== ""
-                        color: AmneziaStyle.color.charcoalGray
-                        font.pixelSize: 13
-                        Layout.fillWidth: true
-                        Layout.topMargin: visible ? 2 : 0
-                    }
-
-                    TextField {
-                        id: textField
-
-
-                        enabled: root.textFieldEditable
-                        color: root.enabled ? root.textFieldTextColor : root.textFieldTextDisabledColor
-
-                        inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhSensitiveData | Qt.ImhNoPredictiveText
-
-                        placeholderTextColor: AmneziaStyle.color.charcoalGray
-
-                        selectionColor:  AmneziaStyle.color.richBrown
-                        selectedTextColor: AmneziaStyle.color.paleGray
-
-                        font.pixelSize: 16
-                        font.weight: 400
-                        font.family: "PT Root UI VF"
-
-                        height: 24
-                        Layout.fillWidth: true
-
-                        topPadding: 0
-                        rightPadding: 0
-                        leftPadding: 0
-                        bottomPadding: 0
-
-                        background: Rectangle {
-                            anchors.fill: parent
-                            color: root.backgroundDisabledColor
-                        }
-
-                        onTextChanged: {
-                            root.errorText = ""
-                        }
-
-                        onActiveFocusChanged: {
-                            if (root.checkEmptyText && text === "") {
-                                root.errorText = qsTr("The field can't be empty")
-                            }
-                        }
-
-                        ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
-                        ContextMenu.onRequested: function(position) {
-                            contextMenu.requestNative(position)
-                        }
-
-                        // Native iOS text fields select the word and show the
-                        // edit menu on double tap; Qt does neither on touch.
-                        TapHandler {
-                            enabled: contextMenu.useNativeEditMenu
-                            acceptedDevices: PointerDevice.TouchScreen
-                            onDoubleTapped: function(eventPoint) {
-                                textField.forceActiveFocus()
-                                textField.cursorPosition = textField.positionAt(eventPoint.position.x, eventPoint.position.y)
-                                textField.selectWord()
-                                contextMenu.requestNative(eventPoint.position)
-                            }
-                        }
-
-                        ContextMenuType {
-                            id: contextMenu
-                            textObj: textField
-                        }
-
-                        onFocusChanged: {
-                            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
-                        }
+                        maximumLineCount: 1
+                        elide: Text.ElideRight
                     }
                 }
+
+                onTextChanged: {
+                    root.errorText = ""
+                }
+
+                onActiveFocusChanged: {
+                    if (root.checkEmptyText && text === "") {
+                        root.errorText = qsTr("The field can't be empty")
+                    }
+                }
+
+                ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
+                ContextMenu.onRequested: function(position) {
+                    contextMenu.requestNative(position)
+                }
+
+                TapHandler {
+                    enabled: contextMenu.useNativeEditMenu
+                    acceptedDevices: PointerDevice.TouchScreen
+                    onDoubleTapped: function(eventPoint) {
+                        textField.forceActiveFocus()
+                        textField.cursorPosition = textField.positionAt(eventPoint.position.x, eventPoint.position.y)
+                        textField.selectWord()
+                        contextMenu.requestNative(eventPoint.position)
+                    }
+                }
+
+                ContextMenuType {
+                    id: contextMenu
+                    textObj: textField
+                }
+
+                Row {
+                    id: actions
+
+                    anchors.right: parent.right
+                    anchors.rightMargin: 12
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    visible: clearButton.visible || eyeButton.visible
+
+                    IconButtonType {
+                        id: clearButton
+
+                        implicitWidth: 40
+                        implicitHeight: 40
+
+                        visible: root.clearable && textField.text !== "" && !textField.readOnly
+                        icon.source: "qrc:/images/controls/x-circle.svg"
+
+                        onClicked: {
+                            textField.clear()
+                            textField.forceActiveFocus()
+                        }
+                    }
+
+                    IconButtonType {
+                        id: eyeButton
+
+                        implicitWidth: 40
+                        implicitHeight: 40
+
+                        visible: root.passwordToggle
+                        icon.source: root.passwordRevealed ? "qrc:/images/controls/eye-off.svg" : "qrc:/images/controls/eye.svg"
+
+                        onClicked: root.passwordRevealed = !root.passwordRevealed
+                    }
+                }
+            }
+
+            InputButtonType {
+                id: attachedButton
+
+                Layout.preferredHeight: textField.height
+
+                visible: root.buttonText !== "" || root.buttonImageSource !== ""
+                joined: root.buttonJoined
+
+                text: root.buttonText
+                imageSource: root.buttonImageSource
+
+                onClicked: root.runClickedFunc()
             }
         }
 
         SmallTextType {
-            id: errorField
-
-            text: root.errorText
-            visible: root.errorText !== ""
-            color: AmneziaStyle.color.vibrantRed
-
             Layout.fillWidth: true
+            Layout.topMargin: 4
+
+            visible: text !== ""
+            text: root.hasError ? root.errorText : root.helperText
+            color: root.hasError ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textTertiary
         }
-    }
-
-    MouseArea {
-        anchors.fill: root
-        cursorShape: contextMenu.opened ? Qt.ArrowCursor : Qt.IBeamCursor
-
-        hoverEnabled: true
-
-        onPressed: function(mouse) {
-            textField.forceActiveFocus()
-            mouse.accepted = false
-
-            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
-        }
-
-        onEntered: {
-            backgroud.border.color = getBackgroundBorderColor(bgBorderHoveredColor)
-        }
-
-        onExited: {
-            backgroud.border.color = getBackgroundBorderColor(root.borderColor)
-        }
-    }
-
-    BasicButtonType {
-        visible: (root.buttonText !== "") || (root.buttonImageSource !== "")
-
-        focusPolicy: Qt.NoFocus
-        text: root.buttonText
-        leftImageSource: root.buttonImageSource
-
-        anchors.top: content.top
-        anchors.bottom: content.bottom
-        anchors.right: content.right
-
-        height: content.implicitHeight
-        width: content.implicitHeight
-        squareLeftSide: true
-
-        clickedFunc: function() {
-            if (root.clickedFunc && typeof root.clickedFunc === "function") {
-                root.clickedFunc()
-            }
-        }
-    }
-
-    // (i) hint: tap to reveal a tooltip with hintText
-    ImageButtonType {
-        id: hintButton
-        visible: root.hintText !== ""
-        focusPolicy: Qt.NoFocus
-        hoverEnabled: true
-
-        image: "qrc:/images/controls/info.svg"
-        imageColor: hintTooltip.opened ? AmneziaStyle.color.paleGray : AmneziaStyle.color.mutedGray
-
-        anchors.top: content.top
-        anchors.right: content.right
-        anchors.topMargin: 10
-        anchors.rightMargin: 12
-
-        implicitWidth: 28
-        implicitHeight: 28
-
-        onClicked: hintTooltip.opened ? hintTooltip.close() : hintTooltip.open()
-
-        ToolTip {
-            id: hintTooltip
-            parent: hintButton
-            x: hintButton.width - width
-            y: -height - 6
-            width: Math.min(280, root.width - 24)
-            delay: 0
-            timeout: 8000
-            closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
-
-            contentItem: Text {
-                text: root.hintText
-                color: AmneziaStyle.color.paleGray
-                wrapMode: Text.WordWrap
-                font.pixelSize: 14
-                font.family: "PT Root UI VF"
-            }
-            background: Rectangle {
-                color: AmneziaStyle.color.slateGray
-                radius: 12
-                border.color: AmneziaStyle.color.charcoalGray
-                border.width: 1
-            }
-        }
-    }
-
-    function getBackgroundBorderColor(noneFocusedColor) {
-        return textField.focus ? root.borderFocusedColor : noneFocusedColor
     }
 
     Keys.onEnterPressed: {
-        if (root.rightButtonClickedOnEnter && root.clickedFunc && typeof root.clickedFunc === "function") {
-            clickedFunc()
+        if (root.rightButtonClickedOnEnter) {
+            root.runClickedFunc()
         }
-
-        // if (KeyNavigation.tab) {
-        //     KeyNavigation.tab.forceActiveFocus();
-        // }
     }
 
     Keys.onReturnPressed: {
-        if (root.rightButtonClickedOnEnter &&root.clickedFunc && typeof root.clickedFunc === "function") {
-            clickedFunc()
+        if (root.rightButtonClickedOnEnter) {
+            root.runClickedFunc()
         }
-
-        // if (KeyNavigation.tab) {
-        //     KeyNavigation.tab.forceActiveFocus();
-        // }
     }
 }

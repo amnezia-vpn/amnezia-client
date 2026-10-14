@@ -30,69 +30,55 @@ PageType {
     property string configCaption: qsTr("Save AmneziaVPN config")
     property string configFileName: "amnezia_config"
 
-    // onVisibleChanged: {
-    //     configExtension = ".vpn"
-    //     configCaption = qsTr("Save AmneziaVPN config")
-    //     configFileName = "amnezia_config"
+    readonly property bool isQrCodeVisible: pageShareConnection.isSelfHostedConfig ? ExportController.qrCodesCount > 0
+                                                                                   : SubscriptionUiController.qrCodesCount > 0
 
-    //     if (visible) {
-    //         var serverName = ServersModel.getProcessedServerData("name") || ServersModel.getProcessedServerData("hostName") || "Server"
-    //         headerText = qsTr("Connection to ") + serverName
-    //         configContentHeaderText = qsTr("File with connection settings to ") + serverName
-    //     }
-    // }
-
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+    function copyText(field) {
+        field.selectAll()
+        field.copy()
+        field.select(0, 0)
+        PageController.showNotificationMessage(qsTr("Copied"))
     }
 
-    Text {
-        id: shareHeader
-        anchors.top: backButton.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
+    TextField {
+        id: nativeConfigString
 
-        text: pageShareConnection.headerText
-        color: AmneziaStyle.color.paleGray
-        font.pixelSize: 32
-        font.weight: 700
-        font.family: "PT Root UI VF"
-        wrapMode: Text.WordWrap
+        visible: false
+        text: ExportController.nativeConfigString
     }
 
-    ListView {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.top: shareHeader.bottom
-        anchors.topMargin: 16
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.fill: parent
 
-        ScrollBar.vertical: ScrollBarType {}
-        model: 1
-        clip: true
-        reuseItems: true
+        contentHeight: content.implicitHeight
 
-        header: ColumnLayout {
-            width: listView.width
+        ColumnLayout {
+            id: content
 
-            BasicButtonType {
+            width: flickable.width
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: pageShareConnection.headerText
+            }
+
+            ButtonType {
                 id: shareButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
                 text: pageShareConnection.shareButtonText
                 leftImageSource: "qrc:/images/controls/share-2.svg"
-                clickedFunc: function() {
+
+                onClicked: {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = configFileName + configExtension
@@ -111,226 +97,133 @@ PageType {
                 }
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: copyConfigTextButton
+
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
-
+                variant: ButtonType.Secondary
                 text: pageShareConnection.copyButtonText
                 leftImageSource: "qrc:/images/controls/copy.svg"
 
-                Keys.onReturnPressed: copyConfigTextButton.clicked()
-                Keys.onEnterPressed: copyConfigTextButton.clicked()
+                onClicked: pageShareConnection.copyText(configContentDrawer.textArea)
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: copyNativeConfigStringButton
+
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: false
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
+
+                visible: nativeConfigString.text !== ""
+
+                variant: ButtonType.Secondary
                 text: qsTr("Copy config string")
                 leftImageSource: "qrc:/images/controls/copy.svg"
+
+                onClicked: pageShareConnection.copyText(nativeConfigString)
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: showSettingsButton
+
                 Layout.fillWidth: true
                 Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
                 visible: pageShareConnection.isSelfHostedConfig
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
+
+                variant: ButtonType.Secondary
                 text: qsTr("Show connection settings")
-                clickedFunc: function() {
-                    configContentDrawer.open()
-                }
+
+                onClicked: configContentDrawer.open()
             }
 
-            DrawerType2 {
-                id: configContentDrawer
-                parent: pageShareConnection
-                expandedHeight: windowHeight * 0.9
-                Item {
-                    id: configContentContainer
-                    anchors.fill: parent
+            QrCodeCard {
+                id: qrCodeCard
 
-                    Connections {
-                        target: copyNativeConfigStringButton
-                        function onClicked() {
-                            nativeConfigString.selectAll()
-                            nativeConfigString.copy()
-                            nativeConfigString.select(0, 0)
-                            PageController.showNotificationMessage(qsTr("Copied"))
-                        }
-                    }
+                property int index: 0
 
-                    Connections {
-                        target: copyConfigTextButton
-                        function onClicked() {
-                            configText.selectAll()
-                            configText.copy()
-                            configText.select(0, 0)
-                            PageController.showNotificationMessage(qsTr("Copied"))
-                            configContentDrawer.forceActiveFocus()
-                        }
-                    }
-
-                    BackButtonType {
-                        id: configBackButton
-                        anchors.top: parent.top
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 16
-                        backButtonFunction: function() { configContentDrawer.close() }
-                    }
-
-                    FlickableType {
-                        anchors.top: configBackButton.bottom
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        contentHeight: configContent.implicitHeight + configContent.anchors.topMargin + configContent.anchors.bottomMargin
-
-                        ColumnLayout {
-                            id: configContent
-                            anchors.fill: parent
-                            anchors.rightMargin: 16
-                            anchors.leftMargin: 16
-
-                            Header2Type {
-                                id: configContentHeader
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                headerText: pageShareConnection.configContentHeaderText
-                            }
-
-                            TextField {
-                                id: nativeConfigString
-                                visible: false
-                                text: ExportController.nativeConfigString
-                                onTextChanged: copyNativeConfigStringButton.visible = nativeConfigString.text !== ""
-                            }
-
-                            TextArea {
-                                id: configText
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                Layout.bottomMargin: 16
-                                padding: 0
-                                leftPadding: 0
-                                height: 24
-                                readOnly: true
-                                activeFocusOnTab: false
-                                color: AmneziaStyle.color.paleGray
-                                selectionColor:  AmneziaStyle.color.richBrown
-                                selectedTextColor: AmneziaStyle.color.paleGray
-                                font.pixelSize: 16
-                                font.weight: Font.Medium
-                                font.family: "PT Root UI VF"
-                                text: ExportController.config
-                                wrapMode: Text.Wrap
-                                background: Rectangle { color: AmneziaStyle.color.transparent }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        delegate: ColumnLayout {
-            width: listView.width
-            property bool isQrCodeVisible: pageShareConnection.isSelfHostedConfig ? ExportController.qrCodesCount > 0 : SubscriptionUiController.qrCodesCount > 0
-
-            Rectangle {
-                id: qrCodeContainer
-                Layout.preferredWidth: Math.min(Math.min(listView.width - (Layout.leftMargin + Layout.rightMargin), pageShareConnection.height * 0.5), 360)
-                Layout.preferredHeight: Layout.preferredWidth
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 20
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: isQrCodeVisible
-                color: "white"
-
-                Image {
-                    anchors.fill: parent
-                    smooth: false
-                    fillMode: Image.PreserveAspectFit
-                    sourceSize.width: parent.width
-                    sourceSize.height: parent.height
-                    source: pageShareConnection.isSelfHostedConfig ? (isQrCodeVisible ? ExportController.qrCodes[0] : "") : (isQrCodeVisible ? SubscriptionUiController.qrCodes[0] : "")
-                    activeFocusOnTab: true
-
-                    Timer {
-                        property int index: 0
-                        interval: 1000
-                        running: isQrCodeVisible
-                        repeat: true
-                        onTriggered: {
-                            if (isQrCodeVisible) {
-                                index++
-                                let qrCodesCount = pageShareConnection.isSelfHostedConfig ? ExportController.qrCodesCount : SubscriptionUiController.qrCodesCount
-                                if (index >= qrCodesCount) index = 0
-                                parent.source = pageShareConnection.isSelfHostedConfig ? ExportController.qrCodes[index] : SubscriptionUiController.qrCodes[index]
-                            }
-                        }
-                    }
-
-                    Behavior on source { PropertyAnimation { duration: 200 } }
-                }
-            }
-
-            ParagraphTextType {
                 Layout.fillWidth: true
+                Layout.maximumWidth: 360
+                Layout.alignment: Qt.AlignHCenter
                 Layout.topMargin: 24
-                Layout.bottomMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: isQrCodeVisible
+
+                visible: pageShareConnection.isQrCodeVisible
+
+                source: pageShareConnection.isQrCodeVisible
+                        ? (pageShareConnection.isSelfHostedConfig ? ExportController.qrCodes[0] : SubscriptionUiController.qrCodes[0])
+                        : ""
+
+                Timer {
+                    interval: 1000
+                    running: pageShareConnection.isQrCodeVisible
+                    repeat: true
+
+                    onTriggered: {
+                        if (pageShareConnection.isQrCodeVisible) {
+                            qrCodeCard.index++
+                            let qrCodesCount = pageShareConnection.isSelfHostedConfig ? ExportController.qrCodesCount
+                                                                                      : SubscriptionUiController.qrCodesCount
+                            if (qrCodeCard.index >= qrCodesCount) {
+                                qrCodeCard.index = 0
+                            }
+                            qrCodeCard.source = pageShareConnection.isSelfHostedConfig ? ExportController.qrCodes[qrCodeCard.index]
+                                                                                       : SubscriptionUiController.qrCodes[qrCodeCard.index]
+                        }
+                    }
+                }
+            }
+
+            SmallTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: pageShareConnection.isQrCodeVisible
                          && !(pageShareConnection.isSelfHostedConfig
                               && (ExportController.config.startsWith("tg://")
                                   || ExportController.config.startsWith("https://t.me")))
+
                 horizontalAlignment: Text.AlignHCenter
+                color: AmneziaStyle.color.textTertiary
                 text: qsTr("To read the QR code in the Amnezia app, tap + in the main menu → 'QR code'")
             }
 
-            WarningType {
+            NotificationType {
                 Layout.fillWidth: true
                 Layout.topMargin: 24
-                Layout.bottomMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 visible: pageShareConnection.isSelfHostedConfig
                          && pageShareConnection.configExtension === ".conf"
-                         && !isQrCodeVisible
+                         && !pageShareConnection.isQrCodeVisible
                          && ExportController.config !== ""
 
-                iconPath: "qrc:/images/controls/alert-circle.svg"
-                textString: qsTr("This config is too large for a QR code. Share the file or copy the connection settings instead.")
+                variant: NotificationType.Warning
+                text: qsTr("This config is too large for a QR code. Share the file or copy the connection settings instead.")
+            }
+
+            Item {
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
             }
         }
+    }
+
+    ConfigContentSheet {
+        id: configContentDrawer
+
+        headerText: pageShareConnection.configContentHeaderText
+        contentText: ExportController.config
     }
 }

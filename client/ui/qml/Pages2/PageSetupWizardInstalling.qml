@@ -95,21 +95,22 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            spacing: 0
 
-                headerText: qsTr("Installing")
-                descriptionText: name
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                backButtonVisible: false
+
+                title: qsTr("Installing")
+                description: name
             }
 
             ProgressBarType {
                 id: progressBar
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -125,7 +126,7 @@ PageType {
                 }
             }
 
-            ParagraphTextType {
+            SmallTextType {
                 id: progressText
 
                 Layout.fillWidth: true
@@ -136,12 +137,12 @@ PageType {
                 text: root.progressBarText
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: cancelIntallationButton
 
                 Layout.fillWidth: true
                 Layout.topMargin: 24
-                Layout.bottomMargin: 24 + PageController.safeAreaBottomMargin
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -149,7 +150,7 @@ PageType {
 
                 text: qsTr("Cancel installation")
 
-                clickedFunc: function() {
+                onClicked: {
                     InstallController.cancelInstallation()
                     PageController.showBusyIndicator(true)
                 }

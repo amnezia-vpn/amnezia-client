@@ -8,10 +8,11 @@ Rectangle {
 
     default property alias rows: rowsColumn.data
 
-    implicitHeight: rowsColumn.implicitHeight
+    implicitHeight: Math.max(0, rowsColumn.implicitHeight - 1)
 
     radius: 16
-    color: AmneziaStyle.color.surfaceBase
+    color: AmneziaStyle.color.bgSurface
+    clip: true
 
     ColumnLayout {
         id: rowsColumn

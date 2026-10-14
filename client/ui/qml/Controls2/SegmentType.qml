@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 
 import Style 1.0
 
@@ -9,105 +8,76 @@ import "TextTypes"
 RadioButton {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
-    property string defaultColor: AmneziaStyle.color.transparent
-    property string checkedColor: AmneziaStyle.color.transparent
-    property string disabledColor: AmneziaStyle.color.transparent
+    enum Size { Large, Medium, Small }
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    property int size: SegmentType.Large
 
-    property string pressedBorderColor: AmneziaStyle.color.charcoalGray
-    property string checkedBorderColor: AmneziaStyle.color.goldenApricot
-    property string defaultBodredColor: AmneziaStyle.color.transparent
-    property string checkedDisabledBorderColor: AmneziaStyle.color.mutedBrown
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderWidth: 0
+    implicitWidth: implicitContentWidth + leftPadding + rightPadding
+    implicitHeight: root.size === SegmentType.Large ? 48 : (root.size === SegmentType.Medium ? 40 : 30)
 
-    implicitWidth: content.implicitWidth
-    implicitHeight: content.implicitHeight
+    horizontalPadding: 12
+    verticalPadding: 0
 
-    indicator: Rectangle {
-        anchors.fill: parent
+    hoverEnabled: true
+
+    opacity: root.enabled ? 1 : (root.checked ? 0.4 : 0.65)
+
+    indicator: null
+
+    background: Rectangle {
         radius: 16
 
         color: {
-            if (root.enabled) {
-                if (root.hovered) {
-                    return root.hoveredColor
-                } else if (root.checked) {
-                    return root.checkedColor
-                }
-                return root.defaultColor
-            } else {
-                return root.disabledColor
+            if (root.checked) {
+                return AmneziaStyle.color.bgSurfaceAlt
             }
+            return root.enabled && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
         }
-
-        border.color: {
-            if (root.enabled) {
-                if (root.pressed) {
-                    return root.pressedBorderColor
-                } else if (root.checked) {
-                    return root.checkedBorderColor
-                } else if (root.activeFocus) {
-                    return root.borderFocusedColor
-                }
-                return root.defaultBodredColor
-            } else {
-                if (root.checked) {
-                    return root.checkedDisabledBorderColor
-                }
-                return root.defaultBodredColor
-            }
-        }
-
-        border.width: {
-            if(root.checked || root.activeFocus) {
-                return 1
-            }
-            return root.pressed ? 1 : 0
-        }
+        border.width: root.checked || (root.enabled && root.down) ? 1 : 0
+        border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderMedium
 
         Behavior on color {
-            PropertyAnimation { duration: 200 }
+            ColorAnimation { duration: 150 }
         }
-        Behavior on border.color {
-            PropertyAnimation { duration: 200 }
-        }
-    }
 
-    ColumnLayout {
-        id: content
-        anchors.fill: parent
-        spacing: 0
-
-        ButtonTextType {
-            text: root.text
-            color: root.enabled ? root.textColor : root.textDisabledColor
-
-            Layout.fillWidth: true
-            Layout.rightMargin: 24
-            Layout.leftMargin: 24
-            Layout.topMargin: 12
-            Layout.bottomMargin: 12
-
-            horizontalAlignment: Qt.AlignHCenter
-            verticalAlignment: Qt.AlignVCenter
+        FocusRingType {
+            radius: 16
+            visible: root.visualFocus
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
+    contentItem: BodyTextType {
+        text: root.text
+        color: AmneziaStyle.color.textPrimary
+        opacity: !root.enabled && !root.checked ? 0.36 : 1
+
+        lineHeight: (root.size === SegmentType.Small ? 18 : 24) + LanguageUiController.getLineHeightAppend()
+        font.pixelSize: root.size === SegmentType.Small ? 14 : 16
+        font.weight: root.size === SegmentType.Small ? 600 : 400
+
+        wrapMode: Text.NoWrap
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+    }
+
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        enabled: false
     }
 
-    Keys.onEnterPressed: {
-        this.clicked()
+    Keys.onEnterPressed: function(event) {
+        if (!event.isAutoRepeat && !root.checked) {
+            root.toggle()
+            root.toggled()
+            root.clicked()
+        }
     }
 
-    Keys.onReturnPressed: {
-        this.clicked()
+    Keys.onReturnPressed: function(event) {
+        if (!event.isAutoRepeat && !root.checked) {
+            root.toggle()
+            root.toggled()
+            root.clicked()
+        }
     }
 }

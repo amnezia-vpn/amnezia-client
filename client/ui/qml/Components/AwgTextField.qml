@@ -5,7 +5,7 @@ import QtQuick.Layouts
 
 import "../Controls2"
 
-TextFieldWithHeaderType {
+TextFieldType {
     id: root
 
     property var scroller: null
@@ -14,7 +14,6 @@ TextFieldWithHeaderType {
     signal edited(string text)
 
     Layout.fillWidth: true
-    Layout.topMargin: 16
     Layout.leftMargin: 16
     Layout.rightMargin: 16
 

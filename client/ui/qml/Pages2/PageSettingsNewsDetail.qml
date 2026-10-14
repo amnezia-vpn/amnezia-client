@@ -29,39 +29,38 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     FlickableType {
         id: fl
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        contentHeight: content.height
+
+        anchors.top: parent.top
+
+        contentHeight: content.implicitHeight
 
         ColumnLayout {
             id: content
+
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                headerText: newsItem ? newsItem.title : ""
+
+                title: newsItem ? newsItem.title : ""
+
+                header.headerTextMaximumLineCount: 0
+                header.headerTextElide: Text.ElideNone
             }
 
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+
                 text: newsItem ? newsItem.content : ""
 
                 textFormat: Text.RichText
@@ -76,7 +75,6 @@ PageType {
                     cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
                 }
             }
-
         }
     }
-} 
+}

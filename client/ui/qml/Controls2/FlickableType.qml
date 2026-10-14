@@ -1,9 +1,8 @@
-import QtQuick 2.12
-import QtQuick.Controls 2.12
-import "../Config"
+import QtQuick
+import QtQuick.Controls
 
 Flickable {
-    id: fl
+    id: root
 
     clip: true
     width: parent.width

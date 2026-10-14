@@ -30,40 +30,30 @@ PageType {
 
     Rectangle {
         anchors.fill: parent
-        color: AmneziaStyle.color.backgroundBase
+        color: AmneziaStyle.color.bgBase
     }
 
-    BackButtonType {
-        id: backButton
+    NavigationBarType {
+        id: navigationBar
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
 
-    ImageButtonType {
-        id: supportButton
+        IconButtonType {
+            id: supportButton
 
-        anchors.verticalCenter: backButton.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: 16
+            size: IconButtonType.Small
+            icon.source: "qrc:/images/controls/headphones.svg"
 
-        implicitWidth: 36
-        implicitHeight: 36
-
-        image: "qrc:/images/controls/headphones.svg"
-        imageColor: AmneziaStyle.color.textPrimary
-
-        onClicked: function() {
-            supportDrawer.open()
+            onClicked: supportDrawer.open()
         }
     }
 
     FlickableType {
         id: fl
 
-        anchors.top: backButton.bottom
+        anchors.top: navigationBar.bottom
         anchors.bottom: stickyBar.top
         contentHeight: content.height + 32
 
@@ -73,7 +63,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 24
+            anchors.topMargin: 12
             anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 24
@@ -123,7 +113,7 @@ PageType {
 
                         sourceItem: heroImage
 
-                        AppDisplayTextType {
+                        DisplayTextType {
                             id: versionText
 
                             anchors.centerIn: parent
@@ -142,12 +132,12 @@ PageType {
                     Repeater {
                         model: UpdateController.tags
 
-                        delegate: TagBadgeType {
+                        delegate: StatusBadgeType {
                             text: modelData
                         }
                     }
 
-                    AppSmallTextType {
+                    SmallTextType {
                         height: 22
 
                         verticalAlignment: Text.AlignVCenter
@@ -163,13 +153,13 @@ PageType {
                 Layout.fillWidth: true
                 spacing: 12
 
-                AppH1TextType {
+                H1TextType {
                     Layout.fillWidth: true
 
                     text: qsTr("New version available")
                 }
 
-                AppH3TextType {
+                H3TextType {
                     Layout.fillWidth: true
 
                     visible: text !== ""
@@ -214,9 +204,9 @@ PageType {
         anchors.right: parent.right
         height: updateButton.height + 32 + PageController.safeAreaBottomMargin
 
-        color: AmneziaStyle.color.backgroundBase
+        color: AmneziaStyle.color.bgBase
 
-        BasicButtonType {
+        ButtonType {
             id: updateButton
 
             anchors.top: parent.top
@@ -225,12 +215,6 @@ PageType {
             anchors.topMargin: 16
             anchors.leftMargin: 16
             anchors.rightMargin: 16
-
-            defaultColor: AmneziaStyle.color.surfaceInverse
-            hoveredColor: AmneziaStyle.color.surfaceInverseHovered
-            pressedColor: AmneziaStyle.color.surfaceInversePressed
-            disabledColor: AmneziaStyle.color.surfaceInverse
-            textColor: AmneziaStyle.color.textInverted
 
             enabled: UpdateController.updateState !== UpdateState.Downloading
 
@@ -249,7 +233,7 @@ PageType {
                 }
             }
 
-            clickedFunc: function() {
+            onClicked: {
                 if (UpdateController.isStoreUpdate) {
                     UpdateController.update()
                     return

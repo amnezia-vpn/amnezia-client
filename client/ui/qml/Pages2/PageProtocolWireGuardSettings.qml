@@ -17,53 +17,38 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        anchors.bottom: saveButton.top
+        anchors.bottomMargin: 16
         anchors.right: parent.right
         anchors.left: parent.left
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
+
+        header: NavigationBarType {
+            width: listView.width
+            height: implicitHeight + 16
+
+            title: qsTr("WG settings")
+        }
 
         model: WireGuardConfigModel
 
         delegate: ColumnLayout {
             width: listView.width
 
-            property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
+            property bool isSaveButtonEnabled: portTextField.errorText === "" &&
+                                               vpnAddressSubnetTextField.errorText === ""
 
-            spacing: 0
+            spacing: 12
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("WG settings")
-            }
-
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: vpnAddressSubnetTextField
 
                 Layout.fillWidth: true
-                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -79,10 +64,10 @@ PageType {
                 checkEmptyText: true
             }
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: portTextField
+
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -99,49 +84,46 @@ PageType {
 
                 checkEmptyText: true
             }
+        }
+    }
 
-            BasicButtonType {
-                id: saveButton
-                
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 24
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+    ButtonType {
+        id: saveButton
 
-                enabled: portTextField.errorText === "" &&
-                         vpnAddressSubnetTextField.errorText === ""
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                text: qsTr("Save")
+        enabled: listView.enabled && listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
 
-                onClicked: function() {
-                    forceActiveFocus()
+        text: qsTr("Save")
 
-                    var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
+        onClicked: function() {
+            forceActiveFocus()
 
-                    var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                            return
-                        }
+            var headerText = qsTr("Save settings?")
+            var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
 
-                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            saveButton.forceActiveFocus()
-                        }
-                    }
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var yesButtonFunction = function() {
+                if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                    return
                 }
 
-                Keys.onEnterPressed: saveButton.clicked()
-                Keys.onReturnPressed: saveButton.clicked()
+                PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+                InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
             }
+            var noButtonFunction = function() {
+                if (!GC.isMobile()) {
+                    saveButton.forceActiveFocus()
+                }
+            }
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

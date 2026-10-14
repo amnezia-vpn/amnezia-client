@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 
 import Style 1.0
@@ -9,133 +10,127 @@ import "TextTypes"
 Switch {
     id: root
 
-    property alias descriptionText: description.text
-    property string descriptionTextColor: AmneziaStyle.color.mutedGray
-    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
+    property string descriptionText
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
+    readonly property bool hasLabel: root.text !== "" || root.descriptionText !== ""
 
-    property string checkedIndicatorColor: AmneziaStyle.color.richBrown
-    property string defaultIndicatorColor: AmneziaStyle.color.transparent
-    property string checkedDisabledIndicatorColor: AmneziaStyle.color.deepBrown
+    implicitWidth: root.hasLabel ? implicitContentWidth + leftPadding + rightPadding : implicitIndicatorWidth
+    implicitHeight: Math.max(implicitContentHeight + topPadding + bottomPadding, implicitIndicatorHeight)
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
+    padding: 0
+    rightPadding: root.hasLabel ? implicitIndicatorWidth + 16 : 0
+    spacing: 16
 
-    property string checkedIndicatorBorderColor: AmneziaStyle.color.richBrown
-    property string defaultIndicatorBorderColor: AmneziaStyle.color.charcoalGray
-    property string checkedDisabledIndicatorBorderColor: AmneziaStyle.color.deepBrown
-
-    property string checkedInnerCircleColor: AmneziaStyle.color.goldenApricot
-    property string defaultInnerCircleColor: AmneziaStyle.color.paleGray
-    property string checkedDisabledInnerCircleColor: AmneziaStyle.color.mutedBrown
-    property string defaultDisabledInnerCircleColor: AmneziaStyle.color.charcoalGray
-
-    property string hoveredIndicatorBackgroundColor: AmneziaStyle.color.translucentWhite
-    property string defaultIndicatorBackgroundColor: AmneziaStyle.color.transparent
-
-    property int indicatorWidth: 52
-    property int indicatorHeight: 32
-    property int checkedInnerCircleSize: 24
-    property int checkedInnerCircleMargin: 4
-
-    hoverEnabled: enabled ? true : false
+    hoverEnabled: true
     focusPolicy: Qt.TabFocus
 
-    indicator: Rectangle {
-        id: switcher
+    opacity: root.enabled ? 1 : 0.5
 
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
+    indicator: Item {
+        x: root.width - width
+        y: (root.height - height) / 2
 
-        implicitWidth: root.indicatorWidth
-        implicitHeight: root.indicatorHeight
+        implicitWidth: 50
+        implicitHeight: 30
 
-        radius: height / 2
-        color: root.checked ? (root.enabled ? root.checkedIndicatorColor : root.checkedDisabledIndicatorColor)
-                            : root.defaultIndicatorColor
+        Rectangle {
+            anchors.fill: parent
 
-        border.color: root.activeFocus ? root.borderFocusedColor : (root.checked ? (root.enabled ? root.checkedIndicatorBorderColor : root.checkedDisabledIndicatorBorderColor)
-                            : root.defaultIndicatorBorderColor)
+            radius: height / 2
+            color: AmneziaStyle.color.bgSurfaceAlt
+            border.width: 1
+            border.color: root.checked ? AmneziaStyle.color.accentDark : AmneziaStyle.color.borderSoft
 
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
-        }
-        Behavior on border.color {
-            PropertyAnimation { duration: 200 }
+            Behavior on border.color {
+                ColorAnimation { duration: 150 }
+            }
         }
 
         Rectangle {
-            id: innerCircle
+            anchors.centerIn: knob
 
-            anchors.verticalCenter: parent.verticalCenter
-            x: root.checked ? parent.width - width - root.checkedInnerCircleMargin : 8
-            width: root.checked ? root.checkedInnerCircleSize : 16
-            height: root.checked ? root.checkedInnerCircleSize : 16
-            radius: 23
-            color: root.checked ? (root.enabled ? root.checkedInnerCircleColor : root.checkedDisabledInnerCircleColor)
-                                : (root.enabled ? root.defaultInnerCircleColor : root.defaultDisabledInnerCircleColor)
+            width: 36
+            height: 36
+            radius: 18
+
+            visible: root.enabled && (root.hovered || root.down)
+            color: root.checked ? AmneziaStyle.color.bgStateLayerAccent : AmneziaStyle.color.bgStateLayer
+        }
+
+        MultiEffect {
+            anchors.fill: knob
+
+            source: knob
+            visible: root.checked
+            shadowEnabled: true
+            shadowColor: AmneziaStyle.color.accentLight
+            shadowBlur: 0.6
+            shadowHorizontalOffset: 0
+            shadowVerticalOffset: 0
+        }
+
+        Rectangle {
+            id: knob
+
+            x: root.checked ? parent.width - width - 4 : 4
+            y: (parent.height - height) / 2
+
+            width: 20
+            height: 20
+            radius: 10
+
+            color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.iconSecondary
 
             Behavior on x {
-                PropertyAnimation { duration: 200 }
+                enabled: !root.down
+                NumberAnimation { duration: 150 }
+            }
+
+            Behavior on color {
+                ColorAnimation { duration: 150 }
             }
         }
 
-        Rectangle {
-            anchors.centerIn: innerCircle
-            width: 40
-            height: 40
-            radius: 23
-            color: root.hovered ? root.hoveredIndicatorBackgroundColor : root.defaultIndicatorBackgroundColor
-
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
-            }
+        FocusRingType {
+            radius: 15
+            visible: root.visualFocus
         }
     }
 
     contentItem: ColumnLayout {
-        id: content
+        visible: root.hasLabel
+        spacing: 4
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-
-        ListItemTitleType {
+        H3TextType {
             Layout.fillWidth: true
-            rightPadding: indicator.width
-
-            text: root.text
-            color: root.enabled ? root.textColor : root.textDisabledColor
-        }
-
-        CaptionTextType {
-            id: description
-
-            Layout.fillWidth: true
-            rightPadding: indicator.width
-
-            color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
 
             visible: text !== ""
+            text: root.text
+        }
+
+        SmallTextType {
+            Layout.fillWidth: true
+
+            visible: text !== ""
+            text: root.descriptionText
         }
     }
 
-    MouseArea {
-        anchors.fill: parent
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        enabled: false
     }
 
-    Keys.onEnterPressed: event => handleSwitch(event)
-    Keys.onReturnPressed: event => handleSwitch(event)
-    Keys.onSpacePressed: event => handleSwitch(event)
-
-    function handleSwitch(event) {
-        if (root.enabled && !event.isAutoRepeat) {
-            root.checked = !root.checked
+    Keys.onEnterPressed: function(event) {
+        if (!event.isAutoRepeat) {
+            root.toggle()
             root.toggled()
         }
-        event.accepted = true
+    }
+
+    Keys.onReturnPressed: function(event) {
+        if (!event.isAutoRepeat) {
+            root.toggle()
+            root.toggled()
+        }
     }
 }

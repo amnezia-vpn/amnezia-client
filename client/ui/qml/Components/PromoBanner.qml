@@ -1,126 +1,121 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
-import QtQuick.Shapes
 
 import Style 1.0
 
-import "../Config"
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-Rectangle {
+ItemDelegate {
     id: root
 
-    property real contentHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
-    activeFocusOnTab: true
+    property string subtitle
+    property bool critical: false
 
-    gradient: Gradient {
-        orientation: Gradient.Horizontal
-        GradientStop { position: 0.0; color: AmneziaStyle.color.translucentSlateGray }
-        GradientStop { position: 1.0; color: AmneziaStyle.color.translucentOnyxBlack }
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: implicitContentHeight + topPadding + bottomPadding
+
+    padding: 16
+    spacing: 12
+
+    hoverEnabled: true
+    focusPolicy: Qt.TabFocus
+    opacity: enabled ? 1.0 : 0.4
+
+    icon.width: 26
+    icon.height: 26
+
+    Accessible.name: root.text
+    Accessible.description: root.subtitle
+
+    Keys.onEnterPressed: root.click()
+    Keys.onReturnPressed: root.click()
+
+    background: Rectangle {
+        implicitWidth: 358
+
+        radius: 16
+        color: {
+            if (!root.enabled) {
+                return AmneziaStyle.color.bgSurface
+            }
+            if (root.down || root.hovered) {
+                return AmneziaStyle.color.bgStateLayer
+            }
+            return root.critical ? AmneziaStyle.color.promoOverlay : AmneziaStyle.color.bgBase
+        }
+        border.width: 1
+        border.color: {
+            if (root.enabled && root.down) {
+                return AmneziaStyle.color.borderMedium
+            }
+            return root.critical ? AmneziaStyle.color.promoRecommendation : AmneziaStyle.color.borderSoft
+        }
+
+        Behavior on color {
+            ColorAnimation { duration: 150 }
+        }
+
+        FocusRingType {
+            radius: 16
+            visible: root.visualFocus
+        }
+
+        HoverHandler {
+            cursorShape: Qt.PointingHandCursor
+            enabled: root.enabled
+        }
     }
-    border.width: 1
-    border.color: AmneziaStyle.color.onyxBlack
-    radius: 13
 
-    visible: ServersUiController.isAdVisible
+    contentItem: RowLayout {
+        spacing: root.spacing
 
-    Keys.onEnterPressed: {
-        Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
-    }
+        Image {
+            Layout.preferredWidth: root.icon.width
+            Layout.preferredHeight: root.icon.height
 
-    Keys.onReturnPressed: {
-        Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
-    }
-
-    RowLayout {
-        id: content
-        anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 12
-        anchors.topMargin: 12
-        anchors.bottomMargin: 12
-        spacing: 20
+            visible: root.icon.source.toString() !== ""
+            source: root.icon.source
+            sourceSize: Qt.size(root.icon.width, root.icon.height)
+        }
 
         ColumnLayout {
             Layout.fillWidth: true
+
             spacing: 4
 
-            CaptionTextType {
+            H3TextType {
                 Layout.fillWidth: true
-                text: ServersUiController.adHeader
-                color: AmneziaStyle.color.paleGray
-                font.pixelSize: 14
-                font.weight: 700
 
+                text: root.text
                 textFormat: Text.RichText
             }
 
-            CaptionTextType {
+            SmallTextType {
                 Layout.fillWidth: true
-                text: ServersUiController.adDescription
-                color: AmneziaStyle.color.mutedGray
-                wrapMode: Text.WordWrap
-                lineHeight: 18
-                lineHeightMode: Text.FixedHeight
-                font.pixelSize: 14
 
                 visible: text !== ""
+                text: root.subtitle
             }
         }
 
         Item {
-            implicitWidth: 40
-            implicitHeight: 40
-            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 36
+            Layout.preferredHeight: 36
+            Layout.leftMargin: 4 - root.spacing
 
-            Rectangle {
-                id: chevronBackground
-                anchors.fill: parent
-                radius: 12
-                color: AmneziaStyle.color.transparent
-                border.width: root.activeFocus ? 1 : 0
-                border.color: AmneziaStyle.color.paleGray
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-
-                Behavior on border.width {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
-
-            Image {
+            IconImage {
                 anchors.centerIn: parent
+                width: 20
+                height: 20
+
                 source: "qrc:/images/controls/chevron-right.svg"
-                sourceSize: Qt.size(24, 24)
+                sourceSize: Qt.size(20, 20)
+                color: AmneziaStyle.color.iconDefault
             }
-        }
-    }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: true
-
-        onEntered: {
-            chevronBackground.color = AmneziaStyle.color.slateGray
-        }
-
-        onExited: {
-            chevronBackground.color = AmneziaStyle.color.transparent
-        }
-
-        onPressedChanged: {
-            chevronBackground.color = pressed ? AmneziaStyle.color.charcoalGray : containsMouse ? AmneziaStyle.color.slateGray : AmneziaStyle.color.transparent
-        }
-
-        onClicked: function() {
-            root.forceActiveFocus()
-            Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
         }
     }
 }

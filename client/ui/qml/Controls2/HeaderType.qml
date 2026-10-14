@@ -1,4 +1,6 @@
 import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 import Style 1.0
@@ -13,63 +15,139 @@ Item {
     property int headerHorizontalAlignment: Text.AlignLeft
     property int headerTextMaximumLineCount: 2
     property int headerTextElide: Qt.ElideRight
+
     property string descriptionText
+
     property string descriptionLinkText
     property string descriptionLinkUrl
-    property alias headerRow: headerRow
+
+    property string actionButtonImage
+    property bool showSwitcher: false
+
+    readonly property alias actionButton: actionButton
+    readonly property alias switcher: switcher
+
+    signal actionClicked()
+    signal switcherToggled(bool checked)
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
     ColumnLayout {
         id: content
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
+        spacing: 8
+
         RowLayout {
-            id: headerRow
             Layout.fillWidth: true
 
-            Header1TextType {
-                id: header
+            spacing: 8
+
+            H1TextType {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+
                 text: root.headerText
                 textFormat: root.headerTextFormat
                 horizontalAlignment: root.headerHorizontalAlignment
                 maximumLineCount: root.headerTextMaximumLineCount
                 elide: root.headerTextElide
             }
+
+            IconButtonType {
+                id: actionButton
+
+                Layout.alignment: Qt.AlignVCenter
+
+                visible: root.actionButtonImage !== ""
+                icon.source: root.actionButtonImage
+
+                onClicked: root.actionClicked()
+            }
+
+            SwitchType {
+                id: switcher
+
+                Layout.alignment: Qt.AlignVCenter
+
+                visible: root.showSwitcher
+
+                onToggled: root.switcherToggled(switcher.checked)
+            }
         }
 
-        ParagraphTextType {
-            id: description
-            Layout.topMargin: 16
+        BodyTextType {
             Layout.fillWidth: true
-            text: root.descriptionText
-            color: AmneziaStyle.color.mutedGray
+
             visible: root.descriptionText !== ""
+
+            text: root.descriptionText
+            color: AmneziaStyle.color.textSecondary
         }
 
-        ParagraphTextType {
+        AbstractButton {
             id: descriptionLink
-            Layout.topMargin: 16
+
             Layout.fillWidth: true
-            text: root.descriptionLinkText !== "" && root.descriptionLinkUrl !== ""
-                  ? ("<a href=\"" + root.descriptionLinkUrl + "\" style=\"color: " + AmneziaStyle.color.goldenApricotString + ";\">" + root.descriptionLinkText + "</a>")
-                  : ""
-            textFormat: Text.RichText
-            visible: root.descriptionLinkText !== ""
 
-            onLinkActivated: function(link) {
-                Qt.openUrlExternally(link)
+            visible: root.descriptionLinkText !== "" && root.descriptionLinkUrl !== ""
+
+            implicitHeight: linkRow.implicitHeight
+            hoverEnabled: true
+
+            text: root.descriptionLinkText
+
+            Accessible.role: Accessible.Link
+
+            background: null
+
+            contentItem: Item {
+                implicitHeight: linkRow.implicitHeight
+
+                RowLayout {
+                    id: linkRow
+
+                    width: Math.min(implicitWidth, parent.width)
+
+                    spacing: 8
+
+                    BodyTextType {
+                        Layout.fillWidth: true
+
+                        text: descriptionLink.text
+                        color: AmneziaStyle.color.textAccent
+                        font.underline: descriptionLink.hovered
+                    }
+
+                    IconImage {
+                        Layout.preferredWidth: 14
+                        Layout.preferredHeight: 14
+
+                        source: "qrc:/images/controls/external-link.svg"
+                        sourceSize: Qt.size(14, 14)
+                        color: AmneziaStyle.color.textAccent
+                    }
+                }
+
+                FocusRingType {
+                    target: linkRow
+                    radius: 4
+                    visible: descriptionLink.visualFocus
+                }
             }
 
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+            HoverHandler {
+                cursorShape: Qt.PointingHandCursor
             }
+
+            onClicked: Qt.openUrlExternally(root.descriptionLinkUrl)
+
+            Keys.onEnterPressed: descriptionLink.clicked()
+            Keys.onReturnPressed: descriptionLink.clicked()
         }
     }
-} 
+}

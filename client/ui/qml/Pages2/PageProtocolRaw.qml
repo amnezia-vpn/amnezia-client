@@ -17,70 +17,40 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.fill: parent
 
-        header: ColumnLayout {
+        header: NavigationBarType {
             width: listView.width
+            height: implicitHeight + 16
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.bottomMargin: 16
-
-                headerText: ContainersModel.getProcessedContainerName() + qsTr(" settings")
-            }
+            title: ContainersModel.getProcessedContainerName() + qsTr(" settings")
         }
 
         model: ProtocolsModel
 
-        delegate: ColumnLayout {
-            width: listView.width
+        delegate: Item {
+            implicitWidth: listView.width
+            implicitHeight: button.implicitHeight
 
-            LabelWithButtonType {
+            ListItemType {
                 id: button
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
 
                 text: qsTr("Show connection options")
 
-                clickedFunction: function() {
+                onClicked: {
                     configContentDrawer.open()
-                }
-
-                MouseArea {
-                    anchors.fill: button
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
                 }
             }
 
-            DividerType {}
-
-            DrawerType2 {
+            SheetType {
                 id: configContentDrawer
 
                 expandedHeight: windowHeight * 0.9
@@ -90,44 +60,51 @@ PageType {
                 Item {
                     anchors.fill: parent
 
-                    BackButtonType {
+                    IconButtonType {
                         id: drawerBackButton
 
                         anchors.top: parent.top
                         anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.topMargin: 16
+                        anchors.topMargin: 8
+                        anchors.leftMargin: 16
 
-                        backButtonFunction: function() {
-                            configContentDrawer.close()
-                        }
+                        size: IconButtonType.Small
+                        icon.source: "qrc:/images/controls/arrow-left.svg"
+
+                        onClicked: configContentDrawer.close()
                     }
 
                     ListViewType {
                         id: drawerListView
 
                         anchors.top: drawerBackButton.bottom
+                        anchors.topMargin: 24
                         anchors.bottom: parent.bottom
                         anchors.right: parent.right
                         anchors.left: parent.left
 
-                        header: ColumnLayout {
+                        header: Item {
                             width: drawerListView.width
+                            height: sheetTitle.implicitHeight + 12
 
-                            Header2Type {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 16
-                                Layout.leftMargin: 16
-                                Layout.rightMargin: 16
+                            SectionHeaderType {
+                                id: sheetTitle
+
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 16
+                                anchors.rightMargin: 16
 
                                 headerText: qsTr("Connection options %1").arg(protocolName)
                             }
                         }
 
-                        model: 1 // fake model to force the ListView to be created without a model
+                        model: 1
 
                         delegate: ColumnLayout {
                             width: drawerListView.width
+
+                            spacing: 0
 
                             TextArea {
                                 id: configText
@@ -135,28 +112,28 @@ PageType {
                                 activeFocusOnTab: false
 
                                 Layout.fillWidth: true
-                                Layout.topMargin: 16
                                 Layout.leftMargin: 16
                                 Layout.rightMargin: 16
+                                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
                                 padding: 0
-                                height: 24
+                                leftPadding: 0
+                                rightPadding: 0
 
-                                color: AmneziaStyle.color.paleGray
-                                selectionColor: AmneziaStyle.color.richBrown
-                                selectedTextColor: AmneziaStyle.color.paleGray
+                                color: AmneziaStyle.color.textSecondary
+                                selectionColor: AmneziaStyle.color.bgStateLayerAccent
+                                selectedTextColor: AmneziaStyle.color.textSecondary
 
                                 font.pixelSize: 16
-                                font.weight: Font.Medium
+                                font.weight: Font.Normal
+                                font.letterSpacing: -0.4
                                 font.family: "PT Root UI VF"
 
                                 text: rawConfig
 
                                 wrapMode: Text.Wrap
 
-                                background: Rectangle {
-                                    color: AmneziaStyle.color.transparent
-                                }
+                                background: null
                             }
                         }
                     }
@@ -167,17 +144,21 @@ PageType {
         footer: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 id: removeButton
 
-                width: parent.width
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 visible: ServersUiController.isProcessedServerHasWriteAccess()
 
                 text: qsTr("Remove ") + ContainersModel.getProcessedContainerName()
-                textColor: AmneziaStyle.color.vibrantRed
+                destructive: true
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                     var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
                     var yesButtonText = qsTr("Continue")
@@ -191,15 +172,12 @@ PageType {
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
-
-                MouseArea {
-                    anchors.fill: removeButton
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
-                }
             }
 
-            DividerType {}
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
+            }
         }
     }
 }

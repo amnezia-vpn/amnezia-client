@@ -242,76 +242,61 @@ PageType {
         anchors.fill: parent
         enabled: !root.pageBusy
 
-        BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        ColumnLayout {
+            id: pageHeader
 
-        onFocusChanged: {
-            if (this.activeFocus) {
-                if (mainTabBar.currentIndex === 0) {
-                    connectionListView.positionViewAtBeginning()
-                } else {
-                    settingsListView.positionViewAtBeginning()
-                }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("TProxy settings")
+            }
+
+            LinkButtonType {
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                size: LinkButtonType.Medium
+                horizontalPadding: 14
+                verticalPadding: 8
+
+                text: qsTr("Read more about Telegram WEB proxy")
+
+                onClicked: Qt.openUrlExternally("https://github.com/telegramdesktop/tproxy-server")
+            }
+
+            SmallTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: root.tproxyNetworkBlocked
+                text: qsTr("No internet connection. Connect to the internet to change TProxy settings.")
             }
         }
-    }
 
-    ColumnLayout {
-        id: pageHeader
-        anchors.top: backButton.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        spacing: 0
-
-        BaseHeaderType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 24
-            headerText: qsTr("TProxy settings")
-            descriptionLinkText: qsTr("Read more about Telegram WEB proxy")
-            descriptionLinkUrl: "https://github.com/telegramdesktop/tproxy-server"
-        }
-
-        CaptionTextType {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.topMargin: 8
-            visible: root.tproxyNetworkBlocked
-            text: qsTr("No internet connection. Connect to the internet to change TProxy settings.")
-            color: AmneziaStyle.color.mutedGray
-            wrapMode: Text.WordWrap
-            font.pixelSize: 14
-        }
-    }
-
-    TabBar {
+    TabsType {
         id: mainTabBar
+
         anchors.top: pageHeader.bottom
+        anchors.topMargin: 24
         anchors.left: parent.left
         anchors.right: parent.right
-        width: parent.width
-        background: Rectangle {
-            color: AmneziaStyle.color.transparent
-            Rectangle {
-                width: parent.width
-                height: 1
-                anchors.bottom: parent.bottom
-                color: AmneziaStyle.color.slateGray
-            }
-        }
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+
         TabButtonType {
             text: qsTr("Connection")
-            isSelected: mainTabBar.currentIndex === 0
         }
         TabButtonType {
             text: qsTr("Settings")
-            isSelected: mainTabBar.currentIndex === 1
         }
     }
 
@@ -351,52 +336,51 @@ PageType {
                     return "tg://webproxy?server=" + host + "&secret=" + secret
                 }
 
-                CaptionTextType {
+                SmallTextType {
                     Layout.fillWidth: true
                     Layout.topMargin: 24
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 8
+
                     text: qsTr("Use Telegram WEB proxy link")
-                    color: AmneziaStyle.color.mutedGray
                 }
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.topMargin: 12
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
-                    implicitHeight: linkRow.implicitHeight + 16
-                    color: AmneziaStyle.color.onyxBlack
-                    radius: 8
-                    border.color: AmneziaStyle.color.slateGray
-                    border.width: 1
+
+                    implicitHeight: Math.max(72, linkRow.implicitHeight + 24)
+                    color: AmneziaStyle.color.bgSurface
+                    radius: 16
 
                     RowLayout {
                         id: linkRow
+
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 8
-                        spacing: 4
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 12
 
-                        CaptionTextType {
+                        spacing: 0
+
+                        BodyTextType {
                             Layout.fillWidth: true
+
                             text: secret !== "" ? displayTmeLink() : qsTr("Set a hostname first")
-                            color: secret !== "" ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
+                            color: secret !== "" ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textTertiary
+                            wrapMode: Text.WrapAnywhere
+                            maximumLineCount: 2
                             elide: Text.ElideRight
-                            maximumLineCount: 1
-                            font.pixelSize: 13
                         }
 
-                        ImageButtonType {
-                            implicitWidth: 36
-                            implicitHeight: 36
-                            hoverEnabled: true
-                            image: "qrc:/images/controls/copy.svg"
-                            imageColor: AmneziaStyle.color.paleGray
+                        IconButtonType {
                             visible: secret !== ""
+                            icon.source: "qrc:/images/controls/copy.svg"
+                            Accessible.name: qsTr("Use Telegram WEB proxy link")
+
                             onClicked: {
                                 GC.copyToClipBoard(displayTmeLink())
                                 PageController.showNotificationMessage(qsTr("Copied"))
@@ -407,40 +391,40 @@ PageType {
 
                 Rectangle {
                     Layout.fillWidth: true
+                    Layout.topMargin: 12
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
-                    implicitHeight: tgLinkRow.implicitHeight + 16
-                    color: AmneziaStyle.color.onyxBlack
-                    radius: 8
-                    border.color: AmneziaStyle.color.slateGray
-                    border.width: 1
+
                     visible: secret !== ""
+                    implicitHeight: Math.max(72, tgLinkRow.implicitHeight + 24)
+                    color: AmneziaStyle.color.bgSurface
+                    radius: 16
 
                     RowLayout {
                         id: tgLinkRow
+
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: 12
-                        anchors.rightMargin: 8
-                        spacing: 4
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 12
 
-                        CaptionTextType {
+                        spacing: 0
+
+                        BodyTextType {
                             Layout.fillWidth: true
+
                             text: displayTgLink()
-                            color: AmneziaStyle.color.goldenApricot
+                            color: AmneziaStyle.color.textPrimary
+                            wrapMode: Text.WrapAnywhere
+                            maximumLineCount: 2
                             elide: Text.ElideRight
-                            maximumLineCount: 1
-                            font.pixelSize: 13
                         }
 
-                        ImageButtonType {
-                            implicitWidth: 36
-                            implicitHeight: 36
-                            hoverEnabled: true
-                            image: "qrc:/images/controls/qr-code.svg"
-                            imageColor: AmneziaStyle.color.paleGray
+                        IconButtonType {
+                            icon.source: "qrc:/images/controls/qr-code.svg"
+                            Accessible.name: qsTr("Telegram connection link")
+
                             onClicked: {
                                 ExportController.generateQrFromStringRaw(displayTgLink())
                                 PageController.goToShareConnectionPage(qsTr("Telegram connection link"),
@@ -448,12 +432,9 @@ PageType {
                             }
                         }
 
-                        ImageButtonType {
-                            implicitWidth: 36
-                            implicitHeight: 36
-                            hoverEnabled: true
-                            image: "qrc:/images/controls/copy.svg"
-                            imageColor: AmneziaStyle.color.paleGray
+                        IconButtonType {
+                            icon.source: "qrc:/images/controls/copy.svg"
+
                             onClicked: {
                                 GC.copyToClipBoard(displayTgLink())
                                 PageController.showNotificationMessage(qsTr("Copied"))
@@ -462,150 +443,78 @@ PageType {
                     }
                 }
 
-                RowLayout {
+                SmallTextType {
                     Layout.fillWidth: true
+                    Layout.topMargin: 24
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 8
-                    spacing: 4
 
-                    CaptionTextType {
-                        text: qsTr("Or enter the proxy details manually.")
-                        color: AmneziaStyle.color.mutedGray
+                    text: qsTr("Or enter the proxy details manually.")
+                }
+
+                ListGroupType {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 12
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+
+                    visible: secret !== ""
+
+                    CopyableValueRow {
+                        Layout.fillWidth: true
+
+                        copiedText: qsTr("Copied")
+                        label: qsTr("Host")
+                        value: effectiveHost()
                     }
 
-                    CaptionTextType {
+                    CopyableValueRow {
                         Layout.fillWidth: true
-                        text: qsTr("How to do it")
-                        color: AmneziaStyle.color.goldenApricot
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: Qt.openUrlExternally("https://github.com/telegramdesktop/tproxy-server")
-                        }
-                    }
 
-                    Item {
-                        Layout.fillWidth: true
+                        copiedText: qsTr("Copied")
+                        label: qsTr("Secret")
+                        value: secret
+                        showSeparator: false
                     }
                 }
 
-                Rectangle {
-                    Layout.fillWidth: true
+                LinkButtonType {
+                    Layout.topMargin: 12
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
-                    implicitHeight: manualCol.implicitHeight + 8
-                    color: AmneziaStyle.color.onyxBlack
-                    radius: 8
-                    border.color: AmneziaStyle.color.slateGray
-                    border.width: 1
-                    visible: secret !== ""
 
-                    ColumnLayout {
-                        id: manualCol
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.topMargin: 8
-                        spacing: 0
+                    size: LinkButtonType.Medium
+                    horizontalPadding: 14
+                    verticalPadding: 8
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 12
-                            Layout.rightMargin: 8
-                            Layout.bottomMargin: 8
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                CaptionTextType {
-                                    text: qsTr("Host")
-                                    color: AmneziaStyle.color.mutedGray
-                                    font.pixelSize: 12
-                                }
-                                CaptionTextType {
-                                    Layout.fillWidth: true
-                                    text: effectiveHost()
-                                    color: AmneziaStyle.color.paleGray
-                                    elide: Text.ElideRight
-                                }
-                            }
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/copy.svg"
-                                imageColor: AmneziaStyle.color.paleGray
-                                onClicked: {
-                                    GC.copyToClipBoard(effectiveHost())
-                                    PageController.showNotificationMessage(qsTr("Copied"))
-                                }
-                            }
-                        }
+                    text: qsTr("How to do it")
 
-                        DividerType {
-                            Layout.fillWidth: true
-                        }
-
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 12
-                            Layout.rightMargin: 8
-                            Layout.topMargin: 8
-                            Layout.bottomMargin: 8
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-                                CaptionTextType {
-                                    text: qsTr("Secret")
-                                    color: AmneziaStyle.color.mutedGray
-                                    font.pixelSize: 12
-                                }
-                                CaptionTextType {
-                                    Layout.fillWidth: true
-                                    text: secret
-                                    color: AmneziaStyle.color.paleGray
-                                    wrapMode: Text.WrapAnywhere
-                                    font.pixelSize: 13
-                                }
-                            }
-                            ImageButtonType {
-                                implicitWidth: 36
-                                implicitHeight: 36
-                                hoverEnabled: true
-                                image: "qrc:/images/controls/copy.svg"
-                                imageColor: AmneziaStyle.color.paleGray
-                                onClicked: {
-                                    GC.copyToClipBoard(secret)
-                                    PageController.showNotificationMessage(qsTr("Copied"))
-                                }
-                            }
-                        }
-                    }
+                    onClicked: Qt.openUrlExternally("https://github.com/telegramdesktop/tproxy-server")
                 }
 
                 CaptionTextType {
                     Layout.fillWidth: true
+                    Layout.topMargin: 12
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.topMargin: 8
-                    Layout.bottomMargin: 16
+
                     text: qsTr("Needs a WEB-capable Telegram client (Desktop proof of concept). Classic MTProxy links will not work.")
-                    color: AmneziaStyle.color.mutedGray
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 12
                 }
 
-                LabelWithButtonType {
+                ButtonType {
                     id: removeButton
+
                     Layout.fillWidth: true
-                    Layout.bottomMargin: 24
-                    Layout.leftMargin: 0
+                    Layout.topMargin: 24
+                    Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
+                    Layout.leftMargin: 16
                     Layout.rightMargin: 16
+
                     visible: ServersUiController.isProcessedServerHasWriteAccess()
+                    variant: ButtonType.Destructive
                     text: qsTr("Delete TProxy")
-                    textColor: AmneziaStyle.color.vibrantRed
-                    clickedFunction: function () {
+
+                    onClicked: {
                         var headerText = qsTr("Remove %1 from server?").arg(ContainersModel.getProcessedContainerName())
                         var yesButtonFunction = function () {
                             PageController.goToPage(PageEnum.PageDeinstalling)
@@ -625,15 +534,16 @@ PageType {
             model: TProxyConfigModel
             delegate: ColumnLayout {
                 width: settingsListView.width
-                spacing: 0
+
+                spacing: 12
+
                 readonly property bool fieldsEditable: isEnabled && containerStatus === 1 && !root.pageBusy
 
-                SwitcherType {
+                SwitchRowType {
                     Layout.fillWidth: true
                     Layout.topMargin: 24
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
                     text: qsTr("Enable TProxy")
                     checked: isEnabled
                     enabled: containerStatus !== 0 && containerStatus !== 3 && !root.pageBusy && !root.tproxyNetworkBlocked
@@ -656,28 +566,25 @@ PageType {
                     }
                 }
 
-                CaptionTextType {
+                SmallTextType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 8
                     visible: !fieldsEditable && !root.pageBusy
                     text: (containerStatus === 1 || containerStatus === 2)
                         ? qsTr("Enable TProxy to edit settings")
                         : (statusErrorCode !== 0
                             ? qsTr("Settings locked: connection timed out (error code %1). Re-open the page to retry.").arg(statusErrorCode)
                             : qsTr("Cannot reach the server — settings are unavailable"))
-                    color: AmneziaStyle.color.mutedGray
-                    wrapMode: Text.WordWrap
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: hostnameTextField
+                    Layout.topMargin: 12
                     enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 8
                     headerText: qsTr("Hostname")
                     textField.placeholderText: qsTr("proxy.example.com")
                     textField.text: hostname
@@ -715,20 +622,16 @@ PageType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
                     text: qsTr("Required. Point a DNS A record at this server. Do not put a CDN in front.")
-                    color: AmneziaStyle.color.mutedGray
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 12
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: emailTextField
+                    Layout.topMargin: 12
                     enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 8
                     headerText: qsTr("ACME email")
                     textField.placeholderText: qsTr("you@example.com")
                     textField.text: acmeEmail
@@ -766,41 +669,31 @@ PageType {
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
                     text: qsTr("Used by Caddy to issue a Let's Encrypt certificate.")
-                    color: AmneziaStyle.color.mutedGray
-                    wrapMode: Text.WordWrap
-                    font.pixelSize: 12
-                }
-
-                CaptionTextType {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
-                    text: qsTr("Carrier mode")
-                    color: AmneziaStyle.color.mutedGray
-                    font.pixelSize: 12
                 }
 
                 DropDownType {
                     id: carrierDropDown
+                    Layout.topMargin: 12
                     enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
                     drawerHeight: 0.45
+                    descriptionText: qsTr("Carrier mode")
                     headerText: qsTr("Carrier mode")
                     text: TProxyConfigModel.carrierModeLabel(carrierMode)
                     listView: Component {
                         ListViewType {
+                            leftMargin: 16
+                            rightMargin: 16
+
                             model: ["https", "https-lanes", "websocket", "websocket-lanes"]
-                            delegate: LabelWithButtonType {
-                                Layout.fillWidth: true
+                            delegate: ListItemType {
+                                width: ListView.view.width - ListView.view.leftMargin - ListView.view.rightMargin
                                 text: TProxyConfigModel.carrierModeLabel(modelData)
-                                rightImageSource: modelData === carrierMode ? "qrc:/images/controls/check.svg" : ""
-                                rightImageColor: AmneziaStyle.color.goldenApricot
-                                clickedFunction: function () {
+                                trailingIconSource: modelData === carrierMode ? "qrc:/images/controls/check.svg" : ""
+                                onClicked: {
                                     TProxyConfigModel.setCarrierMode(modelData)
                                     carrierDropDown.close()
                                 }
@@ -809,13 +702,12 @@ PageType {
                     }
                 }
 
-                TextFieldWithHeaderType {
+                TextFieldType {
                     id: workersTextField
                     enabled: fieldsEditable
                     Layout.fillWidth: true
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
                     headerText: qsTr("MTProxy workers")
                     textField.placeholderText: TProxyConfigModel.defaultWorkers()
                     textField.text: workers
@@ -851,14 +743,15 @@ PageType {
                     }
                 }
 
-                BasicButtonType {
+                ButtonType {
                     Layout.fillWidth: true
+                    Layout.topMargin: 12
+                    Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 32
                     text: qsTr("Save")
                     enabled: fieldsEditable && !root.tproxyNetworkBlocked
-                    clickedFunc: function () {
+                    onClicked: {
                         hostnameTextField.errorText = ""
                         emailTextField.errorText = ""
 

@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 import Style 1.0
@@ -8,72 +9,81 @@ import "TextTypes"
 Item {
     id: root
 
-    property string actionButtonImage
-    property var actionButtonFunction
-
-    property alias actionButton: headerActionButton
+    enum Level { Title, Section }
 
     property string headerText
     property string descriptionText
+    property int level: SectionHeaderType.Title
+
+    property string actionButtonImage
+
+    readonly property alias actionButton: actionButton
+
+    signal actionClicked()
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
     ColumnLayout {
         id: content
-        anchors.fill: parent
+
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        spacing: root.level === SectionHeaderType.Title ? 8 : 4
 
         RowLayout {
-            Header2TextType {
-                id: header
+            Layout.fillWidth: true
 
+            spacing: 8
+
+            H2TextType {
                 Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+
+                visible: root.level === SectionHeaderType.Title
 
                 text: root.headerText
             }
 
-            ImageButtonType {
-                id: headerActionButton
+            H3TextType {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
 
-                implicitWidth: 40
-                implicitHeight: 40
+                visible: root.level === SectionHeaderType.Section
 
-                image: root.actionButtonImage
-                imageColor: AmneziaStyle.color.paleGray
+                text: root.headerText
+            }
 
-                visible: image ? true : false
+            IconButtonType {
+                id: actionButton
 
-                onClicked: {
-                    if (actionButtonFunction && typeof actionButtonFunction === "function") {
-                        actionButtonFunction()
-                    }
-                }
+                Layout.alignment: Qt.AlignVCenter
+
+                size: root.level === SectionHeaderType.Title ? IconButtonType.Regular : IconButtonType.Small
+                visible: root.actionButtonImage !== ""
+                icon.source: root.actionButtonImage
+
+                onClicked: root.actionClicked()
             }
         }
 
-        ParagraphTextType {
-            id: description
-
-            Layout.topMargin: 16
+        BodyTextType {
             Layout.fillWidth: true
 
+            visible: root.level === SectionHeaderType.Title && root.descriptionText !== ""
+
             text: root.descriptionText
-
-            color: AmneziaStyle.color.mutedGray
-
-            visible: root.descriptionText !== ""
+            color: AmneziaStyle.color.textSecondary
         }
-    }
 
-    Keys.onEnterPressed: {
-        if (actionButtonFunction && typeof actionButtonFunction === "function") {
-            actionButtonFunction()
-        }
-    }
+        CaptionTextType {
+            Layout.fillWidth: true
 
-    Keys.onReturnPressed: {
-        if (actionButtonFunction && typeof actionButtonFunction === "function") {
-            actionButtonFunction()
+            visible: root.level === SectionHeaderType.Section && root.descriptionText !== ""
+
+            text: root.descriptionText
         }
     }
 }

@@ -1,97 +1,115 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick.Controls.impl
 
 import Style 1.0
 
-import "../Controls2"
-
-Rectangle {
+TextField {
     id: root
 
-    property alias textField: input
-    property alias text: input.text
-    readonly property alias displayText: input.displayText
-
-    signal cleared()
-
+    implicitWidth: 358
     implicitHeight: 64
 
-    color: AmneziaStyle.color.surfaceBase
-    radius: 16
-    border.width: 1
-    border.color: input.activeFocus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.borderSoft
+    leftPadding: 16
+    rightPadding: clearButton.visible ? 56 : 16
+    topPadding: 20
+    bottomPadding: 20
+    verticalAlignment: TextInput.AlignVCenter
 
-    Behavior on border.color {
-        PropertyAnimation { duration: 200 }
+    opacity: root.enabled ? 1 : 0.4
+
+    color: AmneziaStyle.color.textPrimary
+    placeholderText: qsTr("Search")
+    placeholderTextColor: AmneziaStyle.color.textTertiary
+    selectionColor: AmneziaStyle.color.accentDeep
+    selectedTextColor: AmneziaStyle.color.textPrimary
+
+    font.pixelSize: 16
+    font.weight: 400
+    font.family: "PT Root UI VF"
+    font.letterSpacing: -0.4
+    font.features: { "ss08": 1, "ss09": 1, "lnum": 1, "tnum": 1 }
+
+    inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
+
+    background: Rectangle {
+        radius: 16
+        color: AmneziaStyle.color.bgSurfaceAlt
+        border.width: root.activeFocus ? 2 : 1
+        border.color: root.activeFocus ? AmneziaStyle.color.borderEmphasis : AmneziaStyle.color.borderSoft
     }
 
-    function clear() {
-        input.text = ""
-        root.cleared()
-    }
+    cursorDelegate: Rectangle {
+        id: caret
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 8
-        spacing: 8
+        width: 2
+        height: 22
+        radius: 1
+        color: AmneziaStyle.color.accentLight
+        visible: root.activeFocus && !root.readOnly && root.selectionStart === root.selectionEnd
 
-        TextField {
-            id: input
-
-            Layout.fillWidth: true
-
-            color: AmneziaStyle.color.textPrimary
-            placeholderText: qsTr("Country or region")
-            placeholderTextColor: AmneziaStyle.color.mutedGray
-
-            selectionColor: AmneziaStyle.color.richBrown
-            selectedTextColor: AmneziaStyle.color.textPrimary
-
-            font.pixelSize: 16
-            font.weight: 400
-            font.family: "PT Root UI VF"
-
-            inputMethodHints: Qt.ImhNoAutoUppercase | Qt.ImhNoPredictiveText
-
-            maximumLength: 64
-
-            topPadding: 0
-            bottomPadding: 0
-            leftPadding: 0
-            rightPadding: 0
-
-            background: Rectangle {
-                color: AmneziaStyle.color.transparent
-            }
-
-            Keys.onEscapePressed: function(event) {
-                if (input.text === "") {
-                    event.accepted = false
-                    return
-                }
-                root.clear()
-            }
-
-            ContextMenu.menu: ContextMenuType {
-                textObj: input
-            }
+        Timer {
+            interval: Qt.styleHints.cursorFlashTime / 2
+            running: caret.visible && Qt.styleHints.cursorFlashTime > 0
+            repeat: true
+            onTriggered: caret.opacity = caret.opacity > 0 ? 0 : 1
+            onRunningChanged: caret.opacity = 1
         }
 
-        ImageButtonType {
-            visible: input.text !== ""
+        Connections {
+            target: root
+            function onCursorPositionChanged() {
+                caret.opacity = 1
+            }
+        }
+    }
 
-            implicitWidth: 40
-            implicitHeight: 40
+    Keys.onEscapePressed: function(event) {
+        if (root.text === "") {
+            event.accepted = false
+            return
+        }
+        root.clear()
+    }
 
-            hoverEnabled: true
-            image: "qrc:/images/controls/close.svg"
-            imageColor: AmneziaStyle.color.paleGray
+    ContextMenu.menu: contextMenu.useNativeEditMenu ? null : contextMenu
+    ContextMenu.onRequested: function(position) {
+        contextMenu.requestNative(position)
+    }
 
-            onClicked: root.clear()
-            Keys.onEnterPressed: root.clear()
-            Keys.onReturnPressed: root.clear()
+    TapHandler {
+        enabled: contextMenu.useNativeEditMenu
+        acceptedDevices: PointerDevice.TouchScreen
+        onDoubleTapped: function(eventPoint) {
+            root.forceActiveFocus()
+            root.cursorPosition = root.positionAt(eventPoint.position.x, eventPoint.position.y)
+            root.selectWord()
+            contextMenu.requestNative(eventPoint.position)
+        }
+    }
+
+    ContextMenuType {
+        id: contextMenu
+        textObj: root
+    }
+
+    IconButtonType {
+        id: clearButton
+
+        anchors.right: parent.right
+        anchors.rightMargin: 8
+        anchors.verticalCenter: parent.verticalCenter
+
+        implicitWidth: 40
+        implicitHeight: 40
+
+        visible: root.text !== "" && !root.readOnly
+        icon.source: "qrc:/images/controls/x-circle.svg"
+        icon.color: AmneziaStyle.color.iconSecondary
+
+        onClicked: {
+            root.clear()
+            root.forceActiveFocus()
         }
     }
 }

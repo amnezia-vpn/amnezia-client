@@ -1,135 +1,53 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
-
-import Style 1.0
-
-import "TextTypes"
 
 ListViewType {
     id: root
 
-    property var rootWidth
-
-    property var selectedText
-
-    property int textMaximumLineCount: 2
-    property int textElide: Qt.ElideRight
-
-    property string imageSource: "qrc:/images/controls/check.svg"
-
-    property var clickedFunction
-
     property int selectedIndex: 0
-
+    property string selectedText
     property string currentValue: ""
 
-    width: rootWidth
-    height: root.contentItem.height
+    signal activated(int index)
+
+    implicitHeight: contentHeight
+
+    leftMargin: 16
+    rightMargin: 16
+
+    function triggerCurrentItem() {
+        const item = root.itemAtIndex(root.selectedIndex)
+        if (item) {
+            item.click()
+        }
+    }
 
     ButtonGroup {
         id: buttonGroup
     }
 
-    function triggerCurrentItem() {
-        var item = root.itemAtIndex(selectedIndex)
-        if (!item) {
-            return
-        }
-        item.selectable.clicked()
-    }
+    delegate: RadioItemType {
+        required property int index
+        required property string name
 
-    delegate: ColumnLayout {
-        id: content
+        width: root.width - root.leftMargin - root.rightMargin
 
-        property alias selectable: radioButton
+        text: name
+        showSeparator: index < root.count - 1
 
-        implicitWidth: rootWidth
+        ButtonGroup.group: buttonGroup
+        checked: root.currentValue !== "" ? name === root.currentValue : root.selectedIndex === index
 
-        RadioButton {
-            id: radioButton
-
-            implicitWidth: parent.width
-            implicitHeight: radioButtonContent.implicitHeight
-
-            hoverEnabled: true
-
-            indicator: Rectangle {
-                width: parent.width - 1
-                height: parent.height
-                color: radioButton.hovered ? AmneziaStyle.color.slateGray : AmneziaStyle.color.onyxBlack
-                border.color: radioButton.focus ? AmneziaStyle.color.paleGray : AmneziaStyle.color.transparent
-                border.width: radioButton.focus ? 1 : 0
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-                Behavior on border.color {
-                    PropertyAnimation { duration: 200 }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
-                }
-            }
-
-            RowLayout {
-                id: radioButtonContent
-                anchors.fill: parent
-
-                anchors.rightMargin: 16
-                anchors.leftMargin: 16
-
-                z: 1
-
-                ParagraphTextType {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 20
-                    Layout.bottomMargin: 20
-
-                    text: name
-                    maximumLineCount: root.textMaximumLineCount
-                    elide: root.textElide
-
-                }
-
-                Image {
-                    source: imageSource
-                    visible: radioButton.checked
-
-                    width: 24
-                    height: 24
-
-                    Layout.rightMargin: 8
-                }
-            }
-
-            ButtonGroup.group: buttonGroup
-            checked: root.currentValue !== "" ? (name === root.currentValue) : (root.selectedIndex === index)
-
-            onClicked: {
-                root.selectedIndex = index
-                root.selectedText = name
-                if (clickedFunction && typeof clickedFunction === "function") {
-                    clickedFunction()
-                }
-            }
+        onClicked: {
+            root.selectedIndex = index
+            root.selectedText = name
+            root.activated(index)
         }
 
         Component.onCompleted: {
             if (root.selectedIndex === index) {
                 root.selectedText = name
             }
-        }
-
-        Keys.onReturnPressed: {
-            radioButton.clicked()
-        }
-
-        Keys.onEnterPressed: {
-            radioButton.clicked()
         }
     }
 }

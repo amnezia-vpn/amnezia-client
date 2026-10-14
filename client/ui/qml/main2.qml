@@ -61,7 +61,7 @@ Window  {
     maximumWidth: 600
     maximumHeight: 800
 
-    color: AmneziaStyle.color.midnightBlack
+    color: AmneziaStyle.color.bgBase
 
     onClosing: function(close) {
         close.accepted = false
@@ -102,15 +102,11 @@ Window  {
         }
 
         function onShowErrorMessage(errorMessage) {
-            popupErrorMessage.text = errorMessage
-            popupErrorMessage.open()
+            popupErrorMessage.show(errorMessage)
         }
 
         function onShowNotificationMessage(message) {
-            popupNotificationMessage.text = message
-            popupNotificationMessage.closeButtonVisible = false
-            popupNotificationMessage.open()
-            popupNotificationTimer.start()
+            popupNotificationMessage.show(message)
         }
 
         function onShowPassphraseRequestDrawer() {
@@ -147,52 +143,24 @@ Window  {
         focus: true
     }
 
-    Item {
-        objectName: "popupNotificationItem"
+    SnackbarType {
+        id: popupNotificationMessage
+        objectName: "popupNotificationMessage"
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
-        implicitHeight: popupNotificationMessage.height
-
-        PopupType {
-            id: popupNotificationMessage
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    popupNotificationMessage.close()
-                    popupNotificationTimer.stop()
-                }
-            }
-        }
-
-        Timer {
-            id: popupNotificationTimer
-
-            interval: 3000
-            repeat: false
-            running: false
-            onTriggered: {
-                popupNotificationMessage.close()
-            }
-        }
+        duration: 3000
     }
 
-    Item {
-        objectName: "popupErrorMessageItem"
+    SnackbarType {
+        id: popupErrorMessage
+        objectName: "popupErrorMessage"
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
-        implicitHeight: popupErrorMessage.height
-
-        PopupType {
-            id: popupErrorMessage
-        }
+        variant: SnackbarType.Destructive
+        closable: true
+        duration: 0
     }
 
     Item {
@@ -216,7 +184,7 @@ Window  {
         }
     }
 
-    DrawerType2 {
+    SheetType {
         id: privateKeyPassphraseDrawer
 
         property bool isCloseByUser: false
@@ -251,36 +219,23 @@ Window  {
             anchors.leftMargin: 16
             anchors.rightMargin: 16
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: passphrase
-
-                property bool hidePassword: true
 
                 Layout.fillWidth: true
                 headerText: qsTr("Private key passphrase")
-                textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
-
-                clickedFunc: function() {
-                    hidePassword = !hidePassword
-                }
+                passwordToggle: true
             }
 
-            BasicButtonType {
+            ButtonType {
                 id: saveButton
+                variant: ButtonType.Secondary
 
                 Layout.fillWidth: true
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
-
                 text: qsTr("Save")
 
-                clickedFunc: function() {
+                onClicked: {
                     privateKeyPassphraseDrawer.isCloseByUser = true
                     privateKeyPassphraseDrawer.close()
                     PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
@@ -347,7 +302,7 @@ Window  {
 
         anchors.fill: parent
 
-        BusyIndicatorType {
+        LoadingOverlayType {
             id: busyIndicator
             anchors.centerIn: parent
             z: 1

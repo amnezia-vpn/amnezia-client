@@ -58,6 +58,7 @@ PageType {
         headerText: qsTr("Clear all logs?")
         descriptionText: qsTr("App and tunnel logs will be deleted from the device and can't be restored")
         confirmButtonText: qsTr("Clear")
+        role: AlertDialogType.Destructive
 
         onConfirmed: {
             root.clearAll()
@@ -84,32 +85,12 @@ PageType {
         }
     }
 
-    Rectangle {
-        anchors.fill: parent
-        color: AmneziaStyle.color.backgroundBase
-    }
-
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (this.activeFocus) {
-                flickable.contentY = 0
-            }
-        }
-    }
-
     FlickableType {
         id: flickable
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        contentHeight: content.implicitHeight + content.anchors.topMargin + 16 + PageController.safeAreaBottomMargin
+        anchors.top: parent.top
+
+        contentHeight: content.implicitHeight
 
         ColumnLayout {
             id: content
@@ -117,156 +98,133 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 12
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
 
-            spacing: 24
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Logging")
+                description: qsTr("Logs help support figure out what's wrong")
+            }
 
             ColumnLayout {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                spacing: 8
+                spacing: 24
 
-                AppH1TextType {
+                ListGroupType {
                     Layout.fillWidth: true
 
-                    text: qsTr("Logging")
-                }
+                    ListItemType {
+                        id: loggingRow
 
-                AppTextType {
-                    Layout.fillWidth: true
+                        Layout.fillWidth: true
 
-                    color: AmneziaStyle.color.surfaceInverse
-                    text: qsTr("Logs help support figure out what's wrong")
-                }
-            }
+                        text: qsTr("Record logs")
+                        subtitle: qsTr("Recording turns off after 14 days and logs are deleted")
 
-            CardGroupType {
-                Layout.fillWidth: true
+                        onClicked: {
+                            switcher.toggle()
+                            switcher.toggled()
+                        }
 
-                ActionRowType {
-                    id: loggingRow
+                        SwitchType {
+                            id: switcher
 
-                    Layout.fillWidth: true
-                    Layout.minimumHeight: 88
+                            focusPolicy: Qt.NoFocus
 
-                    text: qsTr("Record logs")
-                    descriptionText: qsTr("Recording turns off after 14 days and logs are deleted")
-                    showDivider: false
+                            checked: SettingsController.isLoggingEnabled
 
-                    clickedFunction: function() {
-                        switcher.toggle()
-                        switcher.toggled()
-                    }
-
-                    SwitcherType {
-                        id: switcher
-
-                        width: indicatorWidth
-                        height: indicatorHeight
-
-                        indicatorWidth: 50
-                        indicatorHeight: 30
-                        checkedInnerCircleSize: 20
-                        checkedInnerCircleMargin: 5
-
-                        checkedIndicatorColor: AmneziaStyle.color.switchTrackChecked
-                        checkedIndicatorBorderColor: AmneziaStyle.color.switchTrackChecked
-                        checkedInnerCircleColor: AmneziaStyle.color.switchThumbChecked
-                        defaultIndicatorBorderColor: AmneziaStyle.color.textTertiary
-
-                        focusPolicy: Qt.NoFocus
-
-                        checked: SettingsController.isLoggingEnabled
-
-                        onToggled: function() {
-                            if (checked !== SettingsController.isLoggingEnabled) {
-                                SettingsController.isLoggingEnabled = checked
+                            onToggled: function() {
+                                if (checked !== SettingsController.isLoggingEnabled) {
+                                    SettingsController.isLoggingEnabled = checked
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            ColumnLayout {
-                Layout.fillWidth: true
-
-                spacing: 12
-
-                AppTextType {
+                ColumnLayout {
                     Layout.fillWidth: true
 
-                    color: AmneziaStyle.color.textTertiary
-                    text: qsTr("Logs")
+                    spacing: 12
+
+                    SmallTextType {
+                        Layout.fillWidth: true
+
+                        text: qsTr("Logs")
+                    }
+
+                    ListGroupType {
+                        Layout.fillWidth: true
+
+                        ListItemType {
+                            id: tunnelLogsRow
+
+                            Layout.fillWidth: true
+
+                            text: qsTr("Tunnel")
+                            subtitle: qsTr("Connection events") + " · " + LogsController.tunnelLogSize
+                            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                            onClicked: {
+                                LogsController.viewerStream = "tunnel"
+                                PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                            }
+                        }
+
+                        ListItemType {
+                            id: appLogsRow
+
+                            Layout.fillWidth: true
+
+                            text: qsTr("Application")
+                            subtitle: qsTr("App events") + " · " + LogsController.appLogSize
+                            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                            onClicked: {
+                                LogsController.viewerStream = "app"
+                                PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                            }
+                        }
+                    }
                 }
 
-                CardGroupType {
+                ListGroupType {
                     Layout.fillWidth: true
 
-                    ActionRowType {
-                        id: tunnelLogsRow
+                    ListItemType {
+                        id: saveAllRow
 
                         Layout.fillWidth: true
 
-                        text: qsTr("Tunnel")
-                        descriptionText: qsTr("Connection events") + " · " + LogsController.tunnelLogSize
-                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                        text: qsTr("Save all logs")
+                        subtitle: qsTr(".zip archive with both logs")
+                        icon.source: "qrc:/images/controls/save.svg"
 
-                        clickedFunction: function() {
-                            LogsController.viewerStream = "tunnel"
-                            PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                        onClicked: {
+                            root.saveAll()
                         }
                     }
 
-                    ActionRowType {
-                        id: appLogsRow
+                    ListItemType {
+                        id: clearAllRow
 
                         Layout.fillWidth: true
 
-                        text: qsTr("Application")
-                        descriptionText: qsTr("App events") + " · " + LogsController.appLogSize
-                        rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                        showDivider: false
+                        text: qsTr("Clear all logs")
+                        destructive: true
+                        icon.source: "qrc:/images/controls/trash-2.svg"
+                        icon.color: AmneziaStyle.color.statusDestructive
 
-                        clickedFunction: function() {
-                            LogsController.viewerStream = "app"
-                            PageController.goToPage(PageEnum.PageSettingsLogViewer)
+                        onClicked: {
+                            clearAllDialog.open()
                         }
-                    }
-                }
-            }
-
-            CardGroupType {
-                Layout.fillWidth: true
-
-                ActionRowType {
-                    id: saveAllRow
-
-                    Layout.fillWidth: true
-
-                    text: qsTr("Save all logs")
-                    descriptionText: qsTr(".zip archive with both logs")
-                    leftImageSource: "qrc:/images/controls/save.svg"
-
-                    clickedFunction: function() {
-                        root.saveAll()
-                    }
-                }
-
-                ActionRowType {
-                    id: clearAllRow
-
-                    Layout.fillWidth: true
-
-                    text: qsTr("Clear all logs")
-                    textColor: AmneziaStyle.color.accentDanger
-                    leftImageSource: "qrc:/images/controls/trash-2.svg"
-                    leftImageColor: AmneziaStyle.color.accentDanger
-                    showDivider: false
-
-                    clickedFunction: function() {
-                        clearAllDialog.open()
                     }
                 }
             }

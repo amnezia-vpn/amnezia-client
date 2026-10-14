@@ -168,7 +168,7 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
+        anchors.bottomMargin: searchRow.searchField.activeFocus ? 0 : PageController.imeHeight
 
         model: ApiCountryListModel
 
@@ -212,166 +212,20 @@ PageType {
                 row: rowItem.rowType === "section" ? rowItem.index : -1
             }
 
-            Item {
-                id: countryRow
-
-                width: rowItem.width
+            CountryListItem {
+                x: 16
+                width: rowItem.width - 32
                 height: rowItem.height
+
                 visible: rowItem.rowType === "country"
 
-                readonly property bool rowPressed: rowTap.pressed && !starTap.pressed
+                text: rowItem.countryName
+                countryFlagCode: rowItem.countryImageCode
+                highlighted: rowItem.isCurrent
+                favorite: rowItem.isFavorite
 
-                Item {
-                    id: rowBody
-
-                    activeFocusOnTab: countryRow.visible
-
-                    anchors.fill: parent
-
-                    function activate() {
-                        root.activateCountry(rowItem.countryCode, rowItem.sourceCountryName)
-                    }
-
-                    HoverHandler {
-                        id: rowHover
-                        cursorShape: Qt.PointingHandCursor
-                    }
-
-                    TapHandler {
-                        id: rowTap
-
-                        gesturePolicy: TapHandler.ReleaseWithinBounds
-
-                        onTapped: function(eventPoint) {
-                            if (star.contains(star.mapFromItem(rowBody, eventPoint.position))) {
-                                return
-                            }
-                            rowBody.activate()
-                        }
-                    }
-
-                    Keys.onEnterPressed: rowBody.activate()
-                    Keys.onReturnPressed: rowBody.activate()
-                    Keys.onSpacePressed: rowBody.activate()
-
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
-                        anchors.topMargin: 4
-                        anchors.bottomMargin: 4
-                        radius: 16
-
-                        color: {
-                            if (countryRow.rowPressed) {
-                                return AmneziaStyle.color.surfacePressed
-                            }
-                            return ((rowHover.hovered && !starHover.hovered) || rowBody.activeFocus)
-                                   ? AmneziaStyle.color.surfaceHovered
-                                   : AmneziaStyle.color.transparent
-                        }
-                        border.width: (rowItem.isCurrent || countryRow.rowPressed) ? 1 : 0
-                        border.color: AmneziaStyle.color.textTertiary
-                    }
-
-                    Image {
-                        id: flag
-
-                        x: 32
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: 24
-                        height: 15
-
-                        source: rowItem.countryImageCode !== ""
-                                ? "qrc:/countriesFlags/images/flagKit/" + rowItem.countryImageCode + ".svg"
-                                : ""
-                    }
-
-                    ListItemTitleType {
-                        anchors.left: flag.right
-                        anchors.leftMargin: 16
-                        anchors.right: parent.right
-                        anchors.rightMargin: star.anchors.rightMargin + star.width + 12
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        lineHeight: 24 + LanguageUiController.getLineHeightAppend()
-                        font.letterSpacing: -0.4
-
-                        text: rowItem.countryName
-                        color: AmneziaStyle.color.textPrimary
-                        maximumLineCount: 2
-                        elide: Text.ElideRight
-                    }
-                }
-
-                Item {
-                    id: star
-
-                    activeFocusOnTab: countryRow.visible
-
-                    anchors.right: parent.right
-                    anchors.rightMargin: 28
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 48
-                    height: 48
-
-                    function toggle() {
-                        ApiCountryListModel.toggleFavorite(rowItem.countryCode)
-                    }
-
-                    Accessible.name: rowItem.isFavorite ? qsTr("Remove from favorites")
-                                                        : qsTr("Add to favorites")
-
-                    HoverHandler {
-                        id: starHover
-                        cursorShape: Qt.PointingHandCursor
-                    }
-
-                    TapHandler {
-                        id: starTap
-
-                        gesturePolicy: TapHandler.ReleaseWithinBounds
-                        onTapped: star.toggle()
-                    }
-
-                    Keys.onEnterPressed: star.toggle()
-                    Keys.onReturnPressed: star.toggle()
-                    Keys.onSpacePressed: star.toggle()
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 12
-
-                        color: {
-                            if (starTap.pressed) {
-                                return AmneziaStyle.color.surfacePressed
-                            }
-                            return (starHover.hovered || star.activeFocus) ? AmneziaStyle.color.surfaceHovered
-                                                                           : AmneziaStyle.color.transparent
-                        }
-                        border.width: (starTap.pressed || star.activeFocus) ? 1 : 0
-                        border.color: starTap.pressed ? AmneziaStyle.color.borderStrong : AmneziaStyle.color.borderSoft
-                    }
-
-                    Image {
-                        anchors.centerIn: parent
-                        width: 24
-                        height: 24
-
-                        source: rowItem.isFavorite ? "qrc:/images/controls/star-filled.svg"
-                                                   : "qrc:/images/controls/star.svg"
-                    }
-                }
-
-                DividerType {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: 16
-                    anchors.rightMargin: 16
-                    anchors.bottom: parent.bottom
-
-                    color: AmneziaStyle.color.borderSoft
-                }
+                onClicked: root.activateCountry(rowItem.countryCode, rowItem.sourceCountryName)
+                onFavoriteToggled: ApiCountryListModel.toggleFavorite(rowItem.countryCode)
             }
         }
     }
@@ -387,7 +241,7 @@ PageType {
         collapsibleContent: ColumnLayout {
             spacing: 0
 
-            ParagraphTextType {
+            BodyTextType {
                 visible: root.showSubscriptionNote
 
                 Layout.fillWidth: true
@@ -396,10 +250,10 @@ PageType {
                 Layout.topMargin: 12
 
                 text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
-                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+                color: root.subscriptionExpired ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
             }
 
-            BasicButtonType {
+            ButtonType {
                 visible: root.showRenewButton
 
                 Layout.fillWidth: true
@@ -407,40 +261,32 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 28
 
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.lightGray
-                pressedColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.midnightBlack
-
                 text: qsTr("Renew subscription")
 
-                clickedFunc: function() {
+                onClicked: {
                     SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
 
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: root.showSubscriptionNote ? 12 : 8
+                Layout.bottomMargin: 16
 
                 text: qsTr("Locations")
-                color: AmneziaStyle.color.paleGray
+                color: AmneziaStyle.color.textSecondary
             }
         }
 
         navigationButtons: [
-            ImageButtonType {
+            IconButtonType {
                 id: settingsButton
                 objectName: "settingsButton"
 
-                implicitWidth: 40
-                implicitHeight: 40
-
-                hoverEnabled: true
-                image: "qrc:/images/controls/settings.svg"
-                imageColor: AmneziaStyle.color.paleGray
+                size: IconButtonType.Small
+                icon.source: "qrc:/images/controls/settings.svg"
 
                 onClicked: root.openServerInfo()
             }
@@ -465,7 +311,7 @@ PageType {
                 Layout.preferredHeight: useCaseChips.implicitHeight
             },
 
-            WarningType {
+            NotificationType {
                 readonly property string bannerText:
                     CountryRegionNames.useCaseBanners[ApiCountryListModel.activeUseCaseId] || ""
 
@@ -476,15 +322,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.topMargin: 24
 
-                backGroundColor: AmneziaStyle.color.surfaceBase
-                radius: 16
-                verticalPadding: 16
-                iconSpacing: 12
-                textPixelSize: 14
-                textLineHeight: 18
-                textColor: AmneziaStyle.color.textPrimary
-                iconPath: "qrc:/images/controls/info.svg"
-                textString: bannerText
+                text: bannerText
             },
 
             Item {
@@ -506,7 +344,7 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: searchRow.searchField.textField.activeFocus ? 0 : PageController.imeHeight
+            anchors.bottomMargin: searchRow.searchField.activeFocus ? 0 : PageController.imeHeight
 
             visible: !ApiCountryListModel.hasResults
 
@@ -528,7 +366,7 @@ PageType {
         listModel: ApiCountryListModel
     }
 
-    ToastType {
+    SnackbarType {
         id: favoritesLimitToast
 
         onActionTriggered: ApiCountryListModel.activeUseCaseId = "favorites"

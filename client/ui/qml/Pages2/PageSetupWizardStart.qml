@@ -15,35 +15,59 @@ PageType {
     id: root
     enableTimer: (SettingsController.isOnTv()) ? false : true
 
-    ColumnLayout {
-        id: content
+    Item {
+        id: logoArea
 
-        anchors.fill: parent
-        spacing: 0
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 16 + PageController.safeAreaTopMargin
+        anchors.bottomMargin: 104 + PageController.safeAreaBottomMargin
 
-        Image {
-            id: image
-            source: "qrc:/images/amneziaBigLogo.png"
+        ColumnLayout {
+            anchors.centerIn: parent
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            Layout.topMargin: 32 + PageController.safeAreaTopMargin
-            Layout.preferredWidth: 360
-            Layout.preferredHeight: 287
-        }
+            spacing: 0
 
-        BasicButtonType {
-            id: startButton
-            Layout.fillWidth: true
-            Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.alignment: Qt.AlignBottom
+            Image {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 147
+                Layout.preferredHeight: 115
 
-            text: qsTr("Let's get started")
-
-            clickedFunc: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
+                source: "qrc:/images/amneziaBigLogo.png"
+                sourceClipRect: Qt.rect(192, 204, 980, 769)
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: true
             }
+
+            CaptionTextType {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 2
+
+                text: "YOUR OWN VPN"
+                color: AmneziaStyle.color.textAccent
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.NoWrap
+            }
+        }
+    }
+
+    ButtonType {
+        id: startButton
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+
+        text: qsTr("Let's get started")
+
+        onClicked: {
+            PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
         }
     }
 

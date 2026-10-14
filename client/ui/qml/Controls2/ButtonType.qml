@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -10,175 +10,185 @@ import "TextTypes"
 Button {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.lightGray
-    property string defaultColor: AmneziaStyle.color.paleGray
-    property string disabledColor: AmneziaStyle.color.charcoalGray
-    property string pressedColor: AmneziaStyle.color.mutedGray
+    enum Variant { Primary, Secondary, Destructive, Text, Tonal, Surface }
+    enum Size { Large, Medium, Small }
 
-    property string textColor: AmneziaStyle.color.midnightBlack
-
-    property string borderColor: AmneziaStyle.color.paleGray
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderWidth: 0
-    property int borderFocusedWidth: 1
+    property int variant: ButtonType.Primary
+    property int size: ButtonType.Large
+    property bool destructive: false
 
     property string leftImageSource
     property string rightImageSource
-    property string leftImageColor: textColor
-    property bool changeLeftImageSize: true
 
-    property bool squareLeftSide: false
+    implicitHeight: d.height
 
-    property var clickedFunc
-
-    property alias buttonTextLabel: buttonText
-
-    implicitHeight: 56
+    horizontalPadding: 12
+    verticalPadding: 8
 
     hoverEnabled: true
 
-    background: Rectangle {
-        id: focusBorder
+    opacity: root.enabled ? 1 : d.disabledOpacity
 
-        color: AmneziaStyle.color.transparent
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
+    QtObject {
+        id: d
 
-        anchors.fill: parent
+        readonly property bool small: root.size === ButtonType.Small
+        readonly property bool outlined: root.variant === ButtonType.Secondary || root.variant === ButtonType.Destructive
+        readonly property bool active: root.down || root.hovered
 
-        radius: 16
+        readonly property int height: root.size === ButtonType.Large ? 48 : (root.size === ButtonType.Medium ? 40 : 36)
+        readonly property int radius: root.size === ButtonType.Large ? 16 : (root.size === ButtonType.Medium ? 14 : 12)
+        readonly property int iconSize: small ? 20 : 24
+        readonly property int gap: root.size === ButtonType.Large ? 4 : 2
 
-        Rectangle {
-            id: background
-
-            anchors.fill: focusBorder
-            anchors.margins: root.activeFocus ? 2 : 0
-
-            radius: root.activeFocus ? 14 : 16
-            color: {
-                if (root.enabled) {
-                    if (root.pressed) {
-                        return pressedColor
-                    }
-                    return root.hovered ? hoveredColor : defaultColor
-                } else {
-                    return disabledColor
-                }
+        readonly property real disabledOpacity: {
+            switch (root.variant) {
+            case ButtonType.Primary: return 0.25
+            case ButtonType.Destructive: return 0.36
+            case ButtonType.Text: return 0.5
+            case ButtonType.Surface: return 0.5
+            default: return 1
             }
-            border.color: borderColor
-            border.width: borderWidth
+        }
 
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
+        readonly property color backgroundColor: {
+            switch (root.variant) {
+            case ButtonType.Primary:
+                return root.down ? AmneziaStyle.color.buttonPrimaryPress
+                                 : (root.hovered ? AmneziaStyle.color.buttonPrimaryHover : AmneziaStyle.color.buttonPrimaryBg)
+            case ButtonType.Secondary:
+            case ButtonType.Destructive:
+            case ButtonType.Surface:
+                return root.down ? AmneziaStyle.color.bgPanel
+                                 : (root.hovered ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.bgSurface)
+            case ButtonType.Tonal:
+                return AmneziaStyle.color.bgSurfaceAlt
+            default:
+                return AmneziaStyle.color.transparent
             }
+        }
 
-            Rectangle {
-                visible: root.squareLeftSide
+        readonly property bool stateLayerVisible: active && (root.variant === ButtonType.Text || root.variant === ButtonType.Tonal)
 
-                z: 1
+        readonly property color borderColor: {
+            if (outlined) {
+                return active ? AmneziaStyle.color.borderBold : AmneziaStyle.color.borderSoft
+            }
+            if (root.variant === ButtonType.Text && root.down) {
+                return AmneziaStyle.color.borderEmphasis
+            }
+            return AmneziaStyle.color.transparent
+        }
 
-                width: parent.radius
-                height: parent.radius
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                color: {
-                    if (root.enabled) {
-                        if (root.pressed) {
-                            return root.pressedColor
-                        }
-                        return root.hovered ? root.hoveredColor : root.defaultColor
-                    } else {
-                        return root.disabledColor
-                    }
-                }
+        readonly property color labelColor: {
+            switch (root.variant) {
+            case ButtonType.Primary: return AmneziaStyle.color.textInverted
+            case ButtonType.Destructive: return AmneziaStyle.color.statusDestructive
+            case ButtonType.Text: return root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
+            case ButtonType.Secondary:
+            case ButtonType.Tonal:
+                return root.enabled ? AmneziaStyle.color.textSecondary : AmneziaStyle.color.textQuaternary
+            default: return AmneziaStyle.color.textSecondary
+            }
+        }
 
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
+        readonly property color iconColor: {
+            switch (root.variant) {
+            case ButtonType.Primary: return AmneziaStyle.color.iconInverted
+            case ButtonType.Destructive: return AmneziaStyle.color.statusDestructive
+            case ButtonType.Text: return root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
+            case ButtonType.Secondary:
+            case ButtonType.Tonal:
+                return root.enabled ? AmneziaStyle.color.iconDefault : AmneziaStyle.color.iconTertiary
+            default: return AmneziaStyle.color.iconDefault
             }
         }
     }
 
-    MouseArea {
-        anchors.fill: focusBorder
-        enabled: false
-        cursorShape: Qt.PointingHandCursor
+    background: Rectangle {
+        implicitHeight: d.height
+
+        radius: d.radius
+        color: d.backgroundColor
+        border.width: d.borderColor.a > 0 ? 1 : 0
+        border.color: d.borderColor
+
+        Behavior on color {
+            ColorAnimation { duration: 150 }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+
+            radius: parent.radius
+            color: AmneziaStyle.color.bgStateLayer
+            visible: d.stateLayerVisible
+        }
+
+        FocusRingType {
+            radius: d.radius
+            visible: root.visualFocus
+        }
     }
 
     contentItem: Item {
-        anchors.fill: focusBorder
-
-        implicitWidth: content.implicitWidth
-        implicitHeight: content.implicitHeight
+        implicitWidth: row.implicitWidth
+        implicitHeight: row.implicitHeight
 
         RowLayout {
-            id: content
+            id: row
+
             anchors.centerIn: parent
+            width: Math.min(implicitWidth, parent.width)
 
-            Image {
-                id: leftImage
+            spacing: d.gap
+
+            IconImage {
+                Layout.preferredWidth: d.iconSize
+                Layout.preferredHeight: d.iconSize
+
+                visible: root.leftImageSource !== ""
                 source: root.leftImageSource
-                visible: root.leftImageSource === "" ? false : true
-
-                layer {
-                    enabled: leftImageColor !== "" ? true : false
-                    effect: ColorOverlay {
-                        color: leftImageColor
-                    }
-                }
-
-                Component.onCompleted: {
-                    if (root.changeLeftImageSize) {
-                        leftImage.Layout.preferredHeight = 20
-                        leftImage.Layout.preferredWidth = 20
-                    }
-                }
+                sourceSize: Qt.size(d.iconSize, d.iconSize)
+                color: d.iconColor
             }
 
             ButtonTextType {
-                id: buttonText
+                Layout.fillWidth: true
 
-                color: root.textColor
+                visible: text !== ""
                 text: root.text
-                visible: root.text === "" ? false : true
 
-                horizontalAlignment: Text.AlignLeft
+                leftPadding: 2
+                rightPadding: 2
+
+                color: d.labelColor
+                lineHeight: (d.small ? 18 : 24) + LanguageUiController.getLineHeightAppend()
+                font.pixelSize: d.small ? 14 : 16
+                font.weight: root.variant === ButtonType.Text ? 400 : 600
+
+                wrapMode: Text.NoWrap
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }
 
-            Image {
-                Layout.preferredHeight: 20
-                Layout.preferredWidth: 20
+            IconImage {
+                Layout.preferredWidth: d.iconSize
+                Layout.preferredHeight: d.iconSize
 
+                visible: root.rightImageSource !== ""
                 source: root.rightImageSource
-                visible: root.rightImageSource === "" ? false : true
-
-                layer {
-                    enabled: true
-                    effect: ColorOverlay {
-                        color: textColor
-                    }
-                }
+                sourceSize: Qt.size(d.iconSize, d.iconSize)
+                color: d.iconColor
             }
         }
     }
 
-    Keys.onEnterPressed: {
-        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-            root.clickedFunc()
-        }
+    HoverHandler {
+        cursorShape: Qt.PointingHandCursor
     }
 
-    Keys.onReturnPressed: {
-        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-            root.clickedFunc()
-        }
-    }
-
-    onClicked: {
-        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-            root.clickedFunc()
-        }
-    }
+    Keys.onEnterPressed: root.clicked()
+    Keys.onReturnPressed: root.clicked()
 }

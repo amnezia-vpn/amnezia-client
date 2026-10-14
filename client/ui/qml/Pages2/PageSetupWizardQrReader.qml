@@ -15,54 +15,64 @@ import "../Config"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-        anchors.left: parent.left
-        anchors.top: parent.top
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
-    ParagraphTextType {
+    ColumnLayout {
         id: header
 
-        property string progressString
-
+        anchors.top: parent.top
         anchors.left: parent.left
-        anchors.top: backButton.bottom
         anchors.right: parent.right
 
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
+        spacing: 0
 
-        text: qsTr("Point the camera at the QR code and hold for a couple of seconds. ") + progressString
+        NavigationBarType {
+            Layout.fillWidth: true
+        }
+
+        H3TextType {
+            id: headerText
+
+            property string progressString
+
+            Layout.fillWidth: true
+            Layout.topMargin: 12
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+
+            text: qsTr("Point the camera at the QR code and hold for a couple of seconds. ") + progressString
+        }
+
+        ProgressBarType {
+            id: progressBar
+
+            Layout.fillWidth: true
+            Layout.topMargin: 16
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+        }
     }
 
-    ProgressBarType {
-        id: progressBar
+    Image {
+        id: scanFrame
 
-        anchors.left: parent.left
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: header.bottom
-        anchors.right: parent.right
+        anchors.topMargin: 46
 
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
+        width: Math.min(parent.width - 92, 298)
+        height: width
+
+        source: "qrc:/images/controls/qr-scan-frame.svg"
+        sourceSize: Qt.size(width, height)
     }
 
     Rectangle {
         id: qrCodeRectange
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        anchors.top: progressBar.bottom
 
-        anchors.topMargin: 34
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.bottomMargin: 34
+        anchors.fill: scanFrame
+        anchors.margins: 3
 
+        radius: 16
         color: AmneziaStyle.color.transparent
-        //radius: 16
 
         QRCodeReader {
            id: qrCodeReader
@@ -70,16 +80,18 @@ PageType {
            onCodeReaded: function(code) {
                ImportController.parseQrCodeChunk(code)
                progressBar.value = ImportController.getQrCodeScanProgressBarValue()
-               header.progressString = ImportController.getQrCodeScanProgressString()
+               headerText.progressString = ImportController.getQrCodeScanProgressString()
            }
 
-           Component.onCompleted: {
+           function start() {
                qrCodeReader.setCameraSize(Qt.rect(qrCodeRectange.x,
                                                   qrCodeRectange.y,
                                                   qrCodeRectange.width,
                                                   qrCodeRectange.height))
                qrCodeReader.startReading()
            }
+
+           Component.onCompleted: Qt.callLater(qrCodeReader.start)
            Component.onDestruction: qrCodeReader.stopReading()
         }
     }

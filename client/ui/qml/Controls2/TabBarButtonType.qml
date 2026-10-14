@@ -1,61 +1,63 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 
 import Style 1.0
 
 TabButton {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.richBrown
-    property string defaultColor: AmneziaStyle.color.paleGray
-    property string selectedColor: AmneziaStyle.color.goldenApricot
-
-    property string image
-
-    property bool isSelected: false
-
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
-    property var clickedFunc
+    property bool showBadge: false
 
     hoverEnabled: true
 
-    icon.source: image
-    icon.color: isSelected ? selectedColor : defaultColor
+    topPadding: 4
+    bottomPadding: 4
+    leftPadding: 0
+    rightPadding: 0
 
-    background: Rectangle {
-        id: background
-        anchors.fill: parent
-        color: AmneziaStyle.color.transparent
-        radius: 10
+    icon.width: 24
+    icon.height: 24
+    icon.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.iconDefault
 
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
+    Accessible.name: root.text
 
+    background: Item {
+        implicitHeight: 32
+
+        FocusRingType {
+            radius: 12
+            visible: root.visualFocus
+        }
     }
 
-    MouseArea {
-        anchors.fill: background
+    contentItem: Item {
+        implicitWidth: root.icon.width
+        implicitHeight: root.icon.height
+
+        IconImage {
+            anchors.centerIn: parent
+
+            width: root.icon.width
+            height: root.icon.height
+
+            source: root.icon.source
+            sourceSize: Qt.size(root.icon.width, root.icon.height)
+            color: root.icon.color
+
+            DotBadgeType {
+                anchors.horizontalCenter: parent.right
+                anchors.verticalCenter: parent.top
+
+                visible: root.showBadge
+            }
+        }
+    }
+
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        enabled: false
-    }
-    
-    Keys.onEnterPressed: {
-        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-            root.clickedFunc()
-        }
     }
 
-    Keys.onReturnPressed: {
-        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-            root.clickedFunc()
-        }
-    }
-
-    onClicked: {
-        if (root.clickedFunc && typeof root.clickedFunc === "function") {
-            root.clickedFunc()
-        }
-    }
+    Keys.onEnterPressed: root.clicked()
+    Keys.onReturnPressed: root.clicked()
 }

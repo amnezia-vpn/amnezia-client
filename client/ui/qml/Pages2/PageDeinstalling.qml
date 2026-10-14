@@ -36,16 +36,16 @@ PageType {
 
         anchors.fill: parent
 
-        spacing: 16
-
         model: proxyServersModel
 
         delegate: ColumnLayout {
             width: listView.width
 
-            BaseHeaderType {
+            spacing: 0
+
+            HeaderType {
                 Layout.fillWidth: true
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
+                Layout.topMargin: 12 + PageController.safeAreaTopMargin
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -72,7 +72,7 @@ PageType {
                 }
             }
 
-            ParagraphTextType {
+            SmallTextType {
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16

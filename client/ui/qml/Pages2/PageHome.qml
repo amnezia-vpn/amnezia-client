@@ -37,11 +37,44 @@ PageType {
         }
     }
 
+    function openServerInfo() {
+        ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+
+        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
+            if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
+                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
+            } else {
+                PageController.showBusyIndicator(true)
+                let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+                PageController.showBusyIndicator(false)
+                if (!result) {
+                    return
+                }
+
+                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+            }
+        } else {
+            PageController.goToPage(PageEnum.PageSettingsServerInfo)
+        }
+    }
+
+    function openProtocolSelection() {
+        if (ConnectionController.isConnectionInProgress) {
+            PageController.showNotificationMessage(qsTr("Unable change protocol while trying to make an active connection"))
+            return
+        }
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+            return
+        }
+        protocolSelectionDrawer.open()
+    }
+
     function protocolDisplayName(protocol) {
         switch (protocol) {
         case "awg": return "AmneziaWG"
         case "vless": return "VLESS"
-        default: return protocol
+        default: return protocol || ""
         }
     }
 
@@ -65,7 +98,7 @@ PageType {
         function onRestorePageHomeState(isContainerInstalled) {
             drawer.open()
             if (isContainerInstalled && root.containersDropDownRef) {
-                root.containersDropDownRef.rootButtonClickedFunction()
+                root.containersDropDownRef.open()
             }
         }
     }
@@ -80,10 +113,12 @@ PageType {
             objectName: "homeColumnLayout"
 
             anchors.fill: parent
-            anchors.topMargin: 12 + PageController.safeAreaTopMargin
-            anchors.bottomMargin: 16
+            anchors.topMargin: PageController.safeAreaTopMargin
+            anchors.bottomMargin: 12
 
-            BasicButtonType {
+            spacing: 0
+
+            HomeInfoButton {
                 id: loggingButton
                 objectName: "loggingButton"
 
@@ -91,27 +126,16 @@ PageType {
 
                 Layout.alignment: Qt.AlignHCenter
 
-                implicitHeight: 36
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
-                borderWidth: 0
-
                 visible: isLoggingEnabled ? true : false
+                largeText: true
                 text: qsTr("Logging enabled")
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageSettingsLogging)
                 }
             }
 
-            BasicButtonType {
+            HomeInfoButton {
                 id: devGatewayButton
                 objectName: "devGatewayButton"
 
@@ -119,66 +143,45 @@ PageType {
 
                 Layout.alignment: Qt.AlignHCenter
 
-                implicitHeight: 36
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
-                borderWidth: 0
-
                 visible: SettingsController.isDevModeEnabled && isDevGatewayEnabled
+                largeText: true
                 text: qsTr("Dev gateway enabled")
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
                     PageController.goToPage(PageEnum.PageDevMenu)
                 }
             }
 
-            ConnectButton {
-                id: connectButton
-                objectName: "connectButton"
-
+            Item {
+                Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.alignment: Qt.AlignCenter
+                Layout.topMargin: 16
+                Layout.bottomMargin: 28
+
+                ConnectButton {
+                    id: connectButton
+                    objectName: "connectButton"
+
+                    anchors.centerIn: parent
+                    width: Math.min(implicitWidth, parent.width, parent.height)
+                    height: width
+                }
             }
 
-            BasicButtonType {
+            HomeInfoButton {
                 id: splitTunnelingButton
                 objectName: "splitTunnelingButton"
 
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignBottom
-                leftPadding: 16
-                rightPadding: 16
-
-                implicitHeight: 36
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.mutedGray
-                borderWidth: 0
-
-                buttonTextLabel.lineHeight: 20
-                buttonTextLabel.font.pixelSize: 14
-                buttonTextLabel.font.weight: 500
+                Layout.alignment: Qt.AlignHCenter
+                Layout.maximumWidth: parent.width - 32
 
                 property bool isSplitTunnelingEnabled: IpSplitTunnelingController.isSplitTunnelingEnabled || AppSplitTunnelingController.isSplitTunnelingEnabled ||
                                                        ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
 
                 text: isSplitTunnelingEnabled ? qsTr("Split tunneling enabled") : qsTr("Split tunneling disabled")
 
-                leftImageSource: isSplitTunnelingEnabled ? "qrc:/images/controls/split-tunneling.svg" : ""
-                leftImageColor: ""
+                leftImageSource: "qrc:/images/controls/split-tunneling.svg"
                 rightImageSource: "qrc:/images/controls/chevron-down.svg"
-
-                Keys.onEnterPressed: this.clicked()
-                Keys.onReturnPressed: this.clicked()
 
                 onClicked: {
                     homeSplitTunnelingDrawer.open()
@@ -192,225 +195,19 @@ PageType {
                 }
             }
 
-            AdLabel {
-                id: adLabel
-
-                Layout.fillWidth: true
-                Layout.preferredHeight: adLabel.contentHeight
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 22
-            }
-        }
-    }
-
-    Component {
-        id: serverSummaryComponent
-
-        ColumnLayout {
-            id: summary
-            objectName: "collapsedColumnLayout"
-
-            readonly property bool expanded: parent ? parent.expanded : false
-            readonly property bool hovered: parent ? parent.hovered : false
-            readonly property bool pressed: parent ? parent.pressed : false
-            readonly property bool outdatedWarningVisible: !summary.expanded && root.isOutdatedAwgWarningVisible
-
-            spacing: 0
-
-            DividerType {
-                Layout.topMargin: 10
-                Layout.fillWidth: false
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 2
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            }
-
-            RowLayout {
-                objectName: "rowLayout"
-
-                Layout.topMargin: 14
-                Layout.leftMargin: 24
-                Layout.rightMargin: 24
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-
-                spacing: 0
-
-                Header1TextType {
-                    id: collapsedButtonHeader
-                    objectName: "collapsedButtonHeader"
-
-                    Layout.maximumWidth: drawer.width - 48 - 18 - 12
-
-                    maximumLineCount: 2
-                    elide: Qt.ElideRight
-
-                    text: ServersUiController.defaultServerName
-                    horizontalAlignment: Qt.AlignHCenter
-
-                    opacity: summary.pressed ? 0.7 : (summary.hovered ? 0.8 : 1)
-
-                    Behavior on opacity {
-                        PropertyAnimation { duration: 200 }
-                    }
-                }
-
-                ImageButtonType {
-                    id: collapsedButtonChevron
-                    objectName: "collapsedButtonChevron"
-
-                    Layout.leftMargin: 8
-
-                    visible: !summary.expanded
-
-                    hoverEnabled: false
-                    backgroundColor: summary.pressed ? pressedColor : (summary.hovered ? hoveredColor : defaultColor)
-                    image: "qrc:/images/controls/chevron-down.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-
-                    icon.width: 18
-                    icon.height: 18
-                    backgroundRadius: 16
-                    horizontalPadding: 4
-                    topPadding: 4
-                    bottomPadding: 3
-
-                    Keys.onEnterPressed: this.clicked()
-                    Keys.onReturnPressed: this.clicked()
-
-                    onClicked: drawer.open()
-                }
-            }
-
-            RowLayout {
-                objectName: "rowLayoutLabel"
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                Layout.topMargin: 8
-                Layout.bottomMargin: (summary.outdatedWarningVisible || root.isApiProtocolSelectionVisible) ? 8 : 44
-                spacing: 0
-
-                BasicButtonType {
-                    enabled: ServersUiController.defaultServerImagePathCollapsed !== ""
-                    hoverEnabled: enabled
-
-                    implicitHeight: 36
-
-                    leftPadding: 16
-                    rightPadding: 16
-
-                    defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.translucentWhite
-                    pressedColor: AmneziaStyle.color.sheerWhite
-                    disabledColor: AmneziaStyle.color.transparent
-                    textColor: AmneziaStyle.color.mutedGray
-
-                    buttonTextLabel.lineHeight: 16
-                    buttonTextLabel.font.pixelSize: 13
-                    buttonTextLabel.font.weight: 400
-
-                    text: ServersUiController.defaultServerDescriptionCollapsed
-                    leftImageSource: ServersUiController.defaultServerImagePathCollapsed
-                    leftImageColor: ""
-                    changeLeftImageSize: false
-
-                    rightImageSource: hoverEnabled ? "qrc:/images/controls/chevron-down.svg" : ""
-
-                    Keys.onEnterPressed: this.clicked()
-                    Keys.onReturnPressed: this.clicked()
-
-                    onClicked: {
-                        ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
-
-                        if (ServersUiController.isServerFromApi(ServersUiController.processedServerId)) {
-                            if (ServersUiController.isServerCountrySelectionAvailable(ServersUiController.processedServerId)) {
-                                PageController.goToPage(PageEnum.PageSettingsApiAvailableCountries)
-                            } else {
-                                PageController.showBusyIndicator(true)
-                                let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                                PageController.showBusyIndicator(false)
-                                if (!result) {
-                                    return
-                                }
-
-                                PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                            }
-                        } else {
-                            PageController.goToPage(PageEnum.PageSettingsServerInfo)
-                        }
-                    }
-                }
-            }
-
-            WarningType {
-                objectName: "outdatedContainerWarning"
+            PromoBanner {
+                id: promoBanner
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 24
+                Layout.topMargin: 12
 
-                visible: summary.outdatedWarningVisible
+                visible: ServersUiController.isAdVisible
+                text: ServersUiController.adHeader
+                subtitle: ServersUiController.adDescription
 
-                backGroundColor: AmneziaStyle.color.transparent
-                iconPath: "qrc:/images/controls/alert-circle.svg"
-                imageColor: AmneziaStyle.color.goldenApricot
-                textColor: AmneziaStyle.color.goldenApricot
-                textString: qsTr("AmneziaWG 2.0 is outdated and no longer supported. Continued use requires a fresh installation of the AmneziaWG 3.1 container.")
-            }
-
-            RowLayout {
-                objectName: "protocolRowLayout"
-                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                Layout.bottomMargin: 44
-                spacing: 0
-
-                visible: root.isApiProtocolSelectionVisible
-
-                BasicButtonType {
-                    id: protocolButton
-                    objectName: "protocolButton"
-
-                    enabled: root.apiAvailableProtocols.length > 1
-                    hoverEnabled: enabled
-
-                    implicitHeight: 36
-
-                    leftPadding: 16
-                    rightPadding: 16
-
-                    defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.translucentWhite
-                    pressedColor: AmneziaStyle.color.sheerWhite
-                    disabledColor: AmneziaStyle.color.transparent
-                    textColor: AmneziaStyle.color.mutedGray
-
-                    buttonTextLabel.lineHeight: 16
-                    buttonTextLabel.font.pixelSize: 13
-                    buttonTextLabel.font.weight: 400
-
-                    text: root.apiAvailableProtocols.length > 1
-                        ? root.protocolDisplayName(root.apiCurrentProtocol)
-                        : root.protocolDisplayName(root.apiAvailableProtocols[0])
-                    leftImageSource: "qrc:/images/controls/arrow-left-right.svg"
-                    leftImageColor: AmneziaStyle.color.mutedGray
-
-                    rightImageSource: enabled ? "qrc:/images/controls/chevron-down.svg" : ""
-
-                    Keys.onEnterPressed: this.clicked()
-                    Keys.onReturnPressed: this.clicked()
-
-                    onClicked: {
-                        if (ConnectionController.isConnectionInProgress) {
-                            PageController.showNotificationMessage(qsTr("Unable change protocol while trying to make an active connection"))
-                            return
-                        }
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                            return
-                        }
-                        protocolSelectionDrawer.open()
-                    }
-                }
+                onClicked: Qt.openUrlExternally(ServersUiController.serverAdEndpoint(ServersUiController.defaultServerId))
             }
         }
     }
@@ -423,7 +220,7 @@ PageType {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
-        height: collapsedSummary.height
+        height: drawer.contentTopOffset + collapsedSummary.height
 
         Rectangle {
             anchors.fill: parent
@@ -431,9 +228,15 @@ PageType {
 
             topLeftRadius: 16
             topRightRadius: 16
-            color: AmneziaStyle.color.onyxBlack
-            border.color: AmneziaStyle.color.slateGray
+            color: drawer.defaultColor
+            border.color: drawer.borderColor
             border.width: 1
+        }
+
+        SheetGrabberType {
+            anchors.top: parent.top
+            anchors.topMargin: 16
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         MouseArea {
@@ -475,26 +278,34 @@ PageType {
             }
         }
 
-        Loader {
+        HomeServerSummary {
             id: collapsedSummary
 
-            property bool expanded: false
-            property bool hovered: collapsedBarMouseArea.containsMouse
-            property bool pressed: collapsedBarMouseArea.pressed
-
+            anchors.top: parent.top
+            anchors.topMargin: drawer.contentTopOffset
             anchors.left: parent.left
             anchors.right: parent.right
 
-            sourceComponent: serverSummaryComponent
+            expanded: false
+            pressed: collapsedBarMouseArea.pressed
+            outdatedWarningVisible: root.isOutdatedAwgWarningVisible
+            protocolSelectionVisible: root.isApiProtocolSelectionVisible
+            protocolSelectable: root.apiAvailableProtocols.length > 1
+            protocolText: root.protocolDisplayName(root.apiAvailableProtocols.length > 1 ? root.apiCurrentProtocol : root.apiAvailableProtocols[0])
+
+            onExpandRequested: drawer.open()
+            onServerInfoRequested: root.openServerInfo()
+            onProtocolSelectionRequested: root.openProtocolSelection()
         }
     }
 
-    DrawerType2 {
+    SheetType {
         id: drawer
         objectName: "drawerProtocol"
 
         bottomY: root.height
         closedY: root.height - collapsedBar.height
+        borderColor: AmneziaStyle.color.borderSoft
         expandedHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
         Item {
@@ -502,17 +313,19 @@ PageType {
 
             anchors.fill: parent
 
-            Loader {
+            HomeServerSummary {
                 id: expandedSummary
-
-                property bool expanded: true
-                property bool hovered: false
-                property bool pressed: false
 
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                sourceComponent: serverSummaryComponent
+                expanded: true
+                protocolSelectionVisible: root.isApiProtocolSelectionVisible
+                protocolSelectable: root.apiAvailableProtocols.length > 1
+                protocolText: root.protocolDisplayName(root.apiAvailableProtocols.length > 1 ? root.apiCurrentProtocol : root.apiAvailableProtocols[0])
+
+                onServerInfoRequested: root.openServerInfo()
+                onProtocolSelectionRequested: root.openProtocolSelection()
             }
 
             ColumnLayout {
@@ -523,141 +336,183 @@ PageType {
                 anchors.right: parent.right
                 anchors.left: parent.left
 
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                    spacing: 8
+                spacing: 0
+
+                ButtonType {
+                    id: containersDropDown
+                    objectName: "containersDropDown"
+
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.maximumWidth: parent.width - 32
+                    Layout.topMargin: 16
 
                     visible: !ServersUiController.isDefaultServerFromApi
 
-                    DropDownType {
-                        id: containersDropDown
-                        objectName: "containersDropDown"
+                    text: ServersUiController.defaultServerDefaultContainerName
+                    rightImageSource: "qrc:/images/controls/chevron-down.svg"
 
-                        Component.onCompleted: root.containersDropDownRef = containersDropDown
-
-                        rootButtonImageColor: AmneziaStyle.color.midnightBlack
-                        rootButtonBackgroundColor: AmneziaStyle.color.paleGray
-                        rootButtonBackgroundHoveredColor: AmneziaStyle.color.mistyGray
-                        rootButtonBackgroundPressedColor: AmneziaStyle.color.cloudyGray
-                        rootButtonHoveredBorderColor: AmneziaStyle.color.transparent
-                        rootButtonDefaultBorderColor: AmneziaStyle.color.transparent
-                        rootButtonTextTopMargin: 8
-                        rootButtonTextBottomMargin: 8
-
-                        text: ServersUiController.defaultServerDefaultContainerName
-                        textColor: AmneziaStyle.color.midnightBlack
-                        headerText: qsTr("VPN protocol")
-                        headerBackButtonImage: "qrc:/images/controls/arrow-left.svg"
-
-                        rootButtonClickedFunction: function() {
-                            containersDropDown.open()
-                        }
-
-                        listView: HomeContainersListView {
-                            id: containersListView
-                            objectName: "containersListView"
-
-                            rootWidth: root.width
-
-                            Connections {
-                                objectName: "rowLayoutConnections"
-
-                                target: ServersUiController
-
-                                function onDefaultServerIdChanged() {
-                                    updateContainersModelFilters()
-                                }
-                            }
-
-                            function updateContainersModelFilters() {
-                                if (ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId)) {
-                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
-                                } else {
-                                    proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
-                                }
-                            }
-
-                            model: SortFilterProxyModel {
-                                id: proxyDefaultServerContainersModel
-                                sourceModel: DefaultServerContainersModel
-
-                                sorters: [
-                                    RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
-                                ]
-                            }
-
-                            Component.onCompleted: updateContainersModelFilters()
-                        }
-                    }
+                    onClicked: containersSheet.open()
                 }
 
-                Header2Type {
+                BodyTextType {
                     Layout.fillWidth: true
-                    Layout.topMargin: 48
+                    Layout.topMargin: containersDropDown.visible ? 24 : 16
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
 
-                    headerText: qsTr("Servers")
+                    text: qsTr("Servers")
+                    color: AmneziaStyle.color.textTertiary
                 }
-            }
-
-            ButtonGroup {
-                id: serversRadioButtonGroup
-                objectName: "serversRadioButtonGroup"
             }
 
             ServersListView {
                 id: serversMenuContent
                 objectName: "serversMenuContent"
+
+                anchors.top: serversMenuHeader.bottom
+                anchors.right: parent.right
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.topMargin: 12
+
+                onServerSettingsOpened: drawer.close()
             }
         }
     }
 
-    DrawerType2 {
+    SheetType {
+        id: containersSheet
+        objectName: "containersSheet"
+
+        expandedHeight: windowHeight * 0.9
+
+        Component.onCompleted: root.containersDropDownRef = containersSheet
+
+        ColumnLayout {
+            anchors.fill: parent
+
+            spacing: 0
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 48
+
+                IconButtonType {
+                    x: 16
+                    y: 4
+
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/arrow-left.svg"
+                    Accessible.name: qsTr("Back")
+
+                    onClicked: containersSheet.close()
+                }
+            }
+
+            HeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
+
+                headerText: qsTr("VPN protocol")
+                descriptionText: qsTr("Select an installed protocol or add a new one")
+            }
+
+            HomeContainersListView {
+                id: containersListView
+                objectName: "containersListView"
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                bottomMargin: 16 + PageController.safeAreaBottomMargin
+
+                onActivated: containersSheet.close()
+
+                Connections {
+                    objectName: "rowLayoutConnections"
+
+                    target: ServersUiController
+
+                    function onDefaultServerIdChanged() {
+                        containersListView.updateContainersModelFilters()
+                    }
+                }
+
+                function updateContainersModelFilters() {
+                    if (ServersUiController.isServerHasWriteAccess(ServersUiController.defaultServerId)) {
+                        proxyDefaultServerContainersModel.filters = ContainersModelFilters.getWriteAccessProtocolsListFilters()
+                    } else {
+                        proxyDefaultServerContainersModel.filters = ContainersModelFilters.getReadAccessProtocolsListFilters()
+                    }
+                }
+
+                model: SortFilterProxyModel {
+                    id: proxyDefaultServerContainersModel
+                    sourceModel: DefaultServerContainersModel
+
+                    sorters: [
+                        RoleSorter { roleName: "isInstalled"; sortOrder: Qt.DescendingOrder }
+                    ]
+                }
+
+                Component.onCompleted: updateContainersModelFilters()
+            }
+        }
+    }
+
+    SheetType {
         id: protocolSelectionDrawer
         objectName: "protocolSelectionDrawer"
 
         expandedHeight: windowHeight * 0.5
 
-        Item {
+        ColumnLayout {
             id: protocolDrawerContainer
+
             anchors.fill: parent
 
-            ColumnLayout {
-                id: protocolDrawerHeader
+            spacing: 0
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 48
 
-                BackButtonType {
+                IconButtonType {
                     id: protocolDrawerBackButton
 
-                    Layout.fillWidth: true
+                    x: 16
+                    y: 4
 
-                    backButtonImage: "qrc:/images/controls/arrow-left.svg"
-                    backButtonFunction: function() { protocolSelectionDrawer.close() }
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/arrow-left.svg"
+                    Accessible.name: qsTr("Back")
+
+                    onClicked: protocolSelectionDrawer.close()
                 }
+            }
 
-                Header2Type {
-                    Layout.fillWidth: true
-                    Layout.topMargin: 16
-                    Layout.leftMargin: 16
-                    Layout.rightMargin: 16
+            HeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
-                    headerText: qsTr("VPN protocol")
-                }
+                headerText: qsTr("VPN protocol")
             }
 
             ListViewType {
                 id: protocolDrawerListView
 
-                anchors.top: protocolDrawerHeader.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.topMargin: 16
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                leftMargin: 16
+                rightMargin: 16
+                bottomMargin: 16 + PageController.safeAreaBottomMargin
 
                 model: root.apiAvailableProtocols
 
@@ -665,58 +520,40 @@ PageType {
                     id: protocolDrawerButtonGroup
                 }
 
-                delegate: Item {
-                    implicitWidth: protocolDrawerListView.width
-                    implicitHeight: protocolDrawerDelegate.implicitHeight
+                delegate: RadioItemType {
+                    id: protocolDrawerRadioButton
 
-                    ColumnLayout {
-                        id: protocolDrawerDelegate
+                    width: protocolDrawerListView.width - protocolDrawerListView.leftMargin - protocolDrawerListView.rightMargin
 
-                        anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
+                    showSeparator: index < protocolDrawerListView.count - 1
 
-                        VerticalRadioButton {
-                            id: protocolDrawerRadioButton
+                    text: root.protocolDisplayName(modelData)
 
-                            Layout.fillWidth: true
+                    ButtonGroup.group: protocolDrawerButtonGroup
 
-                            text: root.protocolDisplayName(modelData)
+                    checkable: !ConnectionController.isConnected
+                    checked: modelData === root.apiCurrentProtocol
 
-                            ButtonGroup.group: protocolDrawerButtonGroup
+                    onClicked: {
+                        protocolSelectionDrawer.close()
 
-                            checkable: !ConnectionController.isConnected
-                            checked: modelData === root.apiCurrentProtocol
-
-                            onClicked: {
-                                protocolSelectionDrawer.close()
-
-                                if (modelData === root.apiCurrentProtocol) {
-                                    return
-                                }
-
-                                if (ConnectionController.isConnected) {
-                                    PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
-                                    return
-                                }
-
-                                PageController.showBusyIndicator(true)
-                                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
-                                SubscriptionUiController.setCurrentProtocol(ServersUiController.defaultServerId, modelData)
-                                if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.defaultServerId, "", "", true)) {
-                                    SubscriptionUiController.setCurrentProtocol(ServersUiController.defaultServerId, root.apiCurrentProtocol)
-                                }
-                                root.updateApiProtocolState()
-                                PageController.showBusyIndicator(false)
-                            }
-
-                            Keys.onEnterPressed: protocolDrawerRadioButton.clicked()
-                            Keys.onReturnPressed: protocolDrawerRadioButton.clicked()
+                        if (modelData === root.apiCurrentProtocol) {
+                            return
                         }
 
-                        DividerType {
-                            Layout.fillWidth: true
+                        if (ConnectionController.isConnected) {
+                            PageController.showNotificationMessage(qsTr("Cannot change protocol during active connection"))
+                            return
                         }
+
+                        PageController.showBusyIndicator(true)
+                        ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+                        SubscriptionUiController.setCurrentProtocol(ServersUiController.defaultServerId, modelData)
+                        if (!SubscriptionUiController.updateServiceFromGateway(ServersUiController.defaultServerId, "", "", true)) {
+                            SubscriptionUiController.setCurrentProtocol(ServersUiController.defaultServerId, root.apiCurrentProtocol)
+                        }
+                        root.updateApiProtocolState()
+                        PageController.showBusyIndicator(false)
                     }
                 }
             }

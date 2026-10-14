@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -17,28 +18,21 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        anchors.bottom: saveButton.top
+        anchors.bottomMargin: 16
         anchors.right: parent.right
         anchors.left: parent.left
+
+        header: NavigationBarType {
+            width: listView.width
+            height: implicitHeight + 16
+
+            title: qsTr("WG settings")
+        }
 
         model: WireGuardConfigModel
 
@@ -50,18 +44,10 @@ PageType {
 
             spacing: 0
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                headerText: qsTr("WG settings")
-            }
-
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: mtuTextField
+
                 Layout.fillWidth: true
-                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -72,22 +58,24 @@ PageType {
                 textField.onEditingFinished: {
                     if (textField.text !== clientMtu) {
                         clientMtu = textField.text
-                    } 
+                    }
                 }
                 checkEmptyText: true
             }
 
-            Header2TextType {
+            BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 text: qsTr("Server settings")
+                color: AmneziaStyle.color.textTertiary
             }
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: portTextField
+
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -99,41 +87,38 @@ PageType {
                 textField.text: port
             }
         }
+    }
 
-        footer: ColumnLayout {
-            width: listView.width
+    ButtonType {
+        id: saveButton
 
-            BasicButtonType {
-                id: saveButton
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                Layout.fillWidth: true
-                Layout.topMargin: 24
-                Layout.bottomMargin: 24
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+        enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
 
-                enabled: listView.currentItem.isSaveButtonEnabled
+        text: qsTr("Save")
 
-                text: qsTr("Save")
+        onClicked: {
+            var headerText = qsTr("Save settings?")
+            var descriptionText = qsTr("Only the settings for this device will be changed")
+            var yesButtonText = qsTr("Continue")
+            var noButtonText = qsTr("Cancel")
 
-                clickedFunc: function() {
-                    var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("Only the settings for this device will be changed")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-
-                    var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                            return
-                        }
-
-                        InstallController.updateClientConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
-                    }
-                    var noButtonFunction = function() {}
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            var yesButtonFunction = function() {
+                if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+                    PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                    return
                 }
+
+                InstallController.updateClientConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
             }
+            var noButtonFunction = function() {}
+            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

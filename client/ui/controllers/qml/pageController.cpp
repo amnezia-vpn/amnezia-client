@@ -99,9 +99,9 @@ void PageController::keyPressEvent(Qt::Key key)
 unsigned int PageController::getInitialPageNavigationBarColor()
 {
     if (m_serversController->getServersCount()) {
-        return 0xFF1C1D21;
+        return 0xFF1F1F23;
     } else {
-        return 0xFF0E0E11;
+        return 0xFF101012;
     }
 }
 

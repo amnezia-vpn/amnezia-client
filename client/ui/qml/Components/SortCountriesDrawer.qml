@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-DrawerType2 {
+SheetType {
     id: root
 
     property var listModel: null
@@ -24,17 +24,17 @@ DrawerType2 {
             id: sortModeGroup
         }
 
-        Header2TextType {
+        SectionHeaderType {
             Layout.fillWidth: true
-            Layout.topMargin: 24
+            Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
             Layout.bottomMargin: 16
 
-            text: qsTr("Sort countries")
+            headerText: qsTr("Sort countries")
         }
 
-        VerticalRadioButton {
+        RadioItemType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
@@ -50,16 +50,13 @@ DrawerType2 {
             }
         }
 
-        DividerType {
-            Layout.fillWidth: true
-        }
-
-        VerticalRadioButton {
+        RadioItemType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
             text: qsTr("Alphabetically")
+            showSeparator: false
 
             ButtonGroup.group: sortModeGroup
             checked: root.listModel !== null && root.listModel.sortMode === 1
@@ -68,10 +65,6 @@ DrawerType2 {
                 root.listModel.sortMode = 1
                 root.close()
             }
-        }
-
-        DividerType {
-            Layout.fillWidth: true
         }
     }
 }

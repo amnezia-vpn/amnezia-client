@@ -1,74 +1,70 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
 import "TextTypes"
 
-Rectangle {
+Control {
     id: root
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string backGroundColor: AmneziaStyle.color.onyxBlack
-    property string imageColor: AmneziaStyle.color.paleGray
-    property string textString
+    enum Variant { Info, Warning, Error }
+
+    property int variant: NotificationType.Info
+    property bool compact: false
+
+    property string text
     property int textFormat: Text.PlainText
+    property string iconSource: root.variant === NotificationType.Info ? "qrc:/images/controls/info.svg"
+                                                                        : "qrc:/images/controls/alert-circle.svg"
 
-    property string iconPath
-    property real iconWidth: 16
-    property real iconHeight: 16
-    property real iconSpacing: 8
+    padding: root.compact ? 12 : 16
 
-    property real verticalPadding: 8
-    property real textPixelSize: 13
-    property real textLineHeight: 16
+    background: Rectangle {
+        radius: 16
+        color: AmneziaStyle.color.bgSurface
+    }
 
-    color: backGroundColor
-    radius: 8
-    implicitHeight: content.implicitHeight + content.anchors.topMargin + content.anchors.bottomMargin
+    contentItem: RowLayout {
+        spacing: root.compact ? 8 : 12
 
-    RowLayout {
-        id: content
-        width: parent.width
-        anchors.fill: parent
+        IconImage {
+            readonly property int size: root.compact ? 18 : 24
 
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.topMargin: root.verticalPadding
-        anchors.bottomMargin: root.verticalPadding
-
-        spacing: 0
-
-        Image {
             Layout.alignment: Qt.AlignTop
+            Layout.preferredWidth: size
+            Layout.preferredHeight: size
 
-            width: iconWidth
-            height: iconHeight
-
-            source: iconPath
-
-            layer {
-                enabled: true
-                effect: ColorOverlay {
-                    color: imageColor
+            visible: root.iconSource !== ""
+            source: root.iconSource
+            sourceSize: Qt.size(size, size)
+            color: {
+                switch (root.variant) {
+                case NotificationType.Warning: return AmneziaStyle.color.accentLight
+                case NotificationType.Error: return AmneziaStyle.color.statusDestructive
+                default: return AmneziaStyle.color.iconDefault
                 }
             }
         }
 
-        CaptionTextType {
-            id: supportingText
-
+        SmallTextType {
             Layout.fillWidth: true
-            Layout.leftMargin: root.iconSpacing
+            Layout.alignment: Qt.AlignVCenter
 
-            lineHeight: root.textLineHeight + LanguageUiController.getLineHeightAppend()
-            font.pixelSize: root.textPixelSize
-
-            text: textString
+            text: root.text
             textFormat: root.textFormat
-            color: textColor
+            color: root.variant === NotificationType.Error ? AmneziaStyle.color.statusDestructive
+                                                           : AmneziaStyle.color.textPrimary
+
+            onLinkActivated: function(link) {
+                Qt.openUrlExternally(link)
+            }
+
+            HoverHandler {
+                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.ArrowCursor
+            }
         }
     }
 }

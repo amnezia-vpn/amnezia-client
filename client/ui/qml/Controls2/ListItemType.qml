@@ -1,324 +1,138 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
-import "TextTypes"
-
-Item {
+ItemDelegate {
     id: root
 
-    // property alias focusObjectName: eyeImage.objectName
-    property string text
-    property int textMaximumLineCount: 2
-    property int textElide: Qt.ElideRight
+    property string overline
+    property string subtitle
+    property color subtitleColor: AmneziaStyle.color.textTertiary
+    property string trailingIconSource
+    property string flagCode
+    property int maximumLineCount: 2
+    property bool destructive: false
+    property bool locked: false
+    property bool showSeparator: true
+    property bool dense: false
+    property bool trailingContentVisible: trailingSlot.children.length > 0
+    property color separatorColor: AmneziaStyle.color.borderSoft
+    property int leadingSlotWidth: 48
 
-    property string descriptionText
+    default property alias trailingContent: trailingSlot.data
 
-    property var clickedFunction
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
 
-    property string buttonImageSource
-    property string rightImageSource
-    property string leftImageSource
-    property string rightWarningImageSource
-    property string rightWarningImageColor: AmneziaStyle.color.goldenApricot
-    property bool isLeftImageHoverEnabled: true
-    property bool isSmallLeftImage: false
+    padding: 12
+    spacing: 12
 
-    property alias rightButton: rightImage
-    property alias eyeButton: eyeImage
+    hoverEnabled: true
+    focusPolicy: Qt.TabFocus
+    opacity: enabled ? 1.0 : 0.4
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
-    property string descriptionColor: AmneziaStyle.color.mutedGray
-    property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
-    property real textOpacity: 1.0
+    icon.width: 24
+    icon.height: 24
+    icon.color: AmneziaStyle.color.iconDefault
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
+    Accessible.name: root.text
+    Accessible.description: root.locked ? qsTr("Available in Premium") : root.subtitle
 
-    property string rightImageColor: AmneziaStyle.color.paleGray
-    property string leftImageColor: ""
+    Keys.onEnterPressed: root.click()
+    Keys.onReturnPressed: root.click()
 
-    property bool descriptionOnTop: false
-    property bool hideDescription: true
-
-    activeFocusOnTab: !(eyeImage.visible || rightImage.visible)
-
-    implicitWidth: content.implicitWidth + content.anchors.topMargin + content.anchors.bottomMargin
-    implicitHeight: content.implicitHeight + content.anchors.leftMargin + content.anchors.rightMargin
-
-    MouseArea {
-        id: mouseArea
-
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        hoverEnabled: root.enabled
-
-        onEntered: {
-            if (rightImageSource) {
-                rightImageBackground.color = rightImage.hoveredColor
-            } else if (leftImageSource) {
-                leftImageBackground.color = rightImage.hoveredColor
-            }
-            root.textOpacity = 0.8
-        }
-
-        onExited: {
-            if (rightImageSource) {
-                rightImageBackground.color = rightImage.defaultColor
-            } else if (leftImageSource) {
-                leftImageBackground.color = rightImage.defaultColor
-            }
-            root.textOpacity = 1
-        }
-
-        onPressedChanged: {
-            if (rightImageSource) {
-                rightImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-            } else if (leftImageSource) {
-                leftImageBackground.color = pressed ? rightImage.pressedColor : entered ? rightImage.hoveredColor : rightImage.defaultColor
-            }
-            root.textOpacity = 0.7
-        }
-
-        onClicked: {
-            if (clickedFunction && typeof clickedFunction === "function") {
-                clickedFunction()
-            }
-        }
+    background: ListItemBackgroundType {
+        control: root
+        selected: root.highlighted
+        showSeparator: root.showSeparator
+        separatorColor: root.separatorColor
     }
 
-    RowLayout {
-        id: content
-        anchors.fill: parent
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
-        anchors.topMargin: 16
-        anchors.bottomMargin: 16
+    contentItem: RowLayout {
+        spacing: root.spacing
 
-        Rectangle {
-            id: leftImageBackground
+        Item {
+            Layout.preferredWidth: root.leadingSlotWidth
+            Layout.preferredHeight: 48
 
-            visible: leftImageSource ? true : false
+            visible: root.icon.source.toString() !== ""
 
-            Layout.preferredHeight: (rightImageSource || !isLeftImageHoverEnabled || isSmallLeftImage) ? 40 : 56
-            Layout.preferredWidth: (rightImageSource || !isLeftImageHoverEnabled || isSmallLeftImage)? 40 : 56
-            Layout.rightMargin: isSmallLeftImage ? 8 : (rightImageSource || !isLeftImageHoverEnabled) ? 16 : 0
-
-            radius: 12
-            color: AmneziaStyle.color.transparent
-
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
-            }
-
-            Image {
-                id: leftImage
-
+            IconImage {
                 anchors.centerIn: parent
-                source: leftImageSource
-                visible: leftImageColor === ""
-            }
+                width: root.icon.width
+                height: root.icon.height
 
-            ColorOverlay {
-                anchors.fill: leftImage
-                source: leftImage
-                color: leftImageColor
-                visible: leftImageColor !== ""
+                source: root.icon.source
+                sourceSize: Qt.size(root.icon.width, root.icon.height)
+                color: root.icon.color
             }
         }
 
-        ColumnLayout {
-            property real textLineHeight: 21.6
-            property real descriptionTextLineHeight: 16
+        ListItemLabelType {
+            Layout.fillWidth: true
+            Layout.leftMargin: 4
 
-            property int textPixelSize: 18
-            property int descriptionTextSize: 13
-
-            ListItemTitleType {
-                text: root.text
-                color: {
-                    if (root.enabled) {
-                        return root.descriptionOnTop ? root.descriptionColor : root.textColor
-                    } else {
-                        return root.descriptionOnTop ? root.descriptionDisabledColor : root.textDisabledColor
-                    }
+            overline: root.overline
+            dense: root.dense
+            title: root.text
+            subtitle: root.subtitle
+            subtitleColor: root.subtitleColor
+            maximumLineCount: root.maximumLineCount
+            textOpacity: root.locked ? 0.65 : 1.0
+            titleColor: {
+                if (root.destructive) {
+                    return AmneziaStyle.color.statusDestructive
                 }
-
-                maximumLineCount: root.textMaximumLineCount
-                elide: root.textElide
-
-                opacity: root.textOpacity
-
-                Layout.fillWidth: true
-
-                lineHeight: root.descriptionOnTop ? parent.descriptionTextLineHeight : parent.textLineHeight
-                font.pixelSize: root.descriptionOnTop ? parent.descriptionTextSize : parent.textPixelSize
-                font.letterSpacing: root.descriptionOnTop ? 0.02 : 0
-
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-
-                Behavior on opacity {
-                    PropertyAnimation { duration: 200 }
+                if (root.locked) {
+                    return AmneziaStyle.color.textSecondary
                 }
-            }
-
-            CaptionTextType {
-                id: description
-
-                text: (eyeImage.visible && hideDescription) ? replaceWithAsterisks(root.descriptionText) : root.descriptionText
-                color: {
-                    if (root.enabled) {
-                        return root.descriptionOnTop ? root.textColor : root.descriptionColor
-                    } else {
-                        return root.descriptionOnTop ? root.textDisabledColor : root.descriptionDisabledColor
-                    }
+                if (root.enabled && root.down || root.highlighted) {
+                    return AmneziaStyle.color.textTertiary
                 }
-
-                opacity: root.textOpacity
-
-                visible: root.descriptionText !== ""
-
-                Layout.fillWidth: true
-
-                lineHeight: root.descriptionOnTop ? parent.textLineHeight : parent.descriptionTextLineHeight
-                font.pixelSize: root.descriptionOnTop ? parent.textPixelSize : parent.descriptionTextSize
-                font.letterSpacing: root.descriptionOnTop ? 0 : 0.02
-
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-
-                Behavior on opacity {
-                    PropertyAnimation { duration: 200 }
+                if (root.enabled && root.hovered) {
+                    return AmneziaStyle.color.textSecondary
                 }
-
-                function replaceWithAsterisks(input) {
-                    return '*'.repeat(input.length)
-                }
+                return AmneziaStyle.color.textPrimary
             }
         }
 
-        Rectangle {
-            id: rightWarningImageBackground
+        Image {
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 15
+            Layout.rightMargin: 4
 
-            visible: rightWarningImageSource !== ""
+            visible: root.flagCode !== ""
+            opacity: root.locked ? 0.4 : 1.0
+            source: root.flagCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + root.flagCode + ".svg" : ""
+            sourceSize: Qt.size(20, 15)
+        }
 
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
-            Layout.alignment: Qt.AlignRight
+        RowLayout {
+            id: trailingSlot
 
-            radius: 12
-            color: AmneziaStyle.color.transparent
+            spacing: 0
+            visible: root.trailingContentVisible
+        }
 
-            Image {
-                id: rightWarningImage
+        Item {
+            Layout.preferredWidth: 48
+            Layout.preferredHeight: 48
 
+            visible: root.trailingIconSource !== ""
+
+            IconImage {
                 anchors.centerIn: parent
-                source: rightWarningImageSource
-                visible: false
+                width: 24
+                height: 24
+
+                source: root.trailingIconSource
+                sourceSize: Qt.size(24, 24)
+                color: root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.iconDefault
             }
-
-            ColorOverlay {
-                anchors.fill: rightWarningImage
-                source: rightWarningImage
-                color: rightWarningImageColor
-            }
-        }
-
-        ImageButtonType {
-            id: eyeImage
-            visible: buttonImageSource !== ""
-
-            implicitWidth: 40
-            implicitHeight: 40
-
-            hoverEnabled: true
-            image: buttonImageSource
-            imageColor: rightImageColor
-
-            Layout.alignment: Qt.AlignRight
-
-            Rectangle {
-                id: eyeImageBackground
-                anchors.fill: parent
-                radius: 12
-                color: AmneziaStyle.color.transparent
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
-
-            onClicked: {
-                hideDescription = !hideDescription
-            }
-
-            Keys.onEnterPressed: {
-                clicked()
-            }
-
-            Keys.onReturnPressed: {
-                clicked()
-            }
-        }
-
-        ImageButtonType {
-            id: rightImage
-
-            implicitWidth: 40
-            implicitHeight: 40
-
-            hoverEnabled: false
-            image: rightImageSource
-            imageColor: rightImageColor
-            visible: rightImageSource ? true : false
-
-            Layout.alignment: Qt.AlignRight
-
-            Rectangle {
-                id: rightImageBackground
-                anchors.fill: parent
-                radius: 12
-                color: AmneziaStyle.color.transparent
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
-                }
-            }
-            onClicked: {
-                if (clickedFunction && typeof clickedFunction === "function") {
-                    clickedFunction()
-                }
-            }
-        }
-    }
-
-    Rectangle {
-        id: background
-        anchors.fill: root
-        color: AmneziaStyle.color.transparent
-
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
-
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
-        }
-    }
-
-    Keys.onEnterPressed: {
-        if (!rightImageSource && clickedFunction && typeof clickedFunction === "function") {
-            clickedFunction()
-        }
-    }
-
-    Keys.onReturnPressed: {
-        if (!rightImageSource && clickedFunction && typeof clickedFunction === "function") {
-            clickedFunction()
         }
     }
 }

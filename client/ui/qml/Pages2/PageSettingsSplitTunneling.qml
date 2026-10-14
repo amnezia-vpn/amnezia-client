@@ -80,99 +80,13 @@ PageType {
         }
     }
 
-    ColumnLayout {
-        id: header
+    ListViewType {
+        id: listView
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        BackButtonType {
-            id: backButton
-        }
-
-        HeaderTypeWithSwitcher {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            headerText: qsTr("Split tunneling")
-
-            enabled: root.pageEnabled
-            showSwitcher: true
-            switcher {
-                checked: IpSplitTunnelingController.isSplitTunnelingEnabled
-                enabled: root.pageEnabled
-            }
-            switcherFunction: function(checked) {
-                IpSplitTunnelingController.toggleSplitTunneling(checked)
-                selector.text = root.routeModesModel[getRouteModesModelIndex()].name
-            }
-        }
-
-        DropDownType {
-            id: selector
-
-            Layout.fillWidth: true
-            Layout.topMargin: 32
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-
-            drawerHeight: 0.4375
-
-            enabled: root.pageEnabled
-
-            headerText: qsTr("Mode")
-
-            listView: ListViewWithRadioButtonType {
-                rootWidth: root.width
-
-                model: root.routeModesModel
-
-                selectedIndex: getRouteModesModelIndex()
-
-                clickedFunction: function() {
-                    selector.text = selectedText
-                    selector.close()
-                    if (IpSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
-                        IpSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
-                    }
-                }
-
-                Component.onCompleted: {
-                    if (root.routeModesModel[selectedIndex].type === IpSplitTunnelingController.routeMode) {
-                        selector.text = selectedText
-                    } else {
-                        selector.text = root.routeModesModel[0].name
-                    }
-                }
-
-                Connections {
-                    target: IpSplitTunnelingController
-                    function onRouteModeChanged() {
-                        selectedIndex = getRouteModesModelIndex()
-                    }
-                }
-            }
-        }
-    }
-
-    ListViewType {
-        id: listView
-
-        ScrollBar.vertical: ScrollBarType { policy: ScrollBar.AlwaysOn }
-
-        anchors.top: header.bottom
-        anchors.topMargin: 16
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: addSiteButton.implicitHeight + 48 + (searchField.textField.activeFocus ? 0 : PageController.imeHeight)
-
-        width: parent.width
-
-        enabled: root.pageEnabled
-        clip: true
+        anchors.bottom: addSitePanel.top
 
         model: SortFilterProxyModel {
             id: proxyIpSplitTunnelingModel
@@ -181,31 +95,109 @@ PageType {
                 AnyOf {
                     RegExpFilter {
                         roleName: "url"
-                        pattern: ".*" + searchField.textField.text + ".*"
+                        pattern: ".*" + addSitePanel.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                     RegExpFilter {
                         roleName: "ip"
-                        pattern: ".*" + searchField.textField.text + ".*"
+                        pattern: ".*" + addSitePanel.textField.text + ".*"
                         caseSensitivity: Qt.CaseInsensitive
                     }
                 }
             ]
         }
 
-        delegate: ColumnLayout {
+        header: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
-                id: site
+            spacing: 0
+
+            NavigationBarType {
+                id: navigationBar
+
                 Layout.fillWidth: true
 
-                text: url
-                descriptionText: ip
-                rightImageSource: "qrc:/images/controls/trash.svg"
-                rightImageColor: AmneziaStyle.color.paleGray
+                title: qsTr("Split tunneling")
 
-                clickedFunction: function() {
+                header.showSwitcher: true
+                header.switcher.checked: IpSplitTunnelingController.isSplitTunnelingEnabled
+                header.switcher.enabled: root.pageEnabled
+
+                Connections {
+                    target: navigationBar.header
+
+                    function onSwitcherToggled(checked) {
+                        IpSplitTunnelingController.toggleSplitTunneling(checked)
+                        selector.text = root.routeModesModel[getRouteModesModelIndex()].name
+                    }
+                }
+            }
+
+            DropDownType {
+                id: selector
+
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 24
+
+                drawerHeight: 0.4375
+
+                enabled: root.pageEnabled
+
+                headerText: qsTr("Mode")
+
+                listView: RadioListType {
+
+                    model: root.routeModesModel
+
+                    selectedIndex: getRouteModesModelIndex()
+
+                    onActivated: {
+                        selector.text = selectedText
+                        selector.close()
+                        if (IpSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
+                            IpSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        if (root.routeModesModel[selectedIndex].type === IpSplitTunnelingController.routeMode) {
+                            selector.text = selectedText
+                        } else {
+                            selector.text = root.routeModesModel[0].name
+                        }
+                    }
+
+                    Connections {
+                        target: IpSplitTunnelingController
+                        function onRouteModeChanged() {
+                            selectedIndex = getRouteModesModelIndex()
+                        }
+                    }
+                }
+            }
+        }
+
+        delegate: Item {
+            width: listView.width
+            implicitHeight: site.implicitHeight
+
+            enabled: root.pageEnabled
+
+            ListItemType {
+                id: site
+
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+
+                text: url
+                subtitle: ip
+                trailingIconSource: "qrc:/images/controls/trash.svg"
+
+                onClicked: {
                     var headerText = qsTr("Remove ") + url + "?"
                     var yesButtonText = qsTr("Continue")
                     var noButtonText = qsTr("Cancel")
@@ -213,84 +205,47 @@ PageType {
                     var yesButtonFunction = function() {
                         IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(index))
                         if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
+                            site.forceActiveFocus(Qt.TabFocusReason)
                         }
                     }
                     var noButtonFunction = function() {
                         if (!GC.isMobile()) {
-                            site.rightButton.forceActiveFocus()
+                            site.forceActiveFocus(Qt.TabFocusReason)
                         }
                     }
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-
-            DividerType {}
         }
     }
 
-    Rectangle {
+    AddSitePanel {
+        id: addSitePanel
+
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        
-        height: addSiteButton.implicitHeight + 48
-        
-        color: AmneziaStyle.color.midnightBlack
-        
-        RowLayout {
-            id: addSiteButton
+        anchors.bottomMargin: addSitePanel.textField.activeFocus ? 0 : PageController.imeHeight
 
-            enabled: root.pageEnabled
+        enabled: root.pageEnabled
+        placeholderText: qsTr("website or IP")
 
-            anchors.bottom: parent.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 24
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
-            anchors.bottomMargin: 24
+        onAddClicked: function(text) {
+            PageController.showBusyIndicator(true)
+            IpSplitTunnelingController.addSite(text)
+            PageController.showBusyIndicator(false)
+        }
 
-            TextFieldWithHeaderType {
-                id: searchField
-
-                Layout.fillWidth: true
-                rightButtonClickedOnEnter: true
-
-                textField.placeholderText: qsTr("website or IP")
-                buttonImageSource: "qrc:/images/controls/plus.svg"
-
-                clickedFunc: function() {
-                    PageController.showBusyIndicator(true)
-                    IpSplitTunnelingController.addSite(textField.text)
-                    textField.text = ""
-                    PageController.showBusyIndicator(false)
-                }
-            }
-
-            ImageButtonType {
-                id: addSiteButtonImage
-                implicitWidth: 56
-                implicitHeight: 56
-
-                image: "qrc:/images/controls/more-vertical.svg"
-                imageColor: AmneziaStyle.color.paleGray
-
-                onClicked: function () {
-                    moreActionsDrawer.open()
-                }
-
-                Keys.onReturnPressed: addSiteButtonImage.clicked()
-                Keys.onEnterPressed: addSiteButtonImage.clicked()
-            }
+        onMoreClicked: {
+            moreActionsDrawer.open()
         }
     }
 
-    DrawerType2 {
+    SheetType {
         id: moreActionsDrawer
 
-        expandedHeight: windowHeight * 0.4375
+        expandedHeight: moreActionsDrawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
         ColumnLayout {
             id: moreActionsDrawerContent
@@ -299,33 +254,43 @@ PageType {
             anchors.left: parent.left
             anchors.right: parent.right
 
-            Header2Type {
+            spacing: 0
+
+            SectionHeaderType {
                 Layout.fillWidth: true
-                Layout.margins: 16
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("Additional options")
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 id: importSitesButton
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Import")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     importSitesDrawer.open()
                 }
             }
 
-            DividerType {}
-
-            LabelWithButtonType {
+            ListItemType {
                 id: exportSitesButton
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Save site list")
 
-                clickedFunction: function() {
+                onClicked: {
                     var fileName = ""
                     if (GC.isMobile()) {
                         fileName = "amnezia_sites.json"
@@ -345,15 +310,16 @@ PageType {
                 }
             }
 
-            DividerType {}
-            
-            LabelWithButtonType {
+            ListItemType {
                 id: clearSitesButton
+
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: qsTr("Clear site list")
 
-                clickedFunction: function() {
+                onClicked: {
                     var headerText = qsTr("Clear site list?")
                     var descriptionText = qsTr("All sites will be removed from list.")
                     var yesButtonText = qsTr("Continue")
@@ -365,81 +331,68 @@ PageType {
                         PageController.showBusyIndicator(false)
                     }
                     var noButtonFunction = function() {
-                        
                     }
 
                     showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }
             }
-
-            DividerType {}
         }
     }
 
-    DrawerType2 {
+    SheetType {
         id: importSitesDrawer
 
-        expandedHeight: windowHeight * 0.4375
+        expandedHeight: importSitesDrawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
-        Item {
-            anchors.fill: parent
+        ColumnLayout {
+            id: importSitesDrawerContent
 
-            BackButtonType {
-                id: importSitesDrawerBackButton
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
+            spacing: 0
 
-                backButtonFunction: function() {
-                    importSitesDrawer.close()
-                }
-                
-                onFocusChanged: {
-                    if (this.activeFocus) {
-                        importSitesDrawerListView.positionViewAtBeginning()
-                    }
+            Item {
+                Layout.fillWidth: true
+                Layout.topMargin: 2
+                Layout.preferredHeight: 48
+
+                IconButtonType {
+                    x: 16
+                    y: 4
+
+                    size: IconButtonType.Small
+                    icon.source: "qrc:/images/controls/arrow-left.svg"
+                    Accessible.name: qsTr("Back")
+
+                    onClicked: importSitesDrawer.close()
                 }
             }
 
-            ListViewType {
-                id: importSitesDrawerListView
+            SectionHeaderType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
 
-                anchors.top: importSitesDrawerBackButton.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
+                headerText: qsTr("Import a list of sites")
+            }
 
-                header: ColumnLayout {
-                    width: importSitesDrawerListView.width
-
-                    Header2Type {
-                        Layout.fillWidth: true
-                        Layout.margins: 16
-
-                        headerText: qsTr("Import a list of sites")
-                    }
-                }
-
+            Repeater {
                 model: importOptions
 
-                delegate: ColumnLayout {
-                    width: importSitesDrawerListView.width
+                delegate: ListItemType {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
-                    LabelWithButtonType {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
+                    text: title
 
-                        text: title
-
-                        clickedFunction: function() {
-                            clickedHandler()
-                        }
+                    onClicked: {
+                        clickedHandler()
                     }
-
-                    DividerType {}
                 }
             }
         }

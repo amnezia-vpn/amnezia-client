@@ -42,6 +42,7 @@
         <file>controls/infinity.svg</file>
         <file>controls/info.svg</file>
         <file>controls/mail.svg</file>
+        <file>controls/mail-warning.svg</file>
         <file>controls/map-pin.svg</file>
         <file>controls/more-vertical.svg</file>
         <file>controls/news.svg</file>
@@ -49,6 +50,7 @@
         <file>controls/unread-dot.svg</file>
         <file>controls/plus.svg</file>
         <file>controls/qr-code.svg</file>
+        <file>controls/qr-scan-frame.svg</file>
         <file>controls/radio-button-inner-circle-pressed.png</file>
         <file>controls/radio-button-inner-circle.png</file>
         <file>controls/radio-button-pressed.svg</file>
@@ -62,7 +64,6 @@
         <file>controls/server.svg</file>
         <file>controls/settings-2.svg</file>
         <file>controls/settings.svg</file>
-        <file>controls/settings-news.svg</file>
         <file>controls/share-2.svg</file>
         <file>controls/star.svg</file>
         <file>controls/star-filled.svg</file>

@@ -1,11 +1,17 @@
 <RCC>
     <qresource prefix="/ui/qml">
+        <file>Components/CopyableValueRow.qml</file>
+        <file>Components/ConfigContentSheet.qml</file>
+        <file>Components/QrCodeCard.qml</file>
+        <file>Components/ShareClientInfoSheet.qml</file>
+        <file>Components/CountryListItem.qml</file>
+        <file>Components/FavoriteButton.qml</file>
+        <file>Components/ServerListItem.qml</file>
         <file>Components/UpdateSupportDrawer.qml</file>
-        <file>Components/AdLabel.qml</file>
+        <file>Components/PromoBanner.qml</file>
         <file>Components/ConnectButton.qml</file>
         <file>Components/ConnectionTypeSelectionDrawer.qml</file>
         <file>Components/CountryListStickyHeader.qml</file>
-        <file>Components/CountrySearchField.qml</file>
         <file>Components/CountrySearchRow.qml</file>
         <file>Components/CountrySectionHeader.qml</file>
         <file>Components/CountriesEmptyState.qml</file>
@@ -13,6 +19,8 @@
         <file>Components/SortCountriesDrawer.qml</file>
         <file>Components/GamepadLoader.qml</file>
         <file>Components/HomeContainersListView.qml</file>
+        <file>Components/HomeServerSummary.qml</file>
+        <file>Components/HomeInfoButton.qml</file>
         <file>Components/HomeSplitTunnelingDrawer.qml</file>
         <file>Components/InstalledAppsDrawer.qml</file>
         <file>Components/QuestionDrawer.qml</file>
@@ -22,7 +30,6 @@
         <file>Components/BenefitRow.qml</file>
         <file>Components/BenefitsPanel.qml</file>
         <file>Components/SubscriptionExpiredDrawer.qml</file>
-        <file>Components/SubscriptionPlanCard.qml</file>
         <file>Components/TermsAndPrivacyText.qml</file>
         <file>Components/TransportProtoSelector.qml</file>
         <file>Components/AddSitePanel.qml</file>
@@ -30,65 +37,66 @@
         <file>Config/CountryRegionNames.qml</file>
         <file>Config/qmldir</file>
         <file>Controls2/BackButtonType.qml</file>
-        <file>Controls2/BasicButtonType.qml</file>
-        <file>Controls2/BusyIndicatorType.qml</file>
+        <file>Controls2/ButtonType.qml</file>
+        <file>Controls2/EmptyStateType.qml</file>
+        <file>Controls2/ListItemBackgroundType.qml</file>
+        <file>Controls2/ListItemLabelType.qml</file>
+        <file>Controls2/LoadingOverlayType.qml</file>
         <file>Controls2/CaptchaDialogType.qml</file>
-        <file>Controls2/CardType.qml</file>
-        <file>Controls2/CardGroupType.qml</file>
-        <file>Controls2/ActionRowType.qml</file>
+        <file>Controls2/RecommendationBadgeType.qml</file>
+        <file>Controls2/SelectableListItemType.qml</file>
+        <file>Controls2/PurchaseOptionType.qml</file>
+        <file>Controls2/ListGroupType.qml</file>
         <file>Controls2/AlertDialogType.qml</file>
+        <file>Controls2/DialogButtonType.qml</file>
         <file>Controls2/ChangelogSectionType.qml</file>
         <file>Controls2/BackdropBlurType.qml</file>
-        <file>Controls2/TagBadgeType.qml</file>
-        <file>Controls2/CardWithIconsType.qml</file>
+        <file>Controls2/RadioIndicatorType.qml</file>
+        <file>Controls2/StatusBadgeType.qml</file>
+        <file>Controls2/BasicCardType.qml</file>
+        <file>Controls2/BottomBarType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>
+        <file>Controls2/ChipType.qml</file>
         <file>Controls2/CollapsingHeaderType.qml</file>
         <file>Controls2/ContextMenuType.qml</file>
-        <file>Controls2/DividerType.qml</file>
-        <file>Controls2/DrawerType2.qml</file>
+        <file>Controls2/FocusRingType.qml</file>
+        <file>Controls2/SheetType.qml</file>
+        <file>Controls2/SheetGrabberType.qml</file>
         <file>Controls2/DropDownType.qml</file>
         <file>Controls2/FlickableType.qml</file>
-        <file>Controls2/Header2Type.qml</file>
-        <file>Controls2/BaseHeaderType.qml</file>
-        <file>Controls2/HeaderTypeWithButton.qml</file>
-        <file>Controls2/HeaderTypeWithSwitcher.qml</file>
-        <file>Controls2/HorizontalRadioButton.qml</file>
-        <file>Controls2/ImageButtonType.qml</file>
-        <file>Controls2/LabelWithButtonType.qml</file>
-        <file>Controls2/LabelWithImageType.qml</file>
-        <file>Controls2/ListViewWithLabelsType.qml</file>
-        <file>Controls2/ListViewWithRadioButtonType.qml</file>
+        <file>Controls2/SectionHeaderType.qml</file>
+        <file>Controls2/HeaderType.qml</file>
+        <file>Controls2/SegmentType.qml</file>
+        <file>Controls2/SegmentedControlType.qml</file>
+        <file>Controls2/IconButtonType.qml</file>
+        <file>Controls2/ListItemType.qml</file>
+        <file>Controls2/RadioListType.qml</file>
         <file>Controls2/PageType.qml</file>
-        <file>Controls2/PopupType.qml</file>
+        <file>Controls2/SnackbarType.qml</file>
         <file>Controls2/ProgressBarType.qml</file>
         <file>Controls2/ScrollBarType.qml</file>
+        <file>Controls2/SearchFieldType.qml</file>
         <file>Controls2/StackViewType.qml</file>
-        <file>Controls2/SwitcherType.qml</file>
+        <file>Controls2/SwitchType.qml</file>
+        <file>Controls2/SwitchRowType.qml</file>
         <file>Controls2/TabButtonType.qml</file>
-        <file>Controls2/TabImageButtonType.qml</file>
+        <file>Controls2/TabsType.qml</file>
+        <file>Controls2/TabBarButtonType.qml</file>
+        <file>Controls2/TabBarType.qml</file>
+        <file>Controls2/DotBadgeType.qml</file>
         <file>Controls2/TextAreaType.qml</file>
-        <file>Controls2/ToastType.qml</file>
-        <file>Controls2/TextAreaWithFooterType.qml</file>
-        <file>Controls2/TextFieldWithHeaderType.qml</file>
-        <file>Controls2/TextTypes/AppCaptionTextType.qml</file>
-        <file>Controls2/TextTypes/AppDisplayTextType.qml</file>
-        <file>Controls2/TextTypes/AppH1TextType.qml</file>
-        <file>Controls2/TextTypes/AppH3EmphasizedTextType.qml</file>
-        <file>Controls2/TextTypes/AppH3TextType.qml</file>
-        <file>Controls2/TextTypes/AppSmallTextType.qml</file>
-        <file>Controls2/TextTypes/AppTextType.qml</file>
-        <file>Controls2/TextTypes/ButtonTextType.qml</file>
+        <file>Controls2/TextFieldType.qml</file>
+        <file>Controls2/InputButtonType.qml</file>
         <file>Controls2/TextTypes/CaptionTextType.qml</file>
-        <file>Controls2/TextTypes/Header1TextType.qml</file>
-        <file>Controls2/TextTypes/Header2TextType.qml</file>
-        <file>Controls2/TextTypes/LabelTextType.qml</file>
-        <file>Controls2/TextTypes/ListItemTitleType.qml</file>
-        <file>Controls2/TextTypes/ParagraphTextType.qml</file>
-        <file>Controls2/TextTypes/BadgeTextType.qml</file>
+        <file>Controls2/TextTypes/DisplayTextType.qml</file>
+        <file>Controls2/TextTypes/H1TextType.qml</file>
+        <file>Controls2/TextTypes/H3TextType.qml</file>
         <file>Controls2/TextTypes/SmallTextType.qml</file>
-        <file>Controls2/TopCloseButtonType.qml</file>
-        <file>Controls2/VerticalRadioButton.qml</file>
-        <file>Controls2/WarningType.qml</file>
+        <file>Controls2/TextTypes/BodyTextType.qml</file>
+        <file>Controls2/TextTypes/ButtonTextType.qml</file>
+        <file>Controls2/TextTypes/H2TextType.qml</file>
+        <file>Controls2/RadioItemType.qml</file>
+        <file>Controls2/NotificationType.qml</file>
         <file>Filters/ContainersModelFilters.qml</file>
         <file>main2.qml</file>
         <file>Modules/Style/AmneziaStyle.qml</file>
@@ -110,6 +118,7 @@
         <file>Pages2/PageProtocolXrayXPaddingSettings.qml</file>
         <file>Pages2/PageProtocolXrayXPaddingBytesSettings.qml</file>
         <file>Controls2/MinMaxRowType.qml</file>
+        <file>Controls2/NavigationBarType.qml</file>
 
         <file>Pages2/PageServiceDnsSettings.qml</file>
         <file>Pages2/PageServiceMtProxySettings.qml</file>
@@ -163,6 +172,8 @@
         <file>Pages2/PageStart.qml</file>
         <file>Components/RenameServerDrawer.qml</file>
         <file>Controls2/ListViewType.qml</file>
+        <file>Controls2/LinkButtonType.qml</file>
+        <file>Controls2/SpinnerType.qml</file>
         <file>Pages2/PageSettingsApiSupport.qml</file>
         <file>Pages2/PageSettingsApiInstructions.qml</file>
         <file>Pages2/PageSettingsApiNativeConfigs.qml</file>

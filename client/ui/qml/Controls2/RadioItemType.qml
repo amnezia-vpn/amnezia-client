@@ -1,171 +1,117 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
-import "TextTypes"
-
-RadioButton {
+RadioDelegate {
     id: root
 
-    property int textMaximumLineCount: 2
-    property int textElide: Qt.ElideRight
-    property string descriptionText
+    property string subtitle
+    property color subtitleColor: AmneziaStyle.color.textTertiary
+    property string flagCode
+    property int maximumLineCount: 2
+    property bool locked: false
+    property bool showSeparator: true
+    property color separatorColor: AmneziaStyle.color.borderSoft
 
-    property string hoveredColor: AmneziaStyle.color.barelyTranslucentWhite
-    property string defaultColor: AmneziaStyle.color.transparent
-    property string disabledColor: AmneziaStyle.color.transparent
-    property string selectedColor: AmneziaStyle.color.transparent
+    default property alias trailingContent: trailingSlot.data
 
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
-    property string selectedTextColor: AmneziaStyle.color.goldenApricot
-    property string selectedTextDisabledColor: AmneziaStyle.color.burntOrange
-    property string descriptionColor: AmneziaStyle.color.mutedGray
-    property string descriptionDisabledColor: AmneziaStyle.color.charcoalGray
+    implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
+                            implicitContentWidth + leftPadding + rightPadding)
+    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
-    property string imageSource
-    property bool showImage
-
-
-    property string radioButtonInnerCirclePressedSource: "qrc:/images/controls/radio-button-inner-circle-pressed.png"
-    property string radioButtonInnerCircleSource: "qrc:/images/controls/radio-button-inner-circle.png"
-    property string radioButtonPressedSource: "qrc:/images/controls/radio-button-pressed.svg"
-    property string radioButtonDefaultSource: "qrc:/images/controls/radio-button.svg"
+    padding: 12
+    leftPadding: 12 + 48 + spacing
+    spacing: 12
 
     hoverEnabled: true
+    focusPolicy: Qt.TabFocus
+    opacity: enabled ? 1.0 : 0.4
 
-    indicator: Rectangle {
-        id: background
+    icon.width: 24
+    icon.height: 24
+    icon.color: AmneziaStyle.color.iconDefault
 
-        anchors.verticalCenter: parent.verticalCenter
+    Accessible.name: root.text
+    Accessible.description: root.locked ? qsTr("Available in Premium") : root.subtitle
 
-        border.color: root.focus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.focus ? root.borderFocusedWidth : 0
+    Keys.onEnterPressed: root.click()
+    Keys.onReturnPressed: root.click()
 
-        implicitWidth: 56
-        implicitHeight: 56
-        radius: 16
+    background: ListItemBackgroundType {
+        control: root
+        showSeparator: root.showSeparator
+        separatorColor: root.separatorColor
+    }
 
-        color: {
-            if (root.enabled) {
-                if (root.hovered) {
-                    return hoveredColor
-                } else if (root.checked) {
-                    return selectedColor
-                }
-                return defaultColor
-            } else {
-                return disabledColor
-            }
-        }
+    indicator: Item {
+        x: 12
+        y: (root.height - height) / 2
+        width: 48
+        height: 48
 
-        Behavior on color {
-            PropertyAnimation { duration: 200 }
-        }
-
-        Behavior on border.color {
-            PropertyAnimation { duration: 200 }
-        }
-
-        Image {
-            source: {
-                if (showImage) {
-                    return imageSource
-                } else if (root.pressed) {
-                    return root.radioButtonInnerCirclePressedSource
-                } else if (root.checked) {
-                    return root.radioButtonInnerCircleSource
-                }
-
-                return ""
-            }
-
-            opacity: root.enabled ? 1.0 : 0.3
+        RadioIndicatorType {
             anchors.centerIn: parent
-
-            width: 24
-            height: 24
+            visible: root.icon.source.toString() === ""
+            checked: root.checked
         }
 
-        Image {
-            source: {
-                if (showImage) {
-                    return ""
-                } else if (root.pressed || root.checked) {
-                    return root.radioButtonPressedSource
-                } else {
-                    return root.radioButtonDefaultSource
-                }
-            }
-
-            opacity: root.enabled ? 1.0 : 0.3
+        IconImage {
             anchors.centerIn: parent
+            width: root.icon.width
+            height: root.icon.height
 
-            width: 24
-            height: 24
+            visible: root.icon.source.toString() !== ""
+            source: root.icon.source
+            sourceSize: Qt.size(root.icon.width, root.icon.height)
+            color: root.icon.color
         }
     }
 
-    contentItem: Item {
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: 8 + background.width
+    contentItem: RowLayout {
+        spacing: root.spacing
 
-        implicitHeight: content.implicitHeight
+        ListItemLabelType {
+            Layout.fillWidth: true
+            Layout.leftMargin: 4
 
-        ColumnLayout {
-            id: content
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-
-            spacing: 4
-
-            ListItemTitleType {
-                text: root.text
-                maximumLineCount: root.textMaximumLineCount
-                elide: root.textElide
-
-                color: {
-                    if (root.enabled) {
-                        return root.checked ? selectedTextColor : textColor
-                    } else {
-                        return root.checked ? selectedTextDisabledColor : textDisabledColor
-                    }
+            title: root.text
+            subtitle: root.subtitle
+            subtitleColor: root.subtitleColor
+            maximumLineCount: root.maximumLineCount
+            textOpacity: root.locked ? 0.65 : 1.0
+            titleColor: {
+                if (root.locked) {
+                    return AmneziaStyle.color.textSecondary
                 }
-
-                Layout.fillWidth: true
-
-                Behavior on color {
-                    PropertyAnimation { duration: 200 }
+                if (root.enabled && root.down) {
+                    return AmneziaStyle.color.textTertiary
                 }
-            }
-
-            CaptionTextType {
-                id: description
-
-                color: root.enabled ? root.descriptionColor : root.descriptionDisabledColor
-                text: root.descriptionText
-
-                visible: root.descriptionText !== ""
-
-                Layout.fillWidth: true
+                if (root.enabled && root.hovered) {
+                    return AmneziaStyle.color.textSecondary
+                }
+                return AmneziaStyle.color.textPrimary
             }
         }
-    }
 
-    MouseArea {
-        anchors.fill: root
-        cursorShape: Qt.PointingHandCursor
-        preventStealing: false
-        enabled: false
+        Image {
+            Layout.preferredWidth: 20
+            Layout.preferredHeight: 15
+            Layout.rightMargin: 4
+
+            visible: root.flagCode !== ""
+            opacity: root.locked ? 0.4 : 1.0
+            source: root.flagCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + root.flagCode + ".svg" : ""
+            sourceSize: Qt.size(20, 15)
+        }
+
+        RowLayout {
+            id: trailingSlot
+
+            spacing: 0
+            visible: children.length > 0
+        }
     }
 }
-

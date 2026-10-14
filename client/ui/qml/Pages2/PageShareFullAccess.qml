@@ -15,58 +15,34 @@ import "../Controls2/TextTypes"
 import "../Components"
 import "../Config"
 
-
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    property string headerText: ""
+    property string configContentHeaderText: ""
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: shareButton.top
+        anchors.bottomMargin: 16
 
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        property string headerText: ""
-        property string configContentHeaderText: ""
+            width: flickable.width
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+            spacing: 0
 
-        header: ColumnLayout {
-            width: listView.width
-
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 24
 
-                headerText: qsTr("Full access to the server and VPN")
-            }
-
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 24
-                Layout.bottomMargin: 24
-
-                text: qsTr("We recommend that you use full access to the server only for your own additional devices.\n") +
-                      qsTr("If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. ")
-                color: AmneziaStyle.color.mutedGray
+                title: qsTr("Full access to the server and VPN")
+                description: qsTr("We recommend that you use full access to the server only for your own additional devices.\n") +
+                             qsTr("If you share full access with other people, they can remove and add protocols and services to the server, which will cause the VPN to work incorrectly for all users. ")
             }
 
             DropDownType {
@@ -80,17 +56,15 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.topMargin: 16
+                Layout.bottomMargin: 16
 
                 drawerHeight: 0.4375
 
                 descriptionText: qsTr("Server")
                 headerText: qsTr("Server")
 
-                listView: ListViewWithRadioButtonType {
+                listView: RadioListType {
                     id: serverSelectorListView
-
-                    rootWidth: root.width
-                    imageSource: "qrc:/images/controls/check.svg"
 
                     model: SortFilterProxyModel {
                         id: proxyServersModel
@@ -103,7 +77,7 @@ PageType {
                         ]
                     }
 
-                    clickedFunction: function() {
+                    onActivated: {
                         handler()
 
                         if (serverSelector.currentIndex !== serverSelectorListView.selectedIndex) {
@@ -111,8 +85,8 @@ PageType {
                             serverSelector.severSelectorIndexChanged()
                         }
 
-                        listView.headerText = qsTr("Accessing ") + serverSelector.text
-                        listView.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
+                        root.headerText = qsTr("Accessing ") + serverSelector.text
+                        root.configContentHeaderText = qsTr("File with accessing settings to ") + serverSelector.text
                         serverSelector.close()
                     }
 
@@ -129,39 +103,35 @@ PageType {
                 }
             }
         }
+    }
 
-        model: 1 // fake model to force the ListView to be created without a model
-        spacing: 0
+    ButtonType {
+        id: shareButton
 
-        delegate: ColumnLayout {
-            width: listView.width
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-            BasicButtonType {
-                id: shareButton
-                Layout.fillWidth: true
-                Layout.topMargin: 32
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+        text: qsTr("Share")
+        leftImageSource: "qrc:/images/controls/share-2.svg"
 
-                text: qsTr("Share")
-                leftImageSource: "qrc:/images/controls/share-2.svg"
+        onClicked: {
+            PageController.showBusyIndicator(true)
 
-                clickedFunc: function() {
-                    PageController.showBusyIndicator(true)
-
-                    if (Qt.platform.os === "android" && !SystemController.isAuthenticated()) {
-                        PageController.showBusyIndicator(false)
-                        ExportController.exportErrorOccurred(qsTr("Access error!"))
-                        return
-                    } else {
-                        ExportController.generateFullAccessConfig(ServersUiController.processedServerId)
-                    }
-
-                    PageController.showBusyIndicator(false)
-                    
-                    PageController.goToShareConnectionPage(listView.headerText, listView.configContentHeaderText, "", ".vpn", "amnezia_config")
-                }
+            if (Qt.platform.os === "android" && !SystemController.isAuthenticated()) {
+                PageController.showBusyIndicator(false)
+                ExportController.exportErrorOccurred(qsTr("Access error!"))
+                return
+            } else {
+                ExportController.generateFullAccessConfig(ServersUiController.processedServerId)
             }
+
+            PageController.showBusyIndicator(false)
+
+            PageController.goToShareConnectionPage(root.headerText, root.configContentHeaderText, "", ".vpn", "amnezia_config")
         }
     }
 }

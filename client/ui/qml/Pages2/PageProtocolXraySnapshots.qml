@@ -18,10 +18,8 @@ PageType {
     property string selectedConfigName: ""
     property int    selectedConfigIndex: -1
 
-    // Reload the list every time we open this page
     Component.onCompleted: XrayConfigSnapshotsModel.reload()
 
-    // ── Save xray config snapshot to file ────────────────────────────
     function saveConfigToFile(json) {
         var fileName = ""
         if (GC.isMobile()) {
@@ -42,57 +40,46 @@ PageType {
         }
     }
 
-
-    BackButtonType {
-        id: backButton
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
-
     ListViewType {
         id: listView
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+
+        anchors.fill: parent
 
         model: XrayConfigSnapshotsModel
 
         header: ColumnLayout {
             width: listView.width
+
             spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("XRay Configurations")
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("Create configuration based on current settings")
+                maximumLineCount: 2
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: XrayConfigSnapshotsModel.createFromCurrentModel()
+            }
+
+            ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 0
-                Layout.bottomMargin: 24
-                headerText: qsTr("XRay Configurations")
-            }
 
-            // ── Create from current settings ──────────────────────────
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                text: qsTr("Create configuration based on current settings")
-                textMaximumLineCount: 2
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
-                    XrayConfigSnapshotsModel.createFromCurrentModel()
-                }
-            }
-
-            DividerType {
-            }
-
-            // ── Export ────────────────────────────────────────────────
-            LabelWithButtonType {
-                Layout.fillWidth: true
                 text: qsTr("Export settings")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
                     var idx = root.selectedConfigIndex >= 0 ? root.selectedConfigIndex : 0
                     if (listView.count > 0) {
                         var json = XrayConfigSnapshotsModel.exportToJson(idx)
@@ -101,16 +88,16 @@ PageType {
                 }
             }
 
-            DividerType {
-            }
-
-            // ── Import ────────────────────────────────────────────────
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Import settings")
-                descriptionText: qsTr("In JSON format")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
+                subtitle: qsTr("In JSON format")
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
                     var filePath = SystemController.getFileName(
                         qsTr("Open XRay configuration"),
                         qsTr("JSON files (*.json)"))
@@ -127,66 +114,63 @@ PageType {
                 }
             }
 
-            DividerType {
-            }
-
-            // ── Section label ─────────────────────────────────────────
-            CaptionTextType {
+            SmallTextType {
                 Layout.fillWidth: true
+                Layout.topMargin: 24
+                Layout.bottomMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 24
-                Layout.bottomMargin: 8
-                text: qsTr("Configurations")
-                color: AmneziaStyle.color.mutedGray
+
                 visible: listView.count > 0
+                text: qsTr("Configurations")
             }
         }
 
-        // ── Empty state ───────────────────────────────────────────────
         footer: ColumnLayout {
             width: listView.width
-            visible: listView.count === 0
+
             spacing: 0
 
-            Item {
-                Layout.preferredHeight: 32
-            }
-
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
+                Layout.topMargin: 32
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
+                visible: listView.count === 0
                 text: qsTr("No saved configurations yet.\nCreate one from the current settings.")
-                color: AmneziaStyle.color.mutedGray
+                color: AmneziaStyle.color.textTertiary
                 horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
+            }
+
+            Item {
+                Layout.preferredHeight: 16 + PageController.safeAreaBottomMargin
             }
         }
 
-        // ── Config list items ─────────────────────────────────────────
         delegate: ColumnLayout {
             width: listView.width
+
             spacing: 0
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: configName
-                descriptionText: configDate
-                rightImageSource: "qrc:/images/controls/more-vertical.svg"
-                clickedFunction: function () {
+                subtitle: configDate
+                trailingIconSource: "qrc:/images/controls/more-vertical.svg"
+
+                onClicked: {
                     root.selectedConfigName = configName
                     root.selectedConfigIndex = index
                     configActionsDrawer.open()
                 }
             }
-
-            DividerType {
-            }
         }
     }
 
-    // ── Import result handler ─────────────────────────────────────────
     Connections {
         target: XrayConfigSnapshotsModel
 
@@ -195,72 +179,71 @@ PageType {
         }
     }
 
-    // ── Per-config actions drawer ─────────────────────────────────────
-    DrawerType2 {
+    SheetType {
         id: configActionsDrawer
+
         parent: root
-        expandedHeight: drawerContent.implicitHeight + 32
+
+        expandedHeight: drawerContent.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
         ColumnLayout {
             id: drawerContent
+
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
+
             spacing: 0
 
-            BackButtonType {
+            SectionHeaderType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
-                backButtonFunction: function () {
-                    configActionsDrawer.close()
-                }
-            }
-
-            BaseHeaderType {
-                Layout.fillWidth: true
+                Layout.bottomMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
-                Layout.bottomMargin: 16
+
                 headerText: root.selectedConfigName
             }
 
-            // Apply
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Apply configuration")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
                     configActionsDrawer.close()
                     XrayConfigSnapshotsModel.applyConfigToCurrentModel(root.selectedConfigIndex)
                     PageController.closePage()
                 }
             }
 
-            DividerType {
-            }
-
-            // Export this config
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Export configuration")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                clickedFunction: function () {
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: {
                     configActionsDrawer.close()
                     var json = XrayConfigSnapshotsModel.exportToJson(root.selectedConfigIndex)
                     saveConfigToFile(json)
                 }
             }
 
-            DividerType {
-            }
-
-            // Delete
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 text: qsTr("Delete configuration")
-                textColor: AmneziaStyle.color.vibrantRed
-                clickedFunction: function () {
+                destructive: true
+
+                onClicked: {
                     configActionsDrawer.close()
                     var yesButtonFunction = function () {
                         XrayConfigSnapshotsModel.removeConfig(root.selectedConfigIndex)
@@ -274,12 +257,6 @@ PageType {
                         yesButtonFunction, function () {
                         })
                 }
-            }
-
-            DividerType {
-            }
-            Item {
-                Layout.preferredHeight: 16
             }
         }
     }
