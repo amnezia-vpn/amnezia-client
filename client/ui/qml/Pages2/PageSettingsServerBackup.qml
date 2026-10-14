@@ -3,124 +3,85 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 import PageEnum 1.0
-import ProtocolEnum 1.0
 import Style 1.0
 
+import "./"
 import "../Controls2"
 import "../Controls2/TextTypes"
-import "../Components"
 import "../Config"
 
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + SettingsController.safeAreaTopMargin
+        anchors.bottom: bottomBar.top
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                flickable.contentY = 0
+        contentHeight: content.implicitHeight + 16
+
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Backup")
+                description: qsTr("Local copy of VPN protocols, services, all server settings and users.")
+            }
+
+            LinkButtonType {
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                text: qsTr("More about backups")
+
+                onClicked: {
+                    // TODO: Open help page or show more info
+                }
             }
         }
     }
 
-    FlickableType {
-        id: flickable
+    BottomBarType {
+        id: bottomBar
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
-        contentHeight: contentColumn.implicitHeight
+        filled: true
 
-        ColumnLayout {
-            id: contentColumn
-            width: flickable.width
+        ButtonType {
+            Layout.fillWidth: true
 
-            spacing: 16
+            text: qsTr("Create backup")
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
-                
-                headerText: qsTr("Backup")
-            }
+            onClicked: createBackup(true)
+        }
 
-            ParagraphTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                
-                text: qsTr("Local copy of VPN protocols, services, all server settings and users.")
-                color: AmneziaStyle.color.mutedGray
-            }
+        ButtonType {
+            Layout.fillWidth: true
 
-            Text {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: -8
-                
-                text: qsTr("More about backups")
-                color: AmneziaStyle.color.goldenApricot
-                font.pixelSize: 14
-                
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        // TODO: Open help page or show more info
-                    }
-                }
-            }
+            variant: ButtonType.Secondary
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 16
-                spacing: 12
+            text: qsTr("Restore from backup")
 
-                BasicButtonType {
-                    Layout.fillWidth: true
-                    text: qsTr("Create backup")
-                    
-                    clickedFunc: function() {
-                        createBackup(true)
-                    }
-                }
-
-                BasicButtonType {
-                    Layout.fillWidth: true
-                    text: qsTr("Restore from backup")
-                    defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: Qt.rgba(1, 1, 1, 0.08)
-                    pressedColor: Qt.rgba(1, 1, 1, 0.12)
-                    disabledColor: AmneziaStyle.color.mutedGray
-                    textColor: AmneziaStyle.color.goldenApricot
-                    borderWidth: 1
-
-                    clickedFunc: function() {
-                        restoreBackup()
-                    }
-                }
-            }
+            onClicked: restoreBackup()
         }
     }
 
     function createBackup(shouldDownload) {
-        // Default shouldDownload = true
         var downloadAfterCreate = (shouldDownload !== undefined) ? shouldDownload : true
-        
-        var headerText = downloadAfterCreate ? 
+
+        var headerText = downloadAfterCreate ?
             qsTr("Create backup and download to device?") :
             qsTr("Create server configuration backup?")
         var descriptionText = downloadAfterCreate ?
@@ -131,7 +92,6 @@ PageType {
 
         var yesButtonFunction = function() {
             PageController.showBusyIndicator(true)
-            // Call C++ method that manages download and delete automatically
             ServersBackupController.createBackupWithDownload(downloadAfterCreate, true)
         }
         var noButtonFunction = function() {}
@@ -141,36 +101,27 @@ PageType {
 
     function restoreBackup() {
         var filter = GC.isMobile() ? "*.gz *.tgz *.tar.gz" : "Backup files (*.tar.gz *.backup *.tgz *.gz)"
-        var localPath = SystemController.getFileName(
-            qsTr("Select Backup to Restore"), 
-            filter,
-            "",
-            false,
-            ""
-        )
-        
+        var localPath = SystemController.getFileName(qsTr("Select Backup to Restore"), filter, "", false, "")
+
         if (!localPath || localPath.length === 0) {
             return
         }
-        
-        // Get file information via C++
+
         var fileInfo = ServersBackupController.getBackupFileInfo(localPath)
         var fileName = fileInfo.fileName || "backup.tgz"
         var serverIp = fileInfo.serverIp || ""
-        
-        // If IP not found in filename, use current server
+
         if (!serverIp || serverIp.length === 0) {
             serverIp = ServersUiController.serverHostName(ServersUiController.processedServerId) || ""
         }
 
         var serverName = ServersUiController.serverName(ServersUiController.processedServerId) || qsTr("Server")
-        
-        // Open restore mode selection page
+
         var parentItem = root.parent
         while (parentItem && parentItem.objectName !== "tabBarStackView") {
             parentItem = parentItem.parent
         }
-        
+
         if (parentItem && typeof parentItem.push === "function") {
             parentItem.push(PageController.getPagePath(PageEnum.PageSettingsServerRestoreMode), {
                 "backupFilePath": localPath,
@@ -183,20 +134,16 @@ PageType {
         }
     }
 
-    // ============ Backup Controller Connections ============
-
     Connections {
         target: ServersBackupController
 
         function onBackupCreated(backupFilename) {
-            // If auto-download is not enabled, show success message
             PageController.showBusyIndicator(false)
             PageController.showNotificationMessage(qsTr("Backup created successfully: %1").arg(backupFilename))
         }
 
         function onBackupDownloaded(localPath) {
             PageController.showBusyIndicator(false)
-            console.log("Backup downloaded to:", localPath)
             PageController.showNotificationMessage(qsTr("Backup downloaded successfully!\n\nSaved to:\n%1").arg(localPath))
         }
 
