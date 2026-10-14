@@ -113,6 +113,7 @@ class Tun2Socks(ConanFile):
                 env.define("CGO_LDFLAGS", " ".join(ldflags))
                 env.define("CGO_CFLAGS", " ".join(cflags))
                 with env.vars(self).apply():
+                    make_build_dir = build_dir.replace('\\', '/') if self._is_windows else build_dir
                     at = Autotools(self)
                     make_build_dir = build_dir.replace("\\", "/") if self._is_windows else build_dir
                     at.make("tun2socks", args=[
