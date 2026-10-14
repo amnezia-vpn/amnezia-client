@@ -17,6 +17,8 @@ PageType {
 
     enableTimer: false
 
+    readonly property bool hasWriteAccess: ServersUiController.isProcessedServerHasWriteAccess()
+
     property bool portDirty: false
     property string portText: ""
 
@@ -97,7 +99,6 @@ PageType {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
         header: NavigationBarType {
@@ -106,6 +107,7 @@ PageType {
             title: qsTr("XRay VLESS settings")
 
             IconButtonType {
+                enabled: root.hasWriteAccess
                 size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/more-vertical.svg"
                 onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
@@ -121,16 +123,6 @@ PageType {
                 if (portField.textField.text !== port) {
                     port = portField.textField.text
                 }
-            }
-
-            SmallTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 16
-                visible: !listView.enabled
-                color: AmneziaStyle.color.textSecondary
-                text: qsTr("You have read-only access to this server. XRay settings cannot be edited.")
             }
 
             LinkButtonType {
@@ -155,7 +147,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: listView.enabled
+                enabled: root.hasWriteAccess
                 headerText: qsTr("Port")
                 placeholderText: XrayConfigModel.portDefault()
                 checkEmptyText: true
@@ -205,7 +197,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: listView.enabled
+                enabled: root.hasWriteAccess
                 text: qsTr("Transport")
                 subtitle: root.formatTransport(transport)
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -218,7 +210,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: listView.enabled
+                enabled: root.hasWriteAccess
                 text: qsTr("Security")
                 subtitle: root.formatSecurity((security === "reality" && transport === "mkcp") ? "none" : security)
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -231,7 +223,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: listView.enabled
+                enabled: root.hasWriteAccess
                 text: qsTr("Flow")
                 subtitle: root.formatFlow((transport === "" || transport === "raw") ? flow : "")
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
@@ -244,7 +236,7 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: listView.enabled
+                visible: root.hasWriteAccess
                 text: qsTr("Reset settings")
                 destructive: true
 
@@ -277,7 +269,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
+        visible: root.hasWriteAccess && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
         enabled: visible && root.portText !== ""
         text: qsTr("Save")
 
