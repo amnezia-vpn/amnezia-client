@@ -77,7 +77,7 @@ private slots:
         QCOMPARE(model.data(index, ApiAccountInfoModel::ServiceDescriptionRole).toString(), QStringLiteral("Premium subscription"));
         QCOMPARE(model.data(index, ApiAccountInfoModel::IsSubscriptionRenewalAvailableRole).toBool(), true);
         QCOMPARE(model.data(index, ApiAccountInfoModel::IsInAppPurchaseRole).toBool(), false);
-        QCOMPARE(model.data(index, ApiAccountInfoModel::IsComponentVisibleRole).toBool(), true);
+        QCOMPARE(model.data(index, ApiAccountInfoModel::IsComponentVisibleRole).toBool(), false);
         QCOMPARE(model.data(QStringLiteral("serviceDescription")).toString(), QStringLiteral("Premium subscription"));
     }
 

@@ -155,7 +155,7 @@ private slots:
         QCOMPARE(model->data(firstIndex, ApiServicesModel::PriceRole).toString(), QString("$19.99"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::TermsOfUseUrlRole).toString(),QString("https://example.com/terms"));
         QCOMPARE(model->data(firstIndex, ApiServicesModel::PrivacyPolicyUrlRole).toString(), QString("https://example.com/privacy"));
-        QCOMPARE(model->data(firstIndex, ApiServicesModel::ShowRecommendedRole).toBool(), false);
+        QCOMPARE(model->data(firstIndex, ApiServicesModel::ShowRecommendedRole).toBool(), true);
         QCOMPARE(model->data(firstIndex, ApiServicesModel::OrderRole).toInt(), 0);
     }
 
@@ -175,7 +175,7 @@ private slots:
         QCOMPARE(selectionChangedSpy.count(), 1);
         QCOMPARE(model->getSelectedServiceName(), QString("Amnezia Free"));
         QCOMPARE(model->getSelectedServiceType(), QString("amnezia-free"));
-        QCOMPARE(model->getSelectedServiceProtocol(), QString("amnezia-free"));
+        QCOMPARE(model->getSelectedServiceProtocol(), QString("wireguard"));
         QCOMPARE(model->getSelectedServiceCountries(), QJsonArray());
         QCOMPARE(model->getCountryCode(), QString());
         QCOMPARE(model->getStoreEndpoint(), QString());
@@ -224,7 +224,7 @@ private slots:
 
         QCOMPARE(model->data(index, ApiServicesModel::IsServiceAvailableRole).toBool(), false);
         QCOMPARE(model->data(index, ApiServicesModel::IsPremiumRole).toBool(), false);
-        QCOMPARE(model->data(index, ApiServicesModel::ShowRecommendedRole).toBool(), false);
+        QCOMPARE(model->data(index, ApiServicesModel::ShowRecommendedRole).toBool(), true);
         QCOMPARE(model->data(index, ApiServicesModel::OrderRole).toInt(), 1);
 
         const QString description = model->data(index, ApiServicesModel::CardDescriptionRole).toString();
