@@ -93,5 +93,16 @@ DrawerType2 {
         DividerType {
             visible: isAppSplitTinnelingEnabled
         }
+
+        StrictSplitTunnelingSwitcher {
+            id: strictSplitTunnelingSwitch
+
+            Layout.fillWidth: true
+            Layout.margins: 16
+        }
+
+        DividerType {
+            visible: strictSplitTunnelingSwitch.visible
+        }
     }
 }

@@ -114,6 +114,7 @@ QByteArray SettingsController::backupAppConfig() const
     config["Conf/autoStart"] = isAutoStartEnabled();
     config["Conf/killSwitchEnabled"] = isKillSwitchEnabled();
     config["Conf/strictKillSwitchEnabled"] = isStrictKillSwitchEnabled();
+    config["Conf/strictSplitTunneling"] = isStrictSplitTunnelingEnabled();
     config["Conf/useAmneziaDns"] = isAmneziaDnsEnabled();
 
     return QJsonDocument(config).toJson();
@@ -172,6 +173,7 @@ ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
     m_appSettingsRepository->setStartMinimized(false);
     m_appSettingsRepository->setKillSwitchEnabled(false);
     m_appSettingsRepository->setStrictKillSwitchEnabled(false);
+    m_appSettingsRepository->setStrictSplitTunnelingEnabled(false);
 #endif
 
     return ErrorCode::NoError;
@@ -283,6 +285,16 @@ bool SettingsController::isStrictKillSwitchEnabled() const
 void SettingsController::toggleStrictKillSwitch(bool enable)
 {
     m_appSettingsRepository->setStrictKillSwitchEnabled(enable);
+}
+
+bool SettingsController::isStrictSplitTunnelingEnabled() const
+{
+    return m_appSettingsRepository->isStrictSplitTunnelingEnabled();
+}
+
+void SettingsController::toggleStrictSplitTunneling(bool enable)
+{
+    m_appSettingsRepository->setStrictSplitTunnelingEnabled(enable);
 }
 
 QString SettingsController::getInstallationUuid(bool createIfNotExists) const
