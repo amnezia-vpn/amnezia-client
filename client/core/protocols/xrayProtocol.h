@@ -6,11 +6,15 @@
 #include <QHostAddress>
 #include <QList>
 
+#include <functional>
+
 #include "core/utils/errorCodes.h"
 #include "core/utils/routeModes.h"
 #include "core/utils/commonStructs.h"
 #include "core/utils/ipcClient.h"
 #include "vpnProtocol.h"
+
+class QTimer;
 
 class XrayProtocol : public VpnProtocol
 {
@@ -25,10 +29,17 @@ private:
     ErrorCode setupRouting();
     ErrorCode startTun2Socks();
 
+    bool probeServerReachable();
+    void runConnectivityProbe(std::function<void(bool)> onResult);
+    void startLivenessMonitor();
+    void stopLivenessMonitor();
+    int extractServerPort() const;
+
     QJsonObject m_xrayConfig;
     amnezia::RouteMode m_routeMode;
     QList<QHostAddress> m_dnsServers;
     QString m_remoteAddress;
+    int m_serverPort = 0;
 
     QString m_socksUser;
     QString m_socksPassword;
@@ -38,6 +49,22 @@ private:
     int m_tun2socksRetryCount = 0;
     static constexpr int maxTun2SocksRetries = 5;
     static constexpr int tun2socksRetryDelayMs = 400;
+
+    bool m_connectivityProbeStarted = false;
+    bool m_tunResourceBusy = false;
+
+    QTimer *m_livenessTimer = nullptr;
+    int m_livenessFailures = 0;
+
+    static constexpr int defaultServerProbeTimeoutMs = 5000;
+    static constexpr int defaultConnectivityProbeTimeoutMs = 7000;
+    static constexpr int defaultLivenessIntervalMs = 15000;
+    static constexpr int defaultMaxLivenessFailures = 3;
+
+    int m_serverProbeTimeoutMs = defaultServerProbeTimeoutMs;
+    int m_connectivityProbeTimeoutMs = defaultConnectivityProbeTimeoutMs;
+    int m_livenessIntervalMs = defaultLivenessIntervalMs;
+    int m_maxLivenessFailures = defaultMaxLivenessFailures;
 };
 
 #endif // XRAYPROTOCOL_H

@@ -41,6 +41,8 @@ public:
     QRemoteObjectHost m_serverNode;
     bool m_isRemotingEnabled = false;
 
+    QPointer<QLocalSocket> m_activeClientSocket;
+
     NetworkWatcher m_networkWatcher;
 #ifdef Q_OS_LINUX
     DaemonLocalServer server{qApp};
