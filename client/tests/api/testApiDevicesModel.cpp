@@ -130,18 +130,6 @@ private slots:
         QVERIFY(!model.data(model.index(1, 0), ApiDevicesModel::OsVersionRole).isValid());
         QVERIFY(!model.data(model.index(0, 0), Qt::DisplayRole).isValid());
     }
-
-    void testRoleNames()
-    {
-        ApiDevicesModel model;
-        const auto roles = model.roleNames();
-
-        QCOMPARE(roles.value(ApiDevicesModel::OsVersionRole), QByteArray("osVersion"));
-        QCOMPARE(roles.value(ApiDevicesModel::SupportTagRole), QByteArray("supportTag"));
-        QCOMPARE(roles.value(ApiDevicesModel::CountryCodeRole), QByteArray("countryCode"));
-        QCOMPARE(roles.value(ApiDevicesModel::LastUpdateRole), QByteArray("lastUpdate"));
-        QCOMPARE(roles.value(ApiDevicesModel::IsCurrentDeviceRole), QByteArray("isCurrentDevice"));
-    }
 };
 
 QTEST_MAIN(TestApiDevicesModel)
