@@ -1062,6 +1062,7 @@ jobs:
           - UiSubscriptionControllerTest
           - UiApiAccountInfoModelTest
           - ApiBenefitsModelTest
+          - ApiCountryModelTest
 
     runs-on: ubuntu-22.04
 
@@ -1258,6 +1259,7 @@ jobs:
           - UiSubscriptionControllerTest
           - UiApiAccountInfoModelTest
           - ApiBenefitsModelTest
+          - ApiCountryModelTest
 
     runs-on: windows-latest
 
@@ -1371,6 +1373,7 @@ jobs:
           - UiSubscriptionControllerTest
           - UiApiAccountInfoModelTest
           - ApiBenefitsModelTest
+          - ApiCountryModelTest
 
     runs-on: macos-15
 
