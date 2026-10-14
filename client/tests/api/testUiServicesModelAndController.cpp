@@ -176,9 +176,9 @@ private slots:
         QCOMPARE(model->getSelectedServiceName(), QString("Amnezia Free"));
         QCOMPARE(model->getSelectedServiceType(), QString("amnezia-free"));
         QCOMPARE(model->getSelectedServiceProtocol(), QString("wireguard"));
-        QCOMPARE(model->getSelectedServiceCountries(), QJsonArray());
-        QCOMPARE(model->getCountryCode(), QString());
-        QCOMPARE(model->getStoreEndpoint(), QString());
+        QCOMPARE(model->getSelectedServiceCountries(), QJsonArray([ "EE", "FI" ]));
+        QCOMPARE(model->getCountryCode(), QString("EE"));
+        QCOMPARE(model->getStoreEndpoint(), QString("https://example.com/store"));
     }
 
     void testSelectedServiceData()
@@ -224,7 +224,7 @@ private slots:
 
         QCOMPARE(model->data(index, ApiServicesModel::IsServiceAvailableRole).toBool(), false);
         QCOMPARE(model->data(index, ApiServicesModel::IsPremiumRole).toBool(), false);
-        QCOMPARE(model->data(index, ApiServicesModel::ShowRecommendedRole).toBool(), true);
+        QCOMPARE(model->data(index, ApiServicesModel::ShowRecommendedRole).toBool(), false);
         QCOMPARE(model->data(index, ApiServicesModel::OrderRole).toInt(), 1);
 
         const QString description = model->data(index, ApiServicesModel::CardDescriptionRole).toString();
