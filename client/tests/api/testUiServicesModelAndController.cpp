@@ -176,13 +176,15 @@ private slots:
 
         QSignalSpy selectionChangedSpy(model, &ApiServicesModel::serviceSelectionChanged);
 
+        const QJsonArray expectedCountries { "EE", "FI" };
+
         model->setServiceIndex(1);
 
         QCOMPARE(selectionChangedSpy.count(), 1);
         QCOMPARE(model->getSelectedServiceName(), QString("Amnezia Free"));
         QCOMPARE(model->getSelectedServiceType(), QString("amnezia-free"));
         QCOMPARE(model->getSelectedServiceProtocol(), QString("wireguard"));
-        QCOMPARE(model->getSelectedServiceCountries(), QJsonArray { "EE", "FI" });
+        QCOMPARE(model->getSelectedServiceCountries(), expectedCountries);
         QCOMPARE(model->getCountryCode(), QString("EE"));
         QCOMPARE(model->getStoreEndpoint(), QString("https://example.com/store"));
     }
