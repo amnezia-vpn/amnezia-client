@@ -11,7 +11,7 @@ Rectangle {
 
     Layout.preferredHeight: root.width
 
-    color: "white"
+    color: AmneziaStyle.color.bgStaticWhite
     radius: 16
 
     Image {

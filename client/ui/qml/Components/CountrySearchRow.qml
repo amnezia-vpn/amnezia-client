@@ -43,7 +43,13 @@ RowLayout {
     IconButtonType {
         objectName: "sortButton"
 
+        implicitWidth: 44
+        implicitHeight: 44
+
         icon.source: "qrc:/images/controls/sort-desc.svg"
+        icon.width: 20
+        icon.height: 20
+        Accessible.name: qsTr("Sort")
 
         onClicked: root.sortRequested()
     }

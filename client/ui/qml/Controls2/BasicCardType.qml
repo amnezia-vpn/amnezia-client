@@ -149,7 +149,7 @@ AbstractButton {
 
                 visible: text !== ""
                 text: root.footnote
-                color: root.muted ? AmneziaStyle.color.textQuaternary : AmneziaStyle.color.textSecondary
+                color: root.muted ? AmneziaStyle.color.textQuaternary : AmneziaStyle.color.textTertiary
             }
         }
 

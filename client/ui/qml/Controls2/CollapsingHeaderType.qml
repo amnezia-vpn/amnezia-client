@@ -33,7 +33,7 @@ Item {
                                              ? Math.max(0, Math.min(1, root.listScrolled / root.collapsibleHeight))
                                              : 0
     readonly property real listOcclusion: root.pinnedBottom - root.listView.y
-    readonly property bool pinnedStuck: root.listScrolled >= root.collapsibleHeight
+    readonly property bool pinnedStuck: root.listScrolled > 0 && root.listScrolled >= root.collapsibleHeight
 
     QtObject {
         id: d
@@ -64,7 +64,7 @@ Item {
         id: headerComponent
 
         Item {
-            readonly property real collapsibleHeight: collapsibleColumn.implicitHeight + 12
+            readonly property real collapsibleHeight: collapsibleColumn.implicitHeight + collapsibleColumn.anchors.topMargin
 
             width: root.listView.width
             height: collapsibleHeight + pinnedBlock.height
@@ -77,7 +77,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.topMargin: 12
+                anchors.topMargin: root.title !== "" ? 12 : 0
 
                 spacing: 0
 
@@ -86,6 +86,8 @@ Item {
                 Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: largeTitleMetrics.height
+
+                    visible: root.title !== ""
                 }
 
                 Loader {

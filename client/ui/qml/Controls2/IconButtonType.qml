@@ -24,7 +24,7 @@ Button {
     icon.height: d.iconSize
     icon.color: root.filled ? AmneziaStyle.color.iconInverted : AmneziaStyle.color.iconDefault
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     QtObject {
         id: d

@@ -11,7 +11,7 @@ import "../Config"
 SheetType {
     id: root
 
-    expandedHeight: content.implicitHeight + 16 + 24 + PageController.safeAreaBottomMargin
+    expandedHeight: content.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
     Item {
         id: contentRoot
@@ -23,14 +23,14 @@ SheetType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 16
+            anchors.topMargin: 12
             spacing: 0
 
             SectionHeaderType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 32
 
                 headerText: qsTr("Support")
                 descriptionText: qsTr("If the update won't install, message us")
@@ -40,8 +40,8 @@ SheetType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
 
+                leadingSlotWidth: 24
                 text: qsTr("Telegram")
                 subtitle: qsTr("We'll reply in chat")
                 icon.source: "qrc:/images/controls/telegram.svg"
@@ -57,6 +57,7 @@ SheetType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                leadingSlotWidth: 24
                 text: qsTr("support@amnezia.org")
                 subtitle: qsTr("Support email")
                 icon.source: "qrc:/images/controls/mail.svg"
@@ -72,6 +73,8 @@ SheetType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
+                leadingSlotWidth: 24
+                showSeparator: false
                 text: qsTr("amnezia.org")
                 subtitle: qsTr("Download the update manually")
                 icon.source: "qrc:/images/controls/amnezia.svg"

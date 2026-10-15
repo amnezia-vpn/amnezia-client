@@ -124,8 +124,6 @@ PageType {
 
         title: root.isAppStream ? qsTr("Application") : qsTr("Tunnel")
 
-        header.headerTextMaximumLineCount: 1
-
         IconButtonType {
             id: refreshButton
 

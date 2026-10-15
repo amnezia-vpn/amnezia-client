@@ -24,7 +24,7 @@ Switch {
     hoverEnabled: true
     focusPolicy: Qt.TabFocus
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     indicator: Item {
         x: root.width - width

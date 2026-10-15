@@ -46,24 +46,21 @@ PageType {
     QtObject {
         id: onlyForwardApps
 
+        readonly property string segmentName: qsTr("Via VPN")
         readonly property string name: qsTr("Only the apps from the list should have access via VPN")
         readonly property int type: routeMode.onlyForwardApps
     }
 
     QtObject {
         id: allExceptApps
-        
+
+        readonly property string segmentName: qsTr("Directly")
         readonly property string name: qsTr("Apps from the list should not have access via VPN")
         readonly property int type: routeMode.allExceptApps
     }
 
     function getRouteModesModelIndex() {
-        var currentRouteMode = AppSplitTunnelingController.routeMode
-        if ((routeMode.onlyForwardApps === currentRouteMode) || (routeMode.allApps === currentRouteMode)) {
-            return 0
-        } else if (routeMode.allExceptApps === currentRouteMode) {
-            return 1
-        }
+        return AppSplitTunnelingController.routeMode === routeMode.allExceptApps ? 1 : 0
     }
 
     ListViewType {
@@ -92,6 +89,12 @@ PageType {
 
             spacing: 0
 
+            onHeightChanged: {
+                if (!listView.moving) {
+                    Qt.callLater(listView.positionViewAtBeginning)
+                }
+            }
+
             NavigationBarType {
                 id: navigationBar
 
@@ -108,55 +111,47 @@ PageType {
 
                     function onSwitcherToggled(checked) {
                         AppSplitTunnelingController.toggleSplitTunneling(checked)
-                        selector.text = root.routeModesModel[getRouteModesModelIndex()].name
                     }
                 }
             }
 
-            DropDownType {
-                id: selector
+            SegmentedControlType {
+                id: modeSelector
 
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 24
-
-                drawerHeight: 0.4375
-
-                headerText: qsTr("Mode")
 
                 enabled: (Qt.platform.os === "android") && root.pageEnabled
 
-                listView: RadioListType {
+                model: [onlyForwardApps.segmentName, allExceptApps.segmentName]
+                currentIndex: root.getRouteModesModelIndex()
 
-                    model: root.routeModesModel
-
-                    selectedIndex: getRouteModesModelIndex()
-
-                    onActivated: {
-                        selector.text = selectedText
-                        selector.close()
-                        if (AppSplitTunnelingController.routeMode !== root.routeModesModel[selectedIndex].type) {
-                            AppSplitTunnelingController.routeMode = root.routeModesModel[selectedIndex].type
-                        }
-                    }
-
-                    Component.onCompleted: {
-                        if (root.routeModesModel[selectedIndex].type === AppSplitTunnelingController.routeMode) {
-                            selector.text = selectedText
-                        } else {
-                            selector.text = root.routeModesModel[0].name
-                        }
-                    }
-
-                    Connections {
-                        target: AppSplitTunnelingController
-                        function onRouteModeChanged() {
-                            selectedIndex = getRouteModesModelIndex()
-                        }
+                onActivated: function(index) {
+                    if (AppSplitTunnelingController.routeMode !== root.routeModesModel[index].type) {
+                        AppSplitTunnelingController.routeMode = root.routeModesModel[index].type
                     }
                 }
+
+                Connections {
+                    target: AppSplitTunnelingController
+
+                    function onRouteModeChanged() {
+                        modeSelector.currentIndex = root.getRouteModesModelIndex()
+                    }
+                }
+            }
+
+            BodyTextType {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 24
+
+                text: root.routeModesModel[modeSelector.currentIndex].name
+                color: AmneziaStyle.color.textSecondary
             }
 
             NotificationType {
@@ -210,7 +205,7 @@ PageType {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: searchField.textField.activeFocus ? 0 : PageController.imeHeight
 
-        implicitHeight: searchField.implicitHeight + 32 + PageController.safeAreaBottomMargin
+        implicitHeight: searchField.implicitHeight + 24 + PageController.safeAreaBottomMargin
 
         color: AmneziaStyle.color.bgBase
 

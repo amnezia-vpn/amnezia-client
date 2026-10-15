@@ -18,7 +18,7 @@ Item {
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     ColumnLayout {
         id: content

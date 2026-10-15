@@ -9,13 +9,16 @@ Item {
     id: root
 
     property string placeholderText: ""
+    property bool moreButtonVisible: true
+    property string moreButtonAccessibleName: ""
     property alias textField: searchField.textField
+    readonly property alias moreButton: moreButton
 
     signal addClicked(string text)
     signal moreClicked()
 
     implicitWidth: 360
-    implicitHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
+    implicitHeight: content.implicitHeight + 24 + PageController.safeAreaBottomMargin
 
     Rectangle {
         anchors.fill: parent
@@ -31,7 +34,7 @@ Item {
         anchors.topMargin: 16
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        anchors.bottomMargin: 16 + PageController.safeAreaBottomMargin
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
         spacing: 8
 
@@ -51,13 +54,28 @@ Item {
             }
         }
 
-        IconButtonType {
-            implicitWidth: 64
-            implicitHeight: 64
+        Rectangle {
+            Layout.preferredWidth: 44
+            Layout.preferredHeight: 44
+            Layout.alignment: Qt.AlignVCenter
 
-            icon.source: "qrc:/images/controls/more-vertical.svg"
+            visible: root.moreButtonVisible
 
-            onClicked: root.moreClicked()
+            radius: 16
+            color: AmneziaStyle.color.bgSurfaceAlt
+
+            IconButtonType {
+                id: moreButton
+
+                anchors.fill: parent
+
+                icon.source: "qrc:/images/controls/more-vertical.svg"
+                icon.width: 20
+                icon.height: 20
+                Accessible.name: root.moreButtonAccessibleName
+
+                onClicked: root.moreClicked()
+            }
         }
     }
 }

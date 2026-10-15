@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.impl
-import QtQuick.Effects
 import QtQuick.Layouts
 
 import Style 1.0
@@ -25,7 +24,7 @@ CheckBox {
     hoverEnabled: true
     focusPolicy: Qt.TabFocus
 
-    opacity: root.enabled ? 1 : 0.5
+    opacity: root.enabled ? 1 : 0.4
 
     indicator: Item {
         x: 0
@@ -49,9 +48,9 @@ CheckBox {
 
             width: 24
             height: 24
-            radius: 6
+            radius: 4
 
-            color: root.checked ? AmneziaStyle.color.bgBase : AmneziaStyle.color.transparent
+            color: AmneziaStyle.color.transparent
             border.width: 1
             border.color: root.checked ? AmneziaStyle.color.accentDark : AmneziaStyle.color.borderBold
 
@@ -60,35 +59,23 @@ CheckBox {
             }
         }
 
-        MultiEffect {
-            anchors.fill: check
-
-            source: check
-            visible: root.checked
-            shadowEnabled: true
-            shadowColor: AmneziaStyle.color.accentLight
-            shadowBlur: 0.6
-            shadowHorizontalOffset: 0
-            shadowVerticalOffset: 0
-        }
-
         IconImage {
             id: check
 
             anchors.centerIn: box
 
-            width: 16
-            height: 16
+            width: 24
+            height: 24
 
             visible: root.checked
             source: "qrc:/images/controls/check.svg"
-            sourceSize: Qt.size(16, 16)
+            sourceSize: Qt.size(24, 24)
             color: AmneziaStyle.color.accentLight
         }
 
         FocusRingType {
             target: box
-            radius: 6
+            radius: 4
             visible: root.visualFocus
         }
     }

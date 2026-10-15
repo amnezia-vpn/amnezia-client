@@ -10,7 +10,7 @@ SheetType {
 
     property var listModel: null
 
-    expandedHeight: content.implicitHeight + 32 + PageController.safeAreaBottomMargin
+    expandedHeight: content.implicitHeight + 24 + PageController.safeAreaBottomMargin
 
     ColumnLayout {
         id: content
@@ -26,19 +26,22 @@ SheetType {
 
         SectionHeaderType {
             Layout.fillWidth: true
-            Layout.topMargin: 16
+            Layout.topMargin: 18
             Layout.rightMargin: 16
             Layout.leftMargin: 16
-            Layout.bottomMargin: 16
+            Layout.bottomMargin: 32
 
-            headerText: qsTr("Sort countries")
+            headerText: qsTr("Filters")
+            descriptionText: qsTr("Sorting")
         }
 
         RadioItemType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+            Layout.preferredHeight: 80
 
+            leftPadding: 16 + 48 + spacing
             text: qsTr("By region")
 
             ButtonGroup.group: sortModeGroup
@@ -54,9 +57,10 @@ SheetType {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
+            Layout.preferredHeight: 80
 
+            leftPadding: 16 + 48 + spacing
             text: qsTr("Alphabetically")
-            showSeparator: false
 
             ButtonGroup.group: sortModeGroup
             checked: root.listModel !== null && root.listModel.sortMode === 1

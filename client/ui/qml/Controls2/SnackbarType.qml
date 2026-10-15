@@ -196,7 +196,7 @@ Popup {
                     radius: 16
                     color: {
                         if (actionButton.down) {
-                            return AmneziaStyle.color.buttonPrimaryPress
+                            return AmneziaStyle.color.bgActionPress
                         }
                         return actionButton.hovered ? AmneziaStyle.color.bgSurfaceInverseAlt
                                                     : AmneziaStyle.color.bgSurfaceInverse

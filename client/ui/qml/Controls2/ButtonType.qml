@@ -16,18 +16,19 @@ Button {
     property int variant: ButtonType.Primary
     property int size: ButtonType.Large
     property bool destructive: false
+    property bool loading: false
 
     property string leftImageSource
     property string rightImageSource
 
-    implicitHeight: d.height
+    implicitHeight: Math.max(d.height, implicitContentHeight + topPadding + bottomPadding)
 
     horizontalPadding: 12
     verticalPadding: 8
 
     hoverEnabled: true
 
-    opacity: root.enabled ? 1 : d.disabledOpacity
+    opacity: root.enabled || root.loading ? 1 : 0.4
 
     QtObject {
         id: d
@@ -41,21 +42,11 @@ Button {
         readonly property int iconSize: small ? 20 : 24
         readonly property int gap: root.size === ButtonType.Large ? 4 : 2
 
-        readonly property real disabledOpacity: {
-            switch (root.variant) {
-            case ButtonType.Primary: return 0.25
-            case ButtonType.Destructive: return 0.36
-            case ButtonType.Text: return 0.5
-            case ButtonType.Surface: return 0.5
-            default: return 1
-            }
-        }
-
         readonly property color backgroundColor: {
             switch (root.variant) {
             case ButtonType.Primary:
-                return root.down ? AmneziaStyle.color.buttonPrimaryPress
-                                 : (root.hovered ? AmneziaStyle.color.buttonPrimaryHover : AmneziaStyle.color.buttonPrimaryBg)
+                return root.down ? AmneziaStyle.color.bgActionPress
+                                 : (root.hovered ? AmneziaStyle.color.bgActionHover : AmneziaStyle.color.bgAction)
             case ButtonType.Secondary:
             case ButtonType.Destructive:
             case ButtonType.Surface:
@@ -72,7 +63,7 @@ Button {
 
         readonly property color borderColor: {
             if (outlined) {
-                return active ? AmneziaStyle.color.borderBold : AmneziaStyle.color.borderSoft
+                return active || root.loading ? AmneziaStyle.color.borderBold : AmneziaStyle.color.borderSoft
             }
             if (root.variant === ButtonType.Text && root.down) {
                 return AmneziaStyle.color.borderEmphasis
@@ -87,7 +78,7 @@ Button {
             case ButtonType.Text: return root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
             case ButtonType.Secondary:
             case ButtonType.Tonal:
-                return root.enabled ? AmneziaStyle.color.textSecondary : AmneziaStyle.color.textQuaternary
+                return AmneziaStyle.color.textSecondary
             default: return AmneziaStyle.color.textSecondary
             }
         }
@@ -99,14 +90,14 @@ Button {
             case ButtonType.Text: return root.destructive ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
             case ButtonType.Secondary:
             case ButtonType.Tonal:
-                return root.enabled ? AmneziaStyle.color.iconDefault : AmneziaStyle.color.iconTertiary
+                return AmneziaStyle.color.iconDefault
             default: return AmneziaStyle.color.iconDefault
             }
         }
     }
 
     background: Rectangle {
-        implicitHeight: d.height
+        implicitHeight: Math.max(d.height, implicitContentHeight + topPadding + bottomPadding)
 
         radius: d.radius
         color: d.backgroundColor
@@ -143,11 +134,21 @@ Button {
 
             spacing: d.gap
 
+            LoaderRingType {
+                Layout.preferredWidth: d.iconSize
+                Layout.preferredHeight: d.iconSize
+
+                visible: root.loading
+                size: d.iconSize
+                arcColor: root.variant === ButtonType.Primary ? AmneziaStyle.color.iconInverted : AmneziaStyle.color.textPrimary
+                trackColor: root.variant === ButtonType.Primary ? Qt.alpha(AmneziaStyle.color.iconInverted, 0.3) : AmneziaStyle.color.textTertiary
+            }
+
             IconImage {
                 Layout.preferredWidth: d.iconSize
                 Layout.preferredHeight: d.iconSize
 
-                visible: root.leftImageSource !== ""
+                visible: root.leftImageSource !== "" && !root.loading
                 source: root.leftImageSource
                 sourceSize: Qt.size(d.iconSize, d.iconSize)
                 color: d.iconColor
@@ -167,8 +168,7 @@ Button {
                 font.pixelSize: d.small ? 14 : 16
                 font.weight: root.variant === ButtonType.Text ? 400 : 600
 
-                wrapMode: Text.NoWrap
-                elide: Text.ElideRight
+                wrapMode: Text.Wrap
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
             }

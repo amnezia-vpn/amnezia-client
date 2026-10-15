@@ -42,6 +42,7 @@
         <file>Controls2/ListItemBackgroundType.qml</file>
         <file>Controls2/ListItemLabelType.qml</file>
         <file>Controls2/LoadingOverlayType.qml</file>
+        <file>Controls2/LoaderRingType.qml</file>
         <file>Controls2/CaptchaDialogType.qml</file>
         <file>Controls2/RecommendationBadgeType.qml</file>
         <file>Controls2/SelectableListItemType.qml</file>
@@ -119,6 +120,9 @@
         <file>Pages2/PageProtocolXrayXPaddingBytesSettings.qml</file>
         <file>Controls2/MinMaxRowType.qml</file>
         <file>Controls2/NavigationBarType.qml</file>
+        <file>Controls2/PopupMenuType.qml</file>
+        <file>Controls2/PopupMenuItemType.qml</file>
+        <file>Controls2/PopupMenuSeparatorType.qml</file>
 
         <file>Pages2/PageServiceDnsSettings.qml</file>
         <file>Pages2/PageServiceMtProxySettings.qml</file>

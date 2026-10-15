@@ -45,27 +45,12 @@ ColumnLayout {
         Repeater {
             model: root.items
 
-            delegate: RowLayout {
+            delegate: BodyTextType {
                 Layout.fillWidth: true
-                spacing: 0
 
-                BodyTextType {
-                    Layout.alignment: Qt.AlignTop
-                    Layout.preferredWidth: 24
+                color: AmneziaStyle.color.textTertiary
 
-                    horizontalAlignment: Text.AlignHCenter
-                    color: AmneziaStyle.color.textTertiary
-
-                    text: "•"
-                }
-
-                BodyTextType {
-                    Layout.fillWidth: true
-
-                    color: AmneziaStyle.color.textTertiary
-
-                    text: modelData
-                }
+                text: modelData
             }
         }
     }
