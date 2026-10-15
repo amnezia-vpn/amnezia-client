@@ -136,7 +136,16 @@ void VpnConnection::onConnectionStateChanged(Vpn::ConnectionState state)
                     QString dns1 = m_vpnConfiguration.value(configKey::dns1).toString();
                     QString dns2 = m_vpnConfiguration.value(configKey::dns2).toString();
 
-#ifdef Q_OS_MACOS
+#ifdef Q_OS_WIN
+                    const RouteMode effectiveRouteMode =
+                            static_cast<RouteMode>(m_vpnConfiguration.value(configKey::splitTunnelType).toInt());
+                    const bool isXray = container == DockerContainer::Xray
+                            || container == DockerContainer::SSXray;
+
+                    if (!isXray || effectiveRouteMode != amnezia::RouteMode::VpnAllSites) {
+                        iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
+                    }
+#elif defined(Q_OS_MACOS)
                     if (!m_appSettingsRepository->isSitesSplitTunnelingEnabled() || m_appSettingsRepository->routeMode() != amnezia::RouteMode::VpnAllExceptSites) {
                         iface->routeAddList(m_vpnProtocol->vpnGateway(), QStringList() << dns1 << dns2);
                     }
