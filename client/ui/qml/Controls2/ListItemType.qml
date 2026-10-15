@@ -17,6 +17,7 @@ ItemDelegate {
     property bool destructive: false
     property bool locked: false
     property bool showSeparator: true
+    property bool interactive: true
     property bool dense: false
     property bool trailingContentVisible: trailingSlot.children.length > 0
     property color separatorColor: AmneziaStyle.color.borderSoft
@@ -31,8 +32,8 @@ ItemDelegate {
     padding: 12
     spacing: 12
 
-    hoverEnabled: true
-    focusPolicy: Qt.TabFocus
+    hoverEnabled: root.interactive
+    focusPolicy: root.interactive ? Qt.TabFocus : Qt.NoFocus
     opacity: enabled ? 1.0 : 0.4
 
     icon.width: 24
@@ -46,7 +47,7 @@ ItemDelegate {
     Keys.onReturnPressed: root.click()
 
     background: ListItemBackgroundType {
-        control: root
+        control: root.interactive ? root : null
         selected: root.highlighted
         showSeparator: root.showSeparator
         separatorColor: root.separatorColor
@@ -90,7 +91,7 @@ ItemDelegate {
                 if (root.locked) {
                     return AmneziaStyle.color.textSecondary
                 }
-                if (root.enabled && root.down || root.highlighted) {
+                if (root.interactive && root.enabled && root.down || root.highlighted) {
                     return AmneziaStyle.color.textTertiary
                 }
                 if (root.enabled && root.hovered) {

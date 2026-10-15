@@ -42,9 +42,6 @@ ItemDelegate {
             if (!root.enabled) {
                 return AmneziaStyle.color.bgSurface
             }
-            if (root.down || root.hovered) {
-                return AmneziaStyle.color.bgStateLayer
-            }
             return root.critical ? AmneziaStyle.color.promoOverlay : AmneziaStyle.color.bgBase
         }
         border.width: 1
@@ -55,8 +52,16 @@ ItemDelegate {
             return root.critical ? AmneziaStyle.color.promoRecommendation : AmneziaStyle.color.borderSoft
         }
 
-        Behavior on color {
-            ColorAnimation { duration: 150 }
+        Rectangle {
+            anchors.fill: parent
+
+            radius: parent.radius
+            color: AmneziaStyle.color.bgStateLayer
+            opacity: root.enabled && (root.down || root.hovered) ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
         }
 
         FocusRingType {

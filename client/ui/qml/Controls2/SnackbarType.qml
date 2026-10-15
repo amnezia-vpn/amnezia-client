@@ -34,6 +34,8 @@ Popup {
 
     parent: Overlay.overlay
 
+    z: 1
+
     width: Math.min(parent.width - 32, 520)
     x: Math.round((parent.width - width) / 2)
     y: parent.height - height - 16 - root.bottomOffset - PageController.imeHeight

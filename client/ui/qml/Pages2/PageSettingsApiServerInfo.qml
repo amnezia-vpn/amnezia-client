@@ -202,8 +202,7 @@ PageType {
 
                         visible: infoRow.value !== ""
 
-                        focusPolicy: Qt.NoFocus
-                        hoverEnabled: false
+                        interactive: false
                         showSeparator: false
                         leadingSlotWidth: 24
 
