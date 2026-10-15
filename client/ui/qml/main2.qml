@@ -308,6 +308,8 @@ Window  {
             id: busyIndicator
             anchors.centerIn: parent
             z: 1
+
+            blurSource: pageStart
         }
     }
 

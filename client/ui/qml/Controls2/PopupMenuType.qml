@@ -57,11 +57,33 @@ Popup {
         }
     }
 
-    background: Rectangle {
-        radius: 14
-        color: AmneziaStyle.color.bgSurface
-        border.width: 1
-        border.color: AmneziaStyle.color.borderSoft
+    background: Item {
+        Rectangle {
+            id: panelShadowSource
+
+            anchors.fill: parent
+
+            radius: 14
+            color: AmneziaStyle.color.bgSurface
+            visible: false
+        }
+
+        ShadowType {
+            anchors.fill: panelShadowSource
+            source: panelShadowSource
+            verticalOffset: 8
+            blur: 24
+            color: AmneziaStyle.color.bgOverlay
+        }
+
+        Rectangle {
+            anchors.fill: parent
+
+            radius: 14
+            color: AmneziaStyle.color.bgSurface
+            border.width: 1
+            border.color: AmneziaStyle.color.borderSoft
+        }
     }
 
     contentItem: ColumnLayout {

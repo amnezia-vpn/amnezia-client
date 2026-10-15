@@ -56,7 +56,7 @@ ItemDelegate {
             anchors.fill: parent
 
             radius: parent.radius
-            color: AmneziaStyle.color.bgStateLayer
+            color: root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer
             opacity: root.enabled && (root.down || root.hovered) ? 1 : 0
 
             Behavior on opacity {

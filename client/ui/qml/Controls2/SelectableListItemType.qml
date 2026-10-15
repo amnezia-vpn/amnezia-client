@@ -37,7 +37,7 @@ RadioDelegate {
             anchors.fill: parent
 
             radius: 16
-            color: root.enabled && !root.checked && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer
+            color: root.enabled && !root.checked && (root.hovered || root.down) ? (root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer)
                                                                                 : AmneziaStyle.color.transparent
             border.width: root.checked || root.down ? 1 : 0
             border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderBold

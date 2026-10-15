@@ -73,6 +73,8 @@
         <file>Controls2/ListItemType.qml</file>
         <file>Controls2/RadioListType.qml</file>
         <file>Controls2/PageType.qml</file>
+        <file>Controls2/SelectionGlowType.qml</file>
+        <file>Controls2/ShadowType.qml</file>
         <file>Controls2/SnackbarType.qml</file>
         <file>Controls2/ProgressBarType.qml</file>
         <file>Controls2/ScrollBarType.qml</file>

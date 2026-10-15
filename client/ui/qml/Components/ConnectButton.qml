@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Shapes
 
 import Style 1.0
@@ -43,26 +42,46 @@ Button {
         implicitWidth: 190
         implicitHeight: 190
 
-        Shape {
+        Item {
             anchors.fill: parent
 
-            visible: root.inProgress
             opacity: 0.1
-            preferredRendererType: Shape.CurveRenderer
 
-            ShapePath {
-                fillColor: AmneziaStyle.color.transparent
-                strokeColor: AmneziaStyle.color.borderEmphasis
-                strokeWidth: 1
+            Item {
+                id: diskSource
 
-                PathAngleArc {
-                    centerX: root.width / 2
-                    centerY: root.height / 2
-                    radiusX: d.ringRadius
-                    radiusY: d.ringRadius
-                    startAngle: 0
-                    sweepAngle: 360
+                anchors.fill: parent
+                anchors.margins: -d.glowMargin
+
+                Shape {
+                    anchors.fill: parent
+
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        fillColor: AmneziaStyle.color.transparent
+                        strokeColor: d.ringColor
+                        strokeWidth: 1
+
+                        PathAngleArc {
+                            centerX: diskSource.width / 2
+                            centerY: diskSource.height / 2
+                            radiusX: d.ringRadius
+                            radiusY: d.ringRadius
+                            startAngle: 0
+                            sweepAngle: 360
+                        }
+                    }
                 }
+            }
+
+            ShadowType {
+                anchors.fill: diskSource
+                z: -1
+
+                source: diskSource
+                color: AmneziaStyle.color.shadowGlow
+                blur: 6
             }
         }
 
@@ -98,16 +117,12 @@ Button {
                 }
             }
 
-            MultiEffect {
-                anchors.fill: ringSource
+            SelectionGlowType {
+                anchors.fill: parent
+                z: -1
 
                 source: ringSource
-                shadowEnabled: true
-                shadowColor: d.ringColor
-                shadowBlur: 0.6
-                shadowHorizontalOffset: 0
-                shadowVerticalOffset: 0
-                blurMax: 16
+                color: d.ringColor
             }
 
             RotationAnimator on rotation {

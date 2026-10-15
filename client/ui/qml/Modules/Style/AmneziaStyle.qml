@@ -22,6 +22,7 @@ QtObject {
         readonly property color bgPanelAlt: '#52525B'
         readonly property color bgOverlay: '#8009090B'
         readonly property color bgStateLayer: '#14FAFAFA'
+        readonly property color bgStateLayerPressed: '#1AFAFAFA'
         readonly property color bgStateLayerAccent: '#14FDBA74'
         readonly property color bgSurfaceInverse: '#E4E4E7'
         readonly property color bgSurfaceInverseAlt: '#D4D4D8'
@@ -66,5 +67,6 @@ QtObject {
 
         readonly property color shadowLayer1: '#26000000'
         readonly property color shadowLayer2: '#4D000000'
+        readonly property color shadowGlow: '#FBB751'
     }
 }

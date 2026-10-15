@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Window
 import Qt5Compat.GraphicalEffects
 
 import Style 1.0
@@ -81,22 +82,34 @@ Popup {
             visible: false
         }
 
-        DropShadow {
-            anchors.fill: shadowSource
-            source: shadowSource
-            verticalOffset: 4
-            radius: 8
-            samples: 17
-            spread: 0.3
+        Rectangle {
+            id: spreadShadowSource
+
+            x: -3
+            y: -3 + 4
+            width: parent.width + 6
+            height: parent.height + 6
+
+            radius: 15
             color: AmneziaStyle.color.shadowLayer1
+            visible: false
         }
 
-        DropShadow {
+        GaussianBlur {
+            anchors.fill: spreadShadowSource
+
+            source: spreadShadowSource
+            deviation: 4 * Screen.devicePixelRatio
+            radius: Math.ceil(deviation * 3)
+            samples: radius * 2 + 1
+            transparentBorder: true
+        }
+
+        ShadowType {
             anchors.fill: shadowSource
             source: shadowSource
             verticalOffset: 1
-            radius: 3
-            samples: 7
+            blur: 3
             color: AmneziaStyle.color.shadowLayer2
         }
 

@@ -59,7 +59,7 @@ AbstractButton {
             anchors.fill: parent
 
             radius: 16
-            color: !root.muted && root.enabled && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer
+            color: !root.muted && root.enabled && (root.hovered || root.down) ? (root.down ? AmneziaStyle.color.bgStateLayerPressed : AmneziaStyle.color.bgStateLayer)
                                                                              : AmneziaStyle.color.transparent
 
             Behavior on color {
