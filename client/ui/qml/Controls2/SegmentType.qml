@@ -27,17 +27,20 @@ RadioButton {
     background: Rectangle {
         radius: 16
 
-        color: {
-            if (root.checked) {
-                return AmneziaStyle.color.bgSurfaceAlt
-            }
-            return root.enabled && (root.hovered || root.down) ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
-        }
+        color: root.checked ? AmneziaStyle.color.bgSurfaceAlt : AmneziaStyle.color.transparent
         border.width: root.checked || (root.enabled && root.down) ? 1 : 0
         border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderMedium
 
-        Behavior on color {
-            ColorAnimation { duration: 150 }
+        Rectangle {
+            anchors.fill: parent
+
+            radius: parent.radius
+            color: AmneziaStyle.color.bgStateLayer
+            opacity: !root.checked && root.enabled && (root.hovered || root.down) ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
+            }
         }
 
         FocusRingType {

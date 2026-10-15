@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
+import Style 1.0
+
 Rectangle {
     id: root
 

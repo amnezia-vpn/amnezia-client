@@ -113,7 +113,7 @@ PageType {
             objectName: "homeColumnLayout"
 
             anchors.fill: parent
-            anchors.topMargin: PageController.safeAreaTopMargin
+            anchors.topMargin: 12 + PageController.safeAreaTopMargin
             anchors.bottomMargin: 12
 
             spacing: 0
