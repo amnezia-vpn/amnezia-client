@@ -5276,8 +5276,8 @@ Cree una a partir de los ajustes actuales.</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="133"/>
-        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
-        <translation>Hosting de Amnezia. Servidores VPN sin ajustes complicados ni quebraderos de cabeza</translation>
+        <source>Amnezia Hosting - VPN servers without complicated settings</source>
+        <translation>Amnezia Hosting - servidores VPN sin ajustes complicados</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="147"/>

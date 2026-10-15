@@ -5273,8 +5273,8 @@ Create one from the current settings.</source>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="133"/>
-        <source>Amnezia hosting. VPN servers without complicated settings and headaches</source>
-        <translation>Amnezia hosting။ ရှုပ်ထွေးသော ဆက်တင်များနှင့် ခေါင်းကိုက်စရာများ မလိုသော VPN ဆာဗာများ</translation>
+        <source>Amnezia Hosting - VPN servers without complicated settings</source>
+        <translation>Amnezia Hosting - ရှုပ်ထွေးသော ဆက်တင်များ မလိုသော VPN ဆာဗာများ</translation>
     </message>
     <message>
         <location filename="../ui/qml/Pages2/PageSetupWizardCredentials.qml" line="147"/>
