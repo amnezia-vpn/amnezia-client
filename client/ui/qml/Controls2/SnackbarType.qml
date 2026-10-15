@@ -1,8 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Window
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import Style 1.0
 
@@ -95,14 +94,13 @@ Popup {
             visible: false
         }
 
-        GaussianBlur {
+        MultiEffect {
             anchors.fill: spreadShadowSource
 
             source: spreadShadowSource
-            deviation: 4 * Screen.devicePixelRatio
-            radius: Math.ceil(deviation * 3)
-            samples: radius * 2 + 1
-            transparentBorder: true
+            blurEnabled: true
+            blurMax: 48
+            blur: 0.5
         }
 
         ShadowType {

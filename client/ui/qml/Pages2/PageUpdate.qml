@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import PageEnum 1.0
 import UpdateState 1.0
@@ -86,8 +86,11 @@ PageType {
                     Layout.preferredHeight: 98
 
                     layer.enabled: true
-                    layer.effect: OpacityMask {
+                    layer.effect: MultiEffect {
+                        maskEnabled: true
                         maskSource: imageBlockMask
+                        maskThresholdMin: 0.5
+                        maskSpreadAtMin: 1.0
                     }
 
                     Image {
@@ -108,6 +111,7 @@ PageType {
                         anchors.fill: parent
                         radius: 16
                         visible: false
+                        layer.enabled: true
                     }
 
                     BackdropBlurType {
