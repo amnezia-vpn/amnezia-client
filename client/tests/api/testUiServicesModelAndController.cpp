@@ -100,7 +100,8 @@ QJsonObject makeServicesResponse()
                               "",
                               "https://example.com/terms",
                               "https://example.com/privacy")
-          } }
+          }
+        }
     };
 }
 
@@ -269,9 +270,9 @@ private slots:
 
         const QModelIndex index = model->index(1, 0);
 
-        QCOMPARE(model->data(index, ApiServicesModel::HasSubscriptionPlansRole) .toBool(), false);
+        QCOMPARE(model->data(index, ApiServicesModel::HasSubscriptionPlansRole).toBool(), false);
     }
-
+    
     void testControllerAccessors()
     {
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
@@ -280,7 +281,9 @@ private slots:
 
         ServicesCatalogUiController *controller = m_coreController->m_servicesCatalogUiController;
 
-        QCOMPARE(controller->getSelectedServiceInfo(), QJsonObject { { "id", "amnezia-premium-info" }, { "name", "Amnezia Premium" } });
+        const QJsonObject expectedServiceInfo { { "id", "amnezia-premium-info" }, { "name", "Amnezia Premium" } };
+
+        QCOMPARE(controller->getSelectedServiceInfo(), expectedServiceInfo);
         QCOMPARE(controller->getSelectedServiceType(), model->getSelectedServiceType());
         QCOMPARE(controller->getSelectedServiceProtocol(), model->getSelectedServiceProtocol());
         QCOMPARE(controller->getSelectedServiceName(), model->getSelectedServiceName());

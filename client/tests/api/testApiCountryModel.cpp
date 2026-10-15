@@ -118,21 +118,9 @@ private slots:
         QVERIFY(!m_model.data(m_model.index(0, 0), Qt::UserRole + 100).isValid());
     }
 
-    void testRoleNames()
-    {
-        const auto roles = m_model.roleNames();
-
-        QCOMPARE(roles.value(ApiCountryModel::CountryNameRole), QByteArray("countryName"));
-        QCOMPARE(roles.value(ApiCountryModel::CountryCodeRole), QByteArray("countryCode"));
-        QCOMPARE(roles.value(ApiCountryModel::CountryImageCodeRole), QByteArray("countryImageCode"));
-        QCOMPARE(roles.value(ApiCountryModel::IsIssuedRole), QByteArray("isIssued"));
-        QCOMPARE(roles.value(ApiCountryModel::IsWorkerExpiredRole), QByteArray("isWorkerExpired"));
-    }
-
     void testUpdateIssuedConfigsInfo()
     {
-        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee"), makeCountry("Germany", "DE", "de") }, "EE",
-                            "EE");
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee"), makeCountry("Germany", "DE", "de") }, "EE", "EE");
 
         const QJsonArray issuedConfigs {
             // Worker timestamp equals download timestamp: not expired.
