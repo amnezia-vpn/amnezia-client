@@ -67,6 +67,7 @@ PageType {
                 text: title
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
                 icon.source: leftImagePath
+                showIconBadge: modelData.hasBadge === true
 
                 onClicked: clickedHandler()
             }
@@ -149,7 +150,8 @@ PageType {
         id: news
 
         property string title: qsTr("News & Notifications")
-        readonly property string leftImagePath: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled() ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
+        readonly property string leftImagePath: "qrc:/images/controls/news.svg"
+        readonly property bool hasBadge: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
         property bool isVisible: ServersUiController.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
             if (!ServersUiController.hasServersFromGatewayApi) {

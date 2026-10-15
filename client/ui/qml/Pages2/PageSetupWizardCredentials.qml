@@ -130,7 +130,7 @@ PageType {
                         visible: GC.isDesktop() && !IsMacOsNeBuild
 
                         text: qsTr("Don't have a server?")
-                        subtitle: qsTr("Amnezia hosting. VPN servers without complicated settings and headaches")
+                        subtitle: qsTr("Amnezia Hosting - VPN servers without complicated settings")
 
                         icon.source: "qrc:/images/controls/amnezia.svg"
 

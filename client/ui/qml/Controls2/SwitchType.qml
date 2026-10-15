@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Layouts
 
 import Style 1.0
@@ -57,16 +56,12 @@ Switch {
             color: root.checked ? AmneziaStyle.color.bgStateLayerAccent : AmneziaStyle.color.bgStateLayer
         }
 
-        MultiEffect {
-            anchors.fill: knob
+        SelectionGlowType {
+            anchors.fill: parent
 
             source: knob
             visible: root.checked
-            shadowEnabled: true
-            shadowColor: AmneziaStyle.color.accentLight
-            shadowBlur: 0.6
-            shadowHorizontalOffset: 0
-            shadowVerticalOffset: 0
+            color: AmneziaStyle.color.accentLight
         }
 
         Rectangle {

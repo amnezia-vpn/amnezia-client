@@ -28,7 +28,7 @@ Item {
         anchors.bottomMargin: 4
 
         radius: 16
-        color: root.hovered || root.pressed ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
+        color: root.pressed ? AmneziaStyle.color.bgStateLayerPressed : root.hovered ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
         border.width: root.pressed || root.selected ? 1 : 0
         border.color: AmneziaStyle.color.borderBold
 

@@ -22,14 +22,14 @@ Button {
         radius: 16
 
         color: root.checked ? AmneziaStyle.color.bgSelected : AmneziaStyle.color.bgSurfaceAlt
-        border.width: root.checked ? 1 : 0
-        border.color: AmneziaStyle.color.accentLight
+        border.width: root.checked || (root.hovered && !root.down) ? 1 : 0
+        border.color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderBold
 
         Rectangle {
             anchors.fill: parent
 
             radius: parent.radius
-            visible: root.down || root.hovered
+            visible: root.down
             color: AmneziaStyle.color.bgStateLayer
         }
 

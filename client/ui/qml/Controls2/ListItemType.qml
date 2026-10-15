@@ -22,6 +22,7 @@ ItemDelegate {
     property bool trailingContentVisible: trailingSlot.children.length > 0
     property color separatorColor: AmneziaStyle.color.borderSoft
     property int leadingSlotWidth: 48
+    property bool showIconBadge: false
 
     default property alias trailingContent: trailingSlot.data
 
@@ -70,6 +71,14 @@ ItemDelegate {
                 source: root.icon.source
                 sourceSize: Qt.size(root.icon.width, root.icon.height)
                 color: root.icon.color
+
+                DotBadgeType {
+                    anchors.horizontalCenter: parent.right
+                    anchors.verticalCenter: parent.top
+
+                    visible: root.showIconBadge
+                    color: AmneziaStyle.color.accentDefault
+                }
             }
         }
 

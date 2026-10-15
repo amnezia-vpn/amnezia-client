@@ -14,6 +14,7 @@ ColumnLayout {
     property color titleColor: AmneziaStyle.color.textPrimary
     property color subtitleColor: AmneziaStyle.color.textTertiary
     property int maximumLineCount: 2
+    property int subtitleLineHeight: 18
     property real textOpacity: 1.0
     property bool dense: false
 
@@ -68,5 +69,6 @@ ColumnLayout {
         text: root.subtitle
         color: root.subtitleColor
         opacity: root.textOpacity
+        lineHeight: root.subtitleLineHeight + LanguageUiController.getLineHeightAppend()
     }
 }
