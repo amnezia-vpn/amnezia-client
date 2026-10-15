@@ -162,17 +162,21 @@ private slots:
         QCOMPARE(processedIndexChangedSpy.count(), 1);
         QCOMPARE(model->data(index, NewsModel::IsProcessedRole).toBool(), true);
 
-        const int unreadSignalsBeforeRepeatedMark = hasUnreadChangedSpy.count();
+        model->markAsRead(0);
+
+        QVERIFY(model->data(index, NewsModel::IsReadRole).toBool());
+        QCOMPARE(hasUnreadChangedSpy.count(), 1);
+        QVERIFY(model->hasUnread());
 
         model->markAsRead(0);
 
-        QCOMPARE(hasUnreadChangedSpy.count(), unreadSignalsBeforeRepeatedMark);
+        QCOMPARE(hasUnreadChangedSpy.count(), 1);
         QVERIFY(model->data(index, NewsModel::IsReadRole).toBool());
 
         model->markAsRead(-1);
         model->markAsRead(model->rowCount());
 
-        QCOMPARE(hasUnreadChangedSpy.count(), unreadSignalsBeforeRepeatedMark);
+        QCOMPARE(hasUnreadChangedSpy.count(), 1);
         QVERIFY(model->hasUnread());
     }
 

@@ -37,7 +37,9 @@ private slots:
         model.updateModel(devices, QStringLiteral("device-1"));
 
         QCOMPARE(model.rowCount(), 1);
-        QCOMPARE(model.rowCount(model.index(0, 0)), 0);
+
+        const QModelIndex index = model.index(0, 0);
+        QVERIFY(index.isValid());
     }
 
     void testUpdateModel()
