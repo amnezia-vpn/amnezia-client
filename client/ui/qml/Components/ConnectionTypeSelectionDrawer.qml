@@ -8,13 +8,12 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType2 {
+SheetType {
     id: root
 
-    width: parent.width
-    height: parent.height
+    expandedHeight: content.implicitHeight + 16 + PageController.safeAreaBottomMargin
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -22,13 +21,9 @@ DrawerType2 {
         anchors.right: parent.right
         spacing: 0
 
-        Component.onCompleted: {
-            root.expandedHeight = content.implicitHeight + 32
-        }
-
-        Header2Type {
+        SectionHeaderType {
             Layout.fillWidth: true
-            Layout.topMargin: 24
+            Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
             Layout.bottomMargin: 16
@@ -36,35 +31,34 @@ DrawerType2 {
             headerText: qsTr("Add new connection")
         }
 
-        LabelWithButtonType {
+        ListItemType {
             id: ip
             Layout.fillWidth: true
-            Layout.topMargin: 16
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             text: qsTr("Configure your server")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-            clickedFunction: function() {
+            onClicked: {
                 PageController.goToPage(PageEnum.PageSetupWizardCredentials)
-                root.closeTriggered()
+                root.close()
             }
         }
 
-        DividerType {}
-
-        LabelWithButtonType {
+        ListItemType {
             id: qrCode
             Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             text: qsTr("Open config file, key or QR code")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-            clickedFunction: function() {
+            onClicked: {
                 PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-                root.closeTriggered()
+                root.close()
             }
         }
-
-        DividerType {}
     }
 }

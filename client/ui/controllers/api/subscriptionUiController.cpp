@@ -831,16 +831,21 @@ bool SubscriptionUiController::getAccountInfo(const QString &serverId, bool relo
     m_apiAccountInfoModel->updateModel(accountInfo, apiV2->toJson());
 
     if (reload) {
-        updateApiCountryModel();
+        updateApiCountryModel(serverId);
         updateApiDevicesModel();
     }
 
     return true;
 }
 
-void SubscriptionUiController::updateApiCountryModel()
+void SubscriptionUiController::updateApiCountryModel(const QString &serverId)
 {
-    m_apiCountryModel->updateModel(m_apiAccountInfoModel->getAvailableCountries(), "");
+    const auto apiV2 = m_serversController->apiV2Config(serverId);
+    const QString currentCountryCode = apiV2.has_value() ? apiV2->apiConfig.serverCountryCode : QString();
+    const QString userCountryCode = apiV2.has_value() ? apiV2->apiConfig.userCountryCode : QString();
+
+    m_apiCountryModel->updateModel(m_apiAccountInfoModel->getAvailableCountries(), currentCountryCode,
+                                   userCountryCode);
     m_apiCountryModel->updateIssuedConfigsInfo(m_apiAccountInfoModel->getIssuedConfigsInfo());
 }
 

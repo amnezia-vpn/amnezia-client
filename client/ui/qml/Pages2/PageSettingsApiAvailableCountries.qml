@@ -17,6 +17,8 @@ import "../Components"
 PageType {
     id: root
 
+    isTabBarHidden: true
+
     property var processedServer
     property bool subscriptionExpired: false
     property bool subscriptionExpiringSoon: false
@@ -30,8 +32,19 @@ PageType {
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
     }
 
-    function selectConnectionCountry(countryIndex, countryCode, countryName) {
-        if (countryIndex === ApiCountryModel.currentIndex) {
+    function openServerInfo() {
+        PageController.showBusyIndicator(true)
+        let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
+        PageController.showBusyIndicator(false)
+        if (!result) {
+            return
+        }
+
+        PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
+    }
+
+    function selectConnectionCountry(countryCode, countryName) {
+        if (countryCode === ApiCountryModel.currentCountryCode) {
             return
         }
 
@@ -40,8 +53,69 @@ PageType {
         PageController.showBusyIndicator(false)
     }
 
+    readonly property bool showSubscriptionNote: root.subscriptionExpired || root.subscriptionExpiringSoon
+    readonly property bool showRenewButton: root.showSubscriptionNote
+                                            && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+
+    property int stickyRevision: 0
+    property real savedScroll: 0
+
+    function activateCountry(countryCode, countryName) {
+        if (ConnectionController.isConnectionInProgress) {
+            PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
+            return
+        }
+        if (ConnectionController.isConnected) {
+            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
+            return
+        }
+        root.selectConnectionCountry(countryCode, countryName)
+    }
+
     Component.onCompleted: {
         root.updateSubscriptionState()
+
+        ApiCountryListModel.applyDefaultState(true)
+    }
+
+    Connections {
+        target: ApiCountryListModel
+
+        function onPositionRequested(row) {
+            Qt.callLater(function() {
+                const current = ApiCountryListModel.rowForCountryCode(ApiCountryModel.currentCountryCode)
+                if (current >= 0) {
+                    menuContent.positionViewAtIndex(current, ListView.Center)
+                    menuContent.contentY = collapsingHeader.clampContentY(menuContent.contentY
+                                                                          - collapsingHeader.pinnedHeight / 2)
+                }
+            })
+        }
+
+        function onLayoutRebuilt() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                root.stickyRevision += 1
+            })
+        }
+
+        function onSourceAboutToRefresh() {
+            root.savedScroll = menuContent.contentY - menuContent.originY
+        }
+
+        function onSourceRefreshed() {
+            Qt.callLater(function() {
+                menuContent.forceLayout()
+                const maxScroll = Math.max(0, menuContent.contentHeight - menuContent.height)
+                menuContent.contentY = menuContent.originY + Math.min(root.savedScroll, maxScroll)
+            })
+        }
+
+        function onFavoritesLimitExceeded() {
+            favoritesLimitToast.show(qsTr("You already have %1 locations in favorites. Remove one")
+                                     .arg(ApiCountryListModel.favoritesLimit),
+                                     qsTr("Show"))
+        }
     }
 
     Connections {
@@ -89,159 +163,200 @@ PageType {
     ListViewType {
         id: menuContent
 
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.topMargin: collapsingHeader.topBarHeight
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: searchRow.searchField.activeFocus ? 0 : PageController.imeHeight
 
-        model: ApiCountryModel
+        model: ApiCountryListModel
 
-        currentIndex: ApiCountryModel.currentIndex
+        interactive: menuContent.contentHeight > menuContent.height
 
-        ButtonGroup {
-            id: containersRadioButtonGroup
+        ScrollBar.vertical: collapsingHeader.scrollBar
+
+        header: collapsingHeader.listHeader
+
+        footer: Item {
+            width: menuContent.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
-        header: ColumnLayout {
+        delegate: Item {
+            id: rowItem
+
+            required property int index
+            required property string rowType
+            required property string sectionKey
+            required property bool isCurrent
+            required property bool isFavorite
+            required property string countryName
+            required property string sourceCountryName
+            required property string countryCode
+            required property string countryImageCode
+
             width: menuContent.width
 
-            spacing: 4
+            implicitHeight: rowItem.rowType === "section" ? sectionHeader.implicitHeight : 72
+            height: implicitHeight
 
-            BackButtonType {
-                id: backButton
-                objectName: "backButton"
+            CountrySectionHeader {
+                id: sectionHeader
 
-                Layout.topMargin: 20 + PageController.safeAreaTopMargin
+                listModel: ApiCountryListModel
+                width: rowItem.width
+                visible: rowItem.rowType === "section"
+
+                sectionKey: rowItem.rowType === "section" ? rowItem.sectionKey : ""
+                row: rowItem.rowType === "section" ? rowItem.index : -1
             }
 
-            HeaderTypeWithButton {
-                id: headerContent
-                objectName: "headerContent"
+            CountryListItem {
+                x: 16
+                width: rowItem.width - 32
+                height: rowItem.height
+
+                visible: rowItem.rowType === "country"
+
+                text: rowItem.countryName
+                countryFlagCode: rowItem.countryImageCode
+                highlighted: rowItem.isCurrent
+                favorite: rowItem.isFavorite
+
+                onClicked: root.activateCountry(rowItem.countryCode, rowItem.sourceCountryName)
+                onFavoriteToggled: ApiCountryListModel.toggleFavorite(rowItem.countryCode)
+            }
+        }
+    }
+
+    CollapsingHeaderType {
+        id: collapsingHeader
+
+        anchors.fill: parent
+
+        listView: menuContent
+
+        collapsibleContent: ColumnLayout {
+            spacing: 0
+
+            BodyTextType {
+                visible: root.showSubscriptionNote
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: root.subscriptionExpired || root.subscriptionExpiringSoon ? 0 : 4
-
-                actionButtonImage: "qrc:/images/controls/settings.svg"
-
-                headerText: root.processedServer.name
-
-                actionButtonFunction: function() {
-                    PageController.showBusyIndicator(true)
-                    let result = SubscriptionUiController.getAccountInfo(ServersUiController.processedServerId, false)
-                    PageController.showBusyIndicator(false)
-                    if (!result) {
-                        return
-                    }
-
-                    PageController.goToPage(PageEnum.PageSettingsApiServerInfo)
-                }
-            }
-
-            ParagraphTextType {
-                visible: root.subscriptionExpired || root.subscriptionExpiringSoon
-
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 12
+                Layout.topMargin: 16
 
                 text: root.subscriptionExpired ? qsTr("Subscription expired") : qsTr("Subscription expiring soon")
-                color: root.subscriptionExpired ? AmneziaStyle.color.vibrantRed : AmneziaStyle.color.goldenApricot
+                color: root.subscriptionExpired ? AmneziaStyle.color.statusDestructive : AmneziaStyle.color.textAccent
             }
 
-            BasicButtonType {
-                visible: (root.subscriptionExpired || root.subscriptionExpiringSoon)
-                    && root.isSubscriptionRenewalAvailable && !root.isInAppPurchase
+            ButtonType {
+                visible: root.showRenewButton
 
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 28
-                Layout.bottomMargin: 0
-
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.lightGray
-                pressedColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.midnightBlack
+                Layout.topMargin: 16
 
                 text: qsTr("Renew subscription")
 
-                clickedFunc: function() {
+                onClicked: {
                     SubscriptionUiController.getRenewalLink(ServersUiController.processedServerId)
                 }
             }
+        }
 
-            ParagraphTextType {
+        navigationButtons: [
+            IconButtonType {
+                id: settingsButton
+                objectName: "settingsButton"
+
+                size: IconButtonType.Small
+                icon.source: "qrc:/images/controls/settings.svg"
+
+                onClicked: root.openServerInfo()
+            }
+        ]
+
+        pinnedContent: [
+            CountrySearchRow {
+                id: searchRow
+
+                listModel: ApiCountryListModel
+
+                onSortRequested: sortDrawer.open()
+            },
+
+            CountryUseCaseChips {
+                id: useCaseChips
+
+                listModel: ApiCountryListModel
+
+                Layout.fillWidth: true
+                Layout.topMargin: 12
+                Layout.preferredHeight: useCaseChips.implicitHeight
+            },
+
+            NotificationType {
+                readonly property string bannerText:
+                    CountryRegionNames.useCaseBanners[ApiCountryListModel.activeUseCaseId] || ""
+
+                visible: bannerText !== ""
+
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: (root.subscriptionExpired || root.subscriptionExpiringSoon) ? 12 : 4
-                Layout.bottomMargin: 8
+                Layout.topMargin: 24
 
-                text: qsTr("Location for connection")
-                color: AmneziaStyle.color.mutedGray
-            }
-        }
+                text: bannerText
+            },
 
-        delegate: ColumnLayout {
-            id: content
-
-            width: menuContent.width
-            height: content.implicitHeight
-
-            RowLayout {
-                VerticalRadioButton {
-                    id: containerRadioButton
-
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 16
-
-                    text: countryName
-
-                    ButtonGroup.group: containersRadioButtonGroup
-
-                    imageSource: "qrc:/images/controls/download.svg"
-
-                    checked: index === ApiCountryModel.currentIndex
-                    checkable: !ConnectionController.isConnected
-
-                    onClicked: {
-                        if (ConnectionController.isConnectionInProgress) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while trying to make an active connection"))
-                            return
-                        }
-                        if (ConnectionController.isConnected) {
-                            PageController.showNotificationMessage(qsTr("Unable change server location while there is an active connection"))
-                            return
-                        }
-
-                        root.selectConnectionCountry(index, countryCode, countryName)
-                    }
-
-                    Keys.onEnterPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                    Keys.onReturnPressed: {
-                        if (checkable) {
-                            checked = true
-                        }
-                        containerRadioButton.clicked()
-                    }
-                }
-
-                Image {
-                    Layout.rightMargin: 32
-                    Layout.alignment: Qt.AlignRight
-
-                    source: countryImageCode !== "" ? "qrc:/countriesFlags/images/flagKit/" + countryImageCode + ".svg" : ""
-                }
-            }
-
-            DividerType {
+            Item {
                 Layout.fillWidth: true
+                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
+            }
+        ]
+
+        CountryListStickyHeader {
+            listModel: ApiCountryListModel
+            listView: menuContent
+            header: collapsingHeader
+            revision: root.stickyRevision
+        }
+
+        CountriesEmptyState {
+            anchors.top: parent.top
+            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: searchRow.searchField.activeFocus ? 0 : PageController.imeHeight
+
+            visible: !ApiCountryListModel.hasResults
+
+            isSearchResult: ApiCountryListModel.isSearchActive
+            categoryName: ApiCountryListModel.activeUseCaseId !== "all"
+                          ? CountryRegionNames.useCaseName(ApiCountryListModel, ApiCountryListModel.activeUseCaseId)
+                          : ""
+
+            onShowAllRequested: {
+                searchRow.searchField.clear()
+                ApiCountryListModel.activeUseCaseId = "all"
             }
         }
+    }
+
+    SortCountriesDrawer {
+        id: sortDrawer
+
+        listModel: ApiCountryListModel
+    }
+
+    SnackbarType {
+        id: favoritesLimitToast
+
+        onActionTriggered: ApiCountryListModel.activeUseCaseId = "favorites"
     }
 }

@@ -11,7 +11,7 @@ import "../Controls2/TextTypes"
 
 import "../Config"
 
-DrawerType2 {
+SheetType {
     id: root
 
     property string headerText
@@ -22,71 +22,55 @@ DrawerType2 {
     property var yesButtonFunction
     property var noButtonFunction
 
-    expandedStateContent: ColumnLayout {
+    expandedHeight: content.implicitHeight + 8 + PageController.safeAreaBottomMargin
+
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
-        spacing: 8
+        spacing: 12
 
-        onImplicitHeightChanged: {
-            root.expandedHeight = content.implicitHeight + 32 + PageController.safeAreaBottomMargin
-        }
-
-        Header2TextType {
+        SectionHeaderType {
             Layout.fillWidth: true
             Layout.topMargin: 16
+            Layout.bottomMargin: 14
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
-            text: root.headerText
+            headerText: root.headerText
+            descriptionText: root.descriptionText
         }
 
-        ParagraphTextType {
-            Layout.fillWidth: true
-            Layout.topMargin: 8
-            Layout.rightMargin: 16
-            Layout.leftMargin: 16
-
-            text: root.descriptionText
-        }
-
-        BasicButtonType {
+        ButtonType {
             id: yesButton
             Layout.fillWidth: true
-            Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
             text: root.yesButtonText
 
-            clickedFunc: function() {
+            onClicked: {
                 if (root.yesButtonFunction && typeof root.yesButtonFunction === "function") {
                     root.yesButtonFunction()
                 }
             }
         }
 
-        BasicButtonType {
+        ButtonType {
             id: noButton
+            variant: ButtonType.Secondary
             Layout.fillWidth: true
             Layout.rightMargin: 16
             Layout.leftMargin: 16
-
-            defaultColor: AmneziaStyle.color.transparent
-            hoveredColor: AmneziaStyle.color.translucentWhite
-            pressedColor: AmneziaStyle.color.sheerWhite
-            disabledColor: AmneziaStyle.color.mutedGray
-            textColor: AmneziaStyle.color.paleGray
-            borderWidth: 1
 
             visible: root.noButtonText !== ""
 
             text: root.noButtonText
 
-            clickedFunc: function() {
+            onClicked: {
                 if (root.noButtonFunction && typeof root.noButtonFunction === "function") {
                     root.noButtonFunction()
                 }

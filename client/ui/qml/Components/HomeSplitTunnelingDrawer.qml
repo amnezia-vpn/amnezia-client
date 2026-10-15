@@ -8,15 +8,14 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType2 {
+SheetType {
     id: root
 
     property bool isAppSplitTinnelingEnabled: Qt.platform.os === "windows" || Qt.platform.os === "android"
 
-    anchors.fill: parent
-    expandedHeight: parent.height * 0.9
+    expandedHeight: Math.min(content.implicitHeight + 24 + PageController.safeAreaBottomMargin, windowHeight * 0.9)
 
-    expandedStateContent: ColumnLayout {
+    ColumnLayout {
         id: content
 
         anchors.top: parent.top
@@ -24,74 +23,67 @@ DrawerType2 {
         anchors.right: parent.right
         spacing: 0
 
-        Header2Type {
+        SectionHeaderType {
             Layout.fillWidth: true
-            Layout.topMargin: 24
+            Layout.topMargin: 16
             Layout.rightMargin: 16
             Layout.leftMargin: 16
-            Layout.bottomMargin: 16
+            Layout.bottomMargin: 32
 
             headerText: qsTr("Split tunneling")
             descriptionText:  qsTr("Allows you to connect to some sites or applications through a VPN connection and bypass others")
         }
 
-        LabelWithButtonType {
+        ListItemType {
             id: splitTunnelingSwitch
             Layout.fillWidth: true
-            Layout.topMargin: 16
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             visible: ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
 
             text: qsTr("Split tunneling on the server")
-            descriptionText: qsTr("Enabled \nCan't be disabled for current server")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            subtitle: qsTr("Enabled \nCan't be disabled for current server")
+            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-            clickedFunction: function() {
+            onClicked: {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.closeTriggered()
+                root.close()
             }
         }
 
-        DividerType {
-            visible: ServersUiController.isDefaultServerDefaultContainerHasSplitTunneling
-        }
-
-        LabelWithButtonType {
+        ListItemType {
             id: siteBasedSplitTunnelingSwitch
             Layout.fillWidth: true
-            Layout.topMargin: 16
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             text: qsTr("Site-based split tunneling")
-            descriptionText: enabled && IpSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            subtitle: enabled && IpSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-            clickedFunction: function() {
+            onClicked: {
                 PageController.goToPage(PageEnum.PageSettingsSplitTunneling)
-                root.closeTriggered()
+                root.close()
             }
         }
 
-        DividerType {
-        }
-
-        LabelWithButtonType {
+        ListItemType {
             id: appSplitTunnelingSwitch
             visible: isAppSplitTinnelingEnabled
 
             Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
 
             text: qsTr("App-based split tunneling")
-            descriptionText: AppSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
-            rightImageSource: "qrc:/images/controls/chevron-right.svg"
+            subtitle: AppSplitTunnelingController.isSplitTunnelingEnabled ? qsTr("Enabled") : qsTr("Disabled")
+            trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-            clickedFunction: function() {
+            onClicked: {
                 PageController.goToPage(PageEnum.PageSettingsAppSplitTunneling)
-                root.closeTriggered()
+                root.close()
             }
-        }
-
-        DividerType {
-            visible: isAppSplitTinnelingEnabled
         }
     }
 }

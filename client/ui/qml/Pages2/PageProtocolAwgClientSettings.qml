@@ -6,6 +6,7 @@ import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 import ProtocolEnum 1.0
+import Style 1.0
 
 import "./"
 import "../Controls2"
@@ -17,21 +18,6 @@ import "../Components"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     SmartScroll {
         id: smartScroll
         listView: listView
@@ -40,21 +26,17 @@ PageType {
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
+        anchors.top: parent.top
         anchors.bottom: saveButton.top
+        anchors.bottomMargin: 16
         anchors.right: parent.right
         anchors.left: parent.left
 
-        header: ColumnLayout {
+        header: NavigationBarType {
             width: listView.width
-            
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            height: implicitHeight + 16
 
-                headerText: qsTr("AmneziaWG settings")
-            }
+            title: qsTr("AmneziaWG settings")
         }
 
         model: AwgConfigModel
@@ -67,13 +49,12 @@ PageType {
                                                junkPacketMinSizeTextField.errorText === "" &&
                                                junkPacketCountTextField.errorText === ""
 
-            spacing: 0
+            spacing: 12
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: mtuTextField
 
                 Layout.fillWidth: true
-                Layout.topMargin: 40
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -180,7 +161,6 @@ PageType {
                 id: headerProtectionCheckBox
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -267,7 +247,6 @@ PageType {
                 id: randomTrailersCheckBox
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -282,7 +261,6 @@ PageType {
                 id: disableCookiesCheckBox
 
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -296,10 +274,10 @@ PageType {
                 }
             }
 
-
-            Header2TextType {
+            H2TextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 20
+                Layout.bottomMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -388,23 +366,20 @@ PageType {
                 headerText: "H4 - Transport packet magic header"
                 textField.text: serverTransportPacketMagicHeader
             }
-
         }
     }
 
-    BasicButtonType {
+    ButtonType {
         id: saveButton
 
-        anchors.right: root.right
-        anchors.left: root.left
-        anchors.bottom: root.bottom
-
-        anchors.topMargin: 24
-        anchors.bottomMargin: 24
+        anchors.right: parent.right
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
         anchors.rightMargin: 16
         anchors.leftMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        enabled: listView.currentItem.isSaveButtonEnabled
+        enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
 
         text: qsTr("Save")
 
@@ -414,7 +389,7 @@ PageType {
             }
         }
 
-        clickedFunc: function() {
+        onClicked: {
             var headerText = qsTr("Save settings?")
             var descriptionText = qsTr("Only the settings for this device will be changed")
             var yesButtonText = qsTr("Continue")

@@ -2,22 +2,16 @@
 
 #include <QDateTime>
 #include <QDebug>
-#include <QDesktopServices>
 #include <QDir>
 #include <QJsonDocument>
 #include <QMetaEnum>
 #include <QStandardPaths>
-#include <QUrl>
 
 #include "core/utils/utilities.h"
 #include "version.h"
 
 #ifdef AMNEZIA_DESKTOP
     #include <core/utils/ipcClient.h>
-#endif
-
-#ifdef Q_OS_IOS
-    #include "core/utils/swiftBridge.h"
 #endif
 
 QFile Logger::m_file;
@@ -135,53 +129,6 @@ QString Logger::serviceLogsFilePath()
     return systemLogDir() + QDir::separator() + m_serviceLogFileName;
 }
 
-QString Logger::getLogFile()
-{
-    if (m_file.isOpen()) {
-        m_file.flush();
-    }
-    QFile file(userLogsFilePath());
-
-    file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
-
-#ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
-#else
-    return qtLog;
-#endif
-}
-
-QString Logger::getServiceLogFile()
-{
-    if (m_file.isOpen()) {
-        m_file.flush();
-    }
-    QFile file(serviceLogsFilePath());
-
-    file.open(QIODevice::ReadOnly);
-    QString qtLog = file.readAll();
-
-#ifdef Q_OS_IOS
-    return QString().fromStdString(SWIFT_BRIDGE_NAMESPACE::swiftUpdateLogData(qtLog.toStdString()));
-#else
-    return qtLog;
-#endif
-}
-
-bool Logger::openLogsFolder(bool isServiceLogger)
-{
-    QString path = isServiceLogger ? systemLogDir() : userLogsDir();
-#ifdef Q_OS_WIN
-    path = "file:///" + path;
-#endif
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(path))) {
-        qWarning() << "Can't open url:" << path;
-        return false;
-    }
-    return true;
-}
-
 void Logger::clearLogs(bool isServiceLogger)
 {
     bool isLogActive = m_file.isOpen();
@@ -192,10 +139,6 @@ void Logger::clearLogs(bool isServiceLogger)
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
     file.resize(0);
     file.close();
-
-#ifdef Q_OS_IOS
-    SWIFT_BRIDGE_NAMESPACE::swiftDeleteLog();
-#endif
 
     if (isLogActive) {
         init(isServiceLogger);

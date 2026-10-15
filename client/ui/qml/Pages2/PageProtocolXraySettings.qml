@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import SortFilterProxyModel 0.2
-
 import PageEnum 1.0
 import ProtocolEnum 1.0
 import Style 1.0
@@ -20,6 +18,38 @@ PageType {
     enableTimer: false
 
     property bool portDirty: false
+    property string portText: ""
+
+    function save() {
+        var errs = XrayConfigModel.validationErrors()
+        if (errs.length > 0) {
+            PageController.showErrorMessage(errs.join("\n"))
+            return
+        }
+
+        var headerText = qsTr("Save settings?")
+        var descriptionText = XrayConfigModel.saveDescription(root.portText)
+        var yesButtonText = qsTr("Continue")
+        var noButtonText = qsTr("Cancel")
+        var yesButtonFunction = function() {
+            if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+                PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                return
+            }
+
+            var content = listView.itemAtIndex(0)
+            if (content) {
+                content.commitPort()
+            }
+
+            PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
+        }
+        var noButtonFunction = function() {
+            if (!GC.isMobile()) saveButton.forceActiveFocus()
+        }
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+    }
 
     function formatTransport(value) {
         if (value === "raw") return "RAW (TCP)"
@@ -39,88 +69,102 @@ PageType {
         return value === "" ? qsTr("Empty") : value
     }
 
-    BackButtonType {
-        id: backButton
+    Connections {
+        target: InstallController
 
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onActiveFocusChanged: {
-            if (backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
+        function onXrayKeyMigrationNeedsConfirm(message) {
+            PageController.showBusyIndicator(false)
+            showQuestionDrawer(
+                qsTr("Recreate XRay with new keys?"),
+                message,
+                qsTr("Continue"),
+                qsTr("Cancel"),
+                function() {
+                    InstallController.updateServerConfig(ServersUiController.processedServerId,
+                                                         ServersUiController.processedContainerIndex,
+                                                         ProtocolEnum.Xray, true, true)
+                },
+                function() {})
         }
     }
 
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
+        anchors.top: parent.top
+        anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
+        anchors.bottomMargin: saveButton.visible ? 16 : 0
         anchors.left: parent.left
         anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
         model: XrayConfigModel
 
+        header: NavigationBarType {
+            width: listView.width
+
+            title: qsTr("XRay VLESS settings")
+
+            IconButtonType {
+                size: IconButtonType.Small
+                icon.source: "qrc:/images/controls/more-vertical.svg"
+                onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
+            }
+        }
+
         delegate: ColumnLayout {
             width: listView.width
 
             spacing: 0
 
-            Text {
+            function commitPort() {
+                if (portField.textField.text !== port) {
+                    port = portField.textField.text
+                }
+            }
+
+            SmallTextType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
+                Layout.topMargin: 16
                 visible: !listView.enabled
-                wrapMode: Text.WordWrap
-                color: AmneziaStyle.color.paleGray
-                font.pixelSize: 14
+                color: AmneziaStyle.color.textSecondary
                 text: qsTr("You have read-only access to this server. XRay settings cannot be edited.")
             }
 
-            RowLayout {
-                Layout.fillWidth: true
+            LinkButtonType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 0
+                Layout.topMargin: 16
 
-                BaseHeaderType {
-                    Layout.fillWidth: true
-                    headerText: qsTr("XRay VLESS settings")
-                    descriptionLinkText: qsTr("More about settings")
-                    descriptionLinkUrl: "https://docs.amnezia.org"
-                }
+                size: LinkButtonType.Medium
+                horizontalPadding: 14
+                verticalPadding: 8
 
-                ImageButtonType {
-                    Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                    implicitWidth: 40
-                    implicitHeight: 40
-                    image: "qrc:/images/controls/more-vertical.svg"
-                    imageColor: AmneziaStyle.color.paleGray
-                    onClicked: PageController.goToPage(PageEnum.PageProtocolXraySnapshots)
-                }
+                text: qsTr("More about settings")
+
+                onClicked: Qt.openUrlExternally("https://docs.amnezia.org")
             }
 
-            TextFieldWithHeaderType {
-                id: textFieldWithHeaderType
+            TextFieldType {
+                id: portField
+
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+
                 enabled: listView.enabled
                 headerText: qsTr("Port")
-                hintText: qsTr("Valid range: 1–65535.")
                 placeholderText: XrayConfigModel.portDefault()
+                checkEmptyText: true
 
                 Binding {
-                    target: textFieldWithHeaderType.textField
+                    target: portField.textField
                     property: "text"
                     value: port
-                    when: !textFieldWithHeaderType.textField.activeFocus
+                    when: !portField.textField.activeFocus
                     restoreMode: Binding.RestoreNone
                 }
 
@@ -134,10 +178,11 @@ PageType {
                     }
                 }
                 textField.onTextChanged: {
+                    root.portText = textField.text
                     root.portDirty = (textField.text !== port)
                 }
                 textField.onEditingFinished: {
-                    var v = textFieldWithHeaderType.textField.text
+                    var v = portField.textField.text
                     if (v !== "") {
                         var n = parseInt(v, 10)
                         if (isNaN(n) || n < 1)
@@ -145,112 +190,65 @@ PageType {
                         if (n > 65535)
                             n = 65535
                         v = String(n)
-                        if (textFieldWithHeaderType.textField.text !== v)
-                            textFieldWithHeaderType.textField.text = v
+                        if (portField.textField.text !== v)
+                            portField.textField.text = v
                     }
                     if (v !== port)
                         port = v
                     root.portDirty = false
                 }
-                checkEmptyText: true
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                text: qsTr("Transport")
-                descriptionText: root.formatTransport(transport)
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                enabled: listView.enabled
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageProtocolXrayTransportSettings)
-                }
-            }
-
-            DividerType {
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                text: qsTr("Security")
-                descriptionText: root.formatSecurity((security === "reality" && transport === "mkcp") ? "none" : security)
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                enabled: listView.enabled
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageProtocolXraySecuritySettings)
-                }
-            }
-
-            DividerType {
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                text: qsTr("Flow")
-                descriptionText: root.formatFlow((transport === "" || transport === "raw") ? flow : "")
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                enabled: listView.enabled
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
-                }
-            }
-
-            DividerType {
-            }
-
-            Item {
-                Layout.fillWidth: true; Layout.preferredHeight: 24
-            }
-
-            BasicButtonType {
-                id: saveButton
-                Layout.fillWidth: true
-                Layout.bottomMargin: 8
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                visible: listView.enabled
-                         && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
-                enabled: visible && textFieldWithHeaderType.textField.text !== ""
-                text: qsTr("Save")
-                onClicked: function() {
-                    forceActiveFocus()
-                    var errs = XrayConfigModel.validationErrors()
-                    if (errs.length > 0) {
-                        PageController.showErrorMessage(errs.join("\n"))
-                        return
-                    }
-                    var headerText = qsTr("Save settings?")
-                    var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
-                    var yesButtonText = qsTr("Continue")
-                    var noButtonText = qsTr("Cancel")
-                    var yesButtonFunction = function() {
-                        if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                            PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                            return
-                        }
 
-                        if (textFieldWithHeaderType.textField.text !== port) {
-                            port = textFieldWithHeaderType.textField.text
-                        }
+                enabled: listView.enabled
+                text: qsTr("Transport")
+                subtitle: root.formatTransport(transport)
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                        PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                        InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
-                    }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) saveButton.forceActiveFocus()
-                    }
-                    showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-                }
-                Keys.onEnterPressed: saveButton.clicked()
-                Keys.onReturnPressed: saveButton.clicked()
+                onClicked: PageController.goToPage(PageEnum.PageProtocolXrayTransportSettings)
             }
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
-                text: qsTr("Reset settings")
-                textColor: AmneziaStyle.color.vibrantRed
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: listView.enabled
+                text: qsTr("Security")
+                subtitle: root.formatSecurity((security === "reality" && transport === "mkcp") ? "none" : security)
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: PageController.goToPage(PageEnum.PageProtocolXraySecuritySettings)
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                enabled: listView.enabled
+                text: qsTr("Flow")
+                subtitle: root.formatFlow((transport === "" || transport === "raw") ? flow : "")
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: PageController.goToPage(PageEnum.PageProtocolXrayFlowSettings)
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
                 visible: listView.enabled
-                clickedFunction: function() {
+                text: qsTr("Reset settings")
+                destructive: true
+
+                onClicked: {
                     var yesButtonFunction = function() {
                         PageController.showNotificationMessage(
                             qsTr("Settings were reset to defaults. Tap Save to apply them on the server."))
@@ -263,8 +261,29 @@ PageType {
             }
 
             Item {
-                Layout.fillWidth: true; Layout.preferredHeight: 32
+                Layout.fillWidth: true
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
+        }
+    }
+
+    ButtonType {
+        id: saveButton
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
+
+        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.portDirty)
+        enabled: visible && root.portText !== ""
+        text: qsTr("Save")
+
+        onClicked: {
+            saveButton.forceActiveFocus()
+            root.save()
         }
     }
 }

@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Window
-import Qt5Compat.GraphicalEffects
 
 import Style 1.0
 
@@ -34,20 +32,15 @@ Popup {
         return 0
     }
 
-    leftMargin: 25
-    rightMargin: 25
-    bottomMargin: 70 + SettingsController.safeAreaBottomMargin
+    parent: Overlay.overlay
 
-    width: parent.width - leftMargin - rightMargin
+    width: parent ? parent.width : 0
+    height: Math.min(contentLayout.implicitHeight + 21 + 8 + PageController.safeAreaBottomMargin, parent ? parent.height - 20 : 0)
 
-    x: Math.round((parent.width - width) / 2)
-    y: {
-        const centered = Math.round((parent.height - height) / 2)
-        if (root.keyboardHeight === 0) {
-            return centered
-        }
-        return Math.max(20, Math.min(centered, parent.height - root.keyboardHeight - height - 16))
-    }
+    x: 0
+    y: parent ? parent.height - height - root.keyboardHeight : 0
+
+    padding: 0
 
     Behavior on y {
         NumberAnimation {
@@ -57,14 +50,15 @@ Popup {
     }
 
     modal: true
-    closePolicy: Popup.NoAutoClose
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
     Overlay.modal: Rectangle {
-        color: AmneziaStyle.color.translucentMidnightBlack
+        color: AmneziaStyle.color.bgOverlay
     }
 
+    focus: true
+
     onOpened: {
-        timer.start()
         solutionField.textField.text = ""
         solutionField.textField.forceActiveFocus()
     }
@@ -81,155 +75,116 @@ Popup {
         }
     }
 
-    onClosed: {
-        FocusController.dropRootObject(root)
+    enter: Transition {
+        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 150 }
     }
 
-    background: Rectangle {
-        anchors.fill: parent
-        color: AmneziaStyle.color.slateGray
-        radius: 22
+    exit: Transition {
+        NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 150 }
     }
 
-    Timer {
-        id: timer
-        interval: 200
-        onTriggered: {
-            FocusController.pushRootObject(root)
-            FocusController.setFocusItem(solutionField.textField)
+    background: Item {
+        Rectangle {
+            anchors.fill: parent
+            anchors.bottomMargin: -border.width
+
+            topLeftRadius: 16
+            topRightRadius: 16
+            color: AmneziaStyle.color.bgSurfaceAlt
+            border.color: AmneziaStyle.color.borderFaint
+            border.width: 1
         }
-        repeat: false
-        running: true
+
+        SheetGrabberType {
+            anchors.top: parent.top
+            anchors.topMargin: 16
+            anchors.horizontalCenter: parent.horizontalCenter
+        }
     }
 
     contentItem: Item {
-        implicitWidth: contentLayout.implicitWidth
-        implicitHeight: contentLayout.implicitHeight
-
-        anchors.fill: parent
-
         ColumnLayout {
             id: contentLayout
 
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            anchors.topMargin: 20
-            anchors.bottomMargin: 20
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 21 + 16
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
 
-            spacing: 16
+            spacing: 0
 
-            Text {
+            H2TextType {
                 id: titleText
 
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
                 text: root.hint
-                wrapMode: Text.WordWrap
-                color: AmneziaStyle.color.paleGray
-                font.pixelSize: 18
-                font.weight: Font.Bold
-                font.family: "PT Root UI VF"
-                lineHeight: 24 + LanguageUiController.getLineHeightAppend()
-                lineHeightMode: Text.FixedHeight
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignTop
             }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 200
+            Rectangle {
+                id: imagePanel
 
-                Rectangle {
-                    id: imagePanel
+                Layout.fillWidth: true
+                Layout.preferredHeight: 128
+                Layout.topMargin: 32
+
+                color: AmneziaStyle.color.bgSurfaceInverse
+                radius: 16
+                clip: true
+
+                Image {
+                    id: captchaImage
 
                     anchors.fill: parent
-                    color: AmneziaStyle.color.pearlGray
-                    radius: 16
+                    fillMode: Image.PreserveAspectFit
+                    cache: false
 
-                    Image {
-                        id: captchaImage
-
-                        anchors.centerIn: parent
-                        fillMode: Image.PreserveAspectFit
-                        cache: false
-
-                        Component.onCompleted: {
-                            if (captchaImageBase64 !== "") {
-                                source = "data:image/png;base64," + captchaImageBase64
-                            }
-                        }
-
-                        Connections {
-                            target: root
-                            function onCaptchaImageBase64Changed() {
-                                captchaImage.source = "data:image/png;base64," + root.captchaImageBase64
-                            }
+                    Component.onCompleted: {
+                        if (captchaImageBase64 !== "") {
+                            source = "data:image/png;base64," + captchaImageBase64
                         }
                     }
 
-                    BusyIndicator {
-                        anchors.centerIn: parent
-                        running: captchaImage.status === Image.Loading
-                    }
-
-                    Rectangle {
-                        id: refreshHit
-
-                        anchors.right: parent.right
-                        anchors.bottom: parent.bottom
-                        anchors.margins: 10
-                        width: 44
-                        height: 44
-                        radius: width / 2
-                        color: AmneziaStyle.color.charcoalGray
-
-                        Image {
-                            id: refreshIcon
-
-                            anchors.centerIn: parent
-                            width: 26
-                            height: 26
-                            fillMode: Image.PreserveAspectFit
-                            smooth: true
-                            mipmap: true
-                            antialiasing: true
-                            source: "qrc:/images/controls/refresh-cw.svg"
-                            // Rasterize SVG at high resolution, then scale down — avoids blocky edges on HiDPI.
-                            readonly property real _dpr: (Window.window && Window.window.screen)
-                                ? Window.window.screen.devicePixelRatio : 2.0
-                            readonly property int _raster: Math.ceil(64 * Math.min(Math.max(_dpr, 1.0), 4.0))
-                            sourceSize: Qt.size(_raster, _raster)
-
-                            layer.enabled: true
-                            layer.smooth: true
-                            layer.textureSize: Qt.size(_raster, _raster)
-                            layer.effect: ColorOverlay {
-                                color: AmneziaStyle.color.goldenApricot
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.refreshCaptchaRequested()
+                    Connections {
+                        target: root
+                        function onCaptchaImageBase64Changed() {
+                            captchaImage.source = "data:image/png;base64," + root.captchaImageBase64
                         }
                     }
                 }
+
+                SpinnerType {
+                    anchors.centerIn: parent
+                    color: AmneziaStyle.color.textInverted
+                    visible: captchaImage.status === Image.Loading
+                }
+
+                IconButtonType {
+                    id: refreshButton
+
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: 16
+                    anchors.bottomMargin: 12
+
+                    filled: true
+                    icon.source: "qrc:/images/controls/refresh-cw.svg"
+
+                    onClicked: root.refreshCaptchaRequested()
+                }
             }
 
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: solutionField
 
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignLeft
+                Layout.topMargin: 26
 
                 headerText: qsTr("Digits from the image")
-                headerTextColor: AmneziaStyle.color.mutedGray
 
                 textField.placeholderText: qsTr("_ _ _ _ _ _")
-                textField.placeholderTextColor: AmneziaStyle.color.mutedGray
                 textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
                 textField.maximumLength: 6
                 textField.validator: RegularExpressionValidator { regularExpression: /^[0-9]{0,6}$/ }
@@ -240,45 +195,16 @@ Popup {
                 }
             }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 8
-            }
-
-            BasicButtonType {
+            ButtonType {
                 id: continueButton
 
                 Layout.fillWidth: true
-                implicitHeight: 52
+                Layout.topMargin: 12
 
                 text: qsTr("Continue")
-                defaultColor: AmneziaStyle.color.paleGray
-                hoveredColor: AmneziaStyle.color.lightGray
-                pressedColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.midnightBlack
 
-                clickedFunc: function() {
+                onClicked: {
                     submitIfNonEmpty()
-                }
-            }
-
-            BasicButtonType {
-                id: closeButton
-
-                Layout.fillWidth: true
-                implicitHeight: 52
-
-                text: qsTr("Close")
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
-                borderColor: AmneziaStyle.color.mutedGray
-                borderFocusedColor: AmneziaStyle.color.paleGray
-
-                clickedFunc: function() {
-                    root.close()
                 }
             }
         }

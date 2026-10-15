@@ -44,6 +44,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/settingsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/logsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
@@ -65,8 +66,8 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/serialization/transfer.h
     ${CLIENT_ROOT_DIR}/../common/logger/logger.h
     ${CLIENT_ROOT_DIR}/../common/crypto/cryptoUtils.h
-    ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/api/countryCatalog.h
     ${CLIENT_ROOT_DIR}/core/utils/api/gatewayPayloadBuilder.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
     ${CLIENT_ROOT_DIR}/core/utils/swiftBridge.h
@@ -129,6 +130,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/settingsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/logsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
@@ -152,8 +154,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/serialization/vmess_new.cpp
     ${CLIENT_ROOT_DIR}/../common/logger/logger.cpp
     ${CLIENT_ROOT_DIR}/../common/crypto/cryptoUtils.cpp
-    ${CLIENT_ROOT_DIR}/ui/utils/qmlUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/api/countryCatalog.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/gatewayPayloadBuilder.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serverConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp

@@ -12,75 +12,61 @@ import "../Config"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
-            width: listView.width
+            spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
+
+                title: qsTr("Connection")
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
-                headerText: qsTr("Connection")
-            }
-        }
+                spacing: 0
 
-        model: 1
+                ListItemType {
+                    id: localProxyButton
 
-        delegate: ColumnLayout {
-            width: listView.width
+                    Layout.fillWidth: true
 
-            LabelWithButtonType {
-                id: localProxyButton
+                    visible: SettingsController.isLocalProxySupported && ServersUiController.processedServerIsPremium
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                visible: SettingsController.isLocalProxySupported && ServersUiController.processedServerIsPremium
-                Layout.preferredHeight: visible ? implicitHeight : 0
-
-                text: qsTr("Local proxy")
-                descriptionText: {
-                    if (!SettingsController.isLocalProxyHttpEnabled) {
-                        return qsTr("Off")
+                    showSeparator: false
+                    text: qsTr("Local proxy")
+                    subtitle: {
+                        if (!SettingsController.isLocalProxyHttpEnabled) {
+                            return qsTr("Off")
+                        }
+                        if (SettingsController.localProxyOwnerId !== ServersUiController.processedServerId) {
+                            return qsTr("In use by another server")
+                        }
+                        return qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyActivePort > 0 ? SettingsController.localProxyActivePort : SettingsController.localProxyPort)
                     }
-                    if (SettingsController.localProxyOwnerId !== ServersUiController.processedServerId) {
-                        return qsTr("In use by another server")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        PageController.goToPage(PageEnum.PageSettingsLocalProxy)
                     }
-                    return qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyActivePort > 0 ? SettingsController.localProxyActivePort : SettingsController.localProxyPort)
                 }
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-
-                clickedFunction: function() {
-                    PageController.goToPage(PageEnum.PageSettingsLocalProxy)
-                }
-            }
-
-            DividerType {
-                visible: SettingsController.isLocalProxySupported
-                Layout.preferredHeight: visible ? implicitHeight : 0
             }
         }
     }

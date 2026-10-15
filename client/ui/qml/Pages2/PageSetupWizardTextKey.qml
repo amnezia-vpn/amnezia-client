@@ -13,53 +13,35 @@ import "../Config"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: bottomBar.top
 
-        onFocusChanged: {
-            if (this.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight + 16
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
-            width: listView.width
+            spacing: 0
 
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
 
-                headerText: qsTr("Connection key")
-                descriptionText: qsTr("A line that starts with vpn://...")
+                title: qsTr("Connection key")
+                description: qsTr("A line that starts with vpn://...")
             }
-        }
 
-        spacing: 16
-        model: 1 // fake model to force the ListView to be created without a model
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: textKey
 
                 Layout.fillWidth: true
-                Layout.topMargin: 32
+                Layout.topMargin: 16
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
 
@@ -73,25 +55,25 @@ PageType {
                 }
             }
         }
+    }
 
-        footer: ColumnLayout {
-            width: listView.width
+    BottomBarType {
+        id: bottomBar
 
-            BasicButtonType {
-                id: continueButton
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.topMargin: 16
-                Layout.bottomMargin: 32
+        ButtonType {
+            id: continueButton
 
-                text: qsTr("Continue")
+            Layout.fillWidth: true
 
-                clickedFunc: function() {
-                    if (ImportController.extractConfigFromData(textKey.textField.text)) {
-                        PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
-                    }
+            text: qsTr("Continue")
+
+            onClicked: {
+                if (ImportController.extractConfigFromData(textKey.textField.text)) {
+                    PageController.goToPage(PageEnum.PageSetupWizardViewConfig)
                 }
             }
         }

@@ -3,7 +3,9 @@
 
 #include <QObject>
 #include <QQmlContext>
+#include <QSharedPointer>
 #include <QThread>
+#include <QTranslator>
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "ui/utils/systemTrayNotificationHandler.h"
@@ -22,6 +24,7 @@
 #include "ui/controllers/selfhosted/installUiController.h"
 #include "ui/controllers/qml/pageController.h"
 #include "ui/controllers/settingsUiController.h"
+#include "ui/controllers/logsUiController.h"
 #include "ui/controllers/serversUiController.h"
 #include "ui/controllers/ipSplitTunnelingUiController.h"
 #include "ui/controllers/systemController.h"
@@ -57,6 +60,7 @@
 #include "ui/models/api/apiAccountInfoModel.h"
 #include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiCountryModel.h"
+#include "ui/models/api/apiCountryListModel.h"
 #include "ui/models/api/apiDevicesModel.h"
 #include "ui/models/api/apiServicesModel.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
@@ -137,6 +141,7 @@ protected:
     ServersUiController* serversUiControllerProtected() const { return m_serversUiController; }
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
+    SubscriptionController* subscriptionControllerProtected() const { return m_subscriptionController; }
 
 private:
     void initRepositories();
@@ -174,6 +179,7 @@ private:
     ImportController* m_importCoreController;
     ExportUiController* m_exportUiController;
     SettingsUiController* m_settingsUiController;
+    LogsUiController* m_logsUiController;
     ServersUiController* m_serversUiController;
     IpSplitTunnelingUiController* m_ipSplitTunnelingUiController;
     SystemController* m_systemController;
@@ -218,6 +224,8 @@ private:
     ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
     ApiBenefitsModel* m_apiBenefitsModel;
     ApiCountryModel* m_apiCountryModel;
+    ApiCountryListModel* m_apiCountryListModel;
+    ApiCountryListModel* m_apiConfigsCountryListModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;
     ApiDevicesModel* m_apiDevicesModel;
 

@@ -375,6 +375,26 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
     emit screenshotsEnabledChanged(enabled);
 }
 
+int SecureAppSettingsRepository::countryListSortMode(const QString &listId) const
+{
+    return value("Conf/countryListSortMode/" + listId, 0).toInt();
+}
+
+void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, int mode)
+{
+    setValue("Conf/countryListSortMode/" + listId, mode);
+}
+
+QStringList SecureAppSettingsRepository::favoriteLocations() const
+{
+    return value("Conf/favoriteLocations").toStringList();
+}
+
+void SecureAppSettingsRepository::setFavoriteLocations(const QStringList &codes)
+{
+    setValue("Conf/favoriteLocations", codes);
+}
+
 bool SecureAppSettingsRepository::isNewsNotifications() const
 {
     return value("Conf/newsNotifications", true).toBool();

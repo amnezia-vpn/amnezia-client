@@ -23,7 +23,6 @@ PageType {
                                                  && SettingsController.localProxyOwnerId !== ""
                                                  && SettingsController.localProxyOwnerId !== ServersUiController.processedServerId
 
-    property string portValidationError: ""
     property int pendingStartRequestedPort: -1
     property bool pendingStartVpnWasActive: false
     property bool pendingEnableAfterVpnDisconnect: false
@@ -50,14 +49,7 @@ PageType {
         return true
     }
 
-    function getPortField() {
-        var item = listView.itemAtIndex(0)
-        return item !== null ? item.children[0] : null
-    }
-
     function computePortErrorText() {
-        var portField = getPortField()
-        if (portField === null) return ""
         const text = portField.textField.text.trim()
         if (text === "") {
             return qsTr("Enter a port")
@@ -133,133 +125,110 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: bottomBar.top
 
-        onActiveFocusChanged: {
-            if (activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
-            width: listView.width
+            spacing: 0
 
-            HeaderTypeWithSwitcher {
-                id: localProxyHeader
+            NavigationBarType {
+                id: navigationBar
 
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                headerText: qsTr("Local Proxy")
-                descriptionText: qsTr("Use a proxy to route selected apps (for example, the CensorTracker extension) through Amnezia Premium.")
-                showSwitcher: ServersUiController.processedServerIsPremium
-                switcher {
-                    checked: root.isEnabledForThisServer
-                    enabled: !root.isOwnedByOtherServer
-                }
-                switcherFunction: function(checked) {
-                    if (checked === root.isEnabledForThisServer) {
-                        return
+
+                title: qsTr("Local Proxy")
+                description: qsTr("Use a proxy to route selected apps (for example, the CensorTracker extension) through Amnezia Premium.")
+
+                header.showSwitcher: ServersUiController.processedServerIsPremium
+                header.switcher.checked: root.isEnabledForThisServer
+                header.switcher.enabled: !root.isOwnedByOtherServer
+
+                Connections {
+                    target: navigationBar.header
+
+                    function onSwitcherToggled(checked) {
+                        if (checked !== root.isEnabledForThisServer) {
+                            root.handleLocalProxyToggle(checked)
+                        }
+                        navigationBar.header.switcher.checked = Qt.binding(function() {
+                            return root.isEnabledForThisServer
+                        })
                     }
-                    root.handleLocalProxyToggle(checked)
-                    localProxyHeader.switcher.checked = Qt.binding(function() {
-                        return root.isEnabledForThisServer
-                    })
                 }
             }
 
-            ParagraphTextType {
+            NotificationType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16
+
                 visible: root.isOwnedByOtherServer
 
-                color: AmneziaStyle.color.goldenApricot
+                variant: NotificationType.Warning
                 text: qsTr("Local proxy is already running for \"%1\". Turn it off there to use it with this server.")
                     .arg(ServersUiController.serverName(SettingsController.localProxyOwnerId))
             }
 
-            ParagraphTextType {
+            BodyTextType {
                 Layout.fillWidth: true
-                Layout.topMargin: 12
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                color: localProxyHeader.descriptionColor
                 text: qsTr("Only one can be on at a time: VPN or local proxy.")
             }
 
-            BasicButtonType {
-                Layout.topMargin: 8
-                Layout.leftMargin: 8
-                Layout.bottomMargin: 28
-                implicitHeight: 32
+            LinkButtonType {
+                Layout.topMargin: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
-
+                size: LinkButtonType.Medium
                 text: qsTr("Learn more")
-                clickedFunc: function() {
+
+                onClicked: {
                     const path = LanguageUiController.currentLanguageName === "Русский"
                         ? "ru/documentation/instructions/local-proxy"
                         : "documentation/instructions/local-proxy"
                     Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(path))
                 }
             }
-        }
 
-        model: 1 // fake model to force the ListView to be created without a model
-
-        delegate: ColumnLayout {
-            width: listView.width
-            spacing: 16
-
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: portField
 
                 Layout.fillWidth: true
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
                 headerText: qsTr("Address and port")
                 buttonText: qsTr("Copy")
-                errorText: root.portValidationError
-                clearErrorOnTextChanged: false
+                placeholderText: root.defaultLocalProxyPort.toString()
 
-                enabled: true
-                rightButtonClickedOnEnter: false
+                textField.leftPadding: 16 + portPrefix.implicitWidth
+                textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
+                textField.validator: RegularExpressionValidator {
+                    regularExpression: /^[0-9]{0,5}$/
+                }
 
                 clickedFunc: function() {
                     const portText = portField.effectivePortText()
                     GC.copyToClipBoard("127.0.0.1:" + portText)
                     PageController.showNotificationMessage(qsTr("Copied: 127.0.0.1:%1").arg(portText))
                 }
-
-                textField.validator: RegularExpressionValidator {
-                    regularExpression: /^[0-9]{0,5}$/
-                }
-                textField.leftPadding: portPrefix.implicitWidth
-                textField.placeholderText: root.defaultLocalProxyPort.toString()
-                textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
 
                 function syncPortValue() {
                     let port = SettingsController.localProxyPort
@@ -292,57 +261,56 @@ PageType {
 
                 Component.onCompleted: syncPortValue()
 
-                textField.onTextChanged: {
-                    if (textField.activeFocus) {
-                        root.portValidationError = ""
-                    }
+                Text {
+                    id: portPrefix
+
+                    parent: portField.textField
+
+                    x: 16
+                    y: portField.textField.topPadding
+                       + (portField.textField.height - portField.textField.topPadding - portField.textField.bottomPadding - height) / 2
+                    z: 1
+
+                    text: "127.0.0.1:"
+                    color: AmneziaStyle.color.textSecondary
+                    font: portField.textField.font
                 }
             }
+        }
+    }
 
-            Text {
-                id: portPrefix
+    BottomBarType {
+        id: bottomBar
 
-                parent: portField.textField
-                text: "127.0.0.1:"
-                color: AmneziaStyle.color.paleGray
-                font.pixelSize: portField.textField.font.pixelSize
-                font.weight: portField.textField.font.weight
-                font.family: portField.textField.font.family
-                z: 1
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-            }
+        ButtonType {
+            Layout.fillWidth: true
 
-            BasicButtonType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            text: qsTr("Save")
 
-                text: qsTr("Save")
-                enabled: true
-
-                clickedFunc: function() {
-                    if (SettingsController.isLocalProxyHttpEnabled) {
-                        PageController.showNotificationMessage(qsTr("Disable Local Proxy to change the port"))
-                        return
-                    }
-                    const validationError = root.computePortErrorText()
-                    root.portValidationError = validationError
-                    if (validationError !== "") {
-                        return
-                    }
-
-                    const value = portField.portValue()
-                    if (!SettingsController.setLocalProxyPort(value)) {
-                        PageController.showNotificationMessage(qsTr("Failed to save port. Valid range: %1-%2")
-                            .arg(root.localProxyPortMin)
-                            .arg(root.localProxyPortMax))
-                    } else {
-                        PageController.showNotificationMessage(qsTr("Port saved: %1").arg(value))
-                    }
-                    portField.syncPortValue()
+            onClicked: {
+                if (SettingsController.isLocalProxyHttpEnabled) {
+                    PageController.showNotificationMessage(qsTr("Disable Local Proxy to change the port"))
+                    return
                 }
+                const validationError = root.computePortErrorText()
+                portField.errorText = validationError
+                if (validationError !== "") {
+                    return
+                }
+
+                const value = portField.portValue()
+                if (!SettingsController.setLocalProxyPort(value)) {
+                    PageController.showNotificationMessage(qsTr("Failed to save port. Valid range: %1-%2")
+                        .arg(root.localProxyPortMin)
+                        .arg(root.localProxyPortMax))
+                } else {
+                    PageController.showNotificationMessage(qsTr("Port saved: %1").arg(value))
+                }
+                portField.syncPortValue()
             }
         }
     }
@@ -402,8 +370,7 @@ PageType {
         target: SettingsController
 
         function onLocalProxySettingsUpdated() {
-            var portField = root.getPortField()
-            if (portField !== null && !portField.textField.activeFocus) {
+            if (!portField.textField.activeFocus) {
                 portField.syncPortValue()
             }
         }
@@ -420,8 +387,7 @@ PageType {
         target: ServersUiController
 
         function onProcessedServerIdChanged() {
-            var portField = root.getPortField()
-            if (portField !== null && !portField.textField.activeFocus) {
+            if (!portField.textField.activeFocus) {
                 portField.syncPortValue()
             }
         }

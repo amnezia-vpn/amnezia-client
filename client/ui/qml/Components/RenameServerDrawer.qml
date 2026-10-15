@@ -9,21 +9,27 @@ import "../Controls2/TextTypes"
 
 import "../Config"
 
-DrawerType2 {
+SheetType {
     property string serverNameText
 
     id: root
     objectName: "serverNameEditDrawer"
 
-    expandedStateContent: ColumnLayout {
+    expandedHeight: content.implicitHeight + 16 + 8 + PageController.safeAreaBottomMargin + PageController.imeHeight
+
+    ColumnLayout {
+        id: content
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 32
+        anchors.topMargin: 16
         anchors.leftMargin: 16
         anchors.rightMargin: 16
 
-        TextFieldWithHeaderType {
+        spacing: 26
+
+        TextFieldType {
             id: serverName
 
             Layout.fillWidth: true
@@ -33,14 +39,14 @@ DrawerType2 {
             checkEmptyText: true
         }
 
-        BasicButtonType {
+        ButtonType {
             id: saveButton
 
             Layout.fillWidth: true
 
             text: qsTr("Save")
 
-            clickedFunc: function() {
+            onClicked: {
                 if (serverName.textField.text === "") {
                     return
                 }
@@ -48,7 +54,7 @@ DrawerType2 {
                 if (serverName.textField.text !== root.serverNameText) {
                     ServersUiController.editServerName(ServersUiController.processedServerId, serverName.textField.text);
                 }
-                root.closeTriggered()
+                root.close()
             }
         }
     }

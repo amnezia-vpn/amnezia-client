@@ -16,6 +16,11 @@ import "../Components"
 PageType {
     id: root
 
+    readonly property bool hasChangelog: UpdateController.description !== ""
+                                         || UpdateController.newFeatures.length > 0
+                                         || UpdateController.improvements.length > 0
+                                         || UpdateController.bugFixes.length > 0
+
     Connections {
         target: UpdateController
 
@@ -30,42 +35,32 @@ PageType {
 
     Rectangle {
         anchors.fill: parent
-        color: AmneziaStyle.color.backgroundBase
+        color: AmneziaStyle.color.bgBase
     }
 
-    BackButtonType {
-        id: backButton
+    NavigationBarType {
+        id: navigationBar
 
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-    }
 
-    ImageButtonType {
-        id: supportButton
+        IconButtonType {
+            id: supportButton
 
-        anchors.verticalCenter: backButton.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: 16
+            size: IconButtonType.Small
+            icon.source: "qrc:/images/controls/headphones.svg"
 
-        implicitWidth: 36
-        implicitHeight: 36
-
-        image: "qrc:/images/controls/headphones.svg"
-        imageColor: AmneziaStyle.color.textPrimary
-
-        onClicked: function() {
-            supportDrawer.openTriggered()
+            onClicked: supportDrawer.open()
         }
     }
 
     FlickableType {
         id: fl
 
-        anchors.top: backButton.bottom
-        anchors.bottom: stickyBar.top
-        contentHeight: content.height + 32
+        anchors.top: navigationBar.bottom
+        anchors.bottom: bottomBar.top
+        contentHeight: content.implicitHeight + 16 + 32
 
         ColumnLayout {
             id: content
@@ -73,7 +68,7 @@ PageType {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 24
+            anchors.topMargin: 16
             anchors.leftMargin: 16
             anchors.rightMargin: 16
             spacing: 24
@@ -95,7 +90,6 @@ PageType {
                         maskSource: imageBlockMask
                     }
 
-                    // Image placement replicates the crop from the design mockup
                     Image {
                         id: heroImage
 
@@ -118,12 +112,12 @@ PageType {
 
                     BackdropBlurType {
                         anchors.centerIn: parent
-                        width: versionText.implicitWidth + 40
+                        width: versionText.implicitWidth + 26
                         height: 55
 
                         sourceItem: heroImage
 
-                        AppDisplayTextType {
+                        DisplayTextType {
                             id: versionText
 
                             anchors.centerIn: parent
@@ -142,13 +136,13 @@ PageType {
                     Repeater {
                         model: UpdateController.tags
 
-                        delegate: TagBadgeType {
+                        delegate: StatusBadgeType {
                             text: modelData
                         }
                     }
 
-                    AppSmallTextType {
-                        height: 22
+                    SmallTextType {
+                        height: UpdateController.tags.length > 0 ? 22 : implicitHeight
 
                         verticalAlignment: Text.AlignVCenter
 
@@ -163,20 +157,20 @@ PageType {
                 Layout.fillWidth: true
                 spacing: 12
 
-                AppH1TextType {
+                H1TextType {
                     Layout.fillWidth: true
 
                     text: qsTr("New version available")
                 }
 
-                AppH3TextType {
+                H3TextType {
                     Layout.fillWidth: true
 
                     visible: text !== ""
 
                     color: AmneziaStyle.color.textTertiary
 
-                    text: UpdateController.description
+                    text: root.hasChangelog ? UpdateController.description : qsTr("No release notes yet")
                 }
 
                 ChangelogSectionType {
@@ -206,36 +200,25 @@ PageType {
         }
     }
 
-    Rectangle {
-        id: stickyBar
+    BottomBarType {
+        id: bottomBar
 
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: updateButton.height + 32 + PageController.safeAreaBottomMargin
 
-        color: AmneziaStyle.color.backgroundBase
+        filled: true
 
-        BasicButtonType {
+        ButtonType {
             id: updateButton
 
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.topMargin: 16
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            Layout.fillWidth: true
 
-            defaultColor: AmneziaStyle.color.surfaceInverse
-            hoveredColor: AmneziaStyle.color.surfaceInverseHovered
-            pressedColor: AmneziaStyle.color.surfaceInversePressed
-            disabledColor: AmneziaStyle.color.surfaceInverse
-            textColor: AmneziaStyle.color.textInverted
-
+            loading: !UpdateController.isStoreUpdate && UpdateController.updateState === UpdateState.Downloading
             enabled: UpdateController.updateState !== UpdateState.Downloading
 
             leftImageSource: !UpdateController.isStoreUpdate && UpdateController.updateState === UpdateState.ReadyToInstall
-                             ? "qrc:/images/controls/download.svg" : ""
+                             ? "qrc:/images/update/arrow-down-circle.svg" : ""
 
             text: {
                 if (UpdateController.isStoreUpdate) {
@@ -249,7 +232,7 @@ PageType {
                 }
             }
 
-            clickedFunc: function() {
+            onClicked: {
                 if (UpdateController.isStoreUpdate) {
                     UpdateController.update()
                     return
@@ -274,6 +257,5 @@ PageType {
         id: supportDrawer
 
         parent: root
-        anchors.fill: parent
     }
 }

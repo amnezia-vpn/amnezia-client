@@ -2,6 +2,24 @@ find_package(Qt6 REQUIRED COMPONENTS Test)
 
 include(CTest)
 
+function(amnezia_copy_runtime_dlls)
+    if(NOT WIN32)
+        return()
+    endif()
+    get_property(_targets DIRECTORY PROPERTY BUILDSYSTEM_TARGETS)
+    foreach(_target ${_targets})
+        get_target_property(_type ${_target} TYPE)
+        if(_type STREQUAL "EXECUTABLE")
+            add_custom_command(TARGET ${_target} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "$<FILTER:$<TARGET_RUNTIME_DLLS:${_target}>,EXCLUDE,/Qt6[^/]*\\.dll$>"
+                    "$<TARGET_FILE_DIR:${_target}>"
+                COMMAND_EXPAND_LISTS
+            )
+        endif()
+    endforeach()
+endfunction()
+
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -32,6 +50,8 @@ qt_add_repc_replicas(test_common
 target_link_libraries(test_common PUBLIC
     ${LIBS}
 )
+
+target_compile_definitions(test_common PUBLIC AMNEZIA_BUILD_TESTS)
 
 target_include_directories(test_common PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -190,6 +210,15 @@ if(NOT ANDROID)
     )
 
     target_link_libraries(test_connection PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_logs_controller
+        testLogsController.cpp
+    )
+
+    target_link_libraries(test_logs_controller PRIVATE
         Qt6::Test
         test_common
     )
@@ -411,7 +440,10 @@ if(NOT ANDROID)
     add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
+    add_test(NAME LogsControllerTest               COMMAND test_logs_controller)
 endif()
 
 # Android tests are executed on-device via androidtestrunner in CI (see .github/workflows/tests.yml).
 # CTest cannot run Android binaries on the host machine, so no add_test() entries are registered here.
+
+amnezia_copy_runtime_dlls()

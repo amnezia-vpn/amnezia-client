@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 
 import Style 1.0
@@ -7,227 +8,150 @@ import Style 1.0
 import "TextTypes"
 import "../Config"
 
-Item {
+AbstractButton {
     id: root
 
-    property string text
-    property string textColor: AmneziaStyle.color.paleGray
-    property string textDisabledColor: AmneziaStyle.color.mutedGray
-    property int textMaximumLineCount: 2
-    property int textElide: Qt.ElideRight
+    enum Variant { Default, Primary }
+
+    property int variant: DropDownType.Default
 
     property string descriptionText
-    property string descriptionTextColor: AmneziaStyle.color.mutedGray
-    property string descriptionTextDisabledColor: AmneziaStyle.color.charcoalGray
+    property string placeholderText
 
     property string headerText
     property string headerBackButtonImage
 
-    property var rootButtonClickedFunction
-    property string rootButtonImage: "qrc:/images/controls/chevron-down.svg"
-    property string rootButtonImageColor: AmneziaStyle.color.paleGray
-    property string rootButtonBackgroundColor: AmneziaStyle.color.onyxBlack
-    property string rootButtonBackgroundHoveredColor: AmneziaStyle.color.onyxBlack
-    property string rootButtonBackgroundPressedColor: AmneziaStyle.color.onyxBlack
-
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
-
-    property string rootButtonHoveredBorderColor: AmneziaStyle.color.charcoalGray
-    property string rootButtonDefaultBorderColor: AmneziaStyle.color.slateGray
-    property string rootButtonPressedBorderColor: AmneziaStyle.color.paleGray
-
-    property int rootButtonTextLeftMargins: 16
-    property int rootButtonTextTopMargin: 16
-    property int rootButtonTextBottomMargin: 16
-
     property real drawerHeight: 0.9
     property bool fitContent: false
-    property Item drawerParent
     property Component listView
 
-    signal openTriggered
-    signal closeTriggered
+    readonly property bool isPrimary: root.variant === DropDownType.Primary
 
-    readonly property bool isFocusable: true
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
+    function open() {
+        menu.open()
     }
 
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
+    function close() {
+        menu.close()
     }
 
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
+    implicitWidth: implicitContentWidth + leftPadding + rightPadding
+    implicitHeight: implicitContentHeight + topPadding + bottomPadding
 
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
+    leftPadding: 16
+    rightPadding: root.isPrimary ? 4 : 16
+    topPadding: root.isPrimary ? 0 : 12
+    bottomPadding: root.isPrimary ? 0 : 12
 
-    Connections {
-        target: Qt.application
+    hoverEnabled: true
 
-        function onStateChanged() {
-            if (Qt.application.state !== Qt.ApplicationActive) {
-                if (!menu.isClosed) {
-                    menu.closeTriggered()
-                }
-            }
-        }
-    }
+    opacity: root.enabled ? 1 : 0.4
 
-    implicitWidth: rootButtonContent.implicitWidth
-    implicitHeight: rootButtonContent.implicitHeight
+    onClicked: menu.open()
 
-    onOpenTriggered: {
-        menu.openTriggered()
-    }
-
-    onCloseTriggered: {
-        menu.closeTriggered()
-    }
-
-    Keys.onEnterPressed: {
-        if (menu.isClosed) {
-            menu.openTriggered()
-        }
-    }
-
-    Keys.onReturnPressed: {
-        if (menu.isClosed) {
-            menu.openTriggered()
-        }
-    }
-
-    Rectangle {
-        id: focusBorder
-
-        color: AmneziaStyle.color.transparent
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
-        anchors.fill: rootButtonContent
+    background: Rectangle {
         radius: 16
+        color: {
+            if (!root.isPrimary) {
+                return AmneziaStyle.color.bgSurface
+            }
+            if (root.down) {
+                return AmneziaStyle.color.bgActionPress
+            }
+            return root.hovered ? AmneziaStyle.color.bgActionHover : AmneziaStyle.color.bgAction
+        }
 
+        Behavior on color {
+            ColorAnimation { duration: 150 }
+        }
 
         Rectangle {
-            id: rootButtonBackground
+            anchors.fill: parent
 
-            anchors.fill: focusBorder
-            anchors.margins: root.activeFocus ? 2 : 0
-            radius: root.activeFocus ? 14 : 16
+            radius: parent.radius
+            visible: !root.isPrimary && root.enabled && (root.hovered || root.down)
+            color: AmneziaStyle.color.bgStateLayer
+        }
 
-            color: {
-                if (root.enabled) {
-                    if (root.pressed) {
-                        return root.rootButtonBackgroundPressedColor
-                    }
-                    return root.hovered ? root.rootButtonBackgroundHoveredColor : root.rootButtonBackgroundColor
-                } else {
-                    return AmneziaStyle.color.transparent
-                }
-            }
-
-            border.color: rootButtonDefaultBorderColor
-            border.width: 1
-
-            Behavior on border.color {
-                PropertyAnimation { duration: 200 }
-            }
-
-            Behavior on color {
-                PropertyAnimation { duration: 200 }
-            }
+        FocusRingType {
+            radius: 16
+            visible: root.visualFocus
         }
     }
 
-    RowLayout {
-        id: rootButtonContent
-        anchors.fill: parent
-
-        spacing: 0
+    contentItem: RowLayout {
+        spacing: 8
 
         ColumnLayout {
-            Layout.leftMargin: rootButtonTextLeftMargins
-            Layout.topMargin: rootButtonTextTopMargin
-            Layout.bottomMargin: rootButtonTextBottomMargin
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
 
-            LabelTextType {
+            spacing: 4
+
+            CaptionTextType {
                 Layout.fillWidth: true
 
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-
-                visible: root.descriptionText !== ""
-
-                color: root.enabled ? root.descriptionTextColor : root.descriptionTextDisabledColor
+                visible: text !== ""
                 text: root.descriptionText
             }
 
-            ButtonTextType {
-                id: buttonText
+            H3TextType {
                 Layout.fillWidth: true
 
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
+                visible: !root.isPrimary
+                text: root.text !== "" ? root.text : root.placeholderText
+                color: root.text !== "" ? AmneziaStyle.color.textPrimary : AmneziaStyle.color.textQuaternary
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
 
-                color: root.enabled ? root.textColor : root.textDisabledColor
+            ButtonTextType {
+                Layout.fillWidth: true
+
+                visible: root.isPrimary
                 text: root.text
-                maximumLineCount: root.textMaximumLineCount
-                elide: root.textElide
+                color: AmneziaStyle.color.textInverted
+                maximumLineCount: 1
+                elide: Text.ElideRight
             }
         }
 
-        ImageButtonType {
-            Layout.rightMargin: 16
+        Item {
+            Layout.preferredWidth: 48
+            Layout.preferredHeight: 48
+            Layout.alignment: Qt.AlignVCenter
 
-            implicitWidth: 40
-            implicitHeight: 40
+            IconImage {
+                anchors.centerIn: parent
 
-            hoverEnabled: false
-            image: rootButtonImage
-            imageColor: rootButtonImageColor
+                width: 24
+                height: 24
+
+                source: "qrc:/images/controls/chevron-down.svg"
+                sourceSize: Qt.size(24, 24)
+                color: root.isPrimary ? AmneziaStyle.color.iconInverted : AmneziaStyle.color.iconDefault
+            }
         }
     }
 
-    MouseArea {
-        anchors.fill: rootButtonContent
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: root.enabled ? true : false
-
-        onClicked: {
-            if (rootButtonClickedFunction && typeof rootButtonClickedFunction === "function") {
-                rootButtonClickedFunction()
-            } else {
-                menu.openTriggered()
-            }
-        }
     }
 
-    DrawerType2 {
+    Keys.onEnterPressed: root.clicked()
+    Keys.onReturnPressed: root.clicked()
+
+    SheetType {
         id: menu
 
-        parent: drawerParent
-
-        anchors.fill: parent
         property real measuredContentHeight: 0
         expandedHeight: (root.fitContent && measuredContentHeight > 0)
-            ? Math.min(measuredContentHeight, drawerParent.height * root.drawerHeight)
-            : drawerParent.height * root.drawerHeight
+            ? Math.min(measuredContentHeight, windowHeight * root.drawerHeight)
+            : windowHeight * root.drawerHeight
 
-        expandedStateContent: Item {
+        Item {
             id: container
-            implicitHeight: menu.expandedHeight
+            anchors.fill: parent
 
             property real fitHeight: backButton.implicitHeight + titleLabel.implicitHeight
                                      + (listViewLoader.item ? listViewLoader.item.contentHeight : 0) + 48
@@ -243,10 +167,10 @@ Item {
                 BackButtonType {
                     id: backButton
                     backButtonImage: root.headerBackButtonImage
-                    backButtonFunction: function() { menu.closeTriggered() }
+                    backButtonFunction: function() { menu.close() }
                 }
 
-                Header2Type {
+                SectionHeaderType {
                     id: titleLabel
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16

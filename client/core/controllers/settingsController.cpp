@@ -12,8 +12,9 @@
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     #include "core/local-proxy/portAvailabilityHelper.h"
 #endif
-#ifdef Q_OS_ANDROID
-    #include "platforms/android/android_controller.h"
+#include "core/controllers/logsController.h"
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    #include "core/utils/swiftBridge.h"
 #endif
 
 QString getPlatformName()
@@ -94,6 +95,9 @@ void SettingsController::toggleLogging(bool enable)
         }
     }
 #endif
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    SWIFT_BRIDGE_NAMESPACE::toggleLogging(enable);
+#endif
     Logger::setServiceLogsEnabled(enable);
 
     if (enable) {
@@ -103,12 +107,8 @@ void SettingsController::toggleLogging(bool enable)
 
 void SettingsController::clearLogs()
 {
-#ifdef Q_OS_ANDROID
-    AndroidController::instance()->clearLogs();
-#else
-    Logger::clearLogs(false);
-    Logger::clearServiceLogs();
-#endif
+    LogsController::clear(LogsController::Stream::App);
+    LogsController::clear(LogsController::Stream::Tunnel);
 }
 
 QByteArray SettingsController::backupAppConfig() const
