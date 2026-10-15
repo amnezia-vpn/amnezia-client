@@ -9,6 +9,7 @@
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS) || defined(MACOS_NE)
     #include <QGuiApplication>
+    #include <QInputMethod>
 #else
     #include <QApplication>
 #endif
@@ -39,6 +40,10 @@ PageController::PageController(ServersController* serversController, SettingsCon
         emit safeAreaBottomMarginChanged();
         emit safeAreaTopMarginChanged();
     });
+#endif
+
+#ifdef Q_OS_IOS
+    connect(QGuiApplication::inputMethod(), &QInputMethod::visibleChanged, this, &PageController::safeAreaBottomMarginChanged);
 #endif
 
 #if defined Q_OS_MACX
@@ -191,7 +196,7 @@ int PageController::getSafeAreaTopMargin()
         return result;
     }
 #endif
-    return 0;
+    return m_safeAreaMargins.top();
 }
 
 int PageController::getSafeAreaBottomMargin()
@@ -207,7 +212,24 @@ int PageController::getSafeAreaBottomMargin()
         return result;
     }
 #endif
-    return 0;
+#ifdef Q_OS_IOS
+    if (QGuiApplication::inputMethod()->isVisible()) {
+        return 0;
+    }
+#endif
+    return m_safeAreaMargins.bottom();
+}
+
+void PageController::setSafeAreaMargins(const QMargins &margins)
+{
+    const QMargins previous = m_safeAreaMargins;
+    m_safeAreaMargins = margins;
+    if (previous.top() != margins.top()) {
+        emit safeAreaTopMarginChanged();
+    }
+    if (previous.bottom() != margins.bottom()) {
+        emit safeAreaBottomMarginChanged();
+    }
 }
 
 int PageController::getImeHeight()

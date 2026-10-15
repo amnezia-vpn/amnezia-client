@@ -12,7 +12,7 @@ RadioDelegate {
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
     leftPadding: 16
@@ -31,7 +31,7 @@ RadioDelegate {
 
     background: Item {
         implicitWidth: 358
-        implicitHeight: 72
+        implicitHeight: 56
 
         Rectangle {
             anchors.fill: parent
@@ -69,6 +69,8 @@ RadioDelegate {
     }
 
     contentItem: ListItemLabelType {
+        spacing: 6
+        subtitleLineHeight: 20
         title: root.text
         subtitle: root.subtitle
         maximumLineCount: 3

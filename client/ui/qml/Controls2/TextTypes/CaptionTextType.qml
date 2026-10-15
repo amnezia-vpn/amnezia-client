@@ -5,13 +5,14 @@ import Style 1.0
 Text {
     id: root
 
-    readonly property real halfLeading: Math.max(0, (root.lineHeight - fontMetrics.height) / 2)
+    readonly property real halfLeading: (root.lineHeight - fontMetrics.height) / 2
+    readonly property real overflow: Math.max(0, Math.ceil(fontMetrics.height) - root.lineHeight)
 
     lineHeight: 14 + LanguageUiController.getLineHeightAppend()
     lineHeightMode: Text.FixedHeight
 
     topPadding: root.halfLeading
-    bottomPadding: -root.halfLeading
+    bottomPadding: -root.halfLeading - root.overflow
 
     color: AmneziaStyle.color.textTertiary
     font.pixelSize: 12

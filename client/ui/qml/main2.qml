@@ -61,6 +61,8 @@ Window  {
     maximumWidth: 600
     maximumHeight: 800
 
+    flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.ExpandedClientAreaHint) : Qt.Window
+
     color: AmneziaStyle.color.bgBase
 
     onClosing: function(close) {

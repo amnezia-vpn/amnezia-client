@@ -59,7 +59,7 @@ Item {
                 y: 4
 
                 visible: root.toolbarVisible
-                spacing: 8
+                spacing: 16
             }
         }
 
