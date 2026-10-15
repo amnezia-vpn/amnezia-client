@@ -13,7 +13,7 @@ import shlex
 
 class Libagw(ConanFile):
     name = "libagw"
-    version = "1.0.6"
+    version = "1.0.8"
     settings = "os", "arch", "compiler"
 
     _headers = ("agw.h", "agw_types.h")
@@ -91,7 +91,7 @@ class Libagw(ConanFile):
 
     def source(self):
         get(self, f"https://github.com/amnezia-vpn/libagw/archive/refs/tags/v{self.version}.zip",
-            sha256="148f421e20e31b53c7686a29a368e03720c41776facce457c55748d8b2974ddb", strip_root=True
+            sha256="ad36125be7ff4a77603107a0bc2194da6778d5612e649f53c9d954c742bb70db", strip_root=True
         )
 
     def generate(self):
