@@ -24,7 +24,6 @@ QJsonObject makeServiceItem(const QString &name,
                             const QString &description,
                             const QString &type,
                             const QString &protocol,
-                            const bool isPremium,
                             const bool isAvailable,
                             const QString &price,
                             const QString &endDate,
@@ -33,9 +32,14 @@ QJsonObject makeServiceItem(const QString &name,
                             const QJsonArray &subscriptionPlans = {})
 {
     return {
+        { "service_info",
+          QJsonObject {
+              { "id", type + "-info" },
+              { "name", name }
+          }
+        },
         { "service_type", type },
         { "service_protocol", protocol },
-        { "is_premium", isPremium },
         { "is_available", isAvailable },
         { "service_description",
           QJsonObject {
@@ -46,16 +50,19 @@ QJsonObject makeServiceItem(const QString &name,
               { "privacy_policy_url", privacyPolicyUrl },
               { "subscription_plans", subscriptionPlans },
               { "min_price_label", price }
-          } },
+          }
+        },
         { "subscription",
           QJsonObject {
               { "end_date", endDate }
-          } },
+          }
+        },
         { "available_countries",
           QJsonArray {
               "EE",
               "FI"
-          } },
+          }
+        },
         { "store_endpoint", "https://example.com/store" }
     };
 }
@@ -71,7 +78,6 @@ QJsonObject makeServicesResponse()
                               "Premium service description",
                               "amnezia-premium",
                               "xray",
-                              true,
                               true,
                               "$19.99",
                               "2026-10-29T10:00:00Z",
@@ -89,7 +95,6 @@ QJsonObject makeServicesResponse()
                               "Free service description",
                               "amnezia-free",
                               "wireguard",
-                              false,
                               true,
                               "$0",
                               "",
@@ -214,7 +219,7 @@ private slots:
         ApiServicesModel *model = m_coreController->m_apiServicesModel;
 
         QJsonArray services { makeServiceItem("Amnezia Free", "Free service", "Free service description", "amnezia-free",
-                                              "wireguard", false, false, "$0", "", "https://example.com/terms", "https://example.com/privacy") };
+                                              "wireguard", false, "$0", "", "https://example.com/terms", "https://example.com/privacy") };
 
         QJsonObject data { { "services", services } };
 
@@ -275,7 +280,7 @@ private slots:
 
         ServicesCatalogUiController *controller = m_coreController->m_servicesCatalogUiController;
 
-        QCOMPARE(controller->getSelectedServiceInfo(), QJsonObject());
+        QCOMPARE(controller->getSelectedServiceInfo(), QJsonObject { { "id", "amnezia-premium-info" }, { "name", "Amnezia Premium" } });
         QCOMPARE(controller->getSelectedServiceType(), model->getSelectedServiceType());
         QCOMPARE(controller->getSelectedServiceProtocol(), model->getSelectedServiceProtocol());
         QCOMPARE(controller->getSelectedServiceName(), model->getSelectedServiceName());

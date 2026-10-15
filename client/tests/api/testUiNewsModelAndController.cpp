@@ -117,10 +117,14 @@ private slots:
     void init()
     {
         m_settings->clearSettings();
+
+        m_coreController->m_serversRepository->clearServers();
         m_coreController->m_serversRepository->invalidateCache();
+
         if (m_coreController->m_serversModel) {
-            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), QString { });
+            m_coreController->m_serversModel->updateModel(QVector<ServerDescription>(), QString{});
         }
+
         m_coreController->m_newsModel->setNewsList({});
     }
 
@@ -158,10 +162,18 @@ private slots:
         QCOMPARE(processedIndexChangedSpy.count(), 1);
         QCOMPARE(model->data(index, NewsModel::IsProcessedRole).toBool(), true);
 
+        const int unreadSignalsBeforeRepeatedMark = hasUnreadChangedSpy.count();
+
         model->markAsRead(0);
 
-        QCOMPARE(model->data(index, NewsModel::IsReadRole).toBool(), true);
-        QCOMPARE(hasUnreadChangedSpy.count(), 1);
+        QCOMPARE(hasUnreadChangedSpy.count(), unreadSignalsBeforeRepeatedMark);
+        QVERIFY(model->data(index, NewsModel::IsReadRole).toBool());
+
+        model->markAsRead(-1);
+        model->markAsRead(model->rowCount());
+
+        QCOMPARE(hasUnreadChangedSpy.count(), unreadSignalsBeforeRepeatedMark);
+        QVERIFY(model->hasUnread());
     }
 
     void testSorting()
@@ -240,11 +252,11 @@ private slots:
 
         const ErrorCode updateError = m_coreController->m_subscriptionController->updateServiceFromGateway(serverId, QStringLiteral("de"), /*isConnectEvent=*/false, &captchaInfo, nullptr);
 
-        QVERIFY2(updateError == ErrorCode::NoError, qPrintable(QStringLiteral("Gateway update failed: %1").arg(static_cast<int>(updateError))));
-
         if (updateError == ErrorCode::ApiCaptchaRequiredError) {
             QSKIP("Gateway requested a captcha, skipping live gateway test");
         }
+
+        QVERIFY2(updateError == ErrorCode::NoError, qPrintable(QStringLiteral("Gateway update failed: %1").arg(static_cast<int>(updateError))));
 
         QCOMPARE(m_coreController->m_serversRepository->serversCount(), 1);
 

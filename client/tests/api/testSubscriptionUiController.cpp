@@ -83,7 +83,8 @@ private slots:
 
         m_subscriptionUiController->getRenewalLink(QString());
 
-        QVERIFY2(errorSpy.count() == 1, "An empty server ID should emit errorOccurred");
+        QCOMPARE(errorSpy.count(), 1);
+        QCOMPARE(errorSpy.at(0).at(0).value<ErrorCode>(), ErrorCode::InternalError);
     }
 
     void testCurrentActivePlanInfoWithoutActivePurchase()

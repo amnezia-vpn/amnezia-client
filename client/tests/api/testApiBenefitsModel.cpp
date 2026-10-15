@@ -13,9 +13,9 @@ private slots:
     void initTestCase();
     void initialState();
     void updateModel();
-    void updateModelWithEmptyArray();
+    void updateModelClearsOnEmptyArray();
     void updateModelSkipsInvalidItems();
-    void updateModelSkipsEmptyItems();
+    void updateModelSkipsItemsWithoutTitleAndBody();
     void updateModelTrimsLinkedBody();
     void updateModelPreservesQrcIcon();
     void updateModelUsesFallbackIcon();
@@ -36,7 +36,6 @@ void TestApiBenefitsModel::initialState()
 
     QCOMPARE(model.rowCount(), 0);
     QCOMPARE(model.rowCount(QModelIndex()), 0);
-    QCOMPARE(model.rowCount(model.index(0, 0)), 0);
 }
 
 void TestApiBenefitsModel::updateModel()
@@ -64,6 +63,7 @@ void TestApiBenefitsModel::updateModel()
     const QModelIndex firstIndex = model.index(0, 0);
     QVERIFY(firstIndex.isValid());
 
+    QCOMPARE(model.rowCount(firstIndex), 0);
     QCOMPARE(model.data(firstIndex, ApiBenefitsModel::IconRole).toString(), QStringLiteral("qrc:/images/controls/globe-2.svg"));
     QCOMPARE(model.data(firstIndex, ApiBenefitsModel::TitleRole).toString(), QStringLiteral("Global access"));
     QCOMPARE(model.data(firstIndex, ApiBenefitsModel::BodyRole).toString(), QStringLiteral("Access servers worldwide"));
@@ -78,7 +78,7 @@ void TestApiBenefitsModel::updateModel()
     QCOMPARE(model.data(secondIndex, ApiBenefitsModel::LinkRole).toBool(), true);
 }
 
-void TestApiBenefitsModel::updateModelWithEmptyArray()
+void TestApiBenefitsModel::updateModelClearsOnEmptyArray()
 {
     ApiBenefitsModel model;
 
@@ -108,7 +108,7 @@ void TestApiBenefitsModel::updateModelSkipsInvalidItems()
     QCOMPARE(model.data(model.index(0, 0), ApiBenefitsModel::TitleRole).toString(), QStringLiteral("Valid benefit"));
 }
 
-void TestApiBenefitsModel::updateModelSkipsEmptyItems()
+void TestApiBenefitsModel::updateModelSkipsItemsWithoutTitleAndBody()
 {
     ApiBenefitsModel model;
 

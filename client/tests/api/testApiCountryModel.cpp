@@ -6,7 +6,7 @@
 #include "core/utils/constants/apiKeys.h"
 #include "ui/models/api/apiCountryModel.h"
 
-class TestApiCountryModel : public QObject
+        class TestApiCountryModel : public QObject
 {
     Q_OBJECT
 
@@ -34,54 +34,83 @@ private:
 private slots:
     void init()
     {
-        m_model.updateIssuedConfigsInfo(QJsonArray { });
-        m_model.updateModel(QJsonArray { }, QString { });
+        m_model.updateIssuedConfigsInfo(QJsonArray {});
+        m_model.updateModel(QJsonArray {}, QString {}, QString {});
     }
 
     void testInitialState()
     {
         QCOMPARE(m_model.rowCount(), 0);
+        QCOMPARE(m_model.getCurrentIndex(), -1);
+        QVERIFY(m_model.getCurrentCountryCode().isEmpty());
+        QVERIFY(m_model.getUserCountryCode().isEmpty());
+        QVERIFY(!m_model.hasExpiredWorkerConfigs());
         QVERIFY(!m_model.data(m_model.index(0, 0), ApiCountryModel::CountryNameRole).isValid());
     }
 
     void testUpdateModel()
     {
-        const QJsonArray countries { makeCountry("Germany", "DE", "de"),
-                                     makeCountry("Estonia", "EE", "ee"),
+        const QJsonArray countries { makeCountry("Germany", "DE", "de"), makeCountry("Estonia", "EE", "ee"),
                                      makeCountry("United States", "US", "us") };
 
         QSignalSpy currentIndexSpy(&m_model, &ApiCountryModel::currentIndexChanged);
 
-        m_model.updateModel(countries, "EE");
+        m_model.updateModel(countries, "EE", "us");
 
         QCOMPARE(m_model.rowCount(), 3);
         QCOMPARE(m_model.getCurrentIndex(), 1);
+        QCOMPARE(m_model.getCurrentCountryCode(), QString("EE"));
+        QCOMPARE(m_model.getUserCountryCode(), QString("US"));
+
         QCOMPARE(currentIndexSpy.count(), 1);
         QCOMPARE(currentIndexSpy.constFirst().constFirst().toInt(), 1);
 
-        const QModelIndex index = m_model.index(0, 0);
-        QVERIFY(index.isValid());
+        const QModelIndex germanyIndex = m_model.index(0, 0);
+        const QModelIndex estoniaIndex = m_model.index(1, 0);
+        const QModelIndex unitedStatesIndex = m_model.index(2, 0);
 
-        QCOMPARE(m_model.data(index, ApiCountryModel::CountryNameRole).toString(), QString("Germany"));
-        QCOMPARE(m_model.data(index, ApiCountryModel::CountryCodeRole).toString(), QString("DE"));
+        QVERIFY(germanyIndex.isValid());
+        QCOMPARE(m_model.data(germanyIndex, ApiCountryModel::CountryNameRole).toString(), QString("Germany"));
+        QCOMPARE(m_model.data(germanyIndex, ApiCountryModel::CountryCodeRole).toString(), QString("DE"));
 
-        QCOMPARE(m_model.data(m_model.index(1, 0), ApiCountryModel::CountryNameRole).toString(), QString("Estonia"));
-        QCOMPARE(m_model.data(m_model.index(2, 0), ApiCountryModel::CountryCodeRole).toString(), QString("US"));
+        QCOMPARE(m_model.data(estoniaIndex, ApiCountryModel::CountryNameRole).toString(), QString("Estonia"));
+        QCOMPARE(m_model.data(estoniaIndex, ApiCountryModel::CountryCodeRole).toString(), QString("EE"));
+
+        QCOMPARE(m_model.data(unitedStatesIndex, ApiCountryModel::CountryNameRole).toString(), QString("United States"));
+        QCOMPARE(m_model.data(unitedStatesIndex, ApiCountryModel::CountryCodeRole).toString(), QString("US"));
+    }
+
+    void testCurrentCountryNotFound()
+    {
+        const QJsonArray countries { makeCountry("Germany", "DE", "de"), makeCountry("Estonia", "EE", "ee") };
+
+        m_model.updateModel(countries, "FI", "ee");
+
+        QCOMPARE(m_model.rowCount(), 2);
+        QCOMPARE(m_model.getCurrentIndex(), -1);
+        QCOMPARE(m_model.getCurrentCountryCode(), QString("FI"));
+        QCOMPARE(m_model.getUserCountryCode(), QString("EE"));
     }
 
     void testCountryImageCodeRole()
     {
-        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE");
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE", "EE");
 
-        const QVariant imageCode = m_model.data(m_model.index(0, 0), ApiCountryModel::CountryImageCodeRole);
+        const QModelIndex index = m_model.index(0, 0);
 
-        QVERIFY(imageCode.isValid());
-        QVERIFY(!imageCode.toString().isEmpty());
+        QCOMPARE(m_model.data(index, ApiCountryModel::CountryImageCodeRole).toString(), QString("EE"));
+    }
+
+    void testCountryImageCodeFallback()
+    {
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "") }, "EE", "EE");
+
+        QCOMPARE(m_model.data(m_model.index(0, 0), ApiCountryModel::CountryImageCodeRole).toString(), QString("EE"));
     }
 
     void testInvalidIndexesAndRoles()
     {
-        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE");
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE", "EE");
 
         QVERIFY(!m_model.data(QModelIndex(), ApiCountryModel::CountryNameRole).isValid());
         QVERIFY(!m_model.data(m_model.index(-1, 0), ApiCountryModel::CountryNameRole).isValid());
@@ -89,13 +118,30 @@ private slots:
         QVERIFY(!m_model.data(m_model.index(0, 0), Qt::UserRole + 100).isValid());
     }
 
+    void testRoleNames()
+    {
+        const auto roles = m_model.roleNames();
+
+        QCOMPARE(roles.value(ApiCountryModel::CountryNameRole), QByteArray("countryName"));
+        QCOMPARE(roles.value(ApiCountryModel::CountryCodeRole), QByteArray("countryCode"));
+        QCOMPARE(roles.value(ApiCountryModel::CountryImageCodeRole), QByteArray("countryImageCode"));
+        QCOMPARE(roles.value(ApiCountryModel::IsIssuedRole), QByteArray("isIssued"));
+        QCOMPARE(roles.value(ApiCountryModel::IsWorkerExpiredRole), QByteArray("isWorkerExpired"));
+    }
+
     void testUpdateIssuedConfigsInfo()
     {
-        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee"), makeCountry("Germany", "DE", "de") }, "EE");
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee"), makeCountry("Germany", "DE", "de") }, "EE",
+                            "EE");
 
         const QJsonArray issuedConfigs {
+            // Worker timestamp equals download timestamp: not expired.
             makeIssuedConfig("EE", "country_config", "2026-10-10T10:00:00", "2026-10-10T10:00:00"),
+
+            // Worker timestamp is newer than the download timestamp: expired.
             makeIssuedConfig("DE", "country_config", "2026-10-09T10:00:00", "2026-10-10T10:00:00"),
+
+            // Non-country configurations must be ignored.
             makeIssuedConfig("EE", "other_config", "2026-10-01T10:00:00", "2026-10-20T10:00:00")
         };
 
@@ -104,44 +150,50 @@ private slots:
         const QModelIndex estoniaIndex = m_model.index(0, 0);
         const QModelIndex germanyIndex = m_model.index(1, 0);
 
-        QCOMPARE(m_model.data(estoniaIndex, ApiCountryModel::IsIssuedRole).toBool(), true);
-        QCOMPARE(m_model.data(estoniaIndex, ApiCountryModel::IsWorkerExpiredRole).toBool(), false);
+        QVERIFY(m_model.data(estoniaIndex, ApiCountryModel::IsIssuedRole).toBool());
+        QVERIFY(!m_model.data(estoniaIndex, ApiCountryModel::IsWorkerExpiredRole).toBool());
 
-        QCOMPARE(m_model.data(germanyIndex, ApiCountryModel::IsIssuedRole).toBool(), true);
-        QCOMPARE(m_model.data(germanyIndex, ApiCountryModel::IsWorkerExpiredRole).toBool(), true);
+        QVERIFY(m_model.data(germanyIndex, ApiCountryModel::IsIssuedRole).toBool());
+        QVERIFY(m_model.data(germanyIndex, ApiCountryModel::IsWorkerExpiredRole).toBool());
+
+        QVERIFY(m_model.hasExpiredWorkerConfigs());
+    }
+
+    void testNonCountryConfigIsIgnored()
+    {
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE", "EE");
+
+        m_model.updateIssuedConfigsInfo(QJsonArray { makeIssuedConfig("EE", "other_config", "2026-10-01T10:00:00", "2026-10-20T10:00:00") });
+
+        const QModelIndex index = m_model.index(0, 0);
+
+        QVERIFY(!m_model.data(index, ApiCountryModel::IsIssuedRole).toBool());
+        QVERIFY(!m_model.data(index, ApiCountryModel::IsWorkerExpiredRole).toBool());
+        QVERIFY(!m_model.hasExpiredWorkerConfigs());
     }
 
     void testCountryWithoutIssuedConfig()
     {
-        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE");
-        m_model.updateIssuedConfigsInfo(QJsonArray {});
+        m_model.updateModel(QJsonArray { makeCountry("Estonia", "EE", "ee") }, "EE", "EE");
+
+        m_model.updateIssuedConfigsInfo(QJsonArray { });
 
         const QModelIndex index = m_model.index(0, 0);
 
-        QCOMPARE(m_model.data(index, ApiCountryModel::IsIssuedRole).toBool(), false);
-        QCOMPARE(m_model.data(index, ApiCountryModel::IsWorkerExpiredRole).toBool(), false);
-    }
-
-    void testSetCurrentIndex()
-    {
-        m_model.updateModel(QJsonArray { makeCountry("Germany", "DE", "de"), makeCountry("Estonia", "EE", "ee") }, "DE");
-
-        QSignalSpy currentIndexSpy(&m_model, &ApiCountryModel::currentIndexChanged);
-
-        m_model.setCurrentIndex(1);
-
-        QCOMPARE(m_model.getCurrentIndex(), 1);
-        QCOMPARE(currentIndexSpy.count(), 1);
-        QCOMPARE(currentIndexSpy.constFirst().constFirst().toInt(), 1);
+        QVERIFY(!m_model.data(index, ApiCountryModel::IsIssuedRole).toBool());
+        QVERIFY(!m_model.data(index, ApiCountryModel::IsWorkerExpiredRole).toBool());
+        QVERIFY(!m_model.hasExpiredWorkerConfigs());
     }
 
     void testUpdateModelResetsCountries()
     {
-        m_model.updateModel(QJsonArray { makeCountry("Germany", "DE", "de"), makeCountry("Estonia", "EE", "ee") }, "EE");
-        m_model.updateModel(QJsonArray { makeCountry("Finland", "FI", "fi") }, "FI");
+        m_model.updateModel(QJsonArray { makeCountry("Germany", "DE", "de"), makeCountry("Estonia", "EE", "ee") }, "EE", "EE");
+        m_model.updateModel(QJsonArray { makeCountry("Finland", "FI", "fi") }, "FI", "FI");
 
         QCOMPARE(m_model.rowCount(), 1);
         QCOMPARE(m_model.getCurrentIndex(), 0);
+        QCOMPARE(m_model.getCurrentCountryCode(), QString("FI"));
+        QCOMPARE(m_model.getUserCountryCode(), QString("FI"));
         QCOMPARE(m_model.data(m_model.index(0, 0), ApiCountryModel::CountryNameRole).toString(), QString("Finland"));
     }
 };

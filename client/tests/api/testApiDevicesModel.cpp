@@ -23,18 +23,21 @@ private:
     }
 
 private slots:
-    void initTestCase()
-    {
-        ApiDevicesModel model;
-        QVERIFY(model.rowCount() == 0);
-    }
-
     void testEmptyModel()
     {
         ApiDevicesModel model;
 
         QCOMPARE(model.rowCount(), 0);
         QCOMPARE(model.rowCount(QModelIndex()), 0);
+
+        const QJsonArray devices { createDevice(QStringLiteral("device-1"), QStringLiteral("gateway_account"),
+                                                QStringLiteral("Windows 11"), QStringLiteral("EE"),
+                                                QStringLiteral("2026-10-10T12:00:00Z")) };
+
+        model.updateModel(devices, QStringLiteral("device-1"));
+
+        QCOMPARE(model.rowCount(), 1);
+        QCOMPARE(model.rowCount(model.index(0, 0)), 0);
     }
 
     void testUpdateModel()
@@ -83,6 +86,22 @@ private slots:
         QCOMPARE(model.data(model.index(1, 0), ApiDevicesModel::IsCurrentDeviceRole).toBool(), true);
     }
 
+    void testLastUpdateRole()
+    {
+        ApiDevicesModel model;
+
+        const QString lastDownloaded = QStringLiteral("2026-10-10T12:00:00Z");
+
+        model.updateModel(QJsonArray { createDevice(QStringLiteral("device-1"), QStringLiteral("gateway_account"), QStringLiteral("Windows 11"), QStringLiteral("EE"), lastDownloaded) }, QStringLiteral("device-1"));
+
+        const QModelIndex index = model.index(0, 0);
+        QVERIFY(index.isValid());
+
+        const QString expected = QDateTime::fromString(lastDownloaded, Qt::ISODate).toLocalTime().toString(QStringLiteral("d MMM yyyy"));
+
+        QCOMPARE(model.data(index, ApiDevicesModel::LastUpdateRole).toString(), expected);
+    }
+
     void testFiltersNonGatewayDevices()
     {
         ApiDevicesModel model;
@@ -126,6 +145,7 @@ private slots:
 
         model.updateModel(devices, QStringLiteral("device-1"));
 
+        QVERIFY(!model.data(model.index(0, 1), ApiDevicesModel::OsVersionRole).isValid());
         QVERIFY(!model.data(model.index(-1, 0), ApiDevicesModel::OsVersionRole).isValid());
         QVERIFY(!model.data(model.index(1, 0), ApiDevicesModel::OsVersionRole).isValid());
         QVERIFY(!model.data(model.index(0, 0), Qt::DisplayRole).isValid());
