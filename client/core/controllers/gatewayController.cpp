@@ -11,6 +11,7 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 #include "core/repositories/secureAppSettingsRepository.h"
+#include "core/utils/constants/apiConstants.h"
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/api/apiUtils.h"
 
@@ -33,6 +34,9 @@ namespace
         constexpr QLatin1String s3FallbackEndpoints("s3_fallback_endpoints");
         constexpr QLatin1String isDevEnvironment("is_dev_environment");
         constexpr QLatin1String requestTimeoutMsecs("request_timeout_msecs");
+        constexpr QLatin1String proxyRequestTimeoutMsecs("proxy_request_timeout_msecs");
+        constexpr QLatin1String proxyStorageTimeoutMsecs("proxy_storage_timeout_msecs");
+        constexpr QLatin1String proxyHealthTimeoutMsecs("proxy_health_timeout_msecs");
     }
 
     namespace agwOptionsKey
@@ -100,6 +104,9 @@ GatewayController::GatewayController(const QString &gatewayEndpoint, const bool 
     config[agwConfigKey::s3FallbackEndpoints] = QJsonArray::fromStringList(fallbackEndpoints);
     config[agwConfigKey::isDevEnvironment] = isDevEnvironment;
     config[agwConfigKey::requestTimeoutMsecs] = requestTimeoutMsecs;
+    config[agwConfigKey::proxyRequestTimeoutMsecs] = apiDefs::proxyRequestTimeoutMsecs;
+    config[agwConfigKey::proxyStorageTimeoutMsecs] = apiDefs::proxyStorageTimeoutMsecs;
+    config[agwConfigKey::proxyHealthTimeoutMsecs] = apiDefs::proxyHealthTimeoutMsecs;
 
     m_client = agw_client_create(QJsonDocument(config).toJson(QJsonDocument::Compact).constData(), nullptr);
     if (m_client == 0) {
