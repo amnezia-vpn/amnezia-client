@@ -61,6 +61,16 @@ target_link_libraries(test_api_country_model PRIVATE
     test_common
 )
 
+
+add_executable(test_api_country_list_model
+    testApiCountryListModel.cpp
+)
+
+target_link_libraries(test_api_country_list_model PRIVATE
+    Qt6::Test
+    test_common
+)
+
 add_executable(test_api_devices_model
     testApiDevicesModel.cpp
 )
@@ -77,6 +87,7 @@ add_test(NAME UiSubscriptionControllerTest COMMAND test_ui_subscription_controll
 add_test(NAME UiApiAccountInfoModelTest COMMAND test_ui_api_account_info_model)
 add_test(NAME ApiBenefitsModelTest COMMAND test_api_benefits_model)
 add_test(NAME ApiCountryModelTest COMMAND test_api_country_model)
+add_test(NAME ApiCountryListModelTest COMMAND test_api_country_list_model)
 add_test(NAME ApiDevicesModelTest COMMAND test_api_devices_model)
 
 amnezia_copy_runtime_dlls()
