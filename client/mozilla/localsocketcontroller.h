@@ -6,6 +6,7 @@
 #define LOCALSOCKETCONTROLLER_H
 
 #include <QHostAddress>
+#include <QJsonObject>
 #include <QLocalSocket>
 #include <QTimer>
 #include <functional>
@@ -58,6 +59,9 @@ class LocalSocketController final : public ControllerImpl {
   QLocalSocket* m_socket = nullptr;
 
   QByteArray m_buffer;
+
+  QJsonObject m_pendingActivation;
+  bool m_activationPending = false;
 
   QString m_deviceIpv4;
   std::function<void(const QString&)> m_logCallback = nullptr;

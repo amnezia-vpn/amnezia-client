@@ -23,19 +23,6 @@ void anchorOpenSSL() {
     #include "platforms/ios/QtAppDelegate-C-Interface.h"
 #endif
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-bool isAnotherInstanceRunning()
-{
-    QLocalSocket socket;
-    socket.connectToServer(APP_INSTANCE_NAME);
-    if (socket.waitForConnected(500)) {
-        qWarning() << APPLICATION_NAME << "is already running";
-        return true;
-    }
-    return false;
-}
-#endif
-
 int main(int argc, char *argv[])
 {
     Migrations migrationsManager;
@@ -52,6 +39,10 @@ int main(int argc, char *argv[])
 #endif
 
     AmneziaApplication app(argc, argv);
+    app.setApplicationName(APPLICATION_NAME);
+    app.setOrganizationName(ORGANIZATION_NAME);
+    app.setApplicationDisplayName(APPLICATION_NAME);
+
     OsSignalHandler::setup();
 
     anchorOpenSSL();
@@ -61,12 +52,21 @@ int main(int argc, char *argv[])
         ssh_finalize();
     });
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    if (isAnotherInstanceRunning()) {
-        QTimer::singleShot(1000, &app, [&]() { app.quit(); });
-        return app.exec();
+    const bool doExec = app.parseCommands();
+    if (!doExec) {
+        return 0;
     }
-    app.startLocalServer();
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    if (const auto forwarded = app.forwardToRunningInstance()) {
+        return *forwarded;
+    }
+    if (const auto handled = app.handleControlCommandWithoutRunningInstance()) {
+        return *handled;
+    }
+    if (!app.startLocalServer()) {
+        return 2;
+    }
 #endif
 
 // Allow to raise app window if secondary instance launched
@@ -75,22 +75,15 @@ int main(int argc, char *argv[])
 #endif
 
     app.registerTypes();
-
-    app.setApplicationName(APPLICATION_NAME);
-    app.setOrganizationName(ORGANIZATION_NAME);
-    app.setApplicationDisplayName(APPLICATION_NAME);
-
     app.loadFonts();
+    app.init();
 
-    bool doExec = app.parseCommands();
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    app.executeStartupControlCommand();
+#endif
 
-    if (doExec) {
-        app.init();
+    qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
+    qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
 
-        qInfo().noquote() << QString("Started %1 version %2 %3").arg(APPLICATION_NAME, APP_VERSION, GIT_COMMIT_HASH);
-        qInfo().noquote() << QString("%1 (%2)").arg(QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
-
-        return app.exec();
-    }
-    return 0;
+    return app.exec();
 }

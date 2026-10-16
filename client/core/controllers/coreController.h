@@ -2,6 +2,7 @@
 #define CORECONTROLLER_H
 
 #include <QObject>
+#include <QJsonObject>
 #include <QQmlContext>
 #include <QSharedPointer>
 #include <QThread>
@@ -46,6 +47,7 @@
 #include "core/controllers/settingsController.h"
 #include "core/controllers/connectionController.h"
 #include "core/controllers/updateController.h"
+#include "core/utils/cliControlProtocol.h"
 
 #include "core/repositories/secureServersRepository.h"
 #include "core/repositories/secureAppSettingsRepository.h"
@@ -104,6 +106,7 @@ public:
     void checkForAppUpdates();
 
     void openConnectionByIndex(int serverIndex);
+    QJsonObject handleCliControlRequest(const CliControl::Request &request);
     void importConfigFromData(const QString &data);
     void updateTranslator(const QLocale &locale);
 
