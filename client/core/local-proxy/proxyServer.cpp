@@ -32,12 +32,12 @@ void ProxyServer::applySettings()
     }
 
     if (!start(localProxy::apiPort)) {
-        disableWithError(tr("Local proxy failed to start. Check if the port is available."));
+        disableWithError(tr("Local proxy failed to start. Check if the port is available"));
         return;
     }
 
     if (!syncXray()) {
-        disableWithError(tr("Couldn’t start the proxy due to an internal error. Try restarting the app."));
+        disableWithError(tr("Couldn’t start the proxy due to an internal error. Try restarting the app"));
         return;
     }
 
@@ -54,7 +54,7 @@ void ProxyServer::onServerEdited(const QString &serverId)
     if (m_service->restartXray()) {
         m_currentProxyPort = m_appSettingsRepository->localProxyPort();
     } else {
-        disableWithError(tr("Couldn’t start the proxy due to an internal error. Try restarting the app."));
+        disableWithError(tr("Couldn’t start the proxy due to an internal error. Try restarting the app"));
     }
 }
 

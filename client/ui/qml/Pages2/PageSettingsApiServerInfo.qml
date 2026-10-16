@@ -268,20 +268,26 @@ PageType {
                 spacing: 0
 
                 ListItemType {
-                    id: connectionSwitcher
+                    id: localProxyItem
 
                     Layout.fillWidth: true
 
                     visible: SettingsController.isLocalProxySupported && ServersUiController.processedServerIsPremium
 
-                    text: qsTr("Connection")
-                    subtitle: SettingsController.isLocalProxySupported
-                              ? qsTr("Protocol selection and local proxy setup")
-                              : qsTr("Protocol selection")
+                    text: qsTr("Local proxy")
+                    subtitle: {
+                        if (!SettingsController.isLocalProxyHttpEnabled) {
+                            return qsTr("Off")
+                        }
+                        if (SettingsController.localProxyOwnerId !== ServersUiController.processedServerId) {
+                            return qsTr("In use by another server")
+                        }
+                        return qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyActivePort > 0 ? SettingsController.localProxyActivePort : SettingsController.localProxyPort)
+                    }
                     trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                     onClicked: {
-                        PageController.goToPage(PageEnum.PageSettingsConnectionType)
+                        PageController.goToPage(PageEnum.PageSettingsLocalProxy)
                     }
                 }
 

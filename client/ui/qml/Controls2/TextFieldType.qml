@@ -17,6 +17,7 @@ Item {
     property bool passwordToggle: false
     property bool passwordRevealed: false
     property bool clearable: false
+    property string trailingIconSource
 
     property string buttonText
     property string buttonImageSource
@@ -28,6 +29,8 @@ Item {
     property alias placeholderText: textField.placeholderText
 
     readonly property bool hasError: root.errorText !== ""
+
+    signal trailingClicked()
 
     implicitWidth: content.implicitWidth
     implicitHeight: content.implicitHeight
@@ -146,7 +149,7 @@ Item {
                     anchors.rightMargin: 12
                     anchors.verticalCenter: parent.verticalCenter
 
-                    visible: clearButton.visible || eyeButton.visible
+                    visible: clearButton.visible || eyeButton.visible || trailingButton.visible
 
                     IconButtonType {
                         id: clearButton
@@ -173,6 +176,18 @@ Item {
                         icon.source: root.passwordRevealed ? "qrc:/images/controls/eye-off.svg" : "qrc:/images/controls/eye.svg"
 
                         onClicked: root.passwordRevealed = !root.passwordRevealed
+                    }
+
+                    IconButtonType {
+                        id: trailingButton
+
+                        implicitWidth: 40
+                        implicitHeight: 40
+
+                        visible: root.trailingIconSource !== ""
+                        icon.source: root.trailingIconSource
+
+                        onClicked: root.trailingClicked()
                     }
                 }
             }

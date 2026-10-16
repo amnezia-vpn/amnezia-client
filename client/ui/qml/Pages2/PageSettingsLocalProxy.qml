@@ -15,7 +15,6 @@ PageType {
 
     readonly property int localProxyPortMin: 1024
     readonly property int localProxyPortMax: 65535
-    readonly property int defaultLocalProxyPort: 10808
 
     readonly property bool isEnabledForThisServer: SettingsController.isLocalProxyHttpEnabled
                                                    && SettingsController.localProxyOwnerId === ServersUiController.processedServerId
@@ -37,7 +36,7 @@ PageType {
 
     function enableLocalProxyNow(serverId, requestedPort, vpnWasActive) {
         if (!SettingsController.enableLocalProxy(serverId, requestedPort)) {
-            PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2).")
+            PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2)")
                 .arg(root.localProxyPortMin)
                 .arg(root.localProxyPortMax))
             return false
@@ -49,20 +48,31 @@ PageType {
         return true
     }
 
+    function portRangeErrorText() {
+        return qsTr("Port must be between %1 and %2").arg(root.localProxyPortMin).arg(root.localProxyPortMax)
+    }
+
+    function portBusyErrorText(port) {
+        return qsTr("Port %1 is already in use on this device. Choose a different one").arg(port)
+    }
+
+    function runningPortText() {
+        const activePort = SettingsController.localProxyActivePort
+        return (activePort > 0 ? activePort : SettingsController.localProxyPort).toString()
+    }
+
     function computePortErrorText() {
         const text = portField.textField.text.trim()
         if (text === "") {
-            return qsTr("Enter a port")
+            return qsTr("Port is required")
         }
         const value = parseInt(text)
         if (isNaN(value) || value < root.localProxyPortMin || value > root.localProxyPortMax) {
-            return qsTr("Port must be between %1 and %2")
-                .arg(root.localProxyPortMin)
-                .arg(root.localProxyPortMax)
+            return root.portRangeErrorText()
         }
-        if (SettingsController.isLocalProxyPortBusy(value)) {
-            return qsTr("Port %1 is already in use on this device. Choose another one")
-                .arg(value)
+        const isOwnActivePort = root.isEnabledForThisServer && value === SettingsController.localProxyActivePort
+        if (!isOwnActivePort && SettingsController.isLocalProxyPortBusy(value)) {
+            return root.portBusyErrorText(value)
         }
         return ""
     }
@@ -93,18 +103,17 @@ PageType {
 
             const requestedPort = SettingsController.localProxyPort
             if (requestedPort < root.localProxyPortMin || requestedPort > root.localProxyPortMax) {
-                PageController.showNotificationMessage(qsTr("Port must be between %1 and %2")
-                    .arg(root.localProxyPortMin)
-                    .arg(root.localProxyPortMax))
+                portField.errorText = root.portRangeErrorText()
                 return
             }
 
             if (SettingsController.isLocalProxyPortBusy(requestedPort)
                     && SettingsController.isLocalProxyPortUserDefined()) {
-                PageController.showNotificationMessage(qsTr("Port %1 is already in use on this device. Choose another one")
-                    .arg(requestedPort))
+                portField.errorText = root.portBusyErrorText(requestedPort)
                 return
             }
+
+            portField.errorText = ""
 
             if (wasVpnActive) {
                 root.pendingEnableAfterVpnDisconnect = true
@@ -147,8 +156,8 @@ PageType {
 
                 Layout.fillWidth: true
 
-                title: qsTr("Local Proxy")
-                description: qsTr("Use a proxy to route selected apps (for example, the CensorTracker extension) through Amnezia Premium.")
+                title: qsTr("Local proxy")
+                description: qsTr("Used by specific apps (e.g., CensorTracker extension) via Amnezia Premium.\nOnly one can be active at a time: VPN or local proxy")
 
                 header.showSwitcher: ServersUiController.processedServerIsPremium
                 header.switcher.checked: root.isEnabledForThisServer
@@ -177,20 +186,11 @@ PageType {
                 visible: root.isOwnedByOtherServer
 
                 variant: NotificationType.Warning
-                text: qsTr("Local proxy is already running for \"%1\". Turn it off there to use it with this server.")
+                text: qsTr("Local proxy is already running for \"%1\". Turn it off there to use it with this server")
                     .arg(ServersUiController.serverName(SettingsController.localProxyOwnerId))
             }
 
-            BodyTextType {
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                text: qsTr("Only one can be on at a time: VPN or local proxy.")
-            }
-
             LinkButtonType {
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
@@ -215,8 +215,8 @@ PageType {
                 Layout.bottomMargin: 16
 
                 headerText: qsTr("Address and port")
-                buttonText: qsTr("Copy")
-                placeholderText: root.defaultLocalProxyPort.toString()
+                placeholderText: SettingsController.localProxyPort.toString()
+                trailingIconSource: root.isEnabledForThisServer ? "qrc:/images/controls/copy.svg" : ""
 
                 textField.leftPadding: 16 + portPrefix.implicitWidth
                 textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
@@ -224,39 +224,25 @@ PageType {
                     regularExpression: /^[0-9]{0,5}$/
                 }
 
-                clickedFunc: function() {
-                    const portText = portField.effectivePortText()
+                onTrailingClicked: {
+                    const portText = root.runningPortText()
                     GC.copyToClipBoard("127.0.0.1:" + portText)
                     PageController.showNotificationMessage(qsTr("Copied: 127.0.0.1:%1").arg(portText))
                 }
 
                 function syncPortValue() {
-                    let port = SettingsController.localProxyPort
                     if (root.isEnabledForThisServer && SettingsController.localProxyActivePort > 0) {
-                        port = SettingsController.localProxyActivePort
+                        textField.text = SettingsController.localProxyActivePort.toString()
+                    } else if (SettingsController.isLocalProxyPortUserDefined()) {
+                        textField.text = SettingsController.localProxyPort.toString()
+                    } else {
+                        textField.text = ""
                     }
-                    const isValidPort = port >= root.localProxyPortMin && port <= root.localProxyPortMax
-                    textField.text = isValidPort ? port.toString() : ""
                 }
 
                 function portValue() {
                     const value = parseInt(textField.text)
                     return isNaN(value) ? -1 : value
-                }
-
-                function effectivePortText() {
-                    if (root.isEnabledForThisServer && SettingsController.localProxyActivePort > 0) {
-                        return SettingsController.localProxyActivePort.toString()
-                    }
-                    const value = portValue()
-                    if (value >= root.localProxyPortMin && value <= root.localProxyPortMax) {
-                        return value.toString()
-                    }
-                    const fallback = SettingsController.localProxyPort
-                    if (fallback >= root.localProxyPortMin && fallback <= root.localProxyPortMax) {
-                        return fallback.toString()
-                    }
-                    return root.defaultLocalProxyPort.toString()
                 }
 
                 Component.onCompleted: syncPortValue()
@@ -272,7 +258,7 @@ PageType {
                     z: 1
 
                     text: "127.0.0.1:"
-                    color: AmneziaStyle.color.textSecondary
+                    color: AmneziaStyle.color.textPrimary
                     font: portField.textField.font
                 }
             }
@@ -292,10 +278,6 @@ PageType {
             text: qsTr("Save")
 
             onClicked: {
-                if (SettingsController.isLocalProxyHttpEnabled) {
-                    PageController.showNotificationMessage(qsTr("Disable Local Proxy to change the port"))
-                    return
-                }
                 const validationError = root.computePortErrorText()
                 portField.errorText = validationError
                 if (validationError !== "") {
@@ -304,12 +286,10 @@ PageType {
 
                 const value = portField.portValue()
                 if (!SettingsController.setLocalProxyPort(value)) {
-                    PageController.showNotificationMessage(qsTr("Failed to save port. Valid range: %1-%2")
-                        .arg(root.localProxyPortMin)
-                        .arg(root.localProxyPortMax))
-                } else {
-                    PageController.showNotificationMessage(qsTr("Port saved: %1").arg(value))
+                    portField.errorText = root.portRangeErrorText()
+                    return
                 }
+                PageController.showNotificationMessage(qsTr("Port saved: %1").arg(value))
                 portField.syncPortValue()
             }
         }
@@ -330,14 +310,14 @@ PageType {
             const shownPort = activePort > 0 ? activePort : requestedPort
 
             if (activePort > 0 && requestedPort > 0 && activePort !== requestedPort) {
-                PageController.showNotificationMessage(qsTr("Port %1 is in use — selected free port %2.")
+                PageController.showNotificationMessage(qsTr("Port %1 is in use — selected free port %2")
                     .arg(requestedPort)
                     .arg(activePort))
             } else if (root.pendingStartVpnWasActive && shownPort > 0) {
-                PageController.showNotificationMessage(qsTr("VPN turned off. Local proxy is running: 127.0.0.1:%1")
+                PageController.showNotificationMessage(qsTr("VPN off. Local proxy running: 127.0.0.1:%1")
                     .arg(shownPort))
             } else if (shownPort > 0) {
-                PageController.showNotificationMessage(qsTr("Local proxy is running: 127.0.0.1:%1")
+                PageController.showNotificationMessage(qsTr("Local proxy running: 127.0.0.1:%1")
                     .arg(shownPort))
             }
 
