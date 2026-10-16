@@ -14,11 +14,11 @@ ColumnLayout {
     property color titleColor: AmneziaStyle.color.textPrimary
     property color subtitleColor: AmneziaStyle.color.textTertiary
     property int maximumLineCount: 2
-    property int subtitleLineHeight: 18
+    property int subtitleLineHeight: 20
     property real textOpacity: 1.0
     property bool dense: false
 
-    spacing: 4
+    spacing: 0
 
     SmallTextType {
         Layout.fillWidth: true

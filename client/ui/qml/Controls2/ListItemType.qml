@@ -28,9 +28,10 @@ ItemDelegate {
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(root.dense ? 72 : 56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
+    verticalPadding: 4
     spacing: 12
 
     hoverEnabled: root.interactive
@@ -85,6 +86,8 @@ ItemDelegate {
         ListItemLabelType {
             Layout.fillWidth: true
             Layout.leftMargin: 4
+            Layout.topMargin: 10
+            Layout.bottomMargin: 10
 
             overline: root.overline
             dense: root.dense

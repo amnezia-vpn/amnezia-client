@@ -20,9 +20,10 @@ RadioDelegate {
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
+    verticalPadding: 4
     leftPadding: 12 + 48 + spacing
     spacing: 12
 
@@ -76,6 +77,8 @@ RadioDelegate {
         ListItemLabelType {
             Layout.fillWidth: true
             Layout.leftMargin: 4
+            Layout.topMargin: 10
+            Layout.bottomMargin: 10
 
             title: root.text
             subtitle: root.subtitle

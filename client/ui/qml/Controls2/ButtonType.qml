@@ -34,13 +34,14 @@ Button {
         id: d
 
         readonly property bool small: root.size === ButtonType.Small
+        readonly property bool textVariant: root.variant === ButtonType.Text
         readonly property bool outlined: root.variant === ButtonType.Secondary || root.variant === ButtonType.Destructive
         readonly property bool active: root.down || root.hovered
 
         readonly property int height: root.size === ButtonType.Large ? 48 : (root.size === ButtonType.Medium ? 40 : 36)
-        readonly property int radius: root.size === ButtonType.Large ? 16 : (root.size === ButtonType.Medium ? 14 : 12)
-        readonly property int iconSize: small ? 20 : 24
-        readonly property int gap: root.size === ButtonType.Large ? 4 : 2
+        readonly property int radius: small ? 12 : (root.size === ButtonType.Medium && !textVariant ? 14 : 16)
+        readonly property int iconSize: small || (textVariant && root.size === ButtonType.Medium) ? 20 : 24
+        readonly property int gap: root.size === ButtonType.Large || textVariant ? 4 : 2
 
         readonly property color backgroundColor: {
             switch (root.variant) {

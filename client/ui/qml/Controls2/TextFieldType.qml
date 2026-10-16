@@ -54,12 +54,12 @@ Item {
                 id: textField
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: 64
+                Layout.preferredHeight: root.headerText !== "" ? 64 : 56
 
                 leftPadding: 16
                 rightPadding: actions.visible ? actions.width + 16 : 16
-                topPadding: root.headerText !== "" ? 28 : 20
-                bottomPadding: root.headerText !== "" ? 12 : 20
+                topPadding: root.headerText !== "" ? 28 : 16
+                bottomPadding: root.headerText !== "" ? 12 : 16
                 verticalAlignment: TextInput.AlignVCenter
 
                 color: AmneziaStyle.color.textPrimary

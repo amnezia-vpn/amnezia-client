@@ -15,7 +15,7 @@ Item {
     readonly property bool pressed: root.active && root.control.down
     readonly property bool hovered: root.active && root.control.hovered
 
-    implicitHeight: 72
+    implicitHeight: 56
 
     HoverHandler {
         cursorShape: Qt.PointingHandCursor

@@ -60,6 +60,7 @@ SheetType {
             Layout.rightMargin: 16
             Layout.leftMargin: 16
 
+            size: ButtonType.Medium
             variant: ButtonType.Text
 
             text: qsTr("Support")
