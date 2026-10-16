@@ -101,14 +101,20 @@ PageType {
                 return
             }
 
-            const requestedPort = SettingsController.localProxyPort
-            if (requestedPort < root.localProxyPortMin || requestedPort > root.localProxyPortMax) {
+            let requestedPort = SettingsController.localProxyPort
+            if (portField.textField.text.trim() !== "") {
+                const validationError = root.computePortErrorText()
+                if (validationError !== "") {
+                    portField.errorText = validationError
+                    return
+                }
+                requestedPort = portField.portValue()
+                SettingsController.setLocalProxyPort(requestedPort)
+            } else if (requestedPort < root.localProxyPortMin || requestedPort > root.localProxyPortMax) {
                 portField.errorText = root.portRangeErrorText()
                 return
-            }
-
-            if (SettingsController.isLocalProxyPortBusy(requestedPort)
-                    && SettingsController.isLocalProxyPortUserDefined()) {
+            } else if (SettingsController.isLocalProxyPortBusy(requestedPort)
+                       && SettingsController.isLocalProxyPortUserDefined()) {
                 portField.errorText = root.portBusyErrorText(requestedPort)
                 return
             }
