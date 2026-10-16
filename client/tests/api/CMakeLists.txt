@@ -66,10 +66,6 @@ add_executable(test_api_country_list_model
     ${CLIENT_ROOT_DIR}/resources/countries.qrc
 )
 
-add_executable(test_api_country_list_model
-    testApiCountryListModel.cpp
-)
-
 target_link_libraries(test_api_country_list_model PRIVATE
     Qt6::Test
     test_common
