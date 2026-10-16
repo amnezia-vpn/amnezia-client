@@ -61,6 +61,10 @@ target_link_libraries(test_api_country_model PRIVATE
     test_common
 )
 
+add_executable(test_api_country_list_model
+    testApiCountryListModel.cpp
+    ${CLIENT_ROOT_DIR}/resources/countries.qrc
+)
 
 add_executable(test_api_country_list_model
     testApiCountryListModel.cpp

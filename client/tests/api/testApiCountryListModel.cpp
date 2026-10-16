@@ -156,9 +156,9 @@ void TestApiCountryListModel::sanitizeSearchFieldText()
     ApiCountryListModel model(nullptr, QStringLiteral("test"));
 
     QCOMPARE(model.sanitizeSearchFieldText(QStringLiteral("Estonia")), QStringLiteral("Estonia"));
-    QCOMPARE(model.sanitizeSearchFieldText(QStringLiteral("Hello, World! 123")), QStringLiteral("Hello World 123"));
-    QCOMPARE(model.sanitizeSearchFieldText(QStringLiteral("  Estonia  ")), QStringLiteral("Estonia  "));
+    QCOMPARE(model.sanitizeSearchFieldText(QStringLiteral("Hello, World! 123")), QStringLiteral("Hello World "));
     QCOMPARE(model.sanitizeSearchFieldText(QStringLiteral("")), QString());
+    QCOMPARE(model.sanitizeSearchFieldText(QStringLiteral("123")), QString());
 }
 
 QTEST_MAIN(TestApiCountryListModel)
