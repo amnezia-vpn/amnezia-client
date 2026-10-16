@@ -41,6 +41,9 @@ class WireguardUtilsWindows final : public WireguardUtils {
   bool updateRoutePrefix(const IPAddress& prefix) override;
   bool deleteRoutePrefix(const IPAddress& prefix) override;
 
+  bool updateRoutePrefixes(const QList<IPAddress>& prefixes) override;
+  bool addExclusionRoutes(const QList<IPAddress>& prefixes) override;
+
   bool addExclusionRoute(const IPAddress& prefix) override;
   bool deleteExclusionRoute(const IPAddress& prefix) override;
 
