@@ -92,6 +92,8 @@ private:
 
    Vpn::ConnectionState m_connectionState;
 
+   bool m_transitionInFlight = false;
+
    void createProtocolConnections();
 
    void appendSplitTunnelingConfig();
