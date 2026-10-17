@@ -18,6 +18,9 @@ RadioDelegate {
 
     default property alias trailingContent: trailingSlot.data
 
+    readonly property bool rowHovered: root.enabled && root.hovered && !trailingHover.hovered
+    readonly property bool rowPressed: root.enabled && root.down
+
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
     implicitHeight: Math.max(56, implicitContentHeight + topPadding + bottomPadding)
@@ -52,6 +55,13 @@ RadioDelegate {
         y: (root.height - height) / 2
         width: 48
         height: 48
+
+        ListItemStateLayerType {
+            anchors.centerIn: parent
+
+            hovered: root.rowHovered
+            pressed: root.rowPressed
+        }
 
         RadioIndicatorType {
             anchors.centerIn: parent
@@ -89,12 +99,6 @@ RadioDelegate {
                 if (root.locked) {
                     return AmneziaStyle.color.textSecondary
                 }
-                if (root.enabled && root.down) {
-                    return AmneziaStyle.color.textTertiary
-                }
-                if (root.enabled && root.hovered) {
-                    return AmneziaStyle.color.textSecondary
-                }
                 return AmneziaStyle.color.textPrimary
             }
         }
@@ -115,6 +119,10 @@ RadioDelegate {
 
             spacing: 0
             visible: children.length > 0
+
+            HoverHandler {
+                id: trailingHover
+            }
         }
     }
 }

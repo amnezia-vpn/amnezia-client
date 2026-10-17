@@ -24,6 +24,9 @@ ItemDelegate {
     property int leadingSlotWidth: 48
     property bool showIconBadge: false
 
+    readonly property bool rowHovered: root.interactive && root.enabled && root.hovered && !trailingHover.hovered
+    readonly property bool rowPressed: root.interactive && root.enabled && root.down
+
     default property alias trailingContent: trailingSlot.data
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
@@ -50,7 +53,6 @@ ItemDelegate {
 
     background: ListItemBackgroundType {
         control: root.interactive ? root : null
-        selected: root.highlighted
         showSeparator: root.showSeparator
         separatorColor: root.separatorColor
     }
@@ -103,12 +105,6 @@ ItemDelegate {
                 if (root.locked) {
                     return AmneziaStyle.color.textSecondary
                 }
-                if (root.interactive && root.enabled && root.down || root.highlighted) {
-                    return AmneziaStyle.color.textTertiary
-                }
-                if (root.enabled && root.hovered) {
-                    return AmneziaStyle.color.textSecondary
-                }
                 return AmneziaStyle.color.textPrimary
             }
         }
@@ -129,6 +125,10 @@ ItemDelegate {
 
             spacing: 0
             visible: root.trailingContentVisible
+
+            HoverHandler {
+                id: trailingHover
+            }
         }
 
         Item {
@@ -136,6 +136,13 @@ ItemDelegate {
             Layout.preferredHeight: 48
 
             visible: root.trailingIconSource !== ""
+
+            ListItemStateLayerType {
+                anchors.centerIn: parent
+
+                hovered: root.rowHovered
+                pressed: root.rowPressed
+            }
 
             IconImage {
                 anchors.centerIn: parent
