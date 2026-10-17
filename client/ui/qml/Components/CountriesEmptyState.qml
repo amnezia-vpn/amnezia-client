@@ -24,6 +24,7 @@ EmptyStateType {
 
     ButtonType {
         visible: root.isSearchResult || root.categoryName !== ""
+        size: ButtonType.Medium
         variant: ButtonType.Text
         text: qsTr("Show all")
 

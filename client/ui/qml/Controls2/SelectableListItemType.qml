@@ -16,6 +16,7 @@ RadioDelegate {
 
     padding: 12
     leftPadding: 16
+    verticalPadding: 14
 
     hoverEnabled: true
     focusPolicy: Qt.StrongFocus
@@ -69,8 +70,6 @@ RadioDelegate {
     }
 
     contentItem: ListItemLabelType {
-        spacing: 6
-        subtitleLineHeight: 20
         title: root.text
         subtitle: root.subtitle
         maximumLineCount: 3

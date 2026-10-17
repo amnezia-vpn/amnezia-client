@@ -24,13 +24,17 @@ ItemDelegate {
     property int leadingSlotWidth: 48
     property bool showIconBadge: false
 
+    readonly property bool rowHovered: root.interactive && root.enabled && root.hovered && !trailingHover.hovered
+    readonly property bool rowPressed: root.interactive && root.enabled && root.down
+
     default property alias trailingContent: trailingSlot.data
 
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(root.dense ? 72 : 56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
+    verticalPadding: 4
     spacing: 12
 
     hoverEnabled: root.interactive
@@ -49,7 +53,6 @@ ItemDelegate {
 
     background: ListItemBackgroundType {
         control: root.interactive ? root : null
-        selected: root.highlighted
         showSeparator: root.showSeparator
         separatorColor: root.separatorColor
     }
@@ -85,6 +88,8 @@ ItemDelegate {
         ListItemLabelType {
             Layout.fillWidth: true
             Layout.leftMargin: 4
+            Layout.topMargin: 10
+            Layout.bottomMargin: 10
 
             overline: root.overline
             dense: root.dense
@@ -98,12 +103,6 @@ ItemDelegate {
                     return AmneziaStyle.color.statusDestructive
                 }
                 if (root.locked) {
-                    return AmneziaStyle.color.textSecondary
-                }
-                if (root.interactive && root.enabled && root.down || root.highlighted) {
-                    return AmneziaStyle.color.textTertiary
-                }
-                if (root.enabled && root.hovered) {
                     return AmneziaStyle.color.textSecondary
                 }
                 return AmneziaStyle.color.textPrimary
@@ -126,6 +125,10 @@ ItemDelegate {
 
             spacing: 0
             visible: root.trailingContentVisible
+
+            HoverHandler {
+                id: trailingHover
+            }
         }
 
         Item {
@@ -133,6 +136,13 @@ ItemDelegate {
             Layout.preferredHeight: 48
 
             visible: root.trailingIconSource !== ""
+
+            ListItemStateLayerType {
+                anchors.centerIn: parent
+
+                hovered: root.rowHovered
+                pressed: root.rowPressed
+            }
 
             IconImage {
                 anchors.centerIn: parent

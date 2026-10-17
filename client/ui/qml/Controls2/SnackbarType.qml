@@ -127,7 +127,7 @@ Popup {
         property real offsetX: 0
         property real offsetY: 0
 
-        implicitHeight: Math.max(content.implicitHeight, actionButton.visible ? 48 : 0)
+        implicitHeight: Math.max(content.implicitHeight, actionButton.visible ? 40 : 0)
 
         transform: Translate {
             x: swipe.offsetX
@@ -199,7 +199,7 @@ Popup {
                 visible: root.actionText !== "" || root.closable
 
                 implicitWidth: actionLabel.implicitWidth + 28
-                implicitHeight: 48
+                implicitHeight: 40
 
                 hoverEnabled: true
 

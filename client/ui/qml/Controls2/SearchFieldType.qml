@@ -11,7 +11,7 @@ TextField {
     implicitHeight: 44
 
     leftPadding: 52
-    rightPadding: clearButton.visible ? clearButton.width + 4 : 16
+    rightPadding: clearButton.visible ? 52 : 16
     topPadding: 10
     bottomPadding: 10
     verticalAlignment: TextInput.AlignVCenter
@@ -111,6 +111,7 @@ TextField {
         id: clearButton
 
         anchors.right: parent.right
+        anchors.rightMargin: 16 - (width - 24) / 2
         anchors.verticalCenter: parent.verticalCenter
 
         implicitWidth: Qt.platform.os === "android" ? 48 : 44

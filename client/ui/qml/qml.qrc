@@ -40,6 +40,7 @@
         <file>Controls2/ButtonType.qml</file>
         <file>Controls2/EmptyStateType.qml</file>
         <file>Controls2/ListItemBackgroundType.qml</file>
+        <file>Controls2/ListItemStateLayerType.qml</file>
         <file>Controls2/ListItemLabelType.qml</file>
         <file>Controls2/LoadingOverlayType.qml</file>
         <file>Controls2/LoaderRingType.qml</file>

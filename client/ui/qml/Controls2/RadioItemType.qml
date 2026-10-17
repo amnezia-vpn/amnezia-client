@@ -18,11 +18,15 @@ RadioDelegate {
 
     default property alias trailingContent: trailingSlot.data
 
+    readonly property bool rowHovered: root.enabled && root.hovered && !trailingHover.hovered
+    readonly property bool rowPressed: root.enabled && root.down
+
     implicitWidth: Math.max(implicitBackgroundWidth + leftInset + rightInset,
                             implicitContentWidth + leftPadding + rightPadding)
-    implicitHeight: Math.max(72, implicitContentHeight + topPadding + bottomPadding)
+    implicitHeight: Math.max(56, implicitContentHeight + topPadding + bottomPadding)
 
     padding: 12
+    verticalPadding: 4
     leftPadding: 12 + 48 + spacing
     spacing: 12
 
@@ -52,6 +56,13 @@ RadioDelegate {
         width: 48
         height: 48
 
+        ListItemStateLayerType {
+            anchors.centerIn: parent
+
+            hovered: root.rowHovered
+            pressed: root.rowPressed
+        }
+
         RadioIndicatorType {
             anchors.centerIn: parent
             visible: root.icon.source.toString() === ""
@@ -76,6 +87,8 @@ RadioDelegate {
         ListItemLabelType {
             Layout.fillWidth: true
             Layout.leftMargin: 4
+            Layout.topMargin: 10
+            Layout.bottomMargin: 10
 
             title: root.text
             subtitle: root.subtitle
@@ -84,12 +97,6 @@ RadioDelegate {
             textOpacity: root.locked ? 0.65 : 1.0
             titleColor: {
                 if (root.locked) {
-                    return AmneziaStyle.color.textSecondary
-                }
-                if (root.enabled && root.down) {
-                    return AmneziaStyle.color.textTertiary
-                }
-                if (root.enabled && root.hovered) {
                     return AmneziaStyle.color.textSecondary
                 }
                 return AmneziaStyle.color.textPrimary
@@ -112,6 +119,10 @@ RadioDelegate {
 
             spacing: 0
             visible: children.length > 0
+
+            HoverHandler {
+                id: trailingHover
+            }
         }
     }
 }

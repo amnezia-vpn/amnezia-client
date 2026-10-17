@@ -7,34 +7,22 @@ Item {
     id: root
 
     property T.AbstractButton control: null
-    property bool selected: false
     property bool showSeparator: true
     property color separatorColor: AmneziaStyle.color.borderSoft
 
     readonly property bool active: root.control !== null && root.control.enabled
-    readonly property bool pressed: root.active && root.control.down
-    readonly property bool hovered: root.active && root.control.hovered
 
-    implicitHeight: 72
+    implicitHeight: 56
 
     HoverHandler {
         cursorShape: Qt.PointingHandCursor
         enabled: root.active
     }
 
-    Rectangle {
+    Item {
         anchors.fill: parent
         anchors.topMargin: 4
         anchors.bottomMargin: 4
-
-        radius: 16
-        color: root.pressed ? AmneziaStyle.color.bgStateLayerPressed : root.hovered ? AmneziaStyle.color.bgStateLayer : AmneziaStyle.color.transparent
-        border.width: root.pressed || root.selected ? 1 : 0
-        border.color: AmneziaStyle.color.borderBold
-
-        Behavior on color {
-            ColorAnimation { duration: 150 }
-        }
 
         FocusRingType {
             radius: 16

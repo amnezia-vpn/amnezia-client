@@ -236,6 +236,7 @@ PageType {
 
                 visible: root.showRenewLink
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 leftImageSource: "qrc:/images/controls/refresh-cw.svg"
                 text: qsTr("Renew subscription")
@@ -354,6 +355,7 @@ PageType {
 
                 Layout.alignment: Qt.AlignHCenter
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 destructive: true
                 text: qsTr("Reload API config")
@@ -387,6 +389,7 @@ PageType {
 
                 visible: root.isVisibleForAmneziaFree
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 destructive: true
                 text: qsTr("Unlink this device")
@@ -422,6 +425,7 @@ PageType {
                 Layout.topMargin: 12
                 Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
 
+                size: ButtonType.Medium
                 variant: ButtonType.Text
                 destructive: true
                 text: qsTr("Remove from application")
