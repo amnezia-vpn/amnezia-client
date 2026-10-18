@@ -75,8 +75,8 @@ PageType {
                         return
                     }
 
-                    if (isCurrentDevice && SettingsController.isLocalProxyHttpEnabled
-                            && SettingsController.localProxyOwnerId === ServersUiController.processedServerId) {
+                    if (isCurrentDevice && LocalProxyController.isEnabled
+                            && LocalProxyController.ownerId === ServersUiController.processedServerId) {
                         PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         return
                     }

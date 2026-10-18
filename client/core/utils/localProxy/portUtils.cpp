@@ -9,7 +9,7 @@
 
 using namespace amnezia;
 
-bool PortAvailabilityHelper::isPortAvailable(int port)
+bool portUtils::isPortAvailable(int port)
 {
     if (port < localProxy::proxyPortMin || port > localProxy::proxyPortMax) {
         return false;
@@ -21,7 +21,7 @@ bool PortAvailabilityHelper::isPortAvailable(int port)
     return success;
 }
 
-bool PortAvailabilityHelper::waitForPort(int port, int timeoutMs)
+bool portUtils::waitForPort(int port, int timeoutMs)
 {
     QElapsedTimer timer;
     timer.start();
@@ -36,7 +36,7 @@ bool PortAvailabilityHelper::waitForPort(int port, int timeoutMs)
     return true;
 }
 
-std::optional<int> PortAvailabilityHelper::findFirstAvailablePort(int startPort, int endPort)
+std::optional<int> portUtils::findFirstAvailablePort(int startPort, int endPort)
 {
     startPort = qMax(startPort, localProxy::proxyPortMin);
     endPort = qMin(endPort, localProxy::proxyPortMax);

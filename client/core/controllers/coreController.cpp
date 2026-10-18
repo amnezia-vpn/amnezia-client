@@ -43,41 +43,13 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     }
     initLogging();
 
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    initLocalProxy();
-#endif
+    m_localProxyController->applySettings();
 
     m_translator = new QTranslator(this);
     if (m_appSettingsRepository) {
         updateTranslator(m_appSettingsRepository->getAppLanguage());
     }
 }
-
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-void CoreController::initLocalProxy()
-{
-    m_proxyServer.reset(new ProxyServer(m_serversRepository, m_appSettingsRepository, this));
-
-    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, m_proxyServer.data(),
-            &ProxyServer::applySettings);
-    connect(m_serversRepository, &SecureServersRepository::serverEdited, m_proxyServer.data(), &ProxyServer::onServerEdited);
-    connect(m_serversRepository, &SecureServersRepository::serverRemoved, m_proxyServer.data(),
-            [this](const QString &serverId, int) { m_proxyServer->onServerRemoved(serverId); });
-
-    connect(m_proxyServer.data(), &ProxyServer::startFailed, m_settingsController, &SettingsController::localProxyStartFailed);
-    connect(m_proxyServer.data(), &ProxyServer::activePortChanged, m_settingsController, &SettingsController::setLocalProxyActivePort);
-    connect(m_connectionController, &ConnectionController::localProxyStoppedBecauseVpnTurnedOn, m_pageController,
-            &PageController::showNotificationMessage);
-
-    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, [this]() {
-        if (m_appSettingsRepository && m_appSettingsRepository->isLocalProxyHttpEnabled()) {
-            m_appSettingsRepository->setLocalProxyHttpEnabled(false);
-        }
-    });
-
-    m_proxyServer->applySettings();
-}
-#endif
 
 void CoreController::setQmlContextProperty(const QString &name, QObject *value)
 {
@@ -209,6 +181,7 @@ void CoreController::initCoreControllers()
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
+    m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, this);
 }
 
 void CoreController::initControllers()
@@ -241,6 +214,9 @@ void CoreController::initControllers()
 
     m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
+
+    m_localProxyUiController = new LocalProxyUiController(m_localProxyController, this);
+    setQmlContextProperty("LocalProxyController", m_localProxyUiController);
 
     m_logsUiController = new LogsUiController(m_settingsController, this);
     setQmlContextProperty("LogsController", m_logsUiController);

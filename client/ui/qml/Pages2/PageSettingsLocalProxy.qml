@@ -16,11 +16,11 @@ PageType {
     readonly property int localProxyPortMin: 1024
     readonly property int localProxyPortMax: 65535
 
-    readonly property bool isEnabledForThisServer: SettingsController.isLocalProxyHttpEnabled
-                                                   && SettingsController.localProxyOwnerId === ServersUiController.processedServerId
-    readonly property bool isOwnedByOtherServer: SettingsController.isLocalProxyHttpEnabled
-                                                 && SettingsController.localProxyOwnerId !== ""
-                                                 && SettingsController.localProxyOwnerId !== ServersUiController.processedServerId
+    readonly property bool isEnabledForThisServer: LocalProxyController.isEnabled
+                                                   && LocalProxyController.ownerId === ServersUiController.processedServerId
+    readonly property bool isOwnedByOtherServer: LocalProxyController.isEnabled
+                                                 && LocalProxyController.ownerId !== ""
+                                                 && LocalProxyController.ownerId !== ServersUiController.processedServerId
 
     property int pendingStartRequestedPort: -1
     property bool pendingStartVpnWasActive: false
@@ -35,7 +35,7 @@ PageType {
     }
 
     function enableLocalProxyNow(serverId, requestedPort, vpnWasActive) {
-        if (!SettingsController.enableLocalProxy(serverId, requestedPort)) {
+        if (!LocalProxyController.enable(serverId, requestedPort)) {
             PageController.showNotificationMessage(qsTr("Failed to enable local proxy. Check the port (%1-%2)")
                 .arg(root.localProxyPortMin)
                 .arg(root.localProxyPortMax))
@@ -57,8 +57,8 @@ PageType {
     }
 
     function runningPortText() {
-        const activePort = SettingsController.localProxyActivePort
-        return (activePort > 0 ? activePort : SettingsController.localProxyPort).toString()
+        const activePort = LocalProxyController.activePort
+        return (activePort > 0 ? activePort : LocalProxyController.port).toString()
     }
 
     function computePortErrorText() {
@@ -70,8 +70,8 @@ PageType {
         if (isNaN(value) || value < root.localProxyPortMin || value > root.localProxyPortMax) {
             return root.portRangeErrorText()
         }
-        const isOwnActivePort = root.isEnabledForThisServer && value === SettingsController.localProxyActivePort
-        if (!isOwnActivePort && SettingsController.isLocalProxyPortBusy(value)) {
+        const isOwnActivePort = root.isEnabledForThisServer && value === LocalProxyController.activePort
+        if (!isOwnActivePort && LocalProxyController.isPortBusy(value)) {
             return root.portBusyErrorText(value)
         }
         return ""
@@ -94,21 +94,21 @@ PageType {
                 return
             }
 
-            if (SettingsController.isLocalProxyHttpEnabled
-                    && SettingsController.localProxyOwnerId
-                    && SettingsController.localProxyOwnerId !== serverId) {
+            if (LocalProxyController.isEnabled
+                    && LocalProxyController.ownerId
+                    && LocalProxyController.ownerId !== serverId) {
                 PageController.showNotificationMessage(qsTr("Local proxy is already enabled for another server"))
                 return
             }
 
-            const requestedPort = SettingsController.localProxyPort
+            const requestedPort = LocalProxyController.port
             if (requestedPort < root.localProxyPortMin || requestedPort > root.localProxyPortMax) {
                 portField.errorText = root.portRangeErrorText()
                 return
             }
 
-            if (SettingsController.isLocalProxyPortBusy(requestedPort)
-                    && SettingsController.isLocalProxyPortUserDefined()) {
+            if (LocalProxyController.isPortBusy(requestedPort)
+                    && LocalProxyController.isPortUserDefined()) {
                 portField.errorText = root.portBusyErrorText(requestedPort)
                 return
             }
@@ -129,7 +129,7 @@ PageType {
             root.clearPendingEnableAfterVpnDisconnect()
             root.pendingStartRequestedPort = -1
             root.pendingStartVpnWasActive = false
-            SettingsController.disableLocalProxy()
+            LocalProxyController.disable()
             PageController.showNotificationMessage(qsTr("Local proxy stopped"))
         }
     }
@@ -187,7 +187,7 @@ PageType {
 
                 variant: NotificationType.Warning
                 text: qsTr("Local proxy is already running for \"%1\". Turn it off there to use it with this server")
-                    .arg(ServersUiController.serverName(SettingsController.localProxyOwnerId))
+                    .arg(ServersUiController.serverName(LocalProxyController.ownerId))
             }
 
             LinkButtonType {
@@ -215,7 +215,7 @@ PageType {
                 Layout.bottomMargin: 16
 
                 headerText: qsTr("Address and port")
-                placeholderText: SettingsController.localProxyPort.toString()
+                placeholderText: LocalProxyController.port.toString()
                 trailingIconSource: root.isEnabledForThisServer ? "qrc:/images/controls/copy.svg" : ""
 
                 textField.leftPadding: 16 + portPrefix.implicitWidth
@@ -231,10 +231,10 @@ PageType {
                 }
 
                 function syncPortValue() {
-                    if (root.isEnabledForThisServer && SettingsController.localProxyActivePort > 0) {
-                        textField.text = SettingsController.localProxyActivePort.toString()
-                    } else if (SettingsController.isLocalProxyPortUserDefined()) {
-                        textField.text = SettingsController.localProxyPort.toString()
+                    if (root.isEnabledForThisServer && LocalProxyController.activePort > 0) {
+                        textField.text = LocalProxyController.activePort.toString()
+                    } else if (LocalProxyController.isPortUserDefined()) {
+                        textField.text = LocalProxyController.port.toString()
                     } else {
                         textField.text = ""
                     }
@@ -285,7 +285,7 @@ PageType {
                 }
 
                 const value = portField.portValue()
-                if (!SettingsController.setLocalProxyPort(value)) {
+                if (!LocalProxyController.setPort(value)) {
                     portField.errorText = root.portRangeErrorText()
                     return
                 }
@@ -301,11 +301,11 @@ PageType {
         repeat: false
         running: false
         onTriggered: {
-            if (!SettingsController.isLocalProxyHttpEnabled) {
+            if (!LocalProxyController.isEnabled) {
                 return
             }
 
-            const activePort = SettingsController.localProxyActivePort
+            const activePort = LocalProxyController.activePort
             const requestedPort = root.pendingStartRequestedPort
             const shownPort = activePort > 0 ? activePort : requestedPort
 
@@ -347,15 +347,15 @@ PageType {
     }
 
     Connections {
-        target: SettingsController
+        target: LocalProxyController
 
-        function onLocalProxySettingsUpdated() {
+        function onStateChanged() {
             if (!portField.textField.activeFocus) {
                 portField.syncPortValue()
             }
         }
 
-        function onLocalProxyStartFailed(message) {
+        function onStartFailed(message) {
             startSuccessToastTimer.stop()
             root.pendingStartRequestedPort = -1
             root.pendingStartVpnWasActive = false

@@ -1,14 +1,13 @@
-#ifndef PORTAVAILABILITYHELPER_H
-#define PORTAVAILABILITYHELPER_H
+#ifndef PORTUTILS_H
+#define PORTUTILS_H
 
 #include <optional>
 
-class PortAvailabilityHelper
+namespace portUtils
 {
-public:
-    static bool isPortAvailable(int port);
-    static bool waitForPort(int port, int timeoutMs);
-    static std::optional<int> findFirstAvailablePort(int startPort, int endPort);
-};
+    bool isPortAvailable(int port);
+    bool waitForPort(int port, int timeoutMs);
+    std::optional<int> findFirstAvailablePort(int startPort, int endPort);
+}
 
-#endif // PORTAVAILABILITYHELPER_H
+#endif // PORTUTILS_H

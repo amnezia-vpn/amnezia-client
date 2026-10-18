@@ -43,6 +43,7 @@ private:
     void initIosSettingsHandler();
     void initNotificationHandler();
     void initUpdateFoundHandler();
+    void initLocalProxyHandler();
 
     CoreController* m_coreController;
 };

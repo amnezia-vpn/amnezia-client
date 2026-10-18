@@ -272,17 +272,17 @@ PageType {
 
                     Layout.fillWidth: true
 
-                    visible: SettingsController.isLocalProxySupported && ServersUiController.processedServerIsPremium
+                    visible: LocalProxyController.isSupported && ServersUiController.processedServerIsPremium
 
                     text: qsTr("Local proxy")
                     subtitle: {
-                        if (!SettingsController.isLocalProxyHttpEnabled) {
+                        if (!LocalProxyController.isEnabled) {
                             return qsTr("Off")
                         }
-                        if (SettingsController.localProxyOwnerId !== ServersUiController.processedServerId) {
+                        if (LocalProxyController.ownerId !== ServersUiController.processedServerId) {
                             return qsTr("In use by another server")
                         }
-                        return qsTr("Running: 127.0.0.1:%1").arg(SettingsController.localProxyActivePort > 0 ? SettingsController.localProxyActivePort : SettingsController.localProxyPort)
+                        return qsTr("Running: 127.0.0.1:%1").arg(LocalProxyController.activePort > 0 ? LocalProxyController.activePort : LocalProxyController.port)
                     }
                     trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
@@ -424,8 +424,8 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device during active connection"))
-                        } else if (SettingsController.isLocalProxyHttpEnabled
-                                   && SettingsController.localProxyOwnerId === ServersUiController.processedServerId) {
+                        } else if (LocalProxyController.isEnabled
+                                   && LocalProxyController.ownerId === ServersUiController.processedServerId) {
                             PageController.showNotificationMessage(qsTr("Cannot unlink device while local proxy is running"))
                         } else {
                             PageController.showBusyIndicator(true)
@@ -461,8 +461,8 @@ PageType {
                     var yesButtonFunction = function() {
                         if (ServersUiController.isDefaultServerCurrentlyProcessed() && ConnectionController.isConnected) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server during active connection"))
-                        } else if (SettingsController.isLocalProxyHttpEnabled
-                                   && SettingsController.localProxyOwnerId === ServersUiController.processedServerId) {
+                        } else if (LocalProxyController.isEnabled
+                                   && LocalProxyController.ownerId === ServersUiController.processedServerId) {
                             PageController.showNotificationMessage(qsTr("Cannot remove server while local proxy is running"))
                         } else {
                             PageController.showBusyIndicator(true)
