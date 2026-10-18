@@ -1,6 +1,6 @@
-#include "portAvailabilityHelper.h"
+#include "portUtils.h"
 
-#include "localProxyDefs.h"
+#include "localProxyConstants.h"
 
 #include <QElapsedTimer>
 #include <QHostAddress>

@@ -263,8 +263,16 @@ set(SOURCES ${SOURCES}
 )
 
 if(NOT ANDROID AND NOT IOS)
-    file(GLOB LOCAL_PROXY_H CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/local-proxy/*.h)
-    file(GLOB LOCAL_PROXY_CPP CONFIGURE_DEPENDS ${CLIENT_ROOT_DIR}/core/local-proxy/*.cpp)
+    file(GLOB LOCAL_PROXY_H CONFIGURE_DEPENDS
+        ${CLIENT_ROOT_DIR}/core/local-proxy/*.h
+        ${CLIENT_ROOT_DIR}/core/utils/localProxy/*.h
+        ${CLIENT_ROOT_DIR}/core/controllers/localProxyController.h
+    )
+    file(GLOB LOCAL_PROXY_CPP CONFIGURE_DEPENDS
+        ${CLIENT_ROOT_DIR}/core/local-proxy/*.cpp
+        ${CLIENT_ROOT_DIR}/core/utils/localProxy/*.cpp
+        ${CLIENT_ROOT_DIR}/core/controllers/localProxyController.cpp
+    )
     list(APPEND HEADERS ${LOCAL_PROXY_H})
     list(APPEND SOURCES ${LOCAL_PROXY_CPP})
 endif()

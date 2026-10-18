@@ -1,8 +1,8 @@
-#include "proxyServer.h"
+#include "localProxyController.h"
 
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/repositories/secureServersRepository.h"
-#include "localProxyDefs.h"
+#include "core/utils/localProxy/localProxyConstants.h"
 
 #include <QDebug>
 

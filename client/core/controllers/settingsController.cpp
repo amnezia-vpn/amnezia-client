@@ -8,9 +8,9 @@
 #include "version.h"
 #include "ui/utils/qAutoStart.h"
 #include "logger.h"
-#include "core/local-proxy/localProxyDefs.h"
+#include "core/utils/localProxy/localProxyConstants.h"
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "core/local-proxy/portAvailabilityHelper.h"
+    #include "core/utils/localProxy/portUtils.h"
 #endif
 #include "core/controllers/logsController.h"
 #if defined(Q_OS_IOS) || defined(MACOS_NE)

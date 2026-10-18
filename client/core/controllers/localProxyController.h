@@ -5,8 +5,8 @@
 #include <QScopedPointer>
 #include <QSharedPointer>
 
-#include "httpApi.h"
-#include "proxyService.h"
+#include "core/local-proxy/httpApi.h"
+#include "core/local-proxy/proxyService.h"
 
 class SecureServersRepository;
 class SecureAppSettingsRepository;

@@ -8,8 +8,8 @@
 #include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/containers/containerUtils.h"
-#include "localProxyDefs.h"
-#include "portAvailabilityHelper.h"
+#include "core/utils/localProxy/localProxyConstants.h"
+#include "core/utils/localProxy/portUtils.h"
 #include "version.h"
 
 #include <QDebug>

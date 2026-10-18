@@ -84,7 +84,7 @@
 #include "ui/models/newsModel.h"
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-    #include "core/local-proxy/proxyServer.h"
+    #include "core/controllers/localProxyController.h"
     #include "ui/utils/notificationHandler.h"
 #endif
 
