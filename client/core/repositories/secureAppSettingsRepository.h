@@ -111,8 +111,6 @@ public:
     void setLocalProxyPort(quint16 port);
     bool isLocalProxyPortUserDefined() const;
     void setLocalProxyPortUserDefined(bool userDefined);
-    bool isLocalProxyHttpEnabled() const;
-    void setLocalProxyHttpEnabled(bool enabled);
 
 signals:
     void appLanguageChanged(QLocale locale);
@@ -127,7 +125,6 @@ signals:
     void saveLogsChanged(bool enabled);
     void screenshotsEnabledChanged(bool enabled);
     void settingsCleared();
-    void localProxySettingsChanged();
 
 private:
     void setVpnSites(RouteMode mode, const QVariantMap &sites);

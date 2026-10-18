@@ -43,8 +43,6 @@ CoreController::CoreController(const QSharedPointer<VpnConnection> &vpnConnectio
     }
     initLogging();
 
-    m_localProxyController->applySettings();
-
     m_translator = new QTranslator(this);
     if (m_appSettingsRepository) {
         updateTranslator(m_appSettingsRepository->getAppLanguage());
@@ -181,7 +179,7 @@ void CoreController::initCoreControllers()
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
-    m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, this);
+    m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, m_subscriptionController, this);
 }
 
 void CoreController::initControllers()

@@ -513,7 +513,6 @@ QString SecureAppSettingsRepository::localProxyOwnerId() const
 void SecureAppSettingsRepository::setLocalProxyOwnerId(const QString &serverId)
 {
     setValue("Conf/localProxyOwnerId", serverId);
-    emit localProxySettingsChanged();
 }
 
 quint16 SecureAppSettingsRepository::localProxyPort() const
@@ -524,7 +523,6 @@ quint16 SecureAppSettingsRepository::localProxyPort() const
 void SecureAppSettingsRepository::setLocalProxyPort(quint16 port)
 {
     setValue("Conf/localProxyPort", port);
-    emit localProxySettingsChanged();
 }
 
 bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
@@ -535,15 +533,4 @@ bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
 void SecureAppSettingsRepository::setLocalProxyPortUserDefined(bool userDefined)
 {
     setValue("Conf/localProxyPortUserDefined", userDefined);
-}
-
-bool SecureAppSettingsRepository::isLocalProxyHttpEnabled() const
-{
-    return value("Conf/localProxyHttpEnabled", false).toBool();
-}
-
-void SecureAppSettingsRepository::setLocalProxyHttpEnabled(bool enabled)
-{
-    setValue("Conf/localProxyHttpEnabled", enabled);
-    emit localProxySettingsChanged();
 }

@@ -3,13 +3,13 @@
 
 #include <optional>
 
-#include <QJsonObject>
 #include <QObject>
 #include <QString>
 
 class QHttpServer;
 class SecureServersRepository;
 class SecureAppSettingsRepository;
+class SubscriptionController;
 
 class LocalProxyController : public QObject
 {
@@ -17,7 +17,7 @@ class LocalProxyController : public QObject
 
 public:
     LocalProxyController(SecureServersRepository *serversRepository, SecureAppSettingsRepository *appSettingsRepository,
-                         QObject *parent = nullptr);
+                         SubscriptionController *subscriptionController, QObject *parent = nullptr);
     ~LocalProxyController();
 
     bool isSupported() const;
@@ -33,7 +33,6 @@ public:
     void disable();
 
 public slots:
-    void applySettings();
     void onServerEdited(const QString &serverId);
     void onServerRemoved(const QString &serverId);
     void onVpnConnectionRequested();
@@ -50,6 +49,7 @@ private:
         int proxyPort = 0;
     };
 
+    void start();
     void stop();
     bool syncXray();
     bool startXray();
@@ -61,7 +61,7 @@ private:
 
     std::optional<XrayConfig> buildXrayConfig() const;
     std::optional<int> selectProxyPort() const;
-    std::optional<QString> fetchXrayConfigFromGateway(const QJsonObject &serverConfig) const;
+    std::optional<QString> fetchXrayConfigFromGateway(const QString &serverId) const;
 
     bool startApi(quint16 port);
     void stopApi();
@@ -71,7 +71,9 @@ private:
 
     SecureServersRepository *m_serversRepository;
     SecureAppSettingsRepository *m_appSettingsRepository;
+    SubscriptionController *m_subscriptionController;
 
+    bool m_isEnabled = false;
     QHttpServer *m_httpServer = nullptr;
     quint16 m_apiPort = 0;
     qint64 m_xrayToken = 0;

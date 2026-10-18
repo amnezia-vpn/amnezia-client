@@ -1,22 +1,17 @@
 #include "localProxyController.h"
 
-#include "core/controllers/gatewayController.h"
+#include "core/controllers/api/subscriptionController.h"
 #include "core/repositories/secureAppSettingsRepository.h"
 #include "core/repositories/secureServersRepository.h"
 #include "core/utils/api/apiUtils.h"
-#include "core/utils/constants/apiConstants.h"
-#include "core/utils/constants/apiKeys.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/localProxy/localProxyConstants.h"
 #include "core/utils/localProxy/portUtils.h"
 #include "core/utils/localProxy/xrayConfigUtils.h"
-#include "version.h"
 
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonParseError>
-#include <QSysInfo>
-#include <QUuid>
 
 #ifdef AMNEZIA_DESKTOP
     #include "core/utils/ipcClient.h"
@@ -30,13 +25,13 @@
 using namespace amnezia;
 
 LocalProxyController::LocalProxyController(SecureServersRepository *serversRepository,
-                                           SecureAppSettingsRepository *appSettingsRepository, QObject *parent)
-    : QObject(parent), m_serversRepository(serversRepository), m_appSettingsRepository(appSettingsRepository)
+                                           SecureAppSettingsRepository *appSettingsRepository,
+                                           SubscriptionController *subscriptionController, QObject *parent)
+    : QObject(parent),
+      m_serversRepository(serversRepository),
+      m_appSettingsRepository(appSettingsRepository),
+      m_subscriptionController(subscriptionController)
 {
-    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, this,
-            &LocalProxyController::stateChanged);
-    connect(m_appSettingsRepository, &SecureAppSettingsRepository::localProxySettingsChanged, this,
-            &LocalProxyController::applySettings);
     connect(m_serversRepository, &SecureServersRepository::serverEdited, this, &LocalProxyController::onServerEdited);
     connect(m_serversRepository, &SecureServersRepository::serverRemoved, this,
             [this](const QString &serverId, int) { onServerRemoved(serverId); });
@@ -49,7 +44,7 @@ LocalProxyController::~LocalProxyController()
 
 bool LocalProxyController::isEnabled() const
 {
-    return m_appSettingsRepository->isLocalProxyHttpEnabled();
+    return m_isEnabled;
 }
 
 int LocalProxyController::port() const
@@ -78,10 +73,16 @@ bool LocalProxyController::setPort(int port)
         return false;
     }
 
-    if (m_appSettingsRepository->localProxyPort() != static_cast<quint16>(port)) {
+    const bool isPortChanged = m_appSettingsRepository->localProxyPort() != static_cast<quint16>(port);
+    if (isPortChanged) {
         m_appSettingsRepository->setLocalProxyPort(static_cast<quint16>(port));
     }
     m_appSettingsRepository->setLocalProxyPortUserDefined(true);
+    emit stateChanged();
+
+    if (isPortChanged && m_isEnabled) {
+        start();
+    }
     return true;
 }
 
@@ -96,7 +97,7 @@ bool LocalProxyController::enable(const QString &ownerId, int port)
         return false;
     }
 
-    if (m_appSettingsRepository->isLocalProxyHttpEnabled() && m_appSettingsRepository->localProxyOwnerId() != ownerId) {
+    if (m_isEnabled && m_appSettingsRepository->localProxyOwnerId() != ownerId) {
         return false;
     }
 
@@ -109,25 +110,27 @@ bool LocalProxyController::enable(const QString &ownerId, int port)
     }
 
     m_appSettingsRepository->setLocalProxyOwnerId(ownerId);
-    m_appSettingsRepository->setLocalProxyHttpEnabled(true);
+    m_isEnabled = true;
+    emit stateChanged();
+
+    start();
     return true;
 }
 
 void LocalProxyController::disable()
 {
-    if (m_appSettingsRepository->isLocalProxyHttpEnabled()) {
-        m_appSettingsRepository->setLocalProxyHttpEnabled(false);
-    }
-}
-
-void LocalProxyController::applySettings()
-{
-    if (!m_appSettingsRepository->isLocalProxyHttpEnabled()) {
-        qDebug() << "Local proxy is disabled";
-        stop();
+    if (!m_isEnabled) {
         return;
     }
 
+    qDebug() << "Local proxy is disabled";
+    m_isEnabled = false;
+    stop();
+    emit stateChanged();
+}
+
+void LocalProxyController::start()
+{
     if (!startApi(localProxy::apiPort)) {
         disableWithError(tr("Local proxy failed to start. Check if the port is available"));
         return;
@@ -162,16 +165,20 @@ void LocalProxyController::onServerRemoved(const QString &serverId)
     }
 
     m_appSettingsRepository->setLocalProxyOwnerId(QString());
-    m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+    if (m_isEnabled) {
+        m_isEnabled = false;
+        stop();
+    }
+    emit stateChanged();
 }
 
 void LocalProxyController::onVpnConnectionRequested()
 {
-    if (!m_appSettingsRepository->isLocalProxyHttpEnabled()) {
+    if (!m_isEnabled) {
         return;
     }
 
-    m_appSettingsRepository->setLocalProxyHttpEnabled(false);
+    disable();
     emit stoppedByVpn(tr("Local proxy stopped because VPN was turned on"));
 }
 
@@ -247,12 +254,9 @@ void LocalProxyController::disableWithError(const QString &message)
 {
     qWarning() << message;
 
-    if (m_appSettingsRepository->isLocalProxyHttpEnabled()) {
-        m_appSettingsRepository->setLocalProxyHttpEnabled(false);
-    } else {
-        stop();
-    }
-
+    m_isEnabled = false;
+    stop();
+    emit stateChanged();
     emit startFailed(message);
 }
 
@@ -292,7 +296,7 @@ std::optional<LocalProxyController::XrayConfig> LocalProxyController::buildXrayC
 
     auto serializedConfig = xrayConfigUtils::extractLastConfig(*ownerServer);
     if (!serializedConfig) {
-        serializedConfig = fetchXrayConfigFromGateway(*ownerServer);
+        serializedConfig = fetchXrayConfigFromGateway(ownerId);
         if (!serializedConfig) {
             return std::nullopt;
         }
@@ -352,85 +356,16 @@ std::optional<int> LocalProxyController::selectProxyPort() const
     return freePort;
 }
 
-std::optional<QString> LocalProxyController::fetchXrayConfigFromGateway(const QJsonObject &serverConfig) const
+std::optional<QString> LocalProxyController::fetchXrayConfigFromGateway(const QString &serverId) const
 {
-    const QJsonObject apiConfig = serverConfig.value(apiDefs::key::apiConfig).toObject();
-    if (apiConfig.isEmpty()) {
-        qWarning() << "Server API config is missing";
-        return std::nullopt;
-    }
-
-    const QString userCountryCode = apiConfig.value(apiDefs::key::userCountryCode).toString();
-    const QString serviceType = apiConfig.value(apiDefs::key::serviceType).toString();
-    if (userCountryCode.isEmpty() || serviceType.isEmpty()) {
-        qWarning() << "Server API config lacks service identifiers";
-        return std::nullopt;
-    }
-
-    QJsonObject apiPayload;
-    apiPayload[apiDefs::key::osVersion] = QSysInfo::productType();
-    apiPayload[apiDefs::key::appVersion] = QString(APP_VERSION);
-
-    const QString appLanguage = m_appSettingsRepository->getAppLanguage().name().split("_").first();
-    if (!appLanguage.isEmpty()) {
-        apiPayload[apiDefs::key::appLanguage] = appLanguage;
-    }
-
-    apiPayload[apiDefs::key::uuid] = m_appSettingsRepository->getInstallationUuid(true);
-    apiPayload[apiDefs::key::userCountryCode] = userCountryCode;
-    apiPayload[apiDefs::key::serviceType] = serviceType;
-    apiPayload[apiDefs::key::serviceProtocol] = QStringLiteral("vless");
-    apiPayload[apiDefs::key::publicKey] = QUuid::createUuid().toString(QUuid::WithoutBraces);
-
-    const QJsonObject authData = serverConfig.value(apiDefs::key::authData).toObject();
-    if (!authData.isEmpty()) {
-        apiPayload[apiDefs::key::authData] = authData;
-    }
-
-    GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
-                                        apiDefs::requestTimeoutMsecs, m_appSettingsRepository->isStrictKillSwitchEnabled(),
-                                        m_appSettingsRepository);
-
-    QByteArray responseBody;
-    const ErrorCode errorCode = gatewayController.post(QString("%1v1/config"), apiPayload, responseBody);
+    QJsonObject serverConfig;
+    const ErrorCode errorCode = m_subscriptionController->fetchServiceConfig(serverId, configKey::vless, serverConfig);
     if (errorCode != ErrorCode::NoError) {
         qWarning() << "Gateway request failed with error code" << static_cast<int>(errorCode);
         return std::nullopt;
     }
 
-    QJsonParseError responseError;
-    const QJsonDocument responseDoc = QJsonDocument::fromJson(responseBody, &responseError);
-    if (responseError.error != QJsonParseError::NoError || !responseDoc.isObject()) {
-        qWarning() << "Failed to parse gateway response:" << responseError.errorString();
-        return std::nullopt;
-    }
-
-    QString data = responseDoc.object().value(configKey::config).toString();
-    if (data.isEmpty()) {
-        qWarning() << "Gateway response lacks config payload";
-        return std::nullopt;
-    }
-
-    data.replace("vpn://", "");
-    QByteArray decoded = QByteArray::fromBase64(data.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
-    if (decoded.isEmpty()) {
-        qWarning() << "Gateway config payload is empty";
-        return std::nullopt;
-    }
-
-    const QByteArray uncompressed = qUncompress(decoded);
-    if (!uncompressed.isEmpty()) {
-        decoded = uncompressed;
-    }
-
-    QJsonParseError configError;
-    const QJsonDocument configDoc = QJsonDocument::fromJson(decoded, &configError);
-    if (configError.error != QJsonParseError::NoError || !configDoc.isObject()) {
-        qWarning() << "Failed to parse gateway config JSON:" << configError.errorString();
-        return std::nullopt;
-    }
-
-    const auto serializedConfig = xrayConfigUtils::extractLastConfig(configDoc.object());
+    const auto serializedConfig = xrayConfigUtils::extractLastConfig(serverConfig);
     if (!serializedConfig) {
         qWarning() << "Gateway response lacks Xray last_config payload";
         return std::nullopt;
