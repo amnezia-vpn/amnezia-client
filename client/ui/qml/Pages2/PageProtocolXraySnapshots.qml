@@ -250,7 +250,7 @@ PageType {
                         root.selectedConfigIndex = -1
                         root.selectedConfigName = ""
                     }
-                    showQuestionDrawer(
+                    Dialogs.askQuestion(
                         qsTr("Delete configuration?"),
                         qsTr("This action cannot be undone."),
                         qsTr("Delete"), qsTr("Cancel"),

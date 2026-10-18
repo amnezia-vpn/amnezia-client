@@ -161,7 +161,7 @@ PageType {
                     clientInfoDrawer.clientId)) {
                 PageController.showNotificationMessage("Unable to revoke current config during active connection")
             } else {
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
             }
         }
     }

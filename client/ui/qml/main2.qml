@@ -298,6 +298,14 @@ Window  {
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
+    Connections {
+        target: Dialogs
+
+        function onQuestionRequested(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
+            root.showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        }
+    }
+
     function showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction) {
         questionDrawer.headerText = headerText
         questionDrawer.descriptionText = descriptionText

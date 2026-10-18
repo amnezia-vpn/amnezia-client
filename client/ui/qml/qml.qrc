@@ -34,6 +34,7 @@
         <file>Components/AddSitePanel.qml</file>
         <file>Config/GlobalConfig.qml</file>
         <file>Config/CountryRegionNames.qml</file>
+        <file>Config/Dialogs.qml</file>
         <file>Config/qmldir</file>
         <file>Controls2/BackButtonType.qml</file>
         <file>Controls2/ButtonType.qml</file>
@@ -127,6 +128,7 @@
         <file>Controls2/PopupMenuSeparatorType.qml</file>
 
         <file>Pages2/PageServiceDnsSettings.qml</file>
+        <file>Pages2/PageServiceMtProtoSettingsBase.qml</file>
         <file>Pages2/PageServiceMtProxySettings.qml</file>
         <file>Pages2/PageServiceTelemtSettings.qml</file>
         <file>Pages2/PageServiceTProxySettings.qml</file>

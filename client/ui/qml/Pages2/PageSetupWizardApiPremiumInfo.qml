@@ -249,7 +249,7 @@ PageType {
                                     .arg(String(plan.priceLabel)).arg(String(plan.billingPeriod))
                         }
 
-                        showQuestionDrawer(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
+                        Dialogs.askQuestion(headerText, descriptionText, qsTr("Continue"), qsTr("Cancel"),
                             function() { root.proceedWithPurchase(plan) },
                             function() {})
                         return

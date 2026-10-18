@@ -15,42 +15,36 @@ import "../Components"
 PageType {
     id: root
 
-    property bool editDirty: false
-
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.visible ? saveButton.top : parent.bottom
         anchors.bottomMargin: saveButton.visible ? 16 : 0
-        anchors.left: parent.left
-        anchors.right: parent.right
 
         enabled: ServersUiController.isProcessedServerHasWriteAccess()
-        model: XrayConfigModel
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("xPaddingBytes")
-        }
+        ColumnLayout {
+            id: content
 
-        footer: Item {
-            width: listView.width
-            height: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
-        }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        delegate: Item {
-            width: listView.width
-            implicitHeight: content.implicitHeight
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("xPaddingBytes")
+            }
 
             ColumnLayout {
-                id: content
-
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 spacing: 12
 
@@ -62,14 +56,18 @@ PageType {
 
                 MinMaxRowType {
                     Layout.fillWidth: true
-                    minValue: xPaddingBytesMin
-                    maxValue: xPaddingBytesMax
+                    minValue: XrayConfigModel.xPaddingBytesMin
+                    maxValue: XrayConfigModel.xPaddingBytesMax
                     minPlaceholder: XrayConfigModel.xPaddingBytesMinDefault()
                     maxPlaceholder: XrayConfigModel.xPaddingBytesMaxDefault()
-                    onMinChanged: function(val) { xPaddingBytesMin = val; root.editDirty = false }
-                    onMaxChanged: function(val) { xPaddingBytesMax = val; root.editDirty = false }
-                    onEdited: root.editDirty = true
+                    onMinChanged: function(val) { XrayConfigModel.xPaddingBytesMin = val }
+                    onMaxChanged: function(val) { XrayConfigModel.xPaddingBytesMax = val }
                 }
+            }
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: saveButton.visible ? 0 : 16 + PageController.safeAreaBottomMargin
             }
         }
     }
@@ -84,11 +82,10 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        visible: listView.enabled && (XrayConfigModel.hasUnsavedChanges || root.editDirty)
+        visible: flickable.enabled && XrayConfigModel.hasUnsavedChanges
         enabled: visible
         text: qsTr("Save")
         onClicked: {
-            saveButton.forceActiveFocus()
             var headerText = qsTr("Save settings?")
             var descriptionText = XrayConfigModel.saveDescription("")
             var yesButtonText = qsTr("Continue")
@@ -102,7 +99,7 @@ PageType {
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
             var noButtonFunction = function () {}
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

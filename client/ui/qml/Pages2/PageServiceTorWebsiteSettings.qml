@@ -23,68 +23,72 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.fill: parent
+        anchors.top: parent.top
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("Tor website settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: TorConfigModel
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        delegate: ColumnLayout {
-            width: listView.width
+            spacing: 0
 
-            spacing: 12
-
-            SmallTextType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                text: qsTr("Website address")
+                title: qsTr("Tor website settings")
             }
 
-            RowLayout {
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                spacing: 8
+                spacing: 12
 
-                BodyTextType {
-                    id: websiteName
-
+                SmallTextType {
                     Layout.fillWidth: true
+                    Layout.topMargin: 16
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
-                    text: site || ""
-                    color: AmneziaStyle.color.textAccent
-                    wrapMode: Text.WrapAnywhere
+                    text: qsTr("Website address")
                 }
 
-                IconButtonType {
-                    Layout.alignment: Qt.AlignVCenter
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
 
-                    icon.source: "qrc:/images/controls/copy.svg"
-                    Accessible.name: qsTr("Website address")
+                    spacing: 8
 
-                    onClicked: {
-                        GC.copyToClipBoard(websiteName.text)
-                        PageController.showNotificationMessage(qsTr("Copied"))
+                    BodyTextType {
+                        id: websiteName
+
+                        Layout.fillWidth: true
+
+                        text: TorConfigModel.site || ""
+                        color: AmneziaStyle.color.textAccent
+                        wrapMode: Text.WrapAnywhere
+                    }
+
+                    IconButtonType {
+                        Layout.alignment: Qt.AlignVCenter
+
+                        icon.source: "qrc:/images/controls/copy.svg"
+                        Accessible.name: qsTr("Website address")
+
+                        onClicked: {
+                            GC.copyToClipBoard(websiteName.text)
+                            PageController.showNotificationMessage(qsTr("Copied"))
+                        }
                     }
                 }
             }
-        }
-
-        footer: ColumnLayout {
-            width: listView.width
-
-            spacing: 0
 
             BodyTextType {
                 Layout.fillWidth: true

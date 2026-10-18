@@ -19,97 +19,96 @@ import "../Components"
 PageType {
     id: root
 
-    SmartScroll {
-        id: smartScroll
-        listView: listView
+    property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
+
+    readonly property bool isSaveButtonEnabled: underloadPacketMagicHeaderTextField.errorText === "" &&
+                                                transportPacketMagicHeaderTextField.errorText === "" &&
+                                                responsePacketMagicHeaderTextField.errorText === "" &&
+                                                initPacketMagicHeaderTextField.errorText === "" &&
+                                                contentPaddingAdditionTextField.errorText === "" &&
+                                                rekeyAfterTimeTextField.errorText === "" &&
+                                                rekeyTimeoutTextField.errorText === "" &&
+                                                rejectAfterTimeTextField.errorText === "" &&
+                                                keepaliveTimeoutTextField.errorText === "" &&
+                                                maxHandshakeAttemptsTextField.errorText === "" &&
+                                                responsePacketJunkSizeTextField.errorText === "" &&
+                                                cookieReplyPacketJunkSizeTextField.errorText === "" &&
+                                                transportPacketJunkSizeTextField.errorText === "" &&
+                                                initPacketJunkSizeTextField.errorText === "" &&
+                                                junkPacketMaxSizeTextField.errorText === "" &&
+                                                junkPacketMinSizeTextField.errorText === "" &&
+                                                junkPacketCountTextField.errorText === "" &&
+                                                portTextField.errorText === "" &&
+                                                vpnAddressSubnetTextField.errorText === ""
+
+    function save() {
+        if (root.isEnabled) {
+            if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
+                                              transportPacketMagicHeaderTextField.textField.text,
+                                              responsePacketMagicHeaderTextField.textField.text,
+                                              initPacketMagicHeaderTextField.textField.text)) {
+                PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
+                return
+            }
+
+            if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text) || 0,
+                                                 parseInt(responsePacketJunkSizeTextField.textField.text) || 0,
+                                                 parseInt(cookieReplyPacketJunkSizeTextField.textField.text) || 0,
+                                                 parseInt(transportPacketJunkSizeTextField.textField.text) || 0)) {
+                PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
+                return
+            }
+        }
+
+        var headerText = qsTr("Save settings?")
+        var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
+        var yesButtonText = qsTr("Continue")
+        var noButtonText = qsTr("Cancel")
+
+        var yesButtonFunction = function() {
+            if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
+                PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
+                return
+            }
+
+            PageController.goToPage(PageEnum.PageSetupWizardInstalling);
+            InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Awg)
+        }
+
+        var noButtonFunction = function() {}
+
+        Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
-    ListViewType {
-        id: listView
+    SmartScroll {
+        id: smartScroll
+        flickable: flickable
+    }
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveRestartButton.top
         anchors.bottomMargin: 16
-        anchors.left: parent.left
-        anchors.right: parent.right
 
-        header: NavigationBarType {
-            width: listView.width
-            height: implicitHeight + 16
+        contentHeight: content.implicitHeight
 
-            title: qsTr("AmneziaWG settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: AwgConfigModel
-
-        delegate: ColumnLayout {
-            id: delegateItem
-
-            width: listView.width
-
-            property alias vpnAddressSubnetTextField: vpnAddressSubnetTextField
-            property bool isEnabled: ServersUiController.isProcessedServerHasWriteAccess()
-
-            readonly property bool isSaveButtonEnabled: underloadPacketMagicHeaderTextField.errorText === "" &&
-                                                        transportPacketMagicHeaderTextField.errorText === "" &&
-                                                        responsePacketMagicHeaderTextField.errorText === "" &&
-                                                        initPacketMagicHeaderTextField.errorText === "" &&
-                                                        contentPaddingAdditionTextField.errorText === "" &&
-                                                        rekeyAfterTimeTextField.errorText === "" &&
-                                                        rekeyTimeoutTextField.errorText === "" &&
-                                                        rejectAfterTimeTextField.errorText === "" &&
-                                                        keepaliveTimeoutTextField.errorText === "" &&
-                                                        maxHandshakeAttemptsTextField.errorText === "" &&
-                                                        responsePacketJunkSizeTextField.errorText === "" &&
-                                                        cookieReplyPacketJunkSizeTextField.errorText === "" &&
-                                                        transportPacketJunkSizeTextField.errorText === "" &&
-                                                        initPacketJunkSizeTextField.errorText === "" &&
-                                                        junkPacketMaxSizeTextField.errorText === "" &&
-                                                        junkPacketMinSizeTextField.errorText === "" &&
-                                                        junkPacketCountTextField.errorText === "" &&
-                                                        portTextField.errorText === "" &&
-                                                        vpnAddressSubnetTextField.errorText === ""
-
-            function save() {
-                if (delegateItem.isEnabled) {
-                    if (AwgConfigModel.isHeadersEqual(underloadPacketMagicHeaderTextField.textField.text,
-                                                      transportPacketMagicHeaderTextField.textField.text,
-                                                      responsePacketMagicHeaderTextField.textField.text,
-                                                      initPacketMagicHeaderTextField.textField.text)) {
-                        PageController.showErrorMessage(qsTr("The values of the H1-H4 fields must be unique"))
-                        return
-                    }
-
-                    if (AwgConfigModel.isPacketSizeEqual(parseInt(initPacketJunkSizeTextField.textField.text) || 0,
-                                                         parseInt(responsePacketJunkSizeTextField.textField.text) || 0,
-                                                         parseInt(cookieReplyPacketJunkSizeTextField.textField.text) || 0,
-                                                         parseInt(transportPacketJunkSizeTextField.textField.text) || 0)) {
-                        PageController.showErrorMessage(qsTr("The value of the field S1 + message initiation size (148) must not equal S2 + message response size (92) + S3 + cookie reply size (64) + S4 + transport packet size (32)"))
-                        return
-                    }
-                }
-
-                var headerText = qsTr("Save settings?")
-                var descriptionText = qsTr("All users with whom you shared a connection with will no longer be able to connect to it.")
-                var yesButtonText = qsTr("Continue")
-                var noButtonText = qsTr("Cancel")
-
-                var yesButtonFunction = function() {
-                    if (ConnectionController.isConnected && ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId) === ServersUiController.processedContainerIndex) {
-                        PageController.showNotificationMessage(qsTr("Unable change settings while there is an active connection"))
-                        return
-                    }
-
-                    PageController.goToPage(PageEnum.PageSetupWizardInstalling);
-                    InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Awg)
-                }
-
-                var noButtonFunction = function() {}
-
-                showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
-            }
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 12
+
+            NavigationBarType {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 4
+
+                title: qsTr("AmneziaWG settings")
+            }
 
             TextFieldType {
                 id: vpnAddressSubnetTextField
@@ -118,16 +117,12 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: delegateItem.isEnabled
+                enabled: root.isEnabled
 
                 headerText: qsTr("VPN address subnet")
-                textField.text: subnetAddress
+                textField.text: AwgConfigModel.subnetAddress
 
-                textField.onEditingFinished: {
-                    if (textField.text !== subnetAddress) {
-                        subnetAddress = textField.text
-                    }
-                }
+                textField.onTextEdited: AwgConfigModel.subnetAddress = textField.text
 
                 textField.onActiveFocusChanged: {
                     if (textField.activeFocus) {
@@ -145,18 +140,14 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                enabled: delegateItem.isEnabled
+                enabled: root.isEnabled
 
                 headerText: qsTr("Port")
-                textField.text: port
+                textField.text: AwgConfigModel.port
                 textField.maximumLength: 5
                 textField.validator: IntValidator { bottom: 1; top: 65535 }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== port) {
-                        port = textField.text
-                    }
-                }
+                textField.onTextEdited: AwgConfigModel.port = textField.text
 
                 textField.onActiveFocusChanged: {
                     if (textField.activeFocus) {
@@ -171,74 +162,74 @@ PageType {
                 id: junkPacketCountTextField
 
                 headerText: qsTr("Jc - Junk packet count")
-                textField.text: serverJunkPacketCount
+                textField.text: AwgConfigModel.serverJunkPacketCount
 
                 scroller: smartScroll
-                onEdited: (text) => { serverJunkPacketCount = text }
+                onEdited: (text) => { AwgConfigModel.serverJunkPacketCount = text }
             }
 
             AwgTextField {
                 id: junkPacketMinSizeTextField
 
                 headerText: qsTr("Jmin - Junk packet minimum size")
-                textField.text: serverJunkPacketMinSize
+                textField.text: AwgConfigModel.serverJunkPacketMinSize
 
                 scroller: smartScroll
-                onEdited: (text) => { serverJunkPacketMinSize = text }
+                onEdited: (text) => { AwgConfigModel.serverJunkPacketMinSize = text }
             }
 
             AwgTextField {
                 id: junkPacketMaxSizeTextField
 
                 headerText: qsTr("Jmax - Junk packet maximum size")
-                textField.text: serverJunkPacketMaxSize
+                textField.text: AwgConfigModel.serverJunkPacketMaxSize
 
                 scroller: smartScroll
-                onEdited: (text) => { serverJunkPacketMaxSize = text }
+                onEdited: (text) => { AwgConfigModel.serverJunkPacketMaxSize = text }
             }
 
             AwgTextField {
                 id: initPacketJunkSizeTextField
 
                 headerText: qsTr("S1 - Init packet junk size")
-                textField.text: serverInitPacketJunkSize
+                textField.text: AwgConfigModel.serverInitPacketJunkSize
 
                 scroller: smartScroll
-                onEdited: (text) => { serverInitPacketJunkSize = text }
+                onEdited: (text) => { AwgConfigModel.serverInitPacketJunkSize = text }
             }
 
             AwgTextField {
                 id: responsePacketJunkSizeTextField
 
                 headerText: qsTr("S2 - Response packet junk size")
-                textField.text: serverResponsePacketJunkSize
+                textField.text: AwgConfigModel.serverResponsePacketJunkSize
 
                 scroller: smartScroll
-                onEdited: (text) => { serverResponsePacketJunkSize = text }
+                onEdited: (text) => { AwgConfigModel.serverResponsePacketJunkSize = text }
             }
 
             AwgTextField {
                 id: cookieReplyPacketJunkSizeTextField
 
-                visible: isAwg2
+                visible: AwgConfigModel.isAwg2
 
                 headerText: qsTr("S3 - Cookie reply packet junk size")
-                textField.text: serverCookieReplyPacketJunkSize
+                textField.text: AwgConfigModel.serverCookieReplyPacketJunkSize
 
                 scroller: smartScroll
-                onEdited: (text) => { serverCookieReplyPacketJunkSize = text }
+                onEdited: (text) => { AwgConfigModel.serverCookieReplyPacketJunkSize = text }
             }
 
             AwgTextField {
                 id: transportPacketJunkSizeTextField
 
-                visible: isAwg2
+                visible: AwgConfigModel.isAwg2
 
                 headerText: qsTr("S4 - Transport packet junk size")
-                textField.text: serverTransportPacketJunkSize
+                textField.text: AwgConfigModel.serverTransportPacketJunkSize
 
                 scroller: smartScroll
-                onEdited: (text) => { serverTransportPacketJunkSize = text }
+                onEdited: (text) => { AwgConfigModel.serverTransportPacketJunkSize = text }
             }
 
             AwgTextField {
@@ -247,10 +238,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("H1 - Init packet magic header")
-                textField.text: serverInitPacketMagicHeader
+                textField.text: AwgConfigModel.serverInitPacketMagicHeader
 
                 scroller: smartScroll
-                onEdited: (text) => { serverInitPacketMagicHeader = text }
+                onEdited: (text) => { AwgConfigModel.serverInitPacketMagicHeader = text }
             }
 
             AwgTextField {
@@ -259,10 +250,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("H2 - Response packet magic header")
-                textField.text: serverResponsePacketMagicHeader
+                textField.text: AwgConfigModel.serverResponsePacketMagicHeader
 
                 scroller: smartScroll
-                onEdited: (text) => { serverResponsePacketMagicHeader = text }
+                onEdited: (text) => { AwgConfigModel.serverResponsePacketMagicHeader = text }
             }
 
             AwgTextField {
@@ -271,10 +262,10 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("H3 - Underload packet magic header")
-                textField.text: serverUnderloadPacketMagicHeader
+                textField.text: AwgConfigModel.serverUnderloadPacketMagicHeader
 
                 scroller: smartScroll
-                onEdited: (text) => { serverUnderloadPacketMagicHeader = text }
+                onEdited: (text) => { AwgConfigModel.serverUnderloadPacketMagicHeader = text }
             }
 
             AwgTextField {
@@ -283,60 +274,60 @@ PageType {
                 rangeValidation: true
 
                 headerText: qsTr("H4 - Transport packet magic header")
-                textField.text: serverTransportPacketMagicHeader
+                textField.text: AwgConfigModel.serverTransportPacketMagicHeader
 
                 scroller: smartScroll
-                onEdited: (text) => { serverTransportPacketMagicHeader = text }
+                onEdited: (text) => { AwgConfigModel.serverTransportPacketMagicHeader = text }
             }
 
             AwgTextField {
                 id: specialJunk1TextField
 
                 headerText: qsTr("I1 - Special junk 1")
-                textField.text: serverSpecialJunk1
+                textField.text: AwgConfigModel.serverSpecialJunk1
 
                 scroller: smartScroll
-                onEdited: (text) => { serverSpecialJunk1 = text }
+                onEdited: (text) => { AwgConfigModel.serverSpecialJunk1 = text }
             }
 
             AwgTextField {
                 id: specialJunk2TextField
 
                 headerText: qsTr("I2 - Special junk 2")
-                textField.text: serverSpecialJunk2
+                textField.text: AwgConfigModel.serverSpecialJunk2
 
                 scroller: smartScroll
-                onEdited: (text) => { serverSpecialJunk2 = text }
+                onEdited: (text) => { AwgConfigModel.serverSpecialJunk2 = text }
             }
 
             AwgTextField {
                 id: specialJunk3TextField
 
                 headerText: qsTr("I3 - Special junk 3")
-                textField.text: serverSpecialJunk3
+                textField.text: AwgConfigModel.serverSpecialJunk3
 
                 scroller: smartScroll
-                onEdited: (text) => { serverSpecialJunk3 = text }
+                onEdited: (text) => { AwgConfigModel.serverSpecialJunk3 = text }
             }
 
             AwgTextField {
                 id: specialJunk4TextField
 
                 headerText: qsTr("I4 - Special junk 4")
-                textField.text: serverSpecialJunk4
+                textField.text: AwgConfigModel.serverSpecialJunk4
 
                 scroller: smartScroll
-                onEdited: (text) => { serverSpecialJunk4 = text }
+                onEdited: (text) => { AwgConfigModel.serverSpecialJunk4 = text }
             }
 
             AwgTextField {
                 id: specialJunk5TextField
 
                 headerText: qsTr("I5 - Special junk 5")
-                textField.text: serverSpecialJunk5
+                textField.text: AwgConfigModel.serverSpecialJunk5
 
                 scroller: smartScroll
-                onEdited: (text) => { serverSpecialJunk5 = text }
+                onEdited: (text) => { AwgConfigModel.serverSpecialJunk5 = text }
             }
 
             CheckBoxType {
@@ -346,14 +337,14 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
 
                 text: qsTr("HeaderProtectionKey")
 
-                checked: serverHeaderProtectionEnabled
+                checked: AwgConfigModel.serverHeaderProtectionEnabled
                 onCheckedChanged: {
-                    if (checked !== serverHeaderProtectionEnabled) {
-                        serverHeaderProtectionEnabled = checked
+                    if (checked !== AwgConfigModel.serverHeaderProtectionEnabled) {
+                        AwgConfigModel.serverHeaderProtectionEnabled = checked
                     }
                 }
             }
@@ -361,79 +352,79 @@ PageType {
             AwgTextField {
                 id: contentPaddingAdditionTextField
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
                 rangeValidation: true
 
                 headerText: qsTr("ContentPaddingAddition - Content padding addition")
-                textField.text: serverContentPaddingAddition
+                textField.text: AwgConfigModel.serverContentPaddingAddition
 
                 scroller: smartScroll
-                onEdited: (text) => { serverContentPaddingAddition = text }
+                onEdited: (text) => { AwgConfigModel.serverContentPaddingAddition = text }
             }
 
             AwgTextField {
                 id: rekeyAfterTimeTextField
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
                 rangeValidation: true
 
                 headerText: qsTr("RekeyAfterTime - Rekey after time")
-                textField.text: serverRekeyAfterTime
+                textField.text: AwgConfigModel.serverRekeyAfterTime
 
                 scroller: smartScroll
-                onEdited: (text) => { serverRekeyAfterTime = text }
+                onEdited: (text) => { AwgConfigModel.serverRekeyAfterTime = text }
             }
 
             AwgTextField {
                 id: rekeyTimeoutTextField
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
                 rangeValidation: true
 
                 headerText: qsTr("RekeyTimeout - Rekey timeout")
-                textField.text: serverRekeyTimeout
+                textField.text: AwgConfigModel.serverRekeyTimeout
 
                 scroller: smartScroll
-                onEdited: (text) => { serverRekeyTimeout = text }
+                onEdited: (text) => { AwgConfigModel.serverRekeyTimeout = text }
             }
 
             AwgTextField {
                 id: rejectAfterTimeTextField
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
                 rangeValidation: true
 
                 headerText: qsTr("RejectAfterTime - Reject after time")
-                textField.text: serverRejectAfterTime
+                textField.text: AwgConfigModel.serverRejectAfterTime
 
                 scroller: smartScroll
-                onEdited: (text) => { serverRejectAfterTime = text }
+                onEdited: (text) => { AwgConfigModel.serverRejectAfterTime = text }
             }
 
             AwgTextField {
                 id: keepaliveTimeoutTextField
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
                 rangeValidation: true
 
                 headerText: qsTr("KeepaliveTimeout - Keepalive timeout")
-                textField.text: serverKeepaliveTimeout
+                textField.text: AwgConfigModel.serverKeepaliveTimeout
 
                 scroller: smartScroll
-                onEdited: (text) => { serverKeepaliveTimeout = text }
+                onEdited: (text) => { AwgConfigModel.serverKeepaliveTimeout = text }
             }
 
             AwgTextField {
                 id: maxHandshakeAttemptsTextField
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
                 rangeValidation: true
 
                 headerText: qsTr("MaxHandshakeAttempts - Max handshake attempts")
-                textField.text: serverMaxHandshakeAttempts
+                textField.text: AwgConfigModel.serverMaxHandshakeAttempts
 
                 scroller: smartScroll
-                onEdited: (text) => { serverMaxHandshakeAttempts = text }
+                onEdited: (text) => { AwgConfigModel.serverMaxHandshakeAttempts = text }
             }
 
             CheckBoxType {
@@ -443,14 +434,14 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
 
                 text: qsTr("RandomTrailers")
 
-                checked: serverRandomTrailers
+                checked: AwgConfigModel.serverRandomTrailers
                 onCheckedChanged: {
-                    if (checked !== serverRandomTrailers) {
-                        serverRandomTrailers = checked
+                    if (checked !== AwgConfigModel.serverRandomTrailers) {
+                        AwgConfigModel.serverRandomTrailers = checked
                     }
                 }
             }
@@ -462,14 +453,14 @@ PageType {
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: isAwg3
+                visible: AwgConfigModel.isAwg3
 
                 text: qsTr("DisableCookies")
 
-                checked: serverDisableCookies
+                checked: AwgConfigModel.serverDisableCookies
                 onCheckedChanged: {
-                    if (checked !== serverDisableCookies) {
-                        serverDisableCookies = checked
+                    if (checked !== AwgConfigModel.serverDisableCookies) {
+                        AwgConfigModel.serverDisableCookies = checked
                     }
                 }
             }
@@ -486,13 +477,12 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
+        enabled: root.isSaveButtonEnabled
 
         text: qsTr("Save")
 
         onClicked: {
-            forceActiveFocus()
-            listView.currentItem.save()
+            root.save()
         }
     }
 }

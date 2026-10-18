@@ -122,7 +122,7 @@ PageType {
                 var noButtonFunction = function() {
                 }
 
-                showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                Dialogs.askQuestion(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
             }
         }
 
