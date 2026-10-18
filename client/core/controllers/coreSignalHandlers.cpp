@@ -1,5 +1,6 @@
 #include "coreSignalHandlers.h"
 
+#include <QCoreApplication>
 #include <QTimer>
 #include <QtConcurrent>
 
@@ -32,6 +33,7 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/controllers/connectionController.h"
+#include "core/controllers/localProxyController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/containersModel.h"
@@ -88,6 +90,7 @@ void CoreSignalHandlers::initAllHandlers()
     initIosSettingsHandler();
     initNotificationHandler();
     initUpdateFoundHandler();
+    initLocalProxyHandler();
 }
 
 void CoreSignalHandlers::initErrorMessagesHandler()
@@ -494,3 +497,12 @@ void CoreSignalHandlers::initUpdateFoundHandler()
     });
 }
 
+void CoreSignalHandlers::initLocalProxyHandler()
+{
+    connect(m_coreController->m_connectionController, &ConnectionController::openConnectionRequested, m_coreController->m_localProxyController,
+            &LocalProxyController::onVpnConnectionRequested);
+    connect(m_coreController->m_localProxyController, &LocalProxyController::stoppedByVpn, m_coreController->m_pageController,
+            &PageController::showNotificationMessage);
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, m_coreController->m_localProxyController,
+            &LocalProxyController::disable);
+}

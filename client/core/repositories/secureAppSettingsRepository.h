@@ -105,6 +105,13 @@ public:
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);
 
+    QString localProxyOwnerId() const;
+    void setLocalProxyOwnerId(const QString &serverId);
+    quint16 localProxyPort() const;
+    void setLocalProxyPort(quint16 port);
+    bool isLocalProxyPortUserDefined() const;
+    void setLocalProxyPortUserDefined(bool userDefined);
+
 signals:
     void appLanguageChanged(QLocale locale);
     void allowedDnsServersChanged(const QStringList &servers);

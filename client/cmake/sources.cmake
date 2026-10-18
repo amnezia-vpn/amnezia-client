@@ -44,6 +44,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.h
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.h
     ${CLIENT_ROOT_DIR}/core/controllers/settingsController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/localProxyController.h
     ${CLIENT_ROOT_DIR}/core/controllers/logsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.h
@@ -69,6 +70,9 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/api/countryCatalog.h
     ${CLIENT_ROOT_DIR}/core/utils/api/gatewayPayloadBuilder.h
+    ${CLIENT_ROOT_DIR}/core/utils/localProxy/localProxyConstants.h
+    ${CLIENT_ROOT_DIR}/core/utils/localProxy/portUtils.h
+    ${CLIENT_ROOT_DIR}/core/utils/localProxy/xrayConfigUtils.h
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.h
     ${CLIENT_ROOT_DIR}/core/utils/swiftBridge.h
     ${CLIENT_ROOT_DIR}/core/utils/utilities.h
@@ -130,6 +134,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/selfhosted/exportController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/connectionController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/settingsController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/localProxyController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/logsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.cpp
@@ -157,6 +162,8 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/utils/api/apiUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/countryCatalog.cpp
     ${CLIENT_ROOT_DIR}/core/utils/api/gatewayPayloadBuilder.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/localProxy/portUtils.cpp
+    ${CLIENT_ROOT_DIR}/core/utils/localProxy/xrayConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/serverConfigUtils.cpp
     ${CLIENT_ROOT_DIR}/core/utils/osSignalHandler.cpp
     ${CLIENT_ROOT_DIR}/core/utils/utilities.cpp

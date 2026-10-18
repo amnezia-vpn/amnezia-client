@@ -504,3 +504,33 @@ void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
 {
     setValue("Xray/savedConfigs", data);
 }
+
+QString SecureAppSettingsRepository::localProxyOwnerId() const
+{
+    return value("Conf/localProxyOwnerId", "").toString();
+}
+
+void SecureAppSettingsRepository::setLocalProxyOwnerId(const QString &serverId)
+{
+    setValue("Conf/localProxyOwnerId", serverId);
+}
+
+quint16 SecureAppSettingsRepository::localProxyPort() const
+{
+    return static_cast<quint16>(value("Conf/localProxyPort", 10808).toUInt());
+}
+
+void SecureAppSettingsRepository::setLocalProxyPort(quint16 port)
+{
+    setValue("Conf/localProxyPort", port);
+}
+
+bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
+{
+    return value("Conf/localProxyPortUserDefined", false).toBool();
+}
+
+void SecureAppSettingsRepository::setLocalProxyPortUserDefined(bool userDefined)
+{
+    setValue("Conf/localProxyPortUserDefined", userDefined);
+}

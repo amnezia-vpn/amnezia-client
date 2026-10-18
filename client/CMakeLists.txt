@@ -37,7 +37,7 @@ add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
 add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    set(PACKAGES ${PACKAGES} Widgets)
+    set(PACKAGES ${PACKAGES} Widgets HttpServer)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
@@ -60,7 +60,7 @@ if(TARGET Qt6::CorePrivate)
 endif()
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    set(LIBS ${LIBS} Qt6::Widgets)
+    set(LIBS ${LIBS} Qt6::Widgets Qt6::HttpServer)
 endif()
 
 qt_standard_project_setup()
