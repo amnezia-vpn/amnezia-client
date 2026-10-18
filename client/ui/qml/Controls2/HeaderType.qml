@@ -24,6 +24,7 @@ Item {
 
     readonly property alias actionButton: actionButton
     readonly property alias switcher: switcher
+    readonly property alias titleItem: titleText
 
     signal actionClicked()
     signal switcherToggled(bool checked)
@@ -46,6 +47,8 @@ Item {
             spacing: 8
 
             H1TextType {
+                id: titleText
+
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
 
