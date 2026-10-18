@@ -172,7 +172,6 @@ PageType {
 
         model: ApiCountryListModel
 
-        interactive: menuContent.contentHeight > menuContent.height
 
         ScrollBar.vertical: collapsingHeader.scrollBar
 
