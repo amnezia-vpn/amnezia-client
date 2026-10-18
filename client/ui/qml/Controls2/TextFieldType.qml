@@ -149,7 +149,7 @@ Item {
                     anchors.rightMargin: 12
                     anchors.verticalCenter: parent.verticalCenter
 
-                    visible: clearButton.visible || eyeButton.visible || trailingButton.visible
+                    visible: root.clearable || root.passwordToggle || root.trailingIconSource !== ""
 
                     IconButtonType {
                         id: clearButton
