@@ -185,9 +185,9 @@ PageType {
 
             NotificationType {
                 Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.bottomMargin: 16
 
                 visible: root.isOwnedByOtherServer
 
@@ -196,11 +196,13 @@ PageType {
                     .arg(ServersUiController.serverName(LocalProxyController.ownerId))
             }
 
-            LinkButtonType {
+            ButtonType {
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                size: LinkButtonType.Medium
+                variant: ButtonType.Text
+                size: ButtonType.Medium
                 text: qsTr("Learn more")
 
                 onClicked: {
