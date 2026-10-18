@@ -76,7 +76,12 @@ inline QStringList sanitizeArguments(PermittedProcess proc, const QStringList &a
         namedArgs["-proxy"] = [](const QString& v) { return v.startsWith("socks5://"); };
         break;
     case CertUtil:
-        return args;
+        namedArgs["-f"] = nullptr;
+        namedArgs["-importpfx"] = nullptr;
+        namedArgs["-p"] = [](const QString& v) { return !v.isEmpty(); };
+        positionalArgs.append([](const QString& v) { return !v.isEmpty() && !v.contains(".."); });
+        positionalArgs.append([](const QString& v) { return v == "NoExport"; });
+        break;
     default:
         return {};
     }
