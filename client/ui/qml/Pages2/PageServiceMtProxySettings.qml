@@ -700,7 +700,6 @@ PageType {
             ListViewType {
                 id: settingsListView
                 model: MtProxyConfigModel
-                reuseItems: false
 
                 delegate: ColumnLayout {
                     id: settingsRoot

@@ -231,7 +231,7 @@ PageType {
                         textField.maximumLength: 32
                         passwordToggle: true
 
-                        textField.onFocusChanged: {
+                        textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
                             if (textField.text !== password) {
                                 password = textField.text

@@ -700,7 +700,6 @@ PageType {
             ListViewType {
                 id: settingsListView
                 model: TelemtConfigModel
-                reuseItems: false
 
                 delegate: ColumnLayout {
                     id: settingsRoot

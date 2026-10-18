@@ -13,7 +13,6 @@ SheetType {
     property string serverNameText
 
     id: root
-    objectName: "serverNameEditDrawer"
 
     expandedHeight: content.implicitHeight + 16 + 8 + PageController.safeAreaBottomMargin + PageController.imeHeight
 

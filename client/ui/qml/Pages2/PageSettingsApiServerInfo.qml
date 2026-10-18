@@ -17,39 +17,6 @@ import "../Components"
 PageType {
     id: root
 
-    property list<QtObject> labelsModel: [
-        statusObject,
-        endDateObject,
-        deviceCountObject
-    ]
-
-    QtObject {
-        id: statusObject
-
-        readonly property string title: qsTr("Subscription Status")
-        readonly property string contentKey: "subscriptionStatus"
-        readonly property string objectImageSource: "qrc:/images/controls/info.svg"
-        readonly property bool isRichText: true
-    }
-
-    QtObject {
-        id: endDateObject
-
-        readonly property string title: qsTr("Valid Until")
-        readonly property string contentKey: "endDate"
-        readonly property string objectImageSource: "qrc:/images/controls/history.svg"
-        readonly property bool isRichText: false
-    }
-
-    QtObject {
-        id: deviceCountObject
-
-        readonly property string title: qsTr("Active Connections")
-        readonly property string contentKey: "connectedDevices"
-        readonly property string objectImageSource: "qrc:/images/controls/monitor.svg"
-        readonly property bool isRichText: false
-    }
-
     property var processedServer
 
     property bool isSubscriptionExpired: false
@@ -58,6 +25,9 @@ PageType {
     property bool isInAppPurchase: false
     property bool isVisibleForAmneziaFree: false
     property string serviceDescription: ""
+    property string subscriptionStatusValue: ""
+    property string endDateValue: ""
+    property string connectedDevicesValue: ""
 
     readonly property bool showSubscriptionNote: root.isSubscriptionExpired || root.isSubscriptionExpiringSoon
     readonly property bool showRenewButton: root.showSubscriptionNote
@@ -72,6 +42,9 @@ PageType {
         root.isInAppPurchase = ApiAccountInfoModel.data("isInAppPurchase")
         root.isVisibleForAmneziaFree = ApiAccountInfoModel.data("isComponentVisible")
         root.serviceDescription = ApiAccountInfoModel.data("serviceDescription") || ""
+        root.subscriptionStatusValue = ApiAccountInfoModel.data("subscriptionStatus") || ""
+        root.endDateValue = ApiAccountInfoModel.data("endDate") || ""
+        root.connectedDevicesValue = ApiAccountInfoModel.data("connectedDevices") || ""
     }
 
     Component.onCompleted: {
@@ -104,7 +77,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -136,7 +108,6 @@ PageType {
 
             NavigationBarType {
                 id: headerContent
-                objectName: "headerContent"
 
                 Layout.fillWidth: true
 
@@ -188,44 +159,78 @@ PageType {
 
                 spacing: 0
 
-                Repeater {
-                    model: root.labelsModel
+                ListItemType {
+                    id: subscriptionStatusRow
 
-                    delegate: ListItemType {
-                        id: infoRow
+                    Layout.fillWidth: true
 
-                        required property var modelData
+                    visible: root.subscriptionStatusValue !== ""
 
-                        property string value: ApiAccountInfoModel.data(infoRow.modelData.contentKey) || ""
+                    interactive: false
+                    showSeparator: false
+                    leadingSlotWidth: 24
 
-                        Layout.fillWidth: true
+                    text: qsTr("Subscription Status")
+                    icon.source: "qrc:/images/controls/info.svg"
 
-                        visible: infoRow.value !== ""
+                    SmallTextType {
+                        Layout.maximumWidth: subscriptionStatusRow.availableWidth * 0.5
+                        Layout.rightMargin: 4
 
-                        interactive: false
-                        showSeparator: false
-                        leadingSlotWidth: 24
+                        text: root.subscriptionStatusValue
+                        textFormat: Text.RichText
+                        color: AmneziaStyle.color.textSecondary
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
 
-                        text: infoRow.modelData.title
-                        icon.source: infoRow.modelData.objectImageSource
+                ListItemType {
+                    id: endDateRow
 
-                        Connections {
-                            target: ApiAccountInfoModel
+                    Layout.fillWidth: true
 
-                            function onModelReset() {
-                                infoRow.value = ApiAccountInfoModel.data(infoRow.modelData.contentKey) || ""
-                            }
-                        }
+                    visible: root.endDateValue !== ""
 
-                        SmallTextType {
-                            Layout.maximumWidth: infoRow.availableWidth * 0.5
-                            Layout.rightMargin: 4
+                    interactive: false
+                    showSeparator: false
+                    leadingSlotWidth: 24
 
-                            text: infoRow.value
-                            textFormat: infoRow.modelData.isRichText ? Text.RichText : Text.PlainText
-                            color: AmneziaStyle.color.textSecondary
-                            horizontalAlignment: Text.AlignRight
-                        }
+                    text: qsTr("Valid Until")
+                    icon.source: "qrc:/images/controls/history.svg"
+
+                    SmallTextType {
+                        Layout.maximumWidth: endDateRow.availableWidth * 0.5
+                        Layout.rightMargin: 4
+
+                        text: root.endDateValue
+                        textFormat: Text.PlainText
+                        color: AmneziaStyle.color.textSecondary
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
+
+                ListItemType {
+                    id: connectedDevicesRow
+
+                    Layout.fillWidth: true
+
+                    visible: root.connectedDevicesValue !== ""
+
+                    interactive: false
+                    showSeparator: false
+                    leadingSlotWidth: 24
+
+                    text: qsTr("Active Connections")
+                    icon.source: "qrc:/images/controls/monitor.svg"
+
+                    SmallTextType {
+                        Layout.maximumWidth: connectedDevicesRow.availableWidth * 0.5
+                        Layout.rightMargin: 4
+
+                        text: root.connectedDevicesValue
+                        textFormat: Text.PlainText
+                        color: AmneziaStyle.color.textSecondary
+                        horizontalAlignment: Text.AlignRight
                     }
                 }
             }

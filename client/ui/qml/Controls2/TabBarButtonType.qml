@@ -59,6 +59,12 @@ TabButton {
         cursorShape: Qt.PointingHandCursor
     }
 
-    Keys.onEnterPressed: root.clicked()
-    Keys.onReturnPressed: root.clicked()
+    Keys.onEnterPressed: {
+        root.checked = true
+        root.clicked()
+    }
+    Keys.onReturnPressed: {
+        root.checked = true
+        root.clicked()
+    }
 }

@@ -29,13 +29,19 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.fill: parent
+        anchors.top: parent.top
 
-        header: ColumnLayout {
-            width: listView.width
+        contentHeight: content.implicitHeight
+
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
 
@@ -47,152 +53,122 @@ PageType {
                 backButtonVisible: false
                 title: qsTr("Settings")
             }
-        }
-
-        model: settingsEntries
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            spacing: 0
 
             ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                visible: isVisible
-
                 leadingSlotWidth: 24
-                text: title
+                text: qsTr("Servers")
+                icon.source: "qrc:/images/controls/server.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-                icon.source: leftImagePath
-                showIconBadge: modelData.hasBadge === true
 
-                onClicked: clickedHandler()
+                onClicked: PageController.goToPage(PageEnum.PageSettingsServersList)
             }
-        }
-
-        footer: ColumnLayout {
-            width: listView.width
-
-            spacing: 0
 
             ListItemType {
-                id: close
-
-                visible: GC.isDesktop()
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
                 leadingSlotWidth: 24
-                text: qsTr("Close application")
+                text: qsTr("Connection")
+                icon.source: "qrc:/images/controls/radio.svg"
                 trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-                icon.source: "qrc:/images/controls/x-circle.svg"
+
+                onClicked: PageController.goToPage(PageEnum.PageSettingsConnection)
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                leadingSlotWidth: 24
+                text: qsTr("Application")
+                icon.source: "qrc:/images/controls/app.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: PageController.goToPage(PageEnum.PageSettingsApplication)
+            }
+
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                visible: ServersUiController.hasServersFromGatewayApi
+
+                leadingSlotWidth: 24
+                text: qsTr("News & Notifications")
+                icon.source: "qrc:/images/controls/news.svg"
+                showIconBadge: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
                 onClicked: {
-                    PageController.closeApplication()
+                    PageController.showBusyIndicator(true)
+                    ApiNewsController.fetchNews(true)
+                    PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
                 }
             }
 
-            Item {
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 16
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+
+                leadingSlotWidth: 24
+                text: qsTr("Backup")
+                icon.source: "qrc:/images/controls/save.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: PageController.goToPage(PageEnum.PageSettingsBackup)
             }
-        }
-    }
 
-    property list<QtObject> settingsEntries: [
-        servers,
-        connection,
-        application,
-        news,
-        backup,
-        about,
-        devConsole
-    ]
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-    QtObject {
-        id: servers
+                leadingSlotWidth: 24
+                text: qsTr("About AmneziaVPN")
+                icon.source: "qrc:/images/controls/amnezia.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-        property string title: qsTr("Servers")
-        readonly property string leftImagePath: "qrc:/images/controls/server.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsServersList)
-        }
-    }
-
-    QtObject {
-        id: connection
-
-        property string title: qsTr("Connection")
-        readonly property string leftImagePath: "qrc:/images/controls/radio.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsConnection)
-        }
-    }
-
-    QtObject {
-        id: application
-
-        property string title: qsTr("Application")
-        readonly property string leftImagePath: "qrc:/images/controls/app.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsApplication)
-        }
-    }
-
-    QtObject {
-        id: news
-
-        property string title: qsTr("News & Notifications")
-        readonly property string leftImagePath: "qrc:/images/controls/news.svg"
-        readonly property bool hasBadge: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
-        property bool isVisible: ServersUiController.hasServersFromGatewayApi
-        readonly property var clickedHandler: function() {
-            if (!ServersUiController.hasServersFromGatewayApi) {
-                return;
+                onClicked: PageController.goToPage(PageEnum.PageSettingsAbout)
             }
-            PageController.showBusyIndicator(true)
-            ApiNewsController.fetchNews(true)
-            PageController.goToPage(PageEnum.PageSettingsNewsNotifications)
-        }
-    }
 
-    QtObject {
-        id: backup
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-        property string title: qsTr("Backup")
-        readonly property string leftImagePath: "qrc:/images/controls/save.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsBackup)
-        }
-    }
+                visible: SettingsController.isDevModeEnabled
 
-    QtObject {
-        id: about
+                leadingSlotWidth: 24
+                text: qsTr("Dev console")
+                icon.source: "qrc:/images/controls/bug.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-        property string title: qsTr("About AmneziaVPN")
-        readonly property string leftImagePath: "qrc:/images/controls/amnezia.svg"
-        property bool isVisible: true
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageSettingsAbout)
-        }
-    }
+                onClicked: PageController.goToPage(PageEnum.PageDevMenu)
+            }
 
-    QtObject {
-        id: devConsole
+            ListItemType {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
-        property string title: qsTr("Dev console")
-        readonly property string leftImagePath: "qrc:/images/controls/bug.svg"
-        property bool isVisible: SettingsController.isDevModeEnabled
-        readonly property var clickedHandler: function() {
-            PageController.goToPage(PageEnum.PageDevMenu)
+                visible: GC.isDesktop()
+
+                leadingSlotWidth: 24
+                text: qsTr("Close application")
+                icon.source: "qrc:/images/controls/x-circle.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                onClicked: PageController.closeApplication()
+            }
         }
     }
 }

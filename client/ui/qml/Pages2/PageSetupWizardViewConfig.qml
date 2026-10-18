@@ -122,7 +122,6 @@ PageType {
 
                 CheckBoxType {
                     id: cloakingCheckBox
-                    objectName: "cloakingCheckBox"
 
                     Layout.fillWidth: true
 

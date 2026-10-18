@@ -86,7 +86,7 @@ SheetType {
 
                         text: appName
                         checked: isAppSelected
-                        onCheckedChanged: {
+                        onToggled: {
                             installedAppsModel.selectedStateChanged(proxyInstalledAppsModel.mapToSource(index), checked)
                         }
                     }

@@ -437,11 +437,7 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling);
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.OpenVpn)
             }
-            var noButtonFunction = function() {
-                if (!GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
+            var noButtonFunction = function() {}
             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }

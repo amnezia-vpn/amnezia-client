@@ -170,7 +170,7 @@ private:
     QMetaObject::Connection m_reloadConfigErrorOccurredConnection;
 
     ConnectionUiController* m_connectionUiController;
-    FocusController* m_focusController;
+    FocusController* m_focusController = nullptr;
     PageController* m_pageController;
     InstallUiController* m_installUiController;
     ImportUiController* m_importController;

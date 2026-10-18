@@ -38,8 +38,13 @@ PageType {
         }
     }
 
-    ButtonGroup {
-        id: buttonGroup
+    function selectContainer(container) {
+        root.isEasySetup = true
+        root.dockerContainer = container
+
+        var defaultContainerProto = ContainerProps.defaultProtocol(container)
+        root.containerDefaultPort = InstallController.getPortForInstall(defaultContainerProto)
+        root.containerDefaultTransportProto = InstallController.defaultTransportProto(defaultContainerProto)
     }
 
     FlickableType {
@@ -89,22 +94,13 @@ PageType {
                         text: easySetupHeader
                         subtitle: easySetupDescription
 
-                        ButtonGroup.group: buttonGroup
+                        checked: root.isEasySetup && root.dockerContainer === dockerContainer
 
-                        onClicked: {
-                            root.isEasySetup = true
-                            checked = true
-                            var defaultContainerProto = ContainerProps.defaultProtocol(dockerContainer)
-
-                            root.dockerContainer = dockerContainer
-                            root.containerDefaultPort = InstallController.getPortForInstall(defaultContainerProto)
-                            root.containerDefaultTransportProto = InstallController.defaultTransportProto(defaultContainerProto)
-                        }
+                        onClicked: root.selectContainer(dockerContainer)
 
                         Component.onCompleted: {
                             if (index === 0) {
-                                checked = true
-                                clicked()
+                                root.selectContainer(dockerContainer)
                             }
                         }
                     }
@@ -116,12 +112,9 @@ PageType {
                     text: qsTr("Manual")
                     subtitle: qsTr("Choose a VPN protocol")
 
-                    ButtonGroup.group: buttonGroup
+                    checked: !root.isEasySetup
 
-                    onClicked: {
-                        root.isEasySetup = false
-                        checked = true
-                    }
+                    onClicked: root.isEasySetup = false
                 }
             }
         }

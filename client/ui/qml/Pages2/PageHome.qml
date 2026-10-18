@@ -18,8 +18,6 @@ import "../Components"
 PageType {
     id: root
 
-    property var containersDropDownRef: null
-
     property var apiAvailableProtocols: []
     property string apiCurrentProtocol: ""
 
@@ -90,27 +88,21 @@ PageType {
     }
 
     Connections {
-        objectName: "pageControllerConnections"
-
         target: PageController
 
         function onRestorePageHomeState(isContainerInstalled) {
             drawer.open()
-            if (isContainerInstalled && root.containersDropDownRef) {
-                root.containersDropDownRef.open()
+            if (isContainerInstalled) {
+                containersSheet.open()
             }
         }
     }
 
     Item {
-        objectName: "homeColumnItem"
-
         anchors.fill: parent
         anchors.bottomMargin: collapsedBar.height
 
         ColumnLayout {
-            objectName: "homeColumnLayout"
-
             anchors.fill: parent
             anchors.topMargin: 12 + PageController.safeAreaTopMargin
             anchors.bottomMargin: 12
@@ -119,7 +111,6 @@ PageType {
 
             HomeInfoButton {
                 id: loggingButton
-                objectName: "loggingButton"
 
                 property bool isLoggingEnabled: SettingsController.isLoggingEnabled
 
@@ -136,7 +127,6 @@ PageType {
 
             HomeInfoButton {
                 id: devGatewayButton
-                objectName: "devGatewayButton"
 
                 property bool isDevGatewayEnabled: SettingsController.isDevGatewayEnv
 
@@ -159,7 +149,6 @@ PageType {
 
                 ConnectButton {
                     id: connectButton
-                    objectName: "connectButton"
 
                     anchors.centerIn: parent
                     width: Math.min(implicitWidth, parent.width, parent.height)
@@ -169,7 +158,6 @@ PageType {
 
             HomeInfoButton {
                 id: splitTunnelingButton
-                objectName: "splitTunnelingButton"
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.maximumWidth: parent.width - 32
@@ -188,7 +176,6 @@ PageType {
 
                 HomeSplitTunnelingDrawer {
                     id: homeSplitTunnelingDrawer
-                    objectName: "homeSplitTunnelingDrawer"
 
                     parent: root
                 }
@@ -213,7 +200,6 @@ PageType {
 
     Item {
         id: collapsedBar
-        objectName: "collapsedBar"
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -300,7 +286,6 @@ PageType {
 
     SheetType {
         id: drawer
-        objectName: "drawerProtocol"
 
         bottomY: root.height
         closedY: root.height - collapsedBar.height
@@ -308,8 +293,6 @@ PageType {
         expandedHeight: Qt.platform.os !== "ios" ? root.height * 0.9 : screen.height * 0.77
 
         Item {
-            objectName: "ProtocolDrawerCollapsedContent"
-
             anchors.fill: parent
 
             HomeServerSummary {
@@ -329,7 +312,6 @@ PageType {
 
             ColumnLayout {
                 id: serversMenuHeader
-                objectName: "serversMenuHeader"
 
                 anchors.top: expandedSummary.bottom
                 anchors.right: parent.right
@@ -339,7 +321,6 @@ PageType {
 
                 ButtonType {
                     id: containersDropDown
-                    objectName: "containersDropDown"
 
                     Layout.alignment: Qt.AlignHCenter
                     Layout.maximumWidth: parent.width - 32
@@ -366,7 +347,6 @@ PageType {
 
             ServersListView {
                 id: serversMenuContent
-                objectName: "serversMenuContent"
 
                 anchors.top: serversMenuHeader.bottom
                 anchors.right: parent.right
@@ -381,11 +361,8 @@ PageType {
 
     SheetType {
         id: containersSheet
-        objectName: "containersSheet"
 
         expandedHeight: windowHeight * 0.9
-
-        Component.onCompleted: root.containersDropDownRef = containersSheet
 
         ColumnLayout {
             anchors.fill: parent
@@ -421,7 +398,6 @@ PageType {
 
             HomeContainersListView {
                 id: containersListView
-                objectName: "containersListView"
 
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -431,8 +407,6 @@ PageType {
                 onActivated: containersSheet.close()
 
                 Connections {
-                    objectName: "rowLayoutConnections"
-
                     target: ServersUiController
 
                     function onDefaultServerIdChanged() {
@@ -464,7 +438,6 @@ PageType {
 
     SheetType {
         id: protocolSelectionDrawer
-        objectName: "protocolSelectionDrawer"
 
         expandedHeight: windowHeight * 0.5
 
@@ -515,10 +488,6 @@ PageType {
 
                 model: root.apiAvailableProtocols
 
-                ButtonGroup {
-                    id: protocolDrawerButtonGroup
-                }
-
                 delegate: RadioItemType {
                     id: protocolDrawerRadioButton
 
@@ -528,9 +497,6 @@ PageType {
 
                     text: root.protocolDisplayName(modelData)
 
-                    ButtonGroup.group: protocolDrawerButtonGroup
-
-                    checkable: !ConnectionController.isConnected
                     checked: modelData === root.apiCurrentProtocol
 
                     onClicked: {

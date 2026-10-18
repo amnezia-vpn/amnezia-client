@@ -132,7 +132,6 @@ Item {
 
             IconButtonType {
                 id: backButton
-                objectName: "backButton"
 
                 x: 16
                 y: 4

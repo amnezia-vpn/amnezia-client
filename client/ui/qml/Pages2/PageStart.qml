@@ -19,16 +19,7 @@ PageType {
     property bool isTabBarShown: true
     readonly property real tabBarHeight: tabBar.visible ? tabBar.height : 0
 
-    Keys.onPressed: function(event) {
-        if (event.key === Qt.Key_Back || event.key === Qt.Key_Escape) {
-            PageController.keyPressEvent(event.key)
-            event.accepted = true
-        }
-    }
-
     Connections {
-        objectName: "pageControllerConnection"
-
         target: PageController
 
         function onGoToPageHome() {
@@ -114,8 +105,6 @@ PageType {
     }
 
     Connections {
-        objectName: "connectionControllerConnections"
-
         target: ConnectionController
 
         function onNoInstalledContainers() {
@@ -127,8 +116,6 @@ PageType {
     }
 
     Connections {
-        objectName: "installControllerConnections"
-
         target: InstallController
 
         function onInstallationErrorOccurred(error) {
@@ -191,8 +178,6 @@ PageType {
     }
 
     Connections {
-        objectName: "importControllerConnections"
-
         target: ImportController
 
         function onImportErrorOccurred(error, goToPageHome) {
@@ -207,8 +192,6 @@ PageType {
     }
 
     Connections {
-        objectName: "settingsControllerConnections"
-
         target: SettingsController
 
         function onLoggingDisableByWatcher() {
@@ -276,7 +259,6 @@ PageType {
 
     StackViewType {
         id: tabBarStackView
-        objectName: "tabBarStackView"
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -308,7 +290,6 @@ PageType {
 
     TabBarType {
         id: tabBar
-        objectName: "tabBar"
 
         anchors.right: parent.right
         anchors.left: parent.left
@@ -327,7 +308,6 @@ PageType {
 
         TabBarButtonType {
             id: homeTabButton
-            objectName: "homeTabButton"
 
             text: qsTr("Home")
             icon.source: "qrc:/images/controls/home.svg"
@@ -335,13 +315,11 @@ PageType {
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageHome)
                 ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
-                tabBar.currentIndex = 0
             }
         }
 
         TabBarButtonType {
             id: shareTabButton
-            objectName: "shareTabButton"
 
             Connections {
                 target: ServersModel
@@ -363,13 +341,11 @@ PageType {
 
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageShare)
-                tabBar.currentIndex = 1
             }
         }
 
         TabBarButtonType {
             id: settingsTabButton
-            objectName: "settingsTabButton"
 
             text: qsTr("Settings")
             icon.source: "qrc:/images/controls/settings.svg"
@@ -377,20 +353,17 @@ PageType {
 
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSettings)
-                tabBar.currentIndex = 2
             }
         }
 
         TabBarButtonType {
             id: plusTabButton
-            objectName: "plusTabButton"
 
             text: qsTr("Add")
             icon.source: "qrc:/images/controls/plus.svg"
 
             onClicked: {
                 tabBarStackView.goToTabBarPage(PageEnum.PageSetupWizardConfigSource)
-                tabBar.currentIndex = 3
             }
         }
     }

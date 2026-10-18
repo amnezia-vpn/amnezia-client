@@ -48,34 +48,12 @@ PageType {
         }
     }
 
-    QtObject {
-        id: routeMode
-        property int allSites: 0
-        property int onlyForwardSites: 1
-        property int allExceptSites: 2
-    }
-
-    property list<QtObject> routeModesModel: [
-        onlyForwardSites,
-        allExceptSites
+    readonly property var routeModes: [
+        { type: 1, segmentName: qsTr("Via VPN"), name: qsTr("Only the sites listed here will be accessed through the VPN") },
+        { type: 2, segmentName: qsTr("Directly"), name: qsTr("Addresses from the list should not be accessed via VPN") }
     ]
 
-    QtObject {
-        id: onlyForwardSites
-        property string segmentName: qsTr("Via VPN")
-        property string name: qsTr("Only the sites listed here will be accessed through the VPN")
-        property int type: routeMode.onlyForwardSites
-    }
-    QtObject {
-        id: allExceptSites
-        property string segmentName: qsTr("Directly")
-        property string name: qsTr("Addresses from the list should not be accessed via VPN")
-        property int type: routeMode.allExceptSites
-    }
-
-    function getRouteModesModelIndex() {
-        return IpSplitTunnelingController.routeMode === routeMode.allExceptSites ? 1 : 0
-    }
+    readonly property int routeModeIndex: IpSplitTunnelingController.routeMode === 2 ? 1 : 0
 
     ListViewType {
         id: listView
@@ -145,12 +123,12 @@ PageType {
 
                 enabled: root.pageEnabled
 
-                model: [onlyForwardSites.segmentName, allExceptSites.segmentName]
-                currentIndex: root.getRouteModesModelIndex()
+                model: root.routeModes.map(function(mode) { return mode.segmentName })
+                currentIndex: root.routeModeIndex
 
                 onActivated: function(index) {
-                    if (IpSplitTunnelingController.routeMode !== root.routeModesModel[index].type) {
-                        IpSplitTunnelingController.routeMode = root.routeModesModel[index].type
+                    if (IpSplitTunnelingController.routeMode !== root.routeModes[index].type) {
+                        IpSplitTunnelingController.routeMode = root.routeModes[index].type
                     }
                 }
 
@@ -158,7 +136,7 @@ PageType {
                     target: IpSplitTunnelingController
 
                     function onRouteModeChanged() {
-                        modeSelector.currentIndex = root.getRouteModesModelIndex()
+                        modeSelector.currentIndex = root.routeModeIndex
                     }
                 }
             }
@@ -170,7 +148,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                text: root.routeModesModel[modeSelector.currentIndex].name
+                text: root.routeModes[modeSelector.currentIndex].name
                 color: AmneziaStyle.color.textSecondary
             }
         }
@@ -199,15 +177,8 @@ PageType {
 
                     var yesButtonFunction = function() {
                         IpSplitTunnelingController.removeSite(proxyIpSplitTunnelingModel.mapToSource(index))
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
                     }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
-                    }
+                    var noButtonFunction = function() {}
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }

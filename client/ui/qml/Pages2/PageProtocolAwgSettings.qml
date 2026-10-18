@@ -16,7 +16,6 @@ import "../Controls2/TextTypes"
 import "../Config"
 import "../Components"
 
-
 PageType {
     id: root
 
@@ -490,12 +489,6 @@ PageType {
         enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
 
         text: qsTr("Save")
-
-        onActiveFocusChanged: {
-            if(activeFocus) {
-                listView.positionViewAtEnd()
-            }
-        }
 
         onClicked: {
             forceActiveFocus()

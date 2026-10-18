@@ -10,7 +10,6 @@
         <file>Components/UpdateSupportDrawer.qml</file>
         <file>Components/PromoBanner.qml</file>
         <file>Components/ConnectButton.qml</file>
-        <file>Components/ConnectionTypeSelectionDrawer.qml</file>
         <file>Components/CountryListStickyHeader.qml</file>
         <file>Components/CountrySearchRow.qml</file>
         <file>Components/CountrySectionHeader.qml</file>

@@ -49,7 +49,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -65,15 +64,12 @@ PageType {
     }
 
     ColumnLayout {
-        objectName: "mainLayout"
-
         anchors.fill: parent
 
         spacing: 0
 
         NavigationBarType {
             id: headerContent
-            objectName: "headerContent"
 
             Layout.fillWidth: true
 
@@ -93,7 +89,6 @@ PageType {
 
             IconButtonType {
                 id: editButton
-                objectName: "editButton"
 
                 size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/edit-3.svg"

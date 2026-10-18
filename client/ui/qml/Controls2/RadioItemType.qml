@@ -30,6 +30,7 @@ RadioDelegate {
     leftPadding: 12 + 48 + spacing
     spacing: 12
 
+    checkable: false
     hoverEnabled: true
     focusPolicy: Qt.TabFocus
     opacity: enabled ? 1.0 : 0.4

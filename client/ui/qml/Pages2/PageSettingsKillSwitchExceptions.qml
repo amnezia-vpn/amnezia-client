@@ -82,15 +82,8 @@ PageType {
 
                     var yesButtonFunction = function() {
                         AllowedDnsController.removeDns(dnsFilterModel.mapToSource(index))
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
                     }
-                    var noButtonFunction = function() {
-                        if (!GC.isMobile()) {
-                            site.forceActiveFocus(Qt.TabFocusReason)
-                        }
-                    }
+                    var noButtonFunction = function() {}
 
                     showQuestionDrawer(headerText, "", yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                 }

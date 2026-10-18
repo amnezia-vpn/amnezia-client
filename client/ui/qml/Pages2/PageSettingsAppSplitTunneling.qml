@@ -31,37 +31,12 @@ PageType {
         }
     }
 
-    QtObject {
-        id: routeMode
-        property int allApps: 0
-        property int onlyForwardApps: 1
-        property int allExceptApps: 2
-    }
-
-    property list<QtObject> routeModesModel: [
-        onlyForwardApps,
-        allExceptApps
+    readonly property var routeModes: [
+        { type: 1, segmentName: qsTr("Via VPN"), name: qsTr("Only the apps from the list should have access via VPN") },
+        { type: 2, segmentName: qsTr("Directly"), name: qsTr("Apps from the list should not have access via VPN") }
     ]
 
-    QtObject {
-        id: onlyForwardApps
-
-        readonly property string segmentName: qsTr("Via VPN")
-        readonly property string name: qsTr("Only the apps from the list should have access via VPN")
-        readonly property int type: routeMode.onlyForwardApps
-    }
-
-    QtObject {
-        id: allExceptApps
-
-        readonly property string segmentName: qsTr("Directly")
-        readonly property string name: qsTr("Apps from the list should not have access via VPN")
-        readonly property int type: routeMode.allExceptApps
-    }
-
-    function getRouteModesModelIndex() {
-        return AppSplitTunnelingController.routeMode === routeMode.allExceptApps ? 1 : 0
-    }
+    readonly property int routeModeIndex: AppSplitTunnelingController.routeMode === 2 ? 1 : 0
 
     ListViewType {
         id: listView
@@ -125,12 +100,12 @@ PageType {
 
                 enabled: (Qt.platform.os === "android") && root.pageEnabled
 
-                model: [onlyForwardApps.segmentName, allExceptApps.segmentName]
-                currentIndex: root.getRouteModesModelIndex()
+                model: root.routeModes.map(function(mode) { return mode.segmentName })
+                currentIndex: root.routeModeIndex
 
                 onActivated: function(index) {
-                    if (AppSplitTunnelingController.routeMode !== root.routeModesModel[index].type) {
-                        AppSplitTunnelingController.routeMode = root.routeModesModel[index].type
+                    if (AppSplitTunnelingController.routeMode !== root.routeModes[index].type) {
+                        AppSplitTunnelingController.routeMode = root.routeModes[index].type
                     }
                 }
 
@@ -138,7 +113,7 @@ PageType {
                     target: AppSplitTunnelingController
 
                     function onRouteModeChanged() {
-                        modeSelector.currentIndex = root.getRouteModesModelIndex()
+                        modeSelector.currentIndex = root.routeModeIndex
                     }
                 }
             }
@@ -150,7 +125,7 @@ PageType {
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 24
 
-                text: root.routeModesModel[modeSelector.currentIndex].name
+                text: root.routeModes[modeSelector.currentIndex].name
                 color: AmneziaStyle.color.textSecondary
             }
 

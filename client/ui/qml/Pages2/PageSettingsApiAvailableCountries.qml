@@ -145,7 +145,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -162,6 +161,8 @@ PageType {
 
     ListViewType {
         id: menuContent
+
+        reuseItems: true
 
         anchors.top: parent.top
         anchors.topMargin: collapsingHeader.topBarHeight
@@ -270,7 +271,6 @@ PageType {
         navigationButtons: [
             IconButtonType {
                 id: settingsButton
-                objectName: "settingsButton"
 
                 size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/settings.svg"

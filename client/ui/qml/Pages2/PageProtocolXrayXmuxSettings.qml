@@ -209,11 +209,7 @@ PageType {
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
                 InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
             }
-            var noButtonFunction = function () {
-                if (typeof GC !== "undefined" && !GC.isMobile()) {
-                    saveButton.forceActiveFocus()
-                }
-            }
+            var noButtonFunction = function () {}
             showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }

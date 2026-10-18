@@ -15,7 +15,7 @@ import "../Components"
 PageType {
     id: root
 
-    enableTimer: false
+    focusOnActivation: false
 
     property bool portDirty: false
     property string portText: ""
@@ -45,9 +45,7 @@ PageType {
             PageController.goToPage(PageEnum.PageSetupWizardInstalling);
             InstallController.updateServerConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.Xray)
         }
-        var noButtonFunction = function() {
-            if (!GC.isMobile()) saveButton.forceActiveFocus()
-        }
+        var noButtonFunction = function() {}
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 

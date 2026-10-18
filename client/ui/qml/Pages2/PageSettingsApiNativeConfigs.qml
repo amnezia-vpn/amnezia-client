@@ -73,6 +73,8 @@ PageType {
     ListViewType {
         id: menuContent
 
+        reuseItems: true
+
         anchors.top: parent.top
         anchors.topMargin: collapsingHeader.topBarHeight
         anchors.left: parent.left
@@ -247,16 +249,6 @@ PageType {
             onShowAllRequested: {
                 searchRow.searchField.clear()
                 ApiConfigsCountryListModel.activeUseCaseId = "all"
-            }
-        }
-    }
-
-    Connections {
-        target: collapsingHeader.backButton
-
-        function onActiveFocusChanged() {
-            if (collapsingHeader.backButton.enabled && collapsingHeader.backButton.activeFocus) {
-                menuContent.positionViewAtBeginning()
             }
         }
     }

@@ -89,18 +89,6 @@ void PageController::hideWindow()
 #endif
 }
 
-void PageController::keyPressEvent(Qt::Key key)
-{
-    switch (key) {
-    case Qt::Key_Back:
-    case Qt::Key_Escape: {
-        emit escapePressed();
-        break;
-    }
-    default: return;
-    }
-}
-
 unsigned int PageController::getInitialPageNavigationBarColor()
 {
     if (m_serversController->getServersCount()) {

@@ -88,8 +88,6 @@ PageType {
 
         anchors.fill: parent
 
-        currentIndex: -1
-
         model: proxyContainersModel
 
         delegate: ColumnLayout {
