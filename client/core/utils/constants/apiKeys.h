@@ -99,6 +99,17 @@ namespace apiDefs
         constexpr QLatin1String expiresAt("expires_at");
         constexpr QLatin1String isConnectEvent("is_connect_event");
         constexpr QLatin1String certificate("certificate");
+
+        constexpr QLatin1String code("code");
+        constexpr QLatin1String idempotencyKey("idempotency_key");
+        constexpr QLatin1String retryAfter("retry_after");
+        constexpr QLatin1String requestId("request_id");
+        constexpr QLatin1String status("status");
+        constexpr QLatin1String userId("user_id");
+        constexpr QLatin1String accessToken("access_token");
+        constexpr QLatin1String refreshToken("refresh_token");
+        constexpr QLatin1String expiresIn("expires_in");
+        constexpr QLatin1String passwordMustChange("password_must_change");
     } // namespace key
 } // namespace apiDefs
 

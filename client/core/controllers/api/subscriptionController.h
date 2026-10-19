@@ -32,6 +32,14 @@ public:
         bool isRequired = false;
     };
 
+    struct FreeAccountData {
+        ProtocolData protocolData;
+        QString userId;
+        QString accessToken;
+        QString captchaId;
+        QString captchaSolution;
+    };
+
     explicit SubscriptionController(SecureServersRepository* serversRepository,
                                      SecureAppSettingsRepository* appSettingsRepository);
 
@@ -44,6 +52,11 @@ public:
                                       CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
+    ErrorCode requestFreeCaptcha(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol,
+                                 CaptchaInfo &captchaInfo);
+    ErrorCode importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                           const QString &serviceProtocol, const FreeAccountData &accountData,
+                                           CaptchaInfo *retryCaptchaOut = nullptr);
 
     ErrorCode updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,
                                        CaptchaInfo *captchaInfoOut = nullptr, ProtocolData *usedProtocolDataOut = nullptr);

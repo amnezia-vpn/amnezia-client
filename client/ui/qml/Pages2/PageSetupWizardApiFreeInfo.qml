@@ -115,6 +115,15 @@ PageType {
 
             onClicked: {
                 PageController.showBusyIndicator(true)
+                var hasPurchasedKey = SubscriptionUiController.hasPurchasedKey()
+                PageController.showBusyIndicator(false)
+
+                if (!hasPurchasedKey) {
+                    freeAccountLoginDialog.start()
+                    return
+                }
+
+                PageController.showBusyIndicator(true)
                 var result = SubscriptionUiController.importFreeFromGateway()
                 PageController.showBusyIndicator(false)
 
@@ -129,5 +138,9 @@ PageType {
                 }
             }
         }
+    }
+
+    FreeAccountLoginDialog {
+        id: freeAccountLoginDialog
     }
 }

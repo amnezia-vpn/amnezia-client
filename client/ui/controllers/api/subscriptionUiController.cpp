@@ -15,6 +15,7 @@
 #include <QEventLoop>
 #include <QFutureWatcher>
 #include <QTimer>
+#include <QUuid>
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "platforms/ios/ios_controller.h"
@@ -25,6 +26,23 @@
 namespace
 {
 constexpr char premiumServiceType[] = "amnezia-premium";
+
+QString freeAccountErrorKind(AccountController::Error error)
+{
+    using Error = AccountController::Error;
+    switch (error) {
+    case Error::NoNetwork: return QStringLiteral("noNetwork");
+    case Error::RateLimited: return QStringLiteral("rateLimited");
+    case Error::InvalidCode: return QStringLiteral("invalidCode");
+    case Error::Conflict: return QStringLiteral("retry");
+    default: return QStringLiteral("failed");
+    }
+}
+
+QString newIdempotencyKey()
+{
+    return QUuid::createUuid().toString(QUuid::WithoutBraces);
+}
 }
 
 SubscriptionUiController::SubscriptionUiController(ServersController* serversController,
@@ -32,6 +50,7 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
                                            ServicesCatalogController* servicesCatalogController,
                                            SubscriptionController* subscriptionController,
                                            StorePurchaseController* storePurchaseController,
+                                           AccountController* accountController,
                                            ApiSubscriptionPlansModel* apiSubscriptionPlansModel,
                                            ApiBenefitsModel* apiBenefitsModel,
                                            ApiAccountInfoModel* apiAccountInfoModel,
@@ -46,6 +65,7 @@ SubscriptionUiController::SubscriptionUiController(ServersController* serversCon
       m_servicesCatalogController(servicesCatalogController),
       m_subscriptionController(subscriptionController),
       m_storePurchaseController(storePurchaseController),
+      m_accountController(accountController),
       m_apiSubscriptionPlansModel(apiSubscriptionPlansModel),
       m_apiBenefitsModel(apiBenefitsModel),
       m_apiAccountInfoModel(apiAccountInfoModel),
@@ -611,6 +631,218 @@ bool SubscriptionUiController::importTrialFromGateway(const QString &email)
 
     emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
     return true;
+}
+
+bool SubscriptionUiController::hasPurchasedKey()
+{
+    for (int i = 0; i < m_serversController->getServersCount(); ++i) {
+        const auto apiV2 = m_serversController->apiV2Config(m_serversController->getServerId(i));
+        if (apiV2.has_value() && (apiV2->apiConfig.isPremium() || apiV2->apiConfig.isExternalPremium())) {
+            return true;
+        }
+    }
+
+#if defined(Q_OS_ANDROID)
+    if (!AndroidController::instance()->isPlay()) {
+        return false;
+    }
+    return !m_storePurchaseController->resolveActiveStoreProductIds().isEmpty();
+#elif defined(Q_OS_IOS) || defined(MACOS_NE)
+    return !m_storePurchaseController->resolveActiveStoreProductIds().isEmpty();
+#else
+    return false;
+#endif
+}
+
+bool SubscriptionUiController::startFreeAccountLogin()
+{
+    m_freeAccount = FreeAccountState{};
+
+    if (m_serversController->isServerFromApiAlreadyExists(m_apiServicesModel->getCountryCode(),
+                                                          m_apiServicesModel->getSelectedServiceType(),
+                                                          m_apiServicesModel->getSelectedServiceProtocol())) {
+        emit errorOccurred(ErrorCode::ApiConfigAlreadyAdded);
+        emit freeAccountLoginFailed(QString(), 0);
+        return false;
+    }
+
+    m_freeAccount.protocolData = SubscriptionController::generateProtocolData(m_apiServicesModel->getSelectedServiceProtocol());
+    return requestFreeAccountCaptcha();
+}
+
+void SubscriptionUiController::refreshFreeAccountCaptcha()
+{
+    requestFreeAccountCaptcha();
+}
+
+bool SubscriptionUiController::requestFreeAccountCaptcha()
+{
+    SubscriptionController::CaptchaInfo captchaInfo;
+    const ErrorCode errorCode = m_subscriptionController->requestFreeCaptcha(m_apiServicesModel->getCountryCode(),
+                                                                             m_apiServicesModel->getSelectedServiceType(),
+                                                                             m_apiServicesModel->getSelectedServiceProtocol(),
+                                                                             captchaInfo);
+    if (errorCode != ErrorCode::NoError) {
+        qWarning().noquote() << "[FreeAccount] Captcha request failed, errorCode =" << static_cast<int>(errorCode);
+        emit errorOccurred(errorCode);
+        emit freeAccountLoginFailed(QString(), 0);
+        return false;
+    }
+
+    m_freeAccount.captchaId = captchaInfo.captchaId;
+    m_freeAccount.captchaSolution.clear();
+    if (!captchaInfo.isRequired) {
+        emit freeAccountCaptchaPassed();
+        return true;
+    }
+    emit freeAccountCaptchaRequired(captchaInfo.captchaId, captchaInfo.captchaImageBase64,
+                                    captchaInfo.hint.isEmpty() ? tr("Enter the digits from the image to continue") : captchaInfo.hint);
+    return true;
+}
+
+bool SubscriptionUiController::solveFreeAccountCaptcha(const QString &solution)
+{
+    const QString trimmedSolution = solution.trimmed();
+    if (m_freeAccount.captchaId.isEmpty() || trimmedSolution.isEmpty()) {
+        emit freeAccountLoginFailed(QStringLiteral("captchaInvalid"), 0);
+        return false;
+    }
+
+    m_freeAccount.captchaSolution = trimmedSolution;
+    if (m_freeAccount.session.isValid()) {
+        return importFreeAccountConfig();
+    }
+    emit freeAccountCaptchaPassed();
+    return true;
+}
+
+bool SubscriptionUiController::requestFreeEmailCode(const QString &email)
+{
+    const QString trimmedEmail = email.trimmed();
+    if (trimmedEmail.isEmpty()) {
+        emit freeAccountLoginFailed(QStringLiteral("failed"), 0);
+        return false;
+    }
+
+    m_freeAccount.email = trimmedEmail;
+    return sendFreeEmailCode();
+}
+
+bool SubscriptionUiController::resendFreeEmailCode()
+{
+    return sendFreeEmailCode();
+}
+
+bool SubscriptionUiController::sendFreeEmailCode()
+{
+    if (m_freeAccount.email.isEmpty()) {
+        emit freeAccountLoginFailed(QStringLiteral("failed"), 0);
+        return false;
+    }
+
+    AccountController::Error error = AccountController::Error::None;
+    int retryAfterSec = 0;
+    const ErrorCode errorCode = m_accountController->requestEmailCode(m_freeAccount.email, newIdempotencyKey(), error, retryAfterSec);
+    if (errorCode != ErrorCode::NoError) {
+        qWarning().noquote() << "[FreeAccount] Code request failed, errorCode =" << static_cast<int>(errorCode)
+                             << "retry after =" << retryAfterSec;
+        emit freeAccountLoginFailed(freeAccountErrorKind(error), retryAfterSec);
+        return false;
+    }
+
+    m_freeAccount.consumeCode.clear();
+    m_freeAccount.consumeIdempotencyKey.clear();
+    m_freeAccount.session = AccountController::Session{};
+    emit freeEmailCodeSent(retryAfterSec);
+    return true;
+}
+
+bool SubscriptionUiController::confirmFreeEmailCode(const QString &code)
+{
+    if (m_freeAccount.email.isEmpty()) {
+        emit freeAccountLoginFailed(QStringLiteral("failed"), 0);
+        return false;
+    }
+
+    if (!m_freeAccount.session.isValid()) {
+        const QString trimmedCode = code.trimmed().toUpper();
+        if (trimmedCode.isEmpty()) {
+            emit freeAccountLoginFailed(QStringLiteral("invalidCode"), 0);
+            return false;
+        }
+
+        // Same email + code reuses the key, so a retry replays the issued session instead of spending a new code
+        if (trimmedCode != m_freeAccount.consumeCode || m_freeAccount.consumeIdempotencyKey.isEmpty()) {
+            m_freeAccount.consumeCode = trimmedCode;
+            m_freeAccount.consumeIdempotencyKey = newIdempotencyKey();
+        }
+
+        AccountController::Error error = AccountController::Error::None;
+        int retryAfterSec = 0;
+        AccountController::Session session;
+        const ErrorCode errorCode = m_accountController->consumeEmailCode(m_freeAccount.email, trimmedCode,
+                                                                              m_freeAccount.consumeIdempotencyKey,
+                                                                              session, error, retryAfterSec);
+        if (errorCode != ErrorCode::NoError) {
+            qWarning().noquote() << "[FreeAccount] Code confirmation failed, errorCode =" << static_cast<int>(errorCode);
+            emit freeAccountLoginFailed(freeAccountErrorKind(error), retryAfterSec);
+            return false;
+        }
+        m_freeAccount.session = session;
+    }
+
+    return importFreeAccountConfig();
+}
+
+bool SubscriptionUiController::importFreeAccountConfig()
+{
+    SubscriptionController::FreeAccountData accountData;
+    accountData.protocolData = m_freeAccount.protocolData;
+    accountData.userId = m_freeAccount.session.userId;
+    accountData.accessToken = m_freeAccount.session.accessToken;
+    accountData.captchaId = m_freeAccount.captchaId;
+    accountData.captchaSolution = m_freeAccount.captchaSolution;
+
+    SubscriptionController::CaptchaInfo retryCaptcha;
+    const ErrorCode importError = m_subscriptionController->importFreeAccountFromGateway(m_apiServicesModel->getCountryCode(),
+                                                                                         m_apiServicesModel->getSelectedServiceType(),
+                                                                                         m_apiServicesModel->getSelectedServiceProtocol(),
+                                                                                         accountData, &retryCaptcha);
+    if (importError != ErrorCode::NoError) {
+        qWarning().noquote() << "[FreeAccount] Config import failed, errorCode =" << static_cast<int>(importError);
+        if (retryCaptcha.isRequired) {
+            m_freeAccount.captchaId = retryCaptcha.captchaId;
+            m_freeAccount.captchaSolution.clear();
+            emit freeAccountCaptchaRequired(retryCaptcha.captchaId, retryCaptcha.captchaImageBase64,
+                                            retryCaptcha.hint.isEmpty() ? tr("Enter the digits from the image to continue") : retryCaptcha.hint);
+            emit freeAccountLoginFailed(importError == ErrorCode::ApiCaptchaInvalidError ? QStringLiteral("captchaInvalid")
+                                                                                         : QStringLiteral("captchaRetry"), 0);
+            return false;
+        }
+        emit errorOccurred(importError);
+        emit freeAccountLoginFailed(QStringLiteral("config"), 0);
+        return false;
+    }
+
+    const QString serverId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
+    QJsonObject accountInfo;
+    const ErrorCode accountInfoError = m_subscriptionController->getAccountInfo(serverId, accountInfo);
+    const auto apiV2 = m_serversController->apiV2Config(serverId);
+    if (accountInfoError != ErrorCode::NoError || !apiV2.has_value()) {
+        qWarning().noquote() << "[FreeAccount] Account info request failed, errorCode =" << static_cast<int>(accountInfoError);
+    } else {
+        m_apiAccountInfoModel->updateModel(accountInfo, apiV2->toJson());
+    }
+
+    m_freeAccount = FreeAccountState{};
+    emit freeAccountLoginFinished();
+    emit installServerFromApiFinished(tr("%1 installed successfully.").arg(m_apiServicesModel->getSelectedServiceName()));
+    return true;
+}
+
+void SubscriptionUiController::cancelFreeAccountLogin()
+{
+    m_freeAccount = FreeAccountState{};
 }
 
 bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,

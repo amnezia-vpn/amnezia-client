@@ -35,6 +35,9 @@ using namespace amnezia;
 
 namespace
 {
+constexpr int httpStatusCodeBadRequest = 400;
+constexpr int httpStatusCodeUnprocessableEntity = 422;
+
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
     if (apiConfig.subscriptionExpiredByServer) {
@@ -305,6 +308,70 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
                                    serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
     return ErrorCode::NoError;
+}
+
+ErrorCode SubscriptionController::requestFreeCaptcha(const QString &userCountryCode, const QString &serviceType,
+                                                     const QString &serviceProtocol, CaptchaInfo &captchaInfo)
+{
+    captchaInfo = CaptchaInfo{};
+
+    // Probe without a public key: the gateway can answer with a captcha or a validation error, but cannot issue a config
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                     .addField(apiDefs::key::serviceType, serviceType)
+                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
+                                     .build();
+
+    QByteArray responseBody;
+    const ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+    if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
+        return fillCaptchaInfoFromResponse(responseBody, captchaInfo) ? ErrorCode::NoError : errorCode;
+    }
+    if (errorCode == ErrorCode::NoError) {
+        qWarning().noquote() << "[FreeAccount] Gateway issued a config for the captcha probe, it is discarded";
+        return ErrorCode::NoError;
+    }
+
+    const int httpStatus = QJsonDocument::fromJson(responseBody).object().value(apiDefs::key::httpStatus).toInt();
+    if (errorCode == ErrorCode::ApiConfigDownloadError
+        && (httpStatus == httpStatusCodeBadRequest || httpStatus == httpStatusCodeUnprocessableEntity)) {
+        qDebug().noquote() << "[FreeAccount] Captcha is not required, probe rejected with http status" << httpStatus;
+        return ErrorCode::NoError;
+    }
+    return errorCode;
+}
+
+ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
+                                                               const QString &serviceProtocol, const FreeAccountData &accountData,
+                                                               CaptchaInfo *retryCaptchaOut)
+{
+    if (accountData.accessToken.isEmpty()) {
+        return ErrorCode::ApiAccountSessionError;
+    }
+
+    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
+                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
+                                     .addField(apiDefs::key::serviceType, serviceType)
+                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
+                                     .addField(apiDefs::key::publicKey, publicKeyForProtocol(serviceProtocol, accountData.protocolData))
+                                     .addField(apiDefs::key::userId, accountData.userId)
+                                     .addField(apiDefs::key::accessToken, accountData.accessToken)
+                                     .addField(apiDefs::key::captchaId, accountData.captchaId)
+                                     .addField(apiDefs::key::captchaSolution, normalizeCaptchaSolution(accountData.captchaSolution))
+                                     .build();
+
+    QByteArray responseBody;
+    ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
+    if (errorCode != ErrorCode::NoError) {
+        if (retryCaptchaOut
+            && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
+                || errorCode == ErrorCode::ApiCaptchaRequiredError)) {
+            fillCaptchaInfoFromResponse(responseBody, *retryCaptchaOut);
+        }
+        return errorCode;
+    }
+
+    return applyImportedServiceConfig(userCountryCode, serviceType, serviceProtocol, accountData.protocolData, responseBody);
 }
 
 ErrorCode SubscriptionController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, bool isConnectEvent,

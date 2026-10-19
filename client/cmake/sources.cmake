@@ -48,6 +48,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.h
+    ${CLIENT_ROOT_DIR}/core/controllers/api/accountController.h
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.h
     ${CLIENT_ROOT_DIR}/core/controllers/updateController.h
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.h
@@ -134,6 +135,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/controllers/api/servicesCatalogController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/storePurchaseController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/subscriptionController.cpp
+    ${CLIENT_ROOT_DIR}/core/controllers/api/accountController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/api/newsController.cpp
     ${CLIENT_ROOT_DIR}/core/controllers/updateController.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.cpp

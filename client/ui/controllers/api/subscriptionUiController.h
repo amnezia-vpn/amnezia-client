@@ -12,6 +12,7 @@
 #include "core/controllers/api/servicesCatalogController.h"
 #include "core/controllers/api/storePurchaseController.h"
 #include "core/controllers/api/subscriptionController.h"
+#include "core/controllers/api/accountController.h"
 #include "ui/models/api/apiSubscriptionPlansModel.h"
 #include "ui/models/api/apiBenefitsModel.h"
 #include "ui/models/api/apiServicesModel.h"
@@ -28,6 +29,7 @@ public:
                          ServicesCatalogController* servicesCatalogController,
                          SubscriptionController* subscriptionController,
                          StorePurchaseController* storePurchaseController,
+                         AccountController* accountController,
                          ApiSubscriptionPlansModel* apiSubscriptionPlansModel,
                          ApiBenefitsModel* apiBenefitsModel,
                          ApiAccountInfoModel* apiAccountInfoModel,
@@ -54,6 +56,14 @@ public slots:
     bool importFreeFromGateway();
     bool restoreServiceFromStore();
     bool importTrialFromGateway(const QString &email);
+    bool hasPurchasedKey();
+    bool startFreeAccountLogin();
+    void refreshFreeAccountCaptcha();
+    bool solveFreeAccountCaptcha(const QString &solution);
+    bool requestFreeEmailCode(const QString &email);
+    bool resendFreeEmailCode();
+    bool confirmFreeEmailCode(const QString &code);
+    void cancelFreeAccountLogin();
     bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool deactivateDevice(const QString &serverId);
@@ -84,6 +94,11 @@ signals:
     void configValidated(bool isValid);
     void errorOccurred(ErrorCode errorCode);
     void trialEmailError(const QString &message);
+    void freeAccountCaptchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
+    void freeAccountCaptchaPassed();
+    void freeEmailCodeSent(int retryAfterSec);
+    void freeAccountLoginFailed(const QString &kind, int retryAfterSec);
+    void freeAccountLoginFinished();
     void subscriptionExpiredOnServer();
     void renewalLinkReceived(const QString &url);
 
@@ -142,6 +157,10 @@ private:
     bool selectPremiumServiceQuietly();
     void applyDefaultServerAfterInstall(int preferredDefaultServerIndex);
 
+    bool requestFreeAccountCaptcha();
+    bool sendFreeEmailCode();
+    bool importFreeAccountConfig();
+
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
     void onStoreTransactionUpdated(const QVariantMap &transaction);
     void processStoreTransactionUpdate(const QVariantMap &transaction);
@@ -157,6 +176,16 @@ private:
     int getQrCodesCount();
     QString getVpnKey();
 
+    struct FreeAccountState {
+        SubscriptionController::ProtocolData protocolData;
+        QString captchaId;
+        QString captchaSolution;
+        QString email;
+        QString consumeCode;
+        QString consumeIdempotencyKey;
+        AccountController::Session session;
+    } m_freeAccount;
+
     QList<QString> m_qrCodes;
     QString m_vpnKey;
 
@@ -165,6 +194,7 @@ private:
     ServicesCatalogController* m_servicesCatalogController;
     SubscriptionController* m_subscriptionController;
     StorePurchaseController* m_storePurchaseController;
+    AccountController* m_accountController;
     ApiSubscriptionPlansModel* m_apiSubscriptionPlansModel;
     ApiBenefitsModel* m_apiBenefitsModel;
     ApiAccountInfoModel* m_apiAccountInfoModel;
