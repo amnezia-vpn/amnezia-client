@@ -1,8 +1,5 @@
 #include "backupUiController.h"
 
-#include <QDebug>
-#include <QTimer>
-
 #include "core/controllers/serversController.h"
 #include "ui/controllers/serversUiController.h"
 #ifdef Q_OS_IOS
@@ -16,44 +13,21 @@ BackupUiController::BackupUiController(BackupController *backupController, Serve
       m_serversController(serversController),
       m_serversUiController(serversUiController)
 {
+    connect(m_backupController, &BackupController::backupCreated, this, &BackupUiController::backupCreated);
+    connect(m_backupController, &BackupController::backupDownloaded, this, &BackupUiController::onBackupDownloaded);
+    connect(m_backupController, &BackupController::backupRestored, this, &BackupUiController::backupRestored);
+    connect(m_backupController, &BackupController::defaultServerAndContainerSet, this,
+            &BackupUiController::defaultServerAndContainerSet);
     connect(m_backupController, &BackupController::progressChanged, this, &BackupUiController::progressChanged);
+    connect(m_backupController, &BackupController::errorOccurred, this, &BackupUiController::errorOccurred);
 }
 
 void BackupUiController::createBackupWithDownload(bool downloadToDevice, bool deleteFromServer)
 {
     ServerCredentials credentials;
-    if (!serverCredentials(false, credentials)) {
-        return;
+    if (serverCredentials(false, credentials)) {
+        m_backupController->createAndDownloadBackup(credentials, downloadToDevice, deleteFromServer);
     }
-
-    QString backupFilename;
-    ErrorCode error = m_backupController->createBackup(credentials, backupFilename);
-    if (error != ErrorCode::NoError) {
-        emit errorOccurred(tr("Failed to create backup: %1").arg(m_backupController->lastError()));
-        return;
-    }
-
-    if (!downloadToDevice) {
-        emit backupCreated(backupFilename);
-        return;
-    }
-
-    const QString localPath = BackupController::defaultDownloadPath(backupFilename);
-    error = m_backupController->downloadBackup(credentials, backupFilename, localPath);
-    if (error != ErrorCode::NoError) {
-        emit errorOccurred(tr("Failed to download backup: %1").arg(m_backupController->lastError()));
-        return;
-    }
-
-#ifdef Q_OS_IOS
-    IosController::Instance()->shareText(QStringList { localPath });
-#endif
-
-    if (deleteFromServer && m_backupController->deleteBackup(credentials, backupFilename) != ErrorCode::NoError) {
-        qWarning() << "Failed to delete backup from server:" << m_backupController->lastError();
-    }
-
-    emit backupDownloaded(localPath);
 }
 
 void BackupUiController::startRestore(bool isFromSetupWizard, const QString &backupFilePath, bool replaceMode,
@@ -69,20 +43,16 @@ void BackupUiController::startRestore(bool isFromSetupWizard, const QString &bac
         return;
     }
 
-    QString remoteFilename;
-    ErrorCode error = m_backupController->uploadBackup(credentials, backupFilePath, remoteFilename);
-    if (error != ErrorCode::NoError) {
-        emit errorOccurred(tr("Failed to upload backup: %1").arg(m_backupController->lastError()));
-        return;
-    }
+    m_backupController->uploadAndRestore(credentials, backupFilePath, replaceMode);
+}
 
-    error = m_backupController->restoreBackup(credentials, remoteFilename, replaceMode);
-    if (error != ErrorCode::NoError) {
-        emit errorOccurred(tr("Failed to restore backup: %1").arg(m_backupController->lastError()));
-        return;
+void BackupUiController::setDefaultServerAfterRestore()
+{
+    const int serversCount = m_serversUiController->getServersCount();
+    if (serversCount > 0) {
+        m_serversUiController->setProcessedServerId(m_serversUiController->getServerId(serversCount - 1));
     }
-
-    emit backupRestored();
+    m_backupController->setDefaultServerAfterRestore();
 }
 
 QStringList BackupUiController::scanBackupForContainers(const QString &localPath)
@@ -96,19 +66,12 @@ QVariantMap BackupUiController::getBackupFileInfo(const QString &backupFilePath)
     return { { "fileName", info.fileName }, { "serverIp", info.serverIp } };
 }
 
-bool BackupUiController::setDefaultServerAfterRestore(bool isFromSetupWizard)
+void BackupUiController::onBackupDownloaded(const QString &localPath)
 {
-    if (!isFromSetupWizard || m_serversController->getServersCount() == 0) {
-        return false;
-    }
-
-    const int serverIndex = m_serversController->getServersCount() - 1;
-    m_serversUiController->setDefaultServerAtIndex(serverIndex);
-    m_serversUiController->setProcessedServerId(m_serversController->getServerId(serverIndex));
-
-    m_containerRetryCount = 0;
-    QTimer::singleShot(500, this, &BackupUiController::trySetDefaultContainer);
-    return true;
+#ifdef Q_OS_IOS
+    IosController::Instance()->shareText(QStringList { localPath });
+#endif
+    emit backupDownloaded(localPath);
 }
 
 bool BackupUiController::serverCredentials(bool fallbackToDefault, ServerCredentials &credentials)
@@ -125,32 +88,4 @@ bool BackupUiController::serverCredentials(bool fallbackToDefault, ServerCredent
 
     credentials = m_serversController->getServerCredentials(serverId);
     return true;
-}
-
-void BackupUiController::trySetDefaultContainer()
-{
-    const int serverIndex = m_serversController->getServersCount() - 1;
-    const QString serverId = m_serversController->getServerId(serverIndex);
-    const auto containers = m_serversController->getServerContainersMap(serverId);
-
-    for (auto it = containers.cbegin(); it != containers.cend(); ++it) {
-        if (it.key() != DockerContainer::None) {
-            m_serversUiController->setDefaultContainerAtIndex(serverIndex, static_cast<int>(it.key()));
-            break;
-        }
-    }
-
-    if (!containers.isEmpty()) {
-        emit defaultServerAndContainerSet();
-        return;
-    }
-
-    // The containers map is filled asynchronously after restore, poll a few times before giving up
-    m_containerRetryCount++;
-    if (m_containerRetryCount < m_maxContainerRetries) {
-        QTimer::singleShot(500, this, &BackupUiController::trySetDefaultContainer);
-    } else {
-        m_containerRetryCount = 0;
-        emit defaultServerAndContainerSet();
-    }
 }

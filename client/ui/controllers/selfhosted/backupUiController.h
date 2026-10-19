@@ -21,11 +21,10 @@ public slots:
     void startRestore(bool isFromSetupWizard, const QString &backupFilePath, bool replaceMode,
                       const QString &wizardHostname = QString(), const QString &wizardUsername = QString(),
                       const QString &wizardSecretData = QString());
+    void setDefaultServerAfterRestore();
 
     QStringList scanBackupForContainers(const QString &localPath);
     QVariantMap getBackupFileInfo(const QString &backupFilePath);
-
-    bool setDefaultServerAfterRestore(bool isFromSetupWizard);
 
 signals:
     void backupCreated(const QString &backupFilename);
@@ -36,15 +35,12 @@ signals:
     void errorOccurred(const QString &errorMessage);
 
 private:
+    void onBackupDownloaded(const QString &localPath);
     bool serverCredentials(bool fallbackToDefault, ServerCredentials &credentials);
-    void trySetDefaultContainer();
 
     BackupController *m_backupController;
     ServersController *m_serversController;
     ServersUiController *m_serversUiController;
-
-    int m_containerRetryCount = 0;
-    static constexpr int m_maxContainerRetries = 3;
 };
 
 #endif // BACKUPUICONTROLLER_H

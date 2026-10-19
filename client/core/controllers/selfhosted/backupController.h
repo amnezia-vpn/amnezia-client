@@ -9,6 +9,8 @@
 #include "core/utils/errorCodes.h"
 #include "core/utils/selfhosted/sshSession.h"
 
+class ServersController;
+
 using namespace amnezia;
 
 class BackupController : public QObject
@@ -21,10 +23,14 @@ public:
         QString serverIp;
     };
 
-    explicit BackupController(QObject *parent = nullptr);
+    explicit BackupController(ServersController *serversController, QObject *parent = nullptr);
 
     void setBackupDirectory(const QString &directory);
     QString backupDirectory() const;
+
+    void createAndDownloadBackup(const ServerCredentials &credentials, bool downloadToDevice, bool deleteFromServer);
+    void uploadAndRestore(const ServerCredentials &credentials, const QString &localPath, bool replaceMode);
+    void setDefaultServerAfterRestore();
 
     ErrorCode createBackup(const ServerCredentials &credentials, QString &backupFilename);
     ErrorCode createContainersBackup(const ServerCredentials &credentials, const QList<DockerContainer> &containers,
@@ -42,9 +48,16 @@ public:
     QString lastError() const;
 
 signals:
+    void backupCreated(const QString &backupFilename);
+    void backupDownloaded(const QString &localPath);
+    void backupRestored();
+    void defaultServerAndContainerSet();
     void progressChanged(int percent, const QString &message);
+    void errorOccurred(const QString &errorMessage);
 
 private:
+    void trySetDefaultContainer();
+
     ErrorCode runBackupScript(const ServerCredentials &credentials, const QString &script, QString &backupFilename);
     ErrorCode runHostScript(const ServerCredentials &credentials, const QString &script);
     ErrorCode readLocalFile(const QString &localPath, QByteArray &data);
@@ -56,11 +69,15 @@ private:
     QString containersBackupScript(const QList<DockerContainer> &containers, const QString &ipAddress) const;
     QString restoreScript(const QString &backupFilename, bool replaceMode) const;
 
+    ServersController *m_serversController;
     SshSession m_sshSession;
     QString m_backupDir;
     QString m_output;
     QString m_error;
     QString m_lastError;
+
+    int m_containerRetryCount = 0;
+    static constexpr int m_maxContainerRetries = 3;
 };
 
 #endif // BACKUPCONTROLLER_H

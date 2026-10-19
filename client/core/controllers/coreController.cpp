@@ -175,7 +175,7 @@ void CoreController::initCoreControllers()
     m_updateController = new UpdateController(m_appSettingsRepository, this);
     
     m_installController = new InstallController(m_serversRepository, m_appSettingsRepository, this);
-    m_backupController = new BackupController(this);
+    m_backupController = new BackupController(m_serversController, this);
     m_exportController = new ExportController(m_serversRepository, m_appSettingsRepository, this);
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);

@@ -7,6 +7,7 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QStandardPaths>
+#include <QTimer>
 #include <QUrl>
 #if !defined(Q_OS_IOS)
 #include <QProcess>
@@ -16,6 +17,7 @@
 #include "platforms/android/android_controller.h"
 #endif
 
+#include "core/controllers/serversController.h"
 #include "core/utils/containers/containerUtils.h"
 #include "core/utils/errorStrings.h"
 #include "core/utils/networkUtilities.h"
@@ -27,7 +29,8 @@ namespace
     const char *kBackupNamePattern = "([\\d_]+)\\s+-\\s+(\\d{2}-\\d{2}-\\d{4})_(\\d{2}-\\d{2}-\\d{2})\\.tgz";
 }
 
-BackupController::BackupController(QObject *parent) : QObject(parent), m_backupDir("/var/backups/amnezia")
+BackupController::BackupController(ServersController *serversController, QObject *parent)
+    : QObject(parent), m_serversController(serversController), m_backupDir("/var/backups/amnezia")
 {
 }
 
@@ -44,6 +47,90 @@ QString BackupController::backupDirectory() const
 QString BackupController::lastError() const
 {
     return m_lastError;
+}
+
+void BackupController::createAndDownloadBackup(const ServerCredentials &credentials, bool downloadToDevice,
+                                               bool deleteFromServer)
+{
+    QString backupFilename;
+    if (createBackup(credentials, backupFilename) != ErrorCode::NoError) {
+        emit errorOccurred(tr("Failed to create backup: %1").arg(m_lastError));
+        return;
+    }
+
+    if (!downloadToDevice) {
+        emit backupCreated(backupFilename);
+        return;
+    }
+
+    const QString localPath = defaultDownloadPath(backupFilename);
+    if (downloadBackup(credentials, backupFilename, localPath) != ErrorCode::NoError) {
+        emit errorOccurred(tr("Failed to download backup: %1").arg(m_lastError));
+        return;
+    }
+
+    if (deleteFromServer && deleteBackup(credentials, backupFilename) != ErrorCode::NoError) {
+        qWarning() << "Failed to delete backup from server:" << m_lastError;
+    }
+
+    emit backupDownloaded(localPath);
+}
+
+void BackupController::uploadAndRestore(const ServerCredentials &credentials, const QString &localPath, bool replaceMode)
+{
+    QString remoteFilename;
+    if (uploadBackup(credentials, localPath, remoteFilename) != ErrorCode::NoError) {
+        emit errorOccurred(tr("Failed to upload backup: %1").arg(m_lastError));
+        return;
+    }
+
+    if (restoreBackup(credentials, remoteFilename, replaceMode) != ErrorCode::NoError) {
+        emit errorOccurred(tr("Failed to restore backup: %1").arg(m_lastError));
+        return;
+    }
+
+    emit backupRestored();
+}
+
+void BackupController::setDefaultServerAfterRestore()
+{
+    const int serversCount = m_serversController->getServersCount();
+    if (serversCount == 0) {
+        emit defaultServerAndContainerSet();
+        return;
+    }
+
+    m_serversController->setDefaultServer(m_serversController->getServerId(serversCount - 1));
+
+    m_containerRetryCount = 0;
+    QTimer::singleShot(500, this, &BackupController::trySetDefaultContainer);
+}
+
+void BackupController::trySetDefaultContainer()
+{
+    const QString serverId = m_serversController->getServerId(m_serversController->getServersCount() - 1);
+    const auto containers = m_serversController->getServerContainersMap(serverId);
+
+    for (auto it = containers.cbegin(); it != containers.cend(); ++it) {
+        if (it.key() != DockerContainer::None) {
+            m_serversController->setDefaultContainer(serverId, it.key());
+            break;
+        }
+    }
+
+    if (!containers.isEmpty()) {
+        emit defaultServerAndContainerSet();
+        return;
+    }
+
+    // The containers map is filled asynchronously after restore, poll a few times before giving up
+    m_containerRetryCount++;
+    if (m_containerRetryCount < m_maxContainerRetries) {
+        QTimer::singleShot(500, this, &BackupController::trySetDefaultContainer);
+    } else {
+        m_containerRetryCount = 0;
+        emit defaultServerAndContainerSet();
+    }
 }
 
 ErrorCode BackupController::createBackup(const ServerCredentials &credentials, QString &backupFilename)

@@ -98,7 +98,7 @@ PageType {
 
         function onBackupRestored() {
             if (isFromSetupWizard) {
-                BackupController.setDefaultServerAfterRestore(true)
+                BackupController.setDefaultServerAfterRestore()
             } else {
                 PageController.showBusyIndicator(false)
                 navigateToRestoredPage()
