@@ -1057,6 +1057,14 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
+          - UiApiAccountInfoModelTest
+          - ApiBenefitsModelTest
+          - ApiCountryModelTest
+          - ApiCountryListModelTest
+          - ApiDevicesModelTest
 
     runs-on: ubuntu-22.04
 
@@ -1077,6 +1085,7 @@ jobs:
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
 
     steps:
       - name: Checkout
@@ -1247,6 +1256,14 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
+          - UiApiAccountInfoModelTest
+          - ApiBenefitsModelTest
+          - ApiCountryModelTest
+          - ApiCountryListModelTest
+          - ApiDevicesModelTest
 
     runs-on: windows-latest
 
@@ -1266,7 +1283,8 @@ jobs:
       THIRD_PARTY_TROJAN_IMPORT_DATA: ${{ secrets.THIRD_PARTY_TROJAN_IMPORT_DATA }}
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
-      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}|
+      AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
 
     steps:
       - name: Checkout
@@ -1354,6 +1372,14 @@ jobs:
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
+          - UiNewsModelAndControllerTest
+          - UiServicesModelAndControllerTest
+          - UiSubscriptionControllerTest
+          - UiApiAccountInfoModelTest
+          - ApiBenefitsModelTest
+          - ApiCountryModelTest
+          - ApiCountryListModelTest
+          - ApiDevicesModelTest
 
     runs-on: macos-15
 
@@ -1374,6 +1400,7 @@ jobs:
       THIRD_PARTY_VLESS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_VLESS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_IMPORT_DATA }}
       THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA: ${{ secrets.THIRD_PARTY_SHADOWSOCKS_SUBSCRIPTION_IMPORT_DATA }}
+      AMNEZIA_TEST_API_KEY: ${{ secrets.AMNEZIA_TEST_API_KEY }}
 
     steps:
       - name: Setup Xcode
