@@ -454,7 +454,14 @@ void VpnConnection::appendSplitTunnelingConfig()
         }
 
         QJsonArray allowedIpsJsonArray = configData.value(configKey::allowedIps).toArray();
-        if (allowedIpsJsonArray.contains("0.0.0.0/0") && allowedIpsJsonArray.contains("::/0")) {
+        if (allowedIpsJsonArray.contains("0.0.0.0/0")) {
+            // Site-based split tunneling only ever collects IPv4 addresses
+            // (see IpSplitTunnelingController::onHostResolved), so requiring
+            // ::/0 as well as 0.0.0.0/0 here silently disabled the whole
+            // feature for any IPv4-only full-tunnel AWG/WireGuard config
+            // (e.g. AllowedIPs = 0.0.0.0/0 with no IPv6 route at all) even
+            // though nothing about that config makes IPv4 site exclusion
+            // unsafe.
             allowSiteBasedSplitTunneling = true;
         }
     }
