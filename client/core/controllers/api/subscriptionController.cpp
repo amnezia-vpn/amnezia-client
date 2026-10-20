@@ -332,12 +332,19 @@ ErrorCode SubscriptionController::requestFreeCaptcha(const QString &userCountryC
         return ErrorCode::NoError;
     }
 
-    const int httpStatus = QJsonDocument::fromJson(responseBody).object().value(apiDefs::key::httpStatus).toInt();
-    if (errorCode == ErrorCode::ApiConfigDownloadError
-        && (httpStatus == httpStatusCodeBadRequest || httpStatus == httpStatusCodeUnprocessableEntity)) {
-        qDebug().noquote() << "[FreeAccount] Captcha is not required, probe rejected with http status" << httpStatus;
+    const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
+    const int httpStatus = response.value(apiDefs::key::httpStatus).toInt();
+    const QString message = response.value(apiDefs::key::message).toString();
+    const bool probeRejected = errorCode == ErrorCode::ApiUpdateRequestError
+            || (errorCode == ErrorCode::ApiConfigDownloadError
+                && (httpStatus == httpStatusCodeBadRequest || httpStatus == httpStatusCodeUnprocessableEntity));
+    if (probeRejected) {
+        qInfo().noquote() << "[FreeAccount] Captcha probe rejected, continuing without captcha, http status =" << httpStatus
+                          << "message:" << message;
         return ErrorCode::NoError;
     }
+    qWarning().noquote() << "[FreeAccount] Captcha probe failed, errorCode =" << static_cast<int>(errorCode)
+                         << "http status =" << httpStatus << "message:" << message;
     return errorCode;
 }
 
@@ -363,6 +370,10 @@ ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &us
     QByteArray responseBody;
     ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
     if (errorCode != ErrorCode::NoError) {
+        const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
+        qWarning().noquote() << "[FreeAccount] Config request failed, errorCode =" << static_cast<int>(errorCode)
+                             << "http status =" << response.value(apiDefs::key::httpStatus).toInt()
+                             << "message:" << response.value(apiDefs::key::message).toString();
         if (retryCaptchaOut
             && (errorCode == ErrorCode::ApiCaptchaInvalidError || errorCode == ErrorCode::ApiCaptchaRefreshError
                 || errorCode == ErrorCode::ApiCaptchaRequiredError)) {

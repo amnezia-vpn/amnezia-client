@@ -104,6 +104,7 @@ namespace apiDefs
         constexpr QLatin1String idempotencyKey("idempotency_key");
         constexpr QLatin1String retryAfter("retry_after");
         constexpr QLatin1String requestId("request_id");
+        constexpr QLatin1String message("message");
         constexpr QLatin1String status("status");
         constexpr QLatin1String userId("user_id");
         constexpr QLatin1String accessToken("access_token");
