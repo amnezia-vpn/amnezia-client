@@ -1105,7 +1105,7 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
           aqtversion: '==3.3.0'
@@ -1181,7 +1181,7 @@ jobs:
           host: linux
           target: desktop
           arch: linux_gcc_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
           aqtversion: '==3.3.0'
@@ -1303,7 +1303,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_msvc2022_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
 
@@ -1413,7 +1413,7 @@ jobs:
           host: mac
           target: desktop
           arch: clang_64
-          modules: qtremoteobjects qt5compat qtshadertools
+          modules: qtremoteobjects qt5compat qtshadertools qthttpserver qtwebsockets
           dir: ${{ runner.temp }}
           set-env: true
 

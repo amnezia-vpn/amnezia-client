@@ -71,7 +71,7 @@ class Libagw(ConanFile):
         basic_layout(self)
 
     def build_requirements(self):
-        self.tool_requires("go/1.23.12")
+        self.tool_requires("go/1.27.1")
         if self._is_windows:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
