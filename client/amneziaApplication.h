@@ -6,6 +6,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QThread>
+#include <optional>
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #include <QGuiApplication>
 #else
@@ -14,12 +15,16 @@
 #include <QClipboard>
 
 #include "core/controllers/coreController.h"
+#include "core/utils/cliControlProtocol.h"
 #include "secureQSettings.h"
 #include "vpnConnection.h"
 #include "ui/models/containerProps.h"
 #include "ui/models/protocolProps.h"
 
 #define amnApp (static_cast<AmneziaApplication *>(QCoreApplication::instance()))
+
+class QLocalServer;
+class QLocalSocket;
 
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
   #define AMNEZIA_BASE_CLASS QGuiApplication
@@ -40,7 +45,10 @@ public:
     bool parseCommands();
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
-    void startLocalServer();
+    bool startLocalServer();
+    std::optional<int> forwardToRunningInstance();
+    std::optional<int> handleControlCommandWithoutRunningInstance();
+    void executeStartupControlCommand();
 #endif
 
     QQmlApplicationEngine *qmlEngine() const;
@@ -66,6 +74,16 @@ private:
     QCommandLineOption m_optCleanup;
     QCommandLineOption m_optConnect;
     QCommandLineOption m_optImport;
+    QCommandLineOption m_optStatus;
+    QCommandLineOption m_optListServers;
+    QCommandLineOption m_optDisconnect;
+    QCommandLineOption m_optToggle;
+
+#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS) && !defined(MACOS_NE)
+    QLocalServer *m_localServer = nullptr;
+    void processControlConnection(QLocalSocket *socket);
+    void writeCliResponse(const QJsonObject &response) const;
+#endif
 
     QSharedPointer<VpnConnection> m_vpnConnection;
     QThread m_vpnConnectionThread;
