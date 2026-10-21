@@ -171,6 +171,37 @@ void SystemController::setQmlRoot(QObject *qmlRoot)
     m_qmlRoot = qmlRoot;
 }
 
+QString SystemController::getFileNameFromPath(const QString &filePath)
+{
+    if (filePath.isEmpty()) {
+        return "";
+    }
+    
+#ifdef Q_OS_ANDROID
+    if (filePath.startsWith("content://")) {
+        QString fileName = AndroidController::instance()->getFileName(filePath);
+        if (!fileName.isEmpty()) {
+            return fileName;
+        }
+    }
+#endif
+    
+    QFileInfo fileInfo(filePath);
+    QString fileName = fileInfo.fileName();
+    
+    if (fileName.isEmpty()) {
+        QStringList parts = filePath.split('/');
+        if (!parts.isEmpty()) {
+            fileName = parts.last();
+            if (fileName.contains('%')) {
+                fileName = QUrl::fromPercentEncoding(fileName.toUtf8());
+            }
+        }
+    }
+    
+    return fileName;
+}
+
 bool SystemController::isAuthenticated()
 {
 #ifdef Q_OS_ANDROID

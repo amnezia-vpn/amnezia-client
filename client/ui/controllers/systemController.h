@@ -19,6 +19,8 @@ public:
 public slots:
     QString getFileName(const QString &acceptLabel, const QString &nameFilter, const QString &selectedFile = "",
                         const bool isSaveMode = false, const QString &defaultSuffix = "");
+    
+    Q_INVOKABLE QString getFileNameFromPath(const QString &filePath);
 
     void setQmlRoot(QObject *qmlRoot);
 

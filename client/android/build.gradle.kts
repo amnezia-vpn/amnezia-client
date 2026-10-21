@@ -128,12 +128,12 @@ android {
         }
     }
 
-    // androiddeployqt expects:
-    //   APK: build/outputs/apk/{base}-{buildType}[-unsigned].apk  (no flavor subdir)
-    //   AAB: build/outputs/bundle/{buildType}/{base}-{buildType}.aab (no flavor subdir)
+    // androiddeployqt and Qt Creator look for the package in the build type dir, without flavor:
+    //   APK: build/outputs/apk/{buildType}/{base}-{buildType}[-unsigned].apk
+    //   AAB: build/outputs/bundle/{buildType}/{base}-{buildType}.aab
     // where {base} = outputBaseName (set by Qt Creator) or "android-build" (CI fallback).
     // Release APK gets -unsigned suffix (Qt cmake signs it); debug does not.
-    // Copy only oss flavor to the flat output dir that androiddeployqt/Qt Creator expect.
+    // Gradle writes flavor outputs to {flavor}/{buildType}, so copy the oss flavor over.
     // Play flavor is built via android_play_apk/android_play_aab cmake targets and uses
     // its native Gradle output paths directly.
     applicationVariants.all {
@@ -146,7 +146,7 @@ android {
             packageApplicationProvider.configure {
                 doLast {
                     val srcDir = layout.buildDirectory.dir("outputs/apk/oss/$buildTypeName").get().asFile
-                    val dstDir = layout.buildDirectory.dir("outputs/apk").get().asFile
+                    val dstDir = layout.buildDirectory.dir("outputs/apk/$buildTypeName").get().asFile
                     dstDir.mkdirs()
                     srcDir.listFiles()?.filter { it.name.endsWith(".apk") }?.forEach { apk ->
                         apk.copyTo(File(dstDir, "$base-$buildTypeName$unsignedSuffix.apk"), overwrite = true)

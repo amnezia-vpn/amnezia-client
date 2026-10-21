@@ -88,6 +88,7 @@ PageType {
 
     property list<QtObject> serverActions: [
         check,
+        backupSection,
         reboot,
         remove,
         clear,
@@ -105,6 +106,18 @@ PageType {
             PageController.showBusyIndicator(true)
             InstallController.scanServerForInstalledContainers(ServersUiController.processedServerId)
             PageController.showBusyIndicator(false)
+        }
+    }
+
+    QtObject {
+        id: backupSection
+
+        property bool isVisible: root.isServerWithWriteAccess
+        readonly property string title: qsTr("Backup")
+        readonly property string description: qsTr("Local copy of VPN protocols, services, all server settings and users")
+        readonly property bool isDestructive: false
+        readonly property var clickedHandler: function() {
+            PageController.goToPage(PageEnum.PageSettingsServerBackup)
         }
     }
 
