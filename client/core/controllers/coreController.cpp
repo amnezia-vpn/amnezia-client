@@ -1,5 +1,6 @@
 #include "coreController.h"
 
+#include <QCoreApplication>
 #include <QDirIterator>
 #include <QTranslator>
 #include <QTimer>
@@ -19,6 +20,9 @@
 
 #if defined(Q_OS_IOS)
     #include "platforms/ios/ios_controller.h"
+#endif
+
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
     #include "core/utils/swiftBridge.h"
 #endif
 
@@ -125,6 +129,12 @@ void CoreController::initModels()
     m_apiCountryModel = new ApiCountryModel(this);
     setQmlContextProperty("ApiCountryModel", m_apiCountryModel);
 
+    m_apiCountryListModel = new ApiCountryListModel(m_apiCountryModel, "picker", this);
+    setQmlContextProperty("ApiCountryListModel", m_apiCountryListModel);
+
+    m_apiConfigsCountryListModel = new ApiCountryListModel(m_apiCountryModel, "nativeConfigs", this);
+    setQmlContextProperty("ApiConfigsCountryListModel", m_apiConfigsCountryListModel);
+
     m_apiSubscriptionPlansModel = new ApiSubscriptionPlansModel(this);
     setQmlContextProperty("ApiSubscriptionPlansModel", m_apiSubscriptionPlansModel);
 
@@ -169,6 +179,7 @@ void CoreController::initCoreControllers()
     m_importCoreController = new ImportController(m_serversRepository, m_appSettingsRepository, this);
     m_connectionController = new ConnectionController(m_serversRepository, m_appSettingsRepository, m_vpnConnection.get(), this);
     m_settingsController = new SettingsController(m_serversRepository, m_appSettingsRepository, this);
+    m_localProxyController = new LocalProxyController(m_serversRepository, m_appSettingsRepository, m_subscriptionController, this);
 }
 
 void CoreController::initControllers()
@@ -178,7 +189,6 @@ void CoreController::initControllers()
 
     if (m_engine) {
         m_focusController = new FocusController(m_engine, this);
-        setQmlContextProperty("FocusController", m_focusController);
     }
 
     m_installUiController = new InstallUiController(m_installController, m_serversController, m_settingsController, m_protocolsModel, m_usersController,
@@ -202,6 +212,12 @@ void CoreController::initControllers()
 
     m_settingsUiController = new SettingsUiController(m_settingsController, m_serversController, this);
     setQmlContextProperty("SettingsController", m_settingsUiController);
+
+    m_localProxyUiController = new LocalProxyUiController(m_localProxyController, this);
+    setQmlContextProperty("LocalProxyController", m_localProxyUiController);
+
+    m_logsUiController = new LogsUiController(m_settingsController, this);
+    setQmlContextProperty("LogsController", m_logsUiController);
 
     m_pageController = new PageController(m_serversController, m_settingsController, this);
     setQmlContextProperty("PageController", m_pageController);
@@ -271,7 +287,7 @@ void CoreController::initAppleController()
 
 void CoreController::initLogging()
 {
-#if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
+#ifndef Q_OS_ANDROID
     bool enabled = m_appSettingsRepository->isSaveLogs();
     if (enabled) {
         if (!Logger::init(false)) {
@@ -279,6 +295,11 @@ void CoreController::initLogging()
         }
     }
     Logger::setServiceLogsEnabled(enabled);
+#endif
+#if defined(Q_OS_IOS) || defined(MACOS_NE)
+    if (m_appSettingsRepository->isSaveLogs()) {
+        SWIFT_BRIDGE_NAMESPACE::toggleLogging(true);
+    }
 #endif
 }
 

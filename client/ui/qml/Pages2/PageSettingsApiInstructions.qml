@@ -79,46 +79,48 @@ PageType {
         id: listView
 
         anchors.fill: parent
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        anchors.bottomMargin: 24
 
         model: instructionsModel
 
         header: ColumnLayout {
             width: listView.width
 
-            BackButtonType {
-                id: backButton
-            }
+            spacing: 0
 
-            BaseHeaderType {
-                id: header
-
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
 
-                headerText: qsTr("How to connect on another device")
-                descriptionText: qsTr("Setup guides on the Amnezia website")
+                title: qsTr("How to connect on another device")
+                description: qsTr("Setup guides on the Amnezia website")
             }
+
+            Item {
+                Layout.preferredHeight: 16
+            }
+        }
+
+        footer: Item {
+            width: listView.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
 
         delegate: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 6
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 text: title
-                rightImageSource: "qrc:/images/controls/external-link.svg"
+                trailingIconSource: "qrc:/images/controls/external-link.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))
                 }
             }
-
-            DividerType {}
         }
     }
 }

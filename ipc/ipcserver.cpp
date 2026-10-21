@@ -310,7 +310,7 @@ bool IpcServer::xrayStart(const QString& cfg)
     qDebug() << "IpcServer::xrayStart";
 #endif
 
-    return Xray::getInstance().startXray(cfg);
+    return Xray::getInstance().start(cfg) != 0;
 }
 
 bool IpcServer::xrayStop()
@@ -319,5 +319,32 @@ bool IpcServer::xrayStop()
     qDebug() << "IpcServer::xrayStop";
 #endif
 
-    return Xray::getInstance().stopXray();
+    return Xray::getInstance().stopAny();
+}
+
+qint64 IpcServer::xrayStartOwned(const QString& cfg)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::xrayStartOwned";
+#endif
+
+    return Xray::getInstance().start(cfg);
+}
+
+bool IpcServer::xrayStopOwned(qint64 token)
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::xrayStopOwned";
+#endif
+
+    return Xray::getInstance().stop(token);
+}
+
+qint64 IpcServer::xrayCurrentToken()
+{
+#ifdef MZ_DEBUG
+    qDebug() << "IpcServer::xrayCurrentToken";
+#endif
+
+    return Xray::getInstance().currentToken();
 }

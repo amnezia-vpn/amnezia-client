@@ -3,94 +3,81 @@ import QtQuick.Controls
 
 import Style 1.0
 
+import "TextTypes"
+
 TabButton {
     id: root
 
-    property string hoveredColor: AmneziaStyle.color.richBrown
-    property string defaultColor: AmneziaStyle.color.slateGray
-    property string selectedColor: AmneziaStyle.color.goldenApricot
+    enum Size { Large, Medium }
 
-    property string textColor: AmneziaStyle.color.paleGray
+    property int size: TabButtonType.Large
 
-    property string borderFocusedColor: AmneziaStyle.color.paleGray
-    property int borderFocusedWidth: 1
+    readonly property int maximumHorizontalPadding: root.size === TabButtonType.Large ? 24 : 10
 
-    property bool isSelected: false
+    implicitWidth: implicitContentWidth + 2 * root.maximumHorizontalPadding
+    implicitHeight: root.size === TabButtonType.Large ? 48 : 36
 
-    property bool isFocusable: true
-
-    Keys.onTabPressed: {
-        FocusController.nextKeyTabItem()
-    }
-
-    Keys.onBacktabPressed: {
-        FocusController.previousKeyTabItem()
-    }
-
-    Keys.onUpPressed: {
-        FocusController.nextKeyUpItem()
-    }
-    
-    Keys.onDownPressed: {
-        FocusController.nextKeyDownItem()
-    }
-    
-    Keys.onLeftPressed: {
-        FocusController.nextKeyLeftItem()
-    }
-
-    Keys.onRightPressed: {
-        FocusController.nextKeyRightItem()
-    }
-    
-    implicitHeight: 48
+    horizontalPadding: Math.max(4, Math.min(root.maximumHorizontalPadding, (root.width - implicitContentWidth) / 2))
+    verticalPadding: 0
 
     hoverEnabled: true
 
-    background: Rectangle {
-        id: background
+    opacity: root.enabled ? 1 : 0.4
 
-        anchors.fill: parent
-        color: AmneziaStyle.color.transparent
-
-        border.color: root.activeFocus ? root.borderFocusedColor : AmneziaStyle.color.transparent
-        border.width: root.activeFocus ? root.borderFocusedWidth : 0
-
+    background: Item {
         Rectangle {
-            width: parent.width
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
             height: 1
-            y: parent.height - height
-            color: {
-                if(root.isSelected) {
-                    return selectedColor
-                }
-                return hovered ? hoveredColor : defaultColor
-            }
+            color: root.checked ? AmneziaStyle.color.accentLight : AmneziaStyle.color.borderSoft
 
             Behavior on color {
-                PropertyAnimation { duration: 200 }
+                ColorAnimation { duration: 150 }
             }
+        }
+
+        FocusRingType {
+            radius: 8
+            visible: root.visualFocus
         }
     }
 
-    MouseArea {
-        anchors.fill: background
-        cursorShape: Qt.PointingHandCursor
-        enabled: false
-    }
-
-    contentItem: Text {
-        anchors.fill: background
-        height: 24
-
-        font.family: "PT Root UI VF"
-        font.styleName: "normal"
-        font.weight: 500
-        font.pixelSize: 16
-        color: textColor
+    contentItem: BodyTextType {
         text: root.text
+        color: {
+            if (root.down) {
+                return AmneziaStyle.color.accentDeep
+            }
+            return root.hovered ? AmneziaStyle.color.textAccent : AmneziaStyle.color.textPrimary
+        }
 
+        wrapMode: Text.NoWrap
+        elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
+
+        Behavior on color {
+            ColorAnimation { duration: 150 }
+        }
+    }
+
+    HoverHandler {
+        cursorShape: Qt.PointingHandCursor
+    }
+
+    Keys.onEnterPressed: function(event) {
+        if (!event.isAutoRepeat) {
+            root.checked = true
+            root.clicked()
+        }
+    }
+
+    Keys.onReturnPressed: function(event) {
+        if (!event.isAutoRepeat) {
+            root.checked = true
+            root.clicked()
+        }
     }
 }

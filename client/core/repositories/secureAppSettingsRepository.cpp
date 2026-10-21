@@ -375,6 +375,26 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
     emit screenshotsEnabledChanged(enabled);
 }
 
+int SecureAppSettingsRepository::countryListSortMode(const QString &listId) const
+{
+    return value("Conf/countryListSortMode/" + listId, 0).toInt();
+}
+
+void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, int mode)
+{
+    setValue("Conf/countryListSortMode/" + listId, mode);
+}
+
+QStringList SecureAppSettingsRepository::favoriteLocations() const
+{
+    return value("Conf/favoriteLocations").toStringList();
+}
+
+void SecureAppSettingsRepository::setFavoriteLocations(const QStringList &codes)
+{
+    setValue("Conf/favoriteLocations", codes);
+}
+
 bool SecureAppSettingsRepository::isNewsNotifications() const
 {
     return value("Conf/newsNotifications", true).toBool();
@@ -483,4 +503,34 @@ QByteArray SecureAppSettingsRepository::xraySavedConfigs() const
 void SecureAppSettingsRepository::setXraySavedConfigs(const QByteArray &data)
 {
     setValue("Xray/savedConfigs", data);
+}
+
+QString SecureAppSettingsRepository::localProxyOwnerId() const
+{
+    return value("Conf/localProxyOwnerId", "").toString();
+}
+
+void SecureAppSettingsRepository::setLocalProxyOwnerId(const QString &serverId)
+{
+    setValue("Conf/localProxyOwnerId", serverId);
+}
+
+quint16 SecureAppSettingsRepository::localProxyPort() const
+{
+    return static_cast<quint16>(value("Conf/localProxyPort", 10808).toUInt());
+}
+
+void SecureAppSettingsRepository::setLocalProxyPort(quint16 port)
+{
+    setValue("Conf/localProxyPort", port);
+}
+
+bool SecureAppSettingsRepository::isLocalProxyPortUserDefined() const
+{
+    return value("Conf/localProxyPortUserDefined", false).toBool();
+}
+
+void SecureAppSettingsRepository::setLocalProxyPortUserDefined(bool userDefined)
+{
+    setValue("Conf/localProxyPortUserDefined", userDefined);
 }

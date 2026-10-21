@@ -51,7 +51,6 @@ PageType {
         }
 
         Component.onCompleted: {
-            settingsContainersListView.isFocusable = true
             settingsContainersListView.interactive = true
             updateContainersModelFilters()
         }

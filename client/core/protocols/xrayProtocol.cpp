@@ -1,5 +1,6 @@
 #include "xrayProtocol.h"
 
+#include "core/models/protocols/xrayProtocolConfig.h"
 #include "core/protocols/protocolUtils.h"
 #include "core/utils/constants/configKeys.h"
 #include "core/utils/constants/protocolConstants.h"
@@ -66,6 +67,8 @@ XrayProtocol::~XrayProtocol()
 
 ErrorCode XrayProtocol::start()
 {
+    resetStopGuard();
+
     qDebug() << "XrayProtocol::start()";
 
     // Inject SOCKS5 auth into the inbound before starting xray.
@@ -87,30 +90,16 @@ ErrorCode XrayProtocol::start()
         return ErrorCode::XrayExecutableCrashed;
     }
 
-    // Fix fingerprint: old configs may contain "Mozilla/5.0" which xray-core rejects.
-    // Replace with the correct default at runtime so stale stored configs still work.
-    if (xrayConfigStr.contains("Mozilla/5.0", Qt::CaseInsensitive)) {
-        xrayConfigStr.replace("Mozilla/5.0", amnezia::protocols::xray::defaultFingerprint,
-                              Qt::CaseInsensitive);
-        qDebug() << "XrayProtocol: patched legacy fingerprint to"
-                 << amnezia::protocols::xray::defaultFingerprint;
-    }
-
-    // Fix inbound listen address: old configs may use "10.33.0.2" which doesn't exist
-    // until TUN is created. xray must listen on 127.0.0.1 so tun2socks can connect.
-    if (xrayConfigStr.contains(amnezia::protocols::xray::defaultLocalAddr)) {
-        xrayConfigStr.replace(amnezia::protocols::xray::defaultLocalAddr,
-                              amnezia::protocols::xray::defaultLocalListenAddr);
-        qDebug() << "XrayProtocol: patched legacy inbound listen address to 127.0.0.1";
-    }
+    xrayConfigStr = amnezia::sanitizeNativeConfig(xrayConfigStr);
 
     return IpcClient::withInterface(
             [&](QSharedPointer<IpcInterfaceReplica> iface) {
-                auto xrayStart = iface->xrayStart(xrayConfigStr);
-                if (!xrayStart.waitForFinished() || !xrayStart.returnValue()) {
+                auto xrayStart = iface->xrayStartOwned(xrayConfigStr);
+                if (!xrayStart.waitForFinished() || xrayStart.returnValue() == 0) {
                     qCritical() << "Failed to start xray";
                     return ErrorCode::XrayExecutableCrashed;
                 }
+                m_xrayToken = xrayStart.returnValue();
                 return startTun2Socks();
             },
             []() { return ErrorCode::AmneziaServiceConnectionFailed; });
@@ -118,9 +107,13 @@ ErrorCode XrayProtocol::start()
 
 void XrayProtocol::stop()
 {
+    if (guardStop()) {
+        return;
+    }
+
     qDebug() << "XrayProtocol::stop()";
 
-    IpcClient::withInterface([](QSharedPointer<IpcInterfaceReplica> iface) {
+    IpcClient::withInterface([this](QSharedPointer<IpcInterfaceReplica> iface) {
         auto disableKillSwitch = iface->disableKillSwitch();
         if (!disableKillSwitch.waitForFinished() || !disableKillSwitch.returnValue())
             qWarning() << "Failed to disable killswitch";
@@ -137,9 +130,10 @@ void XrayProtocol::stop()
         if (!deleteTun.waitForFinished() || !deleteTun.returnValue())
             qWarning() << "Failed to delete tun";
 
-        auto xrayStop = iface->xrayStop();
+        auto xrayStop = iface->xrayStopOwned(m_xrayToken);
         if (!xrayStop.waitForFinished() || !xrayStop.returnValue())
             qWarning() << "Failed to stop xray";
+        m_xrayToken = 0;
     });
 
     if (m_tun2socksProcess) {

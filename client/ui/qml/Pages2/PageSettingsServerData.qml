@@ -63,23 +63,26 @@ PageType {
         delegate: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 visible: isVisible
 
                 text: title
-                descriptionText: description
-                textColor: tColor
+                subtitle: description
+                destructive: isDestructive
 
-                clickedFunction: function() {
+                onClicked: {
                     clickedHandler()
                 }
             }
+        }
 
-            DividerType {
-                visible: isVisible
-            }
+        footer: Item {
+            width: listView.width
+            height: 16 + PageController.safeAreaBottomMargin
         }
     }
 
@@ -97,7 +100,7 @@ PageType {
         property bool isVisible: root.isServerWithWriteAccess
         readonly property string title: qsTr("Check the server for previously installed Amnezia services")
         readonly property string description: qsTr("Add them to the application if they were not displayed")
-        readonly property var tColor: AmneziaStyle.color.paleGray
+        readonly property bool isDestructive: false
         readonly property var clickedHandler: function() {
             PageController.showBusyIndicator(true)
             InstallController.scanServerForInstalledContainers(ServersUiController.processedServerId)
@@ -111,7 +114,7 @@ PageType {
         property bool isVisible: root.isServerWithWriteAccess
         readonly property string title: qsTr("Reboot server")
         readonly property string description: ""
-        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property bool isDestructive: true
         readonly property var clickedHandler: function() {
             var headerText = qsTr("Do you want to reboot the server?")
             var descriptionText = qsTr("The reboot process may take approximately 30 seconds. Are you sure you wish to proceed?")
@@ -141,7 +144,7 @@ PageType {
         property bool isVisible: true
         readonly property string title: qsTr("Remove server from application")
         readonly property string description: ""
-        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property bool isDestructive: true
         readonly property var clickedHandler: function() {
             var headerText = qsTr("Do you want to remove the server from application?")
             var descriptionText = qsTr("All installed AmneziaVPN services will still remain on the server.")
@@ -171,7 +174,7 @@ PageType {
         property bool isVisible: root.isServerWithWriteAccess
         readonly property string title: qsTr("Clear server from Amnezia software")
         readonly property string description: ""
-        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property bool isDestructive: true
         readonly property var clickedHandler: function() {
             var headerText = qsTr("Do you want to clear server from Amnezia software?")
             var descriptionText = qsTr("All users whom you shared a connection with will no longer be able to connect to it.")
@@ -200,7 +203,7 @@ PageType {
         property bool isVisible: ServersUiController.isServerFromApi(ServersUiController.processedServerId)
         readonly property string title: qsTr("Reset API config")
         readonly property string description: ""
-        readonly property var tColor: AmneziaStyle.color.vibrantRed
+        readonly property bool isDestructive: true
         readonly property var clickedHandler: function() {
             var headerText = qsTr("Do you want to reset API config?")
             var descriptionText = ""

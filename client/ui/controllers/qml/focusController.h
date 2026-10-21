@@ -1,57 +1,26 @@
 #ifndef FOCUSCONTROLLER_H
 #define FOCUSCONTROLLER_H
 
-#include "ui/controllers/qml/listViewFocusController.h"
-
 #include <QQmlApplicationEngine>
 
-/*!
- * \brief The FocusController class makes focus control more straightforward
- * \details Focus is handled only for visible and enabled items which have
- *          `isFocused` property from top left to bottom right.
- * \note There are items handled differently (e.g. ListView)
- */
+class QQuickItem;
+
 class FocusController : public QObject
 {
     Q_OBJECT
 public:
     explicit FocusController(QQmlApplicationEngine *engine, QObject *parent = nullptr);
-    ~FocusController() override = default;
 
-    Q_INVOKABLE void nextKeyTabItem();
-    Q_INVOKABLE void previousKeyTabItem();
-    Q_INVOKABLE void nextKeyUpItem();
-    Q_INVOKABLE void nextKeyDownItem();
-    Q_INVOKABLE void nextKeyLeftItem();
-    Q_INVOKABLE void nextKeyRightItem();
-    Q_INVOKABLE void setFocusItem(QQuickItem *item);
-    Q_INVOKABLE void setFocusOnDefaultItem();
-    Q_INVOKABLE void pushRootObject(QObject *object);
-    Q_INVOKABLE void dropRootObject(QObject *object);
-    Q_INVOKABLE void resetRootObject();
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
-    enum class Direction {
-        Forward,
-        Backward,
-    };
-
-    void reload(Direction direction);
-    void nextItem(Direction direction);
-    void focusNextListViewItem();
-    void focusPreviousListViewItem();
-    void dropListView();
-
-    QQmlApplicationEngine *m_engine; // Pointer to engine to get root object
-    QList<QObject *> m_focusChain;   // List of current objects to be focused
-    QQuickItem *m_focusedItem;       // Pointer to the active focus item
-    QStack<QObject *> m_rootObjects; // Pointer to stack of roots for focus chain
-    QQuickItem *m_defaultFocusItem;
-
-    ListViewFocusController *m_lvfc; // ListView focus manager
-
-signals:
-    void focusedItemChanged();
+    static bool wantsArrowKey(const QQuickItem *item, int key);
+    static void sortListViewDelegates(QQuickItem *root);
+    static void ensureVisible(QQuickItem *item);
+    static void scrollToRange(QQuickItem *flickable, qreal start, qreal end, qreal viewSize, const char *position,
+                              const char *origin, const char *contentSize, const char *startMargin,
+                              const char *endMargin);
 };
 
 #endif // FOCUSCONTROLLER_H

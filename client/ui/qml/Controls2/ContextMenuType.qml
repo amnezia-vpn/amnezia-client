@@ -53,12 +53,12 @@ Menu {
 
     MenuItem {
         text: qsTr("C&ut")
-        enabled: textObj.selectedText
+        enabled: textObj.selectedText.length > 0
         onTriggered: textObj.cut()
     }
     MenuItem {
         text: qsTr("&Copy")
-        enabled: textObj.selectedText
+        enabled: textObj.selectedText.length > 0
         onTriggered: textObj.copy()
     }
     MenuItem {

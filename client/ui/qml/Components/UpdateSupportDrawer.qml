@@ -8,19 +8,14 @@ import "../Controls2"
 import "../Controls2/TextTypes"
 import "../Config"
 
-DrawerType2 {
+SheetType {
     id: root
 
-    expandedStateContent: Item {
+    expandedHeight: content.implicitHeight + 16 + PageController.safeAreaBottomMargin
+
+    Item {
         id: contentRoot
-
-        implicitHeight: content.implicitHeight + 40 + PageController.safeAreaBottomMargin
-
-        Binding {
-            target: root
-            property: "expandedHeight"
-            value: contentRoot.implicitHeight
-        }
+        anchors.fill: parent
 
         ColumnLayout {
             id: content
@@ -28,65 +23,64 @@ DrawerType2 {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.topMargin: 24
-            anchors.leftMargin: 16
-            anchors.rightMargin: 16
+            anchors.topMargin: 12
             spacing: 0
 
-            Header2TextType {
+            SectionHeaderType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
+                Layout.bottomMargin: 32
 
-                text: qsTr("Support")
+                headerText: qsTr("Support")
+                descriptionText: qsTr("If the update won't install, message us")
             }
 
-            AppTextType {
+            ListItemType {
                 Layout.fillWidth: true
-                Layout.topMargin: 8
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                color: AmneziaStyle.color.textTertiary
-                text: qsTr("If the update won't install, message us")
-            }
-
-            LabelWithButtonType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-
+                leadingSlotWidth: 24
                 text: qsTr("Telegram")
-                descriptionText: qsTr("We'll reply in chat")
-                leftImageSource: "qrc:/images/controls/telegram.svg"
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                subtitle: qsTr("We'll reply in chat")
+                icon.source: "qrc:/images/controls/telegram.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     Qt.openUrlExternally(qsTr("https://t.me/amnezia_vpn_en"))
                 }
             }
 
-            DividerType {}
-
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
+                leadingSlotWidth: 24
                 text: qsTr("support@amnezia.org")
-                descriptionText: qsTr("Support email")
-                leftImageSource: "qrc:/images/controls/mail.svg"
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                subtitle: qsTr("Support email")
+                icon.source: "qrc:/images/controls/mail.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     Qt.openUrlExternally(qsTr("mailto:support@amnezia.org"))
                 }
             }
 
-            DividerType {}
-
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
+                leadingSlotWidth: 24
+                showSeparator: false
                 text: qsTr("amnezia.org")
-                descriptionText: qsTr("Download the update manually")
-                leftImageSource: "qrc:/images/controls/amnezia.svg"
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                subtitle: qsTr("Download the update manually")
+                icon.source: "qrc:/images/controls/amnezia.svg"
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     Qt.openUrlExternally(LanguageUiController.getCurrentSiteUrl(""))
                 }
             }

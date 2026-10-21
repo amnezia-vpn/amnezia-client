@@ -89,6 +89,11 @@ protected:
     void startTimeoutTimer();
     void stopTimeoutTimer();
 
+    bool guardStop();
+    void resetStopGuard();
+
+    bool m_stopped = false;
+
     Vpn::ConnectionState m_connectionState;
 
     QString m_routeGateway;

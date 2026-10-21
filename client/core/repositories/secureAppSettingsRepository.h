@@ -77,6 +77,11 @@ public:
     void setStartMinimized(bool enabled);
     bool isScreenshotsEnabled() const;
     void setScreenshotsEnabled(bool enabled);
+
+    int countryListSortMode(const QString &listId) const;
+    void setCountryListSortMode(const QString &listId, int mode);
+    QStringList favoriteLocations() const;
+    void setFavoriteLocations(const QStringList &codes);
     bool isNewsNotifications() const;
     void setNewsNotifications(bool enabled);
 
@@ -99,6 +104,13 @@ public:
 
     QByteArray xraySavedConfigs() const;
     void setXraySavedConfigs(const QByteArray &data);
+
+    QString localProxyOwnerId() const;
+    void setLocalProxyOwnerId(const QString &serverId);
+    quint16 localProxyPort() const;
+    void setLocalProxyPort(quint16 port);
+    bool isLocalProxyPortUserDefined() const;
+    void setLocalProxyPortUserDefined(bool userDefined);
 
 signals:
     void appLanguageChanged(QLocale locale);
@@ -126,4 +138,3 @@ private:
 };
 
 #endif // SECUREAPPSETTINGSREPOSITORY_H
-

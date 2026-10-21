@@ -37,21 +37,30 @@ add_definitions(-DFREE_V2_ENDPOINT="$ENV{FREE_V2_ENDPOINT}")
 add_definitions(-DPREM_V1_ENDPOINT="$ENV{PREM_V1_ENDPOINT}")
 
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    set(PACKAGES ${PACKAGES} Widgets)
+    set(PACKAGES ${PACKAGES} Widgets HttpServer)
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS ${PACKAGES})
 find_package(OpenSSL REQUIRED)
+
+find_package(libagw REQUIRED)
 
 set(LIBS ${LIBS}
     Qt6::Core Qt6::Gui
     Qt6::Network Qt6::Xml Qt6::RemoteObjects
     Qt6::Quick Qt6::Svg Qt6::QuickControls2
     Qt6::Core5Compat Qt6::Concurrent
+    amnezia::libagw
 )
 
+find_package(Qt6 QUIET OPTIONAL_COMPONENTS CorePrivate)
+if(TARGET Qt6::CorePrivate)
+    set(LIBS ${LIBS} Qt6::CorePrivate)
+    add_compile_definitions(AMNEZIA_HAS_QZIPWRITER)
+endif()
+
 if(WIN32 OR (APPLE AND NOT IOS) OR (LINUX AND NOT ANDROID))
-    set(LIBS ${LIBS} Qt6::Widgets)
+    set(LIBS ${LIBS} Qt6::Widgets Qt6::HttpServer)
 endif()
 
 qt_standard_project_setup()
@@ -71,6 +80,7 @@ endif()
 qt6_add_resources(QRC ${QRC}
     ${CMAKE_CURRENT_LIST_DIR}/images/images.qrc
     ${CMAKE_CURRENT_LIST_DIR}/images/flagKit.qrc
+    ${CMAKE_CURRENT_LIST_DIR}/resources/countries.qrc
     ${CMAKE_CURRENT_LIST_DIR}/client_scripts/clientScripts.qrc
     ${CLIENT_QML_QRC_FILE}
     ${CMAKE_CURRENT_LIST_DIR}/server_scripts/serverScripts.qrc
@@ -93,6 +103,7 @@ else()
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_es_ES.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_ko_KR.ts
         ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_fr_FR.ts
+        ${CMAKE_CURRENT_LIST_DIR}/translations/${CLIENT_TS_PREFIX}_th_TH.ts
     )
 endif()
 

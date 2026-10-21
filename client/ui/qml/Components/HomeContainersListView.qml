@@ -1,98 +1,55 @@
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
-
-import SortFilterProxyModel 0.2
 
 import PageEnum 1.0
 
 import "../Controls2"
-import "../Controls2/TextTypes"
 
 ListViewType {
-    id: menuContent
+    id: root
 
-    property var rootWidth
-    property var selectedText
+    signal activated()
 
-    width: rootWidth
-    anchors.top: parent.top
-    anchors.bottom: parent.bottom
+    leftMargin: 16
+    rightMargin: 16
+    bottomMargin: 16
 
     ButtonGroup {
         id: containersRadioButtonGroup
     }
 
-    delegate: Item {
-        implicitWidth: rootWidth
-        implicitHeight: content.implicitHeight
+    delegate: RadioItemType {
+        width: root.width - root.leftMargin - root.rightMargin
 
-        ColumnLayout {
-            id: content
+        text: name
+        subtitle: description
+        showSeparator: index < root.count - 1
 
-            anchors.fill: parent
-            anchors.rightMargin: 16
-            anchors.leftMargin: 16
+        ButtonGroup.group: containersRadioButtonGroup
 
-            VerticalRadioButton {
-                id: containerRadioButton
+        icon.source: isInstalled ? "" : "qrc:/images/controls/download.svg"
 
-                Layout.fillWidth: true
+        checkable: isInstalled && !ConnectionController.isConnected
+        checked: root.model.mapToSource(index) === ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId)
 
-                text: name
-                descriptionText: description
-
-                ButtonGroup.group: containersRadioButtonGroup
-
-                imageSource: "qrc:/images/controls/download.svg"
-                showImage: !isInstalled
-
-                checkable: isInstalled && !ConnectionController.isConnected
-                checked: proxyDefaultServerContainersModel.mapToSource(index) === ServersUiController.serverDefaultContainer(ServersUiController.defaultServerId)
-
-                onClicked: {
-                    if (ConnectionController.isConnected && isInstalled) {
-                        PageController.showNotificationMessage(qsTr("Unable change protocol while there is an active connection"))
-                        return
-                    }
-
-                    var containerIndex = proxyDefaultServerContainersModel.mapToSource(index)
-
-                    if (!isInstalled) {
-                        ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
-                        ServersUiController.processedContainerIndex = containerIndex
-                        PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
-                        containersDropDown.closeTriggered()
-                        return
-                    }
-
-                    containersDropDown.closeTriggered()
-                    ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, containerIndex)
-                }
-
-                MouseArea {
-                    anchors.fill: containerRadioButton
-                    cursorShape: Qt.PointingHandCursor
-                    enabled: false
-                }
-
-                Keys.onEnterPressed: {
-                    if (checkable) {
-                        checked = true
-                    }
-                    containerRadioButton.clicked()
-                }
-                Keys.onReturnPressed: {
-                    if (checkable) {
-                        checked = true
-                    }
-                    containerRadioButton.clicked()
-                }
+        onClicked: {
+            if (ConnectionController.isConnected && isInstalled) {
+                PageController.showNotificationMessage(qsTr("Unable change protocol while there is an active connection"))
+                return
             }
 
-            DividerType {
-                Layout.fillWidth: true
+            var containerIndex = root.model.mapToSource(index)
+
+            if (!isInstalled) {
+                ServersUiController.setProcessedServerId(ServersUiController.defaultServerId)
+                ServersUiController.processedContainerIndex = containerIndex
+                PageController.goToPage(PageEnum.PageSetupWizardProtocolSettings)
+                root.activated()
+                return
             }
+
+            root.activated()
+            ServersUiController.setDefaultContainer(ServersUiController.defaultServerId, containerIndex)
         }
     }
 }

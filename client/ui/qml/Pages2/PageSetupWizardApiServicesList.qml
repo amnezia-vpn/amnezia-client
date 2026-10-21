@@ -16,41 +16,22 @@ import "../Config"
 PageType {
     id: root
 
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
-
     ListViewType {
         id: listView
 
-        anchors.top: backButton.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
-        anchors.topMargin: 16
+        anchors.fill: parent
 
         header: ColumnLayout {
             width: listView.width
 
-            BaseHeaderType {
-                Layout.fillWidth: true
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-                Layout.bottomMargin: 24
+            spacing: 0
 
-                headerText: qsTr("VPN by Amnezia")
-                descriptionText: qsTr("Choose a VPN service that suits your needs.")
+            NavigationBarType {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 16
+
+                title: qsTr("VPN by Amnezia")
+                description: qsTr("Choose a VPN service that suits your needs.")
             }
         }
 
@@ -75,22 +56,20 @@ PageType {
 
             enabled: isServiceAvailable
 
-            CardWithIconsType {
+            BasicCardType {
                 id: card
 
                 Layout.fillWidth: true
                 Layout.rightMargin: 16
                 Layout.leftMargin: 16
-                Layout.bottomMargin: 16
+                Layout.bottomMargin: 12
 
-                headerText: name
-                bodyText: cardDescription
-                footerText: price
+                text: name
+                subtitle: cardDescription
+                footnote: price
 
-                showRecommendedBadge: showRecommended && isServiceAvailable
-                recommendedText: qsTr("Recommended")
-
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
+                badgeText: (showRecommended && isServiceAvailable) ? qsTr("Recommended") : ""
+                muted: !isServiceAvailable
 
                 onClicked: {
                     if (isServiceAvailable) {
@@ -102,10 +81,12 @@ PageType {
                         }
                     }
                 }
-                
-                Keys.onEnterPressed: clicked()
-                Keys.onReturnPressed: clicked()
             }
+        }
+
+        footer: Item {
+            width: listView.width
+            height: 4 + PageController.safeAreaBottomMargin
         }
     }
 }

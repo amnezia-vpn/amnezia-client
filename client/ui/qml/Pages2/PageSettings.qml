@@ -37,15 +37,15 @@ PageType {
         header: ColumnLayout {
             width: listView.width
 
-            BaseHeaderType {
-                id: header
-                Layout.fillWidth: true
-                Layout.topMargin: 24 + PageController.safeAreaTopMargin
-                Layout.bottomMargin: 16
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+            spacing: 0
 
-                headerText: qsTr("Settings")
+            NavigationBarType {
+                Layout.fillWidth: true
+                Layout.bottomMargin: 16
+
+                toolbarVisible: false
+                backButtonVisible: false
+                title: qsTr("Settings")
             }
         }
 
@@ -56,47 +56,49 @@ PageType {
 
             spacing: 0
 
-            LabelWithButtonType {
+            ListItemType {
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
                 visible: isVisible
 
+                leadingSlotWidth: 24
                 text: title
-                rightImageSource: "qrc:/images/controls/chevron-right.svg"
-                leftImageSource: leftImagePath
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+                icon.source: leftImagePath
+                showIconBadge: modelData.hasBadge === true
 
-                clickedFunction: clickedHandler
-            }
-
-            DividerType {
-                visible: isVisible
+                onClicked: clickedHandler()
             }
         }
 
         footer: ColumnLayout {
             width: listView.width
 
-            LabelWithButtonType {
+            spacing: 0
+
+            ListItemType {
                 id: close
 
                 visible: GC.isDesktop()
                 Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
+                leadingSlotWidth: 24
                 text: qsTr("Close application")
-                leftImageSource: "qrc:/images/controls/x-circle.svg"
-                isLeftImageHoverEnabled: false
+                trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+                icon.source: "qrc:/images/controls/x-circle.svg"
 
-                clickedFunction: function() {
+                onClicked: {
                     PageController.closeApplication()
                 }
             }
 
-            DividerType {
+            Item {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                visible: GC.isDesktop()
+                Layout.preferredHeight: 16
             }
         }
     }
@@ -148,7 +150,8 @@ PageType {
         id: news
 
         property string title: qsTr("News & Notifications")
-        readonly property string leftImagePath: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled() ? "qrc:/images/controls/news-unread.svg" : "qrc:/images/controls/news.svg"
+        readonly property string leftImagePath: "qrc:/images/controls/news.svg"
+        readonly property bool hasBadge: NewsModel.hasUnread && SettingsController.isNewsNotificationsEnabled()
         property bool isVisible: ServersUiController.hasServersFromGatewayApi
         readonly property var clickedHandler: function() {
             if (!ServersUiController.hasServersFromGatewayApi) {

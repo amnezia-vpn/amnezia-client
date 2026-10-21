@@ -15,35 +15,42 @@ PageType {
     id: root
     enableTimer: (SettingsController.isOnTv()) ? false : true
 
-    ColumnLayout {
-        id: content
+    Item {
+        id: logoArea
 
-        anchors.fill: parent
-        spacing: 0
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.topMargin: 16 + PageController.safeAreaTopMargin
+        anchors.bottomMargin: 96 + PageController.safeAreaBottomMargin
 
         Image {
-            id: image
-            source: "qrc:/images/amneziaBigLogo.png"
+            anchors.centerIn: parent
 
-            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-            Layout.topMargin: 32 + PageController.safeAreaTopMargin
-            Layout.preferredWidth: 360
-            Layout.preferredHeight: 287
+            width: 153
+            height: 131
+
+            source: "qrc:/images/amneziaLogo.svg"
+            sourceSize: Qt.size(153 * Screen.devicePixelRatio, 131 * Screen.devicePixelRatio)
+            fillMode: Image.PreserveAspectFit
         }
+    }
 
-        BasicButtonType {
-            id: startButton
-            Layout.fillWidth: true
-            Layout.bottomMargin: 48 + PageController.safeAreaBottomMargin
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.alignment: Qt.AlignBottom
+    ButtonType {
+        id: startButton
 
-            text: qsTr("Let's get started")
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-            clickedFunc: function() {
-                PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
-            }
+        text: qsTr("Let's get started")
+
+        onClicked: {
+            PageController.goToPage(PageEnum.PageSetupWizardConfigSource)
         }
     }
 

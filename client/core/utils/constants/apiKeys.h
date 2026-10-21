@@ -45,6 +45,8 @@ namespace apiDefs
         constexpr QLatin1String locale("locale");
 
         constexpr QLatin1String captchaId("captcha_id");
+        constexpr QLatin1String captchaImage("captcha_image");
+        constexpr QLatin1String httpStatus("http_status");
         constexpr QLatin1String captchaSolution("captcha_solution");
 
         constexpr QLatin1String activeDeviceCount("active_device_count");

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Controls.impl
 import QtQuick.Layouts
 import QtQuick.Dialogs
 
@@ -15,21 +16,6 @@ PageType {
     id: root
 
     property bool showContent: false
-
-    BackButtonType {
-        id: backButton
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
-        
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
 
     Connections {
         target: PageController
@@ -57,173 +43,157 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    FlickableType {
+        id: flickable
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: bottomBar.top
 
-        header: ColumnLayout {
-            width: listView.width
+        contentHeight: content.implicitHeight + 16
 
-            BaseHeaderType {
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                
-                headerText: qsTr("Add this connection?")
+        ColumnLayout {
+            id: content
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("Add this connection?")
             }
 
-            RowLayout {
-                Layout.topMargin: 32
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 
-                spacing: 8
+                spacing: 12
 
-                visible: fileName.text !== ""
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 16
+                    Layout.rightMargin: 16
+                    Layout.topMargin: 8
+                    Layout.bottomMargin: 8
 
-                Image {
-                    source: "qrc:/images/controls/file-check-2.svg"
+                    spacing: 8
+
+                    visible: fileName.text !== ""
+
+                    IconImage {
+                        Layout.preferredWidth: 24
+                        Layout.preferredHeight: 24
+
+                        source: "qrc:/images/controls/file-check-2.svg"
+                        sourceSize: Qt.size(24, 24)
+                        color: AmneziaStyle.color.iconDefault
+                    }
+
+                    H2TextType {
+                        id: fileName
+
+                        Layout.fillWidth: true
+
+                        text: ImportController.getConfigFileName()
+                        color: AmneziaStyle.color.textSecondary
+                        wrapMode: Text.Wrap
+                    }
                 }
 
-                Header2TextType {
-                    id: fileName
+                ButtonType {
+                    id: showContentButton
+
+                    Layout.alignment: Qt.AlignLeft
+
+                    variant: ButtonType.Text
+                    size: ButtonType.Medium
+
+                    text: root.showContent ? qsTr("Collapse content") : qsTr("Show content")
+
+                    onClicked: {
+                        root.showContent = !root.showContent
+                    }
+                }
+
+                CheckBoxType {
+                    id: cloakingCheckBox
+                    objectName: "cloakingCheckBox"
 
                     Layout.fillWidth: true
 
-                    text: ImportController.getConfigFileName()
-                    wrapMode: Text.Wrap
+                    visible: ImportController.isNativeWireGuardConfig
+
+                    text: qsTr("Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.")
                 }
-            }
 
-            BasicButtonType {
-                id: showContentButton
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                NotificationType {
+                    Layout.fillWidth: true
 
-                implicitHeight: 32
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.goldenApricot
-
-                text: showContent ? qsTr("Collapse content") : qsTr("Show content")
-
-                clickedFunc: function() {
-                    showContent = !showContent
+                    variant: NotificationType.Error
+                    iconSource: "qrc:/images/controls/mail-warning.svg"
+                    text: ImportController.maliciousWarningText
+                    textFormat: Qt.RichText
+                    visible: text !== ""
                 }
-            }
 
-            CheckBoxType {
-                id: cloakingCheckBox
-                objectName: "cloakingCheckBox"
+                NotificationType {
+                    Layout.fillWidth: true
 
-                visible: ImportController.isNativeWireGuardConfig
+                    text: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
+                }
 
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                Rectangle {
+                    Layout.fillWidth: true
 
-                text: qsTr("Enable WireGuard obfuscation. It may be useful if WireGuard is blocked on your provider.")
-            }
-        }
+                    implicitHeight: configContent.implicitHeight + 32
 
-        model: 1 // fake model to force the ListView to be created without a model
+                    radius: 16
+                    color: AmneziaStyle.color.bgSurface
 
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser after have migrated to 6.9
-            width: listView.width
+                    visible: root.showContent
 
-            WarningType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+                    BodyTextType {
+                        id: configContent
 
-                textString: ImportController.maliciousWarningText
-                textFormat: Qt.RichText
-                visible: textString !== ""
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.margins: 16
 
-                iconPath: "qrc:/images/controls/alert-circle.svg"
+                        wrapMode: Text.Wrap
 
-                textColor: AmneziaStyle.color.vibrantRed
-                imageColor: AmneziaStyle.color.vibrantRed
-            }
-
-            WarningType {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-
-                textString: qsTr("Use connection codes only from sources you trust. Codes from public sources may have been created to intercept your data.")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.bottomMargin: 48
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
-
-                implicitHeight: configContent.implicitHeight
-
-                radius: 10
-                color: AmneziaStyle.color.onyxBlack
-
-                visible: showContent
-
-                ParagraphTextType {
-                    id: configContent
-
-                    anchors.fill: parent
-                    anchors.margins: 16
-
-                    wrapMode: Text.Wrap
-
-                    text: ImportController.getConfig()
+                        text: ImportController.getConfig()
+                    }
                 }
             }
         }
+    }
 
-        footer: ColumnLayout {
-            width: listView.width
+    BottomBarType {
+        id: bottomBar
 
-            BasicButtonType {
-                id: connectButton
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
-                Layout.fillWidth: true
-                Layout.topMargin: 16
-                Layout.bottomMargin: 32
-                Layout.rightMargin: 16
-                Layout.leftMargin: 16
+        ButtonType {
+            id: connectButton
 
-                text: qsTr("Add")
-                clickedFunc: function() {
-                    const headerItem = listView.headerItem;
-                    if (!headerItem) {
-                        console.error("Header item not found in ListView")
-                        return
-                    }
+            Layout.fillWidth: true
 
-                    const cloakingCheckBoxItem = listView.findChildWithObjectName(headerItem.children, "cloakingCheckBox");
-                    if (!cloakingCheckBoxItem) {
-                        console.error("cloakingCheckBox not found")
-                        return
-                    }
+            text: qsTr("Add")
 
-                    if (cloakingCheckBoxItem.checked) {
-                        ImportController.processNativeWireGuardConfig()
-                    }
-                    PageController.showBusyIndicator(true)
-                    ImportController.importConfig()
+            onClicked: {
+                if (cloakingCheckBox.checked) {
+                    ImportController.processNativeWireGuardConfig()
                 }
+                PageController.showBusyIndicator(true)
+                ImportController.importConfig()
             }
         }
     }

@@ -172,6 +172,11 @@ void AmneziaApplication::init()
                 win->setPersistentSceneGraph(true);
                 win->setPersistentGraphics(true);
 #endif
+#ifdef Q_OS_IOS
+                auto pageController = m_coreController->pageController();
+                pageController->setSafeAreaMargins(win->safeAreaMargins());
+                QObject::connect(win, &QWindow::safeAreaMarginsChanged, pageController, &PageController::setSafeAreaMargins);
+#endif
 #if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
                 win->show();
 #else

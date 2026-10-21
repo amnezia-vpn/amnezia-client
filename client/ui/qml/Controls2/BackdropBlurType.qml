@@ -1,5 +1,5 @@
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 
 import Style 1.0
 
@@ -9,6 +9,7 @@ Item {
     property Item sourceItem
     property real blurPadding: 40
     property real blurRadius: 50
+    property real radius: height / 2
     property color tintColor: Qt.alpha(AmneziaStyle.color.textStaticWhite, 0.10)
     property color borderColor: Qt.alpha(AmneziaStyle.color.textStaticWhite, 0.75)
 
@@ -16,8 +17,11 @@ Item {
         anchors.fill: parent
 
         layer.enabled: true
-        layer.effect: OpacityMask {
+        layer.effect: MultiEffect {
+            maskEnabled: true
             maskSource: backdropMask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1.0
         }
 
         Item {
@@ -42,10 +46,14 @@ Item {
                 visible: false
             }
 
-            FastBlur {
+            MultiEffect {
                 anchors.fill: parent
                 source: backdrop
-                radius: root.blurRadius
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blurMax: 64
+                blur: root.blurRadius <= 20 ? 0.73 : 0.9
+                blurMultiplier: root.blurRadius <= 20 ? 0 : 0.5
             }
         }
     }
@@ -54,13 +62,14 @@ Item {
         id: backdropMask
 
         anchors.fill: parent
-        radius: height / 2
+        radius: root.radius
         visible: false
+        layer.enabled: true
     }
 
     Rectangle {
         anchors.fill: parent
-        radius: height / 2
+        radius: root.radius
 
         color: root.tintColor
         border.color: root.borderColor

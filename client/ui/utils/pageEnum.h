@@ -29,6 +29,7 @@ namespace PageLoader
         PageSettingsBackup,
         PageSettingsAbout,
         PageSettingsLogging,
+        PageSettingsLogViewer,
         PageSettingsSplitTunneling,
         PageSettingsAppSplitTunneling,
         PageSettingsKillSwitch,
@@ -40,6 +41,7 @@ namespace PageLoader
         PageSettingsApiDevices,
         PageSettingsApiSubscriptionKey,
         PageSettingsKillSwitchExceptions,
+        PageSettingsLocalProxy,
 
         PageServiceSftpSettings,
         PageServiceTorWebsiteSettings,

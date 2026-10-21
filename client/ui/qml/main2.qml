@@ -61,11 +61,19 @@ Window  {
     maximumWidth: 600
     maximumHeight: 800
 
-    color: AmneziaStyle.color.midnightBlack
+    flags: Qt.platform.os === "ios" ? (Qt.Window | Qt.ExpandedClientAreaHint) : Qt.Window
+
+    color: AmneziaStyle.color.bgBase
 
     onClosing: function(close) {
         close.accepted = false
         PageController.closeWindow()
+    }
+
+    onActiveFocusItemChanged: {
+        if (activeFocusItem === contentItem) {
+            pageStart.forceActiveFocus()
+        }
     }
 
     onSceneGraphError: function(error, message) {
@@ -74,31 +82,6 @@ Window  {
     }
 
     title: "AmneziaVPN"
-
-    Item { // This item is needed for focus handling
-        id: defaultFocusItem
-        objectName: "defaultFocusItem"
-
-        focus: true
-
-        Keys.onPressed: function(event) {
-            switch (event.key) {
-            case Qt.Key_Tab:
-            case Qt.Key_Down:
-            case Qt.Key_Right:
-                FocusController.nextKeyTabItem()
-                break
-            case Qt.Key_Backtab:
-            case Qt.Key_Up:
-            case Qt.Key_Left:
-                FocusController.previousKeyTabItem()
-                break
-            default:
-                PageController.keyPressEvent(event.key)
-                event.accepted = true
-            }
-        }
-    }
 
     Loader {
         active: Qt.platform.os === "android"
@@ -121,19 +104,15 @@ Window  {
         }
 
         function onShowErrorMessage(errorMessage) {
-            popupErrorMessage.text = errorMessage
-            popupErrorMessage.open()
+            popupErrorMessage.show(errorMessage)
         }
 
         function onShowNotificationMessage(message) {
-            popupNotificationMessage.text = message
-            popupNotificationMessage.closeButtonVisible = false
-            popupNotificationMessage.open()
-            popupNotificationTimer.start()
+            popupNotificationMessage.show(message)
         }
 
         function onShowPassphraseRequestDrawer() {
-            privateKeyPassphraseDrawer.openTriggered()
+            privateKeyPassphraseDrawer.open()
         }
 
         function onGoToPageSettingsBackup() {
@@ -158,57 +137,32 @@ Window  {
     }
 
     PageStart {
+        id: pageStart
         objectName: "pageStart"
         width: root.width
         height: root.height
+
+        focus: true
     }
 
-    Item {
-        objectName: "popupNotificationItem"
+    SnackbarType {
+        id: popupNotificationMessage
+        objectName: "popupNotificationMessage"
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
-        implicitHeight: popupNotificationMessage.height
-
-        PopupType {
-            id: popupNotificationMessage
-
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    popupNotificationMessage.close()
-                    popupNotificationTimer.stop()
-                }
-            }
-        }
-
-        Timer {
-            id: popupNotificationTimer
-
-            interval: 3000
-            repeat: false
-            running: false
-            onTriggered: {
-                popupNotificationMessage.close()
-            }
-        }
+        duration: 3000
     }
 
-    Item {
-        objectName: "popupErrorMessageItem"
+    SnackbarType {
+        id: popupErrorMessage
+        objectName: "popupErrorMessage"
 
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.bottom: parent.bottom
+        bottomOffset: Math.max(PageController.safeAreaBottomMargin, pageStart.tabBarHeight - 4)
 
-        implicitHeight: popupErrorMessage.height
-
-        PopupType {
-            id: popupErrorMessage
-        }
+        variant: SnackbarType.Destructive
+        closable: true
+        duration: 0
     }
 
     Item {
@@ -232,111 +186,72 @@ Window  {
         }
     }
 
-    Item {
-        objectName: "privateKeyPassphraseDrawerItem"
+    SheetType {
+        id: privateKeyPassphraseDrawer
 
-        anchors.fill: parent
+        property bool isCloseByUser: false
 
-        DrawerType2 {
-            id: privateKeyPassphraseDrawer
+        expandedHeight: windowHeight * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
 
-            property bool isCloseByUser: false
+        onAboutToShow: {
+            PageController.showBusyIndicator(false)
+        }
 
-            anchors.fill: parent
-            expandedHeight: root.height * 0.35 + PageController.safeAreaBottomMargin + PageController.imeHeight
+        onOpened: {
+            passphrase.textField.text = ""
+            passphrase.textField.forceActiveFocus()
+        }
 
-            expandedStateContent: ColumnLayout {
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.topMargin: 16
-                anchors.leftMargin: 16
-                anchors.rightMargin: 16
+        onAboutToHide: {
+            if (privateKeyPassphraseDrawer.isCloseByUser === false) {
+                privateKeyPassphraseDrawer.isCloseByUser = true
+                PageController.passphraseRequestDrawerClosed("")
+            }
 
-                Connections {
-                    target: privateKeyPassphraseDrawer
-                    function onOpened() {
-                        passphrase.textField.text = ""
-                        passphrase.textField.forceActiveFocus()
-                    }
+            if (passphrase.textField.text !== "") {
+                PageController.showBusyIndicator(true)
+            }
+        }
 
-                    function onAboutToHide() {
-                        if (privateKeyPassphraseDrawer.isCloseByUser === false) {
-                            privateKeyPassphraseDrawer.isCloseByUser = true
-                            PageController.passphraseRequestDrawerClosed("")
-                        }
+        ColumnLayout {
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 16
+            anchors.leftMargin: 16
+            anchors.rightMargin: 16
 
-                        if (passphrase.textField.text !== "") {
-                            PageController.showBusyIndicator(true)
-                        }
-                    }
+            TextFieldType {
+                id: passphrase
 
-                    function onAboutToShow() {
-                        PageController.showBusyIndicator(false)
-                    }
-                }
+                Layout.fillWidth: true
+                headerText: qsTr("Private key passphrase")
+                passwordToggle: true
+            }
 
-                TextFieldWithHeaderType {
-                    id: passphrase
+            ButtonType {
+                id: saveButton
+                variant: ButtonType.Secondary
 
-                    property bool hidePassword: true
+                Layout.fillWidth: true
 
-                    Layout.fillWidth: true
-                    headerText: qsTr("Private key passphrase")
-                    textField.echoMode: hidePassword ? TextInput.Password : TextInput.Normal
-                    buttonImageSource: hidePassword ? "qrc:/images/controls/eye.svg" : "qrc:/images/controls/eye-off.svg"
+                text: qsTr("Save")
 
-                    clickedFunc: function() {
-                        hidePassword = !hidePassword
-                    }
-                }
-
-                BasicButtonType {
-                    id: saveButton
-
-                    Layout.fillWidth: true
-
-                    defaultColor: AmneziaStyle.color.transparent
-                    hoveredColor: AmneziaStyle.color.translucentWhite
-                    pressedColor: AmneziaStyle.color.sheerWhite
-                    disabledColor: AmneziaStyle.color.mutedGray
-                    textColor: AmneziaStyle.color.paleGray
-                    borderWidth: 1
-
-                    text: qsTr("Save")
-
-                    clickedFunc: function() {
-                        privateKeyPassphraseDrawer.isCloseByUser = true
-                        privateKeyPassphraseDrawer.closeTriggered()
-                        PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
-                    }
+                onClicked: {
+                    privateKeyPassphraseDrawer.isCloseByUser = true
+                    privateKeyPassphraseDrawer.close()
+                    PageController.passphraseRequestDrawerClosed(passphrase.textField.text)
                 }
             }
         }
     }
 
-    Item {
-        objectName: "questionDrawerItem"
-
-        anchors.fill: parent
-
-        QuestionDrawer {
-            id: questionDrawer
-
-            anchors.fill: parent
-        }
+    QuestionDrawer {
+        id: questionDrawer
     }
 
-    Item {
-        objectName: "subscriptionExpiredDrawerItem"
-
-        anchors.fill: parent
-
-        SubscriptionExpiredDrawer {
-            id: subscriptionExpiredDrawer
-
-            anchors.fill: parent
-        }
+    SubscriptionExpiredDrawer {
+        id: subscriptionExpiredDrawer
     }
 
     Connections {
@@ -351,7 +266,7 @@ Window  {
         target: SubscriptionUiController
 
         function onSubscriptionExpiredOnServer() {
-            subscriptionExpiredDrawer.openTriggered()
+            subscriptionExpiredDrawer.open()
         }
 
         function onCaptchaRequired(captchaId, captchaImageBase64, hint) {
@@ -389,10 +304,12 @@ Window  {
 
         anchors.fill: parent
 
-        BusyIndicatorType {
+        LoadingOverlayType {
             id: busyIndicator
             anchors.centerIn: parent
             z: 1
+
+            blurSource: pageStart
         }
     }
 
@@ -425,18 +342,18 @@ Window  {
         questionDrawer.noButtonText = noButtonText
 
         questionDrawer.yesButtonFunction = function() {
-            questionDrawer.closeTriggered()
+            questionDrawer.close()
             if (yesButtonFunction && typeof yesButtonFunction === "function") {
                 yesButtonFunction()
             }
         }
         questionDrawer.noButtonFunction = function() {
-            questionDrawer.closeTriggered()
+            questionDrawer.close()
             if (noButtonFunction && typeof noButtonFunction === "function") {
                 noButtonFunction()
             }
         }
-        questionDrawer.openTriggered()
+        questionDrawer.open()
     }
 
     FileDialog {

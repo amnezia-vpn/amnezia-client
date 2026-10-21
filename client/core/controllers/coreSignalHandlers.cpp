@@ -1,5 +1,6 @@
 #include "coreSignalHandlers.h"
 
+#include <QCoreApplication>
 #include <QTimer>
 #include <QtConcurrent>
 
@@ -32,6 +33,7 @@
 #include "core/controllers/selfhosted/installController.h"
 #include "core/controllers/selfhosted/exportController.h"
 #include "core/controllers/connectionController.h"
+#include "core/controllers/localProxyController.h"
 #include "ui/models/clientManagementModel.h"
 #include "ui/controllers/api/apiNewsUiController.h"
 #include "ui/models/containersModel.h"
@@ -65,6 +67,8 @@ void CoreSignalHandlers::initAllHandlers()
     initExportControllerHandler();
     initImportControllerHandler();
     initApiCountryModelUpdateHandler();
+    initCountryListSortModeHandler();
+    initCountryListStateHandler();
     initSubscriptionRefreshHandler();
     initAdminConfigRevokedHandler();
     initPassphraseRequestHandler();
@@ -86,6 +90,7 @@ void CoreSignalHandlers::initAllHandlers()
     initIosSettingsHandler();
     initNotificationHandler();
     initUpdateFoundHandler();
+    initLocalProxyHandler();
 }
 
 void CoreSignalHandlers::initErrorMessagesHandler()
@@ -173,6 +178,41 @@ void CoreSignalHandlers::initImportControllerHandler()
     });
 }
 
+void CoreSignalHandlers::initCountryListSortModeHandler()
+{
+    SecureAppSettingsRepository *repository = m_coreController->m_appSettingsRepository;
+
+    const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
+                                                  m_coreController->m_apiConfigsCountryListModel };
+
+    for (ApiCountryListModel *model : models) {
+        model->setSortMode(repository->countryListSortMode(model->listId()));
+        connect(model, &ApiCountryListModel::sortModeChanged, this, [repository, model]() {
+            repository->setCountryListSortMode(model->listId(), model->sortMode());
+        });
+    }
+}
+
+void CoreSignalHandlers::initCountryListStateHandler()
+{
+    SecureAppSettingsRepository *repository = m_coreController->m_appSettingsRepository;
+
+    const QVector<ApiCountryListModel *> models { m_coreController->m_apiCountryListModel,
+                                                  m_coreController->m_apiConfigsCountryListModel };
+
+    for (ApiCountryListModel *model : models) {
+        model->setFavorites(repository->favoriteLocations());
+        connect(model, &ApiCountryListModel::favoritesChanged, this, [repository, models, model](const QStringList &codes) {
+            repository->setFavoriteLocations(codes);
+            for (ApiCountryListModel *other : models) {
+                if (other != model) {
+                    other->setFavorites(codes);
+                }
+            }
+        });
+    }
+}
+
 void CoreSignalHandlers::initApiCountryModelUpdateHandler()
 {
     connect(m_coreController->m_serversUiController, &ServersUiController::updateApiCountryModel, this, [this]() {
@@ -187,7 +227,8 @@ void CoreSignalHandlers::initApiCountryModelUpdateHandler()
         }
 
         m_coreController->m_apiCountryModel->updateModel(apiV2->apiConfig.availableCountries,
-                                                           apiV2->apiConfig.serverCountryCode);
+                                                           apiV2->apiConfig.serverCountryCode,
+                                                           apiV2->apiConfig.userCountryCode);
     });
 }
 
@@ -230,6 +271,18 @@ void CoreSignalHandlers::initTranslationsUpdatedHandler()
     connect(m_coreController->m_languageUiController, &LanguageUiController::updateTranslations, m_coreController, &CoreController::updateTranslator);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_languageUiController, &LanguageUiController::translationsUpdated);
     connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_connectionUiController, &ConnectionUiController::onTranslationsUpdated);
+    connect(m_coreController, &CoreController::translationsUpdated, m_coreController->m_logsUiController, &LogsUiController::refreshSizes);
+
+    const QVector<ApiCountryListModel *> countryListModels { m_coreController->m_apiCountryListModel,
+                                                             m_coreController->m_apiConfigsCountryListModel };
+    auto applyUiLanguage = [this, countryListModels]() {
+        const QString languageCode = QLocale::languageToCode(m_coreController->m_settingsController->getAppLanguage().language());
+        for (ApiCountryListModel *model : countryListModels) {
+            model->setUiLanguage(languageCode);
+        }
+    };
+    applyUiLanguage();
+    connect(m_coreController, &CoreController::translationsUpdated, this, applyUiLanguage);
 }
 
 void CoreSignalHandlers::initLanguageHandler()
@@ -440,3 +493,12 @@ void CoreSignalHandlers::initUpdateFoundHandler()
     });
 }
 
+void CoreSignalHandlers::initLocalProxyHandler()
+{
+    connect(m_coreController->m_connectionController, &ConnectionController::openConnectionRequested, m_coreController->m_localProxyController,
+            &LocalProxyController::onVpnConnectionRequested);
+    connect(m_coreController->m_localProxyController, &LocalProxyController::stoppedByVpn, m_coreController->m_pageController,
+            &PageController::showNotificationMessage);
+    connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, m_coreController->m_localProxyController,
+            &LocalProxyController::disable);
+}

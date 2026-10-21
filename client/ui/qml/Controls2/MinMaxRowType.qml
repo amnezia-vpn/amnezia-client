@@ -2,19 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import Style 1.0
-
 import "../Controls2"
 import "../Controls2/TextTypes"
 
-// MinMaxRowType — two side-by-side labeled text fields: Min / Max
-// Usage:
-//   MinMaxRowType {
-//       minValue: "0"
-//       maxValue: "0"
-//       onMinChanged: function(val) { someProperty = val }
-//       onMaxChanged: function(val) { someProperty = val }
-//   }
 Item {
     id: root
 
@@ -27,7 +17,7 @@ Item {
     property string minPlaceholder: ""
     property string maxPlaceholder: ""
 
-    property string hintText: root.minLimit > 0
+    property string helperText: root.minLimit > 0
                               ? (root.minLimit + "–" + root.maxLimit)
                               : ("≤ " + root.maxLimit)
 
@@ -51,6 +41,14 @@ Item {
         return String(n)
     }
 
+    function effectiveOther(value, placeholder) {
+        if (value !== "")
+            return parseInt(value, 10)
+        if (placeholder !== "")
+            return parseInt(placeholder, 10)
+        return NaN
+    }
+
     function capEdit(tf, holder) {
         if (tf.text !== "" && parseInt(tf.text, 10) > root.maxLimit) {
             tf.text = holder.lastValid
@@ -63,18 +61,18 @@ Item {
     ColumnLayout {
         id: col
         anchors.fill: parent
-        spacing: 4
+        spacing: 12
 
         RowLayout {
             id: row
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
-            // Min field
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: minField
                 property string lastValid: ""
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 headerText: qsTr("Min")
                 placeholderText: root.minPlaceholder
                 textField.maximumLength: 10
@@ -86,8 +84,8 @@ Item {
                 textField.onTextEdited: { root.capEdit(minField.textField, minField); root.edited() }
                 textField.onEditingFinished: {
                     var v = root.clampValue(minField.textField.text)
-                    if (v !== "" && root.maxValue !== "") {
-                        var mx = parseInt(root.maxValue, 10)
+                    if (v !== "") {
+                        var mx = root.effectiveOther(root.maxValue, root.maxPlaceholder)
                         if (!isNaN(mx) && parseInt(v, 10) > mx)
                             root.maxChanged(v)
                     }
@@ -105,11 +103,11 @@ Item {
                 }
             }
 
-            // Max field
-            TextFieldWithHeaderType {
+            TextFieldType {
                 id: maxField
                 property string lastValid: ""
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 headerText: qsTr("Max")
                 placeholderText: root.maxPlaceholder
                 textField.maximumLength: 10
@@ -121,8 +119,8 @@ Item {
                 textField.onTextEdited: { root.capEdit(maxField.textField, maxField); root.edited() }
                 textField.onEditingFinished: {
                     var v = root.clampValue(maxField.textField.text)
-                    if (v !== "" && root.minValue !== "") {
-                        var mn = parseInt(root.minValue, 10)
+                    if (v !== "") {
+                        var mn = root.effectiveOther(root.minValue, root.minPlaceholder)
                         if (!isNaN(mn) && parseInt(v, 10) < mn)
                             v = String(mn)
                     }
@@ -142,9 +140,8 @@ Item {
         }
 
         SmallTextType {
-            visible: root.hintText !== ""
-            text: root.hintText
-            color: AmneziaStyle.color.mutedGray
+            visible: root.helperText !== ""
+            text: root.helperText
             Layout.fillWidth: true
         }
     }

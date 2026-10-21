@@ -12,7 +12,6 @@ import "./"
 import "../Controls2"
 import "../Config"
 import "../Components"
-import "../Controls2/TextTypes"
 
 PageType {
     id: root
@@ -32,123 +31,100 @@ PageType {
         }
     }
 
-    BackButtonType {
-        id: backButton
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.topMargin: 20 + PageController.safeAreaTopMargin
+        anchors.bottom: buttons.top
 
-        onActiveFocusChanged: {
-            if(backButton.enabled && backButton.activeFocus) {
-                listView.positionViewAtBeginning()
-            }
-        }
-    }
+        contentHeight: content.implicitHeight
 
-    ListViewType {
-        id: listView
+        ColumnLayout {
+            id: content
 
-        anchors.top: backButton.bottom
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-        header: ColumnLayout {
+            spacing: 0
 
-            width: listView.width
-
-            spacing: 16
-
-            BaseHeaderType {
+            NavigationBarType {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
 
-                headerText: qsTr("Back up your configuration")
-                descriptionText: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
+                title: qsTr("Back up your configuration")
+                description: qsTr("You can save your settings to a backup file to restore them the next time you install the application.")
             }
-        }
 
-        model: 1 // fake model to force the ListView to be created without a model
-
-        delegate: ColumnLayout { // TODO(CyAn84): add DelegateChooser when have migrated to 6.9
-
-            width: listView.width
-
-            spacing: 16
-
-            WarningType {
+            NotificationType {
                 Layout.fillWidth: true
                 Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
+                Layout.bottomMargin: 16
 
-                textString: qsTr("The backup will contain your passwords and private keys for all servers added " +
+                text: qsTr("The backup will contain your passwords and private keys for all servers added " +
                                  "to AmneziaVPN. Keep this information in a secure place.")
-
-                iconPath: "qrc:/images/controls/alert-circle.svg"
             }
+        }
+    }
 
-            BasicButtonType {
-                id: makeBackupButton
+    ColumnLayout {
+        id: buttons
 
-                Layout.fillWidth: true
-                Layout.topMargin: 14
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-                text: qsTr("Make a backup")
+        spacing: 12
 
-                clickedFunc: function() {
-                    var fileName = ""
-                    if (GC.isMobile()) {
-                        fileName = "AmneziaVPN.backup"
-                    } else {
-                        fileName = SystemController.getFileName(qsTr("Save backup file"),
-                                                                qsTr("Backup files (*.backup)"),
-                                                                StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
-                                                                true,
-                                                                ".backup")
-                    }
-                    if (fileName !== "") {
-                        PageController.showBusyIndicator(true)
-                        SettingsController.backupAppConfig(fileName)
-                        PageController.showBusyIndicator(false)
-                        PageController.showNotificationMessage(qsTr("Backup file saved"))
-                    }
+        ButtonType {
+            id: makeBackupButton
+
+            Layout.fillWidth: true
+
+            text: qsTr("Make a backup")
+
+            onClicked: {
+                var fileName = ""
+                if (GC.isMobile()) {
+                    fileName = "AmneziaVPN.backup"
+                } else {
+                    fileName = SystemController.getFileName(qsTr("Save backup file"),
+                                                            qsTr("Backup files (*.backup)"),
+                                                            StandardPaths.standardLocations(StandardPaths.DocumentsLocation) + "/AmneziaVPN",
+                                                            true,
+                                                            ".backup")
+                }
+                if (fileName !== "") {
+                    PageController.showBusyIndicator(true)
+                    SettingsController.backupAppConfig(fileName)
+                    PageController.showBusyIndicator(false)
+                    PageController.showNotificationMessage(qsTr("Backup file saved"))
                 }
             }
+        }
 
-            BasicButtonType {
-                id: restoreBackupButton
+        ButtonType {
+            id: restoreBackupButton
 
-                Layout.fillWidth: true
-                Layout.topMargin: -8
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
+            Layout.fillWidth: true
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.mutedGray
-                textColor: AmneziaStyle.color.paleGray
-                borderWidth: 1
+            variant: ButtonType.Secondary
+            enabled: !root.isRestoringBackup
 
-                enabled: !root.isRestoringBackup
+            text: qsTr("Restore from backup")
 
-                text: qsTr("Restore from backup")
-
-                clickedFunc: function() {
-                    if (root.isRestoringBackup) {
-                        return
-                    }
-                    var filePath = SystemController.getFileName(qsTr("Open backup file"),
-                                                                qsTr("Backup files (*.backup)"))
-                    if (filePath !== "") {
-                        restoreBackup(filePath)
-                    }
+            onClicked: {
+                if (root.isRestoringBackup) {
+                    return
+                }
+                var filePath = SystemController.getFileName(qsTr("Open backup file"),
+                                                            qsTr("Backup files (*.backup)"))
+                if (filePath !== "") {
+                    restoreBackup(filePath)
                 }
             }
         }
