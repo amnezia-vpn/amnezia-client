@@ -5,7 +5,9 @@
 #ifndef WIREGUARDUTILS_H
 #define WIREGUARDUTILS_H
 
-#define _WINSOCKAPI_
+#ifndef _WINSOCKAPI_
+    #define _WINSOCKAPI_
+#endif
 
 #include <QCoreApplication>
 #include <QHostAddress>
@@ -46,6 +48,24 @@ class WireguardUtils : public QObject {
   
   virtual bool addExclusionRoute(const IPAddress& prefix) = 0;
   virtual bool deleteExclusionRoute(const IPAddress& prefix) = 0;
+
+  virtual bool addExclusionRoutes(const QList<IPAddress>& prefixes) {
+    QList<IPAddress> addedPrefixes;
+    addedPrefixes.reserve(prefixes.size());
+
+    for (const IPAddress& prefix : prefixes) {
+      if (!addExclusionRoute(prefix)) {
+        for (auto iterator = addedPrefixes.crbegin();
+             iterator != addedPrefixes.crend(); ++iterator) {
+          deleteExclusionRoute(*iterator);
+        }
+        return false;
+      }
+      addedPrefixes.append(prefix);
+    }
+
+    return true;
+  }
 
   virtual bool excludeLocalNetworks(const QList<IPAddress>& addresses) = 0;
 };
