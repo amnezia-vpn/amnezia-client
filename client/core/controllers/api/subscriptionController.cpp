@@ -53,10 +53,11 @@ SubscriptionController::OtpLoginError classifyOtpLoginError(int httpStatus, Erro
     case httpStatusCodeTooManyRequests: return SubscriptionController::OtpLoginError::RateLimited;
     default: break;
     }
+    if (httpStatus > 0) {
+        return SubscriptionController::OtpLoginError::Failed;
+    }
 
     switch (errorCode) {
-    case ErrorCode::ApiNotFoundError: return SubscriptionController::OtpLoginError::PurchaseNotFound;
-    case ErrorCode::ApiRateLimitError: return SubscriptionController::OtpLoginError::RateLimited;
     case ErrorCode::ApiConfigTimeoutError:
     case ErrorCode::ApiConfigSslError:
     case ErrorCode::ApiConfigDownloadError: return SubscriptionController::OtpLoginError::NoNetwork;
@@ -687,8 +688,7 @@ QFuture<QPair<ErrorCode, SubscriptionController::OtpStatus>> SubscriptionControl
                          watcher->deleteLater();
                          if (errorCode != ErrorCode::NoError) {
                              const QJsonObject errorObject = QJsonDocument::fromJson(responseBody).object();
-                             const int httpStatus = errorObject.value(QLatin1String("http_status"))
-                                                            .toInt(errorObject.value(QLatin1String("status")).toInt(-1));
+                             const int httpStatus = httpStatusFromResponse(responseBody);
                              qWarning().noquote() << "[OTP] Status request failed, errorCode =" << static_cast<int>(errorCode)
                                                   << "http status =" << httpStatus
                                                   << "message =" << errorObject.value(QLatin1String("message")).toString()
