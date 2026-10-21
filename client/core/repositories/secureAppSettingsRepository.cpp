@@ -387,7 +387,11 @@ void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, 
 
 QStringList SecureAppSettingsRepository::favoriteLocations() const
 {
-    return value("Conf/favoriteLocations").toStringList();
+    QStringList codes = value("Conf/favoriteLocations").toStringList();
+    codes.removeAll(QString());
+    codes.removeDuplicates();
+    codes.sort();
+    return codes;
 }
 
 void SecureAppSettingsRepository::setFavoriteLocations(const QStringList &codes)

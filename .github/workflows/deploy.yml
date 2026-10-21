@@ -1054,6 +1054,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1244,6 +1245,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
@@ -1351,6 +1353,7 @@ jobs:
           - UiAppSTModelAndControllerTest
           - UiAllowedDnsModelAndControllerTest
           - BackupExportImportTest
+          - FavoriteLocationsRestoreTest
           - ConnectionTest
           - OpenSSLLibraryTest
           - GatewayServiceImportTest
