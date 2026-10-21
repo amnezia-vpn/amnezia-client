@@ -209,9 +209,9 @@ void SettingsUiController::toggleVpnDeepLink(bool enable)
     emit vpnDeepLinkChanged();
 }
 
-bool SettingsUiController::isVpnDeepLinkDefault()
+bool SettingsUiController::isVpnDeepLinkOverridden()
 {
-    return m_settingsController->isVpnDeepLinkDefault();
+    return m_settingsController->isVpnDeepLinkOverridden();
 }
 
 void SettingsUiController::makeVpnDeepLinkDefault()

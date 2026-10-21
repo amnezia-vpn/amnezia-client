@@ -184,51 +184,6 @@ PageType {
                 }
 
                 ListItemType {
-                    id: switcherVpnDeepLinkRow
-
-                    Layout.fillWidth: true
-
-                    visible: !GC.isMobile()
-
-                    text: qsTr("Open vpn:// links")
-                    subtitle: qsTr("Import a key when clicking a vpn:// link in the browser")
-
-                    onClicked: {
-                        switcherVpnDeepLink.toggle()
-                        switcherVpnDeepLink.toggled()
-                    }
-
-                    SwitchType {
-                        id: switcherVpnDeepLink
-
-                        focusPolicy: Qt.NoFocus
-
-                        checked: SettingsController.vpnDeepLinkEnabled
-                        onToggled: function() {
-                            if (checked !== SettingsController.vpnDeepLinkEnabled) {
-                                SettingsController.toggleVpnDeepLink(checked)
-                            }
-                        }
-                    }
-                }
-
-                ListItemType {
-                    id: vpnDeepLinkMakeDefaultRow
-
-                    Layout.fillWidth: true
-
-                    visible: !GC.isMobile() && SettingsController.vpnDeepLinkEnabled && !SettingsController.vpnDeepLinkIsDefault
-
-                    text: qsTr("Make AmneziaVPN the default for vpn:// links")
-                    subtitle: qsTr("vpn:// links are currently opened by another application")
-                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
-
-                    onClicked: {
-                        SettingsController.makeVpnDeepLinkDefault()
-                    }
-                }
-
-                ListItemType {
                     id: switcherNewsNotificationEnabledRow
 
                     Layout.fillWidth: true
@@ -309,6 +264,51 @@ PageType {
 
                     onClicked: {
                         PageController.goToPage(PageEnum.PageSettingsLogging)
+                    }
+                }
+
+                ListItemType {
+                    id: switcherVpnDeepLinkRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile()
+
+                    text: qsTr("Open vpn:// links")
+                    subtitle: qsTr("Import a key when clicking a vpn:// link in the browser")
+
+                    onClicked: {
+                        switcherVpnDeepLink.toggle()
+                        switcherVpnDeepLink.toggled()
+                    }
+
+                    SwitchType {
+                        id: switcherVpnDeepLink
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.vpnDeepLinkEnabled
+                        onToggled: function() {
+                            if (checked !== SettingsController.vpnDeepLinkEnabled) {
+                                SettingsController.toggleVpnDeepLink(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: vpnDeepLinkOverrideRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile() && SettingsController.vpnDeepLinkEnabled && SettingsController.vpnDeepLinkOverridden
+
+                    text: qsTr("Override alias settings for vpn:// links")
+                    subtitle: qsTr("vpn:// links are currently opened by another application")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        SettingsController.makeVpnDeepLinkDefault()
                     }
                 }
 

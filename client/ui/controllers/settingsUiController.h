@@ -32,7 +32,7 @@ public:
     Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
     Q_PROPERTY(bool vpnDeepLinkEnabled READ isVpnDeepLinkEnabled NOTIFY vpnDeepLinkChanged)
-    Q_PROPERTY(bool vpnDeepLinkIsDefault READ isVpnDeepLinkDefault NOTIFY vpnDeepLinkChanged)
+    Q_PROPERTY(bool vpnDeepLinkOverridden READ isVpnDeepLinkOverridden NOTIFY vpnDeepLinkChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -69,7 +69,7 @@ public slots:
 
     bool isVpnDeepLinkEnabled();
     void toggleVpnDeepLink(bool enable);
-    bool isVpnDeepLinkDefault();
+    bool isVpnDeepLinkOverridden();
     void makeVpnDeepLinkDefault();
     void dismissVpnDeepLinkPrompt();
     void refreshVpnDeepLinkStatus();

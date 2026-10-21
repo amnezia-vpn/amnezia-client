@@ -256,9 +256,9 @@ void SettingsController::toggleVpnDeepLink(bool enable)
     }
 }
 
-bool SettingsController::isVpnDeepLinkDefault() const
+bool SettingsController::isVpnDeepLinkOverridden() const
 {
-    return VpnUrlHandler::status() == VpnUrlHandler::Status::IsDefault;
+    return VpnUrlHandler::status() == VpnUrlHandler::Status::OtherHandler;
 }
 
 bool SettingsController::makeVpnDeepLinkDefault()

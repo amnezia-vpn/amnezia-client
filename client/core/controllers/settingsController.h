@@ -59,7 +59,7 @@ public:
 
     bool isVpnDeepLinkEnabled() const;
     void toggleVpnDeepLink(bool enable);
-    bool isVpnDeepLinkDefault() const;
+    bool isVpnDeepLinkOverridden() const;
     bool makeVpnDeepLinkDefault();
     bool isVpnDeepLinkPromptDismissed() const;
     void dismissVpnDeepLinkPrompt();
