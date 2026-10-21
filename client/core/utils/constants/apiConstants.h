@@ -8,6 +8,8 @@ constexpr int requestTimeoutMsecs = 6 * 1000;
 constexpr int proxyRequestTimeoutMsecs = 6 * 1000;
 constexpr int proxyStorageTimeoutMsecs = 6 * 1000;
 constexpr int proxyHealthTimeoutMsecs = 1000;
+constexpr int dnsTimeoutMsecs = 10 * 1000;
+constexpr int totalRequestTimeoutMsecs = 25 * 1000;
 
 } // namespace apiDefs
 
