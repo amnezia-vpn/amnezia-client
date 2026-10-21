@@ -385,18 +385,57 @@ void SecureAppSettingsRepository::setCountryListSortMode(const QString &listId, 
     setValue("Conf/countryListSortMode/" + listId, mode);
 }
 
-QStringList SecureAppSettingsRepository::favoriteLocations() const
+QStringList SecureAppSettingsRepository::favoriteLocations(const QString &serverId) const
 {
-    QStringList codes = value("Conf/favoriteLocations").toStringList();
+    QStringList codes = value("Conf/favoriteLocations").toMap().value(serverId).toStringList();
     codes.removeAll(QString());
     codes.removeDuplicates();
     codes.sort();
     return codes;
 }
 
-void SecureAppSettingsRepository::setFavoriteLocations(const QStringList &codes)
+void SecureAppSettingsRepository::setFavoriteLocations(const QString &serverId, const QStringList &codes)
 {
-    setValue("Conf/favoriteLocations", codes);
+    if (serverId.isEmpty()) {
+        return;
+    }
+    QVariantMap favorites = value("Conf/favoriteLocations").toMap();
+    if (codes.isEmpty()) {
+        favorites.remove(serverId);
+    } else {
+        favorites.insert(serverId, codes);
+    }
+    setValue("Conf/favoriteLocations", favorites);
+}
+
+void SecureAppSettingsRepository::removeFavoriteLocations(const QString &serverId)
+{
+    QVariantMap favorites = value("Conf/favoriteLocations").toMap();
+    if (favorites.remove(serverId) > 0) {
+        setValue("Conf/favoriteLocations", favorites);
+    }
+}
+
+void SecureAppSettingsRepository::migrateLegacyFavoriteLocations(const QStringList &serverIds)
+{
+    // Before per-subscription favorites the key held one list shared by all servers
+    const QVariant stored = value("Conf/favoriteLocations");
+    const int type = stored.typeId();
+    if (type != QMetaType::QStringList && type != QMetaType::QVariantList && type != QMetaType::QString) {
+        return;
+    }
+
+    QStringList codes = stored.toStringList();
+    codes.removeAll(QString());
+    codes.removeDuplicates();
+
+    QVariantMap favorites;
+    if (!codes.isEmpty()) {
+        for (const QString &serverId : serverIds) {
+            favorites.insert(serverId, codes);
+        }
+    }
+    setValue("Conf/favoriteLocations", favorites);
 }
 
 bool SecureAppSettingsRepository::isNewsNotifications() const
