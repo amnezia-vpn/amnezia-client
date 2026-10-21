@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
+import PageEnum 1.0
 import Style 1.0
 
 import "./"
@@ -119,7 +120,7 @@ PageType {
                 PageController.showBusyIndicator(false)
 
                 if (!hasPurchasedKey) {
-                    freeAccountLoginDialog.start()
+                    PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
                     return
                 }
 
@@ -138,9 +139,5 @@ PageType {
                 }
             }
         }
-    }
-
-    FreeAccountLoginDialog {
-        id: freeAccountLoginDialog
     }
 }

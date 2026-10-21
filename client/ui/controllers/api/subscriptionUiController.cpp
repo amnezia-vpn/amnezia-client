@@ -753,6 +753,7 @@ bool SubscriptionUiController::sendFreeEmailCode()
     m_freeAccount.consumeCode.clear();
     m_freeAccount.consumeIdempotencyKey.clear();
     m_freeAccount.session = AccountController::Session{};
+    m_freeAccount.retryAfterSec = retryAfterSec;
     emit freeEmailCodeSent(retryAfterSec);
     return true;
 }
@@ -843,6 +844,16 @@ bool SubscriptionUiController::importFreeAccountConfig()
 void SubscriptionUiController::cancelFreeAccountLogin()
 {
     m_freeAccount = FreeAccountState{};
+}
+
+QString SubscriptionUiController::freeAccountEmail() const
+{
+    return m_freeAccount.email;
+}
+
+int SubscriptionUiController::freeAccountRetryAfterSec() const
+{
+    return m_freeAccount.retryAfterSec;
 }
 
 bool SubscriptionUiController::updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,

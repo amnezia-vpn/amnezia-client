@@ -64,6 +64,8 @@ public slots:
     bool resendFreeEmailCode();
     bool confirmFreeEmailCode(const QString &code);
     void cancelFreeAccountLogin();
+    QString freeAccountEmail() const;
+    int freeAccountRetryAfterSec() const;
     bool updateServiceFromGateway(const QString &serverId, const QString &newCountryCode, const QString &newCountryName,
                                   bool reloadServiceConfig = false);
     bool deactivateDevice(const QString &serverId);
@@ -183,6 +185,7 @@ private:
         QString email;
         QString consumeCode;
         QString consumeIdempotencyKey;
+        int retryAfterSec = 0;
         AccountController::Session session;
     } m_freeAccount;
 

@@ -518,129 +518,6 @@
     </message>
 </context>
 <context>
-    <name>FreeAccountLoginDialog</name>
-    <message>
-        <source>Enter the digits from the image</source>
-        <translation>Введите цифры с картинки</translation>
-    </message>
-    <message>
-        <source>Enter the digits from the image to continue</source>
-        <translation>Введите цифры с изображения чтобы продолжить</translation>
-    </message>
-    <message>
-        <source>Digits from the image</source>
-        <translation>Цифры с картинки</translation>
-    </message>
-    <message>
-        <source>_ _ _ _ _ _</source>
-        <translation>_ _ _ _ _ _</translation>
-    </message>
-    <message>
-        <source>Continue</source>
-        <translation>Продолжить</translation>
-    </message>
-    <message>
-        <source>CAPTCHA was incorrect. Please try again</source>
-        <translation>CAPTCHA введена неверно. Попробуйте ещё раз</translation>
-    </message>
-    <message>
-        <source>Please solve the new CAPTCHA to continue</source>
-        <translation>Решите новую CAPTCHA, чтобы продолжить</translation>
-    </message>
-    <message>
-        <source>Enter a valid email address</source>
-        <translation>Введите корректный адрес электронной почты</translation>
-    </message>
-    <message>
-        <source>Enter the code from the email</source>
-        <translation>Введите код из письма</translation>
-    </message>
-    <message>
-        <source>No connection. Check your internet and try again</source>
-        <translation>Нет соединения. Проверьте интернет и попробуйте снова</translation>
-    </message>
-    <message>
-        <source>Too many requests. Try again in %1 s</source>
-        <translation>Слишком много запросов. Попробуйте через %1 с</translation>
-    </message>
-    <message>
-        <source>Too many requests. Try again later</source>
-        <translation>Слишком много запросов. Попробуйте позже</translation>
-    </message>
-    <message>
-        <source>The code is invalid or has expired. Request a new one</source>
-        <translation>Код неверный или истёк. Запросите новый</translation>
-    </message>
-    <message>
-        <source>Something went wrong. Please try again</source>
-        <translation>Что-то пошло не так. Попробуйте ещё раз</translation>
-    </message>
-    <message>
-        <source>Couldn't create the configuration. Please try again</source>
-        <translation>Не удалось создать конфигурацию. Попробуйте ещё раз</translation>
-    </message>
-    <message>
-        <source>Something went wrong. Try again later</source>
-        <translation>Что-то пошло не так. Попробуйте позже</translation>
-    </message>
-    <message>
-        <source>Sign in with email</source>
-        <translation>Вход по электронной почте</translation>
-    </message>
-    <message>
-        <source>Enter the code</source>
-        <translation>Введите код</translation>
-    </message>
-    <message>
-        <source>We'll send a one-time sign-in code to this address and create an account for your free subscription</source>
-        <translation>Мы отправим на этот адрес одноразовый код для входа и создадим учётную запись для бесплатной подписки</translation>
-    </message>
-    <message>
-        <source>Send code</source>
-        <translation>Отправить код</translation>
-    </message>
-    <message>
-        <source>We've sent a sign-in code to %1</source>
-        <translation>Мы отправили код для входа на %1</translation>
-    </message>
-    <message>
-        <source>Email</source>
-        <translation>Электронная почта</translation>
-    </message>
-    <message>
-        <source>Code from the email</source>
-        <translation>Код из письма</translation>
-    </message>
-    <message>
-        <source>Code</source>
-        <translation>Код</translation>
-    </message>
-    <message>
-        <source>Confirm</source>
-        <translation>Подтвердить</translation>
-    </message>
-    <message>
-        <source>Change email</source>
-        <translation>Изменить почту</translation>
-    </message>
-    <message>
-        <source>The code has expired. Request a new one</source>
-        <translation>Код истёк. Запросите новый</translation>
-    </message>
-    <message>
-        <source>Time left %1</source>
-        <translation>Осталось %1</translation>
-    </message>
-    <message>
-        <source>Resend in %1</source>
-        <translation>Отправить снова через %1</translation>
-    </message>
-    <message>
-        <source>Resend code</source>
-        <translation>Отправить код снова</translation>
-    </message>
-</context>
-<context>
     <name>HomeContainersListView</name>
     <message>
         <location filename="../ui/qml/Components/HomeContainersListView.qml" line="37"/>
@@ -5481,6 +5358,132 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSettingsSplitTunneling.qml" line="422"/>
         <source>Add imported sites to existing ones</source>
         <translation>Добавить импортированные сайты к существующим</translation>
+    </message>
+</context>
+<context>
+    <name>PageSetupWizardApiFreeCode</name>
+    <message>
+        <source>Enter the 6-digit code from the email</source>
+        <translation>Введите 6 цифр из письма</translation>
+    </message>
+    <message>
+        <source>The code has expired. Request a new one</source>
+        <translation>Код устарел. Запросите новый</translation>
+    </message>
+    <message>
+        <source>Too many attempts. Try again later</source>
+        <translation>Слишком много попыток. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>The code is invalid. Check it and try again</source>
+        <translation>Код не подходит. Проверьте и введите заново</translation>
+    </message>
+    <message>
+        <source>Check your email</source>
+        <translation>Проверьте почту</translation>
+    </message>
+    <message>
+        <source>We sent a code to %1</source>
+        <translation>Мы отправили код на %1</translation>
+    </message>
+    <message>
+        <source>Code</source>
+        <translation>Код</translation>
+    </message>
+    <message>
+        <source>6 digits from the email</source>
+        <translation>6 цифр из письма</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Resend code in %1</source>
+        <translation>Отправить код повторно через %1</translation>
+    </message>
+    <message>
+        <source>Resend code</source>
+        <translation>Отправить код повторно</translation>
+    </message>
+    <message>
+        <source>CAPTCHA was incorrect. Please try again</source>
+        <translation>Капча введена неверно. Попробуйте ещё раз</translation>
+    </message>
+    <message>
+        <source>Please solve the new CAPTCHA to continue</source>
+        <translation>Решите новую капчу, чтобы продолжить</translation>
+    </message>
+    <message>
+        <source>No connection. Check your internet and try again</source>
+        <translation>Нет соединения. Проверьте интернет и попробуйте снова</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again in %1 s</source>
+        <translation>Слишком много запросов. Попробуйте через %1 с</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again later</source>
+        <translation>Слишком много запросов. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>Something went wrong. Try again later</source>
+        <translation>Что-то пошло не так. Попробуйте позже</translation>
+    </message>
+</context>
+<context>
+    <name>PageSetupWizardApiFreeEmail</name>
+    <message>
+        <source>Invalid email</source>
+        <translation>Неверный email</translation>
+    </message>
+    <message>
+        <source>Sign in or sign up</source>
+        <translation>Вход или регистрация</translation>
+    </message>
+    <message>
+        <source>Enter your email to sign in or create an account</source>
+        <translation>Введите почту, чтобы войти или создать аккаунт</translation>
+    </message>
+    <message>
+        <source>Email</source>
+        <translation>Почта</translation>
+    </message>
+    <message>
+        <source>Enter email</source>
+        <translation>Введите Email</translation>
+    </message>
+    <message>
+        <source>Continue</source>
+        <translation>Продолжить</translation>
+    </message>
+    <message>
+        <source>Can't sign in?</source>
+        <translation>Не удается войти?</translation>
+    </message>
+    <message>
+        <source>CAPTCHA was incorrect. Please try again</source>
+        <translation>Капча введена неверно. Попробуйте ещё раз</translation>
+    </message>
+    <message>
+        <source>Please solve the new CAPTCHA to continue</source>
+        <translation>Решите новую капчу, чтобы продолжить</translation>
+    </message>
+    <message>
+        <source>No connection. Check your internet and try again</source>
+        <translation>Нет соединения. Проверьте интернет и попробуйте снова</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again in %1 s</source>
+        <translation>Слишком много запросов. Попробуйте через %1 с</translation>
+    </message>
+    <message>
+        <source>Too many requests. Try again later</source>
+        <translation>Слишком много запросов. Попробуйте позже</translation>
+    </message>
+    <message>
+        <source>Something went wrong. Try again later</source>
+        <translation>Что-то пошло не так. Попробуйте позже</translation>
     </message>
 </context>
 <context>
