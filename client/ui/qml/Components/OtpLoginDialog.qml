@@ -118,21 +118,24 @@ Popup {
         }
     }
 
-    leftMargin: 16
-    rightMargin: 16
-    padding: 0
-    width: parent.width - leftMargin - rightMargin
+    parent: Overlay.overlay
 
-    anchors.centerIn: parent
+    x: Math.round((parent.width - width) / 2)
+    y: Math.round((parent.height - height) / 2)
+    width: Math.min(parent.width - 32, 400)
+
+    padding: 0
+
     modal: true
+    focus: true
     closePolicy: Popup.CloseOnEscape
 
     Overlay.modal: Rectangle {
-        color: AmneziaStyle.color.translucentMidnightBlack
+        color: AmneziaStyle.color.bgOverlay
     }
 
     background: Rectangle {
-        color: AmneziaStyle.color.surfaceBase
+        color: AmneziaStyle.color.bgSurfaceAlt
         radius: 16
     }
 
@@ -233,7 +236,7 @@ Popup {
     contentItem: ColumnLayout {
         spacing: 0
 
-        Header2TextType {
+        H3TextType {
             Layout.fillWidth: true
             Layout.topMargin: 16
             Layout.leftMargin: 16
@@ -242,13 +245,13 @@ Popup {
             text: root.titleText()
         }
 
-        ParagraphTextType {
+        BodyTextType {
             Layout.fillWidth: true
             Layout.topMargin: 8
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 
-            color: AmneziaStyle.color.mutedGray
+            color: AmneziaStyle.color.textTertiary
             text: root.subtitleText()
         }
 
@@ -263,7 +266,7 @@ Popup {
 
             visible: root.showsCode
             radius: 16
-            color: AmneziaStyle.color.backgroundBase
+            color: AmneziaStyle.color.bgBase
 
             Rectangle {
                 anchors.centerIn: parent
@@ -272,7 +275,7 @@ Popup {
                 radius: 12
 
                 visible: root.dialogState === "loading"
-                color: AmneziaStyle.color.surfaceBase
+                color: AmneziaStyle.color.bgSurface
             }
 
             ColumnLayout {
@@ -287,7 +290,7 @@ Popup {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
 
-                    Header1TextType {
+                    H1TextType {
                         anchors.centerIn: parent
 
                         horizontalAlignment: Text.AlignHCenter
@@ -295,17 +298,15 @@ Popup {
                         text: root.formattedCode()
                     }
 
-                    ImageButtonType {
+                    IconButtonType {
                         id: copyButton
 
                         anchors.right: parent.right
                         anchors.verticalCenter: parent.verticalCenter
 
-                        implicitWidth: 40
-                        implicitHeight: 40
+                        size: IconButtonType.Small
 
-                        image: "qrc:/images/controls/copy.svg"
-                        imageColor: AmneziaStyle.color.paleGray
+                        icon.source: "qrc:/images/controls/copy.svg"
 
                         onClicked: {
                             GC.copyToClipBoard(root.otpCode)
@@ -319,7 +320,7 @@ Popup {
                     Layout.bottomMargin: 12
 
                     horizontalAlignment: Text.AlignHCenter
-                    color: AmneziaStyle.color.mutedGray
+                    color: AmneziaStyle.color.textTertiary
                     text: qsTr("Time left %1").arg(root.formattedTime())
                 }
             }
@@ -333,7 +334,7 @@ Popup {
 
             visible: root.showsCode
             horizontalAlignment: Text.AlignHCenter
-            color: AmneziaStyle.color.mutedGray
+            color: AmneziaStyle.color.textTertiary
             text: qsTr("Never share this code with anyone, including support")
         }
 
@@ -344,41 +345,26 @@ Popup {
             Layout.leftMargin: 8
             Layout.rightMargin: 8
 
-            Item {
+            DialogButtonType {
                 Layout.fillWidth: true
-            }
-
-            BasicButtonType {
-                implicitHeight: 40
-
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                textColor: AmneziaStyle.color.paleGray
+                Layout.preferredWidth: 1
 
                 text: qsTr("Close")
 
-                clickedFunc: function() {
-                    root.close()
-                }
+                onClicked: root.close()
             }
 
-            BasicButtonType {
-                implicitHeight: 40
+            DialogButtonType {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
 
                 enabled: root.primaryButtonEnabled()
 
-                defaultColor: AmneziaStyle.color.transparent
-                hoveredColor: AmneziaStyle.color.translucentWhite
-                pressedColor: AmneziaStyle.color.sheerWhite
-                disabledColor: AmneziaStyle.color.transparent
-                textColor: enabled ? AmneziaStyle.color.goldenApricot : AmneziaStyle.color.mutedGray
-
                 text: root.primaryButtonText()
+                emphasized: true
+                textColor: AmneziaStyle.color.textAccent
 
-                clickedFunc: function() {
-                    root.primaryButtonClicked()
-                }
+                onClicked: root.primaryButtonClicked()
             }
         }
     }
