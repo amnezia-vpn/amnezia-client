@@ -26,6 +26,7 @@ set(CMAKE_AUTOUIC ON)
 
 qt6_add_resources(TEST_QRC
     ../server_scripts/serverScripts.qrc
+    ../resources/countries.qrc
 )
 
 set(_main_cpp "${CMAKE_CURRENT_SOURCE_DIR}/../main.cpp")
@@ -192,6 +193,15 @@ if(NOT ANDROID)
     )
 
     target_link_libraries(test_ui_allowed_dns_model_and_controller PRIVATE
+        Qt6::Test
+        test_common
+    )
+
+    add_executable(test_favorite_locations_restore
+        testFavoriteLocationsRestore.cpp
+    )
+
+    target_link_libraries(test_favorite_locations_restore PRIVATE
         Qt6::Test
         test_common
     )
@@ -438,6 +448,7 @@ if(NOT ANDROID)
     add_test(NAME UiAppSTModelAndControllerTest    COMMAND test_ui_app_st_model_and_controller)
     add_test(NAME UiAllowedDnsModelAndControllerTest COMMAND test_ui_allowed_dns_model_and_controller)
     add_test(NAME BackupExportImportTest           COMMAND test_backup_export_import)
+    add_test(NAME FavoriteLocationsRestoreTest     COMMAND test_favorite_locations_restore)
     add_test(NAME ConnectionTest                   COMMAND test_connection)
     add_test(NAME OpenSSLLibraryTest               COMMAND test_openssl_library)
     add_test(NAME LogsControllerTest               COMMAND test_logs_controller)

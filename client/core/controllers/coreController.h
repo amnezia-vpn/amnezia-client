@@ -143,6 +143,9 @@ protected:
     ServicesCatalogUiController* servicesCatalogUiControllerProtected() const { return m_servicesCatalogUiController; }
     ApiNewsUiController* apiNewsUiControllerProtected() const { return m_apiNewsUiController; }
     SubscriptionController* subscriptionControllerProtected() const { return m_subscriptionController; }
+    ApiCountryModel* apiCountryModelProtected() const { return m_apiCountryModel; }
+    ApiCountryListModel* apiCountryListModelProtected() const { return m_apiCountryListModel; }
+    ApiCountryListModel* apiConfigsCountryListModelProtected() const { return m_apiConfigsCountryListModel; }
 
 private:
     void initRepositories();
