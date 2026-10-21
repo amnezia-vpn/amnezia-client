@@ -24,9 +24,6 @@ PageType {
 
     property bool isRestoreFromBackup: false
     property string backupFilePath: ""
-    property string restoreHostname: ""
-    property string restoreUsername: ""
-    property string restoreSecretData: ""
     property bool waitingForServerToAdd: false
 
     property var containersToInstall: []
@@ -39,6 +36,7 @@ PageType {
         function onInstallServerFinished(finishedMessage) {
             if (root.waitingForServerToAdd && root.isRestoreFromBackup && root.backupFilePath.length > 0) {
                 root.waitingForServerToAdd = false
+                ServersUiController.setProcessedServerId(ServersUiController.getServerId(ServersUiController.getServersCount() - 1))
                 root.isInstallingContainers = true
                 installNextContainer()
             }
@@ -78,16 +76,13 @@ PageType {
         var defaultPort = InstallController.getPortForInstall(defaultProtocol)
         var defaultTransport = InstallController.defaultTransportProto(defaultProtocol)
 
-        var serverId = ServersUiController.getServerId(ServersUiController.getServersCount() - 1)
-        ServersUiController.setProcessedServerId(serverId)
+        var serverId = ServersUiController.processedServerId
 
         PageController.showBusyIndicator(true)
         PageController.showNotificationMessage(qsTr("Installing %1 (%2/%3)...")
             .arg(containerName)
             .arg(root.currentContainerIndex + 1)
             .arg(root.containersToInstall.length))
-
-        InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
 
         console.log("Installing container:", containerName, "serverId:", serverId)
         ServersUiController.processedContainerIndex = dockerContainer
@@ -113,7 +108,7 @@ PageType {
                     serverIp = ipMatch[1].replace(/_/g, ".")
                 }
                 if (!serverIp || serverIp.length === 0) {
-                    serverIp = root.restoreHostname
+                    serverIp = ServersUiController.serverHostName(ServersUiController.processedServerId)
                 }
 
                 PageController.goToPage(PageEnum.PageSetupWizardInstalling)
@@ -137,10 +132,7 @@ PageType {
                             "backupFileName": fileName,
                             "serverName": "",
                             "serverIp": serverIp,
-                            "isFromSetupWizard": true,
-                            "wizardHostname": root.restoreHostname,
-                            "wizardUsername": root.restoreUsername,
-                            "wizardSecretData": root.restoreSecretData
+                            "isFromSetupWizard": true
                         })
                     } else {
                         console.error("Could not find StackView")
@@ -271,31 +263,6 @@ PageType {
                         root.backupFilePath = localPath
                         root.isRestoreFromBackup = true
 
-                        var credentialsPage = null
-                        var item = root
-                        while (item && !item.hasOwnProperty("depth")) {
-                            item = item.parent
-                        }
-
-                        if (item && item.depth > 0) {
-                            for (var i = 0; i < item.depth; i++) {
-                                var page = item.get(i)
-                                if (page && page.hasOwnProperty("savedHostname")) {
-                                    credentialsPage = page
-                                    break
-                                }
-                            }
-                        }
-
-                        if (!credentialsPage || credentialsPage.savedHostname.length === 0) {
-                            console.log("WARNING: No credentials found")
-                            return
-                        }
-
-                        root.restoreHostname = credentialsPage.savedHostname
-                        root.restoreUsername = credentialsPage.savedUsername
-                        root.restoreSecretData = credentialsPage.savedSecretData
-
                         var foundContainers = BackupController.scanBackupForContainers(localPath)
                         if (foundContainers.length === 0) {
                             PageController.showErrorMessage(qsTr("No containers found in backup file"))
@@ -306,7 +273,6 @@ PageType {
                         root.containersToInstall = foundContainers
                         root.currentContainerIndex = 0
 
-                        InstallController.setProcessedServerCredentials(root.restoreHostname, root.restoreUsername, root.restoreSecretData)
                         root.waitingForServerToAdd = true
                         InstallController.addEmptyServer()
                     }

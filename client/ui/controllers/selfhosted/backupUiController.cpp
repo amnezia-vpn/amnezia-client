@@ -30,20 +30,12 @@ void BackupUiController::createBackupWithDownload(bool downloadToDevice, bool de
     }
 }
 
-void BackupUiController::startRestore(bool isFromSetupWizard, const QString &backupFilePath, bool replaceMode,
-                                      const QString &wizardHostname, const QString &wizardUsername,
-                                      const QString &wizardSecretData)
+void BackupUiController::startRestore(const QString &backupFilePath, bool replaceMode)
 {
     ServerCredentials credentials;
-    if (isFromSetupWizard && !wizardHostname.isEmpty()) {
-        credentials.hostName = wizardHostname;
-        credentials.userName = wizardUsername;
-        credentials.secretData = wizardSecretData;
-    } else if (!serverCredentials(true, credentials)) {
-        return;
+    if (serverCredentials(true, credentials)) {
+        m_backupController->uploadAndRestore(credentials, backupFilePath, replaceMode);
     }
-
-    m_backupController->uploadAndRestore(credentials, backupFilePath, replaceMode);
 }
 
 void BackupUiController::setDefaultServerAfterRestore()

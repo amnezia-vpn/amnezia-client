@@ -18,9 +18,7 @@ public:
 
 public slots:
     void createBackupWithDownload(bool downloadToDevice = true, bool deleteFromServer = true);
-    void startRestore(bool isFromSetupWizard, const QString &backupFilePath, bool replaceMode,
-                      const QString &wizardHostname = QString(), const QString &wizardUsername = QString(),
-                      const QString &wizardSecretData = QString());
+    void startRestore(const QString &backupFilePath, bool replaceMode);
     void setDefaultServerAfterRestore();
 
     QStringList scanBackupForContainers(const QString &localPath);

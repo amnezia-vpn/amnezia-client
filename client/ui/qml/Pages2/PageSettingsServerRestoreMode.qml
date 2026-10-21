@@ -19,11 +19,6 @@ PageType {
     property string serverIp: ""
     property bool isFromSetupWizard: false
 
-    // Credentials for setup wizard (when server is not yet added to ServersModel)
-    property string wizardHostname: ""
-    property string wizardUsername: ""
-    property string wizardSecretData: ""
-
     property bool restoreReplaceMode: false
 
     FlickableType {
@@ -83,14 +78,7 @@ PageType {
         restoreReplaceMode = replaceMode
         PageController.showBusyIndicator(true)
 
-        BackupController.startRestore(
-            isFromSetupWizard,
-            backupFilePath,
-            replaceMode,
-            wizardHostname || "",
-            wizardUsername || "",
-            wizardSecretData || ""
-        )
+        BackupController.startRestore(backupFilePath, replaceMode)
     }
 
     Connections {

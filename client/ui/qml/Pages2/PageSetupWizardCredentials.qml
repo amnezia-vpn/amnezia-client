@@ -13,10 +13,6 @@ import "../Controls2/TextTypes"
 PageType {
     id: root
 
-    property string savedHostname: ""
-    property string savedUsername: ""
-    property string savedSecretData: ""
-
     function trimField(field) {
         field.textField.text = field.textField.text.replace(/^\s+|\s+$/g, '')
     }
@@ -194,10 +190,6 @@ PageType {
                 if (!isConnectionOpened) {
                     return
                 }
-
-                root.savedHostname = hostnameField.textField.text
-                root.savedUsername = usernameField.textField.text
-                root.savedSecretData = secretDataField.textField.text
 
                 PageController.goToPage(PageEnum.PageSetupWizardEasy)
             }
