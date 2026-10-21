@@ -7,8 +7,10 @@
 #include <net/if.h>
 
 #include <QDBusVariant>
+#include <QNetworkInterface>
 #include <QtDBus/QtDBus>
 
+#include "core/networkUtilities.h"
 #include "leakdetector.h"
 #include "logger.h"
 
@@ -34,6 +36,16 @@ DnsUtilsLinux::DnsUtilsLinux(QObject* parent) : DnsUtils(parent) {
 DnsUtilsLinux::~DnsUtilsLinux() {
   MZ_COUNT_DTOR(DnsUtilsLinux);
 
+  for (auto iterator = m_linkDefaultRoutes.constBegin();
+       iterator != m_linkDefaultRoutes.constEnd(); ++iterator) {
+    QList<QVariant> argumentList;
+    argumentList << QVariant::fromValue(iterator.key());
+    argumentList << QVariant::fromValue(iterator.value());
+    m_resolver->asyncCallWithArgumentList(QStringLiteral("SetLinkDefaultRoute"),
+                                          argumentList);
+  }
+  m_linkDefaultRoutes.clear();
+
   for (auto iterator = m_linkDomains.constBegin();
        iterator != m_linkDomains.constEnd(); ++iterator) {
     QList<QVariant> argumentList;
@@ -52,12 +64,21 @@ DnsUtilsLinux::~DnsUtilsLinux() {
 
 bool DnsUtilsLinux::updateResolvers(const QString& ifname,
                                     const QList<QHostAddress>& resolvers) {
+  for (auto iterator = m_linkDefaultRoutes.constBegin();
+       iterator != m_linkDefaultRoutes.constEnd(); ++iterator) {
+    setLinkDefaultRoute(iterator.key(), iterator.value());
+  }
+  m_linkDefaultRoutes.clear();
+
   m_ifindex = if_nametoindex(qPrintable(ifname));
   if (m_ifindex <= 0) {
     logger.error() << "Unable to resolve ifindex for" << ifname;
     return false;
   }
 
+  // Avoid transient "both links are default-route" state: this state can
+  // overload systemd-resolved when the uplink DNS becomes unreachable via VPN.
+  updateLinkDefaultRoutes();
   setLinkDNS(m_ifindex, resolvers);
   setLinkDefaultRoute(m_ifindex, true);
   updateLinkDomains();
@@ -65,6 +86,12 @@ bool DnsUtilsLinux::updateResolvers(const QString& ifname,
 }
 
 bool DnsUtilsLinux::restoreResolvers() {
+  for (auto iterator = m_linkDefaultRoutes.constBegin();
+       iterator != m_linkDefaultRoutes.constEnd(); ++iterator) {
+    setLinkDefaultRoute(iterator.key(), iterator.value());
+  }
+  m_linkDefaultRoutes.clear();
+
   for (auto iterator = m_linkDomains.constBegin();
        iterator != m_linkDomains.constEnd(); ++iterator) {
     setLinkDomains(iterator.key(), iterator.value());
@@ -155,6 +182,23 @@ void DnsUtilsLinux::setLinkDefaultRoute(int ifindex, bool enable) {
                    SLOT(dnsCallCompleted(QDBusPendingCallWatcher*)));
 }
 
+void DnsUtilsLinux::updateLinkDefaultRoutes() {
+  const QNetworkInterface defaultIface = NetworkUtilities::getGatewayAndIface().second;
+  const int ifindex = defaultIface.index();
+  if (ifindex <= 0) {
+    logger.warning() << "Unable to determine default route interface";
+    return;
+  }
+  if ((ifindex == m_ifindex) || m_linkDefaultRoutes.contains(ifindex)) {
+    return;
+  }
+
+  // Gateway link normally has DefaultRoute=yes. Keep behavior simple:
+  // disable it while VPN DNS is active and restore to yes on teardown.
+  m_linkDefaultRoutes[ifindex] = true;
+  setLinkDefaultRoute(ifindex, false);
+}
+
 void DnsUtilsLinux::updateLinkDomains() {
   /* Get the list of search domains, and remove any others that might conspire
    * to satisfy DNS resolution. Unfortunately, this is a pain because Qt doesn't
@@ -206,6 +250,7 @@ void DnsUtilsLinux::dnsDomainsReceived(QDBusPendingCallWatcher* call) {
   /* Add a root search domain for the new interface. */
   QList<DnsLinkDomain> newlist = {root};
   setLinkDomains(m_ifindex, newlist);
+  updateLinkDefaultRoutes();
   delete call;
 }
 
