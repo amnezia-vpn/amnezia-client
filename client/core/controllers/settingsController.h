@@ -57,6 +57,13 @@ public:
     bool isScreenshotsEnabled() const;
     void toggleScreenshotsEnabled(bool enable);
 
+    bool isVpnDeepLinkEnabled() const;
+    void toggleVpnDeepLink(bool enable);
+    bool isVpnDeepLinkDefault() const;
+    bool makeVpnDeepLinkDefault();
+    bool isVpnDeepLinkPromptDismissed() const;
+    void dismissVpnDeepLinkPrompt();
+
     bool isNewsNotificationsEnabled() const;
     void toggleNewsNotificationsEnabled(bool enable);
 

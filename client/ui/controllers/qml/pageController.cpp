@@ -49,6 +49,7 @@ PageController::PageController(ServersController* serversController, SettingsCon
 #if defined Q_OS_MACX
     connect(this, &PageController::raiseMainWindow, []() {
         setDockIconVisible(true);
+        activateApplication();
     });
     connect(this, &PageController::hideMainWindow, []() {
         setDockIconVisible(false);

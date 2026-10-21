@@ -111,29 +111,6 @@ QString vpnUrlFromArguments(const QStringList &args)
 } // namespace
 #endif
 
-#if defined(Q_OS_WIN) && !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-namespace {
-void registerWindowsVpnUrlSchemeIfNeeded()
-{
-    QSettings flag(ORGANIZATION_NAME, APPLICATION_NAME);
-    if (flag.value(QStringLiteral("protocolHandler/vpnRegistered")).toBool()) {
-        return;
-    }
-
-    const QString exe = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
-
-    QSettings vpnKey(QStringLiteral("HKEY_CURRENT_USER\\Software\\Classes\\vpn"), QSettings::NativeFormat);
-    vpnKey.setValue(QStringLiteral("."), QStringLiteral("URL:AmneziaVPN"));
-    vpnKey.setValue(QStringLiteral("URL Protocol"), QString());
-
-    QSettings cmdKey(QStringLiteral("HKEY_CURRENT_USER\\Software\\Classes\\vpn\\shell\\open\\command"), QSettings::NativeFormat);
-    cmdKey.setValue(QStringLiteral("."), QStringLiteral("\"%1\" \"%2\"").arg(exe, QStringLiteral("%1")));
-
-    flag.setValue(QStringLiteral("protocolHandler/vpnRegistered"), true);
-}
-} // namespace
-#endif
-
 #ifdef Q_OS_ANDROID
 namespace {
     static void clearQtCaches()
@@ -267,9 +244,7 @@ void AmneziaApplication::init()
     }
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
-#    ifdef Q_OS_WIN
-    registerWindowsVpnUrlSchemeIfNeeded();
-#    endif
+    QTimer::singleShot(0, this, [this]() { m_coreController->checkVpnDeepLinkHandler(); });
     if (!m_parser.isSet(m_optImport)) {
         const QString vpnArg = vpnUrlFromArguments(QCoreApplication::arguments());
         if (!vpnArg.isEmpty()) {
@@ -395,6 +370,12 @@ void AmneziaApplication::deliverVpnDeepLink(const QString &payload)
     if (trimmed.isEmpty()) {
         return;
     }
+    if (!m_coreController->isVpnDeepLinkEnabled()) {
+        emit m_coreController->pageController()->raiseMainWindow();
+        emit m_coreController->pageController()->showNotificationMessage(
+                tr("Opening vpn:// links is turned off in the settings"));
+        return;
+    }
     m_coreController->openVpnKeyImportPreview(trimmed);
 }
 
@@ -403,11 +384,9 @@ QString vpnPayloadFromFileOpenUrl(const QUrl &url)
     const QString decoded = url.toString(QUrl::PrettyDecoded);
     const int idx = decoded.indexOf(QLatin1String("vpn://"), 0, Qt::CaseInsensitive);
     if (idx >= 0) {
-        qDebug() << "vpn://" << decoded;
         return decoded.mid(idx).trimmed();
     }
     if (url.scheme().compare(QLatin1String("vpn"), Qt::CaseInsensitive) == 0) {
-        qDebug() << "vpn://" << decoded;
         return decoded.trimmed();
     }
     return {};
@@ -437,9 +416,7 @@ bool AmneziaApplication::event(QEvent *event)
     if (event->type() == QEvent::FileOpen) {
         auto *foe = static_cast<QFileOpenEvent *>(event);
         const QUrl &url = foe->url();
-        qDebug() << "url:" << url;
         const QString payload = vpnPayloadFromFileOpenUrl(url);
-        qDebug() << "payload" << payload;
         if (!payload.isEmpty()) {
             if (m_coreController) {
                 QTimer::singleShot(0, this, [this, payload]() { deliverVpnDeepLink(payload); });

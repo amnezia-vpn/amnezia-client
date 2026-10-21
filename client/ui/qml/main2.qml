@@ -260,6 +260,10 @@ Window  {
         function onUnsupportedConnectDrawerRequested() {
             root.showUnsupportedConnectDrawer()
         }
+
+        function onVpnDeepLinkDefaultDrawerRequested() {
+            root.showVpnDeepLinkDefaultDrawer()
+        }
     }
 
     Connections {
@@ -330,6 +334,22 @@ Window  {
             PageController.showBusyIndicator(false)
         }
         let noButtonFunction = function() {
+        }
+
+        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+    }
+
+    function showVpnDeepLinkDefaultDrawer() {
+        let headerText = qsTr("Make AmneziaVPN the default app for vpn:// links?")
+        let descriptionText = qsTr("vpn:// links are currently opened by another application. You can change this later in Settings → Application.")
+        let yesButtonText = qsTr("Make default")
+        let noButtonText = qsTr("No")
+
+        let yesButtonFunction = function() {
+            SettingsController.makeVpnDeepLinkDefault()
+        }
+        let noButtonFunction = function() {
+            SettingsController.dismissVpnDeepLinkPrompt()
         }
 
         showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)

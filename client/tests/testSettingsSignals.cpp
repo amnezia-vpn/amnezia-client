@@ -144,6 +144,20 @@ private slots:
         QVERIFY2(m_coreController->m_appSettingsRepository->isStartMinimized() == !initialStartMinimized, "Start minimized state should be available in SecureAppSettingsRepository");
     }
 
+    void testVpnDeepLinkSignals() {
+        QSignalSpy vpnDeepLinkChangedSpy(m_coreController->m_settingsUiController, &SettingsUiController::vpnDeepLinkChanged);
+
+        m_coreController->m_appSettingsRepository->setVpnDeepLinkPromptDismissed(false);
+        m_coreController->m_settingsUiController->dismissVpnDeepLinkPrompt();
+        QVERIFY2(m_coreController->m_settingsController->isVpnDeepLinkPromptDismissed(), "Prompt dismissal should be stored");
+        QVERIFY2(m_coreController->m_appSettingsRepository->isVpnDeepLinkPromptDismissed(), "Prompt dismissal should be available in SecureAppSettingsRepository");
+
+        m_coreController->m_settingsUiController->refreshVpnDeepLinkStatus();
+        QVERIFY2(vpnDeepLinkChangedSpy.count() == 1, "vpnDeepLinkChanged signal should be emitted on refresh");
+        QVERIFY2(m_coreController->m_settingsUiController->isVpnDeepLinkEnabled() == m_coreController->m_appSettingsRepository->isVpnDeepLinkEnabled(),
+                 "Deep link state should be available in SettingsUiController");
+    }
+
     void testAutoConnectSignals() {
         bool initialAutoConnect = m_coreController->m_settingsController->isAutoConnectEnabled();
 

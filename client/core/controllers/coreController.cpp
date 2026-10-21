@@ -12,6 +12,7 @@
 #include "logger.h"
 #include "secureQSettings.h"
 #include "core/utils/appUiConfig.h"
+#include "ui/utils/vpnUrlHandler.h"
 
 #if defined(Q_OS_ANDROID)
     #include "core/utils/installedAppsImageProvider.h"
@@ -324,6 +325,32 @@ void CoreController::checkForAppUpdates()
     m_updateController->checkForUpdates();
 }
 
+void CoreController::checkVpnDeepLinkHandler()
+{
+    if (!m_appSettingsRepository->isVpnDeepLinkEnabled()) {
+        VpnUrlHandler::unregister();
+        return;
+    }
+
+    switch (VpnUrlHandler::status()) {
+    case VpnUrlHandler::Status::IsDefault:
+        return;
+    case VpnUrlHandler::Status::NotRegistered:
+        VpnUrlHandler::setAsDefault();
+        return;
+    case VpnUrlHandler::Status::OtherHandler:
+        if (!m_appSettingsRepository->isVpnDeepLinkPromptDismissed()) {
+            emit m_pageController->vpnDeepLinkDefaultDrawerRequested();
+        }
+        return;
+    }
+}
+
+bool CoreController::isVpnDeepLinkEnabled() const
+{
+    return m_appSettingsRepository->isVpnDeepLinkEnabled();
+}
+
 void CoreController::updateTranslator(const QLocale &locale)
 {
     if (!m_translator->isEmpty()) {
@@ -407,10 +434,10 @@ void CoreController::openVpnKeyImportPreview(const QString &data)
     }
 
     emit m_pageController->goToPageHome();
-    if (!m_importController->extractConfigFromData(data)) {
-        return;
+    const bool extracted = m_importController->extractConfigFromData(data);
+    if (extracted) {
+        emit m_pageController->goToPageViewConfig();
     }
-    emit m_pageController->goToPageViewConfig();
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     emit m_pageController->raiseMainWindow();
 #endif

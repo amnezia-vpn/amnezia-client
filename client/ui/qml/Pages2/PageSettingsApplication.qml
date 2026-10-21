@@ -13,6 +13,13 @@ import "../Components"
 PageType {
     id: root
 
+    Component.onCompleted: SettingsController.refreshVpnDeepLinkStatus()
+    onVisibleChanged: {
+        if (visible) {
+            SettingsController.refreshVpnDeepLinkStatus()
+        }
+    }
+
     FlickableType {
         id: flickable
 
@@ -173,6 +180,51 @@ PageType {
                                 SettingsController.toggleStartMinimized(checked)
                             }
                         }
+                    }
+                }
+
+                ListItemType {
+                    id: switcherVpnDeepLinkRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile()
+
+                    text: qsTr("Open vpn:// links")
+                    subtitle: qsTr("Import a key when clicking a vpn:// link in the browser")
+
+                    onClicked: {
+                        switcherVpnDeepLink.toggle()
+                        switcherVpnDeepLink.toggled()
+                    }
+
+                    SwitchType {
+                        id: switcherVpnDeepLink
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.vpnDeepLinkEnabled
+                        onToggled: function() {
+                            if (checked !== SettingsController.vpnDeepLinkEnabled) {
+                                SettingsController.toggleVpnDeepLink(checked)
+                            }
+                        }
+                    }
+                }
+
+                ListItemType {
+                    id: vpnDeepLinkMakeDefaultRow
+
+                    Layout.fillWidth: true
+
+                    visible: !GC.isMobile() && SettingsController.vpnDeepLinkEnabled && !SettingsController.vpnDeepLinkIsDefault
+
+                    text: qsTr("Make AmneziaVPN the default for vpn:// links")
+                    subtitle: qsTr("vpn:// links are currently opened by another application")
+                    trailingIconSource: "qrc:/images/controls/chevron-right.svg"
+
+                    onClicked: {
+                        SettingsController.makeVpnDeepLinkDefault()
                     }
                 }
 

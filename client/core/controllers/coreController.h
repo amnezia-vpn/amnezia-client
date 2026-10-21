@@ -104,6 +104,8 @@ public:
     PageController* pageController() const;
     void setQmlRoot();
     void checkForAppUpdates();
+    void checkVpnDeepLinkHandler();
+    bool isVpnDeepLinkEnabled() const;
 
     void openConnectionByIndex(int serverIndex);
     void importConfigFromData(const QString &data);

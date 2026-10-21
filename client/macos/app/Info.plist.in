@@ -60,19 +60,6 @@
 			<string>AppIcon</string>
 		</dict>
 	</dict>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLName</key>
-			<string>${MACOSX_BUNDLE_GUI_IDENTIFIER}.vpn-deeplink</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>vpn</string>
-			</array>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-		</dict>
-	</array>
 	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>

@@ -36,6 +36,15 @@ void setDockIconVisible(bool visible)
     }
 }
 
+void activateApplication()
+{
+    if (@available(macOS 14.0, *)) {
+        [NSApp activate];
+    } else {
+        [NSApp activateIgnoringOtherApps:YES];
+    }
+}
+
 // this Objective-c class is used to override the action of system close button and zoom button
 // https://stackoverflow.com/questions/27643659/setting-c-function-as-selector-for-nsbutton-produces-no-results
 @interface ButtonPasser : NSObject {
