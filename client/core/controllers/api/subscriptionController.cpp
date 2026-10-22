@@ -269,8 +269,10 @@ ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &respo
 
     QString vpnKey;
     QJsonObject configObject;
-    if (response.value(QStringLiteral("key")).isString()) {
-        vpnKey = response.value(QStringLiteral("key")).toString();
+    const QJsonValue keyValue = response.value(QStringLiteral("key")).isString() ? response.value(QStringLiteral("key"))
+                                                                                  : response.value(configKey::config);
+    if (keyValue.isString()) {
+        vpnKey = keyValue.toString();
         vpnKey.replace(QStringLiteral("vpn://"), QString());
         QByteArray configString = QByteArray::fromBase64(vpnKey.toUtf8(), QByteArray::Base64UrlEncoding | QByteArray::OmitTrailingEquals);
         const QByteArray configUncompressed = qUncompress(configString);
@@ -278,14 +280,19 @@ ErrorCode SubscriptionController::applyFreeAccountConfig(const QByteArray &respo
             configString = configUncompressed;
         }
         configObject = QJsonDocument::fromJson(configString).object();
+        if (configObject.isEmpty()) {
+            configObject = QJsonDocument::fromJson(keyValue.toString().toUtf8()).object();
+            vpnKey.clear();
+        }
     } else if (response.contains(configKey::configVersion)) {
         configObject = response;
-    } else if (response.value(QStringLiteral("config")).isObject()) {
-        configObject = response.value(QStringLiteral("config")).toObject();
+    } else if (keyValue.isObject()) {
+        configObject = keyValue.toObject();
     }
 
     if (configObject.isEmpty()) {
-        qWarning().noquote() << "[FreeAccount] Account response has no config, keys =" << response.keys();
+        qWarning().noquote() << "[FreeAccount] Account response has no config, keys =" << response.keys()
+                             << "config =" << (keyValue.isString() ? keyValue.toString().left(40) : QString());
         return ErrorCode::ApiConfigDownloadError;
     }
     if (!serverConfigUtils::isConfigFormatVersionSupported(configObject)) {
