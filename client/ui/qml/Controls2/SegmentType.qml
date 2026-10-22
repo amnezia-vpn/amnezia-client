@@ -18,6 +18,7 @@ RadioButton {
     horizontalPadding: 12
     verticalPadding: 0
 
+    checkable: false
     hoverEnabled: true
 
     opacity: root.enabled ? 1 : (root.checked ? 0.4 : 0.65)
@@ -70,16 +71,12 @@ RadioButton {
 
     Keys.onEnterPressed: function(event) {
         if (!event.isAutoRepeat && !root.checked) {
-            root.toggle()
-            root.toggled()
             root.clicked()
         }
     }
 
     Keys.onReturnPressed: function(event) {
         if (!event.isAutoRepeat && !root.checked) {
-            root.toggle()
-            root.toggled()
             root.clicked()
         }
     }

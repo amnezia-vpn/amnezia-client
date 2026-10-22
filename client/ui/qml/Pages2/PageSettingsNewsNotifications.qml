@@ -26,7 +26,6 @@ PageType {
 
             NavigationBarType {
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
 
                 title: qsTr("News & Notifications")
             }

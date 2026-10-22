@@ -10,10 +10,7 @@ import "TextTypes"
 Popup {
     id: root
 
-    enum Variant { Default, Destructive }
-
     property string text
-    property int variant: SnackbarType.Default
     property string actionText
     property bool closable: false
     property int duration: 4000
@@ -179,8 +176,8 @@ Popup {
                 Layout.fillWidth: true
 
                 text: root.text
-                color: root.variant === SnackbarType.Destructive ? AmneziaStyle.color.statusDestructive
-                                                                  : AmneziaStyle.color.textInverted
+                color: AmneziaStyle.color.textInverted
+                linkColor: AmneziaStyle.color.textAccent
 
                 onLinkActivated: function(link) {
                     Qt.openUrlExternally(LanguageUiController.getCurrentDocsUrl(link))

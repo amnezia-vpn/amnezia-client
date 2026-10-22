@@ -144,7 +144,7 @@ AbstractButton {
     SheetType {
         id: menu
 
-        property real measuredContentHeight: 0
+        readonly property real measuredContentHeight: container.fitHeight
         expandedHeight: (root.fitContent && measuredContentHeight > 0)
             ? Math.min(measuredContentHeight, windowHeight * root.drawerHeight)
             : windowHeight * root.drawerHeight
@@ -155,8 +155,6 @@ AbstractButton {
 
             property real fitHeight: backButton.implicitHeight + titleLabel.implicitHeight
                                      + (listViewLoader.item ? listViewLoader.item.contentHeight : 0) + 48
-            onFitHeightChanged: menu.measuredContentHeight = fitHeight
-            Component.onCompleted: menu.measuredContentHeight = fitHeight
 
             ColumnLayout {
                 id: header
@@ -174,7 +172,7 @@ AbstractButton {
                     id: titleLabel
                     Layout.leftMargin: 16
                     Layout.rightMargin: 16
-                    Layout.bottomMargin: 16
+                    Layout.bottomMargin: 32
                     Layout.fillWidth: true
 
                     headerText: root.headerText

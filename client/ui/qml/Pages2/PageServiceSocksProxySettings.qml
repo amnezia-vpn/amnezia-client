@@ -24,37 +24,38 @@ PageType {
         }
     }
 
-    ListViewType {
-        id: listView
+    function openSettings() {
+        changeSettingsDrawer.open()
+    }
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: changeSettingsButton.top
-        anchors.bottomMargin: 16
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.bottomMargin: 24
 
-        header: NavigationBarType {
-            width: listView.width
+        contentHeight: content.implicitHeight
 
-            title: qsTr("SOCKS5 settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: Socks5ProxyConfigModel
-
-        delegate: ColumnLayout {
-            width: listView.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
 
-            function openSettings() {
-                changeSettingsDrawer.open()
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("SOCKS5 settings")
             }
 
             ListItemType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 16
 
                 dense: true
                 overline: qsTr("Host")
@@ -76,7 +77,7 @@ PageType {
 
                 dense: true
                 overline: qsTr("Port")
-                text: port
+                text: Socks5ProxyConfigModel.port
                 Accessible.name: overline + " " + text
 
                 trailingIconSource: "qrc:/images/controls/copy.svg"
@@ -94,7 +95,7 @@ PageType {
 
                 dense: true
                 overline: qsTr("User name")
-                text: username
+                text: Socks5ProxyConfigModel.username
                 Accessible.name: overline + " " + text
 
                 trailingIconSource: "qrc:/images/controls/copy.svg"
@@ -117,13 +118,13 @@ PageType {
                 showSeparator: false
                 dense: true
                 overline: qsTr("Password")
-                text: masked ? "*".repeat(password.length) : password
+                text: masked ? "*".repeat(Socks5ProxyConfigModel.password.length) : Socks5ProxyConfigModel.password
                 Accessible.name: overline
 
                 trailingIconSource: "qrc:/images/controls/copy.svg"
 
                 onClicked: {
-                    GC.copyToClipBoard(password)
+                    GC.copyToClipBoard(Socks5ProxyConfigModel.password)
                     PageController.showNotificationMessage(qsTr("Copied"))
                 }
 
@@ -145,9 +146,9 @@ PageType {
                 ColumnLayout {
                     id: drawerContent
 
-                    property string tempPort: port
-                    property string tempUsername: username
-                    property string tempPassword: password
+                    property string tempPort: Socks5ProxyConfigModel.port
+                    property string tempUsername: Socks5ProxyConfigModel.username
+                    property string tempPassword: Socks5ProxyConfigModel.password
 
                     anchors.top: parent.top
                     anchors.left: parent.left
@@ -161,25 +162,25 @@ PageType {
                         target: changeSettingsDrawer
 
                         function onOpened() {
-                            drawerContent.tempPort = port
-                            drawerContent.tempUsername = username
-                            drawerContent.tempPassword = password
+                            drawerContent.tempPort = Socks5ProxyConfigModel.port
+                            drawerContent.tempUsername = Socks5ProxyConfigModel.username
+                            drawerContent.tempPassword = Socks5ProxyConfigModel.password
                         }
 
                         function onClosed() {
-                            port = drawerContent.tempPort
-                            username = drawerContent.tempUsername
-                            password = drawerContent.tempPassword
-                            portTextField.textField.text = port
-                            usernameTextField.textField.text = username
-                            passwordTextField.textField.text = password
+                            Socks5ProxyConfigModel.port = drawerContent.tempPort
+                            Socks5ProxyConfigModel.username = drawerContent.tempUsername
+                            Socks5ProxyConfigModel.password = drawerContent.tempPassword
+                            portTextField.textField.text = Socks5ProxyConfigModel.port
+                            usernameTextField.textField.text = Socks5ProxyConfigModel.username
+                            passwordTextField.textField.text = Socks5ProxyConfigModel.password
                         }
                     }
 
                     SectionHeaderType {
                         Layout.fillWidth: true
                         Layout.topMargin: 16
-                        Layout.bottomMargin: 12
+                        Layout.bottomMargin: 20
 
                         headerText: qsTr("SOCKS5 settings")
                     }
@@ -190,15 +191,15 @@ PageType {
                         Layout.fillWidth: true
 
                         headerText: qsTr("Port")
-                        textField.text: port
+                        textField.text: Socks5ProxyConfigModel.port
                         textField.maximumLength: 5
                         textField.validator: IntValidator { bottom: 1; top: 65535 }
 
+                        textField.onTextEdited: Socks5ProxyConfigModel.port = textField.text
+
                         textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== port) {
-                                port = textField.text
-                            }
+                            Socks5ProxyConfigModel.port = textField.text
                         }
                     }
 
@@ -209,14 +210,14 @@ PageType {
 
                         headerText: qsTr("Username")
                         textField.placeholderText: "username"
-                        textField.text: username
+                        textField.text: Socks5ProxyConfigModel.username
                         textField.maximumLength: 32
+
+                        textField.onTextEdited: Socks5ProxyConfigModel.username = textField.text
 
                         textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== username) {
-                                username = textField.text
-                            }
+                            Socks5ProxyConfigModel.username = textField.text
                         }
                     }
 
@@ -227,15 +228,15 @@ PageType {
 
                         headerText: qsTr("Password")
                         textField.placeholderText: "password"
-                        textField.text: password
+                        textField.text: Socks5ProxyConfigModel.password
                         textField.maximumLength: 32
                         passwordToggle: true
 
-                        textField.onFocusChanged: {
+                        textField.onTextEdited: Socks5ProxyConfigModel.password = textField.text
+
+                        textField.onEditingFinished: {
                             textField.text = textField.text.replace(/^\s+|\s+$/g, '')
-                            if (textField.text !== password) {
-                                password = textField.text
-                            }
+                            Socks5ProxyConfigModel.password = textField.text
                         }
                     }
 
@@ -248,6 +249,10 @@ PageType {
                         text: qsTr("Change connection settings")
 
                         onClicked: {
+                            Socks5ProxyConfigModel.port = Socks5ProxyConfigModel.port.trim()
+                            Socks5ProxyConfigModel.username = Socks5ProxyConfigModel.username.trim()
+                            Socks5ProxyConfigModel.password = Socks5ProxyConfigModel.password.trim()
+
                             if (!portTextField.textField.acceptableInput) {
                                 portTextField.errorText = qsTr("The port must be in the range of 1 to 65535")
                                 return
@@ -286,10 +291,7 @@ PageType {
         text: qsTr("Change connection settings")
 
         onClicked: {
-            var content = listView.itemAtIndex(0)
-            if (content) {
-                content.openSettings()
-            }
+            root.openSettings()
         }
     }
 }

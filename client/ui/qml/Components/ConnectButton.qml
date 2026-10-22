@@ -88,41 +88,39 @@ Button {
         Item {
             anchors.fill: parent
 
-            Item {
+            RingGlowType {
+                anchors.fill: parent
+                anchors.margins: -d.glowMargin
+
+                color: d.ringColor
+                radius: d.ringRadius
+                startAngle: 100
+                sweepAngle: root.inProgress ? 160 : 360
+            }
+
+            Shape {
                 id: ringSource
 
                 anchors.fill: parent
                 anchors.margins: -d.glowMargin
 
-                Shape {
-                    anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
 
-                    preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    fillColor: AmneziaStyle.color.transparent
+                    strokeColor: d.ringColor
+                    strokeWidth: 2
+                    capStyle: ShapePath.RoundCap
 
-                    ShapePath {
-                        fillColor: AmneziaStyle.color.transparent
-                        strokeColor: d.ringColor
-                        strokeWidth: 2
-                        capStyle: ShapePath.RoundCap
-
-                        PathAngleArc {
-                            centerX: ringSource.width / 2
-                            centerY: ringSource.height / 2
-                            radiusX: d.ringRadius
-                            radiusY: d.ringRadius
-                            startAngle: 100
-                            sweepAngle: root.inProgress ? 160 : 360
-                        }
+                    PathAngleArc {
+                        centerX: ringSource.width / 2
+                        centerY: ringSource.height / 2
+                        radiusX: d.ringRadius
+                        radiusY: d.ringRadius
+                        startAngle: 100
+                        sweepAngle: root.inProgress ? 160 : 360
                     }
                 }
-            }
-
-            SelectionGlowType {
-                anchors.fill: parent
-                z: -1
-
-                source: ringSource
-                color: d.ringColor
             }
 
             RotationAnimator on rotation {

@@ -34,10 +34,35 @@ set(SOURCES ${SOURCES}
 
 
 
-set(ICON_FILE ${CLIENT_MACOS_APP_ICNS_PATH})
-get_filename_component(MACOSX_BUNDLE_ICON_FILE "${CLIENT_MACOS_APP_ICNS_PATH}" NAME)
-set_source_files_properties(${ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-set(SOURCES ${SOURCES} ${ICON_FILE})
+check_apple_app_icon(${CLIENT_MACOS_APP_ICON_PATH})
+
+set(APP_ICON_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/appicon)
+set(APP_ICON_FILES ${APP_ICON_OUTPUT_DIR}/Assets.car ${APP_ICON_OUTPUT_DIR}/AppIcon.icns)
+file(GLOB_RECURSE APP_ICON_INPUTS CONFIGURE_DEPENDS "${CLIENT_MACOS_APP_ICON_PATH}/*")
+
+add_custom_command(
+    OUTPUT ${APP_ICON_FILES}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${APP_ICON_OUTPUT_DIR}
+    COMMAND xcrun actool --output-format human-readable-text --warnings --errors
+            --platform macosx
+            --minimum-deployment-target ${CMAKE_OSX_DEPLOYMENT_TARGET}
+            --app-icon AppIcon
+            --output-partial-info-plist ${APP_ICON_OUTPUT_DIR}/partial.plist
+            --compile ${APP_ICON_OUTPUT_DIR}
+            ${CLIENT_MACOS_APP_ICON_PATH}
+    DEPENDS ${APP_ICON_INPUTS}
+    COMMENT "Compiling macOS app icon"
+    VERBATIM
+)
+
+set(MACOSX_BUNDLE_ICON_FILE AppIcon)
+set_source_files_properties(${APP_ICON_FILES} PROPERTIES GENERATED TRUE MACOSX_PACKAGE_LOCATION Resources)
+set(SOURCES ${SOURCES} ${APP_ICON_FILES})
+
+add_custom_command(TARGET ${PROJECT} POST_BUILD
+    COMMAND plutil -replace CFBundleIconName -string AppIcon $<TARGET_BUNDLE_CONTENT_DIR:${PROJECT}>/Info.plist
+    VERBATIM
+)
 
 target_compile_options(${PROJECT} PRIVATE
     -DGROUP_ID=\"${BUILD_IOS_GROUP_IDENTIFIER}\"

@@ -7,6 +7,7 @@ import Style 1.0
 
 import "./"
 import "../Controls2"
+import "../Controls2/TextTypes"
 import "../Config"
 
 PageType {
@@ -34,29 +35,57 @@ PageType {
                 Layout.fillWidth: true
 
                 title: qsTr("KillSwitch")
-                description: qsTr("Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops")
+            }
 
-                header.showSwitcher: true
-                header.switcher.checked: SettingsController.isKillSwitchEnabled
-                header.switcher.enabled: !ConnectionController.isConnected
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 16
+                Layout.rightMargin: 16
 
-                Connections {
-                    target: navigationBar.header
+                spacing: 8
 
-                    function onSwitcherToggled(checked) {
-                        if (!ConnectionController.isConnected) {
-                            SettingsController.isKillSwitchEnabled = checked
-                        } else {
-                            PageController.showNotificationMessage(qsTr("KillSwitch settings cannot be changed during an active connection"))
-                            navigationBar.header.switcher.checked = SettingsController.isKillSwitchEnabled
+                ListItemType {
+                    Layout.fillWidth: true
+
+                    visible: GC.isDesktop()
+                    enabled: !ConnectionController.isConnected
+
+                    text: qsTr("KillSwitch")
+
+                    onClicked: {
+                        killSwitchSwitch.toggle()
+                        killSwitchSwitch.toggled()
+                    }
+
+                    SwitchType {
+                        id: killSwitchSwitch
+
+                        focusPolicy: Qt.NoFocus
+
+                        checked: SettingsController.isKillSwitchEnabled
+
+                        onToggled: {
+                            if (!ConnectionController.isConnected) {
+                                SettingsController.isKillSwitchEnabled = checked
+                            } else {
+                                PageController.showNotificationMessage(qsTr("KillSwitch settings cannot be changed during an active connection"))
+                                killSwitchSwitch.checked = SettingsController.isKillSwitchEnabled
+                            }
                         }
                     }
+                }
+
+                BodyTextType {
+                    Layout.fillWidth: true
+
+                    text: qsTr("Enable to ensure network traffic goes through a secure VPN tunnel, preventing accidental exposure of your IP and DNS queries if the connection drops")
+                    color: AmneziaStyle.color.textSecondary
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
+                Layout.topMargin: 24
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 Layout.bottomMargin: 16 + PageController.safeAreaBottomMargin
@@ -108,7 +137,7 @@ PageType {
                             var noButtonFunction = function() {
                             }
 
-                            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+                            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
                         }
                     }
                 }

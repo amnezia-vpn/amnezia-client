@@ -7,6 +7,8 @@ Flickable {
     clip: true
     width: parent.width
 
+    interactive: root.contentHeight + root.topMargin + root.bottomMargin > root.height
+
     anchors.bottom: parent.bottom
     anchors.left: parent.left
     anchors.right: parent.right

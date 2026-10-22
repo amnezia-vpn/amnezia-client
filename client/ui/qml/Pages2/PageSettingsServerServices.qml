@@ -50,9 +50,6 @@ PageType {
             ]
         }
 
-        Component.onCompleted: {
-            settingsContainersListView.interactive = true
-            updateContainersModelFilters()
-        }
+        Component.onCompleted: updateContainersModelFilters()
     }
 }

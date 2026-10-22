@@ -10,7 +10,6 @@
         <file>Components/UpdateSupportDrawer.qml</file>
         <file>Components/PromoBanner.qml</file>
         <file>Components/ConnectButton.qml</file>
-        <file>Components/ConnectionTypeSelectionDrawer.qml</file>
         <file>Components/CountryListStickyHeader.qml</file>
         <file>Components/CountrySearchRow.qml</file>
         <file>Components/CountrySectionHeader.qml</file>
@@ -35,6 +34,7 @@
         <file>Components/AddSitePanel.qml</file>
         <file>Config/GlobalConfig.qml</file>
         <file>Config/CountryRegionNames.qml</file>
+        <file>Config/Dialogs.qml</file>
         <file>Config/qmldir</file>
         <file>Controls2/BackButtonType.qml</file>
         <file>Controls2/ButtonType.qml</file>
@@ -59,7 +59,7 @@
         <file>Controls2/BottomBarType.qml</file>
         <file>Controls2/CheckBoxType.qml</file>
         <file>Controls2/ChipType.qml</file>
-        <file>Controls2/CollapsingHeaderType.qml</file>
+        <file>Controls2/ListPageHeaderType.qml</file>
         <file>Controls2/ContextMenuType.qml</file>
         <file>Controls2/FocusRingType.qml</file>
         <file>Controls2/SheetType.qml</file>
@@ -100,6 +100,7 @@
         <file>Controls2/TextTypes/ButtonTextType.qml</file>
         <file>Controls2/TextTypes/H2TextType.qml</file>
         <file>Controls2/RadioItemType.qml</file>
+        <file>Controls2/RingGlowType.qml</file>
         <file>Controls2/NotificationType.qml</file>
         <file>Filters/ContainersModelFilters.qml</file>
         <file>main2.qml</file>
@@ -128,6 +129,7 @@
         <file>Controls2/PopupMenuSeparatorType.qml</file>
 
         <file>Pages2/PageServiceDnsSettings.qml</file>
+        <file>Pages2/PageServiceMtProtoSettingsBase.qml</file>
         <file>Pages2/PageServiceMtProxySettings.qml</file>
         <file>Pages2/PageServiceTelemtSettings.qml</file>
         <file>Pages2/PageServiceTProxySettings.qml</file>

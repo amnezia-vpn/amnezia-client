@@ -34,7 +34,6 @@ PageType {
             property string progressString
 
             Layout.fillWidth: true
-            Layout.topMargin: 12
             Layout.leftMargin: 16
             Layout.rightMargin: 16
 

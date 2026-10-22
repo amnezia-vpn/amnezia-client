@@ -20,10 +20,6 @@ PageType {
 
     property var installedProtocolsCount
 
-    function resetView() {
-        settingsContainersListView.positionViewAtBeginning()
-    }
-
     SettingsContainersListView {
         id: settingsContainersListView
 
@@ -55,9 +51,6 @@ PageType {
             ]
         }
 
-        Component.onCompleted: {
-            settingsContainersListView.interactive = true
-            updateContainersModelFilters()
-        }
+        Component.onCompleted: updateContainersModelFilters()
     }
 }

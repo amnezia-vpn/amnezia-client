@@ -9,8 +9,6 @@ import "../Controls2"
 ListViewType {
     id: root
 
-    property int selectedIndex: ServersUiController.getServerIndexById(ServersUiController.defaultServerId)
-
     signal serverSettingsOpened()
 
     leftMargin: 16
@@ -18,18 +16,6 @@ ListViewType {
     bottomMargin: 16
 
     model: ServersModel
-
-    Connections {
-        target: ServersUiController
-        function onDefaultServerIdChanged() {
-            root.selectedIndex = ServersUiController.getServerIndexById(ServersUiController.defaultServerId)
-        }
-    }
-
-    ButtonGroup {
-        id: serversRadioButtonGroup
-        objectName: "serversRadioButtonGroup"
-    }
 
     function openServerSettings(serverId) {
         ServersUiController.setProcessedServerId(serverId)
@@ -55,8 +41,6 @@ ListViewType {
     }
 
     delegate: ServerListItem {
-        objectName: "serverRadioButton"
-
         readonly property bool subscriptionAlert: isServerFromGatewayApi && (isSubscriptionExpired || isSubscriptionExpiringSoon)
 
         width: root.width - root.leftMargin - root.rightMargin
@@ -71,18 +55,13 @@ ListViewType {
         showWarning: ServersUiController.serverHasOutdatedAwgContainer(serverId)
         showSeparator: index < root.count - 1
 
-        checked: index === root.selectedIndex
-        checkable: !ConnectionController.isConnected
-
-        ButtonGroup.group: serversRadioButtonGroup
+        checked: serverId === ServersUiController.defaultServerId
 
         onClicked: {
             if (ConnectionController.isConnected) {
                 PageController.showNotificationMessage(qsTr("Unable change server while there is an active connection"))
                 return
             }
-
-            root.selectedIndex = index
 
             ServersUiController.setDefaultServerAtIndex(index)
         }

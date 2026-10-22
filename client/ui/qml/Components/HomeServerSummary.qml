@@ -20,13 +20,10 @@ ColumnLayout {
     signal serverInfoRequested()
     signal protocolSelectionRequested()
 
-    objectName: "collapsedColumnLayout"
 
     spacing: 0
 
     RowLayout {
-        objectName: "rowLayout"
-
         Layout.topMargin: 16
         Layout.leftMargin: 16
         Layout.rightMargin: 16
@@ -35,8 +32,6 @@ ColumnLayout {
         spacing: 10
 
         H1TextType {
-            objectName: "collapsedButtonHeader"
-
             Layout.maximumWidth: root.width - 32 - (chevron.visible ? chevron.width + 10 : 0)
 
             maximumLineCount: 1
@@ -49,7 +44,6 @@ ColumnLayout {
 
         IconButtonType {
             id: chevron
-            objectName: "collapsedButtonChevron"
 
             visible: !root.expanded
 
@@ -63,8 +57,6 @@ ColumnLayout {
     }
 
     HomeInfoButton {
-        objectName: "serverDescriptionButton"
-
         Layout.fillWidth: true
         Layout.maximumWidth: implicitWidth
         Layout.alignment: Qt.AlignHCenter
@@ -88,8 +80,6 @@ ColumnLayout {
     }
 
     NotificationType {
-        objectName: "outdatedContainerWarning"
-
         Layout.fillWidth: true
         Layout.leftMargin: 16
         Layout.rightMargin: 16
@@ -102,8 +92,6 @@ ColumnLayout {
     }
 
     HomeInfoButton {
-        objectName: "protocolButton"
-
         Layout.fillWidth: true
         Layout.maximumWidth: implicitWidth
         Layout.alignment: Qt.AlignHCenter

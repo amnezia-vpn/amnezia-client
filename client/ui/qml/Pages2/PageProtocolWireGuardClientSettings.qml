@@ -18,31 +18,31 @@ import "../Components"
 PageType {
     id: root
 
-    ListViewType {
-        id: listView
+    readonly property bool isSaveButtonEnabled: mtuTextField.errorText === ""
+
+    FlickableType {
+        id: flickable
 
         anchors.top: parent.top
         anchors.bottom: saveButton.top
-        anchors.bottomMargin: 16
-        anchors.right: parent.right
-        anchors.left: parent.left
+        anchors.bottomMargin: 24
 
-        header: NavigationBarType {
-            width: listView.width
-            height: implicitHeight + 16
+        contentHeight: content.implicitHeight
 
-            title: qsTr("WG settings")
-        }
+        ColumnLayout {
+            id: content
 
-        model: WireGuardConfigModel
-
-        delegate: ColumnLayout {
-            width: listView.width
-
-            property alias mtuTextField: mtuTextField
-            property bool isSaveButtonEnabled: mtuTextField.errorText === ""
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
             spacing: 0
+
+            NavigationBarType {
+                Layout.fillWidth: true
+
+                title: qsTr("WG settings")
+            }
 
             TextFieldType {
                 id: mtuTextField
@@ -52,14 +52,11 @@ PageType {
                 Layout.rightMargin: 16
 
                 headerText: qsTr("MTU")
-                textField.text: clientMtu
+                textField.text: WireGuardConfigModel.clientMtu
                 textField.validator: IntValidator { bottom: 576; top: 65535 }
 
-                textField.onEditingFinished: {
-                    if (textField.text !== clientMtu) {
-                        clientMtu = textField.text
-                    }
-                }
+                textField.onTextEdited: WireGuardConfigModel.clientMtu = textField.text
+
                 checkEmptyText: true
             }
 
@@ -74,8 +71,6 @@ PageType {
             }
 
             TextFieldType {
-                id: portTextField
-
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 Layout.leftMargin: 16
@@ -84,7 +79,7 @@ PageType {
                 enabled: false
 
                 headerText: qsTr("Port")
-                textField.text: port
+                textField.text: WireGuardConfigModel.port
             }
         }
     }
@@ -99,7 +94,7 @@ PageType {
         anchors.rightMargin: 16
         anchors.bottomMargin: 8 + PageController.safeAreaBottomMargin
 
-        enabled: listView.currentItem !== null && listView.currentItem.isSaveButtonEnabled
+        enabled: root.isSaveButtonEnabled
 
         text: qsTr("Save")
 
@@ -118,7 +113,7 @@ PageType {
                 InstallController.updateClientConfig(ServersUiController.processedServerId, ServersUiController.processedContainerIndex, ProtocolEnum.WireGuard)
             }
             var noButtonFunction = function() {}
-            showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+            Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
         }
     }
 }

@@ -36,6 +36,7 @@ private:
     void initAppSplitTunnelingModelUpdateHandler();
     void initPrepareConfigHandler();
     void initUnsupportedConnectDrawerHandler();
+    void initBackNavigationHandler();
     void initStrictKillSwitchHandler();
     void initAndroidSettingsHandler();
     void initAndroidConnectionHandler();

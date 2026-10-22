@@ -19,7 +19,6 @@ PageType {
 
     ListViewType {
         id: servers
-        objectName: "servers"
 
         anchors.fill: parent
 

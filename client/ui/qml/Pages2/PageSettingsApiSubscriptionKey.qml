@@ -39,7 +39,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -82,7 +81,6 @@ PageType {
 
             ButtonType {
                 Layout.fillWidth: true
-                Layout.topMargin: 16
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
 

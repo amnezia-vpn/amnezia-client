@@ -73,8 +73,10 @@ PageType {
     ListViewType {
         id: menuContent
 
+        reuseItems: true
+
         anchors.top: parent.top
-        anchors.topMargin: collapsingHeader.topBarHeight
+        anchors.topMargin: pageHeader.topBarHeight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -82,11 +84,10 @@ PageType {
 
         model: ApiConfigsCountryListModel
 
-        interactive: menuContent.contentHeight > menuContent.height
 
-        ScrollBar.vertical: collapsingHeader.scrollBar
+        ScrollBar.vertical: pageHeader.scrollBar
 
-        header: collapsingHeader.listHeader
+        header: pageHeader.listHeader
 
         footer: Item {
             width: menuContent.width
@@ -162,8 +163,8 @@ PageType {
         }
     }
 
-    CollapsingHeaderType {
-        id: collapsingHeader
+    ListPageHeaderType {
+        id: pageHeader
 
         anchors.fill: parent
 
@@ -177,8 +178,8 @@ PageType {
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
-                Layout.topMargin: 8
-                Layout.bottomMargin: 16
+                Layout.topMargin: 16
+                Layout.bottomMargin: 8
 
                 text: qsTr("For router setup or the AmneziaWG app")
                 color: AmneziaStyle.color.textSecondary
@@ -219,20 +220,20 @@ PageType {
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 12
+                Layout.preferredHeight: ApiConfigsCountryListModel.isGrouped ? 0 : 24
             }
         ]
 
         CountryListStickyHeader {
             listModel: ApiConfigsCountryListModel
             listView: menuContent
-            header: collapsingHeader
+            header: pageHeader
             revision: root.stickyRevision
         }
 
         CountriesEmptyState {
             anchors.top: parent.top
-            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.topMargin: pageHeader.pinnedBottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -248,16 +249,6 @@ PageType {
             onShowAllRequested: {
                 searchRow.searchField.clear()
                 ApiConfigsCountryListModel.activeUseCaseId = "all"
-            }
-        }
-    }
-
-    Connections {
-        target: collapsingHeader.backButton
-
-        function onActiveFocusChanged() {
-            if (collapsingHeader.backButton.enabled && collapsingHeader.backButton.activeFocus) {
-                menuContent.positionViewAtBeginning()
             }
         }
     }
@@ -379,7 +370,7 @@ PageType {
         }
         var noButtonFunction = function() {}
 
-        showQuestionDrawer(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
+        Dialogs.askQuestion(headerText, descriptionText, yesButtonText, noButtonText, yesButtonFunction, noButtonFunction)
     }
 
     SnackbarType {

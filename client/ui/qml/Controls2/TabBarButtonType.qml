@@ -9,12 +9,14 @@ TabButton {
 
     property bool showBadge: false
 
+    implicitWidth: 44
+    implicitHeight: 44
+    width: 44
+    height: 44
+
     hoverEnabled: true
 
-    topPadding: 4
-    bottomPadding: 4
-    leftPadding: 0
-    rightPadding: 0
+    padding: 0
 
     icon.width: 24
     icon.height: 24
@@ -23,8 +25,6 @@ TabButton {
     Accessible.name: root.text
 
     background: Item {
-        implicitHeight: 32
-
         FocusRingType {
             radius: 12
             visible: root.visualFocus
@@ -59,6 +59,12 @@ TabButton {
         cursorShape: Qt.PointingHandCursor
     }
 
-    Keys.onEnterPressed: root.clicked()
-    Keys.onReturnPressed: root.clicked()
+    Keys.onEnterPressed: {
+        root.checked = true
+        root.clicked()
+    }
+    Keys.onReturnPressed: {
+        root.checked = true
+        root.clicked()
+    }
 }

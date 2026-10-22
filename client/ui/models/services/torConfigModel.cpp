@@ -10,68 +10,34 @@
 using namespace amnezia;
 using namespace ProtocolUtils;
 
-TorConfigModel::TorConfigModel(QObject *parent) : QAbstractListModel(parent)
+TorConfigModel::TorConfigModel(QObject *parent) : QObject(parent)
 {
 }
 
-int TorConfigModel::rowCount(const QModelIndex &parent) const
+QString TorConfigModel::site() const
 {
-    Q_UNUSED(parent);
-    return 1;
+    return m_protocolConfig.serverConfig.site;
 }
 
-bool TorConfigModel::setData(const QModelIndex &index, const QVariant &value, int role)
+void TorConfigModel::setSite(const QString &value)
 {
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return false;
+    if (m_protocolConfig.serverConfig.site == value) {
+        return;
     }
-
-    QString strValue = value.toString();
-
-    switch (role) {
-    case Roles::SiteRole: m_protocolConfig.serverConfig.site = strValue; break;
-    default:
-        return false;
-    }
-
-    emit dataChanged(index, index, QList { role });
-    return true;
-}
-
-QVariant TorConfigModel::data(const QModelIndex &index, int role) const
-{
-    if (!index.isValid() || index.row() < 0 || index.row() >= rowCount()) {
-        return QVariant();
-    }
-
-    switch (role) {
-    case Roles::SiteRole: return m_protocolConfig.serverConfig.site;
-    }
-
-    return QVariant();
+    m_protocolConfig.serverConfig.site = value;
+    emit changed();
 }
 
 void TorConfigModel::updateModel(amnezia::DockerContainer container, const amnezia::TorProtocolConfig &protocolConfig)
 {
-    beginResetModel();
     m_container = container;
     m_protocolConfig = protocolConfig;
     m_originalProtocolConfig = m_protocolConfig;
     
-    endResetModel();
+    emit changed();
 }
 
 amnezia::TorProtocolConfig TorConfigModel::getProtocolConfig()
 {
     return m_protocolConfig;
 }
-
-QHash<int, QByteArray> TorConfigModel::roleNames() const
-{
-    QHash<int, QByteArray> roles;
-
-    roles[SiteRole] = "site";
-
-    return roles;
-}
-

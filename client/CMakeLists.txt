@@ -226,6 +226,10 @@ if(ANDROID)
     include(cmake/android.cmake)
 endif()
 
+if(APPLE)
+    include(cmake/appleAppIcon.cmake)
+endif()
+
 if(IOS)
     include(cmake/ios.cmake)
     include(cmake/ios-arch-fixup.cmake)

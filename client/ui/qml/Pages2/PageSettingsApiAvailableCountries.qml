@@ -86,8 +86,8 @@ PageType {
                 const current = ApiCountryListModel.rowForCountryCode(ApiCountryModel.currentCountryCode)
                 if (current >= 0) {
                     menuContent.positionViewAtIndex(current, ListView.Center)
-                    menuContent.contentY = collapsingHeader.clampContentY(menuContent.contentY
-                                                                          - collapsingHeader.pinnedHeight / 2)
+                    menuContent.contentY = pageHeader.clampContentY(menuContent.contentY
+                                                                          - pageHeader.pinnedHeight / 2)
                 }
             })
         }
@@ -145,7 +145,6 @@ PageType {
 
     SortFilterProxyModel {
         id: proxyServersModel
-        objectName: "proxyServersModel"
 
         sourceModel: ServersModel
         filters: [
@@ -163,8 +162,10 @@ PageType {
     ListViewType {
         id: menuContent
 
+        reuseItems: true
+
         anchors.top: parent.top
-        anchors.topMargin: collapsingHeader.topBarHeight
+        anchors.topMargin: pageHeader.topBarHeight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -172,11 +173,10 @@ PageType {
 
         model: ApiCountryListModel
 
-        interactive: menuContent.contentHeight > menuContent.height
 
-        ScrollBar.vertical: collapsingHeader.scrollBar
+        ScrollBar.vertical: pageHeader.scrollBar
 
-        header: collapsingHeader.listHeader
+        header: pageHeader.listHeader
 
         footer: Item {
             width: menuContent.width
@@ -230,8 +230,8 @@ PageType {
         }
     }
 
-    CollapsingHeaderType {
-        id: collapsingHeader
+    ListPageHeaderType {
+        id: pageHeader
 
         anchors.fill: parent
 
@@ -271,9 +271,7 @@ PageType {
         navigationButtons: [
             IconButtonType {
                 id: settingsButton
-                objectName: "settingsButton"
 
-                size: IconButtonType.Small
                 icon.source: "qrc:/images/controls/settings.svg"
 
                 onClicked: root.openServerInfo()
@@ -315,20 +313,20 @@ PageType {
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 12
+                Layout.preferredHeight: ApiCountryListModel.isGrouped ? 0 : 24
             }
         ]
 
         CountryListStickyHeader {
             listModel: ApiCountryListModel
             listView: menuContent
-            header: collapsingHeader
+            header: pageHeader
             revision: root.stickyRevision
         }
 
         CountriesEmptyState {
             anchors.top: parent.top
-            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.topMargin: pageHeader.pinnedBottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
