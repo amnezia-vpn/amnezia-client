@@ -122,13 +122,17 @@ target_sources(${PROJECT} PRIVATE
     ${CLIENT_ROOT_DIR}/platforms/ios/StoreKit2Helper.swift
 )
 
+check_apple_app_icon(${CLIENT_MACOS_APP_ICON_PATH})
+
 set_source_files_properties(
-    ${CLIENT_MACOS_MEDIA_ASSETS_PATH}
-    PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+    ${CLIENT_MACOS_APP_ICON_PATH}
+    PROPERTIES
+    MACOSX_PACKAGE_LOCATION Resources
+    XCODE_LAST_KNOWN_FILE_TYPE folder.iconcomposer.icon
 )
 
 target_sources(${PROJECT} PRIVATE
-    ${CLIENT_MACOS_MEDIA_ASSETS_PATH}
+    ${CLIENT_MACOS_APP_ICON_PATH}
     ${CMAKE_CURRENT_SOURCE_DIR}/ios/app/PrivacyInfo.xcprivacy
 )
 

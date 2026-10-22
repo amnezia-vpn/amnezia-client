@@ -1,0 +1,37 @@
+{
+  "fill" : {
+    "solid" : "srgb:0.12157,0.12157,0.13725,1.00000"
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "image-name-specializations" : [
+            {
+              "value" : "01-mark.svg"
+            },
+            {
+              "appearance" : "tinted",
+              "value" : "02-mark-mono.svg"
+            }
+          ],
+          "name" : "01-mark"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
