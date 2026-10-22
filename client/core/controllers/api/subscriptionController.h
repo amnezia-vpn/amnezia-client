@@ -52,8 +52,6 @@ public:
                                       CaptchaInfo &captchaInfo);
     ErrorCode importTrialFromGateway(const QString &userCountryCode, const QString &serviceType,
                                      const QString &serviceProtocol, const QString &email);
-    ErrorCode requestFreeCaptcha(const QString &userCountryCode, const QString &serviceType, const QString &serviceProtocol,
-                                 CaptchaInfo &captchaInfo);
     ErrorCode importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,
                                            const QString &serviceProtocol, const FreeAccountData &accountData,
                                            CaptchaInfo *retryCaptchaOut = nullptr);

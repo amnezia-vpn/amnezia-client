@@ -5477,6 +5477,14 @@ Create one from the current settings.</source>
         <source>Something went wrong. Try again later</source>
         <translation>Что-то пошло не так. Попробуйте позже</translation>
     </message>
+    <message>
+        <source>CAPTCHA was incorrect. Please try again</source>
+        <translation>Капча введена неверно. Попробуйте ещё раз</translation>
+    </message>
+    <message>
+        <source>Please solve the new CAPTCHA to continue</source>
+        <translation>Решите новую капчу, чтобы продолжить</translation>
+    </message>
 </context>
 <context>
     <name>PageSetupWizardApiFreeInfo</name>
@@ -5489,30 +5497,6 @@ Create one from the current settings.</source>
         <location filename="../ui/qml/Pages2/PageSetupWizardApiFreeInfo.qml" line="114"/>
         <source>Continue</source>
         <translation>Продолжить</translation>
-    </message>
-    <message>
-        <source>CAPTCHA was incorrect. Please try again</source>
-        <translation>Капча введена неверно. Попробуйте ещё раз</translation>
-    </message>
-    <message>
-        <source>Please solve the new CAPTCHA to continue</source>
-        <translation>Решите новую капчу, чтобы продолжить</translation>
-    </message>
-    <message>
-        <source>No connection. Check your internet and try again</source>
-        <translation>Нет соединения. Проверьте интернет и попробуйте снова</translation>
-    </message>
-    <message>
-        <source>Too many requests. Try again in %1 s</source>
-        <translation>Слишком много запросов. Попробуйте через %1 с</translation>
-    </message>
-    <message>
-        <source>Too many requests. Try again later</source>
-        <translation>Слишком много запросов. Попробуйте позже</translation>
-    </message>
-    <message>
-        <source>Something went wrong. Try again later</source>
-        <translation>Что-то пошло не так. Попробуйте позже</translation>
     </message>
 </context>
 <context>

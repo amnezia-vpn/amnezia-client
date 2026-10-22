@@ -35,8 +35,6 @@ using namespace amnezia;
 
 namespace
 {
-constexpr int httpStatusCodeBadRequest = 400;
-constexpr int httpStatusCodeUnprocessableEntity = 422;
 
 QString getSubscriptionStatusForRenewal(const ApiConfig &apiConfig)
 {
@@ -308,44 +306,6 @@ ErrorCode SubscriptionController::importTrialFromGateway(const QString &userCoun
     m_serversRepository->addServer(QString(), apiV2ServerConfig.toJson(),
                                    serverConfigUtils::configTypeFromJson(apiV2ServerConfig.toJson()));
     return ErrorCode::NoError;
-}
-
-ErrorCode SubscriptionController::requestFreeCaptcha(const QString &userCountryCode, const QString &serviceType,
-                                                     const QString &serviceProtocol, CaptchaInfo &captchaInfo)
-{
-    captchaInfo = CaptchaInfo{};
-
-    // Probe without a public key: the gateway can answer with a captcha or a validation error, but cannot issue a config
-    QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                     .addField(apiDefs::key::userCountryCode, userCountryCode)
-                                     .addField(apiDefs::key::serviceType, serviceType)
-                                     .addField(apiDefs::key::serviceProtocol, serviceProtocol)
-                                     .build();
-
-    QByteArray responseBody;
-    const ErrorCode errorCode = executeRequest(QString("%1v1/config"), apiPayload, responseBody);
-    if (errorCode == ErrorCode::ApiCaptchaRequiredError) {
-        return fillCaptchaInfoFromResponse(responseBody, captchaInfo) ? ErrorCode::NoError : errorCode;
-    }
-    if (errorCode == ErrorCode::NoError) {
-        qWarning().noquote() << "[FreeAccount] Gateway issued a config for the captcha probe, it is discarded";
-        return ErrorCode::NoError;
-    }
-
-    const QJsonObject response = QJsonDocument::fromJson(responseBody).object();
-    const int httpStatus = response.value(apiDefs::key::httpStatus).toInt();
-    const QString message = response.value(apiDefs::key::message).toString();
-    const bool probeRejected = errorCode == ErrorCode::ApiUpdateRequestError
-            || (errorCode == ErrorCode::ApiConfigDownloadError
-                && (httpStatus == httpStatusCodeBadRequest || httpStatus == httpStatusCodeUnprocessableEntity));
-    if (probeRejected) {
-        qInfo().noquote() << "[FreeAccount] Captcha probe rejected, continuing without captcha, http status =" << httpStatus
-                          << "message:" << message;
-        return ErrorCode::NoError;
-    }
-    qWarning().noquote() << "[FreeAccount] Captcha probe failed, errorCode =" << static_cast<int>(errorCode)
-                         << "http status =" << httpStatus << "message:" << message;
-    return errorCode;
 }
 
 ErrorCode SubscriptionController::importFreeAccountFromGateway(const QString &userCountryCode, const QString &serviceType,

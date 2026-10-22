@@ -22,7 +22,7 @@ CaptchaDialogType {
             }
         }
 
-        function onFreeAccountCaptchaPassed() {
+        function onFreeEmailCodeSent(retryAfterSec) {
             if (root.opened) {
                 root.close()
             }

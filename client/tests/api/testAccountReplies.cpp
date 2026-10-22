@@ -14,6 +14,8 @@ private slots:
 
     void classifyReply_data();
     void classifyReply();
+    void classifyCaptchaReply();
+    void captchaFromResponse();
 };
 
 void TestAccountReplies::sessionFromDocumentedResponse()
@@ -91,6 +93,36 @@ void TestAccountReplies::classifyReply()
     reply.httpStatus = httpStatus;
 
     QCOMPARE(int(AccountController::classifyReply(reply)), expected);
+}
+
+void TestAccountReplies::classifyCaptchaReply()
+{
+    AccountController::Reply reply;
+    reply.errorCode = amnezia::ErrorCode::ApiCaptchaRequiredError;
+    reply.httpStatus = 402;
+    reply.body = QJsonObject{ { "http_status", 402 }, { "error", "rate_limit_exceeded" }, { "captcha_id", "abc" }, { "captcha_image", "aGk=" } };
+    QCOMPARE(AccountController::classifyReply(reply), AccountController::Error::CaptchaRequired);
+
+    reply.errorCode = amnezia::ErrorCode::ApiConfigDownloadError;
+    reply.httpStatus = 422;
+    reply.body.insert("http_status", 422);
+    QCOMPARE(AccountController::classifyReply(reply), AccountController::Error::CaptchaRequired);
+
+    reply.body = QJsonObject{ { "http_status", 402 } };
+    reply.httpStatus = 402;
+    QCOMPARE(AccountController::classifyReply(reply), AccountController::Error::Failed);
+}
+
+void TestAccountReplies::captchaFromResponse()
+{
+    const AccountController::Captcha captcha = AccountController::captchaFromResponse(
+            QJsonObject{ { "captcha_id", "abc" }, { "captcha_image", "aGk=" } });
+    QVERIFY(captcha.isRequired());
+    QCOMPARE(captcha.id, QStringLiteral("abc"));
+    QCOMPARE(captcha.imageBase64, QStringLiteral("aGk="));
+    QVERIFY(captcha.hint.isEmpty());
+
+    QVERIFY(!AccountController::captchaFromResponse(QJsonObject()).isRequired());
 }
 
 QTEST_GUILESS_MAIN(TestAccountReplies)

@@ -59,6 +59,7 @@ PageType {
         if (root.locked || root.busy) {
             return
         }
+        root.resending = false
         var value = codeField.textField.text.trim()
         if (value.length !== root.codeLength) {
             codeField.errorText = qsTr("Enter the 6-digit code from the email")
@@ -75,7 +76,7 @@ PageType {
         }
         root.resending = true
         root.runBusy(function() {
-            SubscriptionUiController.startFreeAccountLogin()
+            SubscriptionUiController.resendFreeEmailCode()
         })
     }
 
@@ -124,10 +125,6 @@ PageType {
     Connections {
         target: SubscriptionUiController
         enabled: root.visible
-
-        function onFreeAccountCaptchaPassed() {
-            SubscriptionUiController.requestFreeEmailCode(root.email)
-        }
 
         function onFreeEmailCodeSent(retryAfterSec) {
             root.resending = false

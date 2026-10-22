@@ -97,7 +97,6 @@ signals:
     void errorOccurred(ErrorCode errorCode);
     void trialEmailError(const QString &message);
     void freeAccountCaptchaRequired(const QString &captchaId, const QString &captchaImageBase64, const QString &hint);
-    void freeAccountCaptchaPassed();
     void freeEmailCodeSent(int retryAfterSec);
     void freeAccountLoginFailed(const QString &kind, int retryAfterSec);
     void freeAccountLoginFinished();
@@ -159,8 +158,7 @@ private:
     bool selectPremiumServiceQuietly();
     void applyDefaultServerAfterInstall(int preferredDefaultServerIndex);
 
-    bool requestFreeAccountCaptcha();
-    bool sendFreeEmailCode();
+    bool sendFreeEmailCode(bool refreshCaptcha);
     bool importFreeAccountConfig();
 
 #if defined(Q_OS_IOS) || defined(MACOS_NE)

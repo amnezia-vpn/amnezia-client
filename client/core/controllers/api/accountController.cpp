@@ -26,16 +26,30 @@ AccountController::AccountController(SecureAppSettingsRepository *appSettingsRep
 {
 }
 
-ErrorCode AccountController::requestEmailCode(const QString &email, const QString &idempotencyKey, Error &error, int &retryAfterSec)
+ErrorCode AccountController::requestEmailCode(const EmailCodeRequest &request, Captcha &captcha, Error &error, int &retryAfterSec)
 {
-    const QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
-                                           .addField(apiDefs::key::email, email)
-                                           .addField(apiDefs::key::idempotencyKey, idempotencyKey)
-                                           .build();
+    captcha = Captcha{};
 
-    const Reply reply = post(emailCodeEndpoint, apiPayload);
+    GatewayPayloadBuilder builder(m_appSettingsRepository);
+    builder.addField(apiDefs::key::email, request.email)
+            .addField(apiDefs::key::userCountryCode, request.userCountryCode)
+            .addField(apiDefs::key::idempotencyKey, request.idempotencyKey)
+            .addField(apiDefs::key::captchaId, request.captchaId)
+            .addField(apiDefs::key::captchaSolution, request.captchaSolution.trimmed());
+    if (request.refreshCaptcha) {
+        builder.addField(apiDefs::key::refreshCaptcha, true);
+    }
+
+    const Reply reply = post(emailCodeEndpoint, builder.build());
     retryAfterSec = reply.retryAfterSec;
     error = classifyReply(reply);
+    if (error == Error::CaptchaRequired) {
+        captcha = captchaFromResponse(reply.body);
+        if (reply.errorCode == ErrorCode::ApiCaptchaInvalidError || reply.errorCode == ErrorCode::ApiCaptchaRefreshError) {
+            return reply.errorCode;
+        }
+        return ErrorCode::ApiCaptchaRequiredError;
+    }
     if (error == Error::InvalidCode || error == Error::Conflict) {
         error = Error::Failed;
     }
@@ -49,7 +63,7 @@ ErrorCode AccountController::requestEmailCode(const QString &email, const QStrin
 }
 
 ErrorCode AccountController::consumeEmailCode(const QString &email, const QString &code, const QString &idempotencyKey,
-                                                  Session &session, Error &error, int &retryAfterSec)
+                                              Session &session, Error &error, int &retryAfterSec)
 {
     const QJsonObject apiPayload = GatewayPayloadBuilder(m_appSettingsRepository)
                                            .addField(apiDefs::key::email, email)
@@ -80,6 +94,9 @@ ErrorCode AccountController::consumeEmailCode(const QString &email, const QStrin
 
 AccountController::Error AccountController::classifyReply(const Reply &reply)
 {
+    if (reply.body.contains(apiDefs::key::captchaId) && reply.body.contains(apiDefs::key::captchaImage)) {
+        return Error::CaptchaRequired;
+    }
     switch (reply.httpStatus) {
     case httpStatusNotFound: return Error::InvalidCode;
     case httpStatusConflict: return Error::Conflict;
@@ -106,6 +123,15 @@ AccountController::Session AccountController::sessionFromResponse(const QJsonObj
     return session;
 }
 
+AccountController::Captcha AccountController::captchaFromResponse(const QJsonObject &response)
+{
+    Captcha captcha;
+    captcha.id = response.value(apiDefs::key::captchaId).toString();
+    captcha.imageBase64 = response.value(apiDefs::key::captchaImage).toString();
+    captcha.hint = response.value(QLatin1String("hint")).toString();
+    return captcha;
+}
+
 AccountController::Reply AccountController::post(const QString &endpoint, const QJsonObject &apiPayload)
 {
     GatewayController gatewayController(m_appSettingsRepository->getGatewayEndpoint(), m_appSettingsRepository->isDevGatewayEnv(),
@@ -123,9 +149,12 @@ AccountController::Reply AccountController::post(const QString &endpoint, const 
     if (reply.errorCode != ErrorCode::NoError || reply.httpStatus >= 400) {
         qWarning().noquote() << "[Account]" << endpoint << "failed, errorCode =" << static_cast<int>(reply.errorCode)
                              << "http status =" << reply.httpStatus << "retry after =" << reply.retryAfterSec
+                             << "message =" << reply.body.value(apiDefs::key::message).toString()
                              << "detail =" << reply.body.value(QLatin1String("title")).toString()
                              << reply.body.value(QLatin1String("detail")).toString()
-                             << "request id =" << requestId;
+                             << "request id =" << requestId
+                             << "sent fields =" << apiPayload.keys().join(QLatin1Char(','))
+                             << "body =" << QString::fromUtf8(responseBody.left(300));
     } else {
         qDebug().noquote() << "[Account]" << endpoint << "done, request id =" << requestId;
     }
