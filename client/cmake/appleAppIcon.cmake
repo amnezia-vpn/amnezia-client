@@ -12,4 +12,14 @@ function(check_apple_app_icon ICON_PATH)
     if(NOT ACTOOL_VERSION_MATCH OR CMAKE_MATCH_1 LESS 26)
         message(FATAL_ERROR "Xcode 26 or later is required to build the app icon ${ICON_PATH}")
     endif()
+
+    execute_process(
+        COMMAND sw_vers -productVersion
+        OUTPUT_VARIABLE HOST_MACOS_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(HOST_MACOS_VERSION VERSION_LESS 26)
+        message(FATAL_ERROR "macOS 26 or later is required to build the app icon ${ICON_PATH} (found macOS ${HOST_MACOS_VERSION})")
+    endif()
 endfunction()
