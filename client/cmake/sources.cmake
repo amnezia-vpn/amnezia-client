@@ -274,10 +274,12 @@ set(SOURCES ${SOURCES}
 if(WIN32)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h
+        ${CLIENT_ROOT_DIR}/ui/utils/windowsUtil.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/windowsUtil.cpp
     )
 
     set(RESOURCES ${RESOURCES}
