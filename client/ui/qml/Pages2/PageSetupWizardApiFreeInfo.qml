@@ -22,7 +22,48 @@ PageType {
         root.freeHeaderDescription = String(ApiServicesModel.getSelectedServiceData("serviceDescription"))
     }
 
+    function runBusy(action) {
+        PageController.showBusyIndicator(true)
+        Qt.callLater(function() {
+            action()
+            PageController.showBusyIndicator(false)
+        })
+    }
+
+    function freeAccountErrorMessage(kind, retryAfterSec) {
+        switch (kind) {
+        case "captchaInvalid": return qsTr("CAPTCHA was incorrect. Please try again")
+        case "captchaRetry": return qsTr("Please solve the new CAPTCHA to continue")
+        case "noNetwork": return qsTr("No connection. Check your internet and try again")
+        case "rateLimited": return retryAfterSec > 0 ? qsTr("Too many requests. Try again in %1 s").arg(retryAfterSec)
+                                                     : qsTr("Too many requests. Try again later")
+        default: return qsTr("Something went wrong. Try again later")
+        }
+    }
+
     Component.onCompleted: syncFromModel()
+
+    Component.onDestruction: SubscriptionUiController.cancelFreeAccountLogin()
+
+    Connections {
+        target: SubscriptionUiController
+        enabled: root.visible
+
+        function onFreeAccountCaptchaPassed() {
+            PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
+        }
+
+        function onFreeAccountLoginFailed(kind, retryAfterSec) {
+            if (kind === "" || kind === "config") {
+                return
+            }
+            PageController.showErrorMessage(root.freeAccountErrorMessage(kind, retryAfterSec))
+        }
+    }
+
+    FreeAccountCaptchaDialog {
+        active: root.visible
+    }
 
     FlickableType {
         id: flick
@@ -120,7 +161,9 @@ PageType {
                 PageController.showBusyIndicator(false)
 
                 if (!hasPurchasedKey) {
-                    PageController.goToPage(PageEnum.PageSetupWizardApiFreeEmail)
+                    root.runBusy(function() {
+                        SubscriptionUiController.startFreeAccountLogin()
+                    })
                     return
                 }
 

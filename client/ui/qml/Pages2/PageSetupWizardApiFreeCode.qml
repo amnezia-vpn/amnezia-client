@@ -100,8 +100,6 @@ PageType {
         root.startCodeSession(SubscriptionUiController.freeAccountRetryAfterSec())
     }
 
-    Component.onDestruction: SubscriptionUiController.cancelFreeAccountLogin()
-
     onCodeTtlSecChanged: {
         if (root.codeTtlSec <= 0 && !root.locked && codeField.errorText === "") {
             codeField.errorText = qsTr("The code has expired. Request a new one")

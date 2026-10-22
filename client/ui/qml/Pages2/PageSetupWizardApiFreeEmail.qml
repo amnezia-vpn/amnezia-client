@@ -37,7 +37,7 @@ PageType {
         emailField.errorText = ""
         root.email = value
         root.runBusy(function() {
-            SubscriptionUiController.startFreeAccountLogin()
+            SubscriptionUiController.requestFreeEmailCode(value)
         })
     }
 
@@ -51,8 +51,6 @@ PageType {
 
     function errorMessage(kind, retryAfterSec) {
         switch (kind) {
-        case "captchaInvalid": return qsTr("CAPTCHA was incorrect. Please try again")
-        case "captchaRetry": return qsTr("Please solve the new CAPTCHA to continue")
         case "noNetwork": return qsTr("No connection. Check your internet and try again")
         case "rateLimited": return retryAfterSec > 0 ? qsTr("Too many requests. Try again in %1 s").arg(retryAfterSec)
                                                      : qsTr("Too many requests. Try again later")
@@ -60,15 +58,9 @@ PageType {
         }
     }
 
-    Component.onDestruction: SubscriptionUiController.cancelFreeAccountLogin()
-
     Connections {
         target: SubscriptionUiController
         enabled: root.visible
-
-        function onFreeAccountCaptchaPassed() {
-            SubscriptionUiController.requestFreeEmailCode(root.email)
-        }
 
         function onFreeEmailCodeSent(retryAfterSec) {
             PageController.goToPage(PageEnum.PageSetupWizardApiFreeCode)
@@ -80,10 +72,6 @@ PageType {
             }
             PageController.showErrorMessage(root.errorMessage(kind, retryAfterSec))
         }
-    }
-
-    FreeAccountCaptchaDialog {
-        active: root.visible
     }
 
     FlickableType {
