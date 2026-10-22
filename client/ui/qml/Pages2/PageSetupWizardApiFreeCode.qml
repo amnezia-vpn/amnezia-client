@@ -27,7 +27,7 @@ PageType {
     readonly property int defaultResendCooldownSec: 60
     readonly property int defaultCodeTtlSec: 300
     readonly property int maxAttempts: 10
-    readonly property int codeLength: 6
+    readonly property int codeLength: 8
 
     function runBusy(action) {
         root.busy = true
@@ -61,8 +61,8 @@ PageType {
         }
         root.resending = false
         var value = codeField.textField.text.trim()
-        if (value.length !== root.codeLength) {
-            codeField.errorText = qsTr("Enter the 6-digit code from the email")
+        if (value.length === 0) {
+            codeField.errorText = qsTr("Enter the code from the email")
             return
         }
         root.runBusy(function() {
@@ -204,10 +204,10 @@ PageType {
                 enabled: !root.locked
 
                 headerText: qsTr("Code")
-                textField.placeholderText: qsTr("6 digits from the email")
-                textField.inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
+                textField.placeholderText: qsTr("Code from the email")
+                textField.inputMethodHints: Qt.ImhPreferUppercase | Qt.ImhNoPredictiveText | Qt.ImhSensitiveData
                 textField.maximumLength: root.codeLength
-                textField.validator: RegularExpressionValidator { regularExpression: /^[0-9]{0,6}$/ }
+                textField.validator: RegularExpressionValidator { regularExpression: /^[0-9A-Za-z]{0,8}$/ }
 
                 textField.onTextChanged: {
                     if (root.locked) {

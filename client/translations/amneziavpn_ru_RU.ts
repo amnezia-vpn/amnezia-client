@@ -5363,8 +5363,8 @@ Create one from the current settings.</source>
 <context>
     <name>PageSetupWizardApiFreeCode</name>
     <message>
-        <source>Enter the 6-digit code from the email</source>
-        <translation>Введите 6 цифр из письма</translation>
+        <source>Enter the code from the email</source>
+        <translation>Введите код из письма</translation>
     </message>
     <message>
         <source>The code has expired. Request a new one</source>
@@ -5391,8 +5391,8 @@ Create one from the current settings.</source>
         <translation>Код</translation>
     </message>
     <message>
-        <source>6 digits from the email</source>
-        <translation>6 цифр из письма</translation>
+        <source>Code from the email</source>
+        <translation>Код из письма</translation>
     </message>
     <message>
         <source>Continue</source>

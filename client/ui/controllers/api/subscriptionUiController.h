@@ -58,6 +58,7 @@ public slots:
     bool importTrialFromGateway(const QString &email);
     bool hasPurchasedKey();
     bool startFreeAccountLogin();
+    bool startFreeAccountLoginForKey(const QJsonObject &keyConfig);
     void refreshFreeAccountCaptcha();
     bool solveFreeAccountCaptcha(const QString &solution);
     bool requestFreeEmailCode(const QString &email);
@@ -158,6 +159,7 @@ private:
     bool selectPremiumServiceQuietly();
     void applyDefaultServerAfterInstall(int preferredDefaultServerIndex);
 
+    bool beginFreeAccountLogin();
     bool sendFreeEmailCode(bool refreshCaptcha);
     bool importFreeAccountConfig();
 
@@ -177,6 +179,12 @@ private:
     QString getVpnKey();
 
     struct FreeAccountState {
+        QString userCountryCode;
+        QString serviceType;
+        QString serviceProtocol;
+        QString serviceName;
+        QJsonObject authData;
+        QString vpnKey;
         SubscriptionController::ProtocolData protocolData;
         QString captchaId;
         QString captchaSolution;

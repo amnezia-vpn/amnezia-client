@@ -1,3 +1,5 @@
+#include "core/utils/serverConfigUtils.h"
+#include "core/models/api/apiV2ServerConfig.h"
 #include "importUiController.h"
 
 #include <QDebug>
@@ -122,6 +124,15 @@ void ImportUiController::processNativeWireGuardConfig()
 {
     m_config = m_importController->processNativeWireGuardConfig(m_config);
     emit importConfigChanged();
+}
+
+void ImportUiController::openImportedConfig()
+{
+    if (serverConfigUtils::isServerFromApi(m_config) && ApiV2ServerConfig::fromJson(m_config).isFree()) {
+        emit freeKeyImported(m_config);
+        return;
+    }
+    emit configPreviewRequested();
 }
 
 void ImportUiController::importConfig()
