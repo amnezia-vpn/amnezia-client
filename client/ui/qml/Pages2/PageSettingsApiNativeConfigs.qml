@@ -76,7 +76,7 @@ PageType {
         reuseItems: true
 
         anchors.top: parent.top
-        anchors.topMargin: collapsingHeader.topBarHeight
+        anchors.topMargin: pageHeader.topBarHeight
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -85,9 +85,9 @@ PageType {
         model: ApiConfigsCountryListModel
 
 
-        ScrollBar.vertical: collapsingHeader.scrollBar
+        ScrollBar.vertical: pageHeader.scrollBar
 
-        header: collapsingHeader.listHeader
+        header: pageHeader.listHeader
 
         footer: Item {
             width: menuContent.width
@@ -163,8 +163,8 @@ PageType {
         }
     }
 
-    CollapsingHeaderType {
-        id: collapsingHeader
+    ListPageHeaderType {
+        id: pageHeader
 
         anchors.fill: parent
 
@@ -227,13 +227,13 @@ PageType {
         CountryListStickyHeader {
             listModel: ApiConfigsCountryListModel
             listView: menuContent
-            header: collapsingHeader
+            header: pageHeader
             revision: root.stickyRevision
         }
 
         CountriesEmptyState {
             anchors.top: parent.top
-            anchors.topMargin: collapsingHeader.pinnedBottom
+            anchors.topMargin: pageHeader.pinnedBottom
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom

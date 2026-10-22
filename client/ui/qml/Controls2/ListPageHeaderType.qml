@@ -4,8 +4,6 @@ import QtQuick.Layouts
 
 import Style 1.0
 
-import "TextTypes"
-
 Item {
     id: root
 
@@ -15,10 +13,9 @@ Item {
     property Component collapsibleContent
 
     property alias pinnedContent: pinnedColumn.data
-    property alias navigationButtons: navigationButtonsRow.data
+    property alias navigationButtons: navigationBar.actions
     default property alias overlays: overlayLayer.data
 
-    property alias backButton: backButton
     property alias scrollBar: listScrollBar
 
     readonly property Component listHeader: headerComponent
@@ -104,60 +101,23 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        color: AmneziaStyle.color.bgBase
+        implicitHeight: navigationBar.barHeight
 
-        implicitHeight: navigationRow.y + navigationRow.height
+        color: AmneziaStyle.color.bgBase
 
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
         }
 
-        Item {
-            id: navigationRow
+        NavigationBarType {
+            id: navigationBar
 
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.topMargin: PageController.safeAreaTopMargin
-            height: 56
+            height: navigationBar.barHeight
 
-            IconButtonType {
-                id: backButton
-
-                x: 4
-                y: 4
-
-                icon.source: "qrc:/images/controls/arrow-left.svg"
-                Accessible.name: qsTr("Back")
-
-                onClicked: PageController.closePage()
-            }
-
-            H3TextType {
-                readonly property real sideWidth: Math.max(48, navigationButtonsRow.width)
-
-                x: 4 + sideWidth
-                y: (navigationRow.height - height) / 2
-                width: navigationRow.width - 8 - 2 * sideWidth
-
-                font.weight: 600
-                font.letterSpacing: 0
-
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.NoWrap
-                maximumLineCount: 1
-                elide: Text.ElideRight
-                text: root.title
-            }
-
-            Row {
-                id: navigationButtonsRow
-
-                anchors.right: parent.right
-                anchors.rightMargin: 4
-                y: 4
-            }
+            title: root.title
         }
     }
 

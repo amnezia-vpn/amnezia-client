@@ -15,6 +15,8 @@ Item {
 
     default property alias actions: actionsRow.data
 
+    readonly property real barHeight: d.toolbarTop + 56
+
     signal backClicked()
 
     implicitHeight: column.implicitHeight
@@ -106,7 +108,7 @@ Item {
         id: toolbar
 
         width: root.width
-        height: d.toolbarTop + 56
+        height: root.barHeight
         y: d.scrolled
 
         color: d.scrolled > 0 ? AmneziaStyle.color.bgBase : AmneziaStyle.color.transparent
