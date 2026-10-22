@@ -20,6 +20,46 @@
 #if defined Q_OS_MAC
     #include "ui/utils/macosUtil.h"
 #endif
+#ifdef Q_OS_WIN
+    #include <QWindow>
+    #include <Windows.h>
+
+namespace {
+void activateApplication()
+{
+    QWindow *window = nullptr;
+    for (QWindow *candidate : QGuiApplication::topLevelWindows()) {
+        if (candidate->objectName() == QLatin1String("mainWindow")) {
+            window = candidate;
+            break;
+        }
+    }
+    if (!window)
+        return;
+
+    if (window->visibility() == QWindow::Hidden || window->visibility() == QWindow::Minimized)
+        window->showNormal();
+
+    const HWND hwnd = reinterpret_cast<HWND>(window->winId());
+    if (!hwnd)
+        return;
+    if (IsIconic(hwnd))
+        ShowWindow(hwnd, SW_RESTORE);
+
+    if (GetForegroundWindow() == hwnd)
+        return;
+
+    const HWND foreground = GetForegroundWindow();
+    const DWORD foregroundThread = foreground ? GetWindowThreadProcessId(foreground, nullptr) : 0;
+    const DWORD currentThread = GetCurrentThreadId();
+    const bool attached = foregroundThread && foregroundThread != currentThread
+            && AttachThreadInput(foregroundThread, currentThread, TRUE);
+    SetForegroundWindow(hwnd);
+    if (attached)
+        AttachThreadInput(foregroundThread, currentThread, FALSE);
+}
+} // namespace
+#endif
 
 PageController::PageController(ServersController* serversController, SettingsController* settingsController,
                                QObject *parent)
@@ -54,6 +94,10 @@ PageController::PageController(ServersController* serversController, SettingsCon
     connect(this, &PageController::hideMainWindow, []() {
         setDockIconVisible(false);
     });
+#endif
+
+#ifdef Q_OS_WIN
+    connect(this, &PageController::raiseMainWindow, []() { activateApplication(); });
 #endif
 
     connect(this, qOverload<ErrorCode>(&PageController::showErrorMessage), this, &PageController::onShowErrorMessage);
