@@ -15,7 +15,9 @@ ItemDelegate {
     property int maximumLineCount: 2
     property bool showSeparator: true
 
-    readonly property bool rowHovered: root.enabled && root.hovered && !favoriteButton.hovered
+    default property alias trailingContent: trailingRow.data
+
+    readonly property bool rowHovered: root.enabled && root.hovered && !favoriteButton.hovered && !trailingHover.hovered
 
     signal favoriteToggled()
 
@@ -118,6 +120,18 @@ ItemDelegate {
             favorite: root.favorite
 
             onClicked: root.favoriteToggled()
+        }
+
+        Row {
+            id: trailingRow
+
+            Layout.leftMargin: -root.spacing
+
+            visible: trailingRow.children.length > 0
+
+            HoverHandler {
+                id: trailingHover
+            }
         }
     }
 }
