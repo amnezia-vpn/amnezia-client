@@ -84,6 +84,7 @@ signals:
     void passphraseRequestDrawerClosed(QString passphrase);
 
     void unsupportedConnectDrawerRequested();
+    void vpnDeepLinkDefaultDrawerRequested();
 
     void escapePressed();
 

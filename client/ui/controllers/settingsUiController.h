@@ -31,6 +31,8 @@ public:
     Q_PROPERTY(bool isHomeAdLabelVisible READ isHomeAdLabelVisible NOTIFY isHomeAdLabelVisibleChanged)
     Q_PROPERTY(bool autoStartEnabled READ isAutoStartEnabled NOTIFY autoStartChanged)
     Q_PROPERTY(bool startMinimized READ isStartMinimizedEnabled NOTIFY startMinimizedChanged)
+    Q_PROPERTY(bool vpnDeepLinkEnabled READ isVpnDeepLinkEnabled NOTIFY vpnDeepLinkChanged)
+    Q_PROPERTY(bool vpnDeepLinkOverridden READ isVpnDeepLinkOverridden NOTIFY vpnDeepLinkChanged)
 
 public slots:
     void toggleAmneziaDns(bool enable);
@@ -64,6 +66,13 @@ public slots:
 
     bool isStartMinimizedEnabled();
     void toggleStartMinimized(bool enable);
+
+    bool isVpnDeepLinkEnabled();
+    void toggleVpnDeepLink(bool enable);
+    bool isVpnDeepLinkOverridden();
+    void makeVpnDeepLinkDefault();
+    void dismissVpnDeepLinkPrompt();
+    void refreshVpnDeepLinkStatus();
 
     bool isNewsNotificationsEnabled();
     void toggleNewsNotificationsEnabled(bool enable);
@@ -135,6 +144,7 @@ signals:
     void isHomeAdLabelVisibleChanged(bool visible);
     void autoStartChanged();
     void startMinimizedChanged();
+    void vpnDeepLinkChanged();
 
 private:
     SettingsController* m_settingsController;

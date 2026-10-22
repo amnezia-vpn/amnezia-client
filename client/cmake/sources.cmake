@@ -57,6 +57,7 @@ set(HEADERS ${HEADERS}
     ${CLIENT_ROOT_DIR}/ui/utils/pages.h
     ${CLIENT_PAGE_ENUM_HEADER}
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.h
+    ${CLIENT_ROOT_DIR}/ui/utils/vpnUrlHandler.h
     ${CLIENT_ROOT_DIR}/ui/utils/mtProxyPublicHostInput.h
     ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.h
     ${CMAKE_CURRENT_BINARY_DIR}/version.h
@@ -144,6 +145,7 @@ set(SOURCES ${SOURCES}
     ${CLIENT_ROOT_DIR}/core/repositories/secureServersRepository.cpp
     ${CLIENT_ROOT_DIR}/core/repositories/secureAppSettingsRepository.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/qAutoStart.cpp
+    ${CLIENT_ROOT_DIR}/ui/utils/vpnUrlHandler.cpp
     ${CLIENT_ROOT_DIR}/ui/utils/mtProxyPublicHostInput.cpp
     ${CLIENT_ROOT_DIR}/core/protocols/vpnProtocol.cpp
     ${CLIENT_ROOT_DIR}/core/utils/selfhosted/sshClient.cpp
@@ -272,10 +274,12 @@ set(SOURCES ${SOURCES}
 if(WIN32)
     set(HEADERS ${HEADERS}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.h
+        ${CLIENT_ROOT_DIR}/ui/utils/windowsUtil.h
     )
 
     set(SOURCES ${SOURCES}
         ${CLIENT_ROOT_DIR}/core/protocols/ikev2VpnProtocolWindows.cpp
+        ${CLIENT_ROOT_DIR}/ui/utils/windowsUtil.cpp
     )
 
     set(RESOURCES ${RESOURCES}

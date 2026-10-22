@@ -135,6 +135,7 @@ void SettingsUiController::restoreAppConfigFromData(const QByteArray &data)
         emit restoreBackupFinished();
         emit autoStartChanged();
         emit startMinimizedChanged();
+        emit vpnDeepLinkChanged();
 
         if (m_settingsController->unsupportedFormatConfigsSkippedCount() > 0) {
             emit errorOccurred(ErrorCode::RestoreBackupUnsupportedConfigsSkipped);
@@ -154,6 +155,7 @@ void SettingsUiController::clearSettings()
     m_settingsController->clearSettings();
     emit autoStartChanged();
     emit startMinimizedChanged();
+    emit vpnDeepLinkChanged();
     emit resetLanguageToSystem();
 
     emit changeSettingsFinished(tr("All settings have been reset to default values"));
@@ -194,6 +196,40 @@ void SettingsUiController::toggleStartMinimized(bool enable)
 {
     m_settingsController->toggleStartMinimized(enable);
     emit startMinimizedChanged();
+}
+
+bool SettingsUiController::isVpnDeepLinkEnabled()
+{
+    return m_settingsController->isVpnDeepLinkEnabled();
+}
+
+void SettingsUiController::toggleVpnDeepLink(bool enable)
+{
+    m_settingsController->toggleVpnDeepLink(enable);
+    emit vpnDeepLinkChanged();
+}
+
+bool SettingsUiController::isVpnDeepLinkOverridden()
+{
+    return m_settingsController->isVpnDeepLinkOverridden();
+}
+
+void SettingsUiController::makeVpnDeepLinkDefault()
+{
+    if (!m_settingsController->makeVpnDeepLinkDefault()) {
+        emit changeSettingsFinished(tr("Select AmneziaVPN for vpn:// links in the system settings"));
+    }
+    emit vpnDeepLinkChanged();
+}
+
+void SettingsUiController::dismissVpnDeepLinkPrompt()
+{
+    m_settingsController->dismissVpnDeepLinkPrompt();
+}
+
+void SettingsUiController::refreshVpnDeepLinkStatus()
+{
+    emit vpnDeepLinkChanged();
 }
 
 bool SettingsUiController::isScreenshotsEnabled()

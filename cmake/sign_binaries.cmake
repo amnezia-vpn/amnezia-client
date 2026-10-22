@@ -40,7 +40,12 @@ if(APPLE)
     set(other_execs ${execs})
     list(FILTER other_execs EXCLUDE REGEX [[AmneziaVPN$|AmneziaVPN-service$]])
 
-    list(APPEND files "${frameworks}" "${dylibs}" "${other_execs}" "${service_exec}" "${client_exec}" "${bundle}")
+    set(link_handler "${bundle}/Contents/Resources/LinkHandler.template")
+    if(NOT EXISTS "${link_handler}")
+        set(link_handler "")
+    endif()
+
+    list(APPEND files "${frameworks}" "${dylibs}" "${other_execs}" "${service_exec}" "${link_handler}" "${client_exec}" "${bundle}")
 
     if (files AND CODESIGN_SIGNATURE)
         include(${CMAKE_CURRENT_LIST_DIR}/util/codesign.cmake)

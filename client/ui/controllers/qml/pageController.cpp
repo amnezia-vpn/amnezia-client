@@ -20,6 +20,9 @@
 #if defined Q_OS_MAC
     #include "ui/utils/macosUtil.h"
 #endif
+#ifdef Q_OS_WIN
+    #include "ui/utils/windowsUtil.h"
+#endif
 
 PageController::PageController(ServersController* serversController, SettingsController* settingsController,
                                QObject *parent)
@@ -53,6 +56,10 @@ PageController::PageController(ServersController* serversController, SettingsCon
     connect(this, &PageController::hideMainWindow, []() {
         setDockIconVisible(false);
     });
+#endif
+
+#if defined Q_OS_MACX || defined Q_OS_WIN
+    connect(this, &PageController::raiseMainWindow, this, []() { activateApplication(); }, Qt::QueuedConnection);
 #endif
 
     connect(this, qOverload<ErrorCode>(&PageController::showErrorMessage), this, &PageController::onShowErrorMessage);

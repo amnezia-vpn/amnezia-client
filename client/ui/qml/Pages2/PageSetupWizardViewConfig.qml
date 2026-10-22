@@ -63,7 +63,7 @@ PageType {
             NavigationBarType {
                 Layout.fillWidth: true
 
-                title: qsTr("New connection")
+                title: qsTr("Add this connection?")
             }
 
             ColumnLayout {
@@ -186,7 +186,7 @@ PageType {
 
             Layout.fillWidth: true
 
-            text: qsTr("Connect")
+            text: qsTr("Add")
 
             onClicked: {
                 if (cloakingCheckBox.checked) {

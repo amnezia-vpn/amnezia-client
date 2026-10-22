@@ -375,6 +375,26 @@ void SecureAppSettingsRepository::setScreenshotsEnabled(bool enabled)
     emit screenshotsEnabledChanged(enabled);
 }
 
+bool SecureAppSettingsRepository::isVpnDeepLinkEnabled() const
+{
+    return value("Conf/vpnDeepLinkEnabled", true).toBool();
+}
+
+void SecureAppSettingsRepository::setVpnDeepLinkEnabled(bool enabled)
+{
+    setValue("Conf/vpnDeepLinkEnabled", enabled);
+}
+
+bool SecureAppSettingsRepository::isVpnDeepLinkPromptDismissed() const
+{
+    return value("Conf/vpnDeepLinkPromptDismissed", false).toBool();
+}
+
+void SecureAppSettingsRepository::setVpnDeepLinkPromptDismissed(bool dismissed)
+{
+    setValue("Conf/vpnDeepLinkPromptDismissed", dismissed);
+}
+
 int SecureAppSettingsRepository::countryListSortMode(const QString &listId) const
 {
     return value("Conf/countryListSortMode/" + listId, 0).toInt();

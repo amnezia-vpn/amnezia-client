@@ -46,6 +46,7 @@ set(SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/iosglue.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QRCodeReaderBase.mm
     ${CMAKE_CURRENT_SOURCE_DIR}/platforms/ios/QtAppDelegate.mm
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui/utils/vpnUrlHandler_mac.mm
 )
 
 target_include_directories(${PROJECT} PRIVATE
@@ -56,7 +57,7 @@ target_include_directories(${PROJECT} PRIVATE
 
 set_target_properties(${PROJECT} PROPERTIES
     XCODE_LINK_BUILD_PHASE_MODE KNOWN_LOCATION
-    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Info.plist.in
+    MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/macos/app/Info-NE.plist.in
     MACOSX_BUNDLE_ICON_FILE "AppIcon"
     MACOSX_BUNDLE_INFO_STRING "${CLIENT_APPLICATION_NAME}"
     MACOSX_BUNDLE_BUNDLE_NAME "${CLIENT_APPLICATION_NAME}"

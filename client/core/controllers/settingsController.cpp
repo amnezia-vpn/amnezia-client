@@ -7,6 +7,7 @@
 
 #include "version.h"
 #include "ui/utils/qAutoStart.h"
+#include "ui/utils/vpnUrlHandler.h"
 #include "logger.h"
 #include "core/controllers/logsController.h"
 #if defined(Q_OS_IOS) || defined(MACOS_NE)
@@ -140,6 +141,10 @@ ErrorCode SettingsController::restoreAppConfigFromData(const QByteArray &data)
         autoStart = newConfigData["Conf/autoStart"].toBool();
     }
     toggleAutoStart(autoStart);
+
+    if (!m_appSettingsRepository->isVpnDeepLinkEnabled()) {
+        VpnUrlHandler::unregister();
+    }
 #endif
 
 #if defined(Q_OS_WINDOWS) || defined(Q_OS_ANDROID)
@@ -233,6 +238,42 @@ bool SettingsController::isStartMinimizedEnabled() const
 void SettingsController::toggleStartMinimized(bool enable)
 {
     m_appSettingsRepository->setStartMinimized(enable);
+}
+
+bool SettingsController::isVpnDeepLinkEnabled() const
+{
+    return m_appSettingsRepository->isVpnDeepLinkEnabled();
+}
+
+void SettingsController::toggleVpnDeepLink(bool enable)
+{
+    m_appSettingsRepository->setVpnDeepLinkEnabled(enable);
+    if (enable) {
+        m_appSettingsRepository->setVpnDeepLinkPromptDismissed(false);
+        VpnUrlHandler::setAsDefault();
+    } else {
+        VpnUrlHandler::unregister();
+    }
+}
+
+bool SettingsController::isVpnDeepLinkOverridden() const
+{
+    return VpnUrlHandler::status() == VpnUrlHandler::Status::OtherHandler;
+}
+
+bool SettingsController::makeVpnDeepLinkDefault()
+{
+    return VpnUrlHandler::setAsDefault();
+}
+
+bool SettingsController::isVpnDeepLinkPromptDismissed() const
+{
+    return m_appSettingsRepository->isVpnDeepLinkPromptDismissed();
+}
+
+void SettingsController::dismissVpnDeepLinkPrompt()
+{
+    m_appSettingsRepository->setVpnDeepLinkPromptDismissed(true);
 }
 
 bool SettingsController::isScreenshotsEnabled() const

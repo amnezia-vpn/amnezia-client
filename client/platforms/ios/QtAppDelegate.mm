@@ -1,8 +1,5 @@
 #import "QtAppDelegate.h"
-#import "ios_controller.h"
-
-#include <QFile>
-
+#import "AmneziaOpenUrlImport.h"
 
 @implementation QIOSApplicationDelegate (AmneziaVPNDelegate)
 #if !MACOS_NE
@@ -11,6 +8,10 @@
     [application setMinimumBackgroundFetchInterval: UIApplicationBackgroundFetchIntervalMinimum];
     // Override point for customization after application launch.
     NSLog(@"Application didFinishLaunchingWithOptions");
+    NSURL *launchUrl = launchOptions[UIApplicationLaunchOptionsURLKey];
+    if (launchUrl) {
+        AmneziaHandleOpenUrl(launchUrl);
+    }
     return YES;
 }
 
@@ -35,24 +36,11 @@
 - (BOOL)application:(UIApplication *)app
             openURL:(NSURL *)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
-    if (url.fileURL) {
-        QString filePath(url.path.UTF8String);
-        if (filePath.isEmpty()) return NO;
+    NSLog(@"Application openURL: %@", url);
+    AmneziaHandleOpenUrl(url);
 
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-            NSLog(@"Application openURL: %@", url);
-
-            if (filePath.contains("backup")) {
-                IosController::Instance()->importBackupFromOutside(filePath);
-            } else {
-                QFile file(filePath);
-                bool isOpenFile = file.open(QIODevice::ReadOnly);
-                QByteArray data = file.readAll();
-
-                IosController::Instance()->importConfigFromOutside(QString(data));
-            }
-        });
-
+    NSString *scheme = url.scheme ? [url.scheme lowercaseString] : @"";
+    if ([scheme isEqualToString:@"vpn"] || url.fileURL) {
         return YES;
     }
     return NO;

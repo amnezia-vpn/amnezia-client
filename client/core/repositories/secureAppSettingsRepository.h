@@ -77,6 +77,10 @@ public:
     void setStartMinimized(bool enabled);
     bool isScreenshotsEnabled() const;
     void setScreenshotsEnabled(bool enabled);
+    bool isVpnDeepLinkEnabled() const;
+    void setVpnDeepLinkEnabled(bool enabled);
+    bool isVpnDeepLinkPromptDismissed() const;
+    void setVpnDeepLinkPromptDismissed(bool dismissed);
 
     int countryListSortMode(const QString &listId) const;
     void setCountryListSortMode(const QString &listId, int mode);
