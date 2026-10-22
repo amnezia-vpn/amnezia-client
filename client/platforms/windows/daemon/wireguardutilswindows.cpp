@@ -141,6 +141,7 @@ bool WireguardUtilsWindows::addInterface(const InterfaceConfig& config) {
 bool WireguardUtilsWindows::deleteInterface() {
   if (m_routeMonitor) {
     m_routeMonitor->deleteLater();
+    m_routeMonitor = nullptr;
   }
 
   m_firewall->disableKillSwitch();
@@ -195,7 +196,7 @@ bool WireguardUtilsWindows::updatePeer(const InterfaceConfig& config) {
 
   QString reply = m_tunnel.uapiCommand(message);
   logger.debug() << "DATA:" << reply;
-  return true;
+  return reply.split('\n').contains(QStringLiteral("errno=0"));
 }
 
 bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
@@ -219,7 +220,7 @@ bool WireguardUtilsWindows::deletePeer(const InterfaceConfig& config) {
 
   QString reply = m_tunnel.uapiCommand(message);
   logger.debug() << "DATA:" << reply;
-  return true;
+  return reply.split('\n').contains(QStringLiteral("errno=0"));
 }
 
 void WireguardUtilsWindows::buildMibForwardRow(const IPAddress& prefix,
